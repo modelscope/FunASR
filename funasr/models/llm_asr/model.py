@@ -2125,6 +2125,838 @@ class LLMASR4_extract_kv(nn.Module):
         return results, meta_data
 
 
+@tables.register("model_classes", "LLMASRXvecSlotTTS")
+class LLMASRXvecSlotTTS(nn.Module):
+    """ """
+
+    def __init__(
+        self,
+        audio_encoder: str = None,
+        audio_encoder_conf: dict = None,
+        audio_adaptor: str = None,
+        audio_adaptor_conf: dict = None,
+        llm: str = None,
+        llm_conf: dict = None,
+        input_size: int = 80,
+        length_normalized_loss: bool = False,
+        **kwargs,
+    ):
+
+        super().__init__()
+
+        # audio encoder
+        hub = audio_encoder_conf.get("hub", None)
+        self.audio_encoder_activation_checkpoint = audio_encoder_conf.get(
+            "activation_checkpoint", False
+        )
+        if hub == "ms":
+            from funasr import AutoModel
+
+            model = AutoModel(model=audio_encoder, model_revision="master")
+            # frontend = model.kwargs.get("frontend")
+            audio_encoder_output_size = model.model.encoder_output_size
+
+            audio_encoder = (
+                model.model.model.encoder if hasattr(model.model, "model") else model.model.encoder
+            )
+
+            # self.frontend = frontend
+
+        elif hub == "hf":
+            pass
+        else:
+            encoder_class = tables.encoder_classes.get(audio_encoder)
+            audio_encoder = encoder_class(input_size=input_size, **audio_encoder_conf)
+            audio_encoder_output_size = audio_encoder.output_size()
+        freeze = audio_encoder_conf.get("freeze", True)
+        freeze_layer_num = int(audio_encoder_conf.get("freeze_layer_num", -1))
+        # if freeze_layer_num > 0:
+        #     freeze_layer_num = range(freeze_layer_num)
+
+        if freeze:
+            for name, param in audio_encoder.named_parameters():
+                if freeze_layer_num > 0:
+                    idx = re.search(r"\.\d+\.", name)
+                    if idx is not None:
+                        beg, end = idx.regs[0]
+                        layer_id = int(name[beg + 1 : end - 1])
+                        if layer_id < freeze_layer_num:
+                            param.requires_grad = False
+                    elif "ln_post." not in name:
+                        param.requires_grad = False
+                else:
+                    param.requires_grad = False
+
+            audio_encoder.eval()
+
+        self.audio_encoder = audio_encoder
+
+        # llm
+        self.llm = None
+
+        from transformers import AutoModelForCausalLM, AutoTokenizer, AutoConfig
+
+        init_param_path = llm_conf.get("init_param_path", "vicuna-7b-v1.5")
+
+        if not llm_conf.get("low_cpu", False):
+            model = AutoModelForCausalLM.from_pretrained(
+                init_param_path,
+                load_in_8bit=None,
+                device_map=None,
+                use_cache=None,
+            )
+        else:
+            import os
+
+            if int(os.environ.get("RANK", 0)) == 0:
+                model = AutoModelForCausalLM.from_pretrained(
+                    init_param_path,
+                    load_in_8bit=None,
+                    device_map="cpu",
+                    use_cache=None,
+                )
+            else:
+                llm_config = AutoConfig.from_pretrained(init_param_path)
+                model = AutoModelForCausalLM.from_config(llm_config)
+
+        freeze = llm_conf.get("freeze", True)
+        if freeze:
+            for name, param in model.named_parameters():
+                param.requires_grad = False
+            model.eval()
+
+        logging.info(f"use_lora: {llm_conf.get('use_lora', False)}")
+        if llm_conf.get("use_lora", False):
+            from omegaconf import OmegaConf, DictConfig
+
+            lora_conf = llm_conf.get("lora_conf", {})
+            if isinstance(lora_conf, (OmegaConf, DictConfig)):
+                lora_conf = OmegaConf.to_container(lora_conf, resolve=True)
+            from peft import get_peft_model, LoraConfig, TaskType, PeftConfig, PeftModel
+
+            lora_init_param_path = lora_conf.get("init_param_path", None)
+            if lora_init_param_path is not None:
+                model = PeftModel.from_pretrained(model, lora_init_param_path)
+            else:
+                peft_config = LoraConfig(**lora_conf)
+                model = get_peft_model(model, peft_config)
+                model.print_trainable_parameters()
+
+        if llm_conf.get("activation_checkpoint", False):
+            model.gradient_checkpointing_enable()
+
+        self.llm_dtype = llm_conf.get("llm_dtype", "fp32")
+        self.llm = model.to(dtype_map[self.llm_dtype])
+        llm_dim = model.get_input_embeddings().weight.shape[-1]
+
+        # adaptor
+        adaptor_class = tables.adaptor_classes.get(audio_adaptor)
+        audio_adaptor_conf["encoder_dim"] = audio_encoder_output_size
+        audio_adaptor_conf["llm_dim"] = llm_dim
+        audio_adaptor = adaptor_class(**audio_adaptor_conf)
+        init_param_path = audio_adaptor_conf.get("init_param_path", None)
+        if init_param_path is not None:
+            src_state = torch.load(init_param_path, map_location="cpu")
+            flag = audio_adaptor.load_state_dict(src_state, strict=False)
+            logging.info(f"Loading audio_adaptor ckpt: {init_param_path}, status: {flag}")
+        freeze = audio_adaptor_conf.get("freeze", False)
+        if freeze:
+            for name, param in audio_adaptor.named_parameters():
+                param.requires_grad = False
+            audio_adaptor.eval()
+
+        self.audio_adaptor = audio_adaptor
+
+        self.error_calculator = None
+
+        self.length_normalized_loss = length_normalized_loss
+        self.beam_search = None
+
+        # tts text tokenizer related
+        audio_decoder_conf = kwargs.get("audio_decoder_conf", {})
+        tts_token_type = audio_decoder_conf.get("tts_token_type", "whisper_rich_ttsfrd")
+        ttsfrd_res_dir = audio_decoder_conf.get("ttsfrd_res_dir", "./ttsfrd/9.5.5")
+        from funasr.models.llm_asr.tts_text_tokenizer.build_tokenizer import build_tokenizer
+
+        self.tts_text_tokenizer = build_tokenizer(
+            tts_token_type,
+            bpemodel=ttsfrd_res_dir,
+            p_word2phn=1.0,
+        )
+        # e2e tts model related
+        from funasr.models.llm_asr.tts_models.e2e_model import UCTDXvecSlotModel
+
+        self.tts_model = UCTDXvecSlotModel(**kwargs.get("tts_model_conf", {}))
+        # vocoder related
+        vocoder_name = kwargs.get("vocoder", None)
+        vocoder_conf = kwargs.get("vocoder_conf", None)
+        self.vocoder = self.build_vocoder(name=vocoder_name, conf=vocoder_conf)
+
+        import os
+
+        rank = int(os.environ.get("RANK", 0))
+        logging.info(f"rank: {rank}, model is builded.")
+
+    def build_vocoder(self, name: str, conf: dict):
+        if name is None or conf is None:
+            return None
+        if name == "HifiGAN":
+            from funasr.models.llm_asr.hifigan import HifiGan
+
+            return HifiGan(**conf)
+        return None
+
+    def forward(
+        self,
+        speech: torch.Tensor = None,
+        speech_lengths: torch.Tensor = None,
+        input_ids: torch.Tensor = None,
+        attention_mask: torch.Tensor = None,
+        labels_ids: torch.Tensor = None,
+        fbank_beg: torch.Tensor = None,
+        fbank_mask: torch.Tensor = None,
+        **kwargs,
+    ):
+        """Encoder + Decoder + Calc loss
+        Args:
+                speech: (Batch, Length, ...)
+                speech_lengths: (Batch, )
+                text: (Batch, Length)
+                text_lengths: (Batch,)
+        """
+        # import pdb
+        #
+        # pdb.set_trace()
+        input_ids[input_ids < 0] = 0
+        inputs_embeds = self.llm.model.get_input_embeddings()(input_ids)
+        if speech is not None:
+            if len(speech_lengths.size()) > 1:
+                speech_lengths = speech_lengths[:, 0]
+
+            batch_size_speech, frames, _ = speech.shape
+            batch_size, token_num = input_ids.shape
+
+            # with torch.cuda.amp.autocast(enabled=False):
+            # audio encoder
+            if self.audio_encoder_activation_checkpoint:
+                from torch.utils.checkpoint import checkpoint
+
+                encoder_out, encoder_out_lens = checkpoint(
+                    self.encode, speech, speech_lengths, use_reentrant=False
+                )
+            else:
+                encoder_out, encoder_out_lens = self.encode(speech, speech_lengths)
+
+            # audio_adaptor
+            encoder_out, encoder_out_lens = self.audio_adaptor(encoder_out, encoder_out_lens)
+
+            batch_size, token_num, dims = inputs_embeds.shape
+            fake_token_len = kwargs.get("fake_token_len")
+            fake_token_len[fake_token_len < 0] = 0
+            fbank_beg[fbank_beg < 0] = 0
+
+            speech_idx = 0
+            for batch_idx in range(batch_size):
+
+                for turn_id in range(fbank_beg.shape[1]):
+                    fbank_beg_idx = fbank_beg[batch_idx, turn_id].item()
+                    if fbank_beg_idx > 0:
+                        speech_token_len = fake_token_len[batch_idx, turn_id]
+                        speech_token = encoder_out[speech_idx, :speech_token_len, :]
+
+                        try:
+                            inputs_embeds[
+                                batch_idx, fbank_beg_idx : fbank_beg_idx + speech_token_len, :
+                            ] = speech_token
+                        except Exception as e:
+                            #
+                            logging.error(f"{str(e)}, {traceback.format_exc()}")
+                            logging.info(
+                                f"batch_idx: {batch_idx}, inputs_embeds: {inputs_embeds.shape}, fbank_beg_idx: {fbank_beg_idx}, speech_token_len: {speech_token_len}, encoder_out: {encoder_out.shape}, encoder_out_lens: {encoder_out_lens}, fake_token_len: {fake_token_len}, speech_lengths: {speech_lengths}"
+                            )
+                            # import pdb;
+                            # pdb.set_trace()
+                            speech_token_len = encoder_out_lens[speech_idx].item()
+                            speech_token = encoder_out[speech_idx, :speech_token_len, :]
+                            inputs_embeds[
+                                batch_idx, fbank_beg_idx : fbank_beg_idx + speech_token_len, :
+                            ] = speech_token
+
+                        speech_idx += 1
+
+        with torch.cuda.amp.autocast(
+            enabled=True if self.llm_dtype != "fp32" else False, dtype=dtype_map[self.llm_dtype]
+        ):
+            labels_ids[labels_ids == -1] = -100
+            attention_mask[attention_mask < 0] = 0
+            model_outputs = self.llm(
+                inputs_embeds=inputs_embeds.to(dtype_map[self.llm_dtype]),
+                attention_mask=attention_mask,
+                labels=labels_ids,
+            )
+            loss = model_outputs.loss
+
+        stats = {}
+        with torch.no_grad():
+            preds = torch.argmax(model_outputs.logits, -1)
+            acc_att = compute_accuracy(preds[:, :-1], labels_ids[:, 1:], ignore_label=-100)
+            stats["acc"] = acc_att
+
+        # tts model training related
+        # audio sampling point
+        audio = kwargs.get("audio")
+        audio_len = kwargs.get("audio_len")
+
+        # codec
+        codec = kwargs.get("codec")
+        codec_len = (codec > 0).sum(-1)
+
+        input_mask = kwargs.get("input_mask")
+        input_mask[input_mask < 0] = 0
+
+        hidden_states = model_outputs.hidden_states[-1].float()
+        hidden_states_his_select = []
+
+        # target, str
+        target_ids = []
+        target_ids_len = []
+        turn_id_cum = 0
+        for batch_idx in range(labels_ids.shape[0]):
+
+            for turn_id in range(fbank_beg.shape[1]):
+                beg = 0
+                end = input_mask[turn_id_cum].sum(-1)
+                print(f"beg: {beg}, end: {end}")
+                hidden_states_his_i = hidden_states[batch_idx, beg:end, :]
+                hidden_states_his_select.append(hidden_states_his_i)
+
+                turn_id_cum += 1
+
+            beg_i = 0
+            end_i = 0
+            for token_idx in range(labels_ids.shape[1]):
+                token_int = labels_ids[batch_idx, token_idx].item()
+                if token_int == self.eos:
+                    target_ids_i = labels_ids[batch_idx, beg_i:end_i]
+                    target_ids_len_i = end_i - beg_i
+                    target_ids_len.append(target_ids_len_i)
+                    target = self.tokenizer.decode(target_ids_i)
+                    target_ids.append(target)
+
+                    end_i += 1
+                    beg_i = end_i
+                    continue
+
+                end_i += 1
+                if token_int <= 0:
+                    beg_i += 1
+
+        # hidden_states_his_select
+        hidden_states_his_select = torch.nn.utils.rnn.pad_sequence(
+            hidden_states_his_select, batch_first=True, padding_value=0.0
+        )
+        hidden_states_his_select = hidden_states_his_select.to(device=input_ids.device)
+        hidden_states_his_select_len = input_mask.sum(-1)
+
+        # nar tts model related
+        device = hidden_states_his_select.device
+        text = [self.tts_text_tokenizer.text2tokens(x) for x in target_ids]
+        text_lengths = [len(x) for x in text]
+        text = pad_list(text, pad_value=-1).long().to(device)
+        text_lengths = torch.tensor(text_lengths).to(audio_len)
+        # mute the "da" noise.
+        # TODO: make sure the sample rate is 22050.
+        audio[:, : int(0.02 * 22050)] = 0
+        hidden_states_his_select = self.tts_dim_proj(hidden_states_his_select)
+        tts_loss, tts_states, tts_weight = self.tts_model.forward(
+            text=text,
+            text_lengths=text_lengths,
+            speech_token=codec,
+            speech_token_lengths=codec_len,
+            audio=audio,
+            audio_lengths=audio_len,
+            prompt=hidden_states_his_select,
+            prompt_len=hidden_states_his_select_len,
+        )
+        loss = loss + tts_loss
+        for key, value in tts_states.items():
+            stats[f"tts_{key}"] = value
+
+        stats["loss"] = torch.clone(loss.detach())
+        stats["batch_size"] = batch_size
+        stats["batch_size_speech"] = batch_size_speech
+        stats["batch_size_x_frames"] = frames * batch_size_speech
+        stats["batch_size_real_frames"] = speech_lengths.sum().item()
+        stats["padding_frames"] = stats["batch_size_x_frames"] - stats["batch_size_real_frames"]
+        stats["batch_size_x_tokens"] = token_num * batch_size
+        stats["batch_size_real_tokens"] = attention_mask.sum().item()
+        stats["padding_tokens"] = stats["batch_size_x_tokens"] - stats["batch_size_real_tokens"]
+
+        dialog_turns = (fbank_beg > 0).sum(-1)
+        dialog_turns_max = torch.max(dialog_turns).int().item()
+        dialog_turns_avg = dialog_turns.sum().item() / batch_size
+        stats["dialog_turns_max"] = dialog_turns_max
+        stats["dialog_turns_avg"] = dialog_turns_avg
+
+        # force_gatherable: to-device and to-tensor if scalar for DataParallel
+        if self.length_normalized_loss:
+            batch_size = int((labels_ids > 0 + 1).sum())
+        loss, stats, weight = force_gatherable((loss, stats, batch_size), loss.device)
+        return loss, stats, weight
+
+    def encode(self, speech, speech_lengths):
+        # audio encoder
+        encoder_out, encoder_out_lens = self.audio_encoder(speech.permute(0, 2, 1), speech_lengths)
+
+        return encoder_out, encoder_out_lens
+
+    def data_template(self, data):
+        system, user, assistant = [], [], []
+        for i, item in enumerate(data):
+            role = item["role"]
+            content = item["content"]
+            if role == "system":
+                system.append(content)
+            elif role == "user":
+                if "audio" in item:
+                    audio = item["audio"]
+                    content = [content, audio]
+                user.append(content)
+            elif role == "assistant":
+                assistant.append(content)
+
+        system = system * len(user)
+
+        contents = {
+            "system": system,
+            "user": user,
+            "assistant": assistant,
+        }
+
+        return contents
+
+    def data_load_speech(self, contents: dict, tokenizer, frontend, meta_data={}, **kwargs):
+
+        system = contents["system"]
+        user = contents["user"]
+        assistant = contents["assistant"]
+        pattern = re.compile(r"(<\|startofspeech\|>.*?<\|endofspeech\|>)")
+
+        (
+            input_ids,
+            labels,
+            fbank,
+            fbank_lens,
+            fbank_mask,
+            fbank_beg,
+            fake_token_len,
+            input_mask,
+            input_mask_beg,
+        ) = ([], [], [], [], [], [], [], [], [])
+        input_source_ids = []
+        for i, (system_prompt, user_prompt, target_out) in enumerate(zip(system, user, assistant)):
+            if i >= kwargs.get("multiturn_num_max", 5):
+                break
+            if len(input_ids) > kwargs.get("max_token_length", 1500):
+
+                break
+            if isinstance(user_prompt, (list, tuple)):
+                user_prompt, audio = user_prompt
+            if i == 0:
+                if kwargs.get("infer_with_assistant_input", False):
+                    source_input = f"<|im_start|>system\n{system_prompt}<|im_end|>\n<|im_start|>user\n{user_prompt}"
+                else:
+                    source_input = f"<|im_start|>system\n{system_prompt}<|im_end|>\n<|im_start|>user\n{user_prompt}<|im_end|>\n<|im_start|>assistant\n"
+            else:
+                if kwargs.get("infer_with_assistant_input", False):
+                    source_input = f"<|im_start|>user\n{user_prompt}"
+                else:
+                    source_input = (
+                        f"<|im_start|>user\n{user_prompt}<|im_end|>\n<|im_start|>assistant\n"
+                    )
+
+            splits = pattern.split(source_input)
+            source_ids = []
+            fbank_i = []
+            fbank_mask_i = []
+            fake_token_len_i = 0
+            fbank_beg_i = -1
+            fbank_lens_i = []
+            speech, speech_lengths = [], []
+            for k, sub_str in enumerate(splits):
+                if not sub_str.startswith("<|startofspeech|>"):
+                    sub_token = tokenizer.encode(sub_str)
+                    source_ids += sub_token
+                    fbank_mask_i += [0] * len(sub_token)
+                else:
+                    sub_str = sub_str.replace("<|startofspeech|>", "").replace(
+                        "<|endofspeech|>", ""
+                    )
+                    if sub_str.startswith("!"):
+                        sub_str = sub_str[1:]
+                        if sub_str.startswith("!"):  # !!: audio sample point
+                            sub_str = audio
+                        try:
+                            time1 = time.perf_counter()
+                            data_src = load_audio_text_image_video(sub_str, fs=frontend.fs)
+                            time2 = time.perf_counter()
+                            meta_data["load_data"] = f"{time2 - time1:0.3f}"
+                        except Exception as e:
+                            logging.error(f"Loading wav failed! {str(e)}, {traceback.format_exc()}")
+
+                        speech, speech_lengths = extract_fbank(
+                            data_src,
+                            data_type=kwargs.get("data_type", "sound"),
+                            frontend=frontend,
+                            is_final=True,
+                        )  # speech: [b, T, d]
+
+                        time3 = time.perf_counter()
+                        meta_data["extract_feat"] = f"{time3 - time2:0.3f}"
+                        meta_data["batch_data_time"] = (
+                            speech_lengths.sum().item()
+                            * frontend.frame_shift
+                            * frontend.lfr_n
+                            / 1000
+                        )
+
+                        if kwargs.get("permute", True):
+                            speech = speech.permute(0, 2, 1)
+                        if speech_lengths > kwargs.get("max_source_length", 5500):
+                            # logging.info(
+                            #     f"speech_lengths > max_source_length: {speech_lengths}>{self.max_source_length}, {item}"
+                            # )
+                            badcase_flag = True
+
+                        olens = 1 + (speech_lengths[0].item() - 3 + 2 * 1) // 2
+                        olens = 1 + (olens - 3 + 2 * 1) // 2
+                        fake_token_len_i = (olens - 1) // 2 + 1
+                        fake_token = [0] * fake_token_len_i
+                        fbank_beg_i = len(source_ids)
+                        source_ids += fake_token
+                        fbank_mask_i += [1] * len(fake_token)
+
+            fbank_beg += [fbank_beg_i + len(input_ids)]
+            fake_token_len += [fake_token_len_i]
+            source_mask = [-100] * len(source_ids)
+            target_out = f"{target_out}<|im_end|>"
+            target_ids = tokenizer.encode(target_out)
+
+            if i == 0:
+                sys_prompt = f"<|im_start|>system\n{system_prompt}<|im_end|>\n"
+                sys_prompt_len = tokenizer.encode(sys_prompt)
+                input_mask_i = (
+                    [1] * len(sys_prompt_len) + [0] * len(source_ids) + [0] * len(target_ids)
+                )
+            else:
+                input_mask_i = [1] * len(input_ids) + [0] * len(source_ids)
+            input_mask_i = torch.tensor(input_mask_i, dtype=torch.int64)
+            input_mask_beg.append(input_mask_i)
+
+            input_mask_i = [1] * len(input_ids) + [1] * len(source_ids)
+            input_mask_i = torch.tensor(input_mask_i, dtype=torch.int64)
+            input_mask.append(input_mask_i)
+
+            input_source_ids = input_ids + source_ids
+            input_ids += source_ids + target_ids
+            labels += source_mask + target_ids
+            fbank_mask += fbank_mask_i
+            if len(speech) > 0:
+                fbank.append(speech[0, :, :])
+                fbank_lens.append(speech_lengths)
+
+        input_ids = torch.tensor(input_ids, dtype=torch.int64)  # [: self.max_token_length]
+        attention_mask = torch.tensor([1] * len(input_ids), dtype=torch.int32)
+        labels = torch.tensor(labels, dtype=torch.int64)  # [: self.max_token_length]
+
+        # fbank = speech[0, :, :]
+        # fbank_lens = torch.tensor(fbank_lens, dtype=torch.int32)
+        fbank_mask = torch.tensor(fbank_mask, dtype=torch.float32)
+        fbank_beg = torch.tensor(fbank_beg, dtype=torch.int32)
+        fake_token_len = torch.tensor(fake_token_len, dtype=torch.int32)
+        source_ids = torch.tensor(input_source_ids, dtype=torch.int64)
+        target_ids = torch.tensor(target_ids, dtype=torch.int64)
+
+        if len(fbank) > 0:
+            speech = torch.nn.utils.rnn.pad_sequence(fbank, batch_first=True, padding_value=0.0)
+            speech_lengths = torch.nn.utils.rnn.pad_sequence(
+                fbank_lens, batch_first=True, padding_value=-1
+            )
+        else:
+            speech = []
+            speech_lengths = []
+        output = {
+            "speech": speech,
+            "speech_lengths": speech_lengths,
+            "fbank_mask": fbank_mask[None, :],
+            "fbank_beg": fbank_beg[None,],
+            "fake_token_len": fake_token_len[None, :],
+            "input_ids": input_ids[None,],
+            "attention_mask": attention_mask[None,],
+            "labels_ids": labels,
+            "source_ids": source_ids[None, :],
+            "target_ids": target_ids[None, :],
+        }
+        if len(input_mask) > 0:
+            output["input_mask"] = input_mask
+            output["input_mask_beg"] = input_mask_beg
+        return output
+
+    def inference_prepare(
+        self,
+        data_in,
+        data_lengths=None,
+        key: list = None,
+        tokenizer=None,
+        frontend=None,
+        **kwargs,
+    ):
+
+        meta_data = {}
+        prompt = kwargs.get("prompt", None)
+
+        if kwargs.get("batch_size", 1) > 1:
+            raise NotImplementedError("batch decoding is not implemented")
+
+        contents = self.data_template(data_in[0])
+        output = self.data_load_speech(contents, tokenizer, frontend, meta_data=meta_data, **kwargs)
+        batch = to_device(output, kwargs["device"])
+
+        # audio encoder
+        speech = batch["speech"]
+        if len(speech) > 0:
+            speech_lengths = batch["speech_lengths"][:, 0]
+            # fp16
+            if kwargs.get("fp16", False):
+                speech = speech.to(torch.float16)
+            elif kwargs.get("bf16", False):
+                speech = speech.to(torch.bfloat16)
+            # audio encoder
+            encoder_out, encoder_out_lens = self.encode(speech, speech_lengths)
+
+            # audio_adaptor
+            encoder_out, encoder_out_lens = self.audio_adaptor(encoder_out, encoder_out_lens)
+
+        input_ids = batch["input_ids"]
+        source_ids = batch["source_ids"]
+        fbank_beg = batch["fbank_beg"]
+        fake_token_len = batch["fake_token_len"]
+
+        if not kwargs.get("tearchforing", False):
+            input_ids = source_ids
+
+        input_ids[input_ids < 0] = 0
+        inputs_embeds = self.llm.model.get_input_embeddings()(input_ids)
+
+        batch_size, token_num, dims = inputs_embeds.shape
+
+        fake_token_len[fake_token_len < 0] = 0
+        fbank_beg[fbank_beg < 0] = 0
+
+        speech_idx = 0
+        for batch_idx in range(batch_size):
+
+            for turn_id in range(fbank_beg.shape[1]):
+                fbank_beg_idx = fbank_beg[batch_idx, turn_id].item()
+                if fbank_beg_idx > 0:
+                    speech_token_len = fake_token_len[batch_idx, turn_id]
+                    speech_token = encoder_out[speech_idx, :speech_token_len, :]
+
+                    try:
+                        inputs_embeds[
+                            batch_idx, fbank_beg_idx : fbank_beg_idx + speech_token_len, :
+                        ] = speech_token
+                    except Exception as e:
+                        #
+                        logging.error(f"{str(e)}, {traceback.format_exc()}")
+                        logging.info(
+                            f"batch_idx: {batch_idx}, inputs_embeds: {inputs_embeds.shape}, fbank_beg_idx: {fbank_beg_idx}, speech_token_len: {speech_token_len}, encoder_out: {encoder_out.shape}, encoder_out_lens: {encoder_out_lens}, fake_token_len: {fake_token_len}, speech_lengths: {speech_lengths}"
+                        )
+                        # import pdb;
+                        # pdb.set_trace()
+                        speech_token_len = encoder_out_lens[speech_idx].item()
+                        speech_token = encoder_out[speech_idx, :speech_token_len, :]
+                        inputs_embeds[
+                            batch_idx, fbank_beg_idx : fbank_beg_idx + speech_token_len, :
+                        ] = speech_token
+
+                    speech_idx += 1
+        return inputs_embeds, contents, batch, source_ids, meta_data, output
+
+    def inference(
+        self,
+        data_in,
+        data_lengths=None,
+        key: list = None,
+        tokenizer=None,
+        frontend=None,
+        **kwargs,
+    ):
+
+        inputs_embeds, contents, batch, source_ids, meta_data, outputs = self.inference_prepare(
+            data_in, data_lengths, key, tokenizer, frontend, **kwargs
+        )
+        rand_seed = kwargs.get("rand_seed", 0)
+
+        llm_dtype = kwargs.get("llm_dtype", "fp32")
+        if llm_dtype == "fp32":
+            llm_dtype = "fp16" if kwargs.get("fp16", False) else llm_dtype
+            llm_dtype = "bf16" if kwargs.get("bf16", False) else llm_dtype
+
+        with torch.cuda.amp.autocast(
+            enabled=True if llm_dtype != "fp32" else False, dtype=dtype_map[llm_dtype]
+        ):
+            label = contents["assistant"][-1]
+            self.llm = self.llm.to(dtype_map[llm_dtype])
+            inputs_embeds = inputs_embeds.to(dtype_map[llm_dtype])
+            llm_kwargs = kwargs.get("llm_kwargs", {})
+            if not kwargs.get("tearchforing", False):
+
+                generated_ids = self.llm.generate(
+                    inputs_embeds=inputs_embeds,
+                    max_new_tokens=kwargs.get("max_length", 512),
+                    output_hidden_states=True,
+                    return_dict_in_generate=True,
+                    output_scores=True,
+                    **llm_kwargs,
+                )
+                # hidden_states: (t1, t2, ..., tn, ..., tN), tn=(l1, l2, ..., ln, ..., lN), ln: shape: 1x1x3584
+                hidden_states = generated_ids["hidden_states"].hidden_states[-1].float()
+                # TODO: get llm_cur_kv_cache
+
+                target_ids = generated_ids["sequences"]
+                response = tokenizer.batch_decode(
+                    target_ids, skip_special_tokens=kwargs.get("skip_special_tokens", True)
+                )[0]
+
+                loss = None
+            else:
+
+                labels_ids = batch["labels_ids"]
+                labels_ids[labels_ids == -1] = -100
+                attention_mask = batch.get("attention_mask", None)
+                # attention_mask = attention_mask.to(dtype_map[llm_dtype])
+                model_outputs = self.llm(
+                    inputs_embeds=inputs_embeds,
+                    attention_mask=attention_mask,
+                    labels=labels_ids,
+                    **llm_kwargs,
+                )
+
+                preds = torch.argmax(model_outputs.logits, -1)[:, source_ids.shape[1] :]
+                response = tokenizer.batch_decode(
+                    preds,
+                    add_special_tokens=False,
+                    skip_special_tokens=kwargs.get("skip_special_tokens", True),
+                )[0]
+                loss = model_outputs.loss.item()
+
+        ibest_writer = None
+        if kwargs.get("output_dir") is not None:
+            if not hasattr(self, "writer"):
+                self.writer = DatadirWriter(kwargs.get("output_dir"))
+            ibest_writer = self.writer[f"{0 + 1}best_recog"]
+
+        results = []
+        response_clean = re.sub(r"[^\w\s\u3000\u4e00-\u9fff]+", "", response)
+        result_i = {"key": key[0], "text": response, "text_tn": response_clean, "label": label}
+        if loss is not None:
+            result_i["loss"] = loss
+        results.append(result_i)
+
+        if ibest_writer is not None:
+            ibest_writer["text"][key[0]] = response.replace("\n", " ")
+            ibest_writer["label"][key[0]] = label.replace("\n", " ")
+            ibest_writer["text_tn"][key[0]] = response_clean
+
+        # tts related inference, require the kv cache of llm last layer for only the current inputs
+        # TODO: select kv cache of the current turn inputs
+
+        # hidden_states = generated_ids[
+        #     "hidden_states"
+        # ]  # hidden_states: (t1, t2, ..., tn, ..., tN), tn=(l1, l2, ..., ln, ..., lN), ln: shape: 1x1x3584
+
+        token_num = len(hidden_states)
+        hidden_states_select = torch.zeros((1, token_num, 3584), dtype=torch.float32).to(
+            inputs_embeds.device
+        )
+
+        for i in range(token_num):
+            hidden_states_select[0, i, :] = hidden_states[i][-1][0, 0, :].to(torch.float32)
+
+        llm_cur_kv_cache, llm_cur_kv_cache_len = None, None
+
+        input_mask_beg = outputs.get("input_mask_beg")
+        input_mask_beg[input_mask_beg < 0] = 0
+        input_mask = outputs.get("input_mask")
+        input_mask[input_mask < 0] = 0
+
+        for turn_id_cum in range(input_mask.shape[0]):
+            beg = input_mask_beg[turn_id_cum].sum(-1)
+            end = input_mask[turn_id_cum].sum(-1)
+            llm_cur_kv_cache = hidden_states_select[:, beg:end, :]
+            llm_cur_kv_cache_len = torch.tensor(
+                [
+                    end - beg,
+                ],
+                dtype=torch.int32,
+            ).to(inputs_embeds.device)
+        # Generative quality is sensitive to dtype, FM requires fp32
+        tts_dtype = "fp32"
+        with torch.cuda.amp.autocast(
+            enabled=True if tts_dtype != "fp32" else False, dtype=dtype_map[tts_dtype]
+        ):
+            assert llm_cur_kv_cache is not None
+            set_all_random_seed(rand_seed)
+            speech_tokens, mel, wav = self.generate_speech(
+                response, llm_cur_kv_cache, llm_cur_kv_cache_len, dtype_map[tts_dtype]
+            )
+            self.write_mel_wav(kwargs.get("output_dir"), mel, wav, key[0])
+
+        return results, meta_data
+
+    def generate_speech(self, text, llm_cur_kv_cache, llm_cur_kv_cache_len, llm_dtype):
+        self.tts_text_tokenizer = self.tts_text_tokenizer.to(llm_dtype)
+        self.vocoder = self.vocoder.to(llm_dtype)
+        device = llm_cur_kv_cache.device
+        # tokenize text
+        text_token = self.tts_text_tokenizer.text2tokens(f"<|endofprompt|><|sil|>{text}<|sil|>")
+        text_token = torch.tensor([text_token], llm_dtype, device)
+        text_token_len = torch.tensor([text_token.shape[1]], torch.long, device)
+        # e2e tts model forward
+        speech_tokens, mel_feats = self.tts_model.inference(
+            text_token,
+            text_token_len,
+            None,
+            None,
+            outside_prompt=llm_cur_kv_cache,
+            outside_prompt_lengths=llm_cur_kv_cache_len,
+        )
+        # vocoder forward
+        wav = self.vocoder.inference(mel_feats.transpose(1, 2))
+
+        return speech_tokens, mel_feats, wav
+
+    def write_mel_wav(self, output_dir, feat, wav, key):
+        out_dir = os.path.join(output_dir, "1best_recog", "mels")
+        os.makedirs(out_dir, exist_ok=True)
+        if feat is not None:
+            feat = feat.cpu().numpy()[0]
+            np.save(os.path.join(out_dir, f"{key}.npy"), feat)
+
+        out_dir = os.path.join(output_dir, "1best_recog", "wavs")
+        os.makedirs(out_dir, exist_ok=True)
+        if wav is not None:
+            path = os.path.join(out_dir, f"{key}.wav")
+            torchaudio.save(
+                path,
+                wav.cpu(),
+                sample_rate=self.vocoder.sample_rate,
+                encoding="PCM_S",
+                bits_per_sample=16,
+            )
+
+
 class Swish(torch.nn.Module):
     """Construct an Swish object."""
 
