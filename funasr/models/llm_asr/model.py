@@ -2277,6 +2277,7 @@ class LLMASRXvecSlotTTS(nn.Module):
         tts_token_type = audio_decoder_conf.get("tts_token_type", "whisper_rich_ttsfrd")
         ttsfrd_res_dir = audio_decoder_conf.get("ttsfrd_res_dir", "./ttsfrd/9.5.5")
         from funasr.models.llm_asr.tts_text_tokenizer.build_tokenizer import build_tokenizer
+
         self.tts_text_tokenizer = build_tokenizer(
             tts_token_type,
             bpemodel=ttsfrd_res_dir,
@@ -2284,15 +2285,15 @@ class LLMASRXvecSlotTTS(nn.Module):
         )
         # e2e tts model related
         from funasr.models.llm_asr.tts_models.e2e_model import UCTDXvecSlotModel
-        self.tts_model = UCTDXvecSlotModel(
-            **kwargs.get("tts_model_conf", {})
-        )
+
+        self.tts_model = UCTDXvecSlotModel(**kwargs.get("tts_model_conf", {}))
         # vocoder related
         vocoder_name = kwargs.get("vocoder", None)
         vocoder_conf = kwargs.get("vocoder_conf", None)
         self.vocoder = self.build_vocoder(name=vocoder_name, conf=vocoder_conf)
 
         import os
+
         rank = int(os.environ.get("RANK", 0))
         logging.info(f"rank: {rank}, model is builded.")
 
@@ -2465,7 +2466,7 @@ class LLMASRXvecSlotTTS(nn.Module):
         text_lengths = torch.tensor(text_lengths).to(audio_len)
         # mute the "da" noise.
         # TODO: make sure the sample rate is 22050.
-        audio[:, :int(0.02 * 22050)] = 0
+        audio[:, : int(0.02 * 22050)] = 0
         hidden_states_his_select = self.tts_dim_proj(hidden_states_his_select)
         tts_loss, tts_states, tts_weight = self.tts_model.forward(
             text=text,
@@ -2475,7 +2476,7 @@ class LLMASRXvecSlotTTS(nn.Module):
             audio=audio,
             audio_lengths=audio_len,
             prompt=hidden_states_his_select,
-            prompt_len=hidden_states_his_select_len
+            prompt_len=hidden_states_his_select_len,
         )
         loss = loss + tts_loss
         for key, value in tts_states.items():
@@ -2541,15 +2542,17 @@ class LLMASRXvecSlotTTS(nn.Module):
         assistant = contents["assistant"]
         pattern = re.compile(r"(<\|startofspeech\|>.*?<\|endofspeech\|>)")
 
-        input_ids, labels, fbank, fbank_lens, fbank_mask, fbank_beg, fake_token_len = (
-            [],
-            [],
-            [],
-            [],
-            [],
-            [],
-            [],
-        )
+        (
+            input_ids,
+            labels,
+            fbank,
+            fbank_lens,
+            fbank_mask,
+            fbank_beg,
+            fake_token_len,
+            input_mask,
+            input_mask_beg,
+        ) = ([], [], [], [], [], [], [], [], [])
         input_source_ids = []
         for i, (system_prompt, user_prompt, target_out) in enumerate(zip(system, user, assistant)):
             if i >= kwargs.get("multiturn_num_max", 5):
@@ -2638,6 +2641,22 @@ class LLMASRXvecSlotTTS(nn.Module):
             source_mask = [-100] * len(source_ids)
             target_out = f"{target_out}<|im_end|>"
             target_ids = tokenizer.encode(target_out)
+
+            if i == 0:
+                sys_prompt = f"<|im_start|>system\n{system_prompt}<|im_end|>\n"
+                sys_prompt_len = tokenizer.encode(sys_prompt)
+                input_mask_i = (
+                    [1] * len(sys_prompt_len) + [0] * len(source_ids) + [0] * len(target_ids)
+                )
+            else:
+                input_mask_i = [1] * len(input_ids) + [0] * len(source_ids)
+            input_mask_i = torch.tensor(input_mask_i, dtype=torch.int64)
+            input_mask_beg.append(input_mask_i)
+
+            input_mask_i = [1] * len(input_ids) + [1] * len(source_ids)
+            input_mask_i = torch.tensor(input_mask_i, dtype=torch.int64)
+            input_mask.append(input_mask_i)
+
             input_source_ids = input_ids + source_ids
             input_ids += source_ids + target_ids
             labels += source_mask + target_ids
@@ -2678,7 +2697,9 @@ class LLMASRXvecSlotTTS(nn.Module):
             "source_ids": source_ids[None, :],
             "target_ids": target_ids[None, :],
         }
-
+        if len(input_mask) > 0:
+            output["input_mask"] = input_mask
+            output["input_mask_beg"] = input_mask_beg
         return output
 
     def inference_prepare(
@@ -2760,7 +2781,7 @@ class LLMASRXvecSlotTTS(nn.Module):
                         ] = speech_token
 
                     speech_idx += 1
-        return inputs_embeds, contents, batch, source_ids, meta_data
+        return inputs_embeds, contents, batch, source_ids, meta_data, output
 
     def inference(
         self,
@@ -2772,7 +2793,7 @@ class LLMASRXvecSlotTTS(nn.Module):
         **kwargs,
     ):
 
-        inputs_embeds, contents, batch, source_ids, meta_data = self.inference_prepare(
+        inputs_embeds, contents, batch, source_ids, meta_data, outputs = self.inference_prepare(
             data_in, data_lengths, key, tokenizer, frontend, **kwargs
         )
         rand_seed = kwargs.get("rand_seed", 0)
@@ -2800,7 +2821,7 @@ class LLMASRXvecSlotTTS(nn.Module):
                     **llm_kwargs,
                 )
                 # hidden_states: (t1, t2, ..., tn, ..., tN), tn=(l1, l2, ..., ln, ..., lN), ln: shape: 1x1x3584
-                hidden_states = generated_ids["hidden_states"]
+                hidden_states = generated_ids["hidden_states"].hidden_states[-1].float()
                 # TODO: get llm_cur_kv_cache
 
                 target_ids = generated_ids["sequences"]
@@ -2850,8 +2871,36 @@ class LLMASRXvecSlotTTS(nn.Module):
 
         # tts related inference, require the kv cache of llm last layer for only the current inputs
         # TODO: select kv cache of the current turn inputs
+
+        # hidden_states = generated_ids[
+        #     "hidden_states"
+        # ]  # hidden_states: (t1, t2, ..., tn, ..., tN), tn=(l1, l2, ..., ln, ..., lN), ln: shape: 1x1x3584
+
+        token_num = len(hidden_states)
+        hidden_states_select = torch.zeros((1, token_num, 3584), dtype=torch.float32).to(
+            inputs_embeds.device
+        )
+
+        for i in range(token_num):
+            hidden_states_select[0, i, :] = hidden_states[i][-1][0, 0, :].to(torch.float32)
+
         llm_cur_kv_cache, llm_cur_kv_cache_len = None, None
 
+        input_mask_beg = outputs.get("input_mask_beg")
+        input_mask_beg[input_mask_beg < 0] = 0
+        input_mask = outputs.get("input_mask")
+        input_mask[input_mask < 0] = 0
+
+        for turn_id_cum in range(input_mask.shape[0]):
+            beg = input_mask_beg[turn_id_cum].sum(-1)
+            end = input_mask[turn_id_cum].sum(-1)
+            llm_cur_kv_cache = hidden_states_select[:, beg:end, :]
+            llm_cur_kv_cache_len = torch.tensor(
+                [
+                    end - beg,
+                ],
+                dtype=torch.int32,
+            ).to(inputs_embeds.device)
         # Generative quality is sensitive to dtype, FM requires fp32
         tts_dtype = "fp32"
         with torch.cuda.amp.autocast(
@@ -2859,7 +2908,9 @@ class LLMASRXvecSlotTTS(nn.Module):
         ):
             assert llm_cur_kv_cache is not None
             set_all_random_seed(rand_seed)
-            speech_tokens, mel, wav = self.generate_speech(response, llm_cur_kv_cache, llm_cur_kv_cache_len, dtype_map[tts_dtype])
+            speech_tokens, mel, wav = self.generate_speech(
+                response, llm_cur_kv_cache, llm_cur_kv_cache_len, dtype_map[tts_dtype]
+            )
             self.write_mel_wav(kwargs.get("output_dir"), mel, wav, key[0])
 
         return results, meta_data
@@ -2874,7 +2925,10 @@ class LLMASRXvecSlotTTS(nn.Module):
         text_token_len = torch.tensor([text_token.shape[1]], torch.long, device)
         # e2e tts model forward
         speech_tokens, mel_feats = self.tts_model.inference(
-            text_token, text_token_len, None, None,
+            text_token,
+            text_token_len,
+            None,
+            None,
             outside_prompt=llm_cur_kv_cache,
             outside_prompt_lengths=llm_cur_kv_cache_len,
         )
