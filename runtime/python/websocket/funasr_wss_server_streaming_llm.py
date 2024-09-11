@@ -79,6 +79,7 @@ audio_encoder_dir = snapshot_download("iic/SenseVoice", cache_dir=None, revision
 # audio_encoder_dir = "/nfs/yangyexin.yyx/init_model/iic/SenseVoiceModelscope_0712"
 device = "cuda:0"
 all_file_paths = [
+    "/nfs/yangyexin.yyx/init_model/s2tt/qwen2_7b_mmt_v15_20240910_streaming",
     "FunAudioLLM/qwen2_7b_mmt_v15_20240910_streaming",
     "FunAudioLLM/qwen2_7b_mmt_v15_20240902",
     "FunAudioLLM/qwen2_7b_mmt_v14_20240830",
@@ -92,7 +93,6 @@ llm_kwargs = {"num_beams": 1, "do_sample": False, "repetition_penalty": 1.3}
 UNFIX_LEN = 5
 MIN_LEN_PER_PARAGRAPH = 25
 MIN_LEN_SEC_AUDIO_FIX = 1.1
-MAX_ITER_PER_CHUNK = 20
 
 ckpt_dir = all_file_paths[0]
 
@@ -491,15 +491,16 @@ async def ws_serve(websocket, path):
                             print("error in vad")
                         if speech_start_i != -1:
                             speech_start = True
+                            speech_end_i = -1
+                            beg_bias = (websocket.vad_pre_idx - speech_start_i) // duration_ms
+                            frames_pre = frames[-beg_bias:]
                             frames_asr = []
-                            frames_asr.extend(frames)
+                            frames_asr.extend(frames_pre)
                     else:
                         speech_start = True
                         speech_end_i = -1
-                        beg_bias = (websocket.vad_pre_idx - speech_start_i) // duration_ms
-                        frames_pre = frames[-beg_bias:]
                         frames_asr = []
-                        frames_asr.extend(frames_pre)
+                        frames_asr.extend(frames)
 
                 # vad end
                 if speech_end_i != -1 or not websocket.is_speaking:
