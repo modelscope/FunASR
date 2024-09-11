@@ -259,7 +259,10 @@ class ConformerDPO(Conformer):
         encoder_out = encoder_out.expand(-1, self.nbest,-1, -1).contiguous().view(-1, encoder_out.size(-2), encoder_out.size(-1))
         encoder_out_lens = encoder_out_lens.unsqueeze(1).expand(-1, self.nbest).contiguous().view(-1)
         
-        n_best_tokens = n_best_tokens.view(-1, n_best_length.max()).contiguous()
+        if n_best_tokens.nelement() == 0:
+            n_best_tokens = torch.empty(encoder_out.size(0) * self.nbest, 0).to(encoder_out.device)
+        else:
+            n_best_tokens = n_best_tokens.view(-1, n_best_length.max()).contiguous()
         n_best_length = n_best_length.view(-1).contiguous()
 
         ys_in_pad, ys_out_pad = add_sos_eos(n_best_tokens, self.sos, self.eos, self.ignore_id)
