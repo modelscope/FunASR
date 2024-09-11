@@ -2896,9 +2896,9 @@ class LLMASRXvecSlotTTS(nn.Module):
 
         llm_cur_kv_cache, llm_cur_kv_cache_len = None, None
 
-        input_mask_beg = batch.get("input_mask_beg")[0][None, :]
+        input_mask_beg = batch.get("input_mask_beg")[-1][None, :]
         input_mask_beg[input_mask_beg < 0] = 0
-        input_mask = batch.get("input_mask")[0][None, :]
+        input_mask = batch.get("input_mask")[-1][None, :]
         input_mask[input_mask < 0] = 0
 
         for turn_id_cum in range(input_mask.shape[0]):
@@ -2932,7 +2932,7 @@ class LLMASRXvecSlotTTS(nn.Module):
         # tokenize text
         text_token = self.tts_text_tokenizer.text2tokens(f"<|endofprompt|><|sil|>{text}<|sil|>")
         text_token = torch.tensor([text_token], dtype=torch.long, device=device)
-        text_token_len = torch.tensor([text_token.shape[1]], torch.long, device)
+        text_token_len = torch.tensor([text_token.shape[1]], dtype=torch.long, device=device)
         # e2e tts model forward
         self.tts_model.to(llm_dtype)
         speech_tokens, mel_feats = self.tts_model.inference(
