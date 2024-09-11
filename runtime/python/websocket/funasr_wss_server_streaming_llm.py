@@ -79,7 +79,7 @@ audio_encoder_dir = snapshot_download("iic/SenseVoice", cache_dir=None, revision
 # audio_encoder_dir = "/nfs/yangyexin.yyx/init_model/iic/SenseVoiceModelscope_0712"
 device = "cuda:0"
 all_file_paths = [
-    "/nfs/yangyexin.yyx/init_model/s2tt/qwen2_7b_mmt_v15_20240910_streaming",
+    # "/nfs/yangyexin.yyx/init_model/s2tt/qwen2_7b_mmt_v15_20240910_streaming",
     "FunAudioLLM/qwen2_7b_mmt_v15_20240910_streaming",
     "FunAudioLLM/qwen2_7b_mmt_v15_20240902",
     "FunAudioLLM/qwen2_7b_mmt_v14_20240830",
