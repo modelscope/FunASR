@@ -29,6 +29,7 @@ parser.add_argument("--ngpu", type=int, default=1, help="0 for cpu, 1 for gpu")
 parser.add_argument("--device", type=str, default="cuda", help="cuda, cpu")
 parser.add_argument("--ncpu", type=int, default=4, help="cpu cores")
 parser.add_argument("--return_sentence", action="store_true", help="return sentence or all_res")
+parser.add_argument("--no_vad", action="store_true", help="infer without vad")
 parser.add_argument(
     "--certfile",
     type=str,
@@ -483,12 +484,18 @@ async def ws_serve(websocket, path):
                         frames_asr.append(message)
 
                     # vad online
-                    try:
-                        speech_start_i, speech_end_i = await async_vad(websocket, message)
-                    except:
-                        print("error in vad")
-                    if speech_start_i != -1:
+                    if not args.no_vad:
+                        try:
+                            speech_start_i, speech_end_i = await async_vad(websocket, message)
+                        except:
+                            print("error in vad")
+                        if speech_start_i != -1:
+                            speech_start = True
+                            frames_asr = []
+                            frames_asr.extend(frames)
+                    else:
                         speech_start = True
+                        speech_end_i = -1
                         beg_bias = (websocket.vad_pre_idx - speech_start_i) // duration_ms
                         frames_pre = frames[-beg_bias:]
                         frames_asr = []
@@ -496,19 +503,31 @@ async def ws_serve(websocket, path):
 
                 # vad end
                 if speech_end_i != -1 or not websocket.is_speaking:
-                    audio_in = b"".join(frames_asr)
-                    try:
-                        await streaming_transcribe(
-                            websocket, audio_in, is_vad_end=True, asr_prompt=asr_prompt, s2tt_prompt=s2tt_prompt
-                        )
-                    except Exception as e:
-                        print(f"error in streaming, {e}")
-                        print(f"error in streaming, {websocket.streaming_state}")
+                    if speech_end_i != -1:
+                        audio_in = b"".join(frames_asr)
+                        try:
+                            await streaming_transcribe(
+                                websocket, audio_in, is_vad_end=True, asr_prompt=asr_prompt, s2tt_prompt=s2tt_prompt
+                            )
+                        except Exception as e:
+                            print(f"error in streaming, {e}")
+                            print(f"error in streaming, {websocket.streaming_state}")
                     frames_asr = []
                     speech_start = False
                     websocket.streaming_state["previous_asr_text"] = ""
                     websocket.streaming_state["previous_s2tt_text"] = ""
                     if not websocket.is_speaking:
+                        message = json.dumps(
+                            {
+                                "mode": "online",
+                                "asr_text": websocket.streaming_state["onscreen_asr_res"] + "<em></em>",
+                                "s2tt_text": websocket.streaming_state["onscreen_s2tt_res"] + "<em></em>",
+                                "wav_name": websocket.wav_name,
+                                "is_final": websocket.is_speaking,
+                                "is_sentence_end": True,
+                            }
+                        )
+                        await websocket.send(message)
                         await clear_websocket()
                     if args.return_sentence:
                         websocket.streaming_state["previous_vad_onscreen_asr_text"] = ""
