@@ -2922,7 +2922,7 @@ class LLMASRXvecSlotTTS(nn.Module):
             #     response, llm_cur_kv_cache, llm_cur_kv_cache_len, dtype_map[tts_dtype]
             # )
             speech_tokens, mel, wav = self.simulate_streaming_generate_speech(
-                preds, llm_cur_kv_cache, llm_cur_kv_cache_len, dtype_map[tts_dtype], tokenizer
+                target_ids, llm_cur_kv_cache, llm_cur_kv_cache_len, dtype_map[tts_dtype], tokenizer
             )
             self.write_mel_wav(kwargs.get("output_dir"), mel, wav, key[0])
 
