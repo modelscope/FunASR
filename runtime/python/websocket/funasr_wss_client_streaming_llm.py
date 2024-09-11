@@ -182,20 +182,7 @@ async def record_from_scp(chunk_begin, chunk_size):
 
     await asyncio.sleep(2)
 
-    message = json.dumps(
-            {
-                "mode": args.mode,
-                "chunk_size": args.chunk_size,
-                "chunk_interval": args.chunk_interval,
-                "wav_name": "microphone",
-                "is_speaking": False,
-                "asr_prompt": args.asr_prompt,
-                "s2tt_prompt": args.s2tt_prompt,
-            }
-        )
-
-        # voices.put(message)
-    await websocket.send(message)
+    await websocket.close()
 
 
 async def message(id):
@@ -231,14 +218,15 @@ async def message(id):
                 prev_s2tt_text = s2tt_text
                 print_asr_text = Colors.OKGREEN + prev_sentence_asr_text + asr_text[:asr_text.find("<em>")] + Colors.ENDC + Colors.OKCYAN + asr_text[asr_text.find("<em>") + len("<em>"): -len("</em>")] + Colors.ENDC
                 print_s2tt_text = Colors.OKGREEN + prev_sentence_s2tt_text + s2tt_text[:s2tt_text.find("<em>")] + Colors.ENDC + Colors.OKCYAN + s2tt_text[s2tt_text.find("<em>") + len("<em>"): -len("</em>")] + Colors.ENDC
-                
+                text_print = "\n\n" + "ASR: " + print_asr_text + "\n\n" + "S2TT: " + print_s2tt_text
+
                 if is_sentence_end:
                     prev_asr_text = ""
                     prev_s2tt_text = ""
                     clean_asr_text = asr_text.replace("<em>", "").replace("</em>", "")
                     clean_s2tt_text = s2tt_text.replace("<em>", "").replace("</em>", "")
-                    prev_sentence_asr_text = clean_asr_text + "\n\n"
-                    prev_sentence_s2tt_text = clean_s2tt_text + "\n\n"
+                    prev_sentence_asr_text += clean_asr_text + "\n\n"
+                    prev_sentence_s2tt_text += clean_s2tt_text + "\n\n"
 
             else:
                 clean_prev_asr_text = prev_asr_text.replace("<em>", "").replace("</em>", "")
