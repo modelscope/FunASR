@@ -4,6 +4,7 @@ from typing import Dict, Tuple
 import torch
 import torchaudio
 import torch.nn.functional as F
+from torchaudio.models.decoder import ctc_decoder, cuda_ctc_decoder
 from torch.cuda.amp import autocast
 
 from funasr.metrics.compute_acc import th_accuracy
@@ -32,14 +33,14 @@ class ConformerDPO(Conformer):
         )
         for p in self.ref_model.parameters():
             p.requires_grad = False
-        self.ref_model.load_state_dict(self.state_dict())
+        # self.ref_model.load_state_dict(super().state_dict())
 
         self.nbest = kwargs.get("nbest", 5)
         self.beam_size = kwargs.get("beam_size", 10)
         self.mwer_rate = kwargs.get("mwer_rate", 0)
         char_list = [str(x) for x in range(self.vocab_size)]
         
-        self.ctc_decoder = torchaudio.models.decoder.cuda_ctc_decoder(
+        self.ctc_decoder = cuda_ctc_decoder(
             char_list, nbest = self.nbest, beam_size = self.beam_size, blank_skip_threshold = 0.95)
 
     def load_state_dict(self, state_dict, strict=True):
@@ -103,7 +104,7 @@ class ConformerDPO(Conformer):
             loss = self.ctc_weight * loss_ctc + (1 - self.ctc_weight) * loss_att
 
         if self.mwer_rate > 0:
-            mwer_loss = self.mwer_loss(encoder_out, encoder_out_lens, text, text_lengths)
+            mwer_loss = self._calc_mwer_loss(encoder_out, encoder_out_lens, decoder_out, text, text_lengths)
         else:
             mwer_loss = 0
 
@@ -157,8 +158,6 @@ class ConformerDPO(Conformer):
             intermediate_outs = encoder_out[1]
             encoder_out = encoder_out[0]
 
-        if intermediate_outs is not None:
-            return (encoder_out, intermediate_outs), encoder_out_lens
 
         return encoder_out, encoder_out_lens, ref_encoder_out, ref_encoder_out_lens
     def _calc_att_loss(
@@ -231,7 +230,7 @@ class ConformerDPO(Conformer):
     ):
         n_best_tokens, n_best_ctc_probs, n_best_length = self._get_nbest(encoder_out, encoder_out_lens) 
         nbest_dist = self._get_nbest_dist(ys_pad, ys_pad_lens, n_best_tokens, n_best_length)
-        n_best_att_prob = self._get_nbest_att_prob(decoder_out, nbest_dist)
+        n_best_att_prob = self._get_nbest_attprob(encoder_out, encoder_out_lens, n_best_tokens, n_best_length)
         mwer_loss = torch.sum(nbest_dist * n_best_att_prob.softmax(dim=-1), dim = -1)
         return torch.mean(mwer_loss)
 
@@ -240,33 +239,38 @@ class ConformerDPO(Conformer):
         # ctc_log_prob (B, T, V)
         nbest = self.nbest
         ctc_log_prob = self.ctc.log_softmax(encoder_out)
-        decode_results = self.ctc_decoder(ctc_log_prob, encoder_out_lens)
+        decode_results = self.ctc_decoder(ctc_log_prob, encoder_out_lens.int())
         # (B, N, L)
         n_best_tokens = self.ignore_id * torch.ones(len(ctc_log_prob), nbest, ctc_log_prob.size(2), dtype=torch.long, device=ctc_log_prob.device)
         # (B, N)
         n_best_ctc_probs = torch.zeros(len(ctc_log_prob), nbest, dtype=torch.float, device=ctc_log_prob.device)
         # (B, N)
         n_best_length = torch.zeros(len(ctc_log_prob), nbest, dtype=torch.long, device=ctc_log_prob.device)
-        for i in len(decode_results):
-            for j in len(decode_results[i]):
-                n_best_tokens[i, j, :] = torch.tensor(decode_results[i][j].tokens, dtype=torch.long, device=ctc_log_prob.device)
-                n_best_ctc_probs[i, j] = torch.tensor(decode_results[i][j][1].score, dtype=torch.float, device=ctc_log_prob.device)
+        for i in range(len(decode_results)):
+            for j in range(len(decode_results[i])):
+                n_best_tokens[i, j, :len(decode_results[i][j].tokens)] = torch.tensor(decode_results[i][j].tokens, dtype=torch.long, device=ctc_log_prob.device)
+                n_best_ctc_probs[i, j] = torch.tensor(decode_results[i][j].score, dtype=torch.float, device=ctc_log_prob.device)
                 n_best_length[i,j] = len(decode_results[i][j].tokens)
-        n_best_tokens = n_best_tokens[:,:,:max(n_best_length)]
+        n_best_tokens = n_best_tokens[:,:,:n_best_length.max()]
         return n_best_tokens, n_best_ctc_probs, n_best_length
     
     def _get_nbest_attprob(self, encoder_out, encoder_out_lens, n_best_tokens, n_best_length):
+        encoder_out = encoder_out.unsqueeze(1) # (B, 1, T, C)
+        encoder_out = encoder_out.expand(-1, self.nbest,-1, -1).contiguous().view(-1, encoder_out.size(-2), encoder_out.size(-1))
+        encoder_out_lens = encoder_out_lens.unsqueeze(1).expand(-1, self.nbest).contiguous().view(-1)
         
-        encoder_out = encoder_out.unsqueeze(2) # (B, 1, T, C)
-        encoder_out = encoder_out.expand(-1, self.nbest,-1, -1).view(-1, encoder_out.size(-2), encoder_out.size(-1))
-        encoder_out_lens = encoder_out_lens.unsqueeze(1).expand(-1, self.nbest).view(-1)
-        
-        n_best_tokens = n_best_tokens.view(-1, max(n_best_length))
-        n_best_length = n_best_length.view(-1)
+        n_best_tokens = n_best_tokens.view(-1, n_best_length.max()).contiguous()
+        n_best_length = n_best_length.view(-1).contiguous()
 
         ys_in_pad, ys_out_pad = add_sos_eos(n_best_tokens, self.sos, self.eos, self.ignore_id)
         ys_in_lens = n_best_length + 1
 
+        #print(encoder_out.size())
+        #print(encoder_out_lens.size())
+        #print(ys_in_pad.size())
+        #print(ys_in_lens.size())
+        #print(max(ys_in_lens))
+        #exit()
         # 1. Forward decoder
         decoder_out, _ = self.decoder(encoder_out, encoder_out_lens, ys_in_pad, ys_in_lens)
         n_best_prob = torch.log_softmax(decoder_out, dim=-1)
@@ -276,9 +280,9 @@ class ConformerDPO(Conformer):
 
     def _get_nbest_dist(self, ys_pad, ys_pad_lens, n_best_tokens, n_best_length):
         n_best_dist = torch.zeros(len(ys_pad), self.nbest)
-        for i in len(n_best_dist):
-            for j in len(n_best_dist[i]):
-                self.nbest = editdistance(
+        for i in range(len(n_best_dist)):
+            for j in range(len(n_best_dist[i])):
+                n_best_dist[i,j] = editdistance.eval(
                     ys_pad[i,:ys_pad_lens[i]], 
                     n_best_tokens[i, j, :n_best_length[i, j]]
                 )
