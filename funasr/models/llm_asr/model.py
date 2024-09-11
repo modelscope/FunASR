@@ -2918,8 +2918,11 @@ class LLMASRXvecSlotTTS(nn.Module):
         ):
             assert llm_cur_kv_cache is not None
             set_all_random_seed(rand_seed)
-            speech_tokens, mel, wav = self.generate_speech(
-                response, llm_cur_kv_cache, llm_cur_kv_cache_len, dtype_map[tts_dtype]
+            # speech_tokens, mel, wav = self.generate_speech(
+            #     response, llm_cur_kv_cache, llm_cur_kv_cache_len, dtype_map[tts_dtype]
+            # )
+            speech_tokens, mel, wav = self.simulate_streaming_generate_speech(
+                preds, llm_cur_kv_cache, llm_cur_kv_cache_len, dtype_map[tts_dtype], tokenizer
             )
             self.write_mel_wav(kwargs.get("output_dir"), mel, wav, key[0])
 
