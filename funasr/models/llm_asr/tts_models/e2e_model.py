@@ -903,6 +903,7 @@ class UCTDXvecSlotModel(UpsampleCtcTokenDiffModel):
     def streaming_one_step(
             self, text: torch.Tensor, text_lengths: torch.Tensor,
             xvec: Optional[torch.Tensor] = None, xvec_lengths: Optional[torch.Tensor] = None,
+            chunk_idx=0,
             **kwargs
     ):
         device = text.device
@@ -991,6 +992,7 @@ class UCTDXvecSlotModel(UpsampleCtcTokenDiffModel):
             token_hop_len = self.get_hop_lens(fa_tokens, lookahead_size)
             mel_hop_len = int(round(token_hop_len * self.fm_model.length_normalizer_ratio))
 
+        cur_token, feat = None, None
         # exclude empty tokens.
         if aligned_token_emb.shape[1] > prompt_token[0].shape[1]:
             cur_token = aligned_token_emb[:, prompt_token[0].shape[1]:]
@@ -1018,7 +1020,7 @@ class UCTDXvecSlotModel(UpsampleCtcTokenDiffModel):
 
             # v2: reback token and mel feat
             if text[0, -1] != self.endofprompt_token_id+1:
-                text_reback = 2
+                text_reback = 2 if chunk_idx == 0 else 4
                 token_hop_len_2 = self.get_hop_lens(fa_tokens, lookahead_size + text_reback)
                 token_reback = token_hop_len_2 - token_hop_len
                 cur_token = cur_token[:, :cur_token.shape[1] - token_reback, :]
