@@ -3028,11 +3028,14 @@ class LLMASRXvecSlotTTS(nn.Module):
                 continue
             normed_preds.append(c)
         normed_preds = "".join(normed_preds)
-        preds = self.split_characters_and_words(normed_preds)
         idx = -1
         for p in pounc:
-            idx = preds.index(p)
-            if idx > -1:
+            str_idx = normed_preds.find(p)
+            if str_idx > 0:
+                preds = self.split_characters_and_words(normed_preds[:str_idx])
+                idx = len(preds)
+                preds.append(normed_preds[str_idx])
+                preds.extend(self.split_characters_and_words(normed_preds[str_idx+1:]))
                 break
 
         _text = f"<|endofprompt|><|sil|>{text+normed_preds}" + ("<|sil|>" if is_last else "")
