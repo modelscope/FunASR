@@ -2782,7 +2782,7 @@ class LLMASRXvecSlotTTS(nn.Module):
                         ] = speech_token
 
                     speech_idx += 1
-        return inputs_embeds, contents, batch, source_ids, meta_data, output
+        return inputs_embeds, contents, batch, source_ids, meta_data
 
     def inference(
         self,
@@ -2794,7 +2794,7 @@ class LLMASRXvecSlotTTS(nn.Module):
         **kwargs,
     ):
 
-        inputs_embeds, contents, batch, source_ids, meta_data, outputs = self.inference_prepare(
+        inputs_embeds, contents, batch, source_ids, meta_data = self.inference_prepare(
             data_in, data_lengths, key, tokenizer, frontend, **kwargs
         )
         rand_seed = kwargs.get("rand_seed", 0)
@@ -2951,7 +2951,7 @@ class LLMASRXvecSlotTTS(nn.Module):
 
     def split_characters_and_words(self, input_string):
         # 定义正则表达式模式
-        pattern = r'[\u4e00-\u9fff]|[\w]+|[^\w\s]'
+        pattern = r"[\u4e00-\u9fff]|[\w]+|[^\w\s]"
         # 使用 re.findall 找到所有匹配的字符和单词
         results = re.findall(pattern, input_string)
         return results
@@ -2964,19 +2964,25 @@ class LLMASRXvecSlotTTS(nn.Module):
         return text_token
 
     def generate_speech_one_step(
-            self,
-            text: str, last_t_size,
-            llm_cur_kv_cache, llm_cur_kv_cache_len,
-            prompt_token, prompt_audio, tts_text_chunk_size,
-            chunk_idx, is_last, para_len=30,
+        self,
+        text: str,
+        last_t_size,
+        llm_cur_kv_cache,
+        llm_cur_kv_cache_len,
+        prompt_token,
+        prompt_audio,
+        tts_text_chunk_size,
+        chunk_idx,
+        is_last,
+        para_len=30,
     ):
         device = llm_cur_kv_cache.device
-        pounc = ['。', '？', '！', '；', '：', '.', '?', '!', ';', '\n']
+        pounc = ["。", "？", "！", "；", "：", ".", "?", "!", ";", "\n"]
 
         # remove duplicated pounctuations
         normed_text = []
         for i, c in enumerate(text):
-            if i > 0 and text[i-1] in pounc and text[i] in pounc:
+            if i > 0 and text[i - 1] in pounc and text[i] in pounc:
                 continue
             normed_text.append(c)
         text = "".join(normed_text)
@@ -2989,8 +2995,10 @@ class LLMASRXvecSlotTTS(nn.Module):
             text_token = torch.tensor([text_token], dtype=torch.long, device=device)
             text_token_len = torch.tensor([text_token.shape[1]], dtype=torch.long, device=device)
             cur_token, feat = self.tts_model.streaming_one_step(
-                text_token, text_token_len,
-                xvec=None, xvec_lengths=None,
+                text_token,
+                text_token_len,
+                xvec=None,
+                xvec_lengths=None,
                 prompt_dict={
                     "prompt_token": prompt_token,
                     "prompt_audio": prompt_audio,
@@ -3003,8 +3011,14 @@ class LLMASRXvecSlotTTS(nn.Module):
             if cur_token is not None and cur_token.shape[1] > 0 and feat.shape[2] > 0:
                 # process first package, token in B,T,D, feat in B,F,T
                 if prompt_token[0] is None:
-                    prompt_token = [cur_token, torch.tensor([cur_token.shape[1]], dtype=torch.long, device=device)]
-                    prompt_audio = [feat.transpose(1, 2), torch.tensor([feat.shape[2]], dtype=torch.long, device=device)]
+                    prompt_token = [
+                        cur_token,
+                        torch.tensor([cur_token.shape[1]], dtype=torch.long, device=device),
+                    ]
+                    prompt_audio = [
+                        feat.transpose(1, 2),
+                        torch.tensor([feat.shape[2]], dtype=torch.long, device=device),
+                    ]
                 else:
                     prompt_token[1] = prompt_token[1] + cur_token.shape[1]
                     prompt_token[0] = torch.concat([prompt_token[0], cur_token], dim=1)
@@ -3030,10 +3044,11 @@ class LLMASRXvecSlotTTS(nn.Module):
             #         text = text[idx+1:]
             #         last_t_size = len(self.tts_tokenizer_warpper(text))
 
-        return ((cur_token, feat, wav),
-                (text, last_t_size, prompt_token, prompt_audio, chunk_idx))
+        return ((cur_token, feat, wav), (text, last_t_size, prompt_token, prompt_audio, chunk_idx))
 
-    def simulate_streaming_generate_speech(self, preds, llm_cur_kv_cache, llm_cur_kv_cache_len, llm_dtype, llm_tokenizer):
+    def simulate_streaming_generate_speech(
+        self, preds, llm_cur_kv_cache, llm_cur_kv_cache_len, llm_dtype, llm_tokenizer
+    ):
         # self.tts_text_tokenizer = self.tts_text_tokenizer
         self.vocoder.to(llm_dtype)
         self.tts_model.to(llm_dtype)
@@ -3048,19 +3063,23 @@ class LLMASRXvecSlotTTS(nn.Module):
         while st < preds.shape[1]:
             chunk_size = int(llm_token_num_per_call / (given_rtf ** min(count, 2)))
             _resp = llm_tokenizer.batch_decode(
-                preds[:, st:st + chunk_size],
+                preds[:, st : st + chunk_size],
                 add_special_tokens=False,
                 skip_special_tokens=True,
             )[0]
-            is_last = (st + chunk_size >= preds.shape[1])
+            is_last = st + chunk_size >= preds.shape[1]
 
             new_text = new_text + _resp
             rt_value, states = self.generate_speech_one_step(
-                new_text, last_t_size,
-                llm_cur_kv_cache, llm_cur_kv_cache_len,
-                prompt_token, prompt_audio,
+                new_text,
+                last_t_size,
+                llm_cur_kv_cache,
+                llm_cur_kv_cache_len,
+                prompt_token,
+                prompt_audio,
                 text_chunk_size,
-                chunk_idx, is_last,
+                chunk_idx,
+                is_last,
             )
             cur_token, feat, wav = rt_value
             new_text, last_t_size, prompt_token, prompt_audio, chunk_idx = states
