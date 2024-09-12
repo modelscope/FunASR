@@ -80,7 +80,8 @@ class NlsTtsSynthesizer:
         self.started = True
 
     def send_text(self, text):
-        self.sdk.sendStreamInputTts(text)
+        if len(text) > 0:
+            self.sdk.sendStreamInputTts(text)
 
     def stop(self):
         self.sdk.stopStreamInputTts()
