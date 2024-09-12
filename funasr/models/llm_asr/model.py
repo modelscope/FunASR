@@ -3050,8 +3050,8 @@ class LLMASRXvecSlotTTS(nn.Module):
 
     def convert_wav_to_mp3(self, wav: torch.Tensor):
         wav = wav.detach().cpu().numpy()
-        wav = (wav * (2**16-1)).astype(np.int16)
-        mp3 = AudioSegment.from_raw(
+        wav = (wav * (2**15-1) * 0.8).astype(np.int16)
+        mp3 = AudioSegment(
             wav.tobytes(),
             sample_width=16 // 8,  # Sample width in bytes
             frame_rate=22050,
