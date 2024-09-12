@@ -3031,7 +3031,7 @@ class LLMASRXvecSlotTTS(nn.Module):
         idx = -1
         for p in pounc:
             str_idx = normed_preds.find(p)
-            if str_idx > 0:
+            if str_idx > -1:
                 preds = self.split_characters_and_words(normed_preds[:str_idx])
                 idx = len(preds)
                 preds.append(normed_preds[str_idx])
@@ -3096,6 +3096,8 @@ class LLMASRXvecSlotTTS(nn.Module):
             last_t_size = 0
             prompt_token, prompt_audio = [None, None], [None, None]
             wav = torch.cat([wav, torch.zeros([1, 4410]).to(wav)], dim=1)
+        else:
+            text = text + normed_preds
 
         return ((cur_token, feat, wav), (text, last_t_size, prompt_token, prompt_audio, chunk_idx))
 
