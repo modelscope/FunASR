@@ -911,10 +911,7 @@ class UCTDXvecSlotModel(UpsampleCtcTokenDiffModel):
         # streaming related config
         chunk_size = kwargs.get("streaming_chunk_size", 4)
         chunk_size_maxium = kwargs.get("chunk_size_maxium", 16)
-        try:
-            lookahead_size = self.am_model.encoder.pre_lookahead_len
-        except AttributeError:
-            lookahead_size = 0
+        lookahead_size = self.am_model.encoder.pre_lookahead_len
         hint_once(f"chunk_size={chunk_size}, chunk_size_maxium={chunk_size_maxium}, "
                   f"pre lookahead size={lookahead_size}.",
                   "pre_lookahead_len")
