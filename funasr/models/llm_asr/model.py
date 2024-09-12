@@ -2871,9 +2871,6 @@ class LLMASRXvecSlotTTS(nn.Module):
 
         # tts related inference, require the kv cache of llm last layer for only the current inputs
         # TODO: select kv cache of the current turn inputs
-        import pdb
-
-        pdb.set_trace()
         attention_mask = batch.get("attention_mask", None)
         model_outputs = self.llm(
             inputs_embeds=inputs_embeds,
@@ -2918,8 +2915,11 @@ class LLMASRXvecSlotTTS(nn.Module):
         ):
             assert llm_cur_kv_cache is not None
             set_all_random_seed(rand_seed)
-            speech_tokens, mel, wav = self.generate_speech(
-                response, llm_cur_kv_cache, llm_cur_kv_cache_len, dtype_map[tts_dtype]
+            # speech_tokens, mel, wav = self.generate_speech(
+            #     response, llm_cur_kv_cache, llm_cur_kv_cache_len, dtype_map[tts_dtype]
+            # )
+            speech_tokens, mel, wav = self.simulate_streaming_generate_speech(
+                target_ids, llm_cur_kv_cache, llm_cur_kv_cache_len, dtype_map[tts_dtype], tokenizer
             )
             self.write_mel_wav(kwargs.get("output_dir"), mel, wav, key[0])
 
@@ -2942,10 +2942,140 @@ class LLMASRXvecSlotTTS(nn.Module):
             None,
             outside_prompt=llm_cur_kv_cache,
             outside_prompt_lengths=llm_cur_kv_cache_len,
+            sampling="threshold_1e-6",
         )
         # vocoder forward
         wav = self.vocoder.inference(mel_feats.transpose(1, 2))
 
+        return speech_tokens, mel_feats, wav
+
+    def split_characters_and_words(self, input_string):
+        # 定义正则表达式模式
+        pattern = r'[\u4e00-\u9fff]|[\w]+|[^\w\s]'
+        # 使用 re.findall 找到所有匹配的字符和单词
+        results = re.findall(pattern, input_string)
+        return results
+
+    def tts_tokenizer_warpper(self, text):
+        text_token = self.tts_text_tokenizer.text2tokens(text)
+        # remove the added pouc by ttsfrd.
+        if text[-1] != "。" and text_token[-1] == 1542:
+            text_token = text_token[:-1]
+        return text_token
+
+    def generate_speech_one_step(
+            self,
+            text: str, last_t_size,
+            llm_cur_kv_cache, llm_cur_kv_cache_len,
+            prompt_token, prompt_audio, tts_text_chunk_size,
+            chunk_idx, is_last, para_len=30,
+    ):
+        device = llm_cur_kv_cache.device
+        pounc = ['。', '？', '！', '；', '：', '.', '?', '!', ';', '\n']
+
+        # remove duplicated pounctuations
+        normed_text = []
+        for i, c in enumerate(text):
+            if i > 0 and text[i-1] in pounc and text[i] in pounc:
+                continue
+            normed_text.append(c)
+        text = "".join(normed_text)
+
+        cur_token, feat, wav = None, None, None
+        _text = f"<|endofprompt|><|sil|>{text}" + ("<|sil|>" if is_last else "")
+        text_token = self.tts_tokenizer_warpper(_text)
+        t_size = len(text_token)
+        if (t_size - last_t_size) >= tts_text_chunk_size or is_last:
+            text_token = torch.tensor([text_token], dtype=torch.long, device=device)
+            text_token_len = torch.tensor([text_token.shape[1]], dtype=torch.long, device=device)
+            cur_token, feat = self.tts_model.streaming_one_step(
+                text_token, text_token_len,
+                xvec=None, xvec_lengths=None,
+                prompt_dict={
+                    "prompt_token": prompt_token,
+                    "prompt_audio": prompt_audio,
+                },
+                outside_prompt=llm_cur_kv_cache,
+                outside_prompt_lengths=llm_cur_kv_cache_len,
+                sampling="threshold_1e-6",
+                chunk_idx=chunk_idx,
+            )
+            if cur_token is not None and cur_token.shape[1] > 0 and feat.shape[2] > 0:
+                # process first package, token in B,T,D, feat in B,F,T
+                if prompt_token[0] is None:
+                    prompt_token = [cur_token, torch.tensor([cur_token.shape[1]], dtype=torch.long, device=device)]
+                    prompt_audio = [feat.transpose(1, 2), torch.tensor([feat.shape[2]], dtype=torch.long, device=device)]
+                else:
+                    prompt_token[1] = prompt_token[1] + cur_token.shape[1]
+                    prompt_token[0] = torch.concat([prompt_token[0], cur_token], dim=1)
+                    prompt_audio[1] = prompt_audio[1] + feat.shape[2]
+                    prompt_audio[0] = torch.concat([prompt_audio[0], feat.transpose(1, 2)], dim=1)
+                wav = self.vocoder.inference(feat.transpose(1, 2))
+                chunk_idx += 1
+            else:
+                cur_token, feat, wav = None, None, None
+
+            # post process
+            last_t_size = t_size
+            # restart a new paragraph
+            # char_words = self.split_characters_and_words(text)
+            # if len(char_words) > para_len:
+            #     # find the last pounc to split paragraph
+            #     idx = -1
+            #     for i in range(len(char_words)-1, -1, -1):
+            #         if char_words[i] in pounc:
+            #             idx = i
+            #             break
+            #     if idx > 0:
+            #         text = text[idx+1:]
+            #         last_t_size = len(self.tts_tokenizer_warpper(text))
+
+        return ((cur_token, feat, wav),
+                (text, last_t_size, prompt_token, prompt_audio, chunk_idx))
+
+    def simulate_streaming_generate_speech(self, preds, llm_cur_kv_cache, llm_cur_kv_cache_len, llm_dtype, llm_tokenizer):
+        # self.tts_text_tokenizer = self.tts_text_tokenizer
+        self.vocoder.to(llm_dtype)
+        self.tts_model.to(llm_dtype)
+        llm_token_num_per_call = 3
+        text_chunk_size = 8
+        given_rtf = 0.5
+
+        token_list, feat_list, wav_list = [], [], []
+        prompt_token, prompt_audio = [None, None], [None, None]
+        new_text, last_t_size, chunk_idx = "", 0, 0
+        st, count = 0, 0
+        while st < preds.shape[1]:
+            chunk_size = int(llm_token_num_per_call / (given_rtf ** min(count, 2)))
+            _resp = llm_tokenizer.batch_decode(
+                preds[:, st:st + chunk_size],
+                add_special_tokens=False,
+                skip_special_tokens=True,
+            )[0]
+            is_last = (st + chunk_size >= preds.shape[1])
+
+            new_text = new_text + _resp
+            rt_value, states = self.generate_speech_one_step(
+                new_text, last_t_size,
+                llm_cur_kv_cache, llm_cur_kv_cache_len,
+                prompt_token, prompt_audio,
+                text_chunk_size,
+                chunk_idx, is_last,
+            )
+            cur_token, feat, wav = rt_value
+            new_text, last_t_size, prompt_token, prompt_audio, chunk_idx = states
+            # save results
+            if cur_token is not None and feat is not None and wav is not None:
+                token_list.append(cur_token)
+                feat_list.append(feat)
+                wav_list.append(wav)
+
+            st += chunk_size
+            count += 1
+
+        speech_tokens = torch.cat(token_list, dim=1)
+        mel_feats = torch.cat(feat_list, dim=2)
+        wav = torch.cat(wav_list, dim=1)
         return speech_tokens, mel_feats, wav
 
     def write_mel_wav(self, output_dir, feat, wav, key):

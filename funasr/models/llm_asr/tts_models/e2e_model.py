@@ -741,7 +741,7 @@ class UCTDXvecSlotModel(UpsampleCtcTokenDiffModel):
         device = text.device
         use_causal_prob = kwargs.get("use_causal_prob", 1.0)
         # streaming related config
-        chunk_size = kwargs.get("streaming_chunk_size", 1)
+        chunk_size = kwargs.get("streaming_chunk_size", 4)
         chunk_size_maxium = kwargs.get("chunk_size_maxium", 16)
         try:
             lookahead_size = self.am_model.encoder.pre_lookahead_len
@@ -899,3 +899,129 @@ class UCTDXvecSlotModel(UpsampleCtcTokenDiffModel):
                 break
 
         return tokens, prompt_audio[0].transpose(1, 2)
+
+    def streaming_one_step(
+            self, text: torch.Tensor, text_lengths: torch.Tensor,
+            xvec: Optional[torch.Tensor] = None, xvec_lengths: Optional[torch.Tensor] = None,
+            chunk_idx=0,
+            **kwargs
+    ):
+        device = text.device
+        use_causal_prob = kwargs.get("use_causal_prob", 1.0)
+        # streaming related config
+        chunk_size = kwargs.get("streaming_chunk_size", 4)
+        chunk_size_maxium = kwargs.get("chunk_size_maxium", 16)
+        lookahead_size = self.am_model.encoder.pre_lookahead_len
+        hint_once(f"chunk_size={chunk_size}, chunk_size_maxium={chunk_size_maxium}, "
+                  f"pre lookahead size={lookahead_size}.",
+                  "pre_lookahead_len")
+
+        blank_penalty = kwargs.get("blank_penalty", 0.0)
+        sampling = kwargs.get("sampling", "greedy")
+        prompt_dict = kwargs.get("prompt_dict", {})
+        prompt_token = list(prompt_dict.get("prompt_token", [None, None]))
+        prompt_audio = list(prompt_dict.get("prompt_audio", [None, None]))
+
+        ftype = self.text_embedding.weight.dtype
+        if prompt_token[0] is None:
+            prompt_token[0] = torch.zeros([1, 0, self.output_size], device=device, dtype=ftype)
+            prompt_token[1] = torch.tensor([0], device=device, dtype=torch.long)
+        if prompt_audio[0] is None:
+            prompt_audio[0] = torch.zeros(
+                [1, 0, self.fm_model.mel_extractor.num_mels],
+                device=device, dtype=ftype
+            )
+            prompt_audio[1] = torch.tensor([0], device=device, dtype=torch.long)
+
+        # embed text inputs
+        mask = (text != -1).float().unsqueeze(-1)
+        text_emb = self.text_embedding(torch.clamp(text, min=0)) * mask
+        text_emb_lengths = text_lengths
+
+        batch_size = text.shape[0]
+
+        prompt, prompt_lens, text_emb, text_emb_lengths = self.split_prompt(
+            text_emb, text_emb_lengths, text, text_lengths
+        )
+        if "outside_prompt" in kwargs:
+            prompt = kwargs["outside_prompt"].to(device)
+            if "outside_prompt_lengths" in kwargs:
+                prompt_lens = kwargs["outside_prompt_lengths"]
+            else:
+                prompt_lens = torch.tensor([prompt.shape[1]]).to(text_lengths)
+            prompt = self.outside_prompt_poj(prompt)
+            hint_once("use outside_prompt", "outside_prompt")
+
+        if xvec is not None:
+            # using speaker embedding
+            hint_once("using speaker embedding for slot.", "use_spk_emb")
+            xvec = xvec[:, :xvec_lengths.max()]
+        else:
+            # textual prompt xvec
+            hint_once("using textual prompt for slot.", "use_spk_emb")
+            prompt_xvec = self.spk_aggregator(
+                prompt, prompt_lens,
+                self.spk_query.expand([batch_size, -1, -1]), torch.tensor([1] * batch_size).to(prompt_lens)
+            )[0]
+            xvec = self.prompt_xvec_proj(prompt_xvec)
+            xvec_lengths = torch.tensor([1] * batch_size).to(text_lengths)
+
+        chunk_text_emb = text_emb
+        chunk_text_emb_lengths = torch.tensor([chunk_text_emb.shape[1]], dtype=torch.long, device=device)
+
+        outs_tuple = self.text_encoder(chunk_text_emb, ilens=chunk_text_emb_lengths)
+        text_enc = outs_tuple[0]
+        text_enc_lens = chunk_text_emb_lengths
+
+        # forward AM model
+        tokens, aligned_token_emb, aligned_token_lens = self.am_model.inference(
+            text_enc, text_enc_lens,
+            xvec, xvec_lengths,
+            sampling=sampling,
+            blank_penalty=blank_penalty,
+            text_is_embedding=True,
+            return_hidden=True,
+            use_causal_prob=use_causal_prob,
+        )
+        token_hop_len, mel_hop_len = 0, 0
+        if isinstance(tokens, tuple):
+            tokens, fa_tokens = tokens
+            token_hop_len = self.get_hop_lens(fa_tokens, lookahead_size)
+            mel_hop_len = int(round(token_hop_len * self.fm_model.length_normalizer_ratio))
+
+        cur_token, feat = None, None
+        # exclude empty tokens.
+        if aligned_token_emb.shape[1] > prompt_token[0].shape[1]:
+            cur_token = aligned_token_emb[:, prompt_token[0].shape[1]:]
+            cur_token_len = aligned_token_lens - prompt_token[1]
+
+            # v2: excluding lookahead tokens for not-last packages
+            if text[0, -1] != self.endofprompt_token_id+1:
+                cur_token = cur_token[:, :cur_token.shape[1] - token_hop_len, :]
+                cur_token_len = cur_token_len - token_hop_len
+
+            # forward FM model
+            feat = self.fm_model.inference(
+                cur_token, cur_token_len,
+                xvec, xvec_lengths,
+                prompt=dict(
+                    prompt_text=prompt_token,
+                    prompt_audio=prompt_audio,
+                ),
+                **kwargs,
+            )
+            feat = self.rms_rescale_feat(feat)
+            print_token = tokens.cpu().squeeze().tolist()
+            logging.info(f"valid_tokens: {print_token[:len(print_token) - token_hop_len]}, "
+                         f"pad_tokens: {print_token[len(print_token) - token_hop_len:]}.")
+
+            # v2: reback token and mel feat
+            if text[0, -1] != self.endofprompt_token_id+1:
+                text_reback = 2 if chunk_idx == 0 else 4
+                token_hop_len_2 = self.get_hop_lens(fa_tokens, lookahead_size + text_reback)
+                token_reback = token_hop_len_2 - token_hop_len
+                cur_token = cur_token[:, :cur_token.shape[1] - token_reback, :]
+                feat_reback = int(round(token_reback * self.fm_model.length_normalizer_ratio))
+                feat = feat[:, :, :feat.shape[2] - feat_reback]
+
+        return cur_token, feat
