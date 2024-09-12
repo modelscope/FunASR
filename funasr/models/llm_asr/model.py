@@ -1337,18 +1337,26 @@ class LLMASR4(nn.Module):
 
         # audio encoder
         speech = batch["speech"]
+        
         if len(speech) > 0:
-            speech_lengths = batch["speech_lengths"][:, 0]
-            # fp16
-            if kwargs.get("fp16", False):
-                speech = speech.to(torch.float16)
-            elif kwargs.get("bf16", False):
-                speech = speech.to(torch.bfloat16)
-            # audio encoder
-            encoder_out, encoder_out_lens = self.encode(speech, speech_lengths)
+            if "audio_embedding" in kwargs and "audio_embedding_lens" in kwargs:
+                encoder_out = kwargs["audio_embedding"]
+                encoder_out_lens = kwargs["audio_embedding_lens"]
+            else:
+                speech_lengths = batch["speech_lengths"][:, 0]
+                # fp16
+                if kwargs.get("fp16", False):
+                    speech = speech.to(torch.float16)
+                elif kwargs.get("bf16", False):
+                    speech = speech.to(torch.bfloat16)
+                # audio encoder
+                encoder_out, encoder_out_lens = self.encode(speech, speech_lengths)
 
-            # audio_adaptor
-            encoder_out, encoder_out_lens = self.audio_adaptor(encoder_out, encoder_out_lens)
+                # audio_adaptor
+                encoder_out, encoder_out_lens = self.audio_adaptor(encoder_out, encoder_out_lens)
+
+                meta_data["audio_adaptor_out"] = encoder_out
+                meta_data["audio_adaptor_out_lens"] = encoder_out_lens
 
         input_ids = batch["input_ids"]
         source_ids = batch["source_ids"]
