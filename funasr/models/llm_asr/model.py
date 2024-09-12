@@ -28,6 +28,8 @@ from funasr.train_utils.device_funcs import to_device
 from funasr.models.transformer.utils.nets_utils import make_pad_mask, pad_list
 from funasr.train_utils.set_all_random_seed import set_all_random_seed
 import traceback
+from pydub import AudioSegment
+from io import BytesIO
 
 try:
     import numpy as np
@@ -2918,10 +2920,10 @@ class LLMASRXvecSlotTTS(nn.Module):
             # speech_tokens, mel, wav = self.generate_speech(
             #     response, llm_cur_kv_cache, llm_cur_kv_cache_len, dtype_map[tts_dtype]
             # )
-            speech_tokens, mel, wav = self.simulate_streaming_generate_speech(
+            speech_tokens, mel, wav, mp3 = self.simulate_streaming_generate_speech(
                 target_ids, llm_cur_kv_cache, llm_cur_kv_cache_len, dtype_map[tts_dtype], tokenizer
             )
-            self.write_mel_wav(kwargs.get("output_dir"), mel, wav, key[0])
+            self.write_mel_wav(kwargs.get("output_dir"), mel, wav, mp3, key[0])
 
         return results, meta_data
 
@@ -3033,6 +3035,22 @@ class LLMASRXvecSlotTTS(nn.Module):
         return ((cur_token, feat, wav),
                 (text, last_t_size, prompt_token, prompt_audio, chunk_idx))
 
+    def convert_wav_to_mp3(self, wav: torch.Tensor):
+        wav = wav.detach().cpu().numpy()
+        wav = (wav * (2**16-1)).astype(np.int16)
+        mp3 = AudioSegment.from_raw(
+            wav.tobytes(),
+            sample_width=16 // 8,  # Sample width in bytes
+            frame_rate=22050,
+            channels=1
+        )
+        mp3_buffer = BytesIO()
+        mp3.export(mp3_buffer, format="mp3", bitrate="48k")
+        # we should return this to web page.
+        mp3_bytes_data = mp3_buffer.getvalue()
+
+        return mp3_bytes_data
+
     def simulate_streaming_generate_speech(self, preds, llm_cur_kv_cache, llm_cur_kv_cache_len, llm_dtype, llm_tokenizer):
         # self.tts_text_tokenizer = self.tts_text_tokenizer
         self.vocoder.to(llm_dtype)
@@ -3041,7 +3059,7 @@ class LLMASRXvecSlotTTS(nn.Module):
         text_chunk_size = 8
         given_rtf = 0.5
 
-        token_list, feat_list, wav_list = [], [], []
+        token_list, feat_list, wav_list, mp3_list = [], [], [], []
         prompt_token, prompt_audio = [None, None], [None, None]
         new_text, last_t_size, chunk_idx = "", 0, 0
         st, count = 0, 0
@@ -3068,7 +3086,10 @@ class LLMASRXvecSlotTTS(nn.Module):
             if cur_token is not None and feat is not None and wav is not None:
                 token_list.append(cur_token)
                 feat_list.append(feat)
+                # we should return this data to web page for playing.
+                mp3_data = self.convert_wav_to_mp3(wav)
                 wav_list.append(wav)
+                mp3_list.append(mp3_data)
 
             st += chunk_size
             count += 1
@@ -3076,9 +3097,10 @@ class LLMASRXvecSlotTTS(nn.Module):
         speech_tokens = torch.cat(token_list, dim=1)
         mel_feats = torch.cat(feat_list, dim=2)
         wav = torch.cat(wav_list, dim=1)
-        return speech_tokens, mel_feats, wav
+        mp3 = b''.join(mp3_list)
+        return speech_tokens, mel_feats, wav, mp3
 
-    def write_mel_wav(self, output_dir, feat, wav, key):
+    def write_mel_wav(self, output_dir, feat, wav, mp3, key):
         out_dir = os.path.join(output_dir, "1best_recog", "mels")
         os.makedirs(out_dir, exist_ok=True)
         if feat is not None:
@@ -3096,6 +3118,11 @@ class LLMASRXvecSlotTTS(nn.Module):
                 encoding="PCM_S",
                 bits_per_sample=16,
             )
+        if mp3 is not None:
+            path = os.path.join(out_dir, f"{key}.mp3")
+            fd = open(path, "wb")
+            fd.write(mp3)
+            fd.close()
 
 
 class Swish(torch.nn.Module):
