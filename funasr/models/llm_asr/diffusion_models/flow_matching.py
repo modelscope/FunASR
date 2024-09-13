@@ -48,7 +48,7 @@ class BASECFM(torch.nn.Module, ABC):
             sample: generated mel-spectrogram
                 shape: (batch_size, n_feats, mel_timesteps)
         """
-        set_all_random_seed(0)
+        # set_all_random_seed(0)
         z = torch.randn_like(mu) * temperature
         t_span = torch.linspace(0, 1, n_timesteps + 1, device=mu.device)
         if self.t_scheduler == 'cosine':

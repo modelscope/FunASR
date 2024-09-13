@@ -2924,7 +2924,7 @@ class LLMASRXvecSlotTTS(nn.Module):
             enabled=True if tts_dtype != "fp32" else False, dtype=dtype_map[tts_dtype]
         ):
             assert llm_cur_kv_cache is not None
-            set_all_random_seed(rand_seed)
+            # set_all_random_seed(rand_seed)
             # speech_tokens, mel, wav = self.generate_speech(
             #     response, llm_cur_kv_cache, llm_cur_kv_cache_len, dtype_map[tts_dtype]
             # )
