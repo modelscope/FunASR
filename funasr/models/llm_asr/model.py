@@ -3295,14 +3295,14 @@ class LLMASRXvecSlotTTS(nn.Module):
         return cur_token, feat, wav
 
     def simple_streaming_generate_speech(
-        self,
-        preds,
-        states,
-        llm_cur_kv_cache,
-        llm_cur_kv_cache_len,
-        is_last=False,
-        text_chunk_size=8,
-        format="mp3",
+            self,
+            preds,
+            states,
+            llm_cur_kv_cache,
+            llm_cur_kv_cache_len,
+            is_last=False,
+            text_chunk_size=8,
+            format="mp3",
     ):
 
         new_text, last_t_size, prompt_token, prompt_audio, chunk_idx = (
