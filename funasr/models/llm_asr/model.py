@@ -3073,7 +3073,7 @@ class LLMASRXvecSlotTTS(nn.Module):
                 },
                 outside_prompt=llm_cur_kv_cache,
                 outside_prompt_lengths=llm_cur_kv_cache_len,
-                sampling="threshold_1e-6",
+                sampling="threshold_6e-1",
                 chunk_idx=chunk_idx,
             )
             if cur_token is not None and cur_token.shape[1] > 0 and feat.shape[2] > 0:
@@ -3145,7 +3145,7 @@ class LLMASRXvecSlotTTS(nn.Module):
                 },
                 outside_prompt=llm_cur_kv_cache,
                 outside_prompt_lengths=llm_cur_kv_cache_len,
-                sampling="threshold_1e-6",
+                sampling="threshold_6e-1",
                 chunk_idx=chunk_idx,
                 diff_steps=5,
             )
@@ -3252,6 +3252,49 @@ class LLMASRXvecSlotTTS(nn.Module):
         states["chunk_idx"] = 0
 
     def streaming_generate_speech(
+        self,
+        preds,
+        states,
+        llm_cur_kv_cache,
+        llm_cur_kv_cache_len,
+        is_last=False,
+        text_chunk_size=8,
+        format="mp3",
+    ):
+
+        new_text, last_t_size, prompt_token, prompt_audio, chunk_idx = (
+            states["new_text"],
+            states["last_t_size"],
+            states["prompt_token"],
+            states["prompt_audio"],
+            states["chunk_idx"],
+        )
+        # new_text = new_text + preds
+        with torch.cuda.amp.autocast(enabled=False, dtype=torch.float32):
+            rt_value, states_ret = self.generate_speech_one_step(
+                new_text, preds,
+                last_t_size,
+                llm_cur_kv_cache,
+                llm_cur_kv_cache_len,
+                prompt_token,
+                prompt_audio,
+                text_chunk_size,
+                chunk_idx,
+                is_last,
+            )
+        cur_token, feat, wav = rt_value
+        new_text, last_t_size, prompt_token, prompt_audio, chunk_idx = states_ret
+        states["new_text"] = new_text
+        states["last_t_size"] = last_t_size
+        states["prompt_token"] = prompt_token
+        states["prompt_audio"] = prompt_audio
+        states["chunk_idx"] = chunk_idx
+        if format == "mp3":
+            if cur_token is not None:
+                wav = self.convert_wav_to_mp3(wav)
+        return cur_token, feat, wav
+
+    def simple_streaming_generate_speech(
         self,
         preds,
         states,
