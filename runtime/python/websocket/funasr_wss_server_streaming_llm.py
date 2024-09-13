@@ -612,6 +612,15 @@ async def ws_serve(websocket, path):
                     websocket.streaming_state["previous_asr_text"] = ""
                     websocket.streaming_state["previous_s2tt_text"] = ""
                     if not websocket.is_speaking:
+                        if is_alpha_ending(websocket.streaming_state["onscreen_asr_res"]):
+                            websocket.streaming_state["onscreen_asr_res"] += "."
+                        elif is_chinese_ending(websocket.streaming_state["onscreen_asr_res"]):
+                            websocket.streaming_state["onscreen_asr_res"] += "。"
+                            
+                        if is_alpha_ending(websocket.streaming_state["onscreen_s2tt_res"]):
+                            websocket.streaming_state["onscreen_s2tt_res"] += "."
+                        elif is_chinese_ending(websocket.streaming_state["onscreen_s2tt_res"]):
+                            websocket.streaming_state["onscreen_s2tt_res"] += "。"
                         message = json.dumps(
                             {
                                 "mode": "online",

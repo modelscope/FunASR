@@ -10,6 +10,7 @@ from funasr.utils.hinter import hint_once
 from funasr.models.transformer.utils.nets_utils import pad_list
 import numpy as np
 import random
+from funasr.train_utils.set_all_random_seed import set_all_random_seed
 
 
 def norm_and_sample_xvec(xvec, xvec_lengths):
@@ -335,6 +336,7 @@ class UpsampleCtcTokenDiffModel(nn.Module):
         )
 
         # forward FM model
+        set_all_random_seed(0)
         feat = self.fm_model.inference(
             aligned_token_emb, aligned_token_lens,
             prompt=dict(
@@ -1001,6 +1003,7 @@ class UCTDXvecSlotModel(UpsampleCtcTokenDiffModel):
                 cur_token_len = cur_token_len - token_hop_len
 
             # forward FM model
+            set_all_random_seed(0)
             feat = self.fm_model.inference(
                 cur_token, cur_token_len,
                 xvec, xvec_lengths,
@@ -1011,7 +1014,7 @@ class UCTDXvecSlotModel(UpsampleCtcTokenDiffModel):
                 **kwargs,
             )
             feat = self.rms_rescale_feat(feat)
-            print_token = tokens.cpu().squeeze().tolist()
+            print_token = tokens.cpu().squeeze(0).squeeze(-1).tolist()
             logging.info(f"valid_tokens: {print_token[:len(print_token) - token_hop_len]}, "
                          f"pad_tokens: {print_token[len(print_token) - token_hop_len:]}.")
 
