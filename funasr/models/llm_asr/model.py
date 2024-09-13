@@ -3005,6 +3005,7 @@ class LLMASRXvecSlotTTS(nn.Module):
             text_token = text_token[:-1]
         return text_token
 
+    @torch.no_grad()
     def generate_speech_one_step(
         self,
         text: str, preds: str,
@@ -3095,7 +3096,8 @@ class LLMASRXvecSlotTTS(nn.Module):
             text = "".join(preds[idx + 1:])
             last_t_size = 0
             prompt_token, prompt_audio = [None, None], [None, None]
-            wav = torch.cat([wav, torch.zeros([1, 4410]).to(wav)], dim=1)
+            wav = torch.cat([wav, torch.zeros([1, 2205]).to(wav)], dim=1)
+            chunk_idx = 0
         else:
             text = text + normed_preds
 
@@ -3111,7 +3113,7 @@ class LLMASRXvecSlotTTS(nn.Module):
             channels=1,
         )
         mp3_buffer = BytesIO()
-        mp3.export(mp3_buffer, format="mp3", bitrate="48k")
+        mp3.export(mp3_buffer, format="mp3", bitrate="192k")
         # we should return this to web page.
         mp3_bytes_data = mp3_buffer.getvalue()
 
@@ -3201,17 +3203,18 @@ class LLMASRXvecSlotTTS(nn.Module):
             states["chunk_idx"],
         )
         # new_text = new_text + preds
-        rt_value, states_ret = self.generate_speech_one_step(
-            new_text, preds,
-            last_t_size,
-            llm_cur_kv_cache,
-            llm_cur_kv_cache_len,
-            prompt_token,
-            prompt_audio,
-            text_chunk_size,
-            chunk_idx,
-            is_last,
-        )
+        with torch.cuda.amp.autocast(enabled=False, dtype=torch.float32):
+            rt_value, states_ret = self.generate_speech_one_step(
+                new_text, preds,
+                last_t_size,
+                llm_cur_kv_cache,
+                llm_cur_kv_cache_len,
+                prompt_token,
+                prompt_audio,
+                text_chunk_size,
+                chunk_idx,
+                is_last,
+            )
         cur_token, feat, wav = rt_value
         new_text, last_t_size, prompt_token, prompt_audio, chunk_idx = states_ret
         states["new_text"] = new_text
