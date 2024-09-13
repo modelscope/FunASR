@@ -3271,7 +3271,7 @@ class LLMASRXvecSlotTTS(nn.Module):
         # new_text = new_text + preds
         with torch.cuda.amp.autocast(enabled=False, dtype=torch.float32):
             rt_value, states_ret = self.simple_generate_speech_one_step(
-                new_text, preds,
+                preds, "",
                 last_t_size,
                 llm_cur_kv_cache,
                 llm_cur_kv_cache_len,
