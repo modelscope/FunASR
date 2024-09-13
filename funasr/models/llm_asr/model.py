@@ -3142,9 +3142,9 @@ class LLMASRXvecSlotTTS(nn.Module):
             )[0]
             is_last = st + chunk_size >= preds.shape[1]
 
-            new_text = new_text + _resp
+            # new_text = new_text + _resp
             rt_value, states = self.generate_speech_one_step(
-                new_text,
+                new_text, _resp,
                 last_t_size,
                 llm_cur_kv_cache,
                 llm_cur_kv_cache_len,
