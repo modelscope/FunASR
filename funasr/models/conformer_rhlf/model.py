@@ -211,8 +211,8 @@ class ConformerDPO(Conformer):
         ys_ref_decoder_out, _ = self.ref_model.decoder(ref_encoder_out, encoder_out_lens, ys_in_pad, ys_in_lens)
         ys_ref_log_prob, _ = self.get_batch_logps(ys_ref_decoder_out, ys_out_pad, self.ignore_id, True)
 
-        dpo_loss = self.dpo_loss(ys_log_prob, rs_log_prob, ys_ref_log_prob, rs_ref_log_prob)
-        return dpo_loss
+        dpo_loss, _, _ = self.dpo_loss(ys_log_prob, rs_log_prob, ys_ref_log_prob, rs_ref_log_prob)
+        return dpo_loss.mean()
 
     def _calc_mwer_loss(
         self,
@@ -318,7 +318,7 @@ class ConformerDPO(Conformer):
 
         # dummy token; we'll ignore the losses on these tokens later
         labels[labels == label_pad_token_id] = 0
-
+        labels = labels.clone().detach()
         per_token_logps = torch.gather(logits.log_softmax(-1), dim=2, index=labels.unsqueeze(2)).squeeze(2)
 
         return (per_token_logps * loss_mask).sum(-1), loss_mask.sum(-1)
