@@ -41,7 +41,7 @@ def cap_exp(value, cap=-1):
     return torch.exp(torch.clamp(value, max=cap))
 
 
-class DPO(torch.nn.Module):
+class DPOLoss(torch.nn.Module):
     def __init__(
         self,
         loss_type: str = "sigmoid",
@@ -59,7 +59,7 @@ class DPO(torch.nn.Module):
         self.f_divergence_type = f_divergence_type
         self.f_divergence_params = {FDivergenceConstants.ALPHA_DIVERGENCE_COEF_KEY: f_alpha_divergence_coef}
 
-    def dpo_loss(
+    def forward(
         self,
         policy_chosen_logps: torch.FloatTensor,
         policy_rejected_logps: torch.FloatTensor,

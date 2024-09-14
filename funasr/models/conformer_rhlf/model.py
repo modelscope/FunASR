@@ -9,6 +9,7 @@ from torch.cuda.amp import autocast
 
 from funasr.metrics.compute_acc import th_accuracy
 from funasr.models.conformer.model import Conformer
+from funasr.models.conformer_rhlf.dpo_loss import DPOLoss
 from funasr.models.transformer.utils.add_sos_eos import add_sos_eos
 from funasr.models.transformer.utils.nets_utils import make_pad_mask
 from funasr.register import tables
@@ -38,6 +39,8 @@ class ConformerDPO(Conformer):
         self.nbest = kwargs.get("nbest", 5)
         self.beam_size = kwargs.get("beam_size", 10)
         self.mwer_rate = kwargs.get("mwer_rate", 0)
+        self.dpo_rate = kwargs.get("dpo_rate", 0)
+        self.dpo_loss = DPOLoss()
         char_list = [str(x) for x in range(self.vocab_size)]
 
         self.ctc_decoder = cuda_ctc_decoder(
@@ -104,7 +107,15 @@ class ConformerDPO(Conformer):
         else:
             mwer_loss = 0
 
-        loss = loss + self.mwer_rate * mwer_loss
+        if self.dpo_rate > 0:
+            ref_encoder_out, _ = self.ref_encode(speech, speech_lengths)
+            if isinstance(ref_encoder_out, tuple):
+                ref_encoder_out = ref_encoder_out[0]
+            dpo_loss = self._calc_dpo_loss(encoder_out, encoder_out_lens, decoder_out, ref_encoder_out, text, text_lengths)
+        else:
+            dpo_loss = 0
+
+        loss = loss + self.mwer_rate * mwer_loss + self.dpo_rate * dpo_loss
         # Collect Attn branch stats
         stats["loss_att"] = loss_att.detach() if loss_att is not None else None
         stats["acc"] = acc_att
@@ -174,11 +185,33 @@ class ConformerDPO(Conformer):
         ref_encoder_out,
         ys_pad,
         ys_pad_lens,
-        n_best_tokens,
-        n_best_probs,
-        n_best_length
     ):
-        pass
+        n_best_tokens, n_best_ctc_probs, n_best_length = self._get_nbest(encoder_out, encoder_out_lens)
+        nbest_dist = self._get_nbest_dist(ys_pad, ys_pad_lens, n_best_tokens, n_best_length)
+        if n_best_length.min() < 1 or nbest_dist.max() > 2 * ys_pad_lens.max(): # 存在太短的nbest，不做mwer的计算
+            return torch.tensor(0.0).to(n_best_length.device)
+
+        rs_pad = n_best_tokens.gather(1, nbest_dist.argmax(dim=-1))
+        rs_pad_lens = n_best_length.gather(1, nbest_dist.argmax(dim=-1))
+
+        rs_in_pad, rs_out_pad = add_sos_eos(rs_pad, self.sos, self.eos, self.ignore_id)
+        rs_in_lens = rs_pad_lens + 1    
+
+        rs_decoder_out = self.decoder(encoder_out, encoder_out_lens, rs_in_pad, rs_in_lens)
+        rs_log_prob, _ = self.get_batch_logps(rs_decoder_out, rs_out_pad, self.ignore_id, True)
+        rs_ref_decoder_out = self.ref_model.decoder(ref_encoder_out, encoder_out_lens, rs_in_pad, rs_in_lens)
+        rs_ref_log_prob, _ = self.get_batch_logps(rs_ref_decoder_out, rs_out_pad, self.ignore_id, True)
+
+        ys_in_pad, ys_out_pad = add_sos_eos(ys_pad, self.sos, self.eos, self.ignore_id)
+        ys_in_lens = ys_pad_lens + 1    
+
+        ys_decoder_out = decoder_out
+        ys_log_prob, _ = self.get_batch_logps(ys_decoder_out, ys_out_pad, self.ignore_id, True)
+        ys_ref_decoder_out = self.ref_model.decoder(ref_encoder_out, encoder_out_lens, ys_in_pad, ys_in_lens)
+        ys_ref_log_prob, _ = self.get_batch_logps(ys_ref_decoder_out, ys_out_pad, self.ignore_id, True)
+
+        dpo_loss = self.dpo_loss(ys_log_prob, rs_log_prob, ys_ref_log_prob, rs_ref_log_prob)
+        return dpo_loss
 
     def _calc_mwer_loss(
         self,
@@ -191,7 +224,7 @@ class ConformerDPO(Conformer):
     ):
         n_best_tokens, n_best_ctc_probs, n_best_length = self._get_nbest(encoder_out, encoder_out_lens)
         nbest_dist = self._get_nbest_dist(ys_pad, ys_pad_lens, n_best_tokens, n_best_length)
-        if n_best_length.min() < 1: # 存在太短的nbest，不做mwer的计算
+        if n_best_length.min() < 1 or nbest_dist.max() > 2 * ys_pad_lens.max(): # 存在太短的nbest，不做mwer的计算
             return torch.tensor(0.0).to(n_best_length.device)
         n_best_att_prob = self._get_nbest_attprob(encoder_out, encoder_out_lens, n_best_tokens, n_best_length)
         mwer_loss = torch.sum(nbest_dist * n_best_att_prob.softmax(dim=-1), dim = -1)
@@ -287,4 +320,43 @@ class ConformerDPO(Conformer):
 
         per_token_logps = torch.gather(logits.log_softmax(-1), dim=2, index=labels.unsqueeze(2)).squeeze(2)
 
-        return (per_token_logps * loss_mask).sum(-1), loss_mask.sum(-1)     
+        return (per_token_logps * loss_mask).sum(-1), loss_mask.sum(-1)
+
+    def ref_encode(
+        self,
+        speech: torch.Tensor,
+        speech_lengths: torch.Tensor,
+        **kwargs,
+    ) -> Tuple[torch.Tensor, torch.Tensor]:
+        """Frontend + Encoder. Note that this method is used by asr_inference.py
+        Args:
+                speech: (Batch, Length, ...)
+                speech_lengths: (Batch, )
+                ind: int
+        """
+        with autocast(False):
+
+            # Data augmentation
+            if self.specaug is not None and self.training:
+                speech, speech_lengths = self.ref_model.specaug(speech, speech_lengths)
+
+            # Normalization for feature: e.g. Global-CMVN, Utterance-CMVN
+            if self.normalize is not None:
+                speech, speech_lengths = self.ref_model.normalize(speech, speech_lengths)
+
+        # Forward encoder
+        # feats: (Batch, Length, Dim)
+        # -> encoder_out: (Batch, Length2, Dim2)
+        if self.ref_model.encoder.interctc_use_conditioning:
+            encoder_out, encoder_out_lens, _ = self.ref_model.encoder(speech, speech_lengths, ctc=self.ctc)
+        else:
+            encoder_out, encoder_out_lens, _ = self.ref_model.encoder(speech, speech_lengths)
+        intermediate_outs = None
+        if isinstance(encoder_out, tuple):
+            intermediate_outs = encoder_out[1]
+            encoder_out = encoder_out[0]
+
+        if intermediate_outs is not None:
+            return (encoder_out, intermediate_outs), encoder_out_lens
+
+        return encoder_out, encoder_out_lens
