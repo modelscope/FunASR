@@ -77,7 +77,8 @@ class OpenAIIndexDSJsonl(torch.utils.data.Dataset):  # torch.utils.data.Dataset
                                 assistant.append([content, {"wav_path": wav_path}])
                             else:
                                 assistant.append(content)
-
+                    if len(system) == 0:
+                        system = ["You are a helpful assistant."]
                     system = system * len(user)
 
                     contents_i = {
@@ -112,6 +113,7 @@ class OpenAIIndexDSJsonl(torch.utils.data.Dataset):  # torch.utils.data.Dataset
     def get_target_len(self, data_dict):
 
         return 0
+
 
 @tables.register("index_ds_classes", "OpenAIIndexDSJsonlForFullDuplexVAD")
 class OpenAIIndexDSJsonlForFullDuplexVAD(torch.utils.data.Dataset):  # torch.utils.data.Dataset
@@ -155,18 +157,24 @@ class OpenAIIndexDSJsonlForFullDuplexVAD(torch.utils.data.Dataset):  # torch.uti
                     data_dict = json.loads(line.strip())
                     data = data_dict["messages"]
                     for message in data:
-                        if message['role'] == 'user':
-                            message['content'] = message['content'].replace("/home/qinglin.zql/project/dataset/gpt-4o/vad", "/cpfs_speech/qinglin.zql/project/datasets/gpt-4o/vad")
-                            message['content'] = message['content'].replace("/cpfs_speech/qinglin.zql/project/datasets/gpt-4o/vad/alimeeting/wav", "/cpfs_speech/qinglin.zql/project/datasets/gpt-4o/vad/alimeeting/alimeeting_vad/wav")
+                        if message["role"] == "user":
+                            message["content"] = message["content"].replace(
+                                "/home/qinglin.zql/project/dataset/gpt-4o/vad",
+                                "/cpfs_speech/qinglin.zql/project/datasets/gpt-4o/vad",
+                            )
+                            message["content"] = message["content"].replace(
+                                "/cpfs_speech/qinglin.zql/project/datasets/gpt-4o/vad/alimeeting/wav",
+                                "/cpfs_speech/qinglin.zql/project/datasets/gpt-4o/vad/alimeeting/alimeeting_vad/wav",
+                            )
 
                     speech_length = data_dict.get("speech_length", -1) // 8
                     text_length = data_dict.get("text_length", 0)
-                    task = data_dict['task']
-                    last_total_time = data[-1]['end_time'] - data[-1]['start_time']
-                    if task == 'turn-taking':
-                        true_time_span = data[-1]['turn-taking-gap_time-added']
+                    task = data_dict["task"]
+                    last_total_time = data[-1]["end_time"] - data[-1]["start_time"]
+                    if task == "turn-taking":
+                        true_time_span = data[-1]["turn-taking-gap_time-added"]
                     elif task == "barge-in":
-                        true_time_span = last_total_time - data[-1]['barge-in-0']
+                        true_time_span = last_total_time - data[-1]["barge-in-0"]
                     if speech_length > self.max_source_length:
                         logging.info(
                             f"speech_length: {speech_length} > {self.max_source_length}, drop it"
@@ -199,7 +207,7 @@ class OpenAIIndexDSJsonlForFullDuplexVAD(torch.utils.data.Dataset):  # torch.uti
                         "source_len": speech_length + text_length,
                         "task": task,
                         "true_time_span": true_time_span,
-                        "last_total_time": last_total_time
+                        "last_total_time": last_total_time,
                     }
 
                     contents.append(contents_i)

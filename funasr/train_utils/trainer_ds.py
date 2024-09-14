@@ -651,13 +651,16 @@ class Trainer:
             loss_dict["lr"] = scheduler.get_last_lr()[0]
             loss_dict["batch_num_epoch"] = len(dataloader_train)
 
-            self.train_loss_avg = (
-                self.train_loss_avg * batch_idx + loss_dict["loss"].detach().cpu().item()
-            ) / (batch_idx + 1)
+            loss_log = loss_dict["loss"].detach().cpu().item()
+            acc_log = loss_dict["stats"]["acc"].detach().cpu().item()
+            if torch.isnan(loss_dict["loss"]):
+                logging.warning(f"loss is {loss_log}, set is to 0.0.\nitem:\n{batch['item']}")
+                loss_log = 0.0
+                acc_log = 0.0
+
+            self.train_loss_avg = (self.train_loss_avg * batch_idx + loss_log) / (batch_idx + 1)
             if "acc" in loss_dict["stats"]:
-                self.train_acc_avg = (
-                    self.train_acc_avg * batch_idx + loss_dict["stats"]["acc"].detach().cpu().item()
-                ) / (batch_idx + 1)
+                self.train_acc_avg = (self.train_acc_avg * batch_idx + acc_log) / (batch_idx + 1)
 
             self.log(loss_dict, tag="train")
 
