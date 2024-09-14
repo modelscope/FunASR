@@ -1003,7 +1003,9 @@ class UCTDXvecSlotModel(UpsampleCtcTokenDiffModel):
                 cur_token_len = cur_token_len - token_hop_len
 
             # forward FM model
-            set_all_random_seed(0)
+            # set_all_random_seed(0)
+            if cur_token_len[0] < 1:
+                return None, None
             feat = self.fm_model.inference(
                 cur_token, cur_token_len,
                 xvec, xvec_lengths,
