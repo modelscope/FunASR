@@ -198,9 +198,9 @@ class ConformerDPO(Conformer):
         rs_in_pad, rs_out_pad = add_sos_eos(rs_pad, self.sos, self.eos, self.ignore_id)
         rs_in_lens = rs_pad_lens + 1    
 
-        rs_decoder_out = self.decoder(encoder_out, encoder_out_lens, rs_in_pad, rs_in_lens)
+        rs_decoder_out, _ = self.decoder(encoder_out, encoder_out_lens, rs_in_pad, rs_in_lens)
         rs_log_prob, _ = self.get_batch_logps(rs_decoder_out, rs_out_pad, self.ignore_id, True)
-        rs_ref_decoder_out = self.ref_model.decoder(ref_encoder_out, encoder_out_lens, rs_in_pad, rs_in_lens)
+        rs_ref_decoder_out, _ = self.ref_model.decoder(ref_encoder_out, encoder_out_lens, rs_in_pad, rs_in_lens)
         rs_ref_log_prob, _ = self.get_batch_logps(rs_ref_decoder_out, rs_out_pad, self.ignore_id, True)
 
         ys_in_pad, ys_out_pad = add_sos_eos(ys_pad, self.sos, self.eos, self.ignore_id)
@@ -208,7 +208,7 @@ class ConformerDPO(Conformer):
 
         ys_decoder_out = decoder_out
         ys_log_prob, _ = self.get_batch_logps(ys_decoder_out, ys_out_pad, self.ignore_id, True)
-        ys_ref_decoder_out = self.ref_model.decoder(ref_encoder_out, encoder_out_lens, ys_in_pad, ys_in_lens)
+        ys_ref_decoder_out, _ = self.ref_model.decoder(ref_encoder_out, encoder_out_lens, ys_in_pad, ys_in_lens)
         ys_ref_log_prob, _ = self.get_batch_logps(ys_ref_decoder_out, ys_out_pad, self.ignore_id, True)
 
         dpo_loss = self.dpo_loss(ys_log_prob, rs_log_prob, ys_ref_log_prob, rs_ref_log_prob)
