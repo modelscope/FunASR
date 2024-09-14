@@ -5,6 +5,7 @@ from funasr.models.llm_asr.diffusion_models.matcha_decoder import (Decoder, Cond
 import logging
 from funasr.utils.hinter import hint_once
 import time
+from funasr.train_utils.set_all_random_seed import set_all_random_seed
 
 
 class BASECFM(torch.nn.Module, ABC):
@@ -47,6 +48,7 @@ class BASECFM(torch.nn.Module, ABC):
             sample: generated mel-spectrogram
                 shape: (batch_size, n_feats, mel_timesteps)
         """
+        # set_all_random_seed(0)
         z = torch.randn_like(mu) * temperature
         t_span = torch.linspace(0, 1, n_timesteps + 1, device=mu.device)
         if self.t_scheduler == 'cosine':
