@@ -122,6 +122,7 @@ class ConformerDPO(Conformer):
         stats["cer"] = cer_att
         stats["wer"] = wer_att
         stats["mwer"] = mwer_loss
+        stats["dpo"] = dpo_loss
 
         # Collect total loss stats
         stats["loss"] = torch.clone(loss.detach())
@@ -191,8 +192,8 @@ class ConformerDPO(Conformer):
         if n_best_length.min() < 1 or nbest_dist.max() > 2 * ys_pad_lens.max(): # 存在太短的nbest，不做mwer的计算
             return torch.tensor(0.0).to(n_best_length.device)
 
-        rs_pad = n_best_tokens.gather(1, nbest_dist.argmax(dim=-1))
-        rs_pad_lens = n_best_length.gather(1, nbest_dist.argmax(dim=-1))
+        rs_pad = n_best_tokens[torch.arange(nbest_dist.size(0)), nbest_dist.argmax(dim=-1)]
+        rs_pad_lens = n_best_length[torch.arange(nbest_dist.size(0)), nbest_dist.argmax(dim=-1)]
 
         rs_in_pad, rs_out_pad = add_sos_eos(rs_pad, self.sos, self.eos, self.ignore_id)
         rs_in_lens = rs_pad_lens + 1    
