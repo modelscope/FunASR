@@ -655,6 +655,8 @@ class Trainer:
             acc_log = loss_dict["stats"]["acc"].detach().cpu().item()
             if torch.isnan(loss_dict["loss"]):
                 logging.warning(f"loss is {loss_log}, set is to 0.0.\nitem:\n{batch['item']}")
+                if "item" in batch:
+                    logging.warning(f"item:\n{batch['item']}")
                 loss_log = 0.0
                 acc_log = 0.0
 
