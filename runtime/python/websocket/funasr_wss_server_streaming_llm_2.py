@@ -577,6 +577,9 @@ async def ws_serve(websocket, path):
                         or websocket.streaming_state["is_final"]
                     ) and len(frames_asr) != 0:
                         audio_in = b"".join(frames_asr)
+                        now = datetime.datetime.now()
+                        formatted_now = now.strftime("%Y-%m-%d_%H-%M-%S")
+                        sf.write(formatted_now + ".wav", load_bytes(audio_in), 16000)
                         try:
                             await streaming_transcribe(
                                 websocket, audio_in, asr_prompt=asr_prompt, s2tt_prompt=s2tt_prompt
