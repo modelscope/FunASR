@@ -93,7 +93,7 @@ def download_from_ms(**kwargs):
         print(f"Detect model requirements, begin to install it: {requirements}")
         from funasr.utils.install_model_requirements import install_requirements
 
-        install_requirements(requirements)
+        # install_requirements(requirements)
     if kwargs.get("trust_remote_code", False):
         from funasr.utils.dynamic_import import import_module_from_path
 
@@ -163,7 +163,7 @@ def download_from_hf(**kwargs):
         print(f"Detect model requirements, begin to install it: {requirements}")
         from funasr.utils.install_model_requirements import install_requirements
 
-        install_requirements(requirements)
+        # install_requirements(requirements)
     return kwargs
 
 
