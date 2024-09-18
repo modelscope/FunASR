@@ -3193,6 +3193,12 @@ class LLMASRXvecSlotTTS(nn.Module):
         mp3_data = self.mp3_encoder.encode(wav.tobytes())
         if is_last:
             mp3_data += self.mp3_encoder.flush()
+            import lameenc
+            self.mp3_encoder = lameenc.Encoder()
+            self.mp3_encoder.set_bit_rate(128)
+            self.mp3_encoder.set_in_sample_rate(22050)
+            self.mp3_encoder.set_channels(1)
+            self.mp3_encoder.set_quality(2)
 
         return mp3_data
 
