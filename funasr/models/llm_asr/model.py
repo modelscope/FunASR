@@ -3238,7 +3238,7 @@ class LLMASRXvecSlotTTS(nn.Module):
                 token_list.append(cur_token)
                 feat_list.append(feat)
                 # we should return this data to web page for playing.
-                mp3_data = self.convert_wav_to_mp3(wav)
+                mp3_data = self.convert_wav_to_mp3(wav, is_last)
                 wav_list.append(wav)
                 mp3_list.append(mp3_data)
 
@@ -3301,7 +3301,7 @@ class LLMASRXvecSlotTTS(nn.Module):
         states["chunk_idx"] = chunk_idx
         if format == "mp3":
             if cur_token is not None:
-                wav = self.convert_wav_to_mp3(wav)
+                wav = self.convert_wav_to_mp3(wav, is_last)
         return cur_token, feat, wav
 
     def simple_streaming_generate_speech(
@@ -3344,7 +3344,7 @@ class LLMASRXvecSlotTTS(nn.Module):
         states["chunk_idx"] = chunk_idx
         if format == "mp3":
             if cur_token is not None:
-                wav = self.convert_wav_to_mp3(wav)
+                wav = self.convert_wav_to_mp3(wav, is_last)
         return cur_token, feat, wav
 
     def write_mel_wav(self, output_dir, feat, wav, mp3, key):
