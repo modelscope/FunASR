@@ -1037,7 +1037,7 @@ class UCTDXvecSlotModel(UpsampleCtcTokenDiffModel):
             wav = wav_vocoder.inference(feat.transpose(1, 2))
             if prompt_audio[0].shape[1] > 0:
                 pre_wav = wav_vocoder.inference(prompt_audio[0])
-                pre_wav_lb = int(1.0 / pre_token_lb * wav_vocoder.sample_rate)
+                pre_wav_lb = int(1.0 / 25 * wav_vocoder.sample_rate * pre_token_lb)
                 wav = self.cross_fade(pre_wav[:, -pre_wav_lb:], wav, pre_wav_lb)
 
             prompt_token = [
