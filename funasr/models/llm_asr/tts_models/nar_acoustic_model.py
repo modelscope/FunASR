@@ -464,7 +464,7 @@ class NARCTCModel(nn.Module):
             return_probs=True,
         )
         reduced_fa_tokens = []
-        for pred_token, pred_frame in itertools.groupby(fa_tokens.cpu().tolist()):
+        for pred_token, pred_frame in itertools.groupby(fa_tokens[0].cpu().tolist()):
             if pred_token != 0:
                 reduced_fa_tokens.append(pred_token)
             else:
