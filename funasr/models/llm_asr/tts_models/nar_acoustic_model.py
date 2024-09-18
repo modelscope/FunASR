@@ -469,7 +469,7 @@ class NARCTCModel(nn.Module):
                 reduced_fa_tokens.append(pred_token)
             else:
                 reduced_fa_tokens.extend(list(pred_frame))
-        fa_tokens = torch.tensor(reduced_fa_tokens).to(fa_tokens)
+        fa_tokens = torch.tensor([reduced_fa_tokens]).to(fa_tokens)
         # remove blanks (id=0) and convert token ids into the original format
         tokens = [[x-1] for x in fa_tokens[0].cpu().tolist() if x > 0]
         tokens = torch.tensor([tokens], dtype=torch.int64, device=device)
