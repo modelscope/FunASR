@@ -905,8 +905,10 @@ class UCTDXvecSlotModel(UpsampleCtcTokenDiffModel):
     def cross_fade(self, pre: torch.Tensor, feat: torch.Tensor, hop_size: int):
         if pre is not None:
             hop_len = min(hop_size, feat.shape[1], pre.shape[1])
-            sin_wind = torch.tensor(np.sin((np.arange(hop_len * 2) + 1) / (hop_len * 2 + 1) * np.pi)[None, :, None]).to(feat)
-            cf_overlap = ((pre * sin_wind[:, -hop_len:] +
+            sin_wind = torch.tensor(np.sin((np.arange(hop_len * 2) + 1) / (hop_len * 2 + 1) * np.pi)[None, :]).to(feat)
+            if feat.dim() == 3:
+                sin_wind = sin_wind.unsqueeze(-1)
+            cf_overlap = ((pre[:, -hop_len:] * sin_wind[:, -hop_len:] +
                            feat[:, :hop_len] * sin_wind[:, :hop_len]) /
                           (sin_wind[:, :hop_len] + sin_wind[:, -hop_len:]))
             feat[:, :hop_len] = cf_overlap
