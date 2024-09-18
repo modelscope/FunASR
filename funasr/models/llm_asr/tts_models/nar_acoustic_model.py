@@ -50,7 +50,7 @@ class NARCTCModel(nn.Module):
         self.ctc_weight = ctc_weight
 
         # build ctc module
-        from funasr.models.ctc.ctc import CTC
+        from funasr.models.llm_asr.tts_models.ctc_alignment import CTC
         ctc_conf = kwargs.pop("ctc_conf", {})
         self.ctc = CTC(vocab_size, encoder_output_size=self.output_size, **ctc_conf)
 
@@ -463,6 +463,13 @@ class NARCTCModel(nn.Module):
             blank_penalty=blank_penalty,
             return_probs=True,
         )
+        reduced_fa_tokens = []
+        for pred_token, pred_frame in itertools.groupby(fa_tokens[0].cpu().tolist()):
+            if pred_token != 0:
+                reduced_fa_tokens.append(pred_token)
+            else:
+                reduced_fa_tokens.extend(list(pred_frame))
+        fa_tokens = torch.tensor([reduced_fa_tokens]).to(fa_tokens)
         # remove blanks (id=0) and convert token ids into the original format
         tokens = [[x-1] for x in fa_tokens[0].cpu().tolist() if x > 0]
         tokens = torch.tensor([tokens], dtype=torch.int64, device=device)

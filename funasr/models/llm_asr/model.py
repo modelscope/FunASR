@@ -2302,6 +2302,12 @@ class LLMASRXvecSlotTTS(nn.Module):
         vocoder_name = kwargs.get("vocoder", None)
         vocoder_conf = kwargs.get("vocoder_conf", None)
         self.vocoder = self.build_vocoder(name=vocoder_name, conf=vocoder_conf).to(torch.float32)
+        import lameenc
+        self.mp3_encoder = lameenc.Encoder()
+        self.mp3_encoder.set_bit_rate(128)
+        self.mp3_encoder.set_in_sample_rate(22050)
+        self.mp3_encoder.set_channels(1)
+        self.mp3_encoder.set_quality(2)
 
         import os
 
@@ -3075,6 +3081,7 @@ class LLMASRXvecSlotTTS(nn.Module):
                 outside_prompt_lengths=llm_cur_kv_cache_len,
                 sampling="threshold_6e-1",
                 chunk_idx=chunk_idx,
+                diff_steps=5,
             )
             if cur_token is not None and cur_token.shape[1] > 0 and feat.shape[2] > 0:
                 # process first package, token in B,T,D, feat in B,F,T
@@ -3170,21 +3177,24 @@ class LLMASRXvecSlotTTS(nn.Module):
 
         return ((cur_token, feat, wav), (text, last_t_size, prompt_token, prompt_audio, chunk_idx))
 
-    def convert_wav_to_mp3(self, wav: torch.Tensor):
+    def convert_wav_to_mp3(self, wav: torch.Tensor, is_last):
         wav = wav.detach().cpu().numpy()
         wav = (wav * (2**15 - 1) * 0.8).astype(np.int16)
-        mp3 = AudioSegment(
-            wav.tobytes(),
-            sample_width=16 // 8,  # Sample width in bytes
-            frame_rate=22050,
-            channels=1,
-        )
-        mp3_buffer = BytesIO()
-        mp3.export(mp3_buffer, format="mp3", bitrate="192k")
-        # we should return this to web page.
-        mp3_bytes_data = mp3_buffer.getvalue()
+        # mp3 = AudioSegment(
+        #     wav.tobytes(),
+        #     sample_width=16 // 8,  # Sample width in bytes
+        #     frame_rate=22050,
+        #     channels=1,
+        # )
+        # mp3_buffer = BytesIO()
+        # mp3.export(mp3_buffer, format="mp3", bitrate="192k")
+        # # we should return this to web page.
+        # mp3_bytes_data = mp3_buffer.getvalue()
+        mp3_data = self.mp3_encoder.encode(wav.tobytes())
+        if is_last:
+            mp3_data += self.mp3_encoder.flush()
 
-        return mp3_bytes_data
+        return mp3_data
 
     def simulate_streaming_generate_speech(
         self, preds, llm_cur_kv_cache, llm_cur_kv_cache_len, llm_dtype, llm_tokenizer
