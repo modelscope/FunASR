@@ -50,7 +50,7 @@ class NARCTCModel(nn.Module):
         self.ctc_weight = ctc_weight
 
         # build ctc module
-        from funasr.models.ctc.ctc import CTC
+        from funasr.models.llm_asr.tts_models.ctc_alignment import CTC
         ctc_conf = kwargs.pop("ctc_conf", {})
         self.ctc = CTC(vocab_size, encoder_output_size=self.output_size, **ctc_conf)
 
