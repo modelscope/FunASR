@@ -3089,7 +3089,7 @@ class LLMASRXvecSlotTTS(nn.Module):
         if para_end:
             text = "".join(preds[idx + 1:])
             last_t_size = 0
-            prompt_token, prompt_audio = [None, None], [None, None]
+            prompt_token, prompt_audio = ([None, None], 0), ([None, None], 0)
             wav = torch.cat([wav, torch.zeros([1, 2205]).to(wav)], dim=1)
             chunk_idx = 0
         else:
