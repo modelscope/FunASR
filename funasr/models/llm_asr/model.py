@@ -3076,6 +3076,7 @@ class LLMASRXvecSlotTTS(nn.Module):
                 sampling="threshold_6e-1",
                 chunk_idx=chunk_idx,
                 vocoder=self.vocoder,
+                diff_steps=5,
             )
             if cur_token is not None and cur_token.shape[1] > 0 and feat.shape[2] > 0:
                 chunk_idx += 1
