@@ -1057,7 +1057,7 @@ class UCTDXvecSlotModel(UpsampleCtcTokenDiffModel):
                 cur_token = cur_token[:, :cur_token.shape[1] - token_reback, :]
                 feat_reback = int(token_reback * self.fm_model.length_normalizer_ratio)
                 feat = feat[:, :, :feat.shape[2] - feat_reback]
-                wav_reback = int(1.0 / token_reback * wav_vocoder.sample_rate)
+                wav_reback = int(1.0 / 25 * wav_vocoder.sample_rate * token_reback)
                 wav = wav[:, :wav.shape[1] - wav_reback]
 
         return cur_token, feat, wav, (prompt_token, token_reback), (prompt_audio, feat_reback)
