@@ -437,6 +437,7 @@ class OpenAIDatasetMultiTurn(torch.utils.data.Dataset):
                 "attention_mask": attention_mask,
                 "labels_ids": labels,
             }
+            output["item"] = item
             if len(fbank) > 0:
                 output["speech"] = fbank
                 output["speech_lengths"] = fbank_lens
