@@ -2302,6 +2302,12 @@ class LLMASRXvecSlotTTS(nn.Module):
         vocoder_name = kwargs.get("vocoder", None)
         vocoder_conf = kwargs.get("vocoder_conf", None)
         self.vocoder = self.build_vocoder(name=vocoder_name, conf=vocoder_conf).to(torch.float32)
+        import lameenc
+        self.mp3_encoder = lameenc.Encoder()
+        self.mp3_encoder.set_bit_rate(128)
+        self.mp3_encoder.set_in_sample_rate(22050)
+        self.mp3_encoder.set_channels(1)
+        self.mp3_encoder.set_quality(2)
 
         import os
 
@@ -3156,21 +3162,24 @@ class LLMASRXvecSlotTTS(nn.Module):
 
         return ((cur_token, feat, wav), (text, last_t_size, prompt_token, prompt_audio, chunk_idx))
 
-    def convert_wav_to_mp3(self, wav: torch.Tensor):
+    def convert_wav_to_mp3(self, wav: torch.Tensor, is_last):
         wav = wav.detach().cpu().numpy()
         wav = (wav * (2**15 - 1) * 0.8).astype(np.int16)
-        mp3 = AudioSegment(
-            wav.tobytes(),
-            sample_width=16 // 8,  # Sample width in bytes
-            frame_rate=22050,
-            channels=1,
-        )
-        mp3_buffer = BytesIO()
-        mp3.export(mp3_buffer, format="mp3", bitrate="192k")
-        # we should return this to web page.
-        mp3_bytes_data = mp3_buffer.getvalue()
+        # mp3 = AudioSegment(
+        #     wav.tobytes(),
+        #     sample_width=16 // 8,  # Sample width in bytes
+        #     frame_rate=22050,
+        #     channels=1,
+        # )
+        # mp3_buffer = BytesIO()
+        # mp3.export(mp3_buffer, format="mp3", bitrate="192k")
+        # # we should return this to web page.
+        # mp3_bytes_data = mp3_buffer.getvalue()
+        mp3_data = self.mp3_encoder.encode(wav.tobytes())
+        if is_last:
+            mp3_data += self.mp3_encoder.flush()
 
-        return mp3_bytes_data
+        return mp3_data
 
     def simulate_streaming_generate_speech(
         self, preds, llm_cur_kv_cache, llm_cur_kv_cache_len, llm_dtype, llm_tokenizer
@@ -3277,7 +3286,7 @@ class LLMASRXvecSlotTTS(nn.Module):
         states["chunk_idx"] = chunk_idx
         if format == "mp3":
             if cur_token is not None:
-                wav = self.convert_wav_to_mp3(wav)
+                wav = self.convert_wav_to_mp3(wav, is_last)
         return cur_token, feat, wav
 
     def simple_streaming_generate_speech(
