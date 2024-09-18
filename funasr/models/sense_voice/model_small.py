@@ -14,6 +14,7 @@ from funasr.losses.label_smoothing_loss import LabelSmoothingLoss
 from funasr.metrics.compute_acc import compute_accuracy, th_accuracy
 from funasr.utils.load_utils import load_audio_text_image_video, extract_fbank
 from funasr.models.transformer.utils.nets_utils import make_pad_mask
+from funasr.utils.hinter import hint_once
 
 
 class SinusoidalPositionEncoder(torch.nn.Module):
@@ -1595,6 +1596,130 @@ class SenseVoiceEncoder(nn.Module):
 
         for layer, block in enumerate(self.blocks):
             x = block(x, mask=padding_mask, position_ids=position_ids)
+
+        x = self.ln_post(x)
+
+        if ilens is None:
+            return x
+        else:
+            return x, olens
+
+
+@tables.register("encoder_classes", "SenseVoiceQuantizedEncoder")
+class SenseVoiceQuantizedEncoder(SenseVoiceEncoder):
+    def __init__(
+        self,
+        input_size,
+        linear_units: int,
+        attention_heads: int,
+        num_blocks: int,
+        quantize_layer_idx: int,
+        normalized_quant_input: bool,
+        quantizer_config: dict,
+        **kwargs,
+    ):
+        super().__init__(input_size, linear_units, attention_heads, num_blocks, **kwargs)
+        self.linear_units = linear_units
+        self.quantize_layer_idx = quantize_layer_idx
+        self.normalized_quant_input = normalized_quant_input
+        self.quantizer = self.build_quantizer(quantizer_config)
+
+    def build_quantizer(self, vq_config):
+        if vq_config is None:
+            return None
+        name = vq_config.pop("name", "costume_quantizer")
+        if name == "costume_quantizer":
+            from funasr.models.sense_voice.quantizer.costume_quantizer import CostumeQuantizer
+            quantizer = CostumeQuantizer(
+                input_size=self.linear_units,
+                **vq_config,
+            )
+            vq_config["name"] = "costume_quantizer"
+            return quantizer
+        elif name == "lookup_free_quantizer":
+            from funasr.models.sense_voice.quantizer.lookup_free_quantizer import LFQ
+            quantizer = LFQ(
+                input_size=self.linear_units,
+                **vq_config,
+            )
+            vq_config["name"] = "lookup_free_quantizer"
+            return quantizer
+        elif name == "finite_scalar_quantizer":
+            from funasr.models.sense_voice.quantizer.finite_scalar_quantizer import FSQ
+            quantizer = FSQ(
+                input_size=self.linear_units,
+                **vq_config,
+            )
+            vq_config["name"] = "finite_scalar_quantizer"
+            return quantizer
+        else:
+            raise NotImplemented("quantizer {} not implemented".format(name))
+
+    def quantize_enc_outs(self, x):
+        ret_dict = {}
+
+        if self.normalized_quant_input:
+            x = F.normalize(x, dim=-1)
+        ret_dict["quant_in"] = x
+        x, indices, commit_loss, sub_quants = self.quantizer(x)
+        ret_dict["quant_out"] = x
+        ret_dict["indices"] = indices
+        ret_dict["quant_loss"] = commit_loss
+
+        return x, ret_dict
+
+    def forward(
+        self,
+        x: torch.Tensor,
+        ilens: torch.Tensor = None,
+        **kwargs,
+    ):
+        use_padmask = self.use_padmask
+        x = F.gelu(self.conv1(x))
+        x = F.gelu(self.conv2(x))
+        x = x.permute(0, 2, 1)
+        only_extract_tokens = kwargs.get("only_extract_tokens", False)
+
+        n_frames = x.size(1)
+        max_pos = n_frames
+
+        if ilens is not None:
+            if self.downsample_rate == 4:
+                olens = (
+                    1
+                    + (ilens - self.conv1.kernel_size[0] + 2 * self.conv1.padding[0])
+                    // self.conv1.stride[0]
+                )
+            else:
+                olens = ilens
+            olens = (
+                1
+                + (olens - self.conv2.kernel_size[0] + 2 * self.conv2.padding[0])
+                // self.conv2.stride[0]
+            )
+            olens = torch.clamp(olens, max=max_pos)
+        else:
+            olens = None
+
+        if use_padmask and olens is not None:
+            padding_mask = (~make_pad_mask(olens)[:, None, :]).to(torch.bool).to(x.device)
+        else:
+            padding_mask = None
+
+        device = x.device
+        seq_length = x.shape[1]
+        position_ids = torch.arange(0, seq_length, dtype=torch.long, device=device)
+        position_ids = position_ids.unsqueeze(0).view(-1, seq_length)
+
+        for layer, block in enumerate(self.blocks):
+            x = block(x, mask=padding_mask, position_ids=position_ids)
+            if self.quantize_layer_idx is not None and self.quantizer is not None:
+                if layer == self.quantize_layer_idx:
+                    hint_once(f"Quantization at layer {layer} wit {self.quantizer}",
+                              "normalize_quant_enc_out", rank=0)
+                    x, ret_dict = self.quantize_enc_outs(x)
+                    if only_extract_tokens:
+                        return (x, ret_dict), olens
 
         x = self.ln_post(x)
 
