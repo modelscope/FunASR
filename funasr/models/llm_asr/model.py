@@ -3062,7 +3062,7 @@ class LLMASRXvecSlotTTS(nn.Module):
         if (t_size - last_t_size) >= tts_text_chunk_size or is_last or para_end:
             text_token = torch.tensor([text_token], dtype=torch.long, device=device)
             text_token_len = torch.tensor([text_token.shape[1]], dtype=torch.long, device=device)
-            cur_token, feat = self.tts_model.streaming_one_step(
+            cur_token, feat, wav, prompt_token, prompt_audio = self.tts_model.streaming_one_step(
                 text_token,
                 text_token_len,
                 xvec=None,
@@ -3075,24 +3075,9 @@ class LLMASRXvecSlotTTS(nn.Module):
                 outside_prompt_lengths=llm_cur_kv_cache_len,
                 sampling="threshold_6e-1",
                 chunk_idx=chunk_idx,
+                vocoder=self.vocoder,
             )
             if cur_token is not None and cur_token.shape[1] > 0 and feat.shape[2] > 0:
-                # process first package, token in B,T,D, feat in B,F,T
-                if prompt_token[0] is None:
-                    prompt_token = [
-                        cur_token,
-                        torch.tensor([cur_token.shape[1]], dtype=torch.long, device=device),
-                    ]
-                    prompt_audio = [
-                        feat.transpose(1, 2),
-                        torch.tensor([feat.shape[2]], dtype=torch.long, device=device),
-                    ]
-                else:
-                    prompt_token[1] = prompt_token[1] + cur_token.shape[1]
-                    prompt_token[0] = torch.concat([prompt_token[0], cur_token], dim=1)
-                    prompt_audio[1] = prompt_audio[1] + feat.shape[2]
-                    prompt_audio[0] = torch.concat([prompt_audio[0], feat.transpose(1, 2)], dim=1)
-                wav = self.vocoder.inference(feat.transpose(1, 2))
                 chunk_idx += 1
             else:
                 cur_token, feat, wav = None, None, None
@@ -3247,8 +3232,8 @@ class LLMASRXvecSlotTTS(nn.Module):
             states = {}
         states["new_text"] = ""
         states["last_t_size"] = 0
-        states["prompt_token"] = [None, None]
-        states["prompt_audio"] = [None, None]
+        states["prompt_token"] = ([None, None], 0)
+        states["prompt_audio"] = ([None, None], 0)
         states["chunk_idx"] = 0
 
     def streaming_generate_speech(
