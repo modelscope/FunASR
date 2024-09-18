@@ -463,6 +463,13 @@ class NARCTCModel(nn.Module):
             blank_penalty=blank_penalty,
             return_probs=True,
         )
+        reduced_fa_tokens = []
+        for pred_token, pred_frame in itertools.groupby(fa_tokens.cpu().tolist()):
+            if pred_token != 0:
+                reduced_fa_tokens.append(pred_token)
+            else:
+                reduced_fa_tokens.extend(pred_frame)
+        fa_tokens = torch.tensor(reduced_fa_tokens).to(fa_tokens)
         # remove blanks (id=0) and convert token ids into the original format
         tokens = [[x-1] for x in fa_tokens[0].cpu().tolist() if x > 0]
         tokens = torch.tensor([tokens], dtype=torch.int64, device=device)
@@ -470,25 +477,22 @@ class NARCTCModel(nn.Module):
         if not return_hidden:
             return tokens
 
-        # acoustic_embs, acoustic_emb_lens = [], []
-        # for idx, (prob, enc) in enumerate(zip(enc_probs, encoder_out)):
-        #     pred = itertools.groupby(prob.argmax(-1).cpu())
-        #     acs_emb = []
-        #     _start = 0
-        #     for pred_token, pred_frame in pred:
-        #         _end = _start + len(list(pred_frame))
-        #         if pred_token != 0 and pred_token != -1:
-        #             acs_emb.append(torch.mean(enc[_start:_end, :], 0, keepdim=True))
-        #         _start = _end
-        #     acs_emb = torch.cat(acs_emb, dim=0)
-        #     acoustic_embs.append(acs_emb)
-        #     acoustic_emb_lens.append(acs_emb.shape[0])
-        #
-        # acoustic_embs = pad_list(acoustic_embs, 0.0)
-        # acoustic_emb_lens = torch.tensor(acoustic_emb_lens, dtype=torch.int64, device=device)
+        acoustic_embs, acoustic_emb_lens = [], []
+        for idx, (prob, enc) in enumerate(zip(enc_probs, encoder_out)):
+            pred = itertools.groupby(prob.argmax(-1).cpu())
+            acs_emb = []
+            _start = 0
+            for pred_token, pred_frame in pred:
+                _end = _start + len(list(pred_frame))
+                if pred_token != 0 and pred_token != -1:
+                    acs_emb.append(torch.mean(enc[_start:_end, :], 0, keepdim=True))
+                _start = _end
+            acs_emb = torch.cat(acs_emb, dim=0)
+            acoustic_embs.append(acs_emb)
+            acoustic_emb_lens.append(acs_emb.shape[0])
 
-        acoustic_embs = self.token_embedding(tokens.squeeze(-1))
-        acoustic_emb_lens = torch.tensor([acoustic_embs.shape[1]], dtype=torch.int64, device=device)
+        acoustic_embs = pad_list(acoustic_embs, 0.0)
+        acoustic_emb_lens = torch.tensor(acoustic_emb_lens, dtype=torch.int64, device=device)
 
         return (tokens, fa_tokens), acoustic_embs, acoustic_emb_lens
 
