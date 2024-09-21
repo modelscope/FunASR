@@ -59,6 +59,11 @@ class SenseVoiceDataset(torch.utils.data.Dataset):
 
         if isinstance(self.frontend, WhisperFrontend):
             self.permute = True
+        self.max_token_length = kwargs.get("max_token_length", 1500)
+        self.batch_size_scale_ratio_max = kwargs.get("batch_size_scale_ratio_max", 1.5)
+        self.batch_size_token_max = kwargs.get("batch_size_token_max", 2500)
+        self.multiturn_num_max = kwargs.get("multiturn_num_max", 5)
+        self.max_source_length = kwargs.get("max_source_length", 3000)
 
     def get_source_len(self, index):
         item = self.index_ds[index]
@@ -94,9 +99,12 @@ class SenseVoiceDataset(torch.utils.data.Dataset):
             speech, speech_lengths = extract_fbank(
                 data_src, data_type=self.data_type, frontend=self.frontend, is_final=True
             )  # speech: [b, T, d]
-
-            if speech_lengths > self.batch_size:
+            if speech_lengths > self.max_source_length:
+                logging.info(
+                    f"speech_lengths > max_source_length: {speech_lengths}>{self.max_source_length}, {item}"
+                )
                 continue
+
             if self.permute:
                 speech = speech.permute(0, 2, 1)
             target = item["target"]
@@ -340,7 +348,9 @@ class SenseVoiceCTCDataset(torch.utils.data.Dataset):
             event_ids = self.tokenizer.encode(event_target, allowed_special="all")
             punc_itn_bottom_ids = self.tokenizer.encode(punc_itn_bottom, allowed_special="all")
 
-            ids = lid_ids + emo_ids + event_ids + punc_itn_bottom_ids + target_ids # [lid, emo, lid, itn, text]
+            ids = (
+                lid_ids + emo_ids + event_ids + punc_itn_bottom_ids + target_ids
+            )  # [lid, emo, lid, itn, text]
             ids_lengths = len(ids)
 
             text = torch.tensor(ids, dtype=torch.int64)

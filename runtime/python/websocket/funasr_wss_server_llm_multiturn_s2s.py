@@ -7,84 +7,89 @@ import tracemalloc
 import numpy as np
 import argparse
 import ssl
-import nls
+
+# import nls
 from collections import deque
 import threading
 from datetime import datetime
 
+import torch
 
-class NlsTtsSynthesizer:
-    def __init__(
-        self,
-        websocket,
-        tts_fifo,
-        token,
-        appkey,
-        url="wss://nls-gateway-cn-beijing.aliyuncs.com/ws/v1",
-    ):
-        self.websocket = websocket
-        self.tts_fifo = tts_fifo
-        self.url = url
-        self.token = token
-        self.appkey = appkey
-        self.sdk = None
-        self.started = False
-        self.count = 0
-        self.init_sdk()
+torch.backends.cuda.enable_mem_efficient_sdp(False)
+torch.backends.cuda.enable_flash_sdp(False)
 
-    def init_sdk(self):
-        # 配置回调函数
-        self.sdk = nls.NlsStreamInputTtsSynthesizer(
-            url=self.url,
-            token=self.token,
-            appkey=self.appkey,
-            on_data=self.on_data,
-            on_sentence_begin=self.on_sentence_begin,
-            on_sentence_synthesis=self.on_sentence_synthesis,
-            on_sentence_end=self.on_sentence_end,
-            on_completed=self.on_completed,
-            on_error=self.on_error,
-            on_close=self.on_close,
-            callback_args=[],
-        )
-
-    def on_data(self, data, *args):
-        print(f"on_data: {datetime.now()}, len: {len(data)}")
-        self.count += len(data)
-        self.tts_fifo.append(data)
-        # with open('tts_server.pcm', 'ab') as file:
-        #    file.write(data)
-
-    def on_sentence_begin(self, message, *args):
-        print("on sentence begin =>{}".format(message))
-
-    def on_sentence_synthesis(self, message, *args):
-        print("on sentence synthesis =>{}".format(message))
-
-    def on_sentence_end(self, message, *args):
-        print("on sentence end =>{}".format(message))
-
-    def on_completed(self, message, *args):
-        print("on message data cout: =>{}".format(self.count))
-        print("on completed =>{}".format(message))
-        self.started = False
-
-    def on_error(self, message, *args):
-        print("on_error args=>{}".format(args))
-
-    def on_close(self, *args):
-        print("on_close: args=>{}".format(args))
-
-    def start(self, voice):
-        self.sdk.startStreamInputTts(voice=voice)
-        self.started = True
-
-    def send_text(self, text):
-        if len(text) > 0:
-            self.sdk.sendStreamInputTts(text)
-
-    def stop(self):
-        self.sdk.stopStreamInputTts()
+# class NlsTtsSynthesizer:
+#     def __init__(
+#         self,
+#         websocket,
+#         tts_fifo,
+#         token,
+#         appkey,
+#         url="wss://nls-gateway-cn-beijing.aliyuncs.com/ws/v1",
+#     ):
+#         self.websocket = websocket
+#         self.tts_fifo = tts_fifo
+#         self.url = url
+#         self.token = token
+#         self.appkey = appkey
+#         self.sdk = None
+#         self.started = False
+#         self.count = 0
+#         self.init_sdk()
+#
+#     def init_sdk(self):
+#         # 配置回调函数
+#         self.sdk = nls.NlsStreamInputTtsSynthesizer(
+#             url=self.url,
+#             token=self.token,
+#             appkey=self.appkey,
+#             on_data=self.on_data,
+#             on_sentence_begin=self.on_sentence_begin,
+#             on_sentence_synthesis=self.on_sentence_synthesis,
+#             on_sentence_end=self.on_sentence_end,
+#             on_completed=self.on_completed,
+#             on_error=self.on_error,
+#             on_close=self.on_close,
+#             callback_args=[],
+#         )
+#
+#     def on_data(self, data, *args):
+#         print(f"on_data: {datetime.now()}, len: {len(data)}")
+#         self.count += len(data)
+#         self.tts_fifo.append(data)
+#         # with open('tts_server.pcm', 'ab') as file:
+#         #    file.write(data)
+#
+#     def on_sentence_begin(self, message, *args):
+#         print("on sentence begin =>{}".format(message))
+#
+#     def on_sentence_synthesis(self, message, *args):
+#         print("on sentence synthesis =>{}".format(message))
+#
+#     def on_sentence_end(self, message, *args):
+#         print("on sentence end =>{}".format(message))
+#
+#     def on_completed(self, message, *args):
+#         print("on message data cout: =>{}".format(self.count))
+#         print("on completed =>{}".format(message))
+#         self.started = False
+#
+#     def on_error(self, message, *args):
+#         print("on_error args=>{}".format(args))
+#
+#     def on_close(self, *args):
+#         print("on_close: args=>{}".format(args))
+#
+#     def start(self, voice):
+#         self.sdk.startStreamInputTts(voice=voice)
+#         self.started = True
+#
+#     def send_text(self, text):
+#         if len(text) > 0:
+#             self.sdk.sendStreamInputTts(text)
+#
+#     def stop(self):
+#         self.sdk.stopStreamInputTts()
 
 
 parser = argparse.ArgumentParser()
@@ -196,14 +201,28 @@ if "appkey" in os.environ:
 from modelscope.hub.snapshot_download import snapshot_download
 
 os.environ["MODELSCOPE_CACHE"] = "/mnt/workspace"
-llm_dir = snapshot_download("qwen/Qwen2-7B-Instruct", cache_dir=None, revision="master")
+llm_dir = "qwen/Qwen2-7B-Instruct"
+# llm_dir = snapshot_download(llm_dir, cache_dir=None, revision="master")
+llm_dir = "/cpfs_speech/zhifu.gzf/init_model/qwen/Qwen2-7B-Instruct"
+
+audio_encoder_dir = "FunAudioLLM/SenseVoiceSANM"
 # audio_encoder_dir = snapshot_download("iic/SenseVoice", cache_dir=None, revision="master")
-audio_encoder_dir = snapshot_download(
-    "FunAudioLLM/SenseVoiceSANM", cache_dir=None, revision="master"
-)
+# audio_encoder_dir = snapshot_download(audio_encoder_dir, cache_dir=None, revision="master")
+audio_encoder_dir = "/cpfs_speech/zhifu.gzf/init_model/SenseVoiceSANM"
 
 lora_dir = "FunAudioLLM/Speech2Text_Align_V2_0824_chat_balanced_SFT_lora_v1"
-lora_dir = snapshot_download(lora_dir, cache_dir=None, revision="master")
+# lora_dir = snapshot_download(lora_dir, cache_dir=None, revision="master")
+lora_dir = "/cpfs_speech/zhifu.gzf/init_model/Speech2Text_Align_V2_0824_chat_balanced_SFT_lora_v1"
+
+flow_init = "FunAudioLLM/uctd_uni_causal_xlnet_25Hz_xvec_slot_sft_stage2_acc_2_0916_llm_cur_hidden_s2s_tts_feifei"
+# flow_init = snapshot_download(flow_init, cache_dir=None, revision="master")
+flow_init = "/nfs/neo.dzh/src/CosyVoice0731/egs/tts_voicegen/exp/uctd_uni_causal_xlnet_25Hz_xvec_slot_sft_stage2_acc_2_0916_llm_cur_hidden_s2s_tts_feifei"
+flow_init = f"{flow_init}/4epoch.pth"
+
+vocoder_init = "hiftnet_1400k_cvt"
+# vocoder_init = snapshot_download(vocoder_init, cache_dir=None, revision="master")
+vocoder_init = "/nfs/neo.dzh/pretrained/hiftnet_1400k_cvt"
+vocoder_init = f"{vocoder_init}/model.pth.prefix"
 
 
 device = "cuda:0"
@@ -220,9 +239,15 @@ all_file_paths = [
     # "FunAudioLLM/Speech2Text_Align_V0628",
 ]
 
-llm_kwargs = {"num_beams": 1, "do_sample": False}
+# llm_kwargs = {"num_beams": 1, "do_sample": False}
 
 ckpt_dir = all_file_paths[0]
+ckpt_dir = "/cpfs_speech/zhifu.gzf/init_model/Speech2Text_Align_V2_0824_chat_balanced"
+# ckpt_dir = snapshot_download(ckpt_dir, cache_dir=None, revision="master")
+init_param = f"{ckpt_dir}/model.pt"
+
+init_param = f"{init_param},{flow_init},{vocoder_init}"
+
 
 llm_conf = {"init_param_path": llm_dir}
 
@@ -236,10 +261,11 @@ model_llm = AutoModel(
     bf16=False,
     llm_dtype="bf16",
     max_length=1024,
-    llm_kwargs=llm_kwargs,
+    # llm_kwargs=llm_kwargs,
     llm_conf=llm_conf,
     tokenizer_conf={"init_param_path": llm_dir},
     audio_encoder=audio_encoder_dir,
+    init_param=init_param,
 )
 
 model = model_llm.model
@@ -280,11 +306,11 @@ async def model_inference(
     text_usr="",
 ):
     print(f"model_inference: {datetime.now()}")
-    fifo_queue = deque()
-    synthesizer = NlsTtsSynthesizer(
-        websocket=websocket, tts_fifo=fifo_queue, token=appkey_token, appkey=appkey
-    )
-    synthesizer.start(voice="longxiaochun")
+    # fifo_queue = deque()
+    # synthesizer = NlsTtsSynthesizer(
+    #     websocket=websocket, tts_fifo=fifo_queue, token=appkey_token, appkey=appkey
+    # )
+    # synthesizer.start(voice="longxiaochun")
     beg0 = time.time()
     if his_state is None:
         his_state = model_dict
@@ -328,10 +354,17 @@ async def model_inference(
 
     # print(f"contents_i: {len(contents_i)}")
 
+    # speech encoder
     inputs_embeds, contents, batch, source_ids, meta_data = model.inference_prepare(
         [contents_i], None, "test_demo", tokenizer, frontend, device=device
     )
     print(f"speech_encoder: {datetime.now()}")
+
+    # # k v cache
+    llm_cur_kv_cache, llm_cur_kv_cache_len = model.prepare_k_v_cache(
+        inputs_embeds, contents, batch, source_ids, meta_data
+    )
+
     model_inputs = {}
     model_inputs["inputs_embeds"] = inputs_embeds
 
@@ -340,12 +373,23 @@ async def model_inference(
     generation_kwargs = dict(model_inputs, streamer=streamer, max_new_tokens=1024)
     thread = Thread(target=model.llm.generate, kwargs=generation_kwargs)
     thread.start()
+
+    # states
+    states = {}
+    model.reset_generate_states(states)
+
     res = ""
+    wav_total = []
+    cache_text = ""
     beg_llm = time.time()
-    tts_thread = Thread(
-        target=tts_sync_thread, args=(send_to_client(websocket, synthesizer, fifo_queue),)
-    )
-    tts_thread.start()
+    # tts_thread = Thread(
+    #     target=tts_sync_thread, args=(send_to_client(websocket, synthesizer, fifo_queue),)
+    # )
+    # tts_thread.start()
+    count = 0
+    output_dir = "./wavs"
+    f = open(f"{output_dir}/text", "w")
+
     for new_text in streamer:
         end_llm = time.time()
         print(
@@ -354,8 +398,6 @@ async def model_inference(
         if len(new_text) > 0:
             new_text = new_text.replace("<|im_end|>", "")
             res += new_text
-            synthesizer.send_text(new_text)
-
             contents_i[-1]["content"] = res
             websocket_users[websocket]["llm_state"]["contents_i"] = contents_i
             # history[-1][1] = res
@@ -372,9 +414,34 @@ async def model_inference(
             # print(f"online: {message}")
             await websocket.send(message)
 
-    synthesizer.stop()
+            cache_text += new_text
+            # synthesizer.send_text(new_text)
+            if (
+                len(tokenizer.encode(cache_text)) >= (3 / (0.5 ** min(count, 2)))
+                or "<|im_end|>" in cache_text
+            ):
+                if "<|im_end|>" in cache_text:
+                    is_last = True
+                    cache_text = cache_text[: -len("<|im_end|>")]
+                else:
+                    is_last = False
+                with torch.no_grad():
+                    cur_token, feat, wav = model.streaming_generate_speech(
+                        cache_text,
+                        states,
+                        llm_cur_kv_cache,
+                        llm_cur_kv_cache_len,
+                        is_last=is_last,
+                        format="mp3",
+                    )
+                cache_text = ""
+                if wav is not None:
+                    wav_total.append(wav)
+                    await websocket.send(wav)
+
+    # synthesizer.stop()
     # await tts_to_client_task
-    tts_thread.join()
+    # tts_thread.join()
     mode = "2pass-offline"
     message = json.dumps(
         {
@@ -386,6 +453,12 @@ async def model_inference(
     )
     # print(f"offline: {message}")
     await websocket.send(message)
+    mp3_data = b"".join(wav_total)
+    key = websocket_users[websocket].get("wav_name", "microphone")
+    model.write_mel_wav(output_dir, feat=None, wav=None, mp3=mp3_data, key=key)
+    print(f"total generated: {res}")
+    f.write(f"{key} {res.replace('<|im_end|>', '')}\n")
+    f.flush()
 
 
 print("model loaded! only support one client at the same time now!!!!")

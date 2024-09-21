@@ -70,6 +70,8 @@ class EspnetStyleBatchSampler(DistributedSampler):
         self.sort_size = sort_size * num_replicas
         self.max_token_length = kwargs.get("max_token_length", 2048)
         self.min_token_length = kwargs.get("min_token_length", 0)
+        self.batch_size_sample_max = kwargs.get("batch_size_sample_max", 200)
+        self.batch_size_scale_threshold = kwargs.get("batch_size_scale_threshold", 4000.0)
         self.length_scale_source = kwargs.get("length_scale_source", 1.0)
         self.start_step = start_step
         self.batch_num = 1
@@ -95,6 +97,7 @@ class EspnetStyleBatchSampler(DistributedSampler):
         batch = []
         max_len_in_batch = 0  # Tracks the max sample length within the current batch
 
+        count = 1
         for idx in sorted_indices:
 
             # original_sample_length = self.dataset.get_source_len(idx)
@@ -117,15 +120,24 @@ class EspnetStyleBatchSampler(DistributedSampler):
                 sample_length = self.dataset.get_source_len(idx)
             # Calculate potential batch size with the new sample
             potential_batch_length = max(max_len_in_batch, sample_length) * (len(batch) + 1)
+            potential_max_len_in_batch = max(max_len_in_batch, sample_length)
+
+            batch_size = (
+                self.batch_size * self.batch_size_scale_threshold / potential_max_len_in_batch
+                if potential_max_len_in_batch > self.batch_size_scale_threshold
+                else self.batch_size
+            )
             # Add index to batch if it doesn't exceed batch size limit
-            if potential_batch_length <= self.batch_size:
+            if potential_batch_length <= batch_size and count < self.batch_size_sample_max:
                 batch.append(idx)
                 max_len_in_batch = max(max_len_in_batch, sample_length)
+                count += 1
             else:
                 # Save the current batch and start a new one
                 buffer_batches.append(batch)
                 batch = [idx]
                 max_len_in_batch = sample_length
+                count = 1
 
         # Add the last batch if it shouldn't be dropped
         if batch and (not self.drop_last or len(batch) * max_len_in_batch == self.batch_size):
