@@ -125,6 +125,29 @@ def load_audio_text_image_video(
         if mat.ndim == 2:
             mat = mat[:, 0]
         data_or_path_or_list = mat
+    elif isinstance(data_or_path_or_list, str) and data_type == "kaldi_ark_or_sound":
+        if ".ark:" in data_or_path_or_list:
+            data_mat = kaldiio.load_mat(data_or_path_or_list)
+            if isinstance(data_mat, tuple):
+                audio_fs, mat = data_mat
+            else:
+                mat = data_mat
+            if mat.dtype == "int16" or mat.dtype == "int32":
+                mat = mat.astype(np.float64)
+                mat = mat / 32768
+            if mat.ndim == 2:
+                mat = mat[:, 0]
+            data_or_path_or_list = mat
+        else:
+            try:
+                data_or_path_or_list, audio_fs = torchaudio.load(data_or_path_or_list)
+                if kwargs.get("reduce_channels", True):
+                    data_or_path_or_list = data_or_path_or_list.mean(0)
+            except:
+                data_or_path_or_list = _load_audio_ffmpeg(data_or_path_or_list, sr=fs)
+                data_or_path_or_list = torch.from_numpy(
+                    data_or_path_or_list
+                ).squeeze()  # [n_samples,]
     elif isinstance(data_or_path_or_list, bytes):  # audio bytes
         data_or_path_or_list = load_bytes(data_or_path_or_list)
     else:
