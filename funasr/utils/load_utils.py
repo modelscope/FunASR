@@ -129,7 +129,10 @@ def load_audio_text_image_video(
         if ".ark:" in data_or_path_or_list:
             data_mat = kaldiio.load_mat(data_or_path_or_list)
             if isinstance(data_mat, tuple):
-                audio_fs, mat = data_mat
+                if isinstance(data_mat[0], int):
+                    audio_fs, mat = data_mat
+                else:
+                    mat, audio_fs = data_mat
             else:
                 mat = data_mat
             if mat.dtype == "int16" or mat.dtype == "int32":
@@ -137,7 +140,7 @@ def load_audio_text_image_video(
                 mat = mat / 32768
             if mat.ndim == 2:
                 mat = mat[:, 0]
-            data_or_path_or_list = mat
+            data_or_path_or_list = torch.from_numpy(mat)
         else:
             try:
                 data_or_path_or_list, audio_fs = torchaudio.load(data_or_path_or_list)
