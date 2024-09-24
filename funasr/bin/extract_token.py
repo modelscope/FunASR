@@ -20,14 +20,16 @@ def main_hydra(cfg: DictConfig):
 
     kwargs = to_plain_list(cfg)
 
-    dist_rank = torch.distributed.get_rank()
-    world_size = torch.distributed.get_world_size()
+    machine_rank = kwargs.get("dist_rank", 0)
+    world_size = kwargs.get("world_size", 1)
+    local_rank = os.environ["LOCAL_RANK"]
+    node_world_size = os.environ["WORLD_SIZE"]
+    dist_rank = machine_rank * node_world_size + local_rank
     logging.basicConfig(
         level='INFO',
         format=f"[{os.uname()[1].split('.')[0]}]-[{dist_rank}/{world_size}] "
                f" %(asctime)s (%(module)s:%(lineno)d) %(levelname)s: %(message)s",
     )
-    local_rank = os.environ["LOCAL_RANK"]
     kwargs["input"] = kwargs["input"] + f"{dist_rank:02d}"
     kwargs["output_dir"] = os.path.join(kwargs["output_dir"], f"{dist_rank:02d}")
     kwargs["device"] = "cuda"
