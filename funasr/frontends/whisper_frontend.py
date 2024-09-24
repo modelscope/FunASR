@@ -103,7 +103,7 @@ class WhisperFrontend(nn.Module):
                 feat = self.pad_or_trim(input[i], self.pad_samples)
             else:
                 feat = input[i]
-            feat, feat_len = self.log_mel_spectrogram(feat[None, :], input_lengths[0])
+            feat, feat_len = self.log_mel_spectrogram(feat[None, :], input_lengths[i])
             feats.append(feat[0])
             feats_lens.append(feat_len)
         feats_lens = torch.as_tensor(feats_lens)

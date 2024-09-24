@@ -2023,8 +2023,11 @@ class SenseVoiceL(nn.Module):
             )
             time2 = time.perf_counter()
             meta_data["load_data"] = f"{time2 - time1:0.3f}"
+            if data_lengths is None:
+                data_lengths = [x.shape[0] for x in audio_sample_list]
             speech, speech_lengths = extract_fbank(
-                audio_sample_list, data_type=kwargs.get("data_type", "sound"), frontend=frontend
+                audio_sample_list, data_type=kwargs.get("data_type", "sound"), frontend=frontend,
+                data_len=data_lengths
             )
             time3 = time.perf_counter()
             meta_data["extract_feat"] = f"{time3 - time2:0.3f}"
