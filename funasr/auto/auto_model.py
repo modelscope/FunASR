@@ -290,6 +290,8 @@ class AutoModel:
         )
         time_speech_total = 0.0
         time_escape_total = 0.0
+        count = 0
+        log_interval = kwargs.get("log_interval", None)
         for beg_idx in range(0, num_samples, batch_size):
             end_idx = min(num_samples, beg_idx + batch_size)
             data_batch = data_list[beg_idx:end_idx]
@@ -325,8 +327,12 @@ class AutoModel:
             if pbar:
                 pbar.update(batch_size)
                 pbar.set_description(description)
+            else:
+                if log_interval is not None and count % log_interval == 0:
+                    logging.info(f"processed {count*batch_size}/{num_samples} samples: {key_batch[0]}")
             time_speech_total += batch_data_time
             time_escape_total += time_escape
+            count += 1
 
         if run_mode == "extract_token" and hasattr(model, "writer"):
             model.writer.close()
