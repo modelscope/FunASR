@@ -114,6 +114,9 @@ def load_audio_text_image_video(
     elif isinstance(data_or_path_or_list, np.ndarray):  # audio sample point
         data_or_path_or_list = torch.from_numpy(data_or_path_or_list).squeeze()  # [n_samples,]
     elif isinstance(data_or_path_or_list, str) and data_type in ["kaldi_ark", "kaldi_ark_or_sound"]:
+        if len(data_or_path_or_list.split()) == 2:
+            data_or_path_or_list, audio_fs = data_or_path_or_list.split()
+            audio_fs = int(audio_fs)
         data_mat = kaldiio.load_mat(data_or_path_or_list)
         if isinstance(data_mat, tuple):
             audio_fs, mat = data_mat
