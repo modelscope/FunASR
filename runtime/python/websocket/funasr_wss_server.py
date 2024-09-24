@@ -187,7 +187,7 @@ async def ws_serve(websocket, path):
             websocket.status_dict_vad["chunk_size"] = int(
                 websocket.status_dict_asr_online["chunk_size"][1] * 60 / websocket.chunk_interval
             )
-            if len(frames_asr_online) > 0 or len(frames_asr) > 0 or not isinstance(message, str):
+            if len(frames_asr_online) > 0 or len(frames_asr) >= 0 or not isinstance(message, str):
                 if not isinstance(message, str):
                     frames.append(message)
                     duration_ms = len(message) // 32
@@ -291,6 +291,17 @@ async def async_asr(websocket, audio_in):
             )
             await websocket.send(message)
 
+    else:
+        mode = "2pass-offline" if "2pass" in websocket.mode else websocket.mode
+        message = json.dumps(
+            {
+                "mode": mode,
+                "text": "",
+                "wav_name": websocket.wav_name,
+                "is_final": websocket.is_speaking,
+            }
+        )
+        await websocket.send(message)    
 
 async def async_asr_online(websocket, audio_in):
     if len(audio_in) > 0:
