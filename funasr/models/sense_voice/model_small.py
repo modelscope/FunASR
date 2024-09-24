@@ -2052,6 +2052,7 @@ class SenseVoiceL(nn.Module):
         ark_writer = None
         if kwargs.get("output_dir") is not None:
             out_dir = kwargs.get("output_dir")
+            os.makedirs(out_dir, exist_ok=True)
             if not hasattr(self, "writer"):
                 out_path = os.path.join(out_dir, f"enc_token")
                 self.writer = kaldiio.WriteHelper(f"ark,scp,f:{out_path}.ark,{out_path}.scp")
