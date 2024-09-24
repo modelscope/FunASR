@@ -1946,7 +1946,7 @@ class SenseVoiceL(nn.Module):
         speech = speech.to(device=kwargs["device"])[0, :, :]
         speech_lengths = speech_lengths.to(device=kwargs["device"])
 
-        DecodingOptions = kwargs.get("DecodingOptions", {})
+        DecodingOptions = kwargs.get("DecodingOptions", {"fp16": kwargs.get("fp16", True)})
         task = DecodingOptions.get("task", "ASR")
         if isinstance(task, str):
             task = [task]
