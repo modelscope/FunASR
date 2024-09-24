@@ -330,6 +330,8 @@ class AutoModel:
 
         if run_mode == "extract_token" and hasattr(model, "writer"):
             model.writer.close()
+            if hasattr(model, "len_writer"):
+                model.len_writer.close()
 
         if pbar:
             # pbar.update(1)
