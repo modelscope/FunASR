@@ -1972,4 +1972,12 @@ class SenseVoiceL(nn.Module):
 
         results.append(result_i)
 
+        ibest_writer = None
+        if kwargs.get("output_dir") is not None:
+            if not hasattr(self, "writer"):
+                self.writer = DatadirWriter(kwargs.get("output_dir"))
+            ibest_writer = self.writer[f"1best_recog"]
+        if ibest_writer is not None:
+            ibest_writer["text"][key[0]] = text
+
         return results, meta_data
