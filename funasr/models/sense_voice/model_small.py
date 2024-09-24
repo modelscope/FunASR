@@ -2060,6 +2060,6 @@ class SenseVoiceL(nn.Module):
             ark_writer = self.writer
         if ark_writer is not None:
             for k, v, l in zip(key, tokens.detach().cpu().numpy(), out_lens):
-                ark_writer(k, tokens[:l])
+                ark_writer(k, v[:l])
 
         return results, meta_data
