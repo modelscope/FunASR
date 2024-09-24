@@ -272,7 +272,7 @@ class AutoModel:
         deep_update(kwargs, cfg)
         model = self.model if model is None else model
         model.eval()
-
+        run_mode = kwargs.get("run_mode", "asr")
         batch_size = kwargs.get("batch_size", 1)
         # if kwargs.get("device", "cpu") == "cpu":
         #     batch_size = 1
@@ -302,7 +302,10 @@ class AutoModel:
 
             time1 = time.perf_counter()
             with torch.no_grad():
-                res = model.inference(**batch, **kwargs)
+                if run_mode == "extract_token":
+                    res = model.extract_token(**batch, **kwargs)
+                else:
+                    res = model.inference(**batch, **kwargs)
                 if isinstance(res, (list, tuple)):
                     results = res[0] if len(res) > 0 else [{"text": ""}]
                     meta_data = res[1] if len(res) > 1 else {}
@@ -324,6 +327,9 @@ class AutoModel:
                 pbar.set_description(description)
             time_speech_total += batch_data_time
             time_escape_total += time_escape
+
+        if run_mode == "extract_token" and hasattr(model, "writer"):
+            model.writer.close()
 
         if pbar:
             # pbar.update(1)

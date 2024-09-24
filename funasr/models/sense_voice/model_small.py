@@ -1,5 +1,6 @@
 import logging
 import time
+import kaldiio, os
 import torch
 from torch import Tensor, nn
 import torch.nn.functional as F
@@ -1979,5 +1980,84 @@ class SenseVoiceL(nn.Module):
             ibest_writer = self.writer[f"1best_recog"]
         if ibest_writer is not None:
             ibest_writer["text"][key[0]] = text
+
+        return results, meta_data
+
+    def extract_token(
+        self,
+        data_in,
+        data_lengths=None,
+        key: list = None,
+        tokenizer=None,
+        frontend=None,
+        **kwargs,
+    ):
+        if kwargs.get("batch_size", 1) > 1:
+            raise NotImplementedError("batch decoding is not implemented")
+
+        if frontend is None and not hasattr(self, "frontend"):
+            frontend_class = tables.frontend_classes.get("WhisperFrontend")
+            frontend = frontend_class(
+                n_mels=self.model.dims.n_mels, do_pad_trim=kwargs.get("do_pad_trim", True)
+            )
+            self.frontend = frontend
+        else:
+            frontend = frontend if frontend is not None else self.frontend
+
+        meta_data = {}
+        if (
+            isinstance(data_in, torch.Tensor) and kwargs.get("data_type", "sound") == "fbank"
+        ):  # fbank
+            speech, speech_lengths = data_in, data_lengths
+            if len(speech.shape) < 3:
+                speech = speech[None, :, :]
+            if speech_lengths is None:
+                speech_lengths = speech.shape[1]
+        else:
+            # extract fbank feats
+            time1 = time.perf_counter()
+            audio_sample_list = load_audio_text_image_video(
+                data_in,
+                fs=frontend.fs if hasattr(frontend, "fs") else 16000,
+                audio_fs=kwargs.get("fs", 16000),
+                data_type=kwargs.get("data_type", "sound"),
+                tokenizer=tokenizer,
+            )
+            time2 = time.perf_counter()
+            meta_data["load_data"] = f"{time2 - time1:0.3f}"
+            speech, speech_lengths = extract_fbank(
+                audio_sample_list, data_type=kwargs.get("data_type", "sound"), frontend=frontend
+            )
+            time3 = time.perf_counter()
+            meta_data["extract_feat"] = f"{time3 - time2:0.3f}"
+            frame_shift = frontend.frame_shift if hasattr(frontend, "frame_shift") else 10
+            lfr_n = frontend.lfr_n if hasattr(frontend, "lfr_n") else 1
+            meta_data["batch_data_time"] = speech_lengths.sum().item() * frame_shift * lfr_n / 1000
+
+        speech = speech.to(device=kwargs["device"])[0, :, :]
+        speech_lengths = speech_lengths.to(device=kwargs["device"])
+
+        (outs, ret_dict), out_lens = self.model.encoder(
+            speech.permute(0, 2, 1), speech_lengths,
+            only_extract_tokens=True
+        )
+        tokens = ret_dict["indices"]
+
+        text = "extract_token"
+        results = []
+        result_i = {"key": key[0], "text": text}
+
+        results.append(result_i)
+
+        ark_writer = None
+        if kwargs.get("output_dir") is not None:
+            out_dir = kwargs.get("output_dir")
+            if not hasattr(self, "writer"):
+                out_path = os.path.join(out_dir, f"enc_token")
+                self.writer = kaldiio.WriteHelper(f"ark,scp,f:{out_path}.ark,{out_path}.scp")
+            ark_writer = self.writer
+        if ark_writer is not None:
+            for k, v, l in zip(key, tokens.detach().cpu().numpy(), out_lens):
+                ark_writer(k, tokens[:l])
 
         return results, meta_data
