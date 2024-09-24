@@ -20,10 +20,10 @@ def main_hydra(cfg: DictConfig):
 
     kwargs = to_plain_list(cfg)
 
-    machine_rank = kwargs.get("dist_rank", 0)
-    world_size = kwargs.get("world_size", 1)
-    local_rank = os.environ["LOCAL_RANK"]
-    node_world_size = os.environ["WORLD_SIZE"]
+    machine_rank = int(kwargs.get("dist_rank", 0))
+    world_size = int(kwargs.get("world_size", 1))
+    local_rank = int(os.environ["LOCAL_RANK"])
+    node_world_size = int(os.environ["WORLD_SIZE"])
     dist_rank = machine_rank * node_world_size + local_rank
     logging.basicConfig(
         level='INFO',
