@@ -323,7 +323,7 @@ class AutoModel:
             speed_stats["rtf"] = f"{(time_escape) / batch_data_time:0.3f}"
             description = f"{speed_stats}, "
             if pbar:
-                pbar.update(1)
+                pbar.update(batch_size)
                 pbar.set_description(description)
             time_speech_total += batch_data_time
             time_escape_total += time_escape
