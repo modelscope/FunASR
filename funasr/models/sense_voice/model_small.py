@@ -1992,8 +1992,6 @@ class SenseVoiceL(nn.Module):
         frontend=None,
         **kwargs,
     ):
-        if kwargs.get("batch_size", 1) > 1:
-            raise NotImplementedError("batch decoding is not implemented")
 
         if frontend is None and not hasattr(self, "frontend"):
             frontend_class = tables.frontend_classes.get("WhisperFrontend")
