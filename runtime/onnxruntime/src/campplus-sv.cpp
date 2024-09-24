@@ -120,22 +120,26 @@ namespace funasr
     }
 
     void CamPPlusSv::Forward(
-        const std::vector<std::vector<float>> &chunk_feats,
+        const std::vector<std::vector<std::vector<float>>> &chunk_feats,
         std::vector<std::vector<float>> *out_prob)
     {
 
         Ort::MemoryInfo memory_info =
             Ort::MemoryInfo::CreateCpu(OrtDeviceAllocator, OrtMemTypeCPU);
 
-        int num_frames = chunk_feats.size();           // 553
-        const int feature_dim = chunk_feats[0].size(); // 80
+        int batch_size = chunk_feats.size();
+        int num_frames = chunk_feats[0].size();           // 553
+        const int feature_dim = chunk_feats[0][0].size(); // 80
 
         //  2. Generate input nodes tensor
-        const int64_t vad_feats_shape[3] = {1, num_frames, feature_dim}; //[1,553,80]
+        const int64_t vad_feats_shape[3] = {batch_size, num_frames, feature_dim}; //[1,553,80]
         std::vector<float> vad_feats;
-        for (const auto &chunk_feat : chunk_feats)
+        for (const auto &chunk_feat_b : chunk_feats)
         {
-            vad_feats.insert(vad_feats.end(), chunk_feat.begin(), chunk_feat.end());
+            for (const auto &chunk_feat : chunk_feat_b)
+            {
+                vad_feats.insert(vad_feats.end(), chunk_feat.begin(), chunk_feat.end());
+            }
         }
         Ort::Value vad_feats_ort = Ort::Value::CreateTensor<float>(
             memory_info, vad_feats.data(), vad_feats.size(), vad_feats_shape, 3);
@@ -219,21 +223,60 @@ namespace funasr
         }
     }
 
-    std::vector<std::vector<float>> CamPPlusSv::Infer(std::vector<float> &waves)
+    std::vector<std::vector<float>> CamPPlusSv::Infer(sv_segment vad_seg)
     {
-        std::vector<std::vector<float>> vad_feats;
         std::vector<std::vector<float>> voice_features;
 
-        FbankKaldi(sample_rate_, vad_feats, waves);
+        std::vector<std::vector<std::vector<float>>> vad_feats;
+        std::vector<sv_segment> seg_res = SegChunk(vad_seg);
+        for(int idx=0; idx<seg_res.size(); idx++){
+            std::vector<std::vector<float>> vad_feat;
+            std::vector<float> wave = seg_res[idx].data;
+            FbankKaldi(sample_rate_, vad_feat, wave);
+            SubMean(vad_feat);
+            vad_feats.push_back(vad_feat);
+        }
 
-        if (vad_feats.size() == 0)
-        {
+        if (vad_feats.size() == 0 || 
+            vad_feats[0].size() == 0 ||
+            vad_feats[0][0].size() == 0){
             return voice_features;
         }
-        // sub mean  pad 
-        SubMean(vad_feats);  
-        Forward(vad_feats, &voice_features);  
+        Forward(vad_feats, &voice_features);
         return voice_features;
+    }
+
+    std::vector<sv_segment> CamPPlusSv::SegChunk(sv_segment& seg_data) {
+        double seg_st = seg_data.start_time;
+        const std::vector<float>& data = seg_data.data;
+
+        int chunk_len = static_cast<int>(seg_dur * (double)sample_rate_);
+        int chunk_shift = static_cast<int>(seg_shift * (double)sample_rate_);
+        int last_chunk_ed = 0;
+
+        std::vector<sv_segment> seg_res;
+
+        for (int chunk_st = 0; chunk_st < data.size(); chunk_st += chunk_shift) {
+            int chunk_ed = std::min(chunk_st + chunk_len, static_cast<int>(data.size()));
+            if (chunk_ed <= last_chunk_ed) {
+                break;
+            }
+            last_chunk_ed = chunk_ed;
+            chunk_st = std::max(0, chunk_ed - chunk_len);
+
+            std::vector<float> chunk_data(data.begin() + chunk_st, data.begin() + chunk_ed);
+
+            if (chunk_data.size() < chunk_len) {
+                chunk_data.resize(chunk_len, 0.0f);
+            }
+
+            seg_res.push_back({
+                (double)chunk_st / (double)sample_rate_ + seg_st,
+                (double)chunk_ed / (double)sample_rate_ + seg_st,
+                chunk_data
+            });
+        }
+        return seg_res;
     }
 
     CamPPlusSv::~CamPPlusSv()

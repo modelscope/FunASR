@@ -20,9 +20,9 @@ namespace funasr
         CamPPlusSv();
         ~CamPPlusSv();    
         void InitSv(const std::string &model, const std::string &config, int thread_num);
-        std::vector<std::vector<float>> Infer(std::vector<float> &waves);        
+        std::vector<std::vector<float>> Infer(sv_segment vad_seg);
         void Forward(
-            const std::vector<std::vector<float>> &chunk_feats,
+            const std::vector<std::vector<std::vector<float>>> &chunk_feats,
             std::vector<std::vector<float>> *out_prob);
 
         std::shared_ptr<Ort::Session> cam_session_ = nullptr;
@@ -33,6 +33,8 @@ namespace funasr
         knf::FbankOptions fbank_opts_;
 
         int sample_rate_ = MODEL_SAMPLE_RATE;
+        const double seg_dur = 1.5;
+        const double seg_shift = 0.75;
 
     private:
         void ReadModel(const char *cam_model);
@@ -44,6 +46,7 @@ namespace funasr
         void FbankKaldi(float sample_rate, std::vector<std::vector<float>> &vad_feats,
                         std::vector<float> &waves);
         void SubMean(std::vector<std::vector<float>>& voice_feats);
+        std::vector<sv_segment> SegChunk(sv_segment& seg_data);
     };
 
 } // namespace funasr

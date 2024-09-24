@@ -371,6 +371,7 @@
 		std::vector<string> msgs(index_vector.size());
 		std::vector<float> msg_stimes(index_vector.size());
 		std::vector<int> svs(index_vector.size(), -1);
+		std::vector<std::vector<float>> spk_embs;
 
 		float** buff;
 		int* len;
@@ -402,20 +403,11 @@
 			if(offline_stream->UseSv() && use_sv){
 				for(int index=0; index<batch_in; index++){
 					if (len[index] > 1600){
-						if (voice_feats.size() < MAX_SPKS_NUM){						
-							std::vector<float> wave(buff[index], buff[index]+len[index]);
-							std::vector<std::vector<float>> sv_result = offline_stream->sv_handle->Infer(wave);
-							float threshold = offline_stream->sv_handle->threshold;
-							int speaker_idx = funasr::GetSpeakersID(sv_result[0], voice_feats, threshold);
-							if(svs_idx < index_vector.size()){
-								svs[index_vector[svs_idx]] = speaker_idx;
-								svs_idx++;
-							}else{
-								LOG(ERROR) << "svs_idx: " << svs_idx <<" is out of range " << index_vector.size();
-							}
-						}else{
-							LOG(ERROR) << "Exceeding the maximum speaker limit!";
-							LOG(ERROR) << "speaker_idx: " << MAX_SPKS_NUM;
+						std::vector<float> wave(buff[index], buff[index]+len[index]);
+						funasr::sv_segment vad_segment={start_time[index], start_time[index]+ len[index]/(double)sampling_rate, wave};
+						std::vector<std::vector<float>> sv_result = offline_stream->sv_handle->Infer(vad_segment);
+						for (auto spk_emb : sv_result){
+							spk_embs.push_back(spk_emb);
 						}
 					}
 				}
@@ -602,23 +594,23 @@
 		
 			msg = msg_vec[0];
 			//sv-cam for Speaker verification
-			if(tpass_stream->UseSv() && use_sv &&frame->len>1600)//Filter audio clips less than 100ms
-			{
-				std::vector<std::vector<float>>& voice_feats = tpass_online_stream->voice_feats;
-				if (voice_feats.size()<MAX_SPKS_NUM)
-				{
-					std::vector<float>wave(frame->data, frame->data+frame->len);
-					std::vector<std::vector<float>> sv_result = tpass_stream->sv_handle->Infer(wave);
-					float threshold = tpass_stream->sv_handle->threshold;
-					int speaker_idx = funasr::GetSpeakersID(sv_result[0], voice_feats, threshold);
-					// p_result->speaker_idx = speaker_idx;
-				}
-				else
-				{
-					LOG(ERROR)<<"Exceeding the maximum speaker limit!\n";
-					// p_result->speaker_idx = MAX_SPKS_NUM;
-				}
-			}
+			// if(tpass_stream->UseSv() && use_sv &&frame->len>1600)//Filter audio clips less than 100ms
+			// {
+			// 	std::vector<std::vector<float>>& voice_feats = tpass_online_stream->voice_feats;
+			// 	if (voice_feats.size()<MAX_SPKS_NUM)
+			// 	{
+			// 		std::vector<float>wave(frame->data, frame->data+frame->len);
+			// 		std::vector<std::vector<float>> sv_result = tpass_stream->sv_handle->Infer(wave);
+			// 		float threshold = tpass_stream->sv_handle->threshold;
+			// 		int speaker_idx = funasr::GetSpeakersID(sv_result[0], voice_feats, threshold);
+			// 		// p_result->speaker_idx = speaker_idx;
+			// 	}
+			// 	else
+			// 	{
+			// 		LOG(ERROR)<<"Exceeding the maximum speaker limit!\n";
+			// 		// p_result->speaker_idx = MAX_SPKS_NUM;
+			// 	}
+			// }
 			//timestamp
 			if(msg_vec.size() > 1){
 				std::vector<std::string> msg_stamp = funasr::split(msg_vec[1], ',');
@@ -941,7 +933,7 @@ std::vector<std::vector<float>> CamPPlusSvInfer(FUNASR_HANDLE handle, std::vecto
 	if (!sv_obj)
 		return result;
 
-	result = sv_obj->Infer(data);
+	// result = sv_obj->Infer(data);
 	return result;
 }
 

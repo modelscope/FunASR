@@ -138,4 +138,11 @@ namespace funasr {
 #define JIEBA_USERDICT "jieba_usr_dict"
 #define JIEBA_HMM_MODEL "jieba.hmm"
 
+typedef struct
+{
+    double start_time;
+    double end_time;
+    std::vector<float> data;
+}sv_segment;
+
 } // namespace funasr
