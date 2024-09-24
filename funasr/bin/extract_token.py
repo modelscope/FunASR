@@ -42,7 +42,7 @@ def main_hydra(cfg: DictConfig):
     torch.cuda.set_device(int(os.environ["LOCAL_RANK"]))
     model = AutoModel(**kwargs)
     res = model.generate(input=kwargs["input"])
-    print(res)
+    logging.info(f"{res}")
 
 
 if __name__ == "__main__":
