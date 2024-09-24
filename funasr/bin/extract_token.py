@@ -31,6 +31,8 @@ def main_hydra(cfg: DictConfig):
                f" %(asctime)s (%(module)s:%(lineno)d) %(levelname)s: %(message)s",
     )
     kwargs["input"] = kwargs["input"] + f"{dist_rank:02d}"
+    if not kwargs["input"].endswith(".scp"):
+        kwargs["input"] += ".scp"
     kwargs["output_dir"] = os.path.join(kwargs["output_dir"], f"{dist_rank:02d}")
     kwargs["device"] = "cuda"
     kwargs["disable_pbar"] = True
