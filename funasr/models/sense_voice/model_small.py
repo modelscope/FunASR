@@ -2048,7 +2048,7 @@ class SenseVoiceL(nn.Module):
         results = []
         result_i = {"key": key[0], "text": text}
 
-        results.append(result_i)
+        # results.append(result_i)
 
         ark_writer, len_writer = None, None
         if kwargs.get("output_dir") is not None:
