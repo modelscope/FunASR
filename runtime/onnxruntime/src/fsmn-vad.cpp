@@ -311,8 +311,8 @@ void FsmnVad::Test() {
 }
 
 FsmnVad::~FsmnVad() {
-    for (auto vad_in_name_item : vad_in_names_) vad_in_name_item.Free((void*)vad_in_name_item);
-    for (auto vad_out_name_item : vad_out_names_) vad_out_name_item.Free((void*)vad_out_name_item);
+    for (auto vad_in_name_item : vad_in_names_) vad_allocator.Free((void*)vad_in_name_item);
+    for (auto vad_out_name_item : vad_out_names_) vad_allocator.Free((void*)vad_out_name_item);
 }
 
 FsmnVad::FsmnVad():env_(ORT_LOGGING_LEVEL_ERROR, ""),session_options_{} {
