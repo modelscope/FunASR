@@ -58,7 +58,8 @@ def gen_jsonl_from_wav_text_list(
             for key in json_dict[data_type_list[0]].keys():
                 jsonl_line = {"key": key}
                 for data_file in data_type_list:
-                    jsonl_line.update(json_dict[data_file][key])
+                    if key in json_dict[data_file]:
+                        jsonl_line.update(json_dict[data_file][key])
                 jsonl_line = json.dumps(jsonl_line, ensure_ascii=False)
                 f.write(jsonl_line + "\n")
                 f.flush()
@@ -81,10 +82,14 @@ def parse_context_length(data_list: list, data_type: str, id=0):
         key = lines[0]
         line = lines[1] if len(lines) > 1 else ""
         line = line.strip()
-        if os.path.exists(line):
-            waveform, _ = librosa.load(line, sr=16000)
-            sample_num = len(waveform)
-            context_len = int(sample_num / 16000 * 1000 / 10)
+        if data_type == "source":
+            if os.path.exists(line):
+                waveform, _ = librosa.load(line, sr=16000)
+                sample_num = len(waveform)
+                context_len = int(sample_num * 1000 / 16000 / 10)
+            else:
+                print("source file not found: {}".format(line))
+                continue
         else:
             context_len = len(line.split()) if " " in line else len(line)
         res[key] = {data_type: line, f"{data_type}_len": context_len}

@@ -14,6 +14,7 @@ import os.path
 import numpy as np
 from tqdm import tqdm
 
+from omegaconf import DictConfig, ListConfig
 from funasr.utils.misc import deep_update
 from funasr.register import tables
 from funasr.utils.load_utils import load_bytes
@@ -195,15 +196,28 @@ class AutoModel:
                 tokenizer.split(",") if isinstance(tokenizer, str) else tokenizer
             )  # type of tokenizers is list!!!
             tokenizers_conf = kwargs.get("tokenizer_conf", {})
+
+            token_list_files = []
+            seg_dicts = []
+            if isinstance(tokenizers_conf, ListConfig):
+                token_list_files = kwargs.get("token_lists", [])
+                seg_dicts = kwargs.get("seg_dicts", [])
+                assert len(tokenizers_conf) == len(token_list_files)
+                assert len(tokenizers_conf) == len(seg_dicts)
+            else:
+                token_list_files = [tokenizers_conf.token_list]
+                seg_dicts = [tokenizers_conf.seg_dict]
+                tokenizers_conf = [tokenizers_conf] * len(tokenizers)
+
             tokenizers_build = []
             vocab_sizes = []
             token_lists = []
-
-            if not isinstance(tokenizers_conf, (list, tuple)):
-                tokenizers_conf = [tokenizers_conf] * len(tokenizers)
             for i, tokenizer in enumerate(tokenizers):
                 tokenizer_class = tables.tokenizer_classes.get(tokenizer)
                 tokenizer_conf = tokenizers_conf[i]
+                tokenizer_conf.token_list = token_list_files[i]
+                tokenizer_conf.seg_dict = seg_dicts[i]
+
                 tokenizer = tokenizer_class(**tokenizer_conf)
                 tokenizers_build.append(tokenizer)
                 token_list = tokenizer.token_list if hasattr(tokenizer, "token_list") else None

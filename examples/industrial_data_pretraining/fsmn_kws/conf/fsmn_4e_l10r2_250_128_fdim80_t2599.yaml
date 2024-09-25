@@ -1,0 +1,95 @@
+
+# network architecture
+model: FsmnKWS
+model_conf:
+    ctc_weight: 1.0
+
+# encoder related
+encoder: FSMN
+encoder_conf:
+    input_dim: 400
+    input_affine_dim: 140
+    fsmn_layers: 4
+    linear_dim: 250
+    proj_dim: 128
+    lorder: 10
+    rorder: 2
+    lstride: 1
+    rstride: 1
+    output_affine_dim: 140
+    output_dim: 2599
+    use_softmax: false
+
+frontend: WavFrontend
+frontend_conf:
+    fs: 16000
+    window: hamming
+    n_mels: 80
+    frame_length: 25
+    frame_shift: 10
+    lfr_m: 5
+    lfr_n: 3
+
+specaug: SpecAugLFR
+specaug_conf:
+    apply_time_warp: false
+    time_warp_window: 5
+    time_warp_mode: bicubic
+    apply_freq_mask: true
+    freq_mask_width_range:
+    - 0
+    - 30
+    lfr_rate: 3
+    num_freq_mask: 1
+    apply_time_mask: true
+    time_mask_width_range:
+    - 0
+    - 12
+    num_time_mask: 1
+
+train_conf:
+  accum_grad: 1
+  grad_clip: 5
+  max_epoch: 100
+  keep_nbest_models: 10
+  avg_nbest_model: 10
+  avg_keep_nbest_models_type: loss
+  validate_interval: 50000
+  save_checkpoint_interval: 50000
+  avg_checkpoint_interval: 1000
+  log_interval: 50
+
+optim: adam
+optim_conf:
+   lr: 0.0005
+scheduler: warmuplr
+scheduler_conf:
+   warmup_steps: 10000
+
+dataset: AudioDataset
+dataset_conf:
+    index_ds: IndexDSJsonl
+    batch_sampler: EspnetStyleBatchSampler
+    batch_type: length # example or length
+    batch_size: 32000 # if batch_type is example, batch_size is the numbers of samples; if length, batch_size is source_token_len+target_token_len;
+    max_token_length: 1600 # filter samples if source_token_len+target_token_len > max_token_length,
+    buffer_size: 2048
+    shuffle: true
+    num_workers: 8
+    preprocessor_speech: SpeechPreprocessSpeedPerturb
+    preprocessor_speech_conf:
+      speed_perturb: [0.9, 1.0, 1.1]
+
+tokenizer: CharTokenizer
+tokenizer_conf:
+    unk_symbol: <unk>
+    split_with_space: true
+
+ctc_conf:
+    dropout_rate: 0.0
+    ctc_type: builtin
+    reduce: true
+    ignore_nan_grad: true
+    extra_linear: false
+
+normalize: null
