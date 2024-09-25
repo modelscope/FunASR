@@ -1049,14 +1049,17 @@ class EncoderLayerSANMLarge(nn.Module):
         return x
 
 
-# @tables.register("encoder_classes", "SenseVoiceEncoder")
-class SenseVoiceEncoder(nn.Module):
+@tables.register("encoder_classes", "SenseVoiceQuantizedEncoder")
+class SenseVoiceQuantizedEncoder(nn.Module):
     def __init__(
         self,
         input_size,
         linear_units: int,
         attention_heads: int,
         num_blocks: int,
+        quantize_layer_idx: int,
+        normalized_quant_input: bool,
+        quantizer_config: dict,
         **kwargs,
     ):
         super().__init__()
@@ -1073,73 +1076,6 @@ class SenseVoiceEncoder(nn.Module):
         self.use_padmask = kwargs.get("use_padmask", True)
         self.downsample_rate = kwargs.get("downsample_rate", 4)
 
-    def forward(
-        self,
-        x: torch.Tensor,
-        ilens: torch.Tensor = None,
-        **kwargs,
-    ):
-        use_padmask = self.use_padmask
-        x = F.gelu(self.conv1(x))
-        x = F.gelu(self.conv2(x))
-        x = x.permute(0, 2, 1)
-
-        n_frames = x.size(1)
-        max_pos = n_frames
-
-        if ilens is not None:
-            if self.downsample_rate == 4:
-                olens = (
-                    1
-                    + (ilens - self.conv1.kernel_size[0] + 2 * self.conv1.padding[0])
-                    // self.conv1.stride[0]
-                )
-            else:
-                olens = ilens
-            olens = (
-                1
-                + (olens - self.conv2.kernel_size[0] + 2 * self.conv2.padding[0])
-                // self.conv2.stride[0]
-            )
-            olens = torch.clamp(olens, max=max_pos)
-        else:
-            olens = None
-
-        if use_padmask and olens is not None:
-            padding_mask = (~make_pad_mask(olens)[:, None, :]).to(torch.bool).to(x.device)
-        else:
-            padding_mask = None
-
-        device = x.device
-        seq_length = x.shape[1]
-        position_ids = torch.arange(0, seq_length, dtype=torch.long, device=device)
-        position_ids = position_ids.unsqueeze(0).view(-1, seq_length)
-
-        for layer, block in enumerate(self.blocks):
-            x = block(x, mask=padding_mask, position_ids=position_ids)
-
-        x = self.ln_post(x)
-
-        if ilens is None:
-            return x
-        else:
-            return x, olens
-
-
-@tables.register("encoder_classes", "SenseVoiceQuantizedEncoder")
-class SenseVoiceQuantizedEncoder(SenseVoiceEncoder):
-    def __init__(
-        self,
-        input_size,
-        linear_units: int,
-        attention_heads: int,
-        num_blocks: int,
-        quantize_layer_idx: int,
-        normalized_quant_input: bool,
-        quantizer_config: dict,
-        **kwargs,
-    ):
-        super().__init__(input_size, linear_units, attention_heads, num_blocks, **kwargs)
         self.linear_units = linear_units
         self.quantize_layer_idx = quantize_layer_idx
         self.normalized_quant_input = normalized_quant_input
