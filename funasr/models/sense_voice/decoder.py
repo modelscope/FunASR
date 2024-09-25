@@ -59,7 +59,6 @@ def sense_voice_decode_forward(
                     if use_output_layer is True,
             olens: (batch, )
     """
-    time0 = time.perf_counter()
     # import pdb;pdb.set_trace()
     use_padmask = self.use_padmask
     hlens = kwargs.get("hlens", None)
@@ -91,8 +90,7 @@ def sense_voice_decode_forward(
 
     x = self.ln(x)
     x = (x @ torch.transpose(self.token_embedding.weight.to(x.dtype), 0, 1)).float()
-    time1 = time.perf_counter()
-    print(f"decoder: {time1 - time0:0.3f}")
+
     return x
 
 

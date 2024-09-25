@@ -1559,7 +1559,6 @@ class SenseVoiceEncoder(nn.Module):
         ilens: torch.Tensor = None,
         **kwargs,
     ):
-        time0 = time.perf_counter()
         use_padmask = self.use_padmask
         x = F.gelu(self.conv1(x))
         x = F.gelu(self.conv2(x))
@@ -1600,8 +1599,7 @@ class SenseVoiceEncoder(nn.Module):
             x = block(x, mask=padding_mask, position_ids=position_ids)
 
         x = self.ln_post(x)
-        time1 = time.perf_counter()
-        print(f"encoder: {time1 - time0:0.3f}")
+
         if ilens is None:
             return x
         else:
