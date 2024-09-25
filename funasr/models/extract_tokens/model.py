@@ -1267,7 +1267,7 @@ from torch.cuda.amp import autocast
 from funasr.metrics.compute_acc import compute_accuracy, th_accuracy
 from funasr.losses.label_smoothing_loss import LabelSmoothingLoss
 from funasr.train_utils.device_funcs import force_gatherable
-from . import whisper_lib as whisper
+from ..sense_voice import whisper_lib as whisper
 from funasr.utils.load_utils import load_audio_text_image_video, extract_fbank
 from funasr.utils.datadir_writer import DatadirWriter
 import logging
