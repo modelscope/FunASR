@@ -67,7 +67,9 @@ void WebSocketServer::do_decoder(const std::vector<char>& buffer,
                                  bool itn,
                                  int audio_fs,
                                  std::string wav_format,
-                                 FUNASR_DEC_HANDLE& decoder_handle) {
+                                 FUNASR_DEC_HANDLE& decoder_handle,
+                                 std::string svs_lang,
+                                 bool sys_itn) {
   try {
     int num_samples = buffer.size();  // the size of the buf
 
@@ -78,7 +80,8 @@ void WebSocketServer::do_decoder(const std::vector<char>& buffer,
       try{
         FUNASR_RESULT Result = FunOfflineInferBuffer(
             asr_handle, buffer.data(), buffer.size(), RASR_NONE, nullptr, 
-            hotwords_embedding, audio_fs, wav_format, itn, decoder_handle);
+            hotwords_embedding, audio_fs, wav_format, itn, decoder_handle,
+            svs_lang, sys_itn);
         if (Result != nullptr){
           asr_result = FunASRGetResult(Result, 0);  // get decode result
           stamp_res = FunASRGetStamp(Result);
@@ -162,6 +165,8 @@ void WebSocketServer::on_open(websocketpp::connection_hdl hdl) {
   data_msg->msg["audio_fs"] = 16000; // default is 16k
   data_msg->msg["access_num"] = 0; // the number of access for this object, when it is 0, we can free it saftly
   data_msg->msg["is_eof"]=false;
+  data_msg->msg["svs_lang"]="auto";
+  data_msg->msg["svs_itn"]=true;
   FUNASR_DEC_HANDLE decoder_handle =
     FunASRWfstDecoderInit(asr_handle, ASR_OFFLINE, global_beam_, lattice_beam_, am_scale_);
   data_msg->decoder_handle = decoder_handle;
@@ -357,6 +362,12 @@ void WebSocketServer::on_message(websocketpp::connection_hdl hdl,
       if (jsonresult.contains("itn")) {
         msg_data->msg["itn"] = jsonresult["itn"];
       }
+      if (jsonresult.contains("svs_lang")) {
+        msg_data->msg["svs_lang"] = jsonresult["svs_lang"];
+      }
+      if (jsonresult.contains("svs_itn")) {
+        msg_data->msg["svs_itn"] = jsonresult["svs_itn"];
+      }
       if ((jsonresult["is_speaking"] == false ||
           jsonresult["is_finished"] == true) && 
           msg_data->msg["is_eof"] != true && 
@@ -375,7 +386,9 @@ void WebSocketServer::on_message(websocketpp::connection_hdl hdl,
                               msg_data->msg["itn"],
                               msg_data->msg["audio_fs"],
                               msg_data->msg["wav_format"],
-                              std::ref(msg_data->decoder_handle)));
+                              std::ref(msg_data->decoder_handle),
+                              msg_data->msg["svs_lang"],
+                              msg_data->msg["svs_itn"]));
         msg_data->msg["access_num"]=(int)(msg_data->msg["access_num"])+1;
       }
       break;
