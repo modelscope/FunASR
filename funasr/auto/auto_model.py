@@ -228,8 +228,8 @@ class AutoModel:
                 if token_list is not None:
                     vocab_size = len(token_list)
 
-                    if vocab_size == -1 and hasattr(tokenizer, "get_vocab_size"):
-                        vocab_size = tokenizer.get_vocab_size()
+                if vocab_size == -1 and hasattr(tokenizer, "get_vocab_size"):
+                    vocab_size = tokenizer.get_vocab_size()
                 token_lists.append(token_list)
                 vocab_sizes.append(vocab_size)
 
