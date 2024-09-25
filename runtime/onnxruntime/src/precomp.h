@@ -64,6 +64,7 @@ using namespace std;
 #include "seg_dict.h"
 #include "resample.h"
 #include "paraformer.h"
+#include "sensevoice-small.h"
 #ifdef USE_GPU
 #include "paraformer-torch.h"
 #endif

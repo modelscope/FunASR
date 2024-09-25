@@ -49,6 +49,7 @@ std::string VectorToString(const std::vector<std::vector<int>>& vec, bool out_em
 std::string TimestampSmooth(std::string &text, std::string &text_itn, std::string &str_time);
 std::string TimestampSentence(std::string &text, std::string &str_time);
 std::vector<std::string> split(const std::string &s, char delim);
+std::vector<std::string> SplitStr(const std::string &s, string delimiter);
 
 template<typename T>
 void PrintMat(const std::vector<std::vector<T>> &mat, const std::string &name);
