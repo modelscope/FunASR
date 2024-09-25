@@ -304,10 +304,7 @@ class AutoModel:
 
             time1 = time.perf_counter()
             with torch.no_grad():
-                if run_mode == "extract_token":
-                    res = model.extract_token(**batch, **kwargs)
-                else:
-                    res = model.inference(**batch, **kwargs)
+                res = model.inference(**batch, **kwargs)
                 if isinstance(res, (list, tuple)):
                     results = res[0] if len(res) > 0 else [{"text": ""}]
                     meta_data = res[1] if len(res) > 1 else {}
@@ -329,7 +326,9 @@ class AutoModel:
                 pbar.set_description(description)
             else:
                 if log_interval is not None and count % log_interval == 0:
-                    logging.info(f"processed {count*batch_size}/{num_samples} samples: {key_batch[0]}")
+                    logging.info(
+                        f"processed {count*batch_size}/{num_samples} samples: {key_batch[0]}"
+                    )
             time_speech_total += batch_data_time
             time_escape_total += time_escape
             count += 1
