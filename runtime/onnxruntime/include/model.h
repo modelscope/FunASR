@@ -24,6 +24,8 @@ class Model {
     virtual std::string Forward(float *din, int len, bool input_finished, const std::vector<std::vector<float>> &hw_emb={{0.0}}, void* wfst_decoder=nullptr){return "";};
     virtual std::vector<std::string> Forward(float** din, int* len, bool input_finished, const std::vector<std::vector<float>> &hw_emb={{0.0}}, void* wfst_decoder=nullptr, int batch_in=1)
       {return std::vector<string>();};
+    virtual std::vector<std::string> Forward(float** din, int* len, bool input_finished, std::string svs_lang="auto", bool svs_itn=false, int batch_in=1)
+      {return std::vector<string>();};
     virtual std::string Rescoring() = 0;
     virtual void InitHwCompiler(const std::string &hw_model, int thread_num){};
     virtual void InitSegDict(const std::string &seg_dict_model){};
