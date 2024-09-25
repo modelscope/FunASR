@@ -1552,6 +1552,7 @@ class SenseVoiceEncoder(nn.Module):
         self.ln_post = LayerNorm(linear_units)
         self.use_padmask = kwargs.get("use_padmask", True)
         self.downsample_rate = kwargs.get("downsample_rate", 4)
+        # debug
 
     def forward(
         self,
