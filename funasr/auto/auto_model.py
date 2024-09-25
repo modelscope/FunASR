@@ -14,6 +14,7 @@ import os.path
 import numpy as np
 from tqdm import tqdm
 
+from omegaconf import DictConfig, ListConfig
 from funasr.utils.misc import deep_update
 from funasr.register import tables
 from funasr.utils.load_utils import load_bytes
@@ -187,21 +188,59 @@ class AutoModel:
 
         # build tokenizer
         tokenizer = kwargs.get("tokenizer", None)
-        if tokenizer is not None:
-            tokenizer_class = tables.tokenizer_classes.get(tokenizer)
-            tokenizer = tokenizer_class(**kwargs.get("tokenizer_conf", {}))
-            kwargs["token_list"] = (
-                tokenizer.token_list if hasattr(tokenizer, "token_list") else None
-            )
-            kwargs["token_list"] = (
-                tokenizer.get_vocab() if hasattr(tokenizer, "get_vocab") else kwargs["token_list"]
-            )
-            vocab_size = len(kwargs["token_list"]) if kwargs["token_list"] is not None else -1
-            if vocab_size == -1 and hasattr(tokenizer, "get_vocab_size"):
-                vocab_size = tokenizer.get_vocab_size()
-        else:
-            vocab_size = -1
         kwargs["tokenizer"] = tokenizer
+        kwargs["vocab_size"] = -1
+
+        if tokenizer is not None:
+            tokenizers = (
+                tokenizer.split(",") if isinstance(tokenizer, str) else tokenizer
+            )  # type of tokenizers is list!!!
+            tokenizers_conf = kwargs.get("tokenizer_conf", {})
+            tokenizers_build = []
+            vocab_sizes = []
+            token_lists = []
+            ### === only for kws ===
+            token_list_files = kwargs.get("token_lists", [])
+            seg_dicts = kwargs.get("seg_dicts", [])
+            ### === only for kws ===
+
+            if not isinstance(tokenizers_conf, (list, tuple, ListConfig)):
+                tokenizers_conf = [tokenizers_conf] * len(tokenizers)
+
+            for i, tokenizer in enumerate(tokenizers):
+                tokenizer_class = tables.tokenizer_classes.get(tokenizer)
+                tokenizer_conf = tokenizers_conf[i]
+
+                ### === only for kws ===
+                if len(token_list_files) > 1:
+                    tokenizer_conf.token_list = token_list_files[i]
+                if len(seg_dicts) > 1:
+                    tokenizer_conf.seg_dict = seg_dicts[i]
+                ### === only for kws ===
+
+                tokenizer = tokenizer_class(**tokenizer_conf)
+                tokenizers_build.append(tokenizer)
+                token_list = tokenizer.token_list if hasattr(tokenizer, "token_list") else None
+                token_list = (
+                    tokenizer.get_vocab() if hasattr(tokenizer, "get_vocab") else token_list
+                )
+                vocab_size = -1
+                if token_list is not None:
+                    vocab_size = len(token_list)
+
+                    if vocab_size == -1 and hasattr(tokenizer, "get_vocab_size"):
+                        vocab_size = tokenizer.get_vocab_size()
+                token_lists.append(token_list)
+                vocab_sizes.append(vocab_size)
+
+            if len(tokenizers_build) <= 1:
+                tokenizers_build = tokenizers_build[0]
+                token_lists = token_lists[0]
+                vocab_sizes = vocab_sizes[0]
+
+            kwargs["tokenizer"] = tokenizers_build
+            kwargs["vocab_size"] = vocab_sizes
+            kwargs["token_list"] = token_lists
 
         # build frontend
         frontend = kwargs.get("frontend", None)
@@ -219,7 +258,7 @@ class AutoModel:
         model_conf = {}
         deep_update(model_conf, kwargs.get("model_conf", {}))
         deep_update(model_conf, kwargs)
-        model = model_class(**model_conf, vocab_size=vocab_size)
+        model = model_class(**model_conf)
 
         # init_param
         init_param = kwargs.get("init_param", None)

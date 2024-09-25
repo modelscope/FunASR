@@ -1,6 +1,7 @@
 import torch
 import random
 
+
 from funasr.register import tables
 from funasr.utils.load_utils import extract_fbank, load_audio_text_image_video
 
@@ -17,6 +18,7 @@ class AudioDataset(torch.utils.data.Dataset):
         index_ds: str = None,
         frontend=None,
         tokenizer=None,
+        is_training: bool = True,
         int_pad_value: int = -1,
         float_pad_value: float = 0.0,
         **kwargs,
@@ -24,18 +26,23 @@ class AudioDataset(torch.utils.data.Dataset):
         super().__init__()
         index_ds_class = tables.index_ds_classes.get(index_ds)
         self.index_ds = index_ds_class(path, **kwargs)
-        preprocessor_speech = kwargs.get("preprocessor_speech", None)
-        if preprocessor_speech:
-            preprocessor_speech_class = tables.preprocessor_classes.get(preprocessor_speech)
-            preprocessor_speech = preprocessor_speech_class(
-                **kwargs.get("preprocessor_speech_conf")
-            )
-        self.preprocessor_speech = preprocessor_speech
-        preprocessor_text = kwargs.get("preprocessor_text", None)
-        if preprocessor_text:
-            preprocessor_text_class = tables.preprocessor_classes.get(preprocessor_text)
-            preprocessor_text = preprocessor_text_class(**kwargs.get("preprocessor_text_conf"))
-        self.preprocessor_text = preprocessor_text
+
+        self.preprocessor_speech = None
+        self.preprocessor_text = None
+
+        if is_training:
+            preprocessor_speech = kwargs.get("preprocessor_speech", None)
+            if preprocessor_speech:
+                preprocessor_speech_class = tables.preprocessor_classes.get(preprocessor_speech)
+                preprocessor_speech = preprocessor_speech_class(
+                    **kwargs.get("preprocessor_speech_conf")
+                )
+            self.preprocessor_speech = preprocessor_speech
+            preprocessor_text = kwargs.get("preprocessor_text", None)
+            if preprocessor_text:
+                preprocessor_text_class = tables.preprocessor_classes.get(preprocessor_text)
+                preprocessor_text = preprocessor_text_class(**kwargs.get("preprocessor_text_conf"))
+            self.preprocessor_text = preprocessor_text
 
         self.frontend = frontend
         self.fs = 16000 if frontend is None else frontend.fs
@@ -64,6 +71,7 @@ class AudioDataset(torch.utils.data.Dataset):
         data_src = load_audio_text_image_video(source, fs=self.fs)
         if self.preprocessor_speech:
             data_src = self.preprocessor_speech(data_src, fs=self.fs)
+
         speech, speech_lengths = extract_fbank(
             data_src, data_type=self.data_type, frontend=self.frontend, is_final=True
         )  # speech: [b, T, d]
@@ -71,6 +79,7 @@ class AudioDataset(torch.utils.data.Dataset):
         target = item["target"]
         if self.preprocessor_text:
             target = self.preprocessor_text(target)
+
         if self.tokenizer:
             ids = self.tokenizer.encode(target)
             text = torch.tensor(ids, dtype=torch.int64)

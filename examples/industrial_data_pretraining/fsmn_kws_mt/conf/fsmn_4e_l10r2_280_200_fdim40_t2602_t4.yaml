@@ -1,0 +1,103 @@
+
+# network architecture
+model: FsmnKWSMT
+model_conf:
+    ctc_weight: 1.0
+
+# encoder related
+encoder: FSMNMT
+encoder_conf:
+    input_dim: 360
+    input_affine_dim: 280
+    fsmn_layers: 4
+    linear_dim: 280
+    proj_dim: 200
+    lorder: 10
+    rorder: 2
+    lstride: 1
+    rstride: 1
+    output_affine_dim: 400
+    output_dim: 2602
+    output_dim2: 4
+    use_softmax: false
+
+frontend: WavFrontend
+frontend_conf:
+    fs: 16000
+    window: hamming
+    n_mels: 40
+    frame_length: 25
+    frame_shift: 10
+    lfr_m: 9
+    lfr_n: 3
+
+specaug: SpecAugLFR
+specaug_conf:
+    apply_time_warp: false
+    time_warp_window: 5
+    time_warp_mode: bicubic
+    apply_freq_mask: true
+    freq_mask_width_range:
+    - 0
+    - 30
+    lfr_rate: 3
+    num_freq_mask: 1
+    apply_time_mask: true
+    time_mask_width_range:
+    - 0
+    - 12
+    num_time_mask: 1
+
+train_conf:
+  accum_grad: 1
+  grad_clip: 5
+  max_epoch: 100
+  keep_nbest_models: 100
+  avg_nbest_model: 10
+  avg_keep_nbest_models_type: loss
+  log_interval: 50
+
+optim: adam
+optim_conf:
+   lr: 0.001
+scheduler: warmuplr
+scheduler_conf:
+   warmup_steps: 10000
+
+dataset: KwsMTDataset
+dataset_conf:
+    index_ds: IndexDSJsonl
+    batch_sampler: EspnetStyleBatchSampler
+    batch_type: length # example or length
+    batch_size: 64000 # if batch_type is example, batch_size is the numbers of samples; if length, batch_size is source_token_len+target_token_len;
+    max_token_length: 1600 # filter samples if source_token_len+target_token_len > max_token_length,
+    buffer_size: 2048
+    shuffle: true
+    num_workers: 8
+    preprocessor_speech: SpeechPreprocessSpeedPerturb
+    preprocessor_speech_conf:
+      speed_perturb: [0.9, 1.0, 1.1]
+    dataloader: DataloaderMapStyle
+
+tokenizer:
+    - CharTokenizer
+    - CharTokenizer
+
+tokenizer_conf:
+    - unk_symbol: <unk>
+      split_with_space: true
+      token_list: null
+      seg_dict: null
+    - unk_symbol: <unk>
+      split_with_space: true
+      token_list: null
+      seg_dict: null
+
+ctc_conf:
+    dropout_rate: 0.0
+    ctc_type: builtin  # ctc_type: focalctc, builtin
+    reduce: true
+    ignore_nan_grad: true
+    extra_linear: false
+
+normalize: null
