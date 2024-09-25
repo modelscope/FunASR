@@ -1300,7 +1300,7 @@ class SenseVoiceLExtractTokens(nn.Module):
 
         # decoder
         model.decoder.use_padmask = kwargs.get("use_padmask", True)
-        from .decoder import sense_voice_decode_forward
+        from ..sense_voice.decoder import sense_voice_decode_forward
 
         model.decoder.forward = types.MethodType(sense_voice_decode_forward, model.decoder)
 
