@@ -322,6 +322,10 @@ class ContextualParaformer(Paraformer):
             self.pred_bias = config["model_conf"]["predictor_bias"]
         else:
             self.pred_bias = 0
+        if "lang" in config:
+            self.language = config["lang"]
+        else:
+            self.language = None
 
     def __call__(
         self, wav_content: Union[str, np.ndarray, List[str]], hotwords: str, **kwargs
