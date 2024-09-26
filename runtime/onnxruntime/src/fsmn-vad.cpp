@@ -67,7 +67,6 @@ void FsmnVad::GetInputOutputInfo(
         const std::shared_ptr<Ort::Session> &session,
         std::vector<const char *> *in_names, std::vector<const char *> *out_names,
         Ort::AllocatorWithDefaultOptions *allocator) {
-    Ort::AllocatorWithDefaultOptions allocator;
     // Input info
     int num_nodes = session->GetInputCount();
     in_names->resize(num_nodes);
