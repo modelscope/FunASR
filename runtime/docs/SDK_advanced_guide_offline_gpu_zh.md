@@ -10,6 +10,7 @@ FunASR离线文件转写GPU软件包，提供了一款功能强大的语音离�
 
 | 时间         | 详情                                                | 镜像版本                         | 镜像ID         |
 |------------|---------------------------------------------------|------------------------------|--------------|
+| 2024.09.26 | 修复显存泄漏                  | funasr-runtime-sdk-gpu-0.2.0 | d280bf7e495b |
 | 2024.07.01 | 优化bladedisc模型兼容性问题                  | funasr-runtime-sdk-gpu-0.1.1 | 8875cbf9b99e |
 | 2024.06.27 | 离线文件转写服务GPU版本1.0 发布                  | funasr-runtime-sdk-gpu-0.1.0 | b86066f4d018 |
 
@@ -40,11 +41,11 @@ docker安装失败请参考 [Docker Installation](https://alibaba-damo-academy.g
 
 ```shell
 sudo docker pull \
-  registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-gpu-0.1.1
+  registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-gpu-0.2.0
 mkdir -p ./funasr-runtime-resources/models
 sudo docker run --gpus=all -p 10098:10095 -it --privileged=true \
   -v $PWD/funasr-runtime-resources/models:/workspace/models \
-  registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-gpu-0.1.1
+  registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-gpu-0.2.0
 ```
 
 ### 服务端启动

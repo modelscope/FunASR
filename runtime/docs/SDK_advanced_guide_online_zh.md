@@ -12,6 +12,7 @@ FunASR实时语音听写软件包，集成了实时版本的语音端点检测�
 
 | 时间         | 详情                                | 镜像版本                                 | 镜像ID         |
 |:-----------|:----------------------------------|--------------------------------------|--------------|
+| 2024.09.26 | 修复内存泄漏 | funasr-runtime-sdk-online-cpu-0.1.11 | e51a36c42771 |
 | 2024.05.15 | 适配FunASR 1.0模型结构 | funasr-runtime-sdk-online-cpu-0.1.10 | 1c2adfcff84d |
 | 2024.03.05 | docker镜像支持arm64平台，升级modelscope版本 | funasr-runtime-sdk-online-cpu-0.1.9 | 4a875e08c7a2 |
 | 2024.01.25 | 客户端优化| funasr-runtime-sdk-online-cpu-0.1.7  | 2aa23805572e      |
@@ -39,11 +40,11 @@ docker安装失败请参考 [Docker Installation](https://alibaba-damo-academy.g
 
 ```shell
 sudo docker pull \
-  registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-online-cpu-0.1.10
+  registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-online-cpu-0.1.11
 mkdir -p ./funasr-runtime-resources/models
 sudo docker run -p 10096:10095 -it --privileged=true \
   -v $PWD/funasr-runtime-resources/models:/workspace/models \
-  registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-online-cpu-0.1.10
+  registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-online-cpu-0.1.11
 ```
 
 ### 服务端启动

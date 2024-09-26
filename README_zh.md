@@ -33,6 +33,7 @@ FunASR希望在语音识别的学术研究和工业应用之间架起一座桥�
 
 <a name="最新动态"></a>
 ## 最新动态
+- 2024/09/26: 中文离线文件转写服务 4.6、英文离线文件转写服务 1.7、中文实时语音听写服务 1.11 发布，修复ONNX内存泄漏、支持SensevoiceSmall onnx模型；中文离线文件转写服务GPU 2.0 发布，修复显存泄漏; 详细信息参阅([部署文档](runtime/readme_cn.md))
 - 2024/09/25：新增语音唤醒模型，支持[fsmn_kws](https://modelscope.cn/models/iic/speech_sanm_kws_phone-xiaoyun-commands-online), [fsmn_kws_mt](https://modelscope.cn/models/iic/speech_sanm_kws_phone-xiaoyun-commands-online), [sanm_kws](https://modelscope.cn/models/iic/speech_sanm_kws_phone-xiaoyun-commands-offline), [sanm_kws_streaming](https://modelscope.cn/models/iic/speech_sanm_kws_phone-xiaoyun-commands-online) 4个模型的微调和推理。
 - 2024/07/04：[SenseVoice](https://github.com/FunAudioLLM/SenseVoice) 是一个基础语音理解模型，具备多种语音理解能力，涵盖了自动语音识别（ASR）、语言识别（LID）、情感识别（SER）以及音频事件检测（AED）。
 - 2024/07/01：中文离线文件转写服务GPU版本 1.1发布，优化bladedisc模型兼容性问题；详细信息参阅([部署文档](runtime/readme_cn.md))

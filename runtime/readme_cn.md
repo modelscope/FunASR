@@ -19,6 +19,7 @@ FunASR是由阿里巴巴通义实验室语音团队开源的一款语音识别�
 为了支持不同用户的需求，针对不同场景，准备了不同的图文教程：
 
 ### 最新动态
+- 2024/09/26:   中文离线文件转写服务GPU 2.0 发布，修复显存泄漏，docker镜像版本funasr-runtime-sdk-gpu-0.2.0 (d280bf7e495b)
 - 2024/07/01:   中文离线文件转写服务GPU 1.1 发布，优化bladedisc模型兼容性问题，docker镜像版本funasr-runtime-sdk-gpu-0.1.1 (8875cbf9b99e)
 - 2024/06/27:   中文离线文件转写服务GPU 1.0 发布，支持动态batch，支持多路并发，在长音频测试集上单线RTF为0.0076，多线加速比为1200+（CPU为330+），详见([文档](./docs/benchmark_libtorch_cpp.md))，docker镜像版本funasr-runtime-sdk-gpu-0.1.0 (b86066f4d018)
 
@@ -33,6 +34,7 @@ FunASR是由阿里巴巴通义实验室语音团队开源的一款语音识别�
 为了支持不同用户的需求，针对不同场景，准备了不同的图文教程：
 
 ### 最新动态
+- 2024/09/26:   英文离线文件转写服务 1.7 发布，修复内存泄漏，docker镜像版本funasr-runtime-sdk-en-cpu-0.1.7 (f6c5a7b59eb6)
 - 2024/05/15:   英文离线文件转写服务 1.6 发布，适配FunASR 1.0模型结构，docker镜像版本funasr-runtime-sdk-en-cpu-0.1.6 (84d781d07997)
 - 2024/03/05:   英文离线文件转写服务 1.5 发布，docker镜像支持arm64平台，升级modelscope版本，docker镜像版本funasr-runtime-sdk-en-cpu-0.1.5 (7cca2abc5901)
 - 2024/01/25:   英文离线文件转写服务 1.3 发布，优化vad数据处理方式，大幅降低峰值内存占用，内存泄漏优化，docker镜像版本funasr-runtime-sdk-en-cpu-0.1.3 (c00f9ce7a195)
@@ -51,6 +53,7 @@ FunASR实时语音听写服务软件包，既可以实时地进行语音转文�
 为了支持不同用户的需求，针对不同场景，准备了不同的图文教程：
 
 ### 最新动态
+- 2024/09/26:   中文实时语音听写服务 1.11 发布，修复内存泄漏，docker镜像版本funasr-runtime-sdk-online-cpu-0.1.11 (e51a36c42771)
 - 2024/05/15:   中文实时语音听写服务 1.10 发布，适配FunASR 1.0模型结构，docker镜像版本funasr-runtime-sdk-online-cpu-0.1.10 (1c2adfcff84d)
 - 2024/03/05:   中文实时语音听写服务 1.9 发布，docker镜像支持arm64平台，升级modelscope版本，docker镜像版本funasr-runtime-sdk-online-cpu-0.1.9 (4a875e08c7a2)
 - 2024/01/25:   中文实时语音听写服务 1.7 发布，客户端优化，docker镜像版本funasr-runtime-sdk-online-cpu-0.1.7 (2aa23805572e)
@@ -74,6 +77,7 @@ FunASR实时语音听写服务软件包，既可以实时地进行语音转文�
 为了支持不同用户的需求，针对不同场景，准备了不同的图文教程：
 
 ### 最新动态
+- 2024/09/26:   中文离线文件转写服务 4.6 发布，修复内存泄漏、支持SensevoiceSmall onnx模型，docker镜像版本funasr-runtime-sdk-cpu-0.4.6 (8651c6b8a1ae)
 - 2024/05/15:   中文离线文件转写服务 4.5 发布，适配FunASR 1.0模型结构，docker镜像版本funasr-runtime-sdk-cpu-0.4.5 (058b9882ae67)
 - 2024/03/05:   中文离线文件转写服务 4.4 发布，docker镜像支持arm64平台，升级modelscope版本，docker镜像版本funasr-runtime-sdk-cpu-0.4.4 (2dc87b86dc49)
 - 2024/01/25:   中文离线文件转写服务 4.2 发布，优化vad数据处理方式，大幅降低峰值内存占用，内存泄漏优化，docker镜像版本funasr-runtime-sdk-cpu-0.4.2 (befdc7b179ed)

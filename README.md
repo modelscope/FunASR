@@ -29,6 +29,7 @@
 
 <a name="whats-new"></a>
 ## What's new:
+- 2024/09/26: Offline File Transcription Service 4.6, Offline File Transcription Service of English 1.7，Real-time Transcription Service 1.11 released，fix memory leak & Support the SensevoiceSmall onnx model；File Transcription Service 2.0 GPU released, Fix GPU memory leak; ([docs](runtime/readme.md));
 - 2024/09/25：keyword spotting models are new supported. Supports fine-tuning and inference for four models: [fsmn_kws](https://modelscope.cn/models/iic/speech_sanm_kws_phone-xiaoyun-commands-online), [fsmn_kws_mt](https://modelscope.cn/models/iic/speech_sanm_kws_phone-xiaoyun-commands-online), [sanm_kws](https://modelscope.cn/models/iic/speech_sanm_kws_phone-xiaoyun-commands-offline), [sanm_kws_streaming](https://modelscope.cn/models/iic/speech_sanm_kws_phone-xiaoyun-commands-online).
 - 2024/07/04：[SenseVoice](https://github.com/FunAudioLLM/SenseVoice) is a speech foundation model with multiple speech understanding capabilities, including ASR, LID, SER, and AED.
 - 2024/07/01: Offline File Transcription Service GPU 1.1 released, optimize BladeDISC model compatibility issues; ref to ([docs](runtime/readme.md))
