@@ -16,11 +16,11 @@ class OpenAIIndexDSJsonl(torch.utils.data.Dataset):  # torch.utils.data.Dataset
     def __init__(self, path: str, **kwargs):
         super().__init__()
 
-        self.max_source_length = kwargs.get("max_source_length", 3000)
-        self.min_source_length = kwargs.get("min_source_length", 0)
+        self.max_source_length = kwargs.get("max_source_length", 6000)
+        # self.min_source_length = kwargs.get("min_source_length", 0)
         self.max_target_length = kwargs.get("max_target_length", 2048)
-        self.min_target_length = kwargs.get("min_target_length", 0)
-        self.max_token_length = kwargs.get("max_token_length", 2200)
+        # self.min_target_length = kwargs.get("min_target_length", 0)
+        # self.max_token_length = kwargs.get("max_token_length", 2200)
 
         is_training = kwargs.get("is_training", True)
         if not (path.endswith(".jsonl") or path.endswith(".json")):
@@ -53,15 +53,16 @@ class OpenAIIndexDSJsonl(torch.utils.data.Dataset):  # torch.utils.data.Dataset
                     data = data_dict["messages"]
                     speech_length = data_dict.get("speech_length", -1) // 8
                     text_length = data_dict.get("text_length", 0)
-                    if speech_length > self.max_source_length:
+                    if speech_length * 8 > self.max_source_length:
                         logging.info(
-                            f"speech_length: {speech_length} > {self.max_source_length}, drop it"
+                            f"speech_length: {speech_length*8} > {self.max_source_length}, drop it: {data_dict}"
                         )
                         continue
                     if text_length > self.max_target_length:
+                        logging.info(
+                            f"text_length: {text_length} > {self.max_target_length}, drop it: {data_dict}"
+                        )
                         continue
-
-                    self.max_target_length = kwargs.get("max_target_length", 2048)
 
                     system, user, assistant = [], [], []
                     for i, item in enumerate(data):
