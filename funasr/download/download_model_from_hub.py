@@ -162,6 +162,7 @@ def add_file_root_path(model_or_path: str, file_path_metas: dict, cfg={}):
     if isinstance(file_path_metas, dict):
         if isinstance(cfg, list):
             cfg.append({})
+
         for k, v in file_path_metas.items():
             if isinstance(v, str):
                 p = os.path.join(model_or_path, v)
@@ -186,8 +187,8 @@ def add_file_root_path(model_or_path: str, file_path_metas: dict, cfg={}):
                     if k not in cfg:
                         cfg[k] = []
                     if isinstance(vv, str):
-                        p = os.path.join(model_or_path, v)
-                        file_path_metas[i] = p
+                        p = os.path.join(model_or_path, vv)
+                        # file_path_metas[i] = p
                         if os.path.exists(p):
                             if isinstance(cfg[k], dict):
                                 cfg[k] = p

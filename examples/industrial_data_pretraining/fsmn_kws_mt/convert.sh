@@ -5,16 +5,16 @@ workspace=`pwd`
 local_path_root=${workspace}/modelscope_models
 mkdir -p ${local_path_root}
 
-local_path=${local_path_root}/speech_charctc_kws_phone-xiaoyun
+local_path=${local_path_root}/speech_charctc_kws_phone-xiaoyun_mt
 if [ ! -d "$local_path" ]; then
-    git clone https://www.modelscope.cn/iic/speech_charctc_kws_phone-xiaoyun.git ${local_path}
+    git clone https://www.modelscope.cn/iic/speech_charctc_kws_phone-xiaoyun_mt.git ${local_path}
 fi
 
 export PATH=${local_path}/runtime:$PATH
 export LD_LIBRARY_PATH=${local_path}/runtime:$LD_LIBRARY_PATH
 
 # finetune config file
-config=./conf/fsmn_4e_l10r2_280_200_fdim40_t2602_t4.yaml
+config=./conf/fsmn_4e_l10r2_250_128_fdim80_t2599_t4.yaml
 
 # finetune output checkpoint
 torch_nnet=exp/finetune_outputs/model.pt.avg10

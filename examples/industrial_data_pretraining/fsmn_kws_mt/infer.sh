@@ -3,7 +3,7 @@
 
 # method1, inference from model hub
 
-model="iic/speech_charctc_kws_phone-xiaoyun"
+model="iic/speech_charctc_kws_phone-xiaoyun_mt"
 
 # for more input type, please ref to readme.md
 input="https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/KWS/pos_testset/kws_xiaoyunxiaoyun.wav"
