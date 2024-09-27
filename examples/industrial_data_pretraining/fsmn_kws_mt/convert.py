@@ -49,8 +49,6 @@ def convert_to_kaldi(
     copyfile(network_file, os.path.join(model_dir, 'origin.torch.pt'))
 
     model = FsmnKWSMTConvert(
-        vocab_size=configs['encoder_conf']['output_dim'],
-        vocab_size2=configs['encoder_conf']['output_dim2'],
         encoder='FSMNMTConvert',
         encoder_conf=configs['encoder_conf'],
         ctc_conf=configs['ctc_conf'],
@@ -82,8 +80,6 @@ def convert_to_pytorch(
     model_name="convert.torch.pt"
 ):
     model = FsmnKWSMTConvert(
-        vocab_size=configs['encoder_conf']['output_dim'],
-        vocab_size2=configs['encoder_conf']['output_dim2'],
         encoder='FSMNMTConvert',
         encoder_conf=configs['encoder_conf'],
         ctc_conf=configs['ctc_conf'],

@@ -27,19 +27,19 @@ test_sets="test"
 # model_name from model_hub, or model_dir in local path
 
 ## option 1, download model automatically, unsupported currently
-model_name_or_model_dir="iic/speech_charctc_kws_phone-xiaoyun"
+model_name_or_model_dir="iic/speech_charctc_kws_phone-xiaoyun_mt"
 
 ## option 2, download model by git
 local_path_root=${workspace}/modelscope_models
 model_name_or_model_dir=${local_path_root}/${model_name_or_model_dir}
 if [ ! -d $model_name_or_model_dir ]; then
   mkdir -p ${model_name_or_model_dir}
-  git clone https://www.modelscope.cn/iic/speech_charctc_kws_phone-xiaoyun.git ${model_name_or_model_dir}
+  git clone https://www.modelscope.cn/iic/speech_charctc_kws_phone-xiaoyun_mt.git ${model_name_or_model_dir}
 fi
 
 config=fsmn_4e_l10r2_250_128_fdim80_t2599_t4.yaml
 token_list=${model_name_or_model_dir}/funasr/tokens_2599.txt
-token_list2=${model_name_or_model_dir}/funasr/tokens_xiaoyun_char.txt
+token_list2=${model_name_or_model_dir}/funasr/tokens_xiaoyun.txt
 lexicon_list=${model_name_or_model_dir}/funasr/lexicon.txt
 cmvn_file=${model_name_or_model_dir}/funasr/am.mvn.dim80_l2r2
 init_param="${model_name_or_model_dir}/funasr/basetrain_fsmn_4e_l10r2_250_128_fdim80_t2599.pt"
@@ -141,10 +141,8 @@ if [ ${stage} -le 3 ] && [ ${stop_stage} -ge 3 ]; then
           --config-path="${output_dir}" \
           --config-name="config.yaml" \
           ++init_param="${output_dir}/${inference_checkpoint}" \
-          ++tokenizer_conf.token_list="${token_list}" \
-          ++tokenizer_conf.seg_dict="${lexicon_list}" \
-          ++tokenizer2_conf.token_list="${token_list2}" \
-          ++tokenizer2_conf.seg_dict="${lexicon_list}" \
+          ++token_lists='['''${token_list}''', '''${token_list2}''']' \
+          ++seg_dicts='['''${lexicon_list}''', '''${lexicon_list}''']' \
           ++frontend_conf.cmvn_file="${cmvn_file}" \
           ++keywords="\"$keywords_string"\" \
           ++input="${_logdir}/keys.${JOB}.scp" \
