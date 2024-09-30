@@ -84,9 +84,6 @@ def main(**kwargs):
         dist.init_process_group(
             backend=kwargs.get("backend", "nccl"),
             init_method="env://",
-            find_unused_parameters=kwargs.get("train_conf", {}).get(
-                "find_unused_parameters", False
-            ),
         )
         torch.cuda.set_device(local_rank)
 
