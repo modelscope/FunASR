@@ -587,10 +587,10 @@ class SenseVoicePitchDataset(torch.utils.data.Dataset):
                 elif f0.shape < speech.shape[1]:
                     last_value = f0[-1]
                     f0 =  torch.cat([f0, last_value.repeat(speech.shape[1] - f0.shape)])
-                f0_tag = torch.Tensor([1], dtype=torch.int32)
+                f0_tag = torch.tensor([1], dtype=torch.int32)
             else:
                 f0 = torch.tensor([0.0], dtype=torch.float32)
-                f0_tag = torch.Tensor([0], dtype=torch.int32)
+                f0_tag = torch.tensor([0], dtype=torch.int32)
             
             output = {
                 "speech": speech[0, :, :],
