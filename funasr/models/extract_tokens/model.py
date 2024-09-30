@@ -1088,6 +1088,8 @@ class SenseVoiceQuantizedEncoderPitch(nn.Module):
     def build_quantizer(self, vq_config):
         if vq_config is None:
             return None
+        from omegaconf import OmegaConf, DictConfig
+        vq_config = OmegaConf.to_container(vq_config)
         name = vq_config.pop("name", "costume_quantizer")
         if name == "costume_quantizer":
             from funasr.models.sense_voice.quantizer.costume_quantizer import CostumeQuantizer
@@ -1236,6 +1238,8 @@ class SenseVoiceQuantizedEncoder(nn.Module):
     def build_quantizer(self, vq_config):
         if vq_config is None:
             return None
+        from omegaconf import OmegaConf, DictConfig
+        vq_config = OmegaConf.to_container(vq_config)
         name = vq_config.pop("name", "costume_quantizer")
         if name == "costume_quantizer":
             from funasr.models.sense_voice.quantizer.costume_quantizer import CostumeQuantizer

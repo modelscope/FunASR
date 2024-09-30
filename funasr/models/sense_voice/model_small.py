@@ -2027,7 +2027,7 @@ class SenseVoiceLPitch(nn.Module):
         if self.activation_checkpoint:
             from torch.utils.checkpoint import checkpoint
 
-            encoder_out, encoder_out_lens = checkpoint(
+            encoder_out, encoder_f0_out, encoder_out_lens = checkpoint(
                 self.encode, speech, speech_lengths, use_reentrant=False
             )
         else:
