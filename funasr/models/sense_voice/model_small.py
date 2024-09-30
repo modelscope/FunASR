@@ -1951,8 +1951,8 @@ class SenseVoiceL(nn.Module):
     #
     #     return results, meta_data
 
-
-class SenseVoiceLF0Pred(nn.Module):
+@tables.register("model_classes", "SenseVoiceLPitch")
+class SenseVoiceLPitch(nn.Module):
     def __init__(self, *args, **kwargs):
         super().__init__()
 
