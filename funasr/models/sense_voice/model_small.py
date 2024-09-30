@@ -2055,7 +2055,7 @@ class SenseVoiceLPitch(nn.Module):
         return loss, stats, weight
     
     def _cal_f0_loss(self, encoder_f0_out, speech_lengths, f0, f0_tag):
-        if self.encoder.downsample_rate == 4:
+        if self.model.encoder.downsample_rate == 4:
             olens = (
                 1
                 + (speech_lengths - self.conv1.kernel_size[0] + 2 * self.conv1.padding[0])
