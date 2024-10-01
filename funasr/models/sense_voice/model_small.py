@@ -2058,16 +2058,16 @@ class SenseVoiceLPitch(nn.Module):
         if self.model.encoder.downsample_rate == 4:
             olens = (
                 1
-                + (speech_lengths - self.conv1.kernel_size[0] + 2 * self.conv1.padding[0])
-                // self.conv1.stride[0]
+                + (speech_lengths - self.model.encoder.conv1.kernel_size[0] + 2 * self.model.encoder.conv1.padding[0])
+                // self.model.encoder.conv1.stride[0]
             )
             f0 = f0[::2][::2]
         else:
             olens = speech_lengths
         olens = (
             1
-            + (olens - self.conv2.kernel_size[0] + 2 * self.conv2.padding[0])
-            // self.conv2.stride[0]
+            + (olens - self.model.encoder.conv2.kernel_size[0] + 2 * self.model.encoder.conv2.padding[0])
+            // self.model.encoder.conv2.stride[0]
         )
         # olens = torch.clamp(olens, max=encoder_f0_out.shape[1])
         padding_mask = (make_pad_mask(olens)[:, :]).to(torch.bool).to(encoder_f0_out.device)
