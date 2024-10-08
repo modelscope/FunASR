@@ -84,7 +84,8 @@ def ts_prediction_lfr6_standard(
         timestamp_list.append([_end * TIME_RATE, num_frames * TIME_RATE])
         new_char_list.append("<sil>")
     else:
-        timestamp_list[-1][1] = num_frames * TIME_RATE
+        if len(timestamp_list)>0:
+            timestamp_list[-1][1] = num_frames * TIME_RATE
     if vad_offset:  # add offset time in model with vad
         for i in range(len(timestamp_list)):
             timestamp_list[i][0] = timestamp_list[i][0] + vad_offset / 1000.0
