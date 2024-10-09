@@ -125,9 +125,11 @@ def abbr_dispose(words: List[Any], time_stamp: List[List] = None) -> List[Any]:
             if time_stamp is not None:
                 end = time_stamp[ts_nums[num]][1]
                 ts_lists.append([begin, end])
-        else:
-            word_lists.append(words[num])
-            if time_stamp is not None and words[num] != " ":
+        else:            
+            # length of time_stamp may not equal to length of words because of the (somehow improper) threshold set in timestamp_tools.py line 46, e.g., length of time_stamp can be zero but length of words is not.
+            # Moreover, move "word_lists.append(words[num])" into if clause, to keep length of word_lists and length of ts_lists equal.
+            if time_stamp is not None and ts_nums[num]<len(time_stamp) and words[num] != " ":
+                word_lists.append(words[num])
                 begin = time_stamp[ts_nums[num]][0]
                 end = time_stamp[ts_nums[num]][1]
                 ts_lists.append([begin, end])
