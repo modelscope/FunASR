@@ -72,7 +72,7 @@ torchrun $DISTRIBUTED_ARGS \
 ++train_conf.keep_nbest_models=100 \
 ++train_conf.avg_nbest_model=100 \
 ++train_conf.use_deepspeed=false \
-++train_conf.deepspeed_config="/nfs/zhifu.gzf/codebase/FunASR/examples/deepspeed_conf/ds_stage1.json" \
+++train_conf.deepspeed_config="${workspace}/../../deepspeed_conf/ds_stage1.json" \
 ++init_param=${init_param} \
 ++output_dir="${output_dir}" 2>&1 | tee ${log_file}
 
