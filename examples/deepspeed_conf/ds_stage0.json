@@ -18,7 +18,7 @@
   },
   "zero_force_ds_cpu_optimizer": false,
   "zero_optimization": {
-    "stage": 1,
+    "stage": 0,
     "offload_optimizer": {
       "device": "none",
       "pin_memory": true
