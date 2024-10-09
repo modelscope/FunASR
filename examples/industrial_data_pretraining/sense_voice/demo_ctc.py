@@ -13,6 +13,7 @@ input_file = (
 
 model = AutoModel(
     model=model_dir,
+    device="cuda:0",
 )
 
 res = model.generate(

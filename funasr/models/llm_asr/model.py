@@ -860,7 +860,7 @@ class LLMASR3(LLMASR2):
         return encoder_out, encoder_out_lens
 
 
-@tables.register("model_classes", "LLMASR4")
+# @tables.register("model_classes", "LLMASR4")
 class LLMASR4(nn.Module):
     """ """
 
@@ -1339,7 +1339,7 @@ class LLMASR4(nn.Module):
 
         # audio encoder
         speech = batch["speech"]
-        
+
         if len(speech) > 0:
             if "audio_embedding" in kwargs and "audio_embedding_lens" in kwargs:
                 encoder_out = kwargs["audio_embedding"]
@@ -2303,6 +2303,7 @@ class LLMASRXvecSlotTTS(nn.Module):
         vocoder_conf = kwargs.get("vocoder_conf", None)
         self.vocoder = self.build_vocoder(name=vocoder_name, conf=vocoder_conf).to(torch.float32)
         import lameenc
+
         self.mp3_encoder = lameenc.Encoder()
         self.mp3_encoder.set_bit_rate(128)
         self.mp3_encoder.set_in_sample_rate(22050)
@@ -3023,7 +3024,8 @@ class LLMASRXvecSlotTTS(nn.Module):
     @torch.no_grad()
     def generate_speech_one_step(
         self,
-        text: str, preds: str,
+        text: str,
+        preds: str,
         last_t_size,
         llm_cur_kv_cache,
         llm_cur_kv_cache_len,
@@ -3051,14 +3053,14 @@ class LLMASRXvecSlotTTS(nn.Module):
                 preds = self.split_characters_and_words(normed_preds[:str_idx])
                 idx = len(preds)
                 preds.append(normed_preds[str_idx])
-                preds.extend(self.split_characters_and_words(normed_preds[str_idx+1:]))
+                preds.extend(self.split_characters_and_words(normed_preds[str_idx + 1 :]))
                 break
 
         _text = f"<|endofprompt|><|sil|>{text+normed_preds}" + ("<|sil|>" if is_last else "")
         para_end = False
         if idx > -1 and not is_last:
-            pre_part = "".join(preds[:idx+1])
-            if len(self.tts_tokenizer_warpper(text+pre_part)) >= para_phone_len:
+            pre_part = "".join(preds[: idx + 1])
+            if len(self.tts_tokenizer_warpper(text + pre_part)) >= para_phone_len:
                 _text = f"<|endofprompt|><|sil|>{text+pre_part}<|sil|>"
                 para_end = True
 
@@ -3109,7 +3111,7 @@ class LLMASRXvecSlotTTS(nn.Module):
                 last_t_size = t_size
 
         if para_end:
-            text = "".join(preds[idx + 1:])
+            text = "".join(preds[idx + 1 :])
             last_t_size = 0
             prompt_token, prompt_audio = [None, None], [None, None]
             wav = torch.cat([wav, torch.zeros([1, 2205]).to(wav)], dim=1)
@@ -3121,17 +3123,18 @@ class LLMASRXvecSlotTTS(nn.Module):
 
     @torch.no_grad()
     def simple_generate_speech_one_step(
-            self,
-            text: str, preds: str,
-            last_t_size,
-            llm_cur_kv_cache,
-            llm_cur_kv_cache_len,
-            prompt_token,
-            prompt_audio,
-            tts_text_chunk_size,
-            chunk_idx,
-            is_last,
-            para_phone_len=200,
+        self,
+        text: str,
+        preds: str,
+        last_t_size,
+        llm_cur_kv_cache,
+        llm_cur_kv_cache_len,
+        prompt_token,
+        prompt_audio,
+        tts_text_chunk_size,
+        chunk_idx,
+        is_last,
+        para_phone_len=200,
     ):
         device = llm_cur_kv_cache.device
         _text = f"<|endofprompt|><|sil|>{text}" + ("<|sil|>" if is_last else "")
@@ -3194,6 +3197,7 @@ class LLMASRXvecSlotTTS(nn.Module):
         if is_last:
             mp3_data += self.mp3_encoder.flush()
             import lameenc
+
             self.mp3_encoder = lameenc.Encoder()
             self.mp3_encoder.set_bit_rate(128)
             self.mp3_encoder.set_in_sample_rate(22050)
@@ -3227,7 +3231,8 @@ class LLMASRXvecSlotTTS(nn.Module):
 
             # new_text = new_text + _resp
             rt_value, states = self.generate_speech_one_step(
-                new_text, _resp,
+                new_text,
+                _resp,
                 last_t_size,
                 llm_cur_kv_cache,
                 llm_cur_kv_cache_len,
@@ -3288,7 +3293,8 @@ class LLMASRXvecSlotTTS(nn.Module):
         # new_text = new_text + preds
         with torch.cuda.amp.autocast(enabled=False, dtype=torch.float32):
             rt_value, states_ret = self.generate_speech_one_step(
-                new_text, preds,
+                new_text,
+                preds,
                 last_t_size,
                 llm_cur_kv_cache,
                 llm_cur_kv_cache_len,
@@ -3311,14 +3317,14 @@ class LLMASRXvecSlotTTS(nn.Module):
         return cur_token, feat, wav
 
     def simple_streaming_generate_speech(
-            self,
-            preds,
-            states,
-            llm_cur_kv_cache,
-            llm_cur_kv_cache_len,
-            is_last=False,
-            text_chunk_size=8,
-            format="mp3",
+        self,
+        preds,
+        states,
+        llm_cur_kv_cache,
+        llm_cur_kv_cache_len,
+        is_last=False,
+        text_chunk_size=8,
+        format="mp3",
     ):
 
         new_text, last_t_size, prompt_token, prompt_audio, chunk_idx = (
@@ -3331,7 +3337,8 @@ class LLMASRXvecSlotTTS(nn.Module):
         # new_text = new_text + preds
         with torch.cuda.amp.autocast(enabled=False, dtype=torch.float32):
             rt_value, states_ret = self.simple_generate_speech_one_step(
-                preds, "",
+                preds,
+                "",
                 last_t_size,
                 llm_cur_kv_cache,
                 llm_cur_kv_cache_len,
