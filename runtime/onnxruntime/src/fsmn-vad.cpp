@@ -72,38 +72,14 @@ void FsmnVad::GetInputOutputInfo(
     in_names->resize(num_nodes);
     for (int i = 0; i < num_nodes; ++i) {
         std::unique_ptr<char, Ort::detail::AllocatedFree> name = session->GetInputNameAllocated(i, allocator);
-        Ort::TypeInfo type_info = session->GetInputTypeInfo(i);
-        auto tensor_info = type_info.GetTensorTypeAndShapeInfo();
-        ONNXTensorElementDataType type = tensor_info.GetElementType();
-        std::vector<int64_t> node_dims = tensor_info.GetShape();
-        std::stringstream shape;
-        for (auto j: node_dims) {
-            shape << j;
-            shape << " ";
-        }
-        // LOG(INFO) << "\tInput " << i << " : name=" << name.get() << " type=" << type
-        //           << " dims=" << shape.str();
         (*in_names)[i] = name.get();
-        name.release();
     }
     // Output info
     num_nodes = session->GetOutputCount();
     out_names->resize(num_nodes);
     for (int i = 0; i < num_nodes; ++i) {
         std::unique_ptr<char, Ort::detail::AllocatedFree> name = session->GetOutputNameAllocated(i, allocator);
-        Ort::TypeInfo type_info = session->GetOutputTypeInfo(i);
-        auto tensor_info = type_info.GetTensorTypeAndShapeInfo();
-        ONNXTensorElementDataType type = tensor_info.GetElementType();
-        std::vector<int64_t> node_dims = tensor_info.GetShape();
-        std::stringstream shape;
-        for (auto j: node_dims) {
-            shape << j;
-            shape << " ";
-        }
-        // LOG(INFO) << "\tOutput " << i << " : name=" << name.get() << " type=" << type
-        //           << " dims=" << shape.str();
         (*out_names)[i] = name.get();
-        name.release();
     }
 }
 
