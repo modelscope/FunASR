@@ -77,6 +77,7 @@ def export_dynamic_axes(self):
             0: "batch_size",
         },
         "logits": {0: "batch_size", 1: "logits_length"},
+        "token_num": {0: "batch_size"}
     }
 
 
