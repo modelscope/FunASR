@@ -34,6 +34,7 @@ public:
     std::shared_ptr<Ort::Session> vad_session_ = nullptr;
     Ort::Env env_;
     Ort::SessionOptions session_options_;
+    vector<string> m_strInputNames, m_strOutputNames;
     std::vector<const char *> vad_in_names_;
     std::vector<const char *> vad_out_names_;
     std::vector<std::vector<float>> in_cache_;
@@ -53,10 +54,6 @@ private:
 
     void ReadModel(const char* vad_model);
     void LoadConfigFromYaml(const char* filename);
-
-    static void GetInputOutputInfo(
-            const std::shared_ptr<Ort::Session> &session,
-            std::vector<const char *> *in_names, std::vector<const char *> *out_names);
 
     void FbankKaldi(float sample_rate, std::vector<std::vector<float>> &vad_feats,
                     std::vector<float> &waves);

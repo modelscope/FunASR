@@ -45,26 +45,8 @@ void Paraformer::InitAsr(const std::string &am_model, const std::string &am_cmvn
         exit(-1);
     }
 
-    string strName;
-    GetInputName(m_session_.get(), strName);
-    m_strInputNames.push_back(strName.c_str());
-    GetInputName(m_session_.get(), strName,1);
-    m_strInputNames.push_back(strName);
-    if (use_hotword) {
-        GetInputName(m_session_.get(), strName, 2);
-        m_strInputNames.push_back(strName);
-    }
-    
-    size_t numOutputNodes = m_session_->GetOutputCount();
-    for(int index=0; index<numOutputNodes; index++){
-        GetOutputName(m_session_.get(), strName, index);
-        m_strOutputNames.push_back(strName);
-    }
-
-    for (auto& item : m_strInputNames)
-        m_szInputNames.push_back(item.c_str());
-    for (auto& item : m_strOutputNames)
-        m_szOutputNames.push_back(item.c_str());
+    GetInputNames(m_session_.get(), m_strInputNames, m_szInputNames);
+    GetOutputNames(m_session_.get(), m_strOutputNames, m_szOutputNames);
     vocab = new Vocab(token_file.c_str());
 	phone_set_ = new PhoneSet(token_file.c_str());
     LoadCmvn(am_cmvn.c_str());
@@ -162,28 +144,30 @@ void Paraformer::InitAsr(const std::string &am_model, const std::string &en_mode
         exit(-1);
     }
 
-    string strName;
-    GetInputName(m_session_.get(), strName);
-    m_strInputNames.push_back(strName.c_str());
-    GetInputName(m_session_.get(), strName,1);
-    m_strInputNames.push_back(strName);
+    // string strName;
+    // GetInputName(m_session_.get(), strName);
+    // m_strInputNames.push_back(strName.c_str());
+    // GetInputName(m_session_.get(), strName,1);
+    // m_strInputNames.push_back(strName);
 
-    if (use_hotword) {
-        GetInputName(m_session_.get(), strName, 2);
-        m_strInputNames.push_back(strName);
-    }
+    // if (use_hotword) {
+    //     GetInputName(m_session_.get(), strName, 2);
+    //     m_strInputNames.push_back(strName);
+    // }
     
-    // support time stamp
-    size_t numOutputNodes = m_session_->GetOutputCount();
-    for(int index=0; index<numOutputNodes; index++){
-        GetOutputName(m_session_.get(), strName, index);
-        m_strOutputNames.push_back(strName);
-    }
+    // // support time stamp
+    // size_t numOutputNodes = m_session_->GetOutputCount();
+    // for(int index=0; index<numOutputNodes; index++){
+    //     GetOutputName(m_session_.get(), strName, index);
+    //     m_strOutputNames.push_back(strName);
+    // }
 
-    for (auto& item : m_strInputNames)
-        m_szInputNames.push_back(item.c_str());
-    for (auto& item : m_strOutputNames)
-        m_szOutputNames.push_back(item.c_str());
+    // for (auto& item : m_strInputNames)
+    //     m_szInputNames.push_back(item.c_str());
+    // for (auto& item : m_strOutputNames)
+    //     m_szOutputNames.push_back(item.c_str());
+    GetInputNames(m_session_.get(), m_strInputNames, m_szInputNames);
+    GetOutputNames(m_session_.get(), m_strOutputNames, m_szOutputNames);
 }
 
 void Paraformer::InitLm(const std::string &lm_file, 
