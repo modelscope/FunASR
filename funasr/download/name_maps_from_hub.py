@@ -15,6 +15,7 @@ name_maps_ms = {
     "emotion2vec_plus_large": "iic/emotion2vec_plus_large",
     "emotion2vec_plus_base": "iic/emotion2vec_plus_base",
     "emotion2vec_plus_seed": "iic/emotion2vec_plus_seed",
+    "Whisper-large-v3-turbo": "iic/Whisper-large-v3-turbo",
 }
 
 name_maps_hf = {
@@ -36,6 +37,7 @@ name_maps_hf = {
     "iic/emotion2vec_plus_base": "emotion2vec/emotion2vec_plus_base",
     "emotion2vec_plus_seed": "emotion2vec/emotion2vec_plus_seed",
     "iic/emotion2vec_plus_seed": "emotion2vec/emotion2vec_plus_seed",
+    "Whisper-large-v3-turbo": "iic/Whisper-large-v3-turbo",
 }
 
 name_maps_openai = {
@@ -51,4 +53,5 @@ name_maps_openai = {
     "Whisper-large-v2": "large-v2",
     "Whisper-large-v3": "large-v3",
     "Whisper-large": "large",
+    "Whisper-large-v3-turbo": "turbo",
 }
