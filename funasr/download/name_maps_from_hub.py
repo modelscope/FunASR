@@ -15,6 +15,7 @@ name_maps_ms = {
     "emotion2vec_plus_large": "iic/emotion2vec_plus_large",
     "emotion2vec_plus_base": "iic/emotion2vec_plus_base",
     "emotion2vec_plus_seed": "iic/emotion2vec_plus_seed",
+    "Whisper-large-v3-turbo": "iic/Whisper-large-v3-turbo",
 }
 
 name_maps_hf = {
