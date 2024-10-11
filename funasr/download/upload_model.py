@@ -54,7 +54,7 @@ def main_hydra(cfg: DictConfig):
             chinese_name=model_name,
         )
     except Exception as e:
-        print(f"Create_model failed! {str(e)}, {traceback.format_exc()}")
+        print(f"Create_model failed! {str(e)}")
 
     print(f"model url: https://modelscope.cn/models/{model_id}")
 
@@ -70,7 +70,7 @@ def main_hydra(cfg: DictConfig):
 """
 TOKEN="fadd1abb-4df6-4807-9051-5ab01ac81071"
 model_id="iic/Whisper-large-v3-turbo"
-model_dir="/Users/zhifu/Downloads/Whisper-large-v3-turbo"
+model_dir="/cpfs_speech/zhifu.gzf/init_model/Whisper-large-v3-turbo"
 
 python -m funasr.download.upload_model ++TOKEN=${TOKEN} ++model_id=${model_id} ++model_dir=${model_dir}
 """
