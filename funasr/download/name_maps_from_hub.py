@@ -47,8 +47,9 @@ name_maps_openai = {
     "Whisper-small": "small",
     "Whisper-medium.en": "medium.en",
     "Whisper-medium": "medium",
+    "Whisper-large": "large",
     "Whisper-large-v1": "large-v1",
     "Whisper-large-v2": "large-v2",
     "Whisper-large-v3": "large-v3",
-    "Whisper-large": "large",
+    "Whisper-large-v3-turbo": "turbo",
 }
