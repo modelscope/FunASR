@@ -7,12 +7,12 @@ audio_encoder_conf:
   hub: ms
   freeze: true
   freeze_layer_num: -1
-llm: Qwen2.5-14B-Instruct
+llm: Qwen2.5-7B-Instruct
 llm_conf:
   hub: hf
   freeze: true
   llm_dtype: bf16
-  init_param_path: /cpfs_speech/zhifu.gzf/init_model/qwen/Qwen2.5-14B-Instruct
+  init_param_path: /cpfs_speech/zhifu.gzf/init_model/qwen/Qwen2.5-7B-Instruct
   use_lora: true
   lora_conf:
     task_type: "CAUSAL_LM"
