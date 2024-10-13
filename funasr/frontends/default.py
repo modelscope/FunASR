@@ -20,6 +20,7 @@ from funasr.register import tables
 
 
 @tables.register("frontend_classes", "DefaultFrontend")
+@tables.register("frontend_classes", "EspnetFrontend")
 class DefaultFrontend(nn.Module):
     """Conventional frontend structure for ASR.
     Stft -> WPE -> MVDR-Beamformer -> Power-spec -> Mel-Fbank -> CMVN
