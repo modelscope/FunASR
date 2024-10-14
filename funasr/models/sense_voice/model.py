@@ -555,7 +555,7 @@ class SenseVoiceEncoderSmall(nn.Module):
         ilens: torch.Tensor,
     ):
         """Embed positions in tensor."""
-        maxlen = torch.tensor(xs_pad.shape[1]).to(ilens.device)
+        maxlen = xs_pad.shape[1]
         masks = sequence_mask(ilens, maxlen = maxlen, device=ilens.device)[:, None, :]
 
         xs_pad *= self.output_size() ** 0.5
