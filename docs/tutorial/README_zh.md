@@ -442,22 +442,21 @@ print(result)
 
 ### 查看注册表
 
-```python
+```plaintext
 from funasr.register import tables
 
 tables.print()
 ```
 
-支持查看指定类型的注册表：`tables.print("model")`
+支持查看指定类型的注册表：\`tables.print("model")\`
 
-
-### 注册新模型
+### 注册模型
 
 ```python
 from funasr.register import tables
 
-@tables.register("model_classes", "MinMo_S2T")
-class MinMo_S2T(nn.Module):
+@tables.register("model_classes", "SenseVoiceSmall")
+class SenseVoiceSmall(nn.Module):
   def __init__(*args, **kwargs):
     ...
 
@@ -479,10 +478,14 @@ class MinMo_S2T(nn.Module):
 
 ```
 
-然后在config.yaml中指定新注册模型
+在需要注册的类名前加上 `@tables.register("model_classes","SenseVoiceSmall")`，即可完成注册，类需要实现有：__init__，forward，inference方法。
 
-```yaml
-model: MinMo_S2T
+完整代码：[https://github.com/modelscope/FunASR/blob/main/funasr/models/sense\_voice/model.py#L443](https://github.com/modelscope/FunASR/blob/main/funasr/models/sense_voice/model.py#L443)
+
+注册完成后，在config.yaml中指定新注册模型，即可实现对模型的定义
+
+```python
+model: SenseVoiceSmall
 model_conf:
   ...
 ```
