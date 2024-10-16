@@ -7,6 +7,7 @@ FunASR开源了大量在工业数据上预训练模型，您可以在 [模型许
  <a href="#模型推理"> 模型推理 </a>   
 ｜<a href="#模型训练与测试"> 模型训练与测试 </a>
 ｜<a href="#模型导出与测试"> 模型导出与测试 </a>
+｜<a href="#新模型注册教程"> 新模型注册教程 </a>
 </h4>
 </div>
 
@@ -434,3 +435,57 @@ print(result)
 ```
 
 更多例子请参考 [样例](https://github.com/alibaba-damo-academy/FunASR/tree/main/runtime/python/onnxruntime)
+
+<a name="新模型注册教程"></a>
+## 新模型注册教程
+
+
+### 查看注册表
+
+```python
+from funasr.register import tables
+
+tables.print()
+```
+
+支持查看指定类型的注册表：`tables.print("model")`
+
+
+### 注册新模型
+
+```python
+from funasr.register import tables
+
+@tables.register("model_classes", "MinMo_S2T")
+class MinMo_S2T(nn.Module):
+  def __init__(*args, **kwargs):
+    ...
+
+  def forward(
+      self,
+      **kwargs,
+  ):  
+
+  def inference(
+      self,
+      data_in,
+      data_lengths=None,
+      key: list = None,
+      tokenizer=None,
+      frontend=None,
+      **kwargs,
+  ):
+    ...
+
+```
+
+然后在config.yaml中指定新注册模型
+
+```yaml
+model: MinMo_S2T
+model_conf:
+  ...
+```
+
+
+[更多详细教程文档](https://github.com/alibaba-damo-academy/FunASR/docs/tutorial/Tables_zh.md)
