@@ -25,12 +25,12 @@ llm_conf:
       - v_proj
 audio_adaptor: Transformer
 audio_adaptor_conf:
-  freeze: true
   downsample_rate: 2
   ffn_dim: 2048
-  llm_dim: 5120
+  llm_dim: 3584
   encoder_dim: 1280
-  n_layer: 1
+  n_layer: 2
+  freeze: true
 frontend: WhisperFrontend
 frontend_conf:
   fs: 16000
@@ -53,14 +53,13 @@ train_conf:
   use_bf16: false
   use_deepspeed: false
   deepspeed_config: /nfs/zhifu.gzf/codebase/FunASR/examples/deepspeed_conf/ds_stage1.json
-  save_init_model: false
 optim: adamw
 optim_conf:
-  lr: 0.00003
+  lr: 0.00005
   weight_decay: 0.0
 scheduler: warmuplr
 scheduler_conf:
-  warmup_steps: 10000
+  warmup_steps: 200
 dataset: OpenAIDatasetMultiTurn
 dataset_conf:
   index_ds: OpenAIIndexDSJsonl
@@ -84,4 +83,3 @@ tokenizer_conf:
   init_param_path: ${llm_conf.init_param_path}
 enable_tf32: true
 debug: false
-excludes: llm.
