@@ -95,7 +95,9 @@ Recommendations:
 When you input long audio and encounter Out Of Memory (OOM) issues, since memory usage tends to increase quadratically with audio length, consider the following three scenarios:
 
 a) At the beginning of inference, memory usage primarily depends on `batch_size_s`. Appropriately reducing this value can decrease memory usage.
+
 b) During the middle of inference, when encountering long audio segments cut by VAD and the total token count is less than `batch_size_s`, yet still facing OOM, you can appropriately reduce `batch_size_threshold_s`. If the threshold is exceeded, the batch size is forced to 1.
+
 c) Towards the end of inference, if long audio segments cut by VAD have a total token count less than `batch_size_s` and exceed the `threshold` batch_size_threshold_s, forcing the batch size to 1 and still facing OOM, you may reduce `max_single_segment_time` to shorten the VAD audio segment length.
 
 #### Speech Recognition (Streaming)
