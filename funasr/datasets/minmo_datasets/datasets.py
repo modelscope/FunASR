@@ -6,6 +6,7 @@ import traceback
 from funasr.register import tables
 from funasr.utils.load_utils import extract_fbank, load_audio_text_image_video
 import math
+import numpy as np
 
 
 @tables.register("dataset_classes", "OpenAIDataset")
@@ -2048,9 +2049,9 @@ class MinMo_T2S(torch.utils.data.Dataset):
         return len(self.index_ds)
 
     def __getitem__(self, index):
-        # import pdb
-        #
-        # pdb.set_trace()
+        import pdb
+
+        pdb.set_trace()
 
         output = None
 
@@ -2178,6 +2179,7 @@ class MinMo_T2S(torch.utils.data.Dataset):
                         if "spk_emb":
                             spk_emb_path = meta["spk_emb"]
                             sub_spk_emb = np.load(spk_emb_path)
+                            sub_spk_emb = torch.from_numpy(sub_spk_emb)
                             spk_emb.append(sub_spk_emb)
                             spk_emb_len.append(len(sub_spk_emb))
 
@@ -2199,7 +2201,7 @@ class MinMo_T2S(torch.utils.data.Dataset):
                         )
                         if sub_str.startswith("!"):
                             sub_token_codec = np.load(sub_str[1:])
-                            codec_i = torch.from_numpy(sub_token_codec, dtype=torch.int64)
+                            codec_i = torch.from_numpy(sub_token_codec)
                             codec_i_len = len(sub_token_codec)
                             fake_token = [0] * codec_i_len
                             target_ids += fake_token
@@ -2260,6 +2262,9 @@ class MinMo_T2S(torch.utils.data.Dataset):
             if len(audio) > 0:
                 output["audio"] = audio
                 output["audio_len"] = audio_len  # torch.tensor(audio_len, dtype=torch.int32)
+            if len(spk_emb) > 0:
+                output["spk_emb"] = spk_emb
+                output["spk_emb_len"] = torch.tensor(spk_emb_len, dtype=torch.int32)
             # if len(input_mask) > 0:
             #     output["input_mask"] = input_mask
             #     output["input_mask_beg"] = input_mask_beg

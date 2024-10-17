@@ -30,9 +30,9 @@ from funasr.train_utils.set_all_random_seed import set_all_random_seed
 import traceback
 from pydub import AudioSegment
 from io import BytesIO
+import numpy as np
 
 try:
-    import numpy as np
     from scipy.io import savemat
 except:
     pass
@@ -438,7 +438,9 @@ class MinMo_S2T(nn.Module):
                             sub_str = audio
                         try:
                             time1 = time.perf_counter()
-                            data_src = load_audio_text_image_video(sub_str, fs=frontend.fs)
+                            data_src = load_audio_text_image_video(
+                                sub_str, fs=frontend.fs, **kwargs
+                            )
                             time2 = time.perf_counter()
                             meta_data["load_data"] = f"{time2 - time1:0.3f}"
                         except Exception as e:
