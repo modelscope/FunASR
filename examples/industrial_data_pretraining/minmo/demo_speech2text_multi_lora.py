@@ -60,6 +60,7 @@ model = AutoModel(
     llm_dtype="bf16",
     llm_kwargs=llm_kwargs,
     llm_conf=llm_conf,
+    use_ffmpeg=True,
 )
 
 
