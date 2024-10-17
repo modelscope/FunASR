@@ -31,6 +31,8 @@ import traceback
 from pydub import AudioSegment
 from io import BytesIO
 import numpy as np
+from torch.nn import BCEWithLogitsLoss, CrossEntropyLoss, MSELoss
+
 
 try:
     from scipy.io import savemat
@@ -699,8 +701,8 @@ class MinMo_S2T(nn.Module):
         return results, meta_data
 
 
-@tables.register("model_classes", "MinMo_S2S")
-class MinMo_S2S(nn.Module):
+@tables.register("model_classes", "MinMo_T2S")
+class MinMo_T2S(nn.Module):
     """ """
 
     def __init__(
@@ -717,56 +719,6 @@ class MinMo_S2S(nn.Module):
     ):
 
         super().__init__()
-
-        # audio encoder
-        hub = audio_encoder_conf.get("hub", None)
-        self.audio_encoder_activation_checkpoint = audio_encoder_conf.get(
-            "activation_checkpoint", False
-        )
-        if hub == "ms":
-            from funasr import AutoModel
-
-            model = AutoModel(model=audio_encoder, model_revision="master")
-            audio_encoder_output_size = (
-                model.model.encoder_output_size
-                if hasattr(model.model, "encoder_output_size")
-                else -1
-            )
-
-            audio_encoder = (
-                model.model.model.encoder if hasattr(model.model, "model") else model.model.encoder
-            )
-
-            # self.frontend = frontend
-
-        elif hub == "hf":
-            pass
-        else:
-            encoder_class = tables.encoder_classes.get(audio_encoder)
-            audio_encoder = encoder_class(input_size=input_size, **audio_encoder_conf)
-            audio_encoder_output_size = audio_encoder.output_size()
-        freeze = audio_encoder_conf.get("freeze", True)
-        freeze_layer_num = int(audio_encoder_conf.get("freeze_layer_num", -1))
-        # if freeze_layer_num > 0:
-        #     freeze_layer_num = range(freeze_layer_num)
-
-        if freeze:
-            for name, param in audio_encoder.named_parameters():
-                if freeze_layer_num > 0:
-                    idx = re.search(r"\.\d+\.", name)
-                    if idx is not None:
-                        beg, end = idx.regs[0]
-                        layer_id = int(name[beg + 1 : end - 1])
-                        if layer_id < freeze_layer_num:
-                            param.requires_grad = False
-                    elif "ln_post." not in name:
-                        param.requires_grad = False
-                else:
-                    param.requires_grad = False
-
-            audio_encoder.eval()
-
-        self.audio_encoder = audio_encoder
 
         # llm
         self.llm = None
@@ -835,29 +787,43 @@ class MinMo_S2S(nn.Module):
         self.llm = model.to(dtype_map[self.llm_dtype])
         llm_dim = model.get_input_embeddings().weight.shape[-1]
 
-        # adaptor
-        adaptor_class = tables.adaptor_classes.get(audio_adaptor)
-        if audio_encoder_output_size > 0:
-            audio_adaptor_conf["encoder_dim"] = audio_encoder_output_size
-        audio_adaptor_conf["llm_dim"] = llm_dim
-        audio_adaptor = adaptor_class(**audio_adaptor_conf)
-        init_param_path = audio_adaptor_conf.get("init_param_path", None)
-        if init_param_path is not None:
-            src_state = torch.load(init_param_path, map_location="cpu")
-            flag = audio_adaptor.load_state_dict(src_state, strict=False)
-            logging.info(f"Loading audio_adaptor ckpt: {init_param_path}, status: {flag}")
-        freeze = audio_adaptor_conf.get("freeze", False)
-        if freeze:
-            for name, param in audio_adaptor.named_parameters():
-                param.requires_grad = False
-            audio_adaptor.eval()
-
-        self.audio_adaptor = audio_adaptor
-
+        # # adaptor
+        # adaptor_class = tables.adaptor_classes.get(audio_adaptor)
+        # if audio_encoder_output_size > 0:
+        #     audio_adaptor_conf["encoder_dim"] = audio_encoder_output_size
+        # audio_adaptor_conf["llm_dim"] = llm_dim
+        # audio_adaptor = adaptor_class(**audio_adaptor_conf)
+        # init_param_path = audio_adaptor_conf.get("init_param_path", None)
+        # if init_param_path is not None:
+        #     src_state = torch.load(init_param_path, map_location="cpu")
+        #     flag = audio_adaptor.load_state_dict(src_state, strict=False)
+        #     logging.info(f"Loading audio_adaptor ckpt: {init_param_path}, status: {flag}")
+        # freeze = audio_adaptor_conf.get("freeze", False)
+        # if freeze:
+        #     for name, param in audio_adaptor.named_parameters():
+        #         param.requires_grad = False
+        #     audio_adaptor.eval()
+        #
+        # self.audio_adaptor = audio_adaptor
+        del self.llm.lm_head
+        self.codec_unit = kwargs.get("codec_unit", 4097)
+        self.codec_embed = nn.Embedding(self.codec_unit, llm_dim, 0)
+        self.codec_head = nn.Linear(llm_dim, self.codec_unit, bias=False)
         self.error_calculator = None
 
         self.length_normalized_loss = length_normalized_loss
         self.beam_search = None
+
+        self.ignore_id = kwargs.get("ignore_id", -100)
+        # self.criterion_ce = LabelSmoothingLoss(
+        #     size=self.codec_unit,
+        #     padding_idx=self.ignore_id,
+        #     smoothing=kwargs.get("lsm_weight", 0.0),
+        #     normalize_length=self.length_normalized_loss,
+        #     # reduction=False,
+        # )
+        # self.criterion_ce = CrossEntropyLoss(ignore_index=-100)
+
         import os
 
         rank = int(os.environ.get("RANK", 0))
@@ -888,79 +854,71 @@ class MinMo_S2S(nn.Module):
         stats = {}
         input_ids[input_ids < 0] = 0
         inputs_embeds = self.llm.model.get_input_embeddings()(input_ids)
-        if speech is not None:
-            if len(speech_lengths.size()) > 1:
-                speech_lengths = speech_lengths[:, 0]
 
-            batch_size_speech, frames, _ = speech.shape
+        codec = kwargs.get("codec")
+        codec[codec < 0] = 0
+        codec_len = kwargs.get("codec_len")
+        codec_len[codec_len < 0] = 0
+        codec_beg = kwargs.get("codec_beg")
+        codec_beg[codec_beg < 0] = 0
+        fake_codec_len = kwargs.get("fake_codec_len")
+        fake_codec_len[fake_codec_len < 0] = 0
 
-            # audio encoder
-            if self.audio_encoder_activation_checkpoint:
-                from torch.utils.checkpoint import checkpoint
+        audio = kwargs.get("audio")
+        audio_len = kwargs.get("audio_len")
+        spk_emb = kwargs.get("spk_emb")
+        spk_emb_len = kwargs.get("spk_emb_len")
 
-                encoder_out, encoder_out_lens = checkpoint(
-                    self.encode, speech, speech_lengths, use_reentrant=False
-                )
-            else:
-                encoder_out, encoder_out_lens = self.encode(speech, speech_lengths)
+        batch_size, token_num, dims = inputs_embeds.shape
 
-            # audio_adaptor
-            encoder_out, encoder_out_lens = self.audio_adaptor(encoder_out, encoder_out_lens)
+        codec_emb = self.codec_embed(codec)
+        idx = 0
+        for i, batch_idx in enumerate(range(batch_size)):
 
-            batch_size, token_num, dims = inputs_embeds.shape
-            fake_token_len = kwargs.get("fake_token_len")
-            fake_token_len[fake_token_len < 0] = 0
-            fbank_beg[fbank_beg < 0] = 0
+            for j, turn_id in enumerate(range(codec_beg.shape[1])):
+                codec_beg_idx = codec_beg[batch_idx, turn_id].item()
+                if codec_beg_idx > 0:
+                    codec_len_i = codec_len[batch_idx, turn_id]
+                    codec_i = codec_emb[idx, :codec_len_i, :]
 
-            speech_idx = 0
-            for batch_idx in range(batch_size):
-
-                for turn_id in range(fbank_beg.shape[1]):
-                    fbank_beg_idx = fbank_beg[batch_idx, turn_id].item()
-                    if fbank_beg_idx > 0:
-                        speech_token_len = fake_token_len[batch_idx, turn_id]
-                        speech_token = encoder_out[speech_idx, :speech_token_len, :]
-
-                        try:
-                            inputs_embeds[
-                                batch_idx, fbank_beg_idx : fbank_beg_idx + speech_token_len, :
-                            ] = speech_token
-                        except Exception as e:
-                            #
-                            logging.error(f"{str(e)}, {traceback.format_exc()}")
-                            logging.info(
-                                f"batch_idx: {batch_idx}, inputs_embeds: {inputs_embeds.shape}, fbank_beg_idx: {fbank_beg_idx}, speech_token_len: {speech_token_len}, encoder_out: {encoder_out.shape}, encoder_out_lens: {encoder_out_lens}, fake_token_len: {fake_token_len}, speech_lengths: {speech_lengths}"
-                            )
-                            # import pdb;
-                            # pdb.set_trace()
-                            speech_token_len = encoder_out_lens[speech_idx].item()
-                            speech_token = encoder_out[speech_idx, :speech_token_len, :]
-                            inputs_embeds[
-                                batch_idx, fbank_beg_idx : fbank_beg_idx + speech_token_len, :
-                            ] = speech_token
-
-                        speech_idx += 1
-
-            stats["batch_size_speech"] = batch_size_speech
-            stats["batch_size_x_frames"] = frames * batch_size_speech
-            stats["batch_size_real_frames"] = speech_lengths.sum().item()
-            stats["padding_frames"] = stats["batch_size_x_frames"] - stats["batch_size_real_frames"]
+                    inputs_embeds[batch_idx, codec_beg_idx : codec_beg_idx + codec_len_i, :] = (
+                        codec_i
+                    )
+                    idx += 1
 
         with torch.cuda.amp.autocast(
             enabled=True if self.llm_dtype != "fp32" else False, dtype=dtype_map[self.llm_dtype]
         ):
-            labels_ids[labels_ids == -1] = -100
+            labels_ids[labels_ids < 0] = self.ignore_id
             attention_mask[attention_mask < 0] = 0
-            model_outputs = self.llm(
+            outputs = self.llm.model(
                 inputs_embeds=inputs_embeds.to(dtype_map[self.llm_dtype]),
                 attention_mask=attention_mask,
-                labels=labels_ids,
             )
-            loss = model_outputs.loss
+            labels = labels_ids
+            # loss = model_outputs.loss
+            hidden_states = outputs[0]
+            logits = self.codec_head(hidden_states)
+            logits = logits.float()
+
+            # Shift so that tokens < n predict n
+            shift_logits = logits[..., :-1, :].contiguous()
+            shift_labels = labels[..., 1:].contiguous()
+
+            # loss_att = self.criterion_ce(shift_logits, shift_labels)
+            # Flatten the tokens
+            loss_fct = CrossEntropyLoss(ignore_index=self.ignore_id)
+            shift_logits = shift_logits.view(-1, self.codec_unit)
+            shift_labels = shift_labels.view(-1)
+            # Enable model parallelism
+            shift_labels = shift_labels.to(shift_logits.device)
+            loss = loss_fct(shift_logits, shift_labels)
 
         with torch.no_grad():
-            preds = torch.argmax(model_outputs.logits, -1)
-            acc_att = compute_accuracy(preds[:, :-1], labels_ids[:, 1:], ignore_label=-100)
+            preds = torch.argmax(logits, -1)
+            acc_att = compute_accuracy(
+                preds[:, :-1], labels_ids[:, 1:], ignore_label=self.ignore_id
+            )
             stats["acc"] = acc_att
 
         stats["loss"] = torch.clone(loss.detach())

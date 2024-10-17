@@ -24,7 +24,7 @@ class WhisperFrontend(nn.Module):
         **kwargs,
     ):
         super().__init__()
-        assert fs == 16000
+        # assert fs == 16000
         self.fs = fs
         import whisper
         from whisper.audio import HOP_LENGTH, N_FFT, N_SAMPLES

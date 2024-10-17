@@ -2049,9 +2049,9 @@ class MinMo_T2S(torch.utils.data.Dataset):
         return len(self.index_ds)
 
     def __getitem__(self, index):
-        import pdb
-
-        pdb.set_trace()
+        # import pdb
+        #
+        # pdb.set_trace()
 
         output = None
 
@@ -2175,7 +2175,7 @@ class MinMo_T2S(torch.utils.data.Dataset):
                     if isinstance(meta, dict):
                         if "wav_path" in meta:
                             wav_path = meta["wav_path"]
-                            wav_samples = load_audio_text_image_video(wav_path, fs=22050)
+                            wav_samples = load_audio_text_image_video(wav_path, fs=self.fs)
                             audio.append(wav_samples)
                             audio_len.append(len(wav_samples))
                         if "spk_emb":
@@ -2197,16 +2197,17 @@ class MinMo_T2S(torch.utils.data.Dataset):
                     if not sub_str.startswith("<|startofspeech|>"):
                         # sub_str = f"{sub_str}<|im_end|>"
                         sub_token = self.tokenizer.encode(sub_str)
-                        target_ids += sub_token
+                        # target_ids += sub_token
                     else:
                         sub_str = sub_str.replace("<|startofspeech|>", "").replace(
                             "<|endofspeech|>", ""
                         )
                         if sub_str.startswith("!"):
                             sub_token_codec = np.load(sub_str[1:])
-                            codec_i = torch.from_numpy(sub_token_codec)
+                            fake_token = sub_token_codec.tolist() + [4097]
+                            codec_i = torch.tensor(sub_token_codec, dtype=torch.int64)
                             codec_i_len = len(sub_token_codec)
-                            fake_token = [0] * codec_i_len
+
                             target_ids += fake_token
 
                 if len(codec_i) > 0:
@@ -2243,7 +2244,7 @@ class MinMo_T2S(torch.utils.data.Dataset):
             fake_token_len = torch.tensor(fake_token_len, dtype=torch.int32)
 
             output = {
-                "fbank_mask": fbank_mask,
+                # "fbank_mask": fbank_mask,
                 "fbank_beg": fbank_beg,
                 "fake_token_len": fake_token_len,
                 "input_ids": input_ids,
