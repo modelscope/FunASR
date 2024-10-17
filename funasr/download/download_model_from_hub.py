@@ -62,7 +62,11 @@ def download_from_ms(**kwargs):
         kwargs = OmegaConf.merge(config, kwargs)
 
         init_param = kwargs.get("init_param", "")
-        if not os.path.exists(init_param):
+        if (
+            isinstance(init_param, str)
+            and not os.path.exists(init_param)
+            or isinstance(init_param, (list, tuple))
+        ):
             init_param_new = init_param
             if isinstance(init_param, str):
                 init_param = init_param.split(",")

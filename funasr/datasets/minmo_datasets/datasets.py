@@ -2121,6 +2121,8 @@ class MinMo_T2S(torch.utils.data.Dataset):
                 input_mask_i = []
                 target_ids = []
                 for k, sub_str in enumerate(splits):
+                    if len(sub_str) < 1:
+                        continue
                     if not sub_str.startswith("<|startofspeech|>"):
                         sub_token = self.tokenizer.encode(sub_str)
                         source_ids += sub_token
@@ -2190,7 +2192,8 @@ class MinMo_T2S(torch.utils.data.Dataset):
                 codec_beg_i = ([],)
                 fake_codec_len_i = ([],)
                 for k, sub_str in enumerate(splits):
-
+                    if len(sub_str) < 1:
+                        continue
                     if not sub_str.startswith("<|startofspeech|>"):
                         # sub_str = f"{sub_str}<|im_end|>"
                         sub_token = self.tokenizer.encode(sub_str)
