@@ -823,7 +823,21 @@ class MinMo_T2S(nn.Module):
         #     # reduction=False,
         # )
         # self.criterion_ce = CrossEntropyLoss(ignore_index=-100)
+        from .label_smoothing_loss import LabelSmoothingLoss
 
+        self.criterion_ce = LabelSmoothingLoss(
+            size=self.codec_unit,
+            padding_idx=self.ignore_id,
+            smoothing=kwargs.get("lsm_weight", 0.0),
+            normalize_length=self.length_normalized_loss,
+            reduction=False,
+        )
+        specaug = kwargs.get("specaug", None)
+        specaug_conf = kwargs.get("specaug_conf", {})
+        if specaug is not None:
+            specaug_class = tables.specaug_classes.get(specaug)
+            specaug = specaug_class(**specaug_conf)
+        self.specaug = specaug
         import os
 
         rank = int(os.environ.get("RANK", 0))
@@ -879,11 +893,11 @@ class MinMo_T2S(nn.Module):
                 codec_beg_idx = codec_beg[batch_idx, turn_id].item()
                 if codec_beg_idx > 0:
                     codec_len_i = codec_len[batch_idx, turn_id]
-                    codec_i = codec_emb[idx, :codec_len_i, :]
-
-                    inputs_embeds[batch_idx, codec_beg_idx : codec_beg_idx + codec_len_i, :] = (
-                        codec_i
-                    )
+                    codec_i = codec_emb[idx : idx + 1, :codec_len_i, :]
+                    codec_i = self.specaug(codec_i)
+                    inputs_embeds[
+                        batch_idx : batch_idx + 1, codec_beg_idx : codec_beg_idx + codec_len_i, :
+                    ] = codec_i
                     idx += 1
 
         with torch.cuda.amp.autocast(
@@ -940,11 +954,24 @@ class MinMo_T2S(nn.Module):
         loss, stats, weight = force_gatherable((loss, stats, batch_size), loss.device)
         return loss, stats, weight
 
-    def encode(self, speech, speech_lengths):
-        # audio encoder
-        encoder_out, encoder_out_lens = self.audio_encoder(speech.permute(0, 2, 1), speech_lengths)
+    def nll(self, logits, labels):
+        shift_logits = logits[..., :-1, :].contiguous()
+        shift_labels = labels[..., 1:].contiguous()
+        tt = logits.shape[1]
+        nll = self.criterion_ce(
+            logits.reshape(bb, tt * self.predict_nq, -1), target.reshape(bb, tt * self.predict_nq)
+        )
+        nll = nll.sum(-1)
+        # nll: (BxL,) -> (BxL,)
+        nll.masked_fill_(make_pad_mask(y_lengths * self.predict_nq).to(nll.device).view(-1), 0.0)
+        # nll: (BxL,) -> (B, L)
+        nll = nll.reshape(batch_size, -1).reshape(batch_size, tt, self.predict_nq)
 
-        return encoder_out, encoder_out_lens
+    # def encode(self, speech, speech_lengths):
+    #     # audio encoder
+    #     encoder_out, encoder_out_lens = self.audio_encoder(speech.permute(0, 2, 1), speech_lengths)
+    #
+    #     return encoder_out, encoder_out_lens
 
     def data_template(self, data):
         system, user, assistant = [], [], []
