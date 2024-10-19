@@ -196,7 +196,21 @@ class SenseVoiceSmall:
         return asr_res
 
     def load_data(self, wav_content: Union[str, np.ndarray, List[str]], fs: int = None) -> List:
+        
+        def convert_to_wav(input_path, output_path):
+            from pydub import AudioSegment
+            try:
+                audio = AudioSegment.from_mp3(input_path)
+                audio.export(output_path, format="wav")
+            except Exception as e:
+                print(f"转换失败:{e}")
+
         def load_wav(path: str) -> np.ndarray:
+            if path.lower().endswith('.mp3'):
+                input_path = path
+                path = input_path.replace('.mp3', '.wav')
+                convert_to_wav(input_path,path) #将mp3格式转换成wav格式
+
             waveform, _ = librosa.load(path, sr=fs)
             return waveform
 
