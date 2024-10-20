@@ -50,7 +50,7 @@ int main(int argc, char* argv[]) {
     TCLAP::ValueArg<std::string> model_revision(
         "", "model-revision",
         "ASR model revision",
-        false, "v2.0.4", "string");
+        false, "v2.0.5", "string");
     TCLAP::ValueArg<std::string> quantize(
         "", QUANTIZE,
         "true (Default), load the model of model_quant.onnx in model_dir. If set "
@@ -81,7 +81,7 @@ int main(int argc, char* argv[]) {
     TCLAP::ValueArg<std::string> punc_revision(
         "", "punc-revision",
         "PUNC model revision",
-        false, "v2.0.4", "string");
+        false, "v2.0.5", "string");
     TCLAP::ValueArg<std::string> punc_quant(
         "", PUNC_QUANT,
         "true (Default), load the model of model_quant.onnx in punc_dir. If set "
@@ -247,7 +247,7 @@ int main(int argc, char* argv[]) {
             // modify model-revision by model name
             size_t found = s_asr_path.find("speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404");
             if (found != std::string::npos) {
-                model_path["model-revision"]="v2.0.4";
+                model_path["model-revision"]="v2.0.5";
             }
 
             found = s_asr_path.find("speech_paraformer-large-contextual_asr_nat-zh-cn-16k-common-vocab8404");
@@ -257,9 +257,20 @@ int main(int argc, char* argv[]) {
 
             found = s_asr_path.find("speech_paraformer-large_asr_nat-en-16k-common-vocab10020");
             if (found != std::string::npos) {
-                model_path["model-revision"]="v2.0.4";
+                model_path["model-revision"]="v2.0.5";
                 s_itn_path="";
                 s_lm_path="";
+            }
+
+            found = s_asr_path.find(MODEL_SVS);
+            if (found != std::string::npos) {
+                model_path["model-revision"]="v2.0.5";
+                s_itn_path="";
+                model_path[ITN_DIR]="";
+                s_lm_path="";
+                model_path[LM_DIR]="";
+                s_punc_path="";
+                model_path[PUNC_DIR]="";
             }
 
             if (use_gpu_){

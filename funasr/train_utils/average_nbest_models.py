@@ -30,8 +30,8 @@ def _get_checkpoint_paths(output_dir: str, last_n: int = 5, use_deepspeed=False,
                 map_location="cpu",
             )
         avg_keep_nbest_models_type = checkpoint["avg_keep_nbest_models_type"]
-        val_step_or_eoch = checkpoint[f"val_{avg_keep_nbest_models_type}_step_or_eoch"]
-        sorted_items = sorted(val_step_or_eoch.items(), key=lambda x: x[1], reverse=True)
+        val_step_or_epoch = checkpoint[f"val_{avg_keep_nbest_models_type}_step_or_epoch"]
+        sorted_items = sorted(val_step_or_epoch.items(), key=lambda x: x[1], reverse=True)
         sorted_items = (
             sorted_items[:last_n] if avg_keep_nbest_models_type == "acc" else sorted_items[-last_n:]
         )
@@ -53,6 +53,7 @@ def _get_checkpoint_paths(output_dir: str, last_n: int = 5, use_deepspeed=False,
         checkpoint_files.sort(key=lambda x: int(re.search(r"(\d+)", x).group()), reverse=True)
         # Get the last 'last_n' checkpoint paths
         checkpoint_paths = [os.path.join(output_dir, f) for f in checkpoint_files[:last_n]]
+
     return checkpoint_paths
 
 

@@ -134,7 +134,7 @@ class WavFrontend(nn.Module):
             mat = kaldi.fbank(
                 waveform,
                 num_mel_bins=self.n_mels,
-                frame_length=self.frame_length,
+                frame_length=min(self.frame_length,waveform_length/self.fs*1000),
                 frame_shift=self.frame_shift,
                 dither=self.dither,
                 energy_floor=0.0,

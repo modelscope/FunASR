@@ -1,0 +1,109 @@
+
+# network architecture
+model: SanmKWSStreaming
+model_conf:
+    ctc_weight: 1.0
+
+# encoder
+encoder: SANMEncoderChunkOpt
+encoder_conf:
+    output_size: 256    # dimension of attention
+    attention_heads: 4
+    linear_units: 320  # the number of units of position-wise feed forward
+    num_blocks: 6      # the number of encoder blocks
+    dropout_rate: 0.1
+    positional_dropout_rate: 0.1
+    attention_dropout_rate: 0.1
+    input_layer: pe_online
+    pos_enc_class: SinusoidalPositionEncoder
+    normalize_before: true
+    kernel_size: 11
+    sanm_shfit: 0
+    selfattention_layer_type: sanm
+    chunk_size:
+    - 16
+    - 20
+    stride:
+    - 8
+    - 10
+    pad_left:
+    - 4
+    - 5
+    encoder_att_look_back_factor:
+    - 0
+    - 0
+    decoder_att_look_back_factor:
+    - 0
+    - 0
+
+# frontend related
+frontend: WavFrontendOnline
+frontend_conf:
+    fs: 16000
+    window: hamming
+    n_mels: 40
+    frame_length: 25
+    frame_shift: 10
+    lfr_m: 7
+    lfr_n: 6
+
+specaug: SpecAugLFR
+specaug_conf:
+    apply_time_warp: false
+    time_warp_window: 5
+    time_warp_mode: bicubic
+    apply_freq_mask: true
+    freq_mask_width_range:
+    - 0
+    - 30
+    lfr_rate: 6
+    num_freq_mask: 1
+    apply_time_mask: true
+    time_mask_width_range:
+    - 0
+    - 12
+    num_time_mask: 1
+
+train_conf:
+  accum_grad: 1
+  grad_clip: 5
+  max_epoch: 100
+  keep_nbest_models: 20
+  avg_nbest_model: 10
+  avg_keep_nbest_models_type: loss
+  validate_interval: 50000
+  save_checkpoint_interval: 50000
+  avg_checkpoint_interval: 1000
+  log_interval: 50
+
+optim: adam
+optim_conf:
+   lr: 0.001
+scheduler: warmuplr
+scheduler_conf:
+   warmup_steps: 30000
+
+dataset: AudioDataset
+dataset_conf:
+    index_ds: IndexDSJsonl
+    batch_sampler: EspnetStyleBatchSampler
+    batch_type: length # example or length
+    batch_size: 64000 # if batch_type is example, batch_size is the numbers of samples; if length, batch_size is source_token_len+target_token_len;
+    max_token_length: 1600 # filter samples if source_token_len+target_token_len > max_token_length,
+    buffer_size: 2048
+    shuffle: true
+    num_workers: 8
+    preprocessor_speech: SpeechPreprocessSpeedPerturb
+    preprocessor_speech_conf:
+      speed_perturb: [0.9, 1.0, 1.1]
+
+tokenizer: CharTokenizer
+tokenizer_conf:
+  unk_symbol: <unk>
+
+ctc_conf:
+    dropout_rate: 0.0
+    ctc_type: builtin  # ctc_type: focalctc, builtin
+    reduce: true
+    ignore_nan_grad: true
+normalize: null

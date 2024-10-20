@@ -12,6 +12,7 @@ This document serves as a development guide for the FunASR offline file transcri
 
 | TIME       | INFO                                                                                                                             | IMAGE VERSION                | IMAGE ID     |
 |------------|----------------------------------------------------------------------------------------------------------------------------------|------------------------------|--------------|
+| 2024.09.26 | Fix GPU memory leak                  | funasr-runtime-sdk-gpu-0.2.0 | d280bf7e495b |
 | 2024.07.01 | Optimize BladeDISC model compatibility issues | funasr-runtime-sdk-gpu-0.1.1 | 8875cbf9b99e |
 | 2024.06.27 | Offline File Transcription Software Package(GPU) 1.0 released | funasr-runtime-sdk-gpu-0.1.0 | b86066f4d018 |
 
@@ -28,9 +29,9 @@ If you do not have Docker installed, please refer to [Docker Installation](https
 ### Pulling and launching images
 Use the following command to pull and launch the Docker image for the FunASR runtime-SDK:
 ```shell
-sudo docker pull registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-gpu-0.1.1
+sudo docker pull registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-gpu-0.2.0
 
-sudo docker run --gpus=all -p 10098:10095 -it --privileged=true -v /root:/workspace/models registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-gpu-0.1.1
+sudo docker run --gpus=all -p 10098:10095 -it --privileged=true -v /root:/workspace/models registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-gpu-0.2.0
 ```
 
 Introduction to command parameters: 

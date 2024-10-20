@@ -7,7 +7,6 @@ from funasr.models.transformer.scorers.ctc_prefix_score import CTCPrefixScore
 from funasr.models.transformer.scorers.ctc_prefix_score import CTCPrefixScoreTH
 from funasr.models.transformer.scorers.scorer_interface import BatchPartialScorerInterface
 
-
 class CTCPrefixScorer(BatchPartialScorerInterface):
     """Decoder interface wrapper for CTCPrefixScore."""
 

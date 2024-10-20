@@ -17,6 +17,7 @@ Currently, the FunASR runtime-SDK supports the deployment of file transcription 
 To meet the needs of different users, we have prepared different tutorials with text and images for both novice and advanced developers.
 
 ### Whats-new
+- 2024/09/26: File Transcription Service 2.0 GPU released, Fix GPU memory leak, docker image version funasr-runtime-sdk-gpu-0.2.0 (d280bf7e495b)
 - 2024/07/01: File Transcription Service 1.1 GPU released, optimize BladeDISC model compatibility issues, docker image version funasr-runtime-sdk-gpu-0.1.1 (8875cbf9b99e)
 - 2024/06/27: File Transcription Service 1.0 GPU released, supporting dynamic batch processing and multi-threading concurrency. In the long audio test set, the single-thread RTF is 0.0076, and multi-threads' speedup is 1200+ (compared to 330+ on CPU), ref to([docs](./docs/benchmark_libtorch_cpp.md)) , docker image version funasr-runtime-sdk-gpu-0.1.0 (b86066f4d018)
 
@@ -32,6 +33,7 @@ Currently, the FunASR runtime-SDK supports the deployment of file transcription 
 To meet the needs of different users, we have prepared different tutorials with text and images for both novice and advanced developers.
 
 ### Whats-new
+- 2024/09/26: Fix memory leak, docker image version funasr-runtime-sdk-en-cpu-0.1.7 (f6c5a7b59eb6).
 - 2024/05/15: Adapting to FunASR 1.0 model structure, docker image version funasr-runtime-sdk-en-cpu-0.1.6 (84d781d07997).
 - 2024/03/05: docker image supports ARM64 platform, update modelscope, docker image version funasr-runtime-sdk-en-cpu-0.1.5 (7cca2abc5901).
 - 2024/01/25: Optimized the VAD (Voice Activity Detection) data processing method,significantly reducing peak memory usage,memory leak optimization, docker image version funasr-runtime-sdk-en-cpu-0.1.3 (c00f9ce7a195).
@@ -58,6 +60,7 @@ The FunASR real-time speech-to-text service software package not only performs r
 In order to meet the needs of different users for different scenarios, different tutorials are prepared:
 
 ### Whats-new
+- 2024/09/26: Real-time Transcription Service 1.11 released，Fix memory leak, docker image version funasr-runtime-sdk-online-cpu-0.1.11 (e51a36c42771)
 - 2024/05/15: Real-time Transcription Service 1.10 released，adapting to FunASR 1.0 model structure, docker image version funasr-runtime-sdk-online-cpu-0.1.10 (1c2adfcff84d)
 - 2024/03/05: Real-time Transcription Service 1.9 released，docker image supports ARM64 platform, update modelscope, docker image version funasr-runtime-sdk-online-cpu-0.1.9 (4a875e08c7a2)
 - 2024/01/25: Real-time Transcription Service 1.7 released，optimization of the client-side, docker image version funasr-runtime-sdk-online-cpu-0.1.7 (2aa23805572e)
@@ -89,6 +92,7 @@ Currently, the FunASR runtime-SDK supports the deployment of file transcription 
 To meet the needs of different users, we have prepared different tutorials with text and images for both novice and advanced developers.
 
 ### Whats-new
+- 2024/09/26: File Transcription Service 4.6 released, Fix memory leak & Support the SensevoiceSmall onnx model, docker image version funasr-runtime-sdk-cpu-0.4.6 (8651c6b8a1ae)
 - 2024/05/15: File Transcription Service 4.5 released, adapting to FunASR 1.0 model structure, docker image version funasr-runtime-sdk-cpu-0.4.5 (058b9882ae67)
 - 2024/03/05: File Transcription Service 4.4 released, docker image supports ARM64 platform, update modelscope, docker image version funasr-runtime-sdk-cpu-0.4.4 (2dc87b86dc49)
 - 2024/01/25: File Transcription Service 4.2 released, optimized the VAD (Voice Activity Detection) data processing method, significantly reducing peak memory usage, memory leak optimization, docker image version funasr-runtime-sdk-cpu-0.4.2 (befdc7b179ed)

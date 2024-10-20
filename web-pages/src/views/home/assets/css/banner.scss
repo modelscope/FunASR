@@ -1,64 +1,63 @@
-.banner-comp{
+.banner-comp {
     width: 100%;
     height: p(942);
-    .swiper-container{
+    .swiper-container {
         width: 100%;
         height: 100%;
     }
-    .swiper-pagination{
+    .swiper-pagination {
         left: p(80);
         width: p(15) !important;
         top: 48% !important;
         // overflow: initial;
-        .swiper-pagination-bullet{
+        .swiper-pagination-bullet {
             width: p(15);
             height: p(15) !important;
             border-radius: p(3);
             background: #1664ff !important;
-            opacity: 1
+            opacity: 1;
         }
-        .swiper-pagination-bullet-active-next{
-            transform: scale(.33)
+        .swiper-pagination-bullet-active-next {
+            transform: scale(0.33);
         }
-        .swiper-pagination-bullet-active-prev{
-            transform: scale(.33)
+        .swiper-pagination-bullet-active-prev {
+            transform: scale(0.33);
         }
     }
-    .hiddenPagination{
-        .swiper-pagination{
-
+    .hiddenPagination {
+        .swiper-pagination {
             display: none;
         }
     }
-    .item{
+    .item {
         width: 100%;
         height: 100%;
         position: relative;
-        .banner-bg{
+        .banner-bg {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
         }
-        .content{
+        .content {
             top: p(330);
             left: p(216);
             position: absolute;
             z-index: 2;
             display: flex;
             flex-direction: column;
-            .yjqd{
+            .yjqd {
                 letter-spacing: 3px;
-	            color: #ffffff;
+                color: #ffffff;
                 font-size: p(68);
             }
-            .text{
+            .text {
                 font-size: p(17);
                 letter-spacing: 1px;
-	            color: #d4d4d4;
+                color: #d4d4d4;
             }
-            .lxwm{
+            .lxwm {
                 color: #ffffff;
                 font-size: p(16);
                 width: p(124);
@@ -70,8 +69,75 @@
                 margin-top: p(33);
                 cursor: pointer;
             }
-            .lxwm:hover{
+            .lxwm:hover {
                 background-color: #316fff;
+            }
+
+            .jzmd-wrap {
+                margin-top: p(63);
+                .jzmd-title {
+                    position: relative;
+                    line-height: 1;
+                    padding-bottom: p(15);
+                    margin-bottom: p(21);
+                    font-size: p(22);
+                    font-weight: 700;
+                    color: #ffffff;
+
+                    &::after {
+                        content: '';
+                        position: absolute;
+                        bottom: 0;
+                        left: 0;
+                        width: 2em;
+                        height: p(2);
+                        background-color: #aeaeb7;
+                        border-radius: p(2);
+                    }
+                }
+                .jzmd-content {
+                    width: p(294);
+                    height: p(207);
+                    margin-left: 0;
+
+                    .jzmd-row {
+                        display: flex;
+                        flex-wrap: wrap;
+                        align-items: center;
+                        justify-content: space-between;
+                    }
+
+                    .jzmd-item {
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
+                        width: p(118);
+                        line-height: 1;
+                        margin-bottom: p(26);
+                        .name {
+                            font-size: p(16);
+                            color: #ffffff;
+                        }
+                        .num-text {
+                            display: flex;
+                            align-items: baseline;
+                            align-items: baseline;
+                            .text {
+                                font-size: p(18);
+                                color: #ffffff;
+                            }
+                            .unit {
+                                font-size: p(14);
+                                color: #ffffff;
+                            }
+                        }
+                    }
+                    &:after {
+                        content: '';
+                        width: p(118);
+                        height: 0;
+                    }
+                }
             }
         }
     }

@@ -81,7 +81,10 @@ def main(**kwargs):
         deepspeed.init_distributed(dist_backend=kwargs.get("backend", "nccl"))
     elif use_ddp or use_fsdp:
         logging.info(f"use_ddp: {use_ddp}, use_fsdp: {use_fsdp}")
-        dist.init_process_group(backend=kwargs.get("backend", "nccl"), init_method="env://")
+        dist.init_process_group(
+            backend=kwargs.get("backend", "nccl"),
+            init_method="env://",
+        )
         torch.cuda.set_device(local_rank)
 
     # rank = dist.get_rank()

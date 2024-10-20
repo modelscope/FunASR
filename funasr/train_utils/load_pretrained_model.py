@@ -8,6 +8,7 @@ import torch
 import torch.nn
 import torch.optim
 import pdb
+import copy
 
 
 def load_pretrained_model(
@@ -35,11 +36,12 @@ def load_pretrained_model(
     logging.info(f"ckpt: {path}")
 
     if oss_bucket is None:
-        src_state = torch.load(path, map_location=map_location)
+        ori_state = torch.load(path, map_location=map_location)
     else:
         buffer = BytesIO(oss_bucket.get_object(path).read())
-        src_state = torch.load(buffer, map_location=map_location)
+        ori_state = torch.load(buffer, map_location=map_location)
 
+    src_state = copy.deepcopy(ori_state)
     src_state = src_state["state_dict"] if "state_dict" in src_state else src_state
     src_state = src_state["model_state_dict"] if "model_state_dict" in src_state else src_state
     src_state = src_state["model"] if "model" in src_state else src_state
@@ -94,7 +96,6 @@ def load_pretrained_model(
                 )
             else:
                 dst_state[k] = src_state[k_src]
-
         else:
             print(f"Warning, miss key in ckpt: {k}, {path}")
 

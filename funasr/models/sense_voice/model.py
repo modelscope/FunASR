@@ -196,13 +196,13 @@ class MultiHeadedAttentionSANM(nn.Module):
                 "inf"
             )  # float(numpy.finfo(torch.tensor(0, dtype=scores.dtype).numpy().dtype).min)
             scores = scores.masked_fill(mask, min_value)
-            self.attn = torch.softmax(scores, dim=-1).masked_fill(
+            attn = torch.softmax(scores, dim=-1).masked_fill(
                 mask, 0.0
             )  # (batch, head, time1, time2)
         else:
-            self.attn = torch.softmax(scores, dim=-1)  # (batch, head, time1, time2)
+            attn = torch.softmax(scores, dim=-1)  # (batch, head, time1, time2)
 
-        p_attn = self.dropout(self.attn)
+        p_attn = self.dropout(attn)
         x = torch.matmul(p_attn, value)  # (batch, head, time1, d_k)
         x = (
             x.transpose(1, 2).contiguous().view(n_batch, -1, self.h * self.d_k)
@@ -555,7 +555,8 @@ class SenseVoiceEncoderSmall(nn.Module):
         ilens: torch.Tensor,
     ):
         """Embed positions in tensor."""
-        masks = sequence_mask(ilens, device=ilens.device)[:, None, :]
+        maxlen = xs_pad.shape[1]
+        masks = sequence_mask(ilens, maxlen = maxlen, device=ilens.device)[:, None, :]
 
         xs_pad *= self.output_size() ** 0.5
 
@@ -644,7 +645,13 @@ class SenseVoiceSmall(nn.Module):
         self.embed = torch.nn.Embedding(
             7 + len(self.lid_dict) + len(self.textnorm_dict), input_size
         )
-        self.emo_dict = {"unk": 25009, "happy": 25001, "sad": 25002, "angry": 25003, "neutral": 25004}
+        self.emo_dict = {
+            "unk": 25009,
+            "happy": 25001,
+            "sad": 25002,
+            "angry": 25003,
+            "neutral": 25004,
+        }
 
         self.criterion_att = LabelSmoothingLoss(
             size=self.vocab_size,
@@ -698,10 +705,11 @@ class SenseVoiceSmall(nn.Module):
 
         loss_rich, acc_rich = self._calc_rich_ce_loss(encoder_out[:, :4, :], text[:, :4])
 
-        loss = loss_ctc
+        loss = loss_ctc + loss_rich
         # Collect total loss stats
-        stats["loss"] = torch.clone(loss.detach()) if loss_ctc is not None else None
+        stats["loss_ctc"] = torch.clone(loss_ctc.detach()) if loss_ctc is not None else None
         stats["loss_rich"] = torch.clone(loss_rich.detach()) if loss_rich is not None else None
+        stats["loss"] = torch.clone(loss.detach()) if loss is not None else None
         stats["acc_rich"] = acc_rich
 
         # force_gatherable: to-device and to-tensor if scalar for DataParallel
@@ -873,7 +881,7 @@ class SenseVoiceSmall(nn.Module):
         ctc_logits = self.ctc.log_softmax(encoder_out)
         if kwargs.get("ban_emo_unk", False):
             ctc_logits[:, :, self.emo_dict["unk"]] = -float("inf")
-            
+
         results = []
         b, n, d = encoder_out.size()
         if isinstance(key[0], (list, tuple)):

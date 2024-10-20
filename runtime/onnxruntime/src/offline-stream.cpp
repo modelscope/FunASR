@@ -47,7 +47,13 @@ OfflineStream::OfflineStream(std::map<std::string, std::string>& model_path, int
             use_gpu = false;
             #endif
         }else{
-            asr_handle = make_unique<Paraformer>();
+            if (model_path.at(MODEL_DIR).find(MODEL_SVS) != std::string::npos)
+            {
+                asr_handle = make_unique<SenseVoiceSmall>();
+                model_type = MODEL_SVS;
+            }else{
+                asr_handle = make_unique<Paraformer>();
+            }
         }
 
         bool enable_hotword = false;
@@ -138,6 +144,10 @@ OfflineStream::OfflineStream(std::map<std::string, std::string>& model_path, int
         }
     }
 #endif
+    if(model_type == MODEL_SVS){
+        use_itn = false;
+        use_punc = false;
+    }
 }
 
 OfflineStream *CreateOfflineStream(std::map<std::string, std::string>& model_path, int thread_num, bool use_gpu, int batch_size)

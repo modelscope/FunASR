@@ -55,11 +55,11 @@ int main(int argc, char* argv[]) {
 
     TCLAP::ValueArg<std::string> offline_model_revision(
         "", "offline-model-revision", "ASR offline model revision", false,
-        "v2.0.4", "string");
+        "v2.0.5", "string");
 
     TCLAP::ValueArg<std::string> online_model_revision(
         "", "online-model-revision", "ASR online model revision", false,
-        "v2.0.4", "string");
+        "v2.0.5", "string");
 
     TCLAP::ValueArg<std::string> quantize(
         "", QUANTIZE,
@@ -85,7 +85,7 @@ int main(int argc, char* argv[]) {
         "model_quant.onnx, punc.yaml",
         false, "damo/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727-onnx", "string");
     TCLAP::ValueArg<std::string> punc_revision(
-        "", "punc-revision", "PUNC model revision", false, "v2.0.4", "string");
+        "", "punc-revision", "PUNC model revision", false, "v2.0.5", "string");
     TCLAP::ValueArg<std::string> punc_quant(
         "", PUNC_QUANT,
         "true (Default), load the model of model_quant.onnx in punc_dir. If "
@@ -262,7 +262,7 @@ int main(int argc, char* argv[]) {
 
         size_t found = s_offline_asr_path.find("speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404");
         if (found != std::string::npos) {
-            model_path["offline-model-revision"]="v2.0.4";
+            model_path["offline-model-revision"]="v2.0.5";
         }
 
         found = s_offline_asr_path.find("speech_paraformer-large-contextual_asr_nat-zh-cn-16k-common-vocab8404");
@@ -272,7 +272,7 @@ int main(int argc, char* argv[]) {
 
         found = s_offline_asr_path.find("speech_paraformer-large_asr_nat-en-16k-common-vocab10020");
         if (found != std::string::npos) {
-            model_path["model-revision"]="v2.0.4";
+            model_path["model-revision"]="v2.0.5";
             s_itn_path="";
             s_lm_path="";
         }

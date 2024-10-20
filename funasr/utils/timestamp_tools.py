@@ -84,7 +84,8 @@ def ts_prediction_lfr6_standard(
         timestamp_list.append([_end * TIME_RATE, num_frames * TIME_RATE])
         new_char_list.append("<sil>")
     else:
-        timestamp_list[-1][1] = num_frames * TIME_RATE
+        if len(timestamp_list)>0:
+            timestamp_list[-1][1] = num_frames * TIME_RATE
     if vad_offset:  # add offset time in model with vad
         for i in range(len(timestamp_list)):
             timestamp_list[i][0] = timestamp_list[i][0] + vad_offset / 1000.0
@@ -141,6 +142,8 @@ def timestamp_sentence(
     )
     for punc_stamp_text in punc_stamp_text_list:
         punc_id, timestamp, text = punc_stamp_text
+        if sentence_start is None and timestamp is not None:
+            sentence_start = timestamp[0]
         # sentence_text += text if text is not None else ''
         if text is not None:
             if "a" <= text[0] <= "z" or "A" <= text[0] <= "Z":
@@ -156,7 +159,6 @@ def timestamp_sentence(
 
         punc_id = int(punc_id) if punc_id is not None else 1
         sentence_end = timestamp[1] if timestamp is not None else sentence_end
-        sentence_start = timestamp[0] if timestamp is not None else sentence_start
         sentence_text_seg = (
             sentence_text_seg[:-1] if sentence_text_seg[-1] == " " else sentence_text_seg
         )
@@ -184,6 +186,7 @@ def timestamp_sentence(
             sentence_text = ""
             sentence_text_seg = ""
             ts_list = []
+            sentence_start = None
     return res
 
 

@@ -2,7 +2,7 @@ import os
 import argparse
 from pathlib import Path
 
-from funasr.utils.types import str2bool
+from funasr.utils.type_utils import str2bool
 
 
 def main():

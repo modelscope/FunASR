@@ -207,7 +207,8 @@
 	// APIs for Offline-stream Infer
 	_FUNASRAPI FUNASR_RESULT FunOfflineInferBuffer(FUNASR_HANDLE handle, const char* sz_buf, int n_len, 
 												   FUNASR_MODE mode, QM_CALLBACK fn_callback, const std::vector<std::vector<float>> &hw_emb, 
-												   int sampling_rate, std::string wav_format, bool itn, FUNASR_DEC_HANDLE dec_handle)
+												   int sampling_rate, std::string wav_format, bool itn, FUNASR_DEC_HANDLE dec_handle,
+												   std::string svs_lang, bool svs_itn)
 	{
 		funasr::OfflineStream* offline_stream = (funasr::OfflineStream*)handle;
 		if (!offline_stream)
@@ -256,7 +257,12 @@
 			if (wfst_decoder){
 				wfst_decoder->StartUtterance();
 			}
-			vector<string> msg_batch = (offline_stream->asr_handle)->Forward(buff, len, true, hw_emb, dec_handle, batch_in);
+			vector<string> msg_batch;
+			if(offline_stream->GetModelType() == MODEL_SVS){
+				msg_batch = (offline_stream->asr_handle)->Forward(buff, len, true, svs_lang, svs_itn, batch_in);
+			}else{
+				msg_batch = (offline_stream->asr_handle)->Forward(buff, len, true, hw_emb, dec_handle, batch_in);
+			}
 			for(int idx=0; idx<batch_in; idx++){
 				string msg = msg_batch[idx];
 				if(msg_idx < index_vector.size()){
@@ -280,7 +286,7 @@
 		}
 		for(int idx=0; idx<msgs.size(); idx++){
 			string msg = msgs[idx];
-			std::vector<std::string> msg_vec = funasr::split(msg, '|');
+			std::vector<std::string> msg_vec = funasr::SplitStr(msg, " | ");
 			if(msg_vec.size()==0){
 				continue;
 			}
@@ -402,7 +408,7 @@
 		}
 		for(int idx=0; idx<msgs.size(); idx++){
 			string msg = msgs[idx];
-			std::vector<std::string> msg_vec = funasr::split(msg, '|');
+			std::vector<std::string> msg_vec = funasr::SplitStr(msg, " | ");
 			if(msg_vec.size()==0){
 				continue;
 			}
@@ -563,7 +569,7 @@
 			len[0] = frame->len;
 			vector<string> msgs = ((funasr::Paraformer*)asr_handle)->Forward(buff, len, frame->is_final, hw_emb, dec_handle);
 			string msg = msgs.size()>0?msgs[0]:"";
-			std::vector<std::string> msg_vec = funasr::split(msg, '|');  // split with timestamp
+			std::vector<std::string> msg_vec = funasr::SplitStr(msg, " | ");  // split with timestamp
 			if(msg_vec.size()==0){
 				continue;
 			}

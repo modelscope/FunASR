@@ -9,6 +9,7 @@ from torch import Tensor
 from torch import nn
 
 import whisper
+
 # import whisper_timestamped as whisper
 
 from funasr.utils.load_utils import load_audio_text_image_video, extract_fbank
@@ -27,6 +28,7 @@ from funasr.register import tables
 @tables.register("model_classes", "Whisper-large-v1")
 @tables.register("model_classes", "Whisper-large-v2")
 @tables.register("model_classes", "Whisper-large-v3")
+@tables.register("model_classes", "Whisper-large-v3-turbo")
 @tables.register("model_classes", "WhisperWarp")
 class WhisperWarp(nn.Module):
     def __init__(self, *args, **kwargs):
@@ -111,10 +113,10 @@ class WhisperWarp(nn.Module):
 
         # decode the audio
         options = whisper.DecodingOptions(**kwargs.get("DecodingOptions", {}))
-        
-        result = whisper.decode(self.model, speech, language='english')
+
+        result = whisper.decode(self.model, speech, options=options)
         # result = whisper.transcribe(self.model, speech)
-        
+
         results = []
         result_i = {"key": key[0], "text": result.text}
 

@@ -36,6 +36,9 @@ namespace funasr {
 #define HOTWORD_SEP " "
 #define AUDIO_FS "audio-fs"
 
+#define MODEL_PARA "Paraformer"
+#define MODEL_SVS "SenseVoiceSmall"
+
 // #define VAD_MODEL_PATH "vad-model"
 // #define VAD_CMVN_PATH "vad-cmvn"
 // #define VAD_CONFIG_PATH "vad-config"
