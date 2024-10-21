@@ -203,13 +203,15 @@ class SenseVoiceSmall:
                 audio = AudioSegment.from_mp3(input_path)
                 audio.export(output_path, format="wav")
                 print("音频文件为mp3格式，已转换为wav格式")
+                
             except Exception as e:
                 print(f"转换失败:{e}")
 
         def load_wav(path: str) -> np.ndarray:
-            if path.lower().endswith('.mp3'):
+            if not path.lower().endswith('.wav'):
+                import os
                 input_path = path
-                path = input_path.replace('.mp3', '.wav')
+                path = os.path.splitext(path)[0]+'.wav'
                 convert_to_wav(input_path,path) #将mp3格式转换成wav格式
 
             waveform, _ = librosa.load(path, sr=fs)
