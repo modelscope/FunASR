@@ -78,7 +78,11 @@ class OpenAIIndexDSJsonl(torch.utils.data.Dataset):  # torch.utils.data.Dataset
                             #     assistant.append([content, {"wav_path": wav_path}])
                             # else:
                             #     assistant.append(content)
-                            assistant.append(content)
+                            if "prev_content" in item:
+                                prev_content = item["prev_content"]
+                                assistant.append([content, {"prev_content": prev_content}])
+                            else:
+                                assistant.append(content)
                     if len(system) == 0:
                         system = ["You are a helpful assistant."]
                     system = system * len(user)

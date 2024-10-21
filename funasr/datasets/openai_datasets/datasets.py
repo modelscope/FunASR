@@ -409,8 +409,14 @@ class OpenAIDatasetMultiTurn(torch.utils.data.Dataset):
                     fbank_beg += [-1]
                     fake_token_len += [0]
 
-                source_mask = [-100] * len(source_ids)
-                target_out = f"{target_out}<|im_end|>"
+                if any(isinstance(item, dict) and "prev_content" in item for item in target_out):
+                    prev_value = next((item['prev_content'] for item in target_out if isinstance(item, dict) and 'prev_content' in item), None)
+                    source_ids += self.tokenizer.encode(prev_value)
+                    source_mask = [-100] * len(source_ids)
+                    target_out = f"{target_out[0]}<|im_end|>"
+                else:
+                    source_mask = [-100] * len(source_ids)
+                    target_out = f"{target_out}<|im_end|>"
                 target_ids = self.tokenizer.encode(target_out)
                 input_ids += source_ids + target_ids
                 labels += source_mask + target_ids
