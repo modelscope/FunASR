@@ -43,7 +43,7 @@ cd funasr/runtime/python/websocket
 python funasr_wss_server.py --port 10095
 ```
 
-For detailed parameter configuration and analysis, please click [here](https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/runtime/python/websocket).
+For detailed parameter configuration and analysis, please click [here](https://github.com/alibaba-damo-academy/FunASR/tree/main/runtime/python/websocket).
 
 #### Html5 Service (Optional)
 
@@ -69,13 +69,13 @@ Since there are many dependencies for C++, it is recommended to deploy it using 
 curl -O https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/shell/funasr-runtime-deploy-offline-cpu-zh.sh;
 sudo bash funasr-runtime-deploy-offline-cpu-zh.sh install --workspace /root/funasr-runtime-resources
 ```
-For detailed parameter configuration and analysis, please click [here](https://github.com/alibaba-damo-academy/FunASR/blob/main/funasr/runtime/docs/SDK_tutorial_zh.md).
+For detailed parameter configuration and analysis, please click [here](https://github.com/alibaba-damo-academy/FunASR/blob/main/runtime/docs/SDK_tutorial_zh.md).
 
 ## Client Testing
 
 ### Method 1
 
-Directly connect to the html client, manually download the client ([click here](https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/runtime/html5/static)) to the local computer, and open the index.html webpage, enter the wss address and port number to use.
+Directly connect to the html client, manually download the client ([click here](https://github.com/alibaba-damo-academy/FunASR/tree/main/runtime/html5/static)) to the local computer, and open the index.html webpage, enter the wss address and port number to use.
 
 ### Method 2
 
