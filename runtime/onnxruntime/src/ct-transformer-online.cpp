@@ -25,23 +25,8 @@ void CTTransformerOnline::InitPunc(const std::string &punc_model, const std::str
         exit(-1);
     }
     // read inputnames outputnames
-    string strName;
-    GetInputName(m_session.get(), strName);
-    m_strInputNames.push_back(strName.c_str());
-    GetInputName(m_session.get(), strName, 1);
-    m_strInputNames.push_back(strName);
-    GetInputName(m_session.get(), strName, 2);
-    m_strInputNames.push_back(strName);
-    GetInputName(m_session.get(), strName, 3);
-    m_strInputNames.push_back(strName);
-    
-    GetOutputName(m_session.get(), strName);
-    m_strOutputNames.push_back(strName);
-
-    for (auto& item : m_strInputNames)
-        m_szInputNames.push_back(item.c_str());
-    for (auto& item : m_strOutputNames)
-        m_szOutputNames.push_back(item.c_str());
+    GetInputNames(m_session.get(), m_strInputNames, m_szInputNames);
+    GetOutputNames(m_session.get(), m_strOutputNames, m_szOutputNames);
 
 	m_tokenizer.OpenYaml(punc_config.c_str(), token_file.c_str());
 }

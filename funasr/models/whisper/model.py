@@ -28,6 +28,7 @@ from funasr.register import tables
 @tables.register("model_classes", "Whisper-large-v1")
 @tables.register("model_classes", "Whisper-large-v2")
 @tables.register("model_classes", "Whisper-large-v3")
+@tables.register("model_classes", "Whisper-large-v3-turbo")
 @tables.register("model_classes", "WhisperWarp")
 class WhisperWarp(nn.Module):
     def __init__(self, *args, **kwargs):

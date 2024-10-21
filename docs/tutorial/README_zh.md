@@ -7,6 +7,7 @@ FunASR开源了大量在工业数据上预训练模型，您可以在 [模型许
  <a href="#模型推理"> 模型推理 </a>   
 ｜<a href="#模型训练与测试"> 模型训练与测试 </a>
 ｜<a href="#模型导出与测试"> 模型导出与测试 </a>
+｜<a href="#新模型注册教程"> 新模型注册教程 </a>
 </h4>
 </div>
 
@@ -434,3 +435,60 @@ print(result)
 ```
 
 更多例子请参考 [样例](https://github.com/alibaba-damo-academy/FunASR/tree/main/runtime/python/onnxruntime)
+
+<a name="新模型注册教程"></a>
+## 新模型注册教程
+
+
+### 查看注册表
+
+```plaintext
+from funasr.register import tables
+
+tables.print()
+```
+
+支持查看指定类型的注册表：\`tables.print("model")\`
+
+### 注册模型
+
+```python
+from funasr.register import tables
+
+@tables.register("model_classes", "SenseVoiceSmall")
+class SenseVoiceSmall(nn.Module):
+  def __init__(*args, **kwargs):
+    ...
+
+  def forward(
+      self,
+      **kwargs,
+  ):  
+
+  def inference(
+      self,
+      data_in,
+      data_lengths=None,
+      key: list = None,
+      tokenizer=None,
+      frontend=None,
+      **kwargs,
+  ):
+    ...
+
+```
+
+在需要注册的类名前加上 `@tables.register("model_classes","SenseVoiceSmall")`，即可完成注册，类需要实现有：__init__，forward，inference方法。
+
+完整代码：[https://github.com/modelscope/FunASR/blob/main/funasr/models/sense\_voice/model.py#L443](https://github.com/modelscope/FunASR/blob/main/funasr/models/sense_voice/model.py#L443)
+
+注册完成后，在config.yaml中指定新注册模型，即可实现对模型的定义
+
+```python
+model: SenseVoiceSmall
+model_conf:
+  ...
+```
+
+
+[更多详细教程文档](https://github.com/modelscope/FunASR/blob/main/docs/tutorial/Tables_zh.md)
