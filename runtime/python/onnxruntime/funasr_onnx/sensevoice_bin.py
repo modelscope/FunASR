@@ -232,6 +232,10 @@ class SenseVoiceSmall:
         feats, feats_len = [], []
         for waveform in waveform_list:
             speech, _ = self.frontend.fbank(waveform)
+
+            if speech is None or speech.size == 0:
+                print("detected speech size {speech.size}")
+                raise ValueError("Empty speech detected, skipping this waveform.")
             feat, feat_len = self.frontend.lfr_cmvn(speech)
             feats.append(feat)
             feats_len.append(feat_len)
