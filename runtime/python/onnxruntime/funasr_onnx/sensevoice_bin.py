@@ -202,6 +202,7 @@ class SenseVoiceSmall:
             try:
                 audio = AudioSegment.from_mp3(input_path)
                 audio.export(output_path, format="wav")
+                print("音频文件为mp3格式，已转换为wav格式")
             except Exception as e:
                 print(f"转换失败:{e}")
 
