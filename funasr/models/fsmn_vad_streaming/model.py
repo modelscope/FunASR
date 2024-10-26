@@ -8,6 +8,7 @@ import json
 import time
 import math
 import torch
+import numpy as np
 from torch import nn
 from enum import Enum
 from dataclasses import dataclass
@@ -334,18 +335,17 @@ class FsmnVADStreaming(nn.Module):
             cache["stats"].data_buf_all = torch.cat(
                 (cache["stats"].data_buf_all, cache["stats"].waveform[0])
             )
-        for offset in range(
-            0, cache["stats"].waveform.shape[1] - frame_sample_length + 1, frame_shift_length
-        ):
-            cache["stats"].decibel.append(
-                10
-                * math.log10(
-                    (cache["stats"].waveform[0][offset : offset + frame_sample_length])
-                    .square()
-                    .sum()
-                    + 0.000001
-                )
-            )
+            
+        waveform_numpy = cache["stats"].waveform.numpy()
+
+        offsets = np.arange(0, waveform_numpy.shape[1] - frame_sample_length + 1, frame_shift_length)
+        frames = waveform_numpy[0, offsets[:, np.newaxis] + np.arange(frame_sample_length)]
+
+        decibel_numpy = 10 * np.log10(np.sum(np.square(frames), axis=1) + 0.000001)
+        decibel_numpy = decibel_numpy.tolist()
+
+        cache["stats"].decibel.extend(decibel_numpy)
+
 
     def ComputeScores(self, feats: torch.Tensor, cache: dict = {}) -> None:
         scores = self.encoder(feats, cache=cache["encoder"]).to("cpu")  # return B * T * D
