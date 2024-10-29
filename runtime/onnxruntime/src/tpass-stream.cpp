@@ -36,10 +36,17 @@ TpassStream::TpassStream(std::map<std::string, std::string>& model_path, int thr
         string am_cmvn_path;
         string am_config_path;
         string token_path;
+        string online_token_path;
         string hw_compile_model_path;
         string seg_dict_path;
         
-        asr_handle = make_unique<Paraformer>();
+        if (model_path.at(MODEL_DIR).find(MODEL_SVS) != std::string::npos)
+        {
+            asr_handle = make_unique<SenseVoiceSmall>();
+            model_type = MODEL_SVS;
+        }else{
+            asr_handle = make_unique<Paraformer>();
+        }
 
         bool enable_hotword = false;
         hw_compile_model_path = PathAppend(model_path.at(MODEL_DIR), MODEL_EB_NAME);
@@ -54,6 +61,7 @@ TpassStream::TpassStream(std::map<std::string, std::string>& model_path, int thr
         am_model_path = PathAppend(model_path.at(OFFLINE_MODEL_DIR), MODEL_NAME);
         en_model_path = PathAppend(model_path.at(ONLINE_MODEL_DIR), ENCODER_NAME);
         de_model_path = PathAppend(model_path.at(ONLINE_MODEL_DIR), DECODER_NAME);
+        online_token_path = PathAppend(model_path.at(ONLINE_MODEL_DIR), TOKEN_PATH);
         if(model_path.find(QUANTIZE) != model_path.end() && model_path.at(QUANTIZE) == "true"){
             am_model_path = PathAppend(model_path.at(OFFLINE_MODEL_DIR), QUANT_MODEL_NAME);
             en_model_path = PathAppend(model_path.at(ONLINE_MODEL_DIR), QUANT_ENCODER_NAME);
@@ -63,7 +71,7 @@ TpassStream::TpassStream(std::map<std::string, std::string>& model_path, int thr
         am_config_path = PathAppend(model_path.at(ONLINE_MODEL_DIR), AM_CONFIG_NAME);
         token_path = PathAppend(model_path.at(MODEL_DIR), TOKEN_PATH);
 
-        asr_handle->InitAsr(am_model_path, en_model_path, de_model_path, am_cmvn_path, am_config_path, token_path, thread_num);
+        asr_handle->InitAsr(am_model_path, en_model_path, de_model_path, am_cmvn_path, am_config_path, token_path, online_token_path, thread_num);
     }else{
         LOG(ERROR) <<"Can not find offline-model-dir or online-model-dir";
         exit(-1);
