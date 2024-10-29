@@ -232,6 +232,8 @@ scheduler_conf:
 }
 ```
 
+内容可以复用，直接拷贝即可，需要注意字段 `file_path_metas` 所有内容会自动拼接模型资源路径，并且会覆盖 `config.yaml` 中相同字段的路径。
+
 ## 注册表
 
 ### 查看注册表
@@ -242,7 +244,7 @@ from funasr.register import tables
 tables.print()
 ```
 
-支持查看指定类型的注册表：\`tables.print("model")\`
+支持查看指定类型的注册表，例如只看注册的`model`类：`tables.print("model")`
 
 ### 注册模型
 
@@ -282,6 +284,14 @@ class SenseVoiceSmall(nn.Module):
 model: SenseVoiceSmall
 model_conf:
   ...
+```
+
+## 注册失败
+
+如果出现找不到注册模型或者注册函数，`assert model_class is not None, f'{kwargs["model"]} is not registered'`。模型注册的原理是，import 模型文件，可以通过import来查看具体注册失败原因，例如，上述模型文件为，funasr/models/sense_voice/model.py：
+
+```python
+from funasr.models.sense_voice.model import *
 ```
 
 ## 注册原则
