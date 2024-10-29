@@ -276,6 +276,12 @@ int main(int argc, char* argv[]) {
             s_itn_path="";
             s_lm_path="";
         }
+        found = s_offline_asr_path.find(MODEL_SVS);
+        if (found != std::string::npos) {
+            model_path["model-revision"]="v2.0.5";
+            s_lm_path="";
+            model_path[LM_DIR]="";
+        }        
 
         if (access(s_offline_asr_path.c_str(), F_OK) == 0) {
           // local

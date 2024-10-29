@@ -131,9 +131,10 @@ void Paraformer::InitAsr(const std::string &en_model, const std::string &de_mode
 }
 
 // 2pass
-void Paraformer::InitAsr(const std::string &am_model, const std::string &en_model, const std::string &de_model, const std::string &am_cmvn, const std::string &am_config, const std::string &token_file, int thread_num){
+void Paraformer::InitAsr(const std::string &am_model, const std::string &en_model, const std::string &de_model, 
+    const std::string &am_cmvn, const std::string &am_config, const std::string &token_file, const std::string &online_token_file, int thread_num){
     // online
-    InitAsr(en_model, de_model, am_cmvn, am_config, token_file, thread_num);
+    InitAsr(en_model, de_model, am_cmvn, am_config, online_token_file, thread_num);
 
     // offline
     try {
@@ -144,28 +145,6 @@ void Paraformer::InitAsr(const std::string &am_model, const std::string &en_mode
         exit(-1);
     }
 
-    // string strName;
-    // GetInputName(m_session_.get(), strName);
-    // m_strInputNames.push_back(strName.c_str());
-    // GetInputName(m_session_.get(), strName,1);
-    // m_strInputNames.push_back(strName);
-
-    // if (use_hotword) {
-    //     GetInputName(m_session_.get(), strName, 2);
-    //     m_strInputNames.push_back(strName);
-    // }
-    
-    // // support time stamp
-    // size_t numOutputNodes = m_session_->GetOutputCount();
-    // for(int index=0; index<numOutputNodes; index++){
-    //     GetOutputName(m_session_.get(), strName, index);
-    //     m_strOutputNames.push_back(strName);
-    // }
-
-    // for (auto& item : m_strInputNames)
-    //     m_szInputNames.push_back(item.c_str());
-    // for (auto& item : m_strOutputNames)
-    //     m_szOutputNames.push_back(item.c_str());
     GetInputNames(m_session_.get(), m_strInputNames, m_szInputNames);
     GetOutputNames(m_session_.get(), m_strOutputNames, m_szOutputNames);
 }
