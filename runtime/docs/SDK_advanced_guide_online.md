@@ -8,6 +8,7 @@ FunASR Real-time Speech Recognition Software Package integrates real-time versio
 
 | TIME       | INFO                                                                                | IMAGE VERSION                       | IMAGE ID     |
 |------------|-------------------------------------------------------------------------------------|-------------------------------------|--------------|
+| 2024.10.29 | The 2pass-offline mode supports the SensevoiceSmal model | funasr-runtime-sdk-online-cpu-0.1.12 | f5febc5cf13a |
 | 2024.09.26 | Fix memory leak | funasr-runtime-sdk-online-cpu-0.1.11 | e51a36c42771 |
 | 2024.05.15 | Adapting to FunASR 1.0 model structure | funasr-runtime-sdk-online-cpu-0.1.10 | 1c2adfcff84d |
 | 2024.03.05 | docker image supports ARM64 platform, update modelscope | funasr-runtime-sdk-online-cpu-0.1.9 | 4a875e08c7a2 |
@@ -31,9 +32,9 @@ If you do not have Docker installed, please refer to [Docker Installation](https
 ### Pull Docker Image
 Use the following command to pull and start the FunASR software package docker image:
 ```shell
-sudo docker pull registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-online-cpu-0.1.10
+sudo docker pull registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-online-cpu-0.1.12
 mkdir -p ./funasr-runtime-resources/models
-sudo docker run -p 10096:10095 -it --privileged=true -v $PWD/funasr-runtime-resources/models:/workspace/models registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-online-cpu-0.1.10
+sudo docker run -p 10096:10095 -it --privileged=true -v $PWD/funasr-runtime-resources/models:/workspace/models registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-online-cpu-0.1.12
 ```
 
 ### Launching the Server
