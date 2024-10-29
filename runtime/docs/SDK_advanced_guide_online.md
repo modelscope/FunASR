@@ -98,10 +98,11 @@ nohup bash run_server_2pass.sh \
   --hotword ../../hotwords.txt > log.txt 2>&1 &
 
 # If you want to close ssl，please add：--certfile 0
-# If you want to deploy the timestamp or nn hotword model, please set --model-dir to the corresponding model:
-# speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-onnx（timestamp）
-# damo/speech_paraformer-large-contextual_asr_nat-zh-cn-16k-common-vocab8404-onnx（hotword）
-
+# If you want to deploy the SenseVoiceSmall, timestamp or nn hotword model, please set --model-dir to the corresponding model:
+#   iic/SenseVoiceSmall-onnx
+#   speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-onnx（timestamp）
+#   damo/speech_paraformer-large-contextual_asr_nat-zh-cn-16k-common-vocab8404-onnx（hotword）
+# The ASR results “<|zh|><|NEUTRAL|><|Speech|> ” in SenseVoiceSmall-onnx means spoken language、speech emotion、audio event
 ```
 
 ### More details about the script run_server_2pass.sh:
