@@ -480,4 +480,4 @@ model_conf:
   ...
 ```
 
-[More detailed tutorial documents](https://github.com/modelscope/FunASR/blob/main/docs/tutorial/Tables_zh.md)
+[More detailed tutorial documents](https://github.com/modelscope/FunASR/blob/main/docs/tutorial/Tables.md)
