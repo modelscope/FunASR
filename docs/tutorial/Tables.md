@@ -209,20 +209,20 @@ Path resolution: configuration.json (not required)
     "ms":"", 
     "hf":""},
   "file_path_metas": {
-    "init_param":"model.Pt"
-"Config": "config.yaml"
-Languagename_conf: {"bpemodel": "chn_jpn_yue_eng_spectok.bpe.Model"},
-"Frontend_conf":{"cmvn_file": "am.mvn"}}
+    "init_param":"model.pt", 
+    "config":"config.yaml",
+    "tokenizer_conf": {"bpemodel": "chn_jpn_yue_eng_ko_spectok.bpe.model"},
+    "frontend_conf":{"cmvn_file": "am.mvn"}}
 }
 ```
 
 The function of configuration.json is to add the model root directory to the item in file\_path\_metas, so that the path can be correctly parsed. For example, assume that the model root directory is:/home/zhifu.gzf/init\_model/SenseVoiceSmall,The relevant path in config.yaml in the directory is replaced with the correct path (ignoring irrelevant configuration):
 
 ```yaml
-Init_param: /home/zhifu.gz F/init_model/sensevoicemail Mall/model.pt
+init_param: /home/zhifu.gz F/init_model/sensevoicemail Mall/model.pt
 
-Tokenizer_conf:
-Bmodeler: /home/Zhifu.gzf/init_model/SenseVoiceSmall/chn_jpn_yue_eng_ko_spectok.bpe.model
+tokenizer_conf:
+  bpemodel: /home/Zhifu.gzf/init_model/SenseVoiceSmall/chn_jpn_yue_eng_ko_spectok.bpe.model
 
 frontend_conf:
     cmvn_file: /home/zhifu.Gzf/init_model/SenseVoiceSmall/am.mvn
