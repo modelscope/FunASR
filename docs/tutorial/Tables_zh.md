@@ -1,5 +1,7 @@
 # FunASR-1.x.x 注册模型教程
 
+(简体中文|[English](./Tables.md))
+
 funasr-1.x.x 版本的设计初衷是【**让模型集成更简单**】，核心feature为注册表与AutoModel：
 
 *   注册表的引入，使得开发中可以用搭积木的方式接入模型，兼容多种task；

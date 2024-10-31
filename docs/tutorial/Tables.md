@@ -1,5 +1,7 @@
 # FunASR-1.x.x Registration Tutorial
 
+([简体中文](./Tables_zh.md)|English)
+
 The original intention of the funasr-1.x.x version is to make model integration easier. The core feature is the registry and AutoModel:
 
 *   The introduction of the registry enables the development of building blocks to access the model, compatible with a variety of tasks;
