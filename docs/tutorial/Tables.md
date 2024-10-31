@@ -1,4 +1,4 @@
-# FunASR-1.x.x Registration Tutorial
+# FunASR-1.x.x Registration  New Model Tutorial
 
 ([简体中文](./Tables_zh.md)|English)
 

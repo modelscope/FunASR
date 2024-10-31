@@ -1,4 +1,4 @@
-# FunASR-1.x.x 注册模型教程
+# FunASR-1.x.x 注册新模型教程
 
 (简体中文|[English](./Tables.md))
 
