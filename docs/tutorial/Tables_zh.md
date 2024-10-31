@@ -15,24 +15,6 @@ funasr-1.x.x 版本的设计初衷是【**让模型集成更简单**】，核�
 
 ## 基于automodel用法
 
-### Paraformer模型
-
-输入任意时长语音，输出为语音内容对应文字，文字具有标点断句，字级别时间戳，以及说话人身份。
-
-```python
-from funasr import AutoModel
-
-model = AutoModel(model="paraformer-zh",  
-                  vad_model="fsmn-vad", 
-                  vad_kwargs={"max_single_segment_time": 60000},
-                  punc_model="ct-punc", 
-                  # spk_model="cam++"
-                  )
-wav_file = f"{model.model_path}/example/asr_example.wav"
-res = model.generate(input=wav_file, batch_size_s=300, batch_size_threshold_s=60, hotword='魔搭')
-print(res)
-```
-
 ### SenseVoiceSmall模型
 
 输入任意时长语音，输出为语音内容对应文字，文字具有标点断句，支持中英日粤韩5中语言。【字级别时间戳，以及说话人身份】后续会支持。
