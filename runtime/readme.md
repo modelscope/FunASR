@@ -59,7 +59,8 @@ The documentation mainly targets advanced developers who require modifications a
 The FunASR real-time speech-to-text service software package not only performs real-time speech-to-text conversion, but also allows high-precision transcription text correction at the end of each sentence and outputs text with punctuation, supporting high-concurrency multiple requests.
 In order to meet the needs of different users for different scenarios, different tutorials are prepared:
 
-### Whats-new
+### Whats-new+
+- 2024/10/29: Real-time Transcription Service 1.12 released，The 2pass-offline mode supports the SensevoiceSmal model, docker image version funasr-runtime-sdk-online-cpu-0.1.12 (f5febc5cf13a)
 - 2024/09/26: Real-time Transcription Service 1.11 released，Fix memory leak, docker image version funasr-runtime-sdk-online-cpu-0.1.11 (e51a36c42771)
 - 2024/05/15: Real-time Transcription Service 1.10 released，adapting to FunASR 1.0 model structure, docker image version funasr-runtime-sdk-online-cpu-0.1.10 (1c2adfcff84d)
 - 2024/03/05: Real-time Transcription Service 1.9 released，docker image supports ARM64 platform, update modelscope, docker image version funasr-runtime-sdk-online-cpu-0.1.9 (4a875e08c7a2)

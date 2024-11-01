@@ -11,7 +11,7 @@ TpassOnlineStream::TpassOnlineStream(TpassStream* tpass_stream, std::vector<int>
     }
 
     if(tpass_obj->asr_handle){
-        asr_online_handle = make_unique<ParaformerOnline>((Paraformer*)(tpass_obj->asr_handle).get(), chunk_size);
+        asr_online_handle = make_unique<ParaformerOnline>((tpass_obj->asr_handle).get(), chunk_size, tpass_stream->GetModelType());
     }else{
         LOG(ERROR)<<"asr_handle is null";
         exit(-1);

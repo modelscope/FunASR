@@ -12,6 +12,7 @@ FunASR实时语音听写软件包，集成了实时版本的语音端点检测�
 
 | 时间         | 详情                                | 镜像版本                                 | 镜像ID         |
 |:-----------|:----------------------------------|--------------------------------------|--------------|
+| 2024.10.29 | 2pass-offline模式支持SensevoiceSmall模型 | funasr-runtime-sdk-online-cpu-0.1.12 | f5febc5cf13a |
 | 2024.09.26 | 修复内存泄漏 | funasr-runtime-sdk-online-cpu-0.1.11 | e51a36c42771 |
 | 2024.05.15 | 适配FunASR 1.0模型结构 | funasr-runtime-sdk-online-cpu-0.1.10 | 1c2adfcff84d |
 | 2024.03.05 | docker镜像支持arm64平台，升级modelscope版本 | funasr-runtime-sdk-online-cpu-0.1.9 | 4a875e08c7a2 |
@@ -40,11 +41,11 @@ docker安装失败请参考 [Docker Installation](https://alibaba-damo-academy.g
 
 ```shell
 sudo docker pull \
-  registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-online-cpu-0.1.11
+  registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-online-cpu-0.1.12
 mkdir -p ./funasr-runtime-resources/models
 sudo docker run -p 10096:10095 -it --privileged=true \
   -v $PWD/funasr-runtime-resources/models:/workspace/models \
-  registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-online-cpu-0.1.11
+  registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-online-cpu-0.1.12
 ```
 
 ### 服务端启动
@@ -63,11 +64,13 @@ nohup bash run_server_2pass.sh \
   --hotword /workspace/models/hotwords.txt > log.txt 2>&1 &
 
 # 如果您想关闭ssl，增加参数：--certfile 0
-# 如果您想使用时间戳或者nn热词模型进行部署，请设置--model-dir为对应模型：
+# 如果您想使用SenseVoiceSmall模型、时间戳、nn热词模型进行部署，请设置--model-dir为对应模型：
+#   iic/SenseVoiceSmall-onnx
 #   damo/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-onnx（时间戳）
 #   damo/speech_paraformer-large-contextual_asr_nat-zh-cn-16k-common-vocab8404-onnx（nn热词）
 # 如果您想在服务端加载热词，请在宿主机文件./funasr-runtime-resources/models/hotwords.txt配置热词（docker映射地址为/workspace/models/hotwords.txt）:
 #   每行一个热词，格式(热词 权重)：阿里巴巴 20（注：热词理论上无限制，但为了兼顾性能和效果，建议热词长度不超过10，个数不超过1k，权重1~100）
+# SenseVoiceSmall-onnx识别结果中“<|zh|><|NEUTRAL|><|Speech|> ”分别为对应的语种、情感、事件信息
 ```
 服务端详细参数介绍可参考[服务端用法详解](#服务端用法详解)
 ### 客户端测试与使用

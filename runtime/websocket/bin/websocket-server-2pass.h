@@ -125,7 +125,9 @@ class WebSocketServer {
                   int audio_fs,
                   std::string wav_format,
                   FUNASR_HANDLE& tpass_online_handle,
-                  FUNASR_DEC_HANDLE& decoder_handle);
+                  FUNASR_DEC_HANDLE& decoder_handle,
+                  std::string svs_lang,
+                  bool sys_itn);
 
   void initAsr(std::map<std::string, std::string>& model_path, int thread_num);
   void on_message(websocketpp::connection_hdl hdl, message_ptr msg);

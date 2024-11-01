@@ -1,6 +1,8 @@
-# FunASR-1.x.x 注册模型教程
+# FunASR-1.x.x 注册新模型教程
 
-1.0版本的设计初衷是【**让模型集成更简单**】，核心feature为注册表与AutoModel：
+(简体中文|[English](./Tables.md))
+
+funasr-1.x.x 版本的设计初衷是【**让模型集成更简单**】，核心feature为注册表与AutoModel：
 
 *   注册表的引入，使得开发中可以用搭积木的方式接入模型，兼容多种task；
     
@@ -11,29 +13,9 @@
 *   统一学术与工业模型推理训练脚本；
     
 
-![image](https://alidocs.oss-cn-zhangjiakou.aliyuncs.com/a/6Ea1DxkZVte8y0g2/150e0eafd1c34f2dbb9360ccb5db4dc40521.png)
-
 # 快速上手
 
 ## 基于automodel用法
-
-### Paraformer模型
-
-输入任意时长语音，输出为语音内容对应文字，文字具有标点断句，字级别时间戳，以及说话人身份。
-
-```python
-from funasr import AutoModel
-
-model = AutoModel(model="paraformer-zh",  
-                  vad_model="fsmn-vad", 
-                  vad_kwargs={"max_single_segment_time": 60000},
-                  punc_model="ct-punc", 
-                  # spk_model="cam++"
-                  )
-wav_file = f"{model.model_path}/example/asr_example.wav"
-res = model.generate(input=wav_file, batch_size_s=300, batch_size_threshold_s=60, hotword='魔搭')
-print(res)
-```
 
 ### SenseVoiceSmall模型
 
@@ -119,11 +101,15 @@ asr_example2  ./audios/asr_example2.wav
 
 # 注册表详解
 
+以SenseVoiceSmall模型为例，讲解如何注册新模型，模型链接：
+
+**modelscope：**[https://www.modelscope.cn/models/iic/SenseVoiceSmall/files](https://www.modelscope.cn/models/iic/SenseVoiceSmall/files)
+
+**huggingface：**[https://huggingface.co/FunAudioLLM/SenseVoiceSmall](https://huggingface.co/FunAudioLLM/SenseVoiceSmall)
+
 ## 模型资源目录
 
 ![image.png](https://alidocs.oss-cn-zhangjiakou.aliyuncs.com/res/8oLl9y628rBNlapY/img/cab7f215-787f-4407-885a-14dc89ae9e02.png)
-
-**模型链接为：**[https://www.modelscope.cn/models/iic/SenseVoiceSmall/files](https://www.modelscope.cn/models/iic/SenseVoiceSmall/files)
 
 **配置文件**：config.yaml
 
@@ -213,7 +199,7 @@ scheduler_conf:
 
 **模型参数**：model.pt
 
-**路径解析**：configuration.json
+**路径解析**：configuration.json（非必需）
 
 ```json
 {
@@ -232,7 +218,21 @@ scheduler_conf:
 }
 ```
 
+configuration.json的作用是给file\_path\_metas中的item拼接上模型根目录，以便于路径能够被正确的解析，以上为例，假设模型根目录为：/home/zhifu.gzf/init\_model/SenseVoiceSmall，目录中config.yaml中的相关路径被替换成了正确的路径（忽略无关配置）：
+
+```yaml
+init_param: /home/zhifu.gzf/init_model/SenseVoiceSmall/model.pt
+
+tokenizer_conf:
+  bpemodel: /home/zhifu.gzf/init_model/SenseVoiceSmall/chn_jpn_yue_eng_ko_spectok.bpe.model
+
+frontend_conf:
+    cmvn_file: /home/zhifu.gzf/init_model/SenseVoiceSmall/am.mvn
+```
+
 ## 注册表
+
+![image](https://alidocs.oss-cn-zhangjiakou.aliyuncs.com/a/6Ea1DxkZVte8y0g2/c92059e82c38493988fbc8c032d3f5380521.png)
 
 ### 查看注册表
 
@@ -242,7 +242,24 @@ from funasr.register import tables
 tables.print()
 ```
 
-支持查看指定类型的注册表：\`tables.print("model")\`
+支持查看指定类型的注册表：\`tables.print("model")\`，目前funasr已经注册模型如上图所示。目前预先定义了如下几个分类：
+
+```python
+    model_classes = {}
+    frontend_classes = {}
+    specaug_classes = {}
+    normalize_classes = {}
+    encoder_classes = {}
+    decoder_classes = {}
+    joint_network_classes = {}
+    predictor_classes = {}
+    stride_conv_classes = {}
+    tokenizer_classes = {}
+    dataloader_classes = {}
+    batch_sampler_classes = {}
+    dataset_classes = {}
+    index_ds_classes = {}
+```
 
 ### 注册模型
 
@@ -272,7 +289,15 @@ class SenseVoiceSmall(nn.Module):
 
 ```
 
-在需要注册的类名前加上 `@tables.register("model_classes","SenseVoiceSmall")`，即可完成注册，类需要实现有：__init__，forward，inference方法。
+在需要注册的类名前加上 @tables.register("model\_classes", "SenseVoiceSmall")，即可完成注册，类需要实现有：\_\_init\_\_，forward，inference方法。
+
+register用法：
+
+```python
+@tables.register("注册分类", "注册名")
+```
+
+其中，"注册分类"可以是预先定义好的分类（见上面图），如果是自己定义的新分类，会自动将新分类写进注册表分类中，"注册名"即希望注册名字，后续可以直接来使用。
 
 完整代码：[https://github.com/modelscope/FunASR/blob/main/funasr/models/sense\_voice/model.py#L443](https://github.com/modelscope/FunASR/blob/main/funasr/models/sense_voice/model.py#L443)
 
@@ -282,6 +307,14 @@ class SenseVoiceSmall(nn.Module):
 model: SenseVoiceSmall
 model_conf:
   ...
+```
+
+### 注册失败
+
+如果出现找不到注册模型或发方法，assert model\_class is not None, f'{kwargs\["model"\]} is not registered'。模型注册的原理是，import 模型文件，可以通过import来查看具体注册失败原因，例如，上述模型文件为，funasr/models/sense\_voice/model.py：
+
+```python
+from funasr.models.sense_voice.model import *
 ```
 
 ## 注册原则

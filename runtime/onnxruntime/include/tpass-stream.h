@@ -26,11 +26,13 @@ class TpassStream {
     bool UseVad(){return use_vad;};
     bool UsePunc(){return use_punc;}; 
     bool UseITN(){return use_itn;};
+    std::string GetModelType(){return model_type;};
     
   private:
     bool use_vad=false;
     bool use_punc=false;
     bool use_itn=false;
+    std::string model_type = MODEL_PARA;
 };
 
 TpassStream *CreateTpassStream(std::map<std::string, std::string>& model_path, int thread_num=1);
