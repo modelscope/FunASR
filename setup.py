@@ -41,6 +41,7 @@ requirements = {
         "tensorboardX",
         # "rotary_embedding_torch",
         "requests",
+        "modelscope",
     ],
     # train: The modules invoked when training only.
     "train": [
