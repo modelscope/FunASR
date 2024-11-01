@@ -3,9 +3,11 @@ import inspect
 from dataclasses import dataclass
 import re
 
+
 @dataclass
 class RegisterTables:
     """Registry system for classes."""
+
     model_classes = {}
     frontend_classes = {}
     specaug_classes = {}
@@ -46,6 +48,7 @@ class RegisterTables:
 
     def register(self, register_tables_key: str, key: str = None) -> callable:
         """Decorator to register a class."""
+
         def decorator(target_class):
             if not hasattr(self, register_tables_key):
                 setattr(self, register_tables_key, {})
@@ -55,7 +58,7 @@ class RegisterTables:
             registry_key = key if key is not None else target_class.__name__
 
             if registry_key in registry:
-                raise ValueError(f"Key {registry_key} already exists in {register_tables_key}")
+                print(f"Key {registry_key} already exists in {register_tables_key}, re-register")
 
             registry[registry_key] = target_class
 
@@ -77,5 +80,6 @@ class RegisterTables:
             return target_class
 
         return decorator
+
 
 tables = RegisterTables()
