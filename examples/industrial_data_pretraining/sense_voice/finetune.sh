@@ -43,7 +43,7 @@ DISTRIBUTED_ARGS="
 echo $DISTRIBUTED_ARGS
 
 # funasr trainer path
-train_tool=`dirname $(which funasr)`/train_ds.py
+train_tool=../../../funasr/bin/train_ds.py
 
 torchrun $DISTRIBUTED_ARGS \
 ${train_tool} \
