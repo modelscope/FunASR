@@ -74,8 +74,8 @@ class TritonPythonModel:
         load lang_char.txt
         """
         with open(str(vocab_file), "rb") as f:
-            config = yaml.load(f, Loader=yaml.Loader)
-        return config["token_list"]
+            vocab_list = json.load(f, encoding='utf-8')
+        return vocab_list
 
     def execute(self, requests):
         """`execute` must be implemented in every Python model. `execute`
@@ -142,7 +142,7 @@ class TritonPythonModel:
         ]
         responses = []
         for i in range(total_seq):
-            sents = np.array(hyps[i : i + 1])
+            sents = np.array(hyps[i: i + 1])
             out0 = pb_utils.Tensor("OUTPUT0", sents.astype(self.out0_dtype))
             inference_response = pb_utils.InferenceResponse(output_tensors=[out0])
             responses.append(inference_response)

@@ -23,7 +23,7 @@ parameters [
   },
   {
     key: "vocabulary",
-    value: { string_value: "./model_repo_paraformer_large_offline/feature_extractor/config.yaml"}
+    value: { string_value: "./model_repo_paraformer_large_offline/scoring/1/tokens.json"}
   },
   {
     key: "lm_path"
