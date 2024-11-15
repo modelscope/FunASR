@@ -122,7 +122,7 @@ def abbr_dispose(words: List[Any], time_stamp: List[List] = None) -> List[Any]:
                         abbr_word += words[num].upper()
                 num += 1
             word_lists.append(abbr_word)
-            if time_stamp is not None:
+            if time_stamp is not None and ts_nums[num] < len(time_stamp):
                 end = time_stamp[ts_nums[num]][1]
                 ts_lists.append([begin, end])
         else:
