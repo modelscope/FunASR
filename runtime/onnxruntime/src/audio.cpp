@@ -1293,29 +1293,6 @@ void Audio::Split(VadModel* vad_obj, int chunk_len, bool input_finished, ASR_TYP
         int sample_rate = 16000;  // sample_rate 是音频的采样率 这里固定为16000 Hz
         float segment_duration =  (static_cast<float>(seg_sample) / sample_rate) * 1000;  // 每个分段的持续时间（毫秒）
 
-        // for (auto vad_segment : vad_segments) {
-        //     int speech_start_i = -1, speech_end_i = -1;
-        //     if (vad_segment[0] != -1) {
-        //         speech_start_i = vad_segment[0];
-        //     }
-        //     if (vad_segment[1] != -1) {
-        //         speech_end_i = vad_segment[1];
-        //     }
-
-        //     // 计算并打印语音片段的开始和结束时间
-        //     if (speech_start_i != -1 && speech_end_i != -1) {
-        //         float start_time = speech_start_i * segment_duration;  // 开始时间（秒）
-        //         float end_time = speech_end_i * segment_duration;      // 结束时间（秒）
-        //         std::cout << "Speech segment: Start time = " << start_time << "s, End time = " << end_time << "s" << std::endl;
-        //     } else if (speech_start_i != -1) {
-        //         float start_time = speech_start_i * segment_duration;  // 仅有开始时间
-        //         std::cout << "Speech segment: Start time = " << start_time << "s, End time = Unknown" << std::endl;
-        //     } else if (speech_end_i != -1) {
-        //         float end_time = speech_end_i * segment_duration;      // 仅有结束时间
-        //         std::cout << "Speech segment: Start time = Unknown, End time = " << end_time << "s" << std::endl;
-        //     }
-        // }
-
         for(auto vad_segment: vad_segments){
             int speech_start_i=-1, speech_end_i=-1;
             if(vad_segment[0] != -1){
@@ -1358,7 +1335,6 @@ void Audio::Split(VadModel* vad_obj, int chunk_len, bool input_finished, ASR_TYP
                 // 转换为 int64_t 类型并赋值给类的成员变量
                 this->start = static_cast<int64_t>(start_time);
                 this->end = static_cast<int64_t>(end_time);
-                //std::cout << "Speech segment: Start time = " << this->start << "ms, End time = " << this->end << "ms" << std::endl;
                 speech_start = -1;
                 speech_offline_start = -1;
             // [70, -1]
@@ -1386,7 +1362,6 @@ void Audio::Split(VadModel* vad_obj, int chunk_len, bool input_finished, ASR_TYP
 
                 float start_time = speech_start_i * segment_duration;  // 仅有开始时间
                 this->start = static_cast<int64_t>(start_time);
-                //std::cout << "Speech segment: Start time = " << this->start << "ms, End time = Unknown" << std::endl;
             }else if(speech_end_i != -1){ // [-1,100]
                 if(speech_start == -1 || speech_offline_start == -1){
                     LOG(ERROR) <<"Vad start is null while vad end is available. Set vad start 0" ;
@@ -1438,7 +1413,6 @@ void Audio::Split(VadModel* vad_obj, int chunk_len, bool input_finished, ASR_TYP
                 }
                 float end_time = speech_end_i * segment_duration;      // 仅有结束时间
                 this->end = static_cast<int64_t>(end_time);
-                //std::cout << "Speech segment: Start time = Unknown, End time = " << this->end << "ms" << std::endl;
                 speech_start = -1;
                 speech_offline_start = -1;
             }
