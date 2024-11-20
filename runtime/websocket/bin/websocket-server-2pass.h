@@ -61,7 +61,11 @@ typedef struct {
   std::string online_res = "";
   std::string tpass_res = "";
   std::shared_ptr<asio::io_context::strand>  strand_; // for data execute in order
-  FUNASR_DEC_HANDLE decoder_handle=nullptr; 
+  FUNASR_DEC_HANDLE decoder_handle=nullptr;
+
+  bool is_sentence_started = false;
+  int64_t start_time = 0;
+  int64_t end_time = 0;
 } FUNASR_MESSAGE;
 
 // See https://wiki.mozilla.org/Security/Server_Side_TLS for more details about
@@ -114,7 +118,9 @@ class WebSocketServer {
       server_->clear_access_channels(websocketpp::log::alevel::all);
     }
   }
-  void do_decoder(std::vector<char>& buffer, websocketpp::connection_hdl& hdl,
+  void do_decoder(std::map<websocketpp::connection_hdl, std::shared_ptr<FUNASR_MESSAGE>,std::owner_less<websocketpp::connection_hdl>>& data_map,
+                  std::vector<char>& buffer, 
+                  websocketpp::connection_hdl& hdl,
                   nlohmann::json& msg,
                   std::vector<std::vector<std::string>>& punc_cache,
                   std::vector<std::vector<float>> &hotwords_embedding,
