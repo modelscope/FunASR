@@ -525,7 +525,6 @@
 		audio->Split(vad_online_handle, chunk_len, input_finished, mode);
 		p_result->start = audio->start;
 		p_result->end = audio->end;
-		//std::cout << "p_result: Start time = " << p_result->start << "ms, End time = " << p_result->end << "ms" << std::endl;
 
 		funasr::AudioFrame* frame = nullptr;
 		while(audio->FetchChunck(frame) > 0){

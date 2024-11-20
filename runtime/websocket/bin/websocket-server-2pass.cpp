@@ -283,8 +283,7 @@ void WebSocketServer::on_open(websocketpp::connection_hdl hdl) {
     data_msg->msg["audio_fs"] = 16000; // default is 16k
     data_msg->msg["access_num"] = 0; // the number of access for this object, when it is 0, we can free it saftly
     data_msg->msg["is_eof"]=false; // if this connection is closed
-    //data_msg->msg["svs_lang"]="auto";
-    data_msg->msg["svs_lang"]="zh"; // SenseVoice使用时，只需要中文则设为zh
+    data_msg->msg["svs_lang"]="auto";
     data_msg->msg["svs_itn"]=true;
     FUNASR_DEC_HANDLE decoder_handle =
       FunASRWfstDecoderInit(tpass_handle, ASR_TWO_PASS, global_beam_, lattice_beam_, am_scale_);
