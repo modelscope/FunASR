@@ -143,7 +143,24 @@ class Fsmn_vad:
         return segments
 
     def load_data(self, wav_content: Union[str, np.ndarray, List[str]], fs: int = None) -> List:
+        
+        def convert_to_wav(input_path, output_path):
+            from pydub import AudioSegment
+            try:
+                audio = AudioSegment.from_mp3(input_path)
+                audio.export(output_path, format="wav")
+                print("音频文件为mp3格式，已转换为wav格式")
+                
+            except Exception as e:
+                print(f"转换失败:{e}")
+
         def load_wav(path: str) -> np.ndarray:
+            if not path.lower().endswith('.wav'):
+                import os
+                input_path = path
+                path = os.path.splitext(path)[0]+'.wav'
+                convert_to_wav(input_path,path) #将mp3格式转换成wav格式
+
             waveform, _ = librosa.load(path, sr=fs)
             return waveform
 

@@ -139,9 +139,9 @@ class ClusterBackend(torch.nn.Module):
         model_config: The model config.
     """
 
-    def __init__(self):
+    def __init__(self, merge_thr=0.78):
         super().__init__()
-        self.model_config = {"merge_thr": 0.78}
+        self.model_config = {"merge_thr": merge_thr}
         # self.other_config = kwargs
 
         self.spectral_cluster = SpectralCluster()

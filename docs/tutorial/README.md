@@ -7,6 +7,7 @@ FunASR has open-sourced a large number of pre-trained models on industrial data.
  <a href="#Inference"> Model Inference </a>   
 ｜<a href="#Training"> Model Training and Testing </a>
 ｜<a href="#Export"> Model Export and Testing </a>
+｜<a href="#new-model-registration-tutorial"> New Model Registration Tutorial </a>
 </h4>
 </div>
 
@@ -95,7 +96,9 @@ Recommendations:
 When you input long audio and encounter Out Of Memory (OOM) issues, since memory usage tends to increase quadratically with audio length, consider the following three scenarios:
 
 a) At the beginning of inference, memory usage primarily depends on `batch_size_s`. Appropriately reducing this value can decrease memory usage.
+
 b) During the middle of inference, when encountering long audio segments cut by VAD and the total token count is less than `batch_size_s`, yet still facing OOM, you can appropriately reduce `batch_size_threshold_s`. If the threshold is exceeded, the batch size is forced to 1.
+
 c) Towards the end of inference, if long audio segments cut by VAD have a total token count less than `batch_size_s` and exceed the `threshold` batch_size_threshold_s, forcing the batch size to 1 and still facing OOM, you may reduce `max_single_segment_time` to shorten the VAD audio segment length.
 
 #### Speech Recognition (Streaming)
@@ -422,3 +425,59 @@ print(result)
 ```
 
 More examples ref to [demo](https://github.com/alibaba-damo-academy/FunASR/tree/main/runtime/python/onnxruntime)
+
+
+<a name="new-model-registration-tutorial"></a>
+## New Model Registration Tutorial
+
+### Viewing the Registry
+
+```plaintext
+from funasr.register import tables
+
+tables.print()
+```
+
+Supports viewing the registry of a specified type: `tables.print("model")`
+
+### Registering Models
+
+```python
+from funasr.register import tables
+
+@tables.register("model_classes", "SenseVoiceSmall")
+class SenseVoiceSmall(nn.Module):
+  def __init__(*args, **kwargs):
+    ...
+
+  def forward(
+      self,
+      **kwargs,
+  ):  
+
+  def inference(
+      self,
+      data_in,
+      data_lengths=None,
+      key: list = None,
+      tokenizer=None,
+      frontend=None,
+      **kwargs,
+  ):
+    ...
+
+```
+
+Add `@tables.register("model_classes","SenseVoiceSmall")` before the class name that needs to be registered to complete the registration. The class needs to implement the methods: __init__, forward, and inference.
+
+Complete code: [https://github.com/modelscope/FunASR/blob/main/funasr/models/sense_voice/model.py#L443](https://github.com/modelscope/FunASR/blob/main/funasr/models/sense_voice/model.py#L443)
+
+After registration, specify the newly registered model in config.yaml to define the model
+
+```python
+model: SenseVoiceSmall
+model_conf:
+  ...
+```
+
+[More detailed tutorial documents](https://github.com/modelscope/FunASR/blob/main/docs/tutorial/Tables.md)

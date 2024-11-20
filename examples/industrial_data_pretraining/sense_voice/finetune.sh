@@ -10,7 +10,7 @@ gpu_num=$(echo $CUDA_VISIBLE_DEVICES | awk -F "," '{print NF}')
 # model_name from model_hub, or model_dir in local path
 
 ## option 1, download model automatically
-model_name_or_model_dir="iic/SenseVoiceCTC"
+model_name_or_model_dir="iic/SenseVoiceSmall"
 
 ## option 2, download model by git
 #local_path_root=${workspace}/modelscope_models
@@ -43,7 +43,7 @@ DISTRIBUTED_ARGS="
 echo $DISTRIBUTED_ARGS
 
 # funasr trainer path
-train_tool=`dirname $(which funasr)`/train_ds.py
+train_tool=../../../funasr/bin/train_ds.py
 
 torchrun $DISTRIBUTED_ARGS \
 ${train_tool} \

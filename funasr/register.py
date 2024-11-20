@@ -6,6 +6,8 @@ import re
 
 @dataclass
 class RegisterTables:
+    """Registry system for classes."""
+
     model_classes = {}
     frontend_classes = {}
     specaug_classes = {}
@@ -21,17 +23,14 @@ class RegisterTables:
     dataset_classes = {}
     index_ds_classes = {}
 
-    def print(self, key=None):
+    def print(self, key: str = None) -> None:
+        """Print registered classes."""
         print("\ntables: \n")
         fields = vars(self)
+        headers = ["register name", "class name", "class location"]
         for classes_key, classes_dict in fields.items():
-
-            flag = True
-            if key is not None:
-                flag = key in classes_key
-            if classes_key.endswith("_meta") and flag:
+            if classes_key.endswith("_meta") and (key is None or key in classes_key):
                 print(f"-----------    ** {classes_key.replace('_meta', '')} **    --------------")
-                headers = ["register name", "class name", "class location"]
                 metas = []
                 for register_key, meta in classes_dict.items():
                     metas.append(meta)
@@ -47,45 +46,40 @@ class RegisterTables:
                     )
         print("\n")
 
-    def register(self, register_tables_key: str, key=None):
-        def decorator(target_class):
+    def register(self, register_tables_key: str, key: str = None) -> callable:
+        """Decorator to register a class."""
 
+        def decorator(target_class):
             if not hasattr(self, register_tables_key):
                 setattr(self, register_tables_key, {})
-                logging.info("new registry table has been added: {}".format(register_tables_key))
+                logging.info(f"New registry table added: {register_tables_key}")
 
             registry = getattr(self, register_tables_key)
             registry_key = key if key is not None else target_class.__name__
 
-            # assert not registry_key in registry, "(key: {} / class: {}) has been registered already，in {}".format(
-            #     registry_key, target_class, register_tables_key)
+            if registry_key in registry:
+                print(f"Key {registry_key} already exists in {register_tables_key}, re-register")
 
             registry[registry_key] = target_class
 
-            # meta， headers = ["class name", "register name", "class location"]
             register_tables_key_meta = register_tables_key + "_meta"
             if not hasattr(self, register_tables_key_meta):
                 setattr(self, register_tables_key_meta, {})
             registry_meta = getattr(self, register_tables_key_meta)
-            # doc = target_class.__doc__
+
             class_file = inspect.getfile(target_class)
             class_line = inspect.getsourcelines(target_class)[1]
             pattern = r"^.+/funasr/"
             class_file = re.sub(pattern, "funasr/", class_file)
-            # meata_data = [f"{target_class.__name__}", f"{class_file}:{class_line}"]
-            meata_data = [
-                f"{registry_key}",
-                f"{target_class.__name__}",
+            meta_data = [
+                registry_key,
+                target_class.__name__,
                 f"{class_file}:{class_line}",
             ]
-            registry_meta[registry_key] = meata_data
-            # print(f"Registering class: {class_file}:{class_line} - {target_class.__name__} as {registry_key}")
+            registry_meta[registry_key] = meta_data
             return target_class
 
         return decorator
 
 
 tables = RegisterTables()
-
-
-import funasr

@@ -43,7 +43,7 @@ cd funasr/runtime/python/websocket
 python funasr_wss_server.py --port 10095
 ```
 
-详细参数配置与解析（[点击此处](https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/runtime/python/websocket)）
+详细参数配置与解析（[点击此处](https://github.com/modelscope/FunASR/tree/main/runtime/python/websocket)）
 
 #### html5服务（可选）
 
@@ -67,14 +67,14 @@ python h5Server.py --host 0.0.0.0 --port 1337
 curl -O https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/shell/funasr-runtime-deploy-offline-cpu-zh.sh;
 sudo bash funasr-runtime-deploy-offline-cpu-zh.sh install --workspace /root/funasr-runtime-resources
 ```
-详细参数配置与解析（[点击此处](https://github.com/alibaba-damo-academy/FunASR/blob/main/funasr/runtime/docs/SDK_tutorial_zh.md)）
+详细参数配置与解析（[点击此处](https://github.com/alibaba-damo-academy/FunASR/blob/main/runtime/docs/SDK_tutorial_zh.md)）
 
 
 ## 客户端测试
 
 ### 方式一
 
-html客户端直连，手动下载客户端（[点击此处](https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/runtime/html5/static)）至本地，打开`index.html`网页，输入wss地址与端口号即可使用
+html客户端直连，手动下载客户端（[点击此处](https://github.com/alibaba-damo-academy/FunASR/tree/main/runtime/html5/static)）至本地，打开`index.html`网页，输入wss地址与端口号即可使用
 
 ### 方式二
 
