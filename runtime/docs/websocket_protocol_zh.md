@@ -21,6 +21,8 @@ message为（需要用json序列化）：
 `audio_fs`：当输入音频为pcm数据时，需要加上音频采样率参数
 `hotwords`：如果使用热词，需要向服务端发送热词数据（字符串），格式为 "{"阿里巴巴":20,"通义实验室":30}"
 `itn`: 设置是否使用itn，默认True
+`svs_lang`: 设置SenseVoiceSmall模型语种，默认为“auto”
+`svs_itn`: 设置SenseVoiceSmall模型是否开启标点、ITN，默认为True
 ```
 注：热词权重仅在fst热词服务下生效。
 
@@ -73,6 +75,8 @@ message为（需要用json序列化）：
 `audio_fs`：当输入音频为pcm数据是，需要加上音频采样率参数
 `hotwords`：如果使用热词，需要向服务端发送热词数据（字符串），格式为 "{"阿里巴巴":20,"通义实验室":30}"
 `itn`: 设置是否使用itn，默认True
+`svs_lang`: 设置SenseVoiceSmall模型语种，默认为“auto”
+`svs_itn`: 设置SenseVoiceSmall模型是否开启标点、ITN，默认为True
 ```
 注：热词权重仅在fst热词服务下生效。
 
