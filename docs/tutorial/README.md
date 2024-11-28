@@ -1,4 +1,4 @@
-([简体中文](./README_zh.md)|English)
+([简体中文](https://github.com/modelscope/FunASR/blob/main/docs/tutorial/README_zh.md)|English)
 
 FunASR has open-sourced a large number of pre-trained models on industrial data. You are free to use, copy, modify, and share FunASR models under the [Model License Agreement](https://github.com/alibaba-damo-academy/FunASR/blob/main/MODEL_LICENSE). Below, we list some representative models. For a comprehensive list, please refer to our [Model Zoo](https://github.com/alibaba-damo-academy/FunASR/tree/main/model_zoo).
 
