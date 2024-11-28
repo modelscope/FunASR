@@ -58,7 +58,9 @@ class RegisterTables:
             registry_key = key if key is not None else target_class.__name__
 
             if registry_key in registry:
-                print(f"Key {registry_key} already exists in {register_tables_key}, re-register")
+                logging.warning(
+                    f"Key {registry_key} already exists in {register_tables_key}, re-register"
+                )
 
             registry[registry_key] = target_class
 
