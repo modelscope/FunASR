@@ -387,7 +387,7 @@ if __name__ == "__main__":
             p.start()
             process_list.append(p)
 
-        for i in process_list:
+        for p in process_list:
             p.join()
 
         print("end")
