@@ -78,5 +78,6 @@ torchrun $DISTRIBUTED_ARGS \
 ++train_conf.avg_nbest_model=10 \
 ++train_conf.use_deepspeed=false \
 ++train_conf.deepspeed_config=${deepspeed_config} \
+++train_conf.find_unused_parameters=true \
 ++optim_conf.lr=0.0002 \
 ++output_dir="${output_dir}" &> ${log_file}
