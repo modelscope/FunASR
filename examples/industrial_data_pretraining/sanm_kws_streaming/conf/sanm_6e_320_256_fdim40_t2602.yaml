@@ -18,7 +18,7 @@ encoder_conf:
     pos_enc_class: SinusoidalPositionEncoder
     normalize_before: true
     kernel_size: 11
-    sanm_shfit: 0
+    sanm_shift: 0
     selfattention_layer_type: sanm
     chunk_size:
     - 16
