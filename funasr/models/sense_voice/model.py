@@ -94,7 +94,7 @@ class MultiHeadedAttentionSANM(nn.Module):
         n_feat,
         dropout_rate,
         kernel_size,
-        sanm_shfit=0,
+        sanm_shift=0,
         lora_list=None,
         lora_rank=8,
         lora_alpha=16,
@@ -120,17 +120,17 @@ class MultiHeadedAttentionSANM(nn.Module):
         )
         # padding
         left_padding = (kernel_size - 1) // 2
-        if sanm_shfit > 0:
-            left_padding = left_padding + sanm_shfit
+        if sanm_shift > 0:
+            left_padding = left_padding + sanm_shift
         right_padding = kernel_size - 1 - left_padding
         self.pad_fn = nn.ConstantPad1d((left_padding, right_padding), 0.0)
 
-    def forward_fsmn(self, inputs, mask, mask_shfit_chunk=None):
+    def forward_fsmn(self, inputs, mask, mask_shift_chunk=None):
         b, t, d = inputs.size()
         if mask is not None:
             mask = torch.reshape(mask, (b, -1, 1))
-            if mask_shfit_chunk is not None:
-                mask = mask * mask_shfit_chunk
+            if mask_shift_chunk is not None:
+                mask = mask * mask_shift_chunk
             inputs = inputs * mask
 
         x = inputs.transpose(1, 2)
@@ -210,7 +210,7 @@ class MultiHeadedAttentionSANM(nn.Module):
 
         return self.linear_out(x)  # (batch, time1, d_model)
 
-    def forward(self, x, mask, mask_shfit_chunk=None, mask_att_chunk_encoder=None):
+    def forward(self, x, mask, mask_shift_chunk=None, mask_att_chunk_encoder=None):
         """Compute scaled dot product attention.
 
         Args:
@@ -225,7 +225,7 @@ class MultiHeadedAttentionSANM(nn.Module):
 
         """
         q_h, k_h, v_h, v = self.forward_qkv(x)
-        fsmn_memory = self.forward_fsmn(v, mask, mask_shfit_chunk)
+        fsmn_memory = self.forward_fsmn(v, mask, mask_shift_chunk)
         q_h = q_h * self.d_k ** (-0.5)
         scores = torch.matmul(q_h, k_h.transpose(-2, -1))
         att_outs = self.forward_attention(v_h, scores, mask, mask_att_chunk_encoder)
@@ -325,7 +325,7 @@ class EncoderLayerSANM(nn.Module):
         self.stochastic_depth_rate = stochastic_depth_rate
         self.dropout_rate = dropout_rate
 
-    def forward(self, x, mask, cache=None, mask_shfit_chunk=None, mask_att_chunk_encoder=None):
+    def forward(self, x, mask, cache=None, mask_shift_chunk=None, mask_att_chunk_encoder=None):
         """Compute encoded features.
 
         Args:
@@ -362,7 +362,7 @@ class EncoderLayerSANM(nn.Module):
                     self.self_attn(
                         x,
                         mask,
-                        mask_shfit_chunk=mask_shfit_chunk,
+                        mask_shift_chunk=mask_shift_chunk,
                         mask_att_chunk_encoder=mask_att_chunk_encoder,
                     ),
                 ),
@@ -378,7 +378,7 @@ class EncoderLayerSANM(nn.Module):
                     self.self_attn(
                         x,
                         mask,
-                        mask_shfit_chunk=mask_shfit_chunk,
+                        mask_shift_chunk=mask_shift_chunk,
                         mask_att_chunk_encoder=mask_att_chunk_encoder,
                     )
                 )
@@ -387,7 +387,7 @@ class EncoderLayerSANM(nn.Module):
                     self.self_attn(
                         x,
                         mask,
-                        mask_shfit_chunk=mask_shfit_chunk,
+                        mask_shift_chunk=mask_shift_chunk,
                         mask_att_chunk_encoder=mask_att_chunk_encoder,
                     )
                 )
@@ -401,7 +401,7 @@ class EncoderLayerSANM(nn.Module):
         if not self.normalize_before:
             x = self.norm2(x)
 
-        return x, mask, cache, mask_shfit_chunk, mask_att_chunk_encoder
+        return x, mask, cache, mask_shift_chunk, mask_att_chunk_encoder
 
     def forward_chunk(self, x, cache=None, chunk_size=None, look_back=0):
         """Compute encoded features.
@@ -468,7 +468,7 @@ class SenseVoiceEncoderSmall(nn.Module):
         positionwise_conv_kernel_size: int = 1,
         padding_idx: int = -1,
         kernel_size: int = 11,
-        sanm_shfit: int = 0,
+        sanm_shift: int = 0,
         selfattention_layer_type: str = "sanm",
         **kwargs,
     ):
@@ -493,7 +493,7 @@ class SenseVoiceEncoderSmall(nn.Module):
             output_size,
             attention_dropout_rate,
             kernel_size,
-            sanm_shfit,
+            sanm_shift,
         )
         encoder_selfattn_layer_args = (
             attention_heads,
@@ -501,7 +501,7 @@ class SenseVoiceEncoderSmall(nn.Module):
             output_size,
             attention_dropout_rate,
             kernel_size,
-            sanm_shfit,
+            sanm_shift,
         )
 
         self.encoders0 = nn.ModuleList(
