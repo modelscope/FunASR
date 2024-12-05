@@ -2,7 +2,7 @@
 from funasr import AutoModel
 
 model = AutoModel(
-    model="/raid/t3cv/wangch/WORK_SAPCE/ASR/models/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch"
+    model="iic/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch"
 )
 
 res = model.export(type="onnx", quantize=False, opset_version=13, device='cuda')  # fp32 onnx-gpu
