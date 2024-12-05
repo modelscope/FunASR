@@ -65,8 +65,9 @@ def _onnx(
     **kwargs,
 ):
 
+    device = kwargs.get("device", "cpu")
     dummy_input = model.export_dummy_inputs()
-    dummy_input = (dummy_input[0].to("cuda"), dummy_input[1].to("cuda"))
+    dummy_input = (dummy_input[0].to(device), dummy_input[1].to(device))
 
 
     verbose = kwargs.get("verbose", False)
