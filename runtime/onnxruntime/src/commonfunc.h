@@ -12,6 +12,8 @@ typedef struct
     std::string stamp_sents;
     std::string tpass_msg;
     float snippet_time;
+    int64_t start = 0;
+    int64_t end = 0;
 }FUNASR_RECOG_RESULT;
 
 typedef struct
