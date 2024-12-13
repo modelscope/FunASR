@@ -42,6 +42,11 @@ string CTTransformerOnline::AddPunc(const char* sz_input, vector<string> &arr_ca
     vector<int> InputData;
     string strText; //full_text
     strText = accumulate(arr_cache.begin(), arr_cache.end(), strText);
+
+    // 如果上一句的结尾是英语字母，并且这一句的开始也是英语字母，应该添加空格
+    if ((strText.size() > 0 and !(strText[strText.size()-1] & 0x80)) && (strlen(sz_input) > 0 && !(sz_input[0] & 0x80)))
+        strText += " ";
+
     strText += sz_input;  // full_text = precache + text  
     m_tokenizer.Tokenize(strText.c_str(), strOut, InputData);
 
@@ -107,7 +112,7 @@ string CTTransformerOnline::AddPunc(const char* sz_input, vector<string> &arr_ca
     {
         if (!(sentence_words_list[i][0] & 0x80) && (i + 1) < sentence_words_list.size() && !(sentence_words_list[i + 1][0] & 0x80))
         {
-            sentence_words_list[i] = " " + sentence_words_list[i];
+            sentence_words_list[i] = sentence_words_list[i] + " ";
         }
         if (nSkipNum < arr_cache.size())  //    if skip_num < len(cache):
             nSkipNum++;
