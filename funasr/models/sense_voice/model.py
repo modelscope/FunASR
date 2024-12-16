@@ -19,7 +19,7 @@ from funasr.register import tables
 
 
 from funasr.models.paraformer.search import Hypothesis
-from funasr.models.sense_voice.utils.ctc_alignment import ctc_forced_align
+from .utils.ctc_alignment import ctc_forced_align
 
 
 class SinusoidalPositionEncoder(torch.nn.Module):
@@ -557,7 +557,7 @@ class SenseVoiceEncoderSmall(nn.Module):
     ):
         """Embed positions in tensor."""
         maxlen = xs_pad.shape[1]
-        masks = sequence_mask(ilens, maxlen = maxlen, device=ilens.device)[:, None, :]
+        masks = sequence_mask(ilens, maxlen=maxlen, device=ilens.device)[:, None, :]
 
         xs_pad *= self.output_size() ** 0.5
 
@@ -916,27 +916,28 @@ class SenseVoiceSmall(nn.Module):
 
             if output_timestamp:
                 from itertools import groupby
+
                 timestamp = []
                 tokens = tokenizer.text2tokens(text)[4:]
-                logits_speech = self.ctc.softmax(encoder_out)[i, 4:encoder_out_lens[i].item(), :]
+                logits_speech = self.ctc.softmax(encoder_out)[i, 4 : encoder_out_lens[i].item(), :]
                 pred = logits_speech.argmax(-1).cpu()
-                logits_speech[pred==self.blank_id, self.blank_id] = 0
+                logits_speech[pred == self.blank_id, self.blank_id] = 0
                 align = ctc_forced_align(
                     logits_speech.unsqueeze(0).float(),
                     torch.Tensor(token_int[4:]).unsqueeze(0).long().to(logits_speech.device),
-                    (encoder_out_lens-4).long(),
-                    torch.tensor(len(token_int)-4).unsqueeze(0).long().to(logits_speech.device),
+                    (encoder_out_lens - 4).long(),
+                    torch.tensor(len(token_int) - 4).unsqueeze(0).long().to(logits_speech.device),
                     ignore_id=self.ignore_id,
                 )
-                pred = groupby(align[0, :encoder_out_lens[0]])
+                pred = groupby(align[0, : encoder_out_lens[0]])
                 _start = 0
                 token_id = 0
                 ts_max = encoder_out_lens[i] - 4
                 for pred_token, pred_frame in pred:
                     _end = _start + len(list(pred_frame))
                     if pred_token != 0:
-                        ts_left = max((_start*60-30)/1000, 0)
-                        ts_right = min((_end*60-30)/1000, (ts_max*60-30)/1000)
+                        ts_left = max((_start * 60 - 30) / 1000, 0)
+                        ts_right = min((_end * 60 - 30) / 1000, (ts_max * 60 - 30) / 1000)
                         timestamp.append([tokens[token_id], ts_left, ts_right])
                         token_id += 1
                     _start = _end
@@ -952,19 +953,20 @@ class SenseVoiceSmall(nn.Module):
         timestamp_new = []
         for i, t in enumerate(timestamp):
             word, start, end = t
-            if word == '▁':
+            if word == "▁":
                 continue
             if i == 0:
                 # timestamp_new.append([word, start, end])
-                timestamp_new.append([int(start*1000), int(end*1000)])
+                timestamp_new.append([int(start * 1000), int(end * 1000)])
             elif word.startswith("▁") or len(word) == 1 or not word[1].isalpha():
                 word = word[1:]
                 # timestamp_new.append([word, start, end])
-                timestamp_new.append([int(start*1000), int(end*1000)])
+                timestamp_new.append([int(start * 1000), int(end * 1000)])
             else:
                 # timestamp_new[-1][0] += word
-                timestamp_new[-1][1] = int(end*1000)
+                timestamp_new[-1][1] = int(end * 1000)
         return timestamp_new
+
     def export(self, **kwargs):
         from export_meta import export_rebuild_model
 
@@ -974,4 +976,3 @@ class SenseVoiceSmall(nn.Module):
         return models
 
         return results, meta_data
-

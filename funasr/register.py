@@ -52,13 +52,13 @@ class RegisterTables:
         def decorator(target_class):
             if not hasattr(self, register_tables_key):
                 setattr(self, register_tables_key, {})
-                logging.info(f"New registry table added: {register_tables_key}")
+                logging.debug(f"New registry table added: {register_tables_key}")
 
             registry = getattr(self, register_tables_key)
             registry_key = key if key is not None else target_class.__name__
 
             if registry_key in registry:
-                logging.warning(
+                logging.debug(
                     f"Key {registry_key} already exists in {register_tables_key}, re-register"
                 )
 
