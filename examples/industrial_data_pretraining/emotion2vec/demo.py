@@ -16,6 +16,7 @@ model = AutoModel(
     # vad_model="iic/speech_fsmn_vad_zh-cn-16k-common-pytorch",
     # vad_model_revision="master",
     # vad_kwargs={"max_single_segment_time": 2000},
+    hub="ms",  # "ms" or "modelscope" for Mainland China users; "hf" or "huggingface" for Other overseas users
 )
 
 wav_file = f"{model.model_path}/example/test.wav"

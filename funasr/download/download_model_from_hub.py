@@ -7,9 +7,9 @@ from funasr.download.name_maps_from_hub import name_maps_ms, name_maps_hf, name_
 
 def download_model(**kwargs):
     hub = kwargs.get("hub", "ms")
-    if hub == "ms":
+    if hub == "ms" or hub == "modelscope":
         kwargs = download_from_ms(**kwargs)
-    elif hub == "hf":
+    elif hub == "hf" or hub == "huggingface":
         kwargs = download_from_hf(**kwargs)
     elif hub == "openai":
         model_or_path = kwargs.get("model")
