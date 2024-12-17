@@ -1,7 +1,7 @@
 import time
 import sys
 import librosa
-from funasr.utils.types import str2bool
+from funasr.utils.type_utils import str2bool
 
 import argparse
 
