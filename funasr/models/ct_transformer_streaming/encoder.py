@@ -56,7 +56,7 @@ class EncoderLayerSANM(torch.nn.Module):
         self.stochastic_depth_rate = stochastic_depth_rate
         self.dropout_rate = dropout_rate
 
-    def forward(self, x, mask, cache=None, mask_shfit_chunk=None, mask_att_chunk_encoder=None):
+    def forward(self, x, mask, cache=None, mask_shift_chunk=None, mask_att_chunk_encoder=None):
         """Compute encoded features.
 
         Args:
@@ -93,7 +93,7 @@ class EncoderLayerSANM(torch.nn.Module):
                     self.self_attn(
                         x,
                         mask,
-                        mask_shfit_chunk=mask_shfit_chunk,
+                        mask_shift_chunk=mask_shift_chunk,
                         mask_att_chunk_encoder=mask_att_chunk_encoder,
                     ),
                 ),
@@ -109,7 +109,7 @@ class EncoderLayerSANM(torch.nn.Module):
                     self.self_attn(
                         x,
                         mask,
-                        mask_shfit_chunk=mask_shfit_chunk,
+                        mask_shift_chunk=mask_shift_chunk,
                         mask_att_chunk_encoder=mask_att_chunk_encoder,
                     )
                 )
@@ -118,7 +118,7 @@ class EncoderLayerSANM(torch.nn.Module):
                     self.self_attn(
                         x,
                         mask,
-                        mask_shfit_chunk=mask_shfit_chunk,
+                        mask_shift_chunk=mask_shift_chunk,
                         mask_att_chunk_encoder=mask_att_chunk_encoder,
                     )
                 )
@@ -132,7 +132,7 @@ class EncoderLayerSANM(torch.nn.Module):
         if not self.normalize_before:
             x = self.norm2(x)
 
-        return x, mask, cache, mask_shfit_chunk, mask_att_chunk_encoder
+        return x, mask, cache, mask_shift_chunk, mask_att_chunk_encoder
 
     def forward_chunk(self, x, cache=None, chunk_size=None, look_back=0):
         """Compute encoded features.
@@ -198,7 +198,7 @@ class SANMVadEncoder(torch.nn.Module):
         interctc_layer_idx: List[int] = [],
         interctc_use_conditioning: bool = False,
         kernel_size: int = 11,
-        sanm_shfit: int = 0,
+        sanm_shift: int = 0,
         selfattention_layer_type: str = "sanm",
     ):
         super().__init__()
@@ -277,7 +277,7 @@ class SANMVadEncoder(torch.nn.Module):
                 output_size,
                 attention_dropout_rate,
                 kernel_size,
-                sanm_shfit,
+                sanm_shift,
             )
 
             encoder_selfattn_layer_args = (
@@ -286,7 +286,7 @@ class SANMVadEncoder(torch.nn.Module):
                 output_size,
                 attention_dropout_rate,
                 kernel_size,
-                sanm_shfit,
+                sanm_shift,
             )
 
         self.encoders0 = repeat(

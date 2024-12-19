@@ -69,7 +69,7 @@ class EncoderLayerSANM(nn.Module):
         self.stochastic_depth_rate = stochastic_depth_rate
         self.dropout_rate = dropout_rate
 
-    def forward(self, x, mask, cache=None, mask_shfit_chunk=None, mask_att_chunk_encoder=None):
+    def forward(self, x, mask, cache=None, mask_shift_chunk=None, mask_att_chunk_encoder=None):
         """Compute encoded features.
 
         Args:
@@ -106,7 +106,7 @@ class EncoderLayerSANM(nn.Module):
                     self.self_attn(
                         x,
                         mask,
-                        mask_shfit_chunk=mask_shfit_chunk,
+                        mask_shift_chunk=mask_shift_chunk,
                         mask_att_chunk_encoder=mask_att_chunk_encoder,
                     ),
                 ),
@@ -122,7 +122,7 @@ class EncoderLayerSANM(nn.Module):
                     self.self_attn(
                         x,
                         mask,
-                        mask_shfit_chunk=mask_shfit_chunk,
+                        mask_shift_chunk=mask_shift_chunk,
                         mask_att_chunk_encoder=mask_att_chunk_encoder,
                     )
                 )
@@ -131,7 +131,7 @@ class EncoderLayerSANM(nn.Module):
                     self.self_attn(
                         x,
                         mask,
-                        mask_shfit_chunk=mask_shfit_chunk,
+                        mask_shift_chunk=mask_shift_chunk,
                         mask_att_chunk_encoder=mask_att_chunk_encoder,
                     )
                 )
@@ -145,7 +145,7 @@ class EncoderLayerSANM(nn.Module):
         if not self.normalize_before:
             x = self.norm2(x)
 
-        return x, mask, cache, mask_shfit_chunk, mask_att_chunk_encoder
+        return x, mask, cache, mask_shift_chunk, mask_att_chunk_encoder
 
     def forward_chunk(self, x, cache=None, chunk_size=None, look_back=0):
         """Compute encoded features.
@@ -212,7 +212,7 @@ class SANMEncoder(nn.Module):
         interctc_layer_idx: List[int] = [],
         interctc_use_conditioning: bool = False,
         kernel_size: int = 11,
-        sanm_shfit: int = 0,
+        sanm_shift: int = 0,
         lora_list: List[str] = None,
         lora_rank: int = 8,
         lora_alpha: int = 16,
@@ -299,7 +299,7 @@ class SANMEncoder(nn.Module):
                 output_size,
                 attention_dropout_rate,
                 kernel_size,
-                sanm_shfit,
+                sanm_shift,
                 lora_list,
                 lora_rank,
                 lora_alpha,
@@ -312,7 +312,7 @@ class SANMEncoder(nn.Module):
                 output_size,
                 attention_dropout_rate,
                 kernel_size,
-                sanm_shfit,
+                sanm_shift,
                 lora_list,
                 lora_rank,
                 lora_alpha,
