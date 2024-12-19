@@ -312,12 +312,6 @@ model = AutoModel(model="paraformer", device="cpu")
 res = model.export(quantize=False)
 ```
 
-### optimize onnx
-```shell
-# pip3 install -U onnxslim
-onnxslim model.onnx model.onnx
-```
-
 ### Test ONNX
 ```python
 # pip3 install -U funasr-onnx

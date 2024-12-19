@@ -421,6 +421,12 @@ model = AutoModel(model="paraformer")
 res = model.export(quantize=False)
 ```
 
+### 优化onnx
+```shell
+# pip3 install -U onnxslim
+onnxslim model.onnx model.onnx
+```
+
 ### 测试ONNX
 ```python
 # pip3 install -U funasr-onnx
