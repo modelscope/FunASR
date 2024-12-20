@@ -181,12 +181,12 @@ class SenseVoiceSmall:
             )
             for b in range(feats.shape[0]):
                 # back to torch.Tensor
-                if isinstance(ctc_logits, np.ndarray):
-                    ctc_logits = torch.from_numpy(ctc_logits).float()
+                # if isinstance(ctc_logits, np.ndarray):
+                #     ctc_logits = torch.from_numpy(ctc_logits).float()
                 # support batch_size=1 only currently
                 x = ctc_logits[b, : encoder_out_lens[b].item(), :]
                 yseq = x.argmax(dim=-1)
-                yseq = torch.unique_consecutive(yseq, dim=-1)
+                yseq = np.unique(yseq, dim=-1)
 
                 mask = yseq != self.blank_id
                 token_int = yseq[mask].tolist()
