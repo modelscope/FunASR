@@ -7,3 +7,4 @@ model = AutoModel(
 
 res = model.export(type="onnx", quantize=False, opset_version=13, device='cuda')  # fp32 onnx-gpu
 # res = model.export(type="onnx_fp16", quantize=False, opset_version=13, device='cuda')  # fp16 onnx-gpu
+ekfpoewjufewpoewpo ki
