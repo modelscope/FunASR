@@ -10,7 +10,6 @@ import torchaudio
 import time
 import logging
 from torch.nn.utils.rnn import pad_sequence
-from pydub import AudioSegment
 
 try:
     from funasr.download.file import download_from_url
@@ -19,6 +18,11 @@ except:
 import pdb
 import subprocess
 from subprocess import CalledProcessError, run
+
+try:
+    from pydub import AudioSegment
+except:
+    pass
 
 
 def is_ffmpeg_installed():
@@ -166,7 +170,12 @@ def validate_frame_rate(
     byte_data = BytesIO(input)
 
     # 使用 pydub 加载音频
-    audio = AudioSegment.from_file(byte_data)
+    try:
+        audio = AudioSegment.from_file(byte_data)
+    except:
+        raise RuntimeError(
+            "You are decoding the pcm data, please install pydub first. via `pip install pydub`."
+        )
 
     # 确保采样率为 16000 Hz
     if audio.frame_rate != fs:
