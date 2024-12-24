@@ -521,10 +521,10 @@ class UniASR(torch.nn.Module):
             mask_chunk_predictor = self.encoder.overlap_chunk_cls.get_mask_chunk_predictor(
                 None, device=encoder_out.device, batch_size=encoder_out.size(0)
             )
-            mask_shfit_chunk = self.encoder.overlap_chunk_cls.get_mask_shfit_chunk(
+            mask_shift_chunk = self.encoder.overlap_chunk_cls.get_mask_shift_chunk(
                 None, device=encoder_out.device, batch_size=encoder_out.size(0)
             )
-            encoder_out = encoder_out * mask_shfit_chunk
+            encoder_out = encoder_out * mask_shift_chunk
         pre_acoustic_embeds, pre_token_length, pre_alphas, _ = self.predictor(
             encoder_out,
             ys_out_pad,
@@ -622,10 +622,10 @@ class UniASR(torch.nn.Module):
             mask_chunk_predictor = self.encoder2.overlap_chunk_cls.get_mask_chunk_predictor(
                 None, device=encoder_out.device, batch_size=encoder_out.size(0)
             )
-            mask_shfit_chunk = self.encoder2.overlap_chunk_cls.get_mask_shfit_chunk(
+            mask_shift_chunk = self.encoder2.overlap_chunk_cls.get_mask_shift_chunk(
                 None, device=encoder_out.device, batch_size=encoder_out.size(0)
             )
-            encoder_out = encoder_out * mask_shfit_chunk
+            encoder_out = encoder_out * mask_shift_chunk
         pre_acoustic_embeds, pre_token_length, pre_alphas, _ = self.predictor2(
             encoder_out,
             ys_out_pad,
@@ -724,10 +724,10 @@ class UniASR(torch.nn.Module):
             mask_chunk_predictor = self.encoder.overlap_chunk_cls.get_mask_chunk_predictor(
                 None, device=encoder_out.device, batch_size=encoder_out.size(0)
             )
-            mask_shfit_chunk = self.encoder.overlap_chunk_cls.get_mask_shfit_chunk(
+            mask_shift_chunk = self.encoder.overlap_chunk_cls.get_mask_shift_chunk(
                 None, device=encoder_out.device, batch_size=encoder_out.size(0)
             )
-            encoder_out = encoder_out * mask_shfit_chunk
+            encoder_out = encoder_out * mask_shift_chunk
         pre_acoustic_embeds, pre_token_length, pre_alphas, _ = self.predictor(
             encoder_out,
             ys_out_pad,
@@ -806,10 +806,10 @@ class UniASR(torch.nn.Module):
             mask_chunk_predictor = self.encoder2.overlap_chunk_cls.get_mask_chunk_predictor(
                 None, device=encoder_out.device, batch_size=encoder_out.size(0)
             )
-            mask_shfit_chunk = self.encoder2.overlap_chunk_cls.get_mask_shfit_chunk(
+            mask_shift_chunk = self.encoder2.overlap_chunk_cls.get_mask_shift_chunk(
                 None, device=encoder_out.device, batch_size=encoder_out.size(0)
             )
-            encoder_out = encoder_out * mask_shfit_chunk
+            encoder_out = encoder_out * mask_shift_chunk
         pre_acoustic_embeds, pre_token_length, pre_alphas, _ = self.predictor2(
             encoder_out,
             ys_out_pad,

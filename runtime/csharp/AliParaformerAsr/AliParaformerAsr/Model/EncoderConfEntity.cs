@@ -21,7 +21,7 @@ namespace AliParaformerAsr.Model
         private string _pos_enc_class = "SinusoidalPositionEncoder";
         private bool _normalize_before = true;
         private int _kernel_size = 11;
-        private int _sanm_shfit = 0;
+        private int _sanm_shift = 0;
         private string _selfattention_layer_type = "sanm";
 
         public int output_size { get => _output_size; set => _output_size = value; }
@@ -35,7 +35,7 @@ namespace AliParaformerAsr.Model
         public string pos_enc_class { get => _pos_enc_class; set => _pos_enc_class = value; }
         public bool normalize_before { get => _normalize_before; set => _normalize_before = value; }
         public int kernel_size { get => _kernel_size; set => _kernel_size = value; }
-        public int sanm_shfit { get => _sanm_shfit; set => _sanm_shfit = value; }
+        public int sanm_shift { get => _sanm_shift; set => _sanm_shift = value; }
         public string selfattention_layer_type { get => _selfattention_layer_type; set => _selfattention_layer_type = value; }
     }
 }
