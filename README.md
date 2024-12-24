@@ -34,15 +34,15 @@
 
 <a name="whats-new"></a>
 ## What's new:
-- 2024/10/29: Real-time Transcription Service 1.12 released，The 2pass-offline mode supports the SensevoiceSmal model；([docs](runtime/readme.md));
+- 2024/10/29: Real-time Transcription Service 1.12 released, The 2pass-offline mode supports the SensevoiceSmal model；([docs](runtime/readme.md));
 - 2024/10/10：Added support for the Whisper-large-v3-turbo model, a multitasking model that can perform multilingual speech recognition, speech translation, and language identification. It can be downloaded from the [modelscope](examples/industrial_data_pretraining/whisper/demo.py), and [openai](examples/industrial_data_pretraining/whisper/demo_from_openai.py).
-- 2024/09/26: Offline File Transcription Service 4.6, Offline File Transcription Service of English 1.7，Real-time Transcription Service 1.11 released，fix memory leak & Support the SensevoiceSmall onnx model；File Transcription Service 2.0 GPU released, Fix GPU memory leak; ([docs](runtime/readme.md));
+- 2024/09/26: Offline File Transcription Service 4.6, Offline File Transcription Service of English 1.7, Real-time Transcription Service 1.11 released, fix memory leak & Support the SensevoiceSmall onnx model；File Transcription Service 2.0 GPU released, Fix GPU memory leak; ([docs](runtime/readme.md));
 - 2024/09/25：keyword spotting models are new supported. Supports fine-tuning and inference for four models: [fsmn_kws](https://modelscope.cn/models/iic/speech_sanm_kws_phone-xiaoyun-commands-online), [fsmn_kws_mt](https://modelscope.cn/models/iic/speech_sanm_kws_phone-xiaoyun-commands-online), [sanm_kws](https://modelscope.cn/models/iic/speech_sanm_kws_phone-xiaoyun-commands-offline), [sanm_kws_streaming](https://modelscope.cn/models/iic/speech_sanm_kws_phone-xiaoyun-commands-online).
 - 2024/07/04：[SenseVoice](https://github.com/FunAudioLLM/SenseVoice) is a speech foundation model with multiple speech understanding capabilities, including ASR, LID, SER, and AED.
 - 2024/07/01: Offline File Transcription Service GPU 1.1 released, optimize BladeDISC model compatibility issues; ref to ([docs](runtime/readme.md))
 - 2024/06/27: Offline File Transcription Service GPU 1.0 released, supporting dynamic batch processing and multi-threading concurrency. In the long audio test set, the single-thread RTF is 0.0076, and multi-threads' speedup is 1200+ (compared to 330+ on CPU); ref to ([docs](runtime/readme.md))
 - 2024/05/15：emotion recognition models are new supported. [emotion2vec+large](https://modelscope.cn/models/iic/emotion2vec_plus_large/summary)，[emotion2vec+base](https://modelscope.cn/models/iic/emotion2vec_plus_base/summary)，[emotion2vec+seed](https://modelscope.cn/models/iic/emotion2vec_plus_seed/summary). currently supports the following categories: 0: angry 1: happy 2: neutral 3: sad 4: unknown.
-- 2024/05/15: Offline File Transcription Service 4.5, Offline File Transcription Service of English 1.6，Real-time Transcription Service 1.10 released，adapting to FunASR 1.0 model structure；([docs](runtime/readme.md))
+- 2024/05/15: Offline File Transcription Service 4.5, Offline File Transcription Service of English 1.6, Real-time Transcription Service 1.10 released, adapting to FunASR 1.0 model structure；([docs](runtime/readme.md))
 
 <details><summary>Full Changelog</summary>
 
