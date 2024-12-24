@@ -92,7 +92,7 @@ class SenseVoiceSmall:
             return self.lid_dict[lid]
         else:
             raise ValueError(
-                f"The language {l} is not in {list(self.lid_dict.keys())}"
+                f"The language {lid} is not in {list(self.lid_dict.keys())}"
             )
             
     def _get_tnid(self, tnid):
