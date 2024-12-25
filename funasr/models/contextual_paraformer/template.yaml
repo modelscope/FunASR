@@ -30,7 +30,7 @@ encoder_conf:
     pos_enc_class: SinusoidalPositionEncoder
     normalize_before: true
     kernel_size: 11
-    sanm_shift: 0
+    sanm_shfit: 0
     selfattention_layer_type: sanm
 
 
@@ -46,7 +46,7 @@ decoder_conf:
     src_attention_dropout_rate: 0.1
     att_layer_num: 16
     kernel_size: 11
-    sanm_shift: 0
+    sanm_shfit: 0
 
 predictor: CifPredictorV2
 predictor_conf:
