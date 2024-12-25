@@ -5,13 +5,13 @@
 The original intention of the funasr-1.x.x version is to make model integration easier. The core feature is the registry and AutoModel:
 
 *   The introduction of the registry enables the development of building blocks to access the model, compatible with a variety of tasks;
-
+    
 *   The newly designed AutoModel interface unifies modelscope, huggingface, and funasr inference and training interfaces, and supports free download of repositories;
-
+    
 *   Support model export, demo-level service deployment, and industrial-level multi-concurrent service deployment;
-
+    
 *   Unify academic and industrial model inference training scripts;
-
+    
 
 # Quick to get started
 
@@ -51,19 +51,19 @@ Model = AutoModel(model=[str], device=[str], ncpu=[int], output_dir=[str], batch
 ```
 
 *   `model`(str): [Model Warehouse](https://github.com/alibaba-damo-academy/FunASR/tree/main/model_zoo)The model name in, or the model path in the local disk
-
+    
 *   `device`(str): `cuda:0`(Default gpu0), using GPU for inference, specified. If`cpu`Then the CPU is used for inference
-
+    
 *   `ncpu`(int): `4`(Default), set the number of threads used for CPU internal operation parallelism
-
+    
 *   `output_dir`(str): `None`(Default) If set, the output path of the output result
-
+    
 *   `batch_size`(int): `1`(Default), batch processing during decoding, number of samples
-
+    
 *   `hub`(str)：`ms`(Default) to download the model from modelscope. If`hf`To download the model from huggingface.
-
+    
 *   `**kwargs`(dict): All in`config.yaml`Parameters, which can be specified directly here, for example, the maximum cut length in the vad model.`max_single_segment_time=6000`(Milliseconds).
-
+    
 
 #### AutoModel reasoning
 
@@ -72,13 +72,13 @@ Res = model.generate(input=[str], output_dir=[str])
 ```
 
 *   *   wav file path, for example: asr\_example.wav
-
+        
     *   pcm file path, for example: asr\_example.pcm, you need to specify the audio sampling rate fs (default is 16000)
-
+        
     *   Audio byte stream, for example: microphone byte data
-
+        
     *   wav.scp,kaldi-style wav list (`wav_id \t wav_path`), for example:
-
+        
 
 ```plaintext
 Asr_example1./audios/asr_example1.wav
@@ -89,13 +89,13 @@ Asr_example2./audios/asr_example2.wav
 In this input
 
 *   Audio sampling points, for example:`audio, rate = soundfile.read("asr_example_zh.wav")`Is numpy.ndarray. batch input is supported. The type is list:`[audio_sample1, audio_sample2, ..., audio_sampleN]`
-
+    
 *   fbank input, support group batch. shape is \[batch, frames, dim\], type is torch.Tensor, for example
-
+    
 *   `output_dir`: None (default), if set, the output path of the output result
-
+    
 *   `**kwargs`(dict): Model-related inference parameters, e.g,`beam_size=10`,`decoding_ctc_weight=0.1`.
-
+    
 
 Detailed documentation link:[https://github.com/modelscope/FunASR/blob/main/examples/README\_zh.md](https://github.com/modelscope/FunASR/blob/main/examples/README_zh.md)
 
@@ -128,7 +128,7 @@ encoder_conf:
     pos_enc_class: SinusoidalPositionEncoder
     normalize_before: true
     kernel_size: 11
-    sanm_shift: 0
+    sanm_shfit: 0
     selfattention_layer_type: sanm
 
 
@@ -208,10 +208,10 @@ Path resolution: configuration.json (not required)
   "model": {"type" : "funasr"},
   "pipeline": {"type":"funasr-pipeline"},
   "model_name_in_hub": {
-    "ms":"",
+    "ms":"", 
     "hf":""},
   "file_path_metas": {
-    "init_param":"model.pt",
+    "init_param":"model.pt", 
     "config":"config.yaml",
     "tokenizer_conf": {"bpemodel": "chn_jpn_yue_eng_ko_spectok.bpe.model"},
     "frontend_conf":{"cmvn_file": "am.mvn"}}
@@ -274,7 +274,7 @@ class SenseVoiceSmall(nn.Module):
   def forward(
       self,
       **kwargs,
-  ):
+  ):  
 
   def inference(
       self,
@@ -320,9 +320,9 @@ from funasr.models.sense_voice.model import *
 ## Principles of Registration
 
 *   Model: models are independent of each other. Each Model needs to create a new Model directory under funasr/models/. Do not use class inheritance method!!! Do not import from other model directories, and put everything you need into your own model directory!!! Do not modify the existing model code!!!
-
+    
 *   dataset,frontend,tokenizer, if you can reuse the existing one, reuse it directly, if you cannot reuse it, please register a new one, modify it again, and do not modify the original one!!!
-
+    
 
 # Independent warehouse
 
@@ -337,7 +337,7 @@ from funasr import AutoModel
 model = AutoModel (
 model="iic/SenseVoiceSmall ",
 trust_remote_code=True
-remote_code = "./model.py",
+remote_code = "./model.py", 
 )
 ```
 

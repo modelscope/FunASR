@@ -5,13 +5,13 @@
 funasr-1.x.x 版本的设计初衷是【**让模型集成更简单**】，核心feature为注册表与AutoModel：
 
 *   注册表的引入，使得开发中可以用搭积木的方式接入模型，兼容多种task；
-
+    
 *   新设计的AutoModel接口，统一modelscope、huggingface与funasr推理与训练接口，支持自由选择下载仓库；
-
+    
 *   支持模型导出，demo级别服务部署，以及工业级别多并发服务部署；
-
+    
 *   统一学术与工业模型推理训练脚本；
-
+    
 
 # 快速上手
 
@@ -51,19 +51,19 @@ model = AutoModel(model=[str], device=[str], ncpu=[int], output_dir=[str], batch
 ```
 
 *   `model`(str): [模型仓库](https://github.com/alibaba-damo-academy/FunASR/tree/main/model_zoo) 中的模型名称，或本地磁盘中的模型路径
-
+    
 *   `device`(str): `cuda:0`（默认gpu0），使用 GPU 进行推理，指定。如果为`cpu`，则使用 CPU 进行推理
-
+    
 *   `ncpu`(int): `4` （默认），设置用于 CPU 内部操作并行性的线程数
-
+    
 *   `output_dir`(str): `None` （默认），如果设置，输出结果的输出路径
-
+    
 *   `batch_size`(int): `1` （默认），解码时的批处理，样本个数
-
+    
 *   `hub`(str)：`ms`（默认），从modelscope下载模型。如果为`hf`，从huggingface下载模型。
-
+    
 *   `**kwargs`(dict): 所有在`config.yaml`中参数，均可以直接在此处指定，例如，vad模型中最大切割长度 `max_single_segment_time=6000` （毫秒）。
-
+    
 
 #### AutoModel 推理
 
@@ -72,13 +72,13 @@ res = model.generate(input=[str], output_dir=[str])
 ```
 
 *   *   wav文件路径, 例如: asr\_example.wav
-
+        
     *   pcm文件路径, 例如: asr\_example.pcm，此时需要指定音频采样率fs（默认为16000）
-
+        
     *   音频字节数流，例如：麦克风的字节数数据
-
+        
     *   wav.scp，kaldi 样式的 wav 列表 (`wav_id \t wav_path`), 例如:
-
+        
 
 ```plaintext
 asr_example1  ./audios/asr_example1.wav
@@ -89,13 +89,13 @@ asr_example2  ./audios/asr_example2.wav
 在这种输入 
 
 *   音频采样点，例如：`audio, rate = soundfile.read("asr_example_zh.wav")`, 数据类型为 numpy.ndarray。支持batch输入，类型为list： `[audio_sample1, audio_sample2, ..., audio_sampleN]`
-
+    
 *   fbank输入，支持组batch。shape为\[batch, frames, dim\]，类型为torch.Tensor，例如
-
+    
 *   `output_dir`: None （默认），如果设置，输出结果的输出路径
-
+    
 *   `**kwargs`(dict): 与模型相关的推理参数，例如，`beam_size=10`，`decoding_ctc_weight=0.1`。
-
+    
 
 详细文档链接：[https://github.com/modelscope/FunASR/blob/main/examples/README\_zh.md](https://github.com/modelscope/FunASR/blob/main/examples/README_zh.md)
 
@@ -128,7 +128,7 @@ encoder_conf:
     pos_enc_class: SinusoidalPositionEncoder
     normalize_before: true
     kernel_size: 11
-    sanm_shift: 0
+    sanm_shfit: 0
     selfattention_layer_type: sanm
 
 
@@ -208,10 +208,10 @@ scheduler_conf:
   "model": {"type" : "funasr"},
   "pipeline": {"type":"funasr-pipeline"},
   "model_name_in_hub": {
-    "ms":"",
+    "ms":"", 
     "hf":""},
   "file_path_metas": {
-    "init_param":"model.pt",
+    "init_param":"model.pt", 
     "config":"config.yaml",
     "tokenizer_conf": {"bpemodel": "chn_jpn_yue_eng_ko_spectok.bpe.model"},
     "frontend_conf":{"cmvn_file": "am.mvn"}}
@@ -274,7 +274,7 @@ class SenseVoiceSmall(nn.Module):
   def forward(
       self,
       **kwargs,
-  ):
+  ):  
 
   def inference(
       self,
@@ -320,9 +320,9 @@ from funasr.models.sense_voice.model import *
 ## 注册原则
 
 *   Model：模型之间互相独立，每一个模型，都需要在funasr/models/下面新建一个模型目录，不要采用类的继承方法！！！不要从其他模型目录中import，所有需要用到的都单独放到自己的模型目录中！！！不要修改现有的模型代码！！！
-
+    
 *   dataset，frontend，tokenizer，如果能复用现有的，直接复用，如果不能复用，请注册一个新的，再修改，不要修改原来的！！！
-
+    
 
 # 独立仓库
 
@@ -336,8 +336,8 @@ from funasr import AutoModel
 # trust_remote_code：`True` 表示 model 代码实现从 `remote_code` 处加载，`remote_code` 指定 `model` 具体代码的位置（例如，当前目录下的 `model.py`），支持绝对路径与相对路径，以及网络 url。
 model = AutoModel(
     model="iic/SenseVoiceSmall",
-    trust_remote_code=True,
-    remote_code="./model.py",
+    trust_remote_code=True,  
+    remote_code="./model.py", 
 )
 ```
 

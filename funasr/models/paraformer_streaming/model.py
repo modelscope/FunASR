@@ -198,10 +198,10 @@ class ParaformerStreaming(Paraformer):
             mask_chunk_predictor = self.encoder.overlap_chunk_cls.get_mask_chunk_predictor(
                 None, device=encoder_out.device, batch_size=encoder_out.size(0)
             )
-            mask_shift_chunk = self.encoder.overlap_chunk_cls.get_mask_shift_chunk(
+            mask_shfit_chunk = self.encoder.overlap_chunk_cls.get_mask_shfit_chunk(
                 None, device=encoder_out.device, batch_size=encoder_out.size(0)
             )
-            encoder_out = encoder_out * mask_shift_chunk
+            encoder_out = encoder_out * mask_shfit_chunk
         pre_acoustic_embeds, pre_token_length, pre_alphas, _ = self.predictor(
             encoder_out,
             ys_pad,
@@ -357,10 +357,10 @@ class ParaformerStreaming(Paraformer):
             mask_chunk_predictor = self.encoder.overlap_chunk_cls.get_mask_chunk_predictor(
                 None, device=encoder_out.device, batch_size=encoder_out.size(0)
             )
-            mask_shift_chunk = self.encoder.overlap_chunk_cls.get_mask_shift_chunk(
+            mask_shfit_chunk = self.encoder.overlap_chunk_cls.get_mask_shfit_chunk(
                 None, device=encoder_out.device, batch_size=encoder_out.size(0)
             )
-            encoder_out = encoder_out * mask_shift_chunk
+            encoder_out = encoder_out * mask_shfit_chunk
         pre_acoustic_embeds, pre_token_length, pre_alphas, pre_peak_index = self.predictor(
             encoder_out,
             None,
