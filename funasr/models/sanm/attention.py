@@ -154,7 +154,7 @@ class MultiHeadedAttentionSANM(nn.Module):
         n_feat,
         dropout_rate,
         kernel_size,
-        sanm_shift=0,
+        sanm_shfit=0,
         lora_list=None,
         lora_rank=8,
         lora_alpha=16,
@@ -199,17 +199,17 @@ class MultiHeadedAttentionSANM(nn.Module):
         )
         # padding
         left_padding = (kernel_size - 1) // 2
-        if sanm_shift > 0:
-            left_padding = left_padding + sanm_shift
+        if sanm_shfit > 0:
+            left_padding = left_padding + sanm_shfit
         right_padding = kernel_size - 1 - left_padding
         self.pad_fn = nn.ConstantPad1d((left_padding, right_padding), 0.0)
 
-    def forward_fsmn(self, inputs, mask, mask_shift_chunk=None):
+    def forward_fsmn(self, inputs, mask, mask_shfit_chunk=None):
         b, t, d = inputs.size()
         if mask is not None:
             mask = torch.reshape(mask, (b, -1, 1))
-            if mask_shift_chunk is not None:
-                mask = mask * mask_shift_chunk
+            if mask_shfit_chunk is not None:
+                mask = mask * mask_shfit_chunk
             inputs = inputs * mask
 
         x = inputs.transpose(1, 2)
@@ -289,7 +289,7 @@ class MultiHeadedAttentionSANM(nn.Module):
 
         return self.linear_out(x)  # (batch, time1, d_model)
 
-    def forward(self, x, mask, mask_shift_chunk=None, mask_att_chunk_encoder=None):
+    def forward(self, x, mask, mask_shfit_chunk=None, mask_att_chunk_encoder=None):
         """Compute scaled dot product attention.
 
         Args:
@@ -304,7 +304,7 @@ class MultiHeadedAttentionSANM(nn.Module):
 
         """
         q_h, k_h, v_h, v = self.forward_qkv(x)
-        fsmn_memory = self.forward_fsmn(v, mask, mask_shift_chunk)
+        fsmn_memory = self.forward_fsmn(v, mask, mask_shfit_chunk)
         q_h = q_h * self.d_k ** (-0.5)
         scores = torch.matmul(q_h, k_h.transpose(-2, -1))
         att_outs = self.forward_attention(v_h, scores, mask, mask_att_chunk_encoder)
@@ -478,7 +478,7 @@ class MultiHeadedAttentionSANMDecoder(nn.Module):
 
     """
 
-    def __init__(self, n_feat, dropout_rate, kernel_size, sanm_shift=0):
+    def __init__(self, n_feat, dropout_rate, kernel_size, sanm_shfit=0):
         """Construct an MultiHeadedAttention object."""
         super().__init__()
 
@@ -490,13 +490,13 @@ class MultiHeadedAttentionSANMDecoder(nn.Module):
         # padding
         # padding
         left_padding = (kernel_size - 1) // 2
-        if sanm_shift > 0:
-            left_padding = left_padding + sanm_shift
+        if sanm_shfit > 0:
+            left_padding = left_padding + sanm_shfit
         right_padding = kernel_size - 1 - left_padding
         self.pad_fn = nn.ConstantPad1d((left_padding, right_padding), 0.0)
         self.kernel_size = kernel_size
 
-    def forward(self, inputs, mask, cache=None, mask_shift_chunk=None):
+    def forward(self, inputs, mask, cache=None, mask_shfit_chunk=None):
         """
         :param x: (#batch, time1, size).
         :param mask: Mask tensor (#batch, 1, time)
@@ -509,9 +509,9 @@ class MultiHeadedAttentionSANMDecoder(nn.Module):
         if mask is not None:
             mask = torch.reshape(mask, (b, -1, 1))
             # logging.info("in fsmn, mask: {}, {}".format(mask.size(), mask[0:100:50, :, :]))
-            if mask_shift_chunk is not None:
-                # logging.info("in fsmn, mask_fsmn: {}, {}".format(mask_shift_chunk.size(), mask_shift_chunk[0:100:50, :, :]))
-                mask = mask * mask_shift_chunk
+            if mask_shfit_chunk is not None:
+                # logging.info("in fsmn, mask_fsmn: {}, {}".format(mask_shfit_chunk.size(), mask_shfit_chunk[0:100:50, :, :]))
+                mask = mask * mask_shfit_chunk
             # logging.info("in fsmn, mask_after_fsmn: {}, {}".format(mask.size(), mask[0:100:50, :, :]))
             # print("in fsmn, mask", mask.size())
             # print("in fsmn, inputs", inputs.size())

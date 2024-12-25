@@ -19,7 +19,7 @@ namespace AliParaformerAsr.Model
         private float _src_attention_dropout_rate = 0.1F;
         private int _att_layer_num = 16;
         private int _kernel_size = 11;
-        private int _sanm_shift = 0;
+        private int _sanm_shfit = 0;
 
         public int attention_heads { get => _attention_heads; set => _attention_heads = value; }
         public int linear_units { get => _linear_units; set => _linear_units = value; }
@@ -30,7 +30,7 @@ namespace AliParaformerAsr.Model
         public float src_attention_dropout_rate { get => _src_attention_dropout_rate; set => _src_attention_dropout_rate = value; }
         public int att_layer_num { get => _att_layer_num; set => _att_layer_num = value; }
         public int kernel_size { get => _kernel_size; set => _kernel_size = value; }
-        public int sanm_shift { get => _sanm_shift; set => _sanm_shift = value; }
-
+        public int sanm_shfit { get => _sanm_shfit; set => _sanm_shfit = value; }
+        
     }
 }

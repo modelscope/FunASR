@@ -226,7 +226,7 @@ class FsmnDecoderSCAMAOpt(BaseTransformerDecoder):
         concat_after: bool = False,
         att_layer_num: int = 6,
         kernel_size: int = 21,
-        sanm_shift: int = None,
+        sanm_shfit: int = None,
         concat_embeds: bool = False,
         attention_dim: int = None,
         tf2torch_tensor_name_prefix_torch: str = "decoder",
@@ -271,14 +271,14 @@ class FsmnDecoderSCAMAOpt(BaseTransformerDecoder):
 
         self.att_layer_num = att_layer_num
         self.num_blocks = num_blocks
-        if sanm_shift is None:
-            sanm_shift = (kernel_size - 1) // 2
+        if sanm_shfit is None:
+            sanm_shfit = (kernel_size - 1) // 2
         self.decoders = repeat(
             att_layer_num,
             lambda lnum: DecoderLayerSANM(
                 attention_dim,
                 MultiHeadedAttentionSANMDecoder(
-                    attention_dim, self_attention_dropout_rate, kernel_size, sanm_shift=sanm_shift
+                    attention_dim, self_attention_dropout_rate, kernel_size, sanm_shfit=sanm_shfit
                 ),
                 MultiHeadedAttentionCrossAtt(
                     attention_heads,
@@ -303,7 +303,7 @@ class FsmnDecoderSCAMAOpt(BaseTransformerDecoder):
                         attention_dim,
                         self_attention_dropout_rate,
                         kernel_size,
-                        sanm_shift=sanm_shift,
+                        sanm_shfit=sanm_shfit,
                     ),
                     None,
                     PositionwiseFeedForwardDecoderSANM(attention_dim, linear_units, dropout_rate),

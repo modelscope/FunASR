@@ -25,7 +25,7 @@ encoder_conf:
     pos_enc_class: SinusoidalPositionEncoder
     normalize_before: true
     kernel_size: 11
-    sanm_shift: 0
+    sanm_shfit: 0
     selfattention_layer_type: sanm
 
 predictor: CifPredictorV3
@@ -111,5 +111,5 @@ ctc_conf:
     ctc_type: builtin
     reduce: true
     ignore_nan_grad: true
-
+    
 normalize: null
