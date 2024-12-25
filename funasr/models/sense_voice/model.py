@@ -968,7 +968,7 @@ class SenseVoiceSmall(nn.Module):
         return timestamp_new
 
     def export(self, **kwargs):
-        from export_meta import export_rebuild_model
+        from .export_meta import export_rebuild_model
 
         if "max_seq_len" not in kwargs:
             kwargs["max_seq_len"] = 512
