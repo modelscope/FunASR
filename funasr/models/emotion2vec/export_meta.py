@@ -29,8 +29,11 @@ def export_forward(
     self, x: torch.Tensor
 ):
     with torch.no_grad():
-        # if self.cfg.normalize:
-        #     x = F.layer_norm(x, x.shape)
+        if self.cfg.normalize:
+            mean = torch.mean(x, dim=1, keepdim=True)
+            var = torch.var(x, dim=1, keepdim=True, unbiased=False)
+            x = (x - mean) / torch.sqrt(var + 1e-5)
+            x = x.view(x.shape[0], -1)
 
         # Call the original forward directly just like extract_features
         # Cannot directly use self.extract_features since it is being replaced by export_forward
