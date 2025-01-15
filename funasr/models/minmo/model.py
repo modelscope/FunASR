@@ -416,13 +416,14 @@ class MinMo_S2T(nn.Module):
                     )
 
             splits = pattern.split(source_input)
+            if len(splits) > 3: logging.info(f'Debug:\n{splits}') # multimodal
             source_ids = []
             fbank_i = []
             fbank_mask_i = []
-            fake_token_len_i = 0
-            fbank_beg_i = -1
+            fake_token_len_i = [] # multimodal // fake_token_len_i = 0
+            fbank_beg_i = [] # multimodal // fbank_beg_i = -1  # > fbank_beg; speech begin index
             fbank_lens_i = []
-            speech, speech_lengths = [], []
+            speech_i, speech_lengths_i = [], [] # multimodal // speech, speech_lengths = [], []
             for k, sub_str in enumerate(splits):
                 if not sub_str.startswith("<|startofspeech|>"):
                     sub_token = tokenizer.encode(sub_str)
@@ -468,16 +469,19 @@ class MinMo_S2T(nn.Module):
                             # )
                             badcase_flag = True
 
+                        speech_i.append(speech) # multimodal
+                        speech_lengths_i.append(speech_lengths) # multimodal
+
                         olens = 1 + (speech_lengths[0].item() - 3 + 2 * 1) // 2
                         olens = 1 + (olens - 3 + 2 * 1) // 2
-                        fake_token_len_i = (olens - 1) // 2 + 1
-                        fake_token = [0] * fake_token_len_i
-                        fbank_beg_i = len(source_ids)
+                        fake_token_len_i.append((olens - 1) // 2 + 1) # multimodal // fake_token_len_i = (olens - 1) // 2 + 1
+                        fake_token = [0] * fake_token_len_i[-1] # multimodal // fake_token = [0] * fake_token_len_i
+                        fbank_beg_i.append(len(source_ids)) # multimodal // fbank_beg_i = len(source_ids)
                         source_ids += fake_token
                         fbank_mask_i += [1] * len(fake_token)
 
-            fbank_beg += [fbank_beg_i + len(input_ids)]
-            fake_token_len += [fake_token_len_i]
+            fbank_beg += [ffbank_beg_i + len(input_ids) for ffbank_beg_i in fbank_beg_i] # multimodal // fbank_beg += [fbank_beg_i + len(input_ids)]
+            fake_token_len += fake_token_len_i # multimodal // fake_token_len += [fake_token_len_i]
             source_mask = [-100] * len(source_ids)
             target_out = f"{target_out}<|im_end|>"
             target_ids = tokenizer.encode(target_out)
@@ -485,9 +489,14 @@ class MinMo_S2T(nn.Module):
             input_ids += source_ids + target_ids
             labels += source_mask + target_ids
             fbank_mask += fbank_mask_i
-            if len(speech) > 0:
-                fbank.append(speech[0, :, :])
-                fbank_lens.append(speech_lengths)
+            # multimodal //
+            # if len(speech) > 0:
+            #     fbank.append(speech[0, :, :])
+            #     fbank_lens.append(speech_lengths)
+            if len(speech_i) > 0:
+                for speech, speech_lengths in zip(speech_i, speech_lengths_i):
+                    fbank.append(speech[0, :, :])
+                    fbank_lens.append(speech_lengths)
 
         input_ids = torch.tensor(input_ids, dtype=torch.int64)  # [: self.max_token_length]
         attention_mask = torch.tensor([1] * len(input_ids), dtype=torch.int32)
@@ -653,7 +662,7 @@ class MinMo_S2T(nn.Module):
                 response = tokenizer.batch_decode(
                     generated_ids, skip_special_tokens=kwargs.get("skip_special_tokens", True)
                 )[0]
-
+                whether_construct = False # for construct stream sft data
                 loss = None
             else:
 
@@ -674,6 +683,8 @@ class MinMo_S2T(nn.Module):
                     add_special_tokens=False,
                     skip_special_tokens=kwargs.get("skip_special_tokens", True),
                 )[0]
+                preds_logits=model_outputs.logits[:, source_ids.shape[1]-1 :][0] # for construct stream sft data
+                whether_construct = True # for construct stream sft data
                 loss = model_outputs.loss.item()
 
         ibest_writer = None
@@ -684,7 +695,10 @@ class MinMo_S2T(nn.Module):
 
         results = []
         response_clean = re.sub(r"[^\w\s\u3000\u4e00-\u9fff]+", "", response)
-        result_i = {"key": key[0], "text": response, "text_tn": response_clean, "label": label}
+        if whether_construct == True: # for construct stream sft data
+            result_i = {"key": key[0], "text": response, "text_tn": response_clean, "label": label, "preds_probs": preds, "preds_logits": preds_logits}
+        else:
+            result_i = {"key": key[0], "text": response, "text_tn": response_clean, "label": label}
         if loss is not None:
             result_i["loss"] = loss
         results.append(result_i)
