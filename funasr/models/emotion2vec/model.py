@@ -265,3 +265,9 @@ class Emotion2vec(torch.nn.Module):
             results.append(result_i)
 
         return results, meta_data
+
+    def export(self, **kwargs):
+        from .export_meta import export_rebuild_model
+
+        models = export_rebuild_model(model=self, **kwargs)
+        return models
