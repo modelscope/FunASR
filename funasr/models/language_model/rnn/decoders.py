@@ -873,7 +873,8 @@ class Decoder(torch.nn.Module, ScorerInterface):
                         ctc_state[idx], accum_best_ids
                     )
 
-        torch.cuda.empty_cache()
+        with torch.cuda.device(vscores.device):
+            torch.cuda.empty_cache()
 
         dummy_hyps = [{"yseq": [self.sos, self.eos], "score": np.array([-float("inf")])}]
         ended_hyps = [
