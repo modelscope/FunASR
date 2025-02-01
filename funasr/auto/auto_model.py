@@ -366,7 +366,8 @@ class AutoModel:
         if pbar:
             # pbar.update(1)
             pbar.set_description(f"rtf_avg: {time_escape_total/time_speech_total:0.3f}")
-        torch.cuda.empty_cache()
+        with torch.cuda.device(next(model.parameters()).device):
+            torch.cuda.empty_cache()
         return asr_result_list
 
     def inference_with_vad(self, input, input_len=None, **cfg):

@@ -184,7 +184,8 @@ def main(**kwargs):
             )
             trainer.start_step = 0
 
-            torch.cuda.empty_cache()
+            with torch.cuda.device(kwargs["device"]):
+                torch.cuda.empty_cache()
 
             time_escaped = (time.perf_counter() - time_slice_i) / 3600.0
             logging.info(
