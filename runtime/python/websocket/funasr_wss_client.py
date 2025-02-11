@@ -85,7 +85,7 @@ async def record_microphone():
     hotword_msg = ""
     if args.hotword.strip() != "":
         if os.path.exists(args.hotword):
-            f_scp = open(args.hotword)
+            f_scp = open(args.hotword, encoding="utf-8")
             hot_lines = f_scp.readlines()
             for line in hot_lines:
                 words = line.strip().split(" ")
