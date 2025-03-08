@@ -925,11 +925,11 @@ class SenseVoiceSmall(nn.Module):
                 align = ctc_forced_align(
                     logits_speech.unsqueeze(0).float(),
                     torch.Tensor(token_int[4:]).unsqueeze(0).long().to(logits_speech.device),
-                    (encoder_out_lens - 4).long(),
+                    (encoder_out_lens[i] - 4).long(),
                     torch.tensor(len(token_int) - 4).unsqueeze(0).long().to(logits_speech.device),
                     ignore_id=self.ignore_id,
                 )
-                pred = groupby(align[0, : encoder_out_lens[0]])
+                pred = groupby(align[0, : encoder_out_lens[i]])
                 _start = 0
                 token_id = 0
                 ts_max = encoder_out_lens[i] - 4
@@ -951,20 +951,26 @@ class SenseVoiceSmall(nn.Module):
 
     def post(self, timestamp):
         timestamp_new = []
+        prev_word = None
         for i, t in enumerate(timestamp):
             word, start, end = t
+            start = int(start * 1000)
+            end = int(end * 1000)
             if word == "▁":
                 continue
             if i == 0:
                 # timestamp_new.append([word, start, end])
-                timestamp_new.append([int(start * 1000), int(end * 1000)])
-            elif word.startswith("▁") or len(word) == 1 or not word[1].isalpha():
+                timestamp_new.append([start, end])
+            elif word.startswith("▁"):
                 word = word[1:]
-                # timestamp_new.append([word, start, end])
-                timestamp_new.append([int(start * 1000), int(end * 1000)])
+                timestamp_new.append([start, end])
+            elif prev_word.isalpha() and prev_word.isascii() and word.isalpha() and word.isascii():
+                prev_word += word
+                timestamp_new[-1][1] = end
             else:
                 # timestamp_new[-1][0] += word
-                timestamp_new[-1][1] = int(end * 1000)
+                timestamp_new.append([start, end])
+            prev_word = word
         return timestamp_new
 
     def export(self, **kwargs):
