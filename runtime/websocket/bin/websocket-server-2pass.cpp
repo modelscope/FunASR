@@ -15,10 +15,18 @@
 #include <thread>
 #include <utility>
 #include <vector>
+#include <iostream>
+#include <chrono>
 
 extern std::unordered_map<std::string, int> hws_map_;
 extern int fst_inc_wts_;
 extern float global_beam_, lattice_beam_, am_scale_;
+
+int64_t getCurrentTimeMillis() {
+    auto now = std::chrono::system_clock::now();
+    auto millis = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count();
+    return millis;
+}
 
 context_ptr WebSocketServer::on_tls_init(tls_mode mode,
                                          websocketpp::connection_hdl hdl,
@@ -57,7 +65,13 @@ context_ptr WebSocketServer::on_tls_init(tls_mode mode,
   return ctx;
 }
 
-nlohmann::json handle_result(FUNASR_RESULT result) {
+nlohmann::json handle_result(FUNASR_RESULT result, websocketpp::connection_hdl& hdl, std::map<websocketpp::connection_hdl, std::shared_ptr<FUNASR_MESSAGE>,std::owner_less<websocketpp::connection_hdl>>& data_map) {
+  std::shared_ptr<FUNASR_MESSAGE> data_msg = nullptr;
+  auto it = data_map.find(hdl);
+  if (it != data_map.end()) {
+    data_msg = it->second;
+  }
+
   websocketpp::lib::error_code ec;
   nlohmann::json jsonresult;
   jsonresult["text"] = "";
@@ -67,12 +81,26 @@ nlohmann::json handle_result(FUNASR_RESULT result) {
     LOG(INFO) << "online_res :" << tmp_online_msg;
     jsonresult["text"] = tmp_online_msg;
     jsonresult["mode"] = "2pass-online";
+
+    // 如果是第一句话的第一个实时结果或新的句子开始
+    if (!data_msg->is_sentence_started) {
+      data_msg->start_time = FunASRGetTpassStart(result);  // 记录句子的开始时间
+      data_msg->is_sentence_started = true;
+    } 
   }
+
+  data_msg->end_time = FunASRGetTpassEnd(result);  // 记录句子的结束时间
+
   std::string tmp_tpass_msg = FunASRGetTpassResult(result, 0);
   if (tmp_tpass_msg != "") {
     LOG(INFO) << "offline results : " << tmp_tpass_msg;
     jsonresult["text"] = tmp_tpass_msg;
     jsonresult["mode"] = "2pass-offline";
+
+    // 句子结束，记录结束时间
+    jsonresult["start_time"] = data_msg->start_time;
+    jsonresult["end_time"] = data_msg->end_time;
+    data_msg->is_sentence_started = false;  // 重置句子状态
   }
 
   std::string tmp_stamp_msg = FunASRGetStamp(result);
@@ -98,6 +126,7 @@ nlohmann::json handle_result(FUNASR_RESULT result) {
 }
 // feed buffer to asr engine for decoder
 void WebSocketServer::do_decoder(
+    std::map<websocketpp::connection_hdl, std::shared_ptr<FUNASR_MESSAGE>,std::owner_less<websocketpp::connection_hdl>>& data_map,
     std::vector<char>& buffer, 
     websocketpp::connection_hdl& hdl,
     nlohmann::json& msg, 
@@ -158,7 +187,7 @@ void WebSocketServer::do_decoder(
       }
       if (Result) {
         websocketpp::lib::error_code ec;
-        nlohmann::json jsonresult = handle_result(Result);
+        nlohmann::json jsonresult = handle_result(Result, hdl, data_map);
         jsonresult["wav_name"] = wav_name;
         jsonresult["is_final"] = false;
         if (jsonresult["text"] != "") {
@@ -200,7 +229,7 @@ void WebSocketServer::do_decoder(
       }
       if (Result) {
         websocketpp::lib::error_code ec;
-        nlohmann::json jsonresult = handle_result(Result);
+        nlohmann::json jsonresult = handle_result(Result, hdl, data_map);
         jsonresult["wav_name"] = wav_name;
         jsonresult["is_final"] = true;
         if (is_ssl) {
@@ -262,6 +291,8 @@ void WebSocketServer::on_open(websocketpp::connection_hdl hdl) {
     data_msg->punc_cache =
         std::make_shared<std::vector<std::vector<std::string>>>(2);
   	data_msg->strand_ =	std::make_shared<asio::io_context::strand>(io_decoder_);
+
+    data_msg->is_sentence_started = false;
 
     data_map.emplace(hdl, data_msg);
   }catch (std::exception const& e) {
@@ -501,6 +532,7 @@ void WebSocketServer::on_message(websocketpp::connection_hdl hdl,
           std::vector<std::vector<float>> hotwords_embedding_(*(msg_data->hotwords_embedding));
           msg_data->strand_->post(
               std::bind(&WebSocketServer::do_decoder, this,
+                        data_map,
                         std::move(*(sample_data_p.get())), std::move(hdl),
                         std::ref(msg_data->msg), std::ref(*(punc_cache_p.get())),
                         std::move(hotwords_embedding_),
@@ -550,6 +582,7 @@ void WebSocketServer::on_message(websocketpp::connection_hdl hdl,
               std::vector<std::vector<float>> hotwords_embedding_(*(msg_data->hotwords_embedding));
               msg_data->strand_->post(
                         std::bind(&WebSocketServer::do_decoder, this,
+                                  data_map,
                                   std::move(subvector), std::move(hdl),
                                   std::ref(msg_data->msg),
                                   std::ref(*(punc_cache_p.get())),
