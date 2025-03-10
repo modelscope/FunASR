@@ -516,4 +516,4 @@ model_conf:
 ```
 
 
-[更多详细教程文档](https://github.com/modelscope/FunASR/blob/main/docs/tutorial/Tables_zh.md)
+[关于注册更多详细教程文档](https://github.com/modelscope/FunASR/blob/main/docs/tutorial/Tables_zh.md)
