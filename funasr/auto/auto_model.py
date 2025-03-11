@@ -549,41 +549,8 @@ class AutoModel:
 
             # speaker embedding cluster after resorted
             if self.spk_model is not None and kwargs.get("return_spk_res", True):
-                # 1. 先检查时间戳
-                has_timestamp = (
-                    hasattr(self.model, "internal_punc") or
-                    self.punc_model is not None or
-                    "timestamp" in result
-                )
-                
-                if not has_timestamp:
-                    logging.error("Need timestamp support...")
-                    return results_ret_list
-
-                # 2. 初始化 punc_res
-                punc_res = None
-                
-                # 3. 根据不同情况设置 punc_res
-                if hasattr(self.model, "internal_punc"):
-                    punc_res = [{
-                        "text": result["text"],
-                        "punc_array": result.get("punc_array", []),
-                        "timestamp": result.get("timestamp", [])
-                    }]
-                elif self.punc_model is not None:
-                    punc_res = self.inference(
-                        result["text"], 
-                        model=self.punc_model, 
-                        kwargs=self.punc_kwargs, 
-                        **cfg
-                    )
-                else:
-                    # 如果只有时间戳，创建一个基本的 punc_res
-                    punc_res = [{
-                        "text": result["text"],
-                        "punc_array": [],  # 空的标点数组
-                        "timestamp": result["timestamp"]
-                    }]
+                if raw_text is None:
+                    logging.error("Missing punc_model, which is required by spk_model.")
                 all_segments = sorted(all_segments, key=lambda x: x[0])
                 spk_embedding = result["spk_embedding"]
                 labels = self.cb_model(
