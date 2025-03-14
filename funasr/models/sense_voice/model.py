@@ -918,7 +918,7 @@ class SenseVoiceSmall(nn.Module):
                 from itertools import groupby
 
                 timestamp = []
-                tokens = tokenizer.text2tokens(text)[4:]
+                tokens = tokenizer.ids2tokens([[tok_int] for tok_int in token_int])[4:]
                 logits_speech = self.ctc.softmax(encoder_out)[i, 4 : encoder_out_lens[i].item(), :]
                 pred = logits_speech.argmax(-1).cpu()
                 logits_speech[pred == self.blank_id, self.blank_id] = 0
