@@ -81,10 +81,13 @@ nlohmann::json handle_result(FUNASR_RESULT result, websocketpp::connection_hdl& 
     LOG(INFO) << "online_res :" << tmp_online_msg;
     jsonresult["text"] = tmp_online_msg;
     jsonresult["mode"] = "2pass-online";
+    jsonresult["slice_type"] = 1;
+    jsonresult["index"] = data_msg->index;
 
     // 如果是第一句话的第一个实时结果或新的句子开始
     if (!data_msg->is_sentence_started) {
       data_msg->start_time = FunASRGetTpassStart(result);  // 记录句子的开始时间
+      jsonresult["slice_type"] = 0; //0：一段话开始识别; 1：一段话识别中; 2：一段话识别结束
       data_msg->is_sentence_started = true;
     } 
   }
@@ -100,6 +103,10 @@ nlohmann::json handle_result(FUNASR_RESULT result, websocketpp::connection_hdl& 
     // 句子结束，记录结束时间
     jsonresult["start_time"] = data_msg->start_time;
     jsonresult["end_time"] = data_msg->end_time;
+    jsonresult["slice_type"] = 2;
+    jsonresult["index"] = data_msg->index;
+
+    data_msg->index++; //句子序号
     data_msg->is_sentence_started = false;  // 重置句子状态
   }
 
@@ -283,7 +290,7 @@ void WebSocketServer::on_open(websocketpp::connection_hdl hdl) {
     data_msg->msg["audio_fs"] = 16000; // default is 16k
     data_msg->msg["access_num"] = 0; // the number of access for this object, when it is 0, we can free it saftly
     data_msg->msg["is_eof"]=false; // if this connection is closed
-    data_msg->msg["svs_lang"]="auto";
+    data_msg->msg["svs_lang"]="zh";
     data_msg->msg["svs_itn"]=true;
     FUNASR_DEC_HANDLE decoder_handle =
       FunASRWfstDecoderInit(tpass_handle, ASR_TWO_PASS, global_beam_, lattice_beam_, am_scale_);

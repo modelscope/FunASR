@@ -66,6 +66,7 @@ typedef struct {
   bool is_sentence_started = false;
   int64_t start_time = 0;
   int64_t end_time = 0;
+  int64_t index = 0;
 } FUNASR_MESSAGE;
 
 // See https://wiki.mozilla.org/Security/Server_Side_TLS for more details about
