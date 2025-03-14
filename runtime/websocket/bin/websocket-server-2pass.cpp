@@ -93,6 +93,7 @@ nlohmann::json handle_result(FUNASR_RESULT result, websocketpp::connection_hdl& 
   }
 
   data_msg->end_time = FunASRGetTpassEnd(result);  // 记录句子的结束时间
+  jsonresult["timestamp"] = data_msg->timestamp;
 
   std::string tmp_tpass_msg = FunASRGetTpassResult(result, 0);
   if (tmp_tpass_msg != "") {
@@ -198,6 +199,7 @@ void WebSocketServer::do_decoder(
         jsonresult["wav_name"] = wav_name;
         jsonresult["is_final"] = false;
         if (jsonresult["text"] != "") {
+          LOG(INFO) << "jsonresult: " << jsonresult.dump(4);
           if (is_ssl) {
             wss_server_->send(hdl, jsonresult.dump(),
                               websocketpp::frame::opcode::text, ec);
@@ -239,6 +241,7 @@ void WebSocketServer::do_decoder(
         nlohmann::json jsonresult = handle_result(Result, hdl, data_map);
         jsonresult["wav_name"] = wav_name;
         jsonresult["is_final"] = true;
+        LOG(INFO) << "jsonresult: " << jsonresult.dump(4);
         if (is_ssl) {
           wss_server_->send(hdl, jsonresult.dump(),
                             websocketpp::frame::opcode::text, ec);
@@ -300,6 +303,8 @@ void WebSocketServer::on_open(websocketpp::connection_hdl hdl) {
   	data_msg->strand_ =	std::make_shared<asio::io_context::strand>(io_decoder_);
 
     data_msg->is_sentence_started = false;
+
+    data_msg->timestamp = getCurrentTimeMillis();
 
     data_map.emplace(hdl, data_msg);
   }catch (std::exception const& e) {
