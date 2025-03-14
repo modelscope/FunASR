@@ -919,14 +919,20 @@ class SenseVoiceSmall(nn.Module):
 
                 timestamp = []
                 tokens = tokenizer.text2tokens(text)[4:]
+                token_back_to_id = tokenizer.tokens2ids(tokens)
+                token_ids = []
+                for tok_ls in token_back_to_id:
+                    if tok_ls: token_ids.extend(tok_ls)
+                    else: token_ids.append(124)
+
                 logits_speech = self.ctc.softmax(encoder_out)[i, 4 : encoder_out_lens[i].item(), :]
                 pred = logits_speech.argmax(-1).cpu()
                 logits_speech[pred == self.blank_id, self.blank_id] = 0
                 align = ctc_forced_align(
                     logits_speech.unsqueeze(0).float(),
-                    torch.Tensor(token_int[4:]).unsqueeze(0).long().to(logits_speech.device),
+                    torch.Tensor(token_ids).unsqueeze(0).long().to(logits_speech.device),
                     (encoder_out_lens[i] - 4).long(),
-                    torch.tensor(len(token_int) - 4).unsqueeze(0).long().to(logits_speech.device),
+                    torch.tensor(len(token_ids)).unsqueeze(0).long().to(logits_speech.device),
                     ignore_id=self.ignore_id,
                 )
                 pred = groupby(align[0, : encoder_out_lens[i]])

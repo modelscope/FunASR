@@ -160,7 +160,7 @@ def timestamp_sentence(
         punc_id = int(punc_id) if punc_id is not None else 1
         sentence_end = timestamp[1] if timestamp is not None else sentence_end
         sentence_text_seg = (
-            sentence_text_seg[:-1] if sentence_text_seg[-1] == " " else sentence_text_seg
+            sentence_text_seg[:-1] if sentence_text_seg and sentence_text_seg[-1] == " " else sentence_text_seg
         )
         if punc_id > 1:
             sentence_text += punc_list[punc_id - 2]
