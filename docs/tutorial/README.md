@@ -211,7 +211,7 @@ Full code ref to [finetune.sh](https://github.com/alibaba-damo-academy/FunASR/bl
 ### Detailed Parameter Description:
 
 ```shell
-funasr/bin/train.py \
+funasr/bin/train_ds.py \
 ++model="${model_name_or_model_dir}" \
 ++train_data_set_list="${train_data}" \
 ++valid_data_set_list="${val_data}" \
@@ -252,7 +252,7 @@ export CUDA_VISIBLE_DEVICES="0,1"
 gpu_num=$(echo $CUDA_VISIBLE_DEVICES | awk -F "," '{print NF}')
 
 torchrun --nnodes 1 --nproc_per_node ${gpu_num} \
-../../../funasr/bin/train.py ${train_args}
+../../../funasr/bin/train_ds.py ${train_args}
 ```
 --nnodes represents the total number of participating nodes, while --nproc_per_node indicates the number of processes running on each node.
 
@@ -264,7 +264,7 @@ export CUDA_VISIBLE_DEVICES="0,1"
 gpu_num=$(echo $CUDA_VISIBLE_DEVICES | awk -F "," '{print NF}')
 
 torchrun --nnodes 2 --node_rank 0 --nproc_per_node ${gpu_num} --master_addr=192.168.1.1 --master_port=12345 \
-../../../funasr/bin/train.py ${train_args}
+../../../funasr/bin/train_ds.py ${train_args}
 ```
 On the worker node (assuming the IP is 192.168.1.2), you need to ensure that the MASTER_ADDR and MASTER_PORT environment variables are set to match those of the master node, and then run the same command:
 
@@ -273,7 +273,7 @@ export CUDA_VISIBLE_DEVICES="0,1"
 gpu_num=$(echo $CUDA_VISIBLE_DEVICES | awk -F "," '{print NF}')
 
 torchrun --nnodes 2 --node_rank 1 --nproc_per_node ${gpu_num} --master_addr=192.168.1.1 --master_port=12345 \
-../../../funasr/bin/train.py ${train_args}
+../../../funasr/bin/train_ds.py ${train_args}
 ```
 
 --nnodes indicates the total number of nodes participating in the training, --node_rank represents the ID of the current node, and --nproc_per_node specifies the number of processes running on each node (usually corresponds to the number of GPUs).
@@ -320,6 +320,28 @@ jsonl2scp \
 ++data_type_list='["source", "target"]' \
 ++jsonl_file_in="../../../data/list/train.jsonl"
 ```
+
+
+#### Large-Scale Data Training  
+When dealing with large datasets (e.g., 50,000 hours or more), memory issues may arise, especially in multi-GPU experiments. To address this, split the JSONL files into slices, write them into a TXT file (one slice per line), and set `data_split_num`. For example:  
+```shell  
+train_data="/root/data/list/data.list"  
+
+funasr/bin/train_ds.py \  
+++train_data_set_list="${train_data}" \  
+++dataset_conf.data_split_num=256  
+```  
+**Details:**  
+- `data.list`: A plain text file listing the split JSONL files. For example, the content of `data.list` might be:  
+  ```bash  
+  data/list/train.0.jsonl  
+  data/list/train.1.jsonl  
+  ...  
+  ```  
+- `data_split_num`: Specifies the number of slice groups. For instance, if `data.list` contains 512 lines and `data_split_num=256`, the data will be divided into 256 groups, each containing 2 JSONL files. This ensures that only 2 JSONL files are loaded for training at a time, reducing memory usage during training. Note: Groups are created sequentially.  
+
+**Recommendation:**  
+If the dataset is extremely large and contains heterogeneous data types, perform **data balancing** during splitting to ensure uniformity across groups.
 
 #### Training log
 
