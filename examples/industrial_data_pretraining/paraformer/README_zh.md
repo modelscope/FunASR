@@ -365,7 +365,7 @@ tensorboard --logdir /xxxx/FunASR/examples/industrial_data_pretraining/paraforme
 
 从shell推理
 ```shell
-python -m funasr.bin.inference ++model="./model_dir" ++input=="${input}" ++output_dir="${output_dir}"
+python -m funasr.bin.inference ++model="./model_dir" ++input="${input}" ++output_dir="${output_dir}"
 ```
 从python推理
 
