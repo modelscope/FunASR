@@ -107,7 +107,8 @@ def load_audio_text_image_video(
                     data_or_path_or_list
                 ).squeeze()  # [n_samples,]
         elif data_type == "text" and tokenizer is not None:
-            data_or_path_or_list = tokenizer.encode(data_or_path_or_list)
+            with open(data_or_path_or_list, "r") as f:
+                data_or_path_or_list = tokenizer.encode(f.read().strip())
         elif data_type == "image":  # undo
             pass
         elif data_type == "video":  # undo
