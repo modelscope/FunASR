@@ -43,7 +43,7 @@ def download_from_ms(**kwargs):
             print(f"Download: {model_or_path} failed!: {e}")
 
     kwargs["model_path"] = model_or_path if "model_path" not in kwargs else kwargs["model_path"]
-
+    model_or_path = kwargs["model_path"]
     if os.path.exists(os.path.join(model_or_path, "configuration.json")):
         with open(os.path.join(model_or_path, "configuration.json"), "r", encoding="utf-8") as f:
             conf_json = json.load(f)

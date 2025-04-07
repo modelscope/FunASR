@@ -88,8 +88,8 @@ def main(**kwargs):
         total_frames += fbank.shape[0]
 
     cmvn_info = {
-        "mean_stats": list(mean_stats.tolist()),
-        "var_stats": list(var_stats.tolist()),
+        "mean_stats": mean_stats.tolist(),
+        "var_stats": var_stats.tolist(),
         "total_frames": total_frames,
     }
     cmvn_file = kwargs.get("cmvn_file", "cmvn.json")
@@ -118,11 +118,9 @@ def main(**kwargs):
             + str(dims)
             + "\n"
         )
-        mean_str = str(list(mean)).replace(",", "").replace("[", "[ ").replace("]", " ]")
-        fout.write("<LearnRateCoef> 0 " + mean_str + "\n")
+        fout.write("<LearnRateCoef> 0 [ " + " ".join([str(item) for item in mean]) + " ]\n")
         fout.write("<Rescale> " + str(dims) + " " + str(dims) + "\n")
-        var_str = str(list(var)).replace(",", "").replace("[", "[ ").replace("]", " ]")
-        fout.write("<LearnRateCoef> 0 " + var_str + "\n")
+        fout.write("<LearnRateCoef> 0 [ " + " ".join([str(item) for item in var]) + " ]\n")
         fout.write("</Nnet>" + "\n")
 
 
