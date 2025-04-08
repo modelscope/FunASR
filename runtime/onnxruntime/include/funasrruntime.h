@@ -70,6 +70,8 @@ _FUNASRAPI const char*	FunASRGetResult(FUNASR_RESULT result,int n_index);
 _FUNASRAPI const char*	FunASRGetStamp(FUNASR_RESULT result);
 _FUNASRAPI const char*	FunASRGetStampSents(FUNASR_RESULT result);
 _FUNASRAPI const char*	FunASRGetTpassResult(FUNASR_RESULT result,int n_index);
+_FUNASRAPI const int64_t	FunASRGetTpassStart(FUNASR_RESULT result);
+_FUNASRAPI const int64_t	FunASRGetTpassEnd(FUNASR_RESULT result);
 _FUNASRAPI const int	FunASRGetRetNumber(FUNASR_RESULT result);
 _FUNASRAPI void			FunASRFreeResult(FUNASR_RESULT result);
 _FUNASRAPI void			FunASRUninit(FUNASR_HANDLE handle);
