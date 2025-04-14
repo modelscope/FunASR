@@ -184,6 +184,7 @@ class AutoModel:
         device = kwargs.get("device", "cuda")
         if ((device =="cuda" and not torch.cuda.is_available())
             or (device == "xpu" and not torch.xpu.is_available())
+            or (device == "mps" and not torch.backends.mps.is_available())
             or kwargs.get("ngpu", 1) == 0):
             device = "cpu"
             kwargs["batch_size"] = 1
