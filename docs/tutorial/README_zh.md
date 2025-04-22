@@ -39,7 +39,7 @@ print(res)
 model = AutoModel(model=[str], device=[str], ncpu=[int], output_dir=[str], batch_size=[int], hub=[str], **kwargs)
 ```
 - `model`(str): [模型仓库](https://github.com/alibaba-damo-academy/FunASR/tree/main/model_zoo) 中的模型名称，或本地磁盘中的模型路径
-- `device`(str): `cuda:0`（默认gpu0），使用 GPU 进行推理，指定。如果为`cpu`，则使用 CPU 进行推理
+- `device`(str): `cuda:0`（默认gpu0），使用 GPU 进行推理，指定。如果为`cpu`，则使用 CPU 进行推理。`mps`：mac电脑M系列新品试用mps进行推理。`xpu`：使用英特尔gpu进行推理。
 - `ncpu`(int): `4` （默认），设置用于 CPU 内部操作并行性的线程数
 - `output_dir`(str): `None` （默认），如果设置，输出结果的输出路径
 - `batch_size`(int): `1` （默认），解码时的批处理，样本个数
