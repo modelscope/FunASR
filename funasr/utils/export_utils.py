@@ -28,12 +28,12 @@ def export(
                 **kwargs,
             )
         elif type == "torchscript":
-            device = "cuda" if torch.cuda.is_available() else "cpu"
+            device = "cuda" if torch.cuda.is_available() else "xpu" if torch.xpu.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"
             print("Exporting torchscripts on device {}".format(device))
             _torchscripts(m, path=export_dir, device=device)
         elif type == "bladedisc":
             assert (
-                torch.cuda.is_available()
+                torch.cuda.is_available() or torch.xpu.is_available() or torch.backends.mps.is_available()
             ), "Currently bladedisc optimization for FunASR only supports GPU"
             # bladedisc only optimizes encoder/decoder modules
             if hasattr(m, "encoder") and hasattr(m, "decoder"):
@@ -44,7 +44,7 @@ def export(
 
         elif type == "onnx_fp16":
             assert (
-                torch.cuda.is_available()
+                torch.cuda.is_available() or torch.xpu.is_available() or torch.backends.mps.is_available()
             ), "Currently onnx_fp16 optimization for FunASR only supports GPU"
 
             if hasattr(m, "encoder") and hasattr(m, "decoder"):

@@ -925,6 +925,11 @@ class SenseVoiceSmall(nn.Module):
                     if tok_ls: token_ids.extend(tok_ls)
                     else: token_ids.append(124)
 
+                if len(token_ids) == 0:
+                    result_i = {"key": key[i], "text": text}
+                    results.append(result_i)
+                    continue
+
                 logits_speech = self.ctc.softmax(encoder_out)[i, 4 : encoder_out_lens[i].item(), :]
                 pred = logits_speech.argmax(-1).cpu()
                 logits_speech[pred == self.blank_id, self.blank_id] = 0
@@ -970,7 +975,7 @@ class SenseVoiceSmall(nn.Module):
             elif word.startswith("▁"):
                 word = word[1:]
                 timestamp_new.append([start, end])
-            elif prev_word.isalpha() and prev_word.isascii() and word.isalpha() and word.isascii():
+            elif prev_word is not None and prev_word.isalpha() and prev_word.isascii() and word.isalpha() and word.isascii():
                 prev_word += word
                 timestamp_new[-1][1] = end
             else:

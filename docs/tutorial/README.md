@@ -38,7 +38,7 @@ print(res)
 model = AutoModel(model=[str], device=[str], ncpu=[int], output_dir=[str], batch_size=[int], hub=[str], **kwargs)
 ```
 - `model`(str): model name in the [Model Repository](https://github.com/alibaba-damo-academy/FunASR/tree/main/model_zoo), or a model path on local disk.
-- `device`(str): `cuda:0` (default gpu0) for using GPU for inference, specify `cpu` for using CPU.
+- `device`(str): `cuda:0` (default gpu0) for using GPU for inference, specify `cpu` for using CPU. `mps`: Mac computers with M-series chips use MPS for inference. `xpu`: Uses Intel GPU for inference.
 - `ncpu`(int): `4` (default), sets the number of threads for CPU internal operations.
 - `output_dir`(str): `None` (default), set this to specify the output path for the results.
 - `batch_size`(int): `1` (default), the number of samples per batch during decoding.
