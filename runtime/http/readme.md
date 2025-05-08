@@ -18,6 +18,9 @@ tar -xvf ffmpeg-master-latest-linux64-gpl-shared.tar.xz
 
 ### Install deps
 ```shell
+
+# need to install boost lib
+apt install libboost-dev libboost-system-dev #ubuntu
 # openblas
 sudo apt-get install libopenblas-dev #ubuntu
 # sudo yum -y install openblas-devel #centos
@@ -44,15 +47,6 @@ curl -F \"file=@example.wav\" 127.0.0.1:80
 ### run
 
 ```shell
-./funasr-http-server  \
-  --lm-dir '' \
-  --itn-dir '' \
-  --download-model-dir ${download_model_dir} \
-  --model-dir ${model_dir} \
-  --vad-dir ${vad_dir} \
-  --punc-dir ${punc_dir} \
-  --decoder-thread-num ${decoder_thread_num} \
-  --io-thread-num  ${io_thread_num} \
-  --port ${port} \
+./funasr-http-server  --vad-dir damo/speech_fsmn_vad_zh-cn-16k-common-onnx --model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx --punc-dir damo/punc_ct-transformer_cn-en-common-vocab471067-large-onnx --itn-dir ''  --lm-dir ''  --port 10001
 ```
 
