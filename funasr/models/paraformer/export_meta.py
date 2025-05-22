@@ -84,4 +84,4 @@ def export_dynamic_axes(self):
 def export_name(
     self,
 ):
-    return "model"
+    return "model.onnx"
