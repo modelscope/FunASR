@@ -4,7 +4,7 @@
 
 import os.path
 from pathlib import Path
-from typing import List, Union, Tuple
+from typing import List, Union, Tuple, Dict
 
 import copy
 import librosa
@@ -247,19 +247,17 @@ class Fsmn_vad_online:
             model_dir = model.export(type="onnx", quantize=quantize, **kwargs)
 
         config_file = os.path.join(model_dir, "config.yaml")
-        cmvn_file = os.path.join(model_dir, "am.mvn")
-        config = read_yaml(config_file)
+        self.cmvn_file = os.path.join(model_dir, "am.mvn")
+        self.config = read_yaml(config_file)
 
-        self.frontend = WavFrontendOnline(cmvn_file=cmvn_file, **config["frontend_conf"])
         self.ort_infer = OrtInferSession(
             model_file, device_id, intra_op_num_threads=intra_op_num_threads
         )
         self.batch_size = batch_size
-        self.vad_scorer = E2EVadModel(config["model_conf"])
         self.max_end_sil = (
-            max_end_sil if max_end_sil is not None else config["model_conf"]["max_end_silence_time"]
+            max_end_sil if max_end_sil is not None else self.config["model_conf"]["max_end_silence_time"]
         )
-        self.encoder_conf = config["encoder_conf"]
+        self.encoder_conf = self.config["encoder_conf"]
 
     def prepare_cache(self, in_cache: list = []):
         if len(in_cache) > 0:
@@ -275,20 +273,22 @@ class Fsmn_vad_online:
     def __call__(self, audio_in: np.ndarray, **kwargs) -> List:
         waveforms = np.expand_dims(audio_in, axis=0)
 
-        param_dict = kwargs.get("param_dict", dict())
+        param_dict: Dict = kwargs.get("param_dict", dict())
         is_final = param_dict.get("is_final", False)
-        feats, feats_len = self.extract_feat(waveforms, is_final)
+        frontend: WavFrontendOnline = param_dict.get("frontend", WavFrontendOnline(cmvn_file=self.cmvn_file, **self.config["frontend_conf"]))
+        feats, feats_len = self.extract_feat(frontend=frontend, waveforms=waveforms, is_final=is_final)
         segments = []
         if feats.size != 0:
             in_cache = param_dict.get("in_cache", list())
             in_cache = self.prepare_cache(in_cache)
+            vad_scorer = param_dict.get("vad_scorer", E2EVadModel(self.config["model_conf"]))
             try:
                 inputs = [feats]
                 inputs.extend(in_cache)
                 scores, out_caches = self.infer(inputs)
                 param_dict["in_cache"] = out_caches
-                waveforms = self.frontend.get_waveforms()
-                segments = self.vad_scorer(
+                waveforms = frontend.get_waveforms()
+                segments = vad_scorer(
                     scores, waveforms, is_final=is_final, max_end_sil=self.max_end_sil, online=True
                 )
 
@@ -296,6 +296,7 @@ class Fsmn_vad_online:
                 # logging.warning(traceback.format_exc())
                 logging.warning("input wav is silence or noise")
                 segments = []
+        param_dict.update({"frontend": frontend, "vad_scorer": vad_scorer})
         return segments
 
     def load_data(self, wav_content: Union[str, np.ndarray, List[str]], fs: int = None) -> List:
@@ -315,13 +316,13 @@ class Fsmn_vad_online:
         raise TypeError(f"The type of {wav_content} is not in [str, np.ndarray, list]")
 
     def extract_feat(
-        self, waveforms: np.ndarray, is_final: bool = False
+        self, frontend: WavFrontendOnline, waveforms: np.ndarray, is_final: bool = False
     ) -> Tuple[np.ndarray, np.ndarray]:
         waveforms_lens = np.zeros(waveforms.shape[0]).astype(np.int32)
         for idx, waveform in enumerate(waveforms):
             waveforms_lens[idx] = waveform.shape[-1]
 
-        feats, feats_len = self.frontend.extract_fbank(waveforms, waveforms_lens, is_final)
+        feats, feats_len = frontend.extract_fbank(waveforms, waveforms_lens, is_final)
         # feats.append(feat)
         # feats_len.append(feat_len)
 
