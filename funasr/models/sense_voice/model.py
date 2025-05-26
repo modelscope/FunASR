@@ -952,8 +952,8 @@ class SenseVoiceSmall(nn.Module):
                         timestamp.append([tokens[token_id], ts_left, ts_right])
                         token_id += 1
                     _start = _end
-                timestamp = self.post(timestamp)
-                result_i = {"key": key[i], "text": text, "timestamp": timestamp}
+                timestamp, words = self.post(timestamp)
+                result_i = {"key": key[i], "text": text, "timestamp": timestamp, "words": words}
                 results.append(result_i)
             else:
                 result_i = {"key": key[i], "text": text}
@@ -962,6 +962,7 @@ class SenseVoiceSmall(nn.Module):
 
     def post(self, timestamp):
         timestamp_new = []
+        words_new = []
         prev_word = None
         for i, t in enumerate(timestamp):
             word, start, end = t
@@ -972,17 +973,21 @@ class SenseVoiceSmall(nn.Module):
             if i == 0:
                 # timestamp_new.append([word, start, end])
                 timestamp_new.append([start, end])
+                words_new.append(word)
             elif word.startswith("▁"):
                 word = word[1:]
                 timestamp_new.append([start, end])
+                words_new.append(word)
             elif prev_word is not None and prev_word.isalpha() and prev_word.isascii() and word.isalpha() and word.isascii():
                 prev_word += word
                 timestamp_new[-1][1] = end
+                words_new[-1] = prev_word
             else:
                 # timestamp_new[-1][0] += word
                 timestamp_new.append([start, end])
+                words_new.append(word)
             prev_word = word
-        return timestamp_new
+        return timestamp_new, words_new
 
     def export(self, **kwargs):
         from .export_meta import export_rebuild_model
