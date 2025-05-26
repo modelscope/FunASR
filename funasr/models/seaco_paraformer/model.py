@@ -16,6 +16,7 @@ import numpy as np
 from typing import Dict, Tuple
 from contextlib import contextmanager
 from distutils.version import LooseVersion
+from functools import lru_cache
 
 from funasr.register import tables
 from funasr.utils import postprocess_utils
@@ -510,17 +511,6 @@ class SeacoParaformer(BiCifParaformer, Paraformer):
         return results, meta_data
 
     def generate_hotwords_list(self, hotword_list_or_file, tokenizer=None, frontend=None):
-        def load_seg_dict(seg_dict_file):
-            seg_dict = {}
-            assert isinstance(seg_dict_file, str)
-            with open(seg_dict_file, "r", encoding="utf8") as f:
-                lines = f.readlines()
-                for line in lines:
-                    s = line.strip().split()
-                    key = s[0]
-                    value = s[1:]
-                    seg_dict[key] = " ".join(value)
-            return seg_dict
 
         def seg_tokenize(txt, seg_dict):
             pattern = re.compile(r"^[\u4E00-\u9FA50-9]+$")
@@ -626,3 +616,17 @@ class SeacoParaformer(BiCifParaformer, Paraformer):
 
         models = export_rebuild_model(model=self, **kwargs)
         return models
+    
+
+@lru_cache(maxsize=1)
+def load_seg_dict(seg_dict_file):
+    seg_dict = {}
+    assert isinstance(seg_dict_file, str)
+    with open(seg_dict_file, "r", encoding="utf8") as f:
+        lines = f.readlines()
+        for line in lines:
+            s = line.strip().split()
+            key = s[0]
+            value = s[1:]
+            seg_dict[key] = " ".join(value)
+    return seg_dict

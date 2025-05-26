@@ -52,12 +52,12 @@ class WavFrontend:
 
     def fbank(self, waveform: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
         waveform = waveform * (1 << 15)
-        self.fbank_fn = knf.OnlineFbank(self.opts)
-        self.fbank_fn.accept_waveform(self.opts.frame_opts.samp_freq, waveform.tolist())
-        frames = self.fbank_fn.num_frames_ready
+        fbank_fn = knf.OnlineFbank(self.opts)
+        fbank_fn.accept_waveform(self.opts.frame_opts.samp_freq, waveform.tolist())
+        frames = fbank_fn.num_frames_ready
         mat = np.empty([frames, self.opts.mel_opts.num_bins])
         for i in range(frames):
-            mat[i, :] = self.fbank_fn.get_frame(i)
+            mat[i, :] = fbank_fn.get_frame(i)
         feat = mat.astype(np.float32)
         feat_len = np.array(mat.shape[0]).astype(np.int32)
         return feat, feat_len
