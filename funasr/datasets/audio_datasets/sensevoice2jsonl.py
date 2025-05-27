@@ -119,8 +119,12 @@ def gen_jsonl_from_wav_text_list(
         dist.barrier()
 
 def contains_punctuation(s):
-    pattern = r'[!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~]'
-    return re.search(pattern, s) is not None
+    import string
+    punctuations = (
+        string.punctuation +  
+        '，。、；：？！""''（）【】《》〈〉「」『』〔〕［］｛｝～·…—–'  
+    )
+    return any(char in punctuations for char in s)
 
 def parse_context_length(data_list: list, data_type: str, id=0):
     pbar = tqdm(total=len(data_list), dynamic_ncols=True)
