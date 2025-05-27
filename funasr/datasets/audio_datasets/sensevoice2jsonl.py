@@ -4,6 +4,7 @@ import torch
 import logging
 import hydra
 import re
+import string
 from omegaconf import DictConfig, OmegaConf
 import concurrent.futures
 import librosa
@@ -119,7 +120,6 @@ def gen_jsonl_from_wav_text_list(
         dist.barrier()
 
 def contains_punctuation(s):
-    import string
     punctuations = (
         string.punctuation +  
         '，。、；：？！""''（）【】《》〈〉「」『』〔〕［］｛｝～·…—–'  
