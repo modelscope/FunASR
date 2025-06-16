@@ -29,9 +29,9 @@ If you do not have Docker installed, please refer to [Docker Installation](https
 ### Pulling and launching images
 Use the following command to pull and launch the Docker image for the FunASR runtime-SDK:
 ```shell
-sudo docker pull registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-gpu-0.2.0
+sudo docker pull registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-gpu-0.2.1
 
-sudo docker run --gpus=all -p 10098:10095 -it --privileged=true -v /root:/workspace/models registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-gpu-0.2.0
+sudo docker run --gpus=all -p 10098:10095 -it --privileged=true -v /root:/workspace/models registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-gpu-0.2.1
 ```
 
 Introduction to command parameters: 
