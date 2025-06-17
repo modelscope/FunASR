@@ -523,6 +523,8 @@
 		p_result->snippet_time = audio->GetTimeLen();
 		
 		audio->Split(vad_online_handle, chunk_len, input_finished, mode);
+		p_result->start = audio->start;
+		p_result->end = audio->end;
 
 		funasr::AudioFrame* frame = nullptr;
 		while(audio->FetchChunck(frame) > 0){
@@ -693,6 +695,23 @@
 			return nullptr;
 
 		return p_result->tpass_msg.c_str();
+	}
+
+	_FUNASRAPI const int64_t FunASRGetTpassStart(FUNASR_RESULT result)
+	{
+		funasr::FUNASR_RECOG_RESULT * p_result = (funasr::FUNASR_RECOG_RESULT*)result;
+		if(!p_result)
+			return 0;
+
+		return p_result->start;
+	}
+	_FUNASRAPI const int64_t FunASRGetTpassEnd(FUNASR_RESULT result)
+	{
+		funasr::FUNASR_RECOG_RESULT * p_result = (funasr::FUNASR_RECOG_RESULT*)result;
+		if(!p_result)
+			return 0;
+
+		return p_result->end;
 	}
 
 	_FUNASRAPI const char* CTTransformerGetResult(FUNASR_RESULT result,int n_index)
