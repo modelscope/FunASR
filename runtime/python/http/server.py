@@ -107,9 +107,9 @@ async def api_recognition(audio: UploadFile = File(..., description="audio file"
         return {"msg": "读取音频文件发生错误", "code": 1}
     rec_results = model.generate(input=audio_bytes, is_final=True, **param_dict)
     # 结果为空
-    if len(rec_results) == 0:
+    if len(rec_results[0]["text"] ) == 0:
         return {"text": "", "sentences": [], "code": 0}
-    elif len(rec_results) == 1:
+    elif len(rec_results[0]["text"] ) > 0:
         # 解析识别结果
         rec_result = rec_results[0]
         text = rec_result["text"]
