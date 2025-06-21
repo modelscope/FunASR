@@ -272,22 +272,23 @@ class Trainer:
                     )
             else:
                 print("Undo")
-            self.saved_ckpts[ckpt_name] = getattr(
-                self, f"val_{self.avg_keep_nbest_models_type}_step_or_epoch"
-            )[ckpt_name]
-            if self.keep_nbest_models > 0:
-                if len(self.saved_ckpts) > self.keep_nbest_models:
-                    if self.avg_keep_nbest_models_type == "acc":
-                        key = min(self.saved_ckpts, key=self.saved_ckpts.get)
-                    else:
-                        key = max(self.saved_ckpts, key=self.saved_ckpts.get)
-                    if key in self.saved_ckpts:
-                        del self.saved_ckpts[key]
-                    filename = os.path.join(self.output_dir, key)
-                    logging.info(f"Delete: {filename}")
-                    if os.path.exists(filename):
-                        # os.remove(filename)
-                        misc_utils.smart_remove(filename)
+            if self.rank == 0:
+                self.saved_ckpts[ckpt_name] = getattr(
+                    self, f"val_{self.avg_keep_nbest_models_type}_step_or_epoch"
+                )[ckpt_name]
+                if self.keep_nbest_models > 0:
+                    if len(self.saved_ckpts) > self.keep_nbest_models:
+                        if self.avg_keep_nbest_models_type == "acc":
+                            key = min(self.saved_ckpts, key=self.saved_ckpts.get)
+                        else:
+                            key = max(self.saved_ckpts, key=self.saved_ckpts.get)
+                        if key in self.saved_ckpts:
+                            del self.saved_ckpts[key]
+                        filename = os.path.join(self.output_dir, key)
+                        logging.info(f"Delete: {filename}")
+                        if os.path.exists(filename):
+                            # os.remove(filename)
+                            misc_utils.smart_remove(filename)
 
         elif self.use_fsdp:
             pass
