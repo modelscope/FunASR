@@ -297,10 +297,12 @@
 			//timestamp
 			if(msg_vec.size() > 1){
 				std::vector<std::string> msg_stamp = funasr::split(msg_vec[1], ',');
-				for(int i=0; i<(int)msg_stamp.size()-1; i+=2){
-					float begin = std::stof(msg_stamp[i])+msg_stimes[idx];
-					float end = std::stof(msg_stamp[i+1])+msg_stimes[idx];
-					cur_stamp += "["+std::to_string((int)(1000*begin))+","+std::to_string((int)(1000*end))+"],";
+				if (msg_stamp.size() > 1) {
+					for(int i=0; i<msg_stamp.size()-1; i+=2){
+						float begin = std::stof(msg_stamp[i])+msg_stimes[idx];
+						float end = std::stof(msg_stamp[i+1])+msg_stimes[idx];
+						cur_stamp += "["+std::to_string((int)(1000*begin))+","+std::to_string((int)(1000*end))+"],";
+					}
 				}
 			}
 		}

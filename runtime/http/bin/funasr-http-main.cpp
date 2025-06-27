@@ -510,6 +510,7 @@ int main(int argc, char *argv[]) {
 
     s.run();
     LOG(INFO) << "http model loop " << s_port;
+    conn_guard.reset();
     // wait for theads
     for (auto &t : decoder_threads) {
       t.join();
