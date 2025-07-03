@@ -30,9 +30,8 @@ def maybe_autocast(dtype=None, use_deepspeed=False):
             yield
     else:
         if dtype == torch.float16 or dtype == torch.bfloat16:
-            yield
-            # with autocast(enabled=True, dtype=dtype):
-            #     yield
+            with autocast(enabled=True, dtype=dtype):
+                yield
         else:
             yield
 
@@ -684,7 +683,7 @@ class Trainer:
             scaled_loss = model.backward(loss)
         else:
             loss = loss / self.accum_grad
-            if self.use_fp16 or self.use_bf16:
+            if scaler:
                 scaler.scale(loss).backward()
             else:
                 loss.backward()
@@ -712,7 +711,7 @@ class Trainer:
                 # Execute an optimization step (update model parameters)
                 if self.use_ddp or self.use_fsdp:
                     dist.barrier()
-                if self.use_fp16 or self.use_bf16:
+                if scaler:
                     scaler.step(optim)
                     scaler.update()
                 else:
