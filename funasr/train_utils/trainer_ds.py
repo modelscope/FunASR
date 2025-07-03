@@ -736,6 +736,9 @@ class Trainer:
         Args:
             epoch (int): The current epoch number.
         """
+        self.val_loss_avg = 0.0
+        self.val_acc_avg  = 0.0
+
         if self.use_ddp or self.use_fsdp or self.use_deepspeed:
             dist.barrier()
         logging.info(f"Validate epoch: {epoch}, rank: {self.rank}\n")

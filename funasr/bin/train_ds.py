@@ -159,6 +159,10 @@ def main(**kwargs):
         scaler=scaler,
     )
 
+    early_stopping_patience = kwargs.get("train_conf", {}).get("early_stopping_patience", 0)
+    best_val_loss = float("inf")
+    epochs_no_improve = 0
+
     dataloader_tr, dataloader_val = None, None
     for epoch in range(trainer.start_epoch, trainer.max_epoch):
         time1 = time.perf_counter()
@@ -199,6 +203,18 @@ def main(**kwargs):
 
         trainer.start_data_split_i = 0
         trainer.validate_epoch(model=model, dataloader_val=dataloader_val, epoch=epoch + 1)
+        current_val = trainer.val_loss_avg
+
+        if current_val < best_val_loss:
+            best_val_loss = current_val
+            epochs_no_improve = 0
+        else:
+            epochs_no_improve += 1
+            logging.info(f"No val_loss improvement for {epochs_no_improve}/{early_stopping_patience} epochs")
+        if early_stopping_patience > 0 and epochs_no_improve >= early_stopping_patience:
+            logging.info(f"Early stopping triggered at epoch {epoch+1}")
+            break
+
         trainer.step_in_epoch = 0
         trainer.save_checkpoint(
             epoch + 1, model=model, optim=optim, scheduler=scheduler, scaler=scaler
