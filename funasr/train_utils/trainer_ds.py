@@ -757,7 +757,7 @@ class Trainer:
                     "data_split_i": kwargs.get("data_split_i", 0),
                     "data_split_num": kwargs.get("data_split_num", 1),
                     "log_step": batch_idx + kwargs.get("start_step", 0),
-                    "batch_total": batch_idx + 1,
+                    "batch_total": self.batch_total,
                     "step_in_epoch": batch_idx + 1,
                     "lr": 0.0,
                 }
