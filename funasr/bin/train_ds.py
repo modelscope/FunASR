@@ -206,6 +206,7 @@ def main(**kwargs):
         current_val = trainer.val_loss_avg
 
         if current_val < best_val_loss:
+            logging.info(f"current_val: {current_val}, best_val_loss: {best_val_loss}")
             best_val_loss = current_val
             epochs_no_improve = 0
         else:
