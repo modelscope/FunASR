@@ -559,6 +559,7 @@ class AutoModel:
                 labels = self.cb_model(
                     spk_embedding.cpu(), oracle_num=kwargs.get("preset_spk_num", None)
                 )
+                result["spk_labels"] = labels
                 # del result['spk_embedding']
                 sv_output = postprocess(all_segments, None, labels, spk_embedding.cpu())
                 if self.spk_mode == "vad_segment":  # recover sentence_list
@@ -620,7 +621,7 @@ class AutoModel:
                             return_raw_text=return_raw_text,
                         )
                 result["sentence_info"] = sentence_list
-            if "spk_embedding" in result:
+            if "spk_embedding" in result and kwargs.get("return_spk_embedding", False) == False:
                 del result["spk_embedding"]
 
             result["key"] = key
