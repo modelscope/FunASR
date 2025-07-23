@@ -15,13 +15,13 @@ class TestAutoModel(unittest.TestCase):
             "disable_update": True,
         }
 
-    # def test_merge_thr_in_cb_model(self):
-    #     kwargs = self.base_kwargs.copy()
-    #     kwargs["spk_model"] = "cam++"
-    #     merge_thr = 0.5
-    #     kwargs["spk_kwargs"] = {"cb_kwargs": {"merge_thr": merge_thr}}
-    #     model = AutoModel(**kwargs)
-    #     self.assertEqual(model.cb_model.model_config['merge_thr'], merge_thr)
+    def test_merge_thr_in_cb_model(self):
+        kwargs = self.base_kwargs.copy()
+        kwargs["spk_model"] = "cam++"
+        merge_thr = 0.5
+        kwargs["spk_kwargs"] = {"cb_kwargs": {"merge_thr": merge_thr}}
+        model = AutoModel(**kwargs)
+        self.assertEqual(model.cb_model.model_config['merge_thr'], merge_thr)
     # res = model.generate(input="/test.wav",
     #              batch_size_s=300)
 
