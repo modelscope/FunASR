@@ -315,11 +315,16 @@ res = model.export(quantize=False)
 ### 测试ONNX
 ```python
 # pip3 install -U funasr-onnx
-from funasr_onnx import Paraformer
+from pathlib import Path
+from runtime.python.onnxruntime.funasr_onnx.paraformer_bin import Paraformer
+
+
+home_dir = Path.home()
+
 model_dir = "damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch"
 model = Paraformer(model_dir, batch_size=1, quantize=True)
 
-wav_path = ['~/.cache/modelscope/hub/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/example/asr_example.wav']
+wav_path = [f"{home_dir}/.cache/modelscope/hub/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/example/asr_example.wav"]
 
 result = model(wav_path)
 print(result)
