@@ -22,8 +22,8 @@ class TestAutoModel(unittest.TestCase):
         kwargs["spk_kwargs"] = {"cb_kwargs": {"merge_thr": merge_thr}}
         model = AutoModel(**kwargs)
         self.assertEqual(model.cb_model.model_config['merge_thr'], merge_thr)
-    # res = model.generate(input="/test.wav",
-    #              batch_size_s=300)
+        # res = model.generate(input="/test.wav",
+        #              batch_size_s=300)
 
     def test_progress_callback_called(self):
         class DummyModel:
