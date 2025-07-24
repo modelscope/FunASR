@@ -76,7 +76,7 @@
 ```text
 python>=3.8
 torch>=1.13
-torchaudio
+torchaudio==v2.4.0
 ```
 
 - Install for pypi
