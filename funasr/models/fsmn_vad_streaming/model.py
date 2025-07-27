@@ -655,7 +655,7 @@ class FsmnVADStreaming(nn.Module):
         cache: dict = None,
         **kwargs,
     ):
-        if not cache:
+        if cache is None:
             cache = {}
         if len(cache) == 0:
             self.init_cache(cache, **kwargs)
