@@ -715,7 +715,7 @@ class Trainer:
             if self.use_wandb and wandb is not None:
                 wandb.log(
                     description_dict,
-                    setp=self.batch_total,
+                    step=self.batch_total,
                 )
 
     def close(self, writer=None):
