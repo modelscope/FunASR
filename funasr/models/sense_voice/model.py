@@ -980,6 +980,7 @@ class SenseVoiceSmall(nn.Module):
                 words_new.append(word)
             elif prev_word is not None and prev_word.isalpha() and prev_word.isascii() and word.isalpha() and word.isascii():
                 prev_word += word
+                word = prev_word
                 timestamp_new[-1][1] = end
                 words_new[-1] = prev_word
             else:
