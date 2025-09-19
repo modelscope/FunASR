@@ -8,10 +8,10 @@ Features added:
 - safer model loading and per-file error handling
 - configurable output file and supported extensions
 - creates output folder if missing
+- configurable VAD model
 """
 
 import argparse
-import os
 import sys
 from pathlib import Path
 from typing import List
@@ -25,7 +25,7 @@ except Exception as e:
 
 def find_audio_files(folder: Path, exts: List[str], recursive: bool) -> List[Path]:
     if recursive:
-        return [p for p in folder.rglob("*") if p.suffix.lower() in exts and p.is_file()]
+        return [p for p in folder.rglob("*") if p.is_file() and p.suffix.lower() in exts]
     else:
         return [p for p in folder.iterdir() if p.is_file() and p.suffix.lower() in exts]
 
@@ -40,6 +40,7 @@ def main():
     parser.add_argument("--device", "-d", default="cpu", help="Device for inference (default: cpu)")
     parser.add_argument("--recursive", "-r", action="store_true", help="Recursively search input folder for audio files")
     parser.add_argument("--extensions", "-e", nargs="+", default=[".wav", ".mp3"], help="Accepted audio extensions (default: .wav .mp3)")
+    parser.add_argument("--vad-model", default="fsmn-vad", help="VAD model to use. Set to 'none' to disable. (default: fsmn-vad)")
     args = parser.parse_args()
 
     if not args.input_folder.exists():
@@ -52,9 +53,10 @@ def main():
         print(f"No audio files found in {args.input_folder} with extensions {exts}")
         sys.exit(0)
 
+    vad_arg = args.vad_model if args.vad_model.lower() != 'none' else None
     print(f"Loading model '{args.model}' on device '{args.device}'... (this may take a while)")
     try:
-        model = AutoModel(model=args.model, vad_model="fsmn-vad", device=args.device)
+        model = AutoModel(model=args.model, vad_model=vad_arg, device=args.device)
     except Exception as e:
         print("Failed to load model:", e, file=sys.stderr)
         raise
@@ -62,15 +64,17 @@ def main():
     results = {}
     total = len(files)
     for idx, fpath in enumerate(files, start=1):
+        rel_key = str(fpath.relative_to(args.input_folder))
         try:
             print(f"[{idx}/{total}] Processing: {fpath}")
-            res = model.generate(input=str(fpath), cache={}, language="auto")
+            # `cache` was removed per review because it's not used by generate
+            res = model.generate(input=str(fpath), language="auto")
             text = rich_transcription_postprocess(res[0]["text"]) if res and isinstance(res, list) and "text" in res[0] else ""
-            results[fpath.name] = text
+            results[rel_key] = text
             print(f"  -> {text}")
         except Exception as e:
             print(f"  Error processing {fpath}: {e}", file=sys.stderr)
-            results[fpath.name] = f"<ERROR: {e}>"
+            results[rel_key] = f"<ERROR: {e}>"
 
     # Ensure output directory exists
     args.output_file.parent.mkdir(parents=True, exist_ok=True)
