@@ -204,7 +204,7 @@ kill -9 PID
 
 执行上述指令后，启动离线文件转写服务。如果模型指定为ModelScope中model id，会自动从MoldeScope中下载如下模型：
 [FSMN-VAD模型](https://www.modelscope.cn/models/iic/speech_fsmn_vad_zh-cn-16k-common-onnx/summary),
-[Paraformer-lagre模型](https://www.modelscope.cn/models/iic/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary),
+[Paraformer-large模型](https://www.modelscope.cn/models/iic/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary),
 [CT-Transformer标点预测模型](https://www.modelscope.cn/models/iic/punc_ct-transformer_cn-en-common-vocab471067-large-onnx/summary),
 [基于FST的中文ITN](https://www.modelscope.cn/models/thuduj12/fst_itn_zh/summary),
 [Ngram中文语言模型](https://www.modelscope.cn/models/iic/speech_ngram_lm_zh-cn-ai-wesp-fst/summary)
