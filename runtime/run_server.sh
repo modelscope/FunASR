@@ -1,10 +1,10 @@
 
 download_model_dir="/workspace/models"
-model_dir="damo/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-onnx"
-vad_dir="damo/speech_fsmn_vad_zh-cn-16k-common-onnx"
-punc_dir="damo/punc_ct-transformer_cn-en-common-vocab471067-large-onnx"
+model_dir="iic/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-onnx"
+vad_dir="iic/speech_fsmn_vad_zh-cn-16k-common-onnx"
+punc_dir="iic/punc_ct-transformer_cn-en-common-vocab471067-large-onnx"
 itn_dir="thuduj12/fst_itn_zh"
-lm_dir="damo/speech_ngram_lm_zh-cn-ai-wesp-fst"
+lm_dir="iic/speech_ngram_lm_zh-cn-ai-wesp-fst"
 port=10095
 certfile="$(pwd)/ssl_key/server.crt"
 keyfile="$(pwd)/ssl_key/server.key"
