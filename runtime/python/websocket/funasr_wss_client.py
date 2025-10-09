@@ -14,6 +14,25 @@ from multiprocessing import Process
 
 import logging
 
+"""
+python funasr_wss_client.py \
+--host [ip_address] \
+--port [port id] \
+--chunk_size ["5,10,5"=600ms, "8,8,4"=480ms] \
+--chunk_interval [duration of send chunk_size/chunk_interval] \
+--words_max_print [max number of words to print] \
+--audio_in [if set, loadding from wav.scp, else recording from mircrophone] \
+--output_dir [if set, write the results to output_dir] \
+--mode [online for streaming asr, offline for non-streaming, 2pass for unifying streaming and non-streaming asr] \
+--thread_num [thread_num for send data]
+
+--chunk_interval, "10": 600/10=60ms, "5"=600/5=120ms, "20": 600/12=30ms
+python funasr_wss_client.py --host "0.0.0.0" --port 10095 --mode offline --audio_in "./data/wav.scp" --output_dir "./results"
+
+--chunk_size, "5,10,5"=600ms, "8,8,4"=480ms
+python funasr_wss_client.py --host "0.0.0.0" --port 10095 --mode online --chunk_size "5,10,5"
+"""
+
 logging.basicConfig(level=logging.ERROR)
 
 parser = argparse.ArgumentParser()

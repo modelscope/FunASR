@@ -16,6 +16,17 @@ import json
 import time
 import numpy as np
 
+"""
+python funasr_wss_server.py \
+--port [port id] \
+--asr_model [asr model_name] \
+--asr_model_online [asr model_name] \
+--punc_model [punc model_name] \
+--ngpu [0 or 1] \
+--ncpu [1 or 4] \
+--certfile [path of certfile for ssl] \
+--keyfile [path of keyfile for ssl] 
+"""
 
 # class for recognizer in websocket
 class Funasr_websocket_recognizer:

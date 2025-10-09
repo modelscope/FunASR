@@ -8,7 +8,17 @@ import numpy as np
 import argparse
 import ssl
 
-
+"""
+python funasr_wss_server.py \
+--port [port id] \
+--asr_model [asr model_name] \
+--asr_model_online [asr model_name] \
+--punc_model [punc model_name] \
+--ngpu [0 or 1] \
+--ncpu [1 or 4] \
+--certfile [path of certfile for ssl] \
+--keyfile [path of keyfile for ssl] 
+"""
 parser = argparse.ArgumentParser()
 parser.add_argument(
     "--host", type=str, default="0.0.0.0", required=False, help="host ip, localhost, 0.0.0.0"
