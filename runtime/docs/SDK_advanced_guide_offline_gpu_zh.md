@@ -55,18 +55,18 @@ docker启动之后，启动 funasr-wss-server服务程序:
 cd FunASR/runtime
 nohup bash run_server.sh \
   --download-model-dir /workspace/models \
-  --vad-dir damo/speech_fsmn_vad_zh-cn-16k-common-onnx \
-  --model-dir damo/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-pytorch  \
-  --punc-dir damo/punc_ct-transformer_cn-en-common-vocab471067-large-onnx \
-  --lm-dir damo/speech_ngram_lm_zh-cn-ai-wesp-fst \
+  --vad-dir iic/speech_fsmn_vad_zh-cn-16k-common-onnx \
+  --model-dir iic/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-pytorch  \
+  --punc-dir iic/punc_ct-transformer_cn-en-common-vocab471067-large-onnx \
+  --lm-dir iic/speech_ngram_lm_zh-cn-ai-wesp-fst \
   --itn-dir thuduj12/fst_itn_zh \
   --hotword /workspace/models/hotwords.txt > log.txt 2>&1 &
 
 ***服务首次启动时会导出torchscript模型，耗时较长，请耐心等待***
 # 如果您想关闭ssl，增加参数：--certfile 0
 # 默认加载时间戳模型，如果您想使用nn热词模型进行部署，请设置--model-dir为对应模型：
-#   damo/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-pytorch（时间戳）
-#   damo/speech_paraformer-large-contextual_asr_nat-zh-cn-16k-common-vocab8404（nn热词）
+#   iic/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-pytorch（时间戳）
+#   iic/speech_paraformer-large-contextual_asr_nat-zh-cn-16k-common-vocab8404（nn热词）
 # 如果您想在服务端加载热词，请在宿主机文件./funasr-runtime-resources/models/hotwords.txt配置热词（docker映射地址为/workspace/models/hotwords.txt）:
 #   每行一个热词，格式(热词 权重)：阿里巴巴 20（注：热词理论上无限制，但为了兼顾性能和效果，建议热词长度不超过10，个数不超过1k，权重1~100）
 ```
@@ -151,10 +151,10 @@ FunasrWsClient --host localhost --port 10095 --audio_in ./asr_example.wav --mode
 cd /workspace/FunASR/runtime
 nohup bash run_server.sh \
   --download-model-dir /workspace/models \
-  --model-dir damo/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-pytorch \
-  --vad-dir damo/speech_fsmn_vad_zh-cn-16k-common-onnx \
-  --punc-dir damo/punc_ct-transformer_cn-en-common-vocab471067-large-onnx \
-  --lm-dir damo/speech_ngram_lm_zh-cn-ai-wesp-fst \
+  --model-dir iic/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-pytorch \
+  --vad-dir iic/speech_fsmn_vad_zh-cn-16k-common-onnx \
+  --punc-dir iic/punc_ct-transformer_cn-en-common-vocab471067-large-onnx \
+  --lm-dir iic/speech_ngram_lm_zh-cn-ai-wesp-fst \
   --itn-dir thuduj12/fst_itn_zh \
   --certfile  ../../../ssl_key/server.crt \
   --keyfile ../../../ssl_key/server.key \
@@ -190,8 +190,8 @@ kill -9 PID
 ### 修改模型及其他参数
 替换正在使用的模型或者其他参数，需先关闭FunASR服务，修改需要替换的参数，并重新启动FunASR服务。其中模型需为ModelScope中的ASR/VAD/PUNC模型，或者从ModelScope中模型finetune后的模型。
 ```text
-# 例如替换ASR模型为 damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch，则如下设置参数 --model-dir
-    --model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch 
+# 例如替换ASR模型为 iic/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch，则如下设置参数 --model-dir
+    --model-dir iic/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch 
 # 设置端口号 --port
     --port <port number>
 # 设置服务端启动的推理线程数 --decoder-thread-num
@@ -203,10 +203,10 @@ kill -9 PID
 ```
 
 执行上述指令后，启动离线文件转写服务。如果模型指定为ModelScope中model id，会自动从MoldeScope中下载如下模型：
-[FSMN-VAD模型](https://www.modelscope.cn/models/damo/speech_fsmn_vad_zh-cn-16k-common-onnx/summary),
-[Paraformer-lagre模型](https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary),
-[CT-Transformer标点预测模型](https://www.modelscope.cn/models/damo/punc_ct-transformer_cn-en-common-vocab471067-large-onnx/summary),
+[FSMN-VAD模型](https://www.modelscope.cn/models/iic/speech_fsmn_vad_zh-cn-16k-common-onnx/summary),
+[Paraformer-large模型](https://www.modelscope.cn/models/iic/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary),
+[CT-Transformer标点预测模型](https://www.modelscope.cn/models/iic/punc_ct-transformer_cn-en-common-vocab471067-large-onnx/summary),
 [基于FST的中文ITN](https://www.modelscope.cn/models/thuduj12/fst_itn_zh/summary),
-[Ngram中文语言模型](https://www.modelscope.cn/models/damo/speech_ngram_lm_zh-cn-ai-wesp-fst/summary)
+[Ngram中文语言模型](https://www.modelscope.cn/models/iic/speech_ngram_lm_zh-cn-ai-wesp-fst/summary)
 
 如果，您希望部署您finetune后的模型（例如10epoch.pb），需要手动将模型重命名为model.pb，并将原modelscope中模型model.pb替换掉，将路径指定为`model_dir`即可。
