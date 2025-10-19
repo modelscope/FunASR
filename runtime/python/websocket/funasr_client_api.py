@@ -1,8 +1,8 @@
 """
-  Copyright FunASR (https://github.com/alibaba-damo-academy/FunASR). All Rights
-  Reserved. MIT License  (https://opensource.org/licenses/MIT)
-  
-  2022-2023 by zhaomingwork@qq.com  
+Copyright FunASR (https://github.com/alibaba-damo-academy/FunASR). All Rights
+Reserved. MIT License  (https://opensource.org/licenses/MIT)
+
+2022-2023 by zhaomingwork@qq.com
 """
 
 # pip install websocket-client
@@ -15,6 +15,18 @@ import traceback
 import json
 import time
 import numpy as np
+
+"""
+# class Funasr_websocket_recognizer example with 3 step
+# 1.create an recognizer 
+rcg=Funasr_websocket_recognizer(host="127.0.0.1",port="30035",is_ssl=True,mode="2pass")
+# 2.send pcm data to asr engine and get asr result
+text=rcg.feed_chunk(data)
+print("text",text)
+# 3.get last result, set timeout=3
+text=rcg.close(timeout=3)
+print("text",text)
+"""
 
 
 # class for recognizer in websocket
@@ -132,7 +144,9 @@ if __name__ == "__main__":
     print("example for Funasr_websocket_recognizer")
     import wave
 
-    wav_path = "/Users/zhifu/Downloads/modelscope_models/speech_seaco_paraformer_large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/example/asr_example.wav"
+    wav_path = (
+        "/Users/xiaohui/Documents/project/FunASR/runtime/funasr_api/asr_example.wav"
+    )
     with wave.open(wav_path, "rb") as wav_file:
         params = wav_file.getparams()
         frames = wav_file.readframes(wav_file.getnframes())
@@ -142,7 +156,11 @@ if __name__ == "__main__":
     chunk_num = (len(audio_bytes) - 1) // stride + 1
     # create an recognizer
     rcg = Funasr_websocket_recognizer(
-        host="127.0.0.1", port="10095", is_ssl=True, mode="2pass", chunk_size="0,10,5"
+        host="192.168.123.148",
+        port="10095",
+        is_ssl=True,
+        mode="2pass",
+        chunk_size="0,10,5",
     )
     # loop to send chunk
     for i in range(chunk_num):

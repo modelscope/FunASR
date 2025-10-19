@@ -14,17 +14,42 @@ from multiprocessing import Process
 
 import logging
 
+"""
+python funasr_wss_client.py \
+--host [ip_address] \
+--port [port id] \
+--chunk_size ["5,10,5"=600ms, "8,8,4"=480ms] \
+--chunk_interval [duration of send chunk_size/chunk_interval] \
+--words_max_print [max number of words to print] \
+--audio_in [if set, loadding from wav.scp, else recording from mircrophone] \
+--output_dir [if set, write the results to output_dir] \
+--mode [`online` for streaming asr, `offline` for non-streaming, `2pass` for unifying streaming and non-streaming asr] \
+--thread_num [thread_num for send data]
+
+# --chunk_interval, "10": 600/10=60ms, "5"=600/5=120ms, "20": 600/12=30ms
+python funasr_wss_client.py --host "0.0.0.0" --port 10095 --mode offline --audio_in "./data/wav.scp" --output_dir "./results"
+
+# --chunk_size, "5,10,5"=600ms, "8,8,4"=480ms
+python funasr_wss_client.py --host "0.0.0.0" --port 10095 --mode online --chunk_size "5,10,5"
+"""
+
 logging.basicConfig(level=logging.ERROR)
 
 parser = argparse.ArgumentParser()
 parser.add_argument(
-    "--host", type=str, default="localhost", required=False, help="host ip, localhost, 0.0.0.0"
+    "--host",
+    type=str,
+    default="localhost",
+    required=False,
+    help="host ip, localhost, 0.0.0.0",
 )
-parser.add_argument("--port", type=int, default=10095, required=False, help="grpc server port")
-parser.add_argument("--chunk_size", type=str, default="5, 10, 5", help="chunk")
+parser.add_argument(
+    "--port", type=int, default=10095, required=False, help="grpc server port"
+)
+parser.add_argument("--chunk_size", type=str, default="5, 10, 5", help="每次请求毫秒数")
 parser.add_argument("--encoder_chunk_look_back", type=int, default=4, help="chunk")
 parser.add_argument("--decoder_chunk_look_back", type=int, default=0, help="chunk")
-parser.add_argument("--chunk_interval", type=int, default=10, help="chunk")
+parser.add_argument("--chunk_interval", type=int, default=10, help="请求间隔(毫秒)")
 parser.add_argument(
     "--hotword",
     type=str,
@@ -42,8 +67,12 @@ parser.add_argument(
 parser.add_argument("--thread_num", type=int, default=1, help="thread_num")
 parser.add_argument("--words_max_print", type=int, default=10000, help="chunk")
 parser.add_argument("--output_dir", type=str, default=None, help="output_dir")
-parser.add_argument("--ssl", type=int, default=1, help="1 for ssl connect, 0 for no ssl")
-parser.add_argument("--use_itn", type=int, default=1, help="1 for using itn, 0 for not itn")
+parser.add_argument(
+    "--ssl", type=int, default=1, help="1 for ssl connect, 0 for no ssl"
+)
+parser.add_argument(
+    "--use_itn", type=int, default=1, help="1 for using itn, 0 for not itn"
+)
 parser.add_argument("--mode", type=str, default="2pass", help="offline, online, 2pass")
 
 args = parser.parse_args()
@@ -69,16 +98,20 @@ async def record_microphone():
 
     # print("2")
     global voices
-    FORMAT = pyaudio.paInt16
+    FORMAT = pyaudio.paInt16  # 2 字节
     CHANNELS = 1
     RATE = 16000
-    chunk_size = 60 * args.chunk_size[1] / args.chunk_interval
-    CHUNK = int(RATE / 1000 * chunk_size)
+    chunk_size = 60 * args.chunk_size[1] / args.chunk_interval  # 60 * 10 / 10 单位 ms
+    CHUNK = int(RATE / 1000 * chunk_size)  # 采样点数(个) RATE / 1000 为每毫秒的采样点数
 
     p = pyaudio.PyAudio()
 
     stream = p.open(
-        format=FORMAT, channels=CHANNELS, rate=RATE, input=True, frames_per_buffer=CHUNK
+        format=FORMAT,  # 格式
+        channels=CHANNELS,  # 通道数
+        rate=RATE,  # 采样率 Hz
+        input=True,  # 输入源输入
+        frames_per_buffer=CHUNK,  # 每个缓冲的帧数
     )
     # hotwords
     fst_dict = {}
@@ -99,6 +132,9 @@ async def record_microphone():
             hotword_msg = json.dumps(fst_dict)
         else:
             hotword_msg = args.hotword
+        """
+        hotword_msg = {"单词一 单词二 单词三": 10, "单词四": 9}
+        """
 
     use_itn = True
     if args.use_itn == 0:
@@ -188,7 +224,9 @@ async def record_from_scp(chunk_begin, chunk_size):
             with open(wav_path, "rb") as f:
                 audio_bytes = f.read()
 
-        stride = int(60 * args.chunk_size[1] / args.chunk_interval / 1000 * sample_rate * 2)
+        stride = int(
+            60 * args.chunk_size[1] / args.chunk_interval / 1000 * sample_rate * 2
+        )
         chunk_num = (len(audio_bytes) - 1) // stride + 1
         # print(stride)
 
@@ -336,7 +374,9 @@ async def ws_client(id, chunk_begin, chunk_size):
                 task = asyncio.create_task(record_from_scp(i, 1))
             else:
                 task = asyncio.create_task(record_microphone())
-            task3 = asyncio.create_task(message(str(id) + "_" + str(i)))  # processid+fileid
+            task3 = asyncio.create_task(
+                message(str(id) + "_" + str(i))
+            )  # processid+fileid
             await asyncio.gather(task, task3)
     exit(0)
 

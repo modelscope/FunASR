@@ -102,7 +102,7 @@ print(res)
 ```python
 from funasr import AutoModel
 
-chunk_size = [0, 10, 5] #[0, 10, 5] 600ms, [0, 8, 4] 480ms
+chunk_size = [0, 10, 5] #[0, 10, 5] 600ms, [0, 8, 4] 480ms 感觉基础单位并不是 1ms 而是 60ms，分钟/1000
 encoder_chunk_look_back = 4 #number of chunks to lookback for encoder self-attention
 decoder_chunk_look_back = 1 #number of encoder chunks to lookback for decoder cross-attention
 
@@ -113,7 +113,7 @@ import os
 
 wav_file = os.path.join(model.model_path, "example/asr_example.wav")
 speech, sample_rate = soundfile.read(wav_file)
-chunk_stride = chunk_size[1] * 960 # 600ms
+chunk_stride = chunk_size[1] * 960 # 600ms  960表示采样点数 16000 * 0.6
 
 cache = {}
 total_chunk_num = int(len((speech)-1)/chunk_stride+1)
