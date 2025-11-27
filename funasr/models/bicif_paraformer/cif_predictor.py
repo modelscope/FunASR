@@ -62,11 +62,7 @@ def cif(hidden, alphas, threshold):
     max_label_len = len_labels.max()
     for b in range(batch_size):
         fire = fires[b, :]
-        temp = torch.nonzero(fire >= threshold).squeeze()
-        if len(temp.shape) == 0 and 'mps' in hidden.device.type:
-            l = torch.index_select(frames[b, :, :].cpu(), 0, temp.cpu()).to(hidden.device)
-        else:
-            l = torch.index_select(frames[b, :, :], 0, temp)
+        l = torch.index_select(frames[b, :, :], 0, torch.nonzero(fire >= threshold).squeeze(-1))
         pad_l = torch.zeros([max_label_len - l.size(0), hidden_size], device=hidden.device)
         list_ls.append(torch.cat([l, pad_l], 0))
     return torch.stack(list_ls, 0), fires
