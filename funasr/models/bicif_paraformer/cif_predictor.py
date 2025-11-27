@@ -62,7 +62,7 @@ def cif(hidden, alphas, threshold):
     max_label_len = len_labels.max()
     for b in range(batch_size):
         fire = fires[b, :]
-        l = torch.index_select(frames[b, :, :], 0, torch.nonzero(fire >= threshold).squeeze())
+        l = torch.index_select(frames[b, :, :], 0, torch.nonzero(fire >= threshold).squeeze(-1))
         pad_l = torch.zeros([max_label_len - l.size(0), hidden_size], device=hidden.device)
         list_ls.append(torch.cat([l, pad_l], 0))
     return torch.stack(list_ls, 0), fires
@@ -541,3 +541,4 @@ def cif_wo_hidden_export(alphas, threshold: float):
 
     fires = torch.stack(list_fires, 1)
     return fires
+
