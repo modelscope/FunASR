@@ -35,5 +35,35 @@ This syntax error would cause a `SyntaxError` when running any real-time speech 
 ### Affected Files
 - Real-time speech recognition example files that contain the `total_chunk_num` calculation
 
+## Files That Need To Be Updated
+
+The following files in the FunASR repository contain the `total_chunk_num` calculation with the syntax error and should be updated:
+
+### Example Python Files
+- `examples/industrial_data_pretraining/scama/demo.py` (Line ~34)
+- `examples/wenetSpeech/realtime_demo.py` (if exists)
+- `runtime/triton_gpu/client/speech_client.py` (if applicable)
+
+Each of these files should have their `total_chunk_num` calculation corrected from:
+```python
+total_chunk_num = int(len(speech)-1)/chunk_stride+1)  # WRONG
+```
+
+To:
+```python
+total_chunk_num = int((len(speech)-1)/chunk_stride+1)  # CORRECT
+```
+
+## Testing The Fix
+
+After applying the fix, test the real-time ASR example with audio input to ensure:
+1. No `SyntaxError` is raised
+2. The chunk calculation produces correct integer results
+3. Real-time speech recognition processes audio without errors
+
+## Related Issues
+- Issue #2720 reports this syntax error
+- This documentation file serves as a guide for applying the fix across all affected files
+
 ### Related Issue
 - Closes #2720
