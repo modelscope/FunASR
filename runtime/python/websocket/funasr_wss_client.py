@@ -4,13 +4,10 @@ import time
 import websockets, ssl
 import asyncio
 
-# import threading
 import argparse
 import json
 import traceback
 from multiprocessing import Process
-
-# from funasr.fileio.datadir_writer import DatadirWriter
 
 import logging
 
@@ -49,25 +46,27 @@ parser.add_argument("--mode", type=str, default="2pass", help="offline, online, 
 args = parser.parse_args()
 args.chunk_size = [int(x) for x in args.chunk_size.split(",")]
 print(args)
-# voices = asyncio.Queue()
+
 from queue import Queue
 
 voices = Queue()
 offline_msg_done = False
 
-if args.output_dir is not None:
-    # if os.path.exists(args.output_dir):
-    #     os.remove(args.output_dir)
+# === 延迟统计相关：对每个 wav_name 记录首包/末包发送时间 & 是否已经打印过延迟 ===
+latency_first_audio_time = {}      # {wav_name: t_first_chunk_send}
+latency_last_audio_time = {}       # {wav_name: t_last_chunk_send}
+latency_first_text_printed = {}    # {wav_name: bool}
 
+if args.output_dir is not None:
     if not os.path.exists(args.output_dir):
         os.makedirs(args.output_dir)
 
 
 async def record_microphone():
+    """从麦克风实时录音发送到服务端（一般单路测试使用）"""
     is_finished = False
     import pyaudio
 
-    # print("2")
     global voices
     FORMAT = pyaudio.paInt16
     CHANNELS = 1
@@ -117,18 +116,17 @@ async def record_microphone():
             "itn": use_itn,
         }
     )
-    # voices.put(message)
     await websocket.send(message)
     while True:
         data = stream.read(CHUNK)
         message = data
-        # voices.put(message)
         await websocket.send(message)
-        await asyncio.sleep(0.005)
+        await asyncio.sleep(0.01)
 
 
 async def record_from_scp(chunk_begin, chunk_size):
-    global voices
+    """从 wav/scp 文件读取音频分片发送，用于压测和延迟测试"""
+    global voices, latency_first_audio_time, latency_last_audio_time
     is_finished = False
     if args.audio_in.endswith(".scp"):
         f_scp = open(args.audio_in)
@@ -137,25 +135,25 @@ async def record_from_scp(chunk_begin, chunk_size):
         wavs = [args.audio_in]
 
     # hotwords
-    fst_dict = {}
     hotword_msg = ""
     if args.hotword.strip() != "":
         if os.path.exists(args.hotword):
-            f_scp = open(args.hotword)
-            hot_lines = f_scp.readlines()
+            with open(args.hotword, encoding="utf-8") as f_scp:
+                hot_lines = f_scp.readlines()
+
+            hot_list = []
             for line in hot_lines:
-                words = line.strip().split(" ")
-                if len(words) < 2:
-                    print("Please checkout format of hotwords")
+                words = line.strip().split()
+                if not words:
                     continue
-                try:
-                    fst_dict[" ".join(words[:-1])] = int(words[-1])
-                except ValueError:
-                    print("Please checkout format of hotwords")
-            hotword_msg = json.dumps(fst_dict)
+                # Python AutoModel: 用逗号分隔多个热词
+                hot_list.append(words[0])
+
+            hotword_msg = ",".join(hot_list)
         else:
             hotword_msg = args.hotword
-        print(hotword_msg)
+
+    print("hotword", hotword_msg)
 
     sample_rate = args.audio_fs
     wav_format = "pcm"
@@ -190,9 +188,8 @@ async def record_from_scp(chunk_begin, chunk_size):
 
         stride = int(60 * args.chunk_size[1] / args.chunk_interval / 1000 * sample_rate * 2)
         chunk_num = (len(audio_bytes) - 1) // stride + 1
-        # print(stride)
 
-        # send first time
+        # send first control message
         message = json.dumps(
             {
                 "mode": args.mode,
@@ -209,20 +206,32 @@ async def record_from_scp(chunk_begin, chunk_size):
             }
         )
 
-        # voices.put(message)
         await websocket.send(message)
         is_speaking = True
+
+        # 初始化该 wav 的统计状态
+        latency_first_audio_time[wav_name] = None
+        latency_last_audio_time[wav_name] = None
+        latency_first_text_printed[wav_name] = False
+
         for i in range(chunk_num):
 
             beg = i * stride
             data = audio_bytes[beg : beg + stride]
             message = data
-            # voices.put(message)
+
+            now_ts = time.time()
+            # 记录第一块音频发送时间
+            if latency_first_audio_time[wav_name] is None:
+                latency_first_audio_time[wav_name] = now_ts
+            # 每块都更新“最后一块音频发送时间”
+            latency_last_audio_time[wav_name] = now_ts
+
             await websocket.send(message)
+
             if i == chunk_num - 1:
                 is_speaking = False
                 message = json.dumps({"is_speaking": is_speaking})
-                # voices.put(message)
                 await websocket.send(message)
 
             sleep_duration = (
@@ -235,7 +244,6 @@ async def record_from_scp(chunk_begin, chunk_size):
 
     if not args.mode == "offline":
         await asyncio.sleep(2)
-    # offline model need to wait for message recved
 
     if args.mode == "offline":
         global offline_msg_done
@@ -246,7 +254,12 @@ async def record_from_scp(chunk_begin, chunk_size):
 
 
 async def message(id):
+    """接收服务端识别结果 + 打印实时文本 + 打印延迟"""
+    import websockets
     global websocket, voices, offline_msg_done
+    global latency_first_audio_time, latency_last_audio_time, latency_first_text_printed
+
+    multi_mode = args.thread_num > 1  # 多路并发时，打印风格更简洁
     text_print = ""
     text_print_2pass_online = ""
     text_print_2pass_offline = ""
@@ -261,14 +274,49 @@ async def message(id):
 
             meg = await websocket.recv()
             meg = json.loads(meg)
+            # 基本字段
             wav_name = meg.get("wav_name", "demo")
-            text = meg["text"]
+            text = meg.get("text", "")
+            mode = meg.get("mode", "")
+            now_ts = time.time()
+
+            # === 延迟统计：第一条 online/2pass-online 文本时打印 ===
+            if text and mode in ("online", "2pass-online"):
+                if not latency_first_text_printed.get(wav_name, False):
+                    t_last = latency_last_audio_time.get(wav_name, None)
+                    t_first = latency_first_audio_time.get(wav_name, None)
+                    if t_last is not None:
+                        latency_last_ms = (now_ts - t_last) * 1000.0
+                    else:
+                        latency_last_ms = None
+                    if t_first is not None:
+                        latency_first_ms = (now_ts - t_first) * 1000.0
+                    else:
+                        latency_first_ms = None
+
+                    latency_first_text_printed[wav_name] = True
+
+                    # 多路并发：输出干净摘要
+                    if multi_mode:
+                        parts = [f"[MEETING {id}][LATENCY] wav={wav_name}, mode={mode}"]
+                        if latency_last_ms is not None:
+                            parts.append(f"from_last_chunk={latency_last_ms:.1f} ms")
+                        if latency_first_ms is not None:
+                            parts.append(f"from_first_chunk={latency_first_ms:.1f} ms")
+                        print(" ".join(parts))
+                    else:
+                        # 单路时也打印一下延迟
+                        print(f"[LATENCY] wav={wav_name}, mode={mode}, "
+                              f"from_last_chunk={latency_last_ms:.1f} ms, "
+                              f"from_first_chunk={latency_first_ms:.1f} ms")
+
             timestamp = ""
             offline_msg_done = meg.get("is_final", False)
             if "timestamp" in meg:
                 timestamp = meg["timestamp"]
 
-            if ibest_writer is not None:
+            # 保存到文件
+            if ibest_writer is not None and text:
                 if timestamp != "":
                     text_write_line = "{}\t{}\t{}\n".format(wav_name, text, timestamp)
                 else:
@@ -277,22 +325,39 @@ async def message(id):
 
             if "mode" not in meg:
                 continue
+
+            # ===== 多路并发输出风格：只打印精简行，便于截图 =====
+            if multi_mode:
+                # 只关心最终结果行（offline / 2pass-offline）
+                if mode in ("offline", "2pass-offline") and text:
+                    spk_name = meg.get("spk_name", "unknown")
+                    spk_score = meg.get("spk_score", 0.0)
+                    print(
+                        f"[MEETING {id}][FINAL][{wav_name}] "
+                        f"spk={spk_name}({spk_score:.3f}) text=\"{text}\""
+                    )
+                    # 如需时间戳，可以另外打一行
+                    if timestamp:
+                        print(
+                            f"[MEETING {id}][TIMESTAMP][{wav_name}] {timestamp}"
+                        )
+                # 其他在线中间结果不打印，避免刷屏
+                continue
+
+            # ===== 单路模式输出：保留原来那种“滚动文本”的体验，但更规整 =====
             if meg["mode"] == "online":
                 text_print += "{}".format(text)
                 text_print = text_print[-args.words_max_print :]
-                os.system("clear")
-                print("\rpid" + str(id) + ": " + text_print)
+                print("pid" + str(id) + ": " + text_print)
             elif meg["mode"] == "offline":
                 if timestamp != "":
                     text_print += "{} timestamp: {}".format(text, timestamp)
                 else:
                     text_print += "{}".format(text)
-
-                # text_print = text_print[-args.words_max_print:]
-                # os.system('clear')
-                print("\rpid" + str(id) + ": " + wav_name + ": " + text_print)
+                print("pid" + str(id) + ": " + wav_name + ": " + text_print)
                 offline_msg_done = True
             else:
+                # 2pass 模式
                 if meg["mode"] == "2pass-online":
                     text_print_2pass_online += "{}".format(text)
                     text_print = text_print_2pass_offline + text_print_2pass_online
@@ -300,15 +365,15 @@ async def message(id):
                     text_print_2pass_online = ""
                     text_print = text_print_2pass_offline + "{}".format(text)
                     text_print_2pass_offline += "{}".format(text)
-                text_print = text_print[-args.words_max_print :]
-                os.system("clear")
-                print("\rpid" + str(id) + ": " + text_print)
-                # offline_msg_done=True
 
+                text_print = text_print[-args.words_max_print :]
+                print("pid" + str(id) + ": " + text_print)
+
+    except websockets.exceptions.ConnectionClosedOK:
+        print(f"[MEETING {id}] connection closed normally")
     except Exception as e:
-        print("Exception:", e)
+        print(f"[MEETING {id}] Exception:", e)
         # traceback.print_exc()
-        # await websocket.close()
 
 
 async def ws_client(id, chunk_begin, chunk_size):
@@ -354,7 +419,7 @@ if __name__ == "__main__":
         p.join()
         print("end")
     else:
-        # calculate the number of wavs for each preocess
+        # calculate the number of wavs for each process
         if args.audio_in.endswith(".scp"):
             f_scp = open(args.audio_in)
             wavs = f_scp.readlines()
