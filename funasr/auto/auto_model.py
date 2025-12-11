@@ -60,7 +60,7 @@ def prepare_data_iterator(data_in, input_len=None, data_type=None, key=None):
                     if data_in.endswith(".jsonl"):  # file.jsonl: json.dumps({"source": data})
                         lines = json.loads(line.strip())
                         data = lines["source"]
-                        key = data["key"] if "key" in data else key
+                        key = lines.get("key", key)
                     else:  # filelist, wav.scp, text.txt: id \t data or data
                         lines = line.strip().split(maxsplit=1)
                         data = lines[1] if len(lines) > 1 else lines[0]
