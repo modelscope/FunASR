@@ -17,8 +17,8 @@ pip install -U modelscope funasr
 or install from source code
 
 ```shell
-git clone https://github.com/alibaba/FunASR.git && cd FunASR
-cd funasr/runtime/python/onnxruntime
+git clone https://github.com/alibaba/FunASR.git
+cd FunASR/runtime/python/onnxruntime
 pip install -e ./
 # For the users in China, you could install with the command:
 # pip install -e ./ -i https://mirror.sjtu.edu.cn/pypi/web/simple

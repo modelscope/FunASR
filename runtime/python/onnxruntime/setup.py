@@ -34,7 +34,7 @@ setuptools.setup(
         "numpy<=1.26.4",
         "kaldi-native-fbank",
         "PyYAML>=5.1.2",
-        "onnx",
+        "jieba",
         "sentencepiece",
     ],
     packages=[MODULE_NAME, f"{MODULE_NAME}.utils"],
