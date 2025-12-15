@@ -152,7 +152,10 @@ def download_from_hf(**kwargs):
             kwargs["jieba_usr_dict"] = os.path.join(model_or_path, "jieba_usr_dict")
     if isinstance(kwargs, DictConfig):
         kwargs = OmegaConf.to_container(kwargs, resolve=True)
-    if os.path.exists(os.path.join(model_or_path, "requirements.txt")):
+    logging.warning(f'trust_remote_code: {kwargs.get("trust_remote_code", False)}')
+    if os.path.exists(os.path.join(model_or_path, "requirements.txt")) and kwargs.get(
+        "trust_remote_code", False
+    ):
         requirements = os.path.join(model_or_path, "requirements.txt")
         print(f"Detect model requirements, begin to install it: {requirements}")
         from funasr.utils.install_model_requirements import install_requirements
