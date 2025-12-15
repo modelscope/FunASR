@@ -1,0 +1,4 @@
+torch
+torchaudio
+transformers
+funasr>=1.2.7
