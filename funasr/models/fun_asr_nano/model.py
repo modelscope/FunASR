@@ -15,6 +15,7 @@ from funasr.register import tables
 from funasr.train_utils.device_funcs import force_gatherable, to_device
 from funasr.utils.datadir_writer import DatadirWriter
 from funasr.utils.load_utils import extract_fbank, load_audio_text_image_video
+from transformers import AutoConfig, AutoModelForCausalLM
 
 dtype_map = {"bf16": torch.bfloat16, "fp16": torch.float16, "fp32": torch.float32}
 
@@ -69,16 +70,9 @@ class FunASRNano(nn.Module):
         init_param_path = llm_conf.get("init_param_path", None)
         llm_dim = None
 
-        from transformers import AutoModelForCausalLM
-
         llm_load_kwargs = llm_conf.get("load_kwargs", {})
-        model = AutoModelForCausalLM.from_pretrained(
-            init_param_path,
-            load_in_8bit=None,
-            device_map=None,
-            use_cache=None,
-            **llm_load_kwargs,
-        )
+        config = AutoConfig.from_pretrained(init_param_path)
+        model = AutoModelForCausalLM.from_config(config, **llm_load_kwargs)
 
         freeze = llm_conf.get("freeze", True)
         if freeze:
@@ -122,13 +116,6 @@ class FunASRNano(nn.Module):
             llm_dim if llm_dim is not None else audio_adaptor_conf["llm_dim"]
         )
         audio_adaptor = adaptor_class(**audio_adaptor_conf)
-        init_param_path = audio_adaptor_conf.get("init_param_path", None)
-        if init_param_path is not None:
-            src_state = torch.load(init_param_path, map_location="cpu")
-            flag = audio_adaptor.load_state_dict(src_state, strict=False)
-            logging.info(
-                f"Loading audio_adaptor ckpt: {init_param_path}, status: {flag}"
-            )
         freeze = audio_adaptor_conf.get("freeze", False)
         if freeze:
             for name, param in audio_adaptor.named_parameters():
@@ -556,6 +543,26 @@ class FunASRNano(nn.Module):
         frontend=None,
         **kwargs,
     ):
+        hotwords = kwargs.get("hotwords", [])
+        if len(hotwords) > 0:
+            hotwords = ", ".join(hotwords)
+            prompt = f"请结合上下文信息，更加准确地完成语音转写任务。如果没有相关信息，我们会留空。\n\n\n**上下文信息：**\n\n\n"
+            prompt += f"热词列表：[{hotwords}]\n"
+        else:
+            prompt = ""
+        language = kwargs.get("language", "auto")
+        if language not in ("auto", "zh", "en", "ja"):
+            language = "auto"
+        if language == "auto":
+            prompt += "语音转写"
+        else:
+            LANGUAGE_MAP = {"zh": "中文", "en": "英文", "ja": "日文"}
+            prompt += f"语音转写成{LANGUAGE_MAP[language]}"
+        itn = kwargs.get("itn", True)
+        if not itn:
+            prompt += "，不进行文本规整"
+        prompt += "："
+
         new_data_in = []
         for data in data_in:
             if isinstance(data, str):
@@ -564,7 +571,7 @@ class FunASRNano(nn.Module):
                         {"role": "system", "content": "You are a helpful assistant."},
                         {
                             "role": "user",
-                            "content": f"语音转写：<|startofspeech|>!{data}<|endofspeech|>",
+                            "content": f"{prompt}<|startofspeech|>!{data}<|endofspeech|>",
                         },
                         {"role": "assistant", "content": "null"},
                     ]
@@ -575,7 +582,7 @@ class FunASRNano(nn.Module):
                         {"role": "system", "content": "You are a helpful assistant."},
                         {
                             "role": "user",
-                            "content": f"语音转写：<|startofspeech|>!!<|endofspeech|>",
+                            "content": f"{prompt}<|startofspeech|>!!<|endofspeech|>",
                             "audio": data,
                         },
                         {"role": "assistant", "content": "null"},
