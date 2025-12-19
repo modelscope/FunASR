@@ -34,12 +34,15 @@ FunASR 希望在语音识别的学术研究和工业应用之间架起一座桥�
 
 ## 最新动态
 
-- 2025/12/15: [Fun-ASR-Nano-2512](https://modelscope.cn/models/FunAudioLLM/Fun-ASR-Nano-2512) 是一款基于数千万小时真实语音数据训练的端到端语音识别大模型。它支持低延迟实时转写，并涵盖 31 种语言识别功能。
+- 2025/12/15: [Fun-ASR-Nano-2512](https://github.com/FunAudioLLM/Fun-ASR) 是一款基于数千万小时真实语音数据训练的端到端语音识别大模型。它支持低延迟实时转写，并涵盖 31 种语言识别功能。
 - 2024/10/29: 中文实时语音听写服务 1.12 发布，2pass-offline 模式支持 SensevoiceSmall 模型；详细信息参阅([部署文档](runtime/readme_cn.md))
 - 2024/10/10：新增加 Whisper-large-v3-turbo 模型支持，多语言语音识别/翻译/语种识别，支持从 [modelscope](examples/industrial_data_pretraining/whisper/demo.py)仓库下载，也支持从 [openai](examples/industrial_data_pretraining/whisper/demo_from_openai.py)仓库下载模型。
 - 2024/09/26: 中文离线文件转写服务 4.6、英文离线文件转写服务 1.7、中文实时语音听写服务 1.11 发布，修复 ONNX 内存泄漏、支持 SensevoiceSmall onnx 模型；中文离线文件转写服务 GPU 2.0 发布，修复显存泄漏; 详细信息参阅([部署文档](runtime/readme_cn.md))
 - 2024/09/25：新增语音唤醒模型，支持[fsmn_kws](https://modelscope.cn/models/iic/speech_sanm_kws_phone-xiaoyun-commands-online), [fsmn_kws_mt](https://modelscope.cn/models/iic/speech_sanm_kws_phone-xiaoyun-commands-online), [sanm_kws](https://modelscope.cn/models/iic/speech_sanm_kws_phone-xiaoyun-commands-offline), [sanm_kws_streaming](https://modelscope.cn/models/iic/speech_sanm_kws_phone-xiaoyun-commands-online) 4 个模型的微调和推理。
 - 2024/07/04：[SenseVoice](https://github.com/FunAudioLLM/SenseVoice) 是一个基础语音理解模型，具备多种语音理解能力，涵盖了自动语音识别（ASR）、语言识别（LID）、情感识别（SER）以及音频事件检测（AED）。
+ 
+<details><summary>展开日志</summary>
+
 - 2024/07/01：中文离线文件转写服务 GPU 版本 1.1 发布，优化 bladedisc 模型兼容性问题；详细信息参阅([部署文档](runtime/readme_cn.md))
 - 2024/06/27：中文离线文件转写服务 GPU 版本 1.0 发布，支持动态 batch，支持多路并发，在长音频测试集上单线 RTF 为 0.0076，多线加速比为 1200+（CPU 为 330+）；详细信息参阅([部署文档](runtime/readme_cn.md))
 - 2024/05/15：新增加情感识别模型，[emotion2vec+large](https://modelscope.cn/models/iic/emotion2vec_plus_large/summary)，[emotion2vec+base](https://modelscope.cn/models/iic/emotion2vec_plus_base/summary)，[emotion2vec+seed](https://modelscope.cn/models/iic/emotion2vec_plus_seed/summary)，输出情感类别为：生气/angry，开心/happy，中立/neutral，难过/sad。
@@ -48,9 +51,6 @@ FunASR 希望在语音识别的学术研究和工业应用之间架起一座桥�
 - 2024/03/05：新增加 Whisper-large-v3 模型支持，多语言语音识别/翻译/语种识别，支持从 [modelscope](examples/industrial_data_pretraining/whisper/demo.py)仓库下载，也支持从 [openai](examples/industrial_data_pretraining/whisper/demo_from_openai.py)仓库下载模型。
 - 2024/03/05: 中文离线文件转写服务 4.4、英文离线文件转写服务 1.5、中文实时语音听写服务 1.9 发布，docker 镜像支持 arm64 平台，升级 modelscope 版本；详细信息参阅([部署文档](runtime/readme_cn.md))
 - 2024/01/30：funasr-1.0 发布，更新说明[文档](https://github.com/alibaba-damo-academy/FunASR/discussions/1319)
-
-<details><summary>展开日志</summary>
-
 - 2024/01/30：新增加情感识别 [模型链接](https://www.modelscope.cn/models/iic/emotion2vec_base_finetuned/summary)，原始模型 [repo](https://github.com/ddlBoJack/emotion2vec).
 - 2024/01/25: 中文离线文件转写服务 4.2、英文离线文件转写服务 1.3，优化 vad 数据处理方式，大幅降低峰值内存占用，内存泄漏优化；中文实时语音听写服务 1.7 发布，客户端优化；详细信息参阅([部署文档](runtime/readme_cn.md))
 - 2024/01/09: funasr 社区软件包 windows 2.0 版本发布，支持软件包中文离线文件转写 4.1、英文离线文件转写 1.2、中文实时听写服务 1.6 的最新功能，详细信息参阅([FunASR 社区软件包 windows 版本](https://www.modelscope.cn/models/damo/funasr-runtime-win-cpu-x64/summary))
