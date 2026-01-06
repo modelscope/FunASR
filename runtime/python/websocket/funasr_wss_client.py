@@ -242,6 +242,8 @@ async def record_from_scp(chunk_begin, chunk_size):
         while not offline_msg_done:
             await asyncio.sleep(1)
 
+    await asyncio.sleep(10)
+
     await websocket.close()
 
 
