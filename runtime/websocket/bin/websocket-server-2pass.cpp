@@ -78,7 +78,7 @@ nlohmann::json handle_result(FUNASR_RESULT result, websocketpp::connection_hdl& 
 
   std::string tmp_online_msg = FunASRGetResult(result, 0);
   if (tmp_online_msg != "") {
-    LOG(INFO) << "online_res :" << tmp_online_msg;
+    LOG(INFO) << "wav_name: " << data_msg->msg["wav_name"].get<std::string>() << " | online_res :" << tmp_online_msg;
     jsonresult["text"] = tmp_online_msg;
     jsonresult["mode"] = "2pass-online";
     jsonresult["slice_type"] = 1;
@@ -97,7 +97,7 @@ nlohmann::json handle_result(FUNASR_RESULT result, websocketpp::connection_hdl& 
 
   std::string tmp_tpass_msg = FunASRGetTpassResult(result, 0);
   if (tmp_tpass_msg != "") {
-    LOG(INFO) << "offline results : " << tmp_tpass_msg;
+    LOG(INFO) << "wav_name: " << data_msg->msg["wav_name"].get<std::string>() << " | offline results : " << tmp_tpass_msg;
     jsonresult["text"] = tmp_tpass_msg;
     jsonresult["mode"] = "2pass-offline";
 
@@ -199,7 +199,7 @@ void WebSocketServer::do_decoder(
         jsonresult["wav_name"] = wav_name;
         jsonresult["is_final"] = false;
         if (jsonresult["text"] != "") {
-          LOG(INFO) << "jsonresult: " << jsonresult.dump(4);
+          //LOG(INFO) << "jsonresult: " << jsonresult.dump(4);
           if (is_ssl) {
             wss_server_->send(hdl, jsonresult.dump(),
                               websocketpp::frame::opcode::text, ec);
@@ -241,7 +241,7 @@ void WebSocketServer::do_decoder(
         nlohmann::json jsonresult = handle_result(Result, hdl, data_map);
         jsonresult["wav_name"] = wav_name;
         jsonresult["is_final"] = true;
-        LOG(INFO) << "jsonresult: " << jsonresult.dump(4);
+        //LOG(INFO) << "jsonresult: " << jsonresult.dump(4);
         if (is_ssl) {
           wss_server_->send(hdl, jsonresult.dump(),
                             websocketpp::frame::opcode::text, ec);
