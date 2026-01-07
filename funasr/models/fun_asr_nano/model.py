@@ -9,7 +9,6 @@ import traceback
 
 import torch
 import torch.nn as nn
-from funasr import AutoModel
 from funasr.metrics.compute_acc import compute_accuracy
 from funasr.register import tables
 from funasr.train_utils.device_funcs import force_gatherable, to_device
@@ -42,6 +41,7 @@ class FunASRNano(nn.Module):
             "activation_checkpoint", False
         )
         if hub == "ms":
+            from funasr import AutoModel
             model = AutoModel(model=audio_encoder, model_revision="master")
             audio_encoder_output_size = (
                 model.model.encoder_output_size
