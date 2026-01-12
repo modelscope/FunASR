@@ -642,7 +642,7 @@ class ParaformerStreaming(Paraformer):
         result_i = {"key": key[0], "text": text_postprocessed}
         result = [result_i]
 
-        cache["prev_samples"] = audio_sample[:-m]
+        cache["prev_samples"] = audio_sample[-m:] if m > 0 else torch.empty(0)
         if _is_final:
             self.init_cache(cache, **kwargs)
 

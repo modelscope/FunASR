@@ -724,7 +724,7 @@ class FsmnVADStreaming(nn.Module):
             if len(segments_i) > 0:
                 segments.extend(*segments_i)
 
-        cache["prev_samples"] = audio_sample[:-m]
+        cache["prev_samples"] = audio_sample[-m:] if m > 0 else torch.empty(0)
         if _is_final:
             self.init_cache(cache)
 
