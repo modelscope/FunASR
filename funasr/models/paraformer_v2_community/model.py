@@ -413,7 +413,7 @@ class Paraformer(torch.nn.Module):
             timestamps: List[Tuple[int, int]] -> [(start_frame, end_frame), ...]
         """
         if greedy_path.numel() == 0:
-            return torch.zeros((0, ctc_probs.size(1)), device=ctc_probs.device), []
+            return torch.zeros((0, ctc_probs.size(1)), device=ctc_probs.device)
 
         # Find consecutive segments in the greedy path
         unique_tokens, counts = torch.unique_consecutive(greedy_path, return_counts=True)
@@ -510,7 +510,6 @@ class Paraformer(torch.nn.Module):
             # Handling Noise/Silence (Empty Output)
             if compressed_prob.size(0) == 0:
                 token_int = []
-                timestamp_list = []
             else:
                 # 4. Decoder Forward
                 compressed_prob_in = compressed_prob.unsqueeze(0) # [1, U', V]
