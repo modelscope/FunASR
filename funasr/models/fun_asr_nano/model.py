@@ -1,4 +1,3 @@
-import json
 import logging
 import os
 import random
@@ -6,15 +5,20 @@ import re
 import string
 import time
 import traceback
+from typing import Union
 
 import torch
 import torch.nn as nn
+
 from funasr.metrics.compute_acc import compute_accuracy
 from funasr.register import tables
 from funasr.train_utils.device_funcs import force_gatherable, to_device
 from funasr.utils.datadir_writer import DatadirWriter
 from funasr.utils.load_utils import extract_fbank, load_audio_text_image_video
 from transformers import AutoConfig, AutoModelForCausalLM
+
+from ctc import CTC
+from tools.utils import forced_align
 
 dtype_map = {"bf16": torch.bfloat16, "fp16": torch.float16, "fp32": torch.float32}
 
@@ -42,6 +46,7 @@ class FunASRNano(nn.Module):
         )
         if hub == "ms":
             from funasr import AutoModel
+
             model = AutoModel(model=audio_encoder, model_revision="master")
             audio_encoder_output_size = (
                 model.model.encoder_output_size
@@ -49,22 +54,20 @@ class FunASRNano(nn.Module):
                 else -1
             )
             audio_encoder = (
-                model.model.model.encoder
-                if hasattr(model.model, "model")
-                else model.model.encoder
+                model.model.model.encoder if hasattr(model.model, "model") else model.model.encoder
             )
         else:
             encoder_class = tables.encoder_classes.get(audio_encoder)
             audio_encoder = encoder_class(input_size=input_size, **audio_encoder_conf)
             audio_encoder_output_size = audio_encoder.output_size()
         freeze = audio_encoder_conf.get("freeze", True)
-        freeze_layer_num = int(audio_encoder_conf.get("freeze_layer_num", -1))
 
         if freeze:
-            for name, param in audio_encoder.named_parameters():
+            for _, param in audio_encoder.named_parameters():
                 param.requires_grad = False
             audio_encoder.eval()
         self.audio_encoder = audio_encoder
+
         # llm
         self.llm = None
         init_param_path = llm_conf.get("init_param_path", None)
@@ -76,31 +79,9 @@ class FunASRNano(nn.Module):
 
         freeze = llm_conf.get("freeze", True)
         if freeze:
-            for name, param in model.named_parameters():
+            for _, param in model.named_parameters():
                 param.requires_grad = False
             model.eval()
-        logging.info(f"use_lora: {llm_conf.get('use_lora', False)}")
-        if llm_conf.get("use_lora", False):
-            from omegaconf import DictConfig, OmegaConf
-
-            lora_conf = llm_conf.get("lora_conf", {})
-            if isinstance(lora_conf, (OmegaConf, DictConfig)):
-                lora_conf = OmegaConf.to_container(lora_conf, resolve=True)
-            from peft import LoraConfig, PeftModel, get_peft_model
-
-            lora_init_param_path = lora_conf.get("init_param_path", None)
-            if lora_init_param_path is not None:
-                logging.info(f"lora_init_param_path: {lora_init_param_path}")
-                model = PeftModel.from_pretrained(model, lora_init_param_path)
-                for name, param in model.named_parameters():
-                    if not lora_conf.get("freeze_lora", False):
-                        if "lora_" in name:
-                            param.requires_grad = True
-            else:
-                peft_config = LoraConfig(**lora_conf)
-                model = get_peft_model(model, peft_config)
-            model.print_trainable_parameters()
-
         if llm_conf.get("activation_checkpoint", False):
             model.gradient_checkpointing_enable()
 
@@ -118,13 +99,62 @@ class FunASRNano(nn.Module):
         audio_adaptor = adaptor_class(**audio_adaptor_conf)
         freeze = audio_adaptor_conf.get("freeze", False)
         if freeze:
-            for name, param in audio_adaptor.named_parameters():
+            for _, param in audio_adaptor.named_parameters():
                 param.requires_grad = False
             audio_adaptor.eval()
         self.audio_adaptor = audio_adaptor
+        self.use_low_frame_rate = audio_adaptor_conf.get("use_low_frame_rate", False)
+
+        # ctc decoder
+        self.ctc_decoder = None
+        # TODO: fix table name
+        ctc_decoder_class = tables.adaptor_classes.get(kwargs.get("ctc_decoder", None))
+        if ctc_decoder_class is not None:
+            ctc_tokenizer = (
+                kwargs.get("ctc_tokenizer", None)
+                if "ctc_tokenizer" in kwargs
+                else kwargs["dataset_conf"]["ctc_tokenizer"]
+            )
+            ctc_tokenizer_conf = (
+                kwargs.get("ctc_tokenizer_conf", None)
+                if "ctc_tokenizer_conf" in kwargs
+                else kwargs["dataset_conf"]["ctc_tokenizer_conf"]
+            )
+            if ctc_tokenizer is not None and ctc_tokenizer_conf is not None:
+                ctc_tokenizer_class = tables.tokenizer_classes.get(ctc_tokenizer)
+                ctc_tokenizer = ctc_tokenizer_class(**ctc_tokenizer_conf)
+                self.ctc_tokenizer = ctc_tokenizer
+            assert ctc_tokenizer is not None, f"ctc_tokenizer must be set"
+
+            ctc_vocab_size = kwargs.get("ctc_vocab_size", 60515)
+            ctc_decoder_conf = kwargs.get("ctc_decoder_conf", {})
+            if audio_encoder_output_size > 0:
+                ctc_decoder_conf["encoder_dim"] = audio_encoder_output_size
+            self.ctc_decoder = ctc_decoder_class(**ctc_decoder_conf)
+            init_param_path = ctc_decoder_conf.get("init_param_path", None)
+            if init_param_path is not None:
+                src_state = torch.load(init_param_path, map_location="cpu")
+                flag = self.ctc_decoder.load_state_dict(src_state, strict=False)
+                logging.info(f"Loading ctc_decoder ckpt: {init_param_path}, status: {flag}")
+            freeze = ctc_decoder_conf.get("freeze", False)
+            if freeze:
+                for _, param in self.ctc_decoder.named_parameters():
+                    param.requires_grad = False
+                self.ctc_decoder.eval()
+
+            ctc_conf = kwargs.get("ctc_conf", {})
+            self.blank_id = ctc_conf.get("blank_id", ctc_vocab_size - 1)
+            self.ctc_weight = kwargs.get("ctc_weight", 0.3)
+            self.ctc = CTC(
+                odim=ctc_vocab_size,
+                encoder_output_size=audio_encoder_output_size,
+                blank_id=self.blank_id,
+                **ctc_conf,
+            )
+            self.detach_ctc_decoder = kwargs.get("detach_ctc_decoder", True)
+            self.error_calculator = None
 
         self.length_normalized_loss = length_normalized_loss
-        self.feat_permute = audio_encoder_conf.get("feat_permute", True)
         rank = int(os.environ.get("RANK", 0))
         logging.info(f"rank: {rank}, model is builded.")
 
@@ -159,9 +189,7 @@ class FunASRNano(nn.Module):
                 encoder_out, encoder_out_lens = self.encode(speech, speech_lengths)
 
             # audio_adaptor
-            encoder_out, encoder_out_lens = self.audio_adaptor(
-                encoder_out, encoder_out_lens
-            )
+            encoder_out, encoder_out_lens = self.audio_adaptor(encoder_out, encoder_out_lens)
 
             batch_size, token_num, dims = inputs_embeds.shape
             fake_token_len = kwargs.get("fake_token_len")
@@ -200,11 +228,11 @@ class FunASRNano(nn.Module):
             stats["batch_size_speech"] = batch_size_speech
             stats["batch_size_x_frames"] = frames * batch_size_speech
             stats["batch_size_real_frames"] = speech_lengths.sum().item()
-            stats["padding_frames"] = (
-                stats["batch_size_x_frames"] - stats["batch_size_real_frames"]
-            )
+            stats["padding_frames"] = stats["batch_size_x_frames"] - stats["batch_size_real_frames"]
 
-        with torch.cuda.amp.autocast(
+        device_type = next(self.parameters()).device.type
+        with torch.autocast(
+            device_type=device_type if device_type in ["cuda", "xpu", "mps"] else "cpu",
             enabled=True if self.llm_dtype != "fp32" else False,
             dtype=dtype_map[self.llm_dtype],
         ):
@@ -219,9 +247,7 @@ class FunASRNano(nn.Module):
 
         with torch.no_grad():
             preds = torch.argmax(model_outputs.logits, -1)
-            acc_att = compute_accuracy(
-                preds[:, :-1], labels_ids[:, 1:], ignore_label=-100
-            )
+            acc_att = compute_accuracy(preds[:, :-1], labels_ids[:, 1:], ignore_label=-100)
             stats["acc"] = acc_att
 
         stats["loss"] = torch.clone(loss.detach())
@@ -229,9 +255,7 @@ class FunASRNano(nn.Module):
 
         stats["batch_size_x_tokens"] = token_num * batch_size
         stats["batch_size_real_tokens"] = attention_mask.sum().item()
-        stats["padding_tokens"] = (
-            stats["batch_size_x_tokens"] - stats["batch_size_real_tokens"]
-        )
+        stats["padding_tokens"] = stats["batch_size_x_tokens"] - stats["batch_size_real_tokens"]
 
         dialog_turns = (fbank_beg > 0).sum(-1)
         dialog_turns_max = torch.max(dialog_turns).int().item()
@@ -252,12 +276,7 @@ class FunASRNano(nn.Module):
 
     def encode(self, speech, speech_lengths):
         # audio encoder
-        if self.feat_permute:
-            encoder_out, encoder_out_lens = self.audio_encoder(
-                speech.permute(0, 2, 1), speech_lengths
-            )
-        else:
-            encoder_out, encoder_out_lens = self.audio_encoder(speech, speech_lengths)
+        encoder_out, encoder_out_lens = self.audio_encoder(speech, speech_lengths)
 
         return encoder_out, encoder_out_lens
 
@@ -286,9 +305,7 @@ class FunASRNano(nn.Module):
 
         return contents
 
-    def data_load_speech(
-        self, contents: dict, tokenizer, frontend, meta_data={}, **kwargs
-    ):
+    def data_load_speech(self, contents: dict, tokenizer, frontend, meta_data={}, **kwargs):
         system = contents["system"]
         user = contents["user"]
         assistant = contents["assistant"]
@@ -309,9 +326,7 @@ class FunASRNano(nn.Module):
             [],
         )
         input_source_ids = []
-        for i, (system_prompt, user_prompt, target_out) in enumerate(
-            zip(system, user, assistant)
-        ):
+        for i, (system_prompt, user_prompt, target_out) in enumerate(zip(system, user, assistant)):
             if i >= kwargs.get("multiturn_num_max", 5):
                 break
             if len(input_ids) > kwargs.get("max_token_length", 1500):
@@ -326,14 +341,20 @@ class FunASRNano(nn.Module):
                 else:
                     source_input = f"<|im_start|>system\n{system_prompt}<|im_end|>\n<|im_start|>user\n{user_prompt}<|im_end|>\n<|im_start|>assistant\n"
                     if not sys_prompt:
-                        source_input = f"<|im_start|>user\n{user_prompt}<|im_end|>\n<|im_start|>assistant\n"
+                        source_input = (
+                            f"<|im_start|>user\n{user_prompt}<|im_end|>\n<|im_start|>assistant\n"
+                        )
             else:
                 if kwargs.get("infer_with_assistant_input", False):
                     source_input = f"<|im_start|>user\n{user_prompt}"
                 else:
-                    source_input = f"<|im_start|>user\n{user_prompt}<|im_end|>\n<|im_start|>assistant\n"
+                    source_input = (
+                        f"<|im_start|>user\n{user_prompt}<|im_end|>\n<|im_start|>assistant\n"
+                    )
             if not do_think:
                 source_input += "<think>\n\n</think>\n\n"
+            if kwargs.get("prev_text", None) is not None:
+                source_input += kwargs["prev_text"]
 
             splits = pattern.split(source_input)
             source_ids = []
@@ -362,9 +383,7 @@ class FunASRNano(nn.Module):
                             time2 = time.perf_counter()
                             meta_data["load_data"] = f"{time2 - time1:0.3f}"
                         except Exception as e:
-                            logging.error(
-                                f"Loading wav failed! {str(e)}, {traceback.format_exc()}"
-                            )
+                            logging.error(f"Loading wav failed! {str(e)}, {traceback.format_exc()}")
 
                         speech, speech_lengths = extract_fbank(
                             data_src,
@@ -382,12 +401,12 @@ class FunASRNano(nn.Module):
                             / 1000
                         )
 
-                        if self.feat_permute:
-                            speech = speech.permute(0, 2, 1)
-
-                        olens = 1 + (speech_lengths[0].item() - 3 + 2 * 1) // 2
-                        olens = 1 + (olens - 3 + 2 * 1) // 2
-                        fake_token_len_i = (olens - 1) // 2 + 1
+                        if self.use_low_frame_rate:
+                            olens = 1 + (speech_lengths[0].item() - 3 + 2 * 1) // 2
+                            olens = 1 + (olens - 3 + 2 * 1) // 2
+                            fake_token_len_i = (olens - 1) // 2 + 1
+                        else:
+                            fake_token_len_i = speech_lengths[0].item()
                         fake_token = [0] * fake_token_len_i
                         fbank_beg_i = len(source_ids)
                         source_ids += fake_token
@@ -406,9 +425,7 @@ class FunASRNano(nn.Module):
                 fbank.append(speech[0, :, :])
                 fbank_lens.append(speech_lengths)
 
-        input_ids = torch.tensor(
-            input_ids, dtype=torch.int64
-        )  # [: self.max_token_length]
+        input_ids = torch.tensor(input_ids, dtype=torch.int64)  # [: self.max_token_length]
         attention_mask = torch.tensor([1] * len(input_ids), dtype=torch.int32)
         labels = torch.tensor(labels, dtype=torch.int64)  # [: self.max_token_length]
 
@@ -419,9 +436,7 @@ class FunASRNano(nn.Module):
         target_ids = torch.tensor(target_ids, dtype=torch.int64)
 
         if len(fbank) > 0:
-            speech = torch.nn.utils.rnn.pad_sequence(
-                fbank, batch_first=True, padding_value=0.0
-            )
+            speech = torch.nn.utils.rnn.pad_sequence(fbank, batch_first=True, padding_value=0.0)
             speech_lengths = torch.nn.utils.rnn.pad_sequence(
                 fbank_lens, batch_first=True, padding_value=-1
             )
@@ -458,9 +473,7 @@ class FunASRNano(nn.Module):
             raise NotImplementedError("batch decoding is not implemented")
 
         contents = self.data_template(data_in[0])
-        output = self.data_load_speech(
-            contents, tokenizer, frontend, meta_data=meta_data, **kwargs
-        )
+        output = self.data_load_speech(contents, tokenizer, frontend, meta_data=meta_data, **kwargs)
         batch = to_device(output, kwargs["device"])
 
         # audio encoder
@@ -481,18 +494,18 @@ class FunASRNano(nn.Module):
                 encoder_out, encoder_out_lens = self.encode(speech, speech_lengths)
 
                 # audio_adaptor
-                encoder_out, encoder_out_lens = self.audio_adaptor(
-                    encoder_out, encoder_out_lens
-                )
-                meta_data["audio_adaptor_out"] = encoder_out
-                meta_data["audio_adaptor_out_lens"] = encoder_out_lens
+                adaptor_out, adaptor_out_lens = self.audio_adaptor(encoder_out, encoder_out_lens)
+                meta_data["encoder_out"] = encoder_out
+                meta_data["encoder_out_lens"] = encoder_out_lens
+                meta_data["audio_adaptor_out"] = adaptor_out
+                meta_data["audio_adaptor_out_lens"] = adaptor_out_lens
 
         input_ids = batch["input_ids"]
         source_ids = batch["source_ids"]
         fbank_beg = batch["fbank_beg"]
         fake_token_len = batch["fake_token_len"]
 
-        if not kwargs.get("tearchforing", False):
+        if not kwargs.get("teacherforcing", False):
             input_ids = source_ids
 
         input_ids[input_ids < 0] = 0
@@ -509,7 +522,7 @@ class FunASRNano(nn.Module):
                 fbank_beg_idx = fbank_beg[batch_idx, turn_id].item()
                 if fbank_beg_idx > 0:
                     speech_token_len = fake_token_len[batch_idx, turn_id]
-                    speech_token = encoder_out[speech_idx, :speech_token_len, :]
+                    speech_token = adaptor_out[speech_idx, :speech_token_len, :]
 
                     try:
                         inputs_embeds[
@@ -521,10 +534,10 @@ class FunASRNano(nn.Module):
                         #
                         logging.error(f"{str(e)}, {traceback.format_exc()}")
                         logging.info(
-                            f"batch_idx: {batch_idx}, inputs_embeds: {inputs_embeds.shape}, fbank_beg_idx: {fbank_beg_idx}, speech_token_len: {speech_token_len}, encoder_out: {encoder_out.shape}, encoder_out_lens: {encoder_out_lens}, fake_token_len: {fake_token_len}, speech_lengths: {speech_lengths}"
+                            f"batch_idx: {batch_idx}, inputs_embeds: {inputs_embeds.shape}, fbank_beg_idx: {fbank_beg_idx}, speech_token_len: {speech_token_len}, adaptor_out: {adaptor_out.shape}, adaptor_out_lens: {adaptor_out_lens}, fake_token_len: {fake_token_len}, speech_lengths: {speech_lengths}"
                         )
-                        speech_token_len = encoder_out_lens[speech_idx].item()
-                        speech_token = encoder_out[speech_idx, :speech_token_len, :]
+                        speech_token_len = adaptor_out_lens[speech_idx].item()
+                        speech_token = adaptor_out[speech_idx, :speech_token_len, :]
                         inputs_embeds[
                             batch_idx,
                             fbank_beg_idx : fbank_beg_idx + speech_token_len,
@@ -533,6 +546,39 @@ class FunASRNano(nn.Module):
 
                     speech_idx += 1
         return inputs_embeds, contents, batch, source_ids, meta_data
+
+    def get_prompt(self, hotwords: list[str], language: str = None, itn: bool = True):
+        if len(hotwords) > 0:
+            hotwords = ", ".join(hotwords)
+            prompt = f"请结合上下文信息，更加准确地完成语音转写任务。如果没有相关信息，我们会留空。\n\n\n**上下文信息：**\n\n\n"
+            prompt += f"热词列表：[{hotwords}]\n"
+        else:
+            prompt = ""
+        if language is None:
+            prompt += "语音转写"
+        else:
+            prompt += f"语音转写成{language}"
+        if not itn:
+            prompt += "，不进行文本规整"
+        return prompt + "："
+
+    def generate_chatml(self, prompt: str, data: Union[str, torch.Tensor]):
+        if isinstance(data, str):
+            return [
+                {"role": "system", "content": "You are a helpful assistant."},
+                {"role": "user", "content": f"{prompt}<|startofspeech|>!{data}<|endofspeech|>"},
+                {"role": "assistant", "content": "null"},
+            ]
+        elif isinstance(data, torch.Tensor):
+            return [
+                {"role": "system", "content": "You are a helpful assistant."},
+                {
+                    "role": "user",
+                    "content": f"{prompt}<|startofspeech|>!!<|endofspeech|>",
+                    "audio": data,
+                },
+                {"role": "assistant", "content": "null"},
+            ]
 
     def inference(
         self,
@@ -543,60 +589,16 @@ class FunASRNano(nn.Module):
         frontend=None,
         **kwargs,
     ):
-        hotwords = kwargs.get("hotwords", [])
-        if len(hotwords) > 0:
-            hotwords = ", ".join(hotwords)
-            prompt = f"请结合上下文信息，更加准确地完成语音转写任务。如果没有相关信息，我们会留空。\n\n\n**上下文信息：**\n\n\n"
-            prompt += f"热词列表：[{hotwords}]\n"
-        else:
-            prompt = ""
-        language = kwargs.get("language", "auto")
-        if language not in ("auto", "zh", "en", "ja"):
-            language = "auto"
-        if language == "auto":
-            prompt += "语音转写"
-        else:
-            LANGUAGE_MAP = {"zh": "中文", "en": "英文", "ja": "日文"}
-            prompt += f"语音转写成{LANGUAGE_MAP[language]}"
-        itn = kwargs.get("itn", True)
-        if not itn:
-            prompt += "，不进行文本规整"
-        prompt += "："
-
-        new_data_in = []
-        for data in data_in:
-            if isinstance(data, str):
-                new_data_in.append(
-                    [
-                        {"role": "system", "content": "You are a helpful assistant."},
-                        {
-                            "role": "user",
-                            "content": f"{prompt}<|startofspeech|>!{data}<|endofspeech|>",
-                        },
-                        {"role": "assistant", "content": "null"},
-                    ]
-                )
-            elif isinstance(data, torch.Tensor):
-                new_data_in.append(
-                    [
-                        {"role": "system", "content": "You are a helpful assistant."},
-                        {
-                            "role": "user",
-                            "content": f"{prompt}<|startofspeech|>!!<|endofspeech|>",
-                            "audio": data,
-                        },
-                        {"role": "assistant", "content": "null"},
-                    ]
-                )
-        data_in = new_data_in
+        prompt = self.get_prompt(
+            kwargs.get("hotwords", []), kwargs.get("language", None), kwargs.get("itn", True)
+        )
+        data_in = [self.generate_chatml(prompt, data) for data in data_in]
 
         if key is None:
             key = []
             for _ in data_in:
                 chars = string.ascii_letters + string.digits
-                key.append(
-                    "rand_key_" + "".join(random.choice(chars) for _ in range(13))
-                )
+                key.append("rand_key_" + "".join(random.choice(chars) for _ in range(13)))
 
         return self.inference_llm(
             data_in,
@@ -619,22 +621,51 @@ class FunASRNano(nn.Module):
         inputs_embeds, contents, batch, source_ids, meta_data = self.inference_prepare(
             data_in, data_lengths, key, tokenizer, frontend, **kwargs
         )
+
+        ctc_results = []
+        if self.ctc_decoder is not None:
+            encoder_out = meta_data["encoder_out"]
+            encoder_out_lens = meta_data["encoder_out_lens"]
+            decoder_out, decoder_out_lens = self.ctc_decoder(encoder_out, encoder_out_lens)
+            ctc_logits = self.ctc.log_softmax(decoder_out)
+
+            b, n, d = encoder_out.size()
+            if isinstance(key[0], (list, tuple)):
+                key = key[0]
+            if len(key) < b:
+                key = key * b
+            for i in range(b):
+                x = ctc_logits[i, : encoder_out_lens[i].item(), :]
+                yseq = x.argmax(dim=-1)
+                yseq = torch.unique_consecutive(yseq, dim=-1)
+                mask = yseq != self.blank_id
+                token_int = yseq[mask].tolist()
+                # Change integer-ids to tokens
+                text = self.ctc_tokenizer.decode(token_int)
+                ctc_results.append({"key": key[i], "text": text, "ctc_logits": x})
+
         llm_dtype = kwargs.get("llm_dtype", "fp32")
         if llm_dtype == "fp32":
             llm_dtype = "fp16" if kwargs.get("fp16", False) else llm_dtype
             llm_dtype = "bf16" if kwargs.get("bf16", False) else llm_dtype
 
-        with torch.cuda.amp.autocast(
-            enabled=True if llm_dtype != "fp32" else False, dtype=dtype_map[llm_dtype]
+        device_type = torch.device(kwargs.get("device", "cuda")).type
+        with torch.autocast(
+            device_type=device_type if device_type in ["cuda", "xpu", "mps"] else "cpu",
+            enabled=True if llm_dtype != "fp32" else False,
+            dtype=dtype_map[llm_dtype],
         ):
             label = contents["assistant"][-1]
             self.llm = self.llm.to(dtype_map[llm_dtype])
             inputs_embeds = inputs_embeds.to(dtype_map[llm_dtype])
             llm_kwargs = kwargs.get("llm_kwargs", {})
-            if not kwargs.get("teachforing", False):
+            if not kwargs.get("teacherforcing", False):
+                attention_mask = batch.get("attention_mask", None)
                 generated_ids = self.llm.generate(
                     inputs_embeds=inputs_embeds,
+                    attention_mask=attention_mask,
                     max_new_tokens=kwargs.get("max_length", 512),
+                    pad_token_id=self.llm.config.pad_token_id or self.llm.config.eos_token_id,
                     **llm_kwargs,
                 )
 
@@ -652,6 +683,7 @@ class FunASRNano(nn.Module):
                     inputs_embeds=inputs_embeds,
                     attention_mask=attention_mask,
                     labels=labels_ids,
+                    pad_token_id=self.llm.config.pad_token_id or self.llm.config.eos_token_id,
                     **llm_kwargs,
                 )
 
@@ -662,6 +694,7 @@ class FunASRNano(nn.Module):
                     skip_special_tokens=kwargs.get("skip_special_tokens", True),
                 )[0]
                 loss = model_outputs.loss.item()
+        response = kwargs.get("prev_text", "") + response
 
         ibest_writer = None
         if kwargs.get("output_dir") is not None:
@@ -673,7 +706,7 @@ class FunASRNano(nn.Module):
         response_clean = re.sub(r"[^\w\s\u3000\u4e00-\u9fff]+", "", response)
         result_i = {
             "key": key[0],
-            "text": re.sub(r'\s+', ' ', response.replace("/sil", " ")),
+            "text": re.sub(r"\s+", " ", response.replace("/sil", " ")),
             "text_tn": response_clean,
             "label": label,
         }
@@ -681,9 +714,33 @@ class FunASRNano(nn.Module):
             result_i["loss"] = loss
         results.append(result_i)
 
+        for ctc_result, result in zip(ctc_results, results):
+            result["ctc_text"] = ctc_result["text"].replace("<|nospeech|>", "")
+            target_ids = torch.tensor(
+                self.ctc_tokenizer.encode(result["ctc_text"]), dtype=torch.int64
+            )
+            result["ctc_timestamps"] = forced_align(
+                ctc_result["ctc_logits"], target_ids, self.blank_id
+            )
+            target_ids = torch.tensor(self.ctc_tokenizer.encode(result["text"]), dtype=torch.int64)
+            result["timestamps"] = forced_align(ctc_result["ctc_logits"], target_ids, self.blank_id)
+            for timestamps in [result["timestamps"], result["ctc_timestamps"]]:
+                for timestamp in timestamps:
+                    timestamp["token"] = self.ctc_tokenizer.decode([timestamp["token"]])
+                    timestamp["start_time"] = timestamp["start_time"] * 6 * 10 / 1000
+                    timestamp["end_time"] = timestamp["end_time"] * 6 * 10 / 1000
+
         if ibest_writer is not None:
             ibest_writer["text"][key[0]] = response.replace("\n", " ")
             ibest_writer["label"][key[0]] = label.replace("\n", " ")
             ibest_writer["text_tn"][key[0]] = response_clean
 
         return results, meta_data
+
+    @staticmethod
+    def from_pretrained(model: str = None, **kwargs):
+        from funasr import AutoModel
+
+        model, kwargs = AutoModel.build_model(model=model, trust_remote_code=True, **kwargs)
+
+        return model, kwargs
