@@ -15,7 +15,7 @@ from funasr.register import tables
 from funasr.train_utils.device_funcs import force_gatherable, to_device
 from funasr.utils.datadir_writer import DatadirWriter
 from funasr.utils.load_utils import extract_fbank, load_audio_text_image_video
-from transformers import AutoConfig, AutoModelForCausalLM
+
 
 from ctc import CTC
 from tools.utils import forced_align
@@ -72,6 +72,7 @@ class FunASRNano(nn.Module):
         self.llm = None
         init_param_path = llm_conf.get("init_param_path", None)
         llm_dim = None
+        from transformers import AutoConfig, AutoModelForCausalLM
 
         llm_load_kwargs = llm_conf.get("load_kwargs", {})
         config = AutoConfig.from_pretrained(init_param_path)
