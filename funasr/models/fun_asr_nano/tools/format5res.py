@@ -155,9 +155,7 @@ def ch_number2digit(line):
         if line[i] in chsh:
             number_flag = 1
             if line[i] == "两":
-                if (i == len(line) - 1) or (
-                    (line[i + 1] not in chsh.keys()) and (line[i + 1] not in bits.keys())
-                ):
+                if (i == len(line) - 1) or ((line[i + 1] not in chsh.keys()) and (line[i + 1] not in bits.keys())):
                     number_flag = -1
             if number_flag == 1:
                 digit.append(chsh[line[i]])
