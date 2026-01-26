@@ -86,9 +86,7 @@ def main_hydra(cfg: DictConfig):
         transcript_lines = f2.readlines()
 
     if len(scp_lines) != len(transcript_lines):
-        print(
-            f"Warning: Line count mismatch - scp: {len(scp_lines)}, transcript: {len(transcript_lines)}"
-        )
+        print(f"Warning: Line count mismatch - scp: {len(scp_lines)}, transcript: {len(transcript_lines)}")
 
     tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen3-0.6B")
     processor = LineProcessor(tokenizer)
@@ -102,10 +100,7 @@ def main_hydra(cfg: DictConfig):
     with tqdm(total=len(data_pairs), desc="Processing") as pbar:
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
             with open(jsonl_file, "w") as f_out:
-                futures = {
-                    executor.submit(processor.process_line, pair): i
-                    for i, pair in enumerate(data_pairs)
-                }
+                futures = {executor.submit(processor.process_line, pair): i for i, pair in enumerate(data_pairs)}
 
                 for future in as_completed(futures):
                     result = future.result()
