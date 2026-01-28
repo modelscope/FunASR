@@ -24,10 +24,7 @@ def WhisperTokenizer(**kwargs):
 
 @tables.register("tokenizer_classes", "SenseVoiceTokenizer")
 def SenseVoiceTokenizer(**kwargs):
-    try:
-        from funasr.models.sense_voice.whisper_lib.tokenizer import get_tokenizer
-    except:
-        print("Notice: If you want to use whisper, please `pip install -U openai-whisper`")
+    from funasr.models.sense_voice.whisper_lib.tokenizer import get_tokenizer
 
     language = kwargs.get("language", None)
     task = kwargs.get("task", None)

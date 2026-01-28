@@ -17,8 +17,8 @@ from funasr.utils.datadir_writer import DatadirWriter
 from funasr.utils.load_utils import extract_fbank, load_audio_text_image_video
 from transformers import AutoConfig, AutoModelForCausalLM
 
-from ctc import CTC
-from tools.utils import forced_align
+from .ctc import CTC
+from .tools.utils import forced_align
 
 dtype_map = {"bf16": torch.bfloat16, "fp16": torch.float16, "fp32": torch.float32}
 
