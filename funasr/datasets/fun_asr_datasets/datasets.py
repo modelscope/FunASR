@@ -258,8 +258,9 @@ class FunASR(torch.utils.data.Dataset):
                         f"text_length: {len(target_ids)} > {self.max_target_length}, drop it: {item}"
                     )
                 #  simulate prev-token fixed output
+                target_labels = target_ids.copy()
                 if np.random.rand() < self.use_dynamic_output_ratio:
-                    max_len = len(target_ids)
+                    max_len = len(target_labels)
                     min_output_mask_token_len = min(self.min_output_mask_token_len, max_len)
                     min_output_non_mask_token_len = min(self.min_output_non_mask_token_len, max_len)
                     if max_len - min_output_non_mask_token_len > min_output_mask_token_len:
@@ -268,10 +269,10 @@ class FunASR(torch.utils.data.Dataset):
                     else:
                         end_index = max_len - min_output_non_mask_token_len
                     if end_index > 0:
-                        target_ids[:end_index] = [-100] * end_index
+                        target_labels[:end_index] = [-100] * end_index
 
                 input_ids += source_ids + target_ids
-                labels += source_mask + target_ids
+                labels += source_mask + target_labels
                 if len(speech) > 0:
                     fbank.append(speech[0, :, :])
                     fbank_lens.append(speech_lengths)
