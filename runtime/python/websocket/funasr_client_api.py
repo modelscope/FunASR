@@ -63,8 +63,6 @@ class Funasr_websocket_recognizer:
             )
             self.thread_msg.start()
             chunk_size = [int(x) for x in chunk_size.split(",")]
-            stride = int(60 * chunk_size[1] / chunk_interval / 1000 * 16000 * 2)
-            chunk_num = (len(audio_bytes) - 1) // stride + 1
 
             message = json.dumps(
                 {
