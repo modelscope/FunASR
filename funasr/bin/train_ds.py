@@ -119,6 +119,11 @@ def main(**kwargs):
                 if k.startswith(t + ".") or k == t:
                     logging.info(f"Setting {k}.requires_grad = False")
                     p.requires_grad = False
+    lora_only = kwargs.get("lora_only", False)
+    if lora_only:
+        lora_bias = kwargs.get("lora_bias", "none")
+        logging.info("Enable LoRA-only training with bias=%s", lora_bias)
+        mark_only_lora_as_trainable(model, bias=lora_bias)
     if local_rank == 0:
         logging.info(f"{model_summary(model)}")
 

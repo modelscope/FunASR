@@ -1,0 +1,51 @@
+# LoRA finetune config for Paraformer
+# You can override data paths and hyper-parameters by command-line ++key=value.
+
+# model hub name or local model dir
+model: iic/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch
+model_revision: master
+
+# LoRA settings
+lora_only: true
+lora_bias: none
+
+encoder_conf:
+  lora_list: ["q", "k", "v", "o"]
+  lora_rank: 8
+  lora_alpha: 16
+  lora_dropout: 0.05
+
+decoder_conf:
+  lora_list: ["q", "k", "v", "o"]
+  lora_rank: 8
+  lora_alpha: 16
+  lora_dropout: 0.05
+
+# dataset
+train_data_set_list: data/list/train.jsonl
+valid_data_set_list: data/list/val.jsonl
+
+dataset: AudioDataset
+dataset_conf:
+  index_ds: IndexDSJsonl
+  data_split_num: 1
+  batch_sampler: BatchSampler
+  batch_size: 6000
+  sort_size: 1024
+  batch_type: token
+  num_workers: 4
+
+# training
+train_conf:
+  max_epoch: 30
+  log_interval: 10
+  resume: true
+  validate_interval: 2000
+  save_checkpoint_interval: 2000
+  keep_nbest_models: 10
+  avg_nbest_model: 5
+  use_deepspeed: false
+
+optim: adam
+optim_conf:
+  lr: 0.0001
