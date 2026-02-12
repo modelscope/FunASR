@@ -555,8 +555,12 @@ class AutoModel:
                         if k not in result:
                             result[k] = []
                         for t in restored_data[j][k]:
-                            t[0] += vadsegments[j][0]
-                            t[1] += vadsegments[j][0]
+                            if isinstance(t, dict):
+                                t["start_time"] = (t["start_time"] * 1000 + vadsegments[j][0]) / 1000
+                                t["end_time"] = (t["end_time"] * 1000 + vadsegments[j][0]) / 1000
+                            else:
+                                t[0] += vadsegments[j][0]
+                                t[1] += vadsegments[j][0]
                         result[k].extend(restored_data[j][k])
                     elif k == "spk_embedding":
                         if k not in result:
