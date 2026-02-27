@@ -233,10 +233,14 @@ def extract_fbank(data, data_len=None, data_type: str = "sound", frontend=None, 
         data = torch.from_numpy(data)
         if len(data.shape) < 2:
             data = data[None, :]  # data: [batch, N]
+        elif data.shape[0] > 1:
+            data = data.mean(dim=0, keepdim=True)  # convert stereo/multi-channel to mono
         data_len = [data.shape[1]] if data_len is None else data_len
     elif isinstance(data, torch.Tensor):
         if len(data.shape) < 2:
             data = data[None, :]  # data: [batch, N]
+        elif data.shape[0] > 1:
+            data = data.mean(dim=0, keepdim=True)  # convert stereo/multi-channel to mono
         data_len = [data.shape[1]] if data_len is None else data_len
     elif isinstance(data, (list, tuple)):
         data_list, data_len = [], []
