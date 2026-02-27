@@ -15,7 +15,6 @@ try:
     from funasr.download.file import download_from_url
 except:
     print("urllib is not installed, if you infer from url, please install it first.")
-import pdb
 import subprocess
 from subprocess import CalledProcessError, run
 
@@ -144,11 +143,45 @@ def load_audio_text_image_video(
     return data_or_path_or_list
 
 
+def _is_audio_container(data: bytes) -> bool:
+    """Return True if *data* starts with a recognised container-format magic header.
+
+    Raw PCM byte streams have no header, so they will return False and the
+    expensive pydub/ffmpeg validation round-trip can be skipped entirely.
+    """
+    if len(data) < 4:
+        return False
+    # WAV  – RIFF....WAVE
+    if data[:4] == b"RIFF":
+        return True
+    # MP3  – ID3 tag or sync word (0xFF 0xEx)
+    if data[:3] == b"ID3" or (data[0] == 0xFF and (data[1] & 0xE0) == 0xE0):
+        return True
+    # OGG
+    if data[:4] == b"OggS":
+        return True
+    # FLAC
+    if data[:4] == b"fLaC":
+        return True
+    # MP4 / M4A / AAC  – 'ftyp' box at offset 4
+    if len(data) >= 8 and data[4:8] == b"ftyp":
+        return True
+    # WebM / MKV
+    if data[:4] == b"\x1a\x45\xdf\xa3":
+        return True
+    return False
+
+
 def load_bytes(input):
-    try:
-        input = validate_frame_rate(input)
-    except:
-        pass
+    # Only run the (expensive) frame-rate validation when the payload is an
+    # actual audio container (WAV, MP3, OGG, …).  Raw PCM buffers have no
+    # recognisable header and would cause pydub to spend ~200 ms before
+    # raising an exception that is then silently swallowed anyway.
+    if _is_audio_container(input):
+        try:
+            input = validate_frame_rate(input)
+        except Exception:
+            pass
     middle_data = np.frombuffer(input, dtype=np.int16)
     middle_data = np.asarray(middle_data)
     if middle_data.dtype.kind not in "iu":
