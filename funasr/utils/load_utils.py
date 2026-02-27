@@ -166,6 +166,9 @@ def _is_audio_container(data: bytes) -> bool:
     # MP4 / M4A / AAC  – 'ftyp' box at offset 4
     if len(data) >= 8 and data[4:8] == b"ftyp":
         return True
+    # WebM / MKV
+    if data[:4] == b"\x1a\x45\xdf\xa3":
+        return True
     return False
 
 
@@ -177,7 +180,7 @@ def load_bytes(input):
     if _is_audio_container(input):
         try:
             input = validate_frame_rate(input)
-        except:
+        except Exception:
             pass
     middle_data = np.frombuffer(input, dtype=np.int16)
     middle_data = np.asarray(middle_data)
