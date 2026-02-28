@@ -46,11 +46,18 @@ def _resolve_ncpu(config, fallback=4):
         value = fallback
     return max(value, 1)
 
+sv_chunk = None
+postprocess = None
+distribute_spk = None
+ClusterBackend = None
 try:
     from funasr.models.campplus.utils import sv_chunk, postprocess, distribute_spk
     from funasr.models.campplus.cluster_backend import ClusterBackend
-except:
-    pass
+except Exception as e:
+    logging.warning(
+        f"Speaker diarization modules could not be imported: {e}. "
+        "Speaker diarization functionality will be unavailable."
+    )
 
 
 def prepare_data_iterator(data_in, input_len=None, data_type=None, key=None):
@@ -175,6 +182,11 @@ class AutoModel:
             spk_kwargs["device"] = kwargs["device"]
             spk_kwargs.setdefault("ncpu", kwargs.get("ncpu", 4))
             spk_model, spk_kwargs = self.build_model(**spk_kwargs)
+            if any(x is None for x in (sv_chunk, postprocess, distribute_spk, ClusterBackend)):
+                raise ImportError(
+                    "Speaker diarization dependencies failed to import. "
+                    "Please ensure scikit-learn>=1.3.0 and scipy are properly installed."
+                )
             self.cb_model = ClusterBackend(**cb_kwargs).to(kwargs["device"])
             spk_mode = kwargs.get("spk_mode", "punc_segment")
             if spk_mode not in ["default", "vad_segment", "punc_segment"]:
