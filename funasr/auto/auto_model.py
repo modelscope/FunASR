@@ -29,7 +29,13 @@ from funasr.train_utils.set_all_random_seed import set_all_random_seed
 from funasr.train_utils.load_pretrained_model import load_pretrained_model
 from funasr.utils import export_utils
 from funasr.utils import misc
-
+def is_npu_available():
+    """检查NPU是否可用。"""
+    try:
+        import torch_npu
+        return torch_npu.npu.is_available()
+    except ImportError:
+        return False
 
 def _resolve_ncpu(config, fallback=4):
     """Return a positive integer representing CPU threads from config."""
@@ -199,6 +205,7 @@ class AutoModel:
         if ((device =="cuda" and not torch.cuda.is_available())
             or (device == "xpu" and not torch.xpu.is_available())
             or (device == "mps" and not torch.backends.mps.is_available())
+            or (device == "npu" and not is_npu_available())
             or kwargs.get("ngpu", 1) == 0):
             device = "cpu"
             kwargs["batch_size"] = 1
@@ -556,11 +563,11 @@ class AutoModel:
                             result[k] = []
                         for t in restored_data[j][k]:
                             if isinstance(t, dict):
-                                t["start_time"] = (t["start_time"] * 1000 + vadsegments[j][0]) / 1000
-                                t["end_time"] = (t["end_time"] * 1000 + vadsegments[j][0]) / 1000
+                                t["start_time"] = (float(t["start_time"]) * 1000 + int(vadsegments[j][0])) / 1000
+                                t["end_time"] = (float(t["end_time"]) * 1000 + int(vadsegments[j][0])) / 1000
                             else:
-                                t[0] += vadsegments[j][0]
-                                t[1] += vadsegments[j][0]
+                                t[0] = int(t[0]) + int(vadsegments[j][0])
+                                t[1] = int(t[1]) + int(vadsegments[j][0])
                         result[k].extend(restored_data[j][k])
                     elif k == "spk_embedding":
                         if k not in result:

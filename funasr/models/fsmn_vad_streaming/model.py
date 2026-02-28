@@ -348,7 +348,7 @@ class FsmnVADStreaming(nn.Module):
 
 
     def ComputeScores(self, feats: torch.Tensor, cache: dict = {}) -> None:
-        scores = self.encoder(feats, cache=cache["encoder"]).to("cpu")  # return B * T * D
+        scores = self.encoder(feats, cache=cache["encoder"])  # return B * T * D
         assert (
             scores.shape[1] == feats.shape[1]
         ), "The shape between feats and scores does not match"
