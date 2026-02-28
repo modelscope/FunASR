@@ -54,7 +54,6 @@ try:
     from funasr.models.campplus.utils import sv_chunk, postprocess, distribute_spk
     from funasr.models.campplus.cluster_backend import ClusterBackend
 except Exception as e:
-    import logging
     logging.warning(
         f"Speaker diarization modules could not be imported: {e}. "
         "Speaker diarization functionality will be unavailable."
