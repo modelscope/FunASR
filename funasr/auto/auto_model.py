@@ -562,8 +562,12 @@ class AutoModel:
                         if k not in result:
                             result[k] = []
                         for t in restored_data[j][k]:
-                            t[0] = int(t[0]) + int(vadsegments[j][0])
-                            t[1] = int(t[1]) + int(vadsegments[j][0])
+                            if isinstance(t, dict):
+                                t["start_time"] = (float(t["start_time"]) * 1000 + int(vadsegments[j][0])) / 1000
+                                t["end_time"] = (float(t["end_time"]) * 1000 + int(vadsegments[j][0])) / 1000
+                            else:
+                                t[0] = int(t[0]) + int(vadsegments[j][0])
+                                t[1] = int(t[1]) + int(vadsegments[j][0])
                         result[k].extend(restored_data[j][k])
                     elif k == "spk_embedding":
                         if k not in result:
