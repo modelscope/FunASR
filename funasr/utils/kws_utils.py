@@ -224,7 +224,7 @@ class KwsCtcPrefixDecoder():
         if len(main_list) == len(check_list):
             return 0 if main_list == check_list else -1
 
-        for i in range(len(main_list) - len(check_list)):
+        for i in range(len(main_list) - len(check_list) + 1):
             if main_list[i] == check_list[0]:
                 for j in range(len(check_list)):
                     if main_list[i + j] != check_list[j]:
