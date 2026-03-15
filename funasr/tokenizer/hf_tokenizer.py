@@ -5,9 +5,12 @@ from funasr.register import tables
 def HuggingfaceTokenizer(init_param_path, **kwargs):
     try:
         from transformers import AutoTokenizer
-    except:
-        # print("If you want to use hugging, please `pip install -U transformers`")
-        pass
+    except Exception as e:
+        raise ImportError(
+            "HuggingfaceTokenizer requires 'transformers'. "
+            "Please install it with: pip install -U transformers"
+        ) from e
+
     tokenizer = AutoTokenizer.from_pretrained(init_param_path)
 
     return tokenizer
