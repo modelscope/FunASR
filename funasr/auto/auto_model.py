@@ -715,12 +715,26 @@ class AutoModel:
         :return:
         """
 
+        import copy
+
         device = cfg.get("device", "cpu")
-        model = self.model.to(device=device)
-        kwargs = self.kwargs
+        
+        # 对模型进行深拷贝，隔离 ONNX 算子替换（Monkey-patching）对原模型的破坏
+        # Implement deep copy of the model to isolate ONNX operator monkey-patching 
+        # and prevent corruption of the original model
+        model = copy.deepcopy(self.model).to(device=device)
+        
+        # 对配置参数进行深拷贝，隔离 deep_update 和 del 的引用污染
+        # Implement deep copy of configuration parameters to isolate reference pollution caused by deep_update and del.
+        kwargs = copy.deepcopy(self.kwargs)
+        
         deep_update(kwargs, cfg)
         kwargs["device"] = device
-        del kwargs["model"]
+        
+        # Safely delete keys that may cause issues during export
+        if "model" in kwargs:
+            del kwargs["model"]
+            
         model.eval()
 
         type = kwargs.get("type", "onnx")
@@ -730,6 +744,9 @@ class AutoModel:
         )
 
         with torch.no_grad():
+            # 这里的导出操作只会魔改 model 副本，原实例的 self.model 依然是纯洁的 PyTorch 图
+            # This export operation only mutates the model copy; 
+            # the original self.model instance remains an intact PyTorch graph.
             export_dir = export_utils.export(model=model, data_in=data_list, **kwargs)
 
         return export_dir
