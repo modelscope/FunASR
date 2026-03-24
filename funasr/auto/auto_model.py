@@ -715,8 +715,6 @@ class AutoModel:
         :return:
         """
 
-        import copy
-
         device = cfg.get("device", "cpu")
         
         # 对模型进行深拷贝，隔离 ONNX 算子替换（Monkey-patching）对原模型的破坏
