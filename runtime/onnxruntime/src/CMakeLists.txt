@@ -11,7 +11,7 @@ if(GPU)
     set(files ${files} "${CMAKE_CURRENT_SOURCE_DIR}/paraformer-torch.cpp")
 endif()
 
-message("files: "${files})
+message("files: ${files}")
 
 if(WIN32)
 add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/execution-charset:utf-8>")
