@@ -1,4 +1,4 @@
-"""Tests for issue #2839: punc_model=None or empty string should not cause UnboundLocalError."""
+"""Tests for issue #2839: punc_model=None should not cause UnboundLocalError."""
 
 import unittest
 from unittest.mock import MagicMock, patch
