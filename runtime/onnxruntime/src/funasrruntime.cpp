@@ -1,6 +1,11 @@
 #include "precomp.h"
+#include "memtrace.h"
+#include <memory>
 #include <vector>
-
+#include <mutex>
+#include <chrono>
+#include <cstdio>
+#include <cstdlib>
 
 	// APIs for Init
 	_FUNASRAPI FUNASR_HANDLE  FunASRInit(std::map<std::string, std::string>& model_path, int thread_num, ASR_TYPE type)
@@ -519,14 +524,44 @@
 			return nullptr;
 		}
 
+		// #region agent log
+		{
+			const int64_t mem_tid = funasr::MemtraceGetTlsTraceId();
+			funasr::MemtraceLog("tpass_pcm_loaded", "H0", mem_tid >= 0 ? mem_tid : 0LL, (long long)n_len,
+					      input_finished ? 1LL : 0LL);
+		}
+		// #endregion
+
 		funasr::FUNASR_RECOG_RESULT* p_result = new funasr::FUNASR_RECOG_RESULT;
 		p_result->snippet_time = audio->GetTimeLen();
 		
 		audio->Split(vad_online_handle, chunk_len, input_finished, mode);
 
+		// #region agent log
+		{
+			const int64_t mem_tid = funasr::MemtraceGetTlsTraceId();
+			funasr::MemtraceLog("tpass_after_vad_split", "H_vad1", mem_tid >= 0 ? mem_tid : 0LL,
+					    (long long)n_len, (long long)chunk_len);
+		}
+		// #endregion
+
 		funasr::AudioFrame* frame = nullptr;
 		while(audio->FetchChunck(frame) > 0){
+			// #region agent log
+			{
+				const int64_t mem_tid = funasr::MemtraceGetTlsTraceId();
+				funasr::MemtraceLog("tpass_before_online_asr_fwd", "H_on0", mem_tid >= 0 ? mem_tid : 0LL,
+						    (long long)frame->len, frame->is_final ? 1LL : 0LL);
+			}
+			// #endregion
 			string msg = (asr_online_handle)->Forward(frame->data, frame->len, frame->is_final);
+			// #region agent log
+			{
+				const int64_t mem_tid = funasr::MemtraceGetTlsTraceId();
+				funasr::MemtraceLog("tpass_after_online_asr_fwd", "H_on1", mem_tid >= 0 ? mem_tid : 0LL,
+						    (long long)msg.size(), 0);
+			}
+			// #endregion
 			if(mode == ASR_ONLINE){
 				((funasr::ParaformerOnline*)asr_online_handle)->online_res += msg;
 				if(frame->is_final){
@@ -554,6 +589,22 @@
 			}
 		}
 
+		// #region agent log
+		{
+			const int64_t mem_tid = funasr::MemtraceGetTlsTraceId();
+			funasr::MemtraceLog("tpass_after_online_frame_loop", "H_on_done", mem_tid >= 0 ? mem_tid : 0LL,
+					    (long long)p_result->msg.size(), input_finished ? 1LL : 0LL);
+		}
+		// #endregion
+
+		// #region agent log
+		{
+			const int64_t mem_tid = funasr::MemtraceGetTlsTraceId();
+			funasr::MemtraceLog("tpass_before_offline_loop", "H0b", mem_tid >= 0 ? mem_tid : 0LL,
+					    (long long)p_result->msg.size(), input_finished ? 1LL : 0LL);
+		}
+		// #endregion
+
 		// timestamp
 		std::string cur_stamp = "[";		
 		while(audio->FetchTpass(frame) > 0){
@@ -562,21 +613,41 @@
 			if (wfst_decoder){
 				wfst_decoder->StartUtterance();
 			}
-			float** buff;
-			int* len;
-			buff = new float*[1];
-        	len = new int[1];
+			std::unique_ptr<float*[]> buff(new float*[1]);
+			std::unique_ptr<int[]> len(new int[1]);
 			buff[0] = frame->data;
 			len[0] = frame->len;
+			// #region agent log
+			{
+				const int64_t mem_tid = funasr::MemtraceGetTlsTraceId();
+				funasr::MemtraceLog("tpass_before_offline_forward", "H_off_fwd0", mem_tid >= 0 ? mem_tid : 0LL,
+						    (long long)frame->len, (long long)frame->global_start);
+			}
+			// #endregion
+
 			vector<string> msgs;
 			if(tpass_stream->GetModelType() == MODEL_SVS){
-				msgs = (tpass_stream->asr_handle)->Forward(buff, len, true, svs_lang, svs_itn, 1);
+				msgs = (tpass_stream->asr_handle)->Forward(buff.get(), len.get(), true, svs_lang, svs_itn, 1);
 			}else{
-				msgs = (tpass_stream->asr_handle)->Forward(buff, len, true, hw_emb, dec_handle, 1);
+				msgs = (tpass_stream->asr_handle)->Forward(buff.get(), len.get(), true, hw_emb, dec_handle, 1);
 			}
+
+			// #region agent log
+			{
+				const int64_t mem_tid = funasr::MemtraceGetTlsTraceId();
+				long long out_sz = (msgs.size() > 0) ? (long long)msgs[0].size() : 0LL;
+				funasr::MemtraceLog("tpass_after_offline_forward", "H_off_fwd1", mem_tid >= 0 ? mem_tid : 0LL,
+						    out_sz, (long long)msgs.size());
+			}
+			// #endregion
+
 			string msg = msgs.size()>0?msgs[0]:"";
 			std::vector<std::string> msg_vec = funasr::SplitStr(msg, " | ");  // split with timestamp
 			if(msg_vec.size()==0){
+				if(frame != nullptr){
+					delete frame;
+					frame = nullptr;
+				}
 				continue;
 			}
 			msg = msg_vec[0];
@@ -618,9 +689,27 @@
 			}else{
 				p_result->tpass_msg = msg;
 			}
+
+			// #region agent log
+			{
+				const int64_t mem_tid = funasr::MemtraceGetTlsTraceId();
+				funasr::MemtraceLog("tpass_after_punc_itn", "H_off_post", mem_tid >= 0 ? mem_tid : 0LL,
+						    (long long)p_result->tpass_msg.size(), (long long)p_result->stamp.size());
+			}
+			// #endregion
+
 			if (!(p_result->stamp).empty()){
 				p_result->stamp_sents = funasr::TimestampSentence(p_result->tpass_msg, p_result->stamp);
 			}
+
+			// #region agent log
+			{
+				const int64_t mem_tid = funasr::MemtraceGetTlsTraceId();
+				funasr::MemtraceLog("tpass_after_stamp_sents", "H_off_stamp", mem_tid >= 0 ? mem_tid : 0LL,
+						    (long long)p_result->stamp_sents.size(), (long long)p_result->stamp.size());
+			}
+			// #endregion
+
 			if(frame != nullptr){
 				delete frame;
 				frame = nullptr;
@@ -629,7 +718,33 @@
 
 		if(input_finished){
 			audio->ResetIndex();
+			// End-of-utterance explicit session cleanup for 2pass.
+			// Keep model sessions alive, but drop per-utterance caches/states.
+			((funasr::ParaformerOnline*)asr_online_handle)->ResetCache();
+			((funasr::ParaformerOnline*)asr_online_handle)->Reset();
+			((funasr::FsmnVadOnline*)vad_online_handle)->Reset();
+			(asr_handle)->EndUtterance();
+			funasr::WfstDecoder* wfst_decoder = (funasr::WfstDecoder*)dec_handle;
+			if (wfst_decoder){
+				wfst_decoder->EndUtterance();
+				wfst_decoder->StartUtterance();
+			}
+
+			// #region agent log
+			{
+				const int64_t mem_tid = funasr::MemtraceGetTlsTraceId();
+				funasr::MemtraceLog("tpass_final_session_reset_done", "H_reset", mem_tid >= 0 ? mem_tid : 0LL, 1, 0);
+			}
+			// #endregion
 		}
+
+		// #region agent log
+		{
+			const int64_t mem_tid = funasr::MemtraceGetTlsTraceId();
+			funasr::MemtraceLog("tpass_return", "H2", mem_tid >= 0 ? mem_tid : 0LL,
+					    (long long)p_result->msg.size(), (long long)p_result->stamp.size());
+		}
+		// #endregion
 
 		return p_result;
 	}

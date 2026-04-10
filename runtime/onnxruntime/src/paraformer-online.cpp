@@ -4,6 +4,7 @@
 */
 
 #include "precomp.h"
+#include "memtrace.h"
 
 using namespace std;
 
@@ -267,7 +268,8 @@ void ParaformerOnline::GetPosEmb(std::vector<std::vector<float>> &wav_feats, int
     }
 }
 
-void ParaformerOnline::CifSearch(std::vector<std::vector<float>> hidden, std::vector<float> alphas, bool is_final, std::vector<std::vector<float>>& list_frame)
+void ParaformerOnline::CifSearch(std::vector<std::vector<float>>& hidden, std::vector<float>& alphas, bool is_final,
+                                 std::vector<std::vector<float>>& list_frame)
 {
     try{
         int hidden_size = 0;
@@ -365,12 +367,8 @@ void ParaformerOnline::InitCache(){
         feats_cache_.emplace_back(feat_cache);
     }
 
-    // fsmn cache
-#ifdef _WIN_X86
+    // fsmn cache — align with offline Paraformer: device allocator to avoid arena retention on Linux.
     Ort::MemoryInfo m_memoryInfo = Ort::MemoryInfo::CreateCpu(OrtDeviceAllocator, OrtMemTypeCPU);
-#else
-    Ort::MemoryInfo m_memoryInfo = Ort::MemoryInfo::CreateCpu(OrtArenaAllocator, OrtMemTypeDefault);
-#endif
     const int64_t fsmn_shape_[3] = {1, fsmn_dims, fsmn_lorder};
     for(int l=0; l<fsmn_layers; l++){
         Ort::Value onnx_fsmn_cache = Ort::Value::CreateTensor<float>(
@@ -418,11 +416,8 @@ string ParaformerOnline::ForwardChunk(std::vector<std::vector<float>> &chunk_fea
     try{
         int32_t num_frames = chunk_feats.size();
 
-    #ifdef _WIN_X86
-            Ort::MemoryInfo m_memoryInfo = Ort::MemoryInfo::CreateCpu(OrtDeviceAllocator, OrtMemTypeCPU);
-    #else
-            Ort::MemoryInfo m_memoryInfo = Ort::MemoryInfo::CreateCpu(OrtArenaAllocator, OrtMemTypeDefault);
-    #endif
+        // Match paraformer.cpp Forward: I/O tensors use device allocator (not arena) on Linux.
+        Ort::MemoryInfo m_memoryInfo = Ort::MemoryInfo::CreateCpu(OrtDeviceAllocator, OrtMemTypeCPU);
         const int64_t input_shape_[3] = {1, num_frames, feat_dims};
         std::vector<float> wav_feats;
         for (const auto &chunk_feat: chunk_feats) {
@@ -445,28 +440,70 @@ string ParaformerOnline::ForwardChunk(std::vector<std::vector<float>> &chunk_fea
         input_onnx.emplace_back(std::move(onnx_feats));
         input_onnx.emplace_back(std::move(onnx_feats_len)); 
         
+        // #region agent log
+        {
+            const int64_t mem_tid = funasr::MemtraceGetTlsTraceId();
+            funasr::MemtraceLog("ponl_before_online_enc_run", "P0", mem_tid >= 0 ? mem_tid : 0LL,
+                        (long long)num_frames, (long long)feat_dims);
+        }
+        // #endregion
         auto encoder_tensor = encoder_session_->Run(Ort::RunOptions{nullptr}, en_szInputNames_.data(), input_onnx.data(), input_onnx.size(), en_szOutputNames_.data(), en_szOutputNames_.size());
 
         // get enc_vec
         std::vector<int64_t> enc_shape = encoder_tensor[0].GetTensorTypeAndShapeInfo().GetShape();
         float* enc_data = encoder_tensor[0].GetTensorMutableData<float>();
-        std::vector<std::vector<float>> enc_vec(enc_shape[1], std::vector<float>(enc_shape[2]));
-        for (int i = 0; i < enc_shape[1]; i++) {
-            for (int j = 0; j < enc_shape[2]; j++) {
-                enc_vec[i][j] = enc_data[i * enc_shape[2] + j];
-            }
+        // #region agent log
+        {
+            const int64_t mem_tid = funasr::MemtraceGetTlsTraceId();
+            long long enc_el = (enc_shape.size() >= 3) ? (long long)(enc_shape[1] * enc_shape[2]) : 0LL;
+            funasr::MemtraceLog("ponl_after_online_enc_run", "P1", mem_tid >= 0 ? mem_tid : 0LL, enc_el, 0);
+        }
+        // #endregion
+        const int64_t enc_rows = enc_shape[1];
+        const int64_t enc_cols = enc_shape[2];
+        std::vector<std::vector<float>> enc_vec(static_cast<size_t>(enc_rows));
+        for (int64_t i = 0; i < enc_rows; i++) {
+            enc_vec[static_cast<size_t>(i)].resize(static_cast<size_t>(enc_cols));
+            std::memcpy(enc_vec[static_cast<size_t>(i)].data(),
+                        enc_data + i * enc_cols,
+                        sizeof(float) * static_cast<size_t>(enc_cols));
         }
 
         // get alpha_vec
         std::vector<int64_t> alpha_shape = encoder_tensor[2].GetTensorTypeAndShapeInfo().GetShape();
         float* alpha_data = encoder_tensor[2].GetTensorMutableData<float>();
-        std::vector<float> alpha_vec(alpha_shape[1]);
-        for (int i = 0; i < alpha_shape[1]; i++) {
-            alpha_vec[i] = alpha_data[i];
-        } 
+        std::vector<float> alpha_vec(static_cast<size_t>(alpha_shape[1]));
+        std::memcpy(alpha_vec.data(), alpha_data, sizeof(float) * alpha_vec.size());
+
+        // ORT 输出已拷出；尽早释放特征扁平原缓冲，降低与 enc_vec 并存峰值
+        wav_feats.clear();
+        wav_feats.shrink_to_fit();
+
+        // #region agent log
+        {
+            const int64_t mem_tid = funasr::MemtraceGetTlsTraceId();
+            funasr::MemtraceLog("ponl_after_enc_copy_to_vec", "P1b", mem_tid >= 0 ? mem_tid : 0LL,
+                        (long long)enc_vec.size(), enc_vec.empty() ? 0LL : (long long)enc_vec[0].size());
+        }
+        // #endregion
 
         std::vector<std::vector<float>> list_frame;
+        // 按引用传入，避免再整段拷贝 hidden/alphas（原先按值传参会复制整份 enc_vec）
         CifSearch(enc_vec, alpha_vec, input_finished, list_frame);
+
+        // CifSearch 之后 encoder 隐状态已写入 hidden_cache_ 等，enc_vec/alpha_vec 可归还分配器
+        enc_vec.clear();
+        enc_vec.shrink_to_fit();
+        alpha_vec.clear();
+        alpha_vec.shrink_to_fit();
+
+        // #region agent log
+        {
+            const int64_t mem_tid = funasr::MemtraceGetTlsTraceId();
+            funasr::MemtraceLog("ponl_after_cif_search", "P2", mem_tid >= 0 ? mem_tid : 0LL,
+                        (long long)list_frame.size(), 0);
+        }
+        // #endregion
 
         
         if(list_frame.size()>0){
@@ -497,7 +534,21 @@ string ParaformerOnline::ForwardChunk(std::vector<std::vector<float>> &chunk_fea
                 m_memoryInfo, emb_length.data(), emb_length.size(), emb_length_shape, 1);
             decoder_onnx.insert(decoder_onnx.begin()+3, std::move(onnx_emb_len));
 
+            // #region agent log
+            {
+                const int64_t mem_tid = funasr::MemtraceGetTlsTraceId();
+                funasr::MemtraceLog("ponl_before_online_dec_run", "P3", mem_tid >= 0 ? mem_tid : 0LL,
+                            (long long)list_frame.size(), (long long)decoder_onnx.size());
+            }
+            // #endregion
             auto decoder_tensor = decoder_session_->Run(Ort::RunOptions{nullptr}, de_szInputNames_.data(), decoder_onnx.data(), decoder_onnx.size(), de_szOutputNames_.data(), de_szOutputNames_.size());
+            // #region agent log
+            {
+                const int64_t mem_tid = funasr::MemtraceGetTlsTraceId();
+                funasr::MemtraceLog("ponl_after_online_dec_run", "P4", mem_tid >= 0 ? mem_tid : 0LL,
+                            (long long)decoder_tensor.size(), 0);
+            }
+            // #endregion
             // fsmn cache
             try{
                 decoder_onnx.clear();
@@ -513,7 +564,11 @@ string ParaformerOnline::ForwardChunk(std::vector<std::vector<float>> &chunk_fea
             std::vector<int64_t> decoder_shape = decoder_tensor[0].GetTensorTypeAndShapeInfo().GetShape();
             float* float_data = decoder_tensor[0].GetTensorMutableData<float>();
             result = offline_handle_->GreedySearch(float_data, list_frame.size(), decoder_shape[2]);
+            emb_input.clear();
+            emb_input.shrink_to_fit();
         }
+        list_frame.clear();
+        list_frame.shrink_to_fit();
     }catch (std::exception const &e)
     {
         LOG(ERROR)<<e.what();
@@ -542,6 +597,14 @@ string ParaformerOnline::Forward(float* din, int len, bool input_finished, const
             is_first_chunk = false;
         }
         ExtractFeats(offline_handle_->GetAsrSampleRate(), wav_feats, waves, input_finished);
+        // #region agent log
+        {
+            const int64_t mem_tid = funasr::MemtraceGetTlsTraceId();
+            long long fd0 = wav_feats.empty() ? 0LL : (long long)wav_feats[0].size();
+            funasr::MemtraceLog("ponl_after_extract_feats", "Pfb", mem_tid >= 0 ? mem_tid : 0LL,
+                        (long long)wav_feats.size(), fd0);
+        }
+        // #endregion
         if(wav_feats.size() == 0){
             return result;
         }
