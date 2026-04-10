@@ -5,8 +5,12 @@
 
 #include "precomp.h"
 #include "paraformer.h"
+#include "memtrace.h"
 #include "encode_converter.h"
 #include <cstddef>
+#if defined(__linux__)
+#include <malloc.h>
+#endif
 
 using namespace std;
 namespace funasr {
@@ -448,14 +452,16 @@ std::vector<std::string> Paraformer::Forward(float** din, int* len, bool input_f
     int32_t num_frames = asr_feats.size();
 
     std::vector<float> wav_feats;
+    wav_feats.reserve((size_t)num_frames * (size_t)feat_dim);
     for (const auto &frame_feat: asr_feats) {
         wav_feats.insert(wav_feats.end(), frame_feat.begin(), frame_feat.end());
     }
 
 #ifdef _WIN_X86
-        Ort::MemoryInfo m_memoryInfo = Ort::MemoryInfo::CreateCpu(OrtDeviceAllocator, OrtMemTypeCPU);
+    Ort::MemoryInfo m_memoryInfo = Ort::MemoryInfo::CreateCpu(OrtDeviceAllocator, OrtMemTypeCPU);
 #else
-        Ort::MemoryInfo m_memoryInfo = Ort::MemoryInfo::CreateCpu(OrtArenaAllocator, OrtMemTypeDefault);
+    // Use device allocator for per-request input tensors to reduce arena retention.
+    Ort::MemoryInfo m_memoryInfo = Ort::MemoryInfo::CreateCpu(OrtDeviceAllocator, OrtMemTypeCPU);
 #endif
 
     const int64_t input_shape_[3] = {1, num_frames, feat_dim};
@@ -503,6 +509,13 @@ std::vector<std::string> Paraformer::Forward(float** din, int* len, bool input_f
     }
 
     try {
+        // #region agent log
+        {
+            const int64_t mem_tid = funasr::MemtraceGetTlsTraceId();
+            funasr::MemtraceLog("pfwd_before_run", "H_pfwd0", mem_tid >= 0 ? mem_tid : 0LL, (long long)num_frames, (long long)feat_dim);
+        }
+        // #endregion
+
         auto outputTensor = m_session_->Run(Ort::RunOptions{nullptr}, m_szInputNames.data(), input_onnx.data(), input_onnx.size(), m_szOutputNames.data(), m_szOutputNames.size());
         std::vector<int64_t> outputShape = outputTensor[0].GetTensorTypeAndShapeInfo().GetShape();
         //LOG(INFO) << "paraformer out shape " << outputShape[0] << " " << outputShape[1] << " " << outputShape[2];
@@ -543,11 +556,46 @@ std::vector<std::string> Paraformer::Forward(float** din, int* len, bool input_f
                 }
 			}
         }
+
+        // #region agent log
+        {
+            const int64_t mem_tid = funasr::MemtraceGetTlsTraceId();
+            funasr::MemtraceLog("pfwd_after_run", "H_pfwd1", mem_tid >= 0 ? mem_tid : 0LL, (long long)outputTensor.size(), (long long)result.size());
+        }
+        // #endregion
+
+        // Explicitly drop temporary containers after offline forward.
+        outputTensor.clear();
+        std::vector<Ort::Value>().swap(outputTensor);
     }
     catch (std::exception const &e)
     {
         LOG(ERROR)<<e.what();
     }
+
+    std::vector<std::vector<float>>().swap(asr_feats);
+    std::vector<float>().swap(wav_feats);
+    std::vector<float>().swap(embedding);
+    std::vector<Ort::Value>().swap(input_onnx);
+
+    // #region agent log
+    {
+        const int64_t mem_tid = funasr::MemtraceGetTlsTraceId();
+        funasr::MemtraceLog("pfwd_after_temp_release", "H_pfwd_free", mem_tid >= 0 ? mem_tid : 0LL, input_finished ? 1LL : 0LL, 0);
+    }
+    // #endregion
+
+#if defined(__linux__)
+    if (input_finished) {
+        malloc_trim(0);
+        // #region agent log
+        {
+            const int64_t mem_tid = funasr::MemtraceGetTlsTraceId();
+            funasr::MemtraceLog("pfwd_after_malloc_trim", "H_pfwd_trim", mem_tid >= 0 ? mem_tid : 0LL, 0, 0);
+        }
+        // #endregion
+    }
+#endif
 
     results.push_back(result);
     return results;

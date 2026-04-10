@@ -20,7 +20,8 @@ namespace funasr {
                 std::vector<float> &waves);
         int OnlineLfrCmvn(vector<vector<float>> &wav_feats, bool input_finished);
         void GetPosEmb(std::vector<std::vector<float>> &wav_feats, int timesteps, int feat_dim);
-        void CifSearch(std::vector<std::vector<float>> hidden, std::vector<float> alphas, bool is_final, std::vector<std::vector<float>> &list_frame);
+        void CifSearch(std::vector<std::vector<float>>& hidden, std::vector<float>& alphas, bool is_final,
+                       std::vector<std::vector<float>>& list_frame);
 
         static int ComputeFrameNum(int sample_length, int frame_sample_length, int frame_shift_sample_length) {
             int frame_num = static_cast<int>((sample_length - frame_sample_length) / frame_shift_sample_length + 1);

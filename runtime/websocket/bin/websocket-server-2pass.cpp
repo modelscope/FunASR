@@ -11,10 +11,14 @@
 // now only support offline engine.
 
 #include "websocket-server-2pass.h"
+#include "memtrace.h"
 
 #include <thread>
 #include <utility>
 #include <vector>
+#if defined(__linux__)
+#include <malloc.h>
+#endif
 
 extern std::unordered_map<std::string, int> hws_map_;
 extern int fst_inc_wts_;
@@ -132,10 +136,15 @@ void WebSocketServer::do_decoder(
       asr_mode_ = 2;
     }
 
+    funasr::MemtraceDecoderSession mem_sess((long long)buffer.size(), is_final ? 1LL : 0LL);
+
     while (buffer.size() >= 800 * 2 && !msg["is_eof"]) {
       std::vector<char> subvector = {buffer.begin(), buffer.begin() + 800 * 2};
       buffer.erase(buffer.begin(), buffer.begin() + 800 * 2);
 
+      // #region agent log
+      funasr::MemtraceLog("ws_before_chunk_infer", "WS2", mem_sess.trace_id(), (long long)subvector.size(), 0);
+      // #endregion
       try {
         if (tpass_online_handle) {
           Result = FunTpassInferBuffer(tpass_handle, tpass_online_handle,
@@ -156,6 +165,9 @@ void WebSocketServer::do_decoder(
         msg["access_num"]=(int)msg["access_num"]-1;
         return;
       }
+      // #region agent log
+      funasr::MemtraceLog("ws_after_chunk_infer", "WS3", mem_sess.trace_id(), Result ? 1LL : 0LL, 0);
+      // #endregion
       if (Result) {
         websocketpp::lib::error_code ec;
         nlohmann::json jsonresult = handle_result(Result);
@@ -171,9 +183,21 @@ void WebSocketServer::do_decoder(
           }
         }
         FunASRFreeResult(Result);
+        // #region agent log
+        funasr::MemtraceLog("ws_after_chunk_free", "WS4", mem_sess.trace_id(), 0, 0);
+        // #endregion
+#if defined(__linux__)
+        malloc_trim(0);
+        // #region agent log
+        funasr::MemtraceLog("ws_after_chunk_trim", "WS4t", mem_sess.trace_id(), 0, 0);
+        // #endregion
+#endif
       }
     }
     if (is_final && !msg["is_eof"]) {
+      // #region agent log
+      funasr::MemtraceLog("ws_before_final_infer", "WS6", mem_sess.trace_id(), (long long)buffer.size(), 0);
+      // #endregion
       try {
         if (tpass_online_handle) {
           Result = FunTpassInferBuffer(tpass_handle, tpass_online_handle,
@@ -193,6 +217,9 @@ void WebSocketServer::do_decoder(
         msg["access_num"]=(int)msg["access_num"]-1;
         return;
       }
+      // #region agent log
+      funasr::MemtraceLog("ws_after_final_infer", "WS7", mem_sess.trace_id(), Result ? 1LL : 0LL, 0);
+      // #endregion
       if(punc_cache.size()>0){
         for (auto& vec : punc_cache) {
           vec.clear();
@@ -200,7 +227,13 @@ void WebSocketServer::do_decoder(
       }
       if (Result) {
         websocketpp::lib::error_code ec;
+        // #region agent log
+        funasr::MemtraceLog("ws_before_handle_result", "WS7a", mem_sess.trace_id(), 0, 0);
+        // #endregion
         nlohmann::json jsonresult = handle_result(Result);
+        // #region agent log
+        funasr::MemtraceLog("ws_after_handle_result", "WS7b", mem_sess.trace_id(), (long long)jsonresult.dump().size(), 0);
+        // #endregion
         jsonresult["wav_name"] = wav_name;
         jsonresult["is_final"] = true;
         if (is_ssl) {
@@ -210,7 +243,19 @@ void WebSocketServer::do_decoder(
           server_->send(hdl, jsonresult.dump(),
                         websocketpp::frame::opcode::text, ec);
         }
+        // #region agent log
+        funasr::MemtraceLog("ws_after_send_final", "WS7c", mem_sess.trace_id(), 0, 0);
+        // #endregion
         FunASRFreeResult(Result);
+        // #region agent log
+        funasr::MemtraceLog("ws_after_final_free", "WS8", mem_sess.trace_id(), 0, 0);
+        // #endregion
+#if defined(__linux__)
+        malloc_trim(0);
+        // #region agent log
+        funasr::MemtraceLog("ws_after_final_trim", "WS8t", mem_sess.trace_id(), 0, 0);
+        // #endregion
+#endif
       }else{
         if(wav_format != "pcm" && wav_format != "PCM"){
           websocketpp::lib::error_code ec;

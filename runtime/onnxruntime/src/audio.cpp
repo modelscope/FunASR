@@ -439,6 +439,10 @@ bool Audio::FfmpegLoad(const char *filename, bool copy2char){
     
         return true;
     }else{
+        if (speech_char != nullptr) {
+            free(speech_char);
+            speech_char = nullptr;
+        }
         return false;
     }
 
