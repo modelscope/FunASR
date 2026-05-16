@@ -4,6 +4,7 @@ project(FunASROnnx)
 
 option(ENABLE_GLOG "Whether to build glog" ON)
 option(ENABLE_FST "Whether to build openfst" ON) # ITN need openfst compiled
+option(ENABLE_FFMPEG "Whether to enable ffmpeg audio decoding" OFF)
 option(GPU "Whether to build with GPU" OFF)
 
 # set(CMAKE_CXX_STANDARD 11)
@@ -40,7 +41,9 @@ IF(WIN32)
                 ${PROJECT_SOURCE_DIR}/third_party/glog/src/glog/vlog_is_on.h)
 ELSE()
     link_directories(${ONNXRUNTIME_DIR}/lib)
-    link_directories(${FFMPEG_DIR}/lib)
+    if(ENABLE_FFMPEG AND NOT APPLE)
+        link_directories(${FFMPEG_DIR}/lib)
+    endif()
 endif()
 include_directories(${CMAKE_SOURCE_DIR}/src)
 include_directories(${PROJECT_SOURCE_DIR}/third_party/kaldi-native-fbank)
