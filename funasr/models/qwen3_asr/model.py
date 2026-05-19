@@ -7,57 +7,51 @@ import torch
 import torch.nn as nn
 
 from funasr.register import tables
-from funasr.utils.load_utils import load_audio_text_image_video
 
 
 @tables.register("model_classes", "Qwen3ASR")
 class Qwen3ASR(nn.Module):
 
-    def __init__(
-        self,
-        model: str = "Qwen/Qwen3-ASR-1.7B",
-        model_conf: dict = None,
-        **kwargs,
-    ):
+    def __init__(self, **kwargs):
         super().__init__()
-        model_conf = model_conf or {}
-        self.model_path = model
-        self.qwen3_asr_model = None
-        self._device = model_conf.get("device", kwargs.get("device", "cuda:0"))
-        self._dtype = model_conf.get("dtype", kwargs.get("dtype", "bf16"))
-        self._max_new_tokens = model_conf.get("max_new_tokens", 512)
-        self._max_inference_batch_size = model_conf.get("max_inference_batch_size", 32)
-        self._forced_aligner = model_conf.get("forced_aligner", None)
-        self._forced_aligner_kwargs = model_conf.get("forced_aligner_kwargs", None)
-        self._dtype_map = {"bf16": torch.bfloat16, "fp16": torch.float16, "fp32": torch.float32}
-        self._init_model()
+        model_path = kwargs.get("model_path", "Qwen/Qwen3-ASR-1.7B")
+        device = kwargs.get("device", "cuda:0")
+        dtype = kwargs.get("dtype", "bf16")
+        max_new_tokens = kwargs.get("max_new_tokens", 512)
+        max_inference_batch_size = kwargs.get("max_inference_batch_size", 32)
+        forced_aligner = kwargs.get("forced_aligner", None)
+        forced_aligner_kwargs = kwargs.get("forced_aligner_kwargs", None)
 
-    def _init_model(self):
+        self._dtype_map = {"bf16": torch.bfloat16, "fp16": torch.float16, "fp32": torch.float32}
+        self._device = device
+        self.model_path = model_path
+
+        self._placeholder = nn.Parameter(torch.empty(0))
+
         try:
             from qwen_asr import Qwen3ASRModel
         except ImportError:
             raise ImportError(
-                "qwen-asr package is required for Qwen3ASR model. "
-                "Install with: pip install qwen-asr"
+                "qwen-asr package is required. Install with: pip install qwen-asr"
             )
 
-        dtype = self._dtype_map.get(self._dtype, torch.bfloat16)
+        torch_dtype = self._dtype_map.get(dtype, torch.bfloat16)
         fa_kwargs = None
-        if self._forced_aligner:
-            fa_kwargs = self._forced_aligner_kwargs or {}
-            fa_kwargs.setdefault("dtype", dtype)
-            fa_kwargs.setdefault("device_map", self._device)
+        if forced_aligner:
+            fa_kwargs = forced_aligner_kwargs or {}
+            fa_kwargs.setdefault("dtype", torch_dtype)
+            fa_kwargs.setdefault("device_map", device)
 
         self.qwen3_asr_model = Qwen3ASRModel.from_pretrained(
-            self.model_path,
-            dtype=dtype,
-            device_map=self._device,
-            forced_aligner=self._forced_aligner,
+            model_path,
+            dtype=torch_dtype,
+            device_map=device,
+            forced_aligner=forced_aligner,
             forced_aligner_kwargs=fa_kwargs,
-            max_inference_batch_size=self._max_inference_batch_size,
-            max_new_tokens=self._max_new_tokens,
+            max_inference_batch_size=max_inference_batch_size,
+            max_new_tokens=max_new_tokens,
         )
-        logging.info(f"Qwen3ASR model loaded from {self.model_path}")
+        logging.info(f"Qwen3ASR model loaded from {model_path}")
 
     def forward(self, **kwargs):
         raise NotImplementedError("Qwen3ASR only supports inference mode")
@@ -71,44 +65,43 @@ class Qwen3ASR(nn.Module):
         frontend=None,
         **kwargs,
     ):
-        language = kwargs.get("language", None)
-        return_time_stamps = kwargs.get("return_time_stamps", False)
-        context = kwargs.get("context", "")
-        fs = kwargs.get("fs", 16000)
-
         meta_data = {}
         time1 = time.perf_counter()
 
+        language = kwargs.get("language", None)
+        return_time_stamps = kwargs.get("return_time_stamps", False)
+        context = kwargs.get("context", "")
+
         if isinstance(data_in, (list, tuple)):
-            audio_list = data_in
+            audio_inputs = list(data_in)
         elif isinstance(data_in, str):
-            audio_list = [data_in]
+            audio_inputs = [data_in]
         elif isinstance(data_in, torch.Tensor):
-            audio_np = data_in.cpu().numpy()
+            audio_np = data_in.cpu().numpy().astype(np.float32)
             if audio_np.ndim == 1:
-                audio_list = [(audio_np, fs)]
+                audio_inputs = [(audio_np, 16000)]
             else:
-                audio_list = [(audio_np[i], fs) for i in range(audio_np.shape[0])]
+                audio_inputs = [(audio_np[i], 16000) for i in range(audio_np.shape[0])]
         elif isinstance(data_in, np.ndarray):
             if data_in.ndim == 1:
-                audio_list = [(data_in, fs)]
+                audio_inputs = [(data_in.astype(np.float32), 16000)]
             else:
-                audio_list = [(data_in[i], fs) for i in range(data_in.shape[0])]
+                audio_inputs = [(data_in[i].astype(np.float32), 16000) for i in range(data_in.shape[0])]
         else:
-            audio_list = [data_in]
+            audio_inputs = [data_in]
 
         time2 = time.perf_counter()
         meta_data["load_data"] = f"{time2 - time1:0.3f}"
 
         results = self.qwen3_asr_model.transcribe(
-            audio=audio_list,
+            audio=audio_inputs,
             context=context,
             language=language,
             return_time_stamps=return_time_stamps,
         )
 
         time3 = time.perf_counter()
-        meta_data["inference"] = f"{time3 - time2:0.3f}"
+        meta_data["batch_data_time"] = time3 - time2
 
         output = []
         for i, r in enumerate(results):

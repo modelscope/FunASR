@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Test Qwen3-ASR: multi-language speech recognition"""
+"""Test Qwen3-ASR: multi-language speech recognition via AutoModel"""
 import sys
 import time
 
@@ -7,15 +7,16 @@ import time
 def main():
     from funasr import AutoModel
 
-    model_id = "Qwen/Qwen3-ASR-1.7B"
+    model_path = "Qwen/Qwen3-ASR-1.7B"
     url_zh = "https://qianwen-res.oss-cn-beijing.aliyuncs.com/Qwen3-ASR-Repo/asr_zh.wav"
     url_en = "https://qianwen-res.oss-cn-beijing.aliyuncs.com/Qwen3-ASR-Repo/asr_en.wav"
 
     print("[Qwen3-ASR] Loading model...")
     t0 = time.time()
     model = AutoModel(
-        model=model_id,
+        model="Qwen3ASR",
         model_conf={
+            "model_path": model_path,
             "dtype": "bf16",
             "max_new_tokens": 256,
             "max_inference_batch_size": 32,
@@ -25,7 +26,7 @@ def main():
     )
     print("[Qwen3-ASR] Model loaded in %.1fs" % (time.time() - t0))
 
-    # Test 1: Chinese audio
+    # Test 1: Chinese audio with forced language
     print("[Qwen3-ASR] Test 1: Chinese inference...")
     t0 = time.time()
     res = model.generate(
@@ -41,7 +42,7 @@ def main():
         print("[Qwen3-ASR] Test 1 FAILED - no text in result")
         return 1
 
-    # Test 2: English audio
+    # Test 2: English audio with forced language
     print("[Qwen3-ASR] Test 2: English inference...")
     t0 = time.time()
     res = model.generate(
