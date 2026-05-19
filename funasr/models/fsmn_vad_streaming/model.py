@@ -492,6 +492,8 @@ class FsmnVADStreaming(nn.Module):
 
     def GetFrameState(self, t: int, cache: dict = {}):
         frame_state = FrameState.kFrameStateInvalid
+        if t >= len(cache["stats"].decibel):
+            return FrameState.kFrameStateSil
         cur_decibel = cache["stats"].decibel[t]
         cur_snr = cur_decibel - cache["stats"].noise_average_decibel
         # for each frame, calc log posterior probability of each state

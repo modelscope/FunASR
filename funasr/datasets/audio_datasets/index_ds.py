@@ -92,7 +92,8 @@ class IndexDSJsonlRankFull(torch.utils.data.Dataset):
                         target = data["target"]
                         source_len = data.get("source_len", 1)
                         target_len = data.get("target_len", 0)
-                        if "aishell" in source:
+                        text_language = data.get("text_language", "")
+                        if "aishell" in source and text_language != "en":
                             target = target.replace(" ", "")
                         if (
                             source_len < self.min_source_length

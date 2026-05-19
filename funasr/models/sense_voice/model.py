@@ -930,7 +930,7 @@ class SenseVoiceSmall(nn.Module):
                     results.append(result_i)
                     continue
 
-                logits_speech = self.ctc.softmax(encoder_out)[i, 4 : encoder_out_lens[i].item(), :]
+                logits_speech = self.ctc.log_softmax(encoder_out)[i, 4 : encoder_out_lens[i].item(), :]
                 pred = logits_speech.argmax(-1).cpu()
                 logits_speech[pred == self.blank_id, self.blank_id] = 0
                 align = ctc_forced_align(
