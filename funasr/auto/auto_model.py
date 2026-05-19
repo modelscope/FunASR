@@ -29,13 +29,17 @@ from funasr.train_utils.set_all_random_seed import set_all_random_seed
 from funasr.train_utils.load_pretrained_model import load_pretrained_model
 from funasr.utils import export_utils
 from funasr.utils import misc
+
+
 def is_npu_available():
     """检查NPU是否可用。"""
     try:
         import torch_npu
+
         return torch_npu.npu.is_available()
     except ImportError:
         return False
+
 
 def _resolve_ncpu(config, fallback=4):
     """Return a positive integer representing CPU threads from config."""
@@ -45,6 +49,7 @@ def _resolve_ncpu(config, fallback=4):
     except (TypeError, ValueError):
         value = fallback
     return max(value, 1)
+
 
 try:
     from funasr.models.campplus.utils import sv_chunk, postprocess, distribute_spk
@@ -202,11 +207,13 @@ class AutoModel:
         set_all_random_seed(kwargs.get("seed", 0))
 
         device = kwargs.get("device", "cuda")
-        if ((device =="cuda" and not torch.cuda.is_available())
+        if (
+            (device == "cuda" and not torch.cuda.is_available())
             or (device == "xpu" and not torch.xpu.is_available())
             or (device == "mps" and not torch.backends.mps.is_available())
             or (device == "npu" and not is_npu_available())
-            or kwargs.get("ngpu", 1) == 0):
+            or kwargs.get("ngpu", 1) == 0
+        ):
             device = "cpu"
             kwargs["batch_size"] = 1
         kwargs["device"] = device
@@ -573,8 +580,12 @@ class AutoModel:
                             result[k] = []
                         for t in restored_data[j][k]:
                             if isinstance(t, dict):
-                                t["start_time"] = (float(t["start_time"]) * 1000 + int(vadsegments[j][0])) / 1000
-                                t["end_time"] = (float(t["end_time"]) * 1000 + int(vadsegments[j][0])) / 1000
+                                t["start_time"] = (
+                                    float(t["start_time"]) * 1000 + int(vadsegments[j][0])
+                                ) / 1000
+                                t["end_time"] = (
+                                    float(t["end_time"]) * 1000 + int(vadsegments[j][0])
+                                ) / 1000
                             else:
                                 t[0] = int(t[0]) + int(vadsegments[j][0])
                                 t[1] = int(t[1]) + int(vadsegments[j][0])
@@ -600,6 +611,7 @@ class AutoModel:
             return_raw_text = kwargs.get("return_raw_text", False)
             # step.3 compute punc model
             raw_text = None
+            punc_res = None
             if self.punc_model is not None:
                 deep_update(self.punc_kwargs, cfg)
                 punc_res = self.inference(
@@ -645,7 +657,12 @@ class AutoModel:
                                        and 'iic/speech_seaco_paraformer_large_asr_nat-zh-cn-16k-common-vocab8404-pytorch'\
                                        can predict timestamp, and speaker diarization relies on timestamps."
                         )
-                    if kwargs.get("en_post_proc", False):
+                    if punc_res is None:
+                        logging.error(
+                            "Missing punc_model, which is required for punc_segment speaker diarization."
+                        )
+                        sentence_list = []
+                    elif kwargs.get("en_post_proc", False):
                         sentence_list = timestamp_sentence_en(
                             punc_res[0]["punc_array"],
                             result["timestamp"],
@@ -663,6 +680,11 @@ class AutoModel:
                 result["sentence_info"] = sentence_list
             elif kwargs.get("sentence_timestamp", False):
                 if not len(result["text"].strip()):
+                    sentence_list = []
+                elif punc_res is None:
+                    logging.warning(
+                        "punc_model is required for sentence_timestamp, skipping sentence segmentation."
+                    )
                     sentence_list = []
                 else:
                     if kwargs.get("en_post_proc", False):
