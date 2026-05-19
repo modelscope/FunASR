@@ -34,7 +34,7 @@
 
 ## What's new:
 
-- 2026/05/19: Fun-ASR-Nano now supports speaker diarization. Use with `vad_model` + `spk_model` + `punc_model` to get per-sentence speaker labels. See [demo](examples/industrial_data_pretraining/fun_asr_nano/demo_spk.py).
+- 2026/05/19: Fun-ASR-Nano and SenseVoice now support speaker diarization. Use with `vad_model` + `spk_model` + `punc_model` to get per-sentence speaker labels. See [Fun-ASR-Nano demo](examples/industrial_data_pretraining/fun_asr_nano/demo_spk.py), [SenseVoice demo](examples/industrial_data_pretraining/sense_voice/demo_spk.py).
 - 2025/12/15: [Fun-ASR-Nano-2512](https://github.com/FunAudioLLM/Fun-ASR) is an end-to-end speech recognition large model trained on tens of millions of hours real speech data. It supports low-latency real-time transcription and covers 31 languages.
 - 2024/10/29: Real-time Transcription Service 1.12 released, The 2pass-offline mode supports the SensevoiceSmal model；([docs](runtime/readme.md));
 - 2024/10/10：Added support for the Whisper-large-v3-turbo model, a multitasking model that can perform multilingual speech recognition, speech translation, and language identification. It can be downloaded from the [modelscope](examples/industrial_data_pretraining/whisper/demo.py), and [openai](examples/industrial_data_pretraining/whisper/demo_from_openai.py).
@@ -230,6 +230,27 @@ Parameter Description:
 - `batch_size_s`: Indicates the use of dynamic batching, where the total duration of audio in the batch is measured in seconds (s).
 - `merge_vad`: Whether to merge short audio fragments segmented by the VAD model, with the merged length being `merge_length_s`, in seconds (s).
 - `ban_emo_unk`: Whether to ban the output of the `emo_unk` token.
+
+#### SenseVoice with Speaker Diarization
+
+```python
+from funasr import AutoModel
+from funasr.utils.postprocess_utils import rich_transcription_postprocess
+
+model = AutoModel(
+    model="iic/SenseVoiceSmall",
+    vad_model="fsmn-vad",
+    vad_kwargs={"max_single_segment_time": 30000},
+    spk_model="cam++",
+    punc_model="ct-punc",
+    device="cuda:0",
+)
+res = model.generate(input="example.wav", cache={}, language="auto", use_itn=True,
+                     batch_size_s=60, merge_vad=True, merge_length_s=15)
+# Result contains sentence_info with speaker labels
+print(res[0]["sentence_info"])
+# [{'text': '...', 'start': 750, 'end': 5550, 'timestamp': [...], 'spk': 0}]
+```
 
 #### Paraformer
 
