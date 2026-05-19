@@ -34,6 +34,7 @@
 
 ## What's new:
 
+- 2026/05/19: Fun-ASR-Nano now supports speaker diarization. Use with `vad_model` + `spk_model` + `punc_model` to get per-sentence speaker labels. See [demo](examples/industrial_data_pretraining/fun_asr_nano/demo_spk.py).
 - 2025/12/15: [Fun-ASR-Nano-2512](https://github.com/FunAudioLLM/Fun-ASR) is an end-to-end speech recognition large model trained on tens of millions of hours real speech data. It supports low-latency real-time transcription and covers 31 languages.
 - 2024/10/29: Real-time Transcription Service 1.12 released, The 2pass-offline mode supports the SensevoiceSmal model；([docs](runtime/readme.md));
 - 2024/10/10：Added support for the Whisper-large-v3-turbo model, a multitasking model that can perform multilingual speech recognition, speech translation, and language identification. It can be downloaded from the [modelscope](examples/industrial_data_pretraining/whisper/demo.py), and [openai](examples/industrial_data_pretraining/whisper/demo_from_openai.py).
@@ -169,6 +170,27 @@ Parameter Description:
 - `vad_model`: This indicates the activation of VAD (Voice Activity Detection). The purpose of VAD is to split long audio into shorter clips. In this case, the inference time includes both VAD and SenseVoice total consumption, and represents the end-to-end latency. If you wish to test the SenseVoice model's inference time separately, the VAD model can be disabled.
 - `vad_kwargs`: Specifies the configurations for the VAD model. `max_single_segment_time`: denotes the maximum duration for audio segmentation by the `vad_model`, with the unit being milliseconds (ms).
 - `batch_size_s`: Indicates the use of dynamic batching, where the total duration of audio in the batch is measured in seconds (s).
+
+#### Fun-ASR-Nano with Speaker Diarization
+
+```python
+from funasr import AutoModel
+
+model = AutoModel(
+    model="FunAudioLLM/Fun-ASR-Nano-2512",
+    trust_remote_code=True,
+    remote_code="./model.py",
+    vad_model="fsmn-vad",
+    vad_kwargs={"max_single_segment_time": 30000},
+    spk_model="cam++",
+    punc_model="ct-punc",
+    device="cuda:0",
+)
+res = model.generate(input="example.wav", cache={}, batch_size=1, language="中文")
+# Result contains sentence_info with speaker labels
+print(res[0]["sentence_info"])
+# [{'text': '...', 'start': 420, 'end': 5580, 'timestamp': [...], 'spk': 0}]
+```
 
 #### SenseVoice
 

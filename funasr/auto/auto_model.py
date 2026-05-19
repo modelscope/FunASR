@@ -546,7 +546,8 @@ class AutoModel:
                         spk_res = self.inference(
                             speech_b, input_len=None, model=self.spk_model, kwargs=kwargs, **cfg
                         )
-                        results[_b]["spk_embedding"] = spk_res[0]["spk_embedding"]
+                        spk_embs = torch.cat([r["spk_embedding"] for r in spk_res], dim=0)
+                        results[_b]["spk_embedding"] = spk_embs
                 beg_idx = end_idx
                 end_idx += 1
                 max_len_in_batch = sample_length
@@ -606,6 +607,13 @@ class AutoModel:
                         else:
                             result[k] += restored_data[j][k]
 
+            # Convert dict-format timestamps (Fun-ASR-Nano) to list-format for downstream compatibility
+            if "timestamps" in result and "timestamp" not in result:
+                result["timestamp"] = [
+                    [int(t["start_time"] * 1000), int(t["end_time"] * 1000)]
+                    for t in result["timestamps"]
+                ]
+
             if not len(result["text"].strip()):
                 continue
             return_raw_text = kwargs.get("return_raw_text", False)
@@ -624,7 +632,10 @@ class AutoModel:
 
             # speaker embedding cluster after resorted
             if self.spk_model is not None and kwargs.get("return_spk_res", True):
-                if raw_text is None:
+                if raw_text is None and self.spk_mode == "punc_segment":
+                    logging.warning("punc_model is missing, falling back to vad_segment mode for speaker diarization.")
+                    self.spk_mode = "vad_segment"
+                elif raw_text is None:
                     logging.error("Missing punc_model, which is required by spk_model.")
                 all_segments = sorted(all_segments, key=lambda x: x[0])
                 spk_embedding = result["spk_embedding"]
@@ -636,18 +647,22 @@ class AutoModel:
                 if self.spk_mode == "vad_segment":  # recover sentence_list
                     sentence_list = []
                     for rest, vadsegment in zip(restored_data, vadsegments):
-                        if "timestamp" not in rest:
-                            logging.error(
-                                "Only 'iic/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-pytorch' \
-                                           and 'iic/speech_seaco_paraformer_large_asr_nat-zh-cn-16k-common-vocab8404-pytorch'\
-                                           can predict timestamp, and speaker diarization relies on timestamps."
-                            )
+                        if "timestamp" in rest:
+                            ts = rest["timestamp"]
+                        elif "timestamps" in rest:
+                            ts = [
+                                [int(t["start_time"] * 1000), int(t["end_time"] * 1000)]
+                                for t in rest["timestamps"]
+                            ]
+                        else:
+                            logging.error("No timestamp found in ASR result. Speaker diarization relies on timestamps.")
+                            ts = []
                         sentence_list.append(
                             {
                                 "start": vadsegment[0],
                                 "end": vadsegment[1],
                                 "sentence": rest["text"],
-                                "timestamp": rest["timestamp"],
+                                "timestamp": ts,
                             }
                         )
                 elif self.spk_mode == "punc_segment":
