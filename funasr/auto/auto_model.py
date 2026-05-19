@@ -208,10 +208,10 @@ class AutoModel:
 
         device = kwargs.get("device", "cuda")
         if (
-            (device == "cuda" and not torch.cuda.is_available())
-            or (device == "xpu" and not torch.xpu.is_available())
-            or (device == "mps" and not torch.backends.mps.is_available())
-            or (device == "npu" and not is_npu_available())
+            (device.startswith("cuda") and not torch.cuda.is_available())
+            or (device.startswith("xpu") and not torch.xpu.is_available())
+            or (device.startswith("mps") and not torch.backends.mps.is_available())
+            or (device.startswith("npu") and not is_npu_available())
             or kwargs.get("ngpu", 1) == 0
         ):
             device = "cpu"
