@@ -2,6 +2,7 @@
 # -*- encoding: utf-8 -*-
 
 import os
+import functools
 import sys
 import torch
 import torch.nn as nn
@@ -136,7 +137,7 @@ def main(**kwargs):
             min_num_params: int = int(1e8),
         ) -> bool:
             # 根据自定义逻辑决定是否包装模块
-            is_large = unwrapped_params >= min_num_params
+            is_large = nonwrapped_numel >= min_num_params
             requires_grad_uniform = len({p.requires_grad for p in module.parameters()}) == 1
             return is_large and requires_grad_uniform
 
