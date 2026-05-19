@@ -709,9 +709,9 @@ class Trainer:
                     description_dict[f"stats_rank{self.rank}_{key}/{tag}"] = var.item()
                 for key, var in speed_stats.items():
                     writer.add_scalar(
-                        f"stats_rank{self.rank}_{key}/{tag}", eval(var), self.batch_total
+                        f"stats_rank{self.rank}_{key}/{tag}", float(var), self.batch_total
                     )
-                    description_dict[f"stats_rank{self.rank}_{key}/{tag}"] = eval(var)
+                    description_dict[f"stats_rank{self.rank}_{key}/{tag}"] = float(var)
             if self.use_wandb and wandb is not None:
                 wandb.log(
                     description_dict,

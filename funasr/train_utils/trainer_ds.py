@@ -880,8 +880,8 @@ class Trainer:
                     writer.add_scalar(f"stats_rank{self.rank}_{key}/{tag}", var.item(), batch_total)
                     description_dict[f"stats_rank{self.rank}_{key}/{tag}"] = var.item()
                 for key, var in speed_stats.items():
-                    writer.add_scalar(f"stats_rank{self.rank}_{key}/{tag}", eval(var), batch_total)
-                    description_dict[f"stats_rank{self.rank}_{key}/{tag}"] = eval(var)
+                    writer.add_scalar(f"stats_rank{self.rank}_{key}/{tag}", float(var), batch_total)
+                    description_dict[f"stats_rank{self.rank}_{key}/{tag}"] = float(var)
             if self.use_wandb and wandb is not None:
                 wandb.log(
                     description_dict,

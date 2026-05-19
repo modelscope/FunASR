@@ -99,7 +99,7 @@ def main(**kwargs):
     freeze_param = kwargs.get("freeze_param", None)
     if freeze_param is not None:
         if "," in freeze_param:
-            freeze_param = eval(freeze_param)
+            freeze_param = freeze_param.split(",")
         if not isinstance(freeze_param, (list, tuple)):
             freeze_param = (freeze_param,)
         logging.info("freeze_param is not None: %s", freeze_param)
