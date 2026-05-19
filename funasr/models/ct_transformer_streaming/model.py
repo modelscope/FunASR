@@ -65,9 +65,11 @@ class CTTransformerStreaming(CTTransformer):
         key: list = None,
         tokenizer=None,
         frontend=None,
-        cache: dict = {},
+        cache: dict = None,
         **kwargs,
     ):
+        if cache is None:
+            cache = {}
         assert len(data_in) == 1
 
         if len(cache) == 0:

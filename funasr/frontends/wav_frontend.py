@@ -318,9 +318,11 @@ class WavFrontendOnline(nn.Module):
         self,
         input: torch.Tensor,
         input_lengths: torch.Tensor,
-        cache: dict = {},
+        cache: dict = None,
         **kwargs,
     ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+        if cache is None:
+            cache = {}
         batch_size = input.size(0)
 
         input = torch.cat((cache["input_cache"], input), dim=1)
@@ -378,9 +380,11 @@ class WavFrontendOnline(nn.Module):
         input: torch.Tensor,
         input_lengths: torch.Tensor,
         is_final: bool = False,
-        cache: dict = {},
+        cache: dict = None,
         **kwargs,
     ):
+        if cache is None:
+            cache = {}
         batch_size = input.size(0)
         feats = []
         feats_lens = []
@@ -487,7 +491,9 @@ class WavFrontendOnline(nn.Module):
         #     self.init_cache(cache)
         return feats, feats_lengths
 
-    def init_cache(self, cache: dict = {}):
+    def init_cache(self, cache: dict = None):
+        if cache is None:
+            cache = {}
         cache["reserve_waveforms"] = torch.empty(0)
         cache["input_cache"] = torch.empty(0)
         cache["lfr_splice_cache"] = []

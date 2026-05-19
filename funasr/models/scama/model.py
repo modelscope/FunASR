@@ -270,6 +270,8 @@ class SCAMA(nn.Module):
         cache: dict = None,
         **kwargs,
     ) -> Tuple[torch.Tensor, torch.Tensor]:
+        if cache is None:
+            cache = {}
         """Frontend + Encoder. Note that this method is used by asr_inference.py
         Args:
                 speech: (Batch, Length, ...)
@@ -602,7 +604,9 @@ class SCAMA(nn.Module):
 
         return results
 
-    def init_cache(self, cache: dict = {}, **kwargs):
+    def init_cache(self, cache: dict = None, **kwargs):
+        if cache is None:
+            cache = {}
         device = kwargs.get("device", "cuda")
 
         chunk_size = kwargs.get("chunk_size", [0, 10, 5])
@@ -648,9 +652,11 @@ class SCAMA(nn.Module):
         key: list = None,
         tokenizer=None,
         frontend=None,
-        cache: dict = {},
+        cache: dict = None,
         **kwargs,
     ):
+        if cache is None:
+            cache = {}
 
         # init beamsearch
         is_use_ctc = kwargs.get("decoding_ctc_weight", 0.0) > 0.00001 and self.ctc != None

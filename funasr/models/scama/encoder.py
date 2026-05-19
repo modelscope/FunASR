@@ -445,7 +445,9 @@ class SANMEncoderChunkOpt(nn.Module):
             return (xs_pad, intermediate_outs), olens, None
         return xs_pad, olens, None
 
-    def _add_overlap_chunk(self, feats: np.ndarray, cache: dict = {}):
+    def _add_overlap_chunk(self, feats: np.ndarray, cache: dict = None):
+        if cache is None:
+            cache = {}
         if len(cache) == 0:
             return feats
         cache["feats"] = to_device(cache["feats"], device=feats.device)
@@ -460,6 +462,8 @@ class SANMEncoderChunkOpt(nn.Module):
         cache: dict = None,
         **kwargs,
     ):
+        if cache is None:
+            cache = {}
         is_final = kwargs.get("is_final", False)
         xs_pad *= self.output_size() ** 0.5
         if self.embed is None:

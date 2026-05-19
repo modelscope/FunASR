@@ -112,6 +112,8 @@ class SanmKWSStreaming(SanmKWS):
         cache: dict = None,
         **kwargs,
     ) -> Tuple[torch.Tensor, torch.Tensor]:
+        if cache is None:
+            cache = {}
         """Frontend + Encoder. Note that this method is used by asr_inference.py
         Args:
                 speech: (Batch, Length, ...)
@@ -137,7 +139,9 @@ class SanmKWSStreaming(SanmKWS):
 
         return encoder_out, torch.tensor([encoder_out.size(1)])
 
-    def init_cache(self, cache: dict = {}, **kwargs):
+    def init_cache(self, cache: dict = None, **kwargs):
+        if cache is None:
+            cache = {}
         chunk_size = kwargs.get("chunk_size", [0, 10, 5])
         encoder_chunk_look_back = kwargs.get("encoder_chunk_look_back", 0)
         decoder_chunk_look_back = kwargs.get("decoder_chunk_look_back", 0)
@@ -252,9 +256,11 @@ class SanmKWSStreaming(SanmKWS):
         key: list = None,
         tokenizer=None,
         frontend=None,
-        cache: dict = {},
+        cache: dict = None,
         **kwargs,
     ):
+        if cache is None:
+            cache = {}
         keywords = kwargs.get("keywords")
         from funasr.utils.kws_utils import KwsCtcPrefixDecoder
         self.kws_decoder = KwsCtcPrefixDecoder(
