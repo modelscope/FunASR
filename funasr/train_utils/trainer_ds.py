@@ -290,7 +290,9 @@ class Trainer:
                             misc_utils.smart_remove(filename)
 
         elif self.use_fsdp:
-            pass
+            raise NotImplementedError(
+                "FSDP checkpoint saving is not yet implemented. Use DDP or DeepSpeed instead."
+            )
         elif self.rank == 0:
             logging.info(
                 f"Save checkpoint: {epoch}, rank: {self.rank}, local_rank: {self.local_rank}\n"
