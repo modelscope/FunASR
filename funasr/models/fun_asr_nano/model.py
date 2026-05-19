@@ -469,7 +469,7 @@ class FunASRNano(nn.Module):
     ):
         meta_data = {}
 
-        if kwargs.get("batch_size", 1) > 1:
+        if len(data_in) > 1:
             raise NotImplementedError("batch decoding is not implemented")
 
         contents = self.data_template(data_in[0])
