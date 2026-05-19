@@ -320,6 +320,7 @@ class AutoModel:
         elif kwargs.get("bf16", False):
             model.to(torch.bfloat16)
         model.to(device)
+        model.eval()
 
         if not kwargs.get("disable_log", True):
             tables.print()
@@ -371,7 +372,6 @@ class AutoModel:
             kwargs.pop("cache")
         deep_update(kwargs, cfg)
         model = self.model if model is None else model
-        model.eval()
 
         batch_size = kwargs.get("batch_size", 1)
         # if kwargs.get("device", "cpu") == "cpu":
