@@ -801,6 +801,10 @@ class AutoModel:
         baseline["kwargs"] = copy.deepcopy(self.kwargs)
         self._base_kwargs_map = baseline
 
+    _IMMUTABLE_KWARGS_KEYS = frozenset([
+        "token_list", "tokenizer", "frontend", "model", "init_param", "model_path",
+    ])
+
     def _reset_runtime_configs(self):
         """Ensure runtime kwargs reset to baseline defaults before inference."""
         base_map = getattr(self, "_base_kwargs_map", None)
@@ -808,7 +812,12 @@ class AutoModel:
             return
 
         for name, base in base_map.items():
-            restored = copy.deepcopy(base)
+            restored = {}
+            for k, v in base.items():
+                if k in self._IMMUTABLE_KWARGS_KEYS or not isinstance(v, (dict, list)):
+                    restored[k] = v
+                else:
+                    restored[k] = copy.deepcopy(v)
             setattr(self, name, restored)
 
         ncpu = _resolve_ncpu(self.kwargs, 4)
