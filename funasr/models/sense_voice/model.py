@@ -25,7 +25,7 @@ from .utils.ctc_alignment import ctc_forced_align
 class SinusoidalPositionEncoder(torch.nn.Module):
     """ """
 
-    def __int__(self, d_model=80, dropout_rate=0.1):
+    def __init__(self, d_model=80, dropout_rate=0.1):
         pass
 
     def encode(

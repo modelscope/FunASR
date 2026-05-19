@@ -383,7 +383,7 @@ class StreamPositionalEncoding(torch.nn.Module):
 class SinusoidalPositionEncoder(torch.nn.Module):
     """ """
 
-    def __int__(self, d_model=80, dropout_rate=0.1):
+    def __init__(self, d_model=80, dropout_rate=0.1):
         pass
 
     def encode(
@@ -416,7 +416,7 @@ class SinusoidalPositionEncoder(torch.nn.Module):
 class StreamSinusoidalPositionEncoder(torch.nn.Module):
     """ """
 
-    def __int__(self, d_model=80, dropout_rate=0.1):
+    def __init__(self, d_model=80, dropout_rate=0.1):
         pass
 
     def encode(
