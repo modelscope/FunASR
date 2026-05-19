@@ -254,6 +254,9 @@ class CTTransformer(torch.nn.Module):
         **kwargs,
     ):
         assert len(data_in) == 1
+        if not data_in[0] or (isinstance(data_in[0], str) and not data_in[0].strip()):
+            meta_data = {"batch_data_time": -1}
+            return [{"key": key[0] if key else "", "text": "", "punc_array": None}], meta_data
         text = load_audio_text_image_video(data_in, data_type=kwargs.get("kwargs", "text"))[0]
         vad_indexes = kwargs.get("vad_indexes", None)
         # text = data_in[0]

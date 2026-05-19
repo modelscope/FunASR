@@ -688,6 +688,8 @@ class FsmnVADStreaming(nn.Module):
         is_streaming_input = cfg["is_streaming_input"]
         time2 = time.perf_counter()
         meta_data["load_data"] = f"{time2 - time1:0.3f}"
+        if len(audio_sample_list) == 0 or (hasattr(audio_sample_list[0], '__len__') and len(audio_sample_list[0]) == 0):
+            return [{"key": key[0] if key else "", "value": []}], meta_data
         assert len(audio_sample_list) == 1, "batch_size must be set 1"
 
         audio_sample = torch.cat((cache["prev_samples"], audio_sample_list[0]))
