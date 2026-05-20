@@ -16,6 +16,8 @@ tests = [
     "test_sensevoice.py",
     "test_campplus.py",
     "test_paraformer_streaming.py",
+    "test_qwen3_asr.py",
+    "test_glm_asr.py",
 ]
 
 SEP = "-" * 60
