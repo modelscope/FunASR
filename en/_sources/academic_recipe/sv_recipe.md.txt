@@ -1,2 +1,0 @@
-# Speaker Verification
-Undo

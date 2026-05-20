@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FunASR - A Fundamental End-to-End Speech Recognition Toolkit</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --bg: #f8fafc;
+            --text: #1e293b;
+            --text-light: #64748b;
+            --card-bg: #ffffff;
+            --border: #e2e8f0;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+
+        /* Header */
+        header {
+            background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 100%);
+            color: white;
+            padding: 80px 0 60px;
+            text-align: center;
+        }
+        header h1 { font-size: 3rem; margin-bottom: 16px; }
+        header p { font-size: 1.2rem; opacity: 0.9; max-width: 700px; margin: 0 auto 32px; }
+        .badges { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+        .badges a img { height: 24px; }
+
+        /* Nav */
+        nav {
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        nav .container {
+            display: flex;
+            gap: 24px;
+            padding: 16px 24px;
+            overflow-x: auto;
+        }
+        nav a {
+            color: var(--text);
+            text-decoration: none;
+            font-weight: 500;
+            white-space: nowrap;
+            padding: 4px 0;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
+        nav a:hover { color: var(--primary); border-bottom-color: var(--primary); }
+
+        /* Sections */
+        section { padding: 64px 0; }
+        section h2 { font-size: 2rem; margin-bottom: 32px; text-align: center; }
+
+        /* Model Cards */
+        .models-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 24px;
+        }
+        .model-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            transition: box-shadow 0.2s;
+        }
+        .model-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+        .model-card h3 { color: var(--primary); margin-bottom: 8px; }
+        .model-card p { color: var(--text-light); font-size: 0.9rem; margin-bottom: 12px; }
+        .model-card .tags { display: flex; gap: 6px; flex-wrap: wrap; }
+        .tag {
+            background: #eff6ff;
+            color: var(--primary);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        /* Features */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+        }
+        .feature-item {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            text-align: center;
+        }
+        .feature-item .icon { font-size: 2.5rem; margin-bottom: 12px; }
+        .feature-item h3 { margin-bottom: 8px; }
+        .feature-item p { color: var(--text-light); font-size: 0.9rem; }
+
+        /* Code */
+        .code-section { background: #1e293b; border-radius: 12px; padding: 24px; margin: 32px 0; overflow-x: auto; }
+        .code-section pre { color: #e2e8f0; font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; }
+        .code-section .comment { color: #64748b; }
+        .code-section .string { color: #86efac; }
+        .code-section .keyword { color: #93c5fd; }
+
+        /* Links */
+        .links-row { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; margin-top: 24px; }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-dark); }
+        .btn-outline { border: 1px solid var(--border); color: var(--text); background: var(--card-bg); }
+        .btn-outline:hover { border-color: var(--primary); color: var(--primary); }
+
+        /* Footer */
+        footer {
+            background: #1e293b;
+            color: #94a3b8;
+            padding: 40px 0;
+            text-align: center;
+        }
+        footer a { color: #93c5fd; text-decoration: none; }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            header h1 { font-size: 2rem; }
+            header p { font-size: 1rem; }
+            section h2 { font-size: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>FunASR</h1>
+            <p>A Fundamental End-to-End Speech Recognition Toolkit — bridging academic research and industrial applications</p>
+            <div class="badges">
+                <a href="https://pypi.org/project/funasr/"><img src="https://img.shields.io/pypi/v/funasr?style=flat-square" alt="PyPI"></a>
+                <a href="https://github.com/modelscope/FunASR/stargazers"><img src="https://img.shields.io/github/stars/modelscope/FunASR?style=flat-square" alt="Stars"></a>
+                <a href="https://github.com/modelscope/FunASR/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue?style=flat-square" alt="License"></a>
+            </div>
+        </div>
+    </header>
+
+    <nav>
+        <div class="container">
+            <a href="#models">Models</a>
+            <a href="#features">Features</a>
+            <a href="#quickstart">Quick Start</a>
+            <a href="#ecosystem">Ecosystem</a>
+            <a href="https://github.com/modelscope/FunASR">GitHub</a>
+            <a href="https://github.com/modelscope/FunASR/blob/main/docs/tutorial/README.md">Tutorial</a>
+        </div>
+    </nav>
+
+    <section id="features">
+        <div class="container">
+            <h2>Features</h2>
+            <div class="features-grid">
+                <div class="feature-item">
+                    <div class="icon">🎙️</div>
+                    <h3>Speech Recognition</h3>
+                    <p>High-accuracy ASR supporting streaming and non-streaming modes, with VAD segmentation for any-length audio.</p>
+                </div>
+                <div class="feature-item">
+                    <div class="icon">🌍</div>
+                    <h3>50+ Languages</h3>
+                    <p>From Chinese dialects to global languages — Fun-ASR-Nano covers 31 languages, Qwen3-ASR covers 52.</p>
+                </div>
+                <div class="feature-item">
+                    <div class="icon">👥</div>
+                    <h3>Speaker Diarization</h3>
+                    <p>Built-in speaker verification and diarization with CAM++ and ERes2NetV2 models.</p>
+                </div>
+                <div class="feature-item">
+                    <div class="icon">😊</div>
+                    <h3>Emotion & Events</h3>
+                    <p>SenseVoice detects emotions (happy, sad, angry) and audio events (BGM, applause, laughter).</p>
+                </div>
+                <div class="feature-item">
+                    <div class="icon">⚡</div>
+                    <h3>Ultra-fast Inference</h3>
+                    <p>SenseVoice processes 10s audio in 70ms. Streaming ASR delivers results in 600ms chunks.</p>
+                </div>
+                <div class="feature-item">
+                    <div class="icon">🔧</div>
+                    <h3>Easy Fine-tuning</h3>
+                    <p>Multi-GPU training with DeepSpeed, dynamic batching, and simple JSONL data format.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="models" style="background: white;">
+        <div class="container">
+            <h2>Model Zoo</h2>
+            <div class="models-grid">
+                <div class="model-card">
+                    <h3>Fun-ASR-Nano</h3>
+                    <p>End-to-end ASR large model trained on tens of millions of hours. Supports 31 languages, dialects, accents, and lyrics recognition.</p>
+                    <div class="tags">
+                        <span class="tag">800M params</span>
+                        <span class="tag">31 languages</span>
+                        <span class="tag">Timestamps</span>
+                        <span class="tag">Speaker Diarization</span>
+                    </div>
+                </div>
+                <div class="model-card">
+                    <h3>Paraformer</h3>
+                    <p>Non-autoregressive end-to-end model with high accuracy and efficiency. The workhorse for Chinese ASR.</p>
+                    <div class="tags">
+                        <span class="tag">Streaming</span>
+                        <span class="tag">Non-streaming</span>
+                        <span class="tag">Hotwords</span>
+                        <span class="tag">Timestamps</span>
+                    </div>
+                </div>
+                <div class="model-card">
+                    <h3>SenseVoice</h3>
+                    <p>Multi-task speech understanding: ASR + Language ID + Emotion Recognition + Audio Event Detection.</p>
+                    <div class="tags">
+                        <span class="tag">5 languages</span>
+                        <span class="tag">Emotion</span>
+                        <span class="tag">AED</span>
+                        <span class="tag">15x faster than Whisper</span>
+                    </div>
+                </div>
+                <div class="model-card">
+                    <h3>Qwen3-ASR</h3>
+                    <p>Large language model based ASR supporting 52 languages with contextual understanding.</p>
+                    <div class="tags">
+                        <span class="tag">52 languages</span>
+                        <span class="tag">0.6B / 1.7B</span>
+                        <span class="tag">Context-aware</span>
+                    </div>
+                </div>
+                <div class="model-card">
+                    <h3>FSMN-VAD</h3>
+                    <p>Voice Activity Detection for segmenting long audio. Supports streaming and non-streaming modes.</p>
+                    <div class="tags">
+                        <span class="tag">Streaming</span>
+                        <span class="tag">Low latency</span>
+                    </div>
+                </div>
+                <div class="model-card">
+                    <h3>CAM++ / ERes2NetV2</h3>
+                    <p>Speaker verification and embedding extraction for speaker diarization pipelines.</p>
+                    <div class="tags">
+                        <span class="tag">192-dim embedding</span>
+                        <span class="tag">Clustering</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="quickstart">
+        <div class="container">
+            <h2>Quick Start</h2>
+            <div class="code-section">
+<pre><span class="comment"># Install</span>
+pip install funasr
+<span class="comment"># Or install from source for latest features</span>
+pip install git+https://github.com/modelscope/FunASR.git
+
+<span class="comment"># Basic ASR</span>
+<span class="keyword">from</span> funasr <span class="keyword">import</span> AutoModel
+
+model = AutoModel(model=<span class="string">"paraformer-zh"</span>, vad_model=<span class="string">"fsmn-vad"</span>, punc_model=<span class="string">"ct-punc"</span>)
+res = model.generate(input=<span class="string">"audio.wav"</span>)
+print(res[0][<span class="string">"text"</span>])
+
+<span class="comment"># With speaker diarization</span>
+model = AutoModel(model=<span class="string">"paraformer-zh"</span>, vad_model=<span class="string">"fsmn-vad"</span>,
+                  punc_model=<span class="string">"ct-punc"</span>, spk_model=<span class="string">"cam++"</span>)
+res = model.generate(input=<span class="string">"meeting.wav"</span>)
+<span class="keyword">for</span> sent <span class="keyword">in</span> res[0][<span class="string">"sentence_info"</span>]:
+    print(f<span class="string">"Speaker {sent['spk']}: {sent['text']}"</span>)</pre>
+            </div>
+            <div class="links-row">
+                <a href="https://github.com/modelscope/FunASR/blob/main/docs/tutorial/README.md" class="btn btn-primary">Full Tutorial</a>
+                <a href="https://github.com/modelscope/FunASR/tree/main/examples/industrial_data_pretraining" class="btn btn-outline">Examples</a>
+            </div>
+        </div>
+    </section>
+
+    <section id="ecosystem" style="background: white;">
+        <div class="container">
+            <h2>Ecosystem</h2>
+            <div class="models-grid">
+                <div class="model-card">
+                    <h3><a href="https://github.com/modelscope/FunASR" style="text-decoration:none;color:inherit;">FunASR</a></h3>
+                    <p>The core framework — inference, training, model zoo, and deployment tools.</p>
+                </div>
+                <div class="model-card">
+                    <h3><a href="https://github.com/FunAudioLLM/Fun-ASR" style="text-decoration:none;color:inherit;">Fun-ASR-Nano</a></h3>
+                    <p>The latest ASR large model — 31 languages, dialects, timestamps, speaker diarization.</p>
+                </div>
+                <div class="model-card">
+                    <h3><a href="https://github.com/FunAudioLLM/SenseVoice" style="text-decoration:none;color:inherit;">SenseVoice</a></h3>
+                    <p>Multi-task speech understanding — ASR, emotion, language ID, audio events.</p>
+                </div>
+                <div class="model-card">
+                    <h3><a href="https://github.com/modelscope/FunClip" style="text-decoration:none;color:inherit;">FunClip</a></h3>
+                    <p>AI-powered video clipping — ASR + LLM intelligent editing.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <p>FunASR is developed by <a href="https://github.com/modelscope">Tongyi Lab, Alibaba Group</a></p>
+            <p style="margin-top: 8px;">
+                <a href="https://github.com/modelscope/FunASR">GitHub</a> ·
+                <a href="https://github.com/modelscope/FunASR/blob/main/MODEL_LICENSE">License</a> ·
+                <a href="https://github.com/modelscope/FunASR/issues">Issues</a>
+            </p>
+        </div>
+    </footer>
+</body>
+</html>
