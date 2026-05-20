@@ -34,6 +34,7 @@
 
 ## What's new:
 
+- 2026/05/20: Added Qwen3-ASR (0.6B/1.7B) multi-language speech recognition models, supporting 52 languages with auto language detection. [usage](examples/industrial_data_pretraining/qwen3_asr).
 - 2026/05/19: Fun-ASR-Nano and SenseVoice now support speaker diarization. Use with `vad_model` + `spk_model` + `punc_model` to get per-sentence speaker labels. See [Fun-ASR-Nano demo](examples/industrial_data_pretraining/fun_asr_nano/demo_spk.py), [SenseVoice demo](examples/industrial_data_pretraining/sense_voice/demo_spk.py).
 - 2025/12/15: [Fun-ASR-Nano-2512](https://github.com/FunAudioLLM/Fun-ASR) is an end-to-end speech recognition large model trained on tens of millions of hours real speech data. It supports low-latency real-time transcription and covers 31 languages.
 - 2024/10/29: Real-time Transcription Service 1.12 released, The 2pass-offline mode supports the SensevoiceSmal model；([docs](runtime/readme.md));
@@ -42,7 +43,6 @@
 - 2024/09/25：keyword spotting models are new supported. Supports fine-tuning and inference for four models: [fsmn_kws](https://modelscope.cn/models/iic/speech_sanm_kws_phone-xiaoyun-commands-online), [fsmn_kws_mt](https://modelscope.cn/models/iic/speech_sanm_kws_phone-xiaoyun-commands-online), [sanm_kws](https://modelscope.cn/models/iic/speech_sanm_kws_phone-xiaoyun-commands-offline), [sanm_kws_streaming](https://modelscope.cn/models/iic/speech_sanm_kws_phone-xiaoyun-commands-online).
 - 2024/07/04：[SenseVoice](https://github.com/FunAudioLLM/SenseVoice) is a speech foundation model with multiple speech understanding capabilities, including ASR, LID, SER, and AED.
 
-- 2026/05/20: Added Qwen3-ASR (0.6B/1.7B) multi-language speech recognition models, supporting 52 languages with auto language detection. [usage](examples/industrial_data_pretraining/qwen3_asr).
 <details><summary>Full Changelog</summary>
     
 - 2024/07/01: Offline File Transcription Service GPU 1.1 released, optimize BladeDISC model compatibility issues; ref to ([docs](runtime/readme.md))
