@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FunASR Tutorial</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --bg: #f8fafc;
+            --text: #1e293b;
+            --text-light: #64748b;
+            --card-bg: #ffffff;
+            --border: #e2e8f0;
+            --code-bg: #1e293b;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+        }
+        .container { max-width: 900px; margin: 0 auto; padding: 0 24px; }
+
+        /* Nav */
+        nav {
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border);
+            position: sticky; top: 0; z-index: 100;
+        }
+        nav .container { display: flex; align-items: center; gap: 24px; padding: 12px 24px; }
+        nav .logo { font-weight: 700; font-size: 1.2rem; color: var(--primary); text-decoration: none; }
+        nav a { color: var(--text-light); text-decoration: none; font-size: 0.9rem; }
+        nav a:hover { color: var(--primary); }
+
+        /* Content */
+        .content { padding: 48px 0; }
+        h1 { font-size: 2.2rem; margin-bottom: 8px; }
+        h1 + p { color: var(--text-light); margin-bottom: 40px; }
+        h2 { font-size: 1.5rem; margin: 48px 0 16px; padding-bottom: 8px; border-bottom: 2px solid var(--border); }
+        h3 { font-size: 1.15rem; margin: 32px 0 12px; }
+        h4 { font-size: 1rem; margin: 24px 0 8px; color: var(--text-light); }
+        p { margin-bottom: 12px; }
+        ul, ol { margin: 12px 0 12px 24px; }
+        li { margin-bottom: 6px; }
+
+        /* Code */
+        pre {
+            background: var(--code-bg);
+            color: #e2e8f0;
+            border-radius: 8px;
+            padding: 16px 20px;
+            overflow-x: auto;
+            margin: 12px 0 20px;
+            font-size: 0.85rem;
+            line-height: 1.5;
+        }
+        code {
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+        }
+        p code, li code {
+            background: #f1f5f9;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            color: #e11d48;
+        }
+
+        /* TOC sidebar */
+        .toc {
+            position: fixed;
+            right: 24px;
+            top: 80px;
+            width: 220px;
+            font-size: 0.8rem;
+            display: none;
+        }
+        @media (min-width: 1280px) { .toc { display: block; } }
+        .toc a {
+            display: block;
+            padding: 4px 0;
+            color: var(--text-light);
+            text-decoration: none;
+            border-left: 2px solid transparent;
+            padding-left: 12px;
+        }
+        .toc a:hover { color: var(--primary); border-left-color: var(--primary); }
+
+        /* Note boxes */
+        .note {
+            background: #eff6ff;
+            border-left: 4px solid var(--primary);
+            padding: 12px 16px;
+            border-radius: 0 8px 8px 0;
+            margin: 16px 0;
+            font-size: 0.9rem;
+        }
+        .warning {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 12px 16px;
+            border-radius: 0 8px 8px 0;
+            margin: 16px 0;
+            font-size: 0.9rem;
+        }
+
+        /* Table */
+        table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.9rem; }
+        th, td { padding: 8px 12px; text-align: left; border-bottom: 1px solid var(--border); }
+        th { background: #f1f5f9; font-weight: 600; }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="container">
+            <a href="index.html" class="logo">FunASR</a>
+            <a href="index.html">Home</a>
+            <a href="tutorial.html" style="color:var(--primary);font-weight:500;">Tutorial</a>
+            <a href="https://github.com/modelscope/FunASR">GitHub</a>
+        </div>
+    </nav>
+
+    <div class="toc">
+        <a href="#install">Install</a>
+        <a href="#asr-offline">ASR (Offline)</a>
+        <a href="#fun-asr-nano">Fun-ASR-Nano</a>
+        <a href="#sensevoice">SenseVoice</a>
+        <a href="#asr-streaming">ASR (Streaming)</a>
+        <a href="#vad">VAD</a>
+        <a href="#vad-streaming">VAD (Streaming)</a>
+        <a href="#punc">Punctuation</a>
+        <a href="#spk">Speaker Diarization</a>
+        <a href="#qwen3-asr">Qwen3-ASR</a>
+        <a href="#export">ONNX Export</a>
+        <a href="#api">API Reference</a>
+    </div>
+
+    <div class="content">
+        <div class="container">
+            <h1>FunASR Tutorial</h1>
+            <p>Complete guide to inference, streaming, speaker diarization, and more.</p>
+
+            <h2 id="install">Installation</h2>
+<pre>pip install funasr
+
+# Or install from source (recommended for latest features)
+pip install git+https://github.com/modelscope/FunASR.git</pre>
+
+            <h2 id="asr-offline">Speech Recognition (Offline)</h2>
+            <h3>Paraformer — Chinese ASR</h3>
+<pre>from funasr import AutoModel
+
+model = AutoModel(
+    model="paraformer-zh",
+    vad_model="fsmn-vad",
+    vad_kwargs={"max_single_segment_time": 60000},
+    punc_model="ct-punc",
+    # spk_model="cam++",  # uncomment for speaker diarization
+)
+res = model.generate(input="audio.wav", batch_size_s=300, hotword='魔搭')
+print(res)</pre>
+            <div class="note">
+                Combined with <code>vad_model</code>, any length audio is supported. Parameters: <code>batch_size_s</code> (dynamic batch in seconds), <code>hotword</code> (recognition keywords).
+            </div>
+
+            <h2 id="fun-asr-nano">Fun-ASR-Nano — 31 Languages</h2>
+<pre>from funasr import AutoModel
+
+model = AutoModel(
+    model="FunAudioLLM/Fun-ASR-Nano-2512",
+    trust_remote_code=True,
+    remote_code="./model.py",
+    vad_model="fsmn-vad",
+    vad_kwargs={"max_single_segment_time": 30000},
+    device="cuda:0",
+    hub="hf",
+)
+res = model.generate(input=["audio.wav"], cache={}, batch_size=1,
+                     hotwords=["keyword"], language="中文")
+print(res[0]["text"])
+print(res[0]["timestamps"])  # character-level timestamps</pre>
+
+            <h3>Fun-ASR-Nano + Speaker Diarization</h3>
+<pre>model = AutoModel(
+    model="FunAudioLLM/Fun-ASR-Nano-2512",
+    trust_remote_code=True,
+    remote_code="./model.py",
+    vad_model="fsmn-vad",
+    vad_kwargs={"max_single_segment_time": 30000},
+    spk_model="cam++",
+    punc_model="ct-punc",
+    device="cuda:0",
+    hub="hf",
+)
+res = model.generate(input=["meeting.wav"], cache={}, batch_size=1, language="中文")
+for sent in res[0]["sentence_info"]:
+    print(f"Speaker {sent['spk']}: [{sent['start']}ms-{sent['end']}ms] {sent['text']}")</pre>
+            <div class="note">
+                Requires: <code>pip install tiktoken huggingface_hub</code>. Supports 31 languages including Chinese dialects.
+            </div>
+
+            <h2 id="sensevoice">SenseVoice — ASR + Emotion + Audio Events</h2>
+<pre>from funasr import AutoModel
+from funasr.utils.postprocess_utils import rich_transcription_postprocess
+
+model = AutoModel(
+    model="iic/SenseVoiceSmall",
+    vad_model="fsmn-vad",
+    vad_kwargs={"max_single_segment_time": 30000},
+    device="cuda:0",
+)
+res = model.generate(input="audio.wav", cache={}, language="auto",
+                     use_itn=True, batch_size_s=60, merge_vad=True, merge_length_s=15)
+text = rich_transcription_postprocess(res[0]["text"])
+print(text)</pre>
+
+            <h3>SenseVoice + Speaker Diarization</h3>
+<pre>model = AutoModel(
+    model="iic/SenseVoiceSmall",
+    vad_model="fsmn-vad",
+    vad_kwargs={"max_single_segment_time": 30000},
+    spk_model="cam++",
+    punc_model="ct-punc",
+    device="cuda:0",
+)
+res = model.generate(input="audio.wav", cache={}, language="auto",
+                     use_itn=True, batch_size_s=60, merge_vad=True, merge_length_s=15)
+for sent in res[0]["sentence_info"]:
+    print(f"Speaker {sent['spk']}: {rich_transcription_postprocess(sent['text'])}")</pre>
+
+            <h2 id="asr-streaming">Speech Recognition (Streaming)</h2>
+<pre>from funasr import AutoModel
+import soundfile
+
+chunk_size = [0, 10, 5]  # [0, 10, 5] 600ms, [0, 8, 4] 480ms
+encoder_chunk_look_back = 4
+decoder_chunk_look_back = 1
+
+model = AutoModel(model="paraformer-zh-streaming")
+
+wav_file = f"{model.model_path}/example/asr_example.wav"
+speech, sample_rate = soundfile.read(wav_file)
+chunk_stride = chunk_size[1] * 960  # 600ms
+
+cache = {}
+total_chunk_num = int((len(speech) - 1) / chunk_stride + 1)
+for i in range(total_chunk_num):
+    speech_chunk = speech[i * chunk_stride:(i + 1) * chunk_stride]
+    is_final = i == total_chunk_num - 1
+    res = model.generate(input=speech_chunk, cache=cache, is_final=is_final,
+                         chunk_size=chunk_size,
+                         encoder_chunk_look_back=encoder_chunk_look_back,
+                         decoder_chunk_look_back=decoder_chunk_look_back)
+    print(res)</pre>
+            <div class="note">
+                <code>chunk_size=[0,10,5]</code>: display granularity 600ms, lookahead 300ms. Set <code>is_final=True</code> on last chunk to flush remaining text.
+            </div>
+
+            <h2 id="vad">Voice Activity Detection (Offline)</h2>
+<pre>from funasr import AutoModel
+
+model = AutoModel(model="fsmn-vad")
+res = model.generate(input="audio.wav")
+print(res)
+# Output: [{"key": "...", "value": [[beg1, end1], [beg2, end2], ...]}]
+# Times in milliseconds</pre>
+
+            <h2 id="vad-streaming">Voice Activity Detection (Streaming)</h2>
+<pre>from funasr import AutoModel
+import soundfile
+
+chunk_size = 200  # ms
+model = AutoModel(model="fsmn-vad")
+
+speech, sample_rate = soundfile.read("audio.wav")
+chunk_stride = int(chunk_size * sample_rate / 1000)
+
+cache = {}
+total_chunk_num = int((len(speech) - 1) / chunk_stride + 1)
+for i in range(total_chunk_num):
+    speech_chunk = speech[i * chunk_stride:(i + 1) * chunk_stride]
+    is_final = i == total_chunk_num - 1
+    res = model.generate(input=speech_chunk, cache=cache,
+                         is_final=is_final, chunk_size=chunk_size)
+    if len(res[0]["value"]):
+        print(res)</pre>
+            <div class="note">
+                Streaming VAD output: <code>[[beg, -1]]</code> = speech start, <code>[[-1, end]]</code> = speech end, <code>[[beg, end]]</code> = complete segment.
+            </div>
+
+            <h2 id="punc">Punctuation Restoration</h2>
+<pre>from funasr import AutoModel
+
+model = AutoModel(model="ct-punc")
+res = model.generate(input="那今天的会就到这里吧 happy new year 明年见")
+print(res)
+# Output: "那今天的会就到这里吧，happy new year，明年见。"</pre>
+
+            <h2 id="spk">Speaker Diarization</h2>
+            <p>Speaker diarization works with Paraformer, Fun-ASR-Nano, and SenseVoice. Add <code>spk_model="cam++"</code> to enable it:</p>
+<pre>from funasr import AutoModel
+
+model = AutoModel(
+    model="paraformer-zh",
+    vad_model="fsmn-vad",
+    punc_model="ct-punc",
+    spk_model="cam++",  # or "iic/speech_eres2netv2_sv_zh-cn_16k-common"
+)
+res = model.generate(input="meeting.wav", batch_size_s=300)
+for sent in res[0]["sentence_info"]:
+    print(f"[Speaker {sent['spk']}] [{sent['start']}-{sent['end']}ms] {sent['text']}")</pre>
+
+            <h2 id="qwen3-asr">Qwen3-ASR — 52 Languages</h2>
+<pre># pip install qwen-asr
+from funasr import AutoModel
+
+model = AutoModel(model="Qwen/Qwen3-ASR-1.7B", hub="hf", device="cuda:0")
+
+# Auto language detection
+res = model.generate(input="audio.wav")
+print(res[0]["text"], "| Language:", res[0].get("language", ""))
+
+# Specify language
+res = model.generate(input="audio_zh.wav", language="Chinese")
+print(res[0]["text"])</pre>
+
+            <h2 id="export">ONNX Export</h2>
+<pre># Command line
+funasr-export ++model=paraformer ++quantize=false ++device=cpu
+
+# Python
+from funasr import AutoModel
+model = AutoModel(model="paraformer", device="cpu")
+res = model.export(quantize=False)</pre>
+
+<pre># Test ONNX model
+# pip install funasr-onnx
+from funasr_onnx import Paraformer
+model = Paraformer("damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch",
+                   batch_size=1, quantize=True)
+result = model(["audio.wav"])
+print(result)</pre>
+
+            <h2 id="api">API Reference</h2>
+
+            <h3>AutoModel</h3>
+            <table>
+                <tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
+                <tr><td><code>model</code></td><td>str</td><td>Model name or local path</td></tr>
+                <tr><td><code>device</code></td><td>str</td><td><code>"cuda:0"</code>, <code>"cpu"</code>, <code>"mps"</code></td></tr>
+                <tr><td><code>vad_model</code></td><td>str</td><td>VAD model for long audio segmentation</td></tr>
+                <tr><td><code>punc_model</code></td><td>str</td><td>Punctuation restoration model</td></tr>
+                <tr><td><code>spk_model</code></td><td>str</td><td>Speaker model for diarization</td></tr>
+                <tr><td><code>hub</code></td><td>str</td><td><code>"ms"</code> (ModelScope) or <code>"hf"</code> (HuggingFace)</td></tr>
+                <tr><td><code>ncpu</code></td><td>int</td><td>CPU threads (default: 4)</td></tr>
+                <tr><td><code>batch_size</code></td><td>int</td><td>Batch size for inference</td></tr>
+                <tr><td><code>disable_update</code></td><td>bool</td><td>Skip version check</td></tr>
+                <tr><td><code>disable_pbar</code></td><td>bool</td><td>Disable progress bar</td></tr>
+            </table>
+
+            <h3>model.generate()</h3>
+            <table>
+                <tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
+                <tr><td><code>input</code></td><td>str/array/list</td><td>Audio file path, URL, numpy array, or list</td></tr>
+                <tr><td><code>cache</code></td><td>dict</td><td>Cache for streaming (pass <code>{}</code> for first call)</td></tr>
+                <tr><td><code>hotword</code></td><td>str</td><td>Recognition keywords</td></tr>
+                <tr><td><code>batch_size_s</code></td><td>int</td><td>Dynamic batch total duration (seconds)</td></tr>
+                <tr><td><code>language</code></td><td>str</td><td>Language hint (<code>"auto"</code>, <code>"zh"</code>, <code>"en"</code>, etc.)</td></tr>
+                <tr><td><code>is_final</code></td><td>bool</td><td>Last chunk flag for streaming</td></tr>
+                <tr><td><code>return_spk_res</code></td><td>bool</td><td>Return speaker diarization results</td></tr>
+                <tr><td><code>sentence_timestamp</code></td><td>bool</td><td>Return sentence-level timestamps</td></tr>
+            </table>
+
+            <h3>Output Format</h3>
+            <table>
+                <tr><th>Field</th><th>Description</th><th>Models</th></tr>
+                <tr><td><code>text</code></td><td>Recognized text</td><td>All ASR models</td></tr>
+                <tr><td><code>timestamp</code></td><td><code>[[start_ms, end_ms], ...]</code></td><td>Paraformer, SenseVoice, Fun-ASR-Nano</td></tr>
+                <tr><td><code>sentence_info</code></td><td>List of <code>{text, start, end, spk, timestamp}</code></td><td>When spk_model or sentence_timestamp enabled</td></tr>
+                <tr><td><code>value</code></td><td><code>[[start_ms, end_ms], ...]</code></td><td>VAD models</td></tr>
+                <tr><td><code>spk_embedding</code></td><td>Speaker embedding tensor</td><td>CAM++, ERes2NetV2</td></tr>
+            </table>
+
+            <div class="warning" style="margin-top: 48px;">
+                <strong>OOM Issues?</strong> Reduce <code>batch_size_s</code>, lower <code>max_single_segment_time</code> in vad_kwargs, or use <code>batch_size_threshold_s</code> to force batch=1 for long segments.
+            </div>
+        </div>
+    </div>
+</body>
+</html>
