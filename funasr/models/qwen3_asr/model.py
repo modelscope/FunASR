@@ -10,11 +10,13 @@ from funasr.register import tables
 
 
 @tables.register("model_classes", "Qwen3ASR")
+@tables.register("model_classes", "Qwen/Qwen3-ASR-1.7B")
+@tables.register("model_classes", "Qwen/Qwen3-ASR-0.6B")
 class Qwen3ASR(nn.Module):
 
     def __init__(self, **kwargs):
         super().__init__()
-        model_path = kwargs.get("model_path", "Qwen/Qwen3-ASR-1.7B")
+        model_path = kwargs.get("model_path", kwargs.get("model", "Qwen/Qwen3-ASR-1.7B"))
         device = kwargs.get("device", "cuda:0")
         dtype = kwargs.get("dtype", "bf16")
         max_new_tokens = kwargs.get("max_new_tokens", 512)

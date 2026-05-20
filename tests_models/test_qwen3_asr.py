@@ -7,20 +7,16 @@ import time
 def main():
     from funasr import AutoModel
 
-    model_path = "Qwen/Qwen3-ASR-1.7B"
     url_zh = "https://qianwen-res.oss-cn-beijing.aliyuncs.com/Qwen3-ASR-Repo/asr_zh.wav"
     url_en = "https://qianwen-res.oss-cn-beijing.aliyuncs.com/Qwen3-ASR-Repo/asr_en.wav"
 
+    # Standard FunASR usage: model path from ModelScope/HuggingFace
+    # Default hub="ms" (ModelScope), use hub="hf" for HuggingFace
     print("[Qwen3-ASR] Loading model...")
     t0 = time.time()
     model = AutoModel(
-        model="Qwen3ASR",
-        model_conf={
-            "model_path": model_path,
-            "dtype": "bf16",
-            "max_new_tokens": 256,
-            "max_inference_batch_size": 32,
-        },
+        model="Qwen/Qwen3-ASR-1.7B",
+        hub="hf",
         device="cuda:0",
         disable_update=True,
     )
