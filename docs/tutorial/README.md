@@ -101,6 +101,29 @@ b) During the middle of inference, when encountering long audio segments cut by 
 
 c) Towards the end of inference, if long audio segments cut by VAD have a total token count less than `batch_size_s` and exceed the `threshold` batch_size_threshold_s, forcing the batch size to 1 and still facing OOM, you may reduce `max_single_segment_time` to shorten the VAD audio segment length.
 
+#### Speech Recognition (Fun-ASR-Nano)
+```python
+from funasr import AutoModel
+
+model = AutoModel(
+    model="FunAudioLLM/Fun-ASR-Nano-2512",
+    trust_remote_code=True,
+    remote_code="./model.py",
+    vad_model="fsmn-vad",
+    vad_kwargs={"max_single_segment_time": 30000},
+    device="cuda:0",
+    hub="hf",
+)
+res = model.generate(input="audio.wav", cache={}, batch_size=1, language="中文")
+print(res[0]["text"])
+print(res[0]["timestamps"])  # character-level timestamps
+```
+Notes:
+- Fun-ASR-Nano is trained on tens of millions of hours of data, supporting 31 languages including Chinese dialects.
+- Supports hotwords: `hotwords=["keyword1", "keyword2"]`
+- Supports speaker diarization: add `spk_model="cam++"` and `punc_model="ct-punc"` to get `sentence_info` with speaker labels.
+- Requires: `pip install tiktoken huggingface_hub`
+
 #### Speech Recognition (Streaming)
 ```python
 from funasr import AutoModel
@@ -119,7 +142,7 @@ speech, sample_rate = soundfile.read(wav_file)
 chunk_stride = chunk_size[1] * 960 # 600ms
 
 cache = {}
-total_chunk_num = int(len((speech)-1)/chunk_stride+1)
+total_chunk_num = int((len(speech)-1)/chunk_stride+1)
 for i in range(total_chunk_num):
     speech_chunk = speech[i*chunk_stride:(i+1)*chunk_stride]
     is_final = i == total_chunk_num - 1
@@ -153,7 +176,7 @@ speech, sample_rate = soundfile.read(wav_file)
 chunk_stride = int(chunk_size * sample_rate / 1000)
 
 cache = {}
-total_chunk_num = int(len((speech)-1)/chunk_stride+1)
+total_chunk_num = int((len(speech)-1)/chunk_stride+1)
 for i in range(total_chunk_num):
     speech_chunk = speech[i*chunk_stride:(i+1)*chunk_stride]
     is_final = i == total_chunk_num - 1
@@ -252,19 +275,7 @@ Notes: Requires `transformers>=5.0.0` (install from source: `pip install git+htt
 
 
 
-#### Speaker Verification / Diarization (ERes2NetV2)
 
-
-
-Notes:  can also be  (CAM++ model). ERes2NetV2 provides improved short-duration speaker feature extraction.
-
-#### Multi-language ASR (Qwen3-ASR)
-
-Notes: Requires . Supports 0.6B and 1.7B model sizes.
-
-#### Multi-language ASR (GLM-ASR)
-
-Notes: Requires  (install from source: ).
 
 <a name="Training"></a>
 ## Model Training and Testing
