@@ -189,6 +189,83 @@ print(res)
 
 More examples ref to [docs](https://github.com/alibaba-damo-academy/FunASR/tree/main/examples/industrial_data_pretraining)
 
+#### Speaker Verification / Diarization (ERes2NetV2)
+```python
+from funasr import AutoModel
+
+# Standalone speaker embedding extraction
+model = AutoModel(model="iic/speech_eres2netv2_sv_zh-cn_16k-common", device="cuda:0")
+res = model.generate(input="audio.wav")
+embedding = res[0]["spk_embedding"]  # shape: [1, 192]
+```
+
+```python
+from funasr import AutoModel
+
+# ASR with speaker diarization
+model = AutoModel(
+    model="paraformer-zh",
+    vad_model="fsmn-vad",
+    vad_kwargs={"max_single_segment_time": 60000},
+    punc_model="ct-punc",
+    spk_model="iic/speech_eres2netv2_sv_zh-cn_16k-common",
+    device="cuda:0",
+)
+res = model.generate(input="meeting.wav", batch_size_s=300)
+for sentence in res:
+    print(f"[Speaker {sentence['spk']}] {sentence['text']}")
+```
+Notes: `spk_model` can also be `"cam++"` (CAM++ model). ERes2NetV2 provides improved short-duration speaker feature extraction.
+
+#### Multi-language ASR (Qwen3-ASR)
+```python
+from funasr import AutoModel
+
+# Qwen3-ASR supports 52 languages with auto language detection
+# hub="hf" for HuggingFace, default hub="ms" for ModelScope
+model = AutoModel(model="Qwen/Qwen3-ASR-1.7B", hub="hf", device="cuda:0")
+
+# With forced language
+res = model.generate(input="audio_zh.wav", language="Chinese")
+print(res[0]["text"])
+
+# Auto language detection
+res = model.generate(input="audio.wav")
+print(res[0]["text"], res[0].get("language", ""))
+```
+Notes: Requires `pip install qwen-asr`. Supports 0.6B and 1.7B model sizes.
+
+#### Multi-language ASR (GLM-ASR)
+```python
+from funasr import AutoModel
+
+# GLM-ASR-Nano supports 17 languages, optimized for dialects and low-volume speech
+# hub="hf" for HuggingFace, default hub="ms" for ModelScope
+model = AutoModel(model="zai-org/GLM-ASR-Nano-2512", hub="hf", device="cuda:0")
+res = model.generate(input="audio.wav")
+print(res[0]["text"])
+
+# ModelScope (Chinese users)
+model = AutoModel(model="ZhipuAI/GLM-ASR-Nano-2512", hub="ms", device="cuda:0")
+```
+Notes: Requires `transformers>=5.0.0` (install from source: `pip install git+https://github.com/huggingface/transformers`).
+
+
+
+#### Speaker Verification / Diarization (ERes2NetV2)
+
+
+
+Notes:  can also be  (CAM++ model). ERes2NetV2 provides improved short-duration speaker feature extraction.
+
+#### Multi-language ASR (Qwen3-ASR)
+
+Notes: Requires . Supports 0.6B and 1.7B model sizes.
+
+#### Multi-language ASR (GLM-ASR)
+
+Notes: Requires  (install from source: ).
+
 <a name="Training"></a>
 ## Model Training and Testing
 

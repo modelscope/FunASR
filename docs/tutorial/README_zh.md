@@ -191,6 +191,69 @@ print(res)
 ```
 更多（[示例](https://github.com/alibaba-damo-academy/FunASR/tree/main/examples/industrial_data_pretraining)）
 
+#### 说话人确认/分割 (ERes2NetV2)
+```python
+from funasr import AutoModel
+
+# 单独提取说话人 embedding
+model = AutoModel(model="iic/speech_eres2netv2_sv_zh-cn_16k-common", device="cuda:0")
+res = model.generate(input="audio.wav")
+embedding = res[0]["spk_embedding"]  # shape: [1, 192]
+```
+
+```python
+from funasr import AutoModel
+
+# ASR + 说话人分割
+model = AutoModel(
+    model="paraformer-zh",
+    vad_model="fsmn-vad",
+    vad_kwargs={"max_single_segment_time": 60000},
+    punc_model="ct-punc",
+    spk_model="iic/speech_eres2netv2_sv_zh-cn_16k-common",
+    device="cuda:0",
+)
+res = model.generate(input="meeting.wav", batch_size_s=300)
+for sentence in res:
+    print(f"[说话人 {sentence['spk']}] {sentence['text']}")
+```
+注：`spk_model` 也可以使用 `"cam++"` (CAM++ 模型)。ERes2NetV2 在短时说话人特征提取方面有所改进。
+
+#### 多语言语音识别 (Qwen3-ASR)
+```python
+from funasr import AutoModel
+
+# Qwen3-ASR 支持52种语言自动语言检测
+# hub="hf" 从 HuggingFace 下载，默认 hub="ms" 从 ModelScope 下载
+model = AutoModel(model="Qwen/Qwen3-ASR-1.7B", hub="hf", device="cuda:0")
+
+# 指定语言
+res = model.generate(input="audio_zh.wav", language="Chinese")
+print(res[0]["text"])
+
+# 自动语言检测
+res = model.generate(input="audio.wav")
+print(res[0]["text"], res[0].get("language", ""))
+```
+注：需要安装 `pip install qwen-asr`。支持 0.6B 和 1.7B 两种模型规格。
+
+#### 多语言语音识别 (GLM-ASR)
+```python
+from funasr import AutoModel
+
+# GLM-ASR-Nano 支持17种语言，方言及低音量语音优化
+# hub="hf" 从 HuggingFace 下载，默认 hub="ms" 从 ModelScope 下载
+model = AutoModel(model="zai-org/GLM-ASR-Nano-2512", hub="hf", device="cuda:0")
+res = model.generate(input="audio.wav")
+print(res[0]["text"])
+
+# ModelScope（国内用户）
+model = AutoModel(model="ZhipuAI/GLM-ASR-Nano-2512", hub="ms", device="cuda:0")
+```
+注：需要 `transformers>=5.0.0`（从源码安装：`pip install git+https://github.com/huggingface/transformers`）。
+
+
+
 <a name="核心功能"></a>
 ## 模型训练与测试
 
