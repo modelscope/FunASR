@@ -18,6 +18,7 @@ tests = [
     "test_paraformer_streaming.py",
     "test_qwen3_asr.py",
     "test_glm_asr.py",
+    "test_eres2netv2.py",
 ]
 
 SEP = "-" * 60
