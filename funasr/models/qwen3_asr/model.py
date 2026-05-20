@@ -1,4 +1,5 @@
 import logging
+import os
 import time
 from typing import List, Optional, Union
 
@@ -19,6 +20,7 @@ class Qwen3ASR(nn.Module):
         model_path = kwargs.get("model_path", kwargs.get("model", "Qwen/Qwen3-ASR-1.7B"))
         device = kwargs.get("device", "cuda:0")
         dtype = kwargs.get("dtype", "bf16")
+        hub = kwargs.get("hub", "ms")
         max_new_tokens = kwargs.get("max_new_tokens", 512)
         max_inference_batch_size = kwargs.get("max_inference_batch_size", 32)
         forced_aligner = kwargs.get("forced_aligner", None)
@@ -26,9 +28,10 @@ class Qwen3ASR(nn.Module):
 
         self._dtype_map = {"bf16": torch.bfloat16, "fp16": torch.float16, "fp32": torch.float32}
         self._device = device
-        self.model_path = model_path
-
         self._placeholder = nn.Parameter(torch.empty(0))
+
+        model_path = self._resolve_model_path(model_path, hub, kwargs)
+        self.model_path = model_path
 
         try:
             from qwen_asr import Qwen3ASRModel
@@ -54,6 +57,22 @@ class Qwen3ASR(nn.Module):
             max_new_tokens=max_new_tokens,
         )
         logging.info(f"Qwen3ASR model loaded from {model_path}")
+
+    def _resolve_model_path(self, model_path, hub, kwargs):
+        if os.path.exists(model_path):
+            return model_path
+
+        if hub in ("ms", "modelscope"):
+            try:
+                from modelscope.hub.snapshot_download import snapshot_download
+                model_revision = kwargs.get("model_revision", "master")
+                local_path = snapshot_download(model_path, revision=model_revision)
+                logging.info(f"Downloaded from ModelScope: {model_path} -> {local_path}")
+                return local_path
+            except Exception as e:
+                logging.warning(f"ModelScope download failed: {e}, falling back to HuggingFace path")
+
+        return model_path
 
     def forward(self, **kwargs):
         raise NotImplementedError("Qwen3ASR only supports inference mode")
