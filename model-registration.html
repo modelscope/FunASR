@@ -4,45 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FunASR - Model Registration Guide</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
-    <style>
-        :root { --primary: #2563eb; --bg: #f8fafc; --text: #1e293b; --text-light: #64748b; --card-bg: #ffffff; --border: #e2e8f0; --code-bg: #1e293b; }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; }
-        .container { max-width: 900px; margin: 0 auto; padding: 0 24px; }
-        nav { background: var(--card-bg); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
-        nav .container { display: flex; align-items: center; gap: 24px; padding: 12px 24px; }
-        nav .logo { font-weight: 700; font-size: 1.2rem; color: var(--primary); text-decoration: none; }
-        nav a { color: var(--text-light); text-decoration: none; font-size: 0.9rem; }
-        nav a:hover { color: var(--primary); }
-        .content { padding: 48px 0; }
-        h1 { font-size: 2.2rem; margin-bottom: 8px; }
-        h1 + p { color: var(--text-light); margin-bottom: 40px; }
-        h2 { font-size: 1.5rem; margin: 48px 0 16px; padding-bottom: 8px; border-bottom: 2px solid var(--border); }
-        h3 { font-size: 1.15rem; margin: 32px 0 12px; }
-        p { margin-bottom: 12px; }
-        ul, ol { margin: 12px 0 12px 24px; }
-        li { margin-bottom: 6px; }
-        pre { background: var(--code-bg); color: #e2e8f0; border-radius: 8px; padding: 16px 20px; overflow-x: auto; margin: 12px 0 20px; font-size: 0.85rem; line-height: 1.5; }
-        code { font-family: 'JetBrains Mono', 'Fira Code', monospace; }
-        p code, li code { background: #f1f5f9; padding: 2px 6px; border-radius: 4px; font-size: 0.85rem; color: #e11d48; }
-        .note { background: #eff6ff; border-left: 4px solid var(--primary); padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; font-size: 0.9rem; }
-        .warning { background: #fef3c7; border-left: 4px solid #f59e0b; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; font-size: 0.9rem; }
-        table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.9rem; }
-        th, td { padding: 8px 12px; text-align: left; border-bottom: 1px solid var(--border); }
-        th { background: #f1f5f9; font-weight: 600; }
-        .step { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 20px 24px; margin: 16px 0; }
-        .step-num { display: inline-block; width: 28px; height: 28px; background: var(--primary); color: white; border-radius: 50%; text-align: center; line-height: 28px; font-weight: 700; font-size: 0.85rem; margin-right: 8px; }
-    </style>
 </head>
 <body>
-    <nav>
+    <nav class="nav">
         <div class="container">
-            <a href="index.html" class="logo">FunASR</a>
-            <a href="index.html">Home</a>
-            <a href="tutorial.html">Tutorial</a>
-            <a href="model-registration.html" style="color:var(--primary);font-weight:500;">Model Registration</a>
-            <a href="https://github.com/modelscope/FunASR">GitHub</a>
+            <a href="index.html" class="nav-logo">FunASR</a>
+            <div class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="tutorial.html">Tutorial</a>
+                <a href="model-registration.html" class="active">Develop</a>
+            </div>
+            <a href="https://github.com/modelscope/FunASR" class="nav-github">GitHub</a>
         </div>
     </nav>
 
@@ -287,5 +262,9 @@ print(res)</pre>
             <p><code>Warning, miss key in ckpt: ...</code> means your model class defines layers that aren't in the checkpoint. This is OK if those layers are optional (e.g., CTC decoder not in open-source weights).</p>
         </div>
     </div>
+    <footer>
+        <p>FunASR &middot; Tongyi Lab, Alibaba Group</p>
+        <p><a href="https://github.com/modelscope/FunASR">GitHub</a> &middot; <a href="tutorial.html">Tutorial</a> &middot; <a href="model-registration.html">Develop</a></p>
+    </footer>
 </body>
 </html>

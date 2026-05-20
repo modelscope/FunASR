@@ -4,122 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FunASR Tutorial</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
-    <style>
-        :root {
-            --primary: #2563eb;
-            --primary-dark: #1d4ed8;
-            --bg: #f8fafc;
-            --text: #1e293b;
-            --text-light: #64748b;
-            --card-bg: #ffffff;
-            --border: #e2e8f0;
-            --code-bg: #1e293b;
-        }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            line-height: 1.7;
-        }
-        .container { max-width: 900px; margin: 0 auto; padding: 0 24px; }
-
-        /* Nav */
-        nav {
-            background: var(--card-bg);
-            border-bottom: 1px solid var(--border);
-            position: sticky; top: 0; z-index: 100;
-        }
-        nav .container { display: flex; align-items: center; gap: 24px; padding: 12px 24px; }
-        nav .logo { font-weight: 700; font-size: 1.2rem; color: var(--primary); text-decoration: none; }
-        nav a { color: var(--text-light); text-decoration: none; font-size: 0.9rem; }
-        nav a:hover { color: var(--primary); }
-
-        /* Content */
-        .content { padding: 48px 0; }
-        h1 { font-size: 2.2rem; margin-bottom: 8px; }
-        h1 + p { color: var(--text-light); margin-bottom: 40px; }
-        h2 { font-size: 1.5rem; margin: 48px 0 16px; padding-bottom: 8px; border-bottom: 2px solid var(--border); }
-        h3 { font-size: 1.15rem; margin: 32px 0 12px; }
-        h4 { font-size: 1rem; margin: 24px 0 8px; color: var(--text-light); }
-        p { margin-bottom: 12px; }
-        ul, ol { margin: 12px 0 12px 24px; }
-        li { margin-bottom: 6px; }
-
-        /* Code */
-        pre {
-            background: var(--code-bg);
-            color: #e2e8f0;
-            border-radius: 8px;
-            padding: 16px 20px;
-            overflow-x: auto;
-            margin: 12px 0 20px;
-            font-size: 0.85rem;
-            line-height: 1.5;
-        }
-        code {
-            font-family: 'JetBrains Mono', 'Fira Code', monospace;
-        }
-        p code, li code {
-            background: #f1f5f9;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 0.85rem;
-            color: #e11d48;
-        }
-
-        /* TOC sidebar */
-        .toc {
-            position: fixed;
-            right: 24px;
-            top: 80px;
-            width: 220px;
-            font-size: 0.8rem;
-            display: none;
-        }
-        @media (min-width: 1280px) { .toc { display: block; } }
-        .toc a {
-            display: block;
-            padding: 4px 0;
-            color: var(--text-light);
-            text-decoration: none;
-            border-left: 2px solid transparent;
-            padding-left: 12px;
-        }
-        .toc a:hover { color: var(--primary); border-left-color: var(--primary); }
-
-        /* Note boxes */
-        .note {
-            background: #eff6ff;
-            border-left: 4px solid var(--primary);
-            padding: 12px 16px;
-            border-radius: 0 8px 8px 0;
-            margin: 16px 0;
-            font-size: 0.9rem;
-        }
-        .warning {
-            background: #fef3c7;
-            border-left: 4px solid #f59e0b;
-            padding: 12px 16px;
-            border-radius: 0 8px 8px 0;
-            margin: 16px 0;
-            font-size: 0.9rem;
-        }
-
-        /* Table */
-        table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.9rem; }
-        th, td { padding: 8px 12px; text-align: left; border-bottom: 1px solid var(--border); }
-        th { background: #f1f5f9; font-weight: 600; }
-    </style>
 </head>
 <body>
-    <nav>
+    <nav class="nav">
         <div class="container">
-            <a href="index.html" class="logo">FunASR</a>
-            <a href="index.html">Home</a>
-            <a href="tutorial.html" style="color:var(--primary);font-weight:500;">Tutorial</a>
-            <a href="https://github.com/modelscope/FunASR">GitHub</a>
+            <a href="index.html" class="nav-logo">FunASR</a>
+            <div class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="tutorial.html"  class="active">Tutorial</a>
+                <a href="model-registration.html">Develop</a>
+            </div>
+            <a href="https://github.com/modelscope/FunASR" class="nav-github">GitHub</a>
         </div>
     </nav>
 
@@ -389,5 +287,9 @@ print(result)</pre>
             </div>
         </div>
     </div>
+    <footer>
+        <p>FunASR &middot; Tongyi Lab, Alibaba Group</p>
+        <p><a href="https://github.com/modelscope/FunASR">GitHub</a> &middot; <a href="tutorial.html">Tutorial</a> &middot; <a href="model-registration.html">Develop</a></p>
+    </footer>
 </body>
 </html>
