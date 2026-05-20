@@ -24,19 +24,19 @@
         <h1>FunASR Tutorial</h1>
         <p>This guide covers everything from installation to advanced usage — streaming ASR, speaker diarization, emotion detection, and model export.</p>
 
-        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:8px; margin:32px 0 48px; padding:24px; background:#f8fafc; border-radius:12px; border:1px solid #e2e8f0;">
-            <a href="#install" style="color:#334155;text-decoration:none;padding:8px 12px;border-radius:6px;font-size:0.88rem;font-weight:500;transition:background 0.2s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='transparent'">Installation</a>
-            <a href="#asr-offline" style="color:#334155;text-decoration:none;padding:8px 12px;border-radius:6px;font-size:0.88rem;font-weight:500;transition:background 0.2s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='transparent'">Paraformer (Offline)</a>
-            <a href="#fun-asr-nano" style="color:#334155;text-decoration:none;padding:8px 12px;border-radius:6px;font-size:0.88rem;font-weight:500;transition:background 0.2s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='transparent'">Fun-ASR-Nano</a>
-            <a href="#sensevoice" style="color:#334155;text-decoration:none;padding:8px 12px;border-radius:6px;font-size:0.88rem;font-weight:500;transition:background 0.2s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='transparent'">SenseVoice</a>
-            <a href="#asr-streaming" style="color:#334155;text-decoration:none;padding:8px 12px;border-radius:6px;font-size:0.88rem;font-weight:500;transition:background 0.2s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='transparent'">Streaming ASR</a>
-            <a href="#vad" style="color:#334155;text-decoration:none;padding:8px 12px;border-radius:6px;font-size:0.88rem;font-weight:500;transition:background 0.2s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='transparent'">VAD</a>
-            <a href="#punc" style="color:#334155;text-decoration:none;padding:8px 12px;border-radius:6px;font-size:0.88rem;font-weight:500;transition:background 0.2s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='transparent'">Punctuation</a>
-            <a href="#spk" style="color:#334155;text-decoration:none;padding:8px 12px;border-radius:6px;font-size:0.88rem;font-weight:500;transition:background 0.2s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='transparent'">Speaker Diarization</a>
-            <a href="#qwen3-asr" style="color:#334155;text-decoration:none;padding:8px 12px;border-radius:6px;font-size:0.88rem;font-weight:500;transition:background 0.2s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='transparent'">Qwen3-ASR</a>
-            <a href="#export" style="color:#334155;text-decoration:none;padding:8px 12px;border-radius:6px;font-size:0.88rem;font-weight:500;transition:background 0.2s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='transparent'">ONNX Export</a>
-            <a href="#api" style="color:#334155;text-decoration:none;padding:8px 12px;border-radius:6px;font-size:0.88rem;font-weight:500;transition:background 0.2s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='transparent'">API Reference</a>
-        </div>
+        <nav class="quick-nav" aria-label="Tutorial sections">
+            <a href="#install">Installation</a>
+            <a href="#asr-offline">Paraformer offline</a>
+            <a href="#fun-asr-nano">Fun-ASR-Nano</a>
+            <a href="#sensevoice">SenseVoice</a>
+            <a href="#asr-streaming">Streaming ASR</a>
+            <a href="#vad">VAD</a>
+            <a href="#punc">Punctuation</a>
+            <a href="#spk">Speaker diarization</a>
+            <a href="#qwen3-asr">Qwen3-ASR</a>
+            <a href="#export">ONNX export</a>
+            <a href="#api">API reference</a>
+        </nav>
 
         <!-- Installation -->
         <h2 id="install">Installation</h2>
@@ -382,7 +382,7 @@ onnxslim model.onnx model_optimized.onnx</pre>
             <tr><td><code>spk_embedding</code></td><td>Tensor [N, 192]</td><td>Speaker embeddings (CAM++/ERes2NetV2)</td></tr>
         </table>
 
-        <div class="warning" style="margin-top: 48px;">
+        <div class="warning callout-spaced">
             <strong>Model Aliases:</strong> You can use short names like <code>"paraformer-zh"</code>, <code>"fsmn-vad"</code>, <code>"ct-punc"</code>, <code>"cam++"</code> instead of full model IDs. FunASR resolves them automatically via the built-in alias map.
         </div>
     </div>

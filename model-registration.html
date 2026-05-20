@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FunASR - Model Registration Guide</title>
-    
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
@@ -25,6 +24,18 @@
         <div class="container">
             <h1>Model Registration Guide</h1>
             <p>How to add new models to FunASR using the registry system.</p>
+
+            <nav class="quick-nav" aria-label="Model registration sections">
+                <a href="#overview">Architecture overview</a>
+                <a href="#registry-categories">Registry categories</a>
+                <a href="#view-registry">View registry</a>
+                <a href="#step-by-step">Register a model</a>
+                <a href="#inference-contract">Inference contract</a>
+                <a href="#standalone">Remote code</a>
+                <a href="#examples">Real examples</a>
+                <a href="#rules">Key rules</a>
+                <a href="#troubleshooting">Troubleshooting</a>
+            </nav>
 
             <h2 id="overview">Architecture Overview</h2>
             <p>FunASR uses a <strong>registry pattern</strong> to decouple model discovery from model implementation. The core flow is:</p>

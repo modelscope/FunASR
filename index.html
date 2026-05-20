@@ -21,17 +21,42 @@
     </nav>
 
     <div class="hero">
-        <div class="hero-content">
-            <h1>FunASR</h1>
-            <p>Industrial-grade speech recognition toolkit with 50+ languages, speaker diarization, and emotion detection.</p>
-            <div class="hero-badges">
-                <a href="https://pypi.org/project/funasr/"><img src="https://img.shields.io/pypi/v/funasr?style=flat-square&color=3b82f6" alt="PyPI"></a>
-                <a href="https://github.com/modelscope/FunASR/stargazers"><img src="https://img.shields.io/github/stars/modelscope/FunASR?style=flat-square&color=f59e0b" alt="Stars"></a>
-                <a href="https://github.com/modelscope/FunASR/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-10b981?style=flat-square" alt="License"></a>
+        <div class="container hero-content">
+            <div class="hero-copy">
+                <p class="eyebrow">Open-source speech understanding toolkit</p>
+                <h1>FunASR</h1>
+                <p>Production-ready ASR, VAD, punctuation, speaker diarization, emotion detection, and audio event recognition with one unified Python interface.</p>
+                <div class="hero-badges">
+                    <a href="https://pypi.org/project/funasr/"><img src="https://img.shields.io/pypi/v/funasr?style=flat-square&color=2563eb" alt="PyPI"></a>
+                    <a href="https://github.com/modelscope/FunASR/stargazers"><img src="https://img.shields.io/github/stars/modelscope/FunASR?style=flat-square&color=b45309" alt="Stars"></a>
+                    <a href="https://github.com/modelscope/FunASR/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-059669?style=flat-square" alt="License"></a>
+                </div>
+                <div class="hero-actions">
+                    <a href="tutorial.html" class="btn btn-white">Get started</a>
+                    <a href="https://github.com/modelscope/FunASR" class="btn btn-outline-white">View on GitHub</a>
+                </div>
             </div>
-            <div class="hero-actions">
-                <a href="tutorial.html" class="btn btn-white">Get Started</a>
-                <a href="https://github.com/modelscope/FunASR" class="btn btn-outline-white">View on GitHub</a>
+
+            <div class="hero-panel" aria-label="FunASR recognition preview">
+                <div class="terminal-bar">
+                    <span class="terminal-dots"><span></span><span></span><span></span></span>
+                    <span>funasr-pipeline.py</span>
+                </div>
+<pre>from funasr import AutoModel
+
+model = AutoModel(
+    model="paraformer-zh",
+    vad_model="fsmn-vad",
+    punc_model="ct-punc",
+    spk_model="cam++",
+)
+res = model.generate(input="meeting.wav")
+print(res[0]["sentence_info"])</pre>
+                <div class="hero-metrics">
+                    <div><strong>50+</strong><span>languages</span></div>
+                    <div><strong>15x</strong><span>faster</span></div>
+                    <div><strong>1 API</strong><span>pipeline</span></div>
+                </div>
             </div>
         </div>
     </div>
@@ -39,37 +64,37 @@
     <section>
         <div class="container">
             <h2 class="section-title">Capabilities</h2>
-            <p class="section-subtitle">Everything you need for speech understanding — from recognition to speaker identification.</p>
+            <p class="section-subtitle">Everything needed for speech understanding, from raw audio segmentation to speaker-aware transcripts.</p>
             <div class="grid-3">
                 <div class="card">
-                    <div class="card-icon">🎙️</div>
+                    <div class="card-icon">ASR</div>
                     <h3>Speech Recognition</h3>
-                    <p>Streaming and offline ASR with VAD segmentation. Process hours-long audio with a single API call.</p>
+                    <p>Streaming and offline ASR with VAD segmentation. Process long-form audio with a single API call.</p>
                 </div>
                 <div class="card">
-                    <div class="card-icon">🌍</div>
-                    <h3>50+ Languages</h3>
-                    <p>Fun-ASR-Nano: 31 languages including Chinese dialects. Qwen3-ASR: 52 languages with auto-detection.</p>
+                    <div class="card-icon">50+</div>
+                    <h3>Multilingual Models</h3>
+                    <p>Fun-ASR-Nano covers 31 languages and Qwen3-ASR covers 52 languages with language detection.</p>
                 </div>
                 <div class="card">
-                    <div class="card-icon">👥</div>
+                    <div class="card-icon">SPK</div>
                     <h3>Speaker Diarization</h3>
-                    <p>Identify who said what. Works with Paraformer, Fun-ASR-Nano, and SenseVoice models.</p>
+                    <p>Identify who spoke when, then attach speaker labels to sentence-level ASR output.</p>
                 </div>
                 <div class="card">
-                    <div class="card-icon">😊</div>
+                    <div class="card-icon">SFX</div>
                     <h3>Emotion & Events</h3>
-                    <p>SenseVoice detects emotions and audio events — BGM, applause, laughter, crying.</p>
+                    <p>SenseVoice detects emotion and audio events including background music, applause, laughter, and crying.</p>
                 </div>
                 <div class="card">
-                    <div class="card-icon">⚡</div>
-                    <h3>Ultra-fast</h3>
-                    <p>SenseVoice: 70ms for 10s audio. Non-autoregressive architecture, 15x faster than Whisper.</p>
+                    <div class="card-icon">RTF</div>
+                    <h3>Low Latency</h3>
+                    <p>Non-autoregressive models support fast batch and realtime workloads across common deployment targets.</p>
                 </div>
                 <div class="card">
-                    <div class="card-icon">🔧</div>
+                    <div class="card-icon">OPS</div>
                     <h3>Train & Deploy</h3>
-                    <p>Fine-tune with DeepSpeed. Export to ONNX. Deploy with Docker runtime or Python SDK.</p>
+                    <p>Fine-tune with DeepSpeed, export to ONNX, and deploy through Docker runtime or the Python SDK.</p>
                 </div>
             </div>
         </div>
@@ -78,11 +103,11 @@
     <section class="alt">
         <div class="container">
             <h2 class="section-title">Models</h2>
-            <p class="section-subtitle">Pre-trained industrial models — ready to use in 3 lines of code.</p>
+            <p class="section-subtitle">Pre-trained industrial models ready for recognition, segmentation, and speech understanding workflows.</p>
             <div class="grid-2">
                 <div class="card">
                     <h3>Fun-ASR-Nano</h3>
-                    <p>End-to-end ASR trained on tens of millions of hours. 31 languages, dialects, accents, lyrics.</p>
+                    <p>End-to-end ASR trained on tens of millions of hours. 31 languages, dialects, accents, lyrics, timestamps, and hotwords.</p>
                     <div class="card-tags">
                         <span class="tag">800M</span>
                         <span class="tag">31 Languages</span>
@@ -93,7 +118,7 @@
                 </div>
                 <div class="card">
                     <h3>Paraformer</h3>
-                    <p>Non-autoregressive model for Chinese/English. Streaming + offline modes. The production workhorse.</p>
+                    <p>Non-autoregressive Chinese and English ASR with streaming and offline variants for production systems.</p>
                     <div class="card-tags">
                         <span class="tag">Streaming</span>
                         <span class="tag">Offline</span>
@@ -103,7 +128,7 @@
                 </div>
                 <div class="card">
                     <h3>SenseVoice</h3>
-                    <p>Multi-task: ASR + Language ID + Emotion + Audio Events. 5 languages, non-autoregressive.</p>
+                    <p>Multi-task speech understanding for ASR, language ID, emotion, and audio events across five languages.</p>
                     <div class="card-tags">
                         <span class="tag">Emotion</span>
                         <span class="tag">Audio Events</span>
@@ -113,7 +138,7 @@
                 </div>
                 <div class="card">
                     <h3>Qwen3-ASR</h3>
-                    <p>LLM-based ASR with 52 languages and contextual understanding. Auto language detection.</p>
+                    <p>LLM-based ASR with 52 languages, contextual understanding, and automatic language detection.</p>
                     <div class="card-tags">
                         <span class="tag">52 Languages</span>
                         <span class="tag">0.6B / 1.7B</span>
@@ -127,12 +152,11 @@
     <section>
         <div class="container narrow">
             <h2 class="section-title">Quick Start</h2>
-            <p class="section-subtitle">From install to recognition in 30 seconds.</p>
+            <p class="section-subtitle">Install the package, compose the pipeline, and run recognition from Python.</p>
 <pre>pip install funasr
 # Or latest: pip install git+https://github.com/modelscope/FunASR.git</pre>
 <pre>from funasr import AutoModel
 
-# Chinese ASR with speaker diarization
 model = AutoModel(
     model="paraformer-zh",
     vad_model="fsmn-vad",
@@ -143,8 +167,8 @@ res = model.generate(input="meeting.wav", batch_size_s=300)
 
 for sent in res[0]["sentence_info"]:
     print(f"[Speaker {sent['spk']}] {sent['text']}")</pre>
-            <div style="text-align:center; margin-top: 32px;">
-                <a href="tutorial.html" class="btn btn-primary">Full Tutorial →</a>
+            <div class="section-cta">
+                <a href="tutorial.html" class="btn btn-primary">Full tutorial</a>
             </div>
         </div>
     </section>
@@ -152,21 +176,22 @@ for sent in res[0]["sentence_info"]:
     <section class="alt">
         <div class="container">
             <h2 class="section-title">Ecosystem</h2>
+            <p class="section-subtitle">Related projects around ASR, speech understanding, video clipping, and voice generation.</p>
             <div class="grid-2">
                 <div class="card">
-                    <h3><a href="https://github.com/FunAudioLLM/Fun-ASR" style="color:inherit;text-decoration:none;">Fun-ASR-Nano →</a></h3>
-                    <p>The latest ASR large model. 31 languages, timestamps, speaker diarization, hotwords.</p>
+                    <h3><a class="card-title-link" href="https://github.com/FunAudioLLM/Fun-ASR">Fun-ASR-Nano</a></h3>
+                    <p>The latest ASR large model with multilingual recognition, timestamps, speaker diarization, and hotwords.</p>
                 </div>
                 <div class="card">
-                    <h3><a href="https://github.com/FunAudioLLM/SenseVoice" style="color:inherit;text-decoration:none;">SenseVoice →</a></h3>
-                    <p>Multi-task speech understanding. ASR + emotion + audio events. Ultra-fast inference.</p>
+                    <h3><a class="card-title-link" href="https://github.com/FunAudioLLM/SenseVoice">SenseVoice</a></h3>
+                    <p>Multi-task speech understanding for ASR, emotion detection, and audio event recognition.</p>
                 </div>
                 <div class="card">
-                    <h3><a href="https://github.com/modelscope/FunClip" style="color:inherit;text-decoration:none;">FunClip →</a></h3>
-                    <p>AI video clipping powered by FunASR. ASR + LLM intelligent editing.</p>
+                    <h3><a class="card-title-link" href="https://github.com/modelscope/FunClip">FunClip</a></h3>
+                    <p>AI video clipping powered by FunASR and LLM-assisted editing workflows.</p>
                 </div>
                 <div class="card">
-                    <h3><a href="https://github.com/FunAudioLLM/CosyVoice" style="color:inherit;text-decoration:none;">CosyVoice →</a></h3>
+                    <h3><a class="card-title-link" href="https://github.com/FunAudioLLM/CosyVoice">CosyVoice</a></h3>
                     <p>Natural speech generation with multi-language, timbre, and emotion control.</p>
                 </div>
             </div>
@@ -174,11 +199,11 @@ for sent in res[0]["sentence_info"]:
     </section>
 
     <footer>
-        <p>FunASR · Tongyi Lab, Alibaba Group</p>
+        <p>FunASR &middot; Tongyi Lab, Alibaba Group</p>
         <p>
-            <a href="https://github.com/modelscope/FunASR">GitHub</a> ·
-            <a href="https://github.com/modelscope/FunASR/blob/main/MODEL_LICENSE">License</a> ·
-            <a href="https://pypi.org/project/funasr/">PyPI</a> ·
+            <a href="https://github.com/modelscope/FunASR">GitHub</a> &middot;
+            <a href="https://github.com/modelscope/FunASR/blob/main/MODEL_LICENSE">License</a> &middot;
+            <a href="https://pypi.org/project/funasr/">PyPI</a> &middot;
             <a href="https://github.com/modelscope/FunASR/issues">Issues</a>
         </p>
     </footer>
