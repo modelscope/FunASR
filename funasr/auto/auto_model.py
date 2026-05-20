@@ -51,6 +51,48 @@ def _resolve_ncpu(config, fallback=4):
     return max(value, 1)
 
 
+def _get_import_errors():
+    try:
+        import funasr
+    except Exception:
+        return {}
+    get_import_errors = getattr(funasr, "get_import_errors", None)
+    if get_import_errors is not None:
+        return get_import_errors()
+    return dict(getattr(funasr, "_IMPORT_ERRORS", {}))
+
+
+def _format_unregistered_component_error(component_type, component_name, registry):
+    registered = sorted(registry.keys())
+    preview = ", ".join(registered[:80])
+    if len(registered) > 80:
+        preview += f", ... ({len(registered)} total)"
+    if not preview:
+        preview = "(none)"
+
+    import_errors = _get_import_errors()
+    if import_errors:
+        lines = [
+            f"  - {name}: {error}"
+            for name, error in sorted(import_errors.items())[:50]
+        ]
+        remaining = len(import_errors) - len(lines)
+        if remaining > 0:
+            lines.append(f"  ... {remaining} more import failures hidden")
+        import_error_text = "\n".join(lines)
+    else:
+        import_error_text = "  (none recorded)"
+
+    return (
+        f"{component_type} '{component_name}' is not registered.\n"
+        f"Registered {component_type} keys ({len(registered)}): {preview}\n"
+        "Some modules may have failed to import during auto-registration. "
+        "Set FUNASR_IMPORT_DEBUG=1 to print failures during import, or "
+        "FUNASR_STRICT_IMPORT=1 to fail fast.\n"
+        f"Recorded import failures:\n{import_error_text}"
+    )
+
+
 try:
     from funasr.models.campplus.utils import sv_chunk, postprocess, distribute_spk
     from funasr.models.campplus.cluster_backend import ClusterBackend
@@ -292,7 +334,12 @@ class AutoModel:
         kwargs["frontend"] = frontend
         # build model
         model_class = tables.model_classes.get(kwargs["model"])
-        assert model_class is not None, f'{kwargs["model"]} is not registered'
+        if model_class is None:
+            raise RuntimeError(
+                _format_unregistered_component_error(
+                    "model", kwargs["model"], tables.model_classes
+                )
+            )
         model_conf = {}
         deep_update(model_conf, kwargs.get("model_conf", {}))
         deep_update(model_conf, kwargs)
