@@ -7,6 +7,11 @@ import unittest
 from fnmatch import fnmatch
 
 
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT)
+
+
 def gather_test_cases(test_dir, pattern, list_tests):
     case_list = []
     for dirpath, dirnames, filenames in os.walk(test_dir):

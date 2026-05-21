@@ -7,7 +7,7 @@ from collections import defaultdict
 from typing import List, Optional, Tuple
 
 
-symbol_str = '[’!"#$%&\'()*+,-./:;<>=?@，。?★、…【】《》？“”‘’！[\\]^_`{|}~\s]+'
+symbol_str = r'''[’!"#$%&'()*+,\-./:;<>=?@，。?★、…【】《》？“”‘’！\[\]\\^_`{|}~\s]+'''
 
 
 def split_mixed_label(input_str):
