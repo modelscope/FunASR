@@ -11,7 +11,7 @@
     <nav class="nav">
         <div class="container">
             <a href="index.html" class="nav-logo">FunASR</a>
-                                    <div class="nav-links">
+            <div class="nav-links">
                 <a href="index.html" class="active">Home</a>
                 <a href="tutorial.html">Tutorial</a>
                 <a href="training.html">Training</a>
@@ -35,7 +35,8 @@
                 </div>
                 <div class="hero-actions">
                     <a href="tutorial.html" class="btn btn-white">Get started</a>
-                    <a href="https://github.com/modelscope/FunASR" class="btn btn-outline-white">View on GitHub</a>
+                    <a href="training.html" class="btn btn-outline-white">Training guide</a>
+                    <a href="api.html" class="btn btn-outline-white">API reference</a>
                 </div>
             </div>
 
@@ -62,6 +63,36 @@ print(res[0]["sentence_info"])</pre>
             </div>
         </div>
     </div>
+
+
+    <section class="docs-band">
+        <div class="container">
+            <h2 class="section-title">Documentation</h2>
+            <p class="section-subtitle">Start with examples, tune on your own data, extend the registry, or jump into source-linked API docs.</p>
+            <div class="doc-grid">
+                <a class="doc-card" href="tutorial.html">
+                    <span class="doc-kicker">Learn</span>
+                    <h3>Tutorial</h3>
+                    <p>Install FunASR, choose a model, and run common ASR, VAD, diarization, and export flows.</p>
+                </a>
+                <a class="doc-card" href="training.html">
+                    <span class="doc-kicker">Tune</span>
+                    <h3>Training</h3>
+                    <p>Prepare JSONL data, fine-tune Paraformer, SenseVoice, and Fun-ASR-Nano, then monitor runs.</p>
+                </a>
+                <a class="doc-card" href="model-registration.html">
+                    <span class="doc-kicker">Extend</span>
+                    <h3>Developer Guide</h3>
+                    <p>Understand the registry, add a model, package remote code, and avoid integration pitfalls.</p>
+                </a>
+                <a class="doc-card" href="api.html">
+                    <span class="doc-kicker">Reference</span>
+                    <h3>API</h3>
+                    <p>Browse generated classes, methods, source previews, and GitHub line links.</p>
+                </a>
+            </div>
+        </div>
+    </section>
 
     <section>
         <div class="container">
@@ -204,6 +235,8 @@ for sent in res[0]["sentence_info"]:
         <p>FunASR &middot; Tongyi Lab, Alibaba Group</p>
         <p>
             <a href="https://github.com/modelscope/FunASR">GitHub</a> &middot;
+            <a href="training.html">Training</a> &middot;
+            <a href="api.html">API</a> &middot;
             <a href="https://github.com/modelscope/FunASR/blob/main/MODEL_LICENSE">License</a> &middot;
             <a href="https://pypi.org/project/funasr/">PyPI</a> &middot;
             <a href="https://github.com/modelscope/FunASR/issues">Issues</a>
