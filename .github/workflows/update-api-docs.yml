@@ -1,0 +1,30 @@
+name: Update API Documentation
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'funasr/**/*.py'
+
+jobs:
+  build-api-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Generate API docs
+        run: python3 scripts/gen_api_docs.py
+
+      - name: Deploy to gh-pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./gh-pages-output
+          publish_branch: gh-pages
+          keep_files: true
