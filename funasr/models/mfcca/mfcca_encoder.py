@@ -159,6 +159,32 @@ class MFCCAEncoder(AbsEncoder):
         cnn_module_kernel: int = 31,
         padding_idx: int = -1,
     ):
+        """Initialize MFCCAEncoder.
+        
+            Args:
+                input_size: Size/dimension parameter.
+                output_size: Size/dimension parameter.
+                attention_heads: TODO.
+                linear_units: TODO.
+                num_blocks: TODO.
+                dropout_rate: TODO.
+                positional_dropout_rate: TODO.
+                attention_dropout_rate: TODO.
+                input_layer: TODO.
+                normalize_before: TODO.
+                concat_after: TODO.
+                positionwise_layer_type: TODO.
+                positionwise_conv_kernel_size: Size/dimension parameter.
+                macaron_style: TODO.
+                rel_pos_type: TODO.
+                pos_enc_layer_type: TODO.
+                selfattention_layer_type: TODO.
+                activation_type: TODO.
+                use_cnn_module: TODO.
+                zero_triu: TODO.
+                cnn_module_kernel: TODO.
+                padding_idx: TODO.
+            """
         super().__init__()
         self._output_size = output_size
 
@@ -319,6 +345,7 @@ class MFCCAEncoder(AbsEncoder):
         self.conv4 = torch.nn.Conv2d(16, 1, [5, 7], stride=[1, 1], padding=(2, 3))
 
     def output_size(self) -> int:
+        """Output size."""
         return self._output_size
 
     def forward(

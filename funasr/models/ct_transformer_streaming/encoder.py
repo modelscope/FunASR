@@ -201,6 +201,30 @@ class SANMVadEncoder(torch.nn.Module):
         sanm_shfit: int = 0,
         selfattention_layer_type: str = "sanm",
     ):
+        """Initialize SANMVadEncoder.
+        
+            Args:
+                input_size: Size/dimension parameter.
+                output_size: Size/dimension parameter.
+                attention_heads: TODO.
+                linear_units: TODO.
+                num_blocks: TODO.
+                dropout_rate: TODO.
+                positional_dropout_rate: TODO.
+                attention_dropout_rate: TODO.
+                input_layer: TODO.
+                pos_enc_class: TODO.
+                normalize_before: TODO.
+                concat_after: TODO.
+                positionwise_layer_type: TODO.
+                positionwise_conv_kernel_size: Size/dimension parameter.
+                padding_idx: TODO.
+                interctc_layer_idx: TODO.
+                interctc_use_conditioning: TODO.
+                kernel_size: Size/dimension parameter.
+                sanm_shfit: TODO.
+                selfattention_layer_type: TODO.
+            """
         super().__init__()
         self._output_size = output_size
 
@@ -325,6 +349,7 @@ class SANMVadEncoder(torch.nn.Module):
         self.dropout = torch.nn.Dropout(dropout_rate)
 
     def output_size(self) -> int:
+        """Output size."""
         return self._output_size
 
     def forward(
@@ -420,6 +445,12 @@ class EncoderLayerSANMExport(torch.nn.Module):
 
     def forward(self, x, mask):
 
+        """Forward pass for training.
+        
+            Args:
+                x: TODO.
+                mask: TODO.
+            """
         residual = x
         x = self.norm1(x)
         x = self.self_attn(x, mask)
@@ -443,6 +474,15 @@ class SANMVadEncoderExport(torch.nn.Module):
         model_name="encoder",
         onnx: bool = True,
     ):
+        """Initialize SANMVadEncoderExport.
+        
+            Args:
+                model: Model instance or model name.
+                max_seq_len: TODO.
+                feats_dim: Size/dimension parameter.
+                model_name: TODO.
+                onnx: TODO.
+            """
         super().__init__()
         self.embed = model.embed
         self.model = model
@@ -466,6 +506,12 @@ class SANMVadEncoderExport(torch.nn.Module):
             self.model.encoders[i] = EncoderLayerSANMExport(d)
 
     def prepare_mask(self, mask, sub_masks):
+        """Prepare mask.
+        
+            Args:
+                mask: TODO.
+                sub_masks: TODO.
+            """
         mask_3d_btd = mask[:, :, None]
         mask_4d_bhlt = (1 - sub_masks) * -10000.0
 
@@ -478,6 +524,14 @@ class SANMVadEncoderExport(torch.nn.Module):
         vad_masks: torch.Tensor,
         sub_masks: torch.Tensor,
     ):
+        """Forward pass for training.
+        
+            Args:
+                speech: Speech audio tensor, shape (batch, time).
+                speech_lengths: Length of each speech sample.
+                vad_masks: TODO.
+                sub_masks: TODO.
+            """
         speech = speech * self._output_size**0.5
         mask = self.make_pad_mask(speech_lengths)
         vad_masks = self.prepare_mask(mask, vad_masks)
@@ -503,4 +557,5 @@ class SANMVadEncoderExport(torch.nn.Module):
         return xs_pad, speech_lengths
 
     def get_output_size(self):
+        """Get output size."""
         return self.model.encoders[0].size

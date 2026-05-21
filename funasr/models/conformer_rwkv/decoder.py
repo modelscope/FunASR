@@ -31,6 +31,11 @@ from funasr.register import tables
 
 class LayerNorm(nn.LayerNorm):
     def forward(self, x):
+        """Forward pass for training.
+        
+            Args:
+                x: TODO.
+            """
         return super().forward(x.float()).type(x.dtype)
 
 
@@ -216,6 +221,18 @@ class BaseTransformerDecoder(nn.Module, BatchScorerInterface):
         pos_enc_class=PositionalEncoding,
         normalize_before: bool = True,
     ):
+        """Initialize BaseTransformerDecoder.
+        
+            Args:
+                vocab_size: Size/dimension parameter.
+                encoder_output_size: Size/dimension parameter.
+                dropout_rate: TODO.
+                positional_dropout_rate: TODO.
+                input_layer: TODO.
+                use_output_layer: TODO.
+                pos_enc_class: TODO.
+                normalize_before: TODO.
+            """
         super().__init__()
         attention_dim = encoder_output_size
 
@@ -395,6 +412,25 @@ class TransformerRWKVDecoder(BaseTransformerDecoder):
         concat_after: bool = False,
         **kwargs,
     ):
+        """Initialize TransformerRWKVDecoder.
+        
+            Args:
+                vocab_size: Size/dimension parameter.
+                encoder_output_size: Size/dimension parameter.
+                attention_heads: TODO.
+                linear_units: TODO.
+                num_blocks: TODO.
+                dropout_rate: TODO.
+                positional_dropout_rate: TODO.
+                self_attention_dropout_rate: TODO.
+                src_attention_dropout_rate: TODO.
+                input_layer: TODO.
+                use_output_layer: TODO.
+                pos_enc_class: TODO.
+                normalize_before: TODO.
+                concat_after: TODO.
+                **kwargs: Additional keyword arguments.
+            """
         super().__init__(
             vocab_size=vocab_size,
             encoder_output_size=encoder_output_size,

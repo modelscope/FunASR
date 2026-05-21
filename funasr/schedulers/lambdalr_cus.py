@@ -25,12 +25,22 @@ class CustomLambdaLR(_LRScheduler):
         last_epoch=-1,
         verbose=False,
     ):
+        """Initialize CustomLambdaLR.
+        
+            Args:
+                optimizer: TODO.
+                warmup_steps: TODO.
+                total_steps: TODO.
+                last_epoch: TODO.
+                verbose: TODO.
+            """
         self.warmup_steps = warmup_steps
         self.total_steps = total_steps
         super().__init__(optimizer, last_epoch, verbose)
 
     def get_lr(self):
 
+        """Get lr."""
         step = self.last_epoch + 1
         if step < self.warmup_steps:
             lr_scale = step / self.warmup_steps

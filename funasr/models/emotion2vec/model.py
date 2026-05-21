@@ -28,6 +28,11 @@ else:
     # Nothing to do if torch<1.6.0
     @contextmanager
     def autocast(enabled=True):
+        """Autocast.
+        
+            Args:
+                enabled: TODO.
+            """
         yield
 
 
@@ -40,6 +45,11 @@ class Emotion2vec(torch.nn.Module):
     """
 
     def __init__(self, **kwargs):
+        """Initialize Emotion2vec.
+        
+            Args:
+                **kwargs: Additional keyword arguments.
+            """
         super().__init__()
         # import pdb; pdb.set_trace()
         cfg = OmegaConf.create(kwargs["model_conf"])
@@ -50,6 +60,13 @@ class Emotion2vec(torch.nn.Module):
         )
 
         def make_block(drop_path, dim=None, heads=None):
+            """Make block.
+            
+                Args:
+                    drop_path: TODO.
+                    dim: TODO.
+                    heads: TODO.
+                """
             return AltBlock(
                 cfg.get("embed_dim") if dim is None else dim,
                 cfg.get("num_heads") if heads is None else heads,
@@ -116,6 +133,21 @@ class Emotion2vec(torch.nn.Module):
         **kwargs,
     ):
 
+        """Forward pass for training.
+        
+            Args:
+                source: TODO.
+                target: TODO.
+                id: TODO.
+                mode: TODO.
+                padding_mask: TODO.
+                mask: TODO.
+                features_only: TODO.
+                force_remove_masked: TODO.
+                remove_extra_tokens: TODO.
+                precomputed_mask: TODO.
+                **kwargs: Additional keyword arguments.
+            """
         feature_extractor = self.modality_encoders["AUDIO"]
 
         mask_seeds = None
@@ -180,6 +212,15 @@ class Emotion2vec(torch.nn.Module):
     def extract_features(
         self, source, mode=None, padding_mask=None, mask=False, remove_extra_tokens=True
     ):
+        """Extract features.
+        
+            Args:
+                source: TODO.
+                mode: TODO.
+                padding_mask: TODO.
+                mask: TODO.
+                remove_extra_tokens: TODO.
+            """
         res = self.forward(
             source,
             mode=mode,
@@ -205,6 +246,16 @@ class Emotion2vec(torch.nn.Module):
         #     channel = sf.info(source_file).channels
         #     assert sr == 16e3, "Sample rate should be 16kHz, but got {}in file {}".format(sr, source_file)
         #     assert channel == 1, "Channel should be 1, but got {} in file {}".format(channel, source_file)
+        """Run inference on input data.
+        
+            Args:
+                data_in: Input data (audio samples, file paths, or text).
+                data_lengths: Lengths of each input sample in the batch.
+                key: Sample identifiers.
+                tokenizer: Tokenizer instance for text encoding/decoding.
+                frontend: Audio frontend for feature extraction.
+                **kwargs: Additional keyword arguments.
+            """
         granularity = kwargs.get("granularity", "utterance")
         extract_embedding = kwargs.get("extract_embedding", True)
         if self.proj is None:
@@ -267,6 +318,11 @@ class Emotion2vec(torch.nn.Module):
         return results, meta_data
 
     def export(self, **kwargs):
+        """Export.
+        
+            Args:
+                **kwargs: Additional keyword arguments.
+            """
         from .export_meta import export_rebuild_model
 
         models = export_rebuild_model(model=self, **kwargs)

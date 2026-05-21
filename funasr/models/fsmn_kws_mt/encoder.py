@@ -42,6 +42,23 @@ class FSMNMT(nn.Module):
             output_dim2: int,
             use_softmax: bool = True,
     ):
+        """Initialize FSMNMT.
+        
+            Args:
+                input_dim: Size/dimension parameter.
+                input_affine_dim: Size/dimension parameter.
+                fsmn_layers: TODO.
+                linear_dim: Size/dimension parameter.
+                proj_dim: Size/dimension parameter.
+                lorder: TODO.
+                rorder: TODO.
+                lstride: TODO.
+                rstride: TODO.
+                output_affine_dim: Size/dimension parameter.
+                output_dim: Size/dimension parameter.
+                output_dim2: TODO.
+                use_softmax: TODO.
+            """
         super().__init__()
 
         self.input_dim = input_dim
@@ -68,9 +85,11 @@ class FSMNMT(nn.Module):
             self.softmax = nn.Softmax(dim=-1)
 
     def output_size(self) -> int:
+        """Output size."""
         return self.output_dim
 
     def output_size2(self) -> int:
+        """Output size2."""
         return self.output_dim2
 
     def forward(
@@ -121,6 +140,23 @@ class FSMNMTConvert(nn.Module):
             output_dim2: int,
             use_softmax: bool = True,
     ):
+        """Initialize FSMNMTConvert.
+        
+            Args:
+                input_dim: Size/dimension parameter.
+                input_affine_dim: Size/dimension parameter.
+                fsmn_layers: TODO.
+                linear_dim: Size/dimension parameter.
+                proj_dim: Size/dimension parameter.
+                lorder: TODO.
+                rorder: TODO.
+                lstride: TODO.
+                rstride: TODO.
+                output_affine_dim: Size/dimension parameter.
+                output_dim: Size/dimension parameter.
+                output_dim2: TODO.
+                use_softmax: TODO.
+            """
         super().__init__()
 
         self.input_dim = input_dim
@@ -147,12 +183,15 @@ class FSMNMTConvert(nn.Module):
             self.softmax = nn.Softmax(dim=-1)
 
     def output_size(self) -> int:
+        """Output size."""
         return self.output_dim
 
     def output_size2(self) -> int:
+        """Output size2."""
         return self.output_dim2
 
     def to_kaldi_net(self):
+        """To kaldi net."""
         re_str = ''
         re_str += '<Nnet>\n'
         re_str += self.in_linear1.to_kaldi_net()
@@ -170,6 +209,7 @@ class FSMNMTConvert(nn.Module):
         return re_str
 
     def to_kaldi_net2(self):
+        """To kaldi net2."""
         re_str = ''
         re_str += '<Nnet>\n'
         re_str += self.in_linear1.to_kaldi_net()
@@ -187,6 +227,11 @@ class FSMNMTConvert(nn.Module):
         return re_str
 
     def to_pytorch_net(self, kaldi_file):
+        """To pytorch net.
+        
+            Args:
+                kaldi_file: TODO.
+            """
         with open(kaldi_file, 'r', encoding='utf8') as fread:
             fread = open(kaldi_file, 'r')
             nnet_start_line = fread.readline()

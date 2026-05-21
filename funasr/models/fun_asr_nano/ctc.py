@@ -21,6 +21,16 @@ class CTC(torch.nn.Module):
         blank_id: int = 0,
         **kwargs,
     ):
+        """Initialize CTC.
+        
+            Args:
+                odim: TODO.
+                encoder_output_size: Size/dimension parameter.
+                dropout_rate: TODO.
+                reduce: TODO.
+                blank_id: TODO.
+                **kwargs: Additional keyword arguments.
+            """
         super().__init__()
         eprojs = encoder_output_size
         self.dropout_rate = dropout_rate

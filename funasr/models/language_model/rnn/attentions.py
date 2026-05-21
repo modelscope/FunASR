@@ -45,6 +45,7 @@ class NoAtt(torch.nn.Module):
     """No attention"""
 
     def __init__(self):
+        """Initialize NoAtt."""
         super(NoAtt, self).__init__()
         self.h_length = None
         self.enc_h = None
@@ -98,6 +99,14 @@ class AttDot(torch.nn.Module):
     """
 
     def __init__(self, eprojs, dunits, att_dim, han_mode=False):
+        """Initialize AttDot.
+        
+            Args:
+                eprojs: TODO.
+                dunits: TODO.
+                att_dim: Size/dimension parameter.
+                han_mode: TODO.
+            """
         super(AttDot, self).__init__()
         self.mlp_enc = torch.nn.Linear(eprojs, att_dim)
         self.mlp_dec = torch.nn.Linear(dunits, att_dim)
@@ -174,6 +183,14 @@ class AttAdd(torch.nn.Module):
     """
 
     def __init__(self, eprojs, dunits, att_dim, han_mode=False):
+        """Initialize AttAdd.
+        
+            Args:
+                eprojs: TODO.
+                dunits: TODO.
+                att_dim: Size/dimension parameter.
+                han_mode: TODO.
+            """
         super(AttAdd, self).__init__()
         self.mlp_enc = torch.nn.Linear(eprojs, att_dim)
         self.mlp_dec = torch.nn.Linear(dunits, att_dim, bias=False)
@@ -258,6 +275,16 @@ class AttLoc(torch.nn.Module):
     """
 
     def __init__(self, eprojs, dunits, att_dim, aconv_chans, aconv_filts, han_mode=False):
+        """Initialize AttLoc.
+        
+            Args:
+                eprojs: TODO.
+                dunits: TODO.
+                att_dim: Size/dimension parameter.
+                aconv_chans: TODO.
+                aconv_filts: TODO.
+                han_mode: TODO.
+            """
         super(AttLoc, self).__init__()
         self.mlp_enc = torch.nn.Linear(eprojs, att_dim)
         self.mlp_dec = torch.nn.Linear(dunits, att_dim, bias=False)
@@ -381,6 +408,14 @@ class AttCov(torch.nn.Module):
     """
 
     def __init__(self, eprojs, dunits, att_dim, han_mode=False):
+        """Initialize AttCov.
+        
+            Args:
+                eprojs: TODO.
+                dunits: TODO.
+                att_dim: Size/dimension parameter.
+                han_mode: TODO.
+            """
         super(AttCov, self).__init__()
         self.mlp_enc = torch.nn.Linear(eprojs, att_dim)
         self.mlp_dec = torch.nn.Linear(dunits, att_dim, bias=False)
@@ -481,6 +516,17 @@ class AttLoc2D(torch.nn.Module):
     """
 
     def __init__(self, eprojs, dunits, att_dim, att_win, aconv_chans, aconv_filts, han_mode=False):
+        """Initialize AttLoc2D.
+        
+            Args:
+                eprojs: TODO.
+                dunits: TODO.
+                att_dim: Size/dimension parameter.
+                att_win: TODO.
+                aconv_chans: TODO.
+                aconv_filts: TODO.
+                han_mode: TODO.
+            """
         super(AttLoc2D, self).__init__()
         self.mlp_enc = torch.nn.Linear(eprojs, att_dim)
         self.mlp_dec = torch.nn.Linear(dunits, att_dim, bias=False)
@@ -597,6 +643,16 @@ class AttLocRec(torch.nn.Module):
     """
 
     def __init__(self, eprojs, dunits, att_dim, aconv_chans, aconv_filts, han_mode=False):
+        """Initialize AttLocRec.
+        
+            Args:
+                eprojs: TODO.
+                dunits: TODO.
+                att_dim: Size/dimension parameter.
+                aconv_chans: TODO.
+                aconv_filts: TODO.
+                han_mode: TODO.
+            """
         super(AttLocRec, self).__init__()
         self.mlp_enc = torch.nn.Linear(eprojs, att_dim)
         self.mlp_dec = torch.nn.Linear(dunits, att_dim, bias=False)
@@ -716,6 +772,16 @@ class AttCovLoc(torch.nn.Module):
     """
 
     def __init__(self, eprojs, dunits, att_dim, aconv_chans, aconv_filts, han_mode=False):
+        """Initialize AttCovLoc.
+        
+            Args:
+                eprojs: TODO.
+                dunits: TODO.
+                att_dim: Size/dimension parameter.
+                aconv_chans: TODO.
+                aconv_filts: TODO.
+                han_mode: TODO.
+            """
         super(AttCovLoc, self).__init__()
         self.mlp_enc = torch.nn.Linear(eprojs, att_dim)
         self.mlp_dec = torch.nn.Linear(dunits, att_dim, bias=False)
@@ -827,6 +893,16 @@ class AttMultiHeadDot(torch.nn.Module):
     """
 
     def __init__(self, eprojs, dunits, aheads, att_dim_k, att_dim_v, han_mode=False):
+        """Initialize AttMultiHeadDot.
+        
+            Args:
+                eprojs: TODO.
+                dunits: TODO.
+                aheads: TODO.
+                att_dim_k: TODO.
+                att_dim_v: TODO.
+                han_mode: TODO.
+            """
         super(AttMultiHeadDot, self).__init__()
         self.mlp_q = torch.nn.ModuleList()
         self.mlp_k = torch.nn.ModuleList()
@@ -935,6 +1011,16 @@ class AttMultiHeadAdd(torch.nn.Module):
     """
 
     def __init__(self, eprojs, dunits, aheads, att_dim_k, att_dim_v, han_mode=False):
+        """Initialize AttMultiHeadAdd.
+        
+            Args:
+                eprojs: TODO.
+                dunits: TODO.
+                aheads: TODO.
+                att_dim_k: TODO.
+                att_dim_v: TODO.
+                han_mode: TODO.
+            """
         super(AttMultiHeadAdd, self).__init__()
         self.mlp_q = torch.nn.ModuleList()
         self.mlp_k = torch.nn.ModuleList()
@@ -1055,6 +1141,18 @@ class AttMultiHeadLoc(torch.nn.Module):
         aconv_filts,
         han_mode=False,
     ):
+        """Initialize AttMultiHeadLoc.
+        
+            Args:
+                eprojs: TODO.
+                dunits: TODO.
+                aheads: TODO.
+                att_dim_k: TODO.
+                att_dim_v: TODO.
+                aconv_chans: TODO.
+                aconv_filts: TODO.
+                han_mode: TODO.
+            """
         super(AttMultiHeadLoc, self).__init__()
         self.mlp_q = torch.nn.ModuleList()
         self.mlp_k = torch.nn.ModuleList()
@@ -1205,6 +1303,18 @@ class AttMultiHeadMultiResLoc(torch.nn.Module):
         aconv_filts,
         han_mode=False,
     ):
+        """Initialize AttMultiHeadMultiResLoc.
+        
+            Args:
+                eprojs: TODO.
+                dunits: TODO.
+                aheads: TODO.
+                att_dim_k: TODO.
+                att_dim_v: TODO.
+                aconv_chans: TODO.
+                aconv_filts: TODO.
+                han_mode: TODO.
+            """
         super(AttMultiHeadMultiResLoc, self).__init__()
         self.mlp_q = torch.nn.ModuleList()
         self.mlp_k = torch.nn.ModuleList()
@@ -1333,6 +1443,15 @@ class AttForward(torch.nn.Module):
     """
 
     def __init__(self, eprojs, dunits, att_dim, aconv_chans, aconv_filts):
+        """Initialize AttForward.
+        
+            Args:
+                eprojs: TODO.
+                dunits: TODO.
+                att_dim: Size/dimension parameter.
+                aconv_chans: TODO.
+                aconv_filts: TODO.
+            """
         super(AttForward, self).__init__()
         self.mlp_enc = torch.nn.Linear(eprojs, att_dim)
         self.mlp_dec = torch.nn.Linear(dunits, att_dim, bias=False)
@@ -1460,6 +1579,16 @@ class AttForwardTA(torch.nn.Module):
     """
 
     def __init__(self, eunits, dunits, att_dim, aconv_chans, aconv_filts, odim):
+        """Initialize AttForwardTA.
+        
+            Args:
+                eunits: TODO.
+                dunits: TODO.
+                att_dim: Size/dimension parameter.
+                aconv_chans: TODO.
+                aconv_filts: TODO.
+                odim: TODO.
+            """
         super(AttForwardTA, self).__init__()
         self.mlp_enc = torch.nn.Linear(eunits, att_dim)
         self.mlp_dec = torch.nn.Linear(dunits, att_dim, bias=False)
@@ -1483,6 +1612,7 @@ class AttForwardTA(torch.nn.Module):
         self.trans_agent_prob = 0.5
 
     def reset(self):
+        """Reset."""
         self.h_length = None
         self.enc_h = None
         self.pre_compute_enc_h = None

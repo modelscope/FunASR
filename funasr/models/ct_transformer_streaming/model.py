@@ -21,6 +21,11 @@ else:
     # Nothing to do if torch<1.6.0
     @contextmanager
     def autocast(enabled=True):
+        """Autocast.
+        
+            Args:
+                enabled: TODO.
+            """
         yield
 
 
@@ -37,6 +42,12 @@ class CTTransformerStreaming(CTTransformer):
         *args,
         **kwargs,
     ):
+        """Initialize CTTransformerStreaming.
+        
+            Args:
+                *args: Variable positional arguments.
+                **kwargs: Additional keyword arguments.
+            """
         super().__init__(*args, **kwargs)
 
     def punc_forward(
@@ -56,6 +67,7 @@ class CTTransformerStreaming(CTTransformer):
         return y, None
 
     def with_vad(self):
+        """With vad."""
         return True
 
     def inference(
@@ -68,6 +80,17 @@ class CTTransformerStreaming(CTTransformer):
         cache: dict = None,
         **kwargs,
     ):
+        """Run inference on input data.
+        
+            Args:
+                data_in: Input data (audio samples, file paths, or text).
+                data_lengths: Lengths of each input sample in the batch.
+                key: Sample identifiers.
+                tokenizer: Tokenizer instance for text encoding/decoding.
+                frontend: Audio frontend for feature extraction.
+                cache: State cache dict for streaming inference.
+                **kwargs: Additional keyword arguments.
+            """
         if cache is None:
             cache = {}
         assert len(data_in) == 1
@@ -189,6 +212,11 @@ class CTTransformerStreaming(CTTransformer):
 
     def export(self, **kwargs):
 
+        """Export.
+        
+            Args:
+                **kwargs: Additional keyword arguments.
+            """
         from .export_meta import export_rebuild_model
 
         models = export_rebuild_model(model=self, **kwargs)

@@ -13,15 +13,23 @@ from funasr.utils.kws_utils import split_mixed_label
 
 class thread_wrapper(threading.Thread):
     def __init__(self, func, args=()):
+        """Initialize thread_wrapper.
+        
+            Args:
+                func: TODO.
+                args: TODO.
+            """
         super(thread_wrapper, self).__init__()
         self.func = func
         self.args = args
         self.result = []
 
     def run(self):
+        """Run."""
         self.result = self.func(*self.args)
 
     def get_result(self):
+        """Get result."""
         try:
             return self.result
         except Exception:
@@ -29,12 +37,22 @@ class thread_wrapper(threading.Thread):
 
 
 def space_mixed_label(input_str):
+    """Space mixed label.
+    
+        Args:
+            input_str: TODO.
+        """
     splits = split_mixed_label(input_str)
     space_str = ''.join(f'{sub} ' for sub in splits)
     return space_str.strip()
 
 
 def read_lists(list_file):
+    """Read lists.
+    
+        Args:
+            list_file: TODO.
+        """
     lists = []
     with open(list_file, 'r', encoding='utf8') as fin:
         for line in fin:
@@ -44,6 +62,12 @@ def read_lists(list_file):
 
 
 def make_pair(wav_lists, trans_lists):
+    """Make pair.
+    
+        Args:
+            wav_lists: TODO.
+            trans_lists: TODO.
+        """
     logging.info('make pair for wav-trans list')
 
     trans_table = {}
@@ -74,6 +98,12 @@ def make_pair(wav_lists, trans_lists):
 
 
 def count_duration(tid, data_lists):
+    """Count duration.
+    
+        Args:
+            tid: TODO.
+            data_lists: TODO.
+        """
     results = []
 
     for obj in data_lists:
@@ -102,6 +132,14 @@ def count_duration(tid, data_lists):
 
 def load_data_and_score(keywords_list, data_file, trans_file, score_file):
     # score_table: {uttid: [keywordlist]}
+    """Load data and score.
+    
+        Args:
+            keywords_list: TODO.
+            data_file: TODO.
+            trans_file: TODO.
+            score_file: TODO.
+        """
     score_table = {}
     with open(score_file, 'r', encoding='utf8') as fin:
         # read score file and store in table

@@ -6,11 +6,25 @@ import numpy as np
 
 
 def LayerNorm(normalized_shape, eps=1e-5, elementwise_affine=True, export=False):
+    """Layernorm.
+    
+        Args:
+            normalized_shape: TODO.
+            eps: TODO.
+            elementwise_affine: TODO.
+            export: TODO.
+        """
     return torch.nn.LayerNorm(normalized_shape, eps, elementwise_affine)
 
 
 class SamePad(nn.Module):
     def __init__(self, kernel_size, causal=False):
+        """Initialize SamePad.
+        
+            Args:
+                kernel_size: Size/dimension parameter.
+                causal: TODO.
+            """
         super().__init__()
         if causal:
             self.remove = kernel_size - 1
@@ -18,6 +32,11 @@ class SamePad(nn.Module):
             self.remove = 1 if kernel_size % 2 == 0 else 0
 
     def forward(self, x):
+        """Forward pass for training.
+        
+            Args:
+                x: TODO.
+            """
         if self.remove > 0:
             x = x[:, :, : -self.remove]
         return x
@@ -25,10 +44,20 @@ class SamePad(nn.Module):
 
 class TransposeLast(nn.Module):
     def __init__(self, deconstruct_idx=None):
+        """Initialize TransposeLast.
+        
+            Args:
+                deconstruct_idx: TODO.
+            """
         super().__init__()
         self.deconstruct_idx = deconstruct_idx
 
     def forward(self, x):
+        """Forward pass for training.
+        
+            Args:
+                x: TODO.
+            """
         if self.deconstruct_idx is not None:
             x = x[self.deconstruct_idx]
         return x.transpose(-2, -1)
@@ -36,9 +65,20 @@ class TransposeLast(nn.Module):
 
 class Fp32LayerNorm(nn.LayerNorm):
     def __init__(self, *args, **kwargs):
+        """Initialize Fp32LayerNorm.
+        
+            Args:
+                *args: Variable positional arguments.
+                **kwargs: Additional keyword arguments.
+            """
         super().__init__(*args, **kwargs)
 
     def forward(self, input):
+        """Forward pass for training.
+        
+            Args:
+                input: Input audio/text data.
+            """
         output = F.layer_norm(
             input.float(),
             self.normalized_shape,
@@ -51,9 +91,20 @@ class Fp32LayerNorm(nn.LayerNorm):
 
 class Fp32GroupNorm(nn.GroupNorm):
     def __init__(self, *args, **kwargs):
+        """Initialize Fp32GroupNorm.
+        
+            Args:
+                *args: Variable positional arguments.
+                **kwargs: Additional keyword arguments.
+            """
         super().__init__(*args, **kwargs)
 
     def forward(self, input):
+        """Forward pass for training.
+        
+            Args:
+                input: Input audio/text data.
+            """
         output = F.group_norm(
             input.float(),
             self.num_groups,
@@ -72,6 +123,14 @@ class ConvFeatureExtractionModel(nn.Module):
         mode: str = "default",
         conv_bias: bool = False,
     ):
+        """Initialize ConvFeatureExtractionModel.
+        
+            Args:
+                conv_layers: TODO.
+                dropout: TODO.
+                mode: TODO.
+                conv_bias: TODO.
+            """
         super().__init__()
 
         assert mode in {"default", "layer_norm"}
@@ -85,7 +144,19 @@ class ConvFeatureExtractionModel(nn.Module):
             is_group_norm=False,
             conv_bias=False,
         ):
+            """Block.
+            
+                Args:
+                    n_in: TODO.
+                    n_out: TODO.
+                    k: TODO.
+                    stride: TODO.
+                    is_layer_norm: Boolean flag for layer norm.
+                    is_group_norm: Boolean flag for group norm.
+                    conv_bias: TODO.
+                """
             def make_conv():
+                """Make conv."""
                 conv = nn.Conv1d(n_in, n_out, k, stride=stride, bias=conv_bias)
                 nn.init.kaiming_normal_(conv.weight)
                 return conv
@@ -137,6 +208,11 @@ class ConvFeatureExtractionModel(nn.Module):
     def forward(self, x):
 
         # BxT -> BxCxT
+        """Forward pass for training.
+        
+            Args:
+                x: TODO.
+            """
         x = x.unsqueeze(1)
 
         for conv in self.conv_layers:
@@ -225,6 +301,14 @@ def compute_mask_indices(
             mask_idc = []
 
             def arrange(s, e, length, keep_length):
+                """Arrange.
+                
+                    Args:
+                        s: TODO.
+                        e: TODO.
+                        length: TODO.
+                        keep_length: TODO.
+                    """
                 span_start = np.random.randint(s, e - length)
                 mask_idc.extend(span_start + i for i in range(length))
 
@@ -279,20 +363,45 @@ def compute_mask_indices(
 class GradMultiply(torch.autograd.Function):
     @staticmethod
     def forward(ctx, x, scale):
+        """Forward pass for training.
+        
+            Args:
+                ctx: TODO.
+                x: TODO.
+                scale: TODO.
+            """
         ctx.scale = scale
         res = x.new(x)
         return res
 
     @staticmethod
     def backward(ctx, grad):
+        """Backward.
+        
+            Args:
+                ctx: TODO.
+                grad: TODO.
+            """
         return grad * ctx.scale, None
 
 
 def is_xla_tensor(tensor):
+    """Is xla tensor.
+    
+        Args:
+            tensor: TODO.
+        """
     return torch.is_tensor(tensor) and tensor.device.type == "xla"
 
 
 def index_put(tensor, indices, value):
+    """Index put.
+    
+        Args:
+            tensor: TODO.
+            indices: TODO.
+            value: TODO.
+        """
     if is_xla_tensor(tensor):
         for _ in range(indices.dim(), tensor.dim()):
             indices = indices.unsqueeze(-1)

@@ -34,6 +34,20 @@ class PifPredictor(torch.nn.Module):
         bias=0.0,
         sigma_heads=4,
     ):
+        """Initialize PifPredictor.
+        
+            Args:
+                idim: TODO.
+                l_order: TODO.
+                r_order: TODO.
+                threshold: TODO.
+                dropout: TODO.
+                smooth_factor: TODO.
+                noise_threshold: TODO.
+                sigma: TODO.
+                bias: TODO.
+                sigma_heads: TODO.
+            """
         super().__init__()
 
         self.pad = torch.nn.ConstantPad1d((l_order, r_order), 0)
@@ -57,6 +71,16 @@ class PifPredictor(torch.nn.Module):
         target_label_length=None,
     ):
 
+        """Forward pass for training.
+        
+            Args:
+                hidden: TODO.
+                target_label: TODO.
+                mask: TODO.
+                ignore_id: TODO.
+                mask_chunk_predictor: TODO.
+                target_label_length: TODO.
+            """
         with autocast(False):
             h = hidden
             context = h.transpose(1, 2)

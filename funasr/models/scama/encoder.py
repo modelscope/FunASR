@@ -222,6 +222,37 @@ class SANMEncoderChunkOpt(nn.Module):
         tf2torch_tensor_name_prefix_torch: str = "encoder",
         tf2torch_tensor_name_prefix_tf: str = "seq2seq/encoder",
     ):
+        """Initialize SANMEncoderChunkOpt.
+        
+            Args:
+                input_size: Size/dimension parameter.
+                output_size: Size/dimension parameter.
+                attention_heads: TODO.
+                linear_units: TODO.
+                num_blocks: TODO.
+                dropout_rate: TODO.
+                positional_dropout_rate: TODO.
+                attention_dropout_rate: TODO.
+                input_layer: TODO.
+                pos_enc_class: TODO.
+                normalize_before: TODO.
+                concat_after: TODO.
+                positionwise_layer_type: TODO.
+                positionwise_conv_kernel_size: Size/dimension parameter.
+                padding_idx: TODO.
+                interctc_layer_idx: TODO.
+                interctc_use_conditioning: TODO.
+                kernel_size: Size/dimension parameter.
+                sanm_shfit: TODO.
+                selfattention_layer_type: TODO.
+                chunk_size: Size/dimension parameter.
+                stride: TODO.
+                pad_left: TODO.
+                encoder_att_look_back_factor: TODO.
+                decoder_att_look_back_factor: TODO.
+                tf2torch_tensor_name_prefix_torch: TODO.
+                tf2torch_tensor_name_prefix_tf: TODO.
+            """
         super().__init__()
         self._output_size = output_size
 
@@ -356,6 +387,7 @@ class SANMEncoderChunkOpt(nn.Module):
         self.tf2torch_tensor_name_prefix_tf = tf2torch_tensor_name_prefix_tf
 
     def output_size(self) -> int:
+        """Output size."""
         return self._output_size
 
     def forward(
@@ -446,6 +478,12 @@ class SANMEncoderChunkOpt(nn.Module):
         return xs_pad, olens, None
 
     def _add_overlap_chunk(self, feats: np.ndarray, cache: dict = None):
+        """Internal: add overlap chunk.
+        
+            Args:
+                feats: Feature tensor (e.g., fbank), shape (batch, frames, dim).
+                cache: State cache dict for streaming inference.
+            """
         if cache is None:
             cache = {}
         if len(cache) == 0:
@@ -462,6 +500,14 @@ class SANMEncoderChunkOpt(nn.Module):
         cache: dict = None,
         **kwargs,
     ):
+        """Forward chunk.
+        
+            Args:
+                xs_pad: TODO.
+                ilens: TODO.
+                cache: State cache dict for streaming inference.
+                **kwargs: Additional keyword arguments.
+            """
         if cache is None:
             cache = {}
         is_final = kwargs.get("is_final", False)

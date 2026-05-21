@@ -19,6 +19,12 @@ _STRICT_IMPORT = os.environ.get("FUNASR_STRICT_IMPORT") == "1"
 
 
 def _record_import_error(name, error):
+    """Internal: record import error.
+    
+        Args:
+            name: TODO.
+            error: TODO.
+        """
     _IMPORT_ERRORS[name] = f"{error.__class__.__name__}: {error}"
     _IMPORT_ERROR_TRACEBACKS[name] = traceback.format_exc()
     if _IMPORT_DEBUG:
@@ -26,14 +32,22 @@ def _record_import_error(name, error):
 
 
 def get_import_errors():
+    """Get import errors."""
     return dict(_IMPORT_ERRORS)
 
 
 def get_import_error_tracebacks():
+    """Get import error tracebacks."""
     return dict(_IMPORT_ERROR_TRACEBACKS)
 
 
 def import_submodules(package, recursive=True):
+    """Import submodules.
+    
+        Args:
+            package: TODO.
+            recursive: TODO.
+        """
     if isinstance(package, str):
         try:
             package = importlib.import_module(package)

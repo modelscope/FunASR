@@ -12,6 +12,13 @@ class LabelAggregate(torch.nn.Module):
         hop_length: int = 128,
         center: bool = True,
     ):
+        """Initialize LabelAggregate.
+        
+            Args:
+                win_length: TODO.
+                hop_length: TODO.
+                center: TODO.
+            """
         super().__init__()
 
         self.win_length = win_length
@@ -19,6 +26,7 @@ class LabelAggregate(torch.nn.Module):
         self.center = center
 
     def extra_repr(self):
+        """Extra repr."""
         return (
             f"win_length={self.win_length}, "
             f"hop_length={self.hop_length}, "
@@ -85,11 +93,17 @@ class LabelAggregateMaxPooling(torch.nn.Module):
         self,
         hop_length: int = 8,
     ):
+        """Initialize LabelAggregateMaxPooling.
+        
+            Args:
+                hop_length: TODO.
+            """
         super().__init__()
 
         self.hop_length = hop_length
 
     def extra_repr(self):
+        """Extra repr."""
         return f"hop_length={self.hop_length}, "
 
     def forward(

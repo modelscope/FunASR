@@ -66,6 +66,27 @@ class Decoder(torch.nn.Module, ScorerInterface):
         num_encs=1,
     ):
 
+        """Initialize Decoder.
+        
+            Args:
+                eprojs: TODO.
+                odim: TODO.
+                dtype: TODO.
+                dlayers: TODO.
+                dunits: TODO.
+                sos: TODO.
+                eos: TODO.
+                att: TODO.
+                verbose: TODO.
+                char_list: TODO.
+                labeldist: TODO.
+                lsm_weight: TODO.
+                sampling_probability: TODO.
+                dropout: TODO.
+                context_residual: TODO.
+                replace_sos: TODO.
+                num_encs: TODO.
+            """
         torch.nn.Module.__init__(self)
         self.dtype = dtype
         self.dunits = dunits
@@ -124,9 +145,23 @@ class Decoder(torch.nn.Module, ScorerInterface):
         self.logzero = -10000000000.0
 
     def zero_state(self, hs_pad):
+        """Zero state.
+        
+            Args:
+                hs_pad: TODO.
+            """
         return hs_pad.new_zeros(hs_pad.size(0), self.dunits)
 
     def rnn_forward(self, ey, z_list, c_list, z_prev, c_prev):
+        """Rnn forward.
+        
+            Args:
+                ey: TODO.
+                z_list: TODO.
+                c_list: TODO.
+                z_prev: TODO.
+                c_prev: TODO.
+            """
         if self.dtype == "lstm":
             z_list[0], c_list[0] = self.decoder[0](ey, (z_prev[0], c_prev[0]))
             for i in six.moves.range(1, self.dlayers):
@@ -609,6 +644,19 @@ class Decoder(torch.nn.Module, ScorerInterface):
     ):
         # to support mutiple encoder asr mode, in single encoder mode,
         # convert torch.Tensor to List of torch.Tensor
+        """Recognize beam batch.
+        
+            Args:
+                h: TODO.
+                hlens: TODO.
+                lpz: TODO.
+                recog_args: TODO.
+                char_list: TODO.
+                rnnlm: TODO.
+                normalize_score: TODO.
+                strm_idx: TODO.
+                lang_ids: TODO.
+            """
         if self.num_encs == 1:
             h = [h]
             hlens = [hlens]
@@ -1009,6 +1057,11 @@ class Decoder(torch.nn.Module, ScorerInterface):
 
     @staticmethod
     def _get_last_yseq(exp_yseq):
+        """Internal: get last yseq.
+        
+            Args:
+                exp_yseq: TODO.
+            """
         last = []
         for y_seq in exp_yseq:
             last.append(y_seq[-1])
@@ -1016,6 +1069,12 @@ class Decoder(torch.nn.Module, ScorerInterface):
 
     @staticmethod
     def _append_ids(yseq, ids):
+        """Internal: append ids.
+        
+            Args:
+                yseq: TODO.
+                ids: TODO.
+            """
         if isinstance(ids, list):
             for i, j in enumerate(ids):
                 yseq[i].append(j)
@@ -1026,6 +1085,12 @@ class Decoder(torch.nn.Module, ScorerInterface):
 
     @staticmethod
     def _index_select_list(yseq, lst):
+        """Internal: index select list.
+        
+            Args:
+                yseq: TODO.
+                lst: TODO.
+            """
         new_yseq = []
         for i in lst:
             new_yseq.append(yseq[i][:])
@@ -1033,6 +1098,13 @@ class Decoder(torch.nn.Module, ScorerInterface):
 
     @staticmethod
     def _index_select_lm_state(rnnlm_state, dim, vidx):
+        """Internal: index select lm state.
+        
+            Args:
+                rnnlm_state: TODO.
+                dim: TODO.
+                vidx: TODO.
+            """
         if isinstance(rnnlm_state, dict):
             new_state = {}
             for k, v in rnnlm_state.items():
@@ -1047,6 +1119,11 @@ class Decoder(torch.nn.Module, ScorerInterface):
     def init_state(self, x):
         # to support mutiple encoder asr mode, in single encoder mode,
         # convert torch.Tensor to List of torch.Tensor
+        """Init state.
+        
+            Args:
+                x: TODO.
+            """
         if self.num_encs == 1:
             x = [x]
 
@@ -1075,6 +1152,13 @@ class Decoder(torch.nn.Module, ScorerInterface):
     def score(self, yseq, state, x):
         # to support mutiple encoder asr mode, in single encoder mode,
         # convert torch.Tensor to List of torch.Tensor
+        """Score.
+        
+            Args:
+                yseq: TODO.
+                state: TODO.
+                x: TODO.
+            """
         if self.num_encs == 1:
             x = [x]
 
@@ -1124,6 +1208,16 @@ class Decoder(torch.nn.Module, ScorerInterface):
 
 
 def decoder_for(args, odim, sos, eos, att, labeldist):
+    """Decoder for.
+    
+        Args:
+            args: TODO.
+            odim: TODO.
+            sos: TODO.
+            eos: TODO.
+            att: TODO.
+            labeldist: TODO.
+        """
     return Decoder(
         args.eprojs,
         odim,

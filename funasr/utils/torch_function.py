@@ -8,6 +8,12 @@ import numpy as np
 
 class MakePadMask(nn.Module):
     def __init__(self, max_seq_len=512, flip=True):
+        """Initialize MakePadMask.
+        
+            Args:
+                max_seq_len: TODO.
+                flip: TODO.
+            """
         super().__init__()
         if flip:
             self.mask_pad = torch.Tensor(1 - np.tri(max_seq_len)).type(torch.bool)
@@ -46,9 +52,23 @@ class MakePadMask(nn.Module):
 
 class sequence_mask(nn.Module):
     def __init__(self, max_seq_len=512, flip=True):
+        """Initialize sequence_mask.
+        
+            Args:
+                max_seq_len: TODO.
+                flip: TODO.
+            """
         super().__init__()
 
     def forward(self, lengths, max_seq_len=None, dtype=torch.float32, device=None):
+        """Forward pass for training.
+        
+            Args:
+                lengths: TODO.
+                max_seq_len: TODO.
+                dtype: TODO.
+                device: Target device ("cuda:0", "cpu", etc.).
+            """
         if max_seq_len is None:
             max_seq_len = lengths.max()
         row_vector = torch.arange(0, max_seq_len, 1).to(lengths.device)
@@ -61,6 +81,14 @@ class sequence_mask(nn.Module):
 def normalize(
     input: torch.Tensor, p: float = 2.0, dim: int = 1, out: Optional[torch.Tensor] = None
 ) -> torch.Tensor:
+    """Normalize.
+    
+        Args:
+            input: Input audio/text data.
+            p: TODO.
+            dim: TODO.
+            out: TODO.
+        """
     if out is None:
         denom = input.norm(p, dim, keepdim=True).expand_as(input)
         return input / denom
@@ -70,10 +98,16 @@ def normalize(
 
 
 def subsequent_mask(size: torch.Tensor):
+    """Subsequent mask.
+    
+        Args:
+            size: TODO.
+        """
     return torch.ones(size, size).tril()
 
 
 def MakePadMask_test():
+    """Makepadmask test."""
     feats_length = torch.tensor([10]).type(torch.long)
     mask_fn = MakePadMask()
     mask = mask_fn(feats_length)

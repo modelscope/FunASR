@@ -19,6 +19,18 @@ class LidPredictor(ERes2Net):
         pooling_func="TSTP",
         two_emb_layer=False,
     ):
+        """Initialize LidPredictor.
+        
+            Args:
+                block: TODO.
+                block_fuse: TODO.
+                num_blocks: TODO.
+                m_channels: TODO.
+                feat_dim: Size/dimension parameter.
+                embedding_size: Size/dimension parameter.
+                pooling_func: TODO.
+                two_emb_layer: TODO.
+            """
         super(LidPredictor, self).__init__(
             block=block,
             block_fuse=block_fuse,

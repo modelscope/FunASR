@@ -11,6 +11,14 @@ import torch.distributed as dist
 
 def gen_scp_from_jsonl(jsonl_file, data_type_list, wav_scp_file, text_file):
 
+    """Gen scp from jsonl.
+    
+        Args:
+            jsonl_file: TODO.
+            data_type_list: TODO.
+            wav_scp_file: TODO.
+            text_file: TODO.
+        """
     wav_f = open(wav_scp_file, "w")
     text_f = open(text_file, "w")
     with open(jsonl_file, encoding="utf-8") as fin:
@@ -37,6 +45,11 @@ def gen_scp_from_jsonl(jsonl_file, data_type_list, wav_scp_file, text_file):
 @hydra.main(config_name=None, version_base=None)
 def main_hydra(cfg: DictConfig):
 
+    """Main hydra.
+    
+        Args:
+            cfg: Configuration overrides.
+        """
     kwargs = OmegaConf.to_container(cfg, resolve=True)
     print(kwargs)
 

@@ -12,12 +12,19 @@ from funasr.models.seaco_paraformer.export_meta import ContextualEmbedderExport
 
 class ContextualEmbedderExport2(ContextualEmbedderExport):
     def __init__(self, model, **kwargs):
+        """Initialize ContextualEmbedderExport2.
+        
+            Args:
+                model: Model instance or model name.
+                **kwargs: Additional keyword arguments.
+            """
         super().__init__(model)
         self.embedding = model.bias_embed
         model.bias_encoder.batch_first = False
         self.bias_encoder = model.bias_encoder
     
     def export_dummy_inputs(self):
+        """Export dummy inputs."""
         hotword = torch.tensor(
             [
                 [10, 11, 12, 13, 14, 10, 11, 12, 13, 14],
@@ -34,6 +41,12 @@ class ContextualEmbedderExport2(ContextualEmbedderExport):
 
 
 def export_rebuild_model(model, **kwargs):
+    """Export rebuild model.
+    
+        Args:
+            model: Model instance or model name.
+            **kwargs: Additional keyword arguments.
+        """
     is_onnx = kwargs.get("type", "onnx") == "onnx"
 
     encoder_class = tables.encoder_classes.get(kwargs["encoder"] + "Export")
@@ -87,6 +100,13 @@ def export_backbone_forward(
     speech_lengths: torch.Tensor,
     bias_embed: torch.Tensor,
 ):
+    """Export backbone forward.
+    
+        Args:
+            speech: Speech audio tensor, shape (batch, time).
+            speech_lengths: Length of each speech sample.
+            bias_embed: TODO.
+        """
     batch = {"speech": speech, "speech_lengths": speech_lengths}
 
     enc, enc_len = self.encoder(**batch)
@@ -101,6 +121,7 @@ def export_backbone_forward(
 
 
 def export_backbone_dummy_inputs(self):
+    """Export backbone dummy inputs."""
     speech = torch.randn(2, 30, self.feats_dim)
     speech_lengths = torch.tensor([6, 30], dtype=torch.int32)
     bias_embed = torch.randn(2, 1, 512)
@@ -108,14 +129,17 @@ def export_backbone_dummy_inputs(self):
 
 
 def export_backbone_input_names(self):
+    """Export backbone input names."""
     return ["speech", "speech_lengths", "bias_embed"]
 
 
 def export_backbone_output_names(self):
+    """Export backbone output names."""
     return ["logits", "token_num"]
 
 
 def export_backbone_dynamic_axes(self):
+    """Export backbone dynamic axes."""
     return {
         "speech": {0: "batch_size", 1: "feats_length"},
         "speech_lengths": {
@@ -127,4 +151,5 @@ def export_backbone_dynamic_axes(self):
 
 
 def export_backbone_name(self):
+    """Export backbone name."""
     return "model.onnx"

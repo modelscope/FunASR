@@ -17,12 +17,24 @@ from funasr.models.data2vec.quant_noise import quant_noise
 
 class FairseqDropout(nn.Module):
     def __init__(self, p, module_name=None):
+        """Initialize FairseqDropout.
+        
+            Args:
+                p: TODO.
+                module_name: TODO.
+            """
         super().__init__()
         self.p = p
         self.module_name = module_name
         self.apply_during_inference = False
 
     def forward(self, x, inplace: bool = False):
+        """Forward pass for training.
+        
+            Args:
+                x: TODO.
+                inplace: TODO.
+            """
         if self.p > 0 and (self.training or self.apply_during_inference):
             return F.dropout(x, p=self.p, training=True, inplace=inplace)
         else:
@@ -35,6 +47,14 @@ class FairseqDropout(nn.Module):
         retain_dropout_modules: Optional[List[str]] = None,
         **kwargs,
     ):
+        """Make generation fast .
+        
+            Args:
+                name: TODO.
+                retain_dropout: TODO.
+                retain_dropout_modules: TODO.
+                **kwargs: Additional keyword arguments.
+            """
         if retain_dropout:
             if retain_dropout_modules is not None and self.module_name is None:
                 logging.warning(
@@ -72,6 +92,22 @@ class MultiheadAttention(nn.Module):
         q_noise=0.0,
         qn_block_size=8,
     ):
+        """Initialize MultiheadAttention.
+        
+            Args:
+                embed_dim: Size/dimension parameter.
+                num_heads: TODO.
+                kdim: TODO.
+                vdim: TODO.
+                dropout: TODO.
+                bias: TODO.
+                add_bias_kv: TODO.
+                add_zero_attn: TODO.
+                self_attention: TODO.
+                encoder_decoder_attention: TODO.
+                q_noise: TODO.
+                qn_block_size: Size/dimension parameter.
+            """
         super().__init__()
         self.embed_dim = embed_dim
         self.kdim = kdim if kdim is not None else embed_dim
@@ -122,9 +158,11 @@ class MultiheadAttention(nn.Module):
         self.skip_embed_dim_check = False
 
     def prepare_for_onnx_export_(self):
+        """Prepare for onnx export ."""
         self.onnx_trace = True
 
     def reset_parameters(self):
+        """Reset parameters."""
         if self.qkv_same_dim:
             # Empirically observed the convergence to be much better with
             # the scaled initialization
@@ -145,6 +183,11 @@ class MultiheadAttention(nn.Module):
             nn.init.xavier_normal_(self.bias_v)
 
     def _get_reserve_head_index(self, num_heads_to_keep: int):
+        """Internal: get reserve head index.
+        
+            Args:
+                num_heads_to_keep: TODO.
+            """
         k_proj_heads_norm = []
         q_proj_heads_norm = []
         v_proj_heads_norm = []
@@ -178,6 +221,11 @@ class MultiheadAttention(nn.Module):
         return reserve_head_index
 
     def _adaptive_prune_heads(self, reserve_head_index: List[Tuple[int, int]]):
+        """Internal: adaptive prune heads.
+        
+            Args:
+                reserve_head_index: TODO.
+            """
         new_q_weight = []
         new_q_bias = []
         new_k_weight = []
@@ -236,6 +284,7 @@ class MultiheadAttention(nn.Module):
         self.v_proj.out_features = self.embed_dim
 
     def _set_skip_embed_dim_check(self):
+        """Internal: set skip embed dim check."""
         self.skip_embed_dim_check = True
 
     def forward(
@@ -506,6 +555,15 @@ class MultiheadAttention(nn.Module):
         static_kv: bool,
     ) -> Optional[Tensor]:
         # saved key padding masks have shape (bsz, seq_len)
+        """Internal: append prev key padding mask.
+        
+            Args:
+                key_padding_mask: TODO.
+                prev_key_padding_mask: TODO.
+                batch_size: Number of samples per batch.
+                src_len: TODO.
+                static_kv: TODO.
+            """
         if prev_key_padding_mask is not None and static_kv:
             new_key_padding_mask = prev_key_padding_mask
         elif prev_key_padding_mask is not None and key_padding_mask is not None:
@@ -562,6 +620,11 @@ class MultiheadAttention(nn.Module):
     def _get_input_buffer(
         self, incremental_state: Optional[Dict[str, Dict[str, Optional[Tensor]]]]
     ) -> Dict[str, Optional[Tensor]]:
+        """Internal: get input buffer.
+        
+            Args:
+                incremental_state: TODO.
+            """
         result = self.get_incremental_state(incremental_state, "attn_state")
         if result is not None:
             return result
@@ -574,12 +637,32 @@ class MultiheadAttention(nn.Module):
         incremental_state: Dict[str, Dict[str, Optional[Tensor]]],
         buffer: Dict[str, Optional[Tensor]],
     ):
+        """Internal: set input buffer.
+        
+            Args:
+                incremental_state: TODO.
+                buffer: TODO.
+            """
         return self.set_incremental_state(incremental_state, "attn_state", buffer)
 
     def apply_sparse_mask(self, attn_weights, tgt_len: int, src_len: int, bsz: int):
+        """Apply sparse mask.
+        
+            Args:
+                attn_weights: TODO.
+                tgt_len: TODO.
+                src_len: TODO.
+                bsz: TODO.
+            """
         return attn_weights
 
     def upgrade_state_dict_named(self, state_dict, name):
+        """Upgrade state dict named.
+        
+            Args:
+                state_dict: TODO.
+                name: TODO.
+            """
         prefix = name + "." if name != "" else ""
         items_to_add = {}
         keys_to_remove = []

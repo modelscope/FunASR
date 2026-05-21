@@ -44,6 +44,22 @@ class MonotonicAligner(torch.nn.Module):
         length_normalized_loss: bool = False,
         **kwargs,
     ):
+        """Initialize MonotonicAligner.
+        
+            Args:
+                input_size: Size/dimension parameter.
+                specaug: TODO.
+                specaug_conf: Configuration dict for specaug.
+                normalize: TODO.
+                normalize_conf: Configuration dict for normalize.
+                encoder: TODO.
+                encoder_conf: Configuration dict for encoder.
+                predictor: TODO.
+                predictor_conf: Configuration dict for predictor.
+                predictor_bias: TODO.
+                length_normalized_loss: TODO.
+                **kwargs: Additional keyword arguments.
+            """
         super().__init__()
 
         if specaug is not None:
@@ -116,6 +132,13 @@ class MonotonicAligner(torch.nn.Module):
         return loss, stats, weight
 
     def calc_predictor_timestamp(self, encoder_out, encoder_out_lens, token_num):
+        """Calc predictor timestamp.
+        
+            Args:
+                encoder_out: Encoder output tensor.
+                encoder_out_lens: Encoder output lengths.
+                token_num: TODO.
+            """
         encoder_out_mask = (
             ~make_pad_mask(encoder_out_lens, maxlen=encoder_out.size(1))[:, None, :]
         ).to(encoder_out.device)
@@ -162,6 +185,16 @@ class MonotonicAligner(torch.nn.Module):
         frontend=None,
         **kwargs,
     ):
+        """Run inference on input data.
+        
+            Args:
+                data_in: Input data (audio samples, file paths, or text).
+                data_lengths: Lengths of each input sample in the batch.
+                key: Sample identifiers.
+                tokenizer: Tokenizer instance for text encoding/decoding.
+                frontend: Audio frontend for feature extraction.
+                **kwargs: Additional keyword arguments.
+            """
         meta_data = {}
         # extract fbank feats
         time1 = time.perf_counter()

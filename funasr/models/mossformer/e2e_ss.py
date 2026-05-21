@@ -45,6 +45,19 @@ class MossFormer(FunASRModel):
         use_global_pos_enc=True,
         max_length=20000,
     ):
+        """Initialize MossFormer.
+        
+            Args:
+                in_channels: TODO.
+                out_channels: TODO.
+                num_blocks: TODO.
+                kernel_size: Size/dimension parameter.
+                norm: TODO.
+                num_spks: TODO.
+                skip_around_intra: TODO.
+                use_global_pos_enc: TODO.
+                max_length: TODO.
+            """
         super(MossFormer, self).__init__()
         self.num_spks = num_spks
         # Encoding
@@ -72,6 +85,11 @@ class MossFormer(FunASRModel):
         )
 
     def forward(self, input):
+        """Forward pass for training.
+        
+            Args:
+                input: Input audio/text data.
+            """
         x = self.enc(input)
         mask = self.mask_net(x)
         x = torch.stack([x] * self.num_spks)

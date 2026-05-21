@@ -61,6 +61,14 @@ class GlobalLayerNorm(nn.Module):
     """
 
     def __init__(self, dim, shape, eps=1e-8, elementwise_affine=True):
+        """Initialize GlobalLayerNorm.
+        
+            Args:
+                dim: TODO.
+                shape: TODO.
+                eps: TODO.
+                elementwise_affine: TODO.
+            """
         super(GlobalLayerNorm, self).__init__()
         self.dim = dim
         self.eps = eps
@@ -125,6 +133,12 @@ class CumulativeLayerNorm(nn.LayerNorm):
     """
 
     def __init__(self, dim, elementwise_affine=True):
+        """Initialize CumulativeLayerNorm.
+        
+            Args:
+                dim: TODO.
+                elementwise_affine: TODO.
+            """
         super(CumulativeLayerNorm, self).__init__(
             dim, elementwise_affine=elementwise_affine, eps=1e-8
         )
@@ -156,11 +170,22 @@ class CumulativeLayerNorm(nn.LayerNorm):
 
 class ScaleNorm(nn.Module):
     def __init__(self, dim, eps=1e-5):
+        """Initialize ScaleNorm.
+        
+            Args:
+                dim: TODO.
+                eps: TODO.
+            """
         super().__init__()
         self.scale = dim**-0.5
         self.eps = eps
         self.g = nn.Parameter(torch.ones(1))
 
     def forward(self, x):
+        """Forward pass for training.
+        
+            Args:
+                x: TODO.
+            """
         norm = torch.norm(x, dim=-1, keepdim=True) * self.scale
         return x / norm.clamp(min=self.eps) * self.g

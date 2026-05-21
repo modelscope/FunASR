@@ -21,6 +21,17 @@ class AudioLLMNARDataset(torch.utils.data.Dataset):
         float_pad_value: float = 0.0,
         **kwargs
     ):
+        """Initialize AudioLLMNARDataset.
+        
+            Args:
+                path: TODO.
+                index_ds: TODO.
+                frontend: Audio frontend for feature extraction.
+                tokenizer: Tokenizer instance for text encoding/decoding.
+                int_pad_value: TODO.
+                float_pad_value: TODO.
+                **kwargs: Additional keyword arguments.
+            """
         super().__init__()
         index_ds_class = tables.index_ds_classes.get(index_ds)
         self.index_ds = index_ds_class(path, **kwargs)
@@ -52,17 +63,33 @@ class AudioLLMNARDataset(torch.utils.data.Dataset):
         self.int_pad_value = self.IGNORE_INDEX
 
     def get_source_len(self, index):
+        """Get source len.
+        
+            Args:
+                index: TODO.
+            """
         item = self.index_ds[index]
         return self.index_ds.get_source_len(item)
 
     def get_target_len(self, index):
+        """Get target len.
+        
+            Args:
+                index: TODO.
+            """
         item = self.index_ds[index]
         return self.index_ds.get_target_len(item)
 
     def __len__(self):
+        """Internal: len  ."""
         return len(self.index_ds)
 
     def __getitem__(self, index):
+        """Internal: getitem  .
+        
+            Args:
+                index: TODO.
+            """
         item = self.index_ds[index]
         source = item["source"]
         data_src = load_audio_text_image_video(source, fs=self.fs)
@@ -143,6 +170,11 @@ class AudioLLMNARDataset(torch.utils.data.Dataset):
         }
 
     def collator(self, samples: list = None):
+        """Collator.
+        
+            Args:
+                samples: TODO.
+            """
         outputs = {}
         for sample in samples:
             for key in sample.keys():
@@ -180,6 +212,17 @@ class AudioLLMDataset(torch.utils.data.Dataset):
         float_pad_value: float = 0.0,
         **kwargs
     ):
+        """Initialize AudioLLMDataset.
+        
+            Args:
+                path: TODO.
+                index_ds: TODO.
+                frontend: Audio frontend for feature extraction.
+                tokenizer: Tokenizer instance for text encoding/decoding.
+                int_pad_value: TODO.
+                float_pad_value: TODO.
+                **kwargs: Additional keyword arguments.
+            """
         super().__init__()
         index_ds_class = tables.index_ds_classes.get(index_ds)
         self.index_ds = index_ds_class(path, **kwargs)
@@ -211,17 +254,33 @@ class AudioLLMDataset(torch.utils.data.Dataset):
         self.int_pad_value = self.IGNORE_INDEX
 
     def get_source_len(self, index):
+        """Get source len.
+        
+            Args:
+                index: TODO.
+            """
         item = self.index_ds[index]
         return self.index_ds.get_source_len(item)
 
     def get_target_len(self, index):
+        """Get target len.
+        
+            Args:
+                index: TODO.
+            """
         item = self.index_ds[index]
         return self.index_ds.get_target_len(item)
 
     def __len__(self):
+        """Internal: len  ."""
         return len(self.index_ds)
 
     def __getitem__(self, index):
+        """Internal: getitem  .
+        
+            Args:
+                index: TODO.
+            """
         item = self.index_ds[index]
         # import pdb;
         # pdb.set_trace()
@@ -278,6 +337,11 @@ class AudioLLMDataset(torch.utils.data.Dataset):
         }
 
     def collator(self, samples: list = None):
+        """Collator.
+        
+            Args:
+                samples: TODO.
+            """
         outputs = {}
         for sample in samples:
             for key in sample.keys():
@@ -315,6 +379,17 @@ class AudioLLMARDataset(torch.utils.data.Dataset):
         float_pad_value: float = 0.0,
         **kwargs
     ):
+        """Initialize AudioLLMARDataset.
+        
+            Args:
+                path: TODO.
+                index_ds: TODO.
+                frontend: Audio frontend for feature extraction.
+                tokenizer: Tokenizer instance for text encoding/decoding.
+                int_pad_value: TODO.
+                float_pad_value: TODO.
+                **kwargs: Additional keyword arguments.
+            """
         super().__init__()
         index_ds_class = tables.index_ds_classes.get(index_ds)
         self.index_ds = index_ds_class(path, **kwargs)
@@ -346,17 +421,33 @@ class AudioLLMARDataset(torch.utils.data.Dataset):
         self.int_pad_value = self.IGNORE_INDEX
 
     def get_source_len(self, index):
+        """Get source len.
+        
+            Args:
+                index: TODO.
+            """
         item = self.index_ds[index]
         return self.index_ds.get_source_len(item)
 
     def get_target_len(self, index):
+        """Get target len.
+        
+            Args:
+                index: TODO.
+            """
         item = self.index_ds[index]
         return self.index_ds.get_target_len(item)
 
     def __len__(self):
+        """Internal: len  ."""
         return len(self.index_ds)
 
     def __getitem__(self, index):
+        """Internal: getitem  .
+        
+            Args:
+                index: TODO.
+            """
         item = self.index_ds[index]
         # import pdb;
         # pdb.set_trace()
@@ -413,6 +504,11 @@ class AudioLLMARDataset(torch.utils.data.Dataset):
         }
 
     def collator(self, samples: list = None):
+        """Collator.
+        
+            Args:
+                samples: TODO.
+            """
         outputs = {}
         for sample in samples:
             for key in sample.keys():

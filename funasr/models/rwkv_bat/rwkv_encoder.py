@@ -92,6 +92,7 @@ class RWKVEncoder(torch.nn.Module):
         self.time_reduction_factor = time_reduction_factor
 
     def output_size(self) -> int:
+        """Output size."""
         return self._output_size
 
     def forward(self, x: torch.Tensor, x_len) -> torch.Tensor:
@@ -133,6 +134,11 @@ class RWKVEncoder(torch.nn.Module):
 
     def rwkv_infer(self, xs_pad):
 
+        """Rwkv infer.
+        
+            Args:
+                xs_pad: TODO.
+            """
         batch_size = xs_pad.shape[0]
 
         hidden_sizes = [self._output_size for i in range(5)]

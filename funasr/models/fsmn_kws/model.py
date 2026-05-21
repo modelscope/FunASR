@@ -48,6 +48,24 @@ class FsmnKWS(torch.nn.Module):
         blank_id: int = 0,
         **kwargs,
     ):
+        """Initialize FsmnKWS.
+        
+            Args:
+                specaug: TODO.
+                specaug_conf: Configuration dict for specaug.
+                normalize: TODO.
+                normalize_conf: Configuration dict for normalize.
+                encoder: TODO.
+                encoder_conf: Configuration dict for encoder.
+                ctc: TODO.
+                ctc_conf: Configuration dict for ctc.
+                ctc_weight: TODO.
+                input_size: Size/dimension parameter.
+                vocab_size: Size/dimension parameter.
+                ignore_id: TODO.
+                blank_id: TODO.
+                **kwargs: Additional keyword arguments.
+            """
         super().__init__()
 
         if specaug is not None:
@@ -158,6 +176,14 @@ class FsmnKWS(torch.nn.Module):
         ys_pad_lens: torch.Tensor,
     ):
         # Calc CTC loss
+        """Internal: calc ctc loss.
+        
+            Args:
+                encoder_out: Encoder output tensor.
+                encoder_out_lens: Encoder output lengths.
+                ys_pad: TODO.
+                ys_pad_lens: Lengths of ys_pad.
+            """
         loss_ctc = self.ctc(encoder_out, encoder_out_lens, ys_pad, ys_pad_lens)
 
         # Calc CER using CTC
@@ -177,6 +203,16 @@ class FsmnKWS(torch.nn.Module):
         frontend=None,
         **kwargs,
     ):
+        """Run inference on input data.
+        
+            Args:
+                data_in: Input data (audio samples, file paths, or text).
+                data_lengths: Lengths of each input sample in the batch.
+                key: Sample identifiers.
+                tokenizer: Tokenizer instance for text encoding/decoding.
+                frontend: Audio frontend for feature extraction.
+                **kwargs: Additional keyword arguments.
+            """
         keywords = kwargs.get("keywords")
         from funasr.utils.kws_utils import KwsCtcPrefixDecoder
         self.kws_decoder = KwsCtcPrefixDecoder(
@@ -257,6 +293,19 @@ class FsmnKWSConvert(torch.nn.Module):
         blank_id: int = 0,
         **kwargs,
     ):
+        """Initialize FsmnKWSConvert.
+        
+            Args:
+                encoder: TODO.
+                encoder_conf: Configuration dict for encoder.
+                ctc: TODO.
+                ctc_conf: Configuration dict for ctc.
+                ctc_weight: TODO.
+                input_size: Size/dimension parameter.
+                vocab_size: Size/dimension parameter.
+                blank_id: TODO.
+                **kwargs: Additional keyword arguments.
+            """
         super().__init__()
 
         encoder_class = tables.encoder_classes.get(encoder)
@@ -278,8 +327,14 @@ class FsmnKWSConvert(torch.nn.Module):
         self.error_calculator = None
 
     def to_kaldi_net(self):
+		    """To kaldi net."""
 		    return self.encoder.to_kaldi_net()
 
 
     def to_pytorch_net(self, kaldi_file):
+		    """To pytorch net.
+		    
+		        Args:
+		            kaldi_file: TODO.
+		        """
 		    return self.encoder.to_pytorch_net(kaldi_file)

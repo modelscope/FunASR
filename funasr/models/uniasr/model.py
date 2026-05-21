@@ -73,6 +73,51 @@ class UniASR(torch.nn.Module):
         share_embedding: bool = False,
         **kwargs,
     ):
+        """Initialize UniASR.
+        
+            Args:
+                specaug: TODO.
+                specaug_conf: Configuration dict for specaug.
+                normalize: TODO.
+                normalize_conf: Configuration dict for normalize.
+                encoder: TODO.
+                encoder_conf: Configuration dict for encoder.
+                encoder2: TODO.
+                encoder2_conf: Configuration dict for encoder2.
+                decoder: TODO.
+                decoder_conf: Configuration dict for decoder.
+                decoder2: TODO.
+                decoder2_conf: Configuration dict for decoder2.
+                predictor: TODO.
+                predictor_conf: Configuration dict for predictor.
+                predictor_bias: TODO.
+                predictor_weight: TODO.
+                predictor2: TODO.
+                predictor2_conf: Configuration dict for predictor2.
+                predictor2_bias: TODO.
+                predictor2_weight: TODO.
+                ctc: TODO.
+                ctc_conf: Configuration dict for ctc.
+                ctc_weight: TODO.
+                ctc2: TODO.
+                ctc2_conf: Configuration dict for ctc2.
+                ctc2_weight: TODO.
+                decoder_attention_chunk_type: TODO.
+                decoder_attention_chunk_type2: TODO.
+                stride_conv: TODO.
+                stride_conv_conf: Configuration dict for stride_conv.
+                loss_weight_model1: TODO.
+                input_size: Size/dimension parameter.
+                vocab_size: Size/dimension parameter.
+                ignore_id: TODO.
+                blank_id: TODO.
+                sos: TODO.
+                eos: TODO.
+                lsm_weight: TODO.
+                length_normalized_loss: TODO.
+                share_embedding: TODO.
+                **kwargs: Additional keyword arguments.
+            """
         super().__init__()
 
         if specaug is not None:
@@ -308,6 +353,14 @@ class UniASR(torch.nn.Module):
         text: torch.Tensor,
         text_lengths: torch.Tensor,
     ) -> Dict[str, torch.Tensor]:
+        """Collect feats.
+        
+            Args:
+                speech: Speech audio tensor, shape (batch, time).
+                speech_lengths: Length of each speech sample.
+                text: Text tensor or string input.
+                text_lengths: Length of each text sample.
+            """
         if self.extract_feats_in_collect_stats:
             feats, feats_lengths = self._extract_feats(speech, speech_lengths)
         else:
@@ -477,6 +530,14 @@ class UniASR(torch.nn.Module):
         ys_pad: torch.Tensor,
         ys_pad_lens: torch.Tensor,
     ):
+        """Internal: calc att loss.
+        
+            Args:
+                encoder_out: Encoder output tensor.
+                encoder_out_lens: Encoder output lengths.
+                ys_pad: TODO.
+                ys_pad_lens: Lengths of ys_pad.
+            """
         ys_in_pad, ys_out_pad = add_sos_eos(ys_pad, self.sos, self.eos, self.ignore_id)
         ys_in_lens = ys_pad_lens + 1
 
@@ -507,6 +568,14 @@ class UniASR(torch.nn.Module):
         ys_pad: torch.Tensor,
         ys_pad_lens: torch.Tensor,
     ):
+        """Internal: calc att predictor loss.
+        
+            Args:
+                encoder_out: Encoder output tensor.
+                encoder_out_lens: Encoder output lengths.
+                ys_pad: TODO.
+                ys_pad_lens: Lengths of ys_pad.
+            """
         ys_in_pad, ys_out_pad = add_sos_eos(ys_pad, self.sos, self.eos, self.ignore_id)
         ys_in_lens = ys_pad_lens + 1
 
@@ -608,6 +677,14 @@ class UniASR(torch.nn.Module):
         ys_pad: torch.Tensor,
         ys_pad_lens: torch.Tensor,
     ):
+        """Internal: calc att predictor loss2.
+        
+            Args:
+                encoder_out: Encoder output tensor.
+                encoder_out_lens: Encoder output lengths.
+                ys_pad: TODO.
+                ys_pad_lens: Lengths of ys_pad.
+            """
         ys_in_pad, ys_out_pad = add_sos_eos(ys_pad, self.sos, self.eos, self.ignore_id)
         ys_in_lens = ys_pad_lens + 1
 
@@ -711,6 +788,14 @@ class UniASR(torch.nn.Module):
     ):
         # ys_in_pad, ys_out_pad = add_sos_eos(ys_pad, self.sos, self.eos, self.ignore_id)
         # ys_in_lens = ys_pad_lens + 1
+        """Calc predictor mask.
+        
+            Args:
+                encoder_out: Encoder output tensor.
+                encoder_out_lens: Encoder output lengths.
+                ys_pad: TODO.
+                ys_pad_lens: Lengths of ys_pad.
+            """
         ys_out_pad, ys_in_lens = None, None
 
         encoder_out_mask = sequence_mask(
@@ -793,6 +878,14 @@ class UniASR(torch.nn.Module):
     ):
         # ys_in_pad, ys_out_pad = add_sos_eos(ys_pad, self.sos, self.eos, self.ignore_id)
         # ys_in_lens = ys_pad_lens + 1
+        """Calc predictor mask2.
+        
+            Args:
+                encoder_out: Encoder output tensor.
+                encoder_out_lens: Encoder output lengths.
+                ys_pad: TODO.
+                ys_pad_lens: Lengths of ys_pad.
+            """
         ys_out_pad, ys_in_lens = None, None
 
         encoder_out_mask = sequence_mask(
@@ -870,6 +963,11 @@ class UniASR(torch.nn.Module):
         self,
         **kwargs,
     ):
+        """Init beam search.
+        
+            Args:
+                **kwargs: Additional keyword arguments.
+            """
         from funasr.models.uniasr.beam_search import BeamSearchScama
         from funasr.models.transformer.scorers.ctc import CTCPrefixScorer
         from funasr.models.transformer.scorers.length_bonus import LengthBonus
@@ -926,6 +1024,16 @@ class UniASR(torch.nn.Module):
         **kwargs,
     ):
 
+        """Run inference on input data.
+        
+            Args:
+                data_in: Input data (audio samples, file paths, or text).
+                data_lengths: Lengths of each input sample in the batch.
+                key: Sample identifiers.
+                tokenizer: Tokenizer instance for text encoding/decoding.
+                frontend: Audio frontend for feature extraction.
+                **kwargs: Additional keyword arguments.
+            """
         decoding_model = kwargs.get("decoding_model", "normal")
         token_num_relax = kwargs.get("token_num_relax", 5)
         if decoding_model == "fast":

@@ -40,6 +40,11 @@ from funasr import AutoModel
 
 @hydra.main(config_name=None, version_base=None)
 def main_hydra(kwargs: DictConfig):
+    """Main hydra.
+    
+        Args:
+            kwargs: Additional keyword arguments.
+        """
     if kwargs.get("debug", False):
         import pdb
 
@@ -56,6 +61,11 @@ def main_hydra(kwargs: DictConfig):
 def main(**kwargs):
 
     # set random seed
+    """Main.
+    
+        Args:
+            **kwargs: Additional keyword arguments.
+        """
     set_all_random_seed(kwargs.get("seed", 0))
     torch.backends.cudnn.enabled = kwargs.get("cudnn_enabled", torch.backends.cudnn.enabled)
     torch.backends.cudnn.benchmark = kwargs.get("cudnn_benchmark", torch.backends.cudnn.benchmark)
@@ -137,6 +147,14 @@ def main(**kwargs):
             min_num_params: int = int(1e8),
         ) -> bool:
             # 根据自定义逻辑决定是否包装模块
+            """Custom auto wrap policy.
+            
+                Args:
+                    module: TODO.
+                    recurse: TODO.
+                    nonwrapped_numel: TODO.
+                    min_num_params: TODO.
+                """
             is_large = nonwrapped_numel >= min_num_params
             requires_grad_uniform = len({p.requires_grad for p in module.parameters()}) == 1
             return is_large and requires_grad_uniform

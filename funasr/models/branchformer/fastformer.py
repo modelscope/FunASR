@@ -20,6 +20,13 @@ class FastSelfAttention(torch.nn.Module):
         attention_heads,
         dropout_rate,
     ):
+        """Initialize FastSelfAttention.
+        
+            Args:
+                size: TODO.
+                attention_heads: TODO.
+                dropout_rate: TODO.
+            """
         super().__init__()
         if size % attention_heads != 0:
             raise ValueError(
@@ -37,9 +44,15 @@ class FastSelfAttention(torch.nn.Module):
         self.dropout = torch.nn.Dropout(dropout_rate)
 
     def espnet_initialization_fn(self):
+        """Espnet initialization fn."""
         self.apply(self.init_weights)
 
     def init_weights(self, module):
+        """Init weights.
+        
+            Args:
+                module: TODO.
+            """
         if isinstance(module, torch.nn.Linear):
             module.weight.data.normal_(mean=0.0, std=0.02)
         if isinstance(module, torch.nn.Linear) and module.bias is not None:

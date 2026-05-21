@@ -32,6 +32,17 @@ class Stft(torch.nn.Module):
         normalized: bool = False,
         onesided: bool = True,
     ):
+        """Initialize Stft.
+        
+            Args:
+                n_fft: TODO.
+                win_length: TODO.
+                hop_length: TODO.
+                window: TODO.
+                center: TODO.
+                normalized: TODO.
+                onesided: TODO.
+            """
         super().__init__()
         self.n_fft = n_fft
         if win_length is None:
@@ -48,6 +59,7 @@ class Stft(torch.nn.Module):
         self.window = window
 
     def extra_repr(self):
+        """Extra repr."""
         return (
             f"n_fft={self.n_fft}, "
             f"win_length={self.win_length}, "

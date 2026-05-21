@@ -31,6 +31,11 @@ else:
     # Nothing to do if torch<1.6.0
     @contextmanager
     def autocast(enabled=True):
+        """Autocast.
+        
+            Args:
+                enabled: TODO.
+            """
         yield
 
 
@@ -56,6 +61,19 @@ class CAMPPlus(torch.nn.Module):
         output_level="segment",
         **kwargs,
     ):
+        """Initialize CAMPPlus.
+        
+            Args:
+                feat_dim: Size/dimension parameter.
+                embedding_size: Size/dimension parameter.
+                growth_rate: TODO.
+                bn_size: Size/dimension parameter.
+                init_channels: TODO.
+                config_str: TODO.
+                memory_efficient: TODO.
+                output_level: TODO.
+                **kwargs: Additional keyword arguments.
+            """
         super().__init__()
 
         self.head = FCM(feat_dim=feat_dim)

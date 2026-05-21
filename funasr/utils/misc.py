@@ -8,6 +8,12 @@ from omegaconf import DictConfig, OmegaConf
 
 
 def statistic_model_parameters(model, prefix=None):
+    """Statistic model parameters.
+    
+        Args:
+            model: Model instance or model name.
+            prefix: TODO.
+        """
     var_dict = model.state_dict()
     numel = 0
     for i, key in enumerate(
@@ -19,16 +25,36 @@ def statistic_model_parameters(model, prefix=None):
 
 
 def int2vec(x, vec_dim=8, dtype=np.int32):
+    """Int2vec.
+    
+        Args:
+            x: TODO.
+            vec_dim: Size/dimension parameter.
+            dtype: TODO.
+        """
     b = ("{:0" + str(vec_dim) + "b}").format(x)
     # little-endian order: lower bit first
     return (np.array(list(b)[::-1]) == "1").astype(dtype)
 
 
 def seq2arr(seq, vec_dim=8):
+    """Seq2arr.
+    
+        Args:
+            seq: TODO.
+            vec_dim: Size/dimension parameter.
+        """
     return np.row_stack([int2vec(int(x), vec_dim) for x in seq])
 
 
 def load_scp_as_dict(scp_path, value_type="str", kv_sep=" "):
+    """Load scp as dict.
+    
+        Args:
+            scp_path: TODO.
+            value_type: TODO.
+            kv_sep: TODO.
+        """
     with io.open(scp_path, "r", encoding="utf-8") as f:
         ret_dict = OrderedDict()
         for one_line in f.readlines():
@@ -42,6 +68,13 @@ def load_scp_as_dict(scp_path, value_type="str", kv_sep=" "):
 
 
 def load_scp_as_list(scp_path, value_type="str", kv_sep=" "):
+    """Load scp as list.
+    
+        Args:
+            scp_path: TODO.
+            value_type: TODO.
+            kv_sep: TODO.
+        """
     with io.open(scp_path, "r", encoding="utf8") as f:
         ret_dict = []
         for one_line in f.readlines():
@@ -75,6 +108,11 @@ def deep_update(original, update):
 
 def prepare_model_dir(**kwargs):
 
+    """Prepare model dir.
+    
+        Args:
+            **kwargs: Additional keyword arguments.
+        """
     os.makedirs(kwargs.get("output_dir", "./"), exist_ok=True)
 
     yaml_file = os.path.join(kwargs.get("output_dir", "./"), "config.yaml")

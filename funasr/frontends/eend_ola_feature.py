@@ -8,6 +8,12 @@ import numpy as np
 
 
 def transform(Y, dtype=np.float32):
+    """Transform.
+    
+        Args:
+            Y: TODO.
+            dtype: TODO.
+        """
     Y = np.abs(Y)
     n_fft = 2 * (Y.shape[1] - 1)
     sr = 8000
@@ -21,12 +27,25 @@ def transform(Y, dtype=np.float32):
 
 
 def subsample(Y, T, subsampling=1):
+    """Subsample.
+    
+        Args:
+            Y: TODO.
+            T: TODO.
+            subsampling: TODO.
+        """
     Y_ss = Y[::subsampling]
     T_ss = T[::subsampling]
     return Y_ss, T_ss
 
 
 def splice(Y, context_size=0):
+    """Splice.
+    
+        Args:
+            Y: TODO.
+            context_size: Size/dimension parameter.
+        """
     Y_pad = np.pad(Y, [(context_size, context_size), (0, 0)], "constant")
     Y_spliced = np.lib.stride_tricks.as_strided(
         np.ascontiguousarray(Y_pad),
@@ -38,6 +57,13 @@ def splice(Y, context_size=0):
 
 
 def stft(data, frame_size=1024, frame_shift=256):
+    """Stft.
+    
+        Args:
+            data: TODO.
+            frame_size: Size/dimension parameter.
+            frame_shift: TODO.
+        """
     fft_size = 1 << (frame_size - 1).bit_length()
     if len(data) % frame_shift == 0:
         return librosa.stft(data, n_fft=fft_size, win_length=frame_size, hop_length=frame_shift).T[

@@ -41,10 +41,20 @@ def get_human_readable_count(number: int) -> str:
 
 def to_bytes(dtype) -> int:
     # torch.float16 -> 16
+    """To bytes.
+    
+        Args:
+            dtype: TODO.
+        """
     return int(str(dtype)[-2:]) // 8
 
 
 def model_summary(model: torch.nn.Module) -> str:
+    """Model summary.
+    
+        Args:
+            model: Model instance or model name.
+        """
     message = "Model structure:\n"
     message += str(model)
 

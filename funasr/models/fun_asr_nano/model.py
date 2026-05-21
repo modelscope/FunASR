@@ -57,6 +57,19 @@ class FunASRNano(nn.Module):
         length_normalized_loss: bool = False,
         **kwargs,
     ):
+        """Initialize FunASRNano.
+        
+            Args:
+                audio_encoder: TODO.
+                audio_encoder_conf: Configuration dict for audio_encoder.
+                audio_adaptor: TODO.
+                audio_adaptor_conf: Configuration dict for audio_adaptor.
+                llm: TODO.
+                llm_conf: Configuration dict for llm.
+                input_size: Size/dimension parameter.
+                length_normalized_loss: TODO.
+                **kwargs: Additional keyword arguments.
+            """
         super().__init__()
 
         # audio encoder
@@ -189,6 +202,18 @@ class FunASRNano(nn.Module):
         fbank_mask: torch.Tensor = None,
         **kwargs,
     ):
+        """Forward pass for training.
+        
+            Args:
+                speech: Speech audio tensor, shape (batch, time).
+                speech_lengths: Length of each speech sample.
+                input_ids: TODO.
+                attention_mask: TODO.
+                labels_ids: TODO.
+                fbank_beg: TODO.
+                fbank_mask: TODO.
+                **kwargs: Additional keyword arguments.
+            """
         batch_size, token_num = input_ids.shape
         stats = {}
         input_ids[input_ids < 0] = 0
@@ -290,17 +315,35 @@ class FunASRNano(nn.Module):
         return loss, stats, weight
 
     def forward_export(self, speech, speech_lengths, **kwargs):
+        """Forward export.
+        
+            Args:
+                speech: Speech audio tensor, shape (batch, time).
+                speech_lengths: Length of each speech sample.
+                **kwargs: Additional keyword arguments.
+            """
         x, olens = self.audio_encoder(speech, speech_lengths)
         encoder_out, encoder_out_lens = self.audio_adaptor(x, olens)
         return encoder_out, encoder_out_lens
 
     def encode(self, speech, speech_lengths):
         # audio encoder
+        """Encode.
+        
+            Args:
+                speech: Speech audio tensor, shape (batch, time).
+                speech_lengths: Length of each speech sample.
+            """
         encoder_out, encoder_out_lens = self.audio_encoder(speech, speech_lengths)
 
         return encoder_out, encoder_out_lens
 
     def data_template(self, data):
+        """Data template.
+        
+            Args:
+                data: TODO.
+            """
         system, user, assistant = [], [], []
         for i, item in enumerate(data):
             role = item["role"]
@@ -326,6 +369,15 @@ class FunASRNano(nn.Module):
         return contents
 
     def data_load_speech(self, contents: dict, tokenizer, frontend, meta_data={}, **kwargs):
+        """Data load speech.
+        
+            Args:
+                contents: TODO.
+                tokenizer: Tokenizer instance for text encoding/decoding.
+                frontend: Audio frontend for feature extraction.
+                meta_data: TODO.
+                **kwargs: Additional keyword arguments.
+            """
         system = contents["system"]
         user = contents["user"]
         assistant = contents["assistant"]
@@ -487,6 +539,16 @@ class FunASRNano(nn.Module):
         frontend=None,
         **kwargs,
     ):
+        """Inference prepare.
+        
+            Args:
+                data_in: Input data (audio samples, file paths, or text).
+                data_lengths: Lengths of each input sample in the batch.
+                key: Sample identifiers.
+                tokenizer: Tokenizer instance for text encoding/decoding.
+                frontend: Audio frontend for feature extraction.
+                **kwargs: Additional keyword arguments.
+            """
         meta_data = {}
 
         if len(data_in) > 1:
@@ -568,6 +630,13 @@ class FunASRNano(nn.Module):
         return inputs_embeds, contents, batch, source_ids, meta_data
 
     def get_prompt(self, hotwords: list[str], language: str = None, itn: bool = True):
+        """Get prompt.
+        
+            Args:
+                hotwords: TODO.
+                language: Language identifier.
+                itn: TODO.
+            """
         if len(hotwords) > 0:
             hotwords = ", ".join(hotwords)
             prompt = f"请结合上下文信息，更加准确地完成语音转写任务。如果没有相关信息，我们会留空。\n\n\n**上下文信息：**\n\n\n"
@@ -583,6 +652,12 @@ class FunASRNano(nn.Module):
         return prompt + "："
 
     def generate_chatml(self, prompt: str, data: Union[str, torch.Tensor]):
+        """Generate chatml.
+        
+            Args:
+                prompt: TODO.
+                data: TODO.
+            """
         if isinstance(data, str):
             return [
                 {"role": "system", "content": "You are a helpful assistant."},
@@ -609,6 +684,16 @@ class FunASRNano(nn.Module):
         frontend=None,
         **kwargs,
     ):
+        """Run inference on input data.
+        
+            Args:
+                data_in: Input data (audio samples, file paths, or text).
+                data_lengths: Lengths of each input sample in the batch.
+                key: Sample identifiers.
+                tokenizer: Tokenizer instance for text encoding/decoding.
+                frontend: Audio frontend for feature extraction.
+                **kwargs: Additional keyword arguments.
+            """
         prompt = self.get_prompt(
             kwargs.get("hotwords", []), kwargs.get("language", None), kwargs.get("itn", True)
         )
@@ -638,6 +723,16 @@ class FunASRNano(nn.Module):
         frontend=None,
         **kwargs,
     ):
+        """Inference llm.
+        
+            Args:
+                data_in: Input data (audio samples, file paths, or text).
+                data_lengths: Lengths of each input sample in the batch.
+                key: Sample identifiers.
+                tokenizer: Tokenizer instance for text encoding/decoding.
+                frontend: Audio frontend for feature extraction.
+                **kwargs: Additional keyword arguments.
+            """
         inputs_embeds, contents, batch, source_ids, meta_data = self.inference_prepare(
             data_in, data_lengths, key, tokenizer, frontend, **kwargs
         )
@@ -759,6 +854,12 @@ class FunASRNano(nn.Module):
 
     @staticmethod
     def from_pretrained(model: str = None, **kwargs):
+        """From pretrained.
+        
+            Args:
+                model: Model instance or model name.
+                **kwargs: Additional keyword arguments.
+            """
         from funasr import AutoModel
 
         model, kwargs = AutoModel.build_model(model=model, trust_remote_code=True, **kwargs)

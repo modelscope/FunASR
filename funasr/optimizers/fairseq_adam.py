@@ -46,6 +46,16 @@ class FairseqAdam(torch.optim.Optimizer):
         weight_decay=0,
         amsgrad=False,
     ):
+        """Initialize FairseqAdam.
+        
+            Args:
+                params: TODO.
+                lr: TODO.
+                adam_betas: TODO.
+                adam_eps: TODO.
+                weight_decay: TODO.
+                amsgrad: TODO.
+            """
         defaults = dict(
             lr=lr, betas=adam_betas, eps=adam_eps, weight_decay=weight_decay, amsgrad=amsgrad
         )
@@ -54,10 +64,12 @@ class FairseqAdam(torch.optim.Optimizer):
 
     @property
     def supports_memory_efficient_fp16(self):
+        """Supports memory efficient fp16."""
         return True
 
     @property
     def supports_flat_params(self):
+        """Supports flat params."""
         return True
 
     def step(self, closure=None):

@@ -50,6 +50,11 @@ class RegisterTables:
         """Decorator to register a class."""
 
         def decorator(target_class):
+            """Decorator.
+            
+                Args:
+                    target_class: TODO.
+                """
             if not hasattr(self, register_tables_key):
                 setattr(self, register_tables_key, {})
                 logging.debug(f"New registry table added: {register_tables_key}")

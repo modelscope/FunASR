@@ -16,6 +16,12 @@ from funasr.register import tables
 
 
 def exact_div(x, y):
+    """Exact div.
+    
+        Args:
+            x: TODO.
+            y: TODO.
+        """
     assert x % y == 0
     return x // y
 
@@ -35,6 +41,12 @@ TOKENS_PER_SECOND = exact_div(SAMPLE_RATE, N_SAMPLES_PER_TOKEN)  # 20ms per audi
 
 
 def get_T_after_cnn(L_in, dilation=1):
+    """Get t after cnn.
+    
+        Args:
+            L_in: TODO.
+            dilation: TODO.
+        """
     for padding, kernel_size, stride in eval("[(1,3,1)] + [(1,3,2)] "):
         L_out = L_in + 2 * padding - dilation * (kernel_size - 1) - 1
         L_out = 1 + L_out // stride
@@ -43,6 +55,12 @@ def get_T_after_cnn(L_in, dilation=1):
 
 
 def load_bytesio_audio(content, sr: int = SAMPLE_RATE):
+    """Load bytesio audio.
+    
+        Args:
+            content: TODO.
+            sr: TODO.
+        """
     cmd = [
         "ffmpeg",
         "-nostdin",
@@ -228,11 +246,21 @@ class ModelDimensions:
 class LayerNorm(nn.LayerNorm):
     def forward(self, x: Tensor) -> Tensor:
         # return super().forward(x.float()).type(x.dtype)
+        """Forward pass for training.
+        
+            Args:
+                x: TODO.
+            """
         return super().forward(x).type(x.dtype)
 
 
 class Linear(nn.Linear):
     def forward(self, x: Tensor) -> Tensor:
+        """Forward pass for training.
+        
+            Args:
+                x: TODO.
+            """
         return F.linear(
             x,
             self.weight.to(x.dtype),
@@ -242,6 +270,13 @@ class Linear(nn.Linear):
 
 class Conv1d(nn.Conv1d):
     def _conv_forward(self, x: Tensor, weight: Tensor, bias: Optional[Tensor]) -> Tensor:
+        """Internal: conv forward.
+        
+            Args:
+                x: TODO.
+                weight: TODO.
+                bias: TODO.
+            """
         return super()._conv_forward(
             x, weight.to(x.dtype), None if bias is None else bias.to(x.dtype)
         )
@@ -258,6 +293,12 @@ def sinusoids(length, channels, max_timescale=10000):
 
 class MultiHeadAttention(nn.Module):
     def __init__(self, n_state: int, n_head: int):
+        """Initialize MultiHeadAttention.
+        
+            Args:
+                n_state: TODO.
+                n_head: TODO.
+            """
         super().__init__()
         self.n_head = n_head
         self.query = Linear(n_state, n_state)
@@ -272,6 +313,14 @@ class MultiHeadAttention(nn.Module):
         mask: Optional[Tensor] = None,
         kv_cache: Optional[dict] = None,
     ):
+        """Forward pass for training.
+        
+            Args:
+                x: TODO.
+                xa: TODO.
+                mask: TODO.
+                kv_cache: TODO.
+            """
         q = self.query(x)
 
         if kv_cache is None or xa is None or self.key not in kv_cache:
@@ -288,6 +337,14 @@ class MultiHeadAttention(nn.Module):
         return self.out(wv), qk
 
     def qkv_attention(self, q: Tensor, k: Tensor, v: Tensor, mask: Optional[Tensor] = None):
+        """Qkv attention.
+        
+            Args:
+                q: TODO.
+                k: TODO.
+                v: TODO.
+                mask: TODO.
+            """
         n_batch, n_ctx, n_state = q.shape
         scale = (n_state // self.n_head) ** -0.25
         q = q.view(*q.shape[:2], self.n_head, -1).permute(0, 2, 1, 3) * scale
@@ -304,6 +361,13 @@ class MultiHeadAttention(nn.Module):
 
 class ResidualAttentionBlock(nn.Module):
     def __init__(self, n_state: int, n_head: int, cross_attention: bool = False):
+        """Initialize ResidualAttentionBlock.
+        
+            Args:
+                n_state: TODO.
+                n_head: TODO.
+                cross_attention: TODO.
+            """
         super().__init__()
 
         self.attn = MultiHeadAttention(n_state, n_head)
@@ -323,6 +387,14 @@ class ResidualAttentionBlock(nn.Module):
         mask: Optional[Tensor] = None,
         kv_cache: Optional[dict] = None,
     ):
+        """Forward pass for training.
+        
+            Args:
+                x: TODO.
+                xa: TODO.
+                mask: TODO.
+                kv_cache: TODO.
+            """
         x = x + self.attn(self.attn_ln(x), mask=mask, kv_cache=kv_cache)[0]
         if self.cross_attn:
             x = x + self.cross_attn(self.cross_attn_ln(x), xa, kv_cache=kv_cache)[0]
@@ -344,6 +416,19 @@ class QwenAudioEncoder(nn.Module):
         add_audio_bos_eos_token: bool = True,
         **kwargs,
     ):
+        """Initialize QwenAudioEncoder.
+        
+            Args:
+                n_mels: TODO.
+                n_ctx: TODO.
+                n_state: TODO.
+                n_head: TODO.
+                n_layer: TODO.
+                output_dim: Size/dimension parameter.
+                avg_pool: TODO.
+                add_audio_bos_eos_token: TODO.
+                **kwargs: Additional keyword arguments.
+            """
         super().__init__()
         self.conv1 = Conv1d(n_mels, n_state, kernel_size=3, padding=1)
         self.conv2 = Conv1d(n_state, n_state, kernel_size=3, stride=2, padding=1)
@@ -423,6 +508,13 @@ class QwenAudioEncoder(nn.Module):
         return x, bos, eos
 
     def encode(self, input_audios: Tensor, input_audio_lengths: Tensor, audio_span_tokens: List):
+        """Encode.
+        
+            Args:
+                input_audios: TODO.
+                input_audio_lengths: Lengths of input_audio.
+                audio_span_tokens: TODO.
+            """
         real_input_audio_lens = input_audio_lengths[:, 0].tolist()
         max_len_in_batch = max(real_input_audio_lens)
         padding_mask = torch.ones([input_audios.size(0), max_len_in_batch]).to(

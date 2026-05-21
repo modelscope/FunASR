@@ -66,11 +66,24 @@ class LabelSmoothingLoss(nn.Module):
 
 class SequenceBinaryCrossEntropy(nn.Module):
     def __init__(self, normalize_length=False, criterion=nn.BCEWithLogitsLoss(reduction="none")):
+        """Initialize SequenceBinaryCrossEntropy.
+        
+            Args:
+                normalize_length: TODO.
+                criterion: TODO.
+            """
         super().__init__()
         self.normalize_length = normalize_length
         self.criterion = criterion
 
     def forward(self, pred, label, lengths):
+        """Forward pass for training.
+        
+            Args:
+                pred: TODO.
+                label: TODO.
+                lengths: TODO.
+            """
         pad_mask = make_pad_mask(lengths, maxlen=pred.shape[1]).to(pred.device)
         loss = self.criterion(pred, label)
         denom = (~pad_mask).sum() if self.normalize_length else pred.shape[0]

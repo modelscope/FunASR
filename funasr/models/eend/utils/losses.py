@@ -5,6 +5,12 @@ from scipy.optimize import linear_sum_assignment
 
 
 def standard_loss(ys, ts):
+    """Standard loss.
+    
+        Args:
+            ys: TODO.
+            ts: TODO.
+        """
     losses = [F.binary_cross_entropy(torch.sigmoid(y), t) * len(y) for y, t in zip(ys, ts)]
     loss = torch.sum(torch.stack(losses))
     n_frames = (
@@ -17,6 +23,12 @@ def standard_loss(ys, ts):
 
 
 def fast_batch_pit_n_speaker_loss(ys, ts):
+    """Fast batch pit n speaker loss.
+    
+        Args:
+            ys: TODO.
+            ts: TODO.
+        """
     with torch.no_grad():
         bs = len(ys)
         indices = []
@@ -35,6 +47,12 @@ def fast_batch_pit_n_speaker_loss(ys, ts):
 
 
 def cal_power_loss(logits, power_ts):
+    """Cal power loss.
+    
+        Args:
+            logits: TODO.
+            power_ts: TODO.
+        """
     losses = [
         F.cross_entropy(input=logit, target=power_t.to(torch.long)) * len(logit)
         for logit, power_t in zip(logits, power_ts)

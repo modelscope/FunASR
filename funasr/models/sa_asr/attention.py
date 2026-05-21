@@ -23,6 +23,7 @@ class CosineDistanceAttention(nn.Module):
     """
 
     def __init__(self):
+        """Initialize CosineDistanceAttention."""
         super().__init__()
         self.softmax = nn.Softmax(dim=-1)
 

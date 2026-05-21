@@ -26,6 +26,18 @@ class CifPredictor(torch.nn.Module):
         noise_threshold=0,
         tail_threshold=0.45,
     ):
+        """Initialize CifPredictor.
+        
+            Args:
+                idim: TODO.
+                l_order: TODO.
+                r_order: TODO.
+                threshold: TODO.
+                dropout: TODO.
+                smooth_factor: TODO.
+                noise_threshold: TODO.
+                tail_threshold: TODO.
+            """
         super().__init__()
 
         self.pad = torch.nn.ConstantPad1d((l_order, r_order), 0)
@@ -47,6 +59,16 @@ class CifPredictor(torch.nn.Module):
         target_label_length=None,
     ):
 
+        """Forward pass for training.
+        
+            Args:
+                hidden: TODO.
+                target_label: TODO.
+                mask: TODO.
+                ignore_id: TODO.
+                mask_chunk_predictor: TODO.
+                target_label_length: TODO.
+            """
         with autocast(False):
             h = hidden
             context = h.transpose(1, 2)
@@ -89,6 +111,14 @@ class CifPredictor(torch.nn.Module):
         return acoustic_embeds, token_num, alphas, cif_peak
 
     def tail_process_fn(self, hidden, alphas, token_num=None, mask=None):
+        """Tail process fn.
+        
+            Args:
+                hidden: TODO.
+                alphas: TODO.
+                token_num: TODO.
+                mask: TODO.
+            """
         b, t, d = hidden.size()
         tail_threshold = self.tail_threshold
         if mask is not None:
@@ -114,6 +144,12 @@ class CifPredictor(torch.nn.Module):
     def gen_frame_alignments(
         self, alphas: torch.Tensor = None, encoder_sequence_length: torch.Tensor = None
     ):
+        """Gen frame alignments.
+        
+            Args:
+                alphas: TODO.
+                encoder_sequence_length: TODO.
+            """
         batch_size, maximum_length = alphas.size()
         int_type = torch.int32
 
@@ -185,6 +221,21 @@ class CifPredictorV2(torch.nn.Module):
         tf2torch_tensor_name_prefix_tf="seq2seq/cif",
         tail_mask=True,
     ):
+        """Initialize CifPredictorV2.
+        
+            Args:
+                idim: TODO.
+                l_order: TODO.
+                r_order: TODO.
+                threshold: TODO.
+                dropout: TODO.
+                smooth_factor: TODO.
+                noise_threshold: TODO.
+                tail_threshold: TODO.
+                tf2torch_tensor_name_prefix_torch: TODO.
+                tf2torch_tensor_name_prefix_tf: TODO.
+                tail_mask: TODO.
+            """
         super().__init__()
 
         self.pad = torch.nn.ConstantPad1d((l_order, r_order), 0)
@@ -209,6 +260,16 @@ class CifPredictorV2(torch.nn.Module):
         target_label_length=None,
     ):
 
+        """Forward pass for training.
+        
+            Args:
+                hidden: TODO.
+                target_label: TODO.
+                mask: TODO.
+                ignore_id: TODO.
+                mask_chunk_predictor: TODO.
+                target_label_length: TODO.
+            """
         with autocast(False):
             h = hidden
             context = h.transpose(1, 2)
@@ -253,6 +314,13 @@ class CifPredictorV2(torch.nn.Module):
         return acoustic_embeds, token_num, alphas, cif_peak
 
     def forward_chunk(self, hidden, cache=None, **kwargs):
+        """Forward chunk.
+        
+            Args:
+                hidden: TODO.
+                cache: State cache dict for streaming inference.
+                **kwargs: Additional keyword arguments.
+            """
         is_final = kwargs.get("is_final", False)
         batch_size, len_time, hidden_size = hidden.shape
         h = hidden
@@ -344,6 +412,14 @@ class CifPredictorV2(torch.nn.Module):
         return torch.stack(list_ls, 0), torch.stack(token_length, 0), None, None
 
     def tail_process_fn(self, hidden, alphas, token_num=None, mask=None):
+        """Tail process fn.
+        
+            Args:
+                hidden: TODO.
+                alphas: TODO.
+                token_num: TODO.
+                mask: TODO.
+            """
         b, t, d = hidden.size()
         tail_threshold = self.tail_threshold
         if mask is not None:
@@ -372,6 +448,12 @@ class CifPredictorV2(torch.nn.Module):
     def gen_frame_alignments(
         self, alphas: torch.Tensor = None, encoder_sequence_length: torch.Tensor = None
     ):
+        """Gen frame alignments.
+        
+            Args:
+                alphas: TODO.
+                encoder_sequence_length: TODO.
+            """
         batch_size, maximum_length = alphas.size()
         int_type = torch.int32
 
@@ -430,6 +512,12 @@ class CifPredictorV2(torch.nn.Module):
 @tables.register("predictor_classes", "CifPredictorV2Export")
 class CifPredictorV2Export(torch.nn.Module):
     def __init__(self, model, **kwargs):
+        """Initialize CifPredictorV2Export.
+        
+            Args:
+                model: Model instance or model name.
+                **kwargs: Additional keyword arguments.
+            """
         super().__init__()
 
         self.pad = model.pad
@@ -445,6 +533,12 @@ class CifPredictorV2Export(torch.nn.Module):
         hidden: torch.Tensor,
         mask: torch.Tensor,
     ):
+        """Forward pass for training.
+        
+            Args:
+                hidden: TODO.
+                mask: TODO.
+            """
         alphas, token_num = self.forward_cnn(hidden, mask)
         mask = mask.transpose(-1, -2).float()
         mask = mask.squeeze(-1)
@@ -458,6 +552,12 @@ class CifPredictorV2Export(torch.nn.Module):
         hidden: torch.Tensor,
         mask: torch.Tensor,
     ):
+        """Forward cnn.
+        
+            Args:
+                hidden: TODO.
+                mask: TODO.
+            """
         h = hidden
         context = h.transpose(1, 2)
         queries = self.pad(context)
@@ -475,6 +575,14 @@ class CifPredictorV2Export(torch.nn.Module):
         return alphas, token_num
 
     def tail_process_fn(self, hidden, alphas, token_num=None, mask=None):
+        """Tail process fn.
+        
+            Args:
+                hidden: TODO.
+                alphas: TODO.
+                token_num: TODO.
+                mask: TODO.
+            """
         b, t, d = hidden.size()
         tail_threshold = self.tail_threshold
 
@@ -498,6 +606,13 @@ class CifPredictorV2Export(torch.nn.Module):
 
 @torch.jit.script
 def cif_v1_export(hidden, alphas, threshold: float):
+    """Cif v1 export.
+    
+        Args:
+            hidden: TODO.
+            alphas: TODO.
+            threshold: TODO.
+        """
     device = hidden.device
     dtype = hidden.dtype
     batch_size, len_time, hidden_size = hidden.size()
@@ -555,6 +670,13 @@ def cif_v1_export(hidden, alphas, threshold: float):
 
 @torch.jit.script
 def cif_export(hidden, alphas, threshold: float):
+    """Cif export.
+    
+        Args:
+            hidden: TODO.
+            alphas: TODO.
+            threshold: TODO.
+        """
     batch_size, len_time, hidden_size = hidden.size()
     threshold = torch.tensor([threshold], dtype=alphas.dtype).to(alphas.device)
 
@@ -609,11 +731,22 @@ def cif_export(hidden, alphas, threshold: float):
 class mae_loss(torch.nn.Module):
 
     def __init__(self, normalize_length=False):
+        """Initialize mae_loss.
+        
+            Args:
+                normalize_length: TODO.
+            """
         super(mae_loss, self).__init__()
         self.normalize_length = normalize_length
         self.criterion = torch.nn.L1Loss(reduction="sum")
 
     def forward(self, token_length, pre_token_length):
+        """Forward pass for training.
+        
+            Args:
+                token_length: TODO.
+                pre_token_length: TODO.
+            """
         loss_token_normalizer = token_length.size(0)
         if self.normalize_length:
             loss_token_normalizer = token_length.sum().type(torch.float32)
@@ -623,6 +756,13 @@ class mae_loss(torch.nn.Module):
 
 
 def cif(hidden, alphas, threshold):
+    """Cif.
+    
+        Args:
+            hidden: TODO.
+            alphas: TODO.
+            threshold: TODO.
+        """
     batch_size, len_time, hidden_size = hidden.size()
 
     # loop varss
@@ -666,6 +806,13 @@ def cif(hidden, alphas, threshold):
 
 
 def cif_wo_hidden_v1(alphas, threshold, return_fire_idxs=False):
+    """Cif wo hidden v1.
+    
+        Args:
+            alphas: TODO.
+            threshold: TODO.
+            return_fire_idxs: TODO.
+        """
     batch_size, len_time = alphas.size()
     device = alphas.device
     dtype = alphas.dtype
@@ -694,6 +841,13 @@ def cif_wo_hidden_v1(alphas, threshold, return_fire_idxs=False):
 
 
 def cif_v1(hidden, alphas, threshold):
+    """Cif v1.
+    
+        Args:
+            hidden: TODO.
+            alphas: TODO.
+            threshold: TODO.
+        """
     fires, fire_idxs = cif_wo_hidden_v1(alphas, threshold, return_fire_idxs=True)
 
     device = hidden.device
@@ -736,6 +890,12 @@ def cif_v1(hidden, alphas, threshold):
 
 
 def cif_wo_hidden(alphas, threshold):
+    """Cif wo hidden.
+    
+        Args:
+            alphas: TODO.
+            threshold: TODO.
+        """
     batch_size, len_time = alphas.size()
 
     # loop varss

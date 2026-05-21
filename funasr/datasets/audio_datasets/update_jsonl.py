@@ -13,6 +13,13 @@ from concurrent.futures import ThreadPoolExecutor
 
 
 def gen_scp_from_jsonl(jsonl_file, jsonl_file_out, ncpu):
+    """Gen scp from jsonl.
+    
+        Args:
+            jsonl_file: TODO.
+            jsonl_file_out: TODO.
+            ncpu: TODO.
+        """
     jsonl_file_out_f = open(jsonl_file_out, "w")
     with open(jsonl_file, encoding="utf-8") as fin:
         lines = fin.readlines()
@@ -42,6 +49,12 @@ def gen_scp_from_jsonl(jsonl_file, jsonl_file_out, ncpu):
 
 
 def update_data(lines, i):
+    """Update data.
+    
+        Args:
+            lines: TODO.
+            i: TODO.
+        """
     line = lines[i]
     data = json.loads(line.strip())
 
@@ -61,6 +74,13 @@ def update_data(lines, i):
 
 def update_wav_len(jsonl_file_list_in, jsonl_file_out_dir, ncpu=1):
 
+    """Update wav len.
+    
+        Args:
+            jsonl_file_list_in: TODO.
+            jsonl_file_out_dir: TODO.
+            ncpu: TODO.
+        """
     os.makedirs(jsonl_file_out_dir, exist_ok=True)
     with open(jsonl_file_list_in, "r") as f:
         data_file_lists = f.readlines()
@@ -76,6 +96,11 @@ def update_wav_len(jsonl_file_list_in, jsonl_file_out_dir, ncpu=1):
 @hydra.main(config_name=None, version_base=None)
 def main_hydra(cfg: DictConfig):
 
+    """Main hydra.
+    
+        Args:
+            cfg: Configuration overrides.
+        """
     kwargs = OmegaConf.to_container(cfg, resolve=True)
     logging.info(kwargs)
 

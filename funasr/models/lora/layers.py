@@ -18,6 +18,14 @@ class LoRALayer:
         lora_dropout: float,
         merge_weights: bool,
     ):
+        """Initialize LoRALayer.
+        
+            Args:
+                r: TODO.
+                lora_alpha: TODO.
+                lora_dropout: TODO.
+                merge_weights: TODO.
+            """
         self.r = r
         self.lora_alpha = lora_alpha
         # Optional dropout
@@ -41,6 +49,16 @@ class Embedding(nn.Embedding, LoRALayer):
         merge_weights: bool = True,
         **kwargs
     ):
+        """Initialize Embedding.
+        
+            Args:
+                num_embeddings: TODO.
+                embedding_dim: Size/dimension parameter.
+                r: TODO.
+                lora_alpha: TODO.
+                merge_weights: TODO.
+                **kwargs: Additional keyword arguments.
+            """
         nn.Embedding.__init__(self, num_embeddings, embedding_dim, **kwargs)
         LoRALayer.__init__(
             self, r=r, lora_alpha=lora_alpha, lora_dropout=0, merge_weights=merge_weights
@@ -55,6 +73,7 @@ class Embedding(nn.Embedding, LoRALayer):
         self.reset_parameters()
 
     def reset_parameters(self):
+        """Reset parameters."""
         nn.Embedding.reset_parameters(self)
         if hasattr(self, "lora_A"):
             # initialize A the same way as the default for nn.Linear and B to zero
@@ -62,6 +81,11 @@ class Embedding(nn.Embedding, LoRALayer):
             nn.init.normal_(self.lora_B)
 
     def train(self, mode: bool = True):
+        """Train.
+        
+            Args:
+                mode: TODO.
+            """
         nn.Embedding.train(self, mode)
         if self.merge_weights and self.merged:
             # Make sure that the weights are not merged
@@ -70,6 +94,7 @@ class Embedding(nn.Embedding, LoRALayer):
             self.merged = False
 
     def eval(self):
+        """Eval."""
         nn.Linear.eval(self)
         if self.merge_weights and not self.merged:
             # Merge the weights and mark it
@@ -78,6 +103,11 @@ class Embedding(nn.Embedding, LoRALayer):
             self.merged = True
 
     def forward(self, x: torch.Tensor):
+        """Forward pass for training.
+        
+            Args:
+                x: TODO.
+            """
         if self.r > 0 and not self.merged:
             result = nn.Embedding.forward(self, x)
             if self.r > 0:
@@ -109,6 +139,18 @@ class Linear(nn.Linear, LoRALayer):
         merge_weights: bool = True,
         **kwargs
     ):
+        """Initialize Linear.
+        
+            Args:
+                in_features: TODO.
+                out_features: TODO.
+                r: TODO.
+                lora_alpha: TODO.
+                lora_dropout: TODO.
+                fan_in_fan_out: TODO.
+                merge_weights: TODO.
+                **kwargs: Additional keyword arguments.
+            """
         nn.Linear.__init__(self, in_features, out_features, **kwargs)
         LoRALayer.__init__(
             self, r=r, lora_alpha=lora_alpha, lora_dropout=lora_dropout, merge_weights=merge_weights
@@ -127,6 +169,7 @@ class Linear(nn.Linear, LoRALayer):
             self.weight.data = self.weight.data.T
 
     def reset_parameters(self):
+        """Reset parameters."""
         nn.Linear.reset_parameters(self)
         if hasattr(self, "lora_A"):
             # initialize A the same way as the default for nn.Linear and B to zero
@@ -134,7 +177,17 @@ class Linear(nn.Linear, LoRALayer):
             nn.init.zeros_(self.lora_B)
 
     def train(self, mode: bool = True):
+        """Train.
+        
+            Args:
+                mode: TODO.
+            """
         def T(w):
+            """T.
+            
+                Args:
+                    w: TODO.
+                """
             return w.T if self.fan_in_fan_out else w
 
         nn.Linear.train(self, mode)
@@ -145,7 +198,13 @@ class Linear(nn.Linear, LoRALayer):
             self.merged = False
 
     def eval(self):
+        """Eval."""
         def T(w):
+            """T.
+            
+                Args:
+                    w: TODO.
+                """
             return w.T if self.fan_in_fan_out else w
 
         nn.Linear.eval(self)
@@ -156,7 +215,17 @@ class Linear(nn.Linear, LoRALayer):
             self.merged = True
 
     def forward(self, x: torch.Tensor):
+        """Forward pass for training.
+        
+            Args:
+                x: TODO.
+            """
         def T(w):
+            """T.
+            
+                Args:
+                    w: TODO.
+                """
             return w.T if self.fan_in_fan_out else w
 
         if self.r > 0 and not self.merged:
@@ -182,6 +251,19 @@ class MergedLinear(nn.Linear, LoRALayer):
         merge_weights: bool = True,
         **kwargs
     ):
+        """Initialize MergedLinear.
+        
+            Args:
+                in_features: TODO.
+                out_features: TODO.
+                r: TODO.
+                lora_alpha: TODO.
+                lora_dropout: TODO.
+                enable_lora: TODO.
+                fan_in_fan_out: TODO.
+                merge_weights: TODO.
+                **kwargs: Additional keyword arguments.
+            """
         nn.Linear.__init__(self, in_features, out_features, **kwargs)
         LoRALayer.__init__(
             self, r=r, lora_alpha=lora_alpha, lora_dropout=lora_dropout, merge_weights=merge_weights
@@ -211,6 +293,7 @@ class MergedLinear(nn.Linear, LoRALayer):
             self.weight.data = self.weight.data.T
 
     def reset_parameters(self):
+        """Reset parameters."""
         nn.Linear.reset_parameters(self)
         if hasattr(self, "lora_A"):
             # initialize A the same way as the default for nn.Linear and B to zero
@@ -218,6 +301,11 @@ class MergedLinear(nn.Linear, LoRALayer):
             nn.init.zeros_(self.lora_B)
 
     def zero_pad(self, x):
+        """Zero pad.
+        
+            Args:
+                x: TODO.
+            """
         result = x.new_zeros((*x.shape[:-1], self.out_features))
         result = result.view(-1, self.out_features)
         result[:, self.lora_ind] = x.reshape(
@@ -226,7 +314,17 @@ class MergedLinear(nn.Linear, LoRALayer):
         return result.view((*x.shape[:-1], self.out_features))
 
     def train(self, mode: bool = True):
+        """Train.
+        
+            Args:
+                mode: TODO.
+            """
         def T(w):
+            """T.
+            
+                Args:
+                    w: TODO.
+                """
             return w.T if self.fan_in_fan_out else w
 
         nn.Linear.train(self, mode)
@@ -242,7 +340,13 @@ class MergedLinear(nn.Linear, LoRALayer):
             self.merged = False
 
     def eval(self):
+        """Eval."""
         def T(w):
+            """T.
+            
+                Args:
+                    w: TODO.
+                """
             return w.T if self.fan_in_fan_out else w
 
         nn.Linear.eval(self)
@@ -258,7 +362,17 @@ class MergedLinear(nn.Linear, LoRALayer):
             self.merged = True
 
     def forward(self, x: torch.Tensor):
+        """Forward pass for training.
+        
+            Args:
+                x: TODO.
+            """
         def T(w):
+            """T.
+            
+                Args:
+                    w: TODO.
+                """
             return w.T if self.fan_in_fan_out else w
 
         if self.merged:
@@ -289,6 +403,18 @@ class Conv2d(nn.Conv2d, LoRALayer):
         merge_weights: bool = True,
         **kwargs
     ):
+        """Initialize Conv2d.
+        
+            Args:
+                in_channels: TODO.
+                out_channels: TODO.
+                kernel_size: Size/dimension parameter.
+                r: TODO.
+                lora_alpha: TODO.
+                lora_dropout: TODO.
+                merge_weights: TODO.
+                **kwargs: Additional keyword arguments.
+            """
         nn.Conv2d.__init__(self, in_channels, out_channels, kernel_size, **kwargs)
         LoRALayer.__init__(
             self, r=r, lora_alpha=lora_alpha, lora_dropout=lora_dropout, merge_weights=merge_weights
@@ -308,6 +434,7 @@ class Conv2d(nn.Conv2d, LoRALayer):
         self.reset_parameters()
 
     def reset_parameters(self):
+        """Reset parameters."""
         nn.Conv2d.reset_parameters(self)
         if hasattr(self, "lora_A"):
             # initialize A the same way as the default for nn.Linear and B to zero
@@ -315,6 +442,11 @@ class Conv2d(nn.Conv2d, LoRALayer):
             nn.init.zeros_(self.lora_B)
 
     def train(self, mode: bool = True):
+        """Train.
+        
+            Args:
+                mode: TODO.
+            """
         nn.Conv2d.train(self, mode)
         if self.merge_weights and self.merged:
             # Make sure that the weights are not merged
@@ -322,6 +454,7 @@ class Conv2d(nn.Conv2d, LoRALayer):
             self.merged = False
 
     def eval(self):
+        """Eval."""
         nn.Conv2d.eval(self)
         if self.merge_weights and not self.merged:
             # Merge the weights and mark it
@@ -329,6 +462,11 @@ class Conv2d(nn.Conv2d, LoRALayer):
             self.merged = True
 
     def forward(self, x: torch.Tensor):
+        """Forward pass for training.
+        
+            Args:
+                x: TODO.
+            """
         if self.r > 0 and not self.merged:
             return F.conv2d(
                 x,

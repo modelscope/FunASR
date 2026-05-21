@@ -12,21 +12,42 @@ if system_encoding != "utf-8":
     def make_safe(string):
         # replaces any character not representable using the system default encoding with an '?',
         # avoiding UnicodeEncodeError (https://github.com/openai/whisper/discussions/729).
+        """Make safe.
+        
+            Args:
+                string: TODO.
+            """
         return string.encode(system_encoding, errors="replace").decode(system_encoding)
 
 else:
 
     def make_safe(string):
         # utf-8 can encode any Unicode code point, so no need to do the round-trip encoding
+        """Make safe.
+        
+            Args:
+                string: TODO.
+            """
         return string
 
 
 def exact_div(x, y):
+    """Exact div.
+    
+        Args:
+            x: TODO.
+            y: TODO.
+        """
     assert x % y == 0
     return x // y
 
 
 def str2bool(string):
+    """Str2bool.
+    
+        Args:
+            string: TODO.
+        """
     str2val = {"True": True, "False": False}
     if string in str2val:
         return str2val[string]
@@ -35,19 +56,41 @@ def str2bool(string):
 
 
 def optional_int(string):
+    """Optional int.
+    
+        Args:
+            string: TODO.
+        """
     return None if string == "None" else int(string)
 
 
 def optional_float(string):
+    """Optional float.
+    
+        Args:
+            string: TODO.
+        """
     return None if string == "None" else float(string)
 
 
 def compression_ratio(text) -> float:
+    """Compression ratio.
+    
+        Args:
+            text: Text tensor or string input.
+        """
     text_bytes = text.encode("utf-8")
     return len(text_bytes) / len(zlib.compress(text_bytes))
 
 
 def format_timestamp(seconds: float, always_include_hours: bool = False, decimal_marker: str = "."):
+    """Format timestamp.
+    
+        Args:
+            seconds: TODO.
+            always_include_hours: TODO.
+            decimal_marker: TODO.
+        """
     assert seconds >= 0, "non-negative timestamp expected"
     milliseconds = round(seconds * 1000.0)
 
@@ -65,6 +108,11 @@ def format_timestamp(seconds: float, always_include_hours: bool = False, decimal
 
 
 def get_start(segments: List[dict]) -> Optional[float]:
+    """Get start.
+    
+        Args:
+            segments: TODO.
+        """
     return next(
         (w["start"] for s in segments for w in s["words"]),
         segments[0]["start"] if segments else None,
@@ -72,6 +120,11 @@ def get_start(segments: List[dict]) -> Optional[float]:
 
 
 def get_end(segments: List[dict]) -> Optional[float]:
+    """Get end.
+    
+        Args:
+            segments: TODO.
+        """
     return next(
         (w["end"] for s in reversed(segments) for w in reversed(s["words"])),
         segments[-1]["end"] if segments else None,
@@ -82,9 +135,22 @@ class ResultWriter:
     extension: str
 
     def __init__(self, output_dir: str):
+        """Initialize ResultWriter.
+        
+            Args:
+                output_dir: Directory for saving output files.
+            """
         self.output_dir = output_dir
 
     def __call__(self, result: dict, audio_path: str, options: Optional[dict] = None, **kwargs):
+        """Internal: call  .
+        
+            Args:
+                result: TODO.
+                audio_path: TODO.
+                options: TODO.
+                **kwargs: Additional keyword arguments.
+            """
         audio_basename = os.path.basename(audio_path)
         audio_basename = os.path.splitext(audio_basename)[0]
         output_path = os.path.join(self.output_dir, audio_basename + "." + self.extension)
@@ -93,6 +159,14 @@ class ResultWriter:
             self.write_result(result, file=f, options=options, **kwargs)
 
     def write_result(self, result: dict, file: TextIO, options: Optional[dict] = None, **kwargs):
+        """Write result.
+        
+            Args:
+                result: TODO.
+                file: TODO.
+                options: TODO.
+                **kwargs: Additional keyword arguments.
+            """
         raise NotImplementedError
 
 
@@ -100,6 +174,14 @@ class WriteTXT(ResultWriter):
     extension: str = "txt"
 
     def write_result(self, result: dict, file: TextIO, options: Optional[dict] = None, **kwargs):
+        """Write result.
+        
+            Args:
+                result: TODO.
+                file: TODO.
+                options: TODO.
+                **kwargs: Additional keyword arguments.
+            """
         for segment in result["segments"]:
             print(segment["text"].strip(), file=file, flush=True)
 
@@ -118,6 +200,12 @@ class SubtitlesWriter(ResultWriter):
         highlight_words: bool = False,
         max_words_per_line: Optional[int] = None,
     ):
+        """Iterate result.
+        
+            Args:
+                result: TODO.
+                options: TODO.
+            """
         options = options or {}
         max_line_width = max_line_width or options.get("max_line_width")
         max_line_count = max_line_count or options.get("max_line_count")
@@ -128,6 +216,7 @@ class SubtitlesWriter(ResultWriter):
         max_words_per_line = max_words_per_line or 1000
 
         def iterate_subtitles():
+            """Iterate subtitles."""
             line_len = 0
             line_count = 1
             # the next subtitle to yield (a list of word timings with whitespace)
@@ -205,6 +294,11 @@ class SubtitlesWriter(ResultWriter):
                 yield segment_start, segment_end, segment_text
 
     def format_timestamp(self, seconds: float):
+        """Format timestamp.
+        
+            Args:
+                seconds: TODO.
+            """
         return format_timestamp(
             seconds=seconds,
             always_include_hours=self.always_include_hours,
@@ -218,6 +312,14 @@ class WriteVTT(SubtitlesWriter):
     decimal_marker: str = "."
 
     def write_result(self, result: dict, file: TextIO, options: Optional[dict] = None, **kwargs):
+        """Write result.
+        
+            Args:
+                result: TODO.
+                file: TODO.
+                options: TODO.
+                **kwargs: Additional keyword arguments.
+            """
         print("WEBVTT\n", file=file)
         for start, end, text in self.iterate_result(result, options, **kwargs):
             print(f"{start} --> {end}\n{text}\n", file=file, flush=True)
@@ -229,6 +331,14 @@ class WriteSRT(SubtitlesWriter):
     decimal_marker: str = ","
 
     def write_result(self, result: dict, file: TextIO, options: Optional[dict] = None, **kwargs):
+        """Write result.
+        
+            Args:
+                result: TODO.
+                file: TODO.
+                options: TODO.
+                **kwargs: Additional keyword arguments.
+            """
         for i, (start, end, text) in enumerate(
             self.iterate_result(result, options, **kwargs), start=1
         ):
@@ -248,6 +358,14 @@ class WriteTSV(ResultWriter):
     extension: str = "tsv"
 
     def write_result(self, result: dict, file: TextIO, options: Optional[dict] = None, **kwargs):
+        """Write result.
+        
+            Args:
+                result: TODO.
+                file: TODO.
+                options: TODO.
+                **kwargs: Additional keyword arguments.
+            """
         print("start", "end", "text", sep="\t", file=file)
         for segment in result["segments"]:
             print(round(1000 * segment["start"]), file=file, end="\t")
@@ -259,10 +377,24 @@ class WriteJSON(ResultWriter):
     extension: str = "json"
 
     def write_result(self, result: dict, file: TextIO, options: Optional[dict] = None, **kwargs):
+        """Write result.
+        
+            Args:
+                result: TODO.
+                file: TODO.
+                options: TODO.
+                **kwargs: Additional keyword arguments.
+            """
         json.dump(result, file)
 
 
 def get_writer(output_format: str, output_dir: str) -> Callable[[dict, TextIO, dict], None]:
+    """Get writer.
+    
+        Args:
+            output_format: TODO.
+            output_dir: Directory for saving output files.
+        """
     writers = {
         "txt": WriteTXT,
         "vtt": WriteVTT,
@@ -275,6 +407,14 @@ def get_writer(output_format: str, output_dir: str) -> Callable[[dict, TextIO, d
         all_writers = [writer(output_dir) for writer in writers.values()]
 
         def write_all(result: dict, file: TextIO, options: Optional[dict] = None, **kwargs):
+            """Write all.
+            
+                Args:
+                    result: TODO.
+                    file: TODO.
+                    options: TODO.
+                    **kwargs: Additional keyword arguments.
+                """
             for writer in all_writers:
                 writer(result, file, options, **kwargs)
 

@@ -31,6 +31,11 @@ else:
     # Nothing to do if torch<1.6.0
     @contextmanager
     def autocast(enabled=True):
+        """Autocast.
+        
+            Args:
+                enabled: TODO.
+            """
         yield
 
 
@@ -48,6 +53,12 @@ class ParaformerStreaming(Paraformer):
         **kwargs,
     ):
 
+        """Initialize ParaformerStreaming.
+        
+            Args:
+                *args: Variable positional arguments.
+                **kwargs: Additional keyword arguments.
+            """
         super().__init__(*args, **kwargs)
 
         self.sampling_ratio = kwargs.get("sampling_ratio", 0.2)
@@ -155,6 +166,14 @@ class ParaformerStreaming(Paraformer):
         cache: dict = None,
         **kwargs,
     ) -> Tuple[torch.Tensor, torch.Tensor]:
+        """Encode chunk.
+        
+            Args:
+                speech: Speech audio tensor, shape (batch, time).
+                speech_lengths: Length of each speech sample.
+                cache: State cache dict for streaming inference.
+                **kwargs: Additional keyword arguments.
+            """
         if cache is None:
             cache = {}
         """Frontend + Encoder. Note that this method is used by asr_inference.py
@@ -189,6 +208,14 @@ class ParaformerStreaming(Paraformer):
         ys_pad: torch.Tensor,
         ys_pad_lens: torch.Tensor,
     ):
+        """Internal: calc att predictor loss.
+        
+            Args:
+                encoder_out: Encoder output tensor.
+                encoder_out_lens: Encoder output lengths.
+                ys_pad: TODO.
+                ys_pad_lens: Lengths of ys_pad.
+            """
         encoder_out_mask = (
             ~make_pad_mask(encoder_out_lens, maxlen=encoder_out.size(1))[:, None, :]
         ).to(encoder_out.device)
@@ -313,6 +340,16 @@ class ParaformerStreaming(Paraformer):
         chunk_mask=None,
     ):
 
+        """Sampler.
+        
+            Args:
+                encoder_out: Encoder output tensor.
+                encoder_out_lens: Encoder output lengths.
+                ys_pad: TODO.
+                ys_pad_lens: Lengths of ys_pad.
+                pre_acoustic_embeds: TODO.
+                chunk_mask: TODO.
+            """
         tgt_mask = (~make_pad_mask(ys_pad_lens, maxlen=ys_pad_lens.max())[:, :, None]).to(
             ys_pad.device
         )
@@ -351,6 +388,12 @@ class ParaformerStreaming(Paraformer):
 
     def calc_predictor(self, encoder_out, encoder_out_lens):
 
+        """Calc predictor.
+        
+            Args:
+                encoder_out: Encoder output tensor.
+                encoder_out_lens: Encoder output lengths.
+            """
         encoder_out_mask = (
             ~make_pad_mask(encoder_out_lens, maxlen=encoder_out.size(1))[:, None, :]
         ).to(encoder_out.device)
@@ -412,6 +455,14 @@ class ParaformerStreaming(Paraformer):
         return pre_acoustic_embeds, pre_token_length, pre_alphas, pre_peak_index
 
     def calc_predictor_chunk(self, encoder_out, encoder_out_lens, cache=None, **kwargs):
+        """Calc predictor chunk.
+        
+            Args:
+                encoder_out: Encoder output tensor.
+                encoder_out_lens: Encoder output lengths.
+                cache: State cache dict for streaming inference.
+                **kwargs: Additional keyword arguments.
+            """
         is_final = kwargs.get("is_final", False)
 
         return self.predictor.forward_chunk(encoder_out, cache["encoder"], is_final=is_final)
@@ -419,6 +470,14 @@ class ParaformerStreaming(Paraformer):
     def cal_decoder_with_predictor(
         self, encoder_out, encoder_out_lens, sematic_embeds, ys_pad_lens
     ):
+        """Cal decoder with predictor.
+        
+            Args:
+                encoder_out: Encoder output tensor.
+                encoder_out_lens: Encoder output lengths.
+                sematic_embeds: TODO.
+                ys_pad_lens: Lengths of ys_pad.
+            """
         decoder_outs = self.decoder(
             encoder_out, encoder_out_lens, sematic_embeds, ys_pad_lens, self.scama_mask
         )
@@ -429,12 +488,27 @@ class ParaformerStreaming(Paraformer):
     def cal_decoder_with_predictor_chunk(
         self, encoder_out, encoder_out_lens, sematic_embeds, ys_pad_lens, cache=None
     ):
+        """Cal decoder with predictor chunk.
+        
+            Args:
+                encoder_out: Encoder output tensor.
+                encoder_out_lens: Encoder output lengths.
+                sematic_embeds: TODO.
+                ys_pad_lens: Lengths of ys_pad.
+                cache: State cache dict for streaming inference.
+            """
         decoder_outs = self.decoder.forward_chunk(encoder_out, sematic_embeds, cache["decoder"])
         decoder_out = decoder_outs
         decoder_out = torch.log_softmax(decoder_out, dim=-1)
         return decoder_out, ys_pad_lens
 
     def init_cache(self, cache: dict = None, **kwargs):
+        """Init cache.
+        
+            Args:
+                cache: State cache dict for streaming inference.
+                **kwargs: Additional keyword arguments.
+            """
         if cache is None:
             cache = {}
         chunk_size = kwargs.get("chunk_size", [0, 10, 5])
@@ -478,6 +552,16 @@ class ParaformerStreaming(Paraformer):
         frontend=None,
         **kwargs,
     ):
+        """Generate chunk.
+        
+            Args:
+                speech: Speech audio tensor, shape (batch, time).
+                speech_lengths: Length of each speech sample.
+                key: Sample identifiers.
+                tokenizer: Tokenizer instance for text encoding/decoding.
+                frontend: Audio frontend for feature extraction.
+                **kwargs: Additional keyword arguments.
+            """
         cache = kwargs.get("cache", {})
         speech = speech.to(device=kwargs["device"])
         speech_lengths = speech_lengths.to(device=kwargs["device"])
@@ -567,6 +651,17 @@ class ParaformerStreaming(Paraformer):
         cache: dict = None,
         **kwargs,
     ):
+        """Run inference on input data.
+        
+            Args:
+                data_in: Input data (audio samples, file paths, or text).
+                data_lengths: Lengths of each input sample in the batch.
+                key: Sample identifiers.
+                tokenizer: Tokenizer instance for text encoding/decoding.
+                frontend: Audio frontend for feature extraction.
+                cache: State cache dict for streaming inference.
+                **kwargs: Additional keyword arguments.
+            """
         if cache is None:
             cache = {}
 
@@ -662,6 +757,11 @@ class ParaformerStreaming(Paraformer):
         return result, meta_data
 
     def export(self, **kwargs):
+        """Export.
+        
+            Args:
+                **kwargs: Additional keyword arguments.
+            """
         from .export_meta import export_rebuild_model
 
         models = export_rebuild_model(model=self, **kwargs)

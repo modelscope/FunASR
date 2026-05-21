@@ -30,6 +30,16 @@ class OpenAIWhisperEncoderWarp(nn.Module):
         use_padmask: bool = False,
         specaug_conf: Union[dict, None] = None,
     ):
+        """Initialize OpenAIWhisperEncoderWarp.
+        
+            Args:
+                dropout_rate: TODO.
+                whisper_model: Whisper Model instance.
+                download_dir: TODO.
+                use_specaug: TODO.
+                use_padmask: TODO.
+                specaug_conf: Configuration dict for specaug.
+            """
         super().__init__()
 
         # note that originally Whisper doesn't use dropouts
@@ -53,6 +63,12 @@ class OpenAIWhisperEncoderWarp(nn.Module):
         input: torch.Tensor,
         ilens: torch.Tensor = None,
     ) -> torch.Tensor:
+        """Whisper encode.
+        
+            Args:
+                input: Input audio/text data.
+                ilens: TODO.
+            """
         x = F.gelu(self.encoders.conv1(input))
         x = F.gelu(self.encoders.conv2(x))
         x = x.permute(0, 2, 1)
@@ -93,6 +109,7 @@ class OpenAIWhisperEncoderWarp(nn.Module):
 
     def output_size(self) -> int:
         # dummy output size
+        """Output size."""
         return self.encoders.conv2.weight.shape[0]
 
     def forward(
@@ -101,6 +118,13 @@ class OpenAIWhisperEncoderWarp(nn.Module):
         ilens: torch.Tensor,
         prev_states: torch.Tensor = None,
     ) -> Tuple[torch.Tensor, torch.Tensor, Optional[torch.Tensor]]:
+        """Forward pass for training.
+        
+            Args:
+                xs_pad: TODO.
+                ilens: TODO.
+                prev_states: TODO.
+            """
         feats, feats_lens = xs_pad, ilens
 
         if self.specaug is not None and self.encoders.training:

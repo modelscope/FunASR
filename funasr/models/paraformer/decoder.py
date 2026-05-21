@@ -121,6 +121,15 @@ class DecoderLayerSANM(torch.nn.Module):
         return x, tgt_mask, memory, memory_mask, cache
 
     def get_attn_mat(self, tgt, tgt_mask, memory, memory_mask=None, cache=None):
+        """Get attn mat.
+        
+            Args:
+                tgt: TODO.
+                tgt_mask: TODO.
+                memory: TODO.
+                memory_mask: TODO.
+                cache: State cache dict for streaming inference.
+            """
         residual = tgt
         tgt = self.norm1(tgt)
         tgt = self.feed_forward(tgt)
@@ -257,6 +266,35 @@ class ParaformerSANMDecoder(BaseTransformerDecoder):
         tf2torch_tensor_name_prefix_torch: str = "decoder",
         tf2torch_tensor_name_prefix_tf: str = "seq2seq/decoder",
     ):
+        """Initialize ParaformerSANMDecoder.
+        
+            Args:
+                vocab_size: Size/dimension parameter.
+                encoder_output_size: Size/dimension parameter.
+                attention_heads: TODO.
+                linear_units: TODO.
+                num_blocks: TODO.
+                dropout_rate: TODO.
+                positional_dropout_rate: TODO.
+                self_attention_dropout_rate: TODO.
+                src_attention_dropout_rate: TODO.
+                input_layer: TODO.
+                use_output_layer: TODO.
+                wo_input_layer: TODO.
+                pos_enc_class: TODO.
+                normalize_before: TODO.
+                concat_after: TODO.
+                att_layer_num: TODO.
+                kernel_size: Size/dimension parameter.
+                sanm_shfit: TODO.
+                lora_list: TODO.
+                lora_rank: TODO.
+                lora_alpha: TODO.
+                lora_dropout: TODO.
+                chunk_multiply_factor: TODO.
+                tf2torch_tensor_name_prefix_torch: TODO.
+                tf2torch_tensor_name_prefix_tf: TODO.
+            """
         super().__init__(
             vocab_size=vocab_size,
             encoder_output_size=encoder_output_size,
@@ -426,6 +464,14 @@ class ParaformerSANMDecoder(BaseTransformerDecoder):
         ys_in_lens: torch.Tensor,
     ):
 
+        """Forward asf2.
+        
+            Args:
+                hs_pad: TODO.
+                hlens: TODO.
+                ys_in_pad: TODO.
+                ys_in_lens: Lengths of ys_in.
+            """
         tgt = ys_in_pad
         tgt_mask = myutils.sequence_mask(ys_in_lens, device=tgt.device)[:, :, None]
 
@@ -444,6 +490,14 @@ class ParaformerSANMDecoder(BaseTransformerDecoder):
         ys_in_lens: torch.Tensor,
     ):
 
+        """Forward asf6.
+        
+            Args:
+                hs_pad: TODO.
+                hlens: TODO.
+                ys_in_pad: TODO.
+                ys_in_lens: Lengths of ys_in.
+            """
         tgt = ys_in_pad
         tgt_mask = myutils.sequence_mask(ys_in_lens, device=tgt.device)[:, :, None]
 
@@ -592,6 +646,11 @@ class ParaformerSANMDecoder(BaseTransformerDecoder):
 class DecoderLayerSANMExport(torch.nn.Module):
 
     def __init__(self, model):
+        """Initialize DecoderLayerSANMExport.
+        
+            Args:
+                model: Model instance or model name.
+            """
         super().__init__()
         self.self_attn = model.self_attn
         self.src_attn = model.src_attn
@@ -603,6 +662,15 @@ class DecoderLayerSANMExport(torch.nn.Module):
 
     def forward(self, tgt, tgt_mask, memory, memory_mask=None, cache=None):
 
+        """Forward pass for training.
+        
+            Args:
+                tgt: TODO.
+                tgt_mask: TODO.
+                memory: TODO.
+                memory_mask: TODO.
+                cache: State cache dict for streaming inference.
+            """
         residual = tgt
         tgt = self.norm1(tgt)
         tgt = self.feed_forward(tgt)
@@ -621,6 +689,15 @@ class DecoderLayerSANMExport(torch.nn.Module):
         return x, tgt_mask, memory, memory_mask, cache
 
     def get_attn_mat(self, tgt, tgt_mask, memory, memory_mask=None, cache=None):
+        """Get attn mat.
+        
+            Args:
+                tgt: TODO.
+                tgt_mask: TODO.
+                memory: TODO.
+                memory_mask: TODO.
+                cache: State cache dict for streaming inference.
+            """
         residual = tgt
         tgt = self.norm1(tgt)
         tgt = self.feed_forward(tgt)
@@ -640,6 +717,15 @@ class DecoderLayerSANMExport(torch.nn.Module):
 @tables.register("decoder_classes", "ParaformerSANMDecoderExport")
 class ParaformerSANMDecoderExport(torch.nn.Module):
     def __init__(self, model, max_seq_len=512, model_name="decoder", onnx: bool = True, **kwargs):
+        """Initialize ParaformerSANMDecoderExport.
+        
+            Args:
+                model: Model instance or model name.
+                max_seq_len: TODO.
+                model_name: TODO.
+                onnx: TODO.
+                **kwargs: Additional keyword arguments.
+            """
         super().__init__()
         # self.embed = model.embed #Embedding(model.embed, max_seq_len)
 
@@ -673,6 +759,11 @@ class ParaformerSANMDecoderExport(torch.nn.Module):
         self.model_name = model_name
 
     def prepare_mask(self, mask):
+        """Prepare mask.
+        
+            Args:
+                mask: TODO.
+            """
         mask_3d_btd = mask[:, :, None]
         if len(mask.shape) == 2:
             mask_4d_bhlt = 1 - mask[:, None, None, :]
@@ -692,6 +783,16 @@ class ParaformerSANMDecoderExport(torch.nn.Module):
         return_both: bool = False,
     ):
 
+        """Forward pass for training.
+        
+            Args:
+                hs_pad: TODO.
+                hlens: TODO.
+                ys_in_pad: TODO.
+                ys_in_lens: Lengths of ys_in.
+                return_hidden: TODO.
+                return_both: TODO.
+            """
         tgt = ys_in_pad
         tgt_mask = self.make_pad_mask(ys_in_lens)
         tgt_mask, _ = self.prepare_mask(tgt_mask)
@@ -728,6 +829,14 @@ class ParaformerSANMDecoderExport(torch.nn.Module):
         ys_in_lens: torch.Tensor,
     ):
 
+        """Forward asf2.
+        
+            Args:
+                hs_pad: TODO.
+                hlens: TODO.
+                ys_in_pad: TODO.
+                ys_in_lens: Lengths of ys_in.
+            """
         tgt = ys_in_pad
         tgt_mask = myutils.sequence_mask(ys_in_lens, device=tgt.device)[:, :, None]
 
@@ -749,6 +858,14 @@ class ParaformerSANMDecoderExport(torch.nn.Module):
         ys_in_lens: torch.Tensor,
     ):
 
+        """Forward asf6.
+        
+            Args:
+                hs_pad: TODO.
+                hlens: TODO.
+                ys_in_pad: TODO.
+                ys_in_lens: Lengths of ys_in.
+            """
         tgt = ys_in_pad
         tgt_mask = myutils.sequence_mask(ys_in_lens, device=tgt.device)[:, :, None]
 
@@ -829,6 +946,15 @@ class ParaformerSANMDecoderExport(torch.nn.Module):
 @tables.register("decoder_classes", "ParaformerSANMDecoderOnlineExport")
 class ParaformerSANMDecoderOnlineExport(torch.nn.Module):
     def __init__(self, model, max_seq_len=512, model_name="decoder", onnx: bool = True, **kwargs):
+        """Initialize ParaformerSANMDecoderOnlineExport.
+        
+            Args:
+                model: Model instance or model name.
+                max_seq_len: TODO.
+                model_name: TODO.
+                onnx: TODO.
+                **kwargs: Additional keyword arguments.
+            """
         super().__init__()
         # self.embed = model.embed #Embedding(model.embed, max_seq_len)
         self.model = model
@@ -863,6 +989,11 @@ class ParaformerSANMDecoderOnlineExport(torch.nn.Module):
         self.model_name = model_name
 
     def prepare_mask(self, mask):
+        """Prepare mask.
+        
+            Args:
+                mask: TODO.
+            """
         mask_3d_btd = mask[:, :, None]
         if len(mask.shape) == 2:
             mask_4d_bhlt = 1 - mask[:, None, None, :]
@@ -881,6 +1012,15 @@ class ParaformerSANMDecoderOnlineExport(torch.nn.Module):
         *args,
     ):
 
+        """Forward pass for training.
+        
+            Args:
+                hs_pad: TODO.
+                hlens: TODO.
+                ys_in_pad: TODO.
+                ys_in_lens: Lengths of ys_in.
+                *args: Variable positional arguments.
+            """
         tgt = ys_in_pad
         tgt_mask = self.make_pad_mask(ys_in_lens)
         tgt_mask, _ = self.prepare_mask(tgt_mask)
@@ -913,6 +1053,11 @@ class ParaformerSANMDecoderOnlineExport(torch.nn.Module):
         return x, out_caches
 
     def get_dummy_inputs(self, enc_size):
+        """Get dummy inputs.
+        
+            Args:
+                enc_size: Size/dimension parameter.
+            """
         enc = torch.randn(2, 100, enc_size).type(torch.float32)
         enc_len = torch.tensor([30, 100], dtype=torch.int32)
         acoustic_embeds = torch.randn(2, 10, enc_size).type(torch.float32)
@@ -930,6 +1075,7 @@ class ParaformerSANMDecoderOnlineExport(torch.nn.Module):
         return (enc, enc_len, acoustic_embeds, acoustic_embeds_len, *cache)
 
     def get_input_names(self):
+        """Get input names."""
         cache_num = len(self.model.decoders)
         if hasattr(self.model, "decoders2") and self.model.decoders2 is not None:
             cache_num += len(self.model.decoders2)
@@ -938,12 +1084,14 @@ class ParaformerSANMDecoderOnlineExport(torch.nn.Module):
         ]
 
     def get_output_names(self):
+        """Get output names."""
         cache_num = len(self.model.decoders)
         if hasattr(self.model, "decoders2") and self.model.decoders2 is not None:
             cache_num += len(self.model.decoders2)
         return ["logits", "sample_ids"] + ["out_cache_%d" % i for i in range(cache_num)]
 
     def get_dynamic_axes(self):
+        """Get dynamic axes."""
         ret = {
             "enc": {0: "batch_size", 1: "enc_length"},
             "acoustic_embeds": {0: "batch_size", 1: "token_length"},
@@ -1004,6 +1152,25 @@ class ParaformerSANDecoder(BaseTransformerDecoder):
         concat_after: bool = False,
         embeds_id: int = -1,
     ):
+        """Initialize ParaformerSANDecoder.
+        
+            Args:
+                vocab_size: Size/dimension parameter.
+                encoder_output_size: Size/dimension parameter.
+                attention_heads: TODO.
+                linear_units: TODO.
+                num_blocks: TODO.
+                dropout_rate: TODO.
+                positional_dropout_rate: TODO.
+                self_attention_dropout_rate: TODO.
+                src_attention_dropout_rate: TODO.
+                input_layer: TODO.
+                use_output_layer: TODO.
+                pos_enc_class: TODO.
+                normalize_before: TODO.
+                concat_after: TODO.
+                embeds_id: TODO.
+            """
         super().__init__(
             vocab_size=vocab_size,
             encoder_output_size=encoder_output_size,
@@ -1093,6 +1260,14 @@ class ParaformerDecoderSANExport(torch.nn.Module):
         model_name="decoder",
         onnx: bool = True,
     ):
+        """Initialize ParaformerDecoderSANExport.
+        
+            Args:
+                model: Model instance or model name.
+                max_seq_len: TODO.
+                model_name: TODO.
+                onnx: TODO.
+            """
         super().__init__()
         # self.embed = model.embed #Embedding(model.embed, max_seq_len)
         self.model = model
@@ -1116,6 +1291,11 @@ class ParaformerDecoderSANExport(torch.nn.Module):
         self.model_name = model_name
 
     def prepare_mask(self, mask):
+        """Prepare mask.
+        
+            Args:
+                mask: TODO.
+            """
         mask_3d_btd = mask[:, :, None]
         if len(mask.shape) == 2:
             mask_4d_bhlt = 1 - mask[:, None, None, :]
@@ -1133,6 +1313,14 @@ class ParaformerDecoderSANExport(torch.nn.Module):
         ys_in_lens: torch.Tensor,
     ):
 
+        """Forward pass for training.
+        
+            Args:
+                hs_pad: TODO.
+                hlens: TODO.
+                ys_in_pad: TODO.
+                ys_in_lens: Lengths of ys_in.
+            """
         tgt = ys_in_pad
         tgt_mask = self.make_pad_mask(ys_in_lens)
         tgt_mask, _ = self.prepare_mask(tgt_mask)
@@ -1151,6 +1339,11 @@ class ParaformerDecoderSANExport(torch.nn.Module):
         return x, ys_in_lens
 
     def get_dummy_inputs(self, enc_size):
+        """Get dummy inputs.
+        
+            Args:
+                enc_size: Size/dimension parameter.
+            """
         tgt = torch.LongTensor([0]).unsqueeze(0)
         memory = torch.randn(1, 100, enc_size)
         pre_acoustic_embeds = torch.randn(1, 1, enc_size)
@@ -1164,17 +1357,21 @@ class ParaformerDecoderSANExport(torch.nn.Module):
         return (tgt, memory, pre_acoustic_embeds, cache)
 
     def is_optimizable(self):
+        """Is optimizable."""
         return True
 
     def get_input_names(self):
+        """Get input names."""
         cache_num = len(self.model.decoders) + len(self.model.decoders2)
         return ["tgt", "memory", "pre_acoustic_embeds"] + ["cache_%d" % i for i in range(cache_num)]
 
     def get_output_names(self):
+        """Get output names."""
         cache_num = len(self.model.decoders) + len(self.model.decoders2)
         return ["y"] + ["out_cache_%d" % i for i in range(cache_num)]
 
     def get_dynamic_axes(self):
+        """Get dynamic axes."""
         ret = {
             "tgt": {0: "tgt_batch", 1: "tgt_length"},
             "memory": {0: "memory_batch", 1: "memory_length"},

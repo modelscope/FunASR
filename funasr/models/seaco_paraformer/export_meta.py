@@ -16,17 +16,31 @@ class ContextualEmbedderExport(torch.nn.Module):
         feats_dim=560,
         **kwargs,
     ):
+        """Initialize ContextualEmbedderExport.
+        
+            Args:
+                model: Model instance or model name.
+                max_seq_len: TODO.
+                feats_dim: Size/dimension parameter.
+                **kwargs: Additional keyword arguments.
+            """
         super().__init__()
         self.embedding = model.decoder.embed  # model.bias_embed
         model.bias_encoder.batch_first = False
         self.bias_encoder = model.bias_encoder
 
     def forward(self, hotword):
+        """Forward pass for training.
+        
+            Args:
+                hotword: Hotword/keyword for boosting recognition.
+            """
         hotword = self.embedding(hotword).transpose(0, 1)  # batch second
         hw_embed, (_, _) = self.bias_encoder(hotword)
         return hw_embed
 
     def export_dummy_inputs(self):
+        """Export dummy inputs."""
         hotword = torch.tensor(
             [
                 [10, 11, 12, 13, 14, 10, 11, 12, 13, 14],
@@ -42,12 +56,15 @@ class ContextualEmbedderExport(torch.nn.Module):
         return hotword
 
     def export_input_names(self):
+        """Export input names."""
         return ["hotword"]
 
     def export_output_names(self):
+        """Export output names."""
         return ["hw_embed"]
 
     def export_dynamic_axes(self):
+        """Export dynamic axes."""
         return {
             "hotword": {
                 0: "num_hotwords",
@@ -58,10 +75,17 @@ class ContextualEmbedderExport(torch.nn.Module):
         }
 
     def export_name(self):
+        """Export name."""
         return "model_eb.onnx"
 
 
 def export_rebuild_model(model, **kwargs):
+    """Export rebuild model.
+    
+        Args:
+            model: Model instance or model name.
+            **kwargs: Additional keyword arguments.
+        """
     model.device = kwargs.get("device")
     is_onnx = kwargs.get("type", "onnx") == "onnx"
     encoder_class = tables.encoder_classes.get(kwargs["encoder"] + "Export")
@@ -124,6 +148,13 @@ def export_backbone_forward(
     # lmbd: float,
 ):
     # a. To device
+    """Export backbone forward.
+    
+        Args:
+            speech: Speech audio tensor, shape (batch, time).
+            speech_lengths: Length of each speech sample.
+            bias_embed: TODO.
+        """
     batch = {"speech": speech, "speech_lengths": speech_lengths}
 
     enc, enc_len = self.encoder(**batch)
@@ -173,6 +204,7 @@ def export_backbone_forward(
 
 
 def export_backbone_dummy_inputs(self):
+    """Export backbone dummy inputs."""
     speech = torch.randn(2, 30, self.feats_dim)
     speech_lengths = torch.tensor([15, 30], dtype=torch.int32)
     bias_embed = torch.randn(2, 1, 512)
@@ -180,14 +212,17 @@ def export_backbone_dummy_inputs(self):
 
 
 def export_backbone_input_names(self):
+    """Export backbone input names."""
     return ["speech", "speech_lengths", "bias_embed"]
 
 
 def export_backbone_output_names(self):
+    """Export backbone output names."""
     return ["logits", "token_num", "us_alphas", "us_cif_peak"]
 
 
 def export_backbone_dynamic_axes(self):
+    """Export backbone dynamic axes."""
     return {
         "speech": {0: "batch_size", 1: "feats_length"},
         "speech_lengths": {

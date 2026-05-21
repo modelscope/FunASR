@@ -21,6 +21,17 @@ class AudioLLMVicunaDataset(torch.utils.data.Dataset):
         float_pad_value: float = 0.0,
         **kwargs
     ):
+        """Initialize AudioLLMVicunaDataset.
+        
+            Args:
+                path: TODO.
+                index_ds: TODO.
+                frontend: Audio frontend for feature extraction.
+                tokenizer: Tokenizer instance for text encoding/decoding.
+                int_pad_value: TODO.
+                float_pad_value: TODO.
+                **kwargs: Additional keyword arguments.
+            """
         super().__init__()
         index_ds_class = tables.index_ds_classes.get(index_ds)
         self.index_ds = index_ds_class(path, **kwargs)
@@ -54,17 +65,33 @@ class AudioLLMVicunaDataset(torch.utils.data.Dataset):
         self.answer_template = "{}"
 
     def get_source_len(self, index):
+        """Get source len.
+        
+            Args:
+                index: TODO.
+            """
         item = self.index_ds[index]
         return self.index_ds.get_source_len(item)
 
     def get_target_len(self, index):
+        """Get target len.
+        
+            Args:
+                index: TODO.
+            """
         item = self.index_ds[index]
         return self.index_ds.get_target_len(item)
 
     def __len__(self):
+        """Internal: len  ."""
         return len(self.index_ds)
 
     def __getitem__(self, index):
+        """Internal: getitem  .
+        
+            Args:
+                index: TODO.
+            """
         item = self.index_ds[index]
         source = item["source"]
         data_src = load_audio_text_image_video(source, fs=self.fs)
@@ -138,6 +165,11 @@ class AudioLLMVicunaDataset(torch.utils.data.Dataset):
         }
 
     def collator(self, samples: list = None):
+        """Collator.
+        
+            Args:
+                samples: TODO.
+            """
         outputs = {}
         for sample in samples:
             for key in sample.keys():

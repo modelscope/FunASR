@@ -25,10 +25,21 @@ else:
     # Nothing to do if torch<1.6.0
     @contextmanager
     def autocast(enabled=True):
+        """Autocast.
+        
+            Args:
+                enabled: TODO.
+            """
         yield
 
 
 def pad_attractor(att, max_n_speakers):
+    """Pad attractor.
+    
+        Args:
+            att: TODO.
+            max_n_speakers: TODO.
+        """
     C, D = att.shape
     if C < max_n_speakers:
         att = torch.cat(
@@ -38,6 +49,12 @@ def pad_attractor(att, max_n_speakers):
 
 
 def pad_labels(ts, out_size):
+    """Pad labels.
+    
+        Args:
+            ts: TODO.
+            out_size: Size/dimension parameter.
+        """
     for i, t in enumerate(ts):
         if t.shape[1] < out_size:
             ts[i] = F.pad(t, (0, out_size - t.shape[1], 0, 0), mode="constant", value=0.0)
@@ -45,6 +62,12 @@ def pad_labels(ts, out_size):
 
 
 def pad_results(ys, out_size):
+    """Pad results.
+    
+        Args:
+            ys: TODO.
+            out_size: Size/dimension parameter.
+        """
     ys_padded = []
     for i, y in enumerate(ys):
         if y.shape[1] < out_size:
@@ -78,6 +101,18 @@ class DiarEENDOLAModel(nn.Module):
         mapping_dict=None,
         **kwargs,
     ):
+        """Initialize DiarEENDOLAModel.
+        
+            Args:
+                frontend: Audio frontend for feature extraction.
+                encoder: TODO.
+                encoder_decoder_attractor: TODO.
+                n_units: TODO.
+                max_n_speaker: TODO.
+                attractor_loss_weight: TODO.
+                mapping_dict: TODO.
+                **kwargs: Additional keyword arguments.
+            """
         super().__init__()
         self.frontend = frontend
         self.enc = encoder
@@ -92,6 +127,12 @@ class DiarEENDOLAModel(nn.Module):
         self.output_layer = nn.Linear(n_units, mapping_dict["oov"] + 1)
 
     def forward_encoder(self, xs, ilens):
+        """Forward encoder.
+        
+            Args:
+                xs: TODO.
+                ilens: TODO.
+            """
         xs = nn.utils.rnn.pad_sequence(xs, batch_first=True, padding_value=-1)
         pad_shape = xs.shape
         xs_mask = [torch.ones(ilen).to(xs.device) for ilen in ilens]
@@ -104,6 +145,12 @@ class DiarEENDOLAModel(nn.Module):
         return emb
 
     def forward_post_net(self, logits, ilens):
+        """Forward post net.
+        
+            Args:
+                logits: TODO.
+                ilens: TODO.
+            """
         maxlen = torch.max(ilens).to(torch.int).item()
         logits = nn.utils.rnn.pad_sequence(logits, batch_first=True, padding_value=-1)
         logits = nn.utils.rnn.pack_padded_sequence(
@@ -125,6 +172,13 @@ class DiarEENDOLAModel(nn.Module):
     ) -> Tuple[torch.Tensor, Dict[str, torch.Tensor], torch.Tensor]:
 
         # Check that batch_size is unified
+        """Forward pass for training.
+        
+            Args:
+                speech: Speech audio tensor, shape (batch, time).
+                speaker_labels: TODO.
+                orders: TODO.
+            """
         assert len(speech) == len(speaker_labels), (len(speech), len(speaker_labels))
         speech_lengths = torch.tensor([len(sph) for sph in speech]).to(torch.int64)
         speaker_labels_lengths = torch.tensor([spk.shape[-1] for spk in speaker_labels]).to(
@@ -186,6 +240,15 @@ class DiarEENDOLAModel(nn.Module):
         threshold: float = 0.5,
         **kwargs,
     ):
+        """Estimate sequential.
+        
+            Args:
+                speech: Speech audio tensor, shape (batch, time).
+                n_speakers: TODO.
+                shuffle: TODO.
+                threshold: TODO.
+                **kwargs: Additional keyword arguments.
+            """
         speech_lengths = torch.tensor([len(sph) for sph in speech]).to(torch.int64)
         emb = self.forward_encoder(speech, speech_lengths)
         if shuffle:
@@ -231,6 +294,12 @@ class DiarEENDOLAModel(nn.Module):
         return ys, emb, attractors, raw_n_speakers
 
     def recover_y_from_powerlabel(self, logit, n_speaker):
+        """Recover y from powerlabel.
+        
+            Args:
+                logit: TODO.
+                n_speaker: TODO.
+            """
         pred = torch.argmax(torch.softmax(logit, dim=-1), dim=-1)
         oov_index = torch.where(pred == self.mapping_dict["oov"])[0]
         for i in oov_index:
@@ -252,6 +321,11 @@ class DiarEENDOLAModel(nn.Module):
 
     def inv_mapping_func(self, label):
 
+        """Inv mapping func.
+        
+            Args:
+                label: TODO.
+            """
         if not isinstance(label, int):
             label = int(label)
         if label in self.mapping_dict["label2dec"].keys():
@@ -261,4 +335,9 @@ class DiarEENDOLAModel(nn.Module):
         return num
 
     def collect_feats(self, **batch: torch.Tensor) -> Dict[str, torch.Tensor]:
+        """Collect feats.
+        
+            Args:
+                **batch: Additional keyword arguments.
+            """
         pass

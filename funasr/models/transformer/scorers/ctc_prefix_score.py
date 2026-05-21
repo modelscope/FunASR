@@ -262,6 +262,14 @@ class CTCPrefixScore(object):
     """
 
     def __init__(self, x, blank, eos, xp):
+        """Initialize CTCPrefixScore.
+        
+            Args:
+                x: TODO.
+                blank: TODO.
+                eos: TODO.
+                xp: TODO.
+            """
         self.xp = xp
         self.logzero = -10000000000.0
         self.blank = blank

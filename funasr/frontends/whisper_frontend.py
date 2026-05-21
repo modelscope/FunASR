@@ -23,6 +23,16 @@ class WhisperFrontend(nn.Module):
         permute: bool = False,
         **kwargs,
     ):
+        """Initialize WhisperFrontend.
+        
+            Args:
+                fs: TODO.
+                whisper_model: Whisper Model instance.
+                do_pad_trim: TODO.
+                n_mels: TODO.
+                permute: TODO.
+                **kwargs: Additional keyword arguments.
+            """
         super().__init__()
         assert fs == 16000
         self.fs = fs
@@ -55,6 +65,7 @@ class WhisperFrontend(nn.Module):
         # assert whisper_model in whisper.available_models()
 
     def output_size(self) -> int:
+        """Output size."""
         return self.n_mels
 
     def log_mel_spectrogram(
@@ -62,6 +73,12 @@ class WhisperFrontend(nn.Module):
         audio: torch.Tensor,
         ilens: torch.Tensor = None,
     ) -> torch.Tensor:
+        """Log mel spectrogram.
+        
+            Args:
+                audio: TODO.
+                ilens: TODO.
+            """
         window = torch.hann_window(self.win_length).to(audio.device)
         stft = torch.stft(audio, self.n_fft, self.hop_length, window=window, return_complex=True)
 
@@ -94,6 +111,13 @@ class WhisperFrontend(nn.Module):
         input_lengths: torch.Tensor,
         **kwargs,
     ) -> Tuple[torch.Tensor, torch.Tensor]:
+        """Forward pass for training.
+        
+            Args:
+                input: Input audio/text data.
+                input_lengths: Lengths of input.
+                **kwargs: Additional keyword arguments.
+            """
         batch_size = input.size(0)
         feats = []
         feats_lens = []

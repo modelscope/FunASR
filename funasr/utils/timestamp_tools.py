@@ -9,6 +9,12 @@ from itertools import zip_longest
 
 
 def cif_wo_hidden(alphas, threshold):
+    """Cif wo hidden.
+    
+        Args:
+            alphas: TODO.
+            threshold: TODO.
+        """
     batch_size, len_time = alphas.size()
     # loop varss
     integrate = torch.zeros([batch_size], device=alphas.device)
@@ -31,6 +37,17 @@ def cif_wo_hidden(alphas, threshold):
 def ts_prediction_lfr6_standard(
     us_alphas, us_peaks, char_list, vad_offset=0.0, force_time_shift=-1.5, sil_in_str=True, upsample_rate=3,
 ):
+    """Ts prediction lfr6 standard.
+    
+        Args:
+            us_alphas: TODO.
+            us_peaks: TODO.
+            char_list: TODO.
+            vad_offset: TODO.
+            force_time_shift: TODO.
+            sil_in_str: TODO.
+            upsample_rate: TODO.
+        """
     if not len(char_list):
         return "", []
     START_END_THRESHOLD = 5
@@ -206,6 +223,14 @@ def timestamp_sentence(
 def timestamp_sentence_en(
     punc_id_list, timestamp_postprocessed, text_postprocessed, return_raw_text=False
 ):
+    """Timestamp sentence en.
+    
+        Args:
+            punc_id_list: TODO.
+            timestamp_postprocessed: TODO.
+            text_postprocessed: TODO.
+            return_raw_text: TODO.
+        """
     punc_list = [",", ".", "?", ","]
     res = []
     if text_postprocessed is None:

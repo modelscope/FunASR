@@ -14,4 +14,10 @@ class Branchformer(Transformer):
         **kwargs,
     ):
 
+        """Initialize Branchformer.
+        
+            Args:
+                *args: Variable positional arguments.
+                **kwargs: Additional keyword arguments.
+            """
         super().__init__(*args, **kwargs)

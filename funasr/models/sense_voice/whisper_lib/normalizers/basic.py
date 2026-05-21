@@ -58,10 +58,21 @@ def remove_symbols(s: str):
 
 class BasicTextNormalizer:
     def __init__(self, remove_diacritics: bool = False, split_letters: bool = False):
+        """Initialize BasicTextNormalizer.
+        
+            Args:
+                remove_diacritics: TODO.
+                split_letters: TODO.
+            """
         self.clean = remove_symbols_and_diacritics if remove_diacritics else remove_symbols
         self.split_letters = split_letters
 
     def __call__(self, s: str):
+        """Internal: call  .
+        
+            Args:
+                s: TODO.
+            """
         s = s.lower()
         s = re.sub(r"[<\[][^>\]]*[>\]]", "", s)  # remove words between brackets
         s = re.sub(r"\(([^)]+?)\)", "", s)  # remove words between parenthesis

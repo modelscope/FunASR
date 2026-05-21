@@ -21,6 +21,7 @@ class EnglishNumberNormalizer:
     """
 
     def __init__(self):
+        """Initialize EnglishNumberNormalizer."""
         super().__init__()
 
         self.zeros = {"o", "oh", "zero"}
@@ -161,17 +162,32 @@ class EnglishNumberNormalizer:
         self.literal_words = {"one", "ones"}
 
     def process_words(self, words: List[str]) -> Iterator[str]:
+        """Process words.
+        
+            Args:
+                words: TODO.
+            """
         prefix: Optional[str] = None
         value: Optional[Union[str, int]] = None
         skip = False
 
         def to_fraction(s: str):
+            """To fraction.
+            
+                Args:
+                    s: TODO.
+                """
             try:
                 return Fraction(s)
             except ValueError:
                 return None
 
         def output(result: Union[str, int]):
+            """Output.
+            
+                Args:
+                    result: TODO.
+                """
             nonlocal prefix, value
             result = str(result)
             if prefix is not None:
@@ -383,6 +399,11 @@ class EnglishNumberNormalizer:
 
     def preprocess(self, s: str):
         # replace "<number> and a half" with "<number> point five"
+        """Preprocess.
+        
+            Args:
+                s: TODO.
+            """
         results = []
 
         segments = re.split(r"\band\s+a\s+half\b", s)
@@ -411,7 +432,17 @@ class EnglishNumberNormalizer:
         return s
 
     def postprocess(self, s: str):
+        """Postprocess.
+        
+            Args:
+                s: TODO.
+            """
         def combine_cents(m: Match):
+            """Combine cents.
+            
+                Args:
+                    m: TODO.
+                """
             try:
                 currency = m.group(1)
                 integer = m.group(2)
@@ -421,6 +452,11 @@ class EnglishNumberNormalizer:
                 return m.string
 
         def extract_cents(m: Match):
+            """Extract cents.
+            
+                Args:
+                    m: TODO.
+                """
             try:
                 return f"¢{int(m.group(1))}"
             except ValueError:
@@ -436,6 +472,11 @@ class EnglishNumberNormalizer:
         return s
 
     def __call__(self, s: str):
+        """Internal: call  .
+        
+            Args:
+                s: TODO.
+            """
         s = self.preprocess(s)
         s = " ".join(word for word in self.process_words(s.split()) if word is not None)
         s = self.postprocess(s)
@@ -451,15 +492,22 @@ class EnglishSpellingNormalizer:
     """
 
     def __init__(self):
+        """Initialize EnglishSpellingNormalizer."""
         mapping_path = os.path.join(os.path.dirname(__file__), "english.json")
         self.mapping = json.load(open(mapping_path))
 
     def __call__(self, s: str):
+        """Internal: call  .
+        
+            Args:
+                s: TODO.
+            """
         return " ".join(self.mapping.get(word, word) for word in s.split())
 
 
 class EnglishTextNormalizer:
     def __init__(self):
+        """Initialize EnglishTextNormalizer."""
         self.ignore_patterns = r"\b(hmm|mm|mhm|mmm|uh|um)\b"
         self.replacers = {
             # common contractions
@@ -520,6 +568,11 @@ class EnglishTextNormalizer:
         self.standardize_spellings = EnglishSpellingNormalizer()
 
     def __call__(self, s: str):
+        """Internal: call  .
+        
+            Args:
+                s: TODO.
+            """
         s = s.lower()
 
         s = re.sub(r"[<\[][^>\]]*[>\]]", "", s)  # remove words between brackets

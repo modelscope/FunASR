@@ -147,6 +147,14 @@ class MaskAlongAxis(torch.nn.Module):
         dim: Union[int, str] = "time",
         replace_with_zero: bool = True,
     ):
+        """Initialize MaskAlongAxis.
+        
+            Args:
+                mask_width_range: TODO.
+                num_mask: TODO.
+                dim: TODO.
+                replace_with_zero: TODO.
+            """
         if isinstance(mask_width_range, int):
             mask_width_range = (0, mask_width_range)
         if len(mask_width_range) != 2:
@@ -176,6 +184,7 @@ class MaskAlongAxis(torch.nn.Module):
         self.replace_with_zero = replace_with_zero
 
     def extra_repr(self):
+        """Extra repr."""
         return (
             f"mask_width_range={self.mask_width_range}, "
             f"num_mask={self.num_mask}, axis={self.mask_axis}"
@@ -212,6 +221,14 @@ class MaskAlongAxisVariableMaxWidth(torch.nn.Module):
         dim: Union[int, str] = "time",
         replace_with_zero: bool = True,
     ):
+        """Initialize MaskAlongAxisVariableMaxWidth.
+        
+            Args:
+                mask_width_ratio_range: TODO.
+                num_mask: TODO.
+                dim: TODO.
+                replace_with_zero: TODO.
+            """
         if isinstance(mask_width_ratio_range, float):
             mask_width_ratio_range = (0.0, mask_width_ratio_range)
         if len(mask_width_ratio_range) != 2:
@@ -242,6 +259,7 @@ class MaskAlongAxisVariableMaxWidth(torch.nn.Module):
         self.replace_with_zero = replace_with_zero
 
     def extra_repr(self):
+        """Extra repr."""
         return (
             f"mask_width_ratio_range={self.mask_width_ratio_range}, "
             f"num_mask={self.num_mask}, axis={self.mask_axis}"
@@ -281,6 +299,15 @@ class MaskAlongAxisLFR(torch.nn.Module):
         replace_with_zero: bool = True,
         lfr_rate: int = 1,
     ):
+        """Initialize MaskAlongAxisLFR.
+        
+            Args:
+                mask_width_range: TODO.
+                num_mask: TODO.
+                dim: TODO.
+                replace_with_zero: TODO.
+                lfr_rate: TODO.
+            """
         if isinstance(mask_width_range, int):
             mask_width_range = (0, mask_width_range)
         if len(mask_width_range) != 2:
@@ -313,6 +340,7 @@ class MaskAlongAxisLFR(torch.nn.Module):
         self.lfr_rate = lfr_rate
 
     def extra_repr(self):
+        """Extra repr."""
         return (
             f"mask_width_range={self.mask_width_range}, "
             f"num_mask={self.num_mask}, axis={self.mask_axis}"

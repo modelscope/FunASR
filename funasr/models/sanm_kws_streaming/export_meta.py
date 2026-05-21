@@ -11,6 +11,12 @@ from funasr.register import tables
 
 def export_rebuild_model(model, **kwargs):
     # self.device = kwargs.get("device")
+    """Export rebuild model.
+    
+        Args:
+            model: Model instance or model name.
+            **kwargs: Additional keyword arguments.
+        """
     is_onnx = kwargs.get("type", "onnx") == "onnx"
     encoder_class = tables.encoder_classes.get(kwargs["encoder"] + "Export")
 
@@ -47,6 +53,12 @@ def export_encoder_forward(
     speech_lengths: torch.Tensor,
 ):
     # a. To device
+    """Export encoder forward.
+    
+        Args:
+            speech: Speech audio tensor, shape (batch, time).
+            speech_lengths: Length of each speech sample.
+        """
     batch = {
         "speech": speech,
         "speech_lengths": speech_lengths,
@@ -63,21 +75,25 @@ def export_encoder_forward(
 
 
 def export_encoder_dummy_inputs(self):
+    """Export encoder dummy inputs."""
     speech = torch.randn(2, 30, 280)
     speech_lengths = torch.tensor([6, 30], dtype=torch.int32)
     return (speech, speech_lengths)
 
 
 def export_encoder_input_names(self):
+    """Export encoder input names."""
     return ["speech", "speech_lengths"]
 
 
 def export_encoder_output_names(self):
     # return ["encoder_out", "encoder_out_len", "alphas"]
+    """Export encoder output names."""
     return ["encoder_out", "encoder_out_len"]
 
 
 def export_encoder_dynamic_axes(self):
+    """Export encoder dynamic axes."""
     return {
         "speech": {
             0: "batch_size", 1: "feats_length"
@@ -95,4 +111,5 @@ def export_encoder_dynamic_axes(self):
 
 
 def export_encoder_name(self):
+    """Export encoder name."""
     return "encoder.onnx"

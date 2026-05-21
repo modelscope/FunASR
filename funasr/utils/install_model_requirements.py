@@ -3,6 +3,11 @@ import subprocess
 
 
 def install_requirements(requirements_path):
+    """Install requirements.
+    
+        Args:
+            requirements_path: TODO.
+        """
     try:
         result = pip_install_r(requirements_path)
         # check status
@@ -26,6 +31,11 @@ def install_requirements(requirements_path):
 
 
 def pip_install_r(requirements_path):
+    """Pip install r.
+    
+        Args:
+            requirements_path: TODO.
+        """
     cmd = []
     if shutil.which("pip") is not None:
         cmd = ["pip"]

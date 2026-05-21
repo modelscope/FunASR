@@ -7,6 +7,12 @@ import re
 
 
 def split_to_mini_sentence(words: list, word_limit: int = 20):
+    """Split to mini sentence.
+    
+        Args:
+            words: TODO.
+            word_limit: TODO.
+        """
     assert word_limit > 1
     if len(words) <= word_limit:
         return [words]
@@ -21,6 +27,13 @@ def split_to_mini_sentence(words: list, word_limit: int = 20):
 
 
 def split_words(text: str, jieba_usr_dict=None, **kwargs):
+    """Split words.
+    
+        Args:
+            text: Text tensor or string input.
+            jieba_usr_dict: TODO.
+            **kwargs: Additional keyword arguments.
+        """
     if jieba_usr_dict:
         input_list = text.split()
         token_list_all = []
@@ -80,6 +93,11 @@ def split_words(text: str, jieba_usr_dict=None, **kwargs):
 
 
 def isEnglish(text: str):
+    """Isenglish.
+    
+        Args:
+            text: Text tensor or string input.
+        """
     if re.search("^[a-zA-Z']+$", text):
         return True
     else:
@@ -87,6 +105,11 @@ def isEnglish(text: str):
 
 
 def join_chinese_and_english(input_list):
+    """Join chinese and english.
+    
+        Args:
+            input_list: TODO.
+        """
     line = ""
     for token in input_list:
         if isEnglish(token):

@@ -11,6 +11,12 @@ from .layers import LoRALayer
 
 
 def mark_only_lora_as_trainable(model: nn.Module, bias: str = "none") -> None:
+    """Mark only lora as trainable.
+    
+        Args:
+            model: Model instance or model name.
+            bias: TODO.
+        """
     for n, p in model.named_parameters():
         if "lora_" not in n and "cif" not in n:
             p.requires_grad = False
@@ -29,6 +35,12 @@ def mark_only_lora_as_trainable(model: nn.Module, bias: str = "none") -> None:
 
 
 def lora_state_dict(model: nn.Module, bias: str = "none") -> Dict[str, torch.Tensor]:
+    """Lora state dict.
+    
+        Args:
+            model: Model instance or model name.
+            bias: TODO.
+        """
     my_state_dict = model.state_dict()
     if bias == "none":
         return {k: my_state_dict[k] for k in my_state_dict if "lora_" in k}

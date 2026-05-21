@@ -25,6 +25,15 @@ class ConvFeatureExtractionModel(nn.Module):
         conv_bias: bool = False,
         in_d: int = 1,
     ):
+        """Initialize ConvFeatureExtractionModel.
+        
+            Args:
+                conv_layers: TODO.
+                dropout: TODO.
+                mode: TODO.
+                conv_bias: TODO.
+                in_d: TODO.
+            """
         super().__init__()
 
         assert mode in {"default", "layer_norm"}
@@ -38,7 +47,19 @@ class ConvFeatureExtractionModel(nn.Module):
             is_group_norm=False,
             conv_bias=False,
         ):
+            """Block.
+            
+                Args:
+                    n_in: TODO.
+                    n_out: TODO.
+                    k: TODO.
+                    stride: TODO.
+                    is_layer_norm: Boolean flag for layer norm.
+                    is_group_norm: Boolean flag for group norm.
+                    conv_bias: TODO.
+                """
             def make_conv():
+                """Make conv."""
                 conv = nn.Conv1d(n_in, n_out, k, stride=stride, bias=conv_bias)
                 nn.init.kaiming_normal_(conv.weight)
                 return conv
@@ -87,6 +108,11 @@ class ConvFeatureExtractionModel(nn.Module):
             in_d = dim
 
     def forward(self, x):
+        """Forward pass for training.
+        
+            Args:
+                x: TODO.
+            """
         if len(x.shape) == 2:
             x = x.unsqueeze(1)
         else:
@@ -98,6 +124,13 @@ class ConvFeatureExtractionModel(nn.Module):
 
 
 def make_conv_pos(e, k, g):
+    """Make conv pos.
+    
+        Args:
+            e: TODO.
+            k: TODO.
+            g: TODO.
+        """
     pos_conv = nn.Conv1d(
         e,
         e,
@@ -118,6 +151,7 @@ def make_conv_pos(e, k, g):
 
 class TransformerEncoder(nn.Module):
     def build_encoder_layer(self):
+        """Build encoder layer."""
         if self.layer_type == "transformer":
             layer = TransformerSentenceEncoderLayer(
                 embedding_dim=self.embedding_dim,
@@ -154,6 +188,26 @@ class TransformerEncoder(nn.Module):
         encoder_layerdrop,
         max_positions,
     ):
+        """Initialize TransformerEncoder.
+        
+            Args:
+                dropout: TODO.
+                encoder_embed_dim: Size/dimension parameter.
+                required_seq_len_multiple: TODO.
+                pos_conv_depth: TODO.
+                conv_pos: TODO.
+                conv_pos_groups: TODO.
+                layer_type: TODO.
+                encoder_layers: TODO.
+                encoder_ffn_embed_dim: Size/dimension parameter.
+                encoder_attention_heads: TODO.
+                attention_dropout: TODO.
+                activation_dropout: TODO.
+                activation_fn: TODO.
+                layer_norm_first: TODO.
+                encoder_layerdrop: TODO.
+                max_positions: TODO.
+            """
         super().__init__()
 
         # position
@@ -165,6 +219,14 @@ class TransformerEncoder(nn.Module):
             k = max(3, conv_pos // num_layers)
 
             def make_conv_block(e, k, g, l):
+                """Make conv block.
+                
+                    Args:
+                        e: TODO.
+                        k: TODO.
+                        g: TODO.
+                        l: TODO.
+                    """
                 return nn.Sequential(
                     *[
                         nn.Sequential(
@@ -210,6 +272,13 @@ class TransformerEncoder(nn.Module):
         self.apply(utils.init_bert_params)
 
     def forward(self, x, padding_mask=None, layer=None):
+        """Forward pass for training.
+        
+            Args:
+                x: TODO.
+                padding_mask: TODO.
+                layer: TODO.
+            """
         x, layer_results = self.extract_features(x, padding_mask, layer)
 
         if self.layer_norm_first and layer is None:
@@ -225,6 +294,14 @@ class TransformerEncoder(nn.Module):
         min_layer=0,
     ):
 
+        """Extract features.
+        
+            Args:
+                x: TODO.
+                padding_mask: TODO.
+                tgt_layer: TODO.
+                min_layer: TODO.
+            """
         if padding_mask is not None:
             x[padding_mask] = 0
 
@@ -272,6 +349,13 @@ class TransformerEncoder(nn.Module):
             x = x[:, :-pad_length]
 
             def undo_pad(a, b, c):
+                """Undo pad.
+                
+                    Args:
+                        a: TODO.
+                        b: TODO.
+                        c: TODO.
+                    """
                 return (
                     a[:-pad_length],
                     b[:-pad_length] if b is not None else b,
@@ -309,6 +393,18 @@ class TransformerSentenceEncoderLayer(nn.Module):
         layer_norm_first: bool = False,
     ) -> None:
 
+        """Initialize TransformerSentenceEncoderLayer.
+        
+            Args:
+                embedding_dim: Size/dimension parameter.
+                ffn_embedding_dim: Size/dimension parameter.
+                num_attention_heads: TODO.
+                dropout: TODO.
+                attention_dropout: TODO.
+                activation_dropout: TODO.
+                activation_fn: TODO.
+                layer_norm_first: TODO.
+            """
         super().__init__()
         # Initialize parameters
         self.embedding_dim = embedding_dim

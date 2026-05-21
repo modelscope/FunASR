@@ -19,6 +19,15 @@ import funasr.models.lora.layers as lora
 
 
 def preprocess_for_attn(x, mask, cache, pad_fn, kernel_size):
+    """Preprocess for attn.
+    
+        Args:
+            x: TODO.
+            mask: TODO.
+            cache: State cache dict for streaming inference.
+            pad_fn: TODO.
+            kernel_size: Size/dimension parameter.
+        """
     x = x * mask
     x = x.transpose(1, 2)
     if cache is None:
@@ -205,6 +214,13 @@ class MultiHeadedAttentionSANM(nn.Module):
         self.pad_fn = nn.ConstantPad1d((left_padding, right_padding), 0.0)
 
     def forward_fsmn(self, inputs, mask, mask_shfit_chunk=None):
+        """Forward fsmn.
+        
+            Args:
+                inputs: TODO.
+                mask: TODO.
+                mask_shfit_chunk: TODO.
+            """
         b, t, d = inputs.size()
         if mask is not None:
             mask = torch.reshape(mask, (b, -1, 1))
@@ -352,6 +368,11 @@ class MultiHeadedAttentionSANM(nn.Module):
 
 class MultiHeadedAttentionSANMExport(nn.Module):
     def __init__(self, model):
+        """Initialize MultiHeadedAttentionSANMExport.
+        
+            Args:
+                model: Model instance or model name.
+            """
         super().__init__()
         self.d_k = model.d_k
         self.h = model.h
@@ -364,6 +385,12 @@ class MultiHeadedAttentionSANMExport(nn.Module):
         self.all_head_size = self.h * self.d_k
 
     def forward(self, x, mask):
+        """Forward pass for training.
+        
+            Args:
+                x: TODO.
+                mask: TODO.
+            """
         mask_3d_btd, mask_4d_bhlt = mask
         q_h, k_h, v_h, v = self.forward_qkv(x)
         fsmn_memory = self.forward_fsmn(v, mask_3d_btd)
@@ -373,11 +400,21 @@ class MultiHeadedAttentionSANMExport(nn.Module):
         return att_outs + fsmn_memory
 
     def transpose_for_scores(self, x: torch.Tensor) -> torch.Tensor:
+        """Transpose for scores.
+        
+            Args:
+                x: TODO.
+            """
         new_x_shape = x.size()[:-1] + (self.h, self.d_k)
         x = x.view(new_x_shape)
         return x.permute(0, 2, 1, 3)
 
     def forward_qkv(self, x):
+        """Forward qkv.
+        
+            Args:
+                x: TODO.
+            """
         q_k_v = self.linear_q_k_v(x)
         q, k, v = torch.split(q_k_v, int(self.h * self.d_k), dim=-1)
         q_h = self.transpose_for_scores(q)
@@ -388,6 +425,12 @@ class MultiHeadedAttentionSANMExport(nn.Module):
     def forward_fsmn(self, inputs, mask):
         # b, t, d = inputs.size()
         # mask = torch.reshape(mask, (b, -1, 1))
+        """Forward fsmn.
+        
+            Args:
+                inputs: TODO.
+                mask: TODO.
+            """
         inputs = inputs * mask
         x = inputs.transpose(1, 2)
         x = self.pad_fn(x)
@@ -398,6 +441,13 @@ class MultiHeadedAttentionSANMExport(nn.Module):
         return x
 
     def forward_attention(self, value, scores, mask):
+        """Forward attention.
+        
+            Args:
+                value: TODO.
+                scores: TODO.
+                mask: TODO.
+            """
         scores = scores + mask
 
         attn = torch.softmax(scores, dim=-1)
@@ -411,6 +461,11 @@ class MultiHeadedAttentionSANMExport(nn.Module):
 
 class MultiHeadedAttentionSANMExport(nn.Module):
     def __init__(self, model):
+        """Initialize MultiHeadedAttentionSANMExport.
+        
+            Args:
+                model: Model instance or model name.
+            """
         super().__init__()
         self.d_k = model.d_k
         self.h = model.h
@@ -423,6 +478,12 @@ class MultiHeadedAttentionSANMExport(nn.Module):
         self.all_head_size = self.h * self.d_k
 
     def forward(self, x, mask):
+        """Forward pass for training.
+        
+            Args:
+                x: TODO.
+                mask: TODO.
+            """
         mask_3d_btd, mask_4d_bhlt = mask
         q_h, k_h, v_h, v = self.forward_qkv(x)
         fsmn_memory = self.forward_fsmn(v, mask_3d_btd)
@@ -432,11 +493,21 @@ class MultiHeadedAttentionSANMExport(nn.Module):
         return att_outs + fsmn_memory
 
     def transpose_for_scores(self, x: torch.Tensor) -> torch.Tensor:
+        """Transpose for scores.
+        
+            Args:
+                x: TODO.
+            """
         new_x_shape = x.size()[:-1] + (self.h, self.d_k)
         x = x.view(new_x_shape)
         return x.permute(0, 2, 1, 3)
 
     def forward_qkv(self, x):
+        """Forward qkv.
+        
+            Args:
+                x: TODO.
+            """
         q_k_v = self.linear_q_k_v(x)
         q, k, v = torch.split(q_k_v, int(self.h * self.d_k), dim=-1)
         q_h = self.transpose_for_scores(q)
@@ -447,6 +518,12 @@ class MultiHeadedAttentionSANMExport(nn.Module):
     def forward_fsmn(self, inputs, mask):
         # b, t, d = inputs.size()
         # mask = torch.reshape(mask, (b, -1, 1))
+        """Forward fsmn.
+        
+            Args:
+                inputs: TODO.
+                mask: TODO.
+            """
         inputs = inputs * mask
         x = inputs.transpose(1, 2)
         x = self.pad_fn(x)
@@ -457,6 +534,13 @@ class MultiHeadedAttentionSANMExport(nn.Module):
         return x
 
     def forward_attention(self, value, scores, mask):
+        """Forward attention.
+        
+            Args:
+                value: TODO.
+                scores: TODO.
+                mask: TODO.
+            """
         scores = scores + mask
 
         attn = torch.softmax(scores, dim=-1)
@@ -549,6 +633,11 @@ class MultiHeadedAttentionSANMDecoder(nn.Module):
 
 class MultiHeadedAttentionSANMDecoderExport(nn.Module):
     def __init__(self, model):
+        """Initialize MultiHeadedAttentionSANMDecoderExport.
+        
+            Args:
+                model: Model instance or model name.
+            """
         super().__init__()
         self.fsmn_block = model.fsmn_block
         self.pad_fn = model.pad_fn
@@ -556,6 +645,13 @@ class MultiHeadedAttentionSANMDecoderExport(nn.Module):
         self.attn = None
 
     def forward(self, inputs, mask, cache=None):
+        """Forward pass for training.
+        
+            Args:
+                inputs: TODO.
+                mask: TODO.
+                cache: State cache dict for streaming inference.
+            """
         x, cache = preprocess_for_attn(inputs, mask, cache, self.pad_fn, self.kernel_size)
         x = self.fsmn_block(x)
         x = x.transpose(1, 2)
@@ -750,6 +846,11 @@ class MultiHeadedAttentionCrossAtt(nn.Module):
 
 class MultiHeadedAttentionCrossAttExport(nn.Module):
     def __init__(self, model):
+        """Initialize MultiHeadedAttentionCrossAttExport.
+        
+            Args:
+                model: Model instance or model name.
+            """
         super().__init__()
         self.d_k = model.d_k
         self.h = model.h
@@ -760,16 +861,35 @@ class MultiHeadedAttentionCrossAttExport(nn.Module):
         self.all_head_size = self.h * self.d_k
 
     def forward(self, x, memory, memory_mask, ret_attn=False):
+        """Forward pass for training.
+        
+            Args:
+                x: TODO.
+                memory: TODO.
+                memory_mask: TODO.
+                ret_attn: TODO.
+            """
         q, k, v = self.forward_qkv(x, memory)
         scores = torch.matmul(q, k.transpose(-2, -1)) / math.sqrt(self.d_k)
         return self.forward_attention(v, scores, memory_mask, ret_attn)
 
     def transpose_for_scores(self, x: torch.Tensor) -> torch.Tensor:
+        """Transpose for scores.
+        
+            Args:
+                x: TODO.
+            """
         new_x_shape = x.size()[:-1] + (self.h, self.d_k)
         x = x.view(new_x_shape)
         return x.permute(0, 2, 1, 3)
 
     def forward_qkv(self, x, memory):
+        """Forward qkv.
+        
+            Args:
+                x: TODO.
+                memory: TODO.
+            """
         q = self.linear_q(x)
 
         k_v = self.linear_k_v(memory)
@@ -780,6 +900,14 @@ class MultiHeadedAttentionCrossAttExport(nn.Module):
         return q, k, v
 
     def forward_attention(self, value, scores, mask, ret_attn):
+        """Forward attention.
+        
+            Args:
+                value: TODO.
+                scores: TODO.
+                mask: TODO.
+                ret_attn: TODO.
+            """
         scores = scores + mask.to(scores.device)
 
         attn = torch.softmax(scores, dim=-1)

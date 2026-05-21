@@ -90,6 +90,14 @@ def compute_mask_indices(
             mask_idc = []
 
             def arrange(s, e, length, keep_length):
+                """Arrange.
+                
+                    Args:
+                        s: TODO.
+                        e: TODO.
+                        length: TODO.
+                        keep_length: TODO.
+                    """
                 span_start = np.random.randint(s, e - length)
                 mask_idc.extend(span_start + i for i in range(length))
 

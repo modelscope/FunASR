@@ -167,6 +167,21 @@ class TransformerTextEncoder(nn.Module):
         normalize_before: bool = True,
         concat_after: bool = False,
     ):
+        """Initialize TransformerTextEncoder.
+        
+            Args:
+                input_size: Size/dimension parameter.
+                output_size: Size/dimension parameter.
+                attention_heads: TODO.
+                linear_units: TODO.
+                num_blocks: TODO.
+                dropout_rate: TODO.
+                positional_dropout_rate: TODO.
+                attention_dropout_rate: TODO.
+                pos_enc_class: TODO.
+                normalize_before: TODO.
+                concat_after: TODO.
+            """
         super().__init__()
         self._output_size = output_size
 
@@ -198,6 +213,7 @@ class TransformerTextEncoder(nn.Module):
             self.after_norm = LayerNorm(output_size)
 
     def output_size(self) -> int:
+        """Output size."""
         return self._output_size
 
     def forward(
@@ -365,6 +381,16 @@ class ConvPredictor(nn.Module):
         attention_dropout_rate=0.1,
         linear_units=2048,
     ):
+        """Initialize ConvPredictor.
+        
+            Args:
+                size: TODO.
+                l_order: TODO.
+                r_order: TODO.
+                attention_heads: TODO.
+                attention_dropout_rate: TODO.
+                linear_units: TODO.
+            """
         super().__init__()
         self.atten = MultiHeadedAttention(attention_heads, size, attention_dropout_rate)
         self.norm1 = LayerNorm(size)
@@ -376,6 +402,12 @@ class ConvPredictor(nn.Module):
 
     def forward(self, text_enc, asr_enc):
         # stage1 cross-attention
+        """Forward pass for training.
+        
+            Args:
+                text_enc: TODO.
+                asr_enc: TODO.
+            """
         residual = text_enc
         text_enc = residual + self.atten(text_enc, asr_enc, asr_enc, None)
 

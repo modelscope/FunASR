@@ -15,6 +15,11 @@ from funasr.models.transformer.utils.nets_utils import pad_list
 
 
 def base_s3prl_setup(args):
+    """Base s3prl setup.
+    
+        Args:
+            args: TODO.
+        """
     args.upstream_feature_selection = getattr(args, "upstream_feature_selection", None)
     args.upstream_model_config = getattr(args, "upstream_model_config", None)
     args.upstream_refresh = getattr(args, "upstream_refresh", False)
@@ -35,6 +40,14 @@ class S3prlFrontend(nn.Module):
         download_dir: str = None,
         multilayer_feature: bool = False,
     ):
+        """Initialize S3prlFrontend.
+        
+            Args:
+                fs: TODO.
+                frontend_conf: Configuration dict for frontend.
+                download_dir: TODO.
+                multilayer_feature: TODO.
+            """
         super().__init__()
         if isinstance(fs, str):
             fs = humanfriendly.parse_size(fs)
@@ -112,11 +125,18 @@ class S3prlFrontend(nn.Module):
         return tiled_feature
 
     def output_size(self) -> int:
+        """Output size."""
         return self.output_dim
 
     def forward(
         self, input: torch.Tensor, input_lengths: torch.Tensor
     ) -> Tuple[torch.Tensor, torch.Tensor]:
+        """Forward pass for training.
+        
+            Args:
+                input: Input audio/text data.
+                input_lengths: Lengths of input.
+            """
         wavs = [wav[: input_lengths[i]] for i, wav in enumerate(input)]
         self.upstream.eval()
         with torch.no_grad():
@@ -135,5 +155,6 @@ class S3prlFrontend(nn.Module):
         return input_feats, feats_lens
 
     def reload_pretrained_parameters(self):
+        """Reload pretrained parameters."""
         self.upstream.load_state_dict(self.pretrained_params)
         logging.info("Pretrained S3PRL frontend model parameters reloaded!")

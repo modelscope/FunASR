@@ -22,6 +22,11 @@ from funasr.models.transformer.utils.nets_utils import pad_list
 
 
 def check_audio_list(audio: list):
+    """Check audio list.
+    
+        Args:
+            audio: TODO.
+        """
     audio_dur = 0
     for i in range(len(audio)):
         seg = audio[i]
@@ -38,6 +43,11 @@ def check_audio_list(audio: list):
 
 
 def sv_preprocess(inputs: Union[np.ndarray, list]):
+    """Sv preprocess.
+    
+        Args:
+            inputs: TODO.
+        """
     output = []
     for i in range(len(inputs)):
         if isinstance(inputs[i], str):
@@ -64,12 +74,23 @@ def sv_preprocess(inputs: Union[np.ndarray, list]):
 
 
 def sv_chunk(vad_segments: list, fs=16000) -> list:
+    """Sv chunk.
+    
+        Args:
+            vad_segments: TODO.
+            fs: TODO.
+        """
     config = {
         "seg_dur": 1.5,
         "seg_shift": 0.75,
     }
 
     def seg_chunk(seg_data):
+        """Seg chunk.
+        
+            Args:
+                seg_data: TODO.
+            """
         seg_st = seg_data[0]
         data = seg_data[2]
         chunk_len = int(config["seg_dur"] * fs)
@@ -96,6 +117,11 @@ def sv_chunk(vad_segments: list, fs=16000) -> list:
 
 
 def extract_feature(audio):
+    """Extract feature.
+    
+        Args:
+            audio: TODO.
+        """
     features = []
     feature_times = []
     feature_lengths = []
@@ -114,6 +140,14 @@ def extract_feature(audio):
 def postprocess(
     segments: list, vad_segments: list, labels: np.ndarray, embeddings: np.ndarray
 ) -> list:
+    """Postprocess.
+    
+        Args:
+            segments: TODO.
+            vad_segments: TODO.
+            labels: TODO.
+            embeddings: TODO.
+        """
     assert len(segments) == len(labels)
     labels = correct_labels(labels)
     distribute_res = []
@@ -130,6 +164,12 @@ def postprocess(
     spk_embs = np.stack(spk_embs)
 
     def is_overlapped(t1, t2):
+        """Is overlapped.
+        
+            Args:
+                t1: TODO.
+                t2: TODO.
+            """
         if t1 > t2 + 1e-4:
             return True
         return False
@@ -148,6 +188,11 @@ def postprocess(
 
 
 def correct_labels(labels):
+    """Correct labels.
+    
+        Args:
+            labels: TODO.
+        """
     labels_id = 0
     id2id = {}
     new_labels = []
@@ -160,6 +205,11 @@ def correct_labels(labels):
 
 
 def merge_seque(distribute_res):
+    """Merge seque.
+    
+        Args:
+            distribute_res: TODO.
+        """
     res = [distribute_res[0]]
     for i in range(1, len(distribute_res)):
         if distribute_res[i][2] != res[-1][2] or distribute_res[i][0] > res[-1][1]:
@@ -171,6 +221,12 @@ def merge_seque(distribute_res):
 
 def smooth(res, mindur=0.7):
     # if only one segment, return directly
+    """Smooth.
+    
+        Args:
+            res: TODO.
+            mindur: TODO.
+        """
     if len(res) < 2:
         return res
     # short segments are assigned to nearest speakers.
@@ -193,6 +249,12 @@ def smooth(res, mindur=0.7):
 
 
 def distribute_spk(sentence_list, sd_time_list):
+    """Distribute spk.
+    
+        Args:
+            sentence_list: TODO.
+            sd_time_list: TODO.
+        """
     sd_time_list = [(spk_st * 1000, spk_ed * 1000, spk) for spk_st, spk_ed, spk in sd_time_list]
     for d in sentence_list:
         sentence_start = d['start']
@@ -220,18 +282,41 @@ class Storage(metaclass=ABCMeta):
 
     @abstractmethod
     def read(self, filepath: str):
+        """Read.
+        
+            Args:
+                filepath: TODO.
+            """
         pass
 
     @abstractmethod
     def read_text(self, filepath: str):
+        """Read text.
+        
+            Args:
+                filepath: TODO.
+            """
         pass
 
     @abstractmethod
     def write(self, obj: bytes, filepath: Union[str, Path]) -> None:
+        """Write.
+        
+            Args:
+                obj: TODO.
+                filepath: TODO.
+            """
         pass
 
     @abstractmethod
     def write_text(self, obj: str, filepath: Union[str, Path], encoding: str = "utf-8") -> None:
+        """Write text.
+        
+            Args:
+                obj: TODO.
+                filepath: TODO.
+                encoding: TODO.
+            """
         pass
 
 
@@ -315,11 +400,21 @@ class HTTPStorage(Storage):
 
     def read(self, url):
         # TODO @wenmeng.zwm add progress bar if file is too large
+        """Read.
+        
+            Args:
+                url: TODO.
+            """
         r = requests.get(url)
         r.raise_for_status()
         return r.content
 
     def read_text(self, url):
+        """Read text.
+        
+            Args:
+                url: TODO.
+            """
         r = requests.get(url)
         r.raise_for_status()
         return r.text
@@ -351,9 +446,22 @@ class HTTPStorage(Storage):
             os.remove(f.name)
 
     def write(self, obj: bytes, url: Union[str, Path]) -> None:
+        """Write.
+        
+            Args:
+                obj: TODO.
+                url: TODO.
+            """
         raise NotImplementedError("write is not supported by HTTP Storage")
 
     def write_text(self, obj: str, url: Union[str, Path], encoding: str = "utf-8") -> None:
+        """Write text.
+        
+            Args:
+                obj: TODO.
+                url: TODO.
+                encoding: TODO.
+            """
         raise NotImplementedError("write_text is not supported by HTTP Storage")
 
 
@@ -362,12 +470,28 @@ class OSSStorage(Storage):
 
     def __init__(self, oss_config_file=None):
         # read from config file or env var
+        """Initialize OSSStorage.
+        
+            Args:
+                oss_config_file: TODO.
+            """
         raise NotImplementedError("OSSStorage.__init__ to be implemented in the future")
 
     def read(self, filepath):
+        """Read.
+        
+            Args:
+                filepath: TODO.
+            """
         raise NotImplementedError("OSSStorage.read to be implemented in the future")
 
     def read_text(self, filepath, encoding="utf-8"):
+        """Read text.
+        
+            Args:
+                filepath: TODO.
+                encoding: TODO.
+            """
         raise NotImplementedError("OSSStorage.read_text to be implemented in the future")
 
     @contextlib.contextmanager
@@ -397,9 +521,22 @@ class OSSStorage(Storage):
             os.remove(f.name)
 
     def write(self, obj: bytes, filepath: Union[str, Path]) -> None:
+        """Write.
+        
+            Args:
+                obj: TODO.
+                filepath: TODO.
+            """
         raise NotImplementedError("OSSStorage.write to be implemented in the future")
 
     def write_text(self, obj: str, filepath: Union[str, Path], encoding: str = "utf-8") -> None:
+        """Write text.
+        
+            Args:
+                obj: TODO.
+                filepath: TODO.
+                encoding: TODO.
+            """
         raise NotImplementedError("OSSStorage.write_text to be implemented in the future")
 
 
@@ -416,6 +553,11 @@ class File(object):
 
     @staticmethod
     def _get_storage(uri):
+        """Internal: get storage.
+        
+            Args:
+                uri: TODO.
+            """
         assert isinstance(uri, str), f"uri should be str type, but got {type(uri)}"
 
         if "://" not in uri:

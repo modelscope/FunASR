@@ -16,6 +16,11 @@ from funasr.utils.modelscope_file import File
 
 
 def check_audio_list(audio: list):
+    """Check audio list.
+    
+        Args:
+            audio: TODO.
+        """
     audio_dur = 0
     for i in range(len(audio)):
         seg = audio[i]
@@ -32,6 +37,11 @@ def check_audio_list(audio: list):
 
 
 def sv_preprocess(inputs: Union[np.ndarray, list]):
+    """Sv preprocess.
+    
+        Args:
+            inputs: TODO.
+        """
     output = []
     for i in range(len(inputs)):
         if isinstance(inputs[i], str):
@@ -58,12 +68,23 @@ def sv_preprocess(inputs: Union[np.ndarray, list]):
 
 
 def sv_chunk(vad_segments: list, fs=16000) -> list:
+    """Sv chunk.
+    
+        Args:
+            vad_segments: TODO.
+            fs: TODO.
+        """
     config = {
         "seg_dur": 1.5,
         "seg_shift": 0.75,
     }
 
     def seg_chunk(seg_data):
+        """Seg chunk.
+        
+            Args:
+                seg_data: TODO.
+            """
         seg_st = seg_data[0]
         data = seg_data[2]
         chunk_len = int(config["seg_dur"] * fs)
@@ -90,6 +111,11 @@ def sv_chunk(vad_segments: list, fs=16000) -> list:
 
 
 def extract_feature(audio):
+    """Extract feature.
+    
+        Args:
+            audio: TODO.
+        """
     features = []
     for au in audio:
         feature = Kaldi.fbank(au.unsqueeze(0), num_mel_bins=80)
@@ -102,6 +128,14 @@ def extract_feature(audio):
 def postprocess(
     segments: list, vad_segments: list, labels: np.ndarray, embeddings: np.ndarray
 ) -> list:
+    """Postprocess.
+    
+        Args:
+            segments: TODO.
+            vad_segments: TODO.
+            labels: TODO.
+            embeddings: TODO.
+        """
     assert len(segments) == len(labels)
     labels = correct_labels(labels)
     distribute_res = []
@@ -118,6 +152,12 @@ def postprocess(
     spk_embs = np.stack(spk_embs)
 
     def is_overlapped(t1, t2):
+        """Is overlapped.
+        
+            Args:
+                t1: TODO.
+                t2: TODO.
+            """
         if t1 > t2 + 1e-4:
             return True
         return False
@@ -136,6 +176,11 @@ def postprocess(
 
 
 def correct_labels(labels):
+    """Correct labels.
+    
+        Args:
+            labels: TODO.
+        """
     labels_id = 0
     id2id = {}
     new_labels = []
@@ -148,6 +193,11 @@ def correct_labels(labels):
 
 
 def merge_seque(distribute_res):
+    """Merge seque.
+    
+        Args:
+            distribute_res: TODO.
+        """
     res = [distribute_res[0]]
     for i in range(1, len(distribute_res)):
         if distribute_res[i][2] != res[-1][2] or distribute_res[i][0] > res[-1][1]:
@@ -159,6 +209,12 @@ def merge_seque(distribute_res):
 
 def smooth(res, mindur=1):
     # short segments are assigned to nearest speakers.
+    """Smooth.
+    
+        Args:
+            res: TODO.
+            mindur: TODO.
+        """
     for i in range(len(res)):
         res[i][0] = round(res[i][0], 2)
         res[i][1] = round(res[i][1], 2)
@@ -178,6 +234,12 @@ def smooth(res, mindur=1):
 
 
 def distribute_spk(sentence_list, sd_time_list):
+    """Distribute spk.
+    
+        Args:
+            sentence_list: TODO.
+            sd_time_list: TODO.
+        """
     sd_sentence_list = []
     for d in sentence_list:
         sentence_start = d["ts_list"][0][0]

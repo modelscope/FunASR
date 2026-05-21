@@ -36,6 +36,11 @@ else:
     # Nothing to do if torch<1.6.0
     @contextmanager
     def autocast(enabled=True):
+        """Autocast.
+        
+            Args:
+                enabled: TODO.
+            """
         yield
 
 
@@ -56,6 +61,20 @@ class ESPnetSVModel(FunASRModel):
         decoder: AbsDecoder,
     ):
 
+        """Initialize ESPnetSVModel.
+        
+            Args:
+                vocab_size: Size/dimension parameter.
+                token_list: TODO.
+                frontend: Audio frontend for feature extraction.
+                specaug: TODO.
+                normalize: TODO.
+                preencoder: TODO.
+                encoder: TODO.
+                postencoder: TODO.
+                pooling_layer: TODO.
+                decoder: TODO.
+            """
         super().__init__()
         # note that eos is the same as sos (equivalent ID)
         self.vocab_size = vocab_size
@@ -197,6 +216,14 @@ class ESPnetSVModel(FunASRModel):
         text: torch.Tensor,
         text_lengths: torch.Tensor,
     ) -> Dict[str, torch.Tensor]:
+        """Collect feats.
+        
+            Args:
+                speech: Speech audio tensor, shape (batch, time).
+                speech_lengths: Length of each speech sample.
+                text: Text tensor or string input.
+                text_lengths: Length of each text sample.
+            """
         if self.extract_feats_in_collect_stats:
             feats, feats_lengths = self._extract_feats(speech, speech_lengths)
         else:
@@ -246,6 +273,12 @@ class ESPnetSVModel(FunASRModel):
     def _extract_feats(
         self, speech: torch.Tensor, speech_lengths: torch.Tensor
     ) -> Tuple[torch.Tensor, torch.Tensor]:
+        """Internal: extract feats.
+        
+            Args:
+                speech: Speech audio tensor, shape (batch, time).
+                speech_lengths: Length of each speech sample.
+            """
         assert speech_lengths.dim() == 1, speech_lengths.shape
 
         # for data-parallel

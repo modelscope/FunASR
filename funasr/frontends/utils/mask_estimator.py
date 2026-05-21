@@ -12,6 +12,17 @@ from funasr.models.language_model.rnn.encoders import RNNP
 
 class MaskEstimator(torch.nn.Module):
     def __init__(self, type, idim, layers, units, projs, dropout, nmask=1):
+        """Initialize MaskEstimator.
+        
+            Args:
+                type: TODO.
+                idim: TODO.
+                layers: TODO.
+                units: TODO.
+                projs: TODO.
+                dropout: TODO.
+                nmask: TODO.
+            """
         super().__init__()
         subsample = np.ones(layers + 1, dtype=np.int32)
 

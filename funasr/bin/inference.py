@@ -7,7 +7,17 @@ from funasr.auto.auto_model import AutoModel
 
 @hydra.main(config_name=None, version_base=None)
 def main_hydra(cfg: DictConfig):
+    """Main hydra.
+    
+        Args:
+            cfg: Configuration overrides.
+        """
     def to_plain_list(cfg_item):
+        """To plain list.
+        
+            Args:
+                cfg_item: TODO.
+            """
         if isinstance(cfg_item, ListConfig):
             return OmegaConf.to_container(cfg_item, resolve=True)
         elif isinstance(cfg_item, DictConfig):

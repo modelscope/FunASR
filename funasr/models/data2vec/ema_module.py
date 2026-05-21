@@ -59,6 +59,11 @@ class EMAModule:
             state_dict = self.model.state_dict()
 
         def _to_float(t):
+            """Internal: to float.
+            
+                Args:
+                    t: TODO.
+                """
             return t.float() if torch.is_floating_point(t) else t
 
         for param_key in state_dict:
@@ -74,9 +79,15 @@ class EMAModule:
             self.build_fp32_params(state_dict)
 
     def set_decay(self, decay):
+        """Set decay.
+        
+            Args:
+                decay: TODO.
+            """
         self.decay = decay
 
     def get_decay(self):
+        """Get decay."""
         return self.decay
 
     def _step_internal(self, new_model):
@@ -115,6 +126,11 @@ class EMAModule:
         self.restore(ema_state_dict, build_fp32_params=False)
 
     def step(self, new_model):
+        """Step.
+        
+            Args:
+                new_model: New Model instance.
+            """
         self._step_internal(new_model)
 
     def reverse(self, model):

@@ -149,6 +149,11 @@ class DecoderLayer(nn.Module):
 
 class DecoderLayerExport(nn.Module):
     def __init__(self, model):
+        """Initialize DecoderLayerExport.
+        
+            Args:
+                model: Model instance or model name.
+            """
         super().__init__()
         self.self_attn = model.self_attn
         self.src_attn = model.src_attn
@@ -158,6 +163,15 @@ class DecoderLayerExport(nn.Module):
         self.norm3 = model.norm3
 
     def forward(self, tgt, tgt_mask, memory, memory_mask, cache=None):
+        """Forward pass for training.
+        
+            Args:
+                tgt: TODO.
+                tgt_mask: TODO.
+                memory: TODO.
+                memory_mask: TODO.
+                cache: State cache dict for streaming inference.
+            """
         residual = tgt
         tgt = self.norm1(tgt)
         tgt_q = tgt
@@ -209,6 +223,18 @@ class BaseTransformerDecoder(nn.Module, BatchScorerInterface):
         pos_enc_class=PositionalEncoding,
         normalize_before: bool = True,
     ):
+        """Initialize BaseTransformerDecoder.
+        
+            Args:
+                vocab_size: Size/dimension parameter.
+                encoder_output_size: Size/dimension parameter.
+                dropout_rate: TODO.
+                positional_dropout_rate: TODO.
+                input_layer: TODO.
+                use_output_layer: TODO.
+                pos_enc_class: TODO.
+                normalize_before: TODO.
+            """
         super().__init__()
         attention_dim = encoder_output_size
 
@@ -387,6 +413,24 @@ class TransformerDecoder(BaseTransformerDecoder):
         normalize_before: bool = True,
         concat_after: bool = False,
     ):
+        """Initialize TransformerDecoder.
+        
+            Args:
+                vocab_size: Size/dimension parameter.
+                encoder_output_size: Size/dimension parameter.
+                attention_heads: TODO.
+                linear_units: TODO.
+                num_blocks: TODO.
+                dropout_rate: TODO.
+                positional_dropout_rate: TODO.
+                self_attention_dropout_rate: TODO.
+                src_attention_dropout_rate: TODO.
+                input_layer: TODO.
+                use_output_layer: TODO.
+                pos_enc_class: TODO.
+                normalize_before: TODO.
+                concat_after: TODO.
+            """
         super().__init__(
             vocab_size=vocab_size,
             encoder_output_size=encoder_output_size,
@@ -435,6 +479,27 @@ class LightweightConvolutionTransformerDecoder(BaseTransformerDecoder):
         conv_kernel_length: Sequence[int] = (11, 11, 11, 11, 11, 11),
         conv_usebias: int = False,
     ):
+        """Initialize LightweightConvolutionTransformerDecoder.
+        
+            Args:
+                vocab_size: Size/dimension parameter.
+                encoder_output_size: Size/dimension parameter.
+                attention_heads: TODO.
+                linear_units: TODO.
+                num_blocks: TODO.
+                dropout_rate: TODO.
+                positional_dropout_rate: TODO.
+                self_attention_dropout_rate: TODO.
+                src_attention_dropout_rate: TODO.
+                input_layer: TODO.
+                use_output_layer: TODO.
+                pos_enc_class: TODO.
+                normalize_before: TODO.
+                concat_after: TODO.
+                conv_wshare: TODO.
+                conv_kernel_length: TODO.
+                conv_usebias: TODO.
+            """
         if len(conv_kernel_length) != num_blocks:
             raise ValueError(
                 "conv_kernel_length must have equal number of values to num_blocks: "
@@ -495,6 +560,27 @@ class LightweightConvolution2DTransformerDecoder(BaseTransformerDecoder):
         conv_kernel_length: Sequence[int] = (11, 11, 11, 11, 11, 11),
         conv_usebias: int = False,
     ):
+        """Initialize LightweightConvolution2DTransformerDecoder.
+        
+            Args:
+                vocab_size: Size/dimension parameter.
+                encoder_output_size: Size/dimension parameter.
+                attention_heads: TODO.
+                linear_units: TODO.
+                num_blocks: TODO.
+                dropout_rate: TODO.
+                positional_dropout_rate: TODO.
+                self_attention_dropout_rate: TODO.
+                src_attention_dropout_rate: TODO.
+                input_layer: TODO.
+                use_output_layer: TODO.
+                pos_enc_class: TODO.
+                normalize_before: TODO.
+                concat_after: TODO.
+                conv_wshare: TODO.
+                conv_kernel_length: TODO.
+                conv_usebias: TODO.
+            """
         if len(conv_kernel_length) != num_blocks:
             raise ValueError(
                 "conv_kernel_length must have equal number of values to num_blocks: "
@@ -555,6 +641,27 @@ class DynamicConvolutionTransformerDecoder(BaseTransformerDecoder):
         conv_kernel_length: Sequence[int] = (11, 11, 11, 11, 11, 11),
         conv_usebias: int = False,
     ):
+        """Initialize DynamicConvolutionTransformerDecoder.
+        
+            Args:
+                vocab_size: Size/dimension parameter.
+                encoder_output_size: Size/dimension parameter.
+                attention_heads: TODO.
+                linear_units: TODO.
+                num_blocks: TODO.
+                dropout_rate: TODO.
+                positional_dropout_rate: TODO.
+                self_attention_dropout_rate: TODO.
+                src_attention_dropout_rate: TODO.
+                input_layer: TODO.
+                use_output_layer: TODO.
+                pos_enc_class: TODO.
+                normalize_before: TODO.
+                concat_after: TODO.
+                conv_wshare: TODO.
+                conv_kernel_length: TODO.
+                conv_usebias: TODO.
+            """
         if len(conv_kernel_length) != num_blocks:
             raise ValueError(
                 "conv_kernel_length must have equal number of values to num_blocks: "
@@ -615,6 +722,27 @@ class DynamicConvolution2DTransformerDecoder(BaseTransformerDecoder):
         conv_kernel_length: Sequence[int] = (11, 11, 11, 11, 11, 11),
         conv_usebias: int = False,
     ):
+        """Initialize DynamicConvolution2DTransformerDecoder.
+        
+            Args:
+                vocab_size: Size/dimension parameter.
+                encoder_output_size: Size/dimension parameter.
+                attention_heads: TODO.
+                linear_units: TODO.
+                num_blocks: TODO.
+                dropout_rate: TODO.
+                positional_dropout_rate: TODO.
+                self_attention_dropout_rate: TODO.
+                src_attention_dropout_rate: TODO.
+                input_layer: TODO.
+                use_output_layer: TODO.
+                pos_enc_class: TODO.
+                normalize_before: TODO.
+                concat_after: TODO.
+                conv_wshare: TODO.
+                conv_kernel_length: TODO.
+                conv_usebias: TODO.
+            """
         if len(conv_kernel_length) != num_blocks:
             raise ValueError(
                 "conv_kernel_length must have equal number of values to num_blocks: "

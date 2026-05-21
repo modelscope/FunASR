@@ -22,6 +22,11 @@ def load_module_from_path(file_path):
 
 def import_module_from_path(file_path: str):
 
+    """Import module from path.
+    
+        Args:
+            file_path: TODO.
+        """
     if file_path.startswith("http"):
         from funasr.download.file import download_from_url
 

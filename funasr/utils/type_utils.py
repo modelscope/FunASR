@@ -7,10 +7,20 @@ import humanfriendly
 
 
 def str2bool(value: str) -> bool:
+    """Str2bool.
+    
+        Args:
+            value: TODO.
+        """
     return bool(strtobool(value))
 
 
 def remove_parenthesis(value: str):
+    """Remove parenthesis.
+    
+        Args:
+            value: TODO.
+        """
     value = value.strip()
     if value.startswith("(") and value.endswith(")"):
         value = value[1:-1]
@@ -20,6 +30,11 @@ def remove_parenthesis(value: str):
 
 
 def remove_quotes(value: str):
+    """Remove quotes.
+    
+        Args:
+            value: TODO.
+        """
     value = value.strip()
     if value.startswith('"') and value.endswith('"'):
         value = value[1:-1]
@@ -73,12 +88,22 @@ def float_or_none(value: str) -> Optional[float]:
 
 
 def humanfriendly_parse_size_or_none(value) -> Optional[float]:
+    """Humanfriendly parse size or none.
+    
+        Args:
+            value: TODO.
+        """
     if value.strip().lower() in ("none", "null", "nil"):
         return None
     return humanfriendly.parse_size(value)
 
 
 def str_or_int(value: str) -> Union[str, int]:
+    """Str or int.
+    
+        Args:
+            value: TODO.
+        """
     try:
         return int(value)
     except ValueError:

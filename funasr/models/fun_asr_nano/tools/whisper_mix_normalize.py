@@ -18,6 +18,11 @@ english_normalizer = EnglishTextNormalizer()
 
 def is_only_chinese_and_english(s):
     # 定义正则表达式模式，匹配中文字符范围和英文字母（包括大小写）
+    """Is only chinese and english.
+    
+        Args:
+            s: TODO.
+        """
     pattern = r"^[\u4e00-\u9fa5A-Za-z0-9,\.!\?:;，。！？：；、%\'\s\-\~]+$"
     # 使用正则表达式进行匹配
     return re.match(pattern, s) is not None
@@ -25,6 +30,11 @@ def is_only_chinese_and_english(s):
 
 def is_only_english(s):
     # 定义正则表达式模式，匹配中文字符范围和英文字母（包括大小写）
+    """Is only english.
+    
+        Args:
+            s: TODO.
+        """
     pattern = r"^[A-Za-z0-9,\.!\?:;，。！？：；、%\'\s\-\~]+$"
     # 使用正则表达式进行匹配
     return re.match(pattern, s) is not None
@@ -32,12 +42,24 @@ def is_only_english(s):
 
 def is_number(s):
     # 定义正则表达式模式，匹配中文字符范围和英文字母（包括大小写）
+    """Is number.
+    
+        Args:
+            s: TODO.
+        """
     pattern = r"^[0-9,\.!\?:;，。！？：；、%\'\s]+$"
     # 使用正则表达式进行匹配
     return re.match(pattern, s) is not None
 
 
 def safe_ja_g2p(text, kana=True, max_length=100):
+    """Safe ja g2p.
+    
+        Args:
+            text: Text tensor or string input.
+            kana: TODO.
+            max_length: TODO.
+        """
     if len(text) > max_length:
         # 如果文本过长，分段处理
         parts = []
@@ -57,6 +79,13 @@ def safe_ja_g2p(text, kana=True, max_length=100):
 
 
 def normalize_text(srcfn, dstfn, kana=False):
+    """Normalize text.
+    
+        Args:
+            srcfn: TODO.
+            dstfn: TODO.
+            kana: TODO.
+        """
     with open(srcfn, "r") as f_read, open(dstfn, "w") as f_write:
         all_lines = f_read.readlines()
         for line in all_lines:

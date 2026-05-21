@@ -145,6 +145,30 @@ class SelfAttentionEncoder(AbsEncoder):
         tf2torch_tensor_name_prefix_tf: str = "seq2seq/encoder",
         out_units=None,
     ):
+        """Initialize SelfAttentionEncoder.
+        
+            Args:
+                input_size: Size/dimension parameter.
+                output_size: Size/dimension parameter.
+                attention_heads: TODO.
+                linear_units: TODO.
+                num_blocks: TODO.
+                dropout_rate: TODO.
+                positional_dropout_rate: TODO.
+                attention_dropout_rate: TODO.
+                input_layer: TODO.
+                pos_enc_class: TODO.
+                normalize_before: TODO.
+                concat_after: TODO.
+                positionwise_layer_type: TODO.
+                positionwise_conv_kernel_size: Size/dimension parameter.
+                padding_idx: TODO.
+                interctc_layer_idx: TODO.
+                interctc_use_conditioning: TODO.
+                tf2torch_tensor_name_prefix_torch: TODO.
+                tf2torch_tensor_name_prefix_tf: TODO.
+                out_units: TODO.
+            """
         super().__init__()
         self._output_size = output_size
 
@@ -257,6 +281,7 @@ class SelfAttentionEncoder(AbsEncoder):
             self.output_linear = nn.Linear(output_size, out_units)
 
     def output_size(self) -> int:
+        """Output size."""
         return self._output_size
 
     def forward(

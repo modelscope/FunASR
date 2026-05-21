@@ -168,6 +168,7 @@ class Tokenizer:
     special_tokens: Dict[str, int] = field(default_factory=dict)
 
     def __post_init__(self):
+        """Internal: post init  ."""
         for special in self.encoding.special_tokens_set:
             special_token = self.encoding.encode_single_token(special)
             self.special_tokens[special] = special_token
@@ -192,9 +193,21 @@ class Tokenizer:
         self.sot_sequence = tuple(sot_sequence)
 
     def encode(self, text, **kwargs):
+        """Encode.
+        
+            Args:
+                text: Text tensor or string input.
+                **kwargs: Additional keyword arguments.
+            """
         return self.encoding.encode(text, **kwargs)
 
     def decode(self, token_ids: List[int], **kwargs) -> str:
+        """Decode.
+        
+            Args:
+                token_ids: TODO.
+                **kwargs: Additional keyword arguments.
+            """
         token_ids = [t for t in token_ids if t < self.timestamp_begin]
         return self.encoding.decode(token_ids, **kwargs)
 
@@ -206,46 +219,57 @@ class Tokenizer:
         return self.encoding.decode(token_ids, **kwargs)
 
     def get_vocab_size(self) -> int:
+        """Get vocab size."""
         return self.encoding.n_vocab
 
     @cached_property
     def eot(self) -> int:
+        """Eot."""
         return self.encoding.eot_token
 
     @cached_property
     def transcribe(self) -> int:
+        """Transcribe."""
         return self.special_tokens["<|transcribe|>"]
 
     @cached_property
     def translate(self) -> int:
+        """Translate."""
         return self.special_tokens["<|translate|>"]
 
     @cached_property
     def sot(self) -> int:
+        """Sot."""
         return self.special_tokens["<|startoftranscript|>"]
 
     @cached_property
     def sot_sense(self) -> int:
+        """Sot sense."""
         return self.special_tokens["<|startoftranscript|>"]
 
     @cached_property
     def sot_lm(self) -> int:
+        """Sot lm."""
         return self.special_tokens["<|startoflm|>"]
 
     @cached_property
     def sot_prev(self) -> int:
+        """Sot prev."""
         return self.special_tokens["<|startofprev|>"]
 
     @cached_property
     def no_speech(self) -> int:
+        """No speech."""
         return self.special_tokens["<|nospeech|>"]
 
     @cached_property
     def no_timestamps(self) -> int:
+        """No timestamps."""
         return self.special_tokens["<|notimestamps|>"]
 
     @cached_property
     def timestamp_begin(self) -> int:
+        """Timestamp begin."""
         return self.special_tokens["<|0.00|>"]
 
     @cached_property
@@ -257,6 +281,11 @@ class Tokenizer:
         return self.to_language_token(self.language)
 
     def to_language_token(self, language):
+        """To language token.
+        
+            Args:
+                language: Language identifier.
+            """
         if token := self.special_tokens.get(f"<|{language}|>", None):
             return token
 
@@ -264,6 +293,7 @@ class Tokenizer:
 
     @cached_property
     def all_language_tokens(self) -> Tuple[int]:
+        """All language tokens."""
         result = []
         for token, token_id in self.special_tokens.items():
             if token.strip("<|>") in LANGUAGES:
@@ -272,10 +302,12 @@ class Tokenizer:
 
     @cached_property
     def all_language_codes(self) -> Tuple[str]:
+        """All language codes."""
         return tuple(self.decode([_l]).strip("<|>") for _l in self.all_language_tokens)
 
     @cached_property
     def sot_sequence_including_notimestamps(self) -> Tuple[int]:
+        """Sot sequence including notimestamps."""
         return tuple(list(self.sot_sequence) + [self.no_timestamps])
 
     @cached_property
@@ -313,6 +345,11 @@ class Tokenizer:
         return tuple(sorted(result))
 
     def split_to_word_tokens(self, tokens: List[int]):
+        """Split to word tokens.
+        
+            Args:
+                tokens: TODO.
+            """
         if self.language in {"zh", "ja", "th", "lo", "my", "yue"}:
             # These languages don't typically use spaces, so it is difficult to split words
             # without morpheme analysis. Here, we instead split words at any
@@ -322,6 +359,11 @@ class Tokenizer:
         return self.split_tokens_on_spaces(tokens)
 
     def split_tokens_on_unicode(self, tokens: List[int]):
+        """Split tokens on unicode.
+        
+            Args:
+                tokens: TODO.
+            """
         decoded_full = self.decode_with_timestamps(tokens)
         replacement_char = "\ufffd"
 
@@ -347,6 +389,11 @@ class Tokenizer:
         return words, word_tokens
 
     def split_tokens_on_spaces(self, tokens: List[int]):
+        """Split tokens on spaces.
+        
+            Args:
+                tokens: TODO.
+            """
         subwords, subword_tokens_list = self.split_tokens_on_unicode(tokens)
         words = []
         word_tokens = []
@@ -367,6 +414,13 @@ class Tokenizer:
 
 @lru_cache(maxsize=None)
 def get_encoding(name: str = "gpt2", num_languages: int = 99, vocab_path: str = None):
+    """Get encoding.
+    
+        Args:
+            name: TODO.
+            num_languages: TODO.
+            vocab_path: TODO.
+        """
     if vocab_path is None:
         vocab_path = os.path.join(os.path.dirname(__file__), "assets", f"{name}.tiktoken")
 
@@ -430,6 +484,11 @@ def get_tokenizer(
     encoding_path: Optional[str] = None,
     vocab_path: Optional[str] = None,
 ) -> Tokenizer:
+    """Get tokenizer.
+    
+        Args:
+            multilingual: TODO.
+        """
     if language is not None:
         language = language.lower()
         if language not in LANGUAGES:

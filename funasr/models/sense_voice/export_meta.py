@@ -9,6 +9,12 @@ from funasr.utils.torch_function import sequence_mask
 
 
 def export_rebuild_model(model, **kwargs):
+    """Export rebuild model.
+    
+        Args:
+            model: Model instance or model name.
+            **kwargs: Additional keyword arguments.
+        """
     model.device = kwargs.get("device")
     model.make_pad_mask = sequence_mask(kwargs["max_seq_len"], flip=False)
     model.forward = types.MethodType(export_forward, model)
@@ -29,6 +35,15 @@ def export_forward(
 ):
     # speech = speech.to(device="cuda")
     # speech_lengths = speech_lengths.to(device="cuda")
+    """Export forward.
+    
+        Args:
+            speech: Speech audio tensor, shape (batch, time).
+            speech_lengths: Length of each speech sample.
+            language: Language identifier.
+            textnorm: TODO.
+            **kwargs: Additional keyword arguments.
+        """
     language_query = self.embed(language.to(speech.device)).unsqueeze(1)
     textnorm_query = self.embed(textnorm.to(speech.device)).unsqueeze(1)
     
@@ -51,6 +66,7 @@ def export_forward(
     return ctc_logits, encoder_out_lens
 
 def export_dummy_inputs(self):
+    """Export dummy inputs."""
     speech = torch.randn(2, 30, 560)
     speech_lengths = torch.tensor([6, 30], dtype=torch.int32)
     language = torch.tensor([0, 0], dtype=torch.int32)
@@ -58,12 +74,15 @@ def export_dummy_inputs(self):
     return (speech, speech_lengths, language, textnorm)
 
 def export_input_names(self):
+    """Export input names."""
     return ["speech", "speech_lengths", "language", "textnorm"]
 
 def export_output_names(self):
+    """Export output names."""
     return ["ctc_logits", "encoder_out_lens"]
 
 def export_dynamic_axes(self):
+    """Export dynamic axes."""
     return {
         "speech": {0: "batch_size", 1: "feats_length"},
         "speech_lengths": {0: "batch_size"},
@@ -74,4 +93,5 @@ def export_dynamic_axes(self):
     }
 
 def export_name(self):
+    """Export name."""
     return "model.onnx"

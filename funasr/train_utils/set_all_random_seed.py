@@ -5,6 +5,11 @@ import torch
 
 
 def set_all_random_seed(seed: int):
+    """Set all random seed.
+    
+        Args:
+            seed: TODO.
+        """
     random.seed(seed)
     np.random.seed(seed)
     torch.random.manual_seed(seed)

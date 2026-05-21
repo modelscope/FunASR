@@ -20,6 +20,12 @@ class ForwardAdaptor(torch.nn.Module):
     """
 
     def __init__(self, module: torch.nn.Module, name: str):
+        """Initialize ForwardAdaptor.
+        
+            Args:
+                module: TODO.
+                name: TODO.
+            """
         super().__init__()
         self.module = module
         self.name = name
@@ -27,5 +33,11 @@ class ForwardAdaptor(torch.nn.Module):
             raise ValueError(f"{module} doesn't have {name}")
 
     def forward(self, *args, **kwargs):
+        """Forward pass for training.
+        
+            Args:
+                *args: Variable positional arguments.
+                **kwargs: Additional keyword arguments.
+            """
         func = getattr(self.module, self.name)
         return func(*args, **kwargs)

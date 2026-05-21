@@ -347,6 +347,35 @@ class ConformerEncoder(nn.Module):
         interctc_use_conditioning: bool = False,
         stochastic_depth_rate: Union[float, List[float]] = 0.0,
     ):
+        """Initialize ConformerEncoder.
+        
+            Args:
+                input_size: Size/dimension parameter.
+                output_size: Size/dimension parameter.
+                attention_heads: TODO.
+                linear_units: TODO.
+                num_blocks: TODO.
+                dropout_rate: TODO.
+                positional_dropout_rate: TODO.
+                attention_dropout_rate: TODO.
+                input_layer: TODO.
+                normalize_before: TODO.
+                concat_after: TODO.
+                positionwise_layer_type: TODO.
+                positionwise_conv_kernel_size: Size/dimension parameter.
+                macaron_style: TODO.
+                rel_pos_type: TODO.
+                pos_enc_layer_type: TODO.
+                selfattention_layer_type: TODO.
+                activation_type: TODO.
+                use_cnn_module: TODO.
+                zero_triu: TODO.
+                cnn_module_kernel: TODO.
+                padding_idx: TODO.
+                interctc_layer_idx: TODO.
+                interctc_use_conditioning: TODO.
+                stochastic_depth_rate: TODO.
+            """
         super().__init__()
         self._output_size = output_size
 
@@ -524,6 +553,7 @@ class ConformerEncoder(nn.Module):
         self.conditioning_layer = None
 
     def output_size(self) -> int:
+        """Output size."""
         return self._output_size
 
     def forward(
@@ -1004,6 +1034,7 @@ class ConformerChunkEncoder(torch.nn.Module):
         self.time_reduction_factor = time_reduction_factor
 
     def output_size(self) -> int:
+        """Output size."""
         return self._output_size
 
     def get_encoder_input_raw_size(self, size: int, hop_length: int) -> int:
@@ -1181,6 +1212,15 @@ class ConformerChunkEncoder(torch.nn.Module):
         left_context: int = 32,
         right_context: int = 0,
     ) -> torch.Tensor:
+        """Simu chunk forward.
+        
+            Args:
+                x: TODO.
+                x_len: TODO.
+                chunk_size: Size/dimension parameter.
+                left_context: TODO.
+                right_context: TODO.
+            """
         short_status, limit_size = check_short_utt(self.embed.subsampling_factor, x.size(1))
 
         if short_status:

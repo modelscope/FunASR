@@ -23,6 +23,18 @@ class AudioDataset(torch.utils.data.Dataset):
         float_pad_value: float = 0.0,
         **kwargs,
     ):
+        """Initialize AudioDataset.
+        
+            Args:
+                path: TODO.
+                index_ds: TODO.
+                frontend: Audio frontend for feature extraction.
+                tokenizer: Tokenizer instance for text encoding/decoding.
+                is_training: Boolean flag for training.
+                int_pad_value: TODO.
+                float_pad_value: TODO.
+                **kwargs: Additional keyword arguments.
+            """
         super().__init__()
         index_ds_class = tables.index_ds_classes.get(index_ds)
         self.index_ds = index_ds_class(path, **kwargs)
@@ -53,17 +65,33 @@ class AudioDataset(torch.utils.data.Dataset):
         self.float_pad_value = float_pad_value
 
     def get_source_len(self, index):
+        """Get source len.
+        
+            Args:
+                index: TODO.
+            """
         item = self.index_ds[index]
         return self.index_ds.get_source_len(item)
 
     def get_target_len(self, index):
+        """Get target len.
+        
+            Args:
+                index: TODO.
+            """
         item = self.index_ds[index]
         return self.index_ds.get_target_len(item)
 
     def __len__(self):
+        """Internal: len  ."""
         return len(self.index_ds)
 
     def __getitem__(self, index):
+        """Internal: getitem  .
+        
+            Args:
+                index: TODO.
+            """
         item = self.index_ds[index]
         # import pdb;
         # pdb.set_trace()
@@ -97,6 +125,11 @@ class AudioDataset(torch.utils.data.Dataset):
         }
 
     def collator(self, samples: list = None):
+        """Collator.
+        
+            Args:
+                samples: TODO.
+            """
         outputs = {}
         for sample in samples:
             for key in sample.keys():
@@ -127,10 +160,21 @@ class AudioDatasetHotword(AudioDataset):
         seaco_id: bool = 0,
         **kwargs,
     ):
+        """Initialize AudioDatasetHotword.
+        
+            Args:
+                *args: Variable positional arguments.
+                **kwargs: Additional keyword arguments.
+            """
         super().__init__(*args, **kwargs)
         self.seaco_id = seaco_id
 
     def __getitem__(self, index):
+        """Internal: getitem  .
+        
+            Args:
+                index: TODO.
+            """
         item = self.index_ds[index]
         # import pdb;
         # pdb.set_trace()
@@ -164,6 +208,18 @@ class AudioDatasetHotword(AudioDataset):
             pre_index=None,
             pre_hwlist=None,
         ):
+            """Generate index.
+            
+                Args:
+                    length: TODO.
+                    hotword_min_length: TODO.
+                    hotword_max_length: TODO.
+                    sample_rate: TODO.
+                    double_rate: TODO.
+                    pre_prob: TODO.
+                    pre_index: TODO.
+                    pre_hwlist: TODO.
+                """
             if length < hotword_min_length:
                 return [-1]
             if random.random() < sample_rate:
@@ -210,6 +266,11 @@ class AudioDatasetHotword(AudioDataset):
         }
 
     def collator(self, samples: list = None):
+        """Collator.
+        
+            Args:
+                samples: TODO.
+            """
         outputs = {}
         hotword_indxs = []
         seaco_id = samples[0]["seaco_id"]

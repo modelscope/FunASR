@@ -28,6 +28,11 @@ else:
     # Nothing to do if torch<1.6.0
     @contextmanager
     def autocast(enabled=True):
+        """Autocast.
+        
+            Args:
+                enabled: TODO.
+            """
         yield
 
 
@@ -65,6 +70,23 @@ class CTTransformer(torch.nn.Module):
         sentence_end_id: int = 3,
         **kwargs,
     ):
+        """Initialize CTTransformer.
+        
+            Args:
+                encoder: TODO.
+                encoder_conf: Configuration dict for encoder.
+                vocab_size: Size/dimension parameter.
+                punc_list: TODO.
+                punc_weight: TODO.
+                embed_unit: TODO.
+                att_unit: TODO.
+                dropout_rate: TODO.
+                ignore_id: TODO.
+                sos: TODO.
+                eos: TODO.
+                sentence_end_id: TODO.
+                **kwargs: Additional keyword arguments.
+            """
         super().__init__()
 
         punc_size = len(punc_list)
@@ -103,6 +125,7 @@ class CTTransformer(torch.nn.Module):
         return y, None
 
     def with_vad(self):
+        """With vad."""
         return False
 
     def score(self, y: torch.Tensor, state: Any, x: torch.Tensor) -> Tuple[torch.Tensor, Any]:
@@ -245,6 +268,16 @@ class CTTransformer(torch.nn.Module):
         vad_indexes: Optional[torch.Tensor] = None,
         vad_indexes_lengths: Optional[torch.Tensor] = None,
     ):
+        """Forward pass for training.
+        
+            Args:
+                text: Text tensor or string input.
+                punc: TODO.
+                text_lengths: Length of each text sample.
+                punc_lengths: Lengths of punc.
+                vad_indexes: TODO.
+                vad_indexes_lengths: Lengths of vad_indexes.
+            """
         nll, y_lengths = self.nll(text, punc, text_lengths, punc_lengths, vad_indexes=vad_indexes)
         ntokens = y_lengths.sum()
         loss = nll.sum() / ntokens
@@ -263,6 +296,16 @@ class CTTransformer(torch.nn.Module):
         frontend=None,
         **kwargs,
     ):
+        """Run inference on input data.
+        
+            Args:
+                data_in: Input data (audio samples, file paths, or text).
+                data_lengths: Lengths of each input sample in the batch.
+                key: Sample identifiers.
+                tokenizer: Tokenizer instance for text encoding/decoding.
+                frontend: Audio frontend for feature extraction.
+                **kwargs: Additional keyword arguments.
+            """
         assert len(data_in) == 1
         if not data_in[0] or (isinstance(data_in[0], str) and not data_in[0].strip()):
             meta_data = {"batch_data_time": -1}
@@ -427,6 +470,11 @@ class CTTransformer(torch.nn.Module):
 
     def export(self, **kwargs):
 
+        """Export.
+        
+            Args:
+                **kwargs: Additional keyword arguments.
+            """
         from .export_meta import export_rebuild_model
 
         models = export_rebuild_model(model=self, **kwargs)

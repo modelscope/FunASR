@@ -41,6 +41,7 @@ class MossformerBlock(nn.Module):
         norm_type="scalenorm",
         shift_tokens=True
     ):
+        """Initialize MossformerBlock."""
         super().__init__()
         assert norm_type in (
             "scalenorm",
@@ -74,6 +75,11 @@ class MossformerBlock(nn.Module):
         )
 
     def forward(self, x, *, mask=None):
+        """Forward pass for training.
+        
+            Args:
+                x: TODO.
+            """
         ii = 0
         for flash in self.layers:
             x = flash(x, mask=mask)
@@ -124,6 +130,18 @@ class MossFormer_MaskNet(nn.Module):
         use_global_pos_enc=True,
         max_length=20000,
     ):
+        """Initialize MossFormer_MaskNet.
+        
+            Args:
+                in_channels: TODO.
+                out_channels: TODO.
+                num_blocks: TODO.
+                norm: TODO.
+                num_spks: TODO.
+                skip_around_intra: TODO.
+                use_global_pos_enc: TODO.
+                max_length: TODO.
+            """
         super(MossFormer_MaskNet, self).__init__()
         self.num_spks = num_spks
         self.num_blocks = num_blocks
@@ -236,6 +254,13 @@ class MossFormerEncoder(nn.Module):
     """
 
     def __init__(self, kernel_size=2, out_channels=64, in_channels=1):
+        """Initialize MossFormerEncoder.
+        
+            Args:
+                kernel_size: Size/dimension parameter.
+                out_channels: TODO.
+                in_channels: TODO.
+            """
         super(MossFormerEncoder, self).__init__()
         self.conv1d = nn.Conv1d(
             in_channels=in_channels,
@@ -314,6 +339,17 @@ class MossFormerM(nn.Module):
         expansion_factor=4.0,
         attn_dropout=0.1,
     ):
+        """Initialize MossFormerM.
+        
+            Args:
+                num_blocks: TODO.
+                d_model: D Model instance.
+                causal: TODO.
+                group_size: Size/dimension parameter.
+                query_key_dim: Size/dimension parameter.
+                expansion_factor: TODO.
+                attn_dropout: TODO.
+            """
         super().__init__()
 
         self.mossformerM = MossformerBlock(
@@ -379,6 +415,14 @@ class Computation_Block(nn.Module):
         norm="ln",
         skip_around_intra=True,
     ):
+        """Initialize Computation_Block.
+        
+            Args:
+                num_blocks: TODO.
+                out_channels: TODO.
+                norm: TODO.
+                skip_around_intra: TODO.
+            """
         super(Computation_Block, self).__init__()
 
         ##MossFormer2M: MossFormer with recurrence

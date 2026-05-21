@@ -13,6 +13,14 @@ from tqdm import tqdm
 def gen_jsonl_from_wav_text_list(
     path, data_type_list=("source", "target"), jsonl_file_out: str = None, **kwargs
 ):
+    """Gen jsonl from wav text list.
+    
+        Args:
+            path: TODO.
+            data_type_list: TODO.
+            jsonl_file_out: TODO.
+            **kwargs: Additional keyword arguments.
+        """
     try:
         rank = dist.get_rank()
         world_size = dist.get_world_size()
@@ -73,6 +81,13 @@ def gen_jsonl_from_wav_text_list(
 
 
 def parse_context_length(data_list: list, data_type: str, id=0):
+    """Parse context length.
+    
+        Args:
+            data_list: TODO.
+            data_type: TODO.
+            id: TODO.
+        """
     pbar = tqdm(total=len(data_list), dynamic_ncols=True)
     res = {}
     for i, line in enumerate(data_list):
@@ -99,6 +114,11 @@ def parse_context_length(data_list: list, data_type: str, id=0):
 @hydra.main(config_name=None, version_base=None)
 def main_hydra(cfg: DictConfig):
 
+    """Main hydra.
+    
+        Args:
+            cfg: Configuration overrides.
+        """
     kwargs = OmegaConf.to_container(cfg, resolve=True)
     print(kwargs)
 

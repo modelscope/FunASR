@@ -121,6 +121,15 @@ class DecoderLayerSANM(torch.nn.Module):
         return x, tgt_mask, memory, memory_mask, cache
 
     def get_attn_mat(self, tgt, tgt_mask, memory, memory_mask=None, cache=None):
+        """Get attn mat.
+        
+            Args:
+                tgt: TODO.
+                tgt_mask: TODO.
+                memory: TODO.
+                memory_mask: TODO.
+                cache: State cache dict for streaming inference.
+            """
         residual = tgt
         tgt = self.norm1(tgt)
         tgt = self.feed_forward(tgt)
@@ -257,6 +266,35 @@ class ParaformerSANMDecoder(BaseTransformerDecoder):
         tf2torch_tensor_name_prefix_torch: str = "decoder",
         tf2torch_tensor_name_prefix_tf: str = "seq2seq/decoder",
     ):
+        """Initialize ParaformerSANMDecoder.
+        
+            Args:
+                vocab_size: Size/dimension parameter.
+                encoder_output_size: Size/dimension parameter.
+                attention_heads: TODO.
+                linear_units: TODO.
+                num_blocks: TODO.
+                dropout_rate: TODO.
+                positional_dropout_rate: TODO.
+                self_attention_dropout_rate: TODO.
+                src_attention_dropout_rate: TODO.
+                input_layer: TODO.
+                use_output_layer: TODO.
+                wo_input_layer: TODO.
+                pos_enc_class: TODO.
+                normalize_before: TODO.
+                concat_after: TODO.
+                att_layer_num: TODO.
+                kernel_size: Size/dimension parameter.
+                sanm_shfit: TODO.
+                lora_list: TODO.
+                lora_rank: TODO.
+                lora_alpha: TODO.
+                lora_dropout: TODO.
+                chunk_multiply_factor: TODO.
+                tf2torch_tensor_name_prefix_torch: TODO.
+                tf2torch_tensor_name_prefix_tf: TODO.
+            """
         super().__init__(
             vocab_size=vocab_size,
             encoder_output_size=encoder_output_size,
@@ -426,6 +464,14 @@ class ParaformerSANMDecoder(BaseTransformerDecoder):
         ys_in_lens: torch.Tensor,
     ):
 
+        """Forward asf2.
+        
+            Args:
+                hs_pad: TODO.
+                hlens: TODO.
+                ys_in_pad: TODO.
+                ys_in_lens: Lengths of ys_in.
+            """
         tgt = ys_in_pad
         tgt_mask = myutils.sequence_mask(ys_in_lens, device=tgt.device)[:, :, None]
 
@@ -444,6 +490,14 @@ class ParaformerSANMDecoder(BaseTransformerDecoder):
         ys_in_lens: torch.Tensor,
     ):
 
+        """Forward asf6.
+        
+            Args:
+                hs_pad: TODO.
+                hlens: TODO.
+                ys_in_pad: TODO.
+                ys_in_lens: Lengths of ys_in.
+            """
         tgt = ys_in_pad
         tgt_mask = myutils.sequence_mask(ys_in_lens, device=tgt.device)[:, :, None]
 

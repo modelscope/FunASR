@@ -36,6 +36,11 @@ class PositionwiseFeedForward(torch.nn.Module):
 
 class PositionwiseFeedForwardDecoderSANMExport(torch.nn.Module):
     def __init__(self, model):
+        """Initialize PositionwiseFeedForwardDecoderSANMExport.
+        
+            Args:
+                model: Model instance or model name.
+            """
         super().__init__()
         self.w_1 = model.w_1
         self.w_2 = model.w_2
@@ -43,6 +48,11 @@ class PositionwiseFeedForwardDecoderSANMExport(torch.nn.Module):
         self.norm = model.norm
 
     def forward(self, x):
+        """Forward pass for training.
+        
+            Args:
+                x: TODO.
+            """
         x = self.activation(self.w_1(x))
         x = self.w_2(self.norm(x))
         return x

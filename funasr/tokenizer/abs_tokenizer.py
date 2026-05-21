@@ -9,10 +9,20 @@ from typing import Union, Iterable, List, Dict
 class AbsTokenizer(ABC):
     @abstractmethod
     def text2tokens(self, line: str) -> List[str]:
+        """Text2tokens.
+        
+            Args:
+                line: TODO.
+            """
         raise NotImplementedError
 
     @abstractmethod
     def tokens2text(self, tokens: Iterable[str]) -> str:
+        """Tokens2text.
+        
+            Args:
+                tokens: TODO.
+            """
         raise NotImplementedError
 
 
@@ -24,6 +34,13 @@ class BaseTokenizer(ABC):
         **kwargs,
     ):
 
+        """Initialize BaseTokenizer.
+        
+            Args:
+                token_list: TODO.
+                unk_symbol: TODO.
+                **kwargs: Additional keyword arguments.
+            """
         if token_list is not None:
             if isinstance(token_list, (Path, str)) and token_list.endswith(".txt"):
                 token_list = Path(token_list)
@@ -63,31 +80,63 @@ class BaseTokenizer(ABC):
             self.unk_id = self.token2id[self.unk_symbol]
 
     def encode(self, text, **kwargs):
+        """Encode.
+        
+            Args:
+                text: Text tensor or string input.
+                **kwargs: Additional keyword arguments.
+            """
         tokens = self.text2tokens(text)
         text_ints = self.tokens2ids(tokens)
 
         return text_ints
 
     def decode(self, text_ints):
+        """Decode.
+        
+            Args:
+                text_ints: TODO.
+            """
         token = self.ids2tokens(text_ints)
         text = self.tokens2text(token)
         return text
 
     def get_num_vocabulary_size(self) -> int:
+        """Get num vocabulary size."""
         return len(self.token_list)
 
     def ids2tokens(self, integers: Union[np.ndarray, Iterable[int]]) -> List[str]:
+        """Ids2tokens.
+        
+            Args:
+                integers: TODO.
+            """
         if isinstance(integers, np.ndarray) and integers.ndim != 1:
             raise ValueError(f"Must be 1 dim ndarray, but got {integers.ndim}")
         return [self.token_list[i] for i in integers]
 
     def tokens2ids(self, tokens: Iterable[str]) -> List[int]:
+        """Tokens2ids.
+        
+            Args:
+                tokens: TODO.
+            """
         return [self.token2id.get(i, self.unk_id) for i in tokens]
 
     @abstractmethod
     def text2tokens(self, line: str) -> List[str]:
+        """Text2tokens.
+        
+            Args:
+                line: TODO.
+            """
         raise NotImplementedError
 
     @abstractmethod
     def tokens2text(self, tokens: Iterable[str]) -> str:
+        """Tokens2text.
+        
+            Args:
+                tokens: TODO.
+            """
         raise NotImplementedError

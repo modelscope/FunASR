@@ -52,6 +52,7 @@ def _resolve_ncpu(config, fallback=4):
 
 
 def _get_import_errors():
+    """Internal: get import errors."""
     try:
         import funasr
     except Exception:
@@ -63,6 +64,13 @@ def _get_import_errors():
 
 
 def _format_unregistered_component_error(component_type, component_name, registry):
+    """Internal: format unregistered component error.
+    
+        Args:
+            component_type: TODO.
+            component_name: TODO.
+            registry: TODO.
+        """
     registered = sorted(registry.keys())
     preview = ", ".join(registered[:80])
     if len(registered) > 80:
@@ -414,6 +422,12 @@ class AutoModel:
         return model, kwargs
 
     def __call__(self, *args, **cfg):
+        """Internal: call  .
+        
+            Args:
+                *args: Variable positional arguments.
+                **cfg: Configuration overrides.
+            """
         kwargs = self.kwargs
         deep_update(kwargs, cfg)
         res = self.model(*args, kwargs)

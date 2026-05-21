@@ -12,6 +12,15 @@ class DenseDecoder(AbsDecoder):
         num_nodes_last_layer: int = 256,
         batchnorm_momentum: float = 0.5,
     ):
+        """Initialize DenseDecoder.
+        
+            Args:
+                vocab_size: Size/dimension parameter.
+                encoder_output_size: Size/dimension parameter.
+                num_nodes_resnet1: TODO.
+                num_nodes_last_layer: TODO.
+                batchnorm_momentum: TODO.
+            """
         super(DenseDecoder, self).__init__()
         self.resnet1_dense = torch.nn.Linear(encoder_output_size, num_nodes_resnet1)
         self.resnet1_bn = torch.nn.BatchNorm1d(
@@ -26,6 +35,11 @@ class DenseDecoder(AbsDecoder):
         self.output_dense = torch.nn.Linear(num_nodes_last_layer, vocab_size, bias=False)
 
     def forward(self, features):
+        """Forward pass for training.
+        
+            Args:
+                features: TODO.
+            """
         embeddings = {}
         features = self.resnet1_dense(features)
         embeddings["resnet1_dense"] = features

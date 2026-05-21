@@ -11,6 +11,11 @@ symbol_str = '[’!"#$%&\'()*+,-./:;<>=?@，。?★、…【】《》？“”�
 
 
 def split_mixed_label(input_str):
+    """Split mixed label.
+    
+        Args:
+            input_str: TODO.
+        """
     tokens = []
     s = input_str.lower()
     while len(s) > 0:
@@ -25,6 +30,13 @@ def split_mixed_label(input_str):
 
 
 def query_token_set(txt, symbol_table, lexicon_table):
+    """Query token set.
+    
+        Args:
+            txt: TODO.
+            symbol_table: TODO.
+            lexicon_table: TODO.
+        """
     tokens_str = tuple()
     tokens_idx = tuple()
 
@@ -218,6 +230,12 @@ class KwsCtcPrefixDecoder():
 
 
     def is_sublist(self, main_list, check_list):
+        """Is sublist.
+        
+            Args:
+                main_list: TODO.
+                check_list: TODO.
+            """
         if len(main_list) < len(check_list):
             return -1
 
@@ -240,6 +258,12 @@ class KwsCtcPrefixDecoder():
         logits: torch.Tensor,
         logits_lengths: torch.Tensor,
     ):
+        """Internal: decode inside.
+        
+            Args:
+                logits: TODO.
+                logits_lengths: Lengths of logits.
+            """
         hyps = self.beam_search(logits, logits_lengths, self.keywords_idxset)
 
         hit_keyword = None

@@ -26,6 +26,11 @@ def load_segments(segments_file):
 
 
 def load_segments_hash(segments_file):
+    """Load segments hash.
+    
+        Args:
+            segments_file: TODO.
+        """
     ret = {}
     if not os.path.exists(segments_file):
         return None
@@ -36,6 +41,11 @@ def load_segments_hash(segments_file):
 
 
 def load_segments_rechash(segments_file):
+    """Load segments rechash.
+    
+        Args:
+            segments_file: TODO.
+        """
     ret = {}
     if not os.path.exists(segments_file):
         return None
@@ -140,6 +150,11 @@ def extract_segments(wavs, segments=None):
 
 class KaldiData:
     def __init__(self, data_dir):
+        """Initialize KaldiData.
+        
+            Args:
+                data_dir: TODO.
+            """
         self.data_dir = data_dir
         self.segments = load_segments_rechash(os.path.join(self.data_dir, "segments"))
         self.utt2spk = load_utt2spk(os.path.join(self.data_dir, "utt2spk"))
@@ -148,5 +163,12 @@ class KaldiData:
         self.spk2utt = load_spk2utt(os.path.join(self.data_dir, "spk2utt"))
 
     def load_wav(self, recid, start=0, end=None):
+        """Load wav.
+        
+            Args:
+                recid: TODO.
+                start: TODO.
+                end: TODO.
+            """
         data, rate = load_wav(self.wavs[recid], start, end)
         return data, rate

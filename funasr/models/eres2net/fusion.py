@@ -8,6 +8,12 @@ import torch.nn as nn
 class AFF(nn.Module):
 
     def __init__(self, channels=64, r=4):
+        """Initialize AFF.
+        
+            Args:
+                channels: TODO.
+                r: TODO.
+            """
         super(AFF, self).__init__()
         inter_channels = int(channels // r)
 
@@ -20,6 +26,12 @@ class AFF(nn.Module):
         )
 
     def forward(self, x, ds_y):
+        """Forward pass for training.
+        
+            Args:
+                x: TODO.
+                ds_y: TODO.
+            """
         xa = torch.cat((x, ds_y), dim=1)
         x_att = self.local_att(xa)
         x_att = 1.0 + torch.tanh(x_att)

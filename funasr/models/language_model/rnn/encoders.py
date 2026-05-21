@@ -25,6 +25,17 @@ class RNNP(torch.nn.Module):
     """
 
     def __init__(self, idim, elayers, cdim, hdim, subsample, dropout, typ="blstm"):
+        """Initialize RNNP.
+        
+            Args:
+                idim: TODO.
+                elayers: TODO.
+                cdim: TODO.
+                hdim: TODO.
+                subsample: TODO.
+                dropout: TODO.
+                typ: TODO.
+            """
         super(RNNP, self).__init__()
         bidir = typ[0] == "b"
         for i in six.moves.range(elayers):
@@ -100,6 +111,16 @@ class RNN(torch.nn.Module):
     """
 
     def __init__(self, idim, elayers, cdim, hdim, dropout, typ="blstm"):
+        """Initialize RNN.
+        
+            Args:
+                idim: TODO.
+                elayers: TODO.
+                cdim: TODO.
+                hdim: TODO.
+                dropout: TODO.
+                typ: TODO.
+            """
         super(RNN, self).__init__()
         bidir = typ[0] == "b"
         self.nbrnn = (
@@ -176,6 +197,11 @@ class VGG2L(torch.nn.Module):
     """
 
     def __init__(self, in_channel=1):
+        """Initialize VGG2L.
+        
+            Args:
+                in_channel: TODO.
+            """
         super(VGG2L, self).__init__()
         # CNN layer (VGG motivated)
         self.conv1_1 = torch.nn.Conv2d(in_channel, 64, 3, stride=1, padding=1)
@@ -243,6 +269,18 @@ class Encoder(torch.nn.Module):
     """
 
     def __init__(self, etype, idim, elayers, eunits, eprojs, subsample, dropout, in_channel=1):
+        """Initialize Encoder.
+        
+            Args:
+                etype: TODO.
+                idim: TODO.
+                elayers: TODO.
+                eunits: TODO.
+                eprojs: TODO.
+                subsample: TODO.
+                dropout: TODO.
+                in_channel: TODO.
+            """
         super(Encoder, self).__init__()
         typ = etype.lstrip("vgg").rstrip("p")
         if typ not in ["lstm", "gru", "blstm", "bgru"]:

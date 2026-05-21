@@ -14,12 +14,20 @@ class UtteranceMVN(torch.nn.Module):
         norm_vars: bool = False,
         eps: float = 1.0e-20,
     ):
+        """Initialize UtteranceMVN.
+        
+            Args:
+                norm_means: TODO.
+                norm_vars: TODO.
+                eps: TODO.
+            """
         super().__init__()
         self.norm_means = norm_means
         self.norm_vars = norm_vars
         self.eps = eps
 
     def extra_repr(self):
+        """Extra repr."""
         return f"norm_means={self.norm_means}, norm_vars={self.norm_vars}"
 
     def forward(

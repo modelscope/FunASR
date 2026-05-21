@@ -38,10 +38,21 @@ class D2vDecoderConfig:
 
 class FixedPositionalEncoder(nn.Module):
     def __init__(self, pos_embed):
+        """Initialize FixedPositionalEncoder.
+        
+            Args:
+                pos_embed: TODO.
+            """
         super().__init__()
         self.positions = pos_embed
 
     def forward(self, x, padding_mask):
+        """Forward pass for training.
+        
+            Args:
+                x: TODO.
+                padding_mask: TODO.
+            """
         return self.positions
 
 
@@ -52,17 +63,37 @@ class TextFeatPositionalEncoder(nn.Module):
     """
 
     def __init__(self, pos_encoder):
+        """Initialize TextFeatPositionalEncoder.
+        
+            Args:
+                pos_encoder: TODO.
+            """
         super().__init__()
         self.pos_encoder = pos_encoder
 
     def forward(self, x, padding_mask):
         # assume padded token embeddings are 0s
         # TODO: consider using padding_mask as input
+        """Forward pass for training.
+        
+            Args:
+                x: TODO.
+                padding_mask: TODO.
+            """
         return self.pos_encoder(x[..., 0])
 
 
 class BlockEncoder(nn.Module):
     def __init__(self, blocks, norm_layer, layer_norm_first, layerdrop, dropout):
+        """Initialize BlockEncoder.
+        
+            Args:
+                blocks: TODO.
+                norm_layer: TODO.
+                layer_norm_first: TODO.
+                layerdrop: TODO.
+                dropout: TODO.
+            """
         super().__init__()
         self.blocks = blocks
         self.norm = norm_layer
@@ -71,6 +102,14 @@ class BlockEncoder(nn.Module):
         self.dropout = nn.Dropout(dropout, inplace=True)
 
     def forward(self, x, padding_mask, alibi_bias, alibi_scale):
+        """Forward pass for training.
+        
+            Args:
+                x: TODO.
+                padding_mask: TODO.
+                alibi_bias: TODO.
+                alibi_scale: TODO.
+            """
         if self.norm is not None and not self.layer_norm_first:
             x = self.norm(x)
 
@@ -94,16 +133,30 @@ class DecoderBase(nn.Module):
     decoder_cfg: D2vDecoderConfig
 
     def __init__(self, cfg: D2vDecoderConfig):
+        """Initialize DecoderBase.
+        
+            Args:
+                cfg: Configuration overrides.
+            """
         super().__init__()
 
         self.decoder_cfg = cfg
 
     def reset_parameters(self):
+        """Reset parameters."""
         for mod in self.proj.modules():
             if isinstance(mod, nn.Linear):
                 mod.reset_parameters()
 
     def add_residual(self, x, residual, i, mask_info):
+        """Add residual.
+        
+            Args:
+                x: TODO.
+                residual: TODO.
+                i: TODO.
+                mask_info: TODO.
+            """
         if (
             residual is None
             or not self.decoder_cfg.decoder_residual
@@ -118,9 +171,20 @@ class DecoderBase(nn.Module):
 
 class Decoder1d(DecoderBase):
     def __init__(self, cfg: D2vDecoderConfig, input_dim):
+        """Initialize Decoder1d.
+        
+            Args:
+                cfg: Configuration overrides.
+                input_dim: Size/dimension parameter.
+            """
         super().__init__(cfg)
 
         def make_block(in_dim):
+            """Make block.
+            
+                Args:
+                    in_dim: Size/dimension parameter.
+                """
             block = [
                 nn.Conv1d(
                     in_dim,
@@ -160,6 +224,12 @@ class Decoder1d(DecoderBase):
 
     def forward(self, x, mask_info):
 
+        """Forward pass for training.
+        
+            Args:
+                x: TODO.
+                mask_info: TODO.
+            """
         x = x.transpose(1, 2)
 
         residual = x
@@ -193,6 +263,25 @@ class AltBlock(nn.Module):
         ffn_targets=False,
         cosine_attention=False,
     ):
+        """Initialize AltBlock.
+        
+            Args:
+                dim: TODO.
+                num_heads: TODO.
+                mlp_ratio: TODO.
+                qkv_bias: TODO.
+                qk_scale: TODO.
+                drop: TODO.
+                attn_drop: TODO.
+                mlp_drop: TODO.
+                post_mlp_drop: TODO.
+                drop_path: TODO.
+                act_layer: TODO.
+                norm_layer: TODO.
+                layer_norm_first: TODO.
+                ffn_targets: TODO.
+                cosine_attention: TODO.
+            """
         super().__init__()
 
         self.layer_norm_first = layer_norm_first
@@ -223,6 +312,13 @@ class AltBlock(nn.Module):
         self.post_mlp_dropout = nn.Dropout(post_mlp_drop, inplace=False)
 
     def forward(self, x, padding_mask=None, alibi_bias=None):
+        """Forward pass for training.
+        
+            Args:
+                x: TODO.
+                padding_mask: TODO.
+                alibi_bias: TODO.
+            """
         if self.layer_norm_first:
             x = x + self.drop_path(self.attn(self.norm1(x), padding_mask, alibi_bias))
             r = x = self.mlp(self.norm2(x))
@@ -253,6 +349,17 @@ class AltAttention(nn.Module):
         proj_drop=0.0,
         cosine_attention=False,
     ):
+        """Initialize AltAttention.
+        
+            Args:
+                dim: TODO.
+                num_heads: TODO.
+                qkv_bias: TODO.
+                qk_scale: TODO.
+                attn_drop: TODO.
+                proj_drop: TODO.
+                cosine_attention: TODO.
+            """
         super().__init__()
         self.num_heads = num_heads
         head_dim = dim // num_heads
@@ -271,6 +378,13 @@ class AltAttention(nn.Module):
             )
 
     def forward(self, x, padding_mask=None, alibi_bias=None):
+        """Forward pass for training.
+        
+            Args:
+                x: TODO.
+                padding_mask: TODO.
+                alibi_bias: TODO.
+            """
         B, N, C = x.shape
         qkv = (
             self.qkv(x)

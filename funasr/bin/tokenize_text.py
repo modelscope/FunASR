@@ -81,6 +81,26 @@ def tokenize(
     g2p: Optional[str],
 ):
 
+    """Tokenize.
+    
+        Args:
+            input: Input audio/text data.
+            output: TODO.
+            field: TODO.
+            delimiter: TODO.
+            token_type: TODO.
+            space_symbol: TODO.
+            non_linguistic_symbols: TODO.
+            bpemodel: TODO.
+            log_level: TODO.
+            write_vocabulary: TODO.
+            vocabulary_size: Size/dimension parameter.
+            remove_non_linguistic_symbols: TODO.
+            cutoff: TODO.
+            add_symbol: TODO.
+            cleaner: TODO.
+            g2p: TODO.
+        """
     logging.basicConfig(
         level=log_level,
         format="%(asctime)s (%(module)s:%(lineno)d) %(levelname)s: %(message)s",
@@ -185,6 +205,7 @@ def tokenize(
 
 
 def get_parser() -> argparse.ArgumentParser:
+    """Get parser."""
     parser = argparse.ArgumentParser(
         description="Tokenize texts",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
@@ -266,6 +287,11 @@ def get_parser() -> argparse.ArgumentParser:
 
 
 def main(cmd=None):
+    """Main.
+    
+        Args:
+            cmd: TODO.
+        """
     print(get_commandline_args(), file=sys.stderr)
     parser = get_parser()
     args = parser.parse_args(cmd)

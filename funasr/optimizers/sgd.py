@@ -20,6 +20,16 @@ class SGD(torch.optim.SGD):
         weight_decay: float = 0.0,
         nesterov: bool = False,
     ):
+        """Initialize SGD.
+        
+            Args:
+                params: TODO.
+                lr: TODO.
+                momentum: TODO.
+                dampening: TODO.
+                weight_decay: TODO.
+                nesterov: TODO.
+            """
         super().__init__(
             params,
             lr=lr,

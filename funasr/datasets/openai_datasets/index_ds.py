@@ -14,6 +14,12 @@ from funasr.register import tables
 class OpenAIIndexDSJsonl(torch.utils.data.Dataset):  # torch.utils.data.Dataset
 
     def __init__(self, path: str, **kwargs):
+        """Initialize OpenAIIndexDSJsonl.
+        
+            Args:
+                path: TODO.
+                **kwargs: Additional keyword arguments.
+            """
         super().__init__()
 
         self.max_source_length = kwargs.get("max_source_length", 3000)
@@ -89,15 +95,26 @@ class OpenAIIndexDSJsonl(torch.utils.data.Dataset):  # torch.utils.data.Dataset
         logging.info("total_num of samplers: {}, {}".format(len(self.contents), path))
 
     def __len__(self):
+        """Internal: len  ."""
         return len(self.contents)
 
     def __getitem__(self, index):
 
+        """Internal: getitem  .
+        
+            Args:
+                index: TODO.
+            """
         data = self.contents[index]
 
         return data
 
     def get_source_len(self, data_dict):
+        """Get source len.
+        
+            Args:
+                data_dict: TODO.
+            """
         source_len = data_dict.get("source_len", -1)
         if source_len < 0:
             source_len = len(data_dict["system"]) + len(data_dict["user"])
@@ -105,6 +122,11 @@ class OpenAIIndexDSJsonl(torch.utils.data.Dataset):  # torch.utils.data.Dataset
 
     def get_target_len(self, data_dict):
 
+        """Get target len.
+        
+            Args:
+                data_dict: TODO.
+            """
         return 0
 
 

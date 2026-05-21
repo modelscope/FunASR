@@ -175,6 +175,12 @@ class Inference:
 
 class PyTorchInference(Inference):
     def __init__(self, model: "Whisper", initial_token_length: int):
+        """Initialize PyTorchInference.
+        
+            Args:
+                model: Model instance or model name.
+                initial_token_length: TODO.
+            """
         self.model: "Whisper" = model
         self.initial_token_length = initial_token_length
         self.kv_cache = {}
@@ -185,6 +191,12 @@ class PyTorchInference(Inference):
         self.kv_modules = key_modules + value_modules
 
     def logits(self, tokens: Tensor, audio_features: Tensor) -> Tensor:
+        """Logits.
+        
+            Args:
+                tokens: TODO.
+                audio_features: TODO.
+            """
         if not self.kv_cache:
             self.kv_cache, self.hooks = self.model.install_kv_cache_hooks()
 
@@ -195,6 +207,7 @@ class PyTorchInference(Inference):
         return self.model.decoder(tokens, audio_features, kv_cache=self.kv_cache)
 
     def cleanup_caching(self):
+        """Cleanup caching."""
         for hook in self.hooks:
             hook.remove()
 
@@ -202,6 +215,11 @@ class PyTorchInference(Inference):
         self.hooks = []
 
     def rearrange_kv_cache(self, source_indices):
+        """Rearrange kv cache.
+        
+            Args:
+                source_indices: TODO.
+            """
         if source_indices != list(range(len(source_indices))):
             for module in self.kv_modules:
                 # update the key/value cache to contain the selected sequences
@@ -224,10 +242,27 @@ class MaximumLikelihoodRanker(SequenceRanker):
     """
 
     def __init__(self, length_penalty: Optional[float]):
+        """Initialize MaximumLikelihoodRanker.
+        
+            Args:
+                length_penalty: TODO.
+            """
         self.length_penalty = length_penalty
 
     def rank(self, tokens: List[List[Tensor]], sum_logprobs: List[List[float]]):
+        """Rank.
+        
+            Args:
+                tokens: TODO.
+                sum_logprobs: TODO.
+            """
         def scores(logprobs, lengths):
+            """Scores.
+            
+                Args:
+                    logprobs: TODO.
+                    lengths: TODO.
+                """
             result = []
             for logprob, length in zip(logprobs, lengths):
                 if self.length_penalty is None:
@@ -299,10 +334,23 @@ class TokenDecoder:
 
 class GreedyDecoder(TokenDecoder):
     def __init__(self, temperature: float, eot: int):
+        """Initialize GreedyDecoder.
+        
+            Args:
+                temperature: TODO.
+                eot: TODO.
+            """
         self.temperature = temperature
         self.eot = eot
 
     def update(self, tokens: Tensor, logits: Tensor, sum_logprobs: Tensor) -> Tuple[Tensor, bool]:
+        """Update.
+        
+            Args:
+                tokens: TODO.
+                logits: TODO.
+                sum_logprobs: TODO.
+            """
         if self.temperature == 0:
             next_tokens = logits.argmax(dim=-1)
         else:
@@ -320,6 +368,12 @@ class GreedyDecoder(TokenDecoder):
 
     def finalize(self, tokens: Tensor, sum_logprobs: Tensor):
         # make sure each sequence has at least one EOT token at the end
+        """Finalize.
+        
+            Args:
+                tokens: TODO.
+                sum_logprobs: TODO.
+            """
         tokens = F.pad(tokens, (0, 1), value=self.eot)
         return tokens, sum_logprobs.tolist()
 
@@ -332,6 +386,14 @@ class BeamSearchDecoder(TokenDecoder):
         inference: Inference,
         patience: Optional[float] = None,
     ):
+        """Initialize BeamSearchDecoder.
+        
+            Args:
+                beam_size: Size/dimension parameter.
+                eot: TODO.
+                inference: TODO.
+                patience: TODO.
+            """
         self.beam_size = beam_size
         self.eot = eot
         self.inference = inference
@@ -342,9 +404,17 @@ class BeamSearchDecoder(TokenDecoder):
         assert self.max_candidates > 0, f"Invalid beam size ({beam_size}) or patience ({patience})"
 
     def reset(self):
+        """Reset."""
         self.finished_sequences = None
 
     def update(self, tokens: Tensor, logits: Tensor, sum_logprobs: Tensor) -> Tuple[Tensor, bool]:
+        """Update.
+        
+            Args:
+                tokens: TODO.
+                logits: TODO.
+                sum_logprobs: TODO.
+            """
         if tokens.shape[0] % self.beam_size != 0:
             raise ValueError(f"{tokens.shape}[0] % {self.beam_size} != 0")
 
@@ -402,6 +472,12 @@ class BeamSearchDecoder(TokenDecoder):
 
     def finalize(self, preceding_tokens: Tensor, sum_logprobs: Tensor):
         # collect all finished sequences, including patience, and add unfinished ones if not enough
+        """Finalize.
+        
+            Args:
+                preceding_tokens: TODO.
+                sum_logprobs: TODO.
+            """
         sum_logprobs = sum_logprobs.cpu()
         for i, sequences in enumerate(self.finished_sequences):
             if len(sequences) < self.beam_size:  # when not enough sequences are finished
@@ -438,19 +514,42 @@ class LogitFilter:
 
 class SuppressBlank(LogitFilter):
     def __init__(self, tokenizer: Tokenizer, sample_begin: int):
+        """Initialize SuppressBlank.
+        
+            Args:
+                tokenizer: Tokenizer instance for text encoding/decoding.
+                sample_begin: TODO.
+            """
         self.tokenizer = tokenizer
         self.sample_begin = sample_begin
 
     def apply(self, logits: Tensor, tokens: Tensor):
+        """Apply.
+        
+            Args:
+                logits: TODO.
+                tokens: TODO.
+            """
         if tokens.shape[1] == self.sample_begin:
             logits[:, self.tokenizer.encode(" ") + [self.tokenizer.eot]] = -np.inf
 
 
 class SuppressTokens(LogitFilter):
     def __init__(self, suppress_tokens: Sequence[int]):
+        """Initialize SuppressTokens.
+        
+            Args:
+                suppress_tokens: TODO.
+            """
         self.suppress_tokens = list(suppress_tokens)
 
     def apply(self, logits: Tensor, tokens: Tensor):
+        """Apply.
+        
+            Args:
+                logits: TODO.
+                tokens: TODO.
+            """
         logits[:, self.suppress_tokens] = -np.inf
 
 
@@ -458,6 +557,13 @@ class GainEventToken(LogitFilter):
     def __init__(
         self, bg_tokens: Sequence[int], ed_tokens: Sequence[int], gain_values: Sequence[float]
     ):
+        """Initialize GainEventToken.
+        
+            Args:
+                bg_tokens: TODO.
+                ed_tokens: TODO.
+                gain_values: TODO.
+            """
         self.bg_tokens = list(bg_tokens)
         self.ed_tokens = list(ed_tokens)
         self.gain_value = [np.log(max(ga, 1e-9)) for ga in gain_values]
@@ -465,6 +571,12 @@ class GainEventToken(LogitFilter):
         assert len(self.bg_tokens) == len(self.gain_value)
 
     def apply(self, logits: Tensor, tokens: Tensor):
+        """Apply.
+        
+            Args:
+                logits: TODO.
+                tokens: TODO.
+            """
         for i in range(len(tokens)):
             for bg, ed, ga in zip(self.bg_tokens, self.ed_tokens, self.gain_value):
                 sum_bg = sum([1 if x == bg else 0 for x in tokens[i]])
@@ -480,12 +592,25 @@ class ThresholdEmoToken(LogitFilter):
     def __init__(
         self, unk_tokens: Sequence[int], emo_tokens: Sequence[int], th_values: Sequence[float]
     ):
+        """Initialize ThresholdEmoToken.
+        
+            Args:
+                unk_tokens: TODO.
+                emo_tokens: TODO.
+                th_values: TODO.
+            """
         self.unk_token = list(unk_tokens)[0]
         self.emo_tokens = list(emo_tokens)
         self.th_values = list(th_values)
         assert len(self.emo_tokens) == len(self.th_values)
 
     def apply(self, logits: Tensor, tokens: Tensor):
+        """Apply.
+        
+            Args:
+                logits: TODO.
+                tokens: TODO.
+            """
         for i in range(len(tokens)):
             for emo, th in zip(self.emo_tokens, self.th_values):
                 if logits[i].argmax() == emo and logits[i].softmax(dim=-1)[emo] < th:
@@ -509,12 +634,25 @@ class ApplyTimestampRules(LogitFilter):
         sample_begin: int,
         max_initial_timestamp_index: Optional[int],
     ):
+        """Initialize ApplyTimestampRules.
+        
+            Args:
+                tokenizer: Tokenizer instance for text encoding/decoding.
+                sample_begin: TODO.
+                max_initial_timestamp_index: TODO.
+            """
         self.tokenizer = tokenizer
         self.sample_begin = sample_begin
         self.max_initial_timestamp_index = max_initial_timestamp_index
 
     def apply(self, logits: Tensor, tokens: Tensor):
         # suppress <|notimestamps|> which is handled by without_timestamps
+        """Apply.
+        
+            Args:
+                logits: TODO.
+                tokens: TODO.
+            """
         if self.tokenizer.no_timestamps is not None:
             logits[:, self.tokenizer.no_timestamps] = -np.inf
 
@@ -566,6 +704,12 @@ class DecodingTask:
     logit_filters: List[LogitFilter]
 
     def __init__(self, model: "Whisper", options: DecodingOptions):
+        """Initialize DecodingTask.
+        
+            Args:
+                model: Model instance or model name.
+                options: TODO.
+            """
         self.model = model
 
         language = options.language or "en"
@@ -637,6 +781,11 @@ class DecodingTask:
             )
 
     def _verify_options(self, options: DecodingOptions) -> DecodingOptions:
+        """Internal: verify options.
+        
+            Args:
+                options: TODO.
+            """
         if options.beam_size is not None and options.best_of is not None:
             raise ValueError("beam_size and best_of can't be given together")
         if options.temperature == 0:
@@ -650,6 +799,7 @@ class DecodingTask:
         return options
 
     def _get_initial_tokens(self) -> Tuple[int]:
+        """Internal: get initial tokens."""
         tokens = list(self.sot_sequence)
 
         if prefix := self.options.prefix:
@@ -678,6 +828,7 @@ class DecodingTask:
         return tuple(tokens)
 
     def _get_suppress_tokens(self) -> Tuple[int]:
+        """Internal: get suppress tokens."""
         suppress_tokens = self.options.suppress_tokens
 
         if isinstance(suppress_tokens, str):
@@ -707,6 +858,11 @@ class DecodingTask:
         return tuple(sorted(set(suppress_tokens)))
 
     def _get_audio_features(self, mel: Tensor):
+        """Internal: get audio features.
+        
+            Args:
+                mel: TODO.
+            """
         if self.options.fp16:
             mel = mel.half()
 
@@ -727,6 +883,12 @@ class DecodingTask:
         return audio_features
 
     def _detect_language(self, audio_features: Tensor, tokens: Tensor):
+        """Internal: detect language.
+        
+            Args:
+                audio_features: TODO.
+                tokens: TODO.
+            """
         languages = [self.options.language] * audio_features.shape[0]
         lang_probs = None
 
@@ -755,6 +917,12 @@ class DecodingTask:
         return languages, lang_probs
 
     def _main_loop(self, audio_features: Tensor, tokens: Tensor):
+        """Internal: main loop.
+        
+            Args:
+                audio_features: TODO.
+                tokens: TODO.
+            """
         n_batch = tokens.shape[0]
         sum_logprobs: Tensor = torch.zeros(n_batch, device=audio_features.device)
         no_speech_probs = [np.nan] * n_batch
@@ -786,6 +954,11 @@ class DecodingTask:
 
     @torch.no_grad()
     def run(self, mel: Tensor) -> List[DecodingResult]:
+        """Run.
+        
+            Args:
+                mel: TODO.
+            """
         self.decoder.reset()
         tokenizer: Tokenizer = self.tokenizer
         n_audio: int = mel.shape[0]

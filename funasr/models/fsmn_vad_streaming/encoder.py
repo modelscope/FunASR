@@ -13,12 +13,23 @@ from funasr.register import tables
 class LinearTransform(nn.Module):
 
     def __init__(self, input_dim, output_dim):
+        """Initialize LinearTransform.
+        
+            Args:
+                input_dim: Size/dimension parameter.
+                output_dim: Size/dimension parameter.
+            """
         super(LinearTransform, self).__init__()
         self.input_dim = input_dim
         self.output_dim = output_dim
         self.linear = nn.Linear(input_dim, output_dim, bias=False)
 
     def forward(self, input):
+        """Forward pass for training.
+        
+            Args:
+                input: Input audio/text data.
+            """
         output = self.linear(input)
 
         return output
@@ -27,12 +38,23 @@ class LinearTransform(nn.Module):
 class AffineTransform(nn.Module):
 
     def __init__(self, input_dim, output_dim):
+        """Initialize AffineTransform.
+        
+            Args:
+                input_dim: Size/dimension parameter.
+                output_dim: Size/dimension parameter.
+            """
         super(AffineTransform, self).__init__()
         self.input_dim = input_dim
         self.output_dim = output_dim
         self.linear = nn.Linear(input_dim, output_dim)
 
     def forward(self, input):
+        """Forward pass for training.
+        
+            Args:
+                input: Input audio/text data.
+            """
         output = self.linear(input)
 
         return output
@@ -41,12 +63,23 @@ class AffineTransform(nn.Module):
 class RectifiedLinear(nn.Module):
 
     def __init__(self, input_dim, output_dim):
+        """Initialize RectifiedLinear.
+        
+            Args:
+                input_dim: Size/dimension parameter.
+                output_dim: Size/dimension parameter.
+            """
         super(RectifiedLinear, self).__init__()
         self.dim = input_dim
         self.relu = nn.ReLU()
         self.dropout = nn.Dropout(0.1)
 
     def forward(self, input):
+        """Forward pass for training.
+        
+            Args:
+                input: Input audio/text data.
+            """
         out = self.relu(input)
         return out
 
@@ -62,6 +95,16 @@ class FSMNBlock(nn.Module):
         lstride=1,
         rstride=1,
     ):
+        """Initialize FSMNBlock.
+        
+            Args:
+                input_dim: Size/dimension parameter.
+                output_dim: Size/dimension parameter.
+                lorder: TODO.
+                rorder: TODO.
+                lstride: TODO.
+                rstride: TODO.
+            """
         super(FSMNBlock, self).__init__()
 
         self.dim = input_dim
@@ -86,6 +129,12 @@ class FSMNBlock(nn.Module):
             self.conv_right = None
 
     def forward(self, input: torch.Tensor, cache: torch.Tensor = None):
+        """Forward pass for training.
+        
+            Args:
+                input: Input audio/text data.
+                cache: State cache dict for streaming inference.
+            """
         x = torch.unsqueeze(input, 1)
         x_per = x.permute(0, 3, 2, 1)  # B D T C
 
@@ -123,6 +172,17 @@ class BasicBlock(nn.Module):
         rstride: int,
         stack_layer: int,
     ):
+        """Initialize BasicBlock.
+        
+            Args:
+                linear_dim: Size/dimension parameter.
+                proj_dim: Size/dimension parameter.
+                lorder: TODO.
+                rorder: TODO.
+                lstride: TODO.
+                rstride: TODO.
+                stack_layer: TODO.
+            """
         super(BasicBlock, self).__init__()
         self.lorder = lorder
         self.rorder = rorder
@@ -135,6 +195,12 @@ class BasicBlock(nn.Module):
         self.relu = RectifiedLinear(linear_dim, linear_dim)
 
     def forward(self, input: torch.Tensor, cache: Dict[str, torch.Tensor] = None):
+        """Forward pass for training.
+        
+            Args:
+                input: Input audio/text data.
+                cache: State cache dict for streaming inference.
+            """
         x1 = self.linear(input)  # B T D
 
         if cache is not None:
@@ -156,6 +222,11 @@ class BasicBlock_export(nn.Module):
         self,
         model,
     ):
+        """Initialize BasicBlock_export.
+        
+            Args:
+                model: Model instance or model name.
+            """
         super(BasicBlock_export, self).__init__()
         self.linear = model.linear
         self.fsmn_block = model.fsmn_block
@@ -163,6 +234,12 @@ class BasicBlock_export(nn.Module):
         self.relu = model.relu
 
     def forward(self, input: torch.Tensor, in_cache: torch.Tensor):
+        """Forward pass for training.
+        
+            Args:
+                input: Input audio/text data.
+                in_cache: TODO.
+            """
         x = self.linear(input)  # B T D
         # cache_layer_name = 'cache_layer_{}'.format(self.stack_layer)
         # if cache_layer_name not in in_cache:
@@ -175,9 +252,20 @@ class BasicBlock_export(nn.Module):
 
 class FsmnStack(nn.Sequential):
     def __init__(self, *args):
+        """Initialize FsmnStack.
+        
+            Args:
+                *args: Variable positional arguments.
+            """
         super(FsmnStack, self).__init__(*args)
 
     def forward(self, input: torch.Tensor, cache: Dict[str, torch.Tensor]):
+        """Forward pass for training.
+        
+            Args:
+                input: Input audio/text data.
+                cache: State cache dict for streaming inference.
+            """
         x = input
         for module in self._modules.values():
             x = module(x, cache)
@@ -213,6 +301,22 @@ class FSMN(nn.Module):
         output_dim: int,
         use_softmax: bool = True,
     ):
+        """Initialize FSMN.
+        
+            Args:
+                input_dim: Size/dimension parameter.
+                input_affine_dim: Size/dimension parameter.
+                fsmn_layers: TODO.
+                linear_dim: Size/dimension parameter.
+                proj_dim: Size/dimension parameter.
+                lorder: TODO.
+                rorder: TODO.
+                lstride: TODO.
+                rstride: TODO.
+                output_affine_dim: Size/dimension parameter.
+                output_dim: Size/dimension parameter.
+                use_softmax: TODO.
+            """
         super().__init__()
 
         self.input_dim = input_dim
@@ -240,9 +344,11 @@ class FSMN(nn.Module):
             self.softmax = nn.Softmax(dim=-1)
 
     def fuse_modules(self):
+        """Fuse modules."""
         pass
 
     def output_size(self) -> int:
+        """Output size."""
         return self.output_dim
 
     def forward(
@@ -278,6 +384,12 @@ class FSMNExport(nn.Module):
         model,
         **kwargs,
     ):
+        """Initialize FSMNExport.
+        
+            Args:
+                model: Model instance or model name.
+                **kwargs: Additional keyword arguments.
+            """
         super().__init__()
 
         # self.input_dim = input_dim
@@ -310,6 +422,7 @@ class FSMNExport(nn.Module):
                 self.fsmn[i] = BasicBlock_export(d)
 
     def fuse_modules(self):
+        """Fuse modules."""
         pass
 
     def forward(

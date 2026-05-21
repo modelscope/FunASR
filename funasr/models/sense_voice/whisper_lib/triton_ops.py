@@ -12,6 +12,19 @@ except ImportError:
 
 @triton.jit
 def dtw_kernel(cost, trace, x, x_stride, cost_stride, trace_stride, N, M, BLOCK_SIZE: tl.constexpr):
+    """Dtw kernel.
+    
+        Args:
+            cost: TODO.
+            trace: TODO.
+            x: TODO.
+            x_stride: TODO.
+            cost_stride: TODO.
+            trace_stride: TODO.
+            N: TODO.
+            M: TODO.
+            BLOCK_SIZE: TODO.
+        """
     offsets = tl.arange(0, BLOCK_SIZE)
     mask = offsets < M
 
@@ -41,7 +54,21 @@ def dtw_kernel(cost, trace, x, x_stride, cost_stride, trace_stride, N, M, BLOCK_
 @lru_cache(maxsize=None)
 def median_kernel(filter_width: int):
     @triton.jit
+    """Median kernel.
+    
+        Args:
+            filter_width: TODO.
+        """
     def kernel(y, x, x_stride, y_stride, BLOCK_SIZE: tl.constexpr):  # x.shape[-1] == filter_width
+        """Kernel.
+        
+            Args:
+                y: TODO.
+                x: TODO.
+                x_stride: TODO.
+                y_stride: TODO.
+                BLOCK_SIZE: TODO.
+            """
         row_idx = tl.program_id(0)
         offsets = tl.arange(0, BLOCK_SIZE)
         mask = offsets < y_stride

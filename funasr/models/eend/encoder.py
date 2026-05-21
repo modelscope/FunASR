@@ -7,6 +7,13 @@ from torch import nn
 
 class MultiHeadSelfAttention(nn.Module):
     def __init__(self, n_units, h=8, dropout_rate=0.1):
+        """Initialize MultiHeadSelfAttention.
+        
+            Args:
+                n_units: TODO.
+                h: TODO.
+                dropout_rate: TODO.
+            """
         super().__init__()
         self.linearQ = nn.Linear(n_units, n_units)
         self.linearK = nn.Linear(n_units, n_units)
@@ -17,6 +24,13 @@ class MultiHeadSelfAttention(nn.Module):
         self.dropout = nn.Dropout(dropout_rate)
 
     def __call__(self, x, batch_size, x_mask):
+        """Internal: call  .
+        
+            Args:
+                x: TODO.
+                batch_size: Number of samples per batch.
+                x_mask: TODO.
+            """
         q = self.linearQ(x).view(batch_size, -1, self.h, self.d_k)
         k = self.linearK(x).view(batch_size, -1, self.h, self.d_k)
         v = self.linearV(x).view(batch_size, -1, self.h, self.d_k)
@@ -33,17 +47,37 @@ class MultiHeadSelfAttention(nn.Module):
 
 class PositionwiseFeedForward(nn.Module):
     def __init__(self, n_units, d_units, dropout_rate):
+        """Initialize PositionwiseFeedForward.
+        
+            Args:
+                n_units: TODO.
+                d_units: TODO.
+                dropout_rate: TODO.
+            """
         super(PositionwiseFeedForward, self).__init__()
         self.linear1 = nn.Linear(n_units, d_units)
         self.linear2 = nn.Linear(d_units, n_units)
         self.dropout = nn.Dropout(dropout_rate)
 
     def __call__(self, x):
+        """Internal: call  .
+        
+            Args:
+                x: TODO.
+            """
         return self.linear2(self.dropout(F.relu(self.linear1(x))))
 
 
 class PositionalEncoding(torch.nn.Module):
     def __init__(self, d_model, dropout_rate, max_len=5000, reverse=False):
+        """Initialize PositionalEncoding.
+        
+            Args:
+                d_model: D Model instance.
+                dropout_rate: TODO.
+                max_len: TODO.
+                reverse: TODO.
+            """
         super(PositionalEncoding, self).__init__()
         self.d_model = d_model
         self.reverse = reverse
@@ -53,6 +87,11 @@ class PositionalEncoding(torch.nn.Module):
         self.extend_pe(torch.tensor(0.0).expand(1, max_len))
 
     def extend_pe(self, x):
+        """Extend pe.
+        
+            Args:
+                x: TODO.
+            """
         if self.pe is not None:
             if self.pe.size(1) >= x.size(1):
                 if self.pe.dtype != x.dtype or self.pe.device != x.device:
@@ -73,6 +112,11 @@ class PositionalEncoding(torch.nn.Module):
         self.pe = pe.to(device=x.device, dtype=x.dtype)
 
     def forward(self, x: torch.Tensor):
+        """Forward pass for training.
+        
+            Args:
+                x: TODO.
+            """
         self.extend_pe(x)
         x = x * self.xscale + self.pe[:, : x.size(1)]
         return self.dropout(x)
@@ -89,6 +133,17 @@ class EENDOLATransformerEncoder(nn.Module):
         dropout_rate: float = 0.1,
         use_pos_emb: bool = False,
     ):
+        """Initialize EENDOLATransformerEncoder.
+        
+            Args:
+                idim: TODO.
+                n_layers: TODO.
+                n_units: TODO.
+                e_units: TODO.
+                h: TODO.
+                dropout_rate: TODO.
+                use_pos_emb: TODO.
+            """
         super(EENDOLATransformerEncoder, self).__init__()
         self.linear_in = nn.Linear(idim, n_units)
         self.lnorm_in = nn.LayerNorm(n_units)
@@ -106,6 +161,12 @@ class EENDOLATransformerEncoder(nn.Module):
         self.lnorm_out = nn.LayerNorm(n_units)
 
     def __call__(self, x, x_mask=None):
+        """Internal: call  .
+        
+            Args:
+                x: TODO.
+                x_mask: TODO.
+            """
         BT_size = x.shape[0] * x.shape[1]
         e = self.linear_in(x.reshape(BT_size, -1))
         for i in range(self.n_layers):

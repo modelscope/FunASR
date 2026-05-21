@@ -78,5 +78,11 @@ def get_mvdr_vector(
 
 def apply_beamforming_vector(beamform_vector: ComplexTensor, mix: ComplexTensor) -> ComplexTensor:
     # (..., C) x (..., C, T) -> (..., T)
+    """Apply beamforming vector.
+    
+        Args:
+            beamform_vector: TODO.
+            mix: TODO.
+        """
     es = FC.einsum("...c,...ct->...t", [beamform_vector.conj(), mix])
     return es

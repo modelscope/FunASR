@@ -19,10 +19,21 @@ from funasr.register import tables
 @tables.register("preprocessor_classes", "TextPreprocessRemovePunctuation")
 class TextPreprocessRemovePunctuation(nn.Module):
     def __init__(self, **kwargs):
+        """Initialize TextPreprocessRemovePunctuation.
+        
+            Args:
+                **kwargs: Additional keyword arguments.
+            """
         super().__init__()
 
     def forward(self, text, **kwargs):
         # 定义英文标点符号
+        """Forward pass for training.
+        
+            Args:
+                text: Text tensor or string input.
+                **kwargs: Additional keyword arguments.
+            """
         en_punct = string.punctuation
         # 定义中文标点符号（部分常用的）
         cn_punct = "。？！，、；：“”‘’（）《》【】…—～·"

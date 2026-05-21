@@ -13,6 +13,11 @@ from funasr.train_utils.set_all_random_seed import set_all_random_seed
 
 @hydra.main(config_name=None, version_base=None)
 def main_hydra(kwargs: DictConfig):
+    """Main hydra.
+    
+        Args:
+            kwargs: Additional keyword arguments.
+        """
     if kwargs.get("debug", False):
         import pdb
 
@@ -27,6 +32,11 @@ def main_hydra(kwargs: DictConfig):
 
 
 def main(**kwargs):
+    """Main.
+    
+        Args:
+            **kwargs: Additional keyword arguments.
+        """
     print(kwargs)
     # set random seed
     # tables.print()

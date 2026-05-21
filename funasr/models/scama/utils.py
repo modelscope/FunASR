@@ -6,6 +6,14 @@ from torch.nn import functional as F
 
 
 def sequence_mask(lengths, maxlen=None, dtype=torch.float32, device=None):
+    """Sequence mask.
+    
+        Args:
+            lengths: TODO.
+            maxlen: TODO.
+            dtype: TODO.
+            device: Target device ("cuda:0", "cpu", etc.).
+        """
     if maxlen is None:
         maxlen = lengths.max()
     row_vector = torch.arange(0, maxlen, 1).to(lengths.device)
@@ -17,6 +25,12 @@ def sequence_mask(lengths, maxlen=None, dtype=torch.float32, device=None):
 
 
 def apply_cmvn(inputs, mvn):
+    """Apply cmvn.
+    
+        Args:
+            inputs: TODO.
+            mvn: TODO.
+        """
     device = inputs.device
     dtype = inputs.dtype
     frame, dim = inputs.shape
@@ -36,6 +50,15 @@ def drop_and_add(
     stoch_layer_coeff: float = 1.0,
 ):
 
+    """Drop and add.
+    
+        Args:
+            inputs: TODO.
+            outputs: TODO.
+            training: TODO.
+            dropout_rate: TODO.
+            stoch_layer_coeff: TODO.
+        """
     outputs = F.dropout(outputs, p=dropout_rate, training=training, inplace=True)
     outputs *= stoch_layer_coeff
 
@@ -48,6 +71,11 @@ def drop_and_add(
 
 
 def proc_tf_vocab(vocab_path):
+    """Proc tf vocab.
+    
+        Args:
+            vocab_path: TODO.
+        """
     with open(vocab_path, encoding="utf-8") as f:
         token_list = [line.rstrip() for line in f]
         if "<unk>" not in token_list:
@@ -56,6 +84,13 @@ def proc_tf_vocab(vocab_path):
 
 
 def gen_config_for_tfmodel(config_path, vocab_path, output_dir):
+    """Gen config for tfmodel.
+    
+        Args:
+            config_path: TODO.
+            vocab_path: TODO.
+            output_dir: Directory for saving output files.
+        """
     token_list = proc_tf_vocab(vocab_path)
     with open(config_path, encoding="utf-8") as f:
         config = yaml.safe_load(f)
@@ -72,6 +107,11 @@ def gen_config_for_tfmodel(config_path, vocab_path, output_dir):
 class NoAliasSafeDumper(yaml.SafeDumper):
     # Disable anchor/alias in yaml because looks ugly
     def ignore_aliases(self, data):
+        """Ignore aliases.
+        
+            Args:
+                data: TODO.
+            """
         return True
 
 

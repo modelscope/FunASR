@@ -6,6 +6,7 @@ from funasr.utils.type_utils import str2bool
 
 
 def main():
+    """Main."""
     parser = argparse.ArgumentParser()
     parser.add_argument("--model-name", type=str, required=True)
     parser.add_argument("--export-dir", type=str, required=True)

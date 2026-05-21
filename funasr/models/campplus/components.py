@@ -13,6 +13,13 @@ class BasicResBlock(torch.nn.Module):
     expansion = 1
 
     def __init__(self, in_planes, planes, stride=1):
+        """Initialize BasicResBlock.
+        
+            Args:
+                in_planes: TODO.
+                planes: TODO.
+                stride: TODO.
+            """
         super(BasicResBlock, self).__init__()
         self.conv1 = torch.nn.Conv2d(
             in_planes, planes, kernel_size=3, stride=(stride, 1), padding=1, bias=False
@@ -35,6 +42,11 @@ class BasicResBlock(torch.nn.Module):
             )
 
     def forward(self, x):
+        """Forward pass for training.
+        
+            Args:
+                x: TODO.
+            """
         out = F.relu(self.bn1(self.conv1(x)))
         out = self.bn2(self.conv2(out))
         out += self.shortcut(x)
@@ -44,6 +56,14 @@ class BasicResBlock(torch.nn.Module):
 
 class FCM(torch.nn.Module):
     def __init__(self, block=BasicResBlock, num_blocks=[2, 2], m_channels=32, feat_dim=80):
+        """Initialize FCM.
+        
+            Args:
+                block: TODO.
+                num_blocks: TODO.
+                m_channels: TODO.
+                feat_dim: Size/dimension parameter.
+            """
         super(FCM, self).__init__()
         self.in_planes = m_channels
         self.conv1 = torch.nn.Conv2d(1, m_channels, kernel_size=3, stride=1, padding=1, bias=False)
@@ -59,6 +79,14 @@ class FCM(torch.nn.Module):
         self.out_channels = m_channels * (feat_dim // 8)
 
     def _make_layer(self, block, planes, num_blocks, stride):
+        """Internal: make layer.
+        
+            Args:
+                block: TODO.
+                planes: TODO.
+                num_blocks: TODO.
+                stride: TODO.
+            """
         strides = [stride] + [1] * (num_blocks - 1)
         layers = []
         for stride in strides:
@@ -67,6 +95,11 @@ class FCM(torch.nn.Module):
         return torch.nn.Sequential(*layers)
 
     def forward(self, x):
+        """Forward pass for training.
+        
+            Args:
+                x: TODO.
+            """
         x = x.unsqueeze(1)
         out = F.relu(self.bn1(self.conv1(x)))
         out = self.layer1(out)
@@ -79,6 +112,12 @@ class FCM(torch.nn.Module):
 
 
 def get_nonlinear(config_str, channels):
+    """Get nonlinear.
+    
+        Args:
+            config_str: TODO.
+            channels: TODO.
+        """
     nonlinear = torch.nn.Sequential()
     for name in config_str.split("-"):
         if name == "relu":
@@ -95,6 +134,15 @@ def get_nonlinear(config_str, channels):
 
 
 def statistics_pooling(x, dim=-1, keepdim=False, unbiased=True, eps=1e-2):
+    """Statistics pooling.
+    
+        Args:
+            x: TODO.
+            dim: TODO.
+            keepdim: TODO.
+            unbiased: TODO.
+            eps: TODO.
+        """
     mean = x.mean(dim=dim)
     std = x.std(dim=dim, unbiased=unbiased)
     stats = torch.cat([mean, std], dim=-1)
@@ -105,6 +153,11 @@ def statistics_pooling(x, dim=-1, keepdim=False, unbiased=True, eps=1e-2):
 
 class StatsPool(torch.nn.Module):
     def forward(self, x):
+        """Forward pass for training.
+        
+            Args:
+                x: TODO.
+            """
         return statistics_pooling(x)
 
 
@@ -120,6 +173,18 @@ class TDNNLayer(torch.nn.Module):
         bias=False,
         config_str="batchnorm-relu",
     ):
+        """Initialize TDNNLayer.
+        
+            Args:
+                in_channels: TODO.
+                out_channels: TODO.
+                kernel_size: Size/dimension parameter.
+                stride: TODO.
+                padding: TODO.
+                dilation: TODO.
+                bias: TODO.
+                config_str: TODO.
+            """
         super(TDNNLayer, self).__init__()
         if padding < 0:
             assert (
@@ -138,6 +203,11 @@ class TDNNLayer(torch.nn.Module):
         self.nonlinear = get_nonlinear(config_str, out_channels)
 
     def forward(self, x):
+        """Forward pass for training.
+        
+            Args:
+                x: TODO.
+            """
         x = self.linear(x)
         x = self.nonlinear(x)
         return x
@@ -147,6 +217,18 @@ class CAMLayer(torch.nn.Module):
     def __init__(
         self, bn_channels, out_channels, kernel_size, stride, padding, dilation, bias, reduction=2
     ):
+        """Initialize CAMLayer.
+        
+            Args:
+                bn_channels: TODO.
+                out_channels: TODO.
+                kernel_size: Size/dimension parameter.
+                stride: TODO.
+                padding: TODO.
+                dilation: TODO.
+                bias: TODO.
+                reduction: TODO.
+            """
         super(CAMLayer, self).__init__()
         self.linear_local = torch.nn.Conv1d(
             bn_channels,
@@ -163,6 +245,11 @@ class CAMLayer(torch.nn.Module):
         self.sigmoid = torch.nn.Sigmoid()
 
     def forward(self, x):
+        """Forward pass for training.
+        
+            Args:
+                x: TODO.
+            """
         y = self.linear_local(x)
         context = x.mean(-1, keepdim=True) + self.seg_pooling(x)
         context = self.relu(self.linear1(context))
@@ -170,6 +257,13 @@ class CAMLayer(torch.nn.Module):
         return y * m
 
     def seg_pooling(self, x, seg_len=100, stype="avg"):
+        """Seg pooling.
+        
+            Args:
+                x: TODO.
+                seg_len: TODO.
+                stype: TODO.
+            """
         if stype == "avg":
             seg = F.avg_pool1d(x, kernel_size=seg_len, stride=seg_len, ceil_mode=True)
         elif stype == "max":
@@ -195,6 +289,19 @@ class CAMDenseTDNNLayer(torch.nn.Module):
         config_str="batchnorm-relu",
         memory_efficient=False,
     ):
+        """Initialize CAMDenseTDNNLayer.
+        
+            Args:
+                in_channels: TODO.
+                out_channels: TODO.
+                bn_channels: TODO.
+                kernel_size: Size/dimension parameter.
+                stride: TODO.
+                dilation: TODO.
+                bias: TODO.
+                config_str: TODO.
+                memory_efficient: TODO.
+            """
         super(CAMDenseTDNNLayer, self).__init__()
         assert kernel_size % 2 == 1, "Expect equal paddings, but got even kernel size ({})".format(
             kernel_size
@@ -215,9 +322,19 @@ class CAMDenseTDNNLayer(torch.nn.Module):
         )
 
     def bn_function(self, x):
+        """Bn function.
+        
+            Args:
+                x: TODO.
+            """
         return self.linear1(self.nonlinear1(x))
 
     def forward(self, x):
+        """Forward pass for training.
+        
+            Args:
+                x: TODO.
+            """
         if self.training and self.memory_efficient:
             x = cp.checkpoint(self.bn_function, x)
         else:
@@ -240,6 +357,20 @@ class CAMDenseTDNNBlock(torch.nn.ModuleList):
         config_str="batchnorm-relu",
         memory_efficient=False,
     ):
+        """Initialize CAMDenseTDNNBlock.
+        
+            Args:
+                num_layers: TODO.
+                in_channels: TODO.
+                out_channels: TODO.
+                bn_channels: TODO.
+                kernel_size: Size/dimension parameter.
+                stride: TODO.
+                dilation: TODO.
+                bias: TODO.
+                config_str: TODO.
+                memory_efficient: TODO.
+            """
         super(CAMDenseTDNNBlock, self).__init__()
         for i in range(num_layers):
             layer = CAMDenseTDNNLayer(
@@ -256,6 +387,11 @@ class CAMDenseTDNNBlock(torch.nn.ModuleList):
             self.add_module("tdnnd%d" % (i + 1), layer)
 
     def forward(self, x):
+        """Forward pass for training.
+        
+            Args:
+                x: TODO.
+            """
         for layer in self:
             x = torch.cat([x, layer(x)], dim=1)
         return x
@@ -263,11 +399,24 @@ class CAMDenseTDNNBlock(torch.nn.ModuleList):
 
 class TransitLayer(torch.nn.Module):
     def __init__(self, in_channels, out_channels, bias=True, config_str="batchnorm-relu"):
+        """Initialize TransitLayer.
+        
+            Args:
+                in_channels: TODO.
+                out_channels: TODO.
+                bias: TODO.
+                config_str: TODO.
+            """
         super(TransitLayer, self).__init__()
         self.nonlinear = get_nonlinear(config_str, in_channels)
         self.linear = torch.nn.Conv1d(in_channels, out_channels, 1, bias=bias)
 
     def forward(self, x):
+        """Forward pass for training.
+        
+            Args:
+                x: TODO.
+            """
         x = self.nonlinear(x)
         x = self.linear(x)
         return x
@@ -275,11 +424,24 @@ class TransitLayer(torch.nn.Module):
 
 class DenseLayer(torch.nn.Module):
     def __init__(self, in_channels, out_channels, bias=False, config_str="batchnorm-relu"):
+        """Initialize DenseLayer.
+        
+            Args:
+                in_channels: TODO.
+                out_channels: TODO.
+                bias: TODO.
+                config_str: TODO.
+            """
         super(DenseLayer, self).__init__()
         self.linear = torch.nn.Conv1d(in_channels, out_channels, 1, bias=bias)
         self.nonlinear = get_nonlinear(config_str, out_channels)
 
     def forward(self, x):
+        """Forward pass for training.
+        
+            Args:
+                x: TODO.
+            """
         if len(x.shape) == 2:
             x = self.linear(x.unsqueeze(dim=-1)).squeeze(dim=-1)
         else:

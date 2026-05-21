@@ -6,6 +6,11 @@ import re
 class KoreanCleaner:
     @classmethod
     def _normalize_numbers(cls, text):
+        """Internal: normalize numbers.
+        
+            Args:
+                text: Text tensor or string input.
+            """
         number_to_kor = {
             "0": "영",
             "1": "일",
@@ -25,6 +30,11 @@ class KoreanCleaner:
 
     @classmethod
     def _normalize_english_text(cls, text):
+        """Internal: normalize english text.
+        
+            Args:
+                text: Text tensor or string input.
+            """
         upper_alphabet_to_kor = {
             "A": "에이",
             "B": "비",
@@ -64,6 +74,11 @@ class KoreanCleaner:
     @classmethod
     def normalize_text(cls, text):
         # stage 0 : text strip
+        """Normalize text.
+        
+            Args:
+                text: Text tensor or string input.
+            """
         text = text.strip()
 
         # stage 1 : normalize numbers

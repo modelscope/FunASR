@@ -17,6 +17,11 @@ class DatadirWriter:
     """
 
     def __init__(self, p: Union[Path, str]):
+        """Initialize DatadirWriter.
+        
+            Args:
+                p: TODO.
+            """
         self.path = Path(p)
         self.chilidren = {}
         self.fd = None
@@ -24,9 +29,15 @@ class DatadirWriter:
         self.keys = set()
 
     def __enter__(self):
+        """Internal: enter  ."""
         return self
 
     def __getitem__(self, key: str) -> "DatadirWriter":
+        """Internal: getitem  .
+        
+            Args:
+                key: Sample identifiers.
+            """
         if self.fd is not None:
             raise RuntimeError("This writer points out a file")
 
@@ -39,6 +50,12 @@ class DatadirWriter:
         return retval
 
     def __setitem__(self, key: str, value: str):
+        """Internal: setitem  .
+        
+            Args:
+                key: Sample identifiers.
+                value: TODO.
+            """
         if self.has_children:
             raise RuntimeError("This writer points out a directory")
         if key in self.keys:
@@ -53,9 +70,17 @@ class DatadirWriter:
         self.fd.flush()
 
     def __exit__(self, exc_type, exc_val, exc_tb):
+        """Internal: exit  .
+        
+            Args:
+                exc_type: TODO.
+                exc_val: TODO.
+                exc_tb: TODO.
+            """
         self.close()
 
     def close(self):
+        """Close."""
         if self.has_children:
             prev_child = None
             for child in self.chilidren.values():

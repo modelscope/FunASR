@@ -25,6 +25,17 @@ class CTC(torch.nn.Module):
         ignore_nan_grad: bool = True,
         extra_linear: bool = True,
     ):
+        """Initialize CTC.
+        
+            Args:
+                odim: TODO.
+                encoder_output_size: Size/dimension parameter.
+                dropout_rate: TODO.
+                ctc_type: TODO.
+                reduce: TODO.
+                ignore_nan_grad: TODO.
+                extra_linear: TODO.
+            """
         super().__init__()
         eprojs = encoder_output_size
         self.dropout_rate = dropout_rate
@@ -51,6 +62,14 @@ class CTC(torch.nn.Module):
         self.reduce = reduce
 
     def loss_fn(self, th_pred, th_target, th_ilen, th_olen) -> torch.Tensor:
+        """Loss fn.
+        
+            Args:
+                th_pred: TODO.
+                th_target: TODO.
+                th_ilen: TODO.
+                th_olen: TODO.
+            """
         if self.ctc_type == "builtin":
             th_pred = th_pred.log_softmax(2)
             loss = self.ctc_loss(th_pred, th_target, th_ilen, th_olen)

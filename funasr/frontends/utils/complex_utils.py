@@ -23,6 +23,12 @@ def new_complex_like(
     ref: Union[torch.Tensor, ComplexTensor],
     real_imag: Tuple[torch.Tensor, torch.Tensor],
 ):
+    """New complex like.
+    
+        Args:
+            ref: TODO.
+            real_imag: TODO.
+        """
     if isinstance(ref, ComplexTensor):
         return ComplexTensor(*real_imag)
     elif is_torch_complex_tensor(ref):
@@ -32,14 +38,29 @@ def new_complex_like(
 
 
 def is_torch_complex_tensor(c):
+    """Is torch complex tensor.
+    
+        Args:
+            c: TODO.
+        """
     return not isinstance(c, ComplexTensor) and is_torch_1_9_plus and torch.is_complex(c)
 
 
 def is_complex(c):
+    """Is complex.
+    
+        Args:
+            c: TODO.
+        """
     return isinstance(c, ComplexTensor) or is_torch_complex_tensor(c)
 
 
 def to_double(c):
+    """To double.
+    
+        Args:
+            c: TODO.
+        """
     if not isinstance(c, ComplexTensor) and is_torch_1_9_plus and torch.is_complex(c):
         return c.to(dtype=torch.complex128)
     else:
@@ -47,6 +68,11 @@ def to_double(c):
 
 
 def to_float(c):
+    """To float.
+    
+        Args:
+            c: TODO.
+        """
     if not isinstance(c, ComplexTensor) and is_torch_1_9_plus and torch.is_complex(c):
         return c.to(dtype=torch.complex64)
     else:
@@ -54,6 +80,13 @@ def to_float(c):
 
 
 def cat(seq: Sequence[Union[ComplexTensor, torch.Tensor]], *args, **kwargs):
+    """Cat.
+    
+        Args:
+            seq: TODO.
+            *args: Variable positional arguments.
+            **kwargs: Additional keyword arguments.
+        """
     if not isinstance(seq, (list, tuple)):
         raise TypeError(
             "cat(): argument 'tensors' (position 1) must be tuple of Tensors, " "not Tensor"
@@ -65,6 +98,13 @@ def cat(seq: Sequence[Union[ComplexTensor, torch.Tensor]], *args, **kwargs):
 
 
 def complex_norm(c: Union[torch.Tensor, ComplexTensor], dim=-1, keepdim=False) -> torch.Tensor:
+    """Complex norm.
+    
+        Args:
+            c: TODO.
+            dim: TODO.
+            keepdim: TODO.
+        """
     if not is_complex(c):
         raise TypeError("Input is not a complex tensor.")
     if is_torch_complex_tensor(c):
@@ -77,6 +117,12 @@ def einsum(equation, *operands):
     # NOTE: Do not mix ComplexTensor and torch.complex in the input!
     # NOTE (wangyou): Until PyTorch 1.9.0, torch.einsum does not support
     # mixed input with complex and real tensors.
+    """Einsum.
+    
+        Args:
+            equation: TODO.
+            *operands: Variable positional arguments.
+        """
     if len(operands) == 1:
         if isinstance(operands[0], (tuple, list)):
             operands = operands[0]
@@ -109,6 +155,11 @@ def einsum(equation, *operands):
 
 
 def inverse(c: Union[torch.Tensor, ComplexTensor]) -> Union[torch.Tensor, ComplexTensor]:
+    """Inverse.
+    
+        Args:
+            c: TODO.
+        """
     if isinstance(c, ComplexTensor):
         return c.inverse2()
     else:
@@ -121,6 +172,12 @@ def matmul(
     # NOTE: Do not mix ComplexTensor and torch.complex in the input!
     # NOTE (wangyou): Until PyTorch 1.9.0, torch.matmul does not support
     # multiplication between complex and real tensors.
+    """Matmul.
+    
+        Args:
+            a: TODO.
+            b: TODO.
+        """
     if isinstance(a, ComplexTensor) or isinstance(b, ComplexTensor):
         return FC.matmul(a, b)
     elif is_torch_1_9_plus and (torch.is_complex(a) or torch.is_complex(b)):
@@ -141,10 +198,21 @@ def matmul(
 def trace(a: Union[torch.Tensor, ComplexTensor]):
     # NOTE (wangyou): until PyTorch 1.9.0, torch.trace does not
     # support bacth processing. Use FC.trace() as fallback.
+    """Trace.
+    
+        Args:
+            a: TODO.
+        """
     return FC.trace(a)
 
 
 def reverse(a: Union[torch.Tensor, ComplexTensor], dim=0):
+    """Reverse.
+    
+        Args:
+            a: TODO.
+            dim: TODO.
+        """
     if isinstance(a, ComplexTensor):
         return FC.reverse(a, dim=dim)
     else:
@@ -174,6 +242,13 @@ def solve(b: Union[torch.Tensor, ComplexTensor], a: Union[torch.Tensor, ComplexT
 
 
 def stack(seq: Sequence[Union[ComplexTensor, torch.Tensor]], *args, **kwargs):
+    """Stack.
+    
+        Args:
+            seq: TODO.
+            *args: Variable positional arguments.
+            **kwargs: Additional keyword arguments.
+        """
     if not isinstance(seq, (list, tuple)):
         raise TypeError(
             "stack(): argument 'tensors' (position 1) must be tuple of Tensors, " "not Tensor"

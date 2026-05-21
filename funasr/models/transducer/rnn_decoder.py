@@ -35,6 +35,27 @@ def build_attention_list(
     han_win: int = 5,
 ):
 
+    """Build attention list.
+    
+        Args:
+            eprojs: TODO.
+            dunits: TODO.
+            atype: TODO.
+            num_att: TODO.
+            num_encs: TODO.
+            aheads: TODO.
+            adim: TODO.
+            awin: TODO.
+            aconv_chans: TODO.
+            aconv_filts: TODO.
+            han_mode: TODO.
+            han_type: TODO.
+            han_heads: TODO.
+            han_dim: Size/dimension parameter.
+            han_conv_chans: TODO.
+            han_conv_filts: TODO.
+            han_win: TODO.
+        """
     att_list = torch.nn.ModuleList()
     if num_encs == 1:
         for i in range(num_att):
@@ -99,6 +120,21 @@ class RNNDecoder(nn.Module):
         att_conf: dict = None,
     ):
         # FIXME(kamo): The parts of num_spk should be refactored more more more
+        """Initialize RNNDecoder.
+        
+            Args:
+                vocab_size: Size/dimension parameter.
+                encoder_output_size: Size/dimension parameter.
+                rnn_type: TODO.
+                num_layers: TODO.
+                hidden_size: Size/dimension parameter.
+                sampling_probability: TODO.
+                dropout: TODO.
+                context_residual: TODO.
+                replace_sos: TODO.
+                num_encs: TODO.
+                att_conf: Configuration dict for att.
+            """
         if rnn_type not in {"lstm", "gru"}:
             raise ValueError(f"Not supported: rnn_type={rnn_type}")
 
@@ -151,9 +187,23 @@ class RNNDecoder(nn.Module):
         self.att_list = build_attention_list(eprojs=eprojs, dunits=hidden_size, **att_conf)
 
     def zero_state(self, hs_pad):
+        """Zero state.
+        
+            Args:
+                hs_pad: TODO.
+            """
         return hs_pad.new_zeros(hs_pad.size(0), self.dunits)
 
     def rnn_forward(self, ey, z_list, c_list, z_prev, c_prev):
+        """Rnn forward.
+        
+            Args:
+                ey: TODO.
+                z_list: TODO.
+                c_list: TODO.
+                z_prev: TODO.
+                c_prev: TODO.
+            """
         if self.dtype == "lstm":
             z_list[0], c_list[0] = self.decoder[0](ey, (z_prev[0], c_prev[0]))
             for i in range(1, self.dlayers):
@@ -170,6 +220,15 @@ class RNNDecoder(nn.Module):
     def forward(self, hs_pad, hlens, ys_in_pad, ys_in_lens, strm_idx=0):
         # to support mutiple encoder asr mode, in single encoder mode,
         # convert torch.Tensor to List of torch.Tensor
+        """Forward pass for training.
+        
+            Args:
+                hs_pad: TODO.
+                hlens: TODO.
+                ys_in_pad: TODO.
+                ys_in_lens: Lengths of ys_in.
+                strm_idx: TODO.
+            """
         if self.num_encs == 1:
             hs_pad = [hs_pad]
             hlens = [hlens]
@@ -254,6 +313,11 @@ class RNNDecoder(nn.Module):
     def init_state(self, x):
         # to support mutiple encoder asr mode, in single encoder mode,
         # convert torch.Tensor to List of torch.Tensor
+        """Init state.
+        
+            Args:
+                x: TODO.
+            """
         if self.num_encs == 1:
             x = [x]
 
@@ -283,6 +347,13 @@ class RNNDecoder(nn.Module):
     def score(self, yseq, state, x):
         # to support mutiple encoder asr mode, in single encoder mode,
         # convert torch.Tensor to List of torch.Tensor
+        """Score.
+        
+            Args:
+                yseq: TODO.
+                state: TODO.
+                x: TODO.
+            """
         if self.num_encs == 1:
             x = [x]
 

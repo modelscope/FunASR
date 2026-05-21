@@ -22,6 +22,14 @@ from funasr.models.transformer.utils.nets_utils import make_pad_mask
 
 
 def get_annealed_rate(start, end, curr_step, total_steps):
+    """Get annealed rate.
+    
+        Args:
+            start: TODO.
+            end: TODO.
+            curr_step: TODO.
+            total_steps: TODO.
+        """
     r = end - start
     pct_remaining = 1 - curr_step / total_steps
     return end - r * pct_remaining
@@ -95,6 +103,63 @@ class Data2VecEncoder(nn.Module):
         # FP16 optimization
         required_seq_len_multiple: int = 2,
     ):
+        """Initialize Data2VecEncoder.
+        
+            Args:
+                input_size: Size/dimension parameter.
+                extractor_mode: TODO.
+                conv_feature_layers: TODO.
+                layer_type: TODO.
+                layer_norm_first: TODO.
+                encoder_layers: TODO.
+                encoder_embed_dim: Size/dimension parameter.
+                encoder_ffn_embed_dim: Size/dimension parameter.
+                encoder_attention_heads: TODO.
+                activation_fn: TODO.
+                dropout: TODO.
+                attention_dropout: TODO.
+                activation_dropout: TODO.
+                encoder_layerdrop: TODO.
+                dropout_input: TODO.
+                dropout_features: TODO.
+                feature_grad_mult: TODO.
+                mask_prob: TODO.
+                mask_length: TODO.
+                mask_selection: TODO.
+                mask_other: TODO.
+                no_mask_overlap: TODO.
+                mask_min_space: TODO.
+                require_same_masks: TODO.
+                mask_dropout: TODO.
+                mask_channel_length: TODO.
+                mask_channel_prob: TODO.
+                mask_channel_before: TODO.
+                mask_channel_selection: TODO.
+                mask_channel_other: TODO.
+                no_mask_channel_overlap: TODO.
+                mask_channel_min_space: TODO.
+                conv_pos: TODO.
+                conv_pos_groups: TODO.
+                pos_conv_depth: TODO.
+                max_positions: TODO.
+                average_top_k_layers: TODO.
+                layer_norm_target_layer: TODO.
+                instance_norm_target_layer: TODO.
+                instance_norm_targets: TODO.
+                layer_norm_targets: TODO.
+                batch_norm_target_layer: TODO.
+                group_norm_target_layer: TODO.
+                ema_decay: TODO.
+                ema_end_decay: TODO.
+                ema_anneal_end_step: TODO.
+                ema_transformer_only: TODO.
+                ema_layers_only: TODO.
+                min_target_var: TODO.
+                min_pred_var: TODO.
+                loss_beta: TODO.
+                loss_scale: TODO.
+                required_seq_len_multiple: TODO.
+            """
         super().__init__()
 
         # ConvFeatureExtractionModel
@@ -206,6 +271,7 @@ class Data2VecEncoder(nn.Module):
         logging.info("Data2VecEncoder settings: {}".format(self.__dict__))
 
     def make_ema_teacher(self):
+        """Make ema teacher."""
         skip_keys = set()
         if self.ema_layers_only:
             self.ema_transformer_only = True
@@ -220,6 +286,11 @@ class Data2VecEncoder(nn.Module):
         )
 
     def set_num_updates(self, num_updates):
+        """Set num updates.
+        
+            Args:
+                num_updates: TODO.
+            """
         if self.ema is None and self.final_proj is not None:
             logging.info("Making EMA Teacher")
             self.make_ema_teacher()
@@ -247,6 +318,14 @@ class Data2VecEncoder(nn.Module):
         mask_indices=None,
         mask_channel_indices=None,
     ):
+        """Apply mask.
+        
+            Args:
+                x: TODO.
+                padding_mask: TODO.
+                mask_indices: TODO.
+                mask_channel_indices: TODO.
+            """
         B, T, C = x.shape
 
         if self.mask_channel_prob > 0 and self.mask_channel_before:
@@ -313,6 +392,13 @@ class Data2VecEncoder(nn.Module):
         """
 
         def _conv_out_length(input_length, kernel_size, stride):
+            """Internal: conv out length.
+            
+                Args:
+                    input_length: TODO.
+                    kernel_size: Size/dimension parameter.
+                    stride: TODO.
+                """
             return torch.floor((input_length - kernel_size).to(torch.float32) / stride + 1)
 
         conv_cfg_list = eval(self.conv_feature_layers)
@@ -336,6 +422,18 @@ class Data2VecEncoder(nn.Module):
         padding_count=None,
     ):
         # create padding_mask by ilens
+        """Forward pass for training.
+        
+            Args:
+                xs_pad: TODO.
+                ilens: TODO.
+                mask: TODO.
+                features_only: TODO.
+                layer: TODO.
+                mask_indices: TODO.
+                mask_channel_indices: TODO.
+                padding_count: TODO.
+            """
         if ilens is not None:
             padding_mask = make_pad_mask(lengths=ilens).to(xs_pad.device)
         else:
@@ -526,6 +624,11 @@ class Data2VecEncoder(nn.Module):
 
     @staticmethod
     def compute_var(y):
+        """Compute var.
+        
+            Args:
+                y: TODO.
+            """
         y = y.view(-1, y.size(-1))
         if dist.is_initialized():
             zc = torch.tensor(y.size(0)).cuda()
@@ -542,6 +645,14 @@ class Data2VecEncoder(nn.Module):
             return torch.sqrt(y.var(dim=0) + 1e-6).mean()
 
     def extract_features(self, xs_pad, ilens, mask=False, layer=None):
+        """Extract features.
+        
+            Args:
+                xs_pad: TODO.
+                ilens: TODO.
+                mask: TODO.
+                layer: TODO.
+            """
         res = self.forward(
             xs_pad,
             ilens,
@@ -552,6 +663,11 @@ class Data2VecEncoder(nn.Module):
         return res
 
     def remove_pretraining_modules(self, last_layer=None):
+        """Remove pretraining modules.
+        
+            Args:
+                last_layer: TODO.
+            """
         self.final_proj = None
         self.ema = None
         if last_layer is not None:
@@ -560,4 +676,5 @@ class Data2VecEncoder(nn.Module):
             )
 
     def output_size(self) -> int:
+        """Output size."""
         return self.encoder_embed_dim

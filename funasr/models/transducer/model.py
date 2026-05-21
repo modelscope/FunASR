@@ -28,6 +28,11 @@ else:
     # Nothing to do if torch<1.6.0
     @contextmanager
     def autocast(enabled=True):
+        """Autocast.
+        
+            Args:
+                enabled: TODO.
+            """
         yield
 
 
@@ -72,6 +77,38 @@ class Transducer(torch.nn.Module):
         **kwargs,
     ):
 
+        """Initialize Transducer.
+        
+            Args:
+                frontend: Audio frontend for feature extraction.
+                frontend_conf: Configuration dict for frontend.
+                specaug: TODO.
+                specaug_conf: Configuration dict for specaug.
+                normalize: TODO.
+                normalize_conf: Configuration dict for normalize.
+                encoder: TODO.
+                encoder_conf: Configuration dict for encoder.
+                decoder: TODO.
+                decoder_conf: Configuration dict for decoder.
+                joint_network: TODO.
+                joint_network_conf: Configuration dict for joint_network.
+                transducer_weight: TODO.
+                fastemit_lambda: TODO.
+                auxiliary_ctc_weight: TODO.
+                auxiliary_ctc_dropout_rate: TODO.
+                auxiliary_lm_loss_weight: TODO.
+                auxiliary_lm_loss_smoothing: TODO.
+                input_size: Size/dimension parameter.
+                vocab_size: Size/dimension parameter.
+                ignore_id: TODO.
+                blank_id: TODO.
+                sos: TODO.
+                eos: TODO.
+                lsm_weight: TODO.
+                length_normalized_loss: TODO.
+                share_embedding: TODO.
+                **kwargs: Additional keyword arguments.
+            """
         super().__init__()
 
         if specaug is not None:
@@ -413,6 +450,11 @@ class Transducer(torch.nn.Module):
     ):
 
         # 1. Build ASR model
+        """Init beam search.
+        
+            Args:
+                **kwargs: Additional keyword arguments.
+            """
         scorers = {}
 
         if self.ctc != None:
@@ -449,6 +491,15 @@ class Transducer(torch.nn.Module):
         **kwargs,
     ):
 
+        """Run inference on input data.
+        
+            Args:
+                data_in: Input data (audio samples, file paths, or text).
+                data_lengths: Lengths of each input sample in the batch.
+                key: Sample identifiers.
+                tokenizer: Tokenizer instance for text encoding/decoding.
+                **kwargs: Additional keyword arguments.
+            """
         if kwargs.get("batch_size", 1) > 1:
             raise NotImplementedError("batch decoding is not implemented")
 

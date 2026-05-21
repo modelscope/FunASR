@@ -48,6 +48,13 @@ _ALIGNMENT_HEADS = {
 
 
 def _download(url: str, root: str, in_memory: bool) -> Union[bytes, str]:
+    """Internal: download.
+    
+        Args:
+            url: TODO.
+            root: TODO.
+            in_memory: TODO.
+        """
     os.makedirs(root, exist_ok=True)
 
     expected_sha256 = url.split("/")[-2]

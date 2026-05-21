@@ -26,11 +26,24 @@ class SinusoidalPositionEncoder(torch.nn.Module):
     """ """
 
     def __init__(self, d_model=80, dropout_rate=0.1):
+        """Initialize SinusoidalPositionEncoder.
+        
+            Args:
+                d_model: D Model instance.
+                dropout_rate: TODO.
+            """
         super().__init__()
 
     def encode(
         self, positions: torch.Tensor = None, depth: int = None, dtype: torch.dtype = torch.float32
     ):
+        """Encode.
+        
+            Args:
+                positions: TODO.
+                depth: TODO.
+                dtype: TODO.
+            """
         batch_size = positions.size(0)
         positions = positions.type(dtype)
         device = positions.device
@@ -48,6 +61,11 @@ class SinusoidalPositionEncoder(torch.nn.Module):
         return encoding.type(dtype)
 
     def forward(self, x):
+        """Forward pass for training.
+        
+            Args:
+                x: TODO.
+            """
         batch_size, timesteps, input_dim = x.size()
         positions = torch.arange(1, timesteps + 1, device=x.device)[None, :]
         position_encoding = self.encode(positions, input_dim, x.dtype).to(x.device)
@@ -127,6 +145,13 @@ class MultiHeadedAttentionSANM(nn.Module):
         self.pad_fn = nn.ConstantPad1d((left_padding, right_padding), 0.0)
 
     def forward_fsmn(self, inputs, mask, mask_shfit_chunk=None):
+        """Forward fsmn.
+        
+            Args:
+                inputs: TODO.
+                mask: TODO.
+                mask_shfit_chunk: TODO.
+            """
         b, t, d = inputs.size()
         if mask is not None:
             mask = torch.reshape(mask, (b, -1, 1))
@@ -274,9 +299,20 @@ class MultiHeadedAttentionSANM(nn.Module):
 
 class LayerNorm(nn.LayerNorm):
     def __init__(self, *args, **kwargs):
+        """Initialize LayerNorm.
+        
+            Args:
+                *args: Variable positional arguments.
+                **kwargs: Additional keyword arguments.
+            """
         super().__init__(*args, **kwargs)
 
     def forward(self, input):
+        """Forward pass for training.
+        
+            Args:
+                input: Input audio/text data.
+            """
         output = F.layer_norm(
             input.float(),
             self.normalized_shape,
@@ -288,6 +324,14 @@ class LayerNorm(nn.LayerNorm):
 
 
 def sequence_mask(lengths, maxlen=None, dtype=torch.float32, device=None):
+    """Sequence mask.
+    
+        Args:
+            lengths: TODO.
+            maxlen: TODO.
+            dtype: TODO.
+            device: Target device ("cuda:0", "cpu", etc.).
+        """
     if maxlen is None:
         maxlen = lengths.max()
     row_vector = torch.arange(0, maxlen, 1).to(lengths.device)
@@ -473,6 +517,31 @@ class SenseVoiceEncoderSmall(nn.Module):
         selfattention_layer_type: str = "sanm",
         **kwargs,
     ):
+        """Initialize SenseVoiceEncoderSmall.
+        
+            Args:
+                input_size: Size/dimension parameter.
+                output_size: Size/dimension parameter.
+                attention_heads: TODO.
+                linear_units: TODO.
+                num_blocks: TODO.
+                tp_blocks: TODO.
+                dropout_rate: TODO.
+                positional_dropout_rate: TODO.
+                attention_dropout_rate: TODO.
+                stochastic_depth_rate: TODO.
+                input_layer: TODO.
+                pos_enc_class: TODO.
+                normalize_before: TODO.
+                concat_after: TODO.
+                positionwise_layer_type: TODO.
+                positionwise_conv_kernel_size: Size/dimension parameter.
+                padding_idx: TODO.
+                kernel_size: Size/dimension parameter.
+                sanm_shfit: TODO.
+                selfattention_layer_type: TODO.
+                **kwargs: Additional keyword arguments.
+            """
         super().__init__()
         self._output_size = output_size
 
@@ -548,6 +617,7 @@ class SenseVoiceEncoderSmall(nn.Module):
         self.tp_norm = LayerNorm(output_size)
 
     def output_size(self) -> int:
+        """Output size."""
         return self._output_size
 
     def forward(
@@ -608,6 +678,25 @@ class SenseVoiceSmall(nn.Module):
         **kwargs,
     ):
 
+        """Initialize SenseVoiceSmall.
+        
+            Args:
+                specaug: TODO.
+                specaug_conf: Configuration dict for specaug.
+                normalize: TODO.
+                normalize_conf: Configuration dict for normalize.
+                encoder: TODO.
+                encoder_conf: Configuration dict for encoder.
+                ctc_conf: Configuration dict for ctc.
+                input_size: Size/dimension parameter.
+                vocab_size: Size/dimension parameter.
+                ignore_id: TODO.
+                blank_id: TODO.
+                sos: TODO.
+                eos: TODO.
+                length_normalized_loss: TODO.
+                **kwargs: Additional keyword arguments.
+            """
         super().__init__()
 
         if specaug is not None:
@@ -663,6 +752,12 @@ class SenseVoiceSmall(nn.Module):
 
     @staticmethod
     def from_pretrained(model: str = None, **kwargs):
+        """From pretrained.
+        
+            Args:
+                model: Model instance or model name.
+                **kwargs: Additional keyword arguments.
+            """
         from funasr import AutoModel
 
         model, kwargs = AutoModel.build_model(model=model, trust_remote_code=True, **kwargs)
@@ -781,6 +876,14 @@ class SenseVoiceSmall(nn.Module):
         ys_pad_lens: torch.Tensor,
     ):
         # Calc CTC loss
+        """Internal: calc ctc loss.
+        
+            Args:
+                encoder_out: Encoder output tensor.
+                encoder_out_lens: Encoder output lengths.
+                ys_pad: TODO.
+                ys_pad_lens: Lengths of ys_pad.
+            """
         loss_ctc = self.ctc(encoder_out, encoder_out_lens, ys_pad, ys_pad_lens)
 
         # Calc CER using CTC
@@ -795,6 +898,12 @@ class SenseVoiceSmall(nn.Module):
         encoder_out: torch.Tensor,
         ys_pad: torch.Tensor,
     ):
+        """Internal: calc rich ce loss.
+        
+            Args:
+                encoder_out: Encoder output tensor.
+                ys_pad: TODO.
+            """
         decoder_out = self.ctc.ctc_lo(encoder_out)
         # 2. Compute attention loss
         loss_rich = self.criterion_att(decoder_out, ys_pad.contiguous())
@@ -816,6 +925,16 @@ class SenseVoiceSmall(nn.Module):
         **kwargs,
     ):
 
+        """Run inference on input data.
+        
+            Args:
+                data_in: Input data (audio samples, file paths, or text).
+                data_lengths: Lengths of each input sample in the batch.
+                key: Sample identifiers.
+                tokenizer: Tokenizer instance for text encoding/decoding.
+                frontend: Audio frontend for feature extraction.
+                **kwargs: Additional keyword arguments.
+            """
         meta_data = {}
         if (
             isinstance(data_in, torch.Tensor) and kwargs.get("data_type", "sound") == "fbank"
@@ -961,6 +1080,11 @@ class SenseVoiceSmall(nn.Module):
         return results, meta_data
 
     def post(self, timestamp):
+        """Post.
+        
+            Args:
+                timestamp: TODO.
+            """
         timestamp_new = []
         words_new = []
         prev_word = None
@@ -990,6 +1114,11 @@ class SenseVoiceSmall(nn.Module):
         return timestamp_new, words_new
 
     def export(self, **kwargs):
+        """Export.
+        
+            Args:
+                **kwargs: Additional keyword arguments.
+            """
         from .export_meta import export_rebuild_model
 
         if "max_seq_len" not in kwargs:

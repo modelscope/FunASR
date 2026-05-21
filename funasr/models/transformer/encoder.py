@@ -182,6 +182,27 @@ class TransformerEncoder(nn.Module):
         interctc_layer_idx: List[int] = [],
         interctc_use_conditioning: bool = False,
     ):
+        """Initialize TransformerEncoder.
+        
+            Args:
+                input_size: Size/dimension parameter.
+                output_size: Size/dimension parameter.
+                attention_heads: TODO.
+                linear_units: TODO.
+                num_blocks: TODO.
+                dropout_rate: TODO.
+                positional_dropout_rate: TODO.
+                attention_dropout_rate: TODO.
+                input_layer: TODO.
+                pos_enc_class: TODO.
+                normalize_before: TODO.
+                concat_after: TODO.
+                positionwise_layer_type: TODO.
+                positionwise_conv_kernel_size: Size/dimension parameter.
+                padding_idx: TODO.
+                interctc_layer_idx: TODO.
+                interctc_use_conditioning: TODO.
+            """
         super().__init__()
         self._output_size = output_size
 
@@ -260,6 +281,7 @@ class TransformerEncoder(nn.Module):
         self.conditioning_layer = None
 
     def output_size(self) -> int:
+        """Output size."""
         return self._output_size
 
     def forward(

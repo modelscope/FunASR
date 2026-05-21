@@ -27,6 +27,18 @@ class SequentialRNNLM(AbsLM):
         rnn_type: str = "lstm",
         ignore_id: int = 0,
     ):
+        """Initialize SequentialRNNLM.
+        
+            Args:
+                vocab_size: Size/dimension parameter.
+                unit: TODO.
+                nhid: TODO.
+                nlayers: TODO.
+                dropout_rate: TODO.
+                tie_weights: TODO.
+                rnn_type: TODO.
+                ignore_id: TODO.
+            """
         super().__init__()
 
         ninp = unit
@@ -87,6 +99,12 @@ class SequentialRNNLM(AbsLM):
     def forward(
         self, input: torch.Tensor, hidden: torch.Tensor
     ) -> Tuple[torch.Tensor, torch.Tensor]:
+        """Forward pass for training.
+        
+            Args:
+                input: Input audio/text data.
+                hidden: TODO.
+            """
         emb = self.drop(self.encoder(input))
         output, hidden = self.rnn(emb, hidden)
         output = self.drop(output)

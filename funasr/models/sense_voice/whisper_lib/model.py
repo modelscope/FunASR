@@ -35,9 +35,20 @@ class ModelDimensions:
 
 class LayerNorm(nn.LayerNorm):
     def __init__(self, *args, **kwargs):
+        """Initialize LayerNorm.
+        
+            Args:
+                *args: Variable positional arguments.
+                **kwargs: Additional keyword arguments.
+            """
         super().__init__(*args, **kwargs)
 
     def forward(self, input):
+        """Forward pass for training.
+        
+            Args:
+                input: Input audio/text data.
+            """
         output = F.layer_norm(
             input.float(),
             self.normalized_shape,
@@ -50,6 +61,11 @@ class LayerNorm(nn.LayerNorm):
 
 class Linear(nn.Linear):
     def forward(self, x: Tensor) -> Tensor:
+        """Forward pass for training.
+        
+            Args:
+                x: TODO.
+            """
         return F.linear(
             x,
             self.weight.to(x.dtype),
@@ -59,6 +75,13 @@ class Linear(nn.Linear):
 
 class Conv1d(nn.Conv1d):
     def _conv_forward(self, x: Tensor, weight: Tensor, bias: Optional[Tensor]) -> Tensor:
+        """Internal: conv forward.
+        
+            Args:
+                x: TODO.
+                weight: TODO.
+                bias: TODO.
+            """
         return super()._conv_forward(
             x, weight.to(x.dtype), None if bias is None else bias.to(x.dtype)
         )
@@ -75,6 +98,12 @@ def sinusoids(length, channels, max_timescale=10000):
 
 class MultiHeadAttention(nn.Module):
     def __init__(self, n_state: int, n_head: int):
+        """Initialize MultiHeadAttention.
+        
+            Args:
+                n_state: TODO.
+                n_head: TODO.
+            """
         super().__init__()
         self.n_head = n_head
         self.query = Linear(n_state, n_state)
@@ -90,6 +119,15 @@ class MultiHeadAttention(nn.Module):
         kv_cache: Optional[dict] = None,
         **kwargs,
     ):
+        """Forward pass for training.
+        
+            Args:
+                x: TODO.
+                xa: TODO.
+                mask: TODO.
+                kv_cache: TODO.
+                **kwargs: Additional keyword arguments.
+            """
         is_pad_mask = kwargs.get("is_pad_mask", False)
 
         q = self.query(x)
@@ -115,6 +153,15 @@ class MultiHeadAttention(nn.Module):
         mask: Optional[Tensor] = None,
         **kwargs,
     ):
+        """Qkv attention.
+        
+            Args:
+                q: TODO.
+                k: TODO.
+                v: TODO.
+                mask: TODO.
+                **kwargs: Additional keyword arguments.
+            """
         is_pad_mask = kwargs.get("is_pad_mask", False)
         n_batch, n_ctx, n_state = q.shape
         scale = (n_state // self.n_head) ** -0.25
@@ -143,6 +190,12 @@ class MultiHeadAttention(nn.Module):
 
 class MultiHeadAttentionSdpa(nn.Module):
     def __init__(self, n_state: int, n_head: int):
+        """Initialize MultiHeadAttentionSdpa.
+        
+            Args:
+                n_state: TODO.
+                n_head: TODO.
+            """
         super().__init__()
         self.n_head = n_head
         self.query = Linear(n_state, n_state)
@@ -158,6 +211,15 @@ class MultiHeadAttentionSdpa(nn.Module):
         kv_cache: Optional[dict] = None,
         **kwargs,
     ):
+        """Forward pass for training.
+        
+            Args:
+                x: TODO.
+                xa: TODO.
+                mask: TODO.
+                kv_cache: TODO.
+                **kwargs: Additional keyword arguments.
+            """
         is_pad_mask = kwargs.get("is_pad_mask", False)
 
         q = self.query(x)
@@ -183,6 +245,15 @@ class MultiHeadAttentionSdpa(nn.Module):
         mask: Optional[Tensor] = None,
         **kwargs,
     ):
+        """Qkv attention.
+        
+            Args:
+                q: TODO.
+                k: TODO.
+                v: TODO.
+                mask: TODO.
+                **kwargs: Additional keyword arguments.
+            """
         is_pad_mask = kwargs.get("is_pad_mask", False)
         is_causal = kwargs.get("is_causal", False)
         n_batch, n_ctx, n_state = q.shape
@@ -222,6 +293,14 @@ att_type_dict = {
 
 class ResidualAttentionBlock(nn.Module):
     def __init__(self, n_state: int, n_head: int, cross_attention: bool = False, **kwargs):
+        """Initialize ResidualAttentionBlock.
+        
+            Args:
+                n_state: TODO.
+                n_head: TODO.
+                cross_attention: TODO.
+                **kwargs: Additional keyword arguments.
+            """
         super().__init__()
 
         att_type = kwargs.get("att_type", "default")
@@ -245,6 +324,15 @@ class ResidualAttentionBlock(nn.Module):
         kv_cache: Optional[dict] = None,
         **kwargs,
     ):
+        """Forward pass for training.
+        
+            Args:
+                x: TODO.
+                xa: TODO.
+                mask: TODO.
+                kv_cache: TODO.
+                **kwargs: Additional keyword arguments.
+            """
         is_pad_mask = kwargs.get("is_pad_mask", False)
         is_pad_memory_mask = kwargs.get("is_pad_memory_mask", False)
         memory_mask = kwargs.get("memory_mask", None)
@@ -266,6 +354,16 @@ class ResidualAttentionBlock(nn.Module):
 
 class AudioEncoder(nn.Module):
     def __init__(self, n_mels: int, n_ctx: int, n_state: int, n_head: int, n_layer: int, **kwargs):
+        """Initialize AudioEncoder.
+        
+            Args:
+                n_mels: TODO.
+                n_ctx: TODO.
+                n_state: TODO.
+                n_head: TODO.
+                n_layer: TODO.
+                **kwargs: Additional keyword arguments.
+            """
         super().__init__()
         self.conv1 = Conv1d(n_mels, n_state, kernel_size=3, stride=2, padding=1)
         self.conv2 = Conv1d(n_state, n_state, kernel_size=3, stride=2, padding=1)
@@ -301,6 +399,16 @@ class AudioEncoder(nn.Module):
 
 class TextDecoder(nn.Module):
     def __init__(self, n_vocab: int, n_ctx: int, n_state: int, n_head: int, n_layer: int, **kwargs):
+        """Initialize TextDecoder.
+        
+            Args:
+                n_vocab: TODO.
+                n_ctx: TODO.
+                n_state: TODO.
+                n_head: TODO.
+                n_layer: TODO.
+                **kwargs: Additional keyword arguments.
+            """
         super().__init__()
 
         self.token_embedding = nn.Embedding(n_vocab, n_state)
@@ -342,6 +450,11 @@ class TextDecoder(nn.Module):
         return logits
 
     def init_state(self, x):
+        """Init state.
+        
+            Args:
+                x: TODO.
+            """
         state = {}
 
         return state
@@ -369,6 +482,11 @@ class TextDecoder(nn.Module):
 
 class Whisper(nn.Module):
     def __init__(self, dims: ModelDimensions):
+        """Initialize Whisper.
+        
+            Args:
+                dims: TODO.
+            """
         super().__init__()
         self.dims = dims
         self.encoder = AudioEncoder(
@@ -396,29 +514,54 @@ class Whisper(nn.Module):
         # model.register_buffer("alignment_heads", alignment_heads_dense, persistent=False)
 
     def set_alignment_heads(self, dump: bytes):
+        """Set alignment heads.
+        
+            Args:
+                dump: TODO.
+            """
         array = np.frombuffer(gzip.decompress(base64.b85decode(dump)), dtype=bool).copy()
         mask = torch.from_numpy(array).reshape(self.dims.n_text_layer, self.dims.n_text_head)
         self.register_buffer("alignment_heads", mask.to_sparse(), persistent=False)
 
     def embed_audio(self, mel: torch.Tensor):
+        """Embed audio.
+        
+            Args:
+                mel: TODO.
+            """
         return self.encoder(mel)
 
     def logits(self, tokens: torch.Tensor, audio_features: torch.Tensor):
+        """Logits.
+        
+            Args:
+                tokens: TODO.
+                audio_features: TODO.
+            """
         return self.decoder(tokens, audio_features)
 
     def forward(self, mel: torch.Tensor, tokens: torch.Tensor) -> Dict[str, torch.Tensor]:
+        """Forward pass for training.
+        
+            Args:
+                mel: TODO.
+                tokens: TODO.
+            """
         return self.decoder(tokens, self.encoder(mel))
 
     @property
     def device(self):
+        """Device."""
         return next(self.parameters()).device
 
     @property
     def is_multilingual(self):
+        """Is multilingual."""
         return self.dims.n_vocab >= 51865
 
     @property
     def num_languages(self):
+        """Num languages."""
         return self.dims.n_vocab - 51765 - int(self.is_multilingual)
 
     def install_kv_cache_hooks(self, cache: Optional[dict] = None):
@@ -439,6 +582,13 @@ class Whisper(nn.Module):
         hooks = []
 
         def save_to_cache(module, _, output):
+            """Save to cache.
+            
+                Args:
+                    module: TODO.
+                    _: TODO.
+                    output: TODO.
+                """
             if module not in cache or output.shape[1] > self.dims.n_text_ctx:
                 # save as-is, for the first token or cross attention
                 cache[module] = output
@@ -447,6 +597,11 @@ class Whisper(nn.Module):
             return cache[module]
 
         def install_hooks(layer: nn.Module):
+            """Install hooks.
+            
+                Args:
+                    layer: TODO.
+                """
             if isinstance(layer, MultiHeadAttention):
                 hooks.append(layer.key.register_forward_hook(save_to_cache))
                 hooks.append(layer.value.register_forward_hook(save_to_cache))

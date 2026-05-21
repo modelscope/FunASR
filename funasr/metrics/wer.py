@@ -11,6 +11,14 @@ def compute_wer(
     cer_file,
     cn_postprocess=False,
 ):
+    """Compute wer.
+    
+        Args:
+            ref_file: TODO.
+            hyp_file: TODO.
+            cer_file: TODO.
+            cn_postprocess: TODO.
+        """
     rst = {
         "Wrd": 0,
         "Corr": 0,
@@ -114,6 +122,12 @@ def compute_wer(
 
 
 def compute_wer_by_line(hyp, ref):
+    """Compute wer by line.
+    
+        Args:
+            hyp: TODO.
+            ref: TODO.
+        """
     hyp = list(map(lambda x: x.lower(), hyp))
     ref = list(map(lambda x: x.lower(), ref))
 
@@ -187,6 +201,11 @@ def compute_wer_by_line(hyp, ref):
 
 
 def print_cer_detail(rst):
+    """Print cer detail.
+    
+        Args:
+            rst: TODO.
+        """
     return (
         "("
         + "nwords="
@@ -208,6 +227,11 @@ def print_cer_detail(rst):
 
 @hydra.main(config_name=None, version_base=None)
 def main_hydra(cfg: DictConfig):
+    """Main hydra.
+    
+        Args:
+            cfg: Configuration overrides.
+        """
     ref_file = cfg.get("ref_file", None)
     hyp_file = cfg.get("hyp_file", None)
     cer_file = cfg.get("cer_file", None)

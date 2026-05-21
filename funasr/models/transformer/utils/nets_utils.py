@@ -511,6 +511,12 @@ class Swish(torch.nn.Module):
     """
 
     def __init__(self, beta: float = 1.0, use_builtin: bool = False) -> None:
+        """Initialize Swish.
+        
+            Args:
+                beta: TODO.
+                use_builtin: TODO.
+            """
         super().__init__()
 
         self.beta = beta

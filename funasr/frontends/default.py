@@ -45,6 +45,26 @@ class DefaultFrontend(nn.Module):
         use_channel: int = None,
         **kwargs,
     ):
+        """Initialize DefaultFrontend.
+        
+            Args:
+                fs: TODO.
+                n_fft: TODO.
+                win_length: TODO.
+                hop_length: TODO.
+                window: TODO.
+                center: TODO.
+                normalized: TODO.
+                onesided: TODO.
+                n_mels: TODO.
+                fmin: TODO.
+                fmax: TODO.
+                htk: TODO.
+                frontend_conf: Configuration dict for frontend.
+                apply_stft: TODO.
+                use_channel: TODO.
+                **kwargs: Additional keyword arguments.
+            """
         super().__init__()
 
         # Deepcopy (In general, dict shouldn't be used as default arg)
@@ -84,11 +104,18 @@ class DefaultFrontend(nn.Module):
         self.frontend_type = "default"
 
     def output_size(self) -> int:
+        """Output size."""
         return self.n_mels
 
     def forward(
         self, input: torch.Tensor, input_lengths: Union[torch.Tensor, list]
     ) -> Tuple[torch.Tensor, torch.Tensor]:
+        """Forward pass for training.
+        
+            Args:
+                input: Input audio/text data.
+                input_lengths: Lengths of input.
+            """
         if isinstance(input_lengths, list):
             input_lengths = torch.tensor(input_lengths)
         if input.dtype == torch.float64:
@@ -131,6 +158,12 @@ class DefaultFrontend(nn.Module):
         return input_feats, feats_lens
 
     def _compute_stft(self, input: torch.Tensor, input_lengths: torch.Tensor) -> torch.Tensor:
+        """Internal: compute stft.
+        
+            Args:
+                input: Input audio/text data.
+                input_lengths: Lengths of input.
+            """
         input_stft, feats_lens = self.stft(input, input_lengths)
 
         assert input_stft.dim() >= 4, input_stft.shape
@@ -172,6 +205,31 @@ class MultiChannelFrontend(nn.Module):
         cmvn_file: str = None,
         mc: bool = True,
     ):
+        """Initialize MultiChannelFrontend.
+        
+            Args:
+                fs: TODO.
+                n_fft: TODO.
+                win_length: TODO.
+                hop_length: TODO.
+                frame_length: TODO.
+                frame_shift: TODO.
+                window: TODO.
+                center: TODO.
+                normalized: TODO.
+                onesided: TODO.
+                n_mels: TODO.
+                fmin: TODO.
+                fmax: TODO.
+                htk: TODO.
+                frontend_conf: Configuration dict for frontend.
+                apply_stft: TODO.
+                use_channel: TODO.
+                lfr_m: TODO.
+                lfr_n: TODO.
+                cmvn_file: TODO.
+                mc: TODO.
+            """
         super().__init__()
         # Deepcopy (In general, dict shouldn't be used as default arg)
         frontend_conf = copy.deepcopy(frontend_conf)
@@ -230,12 +288,19 @@ class MultiChannelFrontend(nn.Module):
         self.frontend_type = "multichannelfrontend"
 
     def output_size(self) -> int:
+        """Output size."""
         return self.n_mels
 
     def forward(
         self, input: torch.Tensor, input_lengths: torch.Tensor
     ) -> Tuple[torch.Tensor, torch.Tensor]:
         # 1. Domain-conversion: e.g. Stft: time -> time-freq
+        """Forward pass for training.
+        
+            Args:
+                input: Input audio/text data.
+                input_lengths: Lengths of input.
+            """
         if self.stft is not None:
             input_stft, feats_lens = self._compute_stft(input, input_lengths)
         else:
@@ -305,6 +370,12 @@ class MultiChannelFrontend(nn.Module):
             return input_feats, feats_lens
 
     def _compute_stft(self, input: torch.Tensor, input_lengths: torch.Tensor) -> torch.Tensor:
+        """Internal: compute stft.
+        
+            Args:
+                input: Input audio/text data.
+                input_lengths: Lengths of input.
+            """
         input_stft, feats_lens = self.stft(input, input_lengths)
 
         assert input_stft.dim() >= 4, input_stft.shape
@@ -317,6 +388,11 @@ class MultiChannelFrontend(nn.Module):
         return input_stft, feats_lens
 
     def _load_cmvn(self, cmvn_file):
+        """Internal: load cmvn.
+        
+            Args:
+                cmvn_file: TODO.
+            """
         with open(cmvn_file, "r", encoding="utf-8") as f:
             lines = f.readlines()
         means_list = []

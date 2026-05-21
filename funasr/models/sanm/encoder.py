@@ -221,6 +221,36 @@ class SANMEncoder(nn.Module):
         tf2torch_tensor_name_prefix_torch: str = "encoder",
         tf2torch_tensor_name_prefix_tf: str = "seq2seq/encoder",
     ):
+        """Initialize SANMEncoder.
+        
+            Args:
+                input_size: Size/dimension parameter.
+                output_size: Size/dimension parameter.
+                attention_heads: TODO.
+                linear_units: TODO.
+                num_blocks: TODO.
+                dropout_rate: TODO.
+                positional_dropout_rate: TODO.
+                attention_dropout_rate: TODO.
+                input_layer: TODO.
+                pos_enc_class: TODO.
+                normalize_before: TODO.
+                concat_after: TODO.
+                positionwise_layer_type: TODO.
+                positionwise_conv_kernel_size: Size/dimension parameter.
+                padding_idx: TODO.
+                interctc_layer_idx: TODO.
+                interctc_use_conditioning: TODO.
+                kernel_size: Size/dimension parameter.
+                sanm_shfit: TODO.
+                lora_list: TODO.
+                lora_rank: TODO.
+                lora_alpha: TODO.
+                lora_dropout: TODO.
+                selfattention_layer_type: TODO.
+                tf2torch_tensor_name_prefix_torch: TODO.
+                tf2torch_tensor_name_prefix_tf: TODO.
+            """
         super().__init__()
         self._output_size = output_size
 
@@ -356,6 +386,7 @@ class SANMEncoder(nn.Module):
         self.tf2torch_tensor_name_prefix_tf = tf2torch_tensor_name_prefix_tf
 
     def output_size(self) -> int:
+        """Output size."""
         return self._output_size
 
     def forward(
@@ -430,6 +461,12 @@ class SANMEncoder(nn.Module):
         return xs_pad, olens, None
 
     def _add_overlap_chunk(self, feats: np.ndarray, cache: dict = None):
+        """Internal: add overlap chunk.
+        
+            Args:
+                feats: Feature tensor (e.g., fbank), shape (batch, frames, dim).
+                cache: State cache dict for streaming inference.
+            """
         if cache is None:
             cache = {}
         if len(cache) == 0:
@@ -446,6 +483,14 @@ class SANMEncoder(nn.Module):
         cache: dict = None,
         ctc: CTC = None,
     ):
+        """Forward chunk.
+        
+            Args:
+                xs_pad: TODO.
+                ilens: TODO.
+                cache: State cache dict for streaming inference.
+                ctc: TODO.
+            """
         if cache is None:
             cache = {}
         xs_pad *= self.output_size() ** 0.5
@@ -504,6 +549,12 @@ class EncoderLayerSANMExport(nn.Module):
 
     def forward(self, x, mask):
 
+        """Forward pass for training.
+        
+            Args:
+                x: TODO.
+                mask: TODO.
+            """
         residual = x
         x = self.norm1(x)
         x = self.self_attn(x, mask)
@@ -529,6 +580,16 @@ class SANMEncoderExport(nn.Module):
         onnx: bool = True,
         ctc_linear: nn.Module = None,
     ):
+        """Initialize SANMEncoderExport.
+        
+            Args:
+                model: Model instance or model name.
+                max_seq_len: TODO.
+                feats_dim: Size/dimension parameter.
+                model_name: TODO.
+                onnx: TODO.
+                ctc_linear: TODO.
+            """
         super().__init__()
         self.embed = model.embed
         if isinstance(self.embed, StreamSinusoidalPositionEncoder):
@@ -561,6 +622,11 @@ class SANMEncoderExport(nn.Module):
         self.ctc_linear = ctc_linear
 
     def prepare_mask(self, mask):
+        """Prepare mask.
+        
+            Args:
+                mask: TODO.
+            """
         mask_3d_btd = mask[:, :, None]
         if len(mask.shape) == 2:
             mask_4d_bhlt = 1 - mask[:, None, None, :]
@@ -571,6 +637,13 @@ class SANMEncoderExport(nn.Module):
         return mask_3d_btd, mask_4d_bhlt
 
     def forward(self, speech: torch.Tensor, speech_lengths: torch.Tensor, online: bool = False):
+        """Forward pass for training.
+        
+            Args:
+                speech: Speech audio tensor, shape (batch, time).
+                speech_lengths: Length of each speech sample.
+                online: TODO.
+            """
         if not online:
             speech = speech * self._output_size**0.5
 
@@ -596,19 +669,24 @@ class SANMEncoderExport(nn.Module):
         return xs_pad, speech_lengths
 
     def get_output_size(self):
+        """Get output size."""
         return self.model.encoders[0].size
 
     def get_dummy_inputs(self):
+        """Get dummy inputs."""
         feats = torch.randn(1, 100, self.feats_dim)
         return feats
 
     def get_input_names(self):
+        """Get input names."""
         return ["feats"]
 
     def get_output_names(self):
+        """Get output names."""
         return ["encoder_out", "encoder_out_lens", "predictor_weight"]
 
     def get_dynamic_axes(self):
+        """Get dynamic axes."""
         return {
             "feats": {1: "feats_length"},
             "encoder_out": {1: "enc_out_length"},

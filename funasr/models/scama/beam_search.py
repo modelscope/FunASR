@@ -623,6 +623,15 @@ class BeamSearchScamaStreaming(torch.nn.Module):
         pre_acoustic_embeds: torch.Tensor = None,
         cache: dict = None,
     ) -> Tuple[Dict[str, torch.Tensor], Dict[str, Any]]:
+        """Score full.
+        
+            Args:
+                hyp: TODO.
+                x: TODO.
+                x_mask: TODO.
+                pre_acoustic_embeds: TODO.
+                cache: State cache dict for streaming inference.
+            """
         if cache is None:
             cache = {}
         """Score new hypothesis by `self.full_scorers`.
@@ -766,6 +775,15 @@ class BeamSearchScamaStreaming(torch.nn.Module):
         pre_acoustic_embeds: torch.Tensor = None,
         cache: dict = None,
     ) -> List[Hypothesis]:
+        """Search.
+        
+            Args:
+                running_hyps: TODO.
+                x: TODO.
+                x_mask: TODO.
+                pre_acoustic_embeds: TODO.
+                cache: State cache dict for streaming inference.
+            """
         if cache is None:
             cache = {}
         """Search new tokens for running hypotheses and encoded speech x.
@@ -831,6 +849,18 @@ class BeamSearchScamaStreaming(torch.nn.Module):
         minlen: int = 0,
         cache: dict = None,
     ) -> List[Hypothesis]:
+        """Forward pass for training.
+        
+            Args:
+                x: TODO.
+                scama_mask: TODO.
+                pre_acoustic_embeds: TODO.
+                maxlenratio: TODO.
+                minlenratio: TODO.
+                maxlen: TODO.
+                minlen: TODO.
+                cache: State cache dict for streaming inference.
+            """
         if cache is None:
             cache = {}
         """Perform beam search.

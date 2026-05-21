@@ -27,6 +27,14 @@ class GlobalMVN(torch.nn.Module):
         norm_vars: bool = True,
         eps: float = 1.0e-20,
     ):
+        """Initialize GlobalMVN.
+        
+            Args:
+                stats_file: TODO.
+                norm_means: TODO.
+                norm_vars: TODO.
+                eps: TODO.
+            """
         super().__init__()
         self.norm_means = norm_means
         self.norm_vars = norm_vars
@@ -53,6 +61,7 @@ class GlobalMVN(torch.nn.Module):
         self.register_buffer("std", torch.from_numpy(std))
 
     def extra_repr(self):
+        """Extra repr."""
         return (
             f"stats_file={self.stats_file}, "
             f"norm_means={self.norm_means}, norm_vars={self.norm_vars}"
@@ -93,6 +102,12 @@ class GlobalMVN(torch.nn.Module):
     def inverse(
         self, x: torch.Tensor, ilens: torch.Tensor = None
     ) -> Tuple[torch.Tensor, torch.Tensor]:
+        """Inverse.
+        
+            Args:
+                x: TODO.
+                ilens: TODO.
+            """
         if ilens is None:
             ilens = x.new_full([x.size(0)], x.size(1))
         norm_means = self.norm_means

@@ -56,11 +56,18 @@ class TimeWarp(torch.nn.Module):
     """
 
     def __init__(self, window: int = 80, mode: str = DEFAULT_TIME_WARP_MODE):
+        """Initialize TimeWarp.
+        
+            Args:
+                window: TODO.
+                mode: TODO.
+            """
         super().__init__()
         self.window = window
         self.mode = mode
 
     def extra_repr(self):
+        """Extra repr."""
         return f"window={self.window}, mode={self.mode}"
 
     def forward(self, x: torch.Tensor, x_lengths: torch.Tensor = None):

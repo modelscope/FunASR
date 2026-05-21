@@ -350,6 +350,17 @@ class Conv1dSubsampling(torch.nn.Module):
         tf2torch_tensor_name_prefix_torch: str = "stride_conv",
         tf2torch_tensor_name_prefix_tf: str = "seq2seq/proj_encoder/downsampling",
     ):
+        """Initialize Conv1dSubsampling.
+        
+            Args:
+                idim: TODO.
+                odim: TODO.
+                kernel_size: Size/dimension parameter.
+                stride: TODO.
+                pad: TODO.
+                tf2torch_tensor_name_prefix_torch: TODO.
+                tf2torch_tensor_name_prefix_tf: TODO.
+            """
         super(Conv1dSubsampling, self).__init__()
         self.conv = torch.nn.Conv1d(idim, odim, kernel_size, stride)
         self.pad_fn = torch.nn.ConstantPad1d(pad, 0.0)
@@ -359,6 +370,7 @@ class Conv1dSubsampling(torch.nn.Module):
         self.tf2torch_tensor_name_prefix_tf = tf2torch_tensor_name_prefix_tf
 
     def output_size(self) -> int:
+        """Output size."""
         return self.odim
 
     def forward(self, x, x_len):

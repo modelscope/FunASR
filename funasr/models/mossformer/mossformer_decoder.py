@@ -25,6 +25,12 @@ class MossFormerDecoder(nn.ConvTranspose1d):
     """
 
     def __init__(self, *args, **kwargs):
+        """Initialize MossFormerDecoder.
+        
+            Args:
+                *args: Variable positional arguments.
+                **kwargs: Additional keyword arguments.
+            """
         super(MossFormerDecoder, self).__init__(*args, **kwargs)
 
     def forward(self, x):

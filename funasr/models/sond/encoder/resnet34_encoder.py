@@ -12,6 +12,14 @@ class BasicLayer(torch.nn.Module):
 
     def __init__(self, in_filters: int, filters: int, stride: int, bn_momentum: float = 0.5):
 
+        """Initialize BasicLayer.
+        
+            Args:
+                in_filters: TODO.
+                filters: TODO.
+                stride: TODO.
+                bn_momentum: TODO.
+            """
         super().__init__()
         self.stride = stride
         self.in_filters = in_filters
@@ -31,6 +39,12 @@ class BasicLayer(torch.nn.Module):
 
     def proper_padding(self, x, stride):
         # align padding mode to tf.layers.conv2d with padding_mod="same"
+        """Proper padding.
+        
+            Args:
+                x: TODO.
+                stride: TODO.
+            """
         if stride == 1:
             return F.pad(x, (1, 1, 1, 1), "constant", 0)
         elif stride == 2:
@@ -39,6 +53,12 @@ class BasicLayer(torch.nn.Module):
             return F.pad(x, (w % 2, 1, h % 2, 1), "constant", 0)
 
     def forward(self, xs_pad, ilens):
+        """Forward pass for training.
+        
+            Args:
+                xs_pad: TODO.
+                ilens: TODO.
+            """
         identity = xs_pad
         if self.in_filters != self.filters or self.stride > 1:
             identity = self.conv_sc(identity)
@@ -60,6 +80,15 @@ class BasicLayer(torch.nn.Module):
 
 class BasicBlock(torch.nn.Module):
     def __init__(self, in_filters, filters, num_layer, stride, bn_momentum=0.5):
+        """Initialize BasicBlock.
+        
+            Args:
+                in_filters: TODO.
+                filters: TODO.
+                num_layer: TODO.
+                stride: TODO.
+                bn_momentum: TODO.
+            """
         super().__init__()
         self.num_layer = num_layer
 
@@ -71,6 +100,12 @@ class BasicBlock(torch.nn.Module):
 
     def forward(self, xs_pad, ilens):
 
+        """Forward pass for training.
+        
+            Args:
+                xs_pad: TODO.
+                ilens: TODO.
+            """
         for i in range(self.num_layer):
             xs_pad, ilens = self._modules["layer_{}".format(i)](xs_pad, ilens)
 
@@ -88,6 +123,17 @@ class ResNet34(AbsEncoder):
         layers_in_block=(3, 4, 6, 3),
         filters_in_block=(32, 64, 128, 256),
     ):
+        """Initialize ResNet34.
+        
+            Args:
+                input_size: Size/dimension parameter.
+                use_head_conv: TODO.
+                batchnorm_momentum: TODO.
+                use_head_maxpool: TODO.
+                num_nodes_pooling_layer: TODO.
+                layers_in_block: TODO.
+                filters_in_block: TODO.
+            """
         super(ResNet34, self).__init__()
 
         self.use_head_conv = use_head_conv
@@ -132,12 +178,20 @@ class ResNet34(AbsEncoder):
         self.time_ds_ratio = 8
 
     def output_size(self) -> int:
+        """Output size."""
         return self.num_nodes_pooling_layer
 
     def forward(
         self, xs_pad: torch.Tensor, ilens: torch.Tensor, prev_states: torch.Tensor = None
     ) -> Tuple[torch.Tensor, torch.Tensor]:
 
+        """Forward pass for training.
+        
+            Args:
+                xs_pad: TODO.
+                ilens: TODO.
+                prev_states: TODO.
+            """
         features = xs_pad
         assert (
             features.size(-1) == self.input_size
@@ -181,6 +235,20 @@ class ResNet34_SP_L2Reg(AbsEncoder):
         tf2torch_tensor_name_prefix_tf="EAND/speech_encoder",
         tf_train_steps=720000,
     ):
+        """Initialize ResNet34_SP_L2Reg.
+        
+            Args:
+                input_size: Size/dimension parameter.
+                use_head_conv: TODO.
+                batchnorm_momentum: TODO.
+                use_head_maxpool: TODO.
+                num_nodes_pooling_layer: TODO.
+                layers_in_block: TODO.
+                filters_in_block: TODO.
+                tf2torch_tensor_name_prefix_torch: TODO.
+                tf2torch_tensor_name_prefix_tf: TODO.
+                tf_train_steps: TODO.
+            """
         super(ResNet34_SP_L2Reg, self).__init__()
 
         self.use_head_conv = use_head_conv
@@ -230,12 +298,20 @@ class ResNet34_SP_L2Reg(AbsEncoder):
         self.time_ds_ratio = 8
 
     def output_size(self) -> int:
+        """Output size."""
         return self.num_nodes_pooling_layer
 
     def forward(
         self, xs_pad: torch.Tensor, ilens: torch.Tensor, prev_states: torch.Tensor = None
     ) -> Tuple[torch.Tensor, torch.Tensor]:
 
+        """Forward pass for training.
+        
+            Args:
+                xs_pad: TODO.
+                ilens: TODO.
+                prev_states: TODO.
+            """
         features = xs_pad
         assert (
             features.size(-1) == self.input_size
@@ -321,6 +397,7 @@ class ResNet34Diar(ResNet34):
         )
 
     def output_size(self) -> int:
+        """Output size."""
         if self.embedding_node.startswith("resnet1"):
             return self.num_nodes_resnet1
         elif self.embedding_node.startswith("resnet2"):
@@ -335,6 +412,13 @@ class ResNet34Diar(ResNet34):
         prev_states: torch.Tensor = None,
     ) -> Tuple[torch.Tensor, torch.Tensor, Optional[torch.Tensor]]:
 
+        """Forward pass for training.
+        
+            Args:
+                xs_pad: TODO.
+                ilens: TODO.
+                prev_states: TODO.
+            """
         endpoints = OrderedDict()
         res_out, ilens = super().forward(xs_pad, ilens)
         endpoints["resnet0_bn"] = res_out
@@ -419,6 +503,7 @@ class ResNet34SpL2RegDiar(ResNet34_SP_L2Reg):
         )
 
     def output_size(self) -> int:
+        """Output size."""
         if self.embedding_node.startswith("resnet1"):
             return self.num_nodes_resnet1
         elif self.embedding_node.startswith("resnet2"):
@@ -433,6 +518,13 @@ class ResNet34SpL2RegDiar(ResNet34_SP_L2Reg):
         prev_states: torch.Tensor = None,
     ) -> Tuple[torch.Tensor, torch.Tensor, Optional[torch.Tensor]]:
 
+        """Forward pass for training.
+        
+            Args:
+                xs_pad: TODO.
+                ilens: TODO.
+                prev_states: TODO.
+            """
         endpoints = OrderedDict()
         res_out, ilens = super().forward(xs_pad, ilens)
         endpoints["resnet0_bn"] = res_out

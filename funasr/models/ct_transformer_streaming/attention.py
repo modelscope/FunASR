@@ -9,9 +9,23 @@ from funasr.models.sanm.attention import MultiHeadedAttentionSANM
 
 class MultiHeadedAttentionSANMwithMask(MultiHeadedAttentionSANM):
     def __init__(self, *args, **kwargs):
+        """Initialize MultiHeadedAttentionSANMwithMask.
+        
+            Args:
+                *args: Variable positional arguments.
+                **kwargs: Additional keyword arguments.
+            """
         super().__init__(*args, **kwargs)
 
     def forward(self, x, mask, mask_shfit_chunk=None, mask_att_chunk_encoder=None):
+        """Forward pass for training.
+        
+            Args:
+                x: TODO.
+                mask: TODO.
+                mask_shfit_chunk: TODO.
+                mask_att_chunk_encoder: TODO.
+            """
         q_h, k_h, v_h, v = self.forward_qkv(x)
         fsmn_memory = self.forward_fsmn(v, mask[0], mask_shfit_chunk)
         q_h = q_h * self.d_k ** (-0.5)

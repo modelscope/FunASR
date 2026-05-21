@@ -16,4 +16,10 @@ class Conformer(Transformer):
         **kwargs,
     ):
 
+        """Initialize Conformer.
+        
+            Args:
+                *args: Variable positional arguments.
+                **kwargs: Additional keyword arguments.
+            """
         super().__init__(*args, **kwargs)

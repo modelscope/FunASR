@@ -36,6 +36,20 @@ class DNN_Beamformer(torch.nn.Module):
         ref_channel: int = -1,
         beamformer_type="mvdr",
     ):
+        """Initialize DNN_Beamformer.
+        
+            Args:
+                bidim: TODO.
+                btype: TODO.
+                blayers: TODO.
+                bunits: TODO.
+                bprojs: TODO.
+                bnmask: TODO.
+                dropout_rate: TODO.
+                badim: TODO.
+                ref_channel: TODO.
+                beamformer_type: TODO.
+            """
         super().__init__()
         self.mask = MaskEstimator(btype, bidim, blayers, bunits, bprojs, dropout_rate, nmask=bnmask)
         self.ref = AttentionReference(bidim, badim)
@@ -69,6 +83,14 @@ class DNN_Beamformer(torch.nn.Module):
 
         def apply_beamforming(data, ilens, psd_speech, psd_noise):
             # u: (B, C)
+            """Apply beamforming.
+            
+                Args:
+                    data: TODO.
+                    ilens: TODO.
+                    psd_speech: TODO.
+                    psd_noise: TODO.
+                """
             if self.ref_channel < 0:
                 u, _ = self.ref(psd_speech, ilens)
             else:
@@ -126,6 +148,12 @@ class DNN_Beamformer(torch.nn.Module):
 
 class AttentionReference(torch.nn.Module):
     def __init__(self, bidim, att_dim):
+        """Initialize AttentionReference.
+        
+            Args:
+                bidim: TODO.
+                att_dim: Size/dimension parameter.
+            """
         super().__init__()
         self.mlp_psd = torch.nn.Linear(bidim, att_dim)
         self.gvec = torch.nn.Linear(att_dim, 1)

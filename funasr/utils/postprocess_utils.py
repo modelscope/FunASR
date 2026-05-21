@@ -6,12 +6,22 @@ from typing import Any, List, Union
 
 
 def isChinese(ch: str):
+    """Ischinese.
+    
+        Args:
+            ch: TODO.
+        """
     if "\u4e00" <= ch <= "\u9fff" or "\u0030" <= ch <= "\u0039" or ch == "@":
         return True
     return False
 
 
 def isAllChinese(word: Union[List[Any], str]):
+    """Isallchinese.
+    
+        Args:
+            word: TODO.
+        """
     word_lists = []
     for i in word:
         cur = i.replace(" ", "")
@@ -31,6 +41,11 @@ def isAllChinese(word: Union[List[Any], str]):
 
 
 def isAllAlpha(word: Union[List[Any], str]):
+    """Isallalpha.
+    
+        Args:
+            word: TODO.
+        """
     word_lists = []
     for i in word:
         cur = i.replace(" ", "")
@@ -54,6 +69,12 @@ def isAllAlpha(word: Union[List[Any], str]):
 
 # def abbr_dispose(words: List[Any]) -> List[Any]:
 def abbr_dispose(words: List[Any], time_stamp: List[List] = None) -> List[Any]:
+    """Abbr dispose.
+    
+        Args:
+            words: TODO.
+            time_stamp: TODO.
+        """
     words_size = len(words)
     word_lists = []
     abbr_begin = []
@@ -142,6 +163,12 @@ def abbr_dispose(words: List[Any], time_stamp: List[List] = None) -> List[Any]:
 
 
 def sentence_postprocess(words: List[Any], time_stamp: List[List] = None):
+    """Sentence postprocess.
+    
+        Args:
+            words: TODO.
+            time_stamp: TODO.
+        """
     middle_lists = []
     word_lists = []
     word_item = ""
@@ -252,6 +279,11 @@ def sentence_postprocess(words: List[Any], time_stamp: List[List] = None):
 
 
 def sentence_postprocess_sentencepiece(words):
+    """Sentence postprocess sentencepiece.
+    
+        Args:
+            words: TODO.
+        """
     middle_lists = []
     word_lists = []
     word_item = ""
@@ -377,6 +409,11 @@ event_set = {
 
 
 def format_str_v2(s):
+    """Format str v2.
+    
+        Args:
+            s: TODO.
+        """
     sptk_dict = {}
     for sptk in emoji_dict:
         sptk_dict[sptk] = s.count(sptk)
@@ -397,10 +434,25 @@ def format_str_v2(s):
 
 
 def rich_transcription_postprocess(s):
+    """Rich transcription postprocess.
+    
+        Args:
+            s: TODO.
+        """
     def get_emo(s):
+        """Get emo.
+        
+            Args:
+                s: TODO.
+            """
         return s[-1] if s[-1] in emo_set else None
 
     def get_event(s):
+        """Get event.
+        
+            Args:
+                s: TODO.
+            """
         return s[0] if s[0] in event_set else None
 
     s = s.replace("<|nospeech|><|Event_UNK|>", "❓")

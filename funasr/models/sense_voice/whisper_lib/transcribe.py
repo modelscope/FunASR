@@ -174,6 +174,11 @@ def transcribe(
         warnings.warn("Word-level timestamps on translations may not be reliable.")
 
     def decode_with_fallback(segment: torch.Tensor) -> DecodingResult:
+        """Decode with fallback.
+        
+            Args:
+                segment: TODO.
+            """
         temperatures = [temperature] if isinstance(temperature, (int, float)) else temperature
         decode_result = None
 
@@ -225,6 +230,7 @@ def transcribe(
         initial_prompt_tokens = []
 
     def new_segment(*, start: float, end: float, tokens: torch.Tensor, result: DecodingResult):
+        """New segment."""
         tokens = tokens.tolist()
         text_tokens = [token for token in tokens if token < tokenizer.eot]
         return {
@@ -282,6 +288,11 @@ def transcribe(
 
             # anomalous words are very long/short/improbable
             def word_anomaly_score(word: dict) -> float:
+                """Word anomaly score.
+                
+                    Args:
+                        word: TODO.
+                    """
                 probability = word.get("probability", 0.0)
                 duration = word["end"] - word["start"]
                 score = 0.0
@@ -294,6 +305,11 @@ def transcribe(
                 return score
 
             def is_segment_anomaly(segment: Optional[dict]) -> bool:
+                """Is segment anomaly.
+                
+                    Args:
+                        segment: TODO.
+                    """
                 if segment is None or not segment["words"]:
                     return False
                 words = [w for w in segment["words"] if w["word"] not in punctuation]
@@ -302,6 +318,11 @@ def transcribe(
                 return score >= 3 or score + 0.01 >= len(words)
 
             def next_words_segment(segments: List[dict]) -> Optional[dict]:
+                """Next words segment.
+                
+                    Args:
+                        segments: TODO.
+                    """
                 return next((s for s in segments if s["words"]), None)
 
             timestamp_tokens: torch.Tensor = tokens.ge(tokenizer.timestamp_begin)
@@ -467,9 +488,15 @@ def transcribe(
 
 
 def cli():
+    """Cli."""
     from . import available_models
 
     def valid_model_name(name):
+        """Valid model name.
+        
+            Args:
+                name: TODO.
+            """
         if name in available_models() or os.path.exists(name):
             return name
         raise ValueError(

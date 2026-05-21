@@ -34,6 +34,11 @@ else:
     # Nothing to do if torch<1.6.0
     @contextmanager
     def autocast(enabled=True):
+        """Autocast.
+        
+            Args:
+                enabled: TODO.
+            """
         yield
 
 
@@ -64,6 +69,31 @@ class SAASRModel(FunASRModel):
         sym_blank: str = "<blank>",
         extract_feats_in_collect_stats: bool = True,
     ):
+        """Initialize SAASRModel.
+        
+            Args:
+                vocab_size: Size/dimension parameter.
+                max_spk_num: TODO.
+                token_list: TODO.
+                frontend: Audio frontend for feature extraction.
+                specaug: TODO.
+                normalize: TODO.
+                asr_encoder: TODO.
+                spk_encoder: TODO.
+                decoder: TODO.
+                ctc: TODO.
+                spk_weight: TODO.
+                ctc_weight: TODO.
+                interctc_weight: TODO.
+                ignore_id: TODO.
+                lsm_weight: TODO.
+                length_normalized_loss: TODO.
+                report_cer: TODO.
+                report_wer: TODO.
+                sym_space: TODO.
+                sym_blank: TODO.
+                extract_feats_in_collect_stats: TODO.
+            """
         assert 0.0 <= ctc_weight <= 1.0, ctc_weight
         assert 0.0 <= interctc_weight < 1.0, interctc_weight
 
@@ -250,6 +280,14 @@ class SAASRModel(FunASRModel):
         text: torch.Tensor,
         text_lengths: torch.Tensor,
     ) -> Dict[str, torch.Tensor]:
+        """Collect feats.
+        
+            Args:
+                speech: Speech audio tensor, shape (batch, time).
+                speech_lengths: Length of each speech sample.
+                text: Text tensor or string input.
+                text_lengths: Length of each text sample.
+            """
         if self.extract_feats_in_collect_stats:
             feats, feats_lengths = self._extract_feats(speech, speech_lengths)
         else:
@@ -326,6 +364,12 @@ class SAASRModel(FunASRModel):
     def _extract_feats(
         self, speech: torch.Tensor, speech_lengths: torch.Tensor
     ) -> Tuple[torch.Tensor, torch.Tensor]:
+        """Internal: extract feats.
+        
+            Args:
+                speech: Speech audio tensor, shape (batch, time).
+                speech_lengths: Length of each speech sample.
+            """
         assert speech_lengths.dim() == 1, speech_lengths.shape
 
         # for data-parallel
@@ -439,6 +483,19 @@ class SAASRModel(FunASRModel):
         text_id: torch.Tensor,
         text_id_lengths: torch.Tensor,
     ):
+        """Internal: calc att loss.
+        
+            Args:
+                asr_encoder_out: TODO.
+                spk_encoder_out: TODO.
+                encoder_out_lens: Encoder output lengths.
+                ys_pad: TODO.
+                ys_pad_lens: Lengths of ys_pad.
+                profile: TODO.
+                profile_lens: Lengths of profile.
+                text_id: TODO.
+                text_id_lengths: Lengths of text_id.
+            """
         ys_in_pad, ys_out_pad = add_sos_eos(ys_pad, self.sos, self.eos, self.ignore_id)
         ys_in_lens = ys_pad_lens + 1
 
@@ -498,6 +555,14 @@ class SAASRModel(FunASRModel):
         ys_pad_lens: torch.Tensor,
     ):
         # Calc CTC loss
+        """Internal: calc ctc loss.
+        
+            Args:
+                encoder_out: Encoder output tensor.
+                encoder_out_lens: Encoder output lengths.
+                ys_pad: TODO.
+                ys_pad_lens: Lengths of ys_pad.
+            """
         loss_ctc = self.ctc(encoder_out, encoder_out_lens, ys_pad, ys_pad_lens)
 
         # Calc CER using CTC

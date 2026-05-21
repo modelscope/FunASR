@@ -32,6 +32,16 @@ class AudioEncoder(ModalitySpecificEncoder):
         alibi_biases: Dict,
     ):
 
+        """Initialize AudioEncoder.
+        
+            Args:
+                modality_cfg: TODO.
+                embed_dim: Size/dimension parameter.
+                make_block: TODO.
+                norm_layer: TODO.
+                layer_norm_first: TODO.
+                alibi_biases: TODO.
+            """
         self.feature_enc_layers = eval(modality_cfg.feature_encoder_spec)
         feature_embed_dim = self.feature_enc_layers[-1][0]
 
@@ -108,12 +118,25 @@ class AudioEncoder(ModalitySpecificEncoder):
         )
 
     def convert_padding_mask(self, x, padding_mask):
+        """Convert padding mask.
+        
+            Args:
+                x: TODO.
+                padding_mask: TODO.
+            """
         def get_feat_extract_output_lengths(input_lengths: torch.LongTensor):
             """
             Computes the output length of the convolutional layers
             """
 
             def _conv_out_length(input_length, kernel_size, stride):
+                """Internal: conv out length.
+                
+                    Args:
+                        input_length: TODO.
+                        kernel_size: Size/dimension parameter.
+                        stride: TODO.
+                    """
                 return torch.floor((input_length - kernel_size) / stride + 1)
 
             for i in range(len(self.feature_enc_layers)):
@@ -148,6 +171,7 @@ class AudioEncoder(ModalitySpecificEncoder):
         return padding_mask
 
     def reset_parameters(self):
+        """Reset parameters."""
         super().reset_parameters()
         for mod in self.project_features.children():
             if isinstance(mod, nn.Linear):

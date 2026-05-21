@@ -10,6 +10,12 @@ from funasr.register import tables
 
 def export_rebuild_model(model, **kwargs):
 
+    """Export rebuild model.
+    
+        Args:
+            model: Model instance or model name.
+            **kwargs: Additional keyword arguments.
+        """
     is_onnx = kwargs.get("type", "onnx") == "onnx"
     encoder_class = tables.encoder_classes.get(kwargs["encoder"] + "Export")
     model.encoder = encoder_class(model.encoder, onnx=is_onnx)
@@ -46,6 +52,7 @@ def export_forward(
 
 
 def export_dummy_inputs(self):
+    """Export dummy inputs."""
     length = 120
     text_indexes = torch.randint(0, self.embed.num_embeddings, (1, length)).type(torch.int32)
     text_lengths = torch.tensor([length], dtype=torch.int32)
@@ -56,14 +63,17 @@ def export_dummy_inputs(self):
 
 
 def export_input_names(self):
+    """Export input names."""
     return ["inputs", "text_lengths", "vad_masks", "sub_masks"]
 
 
 def export_output_names(self):
+    """Export output names."""
     return ["logits"]
 
 
 def export_dynamic_axes(self):
+    """Export dynamic axes."""
     return {
         "inputs": {1: "feats_length"},
         "vad_masks": {2: "feats_length1", 3: "feats_length2"},
@@ -73,4 +83,5 @@ def export_dynamic_axes(self):
 
 
 def export_name(self):
+    """Export name."""
     return "model.onnx"

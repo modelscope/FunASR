@@ -43,6 +43,11 @@ g2p_classes = [
 
 
 def split_by_space(text) -> List[str]:
+    """Split by space.
+    
+        Args:
+            text: Text tensor or string input.
+        """
     if "   " in text:
         text = text.replace("   ", " <space> ")
         return [c.replace("<space>", " ") for c in text.split(" ")]
@@ -51,6 +56,11 @@ def split_by_space(text) -> List[str]:
 
 
 def pyopenjtalk_g2p(text) -> List[str]:
+    """Pyopenjtalk g2p.
+    
+        Args:
+            text: Text tensor or string input.
+        """
     import pyopenjtalk
 
     # phones is a str object separated by space
@@ -60,6 +70,11 @@ def pyopenjtalk_g2p(text) -> List[str]:
 
 
 def pyopenjtalk_g2p_accent(text) -> List[str]:
+    """Pyopenjtalk g2p accent.
+    
+        Args:
+            text: Text tensor or string input.
+        """
     import pyopenjtalk
     import re
 
@@ -72,6 +87,11 @@ def pyopenjtalk_g2p_accent(text) -> List[str]:
 
 
 def pyopenjtalk_g2p_accent_with_pause(text) -> List[str]:
+    """Pyopenjtalk g2p accent with pause.
+    
+        Args:
+            text: Text tensor or string input.
+        """
     import pyopenjtalk
     import re
 
@@ -87,6 +107,11 @@ def pyopenjtalk_g2p_accent_with_pause(text) -> List[str]:
 
 
 def pyopenjtalk_g2p_kana(text) -> List[str]:
+    """Pyopenjtalk g2p kana.
+    
+        Args:
+            text: Text tensor or string input.
+        """
     import pyopenjtalk
 
     kanas = pyopenjtalk.g2p(text, kana=True)
@@ -173,6 +198,12 @@ def pyopenjtalk_g2p_prosody(text: str, drop_unvoiced_vowels: bool = True) -> Lis
 
 
 def _numeric_feature_by_regex(regex, s):
+    """Internal: numeric feature by regex.
+    
+        Args:
+            regex: TODO.
+            s: TODO.
+        """
     match = re.search(regex, s)
     if match is None:
         return -50
@@ -180,6 +211,11 @@ def _numeric_feature_by_regex(regex, s):
 
 
 def pypinyin_g2p(text) -> List[str]:
+    """Pypinyin g2p.
+    
+        Args:
+            text: Text tensor or string input.
+        """
     from pypinyin import pinyin
     from pypinyin import Style
 
@@ -188,6 +224,11 @@ def pypinyin_g2p(text) -> List[str]:
 
 
 def pypinyin_g2p_phone(text) -> List[str]:
+    """Pypinyin g2p phone.
+    
+        Args:
+            text: Text tensor or string input.
+        """
     from pypinyin import pinyin
     from pypinyin import Style
     from pypinyin.style._utils import get_finals
@@ -215,10 +256,20 @@ class G2p_en:
     """
 
     def __init__(self, no_space: bool = False):
+        """Initialize G2p_en.
+        
+            Args:
+                no_space: TODO.
+            """
         self.no_space = no_space
         self.g2p = None
 
     def __call__(self, text) -> List[str]:
+        """Internal: call  .
+        
+            Args:
+                text: Text tensor or string input.
+            """
         if self.g2p is None:
             self.g2p = g2p_en.G2p()
 
@@ -239,6 +290,14 @@ class G2pk:
     """
 
     def __init__(self, descritive=False, group_vowels=False, to_syl=False, no_space=False):
+        """Initialize G2pk.
+        
+            Args:
+                descritive: TODO.
+                group_vowels: TODO.
+                to_syl: TODO.
+                no_space: TODO.
+            """
         self.descritive = descritive
         self.group_vowels = group_vowels
         self.to_syl = to_syl
@@ -246,6 +305,11 @@ class G2pk:
         self.g2p = None
 
     def __call__(self, text) -> List[str]:
+        """Internal: call  .
+        
+            Args:
+                text: Text tensor or string input.
+            """
         if self.g2p is None:
             import g2pk
 
@@ -276,18 +340,39 @@ class Jaso:
     VALID_CHARS = JAMO_LEADS + JAMO_VOWELS + JAMO_TAILS + PUNC + SPACE
 
     def __init__(self, space_symbol=" ", no_space=False):
+        """Initialize Jaso.
+        
+            Args:
+                space_symbol: TODO.
+                no_space: TODO.
+            """
         self.space_symbol = space_symbol
         self.no_space = no_space
 
     def _text_to_jaso(self, line: str) -> List[str]:
+        """Internal: text to jaso.
+        
+            Args:
+                line: TODO.
+            """
         jasos = list(jamo.hangul_to_jamo(line))
         return jasos
 
     def _remove_non_korean_characters(self, tokens):
+        """Internal: remove non korean characters.
+        
+            Args:
+                tokens: TODO.
+            """
         new_tokens = [token for token in tokens if token in self.VALID_CHARS]
         return new_tokens
 
     def __call__(self, text) -> List[str]:
+        """Internal: call  .
+        
+            Args:
+                text: Text tensor or string input.
+            """
         graphemes = [x for x in self._text_to_jaso(text)]
         graphemes = self._remove_non_korean_characters(graphemes)
 
@@ -320,6 +405,17 @@ class Phonemizer:
         **phonemizer_kwargs,
     ):
         # delayed import
+        """Initialize Phonemizer.
+        
+            Args:
+                backend: TODO.
+                word_separator: TODO.
+                syllable_separator: TODO.
+                phone_separator: TODO.
+                strip: TODO.
+                split_by_single_token: TODO.
+                **phonemizer_kwargs: Additional keyword arguments.
+            """
         from phonemizer.backend import BACKENDS
         from phonemizer.separator import Separator
 
@@ -340,6 +436,11 @@ class Phonemizer:
         self.split_by_single_token = split_by_single_token
 
     def __call__(self, text) -> List[str]:
+        """Internal: call  .
+        
+            Args:
+                text: Text tensor or string input.
+            """
         tokens = self.phonemizer.phonemize(
             [text],
             separator=self.separator,
@@ -362,6 +463,14 @@ class PhonemeTokenizer(AbsTokenizer):
         space_symbol: str = "<space>",
         remove_non_linguistic_symbols: bool = False,
     ):
+        """Initialize PhonemeTokenizer.
+        
+            Args:
+                g2p_type: TODO.
+                non_linguistic_symbols: TODO.
+                space_symbol: TODO.
+                remove_non_linguistic_symbols: TODO.
+            """
         if g2p_type is None:
             self.g2p = split_by_space
         elif g2p_type == "g2p_en":
@@ -493,6 +602,7 @@ class PhonemeTokenizer(AbsTokenizer):
         self.remove_non_linguistic_symbols = remove_non_linguistic_symbols
 
     def __repr__(self):
+        """Internal: repr  ."""
         return (
             f"{self.__class__.__name__}("
             f'g2p_type="{self.g2p_type}", '
@@ -502,6 +612,11 @@ class PhonemeTokenizer(AbsTokenizer):
         )
 
     def text2tokens(self, line: str) -> List[str]:
+        """Text2tokens.
+        
+            Args:
+                line: TODO.
+            """
         tokens = []
         while len(line) != 0:
             for w in self.non_linguistic_symbols:
@@ -521,4 +636,9 @@ class PhonemeTokenizer(AbsTokenizer):
 
     def tokens2text(self, tokens: Iterable[str]) -> str:
         # phoneme type is not invertible
+        """Tokens2text.
+        
+            Args:
+                tokens: TODO.
+            """
         return "".join(tokens)

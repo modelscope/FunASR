@@ -33,6 +33,11 @@ else:
     # Nothing to do if torch<1.6.0
     @contextmanager
     def autocast(enabled=True):
+        """Autocast.
+        
+            Args:
+                enabled: TODO.
+            """
         yield
 
 
@@ -73,6 +78,35 @@ class SCAMA(nn.Module):
         **kwargs,
     ):
 
+        """Initialize SCAMA.
+        
+            Args:
+                specaug: TODO.
+                specaug_conf: Configuration dict for specaug.
+                normalize: TODO.
+                normalize_conf: Configuration dict for normalize.
+                encoder: TODO.
+                encoder_conf: Configuration dict for encoder.
+                decoder: TODO.
+                decoder_conf: Configuration dict for decoder.
+                ctc: TODO.
+                ctc_conf: Configuration dict for ctc.
+                ctc_weight: TODO.
+                predictor: TODO.
+                predictor_conf: Configuration dict for predictor.
+                predictor_bias: TODO.
+                predictor_weight: TODO.
+                input_size: Size/dimension parameter.
+                vocab_size: Size/dimension parameter.
+                ignore_id: TODO.
+                blank_id: TODO.
+                sos: TODO.
+                eos: TODO.
+                lsm_weight: TODO.
+                length_normalized_loss: TODO.
+                share_embedding: TODO.
+                **kwargs: Additional keyword arguments.
+            """
         super().__init__()
 
         if specaug is not None:
@@ -270,6 +304,14 @@ class SCAMA(nn.Module):
         cache: dict = None,
         **kwargs,
     ) -> Tuple[torch.Tensor, torch.Tensor]:
+        """Encode chunk.
+        
+            Args:
+                speech: Speech audio tensor, shape (batch, time).
+                speech_lengths: Length of each speech sample.
+                cache: State cache dict for streaming inference.
+                **kwargs: Additional keyword arguments.
+            """
         if cache is None:
             cache = {}
         """Frontend + Encoder. Note that this method is used by asr_inference.py
@@ -298,6 +340,14 @@ class SCAMA(nn.Module):
         return encoder_out, torch.tensor([encoder_out.size(1)])
 
     def calc_predictor_chunk(self, encoder_out, encoder_out_lens, cache=None, **kwargs):
+        """Calc predictor chunk.
+        
+            Args:
+                encoder_out: Encoder output tensor.
+                encoder_out_lens: Encoder output lengths.
+                cache: State cache dict for streaming inference.
+                **kwargs: Additional keyword arguments.
+            """
         is_final = kwargs.get("is_final", False)
 
         return self.predictor.forward_chunk(encoder_out, cache["encoder"], is_final=is_final)
@@ -309,6 +359,14 @@ class SCAMA(nn.Module):
         ys_pad: torch.Tensor,
         ys_pad_lens: torch.Tensor,
     ):
+        """Internal: calc att predictor loss.
+        
+            Args:
+                encoder_out: Encoder output tensor.
+                encoder_out_lens: Encoder output lengths.
+                ys_pad: TODO.
+                ys_pad_lens: Lengths of ys_pad.
+            """
         ys_in_pad, ys_out_pad = add_sos_eos(ys_pad, self.sos, self.eos, self.ignore_id)
         ys_in_lens = ys_pad_lens + 1
 
@@ -404,6 +462,14 @@ class SCAMA(nn.Module):
     ):
         # ys_in_pad, ys_out_pad = add_sos_eos(ys_pad, self.sos, self.eos, self.ignore_id)
         # ys_in_lens = ys_pad_lens + 1
+        """Calc predictor mask.
+        
+            Args:
+                encoder_out: Encoder output tensor.
+                encoder_out_lens: Encoder output lengths.
+                ys_pad: TODO.
+                ys_pad_lens: Lengths of ys_pad.
+            """
         ys_out_pad, ys_in_lens = None, None
 
         encoder_out_mask = sequence_mask(
@@ -473,6 +539,11 @@ class SCAMA(nn.Module):
         **kwargs,
     ):
 
+        """Init beam search.
+        
+            Args:
+                **kwargs: Additional keyword arguments.
+            """
         from funasr.models.scama.beam_search import BeamSearchScamaStreaming
 
         from funasr.models.transformer.scorers.ctc import CTCPrefixScorer
@@ -528,6 +599,16 @@ class SCAMA(nn.Module):
         frontend=None,
         **kwargs,
     ):
+        """Generate chunk.
+        
+            Args:
+                speech: Speech audio tensor, shape (batch, time).
+                speech_lengths: Length of each speech sample.
+                key: Sample identifiers.
+                tokenizer: Tokenizer instance for text encoding/decoding.
+                frontend: Audio frontend for feature extraction.
+                **kwargs: Additional keyword arguments.
+            """
         cache = kwargs.get("cache", {})
         speech = speech.to(device=kwargs["device"])
         speech_lengths = speech_lengths.to(device=kwargs["device"])
@@ -605,6 +686,12 @@ class SCAMA(nn.Module):
         return results
 
     def init_cache(self, cache: dict = None, **kwargs):
+        """Init cache.
+        
+            Args:
+                cache: State cache dict for streaming inference.
+                **kwargs: Additional keyword arguments.
+            """
         if cache is None:
             cache = {}
         device = kwargs.get("device", "cuda")
@@ -655,6 +742,17 @@ class SCAMA(nn.Module):
         cache: dict = None,
         **kwargs,
     ):
+        """Run inference on input data.
+        
+            Args:
+                data_in: Input data (audio samples, file paths, or text).
+                data_lengths: Lengths of each input sample in the batch.
+                key: Sample identifiers.
+                tokenizer: Tokenizer instance for text encoding/decoding.
+                frontend: Audio frontend for feature extraction.
+                cache: State cache dict for streaming inference.
+                **kwargs: Additional keyword arguments.
+            """
         if cache is None:
             cache = {}
 

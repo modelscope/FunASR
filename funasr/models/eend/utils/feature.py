@@ -12,6 +12,13 @@ def get_input_dim(
     context_size,
     transform_type,
 ):
+    """Get input dim.
+    
+        Args:
+            frame_size: Size/dimension parameter.
+            context_size: Size/dimension parameter.
+            transform_type: TODO.
+        """
     if transform_type.startswith("logmel23"):
         frame_size = 23
     elif transform_type.startswith("logmel"):
@@ -155,6 +162,13 @@ def stft(data, frame_size=1024, frame_shift=256):
 
 def _count_frames(data_len, size, shift):
     # HACK: Assuming librosa.stft(..., center=True)
+    """Internal: count frames.
+    
+        Args:
+            data_len: TODO.
+            size: TODO.
+            shift: TODO.
+        """
     n_frames = 1 + int(data_len / shift)
     if data_len % shift == 0:
         n_frames = n_frames - 1

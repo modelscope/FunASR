@@ -59,6 +59,15 @@ class ContextualDecoderLayer(torch.nn.Module):
         cache=None,
     ):
         # tgt = self.dropout(tgt)
+        """Forward pass for training.
+        
+            Args:
+                tgt: TODO.
+                tgt_mask: TODO.
+                memory: TODO.
+                memory_mask: TODO.
+                cache: State cache dict for streaming inference.
+            """
         if isinstance(tgt, Tuple):
             tgt, _ = tgt
         residual = tgt
@@ -103,6 +112,15 @@ class ContextualBiasDecoder(torch.nn.Module):
         self.normalize_before = normalize_before
 
     def forward(self, tgt, tgt_mask, memory, memory_mask=None, cache=None):
+        """Forward pass for training.
+        
+            Args:
+                tgt: TODO.
+                tgt_mask: TODO.
+                memory: TODO.
+                memory_mask: TODO.
+                cache: State cache dict for streaming inference.
+            """
         x = tgt
         if self.src_attn is not None:
             if self.normalize_before:
@@ -139,6 +157,27 @@ class ContextualParaformerDecoder(ParaformerSANMDecoder):
         kernel_size: int = 21,
         sanm_shfit: int = 0,
     ):
+        """Initialize ContextualParaformerDecoder.
+        
+            Args:
+                vocab_size: Size/dimension parameter.
+                encoder_output_size: Size/dimension parameter.
+                attention_heads: TODO.
+                linear_units: TODO.
+                num_blocks: TODO.
+                dropout_rate: TODO.
+                positional_dropout_rate: TODO.
+                self_attention_dropout_rate: TODO.
+                src_attention_dropout_rate: TODO.
+                input_layer: TODO.
+                use_output_layer: TODO.
+                pos_enc_class: TODO.
+                normalize_before: TODO.
+                concat_after: TODO.
+                att_layer_num: TODO.
+                kernel_size: Size/dimension parameter.
+                sanm_shfit: TODO.
+            """
         super().__init__(
             vocab_size=vocab_size,
             encoder_output_size=encoder_output_size,
@@ -322,6 +361,15 @@ class ContextualParaformerDecoderExport(torch.nn.Module):
         onnx: bool = True,
         **kwargs,
     ):
+        """Initialize ContextualParaformerDecoderExport.
+        
+            Args:
+                model: Model instance or model name.
+                max_seq_len: TODO.
+                model_name: TODO.
+                onnx: TODO.
+                **kwargs: Additional keyword arguments.
+            """
         super().__init__()
         from funasr.utils.torch_function import sequence_mask
 
@@ -386,6 +434,11 @@ class ContextualParaformerDecoderExport(torch.nn.Module):
         self.dropout = self.model.dropout
 
     def prepare_mask(self, mask):
+        """Prepare mask.
+        
+            Args:
+                mask: TODO.
+            """
         mask_3d_btd = mask[:, :, None]
         if len(mask.shape) == 2:
             mask_4d_bhlt = 1 - mask[:, None, None, :]
@@ -404,6 +457,15 @@ class ContextualParaformerDecoderExport(torch.nn.Module):
         bias_embed: torch.Tensor,
     ):
 
+        """Forward pass for training.
+        
+            Args:
+                hs_pad: TODO.
+                hlens: TODO.
+                ys_in_pad: TODO.
+                ys_in_lens: Lengths of ys_in.
+                bias_embed: TODO.
+            """
         tgt = ys_in_pad
         tgt_mask = self.make_pad_mask(ys_in_lens)
         tgt_mask, _ = self.prepare_mask(tgt_mask)

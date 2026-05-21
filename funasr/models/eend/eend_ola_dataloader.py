@@ -8,6 +8,11 @@ from torch.utils.data import Dataset
 
 
 def custom_collate(batch):
+    """Custom collate.
+    
+        Args:
+            batch: TODO.
+        """
     keys, speech, speaker_labels, orders = zip(*batch)
     speech = [torch.from_numpy(np.copy(sph)).to(torch.float32) for sph in speech]
     speaker_labels = [torch.from_numpy(np.copy(spk)).to(torch.float32) for spk in speaker_labels]
@@ -22,6 +27,11 @@ class EENDOLADataset(Dataset):
         self,
         data_file,
     ):
+        """Initialize EENDOLADataset.
+        
+            Args:
+                data_file: TODO.
+            """
         self.data_file = data_file
         with open(data_file) as f:
             lines = f.readlines()
@@ -29,9 +39,15 @@ class EENDOLADataset(Dataset):
         logging.info("total samples: {}".format(len(self.samples)))
 
     def __len__(self):
+        """Internal: len  ."""
         return len(self.samples)
 
     def __getitem__(self, idx):
+        """Internal: getitem  .
+        
+            Args:
+                idx: TODO.
+            """
         key, speech_path, speaker_label_path = self.samples[idx]
         speech = kaldiio.load_mat(speech_path)
         speaker_label = kaldiio.load_mat(speaker_label_path).reshape(speech.shape[0], -1)
@@ -44,6 +60,14 @@ class EENDOLADataset(Dataset):
 
 class EENDOLADataLoader:
     def __init__(self, data_file, batch_size, shuffle=True, num_workers=8):
+        """Initialize EENDOLADataLoader.
+        
+            Args:
+                data_file: TODO.
+                batch_size: Number of samples per batch.
+                shuffle: TODO.
+                num_workers: TODO.
+            """
         dataset = EENDOLADataset(data_file)
         self.data_loader = DataLoader(
             dataset,
@@ -54,4 +78,9 @@ class EENDOLADataLoader:
         )
 
     def build_iter(self, epoch):
+        """Build iter.
+        
+            Args:
+                epoch: TODO.
+            """
         return self.data_loader

@@ -73,6 +73,18 @@ class BranchformerEncoderLayer(torch.nn.Module):
         attn_branch_drop_rate: float = 0.0,
         stochastic_depth_rate: float = 0.0,
     ):
+        """Initialize BranchformerEncoderLayer.
+        
+            Args:
+                size: TODO.
+                attn: TODO.
+                cgmlp: TODO.
+                dropout_rate: TODO.
+                merge_method: TODO.
+                cgmlp_weight: TODO.
+                attn_branch_drop_rate: TODO.
+                stochastic_depth_rate: TODO.
+            """
         super().__init__()
         assert (attn is not None) or (cgmlp is not None), "At least one branch should be valid"
 
@@ -305,6 +317,33 @@ class BranchformerEncoder(nn.Module):
         padding_idx: int = -1,
         stochastic_depth_rate: Union[float, List[float]] = 0.0,
     ):
+        """Initialize BranchformerEncoder.
+        
+            Args:
+                input_size: Size/dimension parameter.
+                output_size: Size/dimension parameter.
+                use_attn: TODO.
+                attention_heads: TODO.
+                attention_layer_type: TODO.
+                pos_enc_layer_type: TODO.
+                rel_pos_type: TODO.
+                use_cgmlp: TODO.
+                cgmlp_linear_units: TODO.
+                cgmlp_conv_kernel: TODO.
+                use_linear_after_conv: TODO.
+                gate_activation: TODO.
+                merge_method: TODO.
+                cgmlp_weight: TODO.
+                attn_branch_drop_rate: TODO.
+                num_blocks: TODO.
+                dropout_rate: TODO.
+                positional_dropout_rate: TODO.
+                attention_dropout_rate: TODO.
+                input_layer: TODO.
+                zero_triu: TODO.
+                padding_idx: TODO.
+                stochastic_depth_rate: TODO.
+            """
         super().__init__()
         self._output_size = output_size
 
@@ -472,6 +511,7 @@ class BranchformerEncoder(nn.Module):
         self.after_norm = LayerNorm(output_size)
 
     def output_size(self) -> int:
+        """Output size."""
         return self._output_size
 
     def forward(

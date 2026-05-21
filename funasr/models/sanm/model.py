@@ -25,4 +25,10 @@ class SANM(Transformer):
         **kwargs,
     ):
 
+        """Initialize SANM.
+        
+            Args:
+                *args: Variable positional arguments.
+                **kwargs: Additional keyword arguments.
+            """
         super().__init__(*args, **kwargs)

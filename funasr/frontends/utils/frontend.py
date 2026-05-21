@@ -37,6 +37,29 @@ class Frontend(nn.Module):
         ref_channel: int = -1,
         bdropout_rate=0.0,
     ):
+        """Initialize Frontend.
+        
+            Args:
+                idim: TODO.
+                use_wpe: TODO.
+                wtype: TODO.
+                wlayers: TODO.
+                wunits: TODO.
+                wprojs: TODO.
+                wdropout_rate: TODO.
+                taps: TODO.
+                delay: TODO.
+                use_dnn_mask_for_wpe: TODO.
+                use_beamformer: TODO.
+                btype: TODO.
+                blayers: TODO.
+                bunits: TODO.
+                bprojs: TODO.
+                bnmask: TODO.
+                badim: TODO.
+                ref_channel: TODO.
+                bdropout_rate: TODO.
+            """
         super().__init__()
 
         self.use_beamformer = use_beamformer
@@ -88,6 +111,12 @@ class Frontend(nn.Module):
     def forward(
         self, x: ComplexTensor, ilens: Union[torch.LongTensor, numpy.ndarray, List[int]]
     ) -> Tuple[ComplexTensor, torch.LongTensor, Optional[ComplexTensor]]:
+        """Forward pass for training.
+        
+            Args:
+                x: TODO.
+                ilens: TODO.
+            """
         assert len(x) == len(ilens), (len(x), len(ilens))
         # (B, T, F) or (B, T, C, F)
         if x.dim() not in (3, 4):
@@ -126,6 +155,12 @@ class Frontend(nn.Module):
 
 
 def frontend_for(args, idim):
+    """Frontend for.
+    
+        Args:
+            args: TODO.
+            idim: TODO.
+        """
     return Frontend(
         idim=idim,
         # WPE options

@@ -22,6 +22,11 @@ class TextCleaner:
 
     def __init__(self, cleaner_types: Collection[str] = None):
 
+        """Initialize TextCleaner.
+        
+            Args:
+                cleaner_types: TODO.
+            """
         if cleaner_types is None:
             self.cleaner_types = []
         elif isinstance(cleaner_types, str):
@@ -30,6 +35,11 @@ class TextCleaner:
             self.cleaner_types = list(cleaner_types)
 
     def __call__(self, text: str) -> str:
+        """Internal: call  .
+        
+            Args:
+                text: Text tensor or string input.
+            """
         for t in self.cleaner_types:
             if t == "tacotron":
                 # text = tacotron_cleaner.cleaners.custom_english_cleaners(text)

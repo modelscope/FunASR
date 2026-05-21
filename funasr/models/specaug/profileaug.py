@@ -23,6 +23,17 @@ class ProfileAug(nn.Module):
         disturb_aug_prob: float = 0.4,
         disturb_alpha: float = 0.2,
     ) -> None:
+        """Initialize ProfileAug.
+        
+            Args:
+                apply_split_aug: TODO.
+                split_aug_prob: TODO.
+                apply_merge_aug: TODO.
+                merge_aug_prob: TODO.
+                apply_disturb_aug: TODO.
+                disturb_aug_prob: TODO.
+                disturb_alpha: TODO.
+            """
         super().__init__()
         self.apply_split_aug = apply_split_aug
         self.split_aug_prob = split_aug_prob
@@ -34,6 +45,13 @@ class ProfileAug(nn.Module):
 
     def split_aug(self, profile: torch.Tensor, binary_labels: torch.Tensor, mask: torch.Tensor):
         # B, N
+        """Split aug.
+        
+            Args:
+                profile: TODO.
+                binary_labels: TODO.
+                mask: TODO.
+            """
         bsz, dim = profile.shape[0], profile.shape[-1]
         profile_norm = torch.linalg.norm(profile, dim=-1, keepdim=False)
         spk_count = binary_labels.sum(dim=1)
@@ -56,6 +74,13 @@ class ProfileAug(nn.Module):
         return profile, binary_labels, mask
 
     def merge_aug(self, profile: torch.Tensor, binary_labels: torch.Tensor, mask: torch.Tensor):
+        """Merge aug.
+        
+            Args:
+                profile: TODO.
+                binary_labels: TODO.
+                mask: TODO.
+            """
         bsz, dim = profile.shape[0], profile.shape[-1]
         profile_norm = torch.linalg.norm(profile, dim=-1, keepdim=False)
         spk_count = binary_labels.sum(dim=1)
@@ -86,6 +111,13 @@ class ProfileAug(nn.Module):
         return profile, binary_labels, mask
 
     def disturb_aug(self, profile: torch.Tensor, binary_labels: torch.Tensor, mask: torch.Tensor):
+        """Disturb aug.
+        
+            Args:
+                profile: TODO.
+                binary_labels: TODO.
+                mask: TODO.
+            """
         bsz, dim = profile.shape[0], profile.shape[-1]
         profile_norm = torch.linalg.norm(profile, dim=-1, keepdim=False)
         spk_count = binary_labels.sum(dim=1)
@@ -118,6 +150,16 @@ class ProfileAug(nn.Module):
     ) -> Tuple[torch.Tensor, Optional[torch.Tensor], Optional[torch.Tensor]]:
 
         # copy inputs to avoid inplace-operation
+        """Forward pass for training.
+        
+            Args:
+                speech: Speech audio tensor, shape (batch, time).
+                speech_lengths: Length of each speech sample.
+                profile: TODO.
+                profile_lengths: Lengths of profile.
+                binary_labels: TODO.
+                labels_length: TODO.
+            """
         speech, profile, binary_labels = (
             torch.clone(speech),
             torch.clone(profile),

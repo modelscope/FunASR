@@ -182,6 +182,7 @@ class LearnableFourierPosEnc(torch.nn.Module):
             )
 
     def _reset(self):
+        """Internal: reset."""
         self.w_r.data = torch.normal(0, (1 / math.sqrt(self.gamma)), (1, self.d_model // 2))
 
     def extend_pe(self, x):
@@ -384,11 +385,24 @@ class SinusoidalPositionEncoder(torch.nn.Module):
     """ """
 
     def __init__(self, d_model=80, dropout_rate=0.1):
+        """Initialize SinusoidalPositionEncoder.
+        
+            Args:
+                d_model: D Model instance.
+                dropout_rate: TODO.
+            """
         super().__init__()
 
     def encode(
         self, positions: torch.Tensor = None, depth: int = None, dtype: torch.dtype = torch.float32
     ):
+        """Encode.
+        
+            Args:
+                positions: TODO.
+                depth: TODO.
+                dtype: TODO.
+            """
         batch_size = positions.size(0)
         positions = positions.type(dtype)
         device = positions.device
@@ -406,6 +420,11 @@ class SinusoidalPositionEncoder(torch.nn.Module):
         return encoding.type(dtype)
 
     def forward(self, x):
+        """Forward pass for training.
+        
+            Args:
+                x: TODO.
+            """
         batch_size, timesteps, input_dim = x.size()
         positions = torch.arange(1, timesteps + 1, device=x.device)[None, :]
         position_encoding = self.encode(positions, input_dim, x.dtype).to(x.device)
@@ -417,11 +436,24 @@ class StreamSinusoidalPositionEncoder(torch.nn.Module):
     """ """
 
     def __init__(self, d_model=80, dropout_rate=0.1):
+        """Initialize StreamSinusoidalPositionEncoder.
+        
+            Args:
+                d_model: D Model instance.
+                dropout_rate: TODO.
+            """
         super().__init__()
 
     def encode(
         self, positions: torch.Tensor = None, depth: int = None, dtype: torch.dtype = torch.float32
     ):
+        """Encode.
+        
+            Args:
+                positions: TODO.
+                depth: TODO.
+                dtype: TODO.
+            """
         batch_size = positions.size(0)
         positions = positions.type(dtype)
         log_timescale_increment = torch.log(torch.tensor([10000], dtype=dtype)) / (depth / 2 - 1)
@@ -434,6 +466,12 @@ class StreamSinusoidalPositionEncoder(torch.nn.Module):
         return encoding.type(dtype)
 
     def forward(self, x, cache=None):
+        """Forward pass for training.
+        
+            Args:
+                x: TODO.
+                cache: State cache dict for streaming inference.
+            """
         batch_size, timesteps, input_dim = x.size()
         start_idx = 0
         if cache is not None:
@@ -516,6 +554,11 @@ class StreamingRelPositionalEncoding(torch.nn.Module):
 
 class ScaledSinuEmbedding(torch.nn.Module):
     def __init__(self, dim):
+        """Initialize ScaledSinuEmbedding.
+        
+            Args:
+                dim: TODO.
+            """
         super().__init__()
         self.scale = torch.nn.Parameter(
             torch.ones(
@@ -526,6 +569,11 @@ class ScaledSinuEmbedding(torch.nn.Module):
         self.register_buffer("inv_freq", inv_freq)
 
     def forward(self, x):
+        """Forward pass for training.
+        
+            Args:
+                x: TODO.
+            """
         n, device = x.shape[1], x.device
         t = torch.arange(n, device=device).type_as(self.inv_freq)
         sinu = einsum("i , j -> i j", t, self.inv_freq)

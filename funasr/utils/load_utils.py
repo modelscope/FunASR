@@ -25,6 +25,7 @@ except:
 
 
 def is_ffmpeg_installed():
+    """Is ffmpeg installed."""
     try:
         output = subprocess.check_output(["ffmpeg", "-version"], stderr=subprocess.STDOUT)
         return "ffmpeg version" in output.decode("utf-8")
@@ -222,6 +223,12 @@ def validate_frame_rate(
 ):
 
     # 将文件读取为字节流
+    """Validate frame rate.
+    
+        Args:
+            input: Input audio/text data.
+            fs: TODO.
+        """
     byte_data = BytesIO(input)
 
     # 使用 pydub 加载音频

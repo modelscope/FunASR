@@ -10,6 +10,16 @@ warnings.filterwarnings("ignore")
 def export(
     model, data_in=None, quantize: bool = False, opset_version: int = 14, type="onnx", **kwargs
 ):
+    """Export.
+    
+        Args:
+            model: Model instance or model name.
+            data_in: Input data (audio samples, file paths, or text).
+            quantize: TODO.
+            opset_version: TODO.
+            type: TODO.
+            **kwargs: Additional keyword arguments.
+        """
     model_scripts = model.export(**kwargs)
     export_dir = kwargs.get("output_dir", os.path.dirname(kwargs.get("init_param")))
     os.makedirs(export_dir, exist_ok=True)
@@ -62,6 +72,16 @@ def _onnx(
     **kwargs,
 ):
 
+    """Internal: onnx.
+    
+        Args:
+            model: Model instance or model name.
+            data_in: Input data (audio samples, file paths, or text).
+            quantize: TODO.
+            opset_version: TODO.
+            export_dir: TODO.
+            **kwargs: Additional keyword arguments.
+        """
     device = kwargs.get("device", "cpu")
     dummy_input = model.export_dummy_inputs()
 
@@ -117,6 +137,13 @@ def _onnx(
 
 
 def _torchscripts(model, path, device="cuda"):
+    """Internal: torchscripts.
+    
+        Args:
+            model: Model instance or model name.
+            path: TODO.
+            device: Target device ("cuda:0", "cpu", etc.).
+        """
     dummy_input = model.export_dummy_inputs()
 
     if device == "cuda":
@@ -136,6 +163,13 @@ def _torchscripts(model, path, device="cuda"):
 
 
 def _bladedisc_opt(model, model_inputs, enable_fp16=True):
+    """Internal: bladedisc opt.
+    
+        Args:
+            model: Model instance or model name.
+            model_inputs: TODO.
+            enable_fp16: TODO.
+        """
     model = model.eval()
     try:
         import torch_blade
@@ -155,6 +189,13 @@ def _bladedisc_opt(model, model_inputs, enable_fp16=True):
 
 
 def _rescale_input_hook(m, x, scale):
+    """Internal: rescale input hook.
+    
+        Args:
+            m: TODO.
+            x: TODO.
+            scale: TODO.
+        """
     if len(x) > 1:
         return (x[0] / scale, *x[1:])
     else:
@@ -162,6 +203,14 @@ def _rescale_input_hook(m, x, scale):
 
 
 def _rescale_output_hook(m, x, y, scale):
+    """Internal: rescale output hook.
+    
+        Args:
+            m: TODO.
+            x: TODO.
+            y: TODO.
+            scale: TODO.
+        """
     if isinstance(y, tuple):
         return (y[0] / scale, *y[1:])
     else:
@@ -170,9 +219,22 @@ def _rescale_output_hook(m, x, y, scale):
 
 def _rescale_encoder_model(model, input_data):
     # Calculate absmax
+    """Internal: rescale encoder model.
+    
+        Args:
+            model: Model instance or model name.
+            input_data: TODO.
+        """
     absmax = torch.tensor(0).cuda()
 
     def stat_input_hook(m, x, y):
+        """Stat input hook.
+        
+            Args:
+                m: TODO.
+                x: TODO.
+                y: TODO.
+            """
         val = x[0] if isinstance(x, tuple) else x
         absmax.copy_(torch.max(absmax, val.detach().abs().max()))
 
@@ -200,6 +262,13 @@ def _rescale_encoder_model(model, input_data):
 def _bladedisc_opt_for_encdec(model, path, enable_fp16):
     # Get input data
     # TODO: better to use real data
+    """Internal: bladedisc opt for encdec.
+    
+        Args:
+            model: Model instance or model name.
+            path: TODO.
+            enable_fp16: TODO.
+        """
     input_data = model.export_dummy_inputs()
     if isinstance(input_data, torch.Tensor):
         input_data = input_data.cuda()
@@ -210,6 +279,12 @@ def _bladedisc_opt_for_encdec(model, path, enable_fp16):
     decoder_inputs = list()
 
     def get_input_hook(m, x):
+        """Get input hook.
+        
+            Args:
+                m: TODO.
+                x: TODO.
+            """
         decoder_inputs.extend(list(x))
 
     hook = model.decoder.register_forward_pre_hook(get_input_hook)
@@ -232,6 +307,13 @@ def _onnx_opt_for_encdec(model, path, enable_fp16):
 
     # Get input data
     # TODO: better to use real data
+    """Internal: onnx opt for encdec.
+    
+        Args:
+            model: Model instance or model name.
+            path: TODO.
+            enable_fp16: TODO.
+        """
     input_data = model.export_dummy_inputs()
 
     if isinstance(input_data, torch.Tensor):
@@ -243,6 +325,12 @@ def _onnx_opt_for_encdec(model, path, enable_fp16):
     decoder_inputs = list()
 
     def get_input_hook(m, x):
+        """Get input hook.
+        
+            Args:
+                m: TODO.
+                x: TODO.
+            """
         decoder_inputs.extend(list(x))
 
     hook = model.decoder.register_forward_pre_hook(get_input_hook)

@@ -9,6 +9,12 @@ from funasr.register import tables
 
 
 def export_rebuild_model(model, **kwargs):
+    """Export rebuild model.
+    
+        Args:
+            model: Model instance or model name.
+            **kwargs: Additional keyword arguments.
+        """
     is_onnx = kwargs.get("type", "onnx") == "onnx"
     encoder_class = tables.encoder_classes.get(kwargs["encoder"] + "Export")
     model.encoder = encoder_class(model.encoder, onnx=is_onnx)
@@ -25,12 +31,25 @@ def export_rebuild_model(model, **kwargs):
 
 def export_forward(self, feats: torch.Tensor, *args, **kwargs):
 
+    """Export forward.
+    
+        Args:
+            feats: Feature tensor (e.g., fbank), shape (batch, frames, dim).
+            *args: Variable positional arguments.
+            **kwargs: Additional keyword arguments.
+        """
     scores, out_caches = self.encoder(feats, *args)
 
     return scores, out_caches
 
 
 def export_dummy_inputs(self, data_in=None, frame=30):
+    """Export dummy inputs.
+    
+        Args:
+            data_in: Input data (audio samples, file paths, or text).
+            frame: TODO.
+        """
     if data_in is None:
         speech = torch.randn(1, frame, self.encoder_conf.get("input_dim"))
     else:
@@ -46,14 +65,17 @@ def export_dummy_inputs(self, data_in=None, frame=30):
 
 
 def export_input_names(self):
+    """Export input names."""
     return ["speech", "in_cache0", "in_cache1", "in_cache2", "in_cache3"]
 
 
 def export_output_names(self):
+    """Export output names."""
     return ["logits", "out_cache0", "out_cache1", "out_cache2", "out_cache3"]
 
 
 def export_dynamic_axes(self):
+    """Export dynamic axes."""
     return {
         "speech": {1: "feats_length"},
     }
@@ -62,4 +84,5 @@ def export_dynamic_axes(self):
 def export_name(
     self,
 ):
+    """Export name."""
     return "model.onnx"

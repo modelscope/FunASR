@@ -15,10 +15,20 @@ from omegaconf import DictConfig, OmegaConf, ListConfig
 
 class LineProcessor:
     def __init__(self, tokenizer):
+        """Initialize LineProcessor.
+        
+            Args:
+                tokenizer: Tokenizer instance for text encoding/decoding.
+            """
         self.tokenizer = tokenizer
         self.lock = threading.Lock()
 
     def process_line(self, line_pair: Tuple[str, str]) -> Optional[Dict]:
+        """Process line.
+        
+            Args:
+                line_pair: TODO.
+            """
         line1, line2 = line_pair
 
         line1, line2 = line1.strip(), line2.strip()
@@ -67,7 +77,17 @@ class LineProcessor:
 
 @hydra.main(config_name=None, version_base=None)
 def main_hydra(cfg: DictConfig):
+    """Main hydra.
+    
+        Args:
+            cfg: Configuration overrides.
+        """
     def to_plain_list(cfg_item):
+        """To plain list.
+        
+            Args:
+                cfg_item: TODO.
+            """
         if isinstance(cfg_item, ListConfig):
             return OmegaConf.to_container(cfg_item, resolve=True)
         elif isinstance(cfg_item, DictConfig):

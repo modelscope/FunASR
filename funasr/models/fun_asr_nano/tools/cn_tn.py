@@ -408,14 +408,22 @@ class ChineseChar(object):
     """
 
     def __init__(self, simplified, traditional):
+        """Initialize ChineseChar.
+        
+            Args:
+                simplified: TODO.
+                traditional: TODO.
+            """
         self.simplified = simplified
         self.traditional = traditional
         # self.__repr__ = self.__str__
 
     def __str__(self):
+        """Internal: str  ."""
         return self.simplified or self.traditional or None
 
     def __repr__(self):
+        """Internal: repr  ."""
         return self.__str__()
 
 
@@ -427,16 +435,34 @@ class ChineseNumberUnit(ChineseChar):
     """
 
     def __init__(self, power, simplified, traditional, big_s, big_t):
+        """Initialize ChineseNumberUnit.
+        
+            Args:
+                power: TODO.
+                simplified: TODO.
+                traditional: TODO.
+                big_s: TODO.
+                big_t: TODO.
+            """
         super(ChineseNumberUnit, self).__init__(simplified, traditional)
         self.power = power
         self.big_s = big_s
         self.big_t = big_t
 
     def __str__(self):
+        """Internal: str  ."""
         return "10^{}".format(self.power)
 
     @classmethod
     def create(cls, index, value, numbering_type=NUMBERING_TYPES[1], small_unit=False):
+        """Create.
+        
+            Args:
+                index: TODO.
+                value: TODO.
+                numbering_type: TODO.
+                small_unit: TODO.
+            """
         if small_unit:
             return ChineseNumberUnit(
                 power=index + 1,
@@ -479,6 +505,17 @@ class ChineseNumberDigit(ChineseChar):
     """
 
     def __init__(self, value, simplified, traditional, big_s, big_t, alt_s=None, alt_t=None):
+        """Initialize ChineseNumberDigit.
+        
+            Args:
+                value: TODO.
+                simplified: TODO.
+                traditional: TODO.
+                big_s: TODO.
+                big_t: TODO.
+                alt_s: TODO.
+                alt_t: TODO.
+            """
         super(ChineseNumberDigit, self).__init__(simplified, traditional)
         self.value = value
         self.big_s = big_s
@@ -487,10 +524,17 @@ class ChineseNumberDigit(ChineseChar):
         self.alt_t = alt_t
 
     def __str__(self):
+        """Internal: str  ."""
         return str(self.value)
 
     @classmethod
     def create(cls, i, v):
+        """Create.
+        
+            Args:
+                i: TODO.
+                v: TODO.
+            """
         return ChineseNumberDigit(i, v[0], v[1], v[2], v[3])
 
 
@@ -500,6 +544,14 @@ class ChineseMath(ChineseChar):
     """
 
     def __init__(self, simplified, traditional, symbol, expression=None):
+        """Initialize ChineseMath.
+        
+            Args:
+                simplified: TODO.
+                traditional: TODO.
+                symbol: TODO.
+                expression: TODO.
+            """
         super(ChineseMath, self).__init__(simplified, traditional)
         self.symbol = symbol
         self.expression = expression
@@ -527,11 +579,19 @@ class MathSymbol(object):
     """
 
     def __init__(self, positive, negative, point):
+        """Initialize MathSymbol.
+        
+            Args:
+                positive: TODO.
+                negative: TODO.
+                point: TODO.
+            """
         self.positive = positive
         self.negative = negative
         self.point = point
 
     def __iter__(self):
+        """Internal: iter  ."""
         for v in self.__dict__.values():
             yield v
 
@@ -600,7 +660,19 @@ def create_system(numbering_type=NUMBERING_TYPES[1]):
 
 
 def chn2num(chinese_string, numbering_type=NUMBERING_TYPES[1]):
+    """Chn2num.
+    
+        Args:
+            chinese_string: TODO.
+            numbering_type: TODO.
+        """
     def get_symbol(char, system):
+        """Get symbol.
+        
+            Args:
+                char: TODO.
+                system: TODO.
+            """
         for u in system.units:
             if char in [u.traditional, u.simplified, u.big_s, u.big_t]:
                 return u
@@ -619,6 +691,12 @@ def chn2num(chinese_string, numbering_type=NUMBERING_TYPES[1]):
                 return m
 
     def string2symbols(chinese_string, system):
+        """String2symbols.
+        
+            Args:
+                chinese_string: TODO.
+                system: TODO.
+            """
         int_string, dec_string = chinese_string, ""
         for p in [system.math.point.simplified, system.math.point.traditional]:
             if p in chinese_string:
@@ -705,7 +783,26 @@ def num2chn(
     use_zeros=True,
     use_units=True,
 ):
+    """Num2chn.
+    
+        Args:
+            number_string: TODO.
+            numbering_type: TODO.
+            big: TODO.
+            traditional: TODO.
+            alt_zero: TODO.
+            alt_one: TODO.
+            alt_two: TODO.
+            use_zeros: TODO.
+            use_units: TODO.
+        """
     def get_value(value_string, use_zeros=True):
+        """Get value.
+        
+            Args:
+                value_string: TODO.
+                use_zeros: TODO.
+            """
         striped_string = value_string.lstrip("0")
 
         # record nothing if all zeros
@@ -818,13 +915,21 @@ class Cardinal:
     """
 
     def __init__(self, cardinal=None, chntext=None):
+        """Initialize Cardinal.
+        
+            Args:
+                cardinal: TODO.
+                chntext: TODO.
+            """
         self.cardinal = cardinal
         self.chntext = chntext
 
     def chntext2cardinal(self):
+        """Chntext2cardinal."""
         return chn2num(self.chntext)
 
     def cardinal2chntext(self):
+        """Cardinal2chntext."""
         return num2chn(self.cardinal)
 
 
@@ -834,6 +939,12 @@ class Digit:
     """
 
     def __init__(self, digit=None, chntext=None):
+        """Initialize Digit.
+        
+            Args:
+                digit: TODO.
+                chntext: TODO.
+            """
         self.digit = digit
         self.chntext = chntext
 
@@ -841,6 +952,7 @@ class Digit:
     #     return chn2num(self.chntext)
 
     def digit2chntext(self):
+        """Digit2chntext."""
         return num2chn(self.digit, alt_two=False, use_units=False)
 
 
@@ -850,6 +962,13 @@ class TelePhone:
     """
 
     def __init__(self, telephone=None, raw_chntext=None, chntext=None):
+        """Initialize TelePhone.
+        
+            Args:
+                telephone: TODO.
+                raw_chntext: TODO.
+                chntext: TODO.
+            """
         self.telephone = telephone
         self.raw_chntext = raw_chntext
         self.chntext = chntext
@@ -862,6 +981,11 @@ class TelePhone:
     #     return self.telephone
 
     def telephone2chntext(self, fixed=False):
+        """Telephone2chntext.
+        
+            Args:
+                fixed: TODO.
+            """
         if fixed:
             sil_parts = self.telephone.split("-")
             self.raw_chntext = "<SIL>".join([num2chn(part, alt_two=False, use_units=False) for part in sil_parts])
@@ -879,14 +1003,22 @@ class Fraction:
     """
 
     def __init__(self, fraction=None, chntext=None):
+        """Initialize Fraction.
+        
+            Args:
+                fraction: TODO.
+                chntext: TODO.
+            """
         self.fraction = fraction
         self.chntext = chntext
 
     def chntext2fraction(self):
+        """Chntext2fraction."""
         denominator, numerator = self.chntext.split("分之")
         return chn2num(numerator) + "/" + chn2num(denominator)
 
     def fraction2chntext(self):
+        """Fraction2chntext."""
         numerator, denominator = self.fraction.split("/")
         return num2chn(denominator) + "分之" + num2chn(numerator)
 
@@ -897,6 +1029,12 @@ class Date:
     """
 
     def __init__(self, date=None, chntext=None):
+        """Initialize Date.
+        
+            Args:
+                date: TODO.
+                chntext: TODO.
+            """
         self.date = date
         self.chntext = chntext
 
@@ -925,6 +1063,7 @@ class Date:
     #     return self.date
 
     def date2chntext(self):
+        """Date2chntext."""
         date = self.date
         try:
             year, other = date.strip().split("年", 1)
@@ -955,6 +1094,12 @@ class Money:
     """
 
     def __init__(self, money=None, chntext=None):
+        """Initialize Money.
+        
+            Args:
+                money: TODO.
+                chntext: TODO.
+            """
         self.money = money
         self.chntext = chntext
 
@@ -962,6 +1107,7 @@ class Money:
     #     return self.money
 
     def money2chntext(self):
+        """Money2chntext."""
         money = self.money
         pattern = re.compile(r"(\d+(\.\d+)?)")
         matchers = pattern.findall(money)
@@ -978,17 +1124,30 @@ class Percentage:
     """
 
     def __init__(self, percentage=None, chntext=None):
+        """Initialize Percentage.
+        
+            Args:
+                percentage: TODO.
+                chntext: TODO.
+            """
         self.percentage = percentage
         self.chntext = chntext
 
     def chntext2percentage(self):
+        """Chntext2percentage."""
         return chn2num(self.chntext.strip().strip("百分之")) + "%"
 
     def percentage2chntext(self):
+        """Percentage2chntext."""
         return "百分之" + num2chn(self.percentage.strip().strip("%"))
 
 
 def normalize_nsw(raw_text):
+    """Normalize nsw.
+    
+        Args:
+            raw_text: TODO.
+        """
     text = "^" + raw_text + "$"
 
     # 规范化日期
@@ -1111,6 +1270,11 @@ def remove_erhua(text):
 
 
 def remove_space(text):
+    """Remove space.
+    
+        Args:
+            text: Text tensor or string input.
+        """
     tokens = text.split()
     new = []
     for k, t in enumerate(tokens):
@@ -1132,6 +1296,17 @@ class TextNorm:
         check_chars: bool = False,
         remove_space: bool = False,
     ):
+        """Initialize TextNorm.
+        
+            Args:
+                to_banjiao: TODO.
+                to_upper: TODO.
+                to_lower: TODO.
+                remove_fillers: TODO.
+                remove_erhua: TODO.
+                check_chars: TODO.
+                remove_space: TODO.
+            """
         self.to_banjiao = to_banjiao
         self.to_upper = to_upper
         self.to_lower = to_lower
@@ -1141,6 +1316,11 @@ class TextNorm:
         self.remove_space = remove_space
 
     def __call__(self, text):
+        """Internal: call  .
+        
+            Args:
+                text: Text tensor or string input.
+            """
         if self.to_banjiao:
             text = text.translate(QJ2BJ_TRANSFORM)
 

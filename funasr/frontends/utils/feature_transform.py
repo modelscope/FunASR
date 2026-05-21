@@ -25,6 +25,19 @@ class FeatureTransform(torch.nn.Module):
         uttmvn_norm_means: bool = True,
         uttmvn_norm_vars: bool = False,
     ):
+        """Initialize FeatureTransform.
+        
+            Args:
+                fs: TODO.
+                n_fft: TODO.
+                n_mels: TODO.
+                fmin: TODO.
+                fmax: TODO.
+                stats_file: TODO.
+                apply_uttmvn: TODO.
+                uttmvn_norm_means: TODO.
+                uttmvn_norm_vars: TODO.
+            """
         super().__init__()
         self.apply_uttmvn = apply_uttmvn
 
@@ -44,6 +57,12 @@ class FeatureTransform(torch.nn.Module):
         self, x: ComplexTensor, ilens: Union[torch.LongTensor, np.ndarray, List[int]]
     ) -> Tuple[torch.Tensor, torch.LongTensor]:
         # (B, T, F) or (B, T, C, F)
+        """Forward pass for training.
+        
+            Args:
+                x: TODO.
+                ilens: TODO.
+            """
         if x.dim() not in (3, 4):
             raise ValueError(f"Input dim must be 3 or 4: {x.dim()}")
         if not torch.is_tensor(ilens):
@@ -103,6 +122,17 @@ class LogMel(torch.nn.Module):
         htk: bool = False,
         norm=1,
     ):
+        """Initialize LogMel.
+        
+            Args:
+                fs: TODO.
+                n_fft: TODO.
+                n_mels: TODO.
+                fmin: TODO.
+                fmax: TODO.
+                htk: TODO.
+                norm: TODO.
+            """
         super().__init__()
 
         _mel_options = dict(
@@ -116,12 +146,19 @@ class LogMel(torch.nn.Module):
         self.register_buffer("melmat", torch.from_numpy(melmat.T).float())
 
     def extra_repr(self):
+        """Extra repr."""
         return ", ".join(f"{k}={v}" for k, v in self.mel_options.items())
 
     def forward(
         self, feat: torch.Tensor, ilens: torch.LongTensor
     ) -> Tuple[torch.Tensor, torch.LongTensor]:
         # feat: (B, T, D1) x melmat: (D1, D2) -> mel_feat: (B, T, D2)
+        """Forward pass for training.
+        
+            Args:
+                feat: TODO.
+                ilens: TODO.
+            """
         mel_feat = torch.matmul(feat, self.melmat)
 
         logmel_feat = (mel_feat + 1e-20).log()
@@ -151,6 +188,14 @@ class GlobalMVN(torch.nn.Module):
         norm_vars: bool = True,
         eps: float = 1.0e-20,
     ):
+        """Initialize GlobalMVN.
+        
+            Args:
+                stats_file: TODO.
+                norm_means: TODO.
+                norm_vars: TODO.
+                eps: TODO.
+            """
         super().__init__()
         self.norm_means = norm_means
         self.norm_vars = norm_vars
@@ -170,6 +215,7 @@ class GlobalMVN(torch.nn.Module):
         self.register_buffer("scale", torch.from_numpy(1 / std.astype(np.float32)))
 
     def extra_repr(self):
+        """Extra repr."""
         return (
             f"stats_file={self.stats_file}, "
             f"norm_means={self.norm_means}, norm_vars={self.norm_vars}"
@@ -179,6 +225,12 @@ class GlobalMVN(torch.nn.Module):
         self, x: torch.Tensor, ilens: torch.LongTensor
     ) -> Tuple[torch.Tensor, torch.LongTensor]:
         # feat: (B, T, D)
+        """Forward pass for training.
+        
+            Args:
+                x: TODO.
+                ilens: TODO.
+            """
         if self.norm_means:
             x += self.bias.type_as(x)
             x.masked_fill(make_pad_mask(ilens, x, 1), 0.0)
@@ -190,17 +242,31 @@ class GlobalMVN(torch.nn.Module):
 
 class UtteranceMVN(torch.nn.Module):
     def __init__(self, norm_means: bool = True, norm_vars: bool = False, eps: float = 1.0e-20):
+        """Initialize UtteranceMVN.
+        
+            Args:
+                norm_means: TODO.
+                norm_vars: TODO.
+                eps: TODO.
+            """
         super().__init__()
         self.norm_means = norm_means
         self.norm_vars = norm_vars
         self.eps = eps
 
     def extra_repr(self):
+        """Extra repr."""
         return f"norm_means={self.norm_means}, norm_vars={self.norm_vars}"
 
     def forward(
         self, x: torch.Tensor, ilens: torch.LongTensor
     ) -> Tuple[torch.Tensor, torch.LongTensor]:
+        """Forward pass for training.
+        
+            Args:
+                x: TODO.
+                ilens: TODO.
+            """
         return utterance_mvn(
             x, ilens, norm_means=self.norm_means, norm_vars=self.norm_vars, eps=self.eps
         )
@@ -244,6 +310,12 @@ def utterance_mvn(
 
 
 def feature_transform_for(args, n_fft):
+    """Feature transform for.
+    
+        Args:
+            args: TODO.
+            n_fft: TODO.
+        """
     return FeatureTransform(
         # Mel options,
         fs=args.fbank_fs,

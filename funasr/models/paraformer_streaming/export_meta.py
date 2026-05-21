@@ -10,6 +10,12 @@ from funasr.register import tables
 
 def export_rebuild_model(model, **kwargs):
     # self.device = kwargs.get("device")
+    """Export rebuild model.
+    
+        Args:
+            model: Model instance or model name.
+            **kwargs: Additional keyword arguments.
+        """
     is_onnx = kwargs.get("type", "onnx") == "onnx"
     encoder_class = tables.encoder_classes.get(kwargs["encoder"] + "Export")
     model.encoder = encoder_class(model.encoder, onnx=is_onnx)
@@ -57,6 +63,12 @@ def export_encoder_forward(
     speech_lengths: torch.Tensor,
 ):
     # a. To device
+    """Export encoder forward.
+    
+        Args:
+            speech: Speech audio tensor, shape (batch, time).
+            speech_lengths: Length of each speech sample.
+        """
     batch = {"speech": speech, "speech_lengths": speech_lengths, "online": True}
     # batch = to_device(batch, device=self.device)
 
@@ -68,20 +80,24 @@ def export_encoder_forward(
 
 
 def export_encoder_dummy_inputs(self):
+    """Export encoder dummy inputs."""
     speech = torch.randn(2, 30, 560)
     speech_lengths = torch.tensor([6, 30], dtype=torch.int32)
     return (speech, speech_lengths)
 
 
 def export_encoder_input_names(self):
+    """Export encoder input names."""
     return ["speech", "speech_lengths"]
 
 
 def export_encoder_output_names(self):
+    """Export encoder output names."""
     return ["enc", "enc_len", "alphas"]
 
 
 def export_encoder_dynamic_axes(self):
+    """Export encoder dynamic axes."""
     return {
         "speech": {0: "batch_size", 1: "feats_length"},
         "speech_lengths": {
@@ -96,6 +112,7 @@ def export_encoder_dynamic_axes(self):
 
 
 def export_encoder_name(self):
+    """Export encoder name."""
     return "model.onnx"
 
 
@@ -107,6 +124,15 @@ def export_decoder_forward(
     acoustic_embeds_len: torch.Tensor,
     *args,
 ):
+    """Export decoder forward.
+    
+        Args:
+            enc: TODO.
+            enc_len: TODO.
+            acoustic_embeds: TODO.
+            acoustic_embeds_len: TODO.
+            *args: Variable positional arguments.
+        """
     decoder_out, out_caches = self.decoder(
         enc, enc_len, acoustic_embeds, acoustic_embeds_len, *args
     )
@@ -116,21 +142,26 @@ def export_decoder_forward(
 
 
 def export_decoder_dummy_inputs(self):
+    """Export decoder dummy inputs."""
     dummy_inputs = self.decoder.get_dummy_inputs(enc_size=self.encoder._output_size)
     return dummy_inputs
 
 
 def export_decoder_input_names(self):
+    """Export decoder input names."""
     return self.decoder.get_input_names()
 
 
 def export_decoder_output_names(self):
+    """Export decoder output names."""
     return self.decoder.get_output_names()
 
 
 def export_decoder_dynamic_axes(self):
+    """Export decoder dynamic axes."""
     return self.decoder.get_dynamic_axes()
 
 
 def export_decoder_name(self):
+    """Export decoder name."""
     return "decoder.onnx"

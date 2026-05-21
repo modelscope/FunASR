@@ -9,6 +9,15 @@ from funasr.register import tables
 @tables.register("adaptor_classes", "Linear")
 class Linear(nn.Module):
     def __init__(self, downsample_rate, encoder_dim, llm_dim, ffn_dim: int = 2048, **kwargs):
+        """Initialize Linear.
+        
+            Args:
+                downsample_rate: TODO.
+                encoder_dim: Size/dimension parameter.
+                llm_dim: Size/dimension parameter.
+                ffn_dim: Size/dimension parameter.
+                **kwargs: Additional keyword arguments.
+            """
         super().__init__()
         self.k = downsample_rate
         self.encoder_dim = encoder_dim
@@ -18,6 +27,11 @@ class Linear(nn.Module):
         self.linear2 = nn.Linear(ffn_dim, self.llm_dim)
 
     def forward(self, x):
+        """Forward pass for training.
+        
+            Args:
+                x: TODO.
+            """
         batch_size, seq_len, dim = x.size()
         num_frames_to_discard = seq_len % self.k
         if num_frames_to_discard > 0:
@@ -35,6 +49,15 @@ class Linear(nn.Module):
 @tables.register("adaptor_classes", "QFormer")
 class EncoderProjectorQFormer(nn.Module):
     def __init__(self, downsample_rate, encoder_dim, llm_dim, ffn_dim: int = 2048, **kwargs):
+        """Initialize EncoderProjectorQFormer.
+        
+            Args:
+                downsample_rate: TODO.
+                encoder_dim: Size/dimension parameter.
+                llm_dim: Size/dimension parameter.
+                ffn_dim: Size/dimension parameter.
+                **kwargs: Additional keyword arguments.
+            """
         super().__init__()
         self.encoder_dim = encoder_dim
         self.llm_dim = llm_dim
@@ -56,6 +79,11 @@ class EncoderProjectorQFormer(nn.Module):
         self.second_stride = 0.333333 
 
     def split_frames(self, speech_embeds):
+        """Split frames.
+        
+            Args:
+                speech_embeds: TODO.
+            """
         B, T, C = speech_embeds.shape
         kernel = round(T * self.second_per_frame / 30.0)
         stride = round(T * self.second_stride / 30.0)
@@ -71,6 +99,11 @@ class EncoderProjectorQFormer(nn.Module):
         return speech_embeds, speech_atts
 
     def forward(self, x):
+        """Forward pass for training.
+        
+            Args:
+                x: TODO.
+            """
         B, T, C = x.size()
         encoder_out_feat, attention_mask = self.split_frames(x)
         query = self.query.expand(encoder_out_feat.shape[0], -1, -1)
@@ -94,6 +127,15 @@ class Transformer(nn.Module):
     def __init__(
         self, downsample_rate=2, encoder_dim=1280, llm_dim=4096, ffn_dim: int = 2048, **kwargs
     ):
+        """Initialize Transformer.
+        
+            Args:
+                downsample_rate: TODO.
+                encoder_dim: Size/dimension parameter.
+                llm_dim: Size/dimension parameter.
+                ffn_dim: Size/dimension parameter.
+                **kwargs: Additional keyword arguments.
+            """
         super().__init__()
         self.k = downsample_rate
         self.encoder_dim = encoder_dim
@@ -129,6 +171,12 @@ class Transformer(nn.Module):
 
     def forward(self, x, ilens=None):
 
+        """Forward pass for training.
+        
+            Args:
+                x: TODO.
+                ilens: TODO.
+            """
         batch_size, seq_len, dim = x.size()
         # num_frames_to_discard = seq_len % self.k
         chunk_num = (seq_len - 1) // self.k + 1

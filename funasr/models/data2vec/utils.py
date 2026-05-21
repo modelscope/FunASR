@@ -14,9 +14,20 @@ from funasr.models.data2vec.multihead_attention import MultiheadAttention
 
 class Fp32LayerNorm(nn.LayerNorm):
     def __init__(self, *args, **kwargs):
+        """Initialize Fp32LayerNorm.
+        
+            Args:
+                *args: Variable positional arguments.
+                **kwargs: Additional keyword arguments.
+            """
         super().__init__(*args, **kwargs)
 
     def forward(self, input):
+        """Forward pass for training.
+        
+            Args:
+                input: Input audio/text data.
+            """
         output = F.layer_norm(
             input.float(),
             self.normalized_shape,
@@ -29,9 +40,20 @@ class Fp32LayerNorm(nn.LayerNorm):
 
 class Fp32GroupNorm(nn.GroupNorm):
     def __init__(self, *args, **kwargs):
+        """Initialize Fp32GroupNorm.
+        
+            Args:
+                *args: Variable positional arguments.
+                **kwargs: Additional keyword arguments.
+            """
         super().__init__(*args, **kwargs)
 
     def forward(self, input):
+        """Forward pass for training.
+        
+            Args:
+                input: Input audio/text data.
+            """
         output = F.group_norm(
             input.float(),
             self.num_groups,
@@ -44,10 +66,20 @@ class Fp32GroupNorm(nn.GroupNorm):
 
 class TransposeLast(nn.Module):
     def __init__(self, deconstruct_idx=None):
+        """Initialize TransposeLast.
+        
+            Args:
+                deconstruct_idx: TODO.
+            """
         super().__init__()
         self.deconstruct_idx = deconstruct_idx
 
     def forward(self, x):
+        """Forward pass for training.
+        
+            Args:
+                x: TODO.
+            """
         if self.deconstruct_idx is not None:
             x = x[self.deconstruct_idx]
         return x.transpose(-2, -1)
@@ -55,6 +87,12 @@ class TransposeLast(nn.Module):
 
 class SamePad(nn.Module):
     def __init__(self, kernel_size, causal=False):
+        """Initialize SamePad.
+        
+            Args:
+                kernel_size: Size/dimension parameter.
+                causal: TODO.
+            """
         super().__init__()
         if causal:
             self.remove = kernel_size - 1
@@ -62,6 +100,11 @@ class SamePad(nn.Module):
             self.remove = 1 if kernel_size % 2 == 0 else 0
 
     def forward(self, x):
+        """Forward pass for training.
+        
+            Args:
+                x: TODO.
+            """
         if self.remove > 0:
             x = x[:, :, : -self.remove]
         return x
@@ -69,6 +112,14 @@ class SamePad(nn.Module):
 
 def pad_to_multiple(x, multiple, dim=-1, value=0):
     # Inspired from https://github.com/lucidrains/local-attention/blob/master/local_attention/local_attention.py#L41
+    """Pad to multiple.
+    
+        Args:
+            x: TODO.
+            multiple: TODO.
+            dim: TODO.
+            value: TODO.
+        """
     if x is None:
         return None, 0
     tsz = x.size(dim)
@@ -82,16 +133,27 @@ def pad_to_multiple(x, multiple, dim=-1, value=0):
 
 
 def gelu_accurate(x):
+    """Gelu accurate.
+    
+        Args:
+            x: TODO.
+        """
     if not hasattr(gelu_accurate, "_a"):
         gelu_accurate._a = math.sqrt(2 / math.pi)
     return 0.5 * x * (1 + torch.tanh(gelu_accurate._a * (x + 0.044715 * torch.pow(x, 3))))
 
 
 def gelu(x: torch.Tensor) -> torch.Tensor:
+    """Gelu.
+    
+        Args:
+            x: TODO.
+        """
     return torch.nn.functional.gelu(x.float()).type_as(x)
 
 
 def get_available_activation_fns():
+    """Get available activation fns."""
     return [
         "relu",
         "gelu",
@@ -138,6 +200,11 @@ def init_bert_params(module):
     def normal_(data):
         # with FSDP, module params will be on CUDA, so we cast them back to CPU
         # so that the RNG is consistent with and without FSDP
+        """Normal .
+        
+            Args:
+                data: TODO.
+            """
         data.copy_(data.cpu().normal_(mean=0.0, std=0.02).to(data.device))
 
     if isinstance(module, nn.Linear):

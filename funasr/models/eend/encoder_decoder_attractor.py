@@ -7,6 +7,13 @@ from torch import nn
 class EncoderDecoderAttractor(nn.Module):
 
     def __init__(self, n_units, encoder_dropout=0.1, decoder_dropout=0.1):
+        """Initialize EncoderDecoderAttractor.
+        
+            Args:
+                n_units: TODO.
+                encoder_dropout: TODO.
+                decoder_dropout: TODO.
+            """
         super(EncoderDecoderAttractor, self).__init__()
         self.enc0_dropout = nn.Dropout(encoder_dropout)
         self.encoder = nn.LSTM(n_units, n_units, 1, batch_first=True, dropout=encoder_dropout)
@@ -16,6 +23,12 @@ class EncoderDecoderAttractor(nn.Module):
         self.n_units = n_units
 
     def forward_core(self, xs, zeros):
+        """Forward core.
+        
+            Args:
+                xs: TODO.
+                zeros: TODO.
+            """
         ilens = torch.from_numpy(np.array([x.shape[0] for x in xs])).to(torch.int64)
         xs = [self.enc0_dropout(x) for x in xs]
         xs = nn.utils.rnn.pad_sequence(xs, batch_first=True, padding_value=-1)
@@ -36,6 +49,12 @@ class EncoderDecoderAttractor(nn.Module):
         return attractors
 
     def forward(self, xs, n_speakers):
+        """Forward pass for training.
+        
+            Args:
+                xs: TODO.
+                n_speakers: TODO.
+            """
         zeros = [
             torch.zeros(n_spk + 1, self.n_units).to(torch.float32).to(xs[0].device)
             for n_spk in n_speakers
@@ -56,6 +75,12 @@ class EncoderDecoderAttractor(nn.Module):
         return loss, attractors
 
     def estimate(self, xs, max_n_speakers=15):
+        """Estimate.
+        
+            Args:
+                xs: TODO.
+                max_n_speakers: TODO.
+            """
         zeros = [
             torch.zeros(max_n_speakers, self.n_units).to(torch.float32).to(xs[0].device) for _ in xs
         ]

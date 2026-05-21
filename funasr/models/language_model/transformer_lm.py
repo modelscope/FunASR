@@ -23,12 +23,30 @@ class TransformerLM(AbsLM):
         layer: int = 4,
         dropout_rate: float = 0.5,
     ):
+        """Initialize TransformerLM.
+        
+            Args:
+                vocab_size: Size/dimension parameter.
+                pos_enc: TODO.
+                embed_unit: TODO.
+                att_unit: TODO.
+                head: TODO.
+                unit: TODO.
+                layer: TODO.
+                dropout_rate: TODO.
+            """
         super().__init__()
         if pos_enc == "sinusoidal":
             pos_enc_class = PositionalEncoding
         elif pos_enc is None:
 
             def pos_enc_class(*args, **kwargs):
+                """Pos enc class.
+                
+                    Args:
+                        *args: Variable positional arguments.
+                        **kwargs: Additional keyword arguments.
+                    """
                 return nn.Sequential()  # indentity
 
         else:
@@ -48,6 +66,11 @@ class TransformerLM(AbsLM):
         self.decoder = nn.Linear(att_unit, vocab_size)
 
     def _target_mask(self, ys_in_pad):
+        """Internal: target mask.
+        
+            Args:
+                ys_in_pad: TODO.
+            """
         ys_mask = ys_in_pad != 0
         m = subsequent_mask(ys_mask.size(-1), device=ys_mask.device).unsqueeze(0)
         return ys_mask.unsqueeze(-2) & m

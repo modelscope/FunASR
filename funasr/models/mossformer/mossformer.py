@@ -5,24 +5,54 @@ from einops import rearrange
 
 
 def identity(t, *args, **kwargs):
+    """Identity.
+    
+        Args:
+            t: TODO.
+            *args: Variable positional arguments.
+            **kwargs: Additional keyword arguments.
+        """
     return t
 
 
 def append_dims(x, num_dims):
+    """Append dims.
+    
+        Args:
+            x: TODO.
+            num_dims: TODO.
+        """
     if num_dims <= 0:
         return x
     return x.view(*x.shape, *((1,) * num_dims))
 
 
 def exists(val):
+    """Exists.
+    
+        Args:
+            val: TODO.
+        """
     return val is not None
 
 
 def default(val, d):
+    """Default.
+    
+        Args:
+            val: TODO.
+            d: TODO.
+        """
     return val if exists(val) else d
 
 
 def padding_to_multiple_of(n, mult):
+    """Padding to multiple of.
+    
+        Args:
+            n: TODO.
+            mult: TODO.
+        """
     remainder = n % mult
     if remainder == 0:
         return 0
@@ -33,10 +63,20 @@ class Transpose(nn.Module):
     """Wrapper class of torch.transpose() for Sequential module."""
 
     def __init__(self, shape: tuple):
+        """Initialize Transpose.
+        
+            Args:
+                shape: TODO.
+            """
         super(Transpose, self).__init__()
         self.shape = shape
 
     def forward(self, x):
+        """Forward pass for training.
+        
+            Args:
+                x: TODO.
+            """
         return x.transpose(*self.shape)
 
 
@@ -66,6 +106,16 @@ class DepthwiseConv1d(nn.Module):
         padding: int = 0,
         bias: bool = False,
     ) -> None:
+        """Initialize DepthwiseConv1d.
+        
+            Args:
+                in_channels: TODO.
+                out_channels: TODO.
+                kernel_size: Size/dimension parameter.
+                stride: TODO.
+                padding: TODO.
+                bias: TODO.
+            """
         super(DepthwiseConv1d, self).__init__()
         assert (
             out_channels % in_channels == 0
@@ -81,6 +131,11 @@ class DepthwiseConv1d(nn.Module):
         )
 
     def forward(self, inputs):
+        """Forward pass for training.
+        
+            Args:
+                inputs: TODO.
+            """
         return self.conv(inputs)
 
 
@@ -106,6 +161,14 @@ class ConvModule(nn.Module):
         expansion_factor: int = 2,
         dropout_p: float = 0.1,
     ) -> None:
+        """Initialize ConvModule.
+        
+            Args:
+                in_channels: TODO.
+                kernel_size: Size/dimension parameter.
+                expansion_factor: TODO.
+                dropout_p: TODO.
+            """
         super(ConvModule, self).__init__()
         assert (kernel_size - 1) % 2 == 0, "kernel_size should be a odd number for 'SAME' padding"
         assert expansion_factor == 2, "Currently, Only Supports expansion_factor 2"
@@ -118,23 +181,47 @@ class ConvModule(nn.Module):
         )
 
     def forward(self, inputs):
+        """Forward pass for training.
+        
+            Args:
+                inputs: TODO.
+            """
         return inputs + self.sequential(inputs).transpose(1, 2)
 
 
 class OffsetScale(nn.Module):
     def __init__(self, dim, heads=1):
+        """Initialize OffsetScale.
+        
+            Args:
+                dim: TODO.
+                heads: TODO.
+            """
         super().__init__()
         self.gamma = nn.Parameter(torch.ones(heads, dim))
         self.beta = nn.Parameter(torch.zeros(heads, dim))
         nn.init.normal_(self.gamma, std=0.02)
 
     def forward(self, x):
+        """Forward pass for training.
+        
+            Args:
+                x: TODO.
+            """
         out = einsum("... d, h d -> ... h d", x, self.gamma) + self.beta
         return out.unbind(dim=-2)
 
 
 class FFConvM(nn.Module):
     def __init__(self, dim_in, dim_out, norm_klass=nn.LayerNorm, dropout=0.1):
+        """Initialize FFConvM.
+        
+            Args:
+                dim_in: TODO.
+                dim_out: TODO.
+                norm_klass: TODO.
+                dropout: TODO.
+            """
         super().__init__()
         self.mdl = nn.Sequential(
             norm_klass(dim_in),
@@ -148,6 +235,11 @@ class FFConvM(nn.Module):
         self,
         x,
     ):
+        """Forward pass for training.
+        
+            Args:
+                x: TODO.
+            """
         output = self.mdl(x)
         return output
 
@@ -166,6 +258,7 @@ class FLASH_ShareA_FFConvM(nn.Module):
         norm_klass=nn.LayerNorm,
         shift_tokens=True
     ):
+        """Initialize FLASH_ShareA_FFConvM."""
         super().__init__()
         hidden_dim = int(dim * expansion_factor)
         self.group_size = group_size
@@ -236,6 +329,18 @@ class FLASH_ShareA_FFConvM(nn.Module):
         return x
 
     def cal_attention(self, x, quad_q, lin_q, quad_k, lin_k, v, u, mask=None):
+        """Cal attention.
+        
+            Args:
+                x: TODO.
+                quad_q: TODO.
+                lin_q: TODO.
+                quad_k: TODO.
+                lin_k: TODO.
+                v: TODO.
+                u: TODO.
+                mask: TODO.
+            """
         b, n, device, g = x.shape[0], x.shape[-2], x.device, self.group_size
 
         if exists(mask):

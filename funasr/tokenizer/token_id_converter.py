@@ -14,6 +14,12 @@ class TokenIDConverter:
         unk_symbol: str = "<unk>",
     ):
 
+        """Initialize TokenIDConverter.
+        
+            Args:
+                token_list: TODO.
+                unk_symbol: TODO.
+            """
         if isinstance(token_list, (Path, str)):
             token_list = Path(token_list)
             self.token_list_repr = str(token_list)
@@ -45,12 +51,23 @@ class TokenIDConverter:
         self.unk_id = self.token2id[self.unk_symbol]
 
     def get_num_vocabulary_size(self) -> int:
+        """Get num vocabulary size."""
         return len(self.token_list)
 
     def ids2tokens(self, integers: Union[np.ndarray, Iterable[int]]) -> List[str]:
+        """Ids2tokens.
+        
+            Args:
+                integers: TODO.
+            """
         if isinstance(integers, np.ndarray) and integers.ndim != 1:
             raise ValueError(f"Must be 1 dim ndarray, but got {integers.ndim}")
         return [self.token_list[i] for i in integers]
 
     def tokens2ids(self, tokens: Iterable[str]) -> List[int]:
+        """Tokens2ids.
+        
+            Args:
+                tokens: TODO.
+            """
         return [self.token2id.get(i, self.unk_id) for i in tokens]

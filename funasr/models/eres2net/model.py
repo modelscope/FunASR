@@ -32,6 +32,20 @@ class ERes2NetV2SV(torch.nn.Module):
         two_emb_layer=False,
         **kwargs,
     ):
+        """Initialize ERes2NetV2SV.
+        
+            Args:
+                feat_dim: Size/dimension parameter.
+                embedding_size: Size/dimension parameter.
+                m_channels: TODO.
+                baseWidth: TODO.
+                scale: TODO.
+                expansion: TODO.
+                num_blocks: TODO.
+                pooling_func: TODO.
+                two_emb_layer: TODO.
+                **kwargs: Additional keyword arguments.
+            """
         super().__init__()
         self.model = ERes2NetV2(
             feat_dim=feat_dim,
@@ -56,6 +70,11 @@ class ERes2NetV2SV(torch.nn.Module):
             self._load_pretrained(init_param)
 
     def _load_pretrained(self, path):
+        """Internal: load pretrained.
+        
+            Args:
+                path: TODO.
+            """
         state_dict = torch.load(path, map_location="cpu")
         if "state_dict" in state_dict:
             state_dict = state_dict["state_dict"]
@@ -65,6 +84,11 @@ class ERes2NetV2SV(torch.nn.Module):
         logging.info(f"ERes2NetV2 loaded pretrained weights from {path}")
 
     def forward(self, x):
+        """Forward pass for training.
+        
+            Args:
+                x: TODO.
+            """
         return self.model(x)
 
     def inference(
@@ -76,6 +100,16 @@ class ERes2NetV2SV(torch.nn.Module):
         frontend=None,
         **kwargs,
     ):
+        """Run inference on input data.
+        
+            Args:
+                data_in: Input data (audio samples, file paths, or text).
+                data_lengths: Lengths of each input sample in the batch.
+                key: Sample identifiers.
+                tokenizer: Tokenizer instance for text encoding/decoding.
+                frontend: Audio frontend for feature extraction.
+                **kwargs: Additional keyword arguments.
+            """
         meta_data = {}
         time1 = time.perf_counter()
         audio_sample_list = load_audio_text_image_video(

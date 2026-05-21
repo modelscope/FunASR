@@ -15,6 +15,13 @@ class WordTokenizer(AbsTokenizer):
         non_linguistic_symbols: Union[Path, str, Iterable[str]] = None,
         remove_non_linguistic_symbols: bool = False,
     ):
+        """Initialize WordTokenizer.
+        
+            Args:
+                delimiter: TODO.
+                non_linguistic_symbols: TODO.
+                remove_non_linguistic_symbols: TODO.
+            """
         self.delimiter = delimiter
 
         if not remove_non_linguistic_symbols and non_linguistic_symbols is not None:
@@ -37,9 +44,15 @@ class WordTokenizer(AbsTokenizer):
         self.remove_non_linguistic_symbols = remove_non_linguistic_symbols
 
     def __repr__(self):
+        """Internal: repr  ."""
         return f'{self.__class__.__name__}(delimiter="{self.delimiter}")'
 
     def text2tokens(self, line: str) -> List[str]:
+        """Text2tokens.
+        
+            Args:
+                line: TODO.
+            """
         tokens = []
         for t in line.split(self.delimiter):
             if self.remove_non_linguistic_symbols and t in self.non_linguistic_symbols:
@@ -48,6 +61,11 @@ class WordTokenizer(AbsTokenizer):
         return tokens
 
     def tokens2text(self, tokens: Iterable[str]) -> str:
+        """Tokens2text.
+        
+            Args:
+                tokens: TODO.
+            """
         if self.delimiter is None:
             delimiter = " "
         else:

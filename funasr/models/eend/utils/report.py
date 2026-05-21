@@ -17,6 +17,12 @@ metrics = [
 
 
 def recover_prediction(y, n_speaker):
+    """Recover prediction.
+    
+        Args:
+            y: TODO.
+            n_speaker: TODO.
+        """
     if n_speaker <= 1:
         return y
     elif n_speaker == 2:
@@ -72,6 +78,13 @@ def recover_prediction(y, n_speaker):
 
 class PowerReporter:
     def __init__(self, valid_data_loader, mapping_dict, max_n_speaker):
+        """Initialize PowerReporter.
+        
+            Args:
+                valid_data_loader: TODO.
+                mapping_dict: TODO.
+                max_n_speaker: TODO.
+            """
         valid_data_loader_cp = copy.deepcopy(valid_data_loader)
         self.valid_data_loader = valid_data_loader_cp
         del valid_data_loader
@@ -79,9 +92,23 @@ class PowerReporter:
         self.max_n_speaker = max_n_speaker
 
     def report(self, model, eidx, device):
+        """Report.
+        
+            Args:
+                model: Model instance or model name.
+                eidx: TODO.
+                device: Target device ("cuda:0", "cpu", etc.).
+            """
         self.report_val(model, eidx, device)
 
     def report_val(self, model, eidx, device):
+        """Report val.
+        
+            Args:
+                model: Model instance or model name.
+                eidx: TODO.
+                device: Target device ("cuda:0", "cpu", etc.).
+            """
         model.eval()
         ud_valid_start = time.time()
         valid_res, valid_loss, stats_keys, vad_valid_accuracy = self.report_core(
@@ -105,6 +132,12 @@ class PowerReporter:
         print("Valid cost time ... ", ud_valid)
 
     def inv_mapping_func(self, label, mapping_dict):
+        """Inv mapping func.
+        
+            Args:
+                label: TODO.
+                mapping_dict: TODO.
+            """
         if not isinstance(label, int):
             label = int(label)
         if label in mapping_dict["label2dec"].keys():
@@ -114,6 +147,13 @@ class PowerReporter:
         return num
 
     def report_core(self, model, data_loader, device):
+        """Report core.
+        
+            Args:
+                model: Model instance or model name.
+                data_loader: TODO.
+                device: Target device ("cuda:0", "cpu", etc.).
+            """
         res = {}
         for item in metrics:
             res[item[0]] = 0.0
@@ -162,6 +202,13 @@ class PowerReporter:
         return res, loss_s, stats.keys(), vad_acc
 
     def calc_diarization_error(self, decisions, label, label_delay=0):
+        """Calc diarization error.
+        
+            Args:
+                decisions: TODO.
+                label: TODO.
+                label_delay: TODO.
+            """
         label = label[: len(label) - label_delay, ...]
         n_ref = torch.sum(label, dim=-1)
         n_sys = torch.sum(decisions, dim=-1)

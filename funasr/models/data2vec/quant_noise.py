@@ -57,6 +57,12 @@ def quant_noise(module, p, block_size):
 
     def _forward_pre_hook(mod, input):
         # no noise for evaluation
+        """Internal: forward pre hook.
+        
+            Args:
+                mod: TODO.
+                input: Input audio/text data.
+            """
         if mod.training:
             if not is_conv:
                 # gather weight and sizes

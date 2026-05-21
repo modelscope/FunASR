@@ -9,6 +9,14 @@ from typing import Tuple
 class FusedFrontends(nn.Module):
     def __init__(self, frontends=None, align_method="linear_projection", proj_dim=100, fs=16000):
 
+        """Initialize FusedFrontends.
+        
+            Args:
+                frontends: TODO.
+                align_method: TODO.
+                proj_dim: Size/dimension parameter.
+                fs: TODO.
+            """
         super().__init__()
         self.align_method = align_method  # fusing method : linear_projection only for now
         self.proj_dim = proj_dim  # dim of the projection done on each frontend
@@ -96,6 +104,7 @@ class FusedFrontends(nn.Module):
             self.projection_layers = self.projection_layers.to(torch.device(dev))
 
     def output_size(self) -> int:
+        """Output size."""
         return len(self.frontends) * self.proj_dim
 
     def forward(
@@ -103,6 +112,12 @@ class FusedFrontends(nn.Module):
     ) -> Tuple[torch.Tensor, torch.Tensor]:
 
         # step 0 : get all frontends features
+        """Forward pass for training.
+        
+            Args:
+                input: Input audio/text data.
+                input_lengths: Lengths of input.
+            """
         self.feats = []
         for frontend in self.frontends:
             with torch.no_grad():

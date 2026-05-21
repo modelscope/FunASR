@@ -30,6 +30,11 @@ else:
     # Nothing to do if torch<1.6.0
     @contextmanager
     def autocast(enabled=True):
+        """Autocast.
+        
+            Args:
+                enabled: TODO.
+            """
         yield
 
 
@@ -67,6 +72,29 @@ class MFCCA(FunASRModel):
         sym_blank: str = "<blank>",
         preencoder: Optional[AbsPreEncoder] = None,
     ):
+        """Initialize MFCCA.
+        
+            Args:
+                vocab_size: Size/dimension parameter.
+                token_list: TODO.
+                frontend: Audio frontend for feature extraction.
+                specaug: TODO.
+                normalize: TODO.
+                encoder: TODO.
+                decoder: TODO.
+                ctc: TODO.
+                rnnt_decoder: TODO.
+                ctc_weight: TODO.
+                ignore_id: TODO.
+                lsm_weight: TODO.
+                mask_ratio: TODO.
+                length_normalized_loss: TODO.
+                report_cer: TODO.
+                report_wer: TODO.
+                sym_space: TODO.
+                sym_blank: TODO.
+                preencoder: TODO.
+            """
         assert 0.0 <= ctc_weight <= 1.0, ctc_weight
         assert rnnt_decoder is None, "Not implemented"
 
@@ -198,6 +226,14 @@ class MFCCA(FunASRModel):
         text: torch.Tensor,
         text_lengths: torch.Tensor,
     ) -> Dict[str, torch.Tensor]:
+        """Collect feats.
+        
+            Args:
+                speech: Speech audio tensor, shape (batch, time).
+                speech_lengths: Length of each speech sample.
+                text: Text tensor or string input.
+                text_lengths: Length of each text sample.
+            """
         feats, feats_lengths, channel_size = self._extract_feats(speech, speech_lengths)
         return {"feats": feats, "feats_lengths": feats_lengths}
 
@@ -246,6 +282,12 @@ class MFCCA(FunASRModel):
     def _extract_feats(
         self, speech: torch.Tensor, speech_lengths: torch.Tensor
     ) -> Tuple[torch.Tensor, torch.Tensor]:
+        """Internal: extract feats.
+        
+            Args:
+                speech: Speech audio tensor, shape (batch, time).
+                speech_lengths: Length of each speech sample.
+            """
         assert speech_lengths.dim() == 1, speech_lengths.shape
         # for data-parallel
         speech = speech[:, : speech_lengths.max()]
@@ -268,6 +310,14 @@ class MFCCA(FunASRModel):
         ys_pad: torch.Tensor,
         ys_pad_lens: torch.Tensor,
     ):
+        """Internal: calc att loss.
+        
+            Args:
+                encoder_out: Encoder output tensor.
+                encoder_out_lens: Encoder output lengths.
+                ys_pad: TODO.
+                ys_pad_lens: Lengths of ys_pad.
+            """
         ys_in_pad, ys_out_pad = add_sos_eos(ys_pad, self.sos, self.eos, self.ignore_id)
         ys_in_lens = ys_pad_lens + 1
 
@@ -299,6 +349,14 @@ class MFCCA(FunASRModel):
         ys_pad_lens: torch.Tensor,
     ):
         # Calc CTC loss
+        """Internal: calc ctc loss.
+        
+            Args:
+                encoder_out: Encoder output tensor.
+                encoder_out_lens: Encoder output lengths.
+                ys_pad: TODO.
+                ys_pad_lens: Lengths of ys_pad.
+            """
         if encoder_out.dim() == 4:
             encoder_out = encoder_out.mean(1)
         loss_ctc = self.ctc(encoder_out, encoder_out_lens, ys_pad, ys_pad_lens)
@@ -317,4 +375,12 @@ class MFCCA(FunASRModel):
         ys_pad: torch.Tensor,
         ys_pad_lens: torch.Tensor,
     ):
+        """Internal: calc rnnt loss.
+        
+            Args:
+                encoder_out: Encoder output tensor.
+                encoder_out_lens: Encoder output lengths.
+                ys_pad: TODO.
+                ys_pad_lens: Lengths of ys_pad.
+            """
         raise NotImplementedError

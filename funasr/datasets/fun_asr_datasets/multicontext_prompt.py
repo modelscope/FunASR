@@ -33,6 +33,16 @@ class MultiContextPrompt:
                  use_asr_hotwords=True,
                  use_multi_lingual_prompt=True,
                  **kwargs):
+        """Initialize MultiContextPrompt.
+        
+            Args:
+                use_hist: TODO.
+                use_one_pass_result: TODO.
+                use_hotwords: TODO.
+                use_asr_hotwords: TODO.
+                use_multi_lingual_prompt: TODO.
+                **kwargs: Additional keyword arguments.
+            """
         self.use_hist = use_hist
         self.use_one_pass_result = use_one_pass_result
         self.use_hotwords = use_hotwords
@@ -60,11 +70,21 @@ class MultiContextPrompt:
         self.min_neg_hotwords_num = kwargs.get("min_neg_hotwords_num", 0)
 
     def get_hotwords_list(self, hotwords_file):
+        """Get hotwords list.
+        
+            Args:
+                hotwords_file: TODO.
+            """
         with open(hotwords_file, "r") as f:
             hotwords_list = f.read().strip().split("\n")
         return hotwords_list, len(hotwords_list)
 
     def detect_language(self, text):
+        """Detect language.
+        
+            Args:
+                text: Text tensor or string input.
+            """
         if isinstance(text, list):
             text = " ".join(text)
 
@@ -95,6 +115,11 @@ class MultiContextPrompt:
     def hotwords_sampling(self, hotwords):
 
         # hotwords_list = hotwords.split(", ")
+        """Hotwords sampling.
+        
+            Args:
+                hotwords: TODO.
+            """
         hotwords_list = hotwords
         selected_hotwords = []
         if self.max_neg_hotwords_num > -1:
@@ -112,6 +137,12 @@ class MultiContextPrompt:
         return selected_hotwords, selected_hotwords_num
 
     def get_prompt(self, item, language):
+        """Get prompt.
+        
+            Args:
+                item: TODO.
+                language: Language identifier.
+            """
         template = self.CONTEXT_TEMPLATES[language]
 
         prompt = template['header']
@@ -157,6 +188,12 @@ class MultiContextPrompt:
         return prompt
 
     def get_inference_prompt(self, item, language="zh"):
+        """Get inference prompt.
+        
+            Args:
+                item: TODO.
+                language: Language identifier.
+            """
         template = self.CONTEXT_TEMPLATES[language]
 
         prompt = template['header']
@@ -233,6 +270,15 @@ class MultiContextPromptNew:
                  use_hotwords=True,
                  use_multi_lingual_prompt=True,
                  **kwargs):
+        """Initialize MultiContextPromptNew.
+        
+            Args:
+                use_hist: TODO.
+                use_one_pass_result: TODO.
+                use_hotwords: TODO.
+                use_multi_lingual_prompt: TODO.
+                **kwargs: Additional keyword arguments.
+            """
         self.use_hist = use_hist
         self.use_one_pass_result = use_one_pass_result
         self.use_hotwords = use_hotwords
@@ -244,6 +290,11 @@ class MultiContextPromptNew:
 
     def hotwords_sampling(self, hotwords):
 
+        """Hotwords sampling.
+        
+            Args:
+                hotwords: TODO.
+            """
         hotwords_list = hotwords.split(", ")
         if self.max_hotwords_num > 0:
             max_hotwords_num = min(self.max_hotwords_num, len(hotwords_list))
@@ -261,6 +312,12 @@ class MultiContextPromptNew:
         return hotwords_list, selected_hotwords_num
 
     def get_prompt(self, item, language):
+        """Get prompt.
+        
+            Args:
+                item: TODO.
+                language: Language identifier.
+            """
         template = self.CONTEXT_TEMPLATES[language]
 
         prompt = template['header']
@@ -287,6 +344,13 @@ class MultiContextPromptNew:
         return prompt
 
     def get_inference_prompt(self, hist_context="", one_pass_result="", hotwords=""):
+        """Get inference prompt.
+        
+            Args:
+                hist_context: TODO.
+                one_pass_result: TODO.
+                hotwords: TODO.
+            """
         language = 'zh' if self.use_multi_lingual_prompt and np.random.rand() < 0.5 else 'en'
         template = self.CONTEXT_TEMPLATES[language]
 

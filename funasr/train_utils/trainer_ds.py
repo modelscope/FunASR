@@ -25,6 +25,12 @@ except:
 
 @contextmanager
 def maybe_autocast(dtype=None, use_deepspeed=False):
+    """Maybe autocast.
+    
+        Args:
+            dtype: TODO.
+            use_deepspeed: TODO.
+        """
     if use_deepspeed:
         with torch.cuda.amp.autocast(enabled=True, dtype=dtype, cache_enabled=False):
             yield
@@ -668,6 +674,13 @@ class Trainer:
             self.train_acc_avg = train_acc_avg.detach().cpu().item() / self.world_size
 
     def forward_step(self, model, batch, loss_dict={}):
+        """Forward step.
+        
+            Args:
+                model: Model instance or model name.
+                batch: TODO.
+                loss_dict: TODO.
+            """
         with maybe_autocast(dtype=self.dtype, use_deepspeed=self.use_deepspeed):
             retval = model(**batch)
 
@@ -679,6 +692,13 @@ class Trainer:
         loss_dict["weight"] = weight
 
     def backward_step(self, model, scaler, loss_dict={}):
+        """Backward step.
+        
+            Args:
+                model: Model instance or model name.
+                scaler: TODO.
+                loss_dict: TODO.
+            """
         loss = loss_dict["loss"]
 
         if self.use_deepspeed:
@@ -691,6 +711,15 @@ class Trainer:
                 loss.backward()
 
     def update_step(self, model, optim, scheduler, scaler, loss_dict=None):
+        """Update step.
+        
+            Args:
+                model: Model instance or model name.
+                optim: TODO.
+                scheduler: TODO.
+                scaler: TODO.
+                loss_dict: TODO.
+            """
         batch_idx = loss_dict["batch_idx"]
         if self.use_deepspeed:
             model.step()
@@ -822,6 +851,13 @@ class Trainer:
         tag="train",
         **kwargs,
     ):
+        """Log.
+        
+            Args:
+                loss_dict: TODO.
+                tag: TODO.
+                **kwargs: Additional keyword arguments.
+            """
         loss = loss_dict["loss"].detach().cpu().item()
         epoch = loss_dict["epoch"]
         batch_idx = loss_dict["batch_idx"]
@@ -892,6 +928,11 @@ class Trainer:
 
     def close(self, writer=None):
 
+        """Close.
+        
+            Args:
+                writer: TODO.
+            """
         if self.use_ddp or self.use_fsdp:
             dist.barrier()
 
@@ -903,6 +944,12 @@ class Trainer:
 
     def warp_model(self, model, **kwargs):
 
+        """Warp model.
+        
+            Args:
+                model: Model instance or model name.
+                **kwargs: Additional keyword arguments.
+            """
         if self.use_deepspeed:
             from deepspeed.runtime.zero.stage_1_and_2 import (
                 estimate_zero2_model_states_mem_needs_all_live,
@@ -948,6 +995,12 @@ class Trainer:
         return model
 
     def warp_optim_scheduler(self, model, **kwargs):
+        """Warp optim scheduler.
+        
+            Args:
+                model: Model instance or model name.
+                **kwargs: Additional keyword arguments.
+            """
         from funasr.optimizers import optim_classes
         from funasr.schedulers import scheduler_classes
         from omegaconf import OmegaConf, DictConfig
@@ -989,6 +1042,11 @@ class Trainer:
                 else:
 
                     def scheduler(opt):
+                        """Scheduler.
+                        
+                            Args:
+                                opt: TODO.
+                            """
                         return scheduler_class(opt, **kwargs.get("scheduler_conf"))
 
             model, optimizer, _, scheduler = deepspeed.initialize(

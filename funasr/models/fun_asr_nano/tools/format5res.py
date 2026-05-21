@@ -7,6 +7,13 @@ import sys
 
 
 def scoreformat(name, line, flag=1):
+    """Scoreformat.
+    
+        Args:
+            name: TODO.
+            line: TODO.
+            flag: TODO.
+        """
     newline = ""
     for i in range(0, len(line)):
         curr = line[i]
@@ -47,6 +54,11 @@ def scoreformat(name, line, flag=1):
 
 
 def recoformat(line):
+    """Recoformat.
+    
+        Args:
+            line: TODO.
+        """
     newline = ""
     en_flag = 0  # 0: no-english   1 : english   2: former
     for i in range(0, len(line)):
@@ -86,6 +98,11 @@ def recoformat(line):
 
 
 def numbersingle(line):
+    """Numbersingle.
+    
+        Args:
+            line: TODO.
+        """
     chnu = ["零", "一", "二", "两", "三", "四", "五", "六", "七", "八", "九", "点"]
     newline = ""
     for id in range(len(line)):
@@ -118,6 +135,11 @@ def numbersingle(line):
 
 
 def ch_number2digit(line):
+    """Ch number2digit.
+    
+        Args:
+            line: TODO.
+        """
     number_flag = 0
     zero_flag = 0
     bits = {
@@ -224,6 +246,11 @@ def ch_number2digit(line):
 
 
 def special(line):
+    """Special.
+    
+        Args:
+            line: TODO.
+        """
     newline = ""
     for e in range(len(line)):
         if ord(line[e]) == 247:
@@ -255,6 +282,11 @@ def special(line):
 
 
 def all_convert(content):
+    """All convert.
+    
+        Args:
+            content: TODO.
+        """
     content = recoformat(content)
     content = numbersingle(content)
     content = ch_number2digit(content)

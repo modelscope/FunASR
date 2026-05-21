@@ -3,6 +3,11 @@ from funasr import __version__  # Ensure that __version__ is defined in your pac
 
 
 def get_pypi_version(package_name):
+    """Get pypi version.
+    
+        Args:
+            package_name: TODO.
+        """
     import requests
 
     url = f"https://pypi.org/pypi/{package_name}/json"
@@ -15,6 +20,11 @@ def get_pypi_version(package_name):
 
 
 def check_for_update(disable=False):
+    """Check for update.
+    
+        Args:
+            disable: TODO.
+        """
     current_version = version.parse(__version__)
     print(f"funasr version: {current_version}.")
     if disable:

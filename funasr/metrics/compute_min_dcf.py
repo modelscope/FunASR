@@ -16,6 +16,7 @@ import sys, argparse, os
 
 
 def GetArgs():
+    """Getargs."""
     parser = argparse.ArgumentParser(
         description="Compute the minimum "
         "detection cost function along with the threshold at which it occurs. "
@@ -61,6 +62,11 @@ def GetArgs():
 
 
 def CheckArgs(args):
+    """Checkargs.
+    
+        Args:
+            args: TODO.
+        """
     if args.c_fa <= 0:
         raise Exception("--c-fa must be greater than 0")
     if args.c_miss <= 0:
@@ -77,6 +83,12 @@ def ComputeErrorRates(scores, labels):
     # Sort the scores from smallest to largest, and also get the corresponding
     # indexes of the sorted scores.  We will treat the sorted scores as the
     # thresholds at which the the error-rates are evaluated.
+    """Computeerrorrates.
+    
+        Args:
+            scores: TODO.
+            labels: TODO.
+        """
     sorted_indexes, thresholds = zip(
         *sorted([(index, threshold) for index, threshold in enumerate(scores)], key=itemgetter(1))
     )
@@ -113,6 +125,16 @@ def ComputeErrorRates(scores, labels):
 # Computes the minimum of the detection cost function.  The comments refer to
 # equations in Section 3 of the NIST 2016 Speaker Recognition Evaluation Plan.
 def ComputeMinDcf(fnrs, fprs, thresholds, p_target, c_miss, c_fa):
+    """Computemindcf.
+    
+        Args:
+            fnrs: TODO.
+            fprs: TODO.
+            thresholds: TODO.
+            p_target: TODO.
+            c_miss: TODO.
+            c_fa: TODO.
+        """
     min_c_det = float("inf")
     min_c_det_threshold = thresholds[0]
     for i in range(0, len(fnrs)):
@@ -129,6 +151,15 @@ def ComputeMinDcf(fnrs, fprs, thresholds, p_target, c_miss, c_fa):
 
 
 def compute_min_dcf(scores_filename, trials_filename, c_miss=1, c_fa=1, p_target=0.01):
+    """Compute min dcf.
+    
+        Args:
+            scores_filename: TODO.
+            trials_filename: TODO.
+            c_miss: TODO.
+            c_fa: TODO.
+            p_target: TODO.
+        """
     scores_file = open(scores_filename, "r").readlines()
     trials_file = open(trials_filename, "r").readlines()
     c_miss = c_miss
@@ -162,6 +193,7 @@ def compute_min_dcf(scores_filename, trials_filename, c_miss=1, c_fa=1, p_target
 
 
 def main():
+    """Main."""
     args = GetArgs()
     mindcf, threshold = compute_min_dcf(
         args.scores_filename, args.trials_filename, args.c_miss, args.c_fa, args.p_target

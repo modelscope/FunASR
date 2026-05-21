@@ -21,6 +21,15 @@ class TriStageLR(_LRScheduler, AbsBatchStepScheduler):
         init_lr_scale: float = 0.01,
         final_lr_scale: float = 0.01,
     ):
+        """Initialize TriStageLR.
+        
+            Args:
+                optimizer: TODO.
+                last_epoch: TODO.
+                phase_ratio: TODO.
+                init_lr_scale: TODO.
+                final_lr_scale: TODO.
+            """
         self.optimizer = optimizer
         self.last_epoch = last_epoch
         self.phase_ratio = phase_ratio
@@ -29,6 +38,11 @@ class TriStageLR(_LRScheduler, AbsBatchStepScheduler):
         self.optimizer_lr = self.optimizer.defaults["lr"]
 
     def init_tri_stage_scheudler(self, max_update):
+        """Init tri stage scheudler.
+        
+            Args:
+                max_update: TODO.
+            """
         self.max_update = max_update
         self.peak_lr = self.optimizer_lr
         self.init_lr = self.init_lr_scale * self.optimizer_lr
@@ -95,10 +109,16 @@ class TriStageLR(_LRScheduler, AbsBatchStepScheduler):
         self.set_optimizer_lr(self.lr)
 
     def set_optimizer_lr(self, lr):
+        """Set optimizer lr.
+        
+            Args:
+                lr: TODO.
+            """
         for param_group in self.optimizer.param_groups:
             param_group["lr"] = lr
 
     def get_lr(self):
+        """Get lr."""
         step_num = self.last_epoch + 1
         self.step_update(step_num)
         return [self.lr]

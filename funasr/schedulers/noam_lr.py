@@ -31,6 +31,14 @@ class NoamLR(_LRScheduler, AbsBatchStepScheduler):
         warmup_steps: Union[int, float] = 25000,
         last_epoch: int = -1,
     ):
+        """Initialize NoamLR.
+        
+            Args:
+                optimizer: TODO.
+                model_size: Size/dimension parameter.
+                warmup_steps: TODO.
+                last_epoch: TODO.
+            """
         self.model_size = model_size
         self.warmup_steps = warmup_steps
 
@@ -46,15 +54,22 @@ class NoamLR(_LRScheduler, AbsBatchStepScheduler):
         super().__init__(optimizer, last_epoch)
 
     def lr_for_WarmupLR(self, lr: float) -> float:
+        """Lr for warmuplr.
+        
+            Args:
+                lr: TODO.
+            """
         return lr / self.model_size**0.5 / self.warmup_steps**0.5
 
     def __repr__(self):
+        """Internal: repr  ."""
         return (
             f"{self.__class__.__name__}(model_size={self.model_size}, "
             f"warmup_steps={self.warmup_steps})"
         )
 
     def get_lr(self):
+        """Get lr."""
         step_num = self.last_epoch + 1
         return [
             lr * self.model_size**-0.5 * min(step_num**-0.5, step_num * self.warmup_steps**-1.5)

@@ -14,6 +14,11 @@ from funasr.register import tables
 class GLMASR(nn.Module):
 
     def __init__(self, **kwargs):
+        """Initialize GLMASR.
+        
+            Args:
+                **kwargs: Additional keyword arguments.
+            """
         super().__init__()
         model_path = kwargs.get("model_path", kwargs.get("model", "zai-org/GLM-ASR-Nano-2512"))
         device = kwargs.get("device", "cuda:0")
@@ -43,6 +48,13 @@ class GLMASR(nn.Module):
         logging.info(f"GLM-ASR model loaded from {model_path}")
 
     def _resolve_model_path(self, model_path, hub, kwargs):
+        """Internal: resolve model path.
+        
+            Args:
+                model_path: TODO.
+                hub: TODO.
+                kwargs: Additional keyword arguments.
+            """
         if os.path.exists(model_path):
             return model_path
 
@@ -59,6 +71,11 @@ class GLMASR(nn.Module):
         return model_path
 
     def forward(self, **kwargs):
+        """Forward pass for training.
+        
+            Args:
+                **kwargs: Additional keyword arguments.
+            """
         raise NotImplementedError("GLMASR only supports inference mode")
 
     def inference(
@@ -70,6 +87,16 @@ class GLMASR(nn.Module):
         frontend=None,
         **kwargs,
     ):
+        """Run inference on input data.
+        
+            Args:
+                data_in: Input data (audio samples, file paths, or text).
+                data_lengths: Lengths of each input sample in the batch.
+                key: Sample identifiers.
+                tokenizer: Tokenizer instance for text encoding/decoding.
+                frontend: Audio frontend for feature extraction.
+                **kwargs: Additional keyword arguments.
+            """
         meta_data = {}
         time1 = time.perf_counter()
 

@@ -30,6 +30,17 @@ class LogMel(torch.nn.Module):
         htk: bool = False,
         log_base: float = None,
     ):
+        """Initialize LogMel.
+        
+            Args:
+                fs: TODO.
+                n_fft: TODO.
+                n_mels: TODO.
+                fmin: TODO.
+                fmax: TODO.
+                htk: TODO.
+                log_base: TODO.
+            """
         super().__init__()
 
         fmin = 0 if fmin is None else fmin
@@ -51,6 +62,7 @@ class LogMel(torch.nn.Module):
         self.register_buffer("melmat", torch.from_numpy(melmat.T).float())
 
     def extra_repr(self):
+        """Extra repr."""
         return ", ".join(f"{k}={v}" for k, v in self.mel_options.items())
 
     def forward(
@@ -59,6 +71,12 @@ class LogMel(torch.nn.Module):
         ilens: torch.Tensor = None,
     ) -> Tuple[torch.Tensor, torch.Tensor]:
         # feat: (B, T, D1) x melmat: (D1, D2) -> mel_feat: (B, T, D2)
+        """Forward pass for training.
+        
+            Args:
+                feat: TODO.
+                ilens: TODO.
+            """
         mel_feat = torch.matmul(feat, self.melmat)
         mel_feat = torch.clamp(mel_feat, min=1e-10)
 

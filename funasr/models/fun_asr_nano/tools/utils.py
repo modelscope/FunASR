@@ -7,6 +7,14 @@ import torchaudio.functional as F
 
 
 def load_audio(wav_path, rate: int = None, offset: float = 0, duration: float = None):
+    """Load audio.
+    
+        Args:
+            wav_path: TODO.
+            rate: TODO.
+            offset: TODO.
+            duration: TODO.
+        """
     with sf.SoundFile(wav_path) as f:
         start_frame = int(offset * f.samplerate)
         if duration is None:
@@ -29,6 +37,13 @@ def load_audio(wav_path, rate: int = None, offset: float = 0, duration: float = 
 
 
 def forced_align(log_probs: torch.Tensor, targets: torch.Tensor, blank: int = 0):
+    """Forced align.
+    
+        Args:
+            log_probs: TODO.
+            targets: TODO.
+            blank: TODO.
+        """
     items = []
     try:
         # The current version only supports batch_size==1.

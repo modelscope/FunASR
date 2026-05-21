@@ -30,6 +30,13 @@ class WarmupLR(_LRScheduler, AbsBatchStepScheduler):
         warmup_steps: Union[int, float] = 25000,
         last_epoch: int = -1,
     ):
+        """Initialize WarmupLR.
+        
+            Args:
+                optimizer: TODO.
+                warmup_steps: TODO.
+                last_epoch: TODO.
+            """
         self.warmup_steps = warmup_steps
 
         # __init__() must be invoked before setting field
@@ -37,9 +44,11 @@ class WarmupLR(_LRScheduler, AbsBatchStepScheduler):
         super().__init__(optimizer, last_epoch)
 
     def __repr__(self):
+        """Internal: repr  ."""
         return f"{self.__class__.__name__}(warmup_steps={self.warmup_steps})"
 
     def get_lr(self):
+        """Get lr."""
         step_num = self.last_epoch + 1
         return [
             lr * self.warmup_steps**0.5 * min(step_num**-0.5, step_num * self.warmup_steps**-1.5)

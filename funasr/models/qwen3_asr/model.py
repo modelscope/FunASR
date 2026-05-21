@@ -29,6 +29,11 @@ class Qwen3ASR(nn.Module):
     """
 
     def __init__(self, **kwargs):
+        """Initialize Qwen3ASR.
+        
+            Args:
+                **kwargs: Additional keyword arguments.
+            """
         super().__init__()
         model_path = kwargs.get("model_path", kwargs.get("model", "Qwen/Qwen3-ASR-1.7B"))
         device = kwargs.get("device", "cuda:0")
@@ -98,6 +103,11 @@ class Qwen3ASR(nn.Module):
         return model_path
 
     def forward(self, **kwargs):
+        """Forward pass for training.
+        
+            Args:
+                **kwargs: Additional keyword arguments.
+            """
         raise NotImplementedError("Qwen3ASR only supports inference mode")
 
     def inference(

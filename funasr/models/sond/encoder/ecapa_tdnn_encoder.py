@@ -16,6 +16,18 @@ class _BatchNorm1d(nn.Module):
         combine_batch_time=False,
         skip_transpose=False,
     ):
+        """Initialize _BatchNorm1d.
+        
+            Args:
+                input_shape: TODO.
+                input_size: Size/dimension parameter.
+                eps: TODO.
+                momentum: TODO.
+                affine: TODO.
+                track_running_stats: TODO.
+                combine_batch_time: TODO.
+                skip_transpose: TODO.
+            """
         super().__init__()
         self.combine_batch_time = combine_batch_time
         self.skip_transpose = skip_transpose
@@ -34,6 +46,11 @@ class _BatchNorm1d(nn.Module):
         )
 
     def forward(self, x):
+        """Forward pass for training.
+        
+            Args:
+                x: TODO.
+            """
         shape_or = x.shape
         if self.combine_batch_time:
             if x.ndim == 3:
@@ -69,6 +86,21 @@ class _Conv1d(nn.Module):
         padding_mode="reflect",
         skip_transpose=False,
     ):
+        """Initialize _Conv1d.
+        
+            Args:
+                out_channels: TODO.
+                kernel_size: Size/dimension parameter.
+                input_shape: TODO.
+                in_channels: TODO.
+                stride: TODO.
+                dilation: TODO.
+                padding: TODO.
+                groups: TODO.
+                bias: TODO.
+                padding_mode: TODO.
+                skip_transpose: TODO.
+            """
         super().__init__()
         self.kernel_size = kernel_size
         self.stride = stride
@@ -96,6 +128,11 @@ class _Conv1d(nn.Module):
         )
 
     def forward(self, x):
+        """Forward pass for training.
+        
+            Args:
+                x: TODO.
+            """
         if not self.skip_transpose:
             x = x.transpose(1, -1)
 
@@ -133,6 +170,14 @@ class _Conv1d(nn.Module):
         stride: int,
     ):
         # Detecting input shape
+        """Internal: manage padding.
+        
+            Args:
+                x: TODO.
+                kernel_size: Size/dimension parameter.
+                dilation: TODO.
+                stride: TODO.
+            """
         L_in = x.shape[-1]
 
         # Time padding
@@ -165,6 +210,14 @@ class _Conv1d(nn.Module):
 
 
 def get_padding_elem(L_in: int, stride: int, kernel_size: int, dilation: int):
+    """Get padding elem.
+    
+        Args:
+            L_in: TODO.
+            stride: TODO.
+            kernel_size: Size/dimension parameter.
+            dilation: TODO.
+        """
     if stride > 1:
         n_steps = math.ceil(((L_in - kernel_size * dilation) / stride) + 1)
         L_out = stride * (n_steps - 1) + kernel_size * dilation
@@ -180,15 +233,35 @@ def get_padding_elem(L_in: int, stride: int, kernel_size: int, dilation: int):
 # Skip transpose as much as possible for efficiency
 class Conv1d(_Conv1d):
     def __init__(self, *args, **kwargs):
+        """Initialize Conv1d.
+        
+            Args:
+                *args: Variable positional arguments.
+                **kwargs: Additional keyword arguments.
+            """
         super().__init__(skip_transpose=True, *args, **kwargs)
 
 
 class BatchNorm1d(_BatchNorm1d):
     def __init__(self, *args, **kwargs):
+        """Initialize BatchNorm1d.
+        
+            Args:
+                *args: Variable positional arguments.
+                **kwargs: Additional keyword arguments.
+            """
         super().__init__(skip_transpose=True, *args, **kwargs)
 
 
 def length_to_mask(length, max_len=None, dtype=None, device=None):
+    """Length to mask.
+    
+        Args:
+            length: TODO.
+            max_len: TODO.
+            dtype: TODO.
+            device: Target device ("cuda:0", "cpu", etc.).
+        """
     assert len(length.shape) == 1
 
     if max_len is None:
@@ -217,6 +290,16 @@ class TDNNBlock(nn.Module):
         activation=nn.ReLU,
         groups=1,
     ):
+        """Initialize TDNNBlock.
+        
+            Args:
+                in_channels: TODO.
+                out_channels: TODO.
+                kernel_size: Size/dimension parameter.
+                dilation: TODO.
+                activation: TODO.
+                groups: TODO.
+            """
         super(TDNNBlock, self).__init__()
         self.conv = Conv1d(
             in_channels=in_channels,
@@ -229,6 +312,11 @@ class TDNNBlock(nn.Module):
         self.norm = BatchNorm1d(input_size=out_channels)
 
     def forward(self, x):
+        """Forward pass for training.
+        
+            Args:
+                x: TODO.
+            """
         return self.norm(self.activation(self.conv(x)))
 
 
@@ -258,6 +346,15 @@ class Res2NetBlock(torch.nn.Module):
     """
 
     def __init__(self, in_channels, out_channels, scale=8, kernel_size=3, dilation=1):
+        """Initialize Res2NetBlock.
+        
+            Args:
+                in_channels: TODO.
+                out_channels: TODO.
+                scale: TODO.
+                kernel_size: Size/dimension parameter.
+                dilation: TODO.
+            """
         super(Res2NetBlock, self).__init__()
         assert in_channels % scale == 0
         assert out_channels % scale == 0
@@ -279,6 +376,11 @@ class Res2NetBlock(torch.nn.Module):
         self.scale = scale
 
     def forward(self, x):
+        """Forward pass for training.
+        
+            Args:
+                x: TODO.
+            """
         y = []
         for i, x_i in enumerate(torch.chunk(x, self.scale, dim=1)):
             if i == 0:
@@ -315,6 +417,13 @@ class SEBlock(nn.Module):
     """
 
     def __init__(self, in_channels, se_channels, out_channels):
+        """Initialize SEBlock.
+        
+            Args:
+                in_channels: TODO.
+                se_channels: TODO.
+                out_channels: TODO.
+            """
         super(SEBlock, self).__init__()
 
         self.conv1 = Conv1d(in_channels=in_channels, out_channels=se_channels, kernel_size=1)
@@ -323,6 +432,12 @@ class SEBlock(nn.Module):
         self.sigmoid = torch.nn.Sigmoid()
 
     def forward(self, x, lengths=None):
+        """Forward pass for training.
+        
+            Args:
+                x: TODO.
+                lengths: TODO.
+            """
         L = x.shape[-1]
         if lengths is not None:
             mask = length_to_mask(lengths * L, max_len=L, device=x.device)
@@ -360,6 +475,13 @@ class AttentiveStatisticsPooling(nn.Module):
     """
 
     def __init__(self, channels, attention_channels=128, global_context=True):
+        """Initialize AttentiveStatisticsPooling.
+        
+            Args:
+                channels: TODO.
+                attention_channels: TODO.
+                global_context: TODO.
+            """
         super().__init__()
 
         self.eps = 1e-12
@@ -382,6 +504,14 @@ class AttentiveStatisticsPooling(nn.Module):
         L = x.shape[-1]
 
         def _compute_statistics(x, m, dim=2, eps=self.eps):
+            """Internal: compute statistics.
+            
+                Args:
+                    x: TODO.
+                    m: TODO.
+                    dim: TODO.
+                    eps: TODO.
+                """
             mean = (m * x).sum(dim)
             std = torch.sqrt((m * (x - mean.unsqueeze(dim)).pow(2)).sum(dim).clamp(eps))
             return mean, std
@@ -460,6 +590,18 @@ class SERes2NetBlock(nn.Module):
         activation=torch.nn.ReLU,
         groups=1,
     ):
+        """Initialize SERes2NetBlock.
+        
+            Args:
+                in_channels: TODO.
+                out_channels: TODO.
+                res2net_scale: TODO.
+                se_channels: TODO.
+                kernel_size: Size/dimension parameter.
+                dilation: TODO.
+                activation: TODO.
+                groups: TODO.
+            """
         super().__init__()
         self.out_channels = out_channels
         self.tdnn1 = TDNNBlock(
@@ -492,6 +634,12 @@ class SERes2NetBlock(nn.Module):
             )
 
     def forward(self, x, lengths=None):
+        """Forward pass for training.
+        
+            Args:
+                x: TODO.
+                lengths: TODO.
+            """
         residual = x
         if self.shortcut:
             residual = self.shortcut(x)
@@ -550,6 +698,23 @@ class ECAPA_TDNN(torch.nn.Module):
         window_shift=1,
     ):
 
+        """Initialize ECAPA_TDNN.
+        
+            Args:
+                input_size: Size/dimension parameter.
+                lin_neurons: TODO.
+                activation: TODO.
+                channels: TODO.
+                kernel_sizes: TODO.
+                dilations: TODO.
+                attention_channels: TODO.
+                res2net_scale: TODO.
+                se_channels: TODO.
+                global_context: TODO.
+                groups: TODO.
+                window_size: Size/dimension parameter.
+                window_shift: TODO.
+            """
         super().__init__()
         assert len(channels) == len(kernel_sizes)
         assert len(channels) == len(dilations)
@@ -612,6 +777,12 @@ class ECAPA_TDNN(torch.nn.Module):
 
     def windowed_pooling(self, x, lengths=None):
         # x: Batch, Channel, Time
+        """Windowed pooling.
+        
+            Args:
+                x: TODO.
+                lengths: TODO.
+            """
         tt = x.shape[2]
         num_chunk = int(math.ceil(tt / self.window_shift))
         pad = self.window_size // 2

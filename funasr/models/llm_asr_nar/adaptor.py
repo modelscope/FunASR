@@ -7,6 +7,15 @@ from funasr.register import tables
 @tables.register("adaptor_classes", "Linear")
 class Linear(nn.Module):
     def __init__(self, downsample_rate, encoder_dim, llm_dim, ffn_dim: int = 2048, **kwargs):
+        """Initialize Linear.
+        
+            Args:
+                downsample_rate: TODO.
+                encoder_dim: Size/dimension parameter.
+                llm_dim: Size/dimension parameter.
+                ffn_dim: Size/dimension parameter.
+                **kwargs: Additional keyword arguments.
+            """
         super().__init__()
         self.k = downsample_rate
         self.encoder_dim = encoder_dim
@@ -16,6 +25,11 @@ class Linear(nn.Module):
         self.linear2 = nn.Linear(ffn_dim, self.llm_dim)
 
     def forward(self, x):
+        """Forward pass for training.
+        
+            Args:
+                x: TODO.
+            """
         batch_size, seq_len, dim = x.size()
         num_frames_to_discard = seq_len % self.k
         if num_frames_to_discard > 0:

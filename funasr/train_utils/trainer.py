@@ -23,6 +23,11 @@ except:
 
 @contextmanager
 def maybe_autocast(enabled):
+    """Maybe autocast.
+    
+        Args:
+            enabled: TODO.
+        """
     if enabled:
         with autocast():
             yield
@@ -661,6 +666,24 @@ class Trainer:
         **kwargs,
     ):
 
+        """Log.
+        
+            Args:
+                epoch: TODO.
+                batch_idx: TODO.
+                step_in_epoch: TODO.
+                batch_num_epoch: TODO.
+                lr: TODO.
+                loss: TODO.
+                speed_stats: TODO.
+                stats: TODO.
+                writer: TODO.
+                tag: TODO.
+                data_split_i: TODO.
+                data_split_num: TODO.
+                log_step: TODO.
+                **kwargs: Additional keyword arguments.
+            """
         if (batch_idx + 1) % self.log_interval == 0:
             batch_idx = log_step if log_step is not None else batch_idx
             gpu_info = (
@@ -720,6 +743,11 @@ class Trainer:
 
     def close(self, writer=None):
 
+        """Close.
+        
+            Args:
+                writer: TODO.
+            """
         if self.use_ddp or self.use_fsdp:
             dist.barrier()
 

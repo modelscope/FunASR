@@ -7,6 +7,13 @@ from funasr.register import tables
 # @tables.register("dataloader_classes", "DataloaderMapStyle")
 def DataloaderMapStyle(frontend=None, tokenizer=None, **kwargs):
     # dataset
+    """Dataloadermapstyle.
+    
+        Args:
+            frontend: Audio frontend for feature extraction.
+            tokenizer: Tokenizer instance for text encoding/decoding.
+            **kwargs: Additional keyword arguments.
+        """
     logging.info("Build dataloader")
     dataset_class = tables.dataset_classes.get(kwargs.get("dataset", "AudioDataset"))
     dataset_tr = dataset_class(
@@ -48,6 +55,13 @@ def DataloaderMapStyle(frontend=None, tokenizer=None, **kwargs):
 class DataloaderMapStyle:
     def __init__(self, frontend=None, tokenizer=None, **kwargs):
         # dataset
+        """Initialize DataloaderMapStyle.
+        
+            Args:
+                frontend: Audio frontend for feature extraction.
+                tokenizer: Tokenizer instance for text encoding/decoding.
+                **kwargs: Additional keyword arguments.
+            """
         logging.info("Build dataloader")
 
         dataset_class = tables.dataset_classes.get(kwargs.get("dataset", "AudioDataset"))
@@ -82,6 +96,14 @@ class DataloaderMapStyle:
     def build_iter(self, epoch=0, data_split_i=0, start_step=0, **kwargs):
 
         # reload dataset slice
+        """Build iter.
+        
+            Args:
+                epoch: TODO.
+                data_split_i: TODO.
+                start_step: TODO.
+                **kwargs: Additional keyword arguments.
+            """
         if self.data_split_num > 1:
             del self.dataset_tr
             self.dataset_tr = self.dataset_class(
@@ -119,6 +141,13 @@ class DataloaderMapStyle:
 
 @tables.register("dataloader_classes", "DataloaderIterable")
 def DataloaderIterable(frontend=None, tokenizer=None, **kwargs):
+    """Dataloaderiterable.
+    
+        Args:
+            frontend: Audio frontend for feature extraction.
+            tokenizer: Tokenizer instance for text encoding/decoding.
+            **kwargs: Additional keyword arguments.
+        """
     logging.info("Build dataloader")
     dataset_class = tables.dataset_classes.get(kwargs.get("dataset", "LargeDataset"))
     dataset_tr = dataset_class(

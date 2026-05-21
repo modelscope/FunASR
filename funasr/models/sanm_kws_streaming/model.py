@@ -31,6 +31,11 @@ else:
     # Nothing to do if torch<1.6.0
     @contextmanager
     def autocast(enabled=True):
+        """Autocast.
+        
+            Args:
+                enabled: TODO.
+            """
         yield
 
 
@@ -47,6 +52,12 @@ class SanmKWSStreaming(SanmKWS):
         *args,
         **kwargs,
     ):
+        """Initialize SanmKWSStreaming.
+        
+            Args:
+                *args: Variable positional arguments.
+                **kwargs: Additional keyword arguments.
+            """
         super().__init__(*args, **kwargs)
 
     def forward(
@@ -112,6 +123,14 @@ class SanmKWSStreaming(SanmKWS):
         cache: dict = None,
         **kwargs,
     ) -> Tuple[torch.Tensor, torch.Tensor]:
+        """Encode chunk.
+        
+            Args:
+                speech: Speech audio tensor, shape (batch, time).
+                speech_lengths: Length of each speech sample.
+                cache: State cache dict for streaming inference.
+                **kwargs: Additional keyword arguments.
+            """
         if cache is None:
             cache = {}
         """Frontend + Encoder. Note that this method is used by asr_inference.py
@@ -140,6 +159,12 @@ class SanmKWSStreaming(SanmKWS):
         return encoder_out, torch.tensor([encoder_out.size(1)])
 
     def init_cache(self, cache: dict = None, **kwargs):
+        """Init cache.
+        
+            Args:
+                cache: State cache dict for streaming inference.
+                **kwargs: Additional keyword arguments.
+            """
         if cache is None:
             cache = {}
         chunk_size = kwargs.get("chunk_size", [0, 10, 5])
@@ -185,6 +210,16 @@ class SanmKWSStreaming(SanmKWS):
         frontend=None,
         **kwargs,
     ):
+        """Generate chunk.
+        
+            Args:
+                speech: Speech audio tensor, shape (batch, time).
+                speech_lengths: Length of each speech sample.
+                key: Sample identifiers.
+                tokenizer: Tokenizer instance for text encoding/decoding.
+                frontend: Audio frontend for feature extraction.
+                **kwargs: Additional keyword arguments.
+            """
         cache = kwargs.get("cache", {})
         speech = speech.to(device=kwargs["device"])
         speech_lengths = speech_lengths.to(device=kwargs["device"])
@@ -259,6 +294,17 @@ class SanmKWSStreaming(SanmKWS):
         cache: dict = None,
         **kwargs,
     ):
+        """Run inference on input data.
+        
+            Args:
+                data_in: Input data (audio samples, file paths, or text).
+                data_lengths: Lengths of each input sample in the batch.
+                key: Sample identifiers.
+                tokenizer: Tokenizer instance for text encoding/decoding.
+                frontend: Audio frontend for feature extraction.
+                cache: State cache dict for streaming inference.
+                **kwargs: Additional keyword arguments.
+            """
         if cache is None:
             cache = {}
         keywords = kwargs.get("keywords")
@@ -442,6 +488,11 @@ class SanmKWSStreaming(SanmKWS):
         return result, meta_data
 
     def export(self, **kwargs):
+        """Export.
+        
+            Args:
+                **kwargs: Additional keyword arguments.
+            """
         from .export_meta import export_rebuild_model
 
         models = export_rebuild_model(model=self, **kwargs)

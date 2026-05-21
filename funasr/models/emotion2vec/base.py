@@ -39,6 +39,19 @@ class ModalitySpecificEncoder(nn.Module):
         decoder: nn.Module,
         get_alibi_bias: Optional[Callable[[int, int, str, str], torch.Tensor]],
     ):
+        """Initialize ModalitySpecificEncoder.
+        
+            Args:
+                modality_cfg: TODO.
+                embed_dim: Size/dimension parameter.
+                local_encoder: TODO.
+                project_features: TODO.
+                fixed_positional_encoder: TODO.
+                relative_positional_encoder: TODO.
+                context_encoder: TODO.
+                decoder: TODO.
+                get_alibi_bias: TODO.
+            """
         super().__init__()
 
         self.modality_cfg = modality_cfg
@@ -102,6 +115,12 @@ class ModalitySpecificEncoder(nn.Module):
             self.get_alibi_bias = partial(_learned_alibi_bias, alibi_bias=self.alibi_bias)
 
     def upgrade_state_dict_named(self, state_dict, name):
+        """Upgrade state dict named.
+        
+            Args:
+                state_dict: TODO.
+                name: TODO.
+            """
         k = f"{name}.alibi_scale"
         if k in state_dict and state_dict[k].dim() == 4:
             state_dict[k] = state_dict[k].unsqueeze(0)
@@ -109,9 +128,21 @@ class ModalitySpecificEncoder(nn.Module):
         return state_dict
 
     def convert_padding_mask(self, x, padding_mask):
+        """Convert padding mask.
+        
+            Args:
+                x: TODO.
+                padding_mask: TODO.
+            """
         return padding_mask
 
     def decoder_input(self, x, mask_info: MaskInfo):
+        """Decoder input.
+        
+            Args:
+                x: TODO.
+                mask_info: TODO.
+            """
         inp_drop = self.modality_cfg.decoder.input_dropout
         if inp_drop > 0:
             x = F.dropout(x, inp_drop, training=self.training, inplace=True)
@@ -144,6 +175,11 @@ class ModalitySpecificEncoder(nn.Module):
         return x, mask_info
 
     def local_features(self, features):
+        """Local features.
+        
+            Args:
+                features: TODO.
+            """
         if self.local_grad_mult > 0:
             if self.local_grad_mult == 1.0:
                 x = self.local_encoder(features)
@@ -167,6 +203,17 @@ class ModalitySpecificEncoder(nn.Module):
         precomputed_mask=None,
     ):
 
+        """Contextualized features.
+        
+            Args:
+                x: TODO.
+                padding_mask: TODO.
+                mask: TODO.
+                remove_masked: TODO.
+                clone_batch: TODO.
+                mask_seeds: TODO.
+                precomputed_mask: TODO.
+            """
         if padding_mask is not None:
             padding_mask = self.convert_padding_mask(x, padding_mask)
 
@@ -290,6 +337,17 @@ class ModalitySpecificEncoder(nn.Module):
         mask_seeds: Optional[torch.Tensor] = None,
         precomputed_mask=None,
     ):
+        """Forward pass for training.
+        
+            Args:
+                features: TODO.
+                padding_mask: TODO.
+                mask: TODO.
+                remove_masked: TODO.
+                clone_batch: TODO.
+                mask_seeds: TODO.
+                precomputed_mask: TODO.
+            """
         x = self.local_features(features)
         return self.contextualized_features(
             x,
@@ -302,6 +360,7 @@ class ModalitySpecificEncoder(nn.Module):
         )
 
     def reset_parameters(self):
+        """Reset parameters."""
         pass
 
     def compute_mask(
@@ -312,6 +371,15 @@ class ModalitySpecificEncoder(nn.Module):
         apply,
         precomputed_mask,
     ):
+        """Compute mask.
+        
+            Args:
+                x: TODO.
+                padding_mask: TODO.
+                mask_seed: TODO.
+                apply: TODO.
+                precomputed_mask: TODO.
+            """
         if precomputed_mask is not None:
             mask = precomputed_mask
             mask_info = self.make_maskinfo(x, mask)
@@ -362,6 +430,13 @@ class ModalitySpecificEncoder(nn.Module):
         return x, mask_info
 
     def make_maskinfo(self, x, mask, shape=None):
+        """Make maskinfo.
+        
+            Args:
+                x: TODO.
+                mask: TODO.
+                shape: TODO.
+            """
         if shape is None:
             B, T, D = x.shape
         else:
@@ -392,6 +467,12 @@ class ModalitySpecificEncoder(nn.Module):
         return mask_info
 
     def apply_mask(self, x, mask_info):
+        """Apply mask.
+        
+            Args:
+                x: TODO.
+                mask_info: TODO.
+            """
         cfg = self.modality_cfg
         B, T, C = x.shape
 
@@ -417,11 +498,24 @@ class ModalitySpecificEncoder(nn.Module):
         return x
 
     def remove_pretraining_modules(self, keep_decoder=False):
+        """Remove pretraining modules.
+        
+            Args:
+                keep_decoder: TODO.
+            """
         if not keep_decoder:
             self.decoder = None
 
 
 def get_annealed_rate(start, end, curr_step, total_steps):
+    """Get annealed rate.
+    
+        Args:
+            start: TODO.
+            end: TODO.
+            curr_step: TODO.
+            total_steps: TODO.
+        """
     if curr_step >= total_steps:
         return end
     r = end - start
@@ -431,6 +525,13 @@ def get_annealed_rate(start, end, curr_step, total_steps):
 
 # adapted from MAE
 def random_masking(x, mask_ratio, mask_seed: Optional[MaskSeed]):
+    """Random masking.
+    
+        Args:
+            x: TODO.
+            mask_ratio: TODO.
+            mask_seed: TODO.
+        """
     N, L, D = x.shape  # batch, length, dim
     len_keep = int(L * (1 - mask_ratio))
 
@@ -463,6 +564,12 @@ def random_masking(x, mask_ratio, mask_seed: Optional[MaskSeed]):
 
 
 def gather_unmasked(x: torch.Tensor, mask_info: MaskInfo) -> torch.Tensor:
+    """Gather unmasked.
+    
+        Args:
+            x: TODO.
+            mask_info: TODO.
+        """
     return torch.gather(
         x,
         dim=1,
@@ -471,6 +578,12 @@ def gather_unmasked(x: torch.Tensor, mask_info: MaskInfo) -> torch.Tensor:
 
 
 def gather_unmasked_mask(x: torch.Tensor, mask_info: MaskInfo) -> torch.Tensor:
+    """Gather unmasked mask.
+    
+        Args:
+            x: TODO.
+            mask_info: TODO.
+        """
     return torch.gather(
         x,
         dim=1,
@@ -484,8 +597,26 @@ def get_alibi(
     dims: int = 1,
     distance: str = "manhattan",
 ):
+    """Get alibi.
+    
+        Args:
+            max_positions: TODO.
+            attention_heads: TODO.
+            dims: TODO.
+            distance: TODO.
+        """
     def get_slopes(n):
+        """Get slopes.
+        
+            Args:
+                n: TODO.
+            """
         def get_slopes_power_of_2(n):
+            """Get slopes power of 2.
+            
+                Args:
+                    n: TODO.
+                """
             start = 2 ** (-(2 ** -(math.log2(n) - 3)))
             ratio = start
             return [start * ratio**i for i in range(n)]
@@ -552,6 +683,18 @@ def get_alibi_bias(
     dims=1,
     distance="manhattan",
 ):
+    """Get alibi bias.
+    
+        Args:
+            alibi_biases: TODO.
+            batch_size: Number of samples per batch.
+            time_steps: TODO.
+            heads: TODO.
+            dtype: TODO.
+            device: Target device ("cuda:0", "cpu", etc.).
+            dims: TODO.
+            distance: TODO.
+        """
     cache_key = f"{dims}_{heads}_{distance}"
 
     buffered = alibi_biases.get(cache_key, None)
@@ -589,6 +732,17 @@ def _learned_alibi_bias(
     dtype,
     device,
 ):
+    """Internal: learned alibi bias.
+    
+        Args:
+            alibi_bias: TODO.
+            batch_size: Number of samples per batch.
+            time_steps: TODO.
+            heads: TODO.
+            scale: TODO.
+            dtype: TODO.
+            device: Target device ("cuda:0", "cpu", etc.).
+        """
     assert alibi_bias.size(1) == heads, alibi_bias.shape
     assert alibi_bias.dtype == dtype, alibi_bias.dtype
     assert alibi_bias.device == device, alibi_bias.device
@@ -602,6 +756,12 @@ def _learned_alibi_bias(
 
 
 def masked_alibi(alibi_bias, mask_info):
+    """Masked alibi.
+    
+        Args:
+            alibi_bias: TODO.
+            mask_info: TODO.
+        """
     H = alibi_bias.size(1)
 
     orig_bias = alibi_bias

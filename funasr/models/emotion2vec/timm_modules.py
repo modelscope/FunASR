@@ -28,20 +28,42 @@ class DropPath(nn.Module):
     """Drop paths (Stochastic Depth) per sample  (when applied in main path of residual blocks)."""
 
     def __init__(self, drop_prob: float = 0.0, scale_by_keep: bool = True):
+        """Initialize DropPath.
+        
+            Args:
+                drop_prob: TODO.
+                scale_by_keep: TODO.
+            """
         super(DropPath, self).__init__()
         self.drop_prob = drop_prob
         self.scale_by_keep = scale_by_keep
 
     def forward(self, x):
+        """Forward pass for training.
+        
+            Args:
+                x: TODO.
+            """
         return drop_path(x, self.drop_prob, self.training, self.scale_by_keep)
 
     def extra_repr(self):
+        """Extra repr."""
         return f"drop_prob={round(self.drop_prob,3):0.3f}"
 
 
 # From PyTorch internals
 def _ntuple(n):
+    """Internal: ntuple.
+    
+        Args:
+            n: TODO.
+        """
     def parse(x):
+        """Parse.
+        
+            Args:
+                x: TODO.
+            """
         if isinstance(x, collections.abc.Iterable) and not isinstance(x, str):
             return tuple(x)
         return tuple(repeat(x, n))
@@ -70,6 +92,18 @@ class Mlp(nn.Module):
         drop=0.0,
         use_conv=False,
     ):
+        """Initialize Mlp.
+        
+            Args:
+                in_features: TODO.
+                hidden_features: TODO.
+                out_features: TODO.
+                act_layer: TODO.
+                norm_layer: TODO.
+                bias: TODO.
+                drop: TODO.
+                use_conv: TODO.
+            """
         super().__init__()
         out_features = out_features or in_features
         hidden_features = hidden_features or in_features
@@ -85,6 +119,11 @@ class Mlp(nn.Module):
         self.drop2 = nn.Dropout(drop_probs[1])
 
     def forward(self, x):
+        """Forward pass for training.
+        
+            Args:
+                x: TODO.
+            """
         x = self.fc1(x)
         x = self.act(x)
         x = self.drop1(x)

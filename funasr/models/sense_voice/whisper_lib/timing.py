@@ -54,6 +54,11 @@ def median_filter(x: torch.Tensor, filter_width: int):
 
 @numba.jit(nopython=True)
 def backtrace(trace: np.ndarray):
+    """Backtrace.
+    
+        Args:
+            trace: TODO.
+        """
     i = trace.shape[0] - 1
     j = trace.shape[1] - 1
     trace[0, :] = 2
@@ -79,6 +84,11 @@ def backtrace(trace: np.ndarray):
 
 @numba.jit(nopython=True, parallel=True)
 def dtw_cpu(x: np.ndarray):
+    """Dtw cpu.
+    
+        Args:
+            x: TODO.
+        """
     N, M = x.shape
     cost = np.ones((N + 1, M + 1), dtype=np.float32) * np.inf
     trace = -np.ones((N + 1, M + 1), dtype=np.float32)
@@ -104,6 +114,12 @@ def dtw_cpu(x: np.ndarray):
 
 
 def dtw_cuda(x, BLOCK_SIZE=1024):
+    """Dtw cuda.
+    
+        Args:
+            x: TODO.
+            BLOCK_SIZE: TODO.
+        """
     from .triton_ops import dtw_kernel
 
     M, N = x.shape
@@ -133,6 +149,11 @@ def dtw_cuda(x, BLOCK_SIZE=1024):
 
 
 def dtw(x: torch.Tensor) -> np.ndarray:
+    """Dtw.
+    
+        Args:
+            x: TODO.
+        """
     if x.is_cuda:
         try:
             return dtw_cuda(x)
@@ -164,6 +185,15 @@ def find_alignment(
     medfilt_width: int = 7,
     qk_scale: float = 1.0,
 ) -> List[WordTiming]:
+    """Find alignment.
+    
+        Args:
+            model: Model instance or model name.
+            tokenizer: Tokenizer instance for text encoding/decoding.
+            text_tokens: TODO.
+            mel: TODO.
+            num_frames: TODO.
+        """
     if len(text_tokens) == 0:
         return []
 
@@ -235,6 +265,13 @@ def find_alignment(
 
 def merge_punctuations(alignment: List[WordTiming], prepended: str, appended: str):
     # merge prepended punctuations
+    """Merge punctuations.
+    
+        Args:
+            alignment: TODO.
+            prepended: TODO.
+            appended: TODO.
+        """
     i = len(alignment) - 2
     j = len(alignment) - 1
     while i >= 0:
@@ -279,6 +316,11 @@ def add_word_timestamps(
     last_speech_timestamp: float,
     **kwargs,
 ):
+    """Add word timestamps.
+    
+        Args:
+            **kwargs: Additional keyword arguments.
+        """
     if len(segments) == 0:
         return
 

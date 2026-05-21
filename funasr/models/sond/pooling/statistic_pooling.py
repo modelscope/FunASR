@@ -10,6 +10,12 @@ VAR2STD_EPSILON = 1e-12
 
 class StatisticPooling(torch.nn.Module):
     def __init__(self, pooling_dim: Union[int, Tuple] = 2, eps=1e-12):
+        """Initialize StatisticPooling.
+        
+            Args:
+                pooling_dim: Size/dimension parameter.
+                eps: TODO.
+            """
         super(StatisticPooling, self).__init__()
         if isinstance(pooling_dim, int):
             pooling_dim = (pooling_dim,)
@@ -19,6 +25,12 @@ class StatisticPooling(torch.nn.Module):
     def forward(self, xs_pad, ilens=None):
         # xs_pad in (Batch, Channel, Time, Frequency)
 
+        """Forward pass for training.
+        
+            Args:
+                xs_pad: TODO.
+                ilens: TODO.
+            """
         if ilens is None:
             masks = torch.ones_like(xs_pad).to(xs_pad)
         else:
@@ -47,6 +59,13 @@ def statistic_pooling(
 ) -> torch.Tensor:
     # xs_pad in (Batch, Channel, Time, Frequency)
 
+    """Statistic pooling.
+    
+        Args:
+            xs_pad: TODO.
+            ilens: TODO.
+            pooling_dim: Size/dimension parameter.
+        """
     if ilens is None:
         seq_mask = torch.ones_like(xs_pad).to(xs_pad)
     else:
@@ -79,6 +98,15 @@ def windowed_statistic_pooling(
 ) -> Tuple[torch.Tensor, int]:
     # xs_pad in (Batch, Channel, Time, Frequency)
 
+    """Windowed statistic pooling.
+    
+        Args:
+            xs_pad: TODO.
+            ilens: TODO.
+            pooling_dim: Size/dimension parameter.
+            pooling_size: Size/dimension parameter.
+            pooling_stride: TODO.
+        """
     tt = xs_pad.shape[2]
     num_chunk = int(math.ceil(tt / pooling_stride))
     pad = pooling_size // 2

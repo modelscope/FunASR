@@ -13,9 +13,19 @@ class TAP(nn.Module):
     """
 
     def __init__(self, **kwargs):
+        """Initialize TAP.
+        
+            Args:
+                **kwargs: Additional keyword arguments.
+            """
         super(TAP, self).__init__()
 
     def forward(self, x):
+        """Forward pass for training.
+        
+            Args:
+                x: TODO.
+            """
         pooling_mean = x.mean(dim=-1)
         # To be compatable with 2D input
         pooling_mean = pooling_mean.flatten(start_dim=1)
@@ -28,10 +38,20 @@ class TSDP(nn.Module):
     """
 
     def __init__(self, **kwargs):
+        """Initialize TSDP.
+        
+            Args:
+                **kwargs: Additional keyword arguments.
+            """
         super(TSDP, self).__init__()
 
     def forward(self, x):
         # The last dimension is the temporal axis
+        """Forward pass for training.
+        
+            Args:
+                x: TODO.
+            """
         pooling_std = torch.sqrt(torch.var(x, dim=-1) + 1e-8)
         pooling_std = pooling_std.flatten(start_dim=1)
         return pooling_std
@@ -45,10 +65,20 @@ class TSTP(nn.Module):
     """
 
     def __init__(self, **kwargs):
+        """Initialize TSTP.
+        
+            Args:
+                **kwargs: Additional keyword arguments.
+            """
         super(TSTP, self).__init__()
 
     def forward(self, x):
         # The last dimension is the temporal axis
+        """Forward pass for training.
+        
+            Args:
+                x: TODO.
+            """
         pooling_mean = x.mean(dim=-1)
         pooling_std = torch.sqrt(torch.var(x, dim=-1) + 1e-8)
         pooling_mean = pooling_mean.flatten(start_dim=1)
@@ -64,6 +94,13 @@ class ASTP(nn.Module):
     """
 
     def __init__(self, in_dim, bottleneck_dim=128, global_context_att=False):
+        """Initialize ASTP.
+        
+            Args:
+                in_dim: Size/dimension parameter.
+                bottleneck_dim: Size/dimension parameter.
+                global_context_att: TODO.
+            """
         super(ASTP, self).__init__()
         self.global_context_att = global_context_att
 

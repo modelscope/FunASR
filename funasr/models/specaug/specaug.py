@@ -41,6 +41,20 @@ class SpecAug(nn.Module):
         time_mask_width_ratio_range: Optional[Union[float, Sequence[float]]] = None,
         num_time_mask: int = 2,
     ):
+        """Initialize SpecAug.
+        
+            Args:
+                apply_time_warp: TODO.
+                time_warp_window: TODO.
+                time_warp_mode: TODO.
+                apply_freq_mask: TODO.
+                freq_mask_width_range: TODO.
+                num_freq_mask: TODO.
+                apply_time_mask: TODO.
+                time_mask_width_range: TODO.
+                time_mask_width_ratio_range: TODO.
+                num_time_mask: TODO.
+            """
         if not apply_time_warp and not apply_time_mask and not apply_freq_mask:
             raise ValueError("Either one of time_warp, time_mask, or freq_mask should be applied")
         if (
@@ -93,6 +107,12 @@ class SpecAug(nn.Module):
             self.time_mask = None
 
     def forward(self, x, x_lengths=None):
+        """Forward pass for training.
+        
+            Args:
+                x: TODO.
+                x_lengths: Lengths of x.
+            """
         if self.time_warp is not None:
             x, x_lengths = self.time_warp(x, x_lengths)
         if self.freq_mask is not None:
@@ -122,6 +142,21 @@ class SpecAugLFR(nn.Module):
         time_mask_width_ratio_range: Optional[Union[float, Sequence[float]]] = None,
         num_time_mask: int = 2,
     ):
+        """Initialize SpecAugLFR.
+        
+            Args:
+                apply_time_warp: TODO.
+                time_warp_window: TODO.
+                time_warp_mode: TODO.
+                apply_freq_mask: TODO.
+                freq_mask_width_range: TODO.
+                num_freq_mask: TODO.
+                lfr_rate: TODO.
+                apply_time_mask: TODO.
+                time_mask_width_range: TODO.
+                time_mask_width_ratio_range: TODO.
+                num_time_mask: TODO.
+            """
         if not apply_time_warp and not apply_time_mask and not apply_freq_mask:
             raise ValueError("Either one of time_warp, time_mask, or freq_mask should be applied")
         if (
@@ -177,6 +212,12 @@ class SpecAugLFR(nn.Module):
             self.time_mask = None
 
     def forward(self, x, x_lengths=None):
+        """Forward pass for training.
+        
+            Args:
+                x: TODO.
+                x_lengths: Lengths of x.
+            """
         if self.time_warp is not None:
             x, x_lengths = self.time_warp(x, x_lengths)
         if self.freq_mask is not None:

@@ -11,6 +11,11 @@ from funasr.register import tables
 
 
 def toKaldiMatrix(np_mat):
+    """Tokaldimatrix.
+    
+        Args:
+            np_mat: TODO.
+        """
     np.set_printoptions(threshold=np.inf, linewidth=np.nan)
     out_str = str(np_mat)
     out_str = out_str.replace('[', '')
@@ -21,17 +26,29 @@ def toKaldiMatrix(np_mat):
 class LinearTransform(nn.Module):
 
     def __init__(self, input_dim, output_dim):
+        """Initialize LinearTransform.
+        
+            Args:
+                input_dim: Size/dimension parameter.
+                output_dim: Size/dimension parameter.
+            """
         super(LinearTransform, self).__init__()
         self.input_dim = input_dim
         self.output_dim = output_dim
         self.linear = nn.Linear(input_dim, output_dim, bias=False)
 
     def forward(self, input):
+        """Forward pass for training.
+        
+            Args:
+                input: Input audio/text data.
+            """
         output = self.linear(input)
 
         return output
 
     def to_kaldi_net(self):
+        """To kaldi net."""
         re_str = ''
         re_str += '<LinearTransform> %d %d\n' % (self.output_dim,
                                                  self.input_dim)
@@ -44,6 +61,11 @@ class LinearTransform(nn.Module):
         return re_str
 
     def to_pytorch_net(self, fread):
+        """To pytorch net.
+        
+            Args:
+                fread: TODO.
+            """
         linear_line = fread.readline()
         linear_split = linear_line.strip().split()
         assert len(linear_split) == 3
@@ -74,17 +96,29 @@ class LinearTransform(nn.Module):
 class AffineTransform(nn.Module):
 
     def __init__(self, input_dim, output_dim):
+        """Initialize AffineTransform.
+        
+            Args:
+                input_dim: Size/dimension parameter.
+                output_dim: Size/dimension parameter.
+            """
         super(AffineTransform, self).__init__()
         self.input_dim = input_dim
         self.output_dim = output_dim
         self.linear = nn.Linear(input_dim, output_dim)
 
     def forward(self, input):
+        """Forward pass for training.
+        
+            Args:
+                input: Input audio/text data.
+            """
         output = self.linear(input)
 
         return output
 
     def to_kaldi_net(self):
+        """To kaldi net."""
         re_str = ''
         re_str += '<AffineTransform> %d %d\n' % (self.output_dim,
                                                  self.input_dim)
@@ -101,6 +135,11 @@ class AffineTransform(nn.Module):
         return re_str
 
     def to_pytorch_net(self, fread):
+        """To pytorch net.
+        
+            Args:
+                fread: TODO.
+            """
         affine_line = fread.readline()
         affine_split = affine_line.strip().split()
         assert len(affine_split) == 3
@@ -143,21 +182,38 @@ class AffineTransform(nn.Module):
 class RectifiedLinear(nn.Module):
 
     def __init__(self, input_dim, output_dim):
+        """Initialize RectifiedLinear.
+        
+            Args:
+                input_dim: Size/dimension parameter.
+                output_dim: Size/dimension parameter.
+            """
         super(RectifiedLinear, self).__init__()
         self.dim = input_dim
         self.relu = nn.ReLU()
         self.dropout = nn.Dropout(0.1)
 
     def forward(self, input):
+        """Forward pass for training.
+        
+            Args:
+                input: Input audio/text data.
+            """
         out = self.relu(input)
         return out
 
     def to_kaldi_net(self):
+        """To kaldi net."""
         re_str = ''
         re_str += '<RectifiedLinear> %d %d\n' % (self.dim, self.dim)
         return re_str
 
     def to_pytorch_net(self, fread):
+        """To pytorch net.
+        
+            Args:
+                fread: TODO.
+            """
         line = fread.readline()
         splits = line.strip().split()
         assert len(splits) == 3
@@ -178,6 +234,16 @@ class FSMNBlock(nn.Module):
         lstride=1,
         rstride=1,
     ):
+        """Initialize FSMNBlock.
+        
+            Args:
+                input_dim: Size/dimension parameter.
+                output_dim: Size/dimension parameter.
+                lorder: TODO.
+                rorder: TODO.
+                lstride: TODO.
+                rstride: TODO.
+            """
         super(FSMNBlock, self).__init__()
 
         self.dim = input_dim
@@ -202,6 +268,12 @@ class FSMNBlock(nn.Module):
             self.conv_right = None
 
     def forward(self, input: torch.Tensor, cache: torch.Tensor = None):
+        """Forward pass for training.
+        
+            Args:
+                input: Input audio/text data.
+                cache: State cache dict for streaming inference.
+            """
         x = torch.unsqueeze(input, 1)
         x_per = x.permute(0, 3, 2, 1)  # B D T C
 
@@ -228,6 +300,7 @@ class FSMNBlock(nn.Module):
         return output, cache
 
     def to_kaldi_net(self):
+        """To kaldi net."""
         re_str = ''
         re_str += '<Fsmn> %d %d\n' % (self.dim, self.dim)
         re_str += '<LearnRateCoef> %d <LOrder> %d <ROrder> %d <LStride> %d <RStride> %d <MaxNorm> 0\n' % (
@@ -246,6 +319,11 @@ class FSMNBlock(nn.Module):
         return re_str
 
     def to_pytorch_net(self, fread):
+        """To pytorch net.
+        
+            Args:
+                fread: TODO.
+            """
         fsmn_line = fread.readline()
         fsmn_split = fsmn_line.strip().split()
         assert len(fsmn_split) == 3
@@ -320,6 +398,17 @@ class BasicBlock(nn.Module):
         rstride: int,
         stack_layer: int,
     ):
+        """Initialize BasicBlock.
+        
+            Args:
+                linear_dim: Size/dimension parameter.
+                proj_dim: Size/dimension parameter.
+                lorder: TODO.
+                rorder: TODO.
+                lstride: TODO.
+                rstride: TODO.
+                stack_layer: TODO.
+            """
         super(BasicBlock, self).__init__()
         self.lorder = lorder
         self.rorder = rorder
@@ -332,6 +421,12 @@ class BasicBlock(nn.Module):
         self.relu = RectifiedLinear(linear_dim, linear_dim)
 
     def forward(self, input: torch.Tensor, cache: Dict[str, torch.Tensor] = None):
+        """Forward pass for training.
+        
+            Args:
+                input: Input audio/text data.
+                cache: State cache dict for streaming inference.
+            """
         x1 = self.linear(input)  # B T D
 
         if cache is not None:
@@ -348,6 +443,7 @@ class BasicBlock(nn.Module):
         return x4
 
     def to_kaldi_net(self):
+        """To kaldi net."""
         re_str = ''
         re_str += self.linear.to_kaldi_net()
         re_str += self.fsmn_block.to_kaldi_net()
@@ -357,6 +453,11 @@ class BasicBlock(nn.Module):
         return re_str
 
     def to_pytorch_net(self, fread):
+        """To pytorch net.
+        
+            Args:
+                fread: TODO.
+            """
         self.linear.to_pytorch_net(fread)
         self.fsmn_block.to_pytorch_net(fread)
         self.affine.to_pytorch_net(fread)
@@ -368,6 +469,11 @@ class BasicBlock_export(nn.Module):
         self,
         model,
     ):
+        """Initialize BasicBlock_export.
+        
+            Args:
+                model: Model instance or model name.
+            """
         super(BasicBlock_export, self).__init__()
         self.linear = model.linear
         self.fsmn_block = model.fsmn_block
@@ -375,6 +481,12 @@ class BasicBlock_export(nn.Module):
         self.relu = model.relu
 
     def forward(self, input: torch.Tensor, in_cache: torch.Tensor):
+        """Forward pass for training.
+        
+            Args:
+                input: Input audio/text data.
+                in_cache: TODO.
+            """
         x = self.linear(input)  # B T D
         # cache_layer_name = 'cache_layer_{}'.format(self.stack_layer)
         # if cache_layer_name not in in_cache:
@@ -387,15 +499,27 @@ class BasicBlock_export(nn.Module):
 
 class FsmnStack(nn.Sequential):
     def __init__(self, *args):
+        """Initialize FsmnStack.
+        
+            Args:
+                *args: Variable positional arguments.
+            """
         super(FsmnStack, self).__init__(*args)
 
     def forward(self, input: torch.Tensor, cache: Dict[str, torch.Tensor]):
+        """Forward pass for training.
+        
+            Args:
+                input: Input audio/text data.
+                cache: State cache dict for streaming inference.
+            """
         x = input
         for module in self._modules.values():
             x = module(x, cache)
         return x
 
     def to_kaldi_net(self):
+        """To kaldi net."""
         re_str = ''
         for module in self._modules.values():
             re_str += module.to_kaldi_net()
@@ -403,6 +527,11 @@ class FsmnStack(nn.Sequential):
         return re_str
 
     def to_pytorch_net(self, fread):
+        """To pytorch net.
+        
+            Args:
+                fread: TODO.
+            """
         for module in self._modules.values():
             module.to_pytorch_net(fread)
 
@@ -436,6 +565,22 @@ class FSMNConvert(nn.Module):
         output_dim: int,
         use_softmax: bool = True,
     ):
+        """Initialize FSMNConvert.
+        
+            Args:
+                input_dim: Size/dimension parameter.
+                input_affine_dim: Size/dimension parameter.
+                fsmn_layers: TODO.
+                linear_dim: Size/dimension parameter.
+                proj_dim: Size/dimension parameter.
+                lorder: TODO.
+                rorder: TODO.
+                lstride: TODO.
+                rstride: TODO.
+                output_affine_dim: Size/dimension parameter.
+                output_dim: Size/dimension parameter.
+                use_softmax: TODO.
+            """
         super().__init__()
 
         self.input_dim = input_dim
@@ -463,6 +608,7 @@ class FSMNConvert(nn.Module):
             self.softmax = nn.Softmax(dim=-1)
 
     def output_size(self) -> int:
+        """Output size."""
         return self.output_dim
 
     def forward(
@@ -491,6 +637,7 @@ class FSMNConvert(nn.Module):
         return x6
 
     def to_kaldi_net(self):
+        """To kaldi net."""
         re_str = ''
         re_str += '<Nnet>\n'
         re_str += self.in_linear1.to_kaldi_net()
@@ -508,6 +655,11 @@ class FSMNConvert(nn.Module):
         return re_str
 
     def to_pytorch_net(self, kaldi_file):
+        """To pytorch net.
+        
+            Args:
+                kaldi_file: TODO.
+            """
         with open(kaldi_file, 'r', encoding='utf8') as fread:
             fread = open(kaldi_file, 'r')
             nnet_start_line = fread.readline()

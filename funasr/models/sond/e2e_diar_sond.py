@@ -34,6 +34,11 @@ else:
     # Nothing to do if torch<1.6.0
     @contextmanager
     def autocast(enabled=True):
+        """Autocast.
+        
+            Args:
+                enabled: TODO.
+            """
         yield
 
 
@@ -69,6 +74,33 @@ class DiarSondModel(FunASRModel):
         onfly_shuffle_speaker: bool = True,
     ):
 
+        """Initialize DiarSondModel.
+        
+            Args:
+                vocab_size: Size/dimension parameter.
+                frontend: Audio frontend for feature extraction.
+                specaug: TODO.
+                profileaug: TODO.
+                normalize: TODO.
+                encoder: TODO.
+                speaker_encoder: TODO.
+                ci_scorer: TODO.
+                cd_scorer: TODO.
+                decoder: TODO.
+                token_list: TODO.
+                lsm_weight: TODO.
+                length_normalized_loss: TODO.
+                max_spk_num: TODO.
+                label_aggregator: TODO.
+                normalize_speech_speaker: TODO.
+                ignore_id: TODO.
+                speaker_discrimination_loss_weight: TODO.
+                inter_score_loss_weight: TODO.
+                inputs_type: TODO.
+                model_regularizer_weight: TODO.
+                freeze_encoder: TODO.
+                onfly_shuffle_speaker: TODO.
+            """
         super().__init__()
 
         self.encoder = encoder
@@ -109,6 +141,7 @@ class DiarSondModel(FunASRModel):
         self.to_regularize_parameters = None
 
     def get_regularize_parameters(self):
+        """Get regularize parameters."""
         to_regularize_parameters, normal_parameters = [], []
         for name, param in self.named_parameters():
             if (
@@ -124,6 +157,7 @@ class DiarSondModel(FunASRModel):
         return to_regularize_parameters, normal_parameters
 
     def generate_pse_embedding(self):
+        """Generate pse embedding."""
         embedding = np.zeros((len(self.token_list), self.max_spk_num), dtype=np.float32)
         for idx, pse_label in enumerate(self.token_list):
             emb = int2vec(int(pse_label), vec_dim=self.max_spk_num, dtype=np.float32)
@@ -299,6 +333,7 @@ class DiarSondModel(FunASRModel):
         return loss, stats, weight
 
     def calculate_regularizer_loss(self):
+        """Calculate regularizer loss."""
         regularizer_loss = 0.0
         for name, param in self.to_regularize_parameters:
             regularizer_loss = regularizer_loss + torch.norm(param, p=2)
@@ -307,6 +342,13 @@ class DiarSondModel(FunASRModel):
     def classification_loss(
         self, predictions: torch.Tensor, labels: torch.Tensor, prediction_lengths: torch.Tensor
     ) -> torch.Tensor:
+        """Classification loss.
+        
+            Args:
+                predictions: TODO.
+                labels: TODO.
+                prediction_lengths: Lengths of prediction.
+            """
         mask = make_pad_mask(prediction_lengths, maxlen=labels.shape[1])
         pad_labels = labels.masked_fill(mask.to(predictions.device), value=self.ignore_id)
         loss = self.criterion_diar(predictions.contiguous(), pad_labels)
@@ -316,6 +358,12 @@ class DiarSondModel(FunASRModel):
     def speaker_discrimination_loss(
         self, profile: torch.Tensor, profile_lengths: torch.Tensor
     ) -> torch.Tensor:
+        """Speaker discrimination loss.
+        
+            Args:
+                profile: TODO.
+                profile_lengths: Lengths of profile.
+            """
         profile_mask = (
             torch.linalg.norm(profile, ord=2, dim=2, keepdim=True) > 0
         ).float()  # (B, N, 1)
@@ -339,6 +387,12 @@ class DiarSondModel(FunASRModel):
         return loss
 
     def calculate_multi_labels(self, pse_labels, pse_labels_lengths):
+        """Calculate multi labels.
+        
+            Args:
+                pse_labels: TODO.
+                pse_labels_lengths: Lengths of pse_labels.
+            """
         mask = make_pad_mask(pse_labels_lengths, maxlen=pse_labels.shape[1])
         padding_labels = pse_labels.masked_fill(mask.to(pse_labels.device), value=0).to(pse_labels)
         multi_labels = F.embedding(padding_labels, self.pse_embedding)
@@ -352,6 +406,14 @@ class DiarSondModel(FunASRModel):
         pse_labels: torch.Tensor,
         pse_labels_lengths: torch.Tensor,
     ) -> Tuple[torch.Tensor, torch.Tensor]:
+        """Internal score loss.
+        
+            Args:
+                cd_score: TODO.
+                ci_score: TODO.
+                pse_labels: TODO.
+                pse_labels_lengths: Lengths of pse_labels.
+            """
         multi_labels = self.calculate_multi_labels(pse_labels, pse_labels_lengths)
         ci_loss = self.criterion_bce(ci_score, multi_labels, pse_labels_lengths)
         cd_loss = self.criterion_bce(cd_score, multi_labels, pse_labels_lengths)
@@ -366,6 +428,16 @@ class DiarSondModel(FunASRModel):
         binary_labels: torch.Tensor = None,
         binary_labels_lengths: torch.Tensor = None,
     ) -> Dict[str, torch.Tensor]:
+        """Collect feats.
+        
+            Args:
+                speech: Speech audio tensor, shape (batch, time).
+                speech_lengths: Length of each speech sample.
+                profile: TODO.
+                profile_lengths: Lengths of profile.
+                binary_labels: TODO.
+                binary_labels_lengths: Lengths of binary_labels.
+            """
         feats, feats_lengths = self._extract_feats(speech, speech_lengths)
         return {"feats": feats, "feats_lengths": feats_lengths}
 
@@ -374,6 +446,12 @@ class DiarSondModel(FunASRModel):
         profile: torch.Tensor,
         profile_lengths: torch.Tensor,
     ) -> Tuple[torch.Tensor, torch.Tensor]:
+        """Encode speaker.
+        
+            Args:
+                profile: TODO.
+                profile_lengths: Lengths of profile.
+            """
         with autocast(False):
             if profile.shape[1] < self.max_spk_num:
                 profile = F.pad(
@@ -392,6 +470,12 @@ class DiarSondModel(FunASRModel):
         speech: torch.Tensor,
         speech_lengths: torch.Tensor,
     ) -> Tuple[torch.Tensor, torch.Tensor]:
+        """Encode speech.
+        
+            Args:
+                speech: Speech audio tensor, shape (batch, time).
+                speech_lengths: Length of each speech sample.
+            """
         if self.encoder is not None and self.inputs_type == "raw":
             speech, speech_lengths = self.encode(speech, speech_lengths)
             speech_mask = ~make_pad_mask(speech_lengths, maxlen=speech.shape[1])
@@ -402,6 +486,12 @@ class DiarSondModel(FunASRModel):
 
     @staticmethod
     def concate_speech_ivc(speech: torch.Tensor, ivc: torch.Tensor) -> torch.Tensor:
+        """Concate speech ivc.
+        
+            Args:
+                speech: Speech audio tensor, shape (batch, time).
+                ivc: TODO.
+            """
         nn, tt = ivc.shape[1], speech.shape[1]
         speech = speech.unsqueeze(dim=1)  # B x 1 x T x D
         speech = speech.expand(-1, nn, -1, -1)  # B x N x T x D
@@ -417,6 +507,14 @@ class DiarSondModel(FunASRModel):
         seq_len: torch.Tensor = None,
         spk_len: torch.Tensor = None,
     ) -> Tuple[torch.Tensor, torch.Tensor]:
+        """Calc similarity.
+        
+            Args:
+                speech_encoder_outputs: TODO.
+                speaker_encoder_outputs: TODO.
+                seq_len: TODO.
+                spk_len: TODO.
+            """
         bb, tt = speech_encoder_outputs.shape[0], speech_encoder_outputs.shape[1]
         d_sph, d_spk = speech_encoder_outputs.shape[2], speaker_encoder_outputs.shape[2]
         if self.normalize_speech_speaker:
@@ -439,6 +537,12 @@ class DiarSondModel(FunASRModel):
         return ci_simi, cd_simi
 
     def post_net_forward(self, simi, seq_len):
+        """Post net forward.
+        
+            Args:
+                simi: TODO.
+                seq_len: TODO.
+            """
         logits = self.decoder(simi, seq_len)[0]
 
         return logits
@@ -452,6 +556,15 @@ class DiarSondModel(FunASRModel):
         return_inter_outputs: bool = False,
     ) -> [torch.Tensor, Optional[list]]:
         # speech encoding
+        """Prediction forward.
+        
+            Args:
+                speech: Speech audio tensor, shape (batch, time).
+                speech_lengths: Length of each speech sample.
+                profile: TODO.
+                profile_lengths: Lengths of profile.
+                return_inter_outputs: TODO.
+            """
         speech, speech_lengths = self.encode_speech(speech, speech_lengths)
         # speaker encoding
         profile, profile_lengths = self.encode_speaker(profile, profile_lengths)
@@ -510,6 +623,12 @@ class DiarSondModel(FunASRModel):
     def _extract_feats(
         self, speech: torch.Tensor, speech_lengths: torch.Tensor
     ) -> Tuple[torch.Tensor, torch.Tensor]:
+        """Internal: extract feats.
+        
+            Args:
+                speech: Speech audio tensor, shape (batch, time).
+                speech_lengths: Length of each speech sample.
+            """
         batch_size = speech.shape[0]
         speech_lengths = (
             speech_lengths
@@ -537,6 +656,13 @@ class DiarSondModel(FunASRModel):
     def calc_diarization_error(pred, label, length):
         # Note (jiatong): Credit to https://github.com/hitachi-speech/EEND
 
+        """Calc diarization error.
+        
+            Args:
+                pred: TODO.
+                label: TODO.
+                length: TODO.
+            """
         (batch_size, max_len, num_output) = label.size()
         # mask the padding part
         mask = ~make_pad_mask(length, maxlen=label.shape[1]).unsqueeze(-1).numpy()

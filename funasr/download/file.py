@@ -12,6 +12,11 @@ from urllib.parse import urlparse
 
 
 def download_from_url(url):
+    """Download from url.
+    
+        Args:
+            url: TODO.
+        """
     result = urlparse(url)
     file_path = None
     if result.scheme is not None and len(result.scheme) > 0:
@@ -38,18 +43,41 @@ class Storage(metaclass=ABCMeta):
 
     @abstractmethod
     def read(self, filepath: str):
+        """Read.
+        
+            Args:
+                filepath: TODO.
+            """
         pass
 
     @abstractmethod
     def read_text(self, filepath: str):
+        """Read text.
+        
+            Args:
+                filepath: TODO.
+            """
         pass
 
     @abstractmethod
     def write(self, obj: bytes, filepath: Union[str, Path]) -> None:
+        """Write.
+        
+            Args:
+                obj: TODO.
+                filepath: TODO.
+            """
         pass
 
     @abstractmethod
     def write_text(self, obj: str, filepath: Union[str, Path], encoding: str = "utf-8") -> None:
+        """Write text.
+        
+            Args:
+                obj: TODO.
+                filepath: TODO.
+                encoding: TODO.
+            """
         pass
 
 
@@ -133,11 +161,21 @@ class HTTPStorage(Storage):
 
     def read(self, url):
         # TODO @wenmeng.zwm add progress bar if file is too large
+        """Read.
+        
+            Args:
+                url: TODO.
+            """
         r = requests.get(url)
         r.raise_for_status()
         return r.content
 
     def read_text(self, url):
+        """Read text.
+        
+            Args:
+                url: TODO.
+            """
         r = requests.get(url)
         r.raise_for_status()
         return r.text
@@ -169,9 +207,22 @@ class HTTPStorage(Storage):
             os.remove(f.name)
 
     def write(self, obj: bytes, url: Union[str, Path]) -> None:
+        """Write.
+        
+            Args:
+                obj: TODO.
+                url: TODO.
+            """
         raise NotImplementedError("write is not supported by HTTP Storage")
 
     def write_text(self, obj: str, url: Union[str, Path], encoding: str = "utf-8") -> None:
+        """Write text.
+        
+            Args:
+                obj: TODO.
+                url: TODO.
+                encoding: TODO.
+            """
         raise NotImplementedError("write_text is not supported by HTTP Storage")
 
 
@@ -180,12 +231,28 @@ class OSSStorage(Storage):
 
     def __init__(self, oss_config_file=None):
         # read from config file or env var
+        """Initialize OSSStorage.
+        
+            Args:
+                oss_config_file: TODO.
+            """
         raise NotImplementedError("OSSStorage.__init__ to be implemented in the future")
 
     def read(self, filepath):
+        """Read.
+        
+            Args:
+                filepath: TODO.
+            """
         raise NotImplementedError("OSSStorage.read to be implemented in the future")
 
     def read_text(self, filepath, encoding="utf-8"):
+        """Read text.
+        
+            Args:
+                filepath: TODO.
+                encoding: TODO.
+            """
         raise NotImplementedError("OSSStorage.read_text to be implemented in the future")
 
     @contextlib.contextmanager
@@ -215,9 +282,22 @@ class OSSStorage(Storage):
             os.remove(f.name)
 
     def write(self, obj: bytes, filepath: Union[str, Path]) -> None:
+        """Write.
+        
+            Args:
+                obj: TODO.
+                filepath: TODO.
+            """
         raise NotImplementedError("OSSStorage.write to be implemented in the future")
 
     def write_text(self, obj: str, filepath: Union[str, Path], encoding: str = "utf-8") -> None:
+        """Write text.
+        
+            Args:
+                obj: TODO.
+                filepath: TODO.
+                encoding: TODO.
+            """
         raise NotImplementedError("OSSStorage.write_text to be implemented in the future")
 
 
@@ -234,6 +314,11 @@ class File(object):
 
     @staticmethod
     def _get_storage(uri):
+        """Internal: get storage.
+        
+            Args:
+                uri: TODO.
+            """
         assert isinstance(uri, str), f"uri should be str type, but got {type(uri)}"
 
         if "://" not in uri:

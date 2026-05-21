@@ -23,6 +23,21 @@ class DNN_WPE(torch.nn.Module):
         iterations: int = 1,
         normalization: bool = False,
     ):
+        """Initialize DNN_WPE.
+        
+            Args:
+                wtype: TODO.
+                widim: TODO.
+                wlayers: TODO.
+                wunits: TODO.
+                wprojs: TODO.
+                dropout_rate: TODO.
+                taps: TODO.
+                delay: TODO.
+                use_dnn_mask: TODO.
+                iterations: TODO.
+                normalization: TODO.
+            """
         super().__init__()
         self.iterations = iterations
         self.taps = taps

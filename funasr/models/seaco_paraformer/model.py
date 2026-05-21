@@ -38,6 +38,11 @@ else:
     # Nothing to do if torch<1.6.0
     @contextmanager
     def autocast(enabled=True):
+        """Autocast.
+        
+            Args:
+                enabled: TODO.
+            """
         yield
 
 
@@ -54,6 +59,12 @@ class SeacoParaformer(BiCifParaformer, Paraformer):
         *args,
         **kwargs,
     ):
+        """Initialize SeacoParaformer.
+        
+            Args:
+                *args: Variable positional arguments.
+                **kwargs: Additional keyword arguments.
+            """
         super().__init__(*args, **kwargs)
 
         self.inner_dim = kwargs.get("inner_dim", 256)
@@ -177,9 +188,21 @@ class SeacoParaformer(BiCifParaformer, Paraformer):
         return loss, stats, weight
 
     def _merge(self, cif_attended, dec_attended):
+        """Internal: merge.
+        
+            Args:
+                cif_attended: TODO.
+                dec_attended: TODO.
+            """
         return cif_attended + dec_attended
 
     def calc_predictor(self, encoder_out, encoder_out_lens):
+        """Calc predictor.
+        
+            Args:
+                encoder_out: Encoder output tensor.
+                encoder_out_lens: Encoder output lengths.
+            """
         encoder_out_mask = (
             ~make_pad_mask(encoder_out_lens, maxlen=encoder_out.size(1))[:, None, :]
         ).to(encoder_out.device)
@@ -199,6 +222,17 @@ class SeacoParaformer(BiCifParaformer, Paraformer):
         seaco_label_pad: torch.Tensor,
     ):
         # predictor forward
+        """Internal: calc seaco loss.
+        
+            Args:
+                encoder_out: Encoder output tensor.
+                encoder_out_lens: Encoder output lengths.
+                ys_pad: TODO.
+                ys_lengths: Lengths of ys.
+                hotword_pad: TODO.
+                hotword_lengths: Lengths of hotword.
+                seaco_label_pad: TODO.
+            """
         encoder_out_mask = (
             ~make_pad_mask(encoder_out_lens, maxlen=encoder_out.size(1))[:, None, :]
         ).to(encoder_out.device)
@@ -243,6 +277,17 @@ class SeacoParaformer(BiCifParaformer, Paraformer):
     ):
         # decoder forward
 
+        """Internal: seaco decode with ASF.
+        
+            Args:
+                encoder_out: Encoder output tensor.
+                encoder_out_lens: Encoder output lengths.
+                sematic_embeds: TODO.
+                ys_pad_lens: Lengths of ys_pad.
+                hw_list: TODO.
+                nfilter: TODO.
+                seaco_weight: TODO.
+            """
         decoder_out, decoder_hidden, _ = self.decoder(
             encoder_out,
             encoder_out_lens,
@@ -311,6 +356,12 @@ class SeacoParaformer(BiCifParaformer, Paraformer):
             dha_pred = torch.log_softmax(dha_output, dim=-1)
 
             def _merge_res(dec_output, dha_output):
+                """Internal: merge res.
+                
+                    Args:
+                        dec_output: TODO.
+                        dha_output: TODO.
+                    """
                 lmbd = torch.Tensor([seaco_weight] * dha_output.shape[0])
                 dha_ids = dha_output.max(-1)[-1]  # [0]
                 dha_mask = (dha_ids == self.NO_BIAS).int().unsqueeze(-1)
@@ -328,6 +379,12 @@ class SeacoParaformer(BiCifParaformer, Paraformer):
             return decoder_pred
 
     def _hotword_representation(self, hotword_pad, hotword_lengths):
+        """Internal: hotword representation.
+        
+            Args:
+                hotword_pad: TODO.
+                hotword_lengths: Lengths of hotword.
+            """
         if self.bias_encoder_type != "lstm":
             logging.error("Unsupported bias encoder type")
 
@@ -370,6 +427,16 @@ class SeacoParaformer(BiCifParaformer, Paraformer):
     ):
 
         # init beamsearch
+        """Run inference on input data.
+        
+            Args:
+                data_in: Input data (audio samples, file paths, or text).
+                data_lengths: Lengths of each input sample in the batch.
+                key: Sample identifiers.
+                tokenizer: Tokenizer instance for text encoding/decoding.
+                frontend: Audio frontend for feature extraction.
+                **kwargs: Additional keyword arguments.
+            """
         is_use_ctc = kwargs.get("decoding_ctc_weight", 0.0) > 0.00001 and self.ctc != None
         is_use_lm = (
             kwargs.get("lm_weight", 0.0) > 0.00001 and kwargs.get("lm_file", None) is not None
@@ -512,7 +579,20 @@ class SeacoParaformer(BiCifParaformer, Paraformer):
 
     def generate_hotwords_list(self, hotword_list_or_file, tokenizer=None, frontend=None):
 
+        """Generate hotwords list.
+        
+            Args:
+                hotword_list_or_file: TODO.
+                tokenizer: Tokenizer instance for text encoding/decoding.
+                frontend: Audio frontend for feature extraction.
+            """
         def seg_tokenize(txt, seg_dict):
+            """Seg tokenize.
+            
+                Args:
+                    txt: TODO.
+                    seg_dict: TODO.
+                """
             pattern = re.compile(r"^[\u4E00-\u9FA50-9]+$")
             out_txt = ""
             for word in txt:
@@ -610,6 +690,11 @@ class SeacoParaformer(BiCifParaformer, Paraformer):
         self,
         **kwargs,
     ):
+        """Export.
+        
+            Args:
+                **kwargs: Additional keyword arguments.
+            """
         if "max_seq_len" not in kwargs:
             kwargs["max_seq_len"] = 512
         from .export_meta import export_rebuild_model
@@ -620,6 +705,11 @@ class SeacoParaformer(BiCifParaformer, Paraformer):
 
 @lru_cache(maxsize=1)
 def load_seg_dict(seg_dict_file):
+    """Load seg dict.
+    
+        Args:
+            seg_dict_file: TODO.
+        """
     seg_dict = {}
     assert isinstance(seg_dict_file, str)
     with open(seg_dict_file, "r", encoding="utf8") as f:

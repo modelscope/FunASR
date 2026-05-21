@@ -7,6 +7,12 @@ from itertools import permutations
 
 
 def generate_mapping_dict(max_speaker_num=6, max_olp_speaker_num=3):
+    """Generate mapping dict.
+    
+        Args:
+            max_speaker_num: TODO.
+            max_olp_speaker_num: TODO.
+        """
     all_kinds = []
     all_kinds.append(0)
     for i in range(max_olp_speaker_num):
@@ -32,6 +38,12 @@ def generate_mapping_dict(max_speaker_num=6, max_olp_speaker_num=3):
 
 
 def raw_dec_trans(x, max_speaker_num):
+    """Raw dec trans.
+    
+        Args:
+            x: TODO.
+            max_speaker_num: TODO.
+        """
     num_list = []
     for i in range(max_speaker_num):
         num_list.append(x[:, i])
@@ -45,6 +57,12 @@ def raw_dec_trans(x, max_speaker_num):
 
 
 def mapping_func(num, mapping_dict):
+    """Mapping func.
+    
+        Args:
+            num: TODO.
+            mapping_dict: TODO.
+        """
     if num in mapping_dict["dec2label"].keys():
         label = mapping_dict["dec2label"][num]
     else:
@@ -53,6 +71,13 @@ def mapping_func(num, mapping_dict):
 
 
 def dec_trans(x, max_speaker_num, mapping_dict):
+    """Dec trans.
+    
+        Args:
+            x: TODO.
+            max_speaker_num: TODO.
+            mapping_dict: TODO.
+        """
     num_list = []
     for i in range(max_speaker_num):
         num_list.append(x[:, i])
@@ -67,6 +92,14 @@ def dec_trans(x, max_speaker_num, mapping_dict):
 
 
 def create_powerlabel(label, mapping_dict, max_speaker_num=6, max_olp_speaker_num=3):
+    """Create powerlabel.
+    
+        Args:
+            label: TODO.
+            mapping_dict: TODO.
+            max_speaker_num: TODO.
+            max_olp_speaker_num: TODO.
+        """
     T, C = label.shape
     padding_label = np.zeros((T, max_speaker_num))
     padding_label[:, :C] = label
@@ -76,6 +109,15 @@ def create_powerlabel(label, mapping_dict, max_speaker_num=6, max_olp_speaker_nu
 
 
 def generate_perm_pse(label, n_speaker, mapping_dict, max_speaker_num, max_olp_speaker_num=3):
+    """Generate perm pse.
+    
+        Args:
+            label: TODO.
+            n_speaker: TODO.
+            mapping_dict: TODO.
+            max_speaker_num: TODO.
+            max_olp_speaker_num: TODO.
+        """
     perms = np.array(list(permutations(range(n_speaker)))).astype(np.float32)
     perms = torch.from_numpy(perms).to(label.device).to(torch.int64)
     perm_labels = [label[:, perm] for perm in perms]
@@ -91,6 +133,16 @@ def generate_perm_pse(label, n_speaker, mapping_dict, max_speaker_num, max_olp_s
 def generate_min_pse(
     label, n_speaker, mapping_dict, max_speaker_num, pse_logit, max_olp_speaker_num=3
 ):
+    """Generate min pse.
+    
+        Args:
+            label: TODO.
+            n_speaker: TODO.
+            mapping_dict: TODO.
+            max_speaker_num: TODO.
+            pse_logit: TODO.
+            max_olp_speaker_num: TODO.
+        """
     perm_labels, perm_pse_labels = generate_perm_pse(
         label, n_speaker, mapping_dict, max_speaker_num, max_olp_speaker_num=max_olp_speaker_num
     )

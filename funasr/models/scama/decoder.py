@@ -233,6 +233,32 @@ class FsmnDecoderSCAMAOpt(BaseTransformerDecoder):
         tf2torch_tensor_name_prefix_tf: str = "seq2seq/decoder",
         embed_tensor_name_prefix_tf: str = None,
     ):
+        """Initialize FsmnDecoderSCAMAOpt.
+        
+            Args:
+                vocab_size: Size/dimension parameter.
+                encoder_output_size: Size/dimension parameter.
+                attention_heads: TODO.
+                linear_units: TODO.
+                num_blocks: TODO.
+                dropout_rate: TODO.
+                positional_dropout_rate: TODO.
+                self_attention_dropout_rate: TODO.
+                src_attention_dropout_rate: TODO.
+                input_layer: TODO.
+                use_output_layer: TODO.
+                pos_enc_class: TODO.
+                normalize_before: TODO.
+                concat_after: TODO.
+                att_layer_num: TODO.
+                kernel_size: Size/dimension parameter.
+                sanm_shfit: TODO.
+                concat_embeds: TODO.
+                attention_dim: Size/dimension parameter.
+                tf2torch_tensor_name_prefix_torch: TODO.
+                tf2torch_tensor_name_prefix_tf: TODO.
+                embed_tensor_name_prefix_tf: TODO.
+            """
         super().__init__(
             vocab_size=vocab_size,
             encoder_output_size=encoder_output_size,

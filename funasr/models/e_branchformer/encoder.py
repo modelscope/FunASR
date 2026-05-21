@@ -68,6 +68,17 @@ class EBranchformerEncoderLayer(torch.nn.Module):
         dropout_rate: float,
         merge_conv_kernel: int = 3,
     ):
+        """Initialize EBranchformerEncoderLayer.
+        
+            Args:
+                size: TODO.
+                attn: TODO.
+                cgmlp: TODO.
+                feed_forward: TODO.
+                feed_forward_macaron: TODO.
+                dropout_rate: TODO.
+                merge_conv_kernel: TODO.
+            """
         super().__init__()
 
         self.size = size
@@ -210,6 +221,37 @@ class EBranchformerEncoder(nn.Module):
         interctc_layer_idx=None,
         interctc_use_conditioning: bool = False,
     ):
+        """Initialize EBranchformerEncoder.
+        
+            Args:
+                input_size: Size/dimension parameter.
+                output_size: Size/dimension parameter.
+                attention_heads: TODO.
+                attention_layer_type: TODO.
+                pos_enc_layer_type: TODO.
+                rel_pos_type: TODO.
+                cgmlp_linear_units: TODO.
+                cgmlp_conv_kernel: TODO.
+                use_linear_after_conv: TODO.
+                gate_activation: TODO.
+                num_blocks: TODO.
+                dropout_rate: TODO.
+                positional_dropout_rate: TODO.
+                attention_dropout_rate: TODO.
+                input_layer: TODO.
+                zero_triu: TODO.
+                padding_idx: TODO.
+                layer_drop_rate: TODO.
+                max_pos_emb_len: TODO.
+                use_ffn: TODO.
+                macaron_ffn: TODO.
+                ffn_activation_type: TODO.
+                linear_units: TODO.
+                positionwise_layer_type: TODO.
+                merge_conv_kernel: TODO.
+                interctc_layer_idx: TODO.
+                interctc_use_conditioning: TODO.
+            """
         super().__init__()
         self._output_size = output_size
 
@@ -375,6 +417,7 @@ class EBranchformerEncoder(nn.Module):
         self.conditioning_layer = None
 
     def output_size(self) -> int:
+        """Output size."""
         return self._output_size
 
     def forward(

@@ -3,6 +3,13 @@ from torch.nn.utils.rnn import pad_sequence
 
 
 def slice_padding_fbank(speech, speech_lengths, vad_segments):
+    """Slice padding fbank.
+    
+        Args:
+            speech: Speech audio tensor, shape (batch, time).
+            speech_lengths: Length of each speech sample.
+            vad_segments: TODO.
+        """
     speech_list = []
     speech_lengths_list = []
     for i, segment in enumerate(vad_segments):

@@ -24,6 +24,17 @@ class SenseVoiceDataset(torch.utils.data.Dataset):
         float_pad_value: float = 0.0,
         **kwargs,
     ):
+        """Initialize SenseVoiceDataset.
+        
+            Args:
+                path: TODO.
+                index_ds: TODO.
+                frontend: Audio frontend for feature extraction.
+                tokenizer: Tokenizer instance for text encoding/decoding.
+                int_pad_value: TODO.
+                float_pad_value: TODO.
+                **kwargs: Additional keyword arguments.
+            """
         super().__init__()
         index_ds_class = tables.index_ds_classes.get(index_ds)
         self.index_ds = index_ds_class(path, **kwargs)
@@ -61,18 +72,34 @@ class SenseVoiceDataset(torch.utils.data.Dataset):
             self.permute = True
 
     def get_source_len(self, index):
+        """Get source len.
+        
+            Args:
+                index: TODO.
+            """
         item = self.index_ds[index]
         return self.index_ds.get_source_len(item)
 
     def get_target_len(self, index):
+        """Get target len.
+        
+            Args:
+                index: TODO.
+            """
         item = self.index_ds[index]
         return self.index_ds.get_target_len(item)
 
     def __len__(self):
+        """Internal: len  ."""
         return len(self.index_ds)
 
     def __getitem__(self, index):
 
+        """Internal: getitem  .
+        
+            Args:
+                index: TODO.
+            """
         output = None
         for idx in range(self.retry):
             if idx == 0:
@@ -153,6 +180,11 @@ class SenseVoiceDataset(torch.utils.data.Dataset):
         return output
 
     def collator(self, samples: list = None):
+        """Collator.
+        
+            Args:
+                samples: TODO.
+            """
         outputs = {}
         for sample in samples:
             if sample is None:
@@ -209,6 +241,12 @@ class SenseVoiceDataset(torch.utils.data.Dataset):
         return outputs
 
     def _filter_badcase(self, outputs, i=0):
+        """Internal: filter badcase.
+        
+            Args:
+                outputs: TODO.
+                i: TODO.
+            """
         b, t, _ = outputs["speech"].shape
 
         if b * t > self.batch_size * 1.25:
@@ -247,6 +285,17 @@ class SenseVoiceCTCDataset(torch.utils.data.Dataset):
         float_pad_value: float = 0.0,
         **kwargs,
     ):
+        """Initialize SenseVoiceCTCDataset.
+        
+            Args:
+                path: TODO.
+                index_ds: TODO.
+                frontend: Audio frontend for feature extraction.
+                tokenizer: Tokenizer instance for text encoding/decoding.
+                int_pad_value: TODO.
+                float_pad_value: TODO.
+                **kwargs: Additional keyword arguments.
+            """
         super().__init__()
         index_ds_class = tables.index_ds_classes.get(index_ds)
         self.index_ds = index_ds_class(path, **kwargs)
@@ -284,18 +333,34 @@ class SenseVoiceCTCDataset(torch.utils.data.Dataset):
             self.permute = True
 
     def get_source_len(self, index):
+        """Get source len.
+        
+            Args:
+                index: TODO.
+            """
         item = self.index_ds[index]
         return self.index_ds.get_source_len(item)
 
     def get_target_len(self, index):
+        """Get target len.
+        
+            Args:
+                index: TODO.
+            """
         item = self.index_ds[index]
         return self.index_ds.get_target_len(item)
 
     def __len__(self):
+        """Internal: len  ."""
         return len(self.index_ds)
 
     def __getitem__(self, index):
 
+        """Internal: getitem  .
+        
+            Args:
+                index: TODO.
+            """
         output = None
         for idx in range(self.retry):
             if idx == 0:
@@ -357,6 +422,11 @@ class SenseVoiceCTCDataset(torch.utils.data.Dataset):
         return output
 
     def collator(self, samples: list = None):
+        """Collator.
+        
+            Args:
+                samples: TODO.
+            """
         outputs = {}
         for sample in samples:
             if sample is None:
@@ -410,6 +480,12 @@ class SenseVoiceCTCDataset(torch.utils.data.Dataset):
         return outputs
 
     def _filter_badcase(self, outputs, i=0):
+        """Internal: filter badcase.
+        
+            Args:
+                outputs: TODO.
+                i: TODO.
+            """
         b, t, _ = outputs["speech"].shape
 
         if b * t > self.batch_size * 1.25:

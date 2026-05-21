@@ -26,6 +26,17 @@ class EncoderLayer(nn.Module):
         include_batch_norm=False,
         residual=False,
     ):
+        """Initialize EncoderLayer.
+        
+            Args:
+                input_units: TODO.
+                num_units: TODO.
+                kernel_size: Size/dimension parameter.
+                activation: TODO.
+                stride: TODO.
+                include_batch_norm: TODO.
+                residual: TODO.
+            """
         super().__init__()
         left_padding = math.ceil((kernel_size - stride) / 2)
         right_padding = kernel_size - stride - left_padding
@@ -47,12 +58,23 @@ class EncoderLayer(nn.Module):
 
     @staticmethod
     def get_activation(activation):
+        """Get activation.
+        
+            Args:
+                activation: TODO.
+            """
         if activation == "tanh":
             return nn.Tanh()
         else:
             return nn.ReLU()
 
     def forward(self, xs_pad, ilens=None):
+        """Forward pass for training.
+        
+            Args:
+                xs_pad: TODO.
+                ilens: TODO.
+            """
         outputs = self.conv1d(self.conv_padding(xs_pad))
         if self.residual and self.stride == 1 and self.input_units == self.num_units:
             outputs = outputs + xs_pad
@@ -89,6 +111,26 @@ class ConvEncoder(AbsEncoder):
         tf2torch_tensor_name_prefix_torch: str = "speaker_encoder",
         tf2torch_tensor_name_prefix_tf: str = "EAND/speaker_encoder",
     ):
+        """Initialize ConvEncoder.
+        
+            Args:
+                num_layers: TODO.
+                input_units: TODO.
+                num_units: TODO.
+                kernel_size: Size/dimension parameter.
+                dropout_rate: TODO.
+                position_encoder: TODO.
+                activation: TODO.
+                auxiliary_states: TODO.
+                out_units: TODO.
+                out_norm: TODO.
+                out_residual: TODO.
+                include_batchnorm: TODO.
+                regularization_weight: TODO.
+                stride: TODO.
+                tf2torch_tensor_name_prefix_torch: TODO.
+                tf2torch_tensor_name_prefix_tf: TODO.
+            """
         super().__init__()
         self._output_size = num_units
 
@@ -143,6 +185,7 @@ class ConvEncoder(AbsEncoder):
             self.after_norm = LayerNorm(out_units)
 
     def output_size(self) -> int:
+        """Output size."""
         return self.num_units
 
     def forward(
@@ -152,6 +195,13 @@ class ConvEncoder(AbsEncoder):
         prev_states: torch.Tensor = None,
     ) -> Tuple[torch.Tensor, torch.Tensor, Optional[torch.Tensor]]:
 
+        """Forward pass for training.
+        
+            Args:
+                xs_pad: TODO.
+                ilens: TODO.
+                prev_states: TODO.
+            """
         inputs = xs_pad
         if self.position_encoder is not None:
             inputs = self.position_encoder(inputs)

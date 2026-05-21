@@ -31,6 +31,12 @@ def _compute_eer(label, pred, positive_label=1):
 
 
 def compute_eer(trials_path, scores_path):
+    """Compute eer.
+    
+        Args:
+            trials_path: TODO.
+            scores_path: TODO.
+        """
     labels = []
     for one_line in open(trials_path, "r"):
         labels.append(one_line.strip().rsplit(" ", 1)[-1] == "target")
@@ -46,6 +52,7 @@ def compute_eer(trials_path, scores_path):
 
 
 def main():
+    """Main."""
     parser = argparse.ArgumentParser()
     parser.add_argument("trials", help="trial list")
     parser.add_argument("scores", help="score file, normalized to [0, 1]")

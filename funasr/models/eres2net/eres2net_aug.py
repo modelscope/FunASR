@@ -23,9 +23,15 @@ from funasr.models.eres2net.fusion import AFF
 class ReLU(nn.Hardtanh):
 
     def __init__(self, inplace=False):
+        """Initialize ReLU.
+        
+            Args:
+                inplace: TODO.
+            """
         super(ReLU, self).__init__(0, 20, inplace)
 
     def __repr__(self):
+        """Internal: repr  ."""
         inplace_str = "inplace" if self.inplace else ""
         return self.__class__.__name__ + " (" + inplace_str + ")"
 
@@ -44,6 +50,15 @@ class BasicBlockERes2Net(nn.Module):
     expansion = 4
 
     def __init__(self, in_planes, planes, stride=1, baseWidth=24, scale=3):
+        """Initialize BasicBlockERes2Net.
+        
+            Args:
+                in_planes: TODO.
+                planes: TODO.
+                stride: TODO.
+                baseWidth: TODO.
+                scale: TODO.
+            """
         super(BasicBlockERes2Net, self).__init__()
         width = int(math.floor(planes * (baseWidth / 64.0)))
         self.conv1 = conv1x1(in_planes, width * scale, stride)
@@ -74,6 +89,11 @@ class BasicBlockERes2Net(nn.Module):
         self.scale = scale
 
     def forward(self, x):
+        """Forward pass for training.
+        
+            Args:
+                x: TODO.
+            """
         residual = x
 
         out = self.conv1(x)
@@ -106,6 +126,15 @@ class BasicBlockERes2Net_diff_AFF(nn.Module):
     expansion = 4
 
     def __init__(self, in_planes, planes, stride=1, baseWidth=24, scale=3):
+        """Initialize BasicBlockERes2Net_diff_AFF.
+        
+            Args:
+                in_planes: TODO.
+                planes: TODO.
+                stride: TODO.
+                baseWidth: TODO.
+                scale: TODO.
+            """
         super(BasicBlockERes2Net_diff_AFF, self).__init__()
         width = int(math.floor(planes * (baseWidth / 64.0)))
         self.conv1 = conv1x1(in_planes, width * scale, stride)
@@ -142,6 +171,11 @@ class BasicBlockERes2Net_diff_AFF(nn.Module):
         self.scale = scale
 
     def forward(self, x):
+        """Forward pass for training.
+        
+            Args:
+                x: TODO.
+            """
         residual = x
 
         out = self.conv1(x)
@@ -183,6 +217,18 @@ class ERes2NetAug(nn.Module):
         pooling_func="TSTP",
         two_emb_layer=False,
     ):
+        """Initialize ERes2NetAug.
+        
+            Args:
+                block: TODO.
+                block_fuse: TODO.
+                num_blocks: TODO.
+                m_channels: TODO.
+                feat_dim: Size/dimension parameter.
+                embedding_size: Size/dimension parameter.
+                pooling_func: TODO.
+                two_emb_layer: TODO.
+            """
         super(ERes2NetAug, self).__init__()
         self.in_planes = m_channels
         self.feat_dim = feat_dim
@@ -221,6 +267,14 @@ class ERes2NetAug(nn.Module):
             self.seg_2 = nn.Identity()
 
     def _make_layer(self, block, planes, num_blocks, stride):
+        """Internal: make layer.
+        
+            Args:
+                block: TODO.
+                planes: TODO.
+                num_blocks: TODO.
+                stride: TODO.
+            """
         strides = [stride] + [1] * (num_blocks - 1)
         layers = []
         for stride in strides:
@@ -229,6 +283,11 @@ class ERes2NetAug(nn.Module):
         return nn.Sequential(*layers)
 
     def forward(self, x):
+        """Forward pass for training.
+        
+            Args:
+                x: TODO.
+            """
         x = x.permute(0, 2, 1)  # (B,T,F) => (B,F,T)
 
         x = x.unsqueeze_(1)

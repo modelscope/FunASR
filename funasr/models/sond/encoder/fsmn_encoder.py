@@ -24,6 +24,14 @@ class FsmnBlock(torch.nn.Module):
         kernel_size,
         fsmn_shift=0,
     ):
+        """Initialize FsmnBlock.
+        
+            Args:
+                n_feat: TODO.
+                dropout_rate: TODO.
+                kernel_size: Size/dimension parameter.
+                fsmn_shift: TODO.
+            """
         super().__init__()
         self.dropout = nn.Dropout(p=dropout_rate)
         self.fsmn_block = nn.Conv1d(
@@ -37,6 +45,13 @@ class FsmnBlock(torch.nn.Module):
         self.pad_fn = nn.ConstantPad1d((left_padding, right_padding), 0.0)
 
     def forward(self, inputs, mask, mask_shfit_chunk=None):
+        """Forward pass for training.
+        
+            Args:
+                inputs: TODO.
+                mask: TODO.
+                mask_shfit_chunk: TODO.
+            """
         b, t, d = inputs.size()
         if mask is not None:
             mask = torch.reshape(mask, (b, -1, 1))
@@ -55,6 +70,15 @@ class FsmnBlock(torch.nn.Module):
 
 class EncoderLayer(torch.nn.Module):
     def __init__(self, in_size, size, feed_forward, fsmn_block, dropout_rate=0.0):
+        """Initialize EncoderLayer.
+        
+            Args:
+                in_size: Size/dimension parameter.
+                size: TODO.
+                feed_forward: TODO.
+                fsmn_block: TODO.
+                dropout_rate: TODO.
+            """
         super().__init__()
         self.in_size = in_size
         self.size = size
@@ -67,6 +91,12 @@ class EncoderLayer(torch.nn.Module):
     ) -> Tuple[torch.Tensor, torch.Tensor]:
         # xs_pad in Batch, Time, Dim
 
+        """Forward pass for training.
+        
+            Args:
+                xs_pad: TODO.
+                mask: TODO.
+            """
         context = self.ffn(xs_pad)[0]
         memory = self.memory(context, mask)
 
@@ -160,11 +190,19 @@ class FsmnEncoder(AbsEncoder):
             self.conv1d = nn.Conv1d(num_memory_units, out_units, 1, 1)
 
     def output_size(self) -> int:
+        """Output size."""
         return self.num_memory_units
 
     def forward(
         self, xs_pad: torch.Tensor, ilens: torch.Tensor, prev_states: torch.Tensor = None
     ) -> Tuple[torch.Tensor, torch.Tensor, Optional[torch.Tensor]]:
+        """Forward pass for training.
+        
+            Args:
+                xs_pad: TODO.
+                ilens: TODO.
+                prev_states: TODO.
+            """
         inputs = xs_pad
         if self.position_encoder is not None:
             inputs = self.position_encoder(inputs)

@@ -9,6 +9,12 @@ import torch.nn.functional as F
 
 
 def export_rebuild_model(model, **kwargs):
+    """Export rebuild model.
+    
+        Args:
+            model: Model instance or model name.
+            **kwargs: Additional keyword arguments.
+        """
     model.device = kwargs.get("device")
 
     # store original forward since self.extract_features is calling it
@@ -25,6 +31,11 @@ def export_rebuild_model(model, **kwargs):
 
 
 def export_forward(self, x: torch.Tensor):
+    """Export forward.
+    
+        Args:
+            x: TODO.
+        """
     with torch.no_grad():
         if self.cfg.normalize:
             mean = torch.mean(x, dim=1, keepdim=True)
@@ -44,18 +55,22 @@ def export_forward(self, x: torch.Tensor):
 
 
 def export_dummy_inputs(self):
+    """Export dummy inputs."""
     return (torch.randn(1, 16000),)
 
 
 def export_input_names(self):
+    """Export input names."""
     return ["input"]
 
 
 def export_output_names(self):
+    """Export output names."""
     return ["output"]
 
 
 def export_dynamic_axes(self):
+    """Export dynamic axes."""
     return {
         "input": {
             0: "batch_size",
@@ -66,4 +81,5 @@ def export_dynamic_axes(self):
 
 
 def export_name(self):
+    """Export name."""
     return "emotion2vec"

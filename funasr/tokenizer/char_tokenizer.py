@@ -20,6 +20,16 @@ class CharTokenizer(BaseTokenizer):
         seg_dict: str = None,
         **kwargs,
     ):
+        """Initialize CharTokenizer.
+        
+            Args:
+                non_linguistic_symbols: TODO.
+                space_symbol: TODO.
+                remove_non_linguistic_symbols: TODO.
+                split_with_space: TODO.
+                seg_dict: TODO.
+                **kwargs: Additional keyword arguments.
+            """
         super().__init__(**kwargs)
         self.space_symbol = space_symbol
         if non_linguistic_symbols is None:
@@ -42,6 +52,7 @@ class CharTokenizer(BaseTokenizer):
             self.seg_dict = load_seg_dict(seg_dict)
 
     def __repr__(self):
+        """Internal: repr  ."""
         return (
             f"{self.__class__.__name__}("
             f'space_symbol="{self.space_symbol}"'
@@ -51,6 +62,11 @@ class CharTokenizer(BaseTokenizer):
 
     def text2tokens(self, line: Union[str, list]) -> List[str]:
         # if self.split_with_space:
+        """Text2tokens.
+        
+            Args:
+                line: TODO.
+            """
         if self.seg_dict is not None:
             tokens = line.strip().split(" ")
             tokens = seg_tokenize(tokens, self.seg_dict)
@@ -74,11 +90,21 @@ class CharTokenizer(BaseTokenizer):
         return tokens
 
     def tokens2text(self, tokens: Iterable[str]) -> str:
+        """Tokens2text.
+        
+            Args:
+                tokens: TODO.
+            """
         tokens = [t if t != self.space_symbol else " " for t in tokens]
         return "".join(tokens)
 
 
 def load_seg_dict(seg_dict_file):
+    """Load seg dict.
+    
+        Args:
+            seg_dict_file: TODO.
+        """
     seg_dict = {}
     assert isinstance(seg_dict_file, str)
     with open(seg_dict_file, "r", encoding="utf8") as f:
@@ -93,6 +119,12 @@ def load_seg_dict(seg_dict_file):
 
 def seg_tokenize(txt, seg_dict):
     # pattern = re.compile(r'^[\u4E00-\u9FA50-9]+$')
+    """Seg tokenize.
+    
+        Args:
+            txt: TODO.
+            seg_dict: TODO.
+        """
     pattern = re.compile(r"([\u4E00-\u9FA5A-Za-z0-9])")
     out_txt = ""
     for word in txt:

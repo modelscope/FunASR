@@ -29,6 +29,11 @@ from funasr.models.campplus.utils import sv_chunk, postprocess, distribute_spk
 
 class AutoFrontend:
     def __init__(self, **kwargs):
+        """Initialize AutoFrontend.
+        
+            Args:
+                **kwargs: Additional keyword arguments.
+            """
         assert "model" in kwargs
         if "model_conf" not in kwargs:
             logging.info("download models from model hub: {}".format(kwargs.get("hub", "ms")))
@@ -47,6 +52,14 @@ class AutoFrontend:
 
     def __call__(self, input, input_len=None, kwargs=None, **cfg):
 
+        """Internal: call  .
+        
+            Args:
+                input: Input audio/text data.
+                input_len: TODO.
+                kwargs: Additional keyword arguments.
+                **cfg: Configuration overrides.
+            """
         kwargs = self.kwargs if kwargs is None else kwargs
         kwargs.update(cfg)
 

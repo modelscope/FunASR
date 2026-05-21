@@ -23,6 +23,15 @@ class ConvolutionalSpatialGatingUnit(torch.nn.Module):
         use_linear_after_conv: bool,
         gate_activation: str,
     ):
+        """Initialize ConvolutionalSpatialGatingUnit.
+        
+            Args:
+                size: TODO.
+                kernel_size: Size/dimension parameter.
+                dropout_rate: TODO.
+                use_linear_after_conv: TODO.
+                gate_activation: TODO.
+            """
         super().__init__()
 
         n_channels = size // 2  # split input channels
@@ -48,6 +57,7 @@ class ConvolutionalSpatialGatingUnit(torch.nn.Module):
         self.dropout = torch.nn.Dropout(dropout_rate)
 
     def espnet_initialization_fn(self):
+        """Espnet initialization fn."""
         torch.nn.init.normal_(self.conv.weight, std=1e-6)
         torch.nn.init.ones_(self.conv.bias)
         if self.linear is not None:
@@ -93,6 +103,16 @@ class ConvolutionalGatingMLP(torch.nn.Module):
         use_linear_after_conv: bool,
         gate_activation: str,
     ):
+        """Initialize ConvolutionalGatingMLP.
+        
+            Args:
+                size: TODO.
+                linear_units: TODO.
+                kernel_size: Size/dimension parameter.
+                dropout_rate: TODO.
+                use_linear_after_conv: TODO.
+                gate_activation: TODO.
+            """
         super().__init__()
 
         self.channel_proj1 = torch.nn.Sequential(
@@ -108,6 +128,12 @@ class ConvolutionalGatingMLP(torch.nn.Module):
         self.channel_proj2 = torch.nn.Linear(linear_units // 2, size)
 
     def forward(self, x, mask):
+        """Forward pass for training.
+        
+            Args:
+                x: TODO.
+                mask: TODO.
+            """
         if isinstance(x, tuple):
             xs_pad, pos_emb = x
         else:

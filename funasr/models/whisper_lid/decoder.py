@@ -26,6 +26,14 @@ class OpenAIWhisperDecoderWarp(nn.Module):
         download_dir: str = None,
         use_padmask: bool = False,
     ):
+        """Initialize OpenAIWhisperDecoderWarp.
+        
+            Args:
+                dropout_rate: TODO.
+                whisper_model: Whisper Model instance.
+                download_dir: TODO.
+                use_padmask: TODO.
+            """
         super().__init__()
 
         assert whisper_model in whisper.available_models()

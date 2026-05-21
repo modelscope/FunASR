@@ -25,6 +25,16 @@ class overlap_chunk:
         decoder_att_look_back_factor: tuple = (1,),
     ):
 
+        """Initialize overlap_chunk.
+        
+            Args:
+                chunk_size: Size/dimension parameter.
+                stride: TODO.
+                pad_left: TODO.
+                encoder_att_look_back_factor: TODO.
+                shfit_fsmn: TODO.
+                decoder_att_look_back_factor: TODO.
+            """
         pad_left = self.check_chunk_size_args(chunk_size, pad_left)
         encoder_att_look_back_factor = self.check_chunk_size_args(
             chunk_size, encoder_att_look_back_factor
@@ -63,12 +73,23 @@ class overlap_chunk:
         ) = (None, None, None, None, None)
 
     def check_chunk_size_args(self, chunk_size, x):
+        """Check chunk size args.
+        
+            Args:
+                chunk_size: Size/dimension parameter.
+                x: TODO.
+            """
         if len(x) < len(chunk_size):
             x = [x[0] for i in chunk_size]
         return x
 
     def get_chunk_size(self, ind: int = 0):
         # with torch.no_grad:
+        """Get chunk size.
+        
+            Args:
+                ind: TODO.
+            """
         chunk_size, stride, pad_left, encoder_att_look_back_factor, decoder_att_look_back_factor = (
             self.chunk_size[ind],
             self.stride[ind],
@@ -100,6 +121,12 @@ class overlap_chunk:
         )
 
     def random_choice(self, training=True, decoding_ind=None):
+        """Random choice.
+        
+            Args:
+                training: TODO.
+                decoding_ind: TODO.
+            """
         chunk_num = len(self.chunk_size)
         ind = 0
         if training and chunk_num > 1:
@@ -111,6 +138,14 @@ class overlap_chunk:
 
     def gen_chunk_mask(self, x_len, ind=0, num_units=1, num_units_predictor=1):
 
+        """Gen chunk mask.
+        
+            Args:
+                x_len: TODO.
+                ind: TODO.
+                num_units: TODO.
+                num_units_predictor: TODO.
+            """
         with torch.no_grad():
             x_len = x_len.cpu().numpy()
             x_len_max = x_len.max()
@@ -271,6 +306,13 @@ class overlap_chunk:
         return x_chunk, x_len_chunk
 
     def remove_chunk(self, x_chunk, x_len_chunk, chunk_outs):
+        """Remove chunk.
+        
+            Args:
+                x_chunk: TODO.
+                x_len_chunk: TODO.
+                chunk_outs: TODO.
+            """
         x_chunk = x_chunk[:, : x_len_chunk.max(), :]
         b, t, d = x_chunk.size()
         x_len_chunk_mask = (~make_pad_mask(x_len_chunk, maxlen=t)).to(x_chunk.device)
@@ -286,24 +328,56 @@ class overlap_chunk:
         return x, x_len
 
     def get_x_add_mask(self, chunk_outs=None, device="cpu", idx=0, dtype=torch.float32):
+        """Get x add mask.
+        
+            Args:
+                chunk_outs: TODO.
+                device: Target device ("cuda:0", "cpu", etc.).
+                idx: TODO.
+                dtype: TODO.
+            """
         with torch.no_grad():
             x = chunk_outs[idx] if chunk_outs is not None else self.chunk_outs[idx]
             x = torch.from_numpy(x).type(dtype).to(device)
         return x
 
     def get_x_len_chunk(self, chunk_outs=None, device="cpu", idx=1, dtype=torch.float32):
+        """Get x len chunk.
+        
+            Args:
+                chunk_outs: TODO.
+                device: Target device ("cuda:0", "cpu", etc.).
+                idx: TODO.
+                dtype: TODO.
+            """
         with torch.no_grad():
             x = chunk_outs[idx] if chunk_outs is not None else self.chunk_outs[idx]
             x = torch.from_numpy(x).type(dtype).to(device)
         return x
 
     def get_x_rm_mask(self, chunk_outs=None, device="cpu", idx=2, dtype=torch.float32):
+        """Get x rm mask.
+        
+            Args:
+                chunk_outs: TODO.
+                device: Target device ("cuda:0", "cpu", etc.).
+                idx: TODO.
+                dtype: TODO.
+            """
         with torch.no_grad():
             x = chunk_outs[idx] if chunk_outs is not None else self.chunk_outs[idx]
             x = torch.from_numpy(x).type(dtype).to(device)
         return x
 
     def get_x_len(self, chunk_outs=None, device="cpu", idx=3, dtype=torch.float32):
+        """Get x len.
+        
+            Args:
+                chunk_outs: TODO.
+                device: Target device ("cuda:0", "cpu", etc.).
+                idx: TODO.
+                dtype: TODO.
+            """
         with torch.no_grad():
             x = chunk_outs[idx] if chunk_outs is not None else self.chunk_outs[idx]
             x = torch.from_numpy(x).type(dtype).to(device)
@@ -312,6 +386,16 @@ class overlap_chunk:
     def get_mask_shfit_chunk(
         self, chunk_outs=None, device="cpu", batch_size=1, num_units=1, idx=4, dtype=torch.float32
     ):
+        """Get mask shfit chunk.
+        
+            Args:
+                chunk_outs: TODO.
+                device: Target device ("cuda:0", "cpu", etc.).
+                batch_size: Number of samples per batch.
+                num_units: TODO.
+                idx: TODO.
+                dtype: TODO.
+            """
         with torch.no_grad():
             x = chunk_outs[idx] if chunk_outs is not None else self.chunk_outs[idx]
             x = np.tile(
@@ -328,6 +412,16 @@ class overlap_chunk:
     def get_mask_chunk_predictor(
         self, chunk_outs=None, device="cpu", batch_size=1, num_units=1, idx=5, dtype=torch.float32
     ):
+        """Get mask chunk predictor.
+        
+            Args:
+                chunk_outs: TODO.
+                device: Target device ("cuda:0", "cpu", etc.).
+                batch_size: Number of samples per batch.
+                num_units: TODO.
+                idx: TODO.
+                dtype: TODO.
+            """
         with torch.no_grad():
             x = chunk_outs[idx] if chunk_outs is not None else self.chunk_outs[idx]
             x = np.tile(
@@ -344,6 +438,15 @@ class overlap_chunk:
     def get_mask_att_chunk_encoder(
         self, chunk_outs=None, device="cpu", batch_size=1, idx=6, dtype=torch.float32
     ):
+        """Get mask att chunk encoder.
+        
+            Args:
+                chunk_outs: TODO.
+                device: Target device ("cuda:0", "cpu", etc.).
+                batch_size: Number of samples per batch.
+                idx: TODO.
+                dtype: TODO.
+            """
         with torch.no_grad():
             x = chunk_outs[idx] if chunk_outs is not None else self.chunk_outs[idx]
             x = np.tile(
@@ -360,6 +463,15 @@ class overlap_chunk:
     def get_mask_shift_att_chunk_decoder(
         self, chunk_outs=None, device="cpu", batch_size=1, idx=7, dtype=torch.float32
     ):
+        """Get mask shift att chunk decoder.
+        
+            Args:
+                chunk_outs: TODO.
+                device: Target device ("cuda:0", "cpu", etc.).
+                batch_size: Number of samples per batch.
+                idx: TODO.
+                dtype: TODO.
+            """
         with torch.no_grad():
             x = chunk_outs[idx] if chunk_outs is not None else self.chunk_outs[idx]
             x = np.tile(x[None, None, :, 0], [batch_size, 1, 1])
@@ -383,6 +495,24 @@ def build_scama_mask_for_cross_attention_decoder(
     is_training=True,
     dtype: torch.dtype = torch.float32,
 ):
+    """Build scama mask for cross attention decoder.
+    
+        Args:
+            predictor_alignments: TODO.
+            encoder_sequence_length: TODO.
+            chunk_size: Size/dimension parameter.
+            encoder_chunk_size: Size/dimension parameter.
+            attention_chunk_center_bias: TODO.
+            attention_chunk_size: Size/dimension parameter.
+            attention_chunk_type: TODO.
+            step: TODO.
+            predictor_mask_chunk_hopping: TODO.
+            decoder_att_look_back_factor: TODO.
+            mask_shift_att_chunk_decoder: TODO.
+            target_length: TODO.
+            is_training: Boolean flag for training.
+            dtype: TODO.
+        """
     with torch.no_grad():
         device = predictor_alignments.device
         batch_size, chunk_num = predictor_alignments.size()
@@ -454,6 +584,7 @@ def build_scama_mask_for_cross_attention_decoder(
                 mask_mask_flip = mask_flip * mask
 
             def _fn():
+                """Internal: fn."""
                 mask_sliced = mask[:b, :k, encoder_chunk_size:t]
                 zero_pad_right = torch.zeros(
                     [b, k, encoder_chunk_size], dtype=mask_sliced.dtype
