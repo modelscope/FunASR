@@ -5,6 +5,9 @@ on:
     branches: [main]
     paths:
       - 'funasr/**/*.py'
+      - 'scripts/gen_api_docs.py'
+      - 'training.html'
+      - '.github/workflows/update-api-docs.yml'
 
 jobs:
   build-api-docs:

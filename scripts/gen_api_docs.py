@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-import shutil
 """Generate API page with source code preview and GitHub links.
 Run this script from the repo root on main branch.
 Output: gh-pages-output/api.html for deployment to gh-pages.
@@ -7,12 +6,20 @@ Output: gh-pages-output/api.html for deployment to gh-pages.
 This script is designed to be run by GitHub Actions on every push to main,
 automatically regenerating the API docs.
 """
-import ast, os, html as htmlmod, re, glob, inspect
+import ast
+import glob
+import html as htmlmod
+import os
+import re
+import shutil
+from pathlib import Path
 
 REPO_URL = "https://github.com/modelscope/FunASR"
 BRANCH = "main"
+REPO_ROOT = Path(__file__).resolve().parents[1]
+OUTPUT_DIR = REPO_ROOT / "gh-pages-output"
 
-os.chdir('/cpfs_speech/user/zhifu.gzf/codebase/FunASR-github')
+os.chdir(REPO_ROOT)
 
 tree_structure = {
     "funasr.auto": {"auto_model": "funasr/auto/auto_model.py"},
@@ -113,7 +120,7 @@ for top_level, sub_modules in tree_structure.items():
         with open(filepath) as f:
             source = f.read()
         try:
-            tree = ast.parse(source)
+            tree = ast.parse(source, filename=filepath)
         except:
             continue
         key = f"{top_level}.{sub_name}"
@@ -213,10 +220,7 @@ for top_level in tree_structure:
         sidebar += '</div></div>\n'
     sidebar += '</div></div>\n'
 
-# Write the full page (keeping same CSS structure + new source styles)
-page = open('/tmp/api_template.txt', 'w')  # We'll inline it
-page.close()
-
+# Write the full page (keeping same CSS structure + source styles)
 html_page = f'''<!DOCTYPE html>
 <html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>FunASR API</title>
@@ -267,7 +271,7 @@ h2{{font-size:1.1rem;margin:8px 0}}h2 code{{font-family:'JetBrains Mono',monospa
 </style></head><body>
 <nav class="nav"><div class="container">
 <a href="index.html" class="nav-logo">FunASR</a>
-<div class="nav-links"><a href="index.html">Home</a><a href="tutorial.html">Tutorial</a><a href="model-registration.html">Develop</a><a href="api.html" class="active">API</a></div>
+<div class="nav-links"><a href="index.html">Home</a><a href="tutorial.html">Tutorial</a><a href="training.html">Training</a><a href="model-registration.html">Develop</a><a href="api.html" class="active">API</a></div>
 <a href="https://github.com/modelscope/FunASR" class="nav-github">GitHub</a>
 </div></nav>
 <div class="api-layout">
@@ -298,10 +302,12 @@ if(q)document.querySelectorAll('.l1,.l2').forEach(e=>e.classList.add('open'));
 if(window.location.hash)showEntry(window.location.hash.slice(1));
 </script></body></html>'''
 
-with open("gh-pages-output/api.html", "w") as f:
+OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+with (OUTPUT_DIR / "api.html").open("w", encoding="utf-8") as f:
     f.write(html_page)
+
+training_src = REPO_ROOT / "training.html"
+if training_src.exists():
+    shutil.copy2(training_src, OUTPUT_DIR / "training.html")
+
 print("Generated gh-pages-output/api.html")
-
-# Ensure output dir exists
-os.makedirs("gh-pages-output", exist_ok=True)
-
