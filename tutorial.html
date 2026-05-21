@@ -111,7 +111,7 @@ print(res[0]["timestamps"])  # character-level timestamps</pre>
         <p>The output includes <code>timestamps</code> — a list of dictionaries with <code>token</code>, <code>start_time</code>, and <code>end_time</code> (in seconds) for each character.</p>
 
         <h3>With Speaker Diarization</h3>
-        <p>Add <code>spk_model</code> and <code>punc_model</code> to get per-sentence speaker labels. The output <code>sentence_info</code> contains text, timestamps, and speaker ID for each sentence.</p>
+        <p>Add <code>spk_model</code> to get per-sentence speaker labels. Fun-ASR-Nano outputs punctuation natively, so <code>punc_model</code> is not needed. The output <code>sentence_info</code> contains text, timestamps, and speaker ID for each sentence.</p>
 <pre>model = AutoModel(
     model="FunAudioLLM/Fun-ASR-Nano-2512",
     trust_remote_code=True,
@@ -119,7 +119,6 @@ print(res[0]["timestamps"])  # character-level timestamps</pre>
     vad_model="fsmn-vad",
     vad_kwargs={"max_single_segment_time": 30000},
     spk_model="cam++",
-    punc_model="ct-punc",
     device="cuda:0",
     hub="hf",
 )
@@ -169,7 +168,6 @@ print(text)</pre>
     vad_model="fsmn-vad",
     vad_kwargs={"max_single_segment_time": 30000},
     spk_model="cam++",
-    punc_model="ct-punc",
     device="cuda:0",
 )
 res = model.generate(input="meeting.wav", cache={}, language="auto",
@@ -311,6 +309,7 @@ print(res[0]["text"], "| Language:", res[0].get("language", ""))
 res = model.generate(input="audio_zh.wav", language="Chinese")</pre>
         <div class="note">
             Requires <code>pip install qwen-asr</code> and a GPU with sufficient memory (~4GB for 0.6B, ~8GB for 1.7B).
+            For speaker diarization, add <code>spk_model="cam++"</code> and <code>forced_aligner="Qwen/Qwen3-ForcedAligner-0.6B"</code> at initialization.
         </div>
 
         <!-- ONNX Export -->
