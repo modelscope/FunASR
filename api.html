@@ -1,0 +1,2586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FunASR API Reference</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+    .api-module { margin: 48px 0; }
+    .api-module-title { font-size: 1.1rem; font-weight: 700; color: var(--muted); margin-bottom: 16px; font-family: monospace; }
+    .api-entry { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; margin: 12px 0; overflow: hidden; }
+    .api-header { padding: 14px 20px; cursor: pointer; display: flex; align-items: center; gap: 12px; }
+    .api-header:hover { background: var(--surface-2); }
+    .api-badge { font-size: 0.7rem; font-weight: 700; padding: 2px 8px; border-radius: 4px; text-transform: uppercase; }
+    .badge-class { background: #dbeafe; color: #1d4ed8; }
+    .badge-method { background: #d1fae5; color: #059669; }
+    .badge-func { background: #fef3c7; color: #b45309; }
+    .api-name { font-family: 'JetBrains Mono', monospace; font-weight: 600; font-size: 0.95rem; }
+    .api-args { font-family: monospace; font-size: 0.82rem; color: var(--muted); }
+    .api-body { padding: 0 20px 16px; display: none; border-top: 1px solid var(--line); }
+    .api-body.open { display: block; padding-top: 16px; }
+    .api-body p { font-size: 0.9rem; margin-bottom: 8px; }
+    .doc-section { font-size: 0.85rem; margin-top: 12px; margin-bottom: 4px; }
+    .doc-args { padding-left: 16px; font-size: 0.83rem; font-family: monospace; }
+    .doc-arg { padding: 2px 0; color: var(--ink-soft); }
+    .api-methods { padding-left: 20px; }
+    .search-box { width: 100%; padding: 12px 16px; border: 1px solid var(--line); border-radius: 8px; font-size: 0.95rem; margin-bottom: 24px; }
+    .search-box:focus { outline: none; border-color: var(--primary); }
+    .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+    <nav class="nav">
+        <div class="container">
+            <a href="index.html" class="nav-logo">FunASR</a>
+            <div class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="tutorial.html">Tutorial</a>
+                <a href="model-registration.html">Develop</a>
+                <a href="api.html" class="active">API</a>
+            </div>
+            <a href="https://github.com/modelscope/FunASR" class="nav-github">GitHub</a>
+        </div>
+    </nav>
+
+    <div class="content container narrow">
+        <h1>API Reference</h1>
+        <p>Auto-generated from source code docstrings.</p>
+
+        <input type="text" class="search-box" placeholder="Search classes, methods, functions..." id="searchInput" oninput="filterAPI()">
+<div class="api-module" data-module="funasr.auto.auto_model">
+<div class="api-module-title">funasr.auto.auto_model</div>
+<div class="api-entry" data-name="is_npu_available">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-func">func</span>
+<span class="api-name">is_npu_available</span><span class="api-args">()</span>
+</div>
+<div class="api-body">
+<p>检查NPU是否可用。</p>
+</div></div>
+<div class="api-entry" data-name="_resolve_ncpu">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-func">func</span>
+<span class="api-name">_resolve_ncpu</span><span class="api-args">(config, fallback)</span>
+</div>
+<div class="api-body">
+<p>Return a positive integer representing CPU threads from config.</p>
+</div></div>
+<div class="api-entry" data-name="_get_import_errors">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-func">func</span>
+<span class="api-name">_get_import_errors</span><span class="api-args">()</span>
+</div>
+<div class="api-body">
+<p>Internal: get import errors.</p>
+</div></div>
+<div class="api-entry" data-name="_format_unregistered_component_error">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-func">func</span>
+<span class="api-name">_format_unregistered_component_error</span><span class="api-args">(component_type, component_name, registry)</span>
+</div>
+<div class="api-body">
+<p>Internal: format unregistered component error.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">component_type: TODO.</div>
+<div class="doc-arg">component_name: TODO.</div>
+<div class="doc-arg">registry: TODO.</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="prepare_data_iterator">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-func">func</span>
+<span class="api-name">prepare_data_iterator</span><span class="api-args">(data_in, input_len, data_type, key)</span>
+</div>
+<div class="api-body">
+</div></div>
+<div class="api-entry" data-name="automodel">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-class">class</span>
+<span class="api-name">AutoModel</span>
+</div>
+<div class="api-body">
+<div class="api-methods">
+<div class="api-entry" data-name="__init__">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">__init__</span><span class="api-args">(**kwargs)</span>
+</div>
+<div class="api-body">
+<p>Initialize AutoModel with ASR model and optional sub-models.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">model (str): Model name (hub alias or full ID) or local path.</div>
+<div class="doc-arg">device (str): Device for inference. &quot;cuda:0&quot;, &quot;cpu&quot;, &quot;mps&quot;, &quot;npu:0&quot;.</div>
+<div class="doc-arg">Falls back to CPU if specified device is unavailable.</div>
+<div class="doc-arg">vad_model (str, optional): VAD model for long audio segmentation.</div>
+<div class="doc-arg">Enables processing of any-length audio.</div>
+<div class="doc-arg">vad_kwargs (dict, optional): VAD config, e.g. {&quot;max_single_segment_time&quot;: 60000}.</div>
+<div class="doc-arg">punc_model (str, optional): Punctuation restoration model.</div>
+<div class="doc-arg">Not needed for Fun-ASR-Nano/SenseVoice/Qwen3-ASR (they output punctuation natively).</div>
+<div class="doc-arg">spk_model (str, optional): Speaker model for diarization (&quot;cam++&quot; or full model ID).</div>
+<div class="doc-arg">Requires vad_model. For Qwen3-ASR, also requires forced_aligner.</div>
+<div class="doc-arg">spk_mode (str, optional): Speaker diarization mode. &quot;punc_segment&quot; (default) or &quot;vad_segment&quot;.</div>
+<div class="doc-arg">hub (str): Model hub. &quot;ms&quot; (ModelScope, default) or &quot;hf&quot; (HuggingFace).</div>
+<div class="doc-arg">ncpu (int): CPU threads (default: 4).</div>
+<div class="doc-arg">disable_update (bool): Skip version check on startup.</div>
+<div class="doc-arg">disable_pbar (bool): Disable tqdm progress bars.</div>
+<div class="doc-arg">**kwargs: Additional model-specific parameters (passed to config.yaml overrides).</div>
+</div>
+<div class="doc-section"><strong>Examples:</strong></div>
+<p>&gt;&gt;&gt; model = AutoModel(model=&quot;paraformer-zh&quot;, vad_model=&quot;fsmn-vad&quot;, punc_model=&quot;ct-punc&quot;)</p>
+<p>&gt;&gt;&gt; model = AutoModel(model=&quot;FunAudioLLM/Fun-ASR-Nano-2512&quot;, trust_remote_code=True,</p>
+<p>...                   remote_code=&quot;./model.py&quot;, vad_model=&quot;fsmn-vad&quot;, spk_model=&quot;cam++&quot;, hub=&quot;hf&quot;)</p>
+</div></div>
+<div class="api-entry" data-name="build_model">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">build_model</span><span class="api-args">(**kwargs)</span>
+</div>
+<div class="api-body">
+<p>Download model from hub, build all components, and load pretrained weights.</p>
+<p>This method handles the full model construction pipeline:</p>
+<p>1. Download model files from ModelScope/HuggingFace (if not local)</p>
+<p>2. Parse config.yaml to determine model class, tokenizer, frontend</p>
+<p>3. Instantiate tokenizer, frontend, and model via the registry</p>
+<p>4. Load pretrained weights from model.pt</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">**kwargs: Must include &#x27;model&#x27; (str). All other config.yaml fields can be overridden.</div>
+</div>
+<div class="doc-section"><strong>Returns:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">tuple: (model, kwargs) where model is the instantiated nn.Module and</div>
+<div class="doc-arg">kwargs contains the resolved configuration.</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="generate">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">generate</span><span class="api-args">(input, input_len, progress_callback, **cfg)</span>
+</div>
+<div class="api-body">
+<p>Run speech recognition on input audio.</p>
+<p>This is the primary user-facing method. It automatically routes to:</p>
+<p>- inference() if no vad_model is configured (single utterance)</p>
+<p>- inference_with_vad() if vad_model is configured (long audio with segmentation)</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">input: Audio input. Accepts:</div>
+<div class="doc-arg">- File path (str): &quot;audio.wav&quot;, &quot;audio.mp3&quot;</div>
+<div class="doc-arg">- URL (str): &quot;https://...&quot;</div>
+<div class="doc-arg">- numpy array: raw audio samples (float32, 16kHz)</div>
+<div class="doc-arg">- list: batch of file paths or arrays</div>
+<div class="doc-arg">- bytes: raw audio bytes</div>
+<div class="doc-arg">input_len (tensor, optional): Length of each input sample.</div>
+<div class="doc-arg">progress_callback (callable, optional): fn(current, total) called during processing.</div>
+<div class="doc-arg">**cfg: Runtime parameters:</div>
+<div class="doc-arg">- cache (dict): State cache for streaming mode. Pass {} for first call.</div>
+<div class="doc-arg">- hotword (str/list): Keywords to boost recognition accuracy.</div>
+<div class="doc-arg">- language (str): Language hint (&quot;auto&quot;, &quot;zh&quot;, &quot;en&quot;, &quot;Chinese&quot;, etc.)</div>
+<div class="doc-arg">- batch_size_s (int): Dynamic batch total duration in seconds.</div>
+<div class="doc-arg">- is_final (bool): Last chunk flag for streaming mode.</div>
+<div class="doc-arg">- return_spk_res (bool): Return speaker diarization results.</div>
+<div class="doc-arg">- sentence_timestamp (bool): Return sentence-level timestamps.</div>
+<div class="doc-arg">- use_itn (bool): Apply inverse text normalization (SenseVoice).</div>
+</div>
+<div class="doc-section"><strong>Returns:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">list[dict]: Results for each input sample. Common fields:</div>
+<div class="doc-arg">- &quot;key&quot; (str): Sample identifier</div>
+<div class="doc-arg">- &quot;text&quot; (str): Recognized text</div>
+<div class="doc-arg">- &quot;timestamp&quot; (list): [[start_ms, end_ms], ...] per character/word</div>
+<div class="doc-arg">- &quot;sentence_info&quot; (list): [{text, start, end, spk, timestamp}, ...] when spk enabled</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="inference">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">inference</span><span class="api-args">(input, input_len, model, kwargs, key, progress_callback, **cfg)</span>
+</div>
+<div class="api-body">
+<p>Run model inference on input data (internal method).</p>
+<p>Handles batching, timing, and progress reporting. Called by generate()</p>
+<p>and inference_with_vad(). Typically not called directly by users.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">input: Audio data, file path, or text (for punc model).</div>
+<div class="doc-arg">input_len (tensor, optional): Input lengths for batch.</div>
+<div class="doc-arg">model (nn.Module, optional): Override model (used for VAD/PUNC/SPK sub-models).</div>
+<div class="doc-arg">kwargs (dict, optional): Override kwargs (used for sub-model configs).</div>
+<div class="doc-arg">key (list, optional): Sample identifiers.</div>
+<div class="doc-arg">progress_callback (callable, optional): Progress reporting function.</div>
+<div class="doc-arg">**cfg: Additional config merged into kwargs.</div>
+</div>
+<div class="doc-section"><strong>Returns:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">list[dict]: Model inference results.</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="inference_with_vad">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">inference_with_vad</span><span class="api-args">(input, input_len, **cfg)</span>
+</div>
+<div class="api-body">
+<p>Run ASR with VAD segmentation, punctuation, and optional speaker diarization.</p>
+<p>Pipeline:</p>
+<p>1. VAD: Segment audio into speech regions</p>
+<p>2. ASR: Recognize each segment (sorted by length for efficient batching)</p>
+<p>3. Timestamp merge: Combine per-segment timestamps with VAD offsets</p>
+<p>4. Punctuation: Add punctuation to combined text (if punc_model configured)</p>
+<p>5. Speaker diarization: Cluster speaker embeddings and assign labels (if spk_model configured)</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">input: Audio file path, URL, or numpy array.</div>
+<div class="doc-arg">input_len: Not used (kept for interface consistency).</div>
+<div class="doc-arg">**cfg: Runtime parameters (same as generate()).</div>
+</div>
+<div class="doc-section"><strong>Returns:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">list[dict]: Results with fields: key, text, timestamp, sentence_info, raw_text.</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="export">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">export</span><span class="api-args">(input, **cfg)</span>
+</div>
+<div class="api-body">
+<p>Export model to ONNX format.</p>
+<p>Creates a deep copy of the model to isolate ONNX operator monkey-patching,</p>
+<p>then runs torch.onnx.export. The original model remains usable after export.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">input: Sample input for tracing (auto-generated if None).</div>
+<div class="doc-arg">**cfg: Export parameters:</div>
+<div class="doc-arg">- type (str): Export format, &quot;onnx&quot; (default).</div>
+<div class="doc-arg">- quantize (bool): Whether to quantize the model.</div>
+<div class="doc-arg">- device (str): Device for export.</div>
+</div>
+<div class="doc-section"><strong>Returns:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">str: Path to the exported model directory.</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="_store_base_configs">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">_store_base_configs</span><span class="api-args">()</span>
+</div>
+<div class="api-body">
+<p>Snapshot base kwargs for all submodules to allow reset before inference.</p>
+</div></div>
+<div class="api-entry" data-name="_reset_runtime_configs">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">_reset_runtime_configs</span><span class="api-args">()</span>
+</div>
+<div class="api-body">
+<p>Ensure runtime kwargs reset to baseline defaults before inference.</p>
+</div></div>
+</div>
+</div></div>
+</div>
+<div class="api-module" data-module="funasr.models.paraformer.model">
+<div class="api-module-title">funasr.models.paraformer.model</div>
+<div class="api-entry" data-name="paraformer">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-class">class</span>
+<span class="api-name">Paraformer</span>
+</div>
+<div class="api-body">
+<p>Paraformer: Non-autoregressive End-to-End ASR Model.</p>
+<p>High-accuracy speech recognition for Chinese/English. The production workhorse.</p>
+<p>Features:</p>
+<p>- Non-autoregressive (parallel decoding, fast inference)</p>
+<p>- Character-level timestamps via CIF predictor</p>
+<p>- Streaming and offline modes</p>
+<p>- Hotword customization</p>
+<p>- Speaker diarization (with spk_model)</p>
+<p>- ONNX export support</p>
+<p>Output: {&quot;key&quot;: &quot;...&quot;, &quot;text&quot;: &quot;recognized text&quot;, &quot;timestamp&quot;: [[start_ms, end_ms], ...]}</p>
+<div class="doc-section"><strong>Note: Requires punc_model="ct-punc" for punctuation (unlike Fun-ASR-Nano/SenseVoice</strong></div>
+<p>which output punctuation natively).</p>
+<p>Author: Speech Lab of DAMO Academy, Alibaba Group</p>
+<p>Paraformer: Fast and Accurate Parallel Transformer for Non-autoregressive End-to-End Speech Recognition</p>
+<p>https://arxiv.org/abs/2206.08317</p>
+<div class="api-methods">
+<div class="api-entry" data-name="__init__">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">__init__</span><span class="api-args">(specaug, specaug_conf, normalize, normalize_conf, encoder, encoder_conf, decoder, decoder_conf, ctc, ctc_conf, predictor, predictor_conf, ctc_weight, input_size, vocab_size, ignore_id, blank_id, sos, eos, lsm_weight, length_normalized_loss, predictor_weight, predictor_bias, sampling_ratio, share_embedding, use_1st_decoder_loss, **kwargs)</span>
+</div>
+<div class="api-body">
+<p>Initialize Paraformer.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">specaug: TODO.</div>
+<div class="doc-arg">specaug_conf: Configuration dict for specaug.</div>
+<div class="doc-arg">normalize: TODO.</div>
+<div class="doc-arg">normalize_conf: Configuration dict for normalize.</div>
+<div class="doc-arg">encoder: TODO.</div>
+<div class="doc-arg">encoder_conf: Configuration dict for encoder.</div>
+<div class="doc-arg">decoder: TODO.</div>
+<div class="doc-arg">decoder_conf: Configuration dict for decoder.</div>
+<div class="doc-arg">ctc: TODO.</div>
+<div class="doc-arg">ctc_conf: Configuration dict for ctc.</div>
+<div class="doc-arg">predictor: TODO.</div>
+<div class="doc-arg">predictor_conf: Configuration dict for predictor.</div>
+<div class="doc-arg">ctc_weight: TODO.</div>
+<div class="doc-arg">input_size: Size/dimension parameter.</div>
+<div class="doc-arg">vocab_size: Size/dimension parameter.</div>
+<div class="doc-arg">ignore_id: TODO.</div>
+<div class="doc-arg">blank_id: TODO.</div>
+<div class="doc-arg">sos: TODO.</div>
+<div class="doc-arg">eos: TODO.</div>
+<div class="doc-arg">lsm_weight: TODO.</div>
+<div class="doc-arg">length_normalized_loss: TODO.</div>
+<div class="doc-arg">predictor_weight: TODO.</div>
+<div class="doc-arg">predictor_bias: TODO.</div>
+<div class="doc-arg">sampling_ratio: TODO.</div>
+<div class="doc-arg">share_embedding: TODO.</div>
+<div class="doc-arg">use_1st_decoder_loss: TODO.</div>
+<div class="doc-arg">**kwargs: Additional keyword arguments.</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="forward">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">forward</span><span class="api-args">(speech, speech_lengths, text, text_lengths, **kwargs)</span>
+</div>
+<div class="api-body">
+<p>Encoder + Decoder + Calc loss</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">speech: (Batch, Length, ...)</div>
+<div class="doc-arg">speech_lengths: (Batch, )</div>
+<div class="doc-arg">text: (Batch, Length)</div>
+<div class="doc-arg">text_lengths: (Batch,)</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="encode">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">encode</span><span class="api-args">(speech, speech_lengths, **kwargs)</span>
+</div>
+<div class="api-body">
+<p>Encoder. Note that this method is used by asr_inference.py</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">speech: (Batch, Length, ...)</div>
+<div class="doc-arg">speech_lengths: (Batch, )</div>
+<div class="doc-arg">ind: int</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="calc_predictor">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">calc_predictor</span><span class="api-args">(encoder_out, encoder_out_lens)</span>
+</div>
+<div class="api-body">
+<p>Calc predictor.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">encoder_out: Encoder output tensor.</div>
+<div class="doc-arg">encoder_out_lens: Encoder output lengths.</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="cal_decoder_with_predictor">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">cal_decoder_with_predictor</span><span class="api-args">(encoder_out, encoder_out_lens, sematic_embeds, ys_pad_lens)</span>
+</div>
+<div class="api-body">
+<p>Cal decoder with predictor.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">encoder_out: Encoder output tensor.</div>
+<div class="doc-arg">encoder_out_lens: Encoder output lengths.</div>
+<div class="doc-arg">sematic_embeds: TODO.</div>
+<div class="doc-arg">ys_pad_lens: Lengths of ys_pad.</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="_calc_att_loss">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">_calc_att_loss</span><span class="api-args">(encoder_out, encoder_out_lens, ys_pad, ys_pad_lens)</span>
+</div>
+<div class="api-body">
+<p>Internal: calc att loss.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">encoder_out: Encoder output tensor.</div>
+<div class="doc-arg">encoder_out_lens: Encoder output lengths.</div>
+<div class="doc-arg">ys_pad: TODO.</div>
+<div class="doc-arg">ys_pad_lens: Lengths of ys_pad.</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="sampler">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">sampler</span><span class="api-args">(encoder_out, encoder_out_lens, ys_pad, ys_pad_lens, pre_acoustic_embeds)</span>
+</div>
+<div class="api-body">
+<p>Sampler.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">encoder_out: Encoder output tensor.</div>
+<div class="doc-arg">encoder_out_lens: Encoder output lengths.</div>
+<div class="doc-arg">ys_pad: TODO.</div>
+<div class="doc-arg">ys_pad_lens: Lengths of ys_pad.</div>
+<div class="doc-arg">pre_acoustic_embeds: TODO.</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="_calc_ctc_loss">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">_calc_ctc_loss</span><span class="api-args">(encoder_out, encoder_out_lens, ys_pad, ys_pad_lens)</span>
+</div>
+<div class="api-body">
+<p>Internal: calc ctc loss.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">encoder_out: Encoder output tensor.</div>
+<div class="doc-arg">encoder_out_lens: Encoder output lengths.</div>
+<div class="doc-arg">ys_pad: TODO.</div>
+<div class="doc-arg">ys_pad_lens: Lengths of ys_pad.</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="init_beam_search">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">init_beam_search</span><span class="api-args">(**kwargs)</span>
+</div>
+<div class="api-body">
+<p>Init beam search.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">**kwargs: Additional keyword arguments.</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="inference">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">inference</span><span class="api-args">(data_in, data_lengths, key, tokenizer, frontend, **kwargs)</span>
+</div>
+<div class="api-body">
+<p>Run inference on input data.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">data_in: Input data (audio samples, file paths, or text).</div>
+<div class="doc-arg">data_lengths: Lengths of each input sample in the batch.</div>
+<div class="doc-arg">key: Sample identifiers.</div>
+<div class="doc-arg">tokenizer: Tokenizer instance for text encoding/decoding.</div>
+<div class="doc-arg">frontend: Audio frontend for feature extraction.</div>
+<div class="doc-arg">**kwargs: Additional keyword arguments.</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="export">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">export</span><span class="api-args">(**kwargs)</span>
+</div>
+<div class="api-body">
+<p>Export.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">**kwargs: Additional keyword arguments.</div>
+</div>
+</div></div>
+</div>
+</div></div>
+</div>
+<div class="api-module" data-module="funasr.models.sense_voice.model">
+<div class="api-module-title">funasr.models.sense_voice.model</div>
+<div class="api-entry" data-name="sinusoidalpositionencoder">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-class">class</span>
+<span class="api-name">SinusoidalPositionEncoder</span>
+</div>
+<div class="api-body">
+<div class="api-methods">
+<div class="api-entry" data-name="__init__">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">__init__</span><span class="api-args">(d_model, dropout_rate)</span>
+</div>
+<div class="api-body">
+<p>Initialize SinusoidalPositionEncoder.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">d_model: D Model instance.</div>
+<div class="doc-arg">dropout_rate: TODO.</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="encode">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">encode</span><span class="api-args">(positions, depth, dtype)</span>
+</div>
+<div class="api-body">
+<p>Encode.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">positions: TODO.</div>
+<div class="doc-arg">depth: TODO.</div>
+<div class="doc-arg">dtype: TODO.</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="forward">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">forward</span><span class="api-args">(x)</span>
+</div>
+<div class="api-body">
+<p>Forward pass for training.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">x: TODO.</div>
+</div>
+</div></div>
+</div>
+</div></div>
+<div class="api-entry" data-name="positionwisefeedforward">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-class">class</span>
+<span class="api-name">PositionwiseFeedForward</span>
+</div>
+<div class="api-body">
+<p>Positionwise feed forward layer.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">idim (int): Input dimenstion.</div>
+<div class="doc-arg">hidden_units (int): The number of hidden units.</div>
+<div class="doc-arg">dropout_rate (float): Dropout rate.</div>
+</div>
+<div class="api-methods">
+<div class="api-entry" data-name="__init__">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">__init__</span><span class="api-args">(idim, hidden_units, dropout_rate, activation)</span>
+</div>
+<div class="api-body">
+<p>Construct an PositionwiseFeedForward object.</p>
+</div></div>
+<div class="api-entry" data-name="forward">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">forward</span><span class="api-args">(x)</span>
+</div>
+<div class="api-body">
+<p>Forward function.</p>
+</div></div>
+</div>
+</div></div>
+<div class="api-entry" data-name="multiheadedattentionsanm">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-class">class</span>
+<span class="api-name">MultiHeadedAttentionSANM</span>
+</div>
+<div class="api-body">
+<p>Multi-Head Attention layer.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">n_head (int): The number of heads.</div>
+<div class="doc-arg">n_feat (int): The number of features.</div>
+<div class="doc-arg">dropout_rate (float): Dropout rate.</div>
+</div>
+<div class="api-methods">
+<div class="api-entry" data-name="__init__">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">__init__</span><span class="api-args">(n_head, in_feat, n_feat, dropout_rate, kernel_size, sanm_shfit, lora_list, lora_rank, lora_alpha, lora_dropout)</span>
+</div>
+<div class="api-body">
+<p>Construct an MultiHeadedAttention object.</p>
+</div></div>
+<div class="api-entry" data-name="forward_fsmn">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">forward_fsmn</span><span class="api-args">(inputs, mask, mask_shfit_chunk)</span>
+</div>
+<div class="api-body">
+<p>Forward fsmn.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">inputs: TODO.</div>
+<div class="doc-arg">mask: TODO.</div>
+<div class="doc-arg">mask_shfit_chunk: TODO.</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="forward_qkv">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">forward_qkv</span><span class="api-args">(x)</span>
+</div>
+<div class="api-body">
+<p>Transform query, key and value.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">query (torch.Tensor): Query tensor (#batch, time1, size).</div>
+<div class="doc-arg">key (torch.Tensor): Key tensor (#batch, time2, size).</div>
+<div class="doc-arg">value (torch.Tensor): Value tensor (#batch, time2, size).</div>
+</div>
+<div class="doc-section"><strong>Returns:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">torch.Tensor: Transformed query tensor (#batch, n_head, time1, d_k).</div>
+<div class="doc-arg">torch.Tensor: Transformed key tensor (#batch, n_head, time2, d_k).</div>
+<div class="doc-arg">torch.Tensor: Transformed value tensor (#batch, n_head, time2, d_k).</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="forward_attention">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">forward_attention</span><span class="api-args">(value, scores, mask, mask_att_chunk_encoder)</span>
+</div>
+<div class="api-body">
+<p>Compute attention context vector.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">value (torch.Tensor): Transformed value (#batch, n_head, time2, d_k).</div>
+<div class="doc-arg">scores (torch.Tensor): Attention score (#batch, n_head, time1, time2).</div>
+<div class="doc-arg">mask (torch.Tensor): Mask (#batch, 1, time2) or (#batch, time1, time2).</div>
+</div>
+<div class="doc-section"><strong>Returns:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">torch.Tensor: Transformed value (#batch, time1, d_model)</div>
+<div class="doc-arg">weighted by the attention score (#batch, time1, time2).</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="forward">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">forward</span><span class="api-args">(x, mask, mask_shfit_chunk, mask_att_chunk_encoder)</span>
+</div>
+<div class="api-body">
+<p>Compute scaled dot product attention.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">query (torch.Tensor): Query tensor (#batch, time1, size).</div>
+<div class="doc-arg">key (torch.Tensor): Key tensor (#batch, time2, size).</div>
+<div class="doc-arg">value (torch.Tensor): Value tensor (#batch, time2, size).</div>
+<div class="doc-arg">mask (torch.Tensor): Mask tensor (#batch, 1, time2) or</div>
+<div class="doc-arg">(#batch, time1, time2).</div>
+</div>
+<div class="doc-section"><strong>Returns:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">torch.Tensor: Output tensor (#batch, time1, d_model).</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="forward_chunk">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">forward_chunk</span><span class="api-args">(x, cache, chunk_size, look_back)</span>
+</div>
+<div class="api-body">
+<p>Compute scaled dot product attention.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">query (torch.Tensor): Query tensor (#batch, time1, size).</div>
+<div class="doc-arg">key (torch.Tensor): Key tensor (#batch, time2, size).</div>
+<div class="doc-arg">value (torch.Tensor): Value tensor (#batch, time2, size).</div>
+<div class="doc-arg">mask (torch.Tensor): Mask tensor (#batch, 1, time2) or</div>
+<div class="doc-arg">(#batch, time1, time2).</div>
+</div>
+<div class="doc-section"><strong>Returns:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">torch.Tensor: Output tensor (#batch, time1, d_model).</div>
+</div>
+</div></div>
+</div>
+</div></div>
+<div class="api-entry" data-name="layernorm">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-class">class</span>
+<span class="api-name">LayerNorm</span>
+</div>
+<div class="api-body">
+<div class="api-methods">
+<div class="api-entry" data-name="__init__">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">__init__</span><span class="api-args">(*args, **kwargs)</span>
+</div>
+<div class="api-body">
+<p>Initialize LayerNorm.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">*args: Variable positional arguments.</div>
+<div class="doc-arg">**kwargs: Additional keyword arguments.</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="forward">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">forward</span><span class="api-args">(input)</span>
+</div>
+<div class="api-body">
+<p>Forward pass for training.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">input: Input audio/text data.</div>
+</div>
+</div></div>
+</div>
+</div></div>
+<div class="api-entry" data-name="sequence_mask">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-func">func</span>
+<span class="api-name">sequence_mask</span><span class="api-args">(lengths, maxlen, dtype, device)</span>
+</div>
+<div class="api-body">
+<p>Sequence mask.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">lengths: TODO.</div>
+<div class="doc-arg">maxlen: TODO.</div>
+<div class="doc-arg">dtype: TODO.</div>
+<div class="doc-arg">device: Target device (&quot;cuda:0&quot;, &quot;cpu&quot;, etc.).</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="encoderlayersanm">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-class">class</span>
+<span class="api-name">EncoderLayerSANM</span>
+</div>
+<div class="api-body">
+<div class="api-methods">
+<div class="api-entry" data-name="__init__">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">__init__</span><span class="api-args">(in_size, size, self_attn, feed_forward, dropout_rate, normalize_before, concat_after, stochastic_depth_rate)</span>
+</div>
+<div class="api-body">
+<p>Construct an EncoderLayer object.</p>
+</div></div>
+<div class="api-entry" data-name="forward">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">forward</span><span class="api-args">(x, mask, cache, mask_shfit_chunk, mask_att_chunk_encoder)</span>
+</div>
+<div class="api-body">
+<p>Compute encoded features.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">x_input (torch.Tensor): Input tensor (#batch, time, size).</div>
+<div class="doc-arg">mask (torch.Tensor): Mask tensor for the input (#batch, time).</div>
+<div class="doc-arg">cache (torch.Tensor): Cache tensor of the input (#batch, time - 1, size).</div>
+</div>
+<div class="doc-section"><strong>Returns:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">torch.Tensor: Output tensor (#batch, time, size).</div>
+<div class="doc-arg">torch.Tensor: Mask tensor (#batch, time).</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="forward_chunk">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">forward_chunk</span><span class="api-args">(x, cache, chunk_size, look_back)</span>
+</div>
+<div class="api-body">
+<p>Compute encoded features.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">x_input (torch.Tensor): Input tensor (#batch, time, size).</div>
+<div class="doc-arg">mask (torch.Tensor): Mask tensor for the input (#batch, time).</div>
+<div class="doc-arg">cache (torch.Tensor): Cache tensor of the input (#batch, time - 1, size).</div>
+</div>
+<div class="doc-section"><strong>Returns:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">torch.Tensor: Output tensor (#batch, time, size).</div>
+<div class="doc-arg">torch.Tensor: Mask tensor (#batch, time).</div>
+</div>
+</div></div>
+</div>
+</div></div>
+<div class="api-entry" data-name="sensevoiceencodersmall">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-class">class</span>
+<span class="api-name">SenseVoiceEncoderSmall</span>
+</div>
+<div class="api-body">
+<p>Author: Speech Lab of DAMO Academy, Alibaba Group</p>
+<p>SCAMA: Streaming chunk-aware multihead attention for online end-to-end speech recognition</p>
+<p>https://arxiv.org/abs/2006.01713</p>
+<div class="api-methods">
+<div class="api-entry" data-name="__init__">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">__init__</span><span class="api-args">(input_size, output_size, attention_heads, linear_units, num_blocks, tp_blocks, dropout_rate, positional_dropout_rate, attention_dropout_rate, stochastic_depth_rate, input_layer, pos_enc_class, normalize_before, concat_after, positionwise_layer_type, positionwise_conv_kernel_size, padding_idx, kernel_size, sanm_shfit, selfattention_layer_type, **kwargs)</span>
+</div>
+<div class="api-body">
+<p>Initialize SenseVoiceEncoderSmall.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">input_size: Size/dimension parameter.</div>
+<div class="doc-arg">output_size: Size/dimension parameter.</div>
+<div class="doc-arg">attention_heads: TODO.</div>
+<div class="doc-arg">linear_units: TODO.</div>
+<div class="doc-arg">num_blocks: TODO.</div>
+<div class="doc-arg">tp_blocks: TODO.</div>
+<div class="doc-arg">dropout_rate: TODO.</div>
+<div class="doc-arg">positional_dropout_rate: TODO.</div>
+<div class="doc-arg">attention_dropout_rate: TODO.</div>
+<div class="doc-arg">stochastic_depth_rate: TODO.</div>
+<div class="doc-arg">input_layer: TODO.</div>
+<div class="doc-arg">pos_enc_class: TODO.</div>
+<div class="doc-arg">normalize_before: TODO.</div>
+<div class="doc-arg">concat_after: TODO.</div>
+<div class="doc-arg">positionwise_layer_type: TODO.</div>
+<div class="doc-arg">positionwise_conv_kernel_size: Size/dimension parameter.</div>
+<div class="doc-arg">padding_idx: TODO.</div>
+<div class="doc-arg">kernel_size: Size/dimension parameter.</div>
+<div class="doc-arg">sanm_shfit: TODO.</div>
+<div class="doc-arg">selfattention_layer_type: TODO.</div>
+<div class="doc-arg">**kwargs: Additional keyword arguments.</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="output_size">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">output_size</span><span class="api-args">()</span>
+</div>
+<div class="api-body">
+<p>Output size.</p>
+</div></div>
+<div class="api-entry" data-name="forward">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">forward</span><span class="api-args">(xs_pad, ilens)</span>
+</div>
+<div class="api-body">
+<p>Embed positions in tensor.</p>
+</div></div>
+</div>
+</div></div>
+<div class="api-entry" data-name="sensevoicesmall">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-class">class</span>
+<span class="api-name">SenseVoiceSmall</span>
+</div>
+<div class="api-body">
+<p>CTC-attention hybrid Encoder-Decoder model</p>
+<div class="api-methods">
+<div class="api-entry" data-name="__init__">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">__init__</span><span class="api-args">(specaug, specaug_conf, normalize, normalize_conf, encoder, encoder_conf, ctc_conf, input_size, vocab_size, ignore_id, blank_id, sos, eos, length_normalized_loss, **kwargs)</span>
+</div>
+<div class="api-body">
+<p>Initialize SenseVoiceSmall.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">specaug: TODO.</div>
+<div class="doc-arg">specaug_conf: Configuration dict for specaug.</div>
+<div class="doc-arg">normalize: TODO.</div>
+<div class="doc-arg">normalize_conf: Configuration dict for normalize.</div>
+<div class="doc-arg">encoder: TODO.</div>
+<div class="doc-arg">encoder_conf: Configuration dict for encoder.</div>
+<div class="doc-arg">ctc_conf: Configuration dict for ctc.</div>
+<div class="doc-arg">input_size: Size/dimension parameter.</div>
+<div class="doc-arg">vocab_size: Size/dimension parameter.</div>
+<div class="doc-arg">ignore_id: TODO.</div>
+<div class="doc-arg">blank_id: TODO.</div>
+<div class="doc-arg">sos: TODO.</div>
+<div class="doc-arg">eos: TODO.</div>
+<div class="doc-arg">length_normalized_loss: TODO.</div>
+<div class="doc-arg">**kwargs: Additional keyword arguments.</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="from_pretrained">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">from_pretrained</span><span class="api-args">(model, **kwargs)</span>
+</div>
+<div class="api-body">
+<p>From pretrained.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">model: Model instance or model name.</div>
+<div class="doc-arg">**kwargs: Additional keyword arguments.</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="forward">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">forward</span><span class="api-args">(speech, speech_lengths, text, text_lengths, **kwargs)</span>
+</div>
+<div class="api-body">
+<p>Encoder + Decoder + Calc loss</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">speech: (Batch, Length, ...)</div>
+<div class="doc-arg">speech_lengths: (Batch, )</div>
+<div class="doc-arg">text: (Batch, Length)</div>
+<div class="doc-arg">text_lengths: (Batch,)</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="encode">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">encode</span><span class="api-args">(speech, speech_lengths, text, **kwargs)</span>
+</div>
+<div class="api-body">
+<p>Frontend + Encoder. Note that this method is used by asr_inference.py</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">speech: (Batch, Length, ...)</div>
+<div class="doc-arg">speech_lengths: (Batch, )</div>
+<div class="doc-arg">ind: int</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="_calc_ctc_loss">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">_calc_ctc_loss</span><span class="api-args">(encoder_out, encoder_out_lens, ys_pad, ys_pad_lens)</span>
+</div>
+<div class="api-body">
+<p>Internal: calc ctc loss.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">encoder_out: Encoder output tensor.</div>
+<div class="doc-arg">encoder_out_lens: Encoder output lengths.</div>
+<div class="doc-arg">ys_pad: TODO.</div>
+<div class="doc-arg">ys_pad_lens: Lengths of ys_pad.</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="_calc_rich_ce_loss">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">_calc_rich_ce_loss</span><span class="api-args">(encoder_out, ys_pad)</span>
+</div>
+<div class="api-body">
+<p>Internal: calc rich ce loss.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">encoder_out: Encoder output tensor.</div>
+<div class="doc-arg">ys_pad: TODO.</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="inference">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">inference</span><span class="api-args">(data_in, data_lengths, key, tokenizer, frontend, **kwargs)</span>
+</div>
+<div class="api-body">
+<p>Run inference on input data.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">data_in: Input data (audio samples, file paths, or text).</div>
+<div class="doc-arg">data_lengths: Lengths of each input sample in the batch.</div>
+<div class="doc-arg">key: Sample identifiers.</div>
+<div class="doc-arg">tokenizer: Tokenizer instance for text encoding/decoding.</div>
+<div class="doc-arg">frontend: Audio frontend for feature extraction.</div>
+<div class="doc-arg">**kwargs: Additional keyword arguments.</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="post">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">post</span><span class="api-args">(timestamp)</span>
+</div>
+<div class="api-body">
+<p>Post.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">timestamp: TODO.</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="export">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">export</span><span class="api-args">(**kwargs)</span>
+</div>
+<div class="api-body">
+<p>Export.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">**kwargs: Additional keyword arguments.</div>
+</div>
+</div></div>
+</div>
+</div></div>
+</div>
+<div class="api-module" data-module="funasr.models.fun_asr_nano.model">
+<div class="api-module-title">funasr.models.fun_asr_nano.model</div>
+<div class="api-entry" data-name="funasrnano">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-class">class</span>
+<span class="api-name">FunASRNano</span>
+</div>
+<div class="api-body">
+<p>Fun-ASR-Nano: End-to-End ASR Large Model.</p>
+<p>Trained on tens of millions of hours of real speech data.</p>
+<p>Supports 31 languages including Chinese dialects and regional accents.</p>
+<p>Features:</p>
+<p>- Character-level timestamps (via CTC forced alignment)</p>
+<p>- Hotword customization</p>
+<p>- Speaker diarization (when combined with spk_model)</p>
+<p>- Lyrics and rap recognition</p>
+<p>- Streaming chunk-by-chunk inference (demo2.py)</p>
+<p>Output: {&quot;key&quot;: ..., &quot;text&quot;: ..., &quot;timestamps&quot;: [{&quot;token&quot;, &quot;start_time&quot;, &quot;end_time&quot;}, ...],</p>
+<p>&quot;ctc_timestamps&quot;: [...]}</p>
+<div class="doc-section"><strong>Note: Outputs punctuation natively — punc_model is NOT needed.</strong></div>
+<p>Requirements: pip install tiktoken huggingface_hub</p>
+<div class="api-methods">
+<div class="api-entry" data-name="__init__">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">__init__</span><span class="api-args">(audio_encoder, audio_encoder_conf, audio_adaptor, audio_adaptor_conf, llm, llm_conf, input_size, length_normalized_loss, **kwargs)</span>
+</div>
+<div class="api-body">
+<p>Initialize FunASRNano.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">audio_encoder: TODO.</div>
+<div class="doc-arg">audio_encoder_conf: Configuration dict for audio_encoder.</div>
+<div class="doc-arg">audio_adaptor: TODO.</div>
+<div class="doc-arg">audio_adaptor_conf: Configuration dict for audio_adaptor.</div>
+<div class="doc-arg">llm: TODO.</div>
+<div class="doc-arg">llm_conf: Configuration dict for llm.</div>
+<div class="doc-arg">input_size: Size/dimension parameter.</div>
+<div class="doc-arg">length_normalized_loss: TODO.</div>
+<div class="doc-arg">**kwargs: Additional keyword arguments.</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="forward">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">forward</span><span class="api-args">(speech, speech_lengths, input_ids, attention_mask, labels_ids, fbank_beg, fbank_mask, **kwargs)</span>
+</div>
+<div class="api-body">
+<p>Forward pass for training.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">speech: Speech audio tensor, shape (batch, time).</div>
+<div class="doc-arg">speech_lengths: Length of each speech sample.</div>
+<div class="doc-arg">input_ids: TODO.</div>
+<div class="doc-arg">attention_mask: TODO.</div>
+<div class="doc-arg">labels_ids: TODO.</div>
+<div class="doc-arg">fbank_beg: TODO.</div>
+<div class="doc-arg">fbank_mask: TODO.</div>
+<div class="doc-arg">**kwargs: Additional keyword arguments.</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="forward_export">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">forward_export</span><span class="api-args">(speech, speech_lengths, **kwargs)</span>
+</div>
+<div class="api-body">
+<p>Forward export.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">speech: Speech audio tensor, shape (batch, time).</div>
+<div class="doc-arg">speech_lengths: Length of each speech sample.</div>
+<div class="doc-arg">**kwargs: Additional keyword arguments.</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="encode">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">encode</span><span class="api-args">(speech, speech_lengths)</span>
+</div>
+<div class="api-body">
+<p>Encode.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">speech: Speech audio tensor, shape (batch, time).</div>
+<div class="doc-arg">speech_lengths: Length of each speech sample.</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="data_template">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">data_template</span><span class="api-args">(data)</span>
+</div>
+<div class="api-body">
+<p>Data template.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">data: TODO.</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="data_load_speech">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">data_load_speech</span><span class="api-args">(contents, tokenizer, frontend, meta_data, **kwargs)</span>
+</div>
+<div class="api-body">
+<p>Data load speech.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">contents: TODO.</div>
+<div class="doc-arg">tokenizer: Tokenizer instance for text encoding/decoding.</div>
+<div class="doc-arg">frontend: Audio frontend for feature extraction.</div>
+<div class="doc-arg">meta_data: TODO.</div>
+<div class="doc-arg">**kwargs: Additional keyword arguments.</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="inference_prepare">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">inference_prepare</span><span class="api-args">(data_in, data_lengths, key, tokenizer, frontend, **kwargs)</span>
+</div>
+<div class="api-body">
+<p>Inference prepare.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">data_in: Input data (audio samples, file paths, or text).</div>
+<div class="doc-arg">data_lengths: Lengths of each input sample in the batch.</div>
+<div class="doc-arg">key: Sample identifiers.</div>
+<div class="doc-arg">tokenizer: Tokenizer instance for text encoding/decoding.</div>
+<div class="doc-arg">frontend: Audio frontend for feature extraction.</div>
+<div class="doc-arg">**kwargs: Additional keyword arguments.</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="get_prompt">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">get_prompt</span><span class="api-args">(hotwords, language, itn)</span>
+</div>
+<div class="api-body">
+<p>Get prompt.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">hotwords: TODO.</div>
+<div class="doc-arg">language: Language identifier.</div>
+<div class="doc-arg">itn: TODO.</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="generate_chatml">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">generate_chatml</span><span class="api-args">(prompt, data)</span>
+</div>
+<div class="api-body">
+<p>Generate chatml.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">prompt: TODO.</div>
+<div class="doc-arg">data: TODO.</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="inference">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">inference</span><span class="api-args">(data_in, data_lengths, key, tokenizer, frontend, **kwargs)</span>
+</div>
+<div class="api-body">
+<p>Run inference on input data.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">data_in: Input data (audio samples, file paths, or text).</div>
+<div class="doc-arg">data_lengths: Lengths of each input sample in the batch.</div>
+<div class="doc-arg">key: Sample identifiers.</div>
+<div class="doc-arg">tokenizer: Tokenizer instance for text encoding/decoding.</div>
+<div class="doc-arg">frontend: Audio frontend for feature extraction.</div>
+<div class="doc-arg">**kwargs: Additional keyword arguments.</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="inference_llm">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">inference_llm</span><span class="api-args">(data_in, data_lengths, key, tokenizer, frontend, **kwargs)</span>
+</div>
+<div class="api-body">
+<p>Inference llm.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">data_in: Input data (audio samples, file paths, or text).</div>
+<div class="doc-arg">data_lengths: Lengths of each input sample in the batch.</div>
+<div class="doc-arg">key: Sample identifiers.</div>
+<div class="doc-arg">tokenizer: Tokenizer instance for text encoding/decoding.</div>
+<div class="doc-arg">frontend: Audio frontend for feature extraction.</div>
+<div class="doc-arg">**kwargs: Additional keyword arguments.</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="from_pretrained">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">from_pretrained</span><span class="api-args">(model, **kwargs)</span>
+</div>
+<div class="api-body">
+<p>From pretrained.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">model: Model instance or model name.</div>
+<div class="doc-arg">**kwargs: Additional keyword arguments.</div>
+</div>
+</div></div>
+</div>
+</div></div>
+</div>
+<div class="api-module" data-module="funasr.models.fsmn_vad_streaming.model">
+<div class="api-module-title">funasr.models.fsmn_vad_streaming.model</div>
+<div class="api-entry" data-name="vadstatemachine">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-class">class</span>
+<span class="api-name">VadStateMachine</span>
+</div>
+<div class="api-body">
+</div></div>
+<div class="api-entry" data-name="framestate">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-class">class</span>
+<span class="api-name">FrameState</span>
+</div>
+<div class="api-body">
+</div></div>
+<div class="api-entry" data-name="audiochangestate">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-class">class</span>
+<span class="api-name">AudioChangeState</span>
+</div>
+<div class="api-body">
+</div></div>
+<div class="api-entry" data-name="vaddetectmode">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-class">class</span>
+<span class="api-name">VadDetectMode</span>
+</div>
+<div class="api-body">
+</div></div>
+<div class="api-entry" data-name="vadxoptions">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-class">class</span>
+<span class="api-name">VADXOptions</span>
+</div>
+<div class="api-body">
+<p>Author: Speech Lab of DAMO Academy, Alibaba Group</p>
+<p>Deep-FSMN for Large Vocabulary Continuous Speech Recognition</p>
+<p>https://arxiv.org/abs/1803.05030</p>
+<div class="api-methods">
+<div class="api-entry" data-name="__init__">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">__init__</span><span class="api-args">(sample_rate, detect_mode, snr_mode, max_end_silence_time, max_start_silence_time, do_start_point_detection, do_end_point_detection, window_size_ms, sil_to_speech_time_thres, speech_to_sil_time_thres, speech_2_noise_ratio, do_extend, lookback_time_start_point, lookahead_time_end_point, max_single_segment_time, nn_eval_block_size, dcd_block_size, snr_thres, noise_frame_num_used_for_snr, decibel_thres, speech_noise_thres, fe_prior_thres, silence_pdf_num, sil_pdf_ids, speech_noise_thresh_low, speech_noise_thresh_high, output_frame_probs, frame_in_ms, frame_length_ms, **kwargs)</span>
+</div>
+<div class="api-body">
+<p>Initialize VADXOptions.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">sample_rate: TODO.</div>
+<div class="doc-arg">detect_mode: TODO.</div>
+<div class="doc-arg">snr_mode: TODO.</div>
+<div class="doc-arg">max_end_silence_time: TODO.</div>
+<div class="doc-arg">max_start_silence_time: TODO.</div>
+<div class="doc-arg">do_start_point_detection: TODO.</div>
+<div class="doc-arg">do_end_point_detection: TODO.</div>
+<div class="doc-arg">window_size_ms: TODO.</div>
+<div class="doc-arg">sil_to_speech_time_thres: TODO.</div>
+<div class="doc-arg">speech_to_sil_time_thres: TODO.</div>
+<div class="doc-arg">speech_2_noise_ratio: TODO.</div>
+<div class="doc-arg">do_extend: TODO.</div>
+<div class="doc-arg">lookback_time_start_point: TODO.</div>
+<div class="doc-arg">lookahead_time_end_point: TODO.</div>
+<div class="doc-arg">max_single_segment_time: TODO.</div>
+<div class="doc-arg">nn_eval_block_size: Size/dimension parameter.</div>
+<div class="doc-arg">dcd_block_size: Size/dimension parameter.</div>
+<div class="doc-arg">snr_thres: TODO.</div>
+<div class="doc-arg">noise_frame_num_used_for_snr: TODO.</div>
+<div class="doc-arg">decibel_thres: TODO.</div>
+<div class="doc-arg">speech_noise_thres: TODO.</div>
+<div class="doc-arg">fe_prior_thres: TODO.</div>
+<div class="doc-arg">silence_pdf_num: TODO.</div>
+<div class="doc-arg">sil_pdf_ids: TODO.</div>
+<div class="doc-arg">speech_noise_thresh_low: TODO.</div>
+<div class="doc-arg">speech_noise_thresh_high: TODO.</div>
+<div class="doc-arg">output_frame_probs: TODO.</div>
+<div class="doc-arg">frame_in_ms: TODO.</div>
+<div class="doc-arg">frame_length_ms: TODO.</div>
+<div class="doc-arg">**kwargs: Additional keyword arguments.</div>
+</div>
+</div></div>
+</div>
+</div></div>
+<div class="api-entry" data-name="e2evadspeechbufwithdoa">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-class">class</span>
+<span class="api-name">E2EVadSpeechBufWithDoa</span>
+</div>
+<div class="api-body">
+<p>Author: Speech Lab of DAMO Academy, Alibaba Group</p>
+<p>Deep-FSMN for Large Vocabulary Continuous Speech Recognition</p>
+<p>https://arxiv.org/abs/1803.05030</p>
+<div class="api-methods">
+<div class="api-entry" data-name="__init__">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">__init__</span><span class="api-args">()</span>
+</div>
+<div class="api-body">
+<p>Initialize E2EVadSpeechBufWithDoa.</p>
+</div></div>
+<div class="api-entry" data-name="reset">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">Reset</span><span class="api-args">()</span>
+</div>
+<div class="api-body">
+<p>Reset.</p>
+</div></div>
+</div>
+</div></div>
+<div class="api-entry" data-name="e2evadframeprob">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-class">class</span>
+<span class="api-name">E2EVadFrameProb</span>
+</div>
+<div class="api-body">
+<p>Author: Speech Lab of DAMO Academy, Alibaba Group</p>
+<p>Deep-FSMN for Large Vocabulary Continuous Speech Recognition</p>
+<p>https://arxiv.org/abs/1803.05030</p>
+<div class="api-methods">
+<div class="api-entry" data-name="__init__">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">__init__</span><span class="api-args">()</span>
+</div>
+<div class="api-body">
+<p>Initialize E2EVadFrameProb.</p>
+</div></div>
+</div>
+</div></div>
+<div class="api-entry" data-name="windowdetector">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-class">class</span>
+<span class="api-name">WindowDetector</span>
+</div>
+<div class="api-body">
+<p>Author: Speech Lab of DAMO Academy, Alibaba Group</p>
+<p>Deep-FSMN for Large Vocabulary Continuous Speech Recognition</p>
+<p>https://arxiv.org/abs/1803.05030</p>
+<div class="api-methods">
+<div class="api-entry" data-name="__init__">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">__init__</span><span class="api-args">(window_size_ms, sil_to_speech_time, speech_to_sil_time, frame_size_ms)</span>
+</div>
+<div class="api-body">
+<p>Initialize WindowDetector.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">window_size_ms: TODO.</div>
+<div class="doc-arg">sil_to_speech_time: TODO.</div>
+<div class="doc-arg">speech_to_sil_time: TODO.</div>
+<div class="doc-arg">frame_size_ms: TODO.</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="reset">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">Reset</span><span class="api-args">()</span>
+</div>
+<div class="api-body">
+<p>Reset.</p>
+</div></div>
+<div class="api-entry" data-name="getwinsize">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">GetWinSize</span><span class="api-args">()</span>
+</div>
+<div class="api-body">
+<p>Getwinsize.</p>
+</div></div>
+<div class="api-entry" data-name="detectoneframe">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">DetectOneFrame</span><span class="api-args">(frameState, frame_count, cache)</span>
+</div>
+<div class="api-body">
+<p>Detectoneframe.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">frameState: TODO.</div>
+<div class="doc-arg">frame_count: TODO.</div>
+<div class="doc-arg">cache: State cache dict for streaming inference.</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="framesizems">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">FrameSizeMs</span><span class="api-args">()</span>
+</div>
+<div class="api-body">
+<p>Framesizems.</p>
+</div></div>
+</div>
+</div></div>
+<div class="api-entry" data-name="stats">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-class">class</span>
+<span class="api-name">Stats</span>
+</div>
+<div class="api-body">
+<div class="api-methods">
+<div class="api-entry" data-name="__init__">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">__init__</span><span class="api-args">(sil_pdf_ids, max_end_sil_frame_cnt_thresh, speech_noise_thres)</span>
+</div>
+<div class="api-body">
+<p>Initialize Stats.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">sil_pdf_ids: TODO.</div>
+<div class="doc-arg">max_end_sil_frame_cnt_thresh: TODO.</div>
+<div class="doc-arg">speech_noise_thres: TODO.</div>
+</div>
+</div></div>
+</div>
+</div></div>
+<div class="api-entry" data-name="fsmnvadstreaming">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-class">class</span>
+<span class="api-name">FsmnVADStreaming</span>
+</div>
+<div class="api-body">
+<p>FSMN-based Voice Activity Detection (streaming/offline).</p>
+<p>Detects speech segments in audio, returning start/end timestamps (milliseconds).</p>
+<p>Supports both offline (full audio) and streaming (chunk-by-chunk) modes.</p>
+<p>Offline output: [{&quot;key&quot;: &quot;...&quot;, &quot;value&quot;: [[start_ms, end_ms], ...]}]</p>
+<p>Streaming output: [[beg, -1]] (start), [[-1, end]] (end), [[beg, end]] (complete), [] (no event)</p>
+<p>Author: Speech Lab of DAMO Academy, Alibaba Group</p>
+<p>Deep-FSMN for Large Vocabulary Continuous Speech Recognition</p>
+<p>https://arxiv.org/abs/1803.05030</p>
+<div class="api-methods">
+<div class="api-entry" data-name="__init__">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">__init__</span><span class="api-args">(encoder, encoder_conf, vad_post_args, **kwargs)</span>
+</div>
+<div class="api-body">
+<p>Initialize FsmnVADStreaming.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">encoder: TODO.</div>
+<div class="doc-arg">encoder_conf: Configuration dict for encoder.</div>
+<div class="doc-arg">vad_post_args: TODO.</div>
+<div class="doc-arg">**kwargs: Additional keyword arguments.</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="resetdetection">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">ResetDetection</span><span class="api-args">(cache)</span>
+</div>
+<div class="api-body">
+<p>Resetdetection.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">cache: State cache dict for streaming inference.</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="computedecibel">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">ComputeDecibel</span><span class="api-args">(cache)</span>
+</div>
+<div class="api-body">
+<p>Computedecibel.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">cache: State cache dict for streaming inference.</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="computescores">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">ComputeScores</span><span class="api-args">(feats, cache)</span>
+</div>
+<div class="api-body">
+<p>Computescores.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">feats: Feature tensor (e.g., fbank), shape (batch, frames, dim).</div>
+<div class="doc-arg">cache: State cache dict for streaming inference.</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="popdatabuftillframe">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">PopDataBufTillFrame</span><span class="api-args">(frame_idx, cache)</span>
+</div>
+<div class="api-body">
+<p>Popdatabuftillframe.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">frame_idx: TODO.</div>
+<div class="doc-arg">cache: State cache dict for streaming inference.</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="popdatatooutputbuf">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">PopDataToOutputBuf</span><span class="api-args">(start_frm, frm_cnt, first_frm_is_start_point, last_frm_is_end_point, end_point_is_sent_end, cache)</span>
+</div>
+<div class="api-body">
+<p>Popdatatooutputbuf.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">start_frm: TODO.</div>
+<div class="doc-arg">frm_cnt: TODO.</div>
+<div class="doc-arg">first_frm_is_start_point: TODO.</div>
+<div class="doc-arg">last_frm_is_end_point: TODO.</div>
+<div class="doc-arg">end_point_is_sent_end: TODO.</div>
+<div class="doc-arg">cache: State cache dict for streaming inference.</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="onsilencedetected">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">OnSilenceDetected</span><span class="api-args">(valid_frame, cache)</span>
+</div>
+<div class="api-body">
+<p>Onsilencedetected.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">valid_frame: TODO.</div>
+<div class="doc-arg">cache: State cache dict for streaming inference.</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="onvoicedetected">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">OnVoiceDetected</span><span class="api-args">(valid_frame, cache)</span>
+</div>
+<div class="api-body">
+<p>Onvoicedetected.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">valid_frame: TODO.</div>
+<div class="doc-arg">cache: State cache dict for streaming inference.</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="onvoicestart">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">OnVoiceStart</span><span class="api-args">(start_frame, fake_result, cache)</span>
+</div>
+<div class="api-body">
+<p>Onvoicestart.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">start_frame: TODO.</div>
+<div class="doc-arg">fake_result: TODO.</div>
+<div class="doc-arg">cache: State cache dict for streaming inference.</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="onvoiceend">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">OnVoiceEnd</span><span class="api-args">(end_frame, fake_result, is_last_frame, cache)</span>
+</div>
+<div class="api-body">
+<p>Onvoiceend.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">end_frame: TODO.</div>
+<div class="doc-arg">fake_result: TODO.</div>
+<div class="doc-arg">is_last_frame: Boolean flag for last frame.</div>
+<div class="doc-arg">cache: State cache dict for streaming inference.</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="maybeonvoiceendiflastframe">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">MaybeOnVoiceEndIfLastFrame</span><span class="api-args">(is_final_frame, cur_frm_idx, cache)</span>
+</div>
+<div class="api-body">
+<p>Maybeonvoiceendiflastframe.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">is_final_frame: Boolean flag for final frame.</div>
+<div class="doc-arg">cur_frm_idx: TODO.</div>
+<div class="doc-arg">cache: State cache dict for streaming inference.</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="getlatency">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">GetLatency</span><span class="api-args">(cache)</span>
+</div>
+<div class="api-body">
+<p>Getlatency.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">cache: State cache dict for streaming inference.</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="latencyfrmnumatstartpoint">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">LatencyFrmNumAtStartPoint</span><span class="api-args">(cache)</span>
+</div>
+<div class="api-body">
+<p>Latencyfrmnumatstartpoint.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">cache: State cache dict for streaming inference.</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="getframestate">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">GetFrameState</span><span class="api-args">(t, cache)</span>
+</div>
+<div class="api-body">
+<p>Getframestate.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">t: TODO.</div>
+<div class="doc-arg">cache: State cache dict for streaming inference.</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="forward">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">forward</span><span class="api-args">(feats, waveform, cache, is_final, **kwargs)</span>
+</div>
+<div class="api-body">
+<p>Forward pass for training.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">feats: Feature tensor (e.g., fbank), shape (batch, frames, dim).</div>
+<div class="doc-arg">waveform: TODO.</div>
+<div class="doc-arg">cache: State cache dict for streaming inference.</div>
+<div class="doc-arg">is_final: Whether this is the final chunk in streaming.</div>
+<div class="doc-arg">**kwargs: Additional keyword arguments.</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="init_cache">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">init_cache</span><span class="api-args">(cache, **kwargs)</span>
+</div>
+<div class="api-body">
+<p>Init cache.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">cache: State cache dict for streaming inference.</div>
+<div class="doc-arg">**kwargs: Additional keyword arguments.</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="inference">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">inference</span><span class="api-args">(data_in, data_lengths, key, tokenizer, frontend, cache, **kwargs)</span>
+</div>
+<div class="api-body">
+<p>Run inference on input data.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">data_in: Input data (audio samples, file paths, or text).</div>
+<div class="doc-arg">data_lengths: Lengths of each input sample in the batch.</div>
+<div class="doc-arg">key: Sample identifiers.</div>
+<div class="doc-arg">tokenizer: Tokenizer instance for text encoding/decoding.</div>
+<div class="doc-arg">frontend: Audio frontend for feature extraction.</div>
+<div class="doc-arg">cache: State cache dict for streaming inference.</div>
+<div class="doc-arg">**kwargs: Additional keyword arguments.</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="export">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">export</span><span class="api-args">(**kwargs)</span>
+</div>
+<div class="api-body">
+<p>Export.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">**kwargs: Additional keyword arguments.</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="detectcommonframes">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">DetectCommonFrames</span><span class="api-args">(cache)</span>
+</div>
+<div class="api-body">
+<p>Detectcommonframes.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">cache: State cache dict for streaming inference.</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="detectlastframes">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">DetectLastFrames</span><span class="api-args">(cache)</span>
+</div>
+<div class="api-body">
+<p>Detectlastframes.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">cache: State cache dict for streaming inference.</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="detectoneframe">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">DetectOneFrame</span><span class="api-args">(cur_frm_state, cur_frm_idx, is_final_frame, cache)</span>
+</div>
+<div class="api-body">
+<p>Detectoneframe.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">cur_frm_state: TODO.</div>
+<div class="doc-arg">cur_frm_idx: TODO.</div>
+<div class="doc-arg">is_final_frame: Boolean flag for final frame.</div>
+<div class="doc-arg">cache: State cache dict for streaming inference.</div>
+</div>
+</div></div>
+</div>
+</div></div>
+</div>
+<div class="api-module" data-module="funasr.models.campplus.model">
+<div class="api-module-title">funasr.models.campplus.model</div>
+<div class="api-entry" data-name="campplus">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-class">class</span>
+<span class="api-name">CAMPPlus</span>
+</div>
+<div class="api-body">
+<p>CAM++ Speaker Verification Model.</p>
+<p>Extracts fixed-dimensional speaker embeddings from variable-length audio.</p>
+<p>Used for speaker verification and speaker diarization pipelines.</p>
+<p>Output: 192-dimensional speaker embedding per utterance.</p>
+<div class="api-methods">
+<div class="api-entry" data-name="__init__">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">__init__</span><span class="api-args">(feat_dim, embedding_size, growth_rate, bn_size, init_channels, config_str, memory_efficient, output_level, **kwargs)</span>
+</div>
+<div class="api-body">
+<p>Initialize CAMPPlus.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">feat_dim: Size/dimension parameter.</div>
+<div class="doc-arg">embedding_size: Size/dimension parameter.</div>
+<div class="doc-arg">growth_rate: TODO.</div>
+<div class="doc-arg">bn_size: Size/dimension parameter.</div>
+<div class="doc-arg">init_channels: TODO.</div>
+<div class="doc-arg">config_str: TODO.</div>
+<div class="doc-arg">memory_efficient: TODO.</div>
+<div class="doc-arg">output_level: TODO.</div>
+<div class="doc-arg">**kwargs: Additional keyword arguments.</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="forward">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">forward</span><span class="api-args">(x)</span>
+</div>
+<div class="api-body">
+<p>Extract speaker embedding from fbank features.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">x (Tensor): Input fbank features, shape (batch, time, feat_dim).</div>
+</div>
+<div class="doc-section"><strong>Returns:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">Tensor: Speaker embedding, shape (batch, embedding_size) for segment level,</div>
+<div class="doc-arg">or (batch, time, channels) for frame level.</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="inference">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">inference</span><span class="api-args">(data_in, data_lengths, key, tokenizer, frontend, **kwargs)</span>
+</div>
+<div class="api-body">
+<p>Run speaker embedding extraction on audio input.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">data_in: Audio input (file path, numpy array, or list).</div>
+<div class="doc-arg">data_lengths: Not used.</div>
+<div class="doc-arg">key (list): Sample identifiers.</div>
+<div class="doc-arg">tokenizer: Not used.</div>
+<div class="doc-arg">frontend: Not used.</div>
+<div class="doc-arg">**kwargs: Must include &#x27;device&#x27; (str) and optional &#x27;fs&#x27; (int, default 16000).</div>
+</div>
+<div class="doc-section"><strong>Returns:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">tuple: (results, meta_data) where results is</div>
+<div class="doc-arg">[{&quot;spk_embedding&quot;: Tensor of shape (1, 192)}]</div>
+</div>
+</div></div>
+</div>
+</div></div>
+</div>
+<div class="api-module" data-module="funasr.models.ct_transformer.model">
+<div class="api-module-title">funasr.models.ct_transformer.model</div>
+<div class="api-entry" data-name="cttransformer">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-class">class</span>
+<span class="api-name">CTTransformer</span>
+</div>
+<div class="api-body">
+<p>CT-Transformer: Punctuation Restoration Model.</p>
+<p>Adds punctuation (comma, period, question mark) to unpunctuated text.</p>
+<p>Supports Chinese and English. Used as punc_model in the ASR pipeline.</p>
+<p>Output: {&quot;key&quot;: &quot;...&quot;, &quot;text&quot;: &quot;punctuated text&quot;, &quot;punc_array&quot;: Tensor}</p>
+<p>punc_array encoding: 1=none, 2=comma(，), 3=period(。), 4=question(？)</p>
+<div class="doc-section"><strong>Note: Not needed for Fun-ASR-Nano/SenseVoice/Qwen3-ASR (they output punctuation natively).</strong></div>
+<p>Only required for Paraformer models.</p>
+<p>Author: Speech Lab of DAMO Academy, Alibaba Group</p>
+<p>CT-Transformer: Controllable time-delay transformer for real-time punctuation prediction and disfluency detection</p>
+<p>https://arxiv.org/pdf/2003.01309.pdf</p>
+<div class="api-methods">
+<div class="api-entry" data-name="__init__">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">__init__</span><span class="api-args">(encoder, encoder_conf, vocab_size, punc_list, punc_weight, embed_unit, att_unit, dropout_rate, ignore_id, sos, eos, sentence_end_id, **kwargs)</span>
+</div>
+<div class="api-body">
+<p>Initialize CTTransformer.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">encoder: TODO.</div>
+<div class="doc-arg">encoder_conf: Configuration dict for encoder.</div>
+<div class="doc-arg">vocab_size: Size/dimension parameter.</div>
+<div class="doc-arg">punc_list: TODO.</div>
+<div class="doc-arg">punc_weight: TODO.</div>
+<div class="doc-arg">embed_unit: TODO.</div>
+<div class="doc-arg">att_unit: TODO.</div>
+<div class="doc-arg">dropout_rate: TODO.</div>
+<div class="doc-arg">ignore_id: TODO.</div>
+<div class="doc-arg">sos: TODO.</div>
+<div class="doc-arg">eos: TODO.</div>
+<div class="doc-arg">sentence_end_id: TODO.</div>
+<div class="doc-arg">**kwargs: Additional keyword arguments.</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="punc_forward">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">punc_forward</span><span class="api-args">(text, text_lengths, **kwargs)</span>
+</div>
+<div class="api-body">
+<p>Compute loss value from buffer sequences.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">input (torch.Tensor): Input ids. (batch, len)</div>
+<div class="doc-arg">hidden (torch.Tensor): Target ids. (batch, len)</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="with_vad">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">with_vad</span><span class="api-args">()</span>
+</div>
+<div class="api-body">
+<p>With vad.</p>
+</div></div>
+<div class="api-entry" data-name="score">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">score</span><span class="api-args">(y, state, x)</span>
+</div>
+<div class="api-body">
+<p>Score new token.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">y (torch.Tensor): 1D torch.int64 prefix tokens.</div>
+<div class="doc-arg">state: Scorer state for prefix tokens</div>
+<div class="doc-arg">x (torch.Tensor): encoder feature that generates ys.</div>
+</div>
+<div class="doc-section"><strong>Returns:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">tuple[torch.Tensor, Any]: Tuple of</div>
+<div class="doc-arg">torch.float32 scores for next token (vocab_size)</div>
+<div class="doc-arg">and next state for ys</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="batch_score">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">batch_score</span><span class="api-args">(ys, states, xs)</span>
+</div>
+<div class="api-body">
+<p>Score new token batch.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">ys (torch.Tensor): torch.int64 prefix tokens (n_batch, ylen).</div>
+<div class="doc-arg">states (List[Any]): Scorer states for prefix tokens.</div>
+<div class="doc-arg">xs (torch.Tensor):</div>
+<div class="doc-arg">The encoder feature that generates ys (n_batch, xlen, n_feat).</div>
+</div>
+<div class="doc-section"><strong>Returns:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">tuple[torch.Tensor, List[Any]]: Tuple of</div>
+<div class="doc-arg">batchfied scores for next token with shape of `(n_batch, vocab_size)`</div>
+<div class="doc-arg">and next state list for ys.</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="nll">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">nll</span><span class="api-args">(text, punc, text_lengths, punc_lengths, max_length, vad_indexes, vad_indexes_lengths)</span>
+</div>
+<div class="api-body">
+<p>Compute negative log likelihood(nll)</p>
+<p>Normally, this function is called in batchify_nll.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">text: (Batch, Length)</div>
+<div class="doc-arg">punc: (Batch, Length)</div>
+<div class="doc-arg">text_lengths: (Batch,)</div>
+<div class="doc-arg">max_lengths: int</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="forward">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">forward</span><span class="api-args">(text, punc, text_lengths, punc_lengths, vad_indexes, vad_indexes_lengths)</span>
+</div>
+<div class="api-body">
+<p>Forward pass for training.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">text: Text tensor or string input.</div>
+<div class="doc-arg">punc: TODO.</div>
+<div class="doc-arg">text_lengths: Length of each text sample.</div>
+<div class="doc-arg">punc_lengths: Lengths of punc.</div>
+<div class="doc-arg">vad_indexes: TODO.</div>
+<div class="doc-arg">vad_indexes_lengths: Lengths of vad_indexes.</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="inference">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">inference</span><span class="api-args">(data_in, data_lengths, key, tokenizer, frontend, **kwargs)</span>
+</div>
+<div class="api-body">
+<p>Run inference on input data.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">data_in: Input data (audio samples, file paths, or text).</div>
+<div class="doc-arg">data_lengths: Lengths of each input sample in the batch.</div>
+<div class="doc-arg">key: Sample identifiers.</div>
+<div class="doc-arg">tokenizer: Tokenizer instance for text encoding/decoding.</div>
+<div class="doc-arg">frontend: Audio frontend for feature extraction.</div>
+<div class="doc-arg">**kwargs: Additional keyword arguments.</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="export">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">export</span><span class="api-args">(**kwargs)</span>
+</div>
+<div class="api-body">
+<p>Export.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">**kwargs: Additional keyword arguments.</div>
+</div>
+</div></div>
+</div>
+</div></div>
+</div>
+<div class="api-module" data-module="funasr.models.qwen3_asr.model">
+<div class="api-module-title">funasr.models.qwen3_asr.model</div>
+<div class="api-entry" data-name="qwen3asr">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-class">class</span>
+<span class="api-name">Qwen3ASR</span>
+</div>
+<div class="api-body">
+<p>Qwen3-ASR: Large Language Model based ASR supporting 52 languages.</p>
+<p>Wraps the qwen-asr package&#x27;s Qwen3ASRModel for use within FunASR&#x27;s AutoModel interface.</p>
+<p>Supports auto language detection, contextual recognition, and optional forced alignment</p>
+<p>for character-level timestamps.</p>
+<p>Requirements:</p>
+<p>pip install qwen-asr</p>
+<p>Models:</p>
+<p>- Qwen/Qwen3-ASR-0.6B (lighter, ~4GB GPU memory)</p>
+<p>- Qwen/Qwen3-ASR-1.7B (more accurate, ~8GB GPU memory)</p>
+<div class="api-methods">
+<div class="api-entry" data-name="__init__">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">__init__</span><span class="api-args">(**kwargs)</span>
+</div>
+<div class="api-body">
+<p>Initialize Qwen3ASR.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">**kwargs: Additional keyword arguments.</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="_resolve_model_path">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">_resolve_model_path</span><span class="api-args">(model_path, hub, kwargs)</span>
+</div>
+<div class="api-body">
+<p>Resolve model path: use local if exists, otherwise download from hub.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">model_path (str): Model name or local path.</div>
+<div class="doc-arg">hub (str): &quot;ms&quot; for ModelScope, &quot;hf&quot; for HuggingFace.</div>
+<div class="doc-arg">kwargs (dict): Additional options (model_revision, etc.)</div>
+</div>
+<div class="doc-section"><strong>Returns:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">str: Resolved local path to model files.</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="forward">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">forward</span><span class="api-args">(**kwargs)</span>
+</div>
+<div class="api-body">
+<p>Forward pass for training.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">**kwargs: Additional keyword arguments.</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="inference">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">inference</span><span class="api-args">(data_in, data_lengths, key, tokenizer, frontend, **kwargs)</span>
+</div>
+<div class="api-body">
+<p>Run Qwen3-ASR speech recognition.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">data_in: Audio input. Accepts:</div>
+<div class="doc-arg">- list of file paths/URLs</div>
+<div class="doc-arg">- list of (numpy_array, sample_rate) tuples</div>
+<div class="doc-arg">- single numpy array or torch Tensor</div>
+<div class="doc-arg">data_lengths: Not used.</div>
+<div class="doc-arg">key (list): Sample identifiers.</div>
+<div class="doc-arg">tokenizer: Not used (Qwen3-ASR has internal tokenizer).</div>
+<div class="doc-arg">frontend: Not used (Qwen3-ASR has internal audio processing).</div>
+<div class="doc-arg">**kwargs: Runtime parameters:</div>
+<div class="doc-arg">- language (str): Language hint (e.g. &quot;Chinese&quot;, &quot;English&quot;) or None for auto-detect.</div>
+<div class="doc-arg">- return_time_stamps (bool): Return character-level timestamps (requires forced_aligner).</div>
+<div class="doc-arg">- output_timestamp (bool): Same as return_time_stamps (for pipeline compatibility).</div>
+<div class="doc-arg">- context (str): Context prompt for contextual recognition.</div>
+</div>
+<div class="doc-section"><strong>Returns:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">tuple: (results, meta_data) where results is list of dicts:</div>
+<div class="doc-arg">- &quot;key&quot; (str): Sample ID</div>
+<div class="doc-arg">- &quot;text&quot; (str): Recognized text (with punctuation)</div>
+<div class="doc-arg">- &quot;language&quot; (str): Detected language (if available)</div>
+<div class="doc-arg">- &quot;timestamp&quot; (list): [[start_ms, end_ms], ...] (if timestamps enabled)</div>
+</div>
+</div></div>
+</div>
+</div></div>
+</div>
+<div class="api-module" data-module="funasr.utils.load_utils">
+<div class="api-module-title">funasr.utils.load_utils</div>
+<div class="api-entry" data-name="is_ffmpeg_installed">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-func">func</span>
+<span class="api-name">is_ffmpeg_installed</span><span class="api-args">()</span>
+</div>
+<div class="api-body">
+<p>Is ffmpeg installed.</p>
+</div></div>
+<div class="api-entry" data-name="load_audio_text_image_video">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-func">func</span>
+<span class="api-name">load_audio_text_image_video</span><span class="api-args">(data_or_path_or_list, fs, audio_fs, data_type, tokenizer, **kwargs)</span>
+</div>
+<div class="api-body">
+<p>Load audio/text/image/video data from various input formats.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">data_or_path_or_list: File path, URL, numpy array, torch Tensor, bytes, or list.</div>
+<div class="doc-arg">fs (int): Target sample rate (default 16000).</div>
+<div class="doc-arg">audio_fs (int): Source audio sample rate.</div>
+<div class="doc-arg">data_type (str): Input type (&quot;sound&quot;, &quot;text&quot;, &quot;fbank&quot;).</div>
+</div>
+<div class="doc-section"><strong>Returns:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">torch.Tensor or list: Loaded and resampled audio tensor(s).</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="_is_audio_container">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-func">func</span>
+<span class="api-name">_is_audio_container</span><span class="api-args">(data)</span>
+</div>
+<div class="api-body">
+<p>Return True if *data* starts with a recognised container-format magic header.</p>
+<p>Raw PCM byte streams have no header, so they will return False and the</p>
+<p>expensive pydub/ffmpeg validation round-trip can be skipped entirely.</p>
+</div></div>
+<div class="api-entry" data-name="load_bytes">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-func">func</span>
+<span class="api-name">load_bytes</span><span class="api-args">(input)</span>
+</div>
+<div class="api-body">
+<p>Convert audio bytes to numpy array.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">input (bytes): Raw audio bytes.</div>
+</div>
+<div class="doc-section"><strong>Returns:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">numpy.ndarray: Decoded audio samples.</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="validate_frame_rate">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-func">func</span>
+<span class="api-name">validate_frame_rate</span><span class="api-args">(input, fs)</span>
+</div>
+<div class="api-body">
+<p>Validate frame rate.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">input: Input audio/text data.</div>
+<div class="doc-arg">fs: TODO.</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="extract_fbank">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-func">func</span>
+<span class="api-name">extract_fbank</span><span class="api-args">(data, data_len, data_type, frontend, **kwargs)</span>
+</div>
+<div class="api-body">
+<p>Extract filter-bank features from audio data.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">data: Audio samples (list of numpy arrays or tensors).</div>
+<div class="doc-arg">data_len: Lengths of each sample.</div>
+<div class="doc-arg">data_type (str): Input type (&quot;sound&quot;, &quot;fbank&quot;).</div>
+<div class="doc-arg">frontend: Frontend instance for feature extraction.</div>
+</div>
+<div class="doc-section"><strong>Returns:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">tuple: (features_tensor, feature_lengths, feature_times)</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="_load_audio_ffmpeg">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-func">func</span>
+<span class="api-name">_load_audio_ffmpeg</span><span class="api-args">(file, sr)</span>
+</div>
+<div class="api-body">
+<p>Open an audio file and read as mono waveform, resampling as necessary</p>
+<p>Parameters</p>
+<p>----------</p>
+<p>file: str</p>
+<p>The audio file to open</p>
+<p>sr: int</p>
+<p>The sample rate to resample the audio if necessary</p>
+<p>Returns</p>
+<p>-------</p>
+<p>A NumPy array containing the audio waveform, in float32 dtype.</p>
+</div></div>
+</div>
+<div class="api-module" data-module="funasr.utils.vad_utils">
+<div class="api-module-title">funasr.utils.vad_utils</div>
+<div class="api-entry" data-name="slice_padding_fbank">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-func">func</span>
+<span class="api-name">slice_padding_fbank</span><span class="api-args">(speech, speech_lengths, vad_segments)</span>
+</div>
+<div class="api-body">
+<p>Slice padding fbank.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">speech: Speech audio tensor, shape (batch, time).</div>
+<div class="doc-arg">speech_lengths: Length of each speech sample.</div>
+<div class="doc-arg">vad_segments: TODO.</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="slice_padding_audio_samples">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-func">func</span>
+<span class="api-name">slice_padding_audio_samples</span><span class="api-args">(speech, speech_lengths, vad_segments)</span>
+</div>
+<div class="api-body">
+<p>Slice audio into VAD segments with proper padding.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">speech (Tensor): Full audio tensor.</div>
+<div class="doc-arg">speech_lengths (int): Total audio length.</div>
+<div class="doc-arg">vad_segments (list): List of (segment_info, original_index) tuples,</div>
+<div class="doc-arg">where segment_info is [start_ms, end_ms].</div>
+</div>
+<div class="doc-section"><strong>Returns:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">tuple: (speech_list, speech_lengths_list) - lists of numpy arrays and their lengths.</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="merge_vad">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-func">func</span>
+<span class="api-name">merge_vad</span><span class="api-args">(vad_result, max_length, min_length)</span>
+</div>
+<div class="api-body">
+<p>Merge short VAD segments to reduce fragmentation.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">vad_result (list): VAD segments [[start_ms, end_ms], ...].</div>
+<div class="doc-arg">max_length (int): Maximum merged segment length in ms (default 15000).</div>
+<div class="doc-arg">min_length (int): Minimum segment length; shorter ones get merged (default 0).</div>
+</div>
+<div class="doc-section"><strong>Returns:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">list: Merged VAD segments [[start_ms, end_ms], ...].</div>
+</div>
+</div></div>
+</div>
+<div class="api-module" data-module="funasr.utils.timestamp_tools">
+<div class="api-module-title">funasr.utils.timestamp_tools</div>
+<div class="api-entry" data-name="cif_wo_hidden">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-func">func</span>
+<span class="api-name">cif_wo_hidden</span><span class="api-args">(alphas, threshold)</span>
+</div>
+<div class="api-body">
+<p>Cif wo hidden.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">alphas: TODO.</div>
+<div class="doc-arg">threshold: TODO.</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="ts_prediction_lfr6_standard">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-func">func</span>
+<span class="api-name">ts_prediction_lfr6_standard</span><span class="api-args">(us_alphas, us_peaks, char_list, vad_offset, force_time_shift, sil_in_str, upsample_rate)</span>
+</div>
+<div class="api-body">
+<p>Ts prediction lfr6 standard.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">us_alphas: TODO.</div>
+<div class="doc-arg">us_peaks: TODO.</div>
+<div class="doc-arg">char_list: TODO.</div>
+<div class="doc-arg">vad_offset: TODO.</div>
+<div class="doc-arg">force_time_shift: TODO.</div>
+<div class="doc-arg">sil_in_str: TODO.</div>
+<div class="doc-arg">upsample_rate: TODO.</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="timestamp_sentence">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-func">func</span>
+<span class="api-name">timestamp_sentence</span><span class="api-args">(punc_id_list, timestamp_postprocessed, text_postprocessed, return_raw_text)</span>
+</div>
+<div class="api-body">
+<p>Split recognized text into sentences using punctuation, with timestamps.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">punc_id_list (Tensor/list): Punctuation IDs from CT-Transformer.</div>
+<div class="doc-arg">Values: 1=none, 2=comma, 3=period, 4=question.</div>
+<div class="doc-arg">timestamp_postprocessed (list): Per-character timestamps [[start_ms, end_ms], ...].</div>
+<div class="doc-arg">text_postprocessed (str): Space-separated recognized text.</div>
+<div class="doc-arg">return_raw_text (bool): Include raw_text in output.</div>
+</div>
+<div class="doc-section"><strong>Returns:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">list[dict]: Sentences with keys: text, start, end, timestamp, [raw_text].</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="timestamp_sentence_en">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-func">func</span>
+<span class="api-name">timestamp_sentence_en</span><span class="api-args">(punc_id_list, timestamp_postprocessed, text_postprocessed, return_raw_text)</span>
+</div>
+<div class="api-body">
+<p>Timestamp sentence en.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">punc_id_list: TODO.</div>
+<div class="doc-arg">timestamp_postprocessed: TODO.</div>
+<div class="doc-arg">text_postprocessed: TODO.</div>
+<div class="doc-arg">return_raw_text: TODO.</div>
+</div>
+</div></div>
+</div>
+<div class="api-module" data-module="funasr.utils.misc">
+<div class="api-module-title">funasr.utils.misc</div>
+<div class="api-entry" data-name="statistic_model_parameters">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-func">func</span>
+<span class="api-name">statistic_model_parameters</span><span class="api-args">(model, prefix)</span>
+</div>
+<div class="api-body">
+<p>Statistic model parameters.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">model: Model instance or model name.</div>
+<div class="doc-arg">prefix: TODO.</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="int2vec">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-func">func</span>
+<span class="api-name">int2vec</span><span class="api-args">(x, vec_dim, dtype)</span>
+</div>
+<div class="api-body">
+<p>Int2vec.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">x: TODO.</div>
+<div class="doc-arg">vec_dim: Size/dimension parameter.</div>
+<div class="doc-arg">dtype: TODO.</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="seq2arr">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-func">func</span>
+<span class="api-name">seq2arr</span><span class="api-args">(seq, vec_dim)</span>
+</div>
+<div class="api-body">
+<p>Seq2arr.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">seq: TODO.</div>
+<div class="doc-arg">vec_dim: Size/dimension parameter.</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="load_scp_as_dict">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-func">func</span>
+<span class="api-name">load_scp_as_dict</span><span class="api-args">(scp_path, value_type, kv_sep)</span>
+</div>
+<div class="api-body">
+<p>Load scp as dict.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">scp_path: TODO.</div>
+<div class="doc-arg">value_type: TODO.</div>
+<div class="doc-arg">kv_sep: TODO.</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="load_scp_as_list">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-func">func</span>
+<span class="api-name">load_scp_as_list</span><span class="api-args">(scp_path, value_type, kv_sep)</span>
+</div>
+<div class="api-body">
+<p>Load scp as list.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">scp_path: TODO.</div>
+<div class="doc-arg">value_type: TODO.</div>
+<div class="doc-arg">kv_sep: TODO.</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="deep_update">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-func">func</span>
+<span class="api-name">deep_update</span><span class="api-args">(original, update)</span>
+</div>
+<div class="api-body">
+<p>Recursively merge update dict into original dict (in-place).</p>
+<p>For nested dicts, merges recursively. For other types, overwrites.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">original (dict): Target dict to be updated in-place.</div>
+<div class="doc-arg">update (dict): Source dict with new values.</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="prepare_model_dir">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-func">func</span>
+<span class="api-name">prepare_model_dir</span><span class="api-args">(**kwargs)</span>
+</div>
+<div class="api-body">
+<p>Prepare model dir.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">**kwargs: Additional keyword arguments.</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="extract_filename_without_extension">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-func">func</span>
+<span class="api-name">extract_filename_without_extension</span><span class="api-args">(file_path)</span>
+</div>
+<div class="api-body">
+<p>从给定的文件路径中提取文件名（不包含路径和扩展名）</p>
+<p>:param file_path: 完整的文件路径</p>
+<p>:return: 文件名（不含路径和扩展名）</p>
+</div></div>
+<div class="api-entry" data-name="smart_remove">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-func">func</span>
+<span class="api-name">smart_remove</span><span class="api-args">(path)</span>
+</div>
+<div class="api-body">
+<p>Intelligently removes files, empty directories, and non-empty directories recursively.</p>
+</div></div>
+</div>
+<div class="api-module" data-module="funasr.register">
+<div class="api-module-title">funasr.register</div>
+<div class="api-entry" data-name="registertables">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-class">class</span>
+<span class="api-name">RegisterTables</span>
+</div>
+<div class="api-body">
+<p>Registry system for classes.</p>
+<div class="api-methods">
+<div class="api-entry" data-name="print">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">print</span><span class="api-args">(key)</span>
+</div>
+<div class="api-body">
+<p>Print registered classes.</p>
+</div></div>
+<div class="api-entry" data-name="register">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-method">method</span>
+<span class="api-name">register</span><span class="api-args">(register_tables_key, key)</span>
+</div>
+<div class="api-body">
+<p>Decorator to register a class.</p>
+</div></div>
+</div>
+</div></div>
+</div>
+<div class="api-module" data-module="funasr.download.download_model_from_hub">
+<div class="api-module-title">funasr.download.download_model_from_hub</div>
+<div class="api-entry" data-name="download_model">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-func">func</span>
+<span class="api-name">download_model</span><span class="api-args">(**kwargs)</span>
+</div>
+<div class="api-body">
+<p>Download model from hub and parse its configuration.</p>
+<p>Resolves model name aliases, downloads from ModelScope or HuggingFace,</p>
+<p>reads config.yaml and configuration.json, and returns complete kwargs</p>
+<p>for model instantiation.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">**kwargs: Must include &#x27;model&#x27; (str). Optional: &#x27;hub&#x27;, &#x27;model_revision&#x27;,</div>
+<div class="doc-arg">&#x27;is_training&#x27;, etc.</div>
+</div>
+<div class="doc-section"><strong>Returns:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">dict: Complete kwargs with resolved paths, model class name, and config.</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="download_from_ms">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-func">func</span>
+<span class="api-name">download_from_ms</span><span class="api-args">(**kwargs)</span>
+</div>
+<div class="api-body">
+<p>Download from ms.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">**kwargs: Additional keyword arguments.</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="download_from_hf">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-func">func</span>
+<span class="api-name">download_from_hf</span><span class="api-args">(**kwargs)</span>
+</div>
+<div class="api-body">
+<p>Download from hf.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">**kwargs: Additional keyword arguments.</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="add_file_root_path">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-func">func</span>
+<span class="api-name">add_file_root_path</span><span class="api-args">(model_or_path, file_path_metas, cfg)</span>
+</div>
+<div class="api-body">
+<p>Add file root path.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">model_or_path: TODO.</div>
+<div class="doc-arg">file_path_metas: TODO.</div>
+<div class="doc-arg">cfg: Configuration overrides.</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="get_or_download_model_dir">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-func">func</span>
+<span class="api-name">get_or_download_model_dir</span><span class="api-args">(model, model_revision, is_training, check_latest)</span>
+</div>
+<div class="api-body">
+<p>Get local model directory or download model if necessary.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">model (str): model id or path to local model directory.</div>
+<div class="doc-arg">model_revision  (str, optional): model version number.</div>
+<div class="doc-arg">:param is_training:</div>
+</div>
+</div></div>
+<div class="api-entry" data-name="get_or_download_model_dir_hf">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-func">func</span>
+<span class="api-name">get_or_download_model_dir_hf</span><span class="api-args">(model, model_revision, is_training, check_latest)</span>
+</div>
+<div class="api-body">
+<p>Get local model directory or download model if necessary.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">model (str): model id or path to local model directory.</div>
+<div class="doc-arg">model_revision  (str, optional): model version number.</div>
+<div class="doc-arg">:param is_training:</div>
+</div>
+</div></div>
+</div>
+<div class="api-module" data-module="funasr.train_utils.load_pretrained_model">
+<div class="api-module-title">funasr.train_utils.load_pretrained_model</div>
+<div class="api-entry" data-name="load_pretrained_model">
+<div class="api-header" onclick="toggleBody(this)">
+<span class="api-badge badge-func">func</span>
+<span class="api-name">load_pretrained_model</span><span class="api-args">(path, model, ignore_init_mismatch, map_location, oss_bucket, scope_map, excludes, **kwargs)</span>
+</div>
+<div class="api-body">
+<p>Load a model state and set it to the model.</p>
+<div class="doc-section"><strong>Args:</strong></div>
+<div class="doc-args">
+<div class="doc-arg">init_param: &lt;file_path&gt;:&lt;src_key&gt;:&lt;dst_key&gt;:&lt;exclude_Keys&gt;</div>
+</div>
+<div class="doc-section"><strong>Examples:</strong></div>
+</div></div>
+</div>
+
+    </div>
+    <footer>
+        <p>FunASR &middot; Tongyi Lab, Alibaba Group</p>
+        <p><a href="index.html">Home</a> &middot; <a href="tutorial.html">Tutorial</a> &middot; <a href="https://github.com/modelscope/FunASR">GitHub</a></p>
+    </footer>
+    <script>
+    function toggleBody(header) {
+        const body = header.nextElementSibling;
+        body.classList.toggle("open");
+    }
+    function filterAPI() {
+        const query = document.getElementById("searchInput").value.toLowerCase();
+        document.querySelectorAll(".api-entry").forEach(el => {
+            const name = el.getAttribute("data-name") || "";
+            const text = el.textContent.toLowerCase();
+            if (!query || name.includes(query) || text.includes(query)) {
+                el.classList.remove("hidden");
+            } else {
+                el.classList.add("hidden");
+            }
+        });
+        document.querySelectorAll(".api-module").forEach(el => {
+            const visible = el.querySelectorAll(".api-entry:not(.hidden)").length;
+            el.classList.toggle("hidden", visible === 0);
+        });
+    }
+    </script>
+</body>
+</html>
