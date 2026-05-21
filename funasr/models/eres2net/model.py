@@ -19,6 +19,17 @@ from funasr.models.eres2net.eres2netv2 import ERes2NetV2
 @tables.register("model_classes", "ERes2NetV2")
 @tables.register("model_classes", "iic/speech_eres2netv2_sv_zh-cn_16k-common")
 class ERes2NetV2SV(torch.nn.Module):
+    """ERes2NetV2: Enhanced Res2Net v2 for Speaker Verification.
+
+    Improved speaker embedding model based on Res2Net architecture with
+    multi-scale feature aggregation. Provides 192-dim speaker embeddings
+    for speaker verification and diarization.
+
+    Better than CAM++ for short-duration audio (< 3s) speaker feature extraction.
+
+    Output: {"spk_embedding": Tensor of shape (1, 192)}
+    """
+
     def __init__(
         self,
         feat_dim=80,
