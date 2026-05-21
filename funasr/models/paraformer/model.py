@@ -28,7 +28,23 @@ from funasr.utils.load_utils import load_audio_text_image_video, extract_fbank
 
 @tables.register("model_classes", "Paraformer")
 class Paraformer(torch.nn.Module):
-    """
+    """Paraformer: Non-autoregressive End-to-End ASR Model.
+
+    High-accuracy speech recognition for Chinese/English. The production workhorse.
+
+    Features:
+    - Non-autoregressive (parallel decoding, fast inference)
+    - Character-level timestamps via CIF predictor
+    - Streaming and offline modes
+    - Hotword customization
+    - Speaker diarization (with spk_model)
+    - ONNX export support
+
+    Output: {"key": "...", "text": "recognized text", "timestamp": [[start_ms, end_ms], ...]}
+
+    Note: Requires punc_model="ct-punc" for punctuation (unlike Fun-ASR-Nano/SenseVoice
+    which output punctuation natively).
+
     Author: Speech Lab of DAMO Academy, Alibaba Group
     Paraformer: Fast and Accurate Parallel Transformer for Non-autoregressive End-to-End Speech Recognition
     https://arxiv.org/abs/2206.08317

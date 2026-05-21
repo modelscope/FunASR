@@ -33,7 +33,17 @@ else:
 
 @tables.register("model_classes", "CTTransformer")
 class CTTransformer(torch.nn.Module):
-    """
+    """CT-Transformer: Punctuation Restoration Model.
+
+    Adds punctuation (comma, period, question mark) to unpunctuated text.
+    Supports Chinese and English. Used as punc_model in the ASR pipeline.
+
+    Output: {"key": "...", "text": "punctuated text", "punc_array": Tensor}
+    punc_array encoding: 1=none, 2=comma(，), 3=period(。), 4=question(？)
+
+    Note: Not needed for Fun-ASR-Nano/SenseVoice/Qwen3-ASR (they output punctuation natively).
+    Only required for Paraformer models.
+
     Author: Speech Lab of DAMO Academy, Alibaba Group
     CT-Transformer: Controllable time-delay transformer for real-time punctuation prediction and disfluency detection
     https://arxiv.org/pdf/2003.01309.pdf

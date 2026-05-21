@@ -25,6 +25,26 @@ dtype_map = {"bf16": torch.bfloat16, "fp16": torch.float16, "fp32": torch.float3
 
 @tables.register("model_classes", "FunASRNano")
 class FunASRNano(nn.Module):
+    """Fun-ASR-Nano: End-to-End ASR Large Model.
+
+    Trained on tens of millions of hours of real speech data.
+    Supports 31 languages including Chinese dialects and regional accents.
+
+    Features:
+    - Character-level timestamps (via CTC forced alignment)
+    - Hotword customization
+    - Speaker diarization (when combined with spk_model)
+    - Lyrics and rap recognition
+    - Streaming chunk-by-chunk inference (demo2.py)
+
+    Output: {"key": ..., "text": ..., "timestamps": [{"token", "start_time", "end_time"}, ...],
+             "ctc_timestamps": [...]}
+
+    Note: Outputs punctuation natively — punc_model is NOT needed.
+
+    Requirements: pip install tiktoken huggingface_hub
+    """
+
     def __init__(
         self,
         audio_encoder: str = None,

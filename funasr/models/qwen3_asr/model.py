@@ -14,6 +14,19 @@ from funasr.register import tables
 @tables.register("model_classes", "Qwen/Qwen3-ASR-1.7B")
 @tables.register("model_classes", "Qwen/Qwen3-ASR-0.6B")
 class Qwen3ASR(nn.Module):
+    """Qwen3-ASR: Large Language Model based ASR supporting 52 languages.
+
+    Wraps the qwen-asr package's Qwen3ASRModel for use within FunASR's AutoModel interface.
+    Supports auto language detection, contextual recognition, and optional forced alignment
+    for character-level timestamps.
+
+    Requirements:
+        pip install qwen-asr
+
+    Models:
+        - Qwen/Qwen3-ASR-0.6B (lighter, ~4GB GPU memory)
+        - Qwen/Qwen3-ASR-1.7B (more accurate, ~8GB GPU memory)
+    """
 
     def __init__(self, **kwargs):
         super().__init__()
@@ -59,6 +72,16 @@ class Qwen3ASR(nn.Module):
         logging.info(f"Qwen3ASR model loaded from {model_path}")
 
     def _resolve_model_path(self, model_path, hub, kwargs):
+        """Resolve model path: use local if exists, otherwise download from hub.
+
+        Args:
+            model_path (str): Model name or local path.
+            hub (str): "ms" for ModelScope, "hf" for HuggingFace.
+            kwargs (dict): Additional options (model_revision, etc.)
+
+        Returns:
+            str: Resolved local path to model files.
+        """
         if os.path.exists(model_path):
             return model_path
 
@@ -86,6 +109,30 @@ class Qwen3ASR(nn.Module):
         frontend=None,
         **kwargs,
     ):
+        """Run Qwen3-ASR speech recognition.
+
+        Args:
+            data_in: Audio input. Accepts:
+                - list of file paths/URLs
+                - list of (numpy_array, sample_rate) tuples
+                - single numpy array or torch Tensor
+            data_lengths: Not used.
+            key (list): Sample identifiers.
+            tokenizer: Not used (Qwen3-ASR has internal tokenizer).
+            frontend: Not used (Qwen3-ASR has internal audio processing).
+            **kwargs: Runtime parameters:
+                - language (str): Language hint (e.g. "Chinese", "English") or None for auto-detect.
+                - return_time_stamps (bool): Return character-level timestamps (requires forced_aligner).
+                - output_timestamp (bool): Same as return_time_stamps (for pipeline compatibility).
+                - context (str): Context prompt for contextual recognition.
+
+        Returns:
+            tuple: (results, meta_data) where results is list of dicts:
+                - "key" (str): Sample ID
+                - "text" (str): Recognized text (with punctuation)
+                - "language" (str): Detected language (if available)
+                - "timestamp" (list): [[start_ms, end_ms], ...] (if timestamps enabled)
+        """
         meta_data = {}
         time1 = time.perf_counter()
 

@@ -281,7 +281,14 @@ class Stats(object):
 
 @tables.register("model_classes", "FsmnVADStreaming")
 class FsmnVADStreaming(nn.Module):
-    """
+    """FSMN-based Voice Activity Detection (streaming/offline).
+
+    Detects speech segments in audio, returning start/end timestamps (milliseconds).
+    Supports both offline (full audio) and streaming (chunk-by-chunk) modes.
+
+    Offline output: [{"key": "...", "value": [[start_ms, end_ms], ...]}]
+    Streaming output: [[beg, -1]] (start), [[-1, end]] (end), [[beg, end]] (complete), [] (no event)
+
     Author: Speech Lab of DAMO Academy, Alibaba Group
     Deep-FSMN for Large Vocabulary Continuous Speech Recognition
     https://arxiv.org/abs/1803.05030
