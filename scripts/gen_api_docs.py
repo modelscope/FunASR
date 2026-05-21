@@ -226,52 +226,16 @@ html_page = f'''<!DOCTYPE html>
 <title>FunASR API</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
-<style>
-body{{display:flex;flex-direction:column;min-height:100vh;background:var(--surface)}}
-.api-layout{{display:flex;flex:1}}
-.api-sidebar{{width:260px;min-width:260px;height:calc(100vh - 57px);position:sticky;top:57px;overflow-y:auto;border-right:1px solid var(--line);background:var(--page);padding:8px 0}}
-.sb-search{{margin:4px 8px 10px;padding:7px 10px;width:calc(100% - 16px);border:1px solid var(--line);border-radius:5px;font-size:0.78rem}}
-.sb-search:focus{{outline:none;border-color:var(--primary)}}
-.l1{{border-bottom:1px solid var(--line)}}.l1-title{{padding:9px 12px;font-size:0.78rem;font-weight:700;color:var(--ink-soft);cursor:pointer;display:flex;align-items:center;gap:6px}}
-.l1-title:hover{{background:var(--surface-2)}}.l1-title .cnt{{font-size:0.65rem;background:var(--surface-2);color:var(--muted);padding:1px 5px;border-radius:8px;margin-left:auto}}
-.l1-title .arr{{font-size:0.6rem;color:var(--muted);transition:transform 0.2s}}.l1-children{{max-height:0;overflow:hidden;transition:max-height 0.3s}}
-.l1.open>.l1-children{{max-height:20000px}}.l1.open>.l1-title .arr{{transform:rotate(90deg)}}
-.l2-title{{padding:4px 12px 4px 22px;font-size:0.74rem;font-weight:600;color:var(--muted);cursor:pointer;display:flex;align-items:center}}
-.l2-title:hover{{background:var(--surface-2);color:var(--ink-soft)}}.l2-title .arr{{margin-left:auto;font-size:0.55rem;transition:transform 0.2s}}
-.l2-children{{max-height:0;overflow:hidden;transition:max-height 0.25s}}.l2.open>.l2-children{{max-height:20000px}}.l2.open>.l2-title .arr{{transform:rotate(90deg)}}
-.l3-item{{display:flex;align-items:center;gap:5px;padding:2px 12px 2px 34px;font-size:0.73rem;color:var(--ink-soft);text-decoration:none;cursor:pointer;border-left:2px solid transparent}}
-.l3-item:hover{{background:var(--surface-2)}}.l3-item.active{{background:var(--primary-soft);color:var(--primary-dark);border-left-color:var(--primary);font-weight:600}}
-.l3m{{padding-left:44px;font-size:0.7rem}}
-.mb{{font-size:0.5rem;font-weight:700;width:13px;height:13px;display:inline-flex;align-items:center;justify-content:center;border-radius:2px;flex-shrink:0}}
-.badge-c{{background:#dbeafe;color:#1d4ed8}}.badge-m{{background:#d1fae5;color:#059669}}.badge-f{{background:#fef3c7;color:#b45309}}
-.api-content{{flex:1;padding:32px 40px;overflow-y:auto;max-width:800px}}
-.api-detail{{display:none}}.api-detail.active{{display:block}}
-.api-welcome{{color:var(--muted);padding:60px 20px;text-align:center}}.api-welcome h2{{color:var(--ink-soft);margin-bottom:8px}}
-.dtag{{font-size:0.63rem;font-weight:700;padding:2px 7px;border-radius:3px;text-transform:uppercase}}
-h2{{font-size:1.1rem;margin:8px 0}}h2 code{{font-family:'JetBrains Mono',monospace;font-size:0.92rem;background:none;color:var(--ink);padding:0}}
-.dmod{{font-size:0.7rem;color:var(--muted);font-family:monospace;margin-bottom:18px;padding-bottom:12px;border-bottom:1px solid var(--line)}}
-.dmod a{{color:var(--primary);text-decoration:none;font-size:0.7rem}}.dmod a:hover{{text-decoration:underline}}
-.ddoc{{line-height:1.7}}.ddoc p{{margin-bottom:8px;font-size:0.87rem}}.ddoc h4{{font-size:0.82rem;font-weight:700;margin:16px 0 4px;color:var(--ink)}}
-.ddoc ul{{list-style:none;padding:0;margin:0 0 12px}}.ddoc li{{padding:3px 0 3px 12px;border-left:2px solid var(--line);font-size:0.83rem;color:var(--ink-soft)}}
-.ddoc li code{{background:var(--surface-2);padding:1px 4px;border-radius:3px;font-size:0.77rem;color:#b91c1c}}
-.ddoc li.sub{{padding-left:24px;font-size:0.79rem;color:var(--muted);border-left-color:transparent}}
-.mt{{font-size:0.85rem;font-weight:700;margin:24px 0 10px;padding-top:14px;border-top:1px solid var(--line)}}
-.mblk{{margin:8px 0;padding:10px 14px;background:var(--page);border-radius:6px;border:1px solid var(--line)}}
-.mblk code{{font-family:'JetBrains Mono',monospace;font-size:0.84rem}}
-.mdoc p{{font-size:0.83rem}}.mdoc h4{{font-size:0.78rem}}
-.gh-link{{font-size:0.68rem;color:var(--muted);text-decoration:none;margin-left:8px}}.gh-link:hover{{color:var(--primary)}}
-.src-block{{margin:12px 0;border:1px solid var(--line);border-radius:6px;overflow:hidden}}
-.src-block summary{{padding:8px 14px;font-size:0.78rem;cursor:pointer;color:var(--muted);background:var(--surface-2)}}
-.src-block summary:hover{{color:var(--ink-soft)}}
-.src-block pre{{margin:0;border-radius:0;font-size:0.75rem;max-height:400px;overflow-y:auto}}
-.src-more{{display:block;padding:8px 14px;font-size:0.75rem;color:var(--primary);text-decoration:none;border-top:1px solid var(--line)}}
-.src-more:hover{{background:var(--surface-2)}}
-.muted{{color:var(--muted-2);font-style:italic}}
-.hidden{{display:none!important}}
-</style></head><body>
+</head><body class="api-page">
 <nav class="nav"><div class="container">
 <a href="index.html" class="nav-logo">FunASR</a>
-<div class="nav-links"><a href="index.html">Home</a><a href="tutorial.html">Tutorial</a><a href="training.html">Training</a><a href="model-registration.html">Develop</a><a href="api.html" class="active">API</a></div>
+<div class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="tutorial.html">Tutorial</a>
+                <a href="training.html">Training</a>
+                <a href="model-registration.html">Develop</a>
+                <a href="api.html" class="active">API</a>
+            </div>
 <a href="https://github.com/modelscope/FunASR" class="nav-github">GitHub</a>
 </div></nav>
 <div class="api-layout">
