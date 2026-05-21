@@ -31,6 +31,15 @@ from funasr.register import tables
 @tables.register("model_classes", "Whisper-large-v3-turbo")
 @tables.register("model_classes", "WhisperWarp")
 class WhisperWarp(nn.Module):
+    """Whisper: OpenAI Whisper model integration.
+
+    Wraps Whisper for multilingual speech recognition and translation
+    within FunASR's AutoModel interface.
+
+    Supports: whisper-tiny through whisper-large-v3-turbo.
+    Output: {"key": str, "text": str}
+    """
+
     def __init__(self, *args, **kwargs):
         """Initialize WhisperWarp.
         

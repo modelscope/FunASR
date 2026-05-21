@@ -102,6 +102,12 @@ class QwenAudioWarp(nn.Module):
 @tables.register("model_classes", "QwenAudioChat")
 @tables.register("model_classes", "QwenAudioChatWarp")
 class QwenAudioChatWarp(nn.Module):
+    """QwenAudioChat: Qwen Audio Chat model wrapper.
+
+    Interactive audio chat using the Qwen-Audio-Chat model.
+    Supports multi-turn conversation about audio content.
+    """
+
     def __init__(self, *args, **kwargs):
         """
         Qwen-Audio: Advancing Universal Audio Understanding via Unified Large-Scale Audio-Language Models
