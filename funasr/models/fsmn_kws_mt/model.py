@@ -25,7 +25,14 @@ from funasr.utils.load_utils import load_audio_text_image_video, extract_fbank
 
 @tables.register("model_classes", "FsmnKWSMT")
 class FsmnKWSMT(torch.nn.Module):
-    """
+    """FSMN-KWS-MT: Multi-Task FSMN Keyword Spotting.
+
+    Keyword spotting with multi-task learning: simultaneously
+    detects keywords and performs filler token classification.
+    Improves keyword detection robustness through auxiliary tasks.
+
+    Output: {"key": str, "value": keyword_detection_result}
+
     Author: Speech Lab of DAMO Academy, Alibaba Group
     Deep-FSMN for Large Vocabulary Continuous Speech Recognition
     https://arxiv.org/abs/1803.05030

@@ -26,7 +26,11 @@ dtype_map = {"bf16": torch.bfloat16, "fp16": torch.float16, "fp32": torch.float3
 
 @tables.register("model_classes", "LLMASR")
 class LLMASR(nn.Module):
-    """ """
+    """LLM-ASR: Large Language Model based Speech Recognition.
+
+    Combines audio encoder with LLM decoder for speech-to-text.
+    Output: {"key": str, "text": str}
+    """
 
     def __init__(
         self,

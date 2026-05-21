@@ -29,7 +29,14 @@ from funasr.utils.load_utils import load_audio_text_image_video, extract_fbank
 
 @tables.register("model_classes", "EParaformer")
 class EParaformer(torch.nn.Module):
-    """
+    """E-Paraformer: Enhanced Paraformer with streaming support.
+
+    Extended Paraformer supporting both offline and streaming modes
+    through dynamic masking in the encoder. Used for 2-pass decoding
+    where first pass provides streaming results and second pass refines.
+
+    Output: {"key": str, "text": str, "timestamp": [[start_ms, end_ms], ...]}
+
     Author: Speech Lab of DAMO Academy, Alibaba Group
     Paraformer: Fast and Accurate Parallel Transformer for Non-autoregressive End-to-End Speech Recognition
     https://arxiv.org/abs/2206.08317

@@ -31,10 +31,18 @@ else:
 
 @tables.register("model_classes", "CTTransformerStreaming")
 class CTTransformerStreaming(CTTransformer):
-    """
+    """CT-Transformer Streaming: Online punctuation restoration.
+
+    Processes text incrementally with a sliding window, maintaining cache
+    of previous context for consistent punctuation decisions across chunks.
+    Used as punc_model in streaming ASR pipelines.
+
+    Supports VAD-aware punctuation: uses VAD boundaries to improve sentence segmentation.
+
+    Reference: https://arxiv.org/pdf/2003.01309.pdf
+    Output: {"key": str, "text": str, "punc_array": Tensor}
+
     Author: Speech Lab of DAMO Academy, Alibaba Group
-    CT-Transformer: Controllable time-delay transformer for real-time punctuation prediction and disfluency detection
-    https://arxiv.org/pdf/2003.01309.pdf
     """
 
     def __init__(

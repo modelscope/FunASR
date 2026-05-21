@@ -43,7 +43,13 @@ else:
 
 @tables.register("model_classes", "SCAMA")
 class SCAMA(nn.Module):
-    """
+    """SCAMA: Streaming Chunk-Aware Multi-head Attention ASR.
+
+    Streaming ASR using chunk-based encoder with configurable latency.
+    Supports 2-pass decoding for accuracy refinement.
+
+    Output: {"key": str, "text": str}
+
     Author: Shiliang Zhang, Zhifu Gao, Haoneng Luo, Ming Lei, Jie Gao, Zhijie Yan, Lei Xie
     SCAMA: Streaming chunk-aware multihead attention for online end-to-end speech recognition
     https://arxiv.org/abs/2006.01712
