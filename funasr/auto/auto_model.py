@@ -174,7 +174,31 @@ def prepare_data_iterator(data_in, input_len=None, data_type=None, key=None):
 class AutoModel:
 
     def __init__(self, **kwargs):
+        """Initialize AutoModel with ASR model and optional sub-models.
 
+        Args:
+            model (str): Model name (hub alias or full ID) or local path.
+            device (str): Device for inference. "cuda:0", "cpu", "mps", "npu:0".
+                Falls back to CPU if specified device is unavailable.
+            vad_model (str, optional): VAD model for long audio segmentation.
+                Enables processing of any-length audio.
+            vad_kwargs (dict, optional): VAD config, e.g. {"max_single_segment_time": 60000}.
+            punc_model (str, optional): Punctuation restoration model.
+                Not needed for Fun-ASR-Nano/SenseVoice/Qwen3-ASR (they output punctuation natively).
+            spk_model (str, optional): Speaker model for diarization ("cam++" or full model ID).
+                Requires vad_model. For Qwen3-ASR, also requires forced_aligner.
+            spk_mode (str, optional): Speaker diarization mode. "punc_segment" (default) or "vad_segment".
+            hub (str): Model hub. "ms" (ModelScope, default) or "hf" (HuggingFace).
+            ncpu (int): CPU threads (default: 4).
+            disable_update (bool): Skip version check on startup.
+            disable_pbar (bool): Disable tqdm progress bars.
+            **kwargs: Additional model-specific parameters (passed to config.yaml overrides).
+
+        Examples:
+            >>> model = AutoModel(model="paraformer-zh", vad_model="fsmn-vad", punc_model="ct-punc")
+            >>> model = AutoModel(model="FunAudioLLM/Fun-ASR-Nano-2512", trust_remote_code=True,
+            ...                   remote_code="./model.py", vad_model="fsmn-vad", spk_model="cam++", hub="hf")
+        """
         try:
             from funasr.utils.version_checker import check_for_update
 
@@ -241,6 +265,21 @@ class AutoModel:
 
     @staticmethod
     def build_model(**kwargs):
+        """Download model from hub, build all components, and load pretrained weights.
+
+        This method handles the full model construction pipeline:
+        1. Download model files from ModelScope/HuggingFace (if not local)
+        2. Parse config.yaml to determine model class, tokenizer, frontend
+        3. Instantiate tokenizer, frontend, and model via the registry
+        4. Load pretrained weights from model.pt
+
+        Args:
+            **kwargs: Must include 'model' (str). All other config.yaml fields can be overridden.
+
+        Returns:
+            tuple: (model, kwargs) where model is the instantiated nn.Module and
+                kwargs contains the resolved configuration.
+        """
         assert "model" in kwargs
         if "model_conf" not in kwargs:
             logging.info("download models from model hub: {}".format(kwargs.get("hub", "ms")))
@@ -381,6 +420,38 @@ class AutoModel:
         return res
 
     def generate(self, input, input_len=None, progress_callback=None, **cfg):
+        """Run speech recognition on input audio.
+
+        This is the primary user-facing method. It automatically routes to:
+        - inference() if no vad_model is configured (single utterance)
+        - inference_with_vad() if vad_model is configured (long audio with segmentation)
+
+        Args:
+            input: Audio input. Accepts:
+                - File path (str): "audio.wav", "audio.mp3"
+                - URL (str): "https://..."
+                - numpy array: raw audio samples (float32, 16kHz)
+                - list: batch of file paths or arrays
+                - bytes: raw audio bytes
+            input_len (tensor, optional): Length of each input sample.
+            progress_callback (callable, optional): fn(current, total) called during processing.
+            **cfg: Runtime parameters:
+                - cache (dict): State cache for streaming mode. Pass {} for first call.
+                - hotword (str/list): Keywords to boost recognition accuracy.
+                - language (str): Language hint ("auto", "zh", "en", "Chinese", etc.)
+                - batch_size_s (int): Dynamic batch total duration in seconds.
+                - is_final (bool): Last chunk flag for streaming mode.
+                - return_spk_res (bool): Return speaker diarization results.
+                - sentence_timestamp (bool): Return sentence-level timestamps.
+                - use_itn (bool): Apply inverse text normalization (SenseVoice).
+
+        Returns:
+            list[dict]: Results for each input sample. Common fields:
+                - "key" (str): Sample identifier
+                - "text" (str): Recognized text
+                - "timestamp" (list): [[start_ms, end_ms], ...] per character/word
+                - "sentence_info" (list): [{text, start, end, spk, timestamp}, ...] when spk enabled
+        """
         self._reset_runtime_configs()
         if self.vad_model is None:
             results = self.inference(
@@ -412,6 +483,23 @@ class AutoModel:
         progress_callback=None,
         **cfg,
     ):
+        """Run model inference on input data (internal method).
+
+        Handles batching, timing, and progress reporting. Called by generate()
+        and inference_with_vad(). Typically not called directly by users.
+
+        Args:
+            input: Audio data, file path, or text (for punc model).
+            input_len (tensor, optional): Input lengths for batch.
+            model (nn.Module, optional): Override model (used for VAD/PUNC/SPK sub-models).
+            kwargs (dict, optional): Override kwargs (used for sub-model configs).
+            key (list, optional): Sample identifiers.
+            progress_callback (callable, optional): Progress reporting function.
+            **cfg: Additional config merged into kwargs.
+
+        Returns:
+            list[dict]: Model inference results.
+        """
         if kwargs is None:
             self._reset_runtime_configs()
         kwargs = self.kwargs if kwargs is None else kwargs
@@ -488,6 +576,23 @@ class AutoModel:
         return asr_result_list
 
     def inference_with_vad(self, input, input_len=None, **cfg):
+        """Run ASR with VAD segmentation, punctuation, and optional speaker diarization.
+
+        Pipeline:
+        1. VAD: Segment audio into speech regions
+        2. ASR: Recognize each segment (sorted by length for efficient batching)
+        3. Timestamp merge: Combine per-segment timestamps with VAD offsets
+        4. Punctuation: Add punctuation to combined text (if punc_model configured)
+        5. Speaker diarization: Cluster speaker embeddings and assign labels (if spk_model configured)
+
+        Args:
+            input: Audio file path, URL, or numpy array.
+            input_len: Not used (kept for interface consistency).
+            **cfg: Runtime parameters (same as generate()).
+
+        Returns:
+            list[dict]: Results with fields: key, text, timestamp, sentence_info, raw_text.
+        """
         self._reset_runtime_configs()
         if self.spk_model is not None and "output_timestamp" not in cfg:
             cfg["output_timestamp"] = True
@@ -790,6 +895,21 @@ class AutoModel:
         return results_ret_list
 
     def export(self, input=None, **cfg):
+        """Export model to ONNX format.
+
+        Creates a deep copy of the model to isolate ONNX operator monkey-patching,
+        then runs torch.onnx.export. The original model remains usable after export.
+
+        Args:
+            input: Sample input for tracing (auto-generated if None).
+            **cfg: Export parameters:
+                - type (str): Export format, "onnx" (default).
+                - quantize (bool): Whether to quantize the model.
+                - device (str): Device for export.
+
+        Returns:
+            str: Path to the exported model directory.
+        """
         """
 
         :param input:
