@@ -491,6 +491,7 @@ class AutoModel:
         self._reset_runtime_configs()
         if self.spk_model is not None and "output_timestamp" not in cfg:
             cfg["output_timestamp"] = True
+            cfg["return_time_stamps"] = True
         kwargs = self.kwargs
         # step.1: compute the vad model
         deep_update(self.vad_kwargs, cfg)

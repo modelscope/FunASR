@@ -90,11 +90,18 @@ class Qwen3ASR(nn.Module):
         time1 = time.perf_counter()
 
         language = kwargs.get("language", None)
-        return_time_stamps = kwargs.get("return_time_stamps", False)
+        return_time_stamps = kwargs.get("return_time_stamps", False) or kwargs.get("output_timestamp", False)
         context = kwargs.get("context", "")
 
         if isinstance(data_in, (list, tuple)):
-            audio_inputs = list(data_in)
+            audio_inputs = []
+            for item in data_in:
+                if isinstance(item, np.ndarray):
+                    audio_inputs.append((item.astype(np.float32), 16000))
+                elif isinstance(item, torch.Tensor):
+                    audio_inputs.append((item.cpu().numpy().astype(np.float32), 16000))
+                else:
+                    audio_inputs.append(item)
         elif isinstance(data_in, str):
             audio_inputs = [data_in]
         elif isinstance(data_in, torch.Tensor):
@@ -114,6 +121,12 @@ class Qwen3ASR(nn.Module):
         time2 = time.perf_counter()
         meta_data["load_data"] = f"{time2 - time1:0.3f}"
 
+        # If timestamps requested but forced_aligner not configured, fall back to no timestamps
+        if return_time_stamps and self.qwen3_asr_model.forced_aligner is None:
+            logging.warning("return_time_stamps requires forced_aligner. Skipping timestamps. "
+                           "Initialize with forced_aligner='Qwen/Qwen3-ForcedAligner-0.6B' to enable.")
+            return_time_stamps = False
+
         results = self.qwen3_asr_model.transcribe(
             audio=audio_inputs,
             context=context,
@@ -132,7 +145,7 @@ class Qwen3ASR(nn.Module):
                 result_dict["language"] = r.language
             if return_time_stamps and r.time_stamps is not None:
                 result_dict["timestamp"] = [
-                    [ts.start_time, ts.end_time, ts.text]
+                    [int(ts.start_time), int(ts.end_time)]
                     for ts in r.time_stamps.items
                 ]
             output.append(result_dict)

@@ -28,7 +28,6 @@ def main():
         vad_model="fsmn-vad",
         vad_kwargs={"max_single_segment_time": 30000},
         spk_model="cam++",
-        punc_model="ct-punc",
         device=device,
     )
 

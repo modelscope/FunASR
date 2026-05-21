@@ -14,7 +14,6 @@ def main():
         vad_model="iic/speech_fsmn_vad_zh-cn-16k-common-pytorch",
         vad_kwargs={"max_single_segment_time": 30000},
         spk_model="iic/speech_campplus_sv_zh-cn_16k-common",
-        punc_model="iic/punc_ct-transformer_zh-cn-common-vocab272727-pytorch",
         device="cpu",
         disable_update=True,
     )
@@ -60,7 +59,7 @@ def main():
 
     print("[SenseVoice-SPK] sentence_info:")
     for s in si:
-        print("  spk=%d | [%d-%d] %s" % (s["spk"], s["start"], s["end"], rich_transcription_postprocess(s["text"])))
+        print("  spk=%d | [%d-%d] %s" % (s["spk"], s["start"], s["end"], rich_transcription_postprocess(s.get("text", s.get("sentence", "")))))
 
     has_spk = all("spk" in s for s in si)
     if not has_spk:
