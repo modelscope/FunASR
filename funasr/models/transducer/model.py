@@ -38,6 +38,14 @@ else:
 
 @tables.register("model_classes", "Transducer")
 class Transducer(torch.nn.Module):
+    """Transducer (RNN-T): Streaming ASR using encoder-predictor-joint architecture.
+
+    Combines encoder (audio frames), predictor (text history), and joint network.
+    Supports beam search decoding. Suitable for low-latency streaming applications.
+
+    Output: {"key": str, "text": str}
+    """
+
     def __init__(
         self,
         frontend: Optional[str] = None,

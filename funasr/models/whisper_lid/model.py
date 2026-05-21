@@ -20,7 +20,13 @@ from funasr.register import tables
 
 @tables.register("model_classes", "OpenAIWhisperModel")
 class OpenAIWhisperModel(nn.Module):
-    """CTC-attention hybrid Encoder-Decoder model"""
+    """Whisper-LID: Language Identification using OpenAI Whisper encoder.
+
+    Detects spoken language from audio input. Supports 99 languages.
+    Uses Whisper encoder features with a classification head.
+
+    Output: {"key": str, "text": str (language code)}
+    """
 
     def __init__(
         self,
