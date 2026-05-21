@@ -127,7 +127,7 @@ for top_level, sub_modules in tree_structure.items():
                 methods = []
                 for item in node.body:
                     if isinstance(item, (ast.FunctionDef, ast.AsyncFunctionDef)):
-                        if item.name.startswith("__") and item.name != "__init__":
+                        if item.name.startswith("_"):
                             continue
                         mdoc = ast.get_docstring(item) or ""
                         args = [a.arg for a in item.args.args if a.arg != "self"]
