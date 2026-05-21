@@ -26,10 +26,12 @@ from funasr.utils.load_utils import load_audio_text_image_video, extract_fbank
 
 @tables.register("model_classes", "SanmKWS")
 class SanmKWS(torch.nn.Module):
-    """
-    Author: Speech Lab of DAMO Academy, Alibaba Group
-    Paraformer: Fast and Accurate Parallel Transformer for Non-autoregressive End-to-End Speech Recognition
-    https://arxiv.org/abs/2206.08317
+    """SANM-KWS: Self-Attention Neural Memory based Keyword Spotting.
+
+    Advanced keyword spotting using self-attention mechanism
+    for better context modeling of keyword patterns.
+
+    Output: {"key": str, "value": detected_keyword_info}
     """
 
     def __init__(

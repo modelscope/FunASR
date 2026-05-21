@@ -39,4 +39,10 @@ else:
 
 @tables.register("model_classes", "BAT")  # TODO: BAT training
 class BAT(Transducer):
+    """BAT (Boundary-Aware Transducer): Low-latency RNN-T model with boundary detection.
+
+    Inherits from Transducer. Designed for streaming ASR with reduced latency
+    by predicting token boundaries explicitly.
+    """
+
     pass

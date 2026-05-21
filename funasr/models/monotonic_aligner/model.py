@@ -23,10 +23,13 @@ from funasr.utils.load_utils import load_audio_text_image_video, extract_fbank
 
 @tables.register("model_classes", "MonotonicAligner")
 class MonotonicAligner(torch.nn.Module):
-    """
-    Author: Speech Lab of DAMO Academy, Alibaba Group
-    Achieving timestamp prediction while recognizing with non-autoregressive end-to-end ASR model
-    https://arxiv.org/abs/2301.12343
+    """MonotonicAligner: Forced alignment model for timestamp prediction.
+
+    Given audio and text, computes character-level time alignments
+    using monotonic attention constraint.
+
+    Usage: model.generate(input=(audio_path, text_path), data_type=("sound", "text"))
+    Output: {"key": str, "timestamp": [[start_ms, end_ms], ...], "text": str}
     """
 
     def __init__(

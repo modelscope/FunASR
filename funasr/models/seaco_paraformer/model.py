@@ -48,10 +48,13 @@ else:
 
 @tables.register("model_classes", "SeacoParaformer")
 class SeacoParaformer(BiCifParaformer, Paraformer):
-    """
-    Author: Speech Lab of DAMO Academy, Alibaba Group
-    SeACo-Paraformer: A Non-Autoregressive ASR System with Flexible and Effective Hotword Customization Ability
-    https://arxiv.org/abs/2308.03266
+    """SeACo-Paraformer: Semantic-Aware Contextual Paraformer.
+
+    The recommended Chinese ASR model. Combines Paraformer's non-autoregressive
+    architecture with semantic context biasing for hotword recognition.
+
+    Registered as 'paraformer-zh' alias.
+    Output: {"key": str, "text": str, "timestamp": [[start_ms, end_ms], ...]}
     """
 
     def __init__(

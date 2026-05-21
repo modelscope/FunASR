@@ -25,8 +25,13 @@ from funasr.models.scama.utils import sequence_mask
 
 @tables.register("model_classes", "UniASR")
 class UniASR(torch.nn.Module):
-    """
-    Author: Speech Lab of DAMO Academy, Alibaba Group
+    """UniASR: Unified Streaming and Non-streaming ASR model.
+
+    Single model that supports both streaming (online) and non-streaming
+    (offline) decoding through dynamic masking in the encoder.
+
+    Inherits Paraformer pipeline.
+    Output: {"key": str, "text": str}
     """
 
     def __init__(

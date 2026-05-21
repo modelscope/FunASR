@@ -21,7 +21,17 @@ from funasr.register import tables
 
 @tables.register("model_classes", "Transformer")
 class Transformer(nn.Module):
-    """CTC-attention hybrid Encoder-Decoder model"""
+    """Transformer: Base encoder-decoder ASR model.
+
+    Standard CTC-attention hybrid architecture with:
+    - Encoder (self-attention + position encoding)
+    - CTC branch for auxiliary loss
+    - Attention decoder for sequence generation
+    - Beam search with LM fusion
+
+    Base class for Conformer, Branchformer, etc.
+    Output: {"key": str, "text": str}
+    """
 
     def __init__(
         self,

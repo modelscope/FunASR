@@ -6,7 +6,13 @@ from funasr.register import tables
 
 @tables.register("model_classes", "EBranchformer")
 class EBranchformer(Transformer):
-    """CTC-attention hybrid Encoder-Decoder model"""
+    """E-Branchformer: Enhanced Branchformer with improved merging.
+
+    Uses element-wise merging instead of concatenation for parallel branches,
+    resulting in better parameter efficiency.
+
+    Inherits Transformer pipeline.
+    """
 
     def __init__(
         self,

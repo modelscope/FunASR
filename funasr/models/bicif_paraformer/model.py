@@ -41,12 +41,21 @@ else:
 
 @tables.register("model_classes", "BiCifParaformer")
 class BiCifParaformer(Paraformer):
-    """
+    """BiCifParaformer: Paraformer with Bidirectional CIF for Timestamp Prediction.
+
+    Extends Paraformer with a second CIF predictor that provides accurate
+    character-level timestamp prediction alongside ASR. Uses bidirectional
+    information flow for better alignment between audio frames and text tokens.
+
+    Reference:
+        - FunASR: A Fundamental End-to-End Speech Recognition Toolkit (https://arxiv.org/abs/2305.11013)
+        - Achieving timestamp prediction while recognizing with non-autoregressive end-to-end ASR model
+          (https://arxiv.org/abs/2301.12343)
+
+    Output:
+        {"key": str, "text": str, "timestamp": [[start_ms, end_ms], ...]}
+
     Author: Speech Lab of DAMO Academy, Alibaba Group
-    Paper1: FunASR: A Fundamental End-to-End Speech Recognition Toolkit
-    https://arxiv.org/abs/2305.11013
-    Paper2: Achieving timestamp prediction while recognizing with non-autoregressive end-to-end ASR model
-    https://arxiv.org/abs/2301.12343
     """
 
     def __init__(

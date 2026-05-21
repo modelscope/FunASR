@@ -44,10 +44,12 @@ else:
 
 @tables.register("model_classes", "ContextualParaformer")
 class ContextualParaformer(Paraformer):
-    """
-    Author: Speech Lab of DAMO Academy, Alibaba Group
-    FunASR: A Fundamental End-to-End Speech Recognition Toolkit
-    https://arxiv.org/abs/2305.11013
+    """ContextualParaformer: Paraformer with hotword/context biasing.
+
+    Extends Paraformer with a context encoder that incorporates user-defined
+    hotwords/keywords to boost recognition of domain-specific terms.
+
+    Usage: Pass hotwords via generate(hotword='term1 term2').
     """
 
     def __init__(

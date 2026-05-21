@@ -25,10 +25,12 @@ from funasr.utils.load_utils import load_audio_text_image_video, extract_fbank
 
 @tables.register("model_classes", "FsmnKWS")
 class FsmnKWS(torch.nn.Module):
-    """
-    Author: Speech Lab of DAMO Academy, Alibaba Group
-    Deep-FSMN for Large Vocabulary Continuous Speech Recognition
-    https://arxiv.org/abs/1803.05030
+    """FSMN-KWS: Keyword Spotting model using FSMN architecture.
+
+    Detects predefined keywords/wake words in audio streams.
+    Supports both offline and streaming operation.
+
+    Output: {"key": str, "value": detected_keyword_info}
     """
 
     def __init__(

@@ -41,10 +41,13 @@ else:
 
 @tables.register("model_classes", "ParaformerStreaming")
 class ParaformerStreaming(Paraformer):
-    """
-    Author: Speech Lab of DAMO Academy, Alibaba Group
-    Paraformer: Fast and Accurate Parallel Transformer for Non-autoregressive End-to-End Speech Recognition
-    https://arxiv.org/abs/2206.08317
+    """ParaformerStreaming: Streaming (online) version of Paraformer.
+
+    Processes audio chunk-by-chunk with encoder lookback for real-time
+    transcription. Uses cache mechanism to maintain state across chunks.
+
+    Usage: generate(input=chunk, cache=cache, is_final=bool, chunk_size=[0,10,5])
+    Output: {"key": str, "text": str} (partial results per chunk)
     """
 
     def __init__(

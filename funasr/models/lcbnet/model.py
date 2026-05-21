@@ -26,10 +26,12 @@ from funasr.register import tables
 
 @tables.register("model_classes", "LCBNet")
 class LCBNet(nn.Module):
-    """
-    Author: Speech Lab of DAMO Academy, Alibaba Group
-    LCB-NET: LONG-CONTEXT BIASING FOR AUDIO-VISUAL SPEECH RECOGNITION
-    https://arxiv.org/abs/2401.06390
+    """LCBNet: Lightweight Convolutional Block Network for ASR.
+
+    Efficient model design using depthwise separable convolutions
+    for low-resource deployment scenarios.
+
+    Inherits Paraformer pipeline.
     """
 
     def __init__(
