@@ -52,6 +52,17 @@ def load_audio_text_image_video(
     tokenizer=None,
     **kwargs,
 ):
+    """Load audio/text/image/video data from various input formats.
+
+    Args:
+        data_or_path_or_list: File path, URL, numpy array, torch Tensor, bytes, or list.
+        fs (int): Target sample rate (default 16000).
+        audio_fs (int): Source audio sample rate.
+        data_type (str): Input type ("sound", "text", "fbank").
+
+    Returns:
+        torch.Tensor or list: Loaded and resampled audio tensor(s).
+    """
     if isinstance(data_or_path_or_list, (list, tuple)):
         if data_type is not None and isinstance(data_type, (list, tuple)):
             data_types = [data_type] * len(data_or_path_or_list)
@@ -173,6 +184,14 @@ def _is_audio_container(data: bytes) -> bool:
 
 
 def load_bytes(input):
+    """Convert audio bytes to numpy array.
+
+    Args:
+        input (bytes): Raw audio bytes.
+
+    Returns:
+        numpy.ndarray: Decoded audio samples.
+    """
     # Only run the (expensive) frame-rate validation when the payload is an
     # actual audio container (WAV, MP3, OGG, …).  Raw PCM buffers have no
     # recognisable header and would cause pydub to spend ~200 ms before
@@ -229,6 +248,17 @@ def validate_frame_rate(
 
 
 def extract_fbank(data, data_len=None, data_type: str = "sound", frontend=None, **kwargs):
+    """Extract filter-bank features from audio data.
+
+    Args:
+        data: Audio samples (list of numpy arrays or tensors).
+        data_len: Lengths of each sample.
+        data_type (str): Input type ("sound", "fbank").
+        frontend: Frontend instance for feature extraction.
+
+    Returns:
+        tuple: (features_tensor, feature_lengths, feature_times)
+    """
     if isinstance(data, np.ndarray):
         data = torch.from_numpy(data)
         if len(data.shape) < 2:

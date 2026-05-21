@@ -7,6 +7,20 @@ from funasr.download.name_maps_from_hub import name_maps_ms, name_maps_hf, name_
 
 
 def download_model(**kwargs):
+
+    """Download model from hub and parse its configuration.
+
+    Resolves model name aliases, downloads from ModelScope or HuggingFace,
+    reads config.yaml and configuration.json, and returns complete kwargs
+    for model instantiation.
+
+    Args:
+        **kwargs: Must include 'model' (str). Optional: 'hub', 'model_revision',
+            'is_training', etc.
+
+    Returns:
+        dict: Complete kwargs with resolved paths, model class name, and config.
+    """
     hub = kwargs.get("hub", "ms")
     if hub == "ms" or hub == "modelscope":
         kwargs = download_from_ms(**kwargs)

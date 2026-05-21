@@ -55,6 +55,15 @@ def load_scp_as_list(scp_path, value_type="str", kv_sep=" "):
 
 
 def deep_update(original, update):
+
+    """Recursively merge update dict into original dict (in-place).
+
+    For nested dicts, merges recursively. For other types, overwrites.
+
+    Args:
+        original (dict): Target dict to be updated in-place.
+        update (dict): Source dict with new values.
+    """
     for key, value in update.items():
         if isinstance(value, dict) and key in original:
             if len(value) == 0:

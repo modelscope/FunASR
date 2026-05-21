@@ -108,6 +108,19 @@ def ts_prediction_lfr6_standard(
 def timestamp_sentence(
     punc_id_list, timestamp_postprocessed, text_postprocessed, return_raw_text=False
 ):
+
+    """Split recognized text into sentences using punctuation, with timestamps.
+
+    Args:
+        punc_id_list (Tensor/list): Punctuation IDs from CT-Transformer.
+            Values: 1=none, 2=comma, 3=period, 4=question.
+        timestamp_postprocessed (list): Per-character timestamps [[start_ms, end_ms], ...].
+        text_postprocessed (str): Space-separated recognized text.
+        return_raw_text (bool): Include raw_text in output.
+
+    Returns:
+        list[dict]: Sentences with keys: text, start, end, timestamp, [raw_text].
+    """
     punc_list = ["，", "。", "？", "、"]
     res = []
     if text_postprocessed is None:
