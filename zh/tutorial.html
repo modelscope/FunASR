@@ -1,47 +1,52 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<html lang="zh"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>FunASR Tutorial</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="../style.css">
 </head><body>
 <nav class="nav"><div class="container">
 <a href="index.html" class="nav-logo">FunASR</a>
             <div class="nav-links">
-                <a href="index.html">Home</a>
-                <a href="tutorial.html" class="active">Tutorial</a>
-                <a href="training.html">Training</a>
-                <a href="model-registration.html">Develop</a>
-                <a href="api.html">API</a>
+                <a href="index.html">首页</a>
+                <a href="tutorial.html" class="active">使用教程</a>
+                <a href="training.html">训练</a>
+                <a href="model-registration.html">开发</a>
+                <a href="../api.html">API</a>
             </div>
 <div class="lang-switch">
 <a href="tutorial.html" title="English">EN</a>
 <a href="zh/tutorial.html" title="中文">中</a>
 <a href="ja/tutorial.html" title="日本語">JP</a>
 </div>
+<div class="lang-switch">
+<a href="../tutorial.html" title="English">EN</a>
+<a href="../zh/tutorial.html" title="中文">中</a>
+<a href="../ja/tutorial.html" title="日本語">JP</a>
+</div>
 <a href="https://github.com/modelscope/FunASR" class="nav-github">GitHub</a>
 </div></nav>
 
 <div class="content"><div class="container narrow">
-<h1>Tutorial</h1>
+<h1>使用教程</h1>
 <p>From zero to production — learn FunASR in 10 minutes.</p>
 
 <div class="toc-grid">
-<a href="#quick">30-Second Demo</a>
-<a href="#install">Install</a>
+<a href="#quick">30秒演示</a>
+<a href="#install">安装</a>
 <a href="#choose">Choose a Model</a>
-<a href="#scenarios">Usage Scenarios</a>
-<a href="#offline">Offline ASR</a>
-<a href="#streaming">Streaming ASR</a>
-<a href="#spk">Speaker Diarization</a>
-<a href="#emotion">Emotion Detection</a>
+<a href="#scenarios">使用场景</a>
+<a href="#offline">离线识别</a>
+<a href="#streaming">流式识别</a>
+<a href="#spk">说话人分离</a>
+<a href="#emotion">情感检测</a>
 <a href="#vad">VAD</a>
-<a href="#punc">Punctuation</a>
-<a href="#export">ONNX Export</a>
-<a href="#faq">FAQ & Troubleshooting</a>
+<a href="#punc">标点恢复</a>
+<a href="#export">ONNX导出</a>
+<a href="#faq">常见问题</a>
 </div>
 
 <!-- 30-Second Demo -->
-<h2 id="quick">30-Second Demo</h2>
+<h2 id="quick">30秒演示</h2>
 <p>Copy-paste this and run. No config needed — FunASR downloads everything automatically:</p>
 <pre>pip install funasr
 
@@ -57,7 +62,7 @@ print(res[0]['text'])
 <p>That's it. One model object handles everything: loading audio, VAD segmentation, ASR, and punctuation.</p>
 
 <!-- Install -->
-<h2 id="install">Install</h2>
+<h2 id="install">安装</h2>
 <pre># Stable release
 pip install funasr
 
@@ -67,10 +72,10 @@ pip install git+https://github.com/modelscope/FunASR.git</pre>
 <div class="tip"><strong>China users:</strong> Models download from ModelScope by default (fast in China). International users: add <code>hub="hf"</code> to download from HuggingFace.</div>
 
 <!-- Choose a Model -->
-<h2 id="choose">Which Model Should I Use?</h2>
+<h2 id="choose">选择哪个模型？</h2>
 
 <table>
-<tr><th>Model</th><th>Best For</th><th>Languages</th><th>Speed</th><th>Punctuation</th></tr>
+<tr><th>Model</th><th>Best For</th><th>Languages</th><th>Speed</th><th>标点恢复</th></tr>
 <tr><td><strong>Paraformer</strong></td><td>Chinese production ASR</td><td>Chinese, English</td><td>Fast</td><td>Needs punc_model</td></tr>
 <tr><td><strong>Fun-ASR-Nano</strong></td><td>Multi-language, dialects, lyrics</td><td>31 languages</td><td>Medium</td><td>Built-in ✓</td></tr>
 <tr><td><strong>SenseVoice</strong></td><td>Emotion + events + ASR</td><td>5 languages</td><td>Ultra-fast (70ms/10s)</td><td>Built-in ✓</td></tr>
@@ -88,7 +93,7 @@ pip install git+https://github.com/modelscope/FunASR.git</pre>
 </div>
 
 <!-- Scenarios -->
-<h2 id="scenarios">Usage Scenarios</h2>
+<h2 id="scenarios">使用场景</h2>
 
 <div class="scenario-card">
 <h4>🎤 "I have a meeting recording and want text + who said what"</h4>
@@ -116,7 +121,7 @@ pip install git+https://github.com/modelscope/FunASR.git</pre>
 </div>
 
 <!-- Offline ASR -->
-<h2 id="offline">Offline ASR</h2>
+<h2 id="offline">离线识别</h2>
 
 <h3>Paraformer (Chinese)</h3>
 <pre>from funasr import AutoModel
@@ -258,7 +263,7 @@ for sent in res[0]["sentence_info"]:
     print(f"Speaker {sent['spk']}: {rich_transcription_postprocess(sent['text'])}")</pre>
 
 <!-- Emotion -->
-<h2 id="emotion">Emotion Detection</h2>
+<h2 id="emotion">情感检测</h2>
 
 <h3>Dedicated Emotion Model (emotion2vec)</h3>
 <pre>from funasr import AutoModel
@@ -277,7 +282,7 @@ print(res[0]["scores"])  # [0.01,   0.03,   0.89,      0.05, ...]
 # Use rich_transcription_postprocess() to get clean text</pre>
 
 <!-- VAD -->
-<h2 id="vad">Voice Activity Detection</h2>
+<h2 id="vad">VAD语音检测</h2>
 
 <h3>Offline (full audio)</h3>
 <pre>from funasr import AutoModel
@@ -316,7 +321,7 @@ print(res[0]["text"])  # "那今天的会就到这里吧，happy new year，明�
 <div class="note"><strong>When do you need this?</strong> Only with Paraformer (which outputs raw text without punctuation). Fun-ASR-Nano, SenseVoice, and Qwen3-ASR output punctuation natively.</div>
 
 <!-- Export -->
-<h2 id="export">ONNX Export</h2>
+<h2 id="export">ONNX导出</h2>
 <pre># Export model to ONNX format
 from funasr import AutoModel
 model = AutoModel(model="paraformer", device="cpu")
@@ -331,7 +336,7 @@ result = model(["audio.wav"])
 print(result)</pre>
 
 <!-- FAQ -->
-<h2 id="faq">FAQ & Troubleshooting</h2>
+<h2 id="faq">常见问题</h2>
 
 <h4>Model download is slow</h4>
 <p>Set <code>hub="hf"</code> for HuggingFace (faster outside China), or download once and use local path:</p>
@@ -373,6 +378,6 @@ model = AutoModel(model="...", device="cuda:0")</pre>
 
 <footer>
 <p>FunASR &middot; Tongyi Lab, Alibaba Group</p>
-<p><a href="index.html">Home</a> &middot; <a href="tutorial.html">Tutorial</a> &middot; <a href="training.html">Training</a> &middot; <a href="model-registration.html">Develop</a> &middot; <a href="api.html">API</a> &middot; <a href="https://github.com/modelscope/FunASR">GitHub</a></p>
+<p><a href="index.html">首页</a> &middot; <a href="tutorial.html">使用教程</a> &middot; <a href="training.html">训练</a> &middot; <a href="model-registration.html">开发</a> &middot; <a href="../api.html">API</a> &middot; <a href="https://github.com/modelscope/FunASR">GitHub</a></p>
 </footer>
 </body></html>
