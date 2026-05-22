@@ -7,10 +7,10 @@
 <nav class="nav"><div class="container">
 <a href="index.html" class="nav-logo">FunASR</a>
             <div class="nav-links">
-                <a href="index.html">Home</a>
-                <a href="tutorial.html">使用教程</a>
-                <a href="training.html">Training</a>
-                <a href="model-registration.html" class="active">Develop</a>
+                <a href="index.html">首页</a>
+                <a href="tutorial.html">教程</a>
+                <a href="training.html">训练</a>
+                <a href="model-registration.html" class="active">开发</a>
                 <a href="../api.html">API</a>
             </div>
 
@@ -20,15 +20,15 @@
 
 <div class="content"><div class="container narrow">
 <h1>开发指南</h1>
-<p>从理解架构到贡献你自己的模型——循序渐进的指南。</p>
+<p>从理解框架架构到贡献你自己的模型——循序渐进的引导。</p>
 
 <div class="toc-grid">
 <a href="#architecture">1. 架构概览</a>
 <a href="#setup">2. 开发环境配置</a>
-<a href="#understand">3. 推理工作原理</a>
+<a href="#understand">3. 推理流程详解</a>
 <a href="#add-model">4. 添加新模型</a>
 <a href="#add-component">5. 添加前端/分词器</a>
-<a href="#standalone">6. 独立仓库</a>
+<a href="#standalone">6. 独立仓库模式</a>
 <a href="#testing">7. 测试你的模型</a>
 <a href="#pitfalls">8. 常见陷阱</a>
 <a href="#contribute">9. 贡献代码</a>
@@ -68,13 +68,13 @@ generate(input="audio.wav")
                 2. Sort segments by length (for efficient batching)
                 3. ASR: recognize each segment
                 4. Merge timestamps (add VAD offset)
-                5. 标点 (optional)
+                5. Punctuation (optional)
                 6. Speaker diarization (optional)
                     ↓
                 return [{"key", "text", "timestamp", "sentence_info"}]
 </div>
 
-<h3>Registry System</h3>
+<h3>注册表系统</h3>
 <p>Every component in FunASR is registered by name. The registry is the lookup table that connects config strings to Python classes:</p>
 
 <table>
@@ -115,7 +115,7 @@ python -c "from funasr.register import tables; tables.print('model')"</pre>
 </div>
 
 <div class="step">
-<h4>运行已有测试</h4>
+<h4>运行现有测试</h4>
 <pre># Quick smoke test
 python tests_models/test_fsmn_vad.py
 python tests_models/test_paraformer.py
@@ -124,8 +124,8 @@ python tests_models/test_paraformer.py
 cd tests_models && python run_all_tests.py</pre>
 </div>
 
-<!-- 3. 推理工作原理 -->
-<h2 id="understand">3. 推理工作原理 (Deep Dive)</h2>
+<!-- 3. How Inference Works -->
+<h2 id="understand">3. 推理流程详解</h2>
 
 <p>Understanding the inference data flow is essential before adding a new model. Here's what happens when you call <code>model.generate(input="audio.wav")</code>:</p>
 
@@ -270,7 +270,7 @@ frontend_conf:
 <p>Same pattern for tokenizer (<code>tokenizer_classes</code>), dataset (<code>dataset_classes</code>), encoder (<code>encoder_classes</code>), etc.</p>
 
 <!-- 6. Standalone -->
-<h2 id="standalone">6. 独立仓库 Mode</h2>
+<h2 id="standalone">6. 独立仓库模式</h2>
 <p>Your model doesn't need to live inside the FunASR source tree. With <code>trust_remote_code=True</code>, FunASR dynamically loads your model class from an external file:</p>
 
 <pre># User code — loads YOUR model.py from a separate repo
@@ -381,7 +381,7 @@ from funasr.models.paraformer.model import Paraformer
 <li>No comments explaining WHAT — use clear naming. Comments for WHY only.</li>
 </ul>
 
-<h4>PR检查清单</h4>
+<h4>PR 检查清单</h4>
 <ul>
 <li>New model: self-contained directory, no cross-model imports</li>
 <li>Include a test script in <code>tests_models/</code></li>
@@ -390,13 +390,13 @@ from funasr.models.paraformer.model import Paraformer
 <li>Add entry to README What's New if user-facing</li>
 </ul>
 
-<h4>许可证</h4>
-<p>Code: MIT. Model weights: FunASR Model 许可证 (commercial use allowed with attribution).</p>
+<h4>License</h4>
+<p>Code: MIT. Model weights: FunASR Model License (commercial use allowed with attribution).</p>
 
 </div></div>
 
 <footer>
 <p>FunASR &middot; Tongyi Lab, Alibaba Group</p>
-<p><a href="index.html">Home</a> &middot; <a href="tutorial.html">使用教程</a> &middot; <a href="training.html">Training</a> &middot; <a href="model-registration.html">Develop</a> &middot; <a href="../api.html">API</a> &middot; <a href="https://github.com/modelscope/FunASR">GitHub</a></p>
+<p><a href="index.html">首页</a> &middot; <a href="tutorial.html">教程</a> &middot; <a href="training.html">训练</a> &middot; <a href="model-registration.html">开发</a> &middot; <a href="../api.html">API</a> &middot; <a href="https://github.com/modelscope/FunASR">GitHub</a></p>
 </footer>
 </body></html>

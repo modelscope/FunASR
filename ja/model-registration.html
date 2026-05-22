@@ -7,10 +7,10 @@
 <nav class="nav"><div class="container">
 <a href="index.html" class="nav-logo">FunASR</a>
             <div class="nav-links">
-                <a href="index.html">Home</a>
+                <a href="index.html">ホーム</a>
                 <a href="tutorial.html">チュートリアル</a>
-                <a href="training.html">Training</a>
-                <a href="model-registration.html" class="active">Develop</a>
+                <a href="training.html">トレーニング</a>
+                <a href="model-registration.html" class="active">開発</a>
                 <a href="../api.html">API</a>
             </div>
 
@@ -27,7 +27,7 @@
 <a href="#setup">2. 開発環境セットアップ</a>
 <a href="#understand">3. 推論の仕組み</a>
 <a href="#add-model">4. 新しいモデルの追加</a>
-<a href="#add-component">5. Add Frontend/Tokenizer</a>
+<a href="#add-component">5. フロントエンド/トークナイザーの追加</a>
 <a href="#standalone">6. スタンドアロンリポジトリ</a>
 <a href="#testing">7. モデルのテスト</a>
 <a href="#pitfalls">8. よくある落とし穴</a>
@@ -68,7 +68,7 @@ generate(input="audio.wav")
                 2. Sort segments by length (for efficient batching)
                 3. ASR: recognize each segment
                 4. Merge timestamps (add VAD offset)
-                5. 句読点 (optional)
+                5. Punctuation (optional)
                 6. Speaker diarization (optional)
                     ↓
                 return [{"key", "text", "timestamp", "sentence_info"}]
@@ -124,8 +124,8 @@ python tests_models/test_paraformer.py
 cd tests_models && python run_all_tests.py</pre>
 </div>
 
-<!-- 3. 推論の仕組み -->
-<h2 id="understand">3. 推論の仕組み (Deep Dive)</h2>
+<!-- 3. How Inference Works -->
+<h2 id="understand">3. How Inference Works (Deep Dive)</h2>
 
 <p>Understanding the inference data flow is essential before adding a new model. Here's what happens when you call <code>model.generate(input="audio.wav")</code>:</p>
 
@@ -159,7 +159,7 @@ cd tests_models && python run_all_tests.py</pre>
 <strong>Timestamp format matters!</strong> If your model outputs timestamps differently (e.g., dict format like Fun-ASR-Nano), FunASR's <code>inference_with_vad</code> will auto-convert it. But the standard expected format is <code>[[start_ms, end_ms], ...]</code> (list of 2-element lists in milliseconds).
 </div>
 
-<!-- 4. 新しいモデルの追加 -->
+<!-- 4. Add a New Model -->
 <h2 id="add-model">4. 新しいモデルの追加</h2>
 
 <div class="step">
@@ -270,7 +270,7 @@ frontend_conf:
 <p>Same pattern for tokenizer (<code>tokenizer_classes</code>), dataset (<code>dataset_classes</code>), encoder (<code>encoder_classes</code>), etc.</p>
 
 <!-- 6. Standalone -->
-<h2 id="standalone">6. スタンドアロンリポジトリ Mode</h2>
+<h2 id="standalone">6. Standalone Repository Mode</h2>
 <p>Your model doesn't need to live inside the FunASR source tree. With <code>trust_remote_code=True</code>, FunASR dynamically loads your model class from an external file:</p>
 
 <pre># User code — loads YOUR model.py from a separate repo
@@ -371,7 +371,7 @@ from funasr.models.paraformer.model import Paraformer
 <h4>❌ Modifying <code>self.kwargs</code> during inference</h4>
 <p>Don't mutate <code>kwargs</code> that came from AutoModel. The framework resets state between calls, but persistent mutations can leak between sessions.</p>
 
-<!-- 9. コントリビューション -->
+<!-- 9. Contributing -->
 <h2 id="contribute">9. コントリビューション</h2>
 
 <h4>Code Style</h4>
@@ -397,6 +397,6 @@ from funasr.models.paraformer.model import Paraformer
 
 <footer>
 <p>FunASR &middot; Tongyi Lab, Alibaba Group</p>
-<p><a href="index.html">Home</a> &middot; <a href="tutorial.html">チュートリアル</a> &middot; <a href="training.html">Training</a> &middot; <a href="model-registration.html">Develop</a> &middot; <a href="../api.html">API</a> &middot; <a href="https://github.com/modelscope/FunASR">GitHub</a></p>
+<p><a href="index.html">ホーム</a> &middot; <a href="tutorial.html">チュートリアル</a> &middot; <a href="training.html">トレーニング</a> &middot; <a href="model-registration.html">開発</a> &middot; <a href="../api.html">API</a> &middot; <a href="https://github.com/modelscope/FunASR">GitHub</a></p>
 </footer>
 </body></html>

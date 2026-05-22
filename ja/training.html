@@ -1,16 +1,16 @@
 <!DOCTYPE html>
 <html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>FunASR Training Guide</title>
+<title>FunASR トレーニング・ファインチューニング</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../style.css">
 </head><body>
 <nav class="nav"><div class="container">
 <a href="index.html" class="nav-logo">FunASR</a>
 <div class="nav-links">
-<a href="index.html">Home</a>
+<a href="index.html">ホーム</a>
 <a href="tutorial.html">チュートリアル</a>
-<a href="training.html" class="active">Training</a>
-<a href="model-registration.html">Develop</a>
+<a href="training.html" class="active">トレーニング</a>
+<a href="model-registration.html">開発</a>
 <a href="../api.html">API</a>
 </div>
 
@@ -36,7 +36,7 @@
 <a href="#tips">ヒント・トラブルシューティング</a>
 </div>
 
-<!-- 概要 -->
+<!-- Overview -->
 <h2 id="overview">概要</h2>
 <p>FunASR's training framework supports:</p>
 <ul>
@@ -242,7 +242,7 @@ torchrun --nnodes 2 --node_rank 1 --nproc_per_node 4 \
 • Stage 3: + Parameter partitioned. Maximum memory savings but slower.</div>
 
 <!-- Monitor -->
-<h2 id="monitor">モニタリング Training</h2>
+<h2 id="monitor">Monitoring Training</h2>
 
 <h4>Log file</h4>
 <pre>tail -f outputs/log.txt
@@ -264,7 +264,7 @@ torchrun --nnodes 2 --node_rank 1 --nproc_per_node 4 \
 <pre>tensorboard --logdir outputs/log/tensorboard
 # Open http://localhost:6006</pre>
 
-<!-- ファインチューニング済みモデルの使用 -->
+<!-- Use Fine-tuned Model -->
 <h2 id="inference-after">Use Your Fine-tuned Model</h2>
 
 <h4>If outputs/ has configuration.json</h4>
@@ -322,6 +322,6 @@ print(res[0]["text"])</pre>
 
 <footer>
 <p>FunASR &middot; Tongyi Lab, Alibaba Group</p>
-<p><a href="index.html">Home</a> &middot; <a href="tutorial.html">チュートリアル</a> &middot; <a href="training.html">Training</a> &middot; <a href="model-registration.html">Develop</a> &middot; <a href="../api.html">API</a> &middot; <a href="https://github.com/modelscope/FunASR">GitHub</a></p>
+<p><a href="index.html">ホーム</a> &middot; <a href="tutorial.html">チュートリアル</a> &middot; <a href="training.html">トレーニング</a> &middot; <a href="model-registration.html">開発</a> &middot; <a href="../api.html">API</a> &middot; <a href="https://github.com/modelscope/FunASR">GitHub</a></p>
 </footer>
 </body></html>

@@ -1,16 +1,16 @@
 <!DOCTYPE html>
 <html lang="zh"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>FunASR Training Guide</title>
+<title>FunASR 训练与微调</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../style.css">
 </head><body>
 <nav class="nav"><div class="container">
 <a href="index.html" class="nav-logo">FunASR</a>
 <div class="nav-links">
-<a href="index.html">Home</a>
-<a href="tutorial.html">使用教程</a>
-<a href="training.html" class="active">Training</a>
-<a href="model-registration.html">Develop</a>
+<a href="index.html">首页</a>
+<a href="tutorial.html">教程</a>
+<a href="training.html" class="active">训练</a>
+<a href="model-registration.html">开发</a>
 <a href="../api.html">API</a>
 </div>
 
@@ -20,7 +20,7 @@
 
 <div class="content"><div class="container narrow">
 <h1>训练与微调</h1>
-<p>使用FunASR训练框架在自己的数据上微调预训练模型。</p>
+<p>使用 FunASR 训练框架，在你自己的数据上微调预训练模型。</p>
 
 <div class="toc-grid">
 <a href="#overview">概览</a>
@@ -30,31 +30,31 @@
 <a href="#nano">Fine-tune Fun-ASR-Nano</a>
 <a href="#params">参数参考</a>
 <a href="#multi-gpu">多GPU训练</a>
-<a href="#deepspeed">Deep速度</a>
-<a href="#monitor">监控</a>
-<a href="#inference-after">使用微调模型</a>
-<a href="#tips">技巧与故障排除</a>
+<a href="#deepspeed">DeepSpeed</a>
+<a href="#monitor">训练监控</a>
+<a href="#inference-after">使用微调后的模型</a>
+<a href="#tips">技巧与常见问题</a>
 </div>
 
-<!-- 概览 -->
+<!-- Overview -->
 <h2 id="overview">概览</h2>
-<p>FunASR's training framework supports:</p>
+<p>FunASR 训练框架支持：</p>
 <ul>
-<li><strong>Fine-tuning</strong> any pretrained model on custom domain data</li>
-<li><strong>Multi-GPU</strong> training with PyTorch DDP (single/multi-node)</li>
-<li><strong>Deep速度</strong> ZeRO Stage 1/2/3 for large model training</li>
-<li><strong>Dynamic batching</strong> by token count or example count</li>
-<li><strong>Checkpoint averaging</strong> for best performance</li>
-<li><strong>Resume training</strong> from interruption</li>
+<li>在自定义领域数据上<strong>微调</strong>任意预训练模型</li>
+<li>基于 PyTorch DDP 的<strong>多GPU</strong>训练（单机/多机）</li>
+<li><strong>DeepSpeed</strong> ZeRO Stage 1/2/3 大模型训练</li>
+<li>按 token 数或样本数的<strong>动态批处理</strong></li>
+<li><strong>模型平均</strong>以获得最佳性能</li>
+<li>中断后<strong>断点续训</strong></li>
 </ul>
 
-<p>The training entry point is <code>funasr-train-ds</code> (or <code>funasr/bin/train_ds.py</code>), launched via <code>torchrun</code> for distributed training.</p>
+<p>训练入口为 <code>funasr-train-ds</code> (or <code>funasr/bin/train_ds.py</code>), launched via <code>torchrun</code> for distributed training.</p>
 
 <!-- Data -->
 <h2 id="data">数据准备</h2>
 
 <h3>标准格式（Paraformer、SenseVoice）</h3>
-<p>训练数据使用JSONL格式——每行一个JSON对象：</p>
+<p>训练数据使用 JSONL 格式——每行一个 JSON 对象：</p>
 <pre>{"key": "utt001", "source": "/path/to/audio.wav", "source_len": 90, "target": "这是转写文本", "target_len": 6}
 {"key": "utt002", "source": "/path/to/audio2.wav", "source_len": 150, "target": "hello world", "target_len": 2}</pre>
 
@@ -67,8 +67,8 @@
 <tr><td><code>target_len</code></td><td>int</td><td>Number of text tokens</td></tr>
 </table>
 
-<h4>从wav.scp + text.txt生成</h4>
-<p>如果有Kaldi格式的数据文件，转换：</p>
+<h4>从 wav.scp + text.txt 生成</h4>
+<p>如果你有 Kaldi 格式的数据文件，可以这样转换：</p>
 <pre># train_wav.scp (tab-separated: id \t path)
 utt001  /data/audio/001.wav
 utt002  /data/audio/002.wav
@@ -83,8 +83,8 @@ scp2jsonl \
   ++data_type_list='["source", "target"]' \
   ++jsonl_file_out="/data/list/train.jsonl"</pre>
 
-<h3>ChatML格式（Fun-ASR-Nano）</h3>
-<p>Fun-ASR-Nano使用ChatML对话格式：</p>
+<h3>ChatML 格式（Fun-ASR-Nano）</h3>
+<p>Fun-ASR-Nano 使用 ChatML 对话格式：</p>
 <pre>{"messages": [
   {"role": "system", "content": "You are a helpful assistant."},
   {"role": "user", "content": "语音转写：<|startofspeech|>!/path/to/audio.wav<|endofspeech|>"},
@@ -101,7 +101,7 @@ scp2jsonl \
 </table>
 
 <div class="tip"><strong>Prompt variations:</strong><br>
-• 中文: <code>语音转写：</code><br>
+• Chinese: <code>语音转写：</code><br>
 • English: <code>Speech transcription:</code><br>
 • Cross-language: <code>语音转写成英文：</code><br>
 • No ITN: <code>语音转写，不进行文本规整：</code></div>
@@ -117,7 +117,7 @@ scp2jsonl \
 <pre>cd examples/industrial_data_pretraining/paraformer
 bash finetune.sh</pre>
 
-<p>或自定义关键参数：</p>
+<p>或者自定义关键参数：</p>
 <pre>export CUDA_VISIBLE_DEVICES="0,1"
 gpu_num=2
 
@@ -193,7 +193,7 @@ bash finetune.sh</pre>
 <tr><td><code>train_conf.keep_nbest_models</code></td><td>20</td><td>Keep top N models (by validation accuracy).</td></tr>
 <tr><td><code>train_conf.avg_nbest_model</code></td><td>10</td><td>Average top N models for final checkpoint.</td></tr>
 <tr><td><code>train_conf.resume</code></td><td>true</td><td>Resume from last checkpoint if exists.</td></tr>
-<tr><td><code>train_conf.use_deepspeed</code></td><td>false</td><td>Enable Deep速度 ZeRO optimization.</td></tr>
+<tr><td><code>train_conf.use_deepspeed</code></td><td>false</td><td>Enable DeepSpeed ZeRO optimization.</td></tr>
 <tr><td><code>optim_conf.lr</code></td><td>0.0002</td><td>Learning rate.</td></tr>
 </table>
 
@@ -207,7 +207,7 @@ gpu_num=4
 torchrun --nnodes 1 --nproc_per_node $gpu_num \
   funasr/bin/train_ds.py ${train_args}</pre>
 
-<h3>多机训练</h3>
+<h3>多机多卡</h3>
 <pre># Machine 1 (master, IP=192.168.1.1)
 torchrun --nnodes 2 --node_rank 0 --nproc_per_node 4 \
   --master_addr=192.168.1.1 --master_port=12345 \
@@ -218,9 +218,9 @@ torchrun --nnodes 2 --node_rank 1 --nproc_per_node 4 \
   --master_addr=192.168.1.1 --master_port=12345 \
   funasr/bin/train_ds.py ${train_args}</pre>
 
-<!-- Deep速度 -->
-<h2 id="deepspeed">Deep速度</h2>
-<p>For large models (Fun-ASR-Nano 800M params), enable Deep速度 ZeRO:</p>
+<!-- DeepSpeed -->
+<h2 id="deepspeed">DeepSpeed</h2>
+<p>For large models (Fun-ASR-Nano 800M params), enable DeepSpeed ZeRO:</p>
 <pre>++train_conf.use_deepspeed=true
 ++train_conf.deepspeed_config=./deepspeed_conf/ds_stage1.json</pre>
 
@@ -242,7 +242,7 @@ torchrun --nnodes 2 --node_rank 1 --nproc_per_node 4 \
 • Stage 3: + Parameter partitioned. Maximum memory savings but slower.</div>
 
 <!-- Monitor -->
-<h2 id="monitor">监控 Training</h2>
+<h2 id="monitor">Monitoring Training</h2>
 
 <h4>Log file</h4>
 <pre>tail -f outputs/log.txt
@@ -264,7 +264,7 @@ torchrun --nnodes 2 --node_rank 1 --nproc_per_node 4 \
 <pre>tensorboard --logdir outputs/log/tensorboard
 # Open http://localhost:6006</pre>
 
-<!-- 使用微调模型 -->
+<!-- Use Fine-tuned Model -->
 <h2 id="inference-after">Use Your Fine-tuned Model</h2>
 
 <h4>If outputs/ has configuration.json</h4>
@@ -281,31 +281,31 @@ print(res[0]["text"])</pre>
   ++input="test.wav"</pre>
 
 <!-- Tips -->
-<h2 id="tips">技巧与故障排除</h2>
+<h2 id="tips">技巧与常见问题</h2>
 
-<h4>训练时OOM</h4>
+<h4>训练时显存溢出</h4>
 <ol>
 <li>Reduce <code>dataset_conf.batch_size</code></li>
 <li>Add <code>dataset_conf.max_token_length=2000</code> to filter long utterances</li>
-<li>Enable Deep速度 (partitions optimizer states)</li>
+<li>Enable DeepSpeed (partitions optimizer states)</li>
 <li>Reduce <code>dataset_conf.num_workers</code></li>
 </ol>
 
-<h4>训练loss不下降/梯度NaN</h4>
+<h4>训练 loss 不下降 / 梯度 NaN</h4>
 <ul>
 <li>Reduce learning rate (try 0.00005)</li>
 <li>Check data quality — corrupted audio files cause NaN</li>
 <li>For Fun-ASR-Nano: start with encoder frozen</li>
 </ul>
 
-<h4>验证准确率不提升</h4>
+<h4>验证集准确率不提升</h4>
 <ul>
 <li>Increase training data (min ~10h for fine-tuning)</li>
 <li>Check domain match — model may not generalize to very different domains</li>
 <li>Try unfreezing more layers gradually</li>
 </ul>
 
-<h4>Large-scale data (>10,000 hours)</h4>
+<h4>大规模数据 (>10,000 hours)</h4>
 <p>Use data splitting to avoid memory issues:</p>
 <pre># Split data into chunks, load 2 at a time
 ++dataset_conf.data_split_num=256
@@ -315,13 +315,13 @@ print(res[0]["text"])</pre>
 # ...
 ++train_data_set_list="data/data.list"</pre>
 
-<h4>崩溃后恢复</h4>
+<h4>崩溃后恢复训练</h4>
 <p>Set <code>++train_conf.resume=true</code> (default). Training automatically restarts from the latest checkpoint in <code>output_dir</code>.</p>
 
 </div></div>
 
 <footer>
 <p>FunASR &middot; Tongyi Lab, Alibaba Group</p>
-<p><a href="index.html">Home</a> &middot; <a href="tutorial.html">使用教程</a> &middot; <a href="training.html">Training</a> &middot; <a href="model-registration.html">Develop</a> &middot; <a href="../api.html">API</a> &middot; <a href="https://github.com/modelscope/FunASR">GitHub</a></p>
+<p><a href="index.html">首页</a> &middot; <a href="tutorial.html">教程</a> &middot; <a href="training.html">训练</a> &middot; <a href="model-registration.html">开发</a> &middot; <a href="../api.html">API</a> &middot; <a href="https://github.com/modelscope/FunASR">GitHub</a></p>
 </footer>
 </body></html>
