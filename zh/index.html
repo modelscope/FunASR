@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FunASR - End-to-End Speech Recognition Toolkit</title>
+    <title>FunASR - End-to-End 语音识别 Toolkit</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../style.css">
 </head>
@@ -12,15 +12,14 @@
         <div class="container">
             <a href="index.html" class="nav-logo">FunASR</a>
             <div class="nav-links">
-                <a href="index.html" class="active">首页</a>
+                <a href="index.html" class="active">Home</a>
                 <a href="tutorial.html">使用教程</a>
-                <a href="training.html">训练</a>
-                <a href="model-registration.html">开发</a>
+                <a href="training.html">Training</a>
+                <a href="model-registration.html">Develop</a>
                 <a href="../api.html">API</a>
             </div>
             
-
-<div class="lang-dropdown"><button class="lang-btn">中文</button><div class="lang-menu"><a href="../index.html">English</a><a href="../zh/index.html" class="current">中文</a><a href="../ja/index.html">日本語</a></div></div>
+<div class="lang-dropdown"><button class="lang-btn">English</button><div class="lang-menu"><a href="index.html" class="current">English</a><a href="zh/index.html">中文</a><a href="ja/index.html">日本語</a></div></div>
 <a href="https://github.com/modelscope/FunASR" class="nav-github">GitHub</a>
         </div>
     </nav>
@@ -30,15 +29,15 @@
             <div class="hero-copy">
                 <p class="eyebrow">Open-source speech understanding toolkit</p>
                 <h1>FunASR</h1>
-                <p>Production-ready ASR, VAD, punctuation, speaker diarization, emotion detection, and audio event recognition with one unified Python interface.</p>
+                <p>生产级ASR、VAD、标点恢复、说话人分离、情感检测、音频事件识别，统一Python接口。</p>
                 <div class="hero-badges">
                     <a href="https://pypi.org/project/funasr/"><img src="https://img.shields.io/pypi/v/funasr?style=flat-square&color=2563eb" alt="PyPI"></a>
                     <a href="https://github.com/modelscope/FunASR/stargazers"><img src="https://img.shields.io/github/stars/modelscope/FunASR?style=flat-square&color=b45309" alt="Stars"></a>
-                    <a href="https://github.com/modelscope/FunASR/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-059669?style=flat-square" alt="License"></a>
+                    <a href="https://github.com/modelscope/FunASR/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-059669?style=flat-square" alt="许可证"></a>
                 </div>
                 <div class="hero-actions">
                     <a href="tutorial.html" class="btn btn-white">快速开始</a>
-                    <a href="training.html" class="btn btn-outline-white">Training guide</a>
+                    <a href="training.html" class="btn btn-outline-white">训练指南</a>
                     <a href="../api.html" class="btn btn-outline-white">API reference</a>
                 </div>
             </div>
@@ -76,16 +75,16 @@ print(res[0]["sentence_info"])</pre>
                 <a class="doc-card" href="tutorial.html">
                     <span class="doc-kicker">Learn</span>
                     <h3>使用教程</h3>
-                    <p>Install FunASR, choose a model, and run common ASR, VAD, diarization, and export flows.</p>
+                    <p>安装 FunASR, choose a model, and run common ASR, VAD, diarization, and export flows.</p>
                 </a>
                 <a class="doc-card" href="training.html">
                     <span class="doc-kicker">Tune</span>
-                    <h3>训练</h3>
+                    <h3>Training</h3>
                     <p>Prepare JSONL data, fine-tune Paraformer, SenseVoice, and Fun-ASR-Nano, then monitor runs.</p>
                 </a>
                 <a class="doc-card" href="model-registration.html">
                     <span class="doc-kicker">Extend</span>
-                    <h3>Developer Guide</h3>
+                    <h3>开发指南</h3>
                     <p>Understand the registry, add a model, package remote code, and avoid integration pitfalls.</p>
                 </a>
                 <a class="doc-card" href="../api.html">
@@ -109,8 +108,8 @@ print(res[0]["sentence_info"])</pre>
                 </div>
                 <div class="card">
                     <div class="card-icon">50+</div>
-                    <h3>Multilingual Models</h3>
-                    <p>Fun-ASR-Nano covers 31 languages and Qwen3-ASR covers 52 languages with language detection.</p>
+                    <h3>Multilingual 模型</h3>
+                    <p>Fun-ASR-Nano covers 31种语言 and Qwen3-ASR covers 52种语言 with language detection.</p>
                 </div>
                 <div class="card">
                     <div class="card-icon">SPK</div>
@@ -130,7 +129,7 @@ print(res[0]["sentence_info"])</pre>
                 <div class="card">
                     <div class="card-icon">OPS</div>
                     <h3>训练与部署</h3>
-                    <p>Fine-tune with DeepSpeed, export to ONNX, and deploy through Docker runtime or the Python SDK.</p>
+                    <p>Fine-tune with Deep速度, export to ONNX, and deploy through Docker runtime or the Python SDK.</p>
                 </div>
             </div>
         </div>
@@ -143,10 +142,10 @@ print(res[0]["sentence_info"])</pre>
             <div class="grid-2">
                 <div class="card">
                     <h3>Fun-ASR-Nano</h3>
-                    <p>End-to-end ASR trained on tens of millions of hours. 31 languages, dialects, accents, lyrics, timestamps, and hotwords.</p>
+                    <p>End-to-end ASR trained on tens of millions of hours. 31种语言, dialects, accents, lyrics, timestamps, and hotwords.</p>
                     <div class="card-tags">
                         <span class="tag">800M</span>
-                        <span class="tag">31 Languages</span>
+                        <span class="tag">31 语言</span>
                         <span class="tag">Timestamps</span>
                         <span class="tag">说话人分离</span>
                         <span class="tag">Hotwords</span>
@@ -154,7 +153,7 @@ print(res[0]["sentence_info"])</pre>
                 </div>
                 <div class="card">
                     <h3>Paraformer</h3>
-                    <p>Non-autoregressive Chinese and English ASR with streaming and offline variants for production systems.</p>
+                    <p>Non-autoregressive 中文 and English ASR with streaming and offline variants for production systems.</p>
                     <div class="card-tags">
                         <span class="tag">Streaming</span>
                         <span class="tag">Offline</span>
@@ -174,9 +173,9 @@ print(res[0]["sentence_info"])</pre>
                 </div>
                 <div class="card">
                     <h3>Qwen3-ASR</h3>
-                    <p>LLM-based ASR with 52 languages, contextual understanding, and automatic language detection.</p>
+                    <p>LLM-based ASR with 52种语言, contextual understanding, and automatic language detection.</p>
                     <div class="card-tags">
-                        <span class="tag">52 Languages</span>
+                        <span class="tag">52 语言</span>
                         <span class="tag">0.6B / 1.7B</span>
                         <span class="tag">Context-aware</span>
                     </div>
@@ -188,7 +187,7 @@ print(res[0]["sentence_info"])</pre>
     <section>
         <div class="container narrow">
             <h2 class="section-title">快速开始</h2>
-            <p class="section-subtitle">Install the package, compose the pipeline, and run recognition from Python.</p>
+            <p class="section-subtitle">安装 the package, compose the pipeline, and run recognition from Python.</p>
 <pre>pip install funasr
 # Or latest: pip install git+https://github.com/modelscope/FunASR.git</pre>
 <pre>from funasr import AutoModel
@@ -204,7 +203,7 @@ res = model.generate(input="meeting.wav", batch_size_s=300)
 for sent in res[0]["sentence_info"]:
     print(f"[Speaker {sent['spk']}] {sent['text']}")</pre>
             <div class="section-cta">
-                <a href="tutorial.html" class="btn btn-primary">Full tutorial</a>
+                <a href="tutorial.html" class="btn btn-primary">完整教程</a>
             </div>
         </div>
     </section>
@@ -238,9 +237,9 @@ for sent in res[0]["sentence_info"]:
         <p>FunASR &middot; Tongyi Lab, Alibaba Group</p>
         <p>
             <a href="https://github.com/modelscope/FunASR">GitHub</a> &middot;
-            <a href="training.html">训练</a> &middot;
+            <a href="training.html">Training</a> &middot;
             <a href="../api.html">API</a> &middot;
-            <a href="https://github.com/modelscope/FunASR/blob/main/MODEL_LICENSE">License</a> &middot;
+            <a href="https://github.com/modelscope/FunASR/blob/main/MODEL_LICENSE">许可证</a> &middot;
             <a href="https://pypi.org/project/funasr/">PyPI</a> &middot;
             <a href="https://github.com/modelscope/FunASR/issues">Issues</a>
         </p>

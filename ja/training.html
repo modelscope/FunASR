@@ -7,38 +7,37 @@
 <nav class="nav"><div class="container">
 <a href="index.html" class="nav-logo">FunASR</a>
 <div class="nav-links">
-<a href="index.html">ホーム</a>
+<a href="index.html">Home</a>
 <a href="tutorial.html">チュートリアル</a>
-<a href="training.html" class="active">トレーニング</a>
-<a href="model-registration.html">開発</a>
+<a href="training.html" class="active">Training</a>
+<a href="model-registration.html">Develop</a>
 <a href="../api.html">API</a>
 </div>
 
-
-<div class="lang-dropdown"><button class="lang-btn">日本語</button><div class="lang-menu"><a href="../training.html">English</a><a href="../zh/training.html">中文</a><a href="../ja/training.html" class="current">日本語</a></div></div>
+<div class="lang-dropdown"><button class="lang-btn">English</button><div class="lang-menu"><a href="training.html" class="current">English</a><a href="zh/training.html">中文</a><a href="ja/training.html">日本語</a></div></div>
 <a href="https://github.com/modelscope/FunASR" class="nav-github">GitHub</a>
 </div></nav>
 
 <div class="content"><div class="container narrow">
-<h1>Training & Fine-tuning</h1>
-<p>Fine-tune pretrained models on your own data using FunASR's training framework.</p>
+<h1>トレーニング・ファインチューニング</h1>
+<p>FunASRのトレーニングフレームワークを使用して自分のデータで事前学習モデルをファインチューニング。</p>
 
 <div class="toc-grid">
-<a href="#overview">Overview</a>
-<a href="#data">Data Preparation</a>
+<a href="#overview">概要</a>
+<a href="#data">データ準備</a>
 <a href="#paraformer">Fine-tune Paraformer</a>
 <a href="#sensevoice">Fine-tune SenseVoice</a>
 <a href="#nano">Fine-tune Fun-ASR-Nano</a>
-<a href="#params">Parameter Reference</a>
-<a href="#multi-gpu">Multi-GPU Training</a>
+<a href="#params">パラメータリファレンス</a>
+<a href="#multi-gpu">マルチGPUトレーニング</a>
 <a href="#deepspeed">DeepSpeed</a>
-<a href="#monitor">Monitoring</a>
-<a href="#inference-after">Use Fine-tuned Model</a>
-<a href="#tips">Tips & Troubleshooting</a>
+<a href="#monitor">モニタリング</a>
+<a href="#inference-after">ファインチューニング済みモデルの使用</a>
+<a href="#tips">ヒント・トラブルシューティング</a>
 </div>
 
-<!-- Overview -->
-<h2 id="overview">Overview</h2>
+<!-- 概要 -->
+<h2 id="overview">概要</h2>
 <p>FunASR's training framework supports:</p>
 <ul>
 <li><strong>Fine-tuning</strong> any pretrained model on custom domain data</li>
@@ -52,7 +51,7 @@
 <p>The training entry point is <code>funasr-train-ds</code> (or <code>funasr/bin/train_ds.py</code>), launched via <code>torchrun</code> for distributed training.</p>
 
 <!-- Data -->
-<h2 id="data">Data Preparation</h2>
+<h2 id="data">データ準備</h2>
 
 <h3>Standard Format (Paraformer, SenseVoice)</h3>
 <p>Training data uses JSONL format — one JSON object per line:</p>
@@ -170,7 +169,7 @@ bash finetune.sh</pre>
 <div class="note"><strong>Recommended strategy:</strong> Start with LLM-only fine-tuning (faster, less data needed). If results are insufficient, unfreeze adaptor. Only unfreeze encoder with very large datasets (>1000h).</div>
 
 <!-- Parameters -->
-<h2 id="params">Parameter Reference</h2>
+<h2 id="params">パラメータリファレンス</h2>
 
 <h3>Dataset Parameters</h3>
 <table>
@@ -199,7 +198,7 @@ bash finetune.sh</pre>
 </table>
 
 <!-- Multi-GPU -->
-<h2 id="multi-gpu">Multi-GPU Training</h2>
+<h2 id="multi-gpu">マルチGPUトレーニング</h2>
 
 <h3>Single Machine, Multiple GPUs</h3>
 <pre>export CUDA_VISIBLE_DEVICES="0,1,2,3"
@@ -243,7 +242,7 @@ torchrun --nnodes 2 --node_rank 1 --nproc_per_node 4 \
 • Stage 3: + Parameter partitioned. Maximum memory savings but slower.</div>
 
 <!-- Monitor -->
-<h2 id="monitor">Monitoring Training</h2>
+<h2 id="monitor">モニタリング Training</h2>
 
 <h4>Log file</h4>
 <pre>tail -f outputs/log.txt
@@ -265,7 +264,7 @@ torchrun --nnodes 2 --node_rank 1 --nproc_per_node 4 \
 <pre>tensorboard --logdir outputs/log/tensorboard
 # Open http://localhost:6006</pre>
 
-<!-- Use Fine-tuned Model -->
+<!-- ファインチューニング済みモデルの使用 -->
 <h2 id="inference-after">Use Your Fine-tuned Model</h2>
 
 <h4>If outputs/ has configuration.json</h4>
@@ -282,7 +281,7 @@ print(res[0]["text"])</pre>
   ++input="test.wav"</pre>
 
 <!-- Tips -->
-<h2 id="tips">Tips & Troubleshooting</h2>
+<h2 id="tips">ヒント・トラブルシューティング</h2>
 
 <h4>OOM during training</h4>
 <ol>
@@ -323,6 +322,6 @@ print(res[0]["text"])</pre>
 
 <footer>
 <p>FunASR &middot; Tongyi Lab, Alibaba Group</p>
-<p><a href="index.html">ホーム</a> &middot; <a href="tutorial.html">チュートリアル</a> &middot; <a href="training.html">トレーニング</a> &middot; <a href="model-registration.html">開発</a> &middot; <a href="../api.html">API</a> &middot; <a href="https://github.com/modelscope/FunASR">GitHub</a></p>
+<p><a href="index.html">Home</a> &middot; <a href="tutorial.html">チュートリアル</a> &middot; <a href="training.html">Training</a> &middot; <a href="model-registration.html">Develop</a> &middot; <a href="../api.html">API</a> &middot; <a href="https://github.com/modelscope/FunASR">GitHub</a></p>
 </footer>
 </body></html>

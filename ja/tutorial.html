@@ -1,46 +1,45 @@
 <!DOCTYPE html>
 <html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>FunASR Tutorial</title>
+<title>FunASR チュートリアル</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../style.css">
 </head><body>
 <nav class="nav"><div class="container">
 <a href="index.html" class="nav-logo">FunASR</a>
             <div class="nav-links">
-                <a href="index.html">ホーム</a>
+                <a href="index.html">Home</a>
                 <a href="tutorial.html" class="active">チュートリアル</a>
-                <a href="training.html">トレーニング</a>
-                <a href="model-registration.html">開発</a>
+                <a href="training.html">Training</a>
+                <a href="model-registration.html">Develop</a>
                 <a href="../api.html">API</a>
             </div>
 
-
-<div class="lang-dropdown"><button class="lang-btn">日本語</button><div class="lang-menu"><a href="../tutorial.html">English</a><a href="../zh/tutorial.html">中文</a><a href="../ja/tutorial.html" class="current">日本語</a></div></div>
+<div class="lang-dropdown"><button class="lang-btn">English</button><div class="lang-menu"><a href="tutorial.html" class="current">English</a><a href="zh/tutorial.html">中文</a><a href="ja/tutorial.html">日本語</a></div></div>
 <a href="https://github.com/modelscope/FunASR" class="nav-github">GitHub</a>
 </div></nav>
 
 <div class="content"><div class="container narrow">
 <h1>チュートリアル</h1>
-<p>From zero to production — learn FunASR in 10 minutes.</p>
+<p>ゼロからプロダクションまで——10分でFunASRを学ぶ。</p>
 
 <div class="toc-grid">
 <a href="#quick">30秒デモ</a>
 <a href="#install">インストール</a>
-<a href="#choose">Choose a Model</a>
+<a href="#choose">モデル選択</a>
 <a href="#scenarios">使用シナリオ</a>
 <a href="#offline">オフラインASR</a>
 <a href="#streaming">ストリーミングASR</a>
 <a href="#spk">話者分離</a>
 <a href="#emotion">感情検出</a>
 <a href="#vad">VAD</a>
-<a href="#punc">句読点復元</a>
+<a href="#punc">句読点</a>
 <a href="#export">ONNXエクスポート</a>
 <a href="#faq">FAQ・トラブルシューティング</a>
 </div>
 
-<!-- 30-Second Demo -->
+<!-- 30秒デモ -->
 <h2 id="quick">30秒デモ</h2>
-<p>Copy-paste this and run. No config needed — FunASR downloads everything automatically:</p>
+<p>コピペして実行。設定不要——FunASRがすべて自動ダウンロード：</p>
 <pre>pip install funasr
 
 python -c "
@@ -49,12 +48,12 @@ model = AutoModel(model='paraformer-zh', vad_model='fsmn-vad', punc_model='ct-pu
 res = model.generate(input='https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav')
 print(res[0]['text'])
 "</pre>
-<p><strong>Output:</strong></p>
+<p><strong>出力：</strong></p>
 <div class="output-box">欢迎大家来体验达摩院推出的语音识别模型。</div>
 
-<p>That's it. One model object handles everything: loading audio, VAD segmentation, ASR, and punctuation.</p>
+<p>これだけです。1つのモデルオブジェクトがすべてを処理：音声読み込み、VADセグメンテーション、ASR、句読点。</p>
 
-<!-- Install -->
+<!-- インストール -->
 <h2 id="install">インストール</h2>
 <pre># Stable release
 pip install funasr
@@ -62,17 +61,17 @@ pip install funasr
 # Latest (recommended — has newest models and bug fixes)
 pip install git+https://github.com/modelscope/FunASR.git</pre>
 
-<div class="tip"><strong>China users:</strong> Models download from ModelScope by default (fast in China). International users: add <code>hub="hf"</code> to download from HuggingFace.</div>
+<div class="tip"><strong>China users:</strong> モデル download from ModelScope by default (fast in China). International users: add <code>hub="hf"</code> to download from HuggingFace.</div>
 
-<!-- Choose a Model -->
+<!-- モデル選択 -->
 <h2 id="choose">どのモデルを使うべきか？</h2>
 
 <table>
-<tr><th>Model</th><th>Best For</th><th>Languages</th><th>Speed</th><th>句読点復元</th></tr>
+<tr><th>モデル</th><th>Best For</th><th>Languages</th><th>Speed</th><th>句読点</th></tr>
 <tr><td><strong>Paraformer</strong></td><td>Chinese production ASR</td><td>Chinese, English</td><td>Fast</td><td>Needs punc_model</td></tr>
-<tr><td><strong>Fun-ASR-Nano</strong></td><td>Multi-language, dialects, lyrics</td><td>31 languages</td><td>Medium</td><td>Built-in ✓</td></tr>
-<tr><td><strong>SenseVoice</strong></td><td>Emotion + events + ASR</td><td>5 languages</td><td>Ultra-fast (70ms/10s)</td><td>Built-in ✓</td></tr>
-<tr><td><strong>Qwen3-ASR</strong></td><td>Highest accuracy, context-aware</td><td>52 languages</td><td>Slow (LLM)</td><td>Built-in ✓</td></tr>
+<tr><td><strong>Fun-ASR-Nano</strong></td><td>Multi-language, dialects, lyrics</td><td>31 languages</td><td>Medium</td><td>内蔵 ✓</td></tr>
+<tr><td><strong>SenseVoice</strong></td><td>Emotion + events + ASR</td><td>5 languages</td><td>超高速 (70ms/10s)</td><td>内蔵 ✓</td></tr>
+<tr><td><strong>Qwen3-ASR</strong></td><td>Highest accuracy, context-aware</td><td>52 languages</td><td>Slow (LLM)</td><td>内蔵 ✓</td></tr>
 <tr><td><strong>Paraformer-Streaming</strong></td><td>Real-time transcription</td><td>Chinese</td><td>Real-time</td><td>Needs punc_model</td></tr>
 </table>
 
@@ -90,22 +89,22 @@ pip install git+https://github.com/modelscope/FunASR.git</pre>
 
 <div class="scenario-card">
 <h4>🎤 "I have a meeting recording and want text + who said what"</h4>
-<p>→ Paraformer + VAD + Punctuation + Speaker Diarization → <a href="#spk">Jump to Speaker Diarization</a></p>
+<p>→ Paraformer + VAD + 句読点 + 話者分離 → <a href="#spk">Jump to 話者分離</a></p>
 </div>
 
 <div class="scenario-card">
 <h4>📺 "I want real-time subtitles for a live stream"</h4>
-<p>→ Paraformer-Streaming, feed audio chunks every 600ms → <a href="#streaming">Jump to Streaming ASR</a></p>
+<p>→ Paraformer-Streaming, feed audio chunks every 600ms → <a href="#streaming">Jump to ストリーミングASR</a></p>
 </div>
 
 <div class="scenario-card">
 <h4>😊 "I want to detect user emotions from voice"</h4>
-<p>→ SenseVoice (outputs emotion tags: happy, sad, angry, neutral) → <a href="#emotion">Jump to Emotion Detection</a></p>
+<p>→ SenseVoice (outputs emotion tags: happy, sad, angry, neutral) → <a href="#emotion">Jump to 感情検出</a></p>
 </div>
 
 <div class="scenario-card">
 <h4>🌍 "I have audio in Japanese/Korean/Arabic/etc."</h4>
-<p>→ Fun-ASR-Nano (31 languages) or Qwen3-ASR (52 languages) → <a href="#offline">Jump to Offline ASR</a></p>
+<p>→ Fun-ASR-Nano (31 languages) or Qwen3-ASR (52 languages) → <a href="#offline">Jump to オフラインASR</a></p>
 </div>
 
 <div class="scenario-card">
@@ -113,7 +112,7 @@ pip install git+https://github.com/modelscope/FunASR.git</pre>
 <p>→ Use <a href="https://github.com/modelscope/FunClip">FunClip</a> which integrates FunASR for smart video editing</p>
 </div>
 
-<!-- Offline ASR -->
+<!-- オフラインASR -->
 <h2 id="offline">オフラインASR</h2>
 
 <h3>Paraformer (Chinese)</h3>
@@ -175,7 +174,7 @@ print(res[0]["text"])             # recognized text
 print(res[0].get("language"))    # auto-detected language</pre>
 
 <!-- Streaming -->
-<h2 id="streaming">Streaming ASR (Real-time)</h2>
+<h2 id="streaming">ストリーミングASR（リアルタイム）</h2>
 <p>Process audio chunk-by-chunk for real-time transcription. Each chunk produces partial text immediately.</p>
 
 <pre>from funasr import AutoModel
@@ -210,8 +209,8 @@ for i in range(total_chunks):
 • <code>chunk_size=[0,10,5]</code>: first number unused, second=display granularity (×60ms), third=lookahead (×60ms)
 </div>
 
-<!-- Speaker Diarization -->
-<h2 id="spk">Speaker Diarization ("Who Said What")</h2>
+<!-- 話者分離 -->
+<h2 id="spk">話者分離（「誰が何を言ったか」）</h2>
 <p>Works with <strong>all three major models</strong>: Paraformer, Fun-ASR-Nano, and SenseVoice. Add <code>spk_model="cam++"</code> to get speaker labels per sentence.</p>
 
 <h3>Paraformer + Speaker</h3>
@@ -228,7 +227,7 @@ res = model.generate(input="meeting.wav", batch_size_s=300)
 for sent in res[0]["sentence_info"]:
     print(f"[Speaker {sent['spk']}] [{sent['start']}-{sent['end']}ms] {sent['text']}")</pre>
 
-<p><strong>Output:</strong></p>
+<p><strong>出力：</strong></p>
 <div class="output-box">[Speaker 0] [880-5195ms] 欢迎大家来体验达摩院推出的语音识别模型。</div>
 
 <h3>Fun-ASR-Nano + Speaker (no punc needed)</h3>
@@ -275,7 +274,7 @@ print(res[0]["scores"])  # [0.01,   0.03,   0.89,      0.05, ...]
 # Use rich_transcription_postprocess() to get clean text</pre>
 
 <!-- VAD -->
-<h2 id="vad">VAD音声検出</h2>
+<h2 id="vad">音声活動検出</h2>
 
 <h3>Offline (full audio)</h3>
 <pre>from funasr import AutoModel
@@ -304,8 +303,8 @@ for i in range(int((len(speech)-1)/chunk_stride+1)):
         # [[-1, 5530]]  → speech ended at 5530ms
         # [[610, 5530]] → complete segment</pre>
 
-<!-- Punctuation -->
-<h2 id="punc">Punctuation Restoration</h2>
+<!-- 句読点 -->
+<h2 id="punc">句読点復元</h2>
 <pre>from funasr import AutoModel
 
 model = AutoModel(model="ct-punc")
@@ -348,7 +347,7 @@ print(result)</pre>
 <pre>model = AutoModel(model="/local/path/to/model", disable_update=True)</pre>
 
 <h4>"ModelName is not registered"</h4>
-<p>Usually means pypi version is outdated. Install from source:</p>
+<p>Usually means pypi version is outdated. インストール from source:</p>
 <pre>pip install git+https://github.com/modelscope/FunASR.git</pre>
 
 <h4>Want to suppress all progress bars and logs?</h4>
@@ -371,6 +370,6 @@ model = AutoModel(model="...", device="cuda:0")</pre>
 
 <footer>
 <p>FunASR &middot; Tongyi Lab, Alibaba Group</p>
-<p><a href="index.html">ホーム</a> &middot; <a href="tutorial.html">チュートリアル</a> &middot; <a href="training.html">トレーニング</a> &middot; <a href="model-registration.html">開発</a> &middot; <a href="../api.html">API</a> &middot; <a href="https://github.com/modelscope/FunASR">GitHub</a></p>
+<p><a href="index.html">Home</a> &middot; <a href="tutorial.html">チュートリアル</a> &middot; <a href="training.html">Training</a> &middot; <a href="model-registration.html">Develop</a> &middot; <a href="../api.html">API</a> &middot; <a href="https://github.com/modelscope/FunASR">GitHub</a></p>
 </footer>
 </body></html>

@@ -1,42 +1,41 @@
 <!DOCTYPE html>
 <html lang="zh"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>FunASR Developer Guide</title>
+<title>FunASR 开发指南</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../style.css">
 </head><body>
 <nav class="nav"><div class="container">
 <a href="index.html" class="nav-logo">FunASR</a>
             <div class="nav-links">
-                <a href="index.html">首页</a>
+                <a href="index.html">Home</a>
                 <a href="tutorial.html">使用教程</a>
-                <a href="training.html">训练</a>
-                <a href="model-registration.html" class="active">开发</a>
+                <a href="training.html">Training</a>
+                <a href="model-registration.html" class="active">Develop</a>
                 <a href="../api.html">API</a>
             </div>
 
-
-<div class="lang-dropdown"><button class="lang-btn">中文</button><div class="lang-menu"><a href="../model-registration.html">English</a><a href="../zh/model-registration.html" class="current">中文</a><a href="../ja/model-registration.html">日本語</a></div></div>
+<div class="lang-dropdown"><button class="lang-btn">English</button><div class="lang-menu"><a href="model-registration.html" class="current">English</a><a href="zh/model-registration.html">中文</a><a href="ja/model-registration.html">日本語</a></div></div>
 <a href="https://github.com/modelscope/FunASR" class="nav-github">GitHub</a>
 </div></nav>
 
 <div class="content"><div class="container narrow">
-<h1>Developer Guide</h1>
-<p>From understanding the architecture to contributing your own model — a step-by-step guide.</p>
+<h1>开发指南</h1>
+<p>从理解架构到贡献你自己的模型——循序渐进的指南。</p>
 
 <div class="toc-grid">
-<a href="#architecture">1. Architecture Overview</a>
-<a href="#setup">2. Development Setup</a>
-<a href="#understand">3. How Inference Works</a>
-<a href="#add-model">4. Add a New Model</a>
-<a href="#add-component">5. Add Frontend/Tokenizer</a>
-<a href="#standalone">6. Standalone Repository</a>
-<a href="#testing">7. Testing Your Model</a>
-<a href="#pitfalls">8. Common Pitfalls</a>
-<a href="#contribute">9. Contributing</a>
+<a href="#architecture">1. 架构概览</a>
+<a href="#setup">2. 开发环境配置</a>
+<a href="#understand">3. 推理工作原理</a>
+<a href="#add-model">4. 添加新模型</a>
+<a href="#add-component">5. 添加前端/分词器</a>
+<a href="#standalone">6. 独立仓库</a>
+<a href="#testing">7. 测试你的模型</a>
+<a href="#pitfalls">8. 常见陷阱</a>
+<a href="#contribute">9. 贡献代码</a>
 </div>
 
 <!-- 1. Architecture -->
-<h2 id="architecture">1. Architecture Overview</h2>
+<h2 id="architecture">1. 架构概览</h2>
 <p>FunASR is built around three core ideas: a <strong>registry</strong> for component discovery, <strong>AutoModel</strong> as the unified entry point, and <strong>config.yaml</strong> as the declarative model definition.</p>
 
 <div class="arch-box">User Code                         FunASR Framework                    Model Hub
@@ -69,7 +68,7 @@ generate(input="audio.wav")
                 2. Sort segments by length (for efficient batching)
                 3. ASR: recognize each segment
                 4. Merge timestamps (add VAD offset)
-                5. Punctuation (optional)
+                5. 标点 (optional)
                 6. Speaker diarization (optional)
                     ↓
                 return [{"key", "text", "timestamp", "sentence_info"}]
@@ -99,10 +98,10 @@ class MyModel(nn.Module):
 tables.print("model")</pre>
 
 <!-- 2. Setup -->
-<h2 id="setup">2. Development Setup</h2>
+<h2 id="setup">2. 开发环境配置</h2>
 
 <div class="step">
-<h4>Clone and install in development mode</h4>
+<h4>克隆并以开发模式安装</h4>
 <pre>git clone https://github.com/modelscope/FunASR.git
 cd FunASR
 pip install -e .              # editable install
@@ -110,13 +109,13 @@ pip install -e ".[train]"     # with training dependencies</pre>
 </div>
 
 <div class="step">
-<h4>Verify installation</h4>
+<h4>验证安装</h4>
 <pre>python -c "from funasr import AutoModel; print('OK')"
 python -c "from funasr.register import tables; tables.print('model')"</pre>
 </div>
 
 <div class="step">
-<h4>Run existing tests</h4>
+<h4>运行已有测试</h4>
 <pre># Quick smoke test
 python tests_models/test_fsmn_vad.py
 python tests_models/test_paraformer.py
@@ -125,8 +124,8 @@ python tests_models/test_paraformer.py
 cd tests_models && python run_all_tests.py</pre>
 </div>
 
-<!-- 3. How Inference Works -->
-<h2 id="understand">3. How Inference Works (Deep Dive)</h2>
+<!-- 3. 推理工作原理 -->
+<h2 id="understand">3. 推理工作原理 (Deep Dive)</h2>
 
 <p>Understanding the inference data flow is essential before adding a new model. Here's what happens when you call <code>model.generate(input="audio.wav")</code>:</p>
 
@@ -160,11 +159,11 @@ cd tests_models && python run_all_tests.py</pre>
 <strong>Timestamp format matters!</strong> If your model outputs timestamps differently (e.g., dict format like Fun-ASR-Nano), FunASR's <code>inference_with_vad</code> will auto-convert it. But the standard expected format is <code>[[start_ms, end_ms], ...]</code> (list of 2-element lists in milliseconds).
 </div>
 
-<!-- 4. Add a New Model -->
-<h2 id="add-model">4. Add a New Model</h2>
+<!-- 4. 添加新模型 -->
+<h2 id="add-model">4. 添加新模型</h2>
 
 <div class="step">
-<h4>Create model directory</h4>
+<h4>创建模型目录</h4>
 <pre>funasr/models/my_model/
 ├── __init__.py      # empty file
 ├── model.py         # main model class
@@ -174,7 +173,7 @@ cd tests_models && python run_all_tests.py</pre>
 </div>
 
 <div class="step">
-<h4>Implement the model class</h4>
+<h4>实现模型类</h4>
 <pre>import torch.nn as nn
 from funasr.register import tables
 
@@ -234,7 +233,7 @@ tokenizer_conf:
 </div>
 
 <div class="step">
-<h4>Test locally</h4>
+<h4>本地测试</h4>
 <pre>from funasr import AutoModel
 
 # From local directory
@@ -271,7 +270,7 @@ frontend_conf:
 <p>Same pattern for tokenizer (<code>tokenizer_classes</code>), dataset (<code>dataset_classes</code>), encoder (<code>encoder_classes</code>), etc.</p>
 
 <!-- 6. Standalone -->
-<h2 id="standalone">6. Standalone Repository Mode</h2>
+<h2 id="standalone">6. 独立仓库 Mode</h2>
 <p>Your model doesn't need to live inside the FunASR source tree. With <code>trust_remote_code=True</code>, FunASR dynamically loads your model class from an external file:</p>
 
 <pre># User code — loads YOUR model.py from a separate repo
@@ -301,9 +300,9 @@ model = AutoModel(
 <p>Examples: <a href="https://github.com/FunAudioLLM/Fun-ASR">Fun-ASR-Nano</a>, <a href="https://github.com/FunAudioLLM/SenseVoice">SenseVoice</a></p>
 
 <!-- 7. Testing -->
-<h2 id="testing">7. Testing Your Model</h2>
+<h2 id="testing">7. 测试你的模型</h2>
 
-<h4>Write a test script</h4>
+<h4>编写测试脚本</h4>
 <pre># tests_models/test_my_model.py
 import sys, time
 from funasr import AutoModel
@@ -340,7 +339,7 @@ for i in range(total_chunks):
 # Verify: same audio gives same result across multiple sessions</pre>
 
 <!-- 8. Pitfalls -->
-<h2 id="pitfalls">8. Common Pitfalls</h2>
+<h2 id="pitfalls">8. 常见陷阱</h2>
 
 <h4>❌ Forgetting <code>super().__init__()</code></h4>
 <pre># WRONG — causes "object has no attribute '_state_dict_pre_hooks'"
@@ -372,17 +371,17 @@ from funasr.models.paraformer.model import Paraformer
 <h4>❌ Modifying <code>self.kwargs</code> during inference</h4>
 <p>Don't mutate <code>kwargs</code> that came from AutoModel. The framework resets state between calls, but persistent mutations can leak between sessions.</p>
 
-<!-- 9. Contributing -->
-<h2 id="contribute">9. Contributing</h2>
+<!-- 9. 贡献代码 -->
+<h2 id="contribute">9. 贡献代码</h2>
 
-<h4>Code Style</h4>
+<h4>代码风格</h4>
 <ul>
 <li>Follow existing patterns — look at <code>paraformer/model.py</code> as reference</li>
 <li>Add docstrings to all public methods (Args, Returns)</li>
 <li>No comments explaining WHAT — use clear naming. Comments for WHY only.</li>
 </ul>
 
-<h4>PR Checklist</h4>
+<h4>PR检查清单</h4>
 <ul>
 <li>New model: self-contained directory, no cross-model imports</li>
 <li>Include a test script in <code>tests_models/</code></li>
@@ -391,13 +390,13 @@ from funasr.models.paraformer.model import Paraformer
 <li>Add entry to README What's New if user-facing</li>
 </ul>
 
-<h4>License</h4>
-<p>Code: MIT. Model weights: FunASR Model License (commercial use allowed with attribution).</p>
+<h4>许可证</h4>
+<p>Code: MIT. Model weights: FunASR Model 许可证 (commercial use allowed with attribution).</p>
 
 </div></div>
 
 <footer>
 <p>FunASR &middot; Tongyi Lab, Alibaba Group</p>
-<p><a href="index.html">首页</a> &middot; <a href="tutorial.html">使用教程</a> &middot; <a href="training.html">训练</a> &middot; <a href="model-registration.html">开发</a> &middot; <a href="../api.html">API</a> &middot; <a href="https://github.com/modelscope/FunASR">GitHub</a></p>
+<p><a href="index.html">Home</a> &middot; <a href="tutorial.html">使用教程</a> &middot; <a href="training.html">Training</a> &middot; <a href="model-registration.html">Develop</a> &middot; <a href="../api.html">API</a> &middot; <a href="https://github.com/modelscope/FunASR">GitHub</a></p>
 </footer>
 </body></html>
