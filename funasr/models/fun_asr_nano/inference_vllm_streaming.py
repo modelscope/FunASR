@@ -32,10 +32,12 @@ _CJK_RE = re.compile(r"[一-鿿]")
 
 
 def _clean_text(text: str) -> str:
-    """Remove tags, repetitive garbage, and invalid chars."""
-    text = re.sub(r"<[^>]*>|</[^>]*>", "", text)
-    text = re.sub(r"(>.{2,8}?)\1{3,}", "", text)
-    text = text.replace("�", "").lstrip(">")
+    """Remove tags, repetitive garbage, filler tokens, and invalid chars."""
+    text = re.sub(r'<[^>]*>|</[^>]*>', '', text)
+    text = re.sub(r'(>.{2,8}?){3,}', '', text)
+    text = re.sub(r'\[breath\]|\[noise\]|/sil|endofbreak|FFFF', '', text)
+    text = re.sub(r'\s+', ' ', text)
+    text = text.replace('�', '').lstrip('>')
     return text.strip()
 
 
@@ -170,11 +172,13 @@ class FunASRNanoStreamingVLLM:
         return prompt + "："
 
     @torch.no_grad()
-    def _build_embeds(self, audio_embeds, audio_embed_lens, hotwords=None, language=None, itn=True):
-        """Build input embeddings for a single chunk (no prev_text - fresh each time)."""
+    def _build_embeds(self, audio_embeds, audio_embed_lens, prev_text="", hotwords=None, language=None, itn=True):
+        """Build input embeddings. prev_text is appended as assistant prefix for continuation."""
         prompt = self._build_prompt_text(hotwords, language, itn)
         prefix_text = f"<|im_start|>system\nYou are a helpful assistant.<|im_end|>\n<|im_start|>user\n{prompt}<|startofspeech|>"
         suffix_text = "<|endofspeech|><|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n"
+        if prev_text:
+            suffix_text += prev_text
 
         prefix_ids = self.tokenizer.encode(prefix_text, add_special_tokens=False)
         suffix_ids = self.tokenizer.encode(suffix_text, add_special_tokens=False)
@@ -227,42 +231,88 @@ class FunASRNanoStreamingVLLM:
         chunk_samples = int(self.sample_rate * chunk_ms / 1000)
         num_chunks = (total_samples + chunk_samples - 1) // chunk_samples
 
-        # Pre-compute all chunk embeddings
-        prompts = []
-        chunk_infos = []
-        for i in range(num_chunks):
+        params = SamplingParams(max_tokens=max_new_tokens, temperature=temperature,
+                                repetition_penalty=1.3, skip_special_tokens=True)
+
+        # Two-stage approach for long audio:
+        # Stage 1: batch first N chunks fresh (no prev_text) to find stable output
+        # Stage 2: batch remaining chunks WITH prev_text from stable output
+        stage1_count = min(10, num_chunks)  # ~7.2s should be enough to stabilize
+
+        # Stage 1: encode and batch first chunks
+        prompts_s1 = []
+        chunk_infos_s1 = []
+        for i in range(stage1_count):
             end_sample = min((i + 1) * chunk_samples, total_samples)
-            cumulative_audio = audio_data[:end_sample]
-            adaptor_out, adaptor_out_lens = self._encode_audio(cumulative_audio)
-            input_embeds = self._build_embeds(adaptor_out, adaptor_out_lens,
-                                             hotwords=hotwords, language=language, itn=itn)
-            prompts.append(EmbedsPrompt(prompt_embeds=input_embeds.float()))
-            chunk_infos.append({
+            adaptor_out, adaptor_out_lens = self._encode_audio(audio_data[:end_sample])
+            embeds = self._build_embeds(adaptor_out, adaptor_out_lens, prev_text="",
+                                        hotwords=hotwords, language=language, itn=itn)
+            prompts_s1.append(EmbedsPrompt(prompt_embeds=embeds.float()))
+            chunk_infos_s1.append({
                 "chunk_idx": i + 1,
                 "is_final": end_sample >= total_samples,
                 "audio_duration_ms": end_sample * 1000 / self.sample_rate,
             })
 
-        # Single batch vLLM generate call
-        params = SamplingParams(max_tokens=max_new_tokens, temperature=temperature,
-                                repetition_penalty=1.3, skip_special_tokens=True)
-        outputs = self.vllm_engine.generate(prompts, params, use_tqdm=False)
+        outputs_s1 = self.vllm_engine.generate(prompts_s1, params, use_tqdm=False)
 
-        # Yield results per chunk
-        for i, (output, info) in enumerate(zip(outputs, chunk_infos)):
+        # Find best stable output from stage 1
+        best_text = ""
+        results_s1 = []
+        for output in outputs_s1:
             text = output.outputs[0].text
             if not text and output.outputs[0].token_ids:
                 text = self.tokenizer.decode(list(output.outputs[0].token_ids), skip_special_tokens=True)
             text = _clean_text(text)
+            results_s1.append(text)
+            if _is_meaningful(text) and len(text) > len(best_text):
+                best_text = text
 
+        # Yield stage 1 results
+        for i, (text, info) in enumerate(zip(results_s1, chunk_infos_s1)):
             if info["is_final"]:
                 fixed_text = text
             elif _is_meaningful(text) and len(text) > rollback_chars:
                 fixed_text = text[:-rollback_chars]
             else:
                 fixed_text = ""
-
             yield {"text": text, "fixed_text": fixed_text, **info}
+
+        # Stage 2: if more chunks remain, use prev_text from stable output
+        if stage1_count < num_chunks:
+            prev_text = best_text[:-rollback_chars] if len(best_text) > rollback_chars else best_text
+
+            prompts_s2 = []
+            chunk_infos_s2 = []
+            for i in range(stage1_count, num_chunks):
+                end_sample = min((i + 1) * chunk_samples, total_samples)
+                adaptor_out, adaptor_out_lens = self._encode_audio(audio_data[:end_sample])
+                embeds = self._build_embeds(adaptor_out, adaptor_out_lens, prev_text=prev_text,
+                                            hotwords=hotwords, language=language, itn=itn)
+                prompts_s2.append(EmbedsPrompt(prompt_embeds=embeds.float()))
+                chunk_infos_s2.append({
+                    "chunk_idx": i + 1,
+                    "is_final": end_sample >= total_samples,
+                    "audio_duration_ms": end_sample * 1000 / self.sample_rate,
+                })
+
+            outputs_s2 = self.vllm_engine.generate(prompts_s2, params, use_tqdm=False)
+
+            for output, info in zip(outputs_s2, chunk_infos_s2):
+                text = output.outputs[0].text
+                if not text and output.outputs[0].token_ids:
+                    text = self.tokenizer.decode(list(output.outputs[0].token_ids), skip_special_tokens=True)
+                text = _clean_text(text)
+                full_text = prev_text + text
+
+                if info["is_final"]:
+                    fixed_text = full_text
+                elif _is_meaningful(full_text) and len(full_text) > rollback_chars:
+                    fixed_text = full_text[:-rollback_chars]
+                else:
+                    fixed_text = prev_text
+
+                yield {"text": full_text, "fixed_text": fixed_text, **info}
 
     def generate(self, audio_input, **kwargs):
         """Run streaming and return all chunk results."""
