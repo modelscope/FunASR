@@ -1,3 +1,5 @@
+> **注意：** 本文档已不再更新。请访问 [FunASR 文档站点](https://modelscope.github.io/FunASR/zh/) 获取最新指南。
+
 (简体中文|[English](./README.md))
 
 FunASR开源了大量在工业数据上预训练模型，您可以在 [模型许可协议](https://github.com/alibaba-damo-academy/FunASR/blob/main/MODEL_LICENSE)下自由使用、复制、修改和分享FunASR模型，下面列举代表性的模型，更多模型请参考 [模型仓库](https://github.com/alibaba-damo-academy/FunASR/tree/main/model_zoo)。
