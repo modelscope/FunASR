@@ -14,77 +14,77 @@
 <a href="../api.html">API</a>
 </div>
 
-<div class="lang-dropdown"><button class="lang-btn">English</button><div class="lang-menu"><a href="training.html" class="current">English</a><a href="zh/training.html">中文</a><a href="ja/training.html">日本語</a></div></div>
+<div class="lang-dropdown"><button class="lang-btn">日本語</button><div class="lang-menu"><a href="../training.html">English</a><a href="../zh/training.html">中文</a><a href="training.html" class="current">日本語</a></div></div>
 <a href="https://github.com/modelscope/FunASR" class="nav-github">GitHub</a>
 </div></nav>
 
 <div class="content"><div class="container narrow">
 <h1>トレーニング・ファインチューニング</h1>
-<p>FunASRのトレーニングフレームワークを使用して自分のデータで事前学習モデルをファインチューニング。</p>
+<p>FunASR のトレーニングフレームワークを使用して、自分のデータで事前学習モデルをファインチューニングできます。</p>
 
 <div class="toc-grid">
 <a href="#overview">概要</a>
 <a href="#data">データ準備</a>
-<a href="#paraformer">Fine-tune Paraformer</a>
-<a href="#sensevoice">Fine-tune SenseVoice</a>
-<a href="#nano">Fine-tune Fun-ASR-Nano</a>
+<a href="#paraformer">Paraformer のファインチューニング</a>
+<a href="#sensevoice">SenseVoice のファインチューニング</a>
+<a href="#nano">Fun-ASR-Nano のファインチューニング</a>
 <a href="#params">パラメータリファレンス</a>
-<a href="#multi-gpu">マルチGPUトレーニング</a>
+<a href="#multi-gpu">マルチ GPU トレーニング</a>
 <a href="#deepspeed">DeepSpeed</a>
 <a href="#monitor">モニタリング</a>
 <a href="#inference-after">ファインチューニング済みモデルの使用</a>
 <a href="#tips">ヒント・トラブルシューティング</a>
 </div>
 
-<!-- Overview -->
+<!-- 概要 -->
 <h2 id="overview">概要</h2>
-<p>FunASR's training framework supports:</p>
+<p>FunASR のトレーニングフレームワークは以下をサポートしています：</p>
 <ul>
-<li><strong>Fine-tuning</strong> any pretrained model on custom domain data</li>
-<li><strong>Multi-GPU</strong> training with PyTorch DDP (single/multi-node)</li>
-<li><strong>DeepSpeed</strong> ZeRO Stage 1/2/3 for large model training</li>
-<li><strong>Dynamic batching</strong> by token count or example count</li>
-<li><strong>Checkpoint averaging</strong> for best performance</li>
-<li><strong>Resume training</strong> from interruption</li>
+<li>カスタムドメインデータで任意の事前学習モデルを<strong>ファインチューニング</strong></li>
+<li>PyTorch DDP による<strong>マルチ GPU</strong> トレーニング（シングルノード/マルチノード）</li>
+<li><strong>DeepSpeed</strong> ZeRO Stage 1/2/3 による大規模モデルのトレーニング</li>
+<li>トークン数またはサンプル数による<strong>動的バッチング</strong></li>
+<li>最高性能のための<strong>チェックポイント平均化</strong></li>
+<li>中断後の<strong>トレーニング再開</strong></li>
 </ul>
 
-<p>The training entry point is <code>funasr-train-ds</code> (or <code>funasr/bin/train_ds.py</code>), launched via <code>torchrun</code> for distributed training.</p>
+<p>トレーニングのエントリポイントは <code>funasr-train-ds</code>（<code>funasr/bin/train_ds.py</code>）で、分散トレーニングのために <code>torchrun</code> を通じて起動します。</p>
 
-<!-- Data -->
+<!-- データ準備 -->
 <h2 id="data">データ準備</h2>
 
-<h3>Standard Format (Paraformer, SenseVoice)</h3>
-<p>Training data uses JSONL format — one JSON object per line:</p>
-<pre>{"key": "utt001", "source": "/path/to/audio.wav", "source_len": 90, "target": "这是转写文本", "target_len": 6}
+<h3>標準フォーマット（Paraformer、SenseVoice）</h3>
+<p>トレーニングデータは JSONL フォーマットを使用します——1行に1つの JSON オブジェクト：</p>
+<pre>{"key": "utt001", "source": "/path/to/audio.wav", "source_len": 90, "target": "これは書き起こしテキストです", "target_len": 6}
 {"key": "utt002", "source": "/path/to/audio2.wav", "source_len": 150, "target": "hello world", "target_len": 2}</pre>
 
 <table>
-<tr><th>Field</th><th>Type</th><th>Description</th></tr>
-<tr><td><code>key</code></td><td>str</td><td>Unique utterance ID</td></tr>
-<tr><td><code>source</code></td><td>str</td><td>Audio file path (local path or URL)</td></tr>
-<tr><td><code>source_len</code></td><td>int</td><td>Audio length in fbank frames (1 frame = 10ms)</td></tr>
-<tr><td><code>target</code></td><td>str</td><td>Transcription text</td></tr>
-<tr><td><code>target_len</code></td><td>int</td><td>Number of text tokens</td></tr>
+<tr><th>フィールド</th><th>型</th><th>説明</th></tr>
+<tr><td><code>key</code></td><td>str</td><td>一意の発話ID</td></tr>
+<tr><td><code>source</code></td><td>str</td><td>音声ファイルパス（ローカルパスまたはURL）</td></tr>
+<tr><td><code>source_len</code></td><td>int</td><td>音声の長さ（fbankフレーム数、1フレーム = 10ms）</td></tr>
+<tr><td><code>target</code></td><td>str</td><td>書き起こしテキスト</td></tr>
+<tr><td><code>target_len</code></td><td>int</td><td>テキストのトークン数</td></tr>
 </table>
 
-<h4>Generate from wav.scp + text.txt</h4>
-<p>If you have Kaldi-style data files, convert them:</p>
-<pre># train_wav.scp (tab-separated: id \t path)
+<h4>wav.scp + text.txt から生成</h4>
+<p>Kaldi 形式のデータファイルがある場合、以下のように変換できます：</p>
+<pre># train_wav.scp（タブ区切り：id \t パス）
 utt001  /data/audio/001.wav
 utt002  /data/audio/002.wav
 
-# train_text.txt (tab-separated: id \t text)
-utt001  这是转写文本
+# train_text.txt（タブ区切り：id \t テキスト）
+utt001  これは書き起こしテキストです
 utt002  hello world</pre>
 
-<pre># Convert to jsonl
+<pre># jsonl に変換
 scp2jsonl \
   ++scp_file_list='["/data/list/train_wav.scp", "/data/list/train_text.txt"]' \
   ++data_type_list='["source", "target"]' \
   ++jsonl_file_out="/data/list/train.jsonl"</pre>
 
-<h3>ChatML Format (Fun-ASR-Nano)</h3>
-<p>Fun-ASR-Nano uses ChatML conversation format:</p>
+<h3>ChatML フォーマット（Fun-ASR-Nano）</h3>
+<p>Fun-ASR-Nano は ChatML 会話フォーマットを使用します：</p>
 <pre>{"messages": [
   {"role": "system", "content": "You are a helpful assistant."},
   {"role": "user", "content": "语音转写：<|startofspeech|>!/path/to/audio.wav<|endofspeech|>"},
@@ -92,32 +92,32 @@ scp2jsonl \
 ], "speech_length": 145, "text_length": 3}</pre>
 
 <table>
-<tr><th>Field</th><th>Description</th></tr>
-<tr><td><code>messages[0]</code></td><td>System prompt (fixed: "You are a helpful assistant.")</td></tr>
-<tr><td><code>messages[1]</code></td><td>User: prompt + audio path wrapped in <code>&lt;|startofspeech|&gt;!...&lt;|endofspeech|&gt;</code></td></tr>
-<tr><td><code>messages[2]</code></td><td>Assistant: transcription text</td></tr>
-<tr><td><code>speech_length</code></td><td>Number of fbank frames (10ms each)</td></tr>
-<tr><td><code>text_length</code></td><td>Number of tokens (tokenized by Qwen3-0.6B)</td></tr>
+<tr><th>フィールド</th><th>説明</th></tr>
+<tr><td><code>messages[0]</code></td><td>システムプロンプト（固定："You are a helpful assistant."）</td></tr>
+<tr><td><code>messages[1]</code></td><td>ユーザー入力：プロンプト + <code>&lt;|startofspeech|&gt;!...&lt;|endofspeech|&gt;</code> で囲んだ音声パス</td></tr>
+<tr><td><code>messages[2]</code></td><td>アシスタント応答：書き起こしテキスト</td></tr>
+<tr><td><code>speech_length</code></td><td>fbank フレーム数（各 10ms）</td></tr>
+<tr><td><code>text_length</code></td><td>トークン数（Qwen3-0.6B トークナイザーで計算）</td></tr>
 </table>
 
-<div class="tip"><strong>Prompt variations:</strong><br>
-• Chinese: <code>语音转写：</code><br>
-• English: <code>Speech transcription:</code><br>
-• Cross-language: <code>语音转写成英文：</code><br>
-• No ITN: <code>语音转写，不进行文本规整：</code></div>
+<div class="tip"><strong>プロンプトのバリエーション：</strong><br>
+• 中国語：<code>语音转写：</code><br>
+• 英語：<code>Speech transcription:</code><br>
+• 言語をまたぐ変換：<code>语音转写成英文：</code><br>
+• ITN なし：<code>语音转写，不进行文本规整：</code></div>
 
-<p>Convert from wav.scp + text.txt:</p>
+<p>wav.scp + text.txt から変換：</p>
 <pre>python tools/scp2jsonl.py \
   ++scp_file=data/train_wav.scp \
   ++transcript_file=data/train_text.txt \
   ++jsonl_file=data/train_example.jsonl</pre>
 
 <!-- Paraformer -->
-<h2 id="paraformer">Fine-tune Paraformer</h2>
+<h2 id="paraformer">Paraformer のファインチューニング</h2>
 <pre>cd examples/industrial_data_pretraining/paraformer
 bash finetune.sh</pre>
 
-<p>Or customize the key parameters:</p>
+<p>主要パラメータをカスタマイズする場合：</p>
 <pre>export CUDA_VISIBLE_DEVICES="0,1"
 gpu_num=2
 
@@ -138,93 +138,93 @@ torchrun --nproc_per_node $gpu_num \
   ++output_dir="./outputs"</pre>
 
 <!-- SenseVoice -->
-<h2 id="sensevoice">Fine-tune SenseVoice</h2>
+<h2 id="sensevoice">SenseVoice のファインチューニング</h2>
 <pre>cd examples/industrial_data_pretraining/sense_voice
 bash finetune.sh</pre>
 
-<p>Same data format as Paraformer (source/target JSONL). Key difference: SenseVoice uses its own dataset class internally.</p>
+<p>データフォーマットは Paraformer と同じ（source/target JSONL）です。違いは、SenseVoice が内部的に独自の dataset クラスを使用する点です。</p>
 
 <!-- Fun-ASR-Nano -->
-<h2 id="nano">Fine-tune Fun-ASR-Nano</h2>
+<h2 id="nano">Fun-ASR-Nano のファインチューニング</h2>
 <pre>cd examples/industrial_data_pretraining/fun_asr_nano
 bash finetune.sh</pre>
 
-<p>Key differences from Paraformer:</p>
+<p>Paraformer との主な違い：</p>
 <ul>
-<li>Uses ChatML data format (see above)</li>
-<li><code>++trust_remote_code=true</code> required</li>
-<li>Supports <strong>selective freezing</strong>: freeze encoder/adaptor while training LLM decoder</li>
+<li>ChatML データフォーマットを使用（上記参照）</li>
+<li><code>++trust_remote_code=true</code> が必要</li>
+<li><strong>選択的フリーズ</strong>をサポート：encoder/adaptor をフリーズし、LLM decoder のみトレーニング</li>
 </ul>
 
-<pre># Freeze encoder + adaptor, only train LLM (recommended for domain adaptation)
+<pre># encoder + adaptor をフリーズし、LLM のみトレーニング（ドメイン適応に推奨）
 ++audio_encoder_conf.freeze=true
 ++audio_adaptor_conf.freeze=true
 ++llm_conf.freeze=false
 
-# Full fine-tune (all parameters)
+# 全パラメータファインチューニング
 ++audio_encoder_conf.freeze=false
 ++audio_adaptor_conf.freeze=false
 ++llm_conf.freeze=false</pre>
 
-<div class="note"><strong>Recommended strategy:</strong> Start with LLM-only fine-tuning (faster, less data needed). If results are insufficient, unfreeze adaptor. Only unfreeze encoder with very large datasets (>1000h).</div>
+<div class="note"><strong>推奨戦略：</strong>まず LLM のみのファインチューニングから始めてください（高速・少量データで可能）。結果が不十分な場合は adaptor をアンフリーズ。encoder のアンフリーズは非常に大量のデータ（1000時間超）がある場合のみ。</div>
 
-<!-- Parameters -->
+<!-- パラメータリファレンス -->
 <h2 id="params">パラメータリファレンス</h2>
 
-<h3>Dataset Parameters</h3>
+<h3>データセットパラメータ</h3>
 <table>
-<tr><th>Parameter</th><th>Default</th><th>Description</th></tr>
-<tr><td><code>dataset_conf.batch_type</code></td><td>"token"</td><td><code>"token"</code>: dynamic batch by total tokens. <code>"example"</code>: fixed batch count.</td></tr>
-<tr><td><code>dataset_conf.batch_size</code></td><td>6000</td><td>Token mode: total frames per batch. Example mode: number of samples.</td></tr>
-<tr><td><code>dataset_conf.sort_size</code></td><td>1024</td><td>Buffer size for length-based sorting (improves padding efficiency).</td></tr>
-<tr><td><code>dataset_conf.num_workers</code></td><td>4</td><td>Data loading threads.</td></tr>
-<tr><td><code>dataset_conf.data_split_num</code></td><td>1</td><td>Split data into N groups for large-scale training (reduces memory).</td></tr>
-<tr><td><code>dataset_conf.max_token_length</code></td><td>—</td><td>Filter: skip samples longer than this (in frames/tokens).</td></tr>
-<tr><td><code>dataset_conf.min_token_length</code></td><td>—</td><td>Filter: skip samples shorter than this.</td></tr>
+<tr><th>パラメータ</th><th>デフォルト</th><th>説明</th></tr>
+<tr><td><code>dataset_conf.batch_type</code></td><td>"token"</td><td><code>"token"</code>：総トークン数で動的バッチング。<code>"example"</code>：固定サンプル数。</td></tr>
+<tr><td><code>dataset_conf.batch_size</code></td><td>6000</td><td>token モード：バッチあたりの総フレーム数。example モード：サンプル数。</td></tr>
+<tr><td><code>dataset_conf.sort_size</code></td><td>1024</td><td>長さベースソートのバッファサイズ（パディング効率を向上）。</td></tr>
+<tr><td><code>dataset_conf.num_workers</code></td><td>4</td><td>データ読み込みスレッド数。</td></tr>
+<tr><td><code>dataset_conf.data_split_num</code></td><td>1</td><td>大規模トレーニング用にデータを N 分割（メモリ削減）。</td></tr>
+<tr><td><code>dataset_conf.max_token_length</code></td><td>—</td><td>フィルタ：この値を超えるサンプルをスキップ（フレーム/トークン単位）。</td></tr>
+<tr><td><code>dataset_conf.min_token_length</code></td><td>—</td><td>フィルタ：この値に満たないサンプルをスキップ。</td></tr>
 </table>
 
-<h3>Training Parameters</h3>
+<h3>トレーニングパラメータ</h3>
 <table>
-<tr><th>Parameter</th><th>Default</th><th>Description</th></tr>
-<tr><td><code>train_conf.max_epoch</code></td><td>50</td><td>Total training epochs.</td></tr>
-<tr><td><code>train_conf.log_interval</code></td><td>1</td><td>Print loss every N steps.</td></tr>
-<tr><td><code>train_conf.validate_interval</code></td><td>2000</td><td>Run validation every N steps.</td></tr>
-<tr><td><code>train_conf.save_checkpoint_interval</code></td><td>2000</td><td>Save model every N steps.</td></tr>
-<tr><td><code>train_conf.keep_nbest_models</code></td><td>20</td><td>Keep top N models (by validation accuracy).</td></tr>
-<tr><td><code>train_conf.avg_nbest_model</code></td><td>10</td><td>Average top N models for final checkpoint.</td></tr>
-<tr><td><code>train_conf.resume</code></td><td>true</td><td>Resume from last checkpoint if exists.</td></tr>
-<tr><td><code>train_conf.use_deepspeed</code></td><td>false</td><td>Enable DeepSpeed ZeRO optimization.</td></tr>
-<tr><td><code>optim_conf.lr</code></td><td>0.0002</td><td>Learning rate.</td></tr>
+<tr><th>パラメータ</th><th>デフォルト</th><th>説明</th></tr>
+<tr><td><code>train_conf.max_epoch</code></td><td>50</td><td>総トレーニングエポック数。</td></tr>
+<tr><td><code>train_conf.log_interval</code></td><td>1</td><td>N ステップごとに loss を表示。</td></tr>
+<tr><td><code>train_conf.validate_interval</code></td><td>2000</td><td>N ステップごとにバリデーション実行。</td></tr>
+<tr><td><code>train_conf.save_checkpoint_interval</code></td><td>2000</td><td>N ステップごとにモデルを保存。</td></tr>
+<tr><td><code>train_conf.keep_nbest_models</code></td><td>20</td><td>バリデーション精度が高い上位 N 個のモデルを保持。</td></tr>
+<tr><td><code>train_conf.avg_nbest_model</code></td><td>10</td><td>最良の N 個のモデルを平均化して最終チェックポイントを生成。</td></tr>
+<tr><td><code>train_conf.resume</code></td><td>true</td><td>前回のチェックポイントが存在する場合、自動的に再開。</td></tr>
+<tr><td><code>train_conf.use_deepspeed</code></td><td>false</td><td>DeepSpeed ZeRO 最適化を有効化。</td></tr>
+<tr><td><code>optim_conf.lr</code></td><td>0.0002</td><td>学習率。</td></tr>
 </table>
 
-<!-- Multi-GPU -->
-<h2 id="multi-gpu">マルチGPUトレーニング</h2>
+<!-- マルチ GPU -->
+<h2 id="multi-gpu">マルチ GPU トレーニング</h2>
 
-<h3>Single Machine, Multiple GPUs</h3>
+<h3>シングルマシン・マルチ GPU</h3>
 <pre>export CUDA_VISIBLE_DEVICES="0,1,2,3"
 gpu_num=4
 
 torchrun --nnodes 1 --nproc_per_node $gpu_num \
   funasr/bin/train_ds.py ${train_args}</pre>
 
-<h3>Multiple Machines</h3>
-<pre># Machine 1 (master, IP=192.168.1.1)
+<h3>マルチマシン</h3>
+<pre># マシン 1（マスター、IP=192.168.1.1）
 torchrun --nnodes 2 --node_rank 0 --nproc_per_node 4 \
   --master_addr=192.168.1.1 --master_port=12345 \
   funasr/bin/train_ds.py ${train_args}
 
-# Machine 2
+# マシン 2
 torchrun --nnodes 2 --node_rank 1 --nproc_per_node 4 \
   --master_addr=192.168.1.1 --master_port=12345 \
   funasr/bin/train_ds.py ${train_args}</pre>
 
 <!-- DeepSpeed -->
 <h2 id="deepspeed">DeepSpeed</h2>
-<p>For large models (Fun-ASR-Nano 800M params), enable DeepSpeed ZeRO:</p>
+<p>大規模モデル（Fun-ASR-Nano 8億パラメータなど）の場合、DeepSpeed ZeRO を有効にします：</p>
 <pre>++train_conf.use_deepspeed=true
 ++train_conf.deepspeed_config=./deepspeed_conf/ds_stage1.json</pre>
 
-<p>Stage 1 config (recommended starting point):</p>
+<p>Stage 1 設定（推奨の出発点）：</p>
 <pre>{
   "train_micro_batch_size_per_gpu": 1,
   "gradient_accumulation_steps": 1,
@@ -236,87 +236,87 @@ torchrun --nnodes 2 --node_rank 1 --nproc_per_node 4 \
   }
 }</pre>
 
-<div class="note"><strong>When to use which stage:</strong><br>
-• Stage 1: Optimizer state partitioned. Good for most cases.<br>
-• Stage 2: + Gradient partitioned. For larger models.<br>
-• Stage 3: + Parameter partitioned. Maximum memory savings but slower.</div>
+<div class="note"><strong>各 Stage の使い分け：</strong><br>
+• Stage 1：オプティマイザ状態を分割。ほとんどのケースに最適。<br>
+• Stage 2：さらに勾配を分割。より大きなモデル向け。<br>
+• Stage 3：さらにパラメータを分割。最大のメモリ節約だが速度は低下。</div>
 
-<!-- Monitor -->
-<h2 id="monitor">Monitoring Training</h2>
+<!-- モニタリング -->
+<h2 id="monitor">モニタリング</h2>
 
-<h4>Log file</h4>
+<h4>ログファイル</h4>
 <pre>tail -f outputs/log.txt
 
-# Example output:
+# 出力例：
 # train, rank: 0, epoch: 0/50, step: 6990, (loss_avg_rank: 0.327),
 # (acc_avg_epoch: 0.795), (lr: 1.165e-04),
 # GPU memory: usage: 3.8GB, peak: 18.3GB</pre>
 
-<p>Key metrics to watch:</p>
+<p>注目すべき主要指標：</p>
 <ul>
-<li><code>loss_avg_epoch</code>: should decrease over time</li>
-<li><code>acc_avg_epoch</code>: should increase (most important metric)</li>
-<li><code>lr</code>: learning rate at current step</li>
-<li><code>GPU memory</code>: peak should not exceed your GPU VRAM</li>
+<li><code>loss_avg_epoch</code>：トレーニングの進行に伴い減少すべき</li>
+<li><code>acc_avg_epoch</code>：継続的に上昇すべき（最重要指標）</li>
+<li><code>lr</code>：現在のステップでの学習率</li>
+<li><code>GPU memory</code>：ピーク値が GPU の VRAM を超えないこと</li>
 </ul>
 
 <h4>TensorBoard</h4>
 <pre>tensorboard --logdir outputs/log/tensorboard
-# Open http://localhost:6006</pre>
+# http://localhost:6006 を開く</pre>
 
-<!-- Use Fine-tuned Model -->
-<h2 id="inference-after">Use Your Fine-tuned Model</h2>
+<!-- ファインチューニング済みモデルの使用 -->
+<h2 id="inference-after">ファインチューニング済みモデルの使用</h2>
 
-<h4>If outputs/ has configuration.json</h4>
+<h4>outputs/ に configuration.json がある場合</h4>
 <pre>from funasr import AutoModel
 model = AutoModel(model="./outputs")
 res = model.generate(input="test.wav")
 print(res[0]["text"])</pre>
 
-<h4>If no configuration.json</h4>
+<h4>configuration.json がない場合</h4>
 <pre>funasr ++model="./outputs" \
   ++config-path="./outputs" \
   ++config-name="config.yaml" \
   ++init_param="./outputs/model.pt" \
   ++input="test.wav"</pre>
 
-<!-- Tips -->
+<!-- ヒント・トラブルシューティング -->
 <h2 id="tips">ヒント・トラブルシューティング</h2>
 
-<h4>OOM during training</h4>
+<h4>トレーニング中の OOM（メモリ不足）</h4>
 <ol>
-<li>Reduce <code>dataset_conf.batch_size</code></li>
-<li>Add <code>dataset_conf.max_token_length=2000</code> to filter long utterances</li>
-<li>Enable DeepSpeed (partitions optimizer states)</li>
-<li>Reduce <code>dataset_conf.num_workers</code></li>
+<li><code>dataset_conf.batch_size</code> を減らす</li>
+<li><code>dataset_conf.max_token_length=2000</code> を追加して長い発話をフィルタ</li>
+<li>DeepSpeed を有効にする（オプティマイザ状態を分割）</li>
+<li><code>dataset_conf.num_workers</code> を減らす</li>
 </ol>
 
-<h4>Training loss stuck / NaN gradients</h4>
+<h4>loss が下がらない / 勾配が NaN</h4>
 <ul>
-<li>Reduce learning rate (try 0.00005)</li>
-<li>Check data quality — corrupted audio files cause NaN</li>
-<li>For Fun-ASR-Nano: start with encoder frozen</li>
+<li>学習率を下げる（0.00005 を試す）</li>
+<li>データ品質を確認——破損した音声ファイルは NaN の原因になる</li>
+<li>Fun-ASR-Nano の場合：encoder をフリーズした状態から始める</li>
 </ul>
 
-<h4>Validation accuracy not improving</h4>
+<h4>バリデーション精度が向上しない</h4>
 <ul>
-<li>Increase training data (min ~10h for fine-tuning)</li>
-<li>Check domain match — model may not generalize to very different domains</li>
-<li>Try unfreezing more layers gradually</li>
+<li>トレーニングデータを増やす（ファインチューニングには最低約 10 時間必要）</li>
+<li>ドメインの一致を確認——大きく異なるドメインでは汎化しにくい</li>
+<li>段階的により多くのレイヤーをアンフリーズする</li>
 </ul>
 
-<h4>Large-scale data (>10,000 hours)</h4>
-<p>Use data splitting to avoid memory issues:</p>
-<pre># Split data into chunks, load 2 at a time
+<h4>大規模データ（10,000 時間超）</h4>
+<p>メモリ問題を回避するためにデータ分割を使用：</p>
+<pre># データをチャンクに分割し、一度に 2 つずつ読み込む
 ++dataset_conf.data_split_num=256
-# data.list contains paths to split jsonl files:
+# data.list には分割された jsonl ファイルへのパスを記載：
 # data/train.0.jsonl
 # data/train.1.jsonl
 # ...
 ++train_data_set_list="data/data.list"</pre>
 
-<h4>Resume after crash</h4>
-<p>Set <code>++train_conf.resume=true</code> (default). Training automatically restarts from the latest checkpoint in <code>output_dir</code>.</p>
+<h4>クラッシュ後のトレーニング再開</h4>
+<p><code>++train_conf.resume=true</code> を設定（デフォルトで有効）。トレーニングは <code>output_dir</code> 内の最新チェックポイントから自動的に再開されます。</p>
 
 </div></div>
 

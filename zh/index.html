@@ -19,7 +19,7 @@
                 <a href="../api.html">API</a>
             </div>
             
-<div class="lang-dropdown"><button class="lang-btn">English</button><div class="lang-menu"><a href="index.html" class="current">English</a><a href="zh/index.html">中文</a><a href="ja/index.html">日本語</a></div></div>
+<div class="lang-dropdown"><button class="lang-btn">中文</button><div class="lang-menu"><a href="../index.html">English</a><a href="index.html" class="current">中文</a><a href="../ja/index.html">日本語</a></div></div>
 <a href="https://github.com/modelscope/FunASR" class="nav-github">GitHub</a>
         </div>
     </nav>
@@ -42,7 +42,7 @@
                 </div>
             </div>
 
-            <div class="hero-panel" aria-label="FunASR recognition preview">
+            <div class="hero-panel" aria-label="FunASR 识别预览">
                 <div class="terminal-bar">
                     <span class="terminal-dots"><span></span><span></span><span></span></span>
                     <span>funasr-pipeline.py</span>
@@ -98,38 +98,38 @@ print(res[0]["sentence_info"])</pre>
 
     <section>
         <div class="container">
-            <h2 class="section-title">Capabilities</h2>
-            <p class="section-subtitle">Everything needed for speech understanding, from raw audio segmentation to speaker-aware transcripts.</p>
+            <h2 class="section-title">核心能力</h2>
+            <p class="section-subtitle">语音理解所需的一切——从音频分段到带说话人标注的转写结果。</p>
             <div class="grid-3">
                 <div class="card">
                     <div class="card-icon">ASR</div>
-                    <h3>Speech Recognition</h3>
-                    <p>Streaming and offline ASR with VAD segmentation. Process long-form audio with a single API call.</p>
+                    <h3>语音识别</h3>
+                    <p>支持流式和离线 ASR，内置 VAD 分段。单次 API 调用即可处理数小时的长音频。</p>
                 </div>
                 <div class="card">
                     <div class="card-icon">50+</div>
-                    <h3>Multilingual 模型</h3>
-                    <p>Fun-ASR-Nano covers 31 languages and Qwen3-ASR covers 52 languages with language detection.</p>
+                    <h3>多语言模型</h3>
+                    <p>Fun-ASR-Nano 覆盖 31 种语言含中文方言，Qwen3-ASR 覆盖 52 种语言并自动检测语种。</p>
                 </div>
                 <div class="card">
                     <div class="card-icon">SPK</div>
-                    <h3>Speaker Diarization</h3>
-                    <p>Identify who spoke when, then attach speaker labels to sentence-level ASR output.</p>
+                    <h3>说话人分离</h3>
+                    <p>识别"谁在什么时候说了什么"，将说话人标签附加到句子级 ASR 输出。</p>
                 </div>
                 <div class="card">
                     <div class="card-icon">SFX</div>
-                    <h3>Emotion & Events</h3>
-                    <p>SenseVoice detects emotion and audio events including background music, applause, laughter, and crying.</p>
+                    <h3>情感与音频事件</h3>
+                    <p>SenseVoice 可检测语音情感和音频事件——背景音乐、掌声、笑声、哭声。</p>
                 </div>
                 <div class="card">
                     <div class="card-icon">RTF</div>
-                    <h3>Low Latency</h3>
-                    <p>Non-autoregressive models support fast batch and realtime workloads across common deployment targets.</p>
+                    <h3>低延迟</h3>
+                    <p>非自回归模型支持高效批处理和实时场景，可部署在各种硬件上。</p>
                 </div>
                 <div class="card">
                     <div class="card-icon">OPS</div>
-                    <h3>Train & Deploy</h3>
-                    <p>Fine-tune with DeepSpeed, export to ONNX, and deploy through Docker runtime or the Python SDK.</p>
+                    <h3>训练与部署</h3>
+                    <p>支持 DeepSpeed 微调、ONNX 导出、Docker 运行时和 Python SDK 部署。</p>
                 </div>
             </div>
         </div>
@@ -138,46 +138,46 @@ print(res[0]["sentence_info"])</pre>
     <section class="alt">
         <div class="container">
             <h2 class="section-title">模型</h2>
-            <p class="section-subtitle">Pre-trained industrial models ready for recognition, segmentation, and speech understanding workflows.</p>
+            <p class="section-subtitle">预训练工业级模型，用于语音识别、音频分段和语音理解流水线。</p>
             <div class="grid-2">
                 <div class="card">
                     <h3>Fun-ASR-Nano</h3>
-                    <p>End-to-end ASR trained on tens of millions of hours. 31 languages, dialects, accents, lyrics, timestamps, and hotwords.</p>
+                    <p>基于数千万小时数据训练的端到端 ASR。支持 31 种语言、方言、歌词、时间戳和热词。</p>
                     <div class="card-tags">
-                        <span class="tag">800M</span>
-                        <span class="tag">31 Languages</span>
-                        <span class="tag">Timestamps</span>
-                        <span class="tag">Speaker Diarization</span>
-                        <span class="tag">Hotwords</span>
+                        <span class="tag">8亿参数</span>
+                        <span class="tag">31种语言</span>
+                        <span class="tag">时间戳</span>
+                        <span class="tag">说话人分离</span>
+                        <span class="tag">热词</span>
                     </div>
                 </div>
                 <div class="card">
                     <h3>Paraformer</h3>
                     <p>非自回归中英文语音识别，提供流式和离线版本，适用于生产系统。</p>
                     <div class="card-tags">
-                        <span class="tag">Streaming</span>
-                        <span class="tag">Offline</span>
-                        <span class="tag">Hotwords</span>
+                        <span class="tag">流式</span>
+                        <span class="tag">离线</span>
+                        <span class="tag">热词</span>
                         <span class="tag">ONNX</span>
                     </div>
                 </div>
                 <div class="card">
                     <h3>SenseVoice</h3>
-                    <p>多任务语音理解：语音识别、语种识别、情感检测、音频事件检测，支持5种语言。</p>
+                    <p>多任务语音理解：语音识别、语种识别、情感检测、音频事件检测，支持 5 种语言。</p>
                     <div class="card-tags">
-                        <span class="tag">Emotion</span>
-                        <span class="tag">Audio Events</span>
-                        <span class="tag">Speaker Diarization</span>
+                        <span class="tag">情感</span>
+                        <span class="tag">音频事件</span>
+                        <span class="tag">说话人分离</span>
                         <span class="tag">70ms/10s</span>
                     </div>
                 </div>
                 <div class="card">
                     <h3>Qwen3-ASR</h3>
-                    <p>基于大语言模型的语音识别，支持52种语言，具备上下文理解和自动语种检测能力。</p>
+                    <p>基于大语言模型的语音识别，支持 52 种语言，具备上下文理解和自动语种检测能力。</p>
                     <div class="card-tags">
-                        <span class="tag">52 Languages</span>
+                        <span class="tag">52种语言</span>
                         <span class="tag">0.6B / 1.7B</span>
-                        <span class="tag">Context-aware</span>
+                        <span class="tag">上下文感知</span>
                     </div>
                 </div>
             </div>
@@ -189,7 +189,7 @@ print(res[0]["sentence_info"])</pre>
             <h2 class="section-title">快速开始</h2>
             <p class="section-subtitle">安装包、组合流水线、用 Python 运行识别。</p>
 <pre>pip install funasr
-# Or latest: pip install git+https://github.com/modelscope/FunASR.git</pre>
+# 或安装最新版：pip install git+https://github.com/modelscope/FunASR.git</pre>
 <pre>from funasr import AutoModel
 
 model = AutoModel(
@@ -201,7 +201,7 @@ model = AutoModel(
 res = model.generate(input="meeting.wav", batch_size_s=300)
 
 for sent in res[0]["sentence_info"]:
-    print(f"[Speaker {sent['spk']}] {sent['text']}")</pre>
+    print(f"[说话人 {sent['spk']}] {sent['text']}")</pre>
             <div class="section-cta">
                 <a href="tutorial.html" class="btn btn-primary">完整教程</a>
             </div>
@@ -234,14 +234,14 @@ for sent in res[0]["sentence_info"]:
     </section>
 
     <footer>
-        <p>FunASR &middot; Tongyi Lab, Alibaba Group</p>
+        <p>FunASR &middot; 通义实验室，阿里巴巴集团</p>
         <p>
             <a href="https://github.com/modelscope/FunASR">GitHub</a> &middot;
             <a href="training.html">训练</a> &middot;
             <a href="../api.html">API</a> &middot;
-            <a href="https://github.com/modelscope/FunASR/blob/main/MODEL_LICENSE">License</a> &middot;
+            <a href="https://github.com/modelscope/FunASR/blob/main/MODEL_LICENSE">许可证</a> &middot;
             <a href="https://pypi.org/project/funasr/">PyPI</a> &middot;
-            <a href="https://github.com/modelscope/FunASR/issues">Issues</a>
+            <a href="https://github.com/modelscope/FunASR/issues">问题反馈</a>
         </p>
     </footer>
 </body>

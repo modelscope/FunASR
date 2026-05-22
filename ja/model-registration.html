@@ -6,21 +6,21 @@
 </head><body>
 <nav class="nav"><div class="container">
 <a href="index.html" class="nav-logo">FunASR</a>
-            <div class="nav-links">
-                <a href="index.html">ホーム</a>
-                <a href="tutorial.html">チュートリアル</a>
-                <a href="training.html">トレーニング</a>
-                <a href="model-registration.html" class="active">開発</a>
-                <a href="../api.html">API</a>
-            </div>
+<div class="nav-links">
+<a href="index.html">ホーム</a>
+<a href="tutorial.html">チュートリアル</a>
+<a href="training.html">トレーニング</a>
+<a href="model-registration.html" class="active">開発</a>
+<a href="../api.html">API</a>
+</div>
 
-<div class="lang-dropdown"><button class="lang-btn">English</button><div class="lang-menu"><a href="model-registration.html" class="current">English</a><a href="zh/model-registration.html">中文</a><a href="ja/model-registration.html">日本語</a></div></div>
+<div class="lang-dropdown"><button class="lang-btn">日本語</button><div class="lang-menu"><a href="../model-registration.html">English</a><a href="../zh/model-registration.html">中文</a><a href="model-registration.html" class="current">日本語</a></div></div>
 <a href="https://github.com/modelscope/FunASR" class="nav-github">GitHub</a>
 </div></nav>
 
 <div class="content"><div class="container narrow">
 <h1>開発者ガイド</h1>
-<p>アーキテクチャの理解から自分のモデルの貢献まで——ステップバイステップガイド。</p>
+<p>アーキテクチャの理解から自分のモデルの貢献まで——ステップバイステップの完全ガイド。</p>
 
 <div class="toc-grid">
 <a href="#architecture">1. アーキテクチャ概要</a>
@@ -28,152 +28,152 @@
 <a href="#understand">3. 推論の仕組み</a>
 <a href="#add-model">4. 新しいモデルの追加</a>
 <a href="#add-component">5. フロントエンド/トークナイザーの追加</a>
-<a href="#standalone">6. スタンドアロンリポジトリ</a>
+<a href="#standalone">6. スタンドアロンリポジトリモード</a>
 <a href="#testing">7. モデルのテスト</a>
 <a href="#pitfalls">8. よくある落とし穴</a>
 <a href="#contribute">9. コントリビューション</a>
 </div>
 
-<!-- 1. Architecture -->
+<!-- 1. アーキテクチャ -->
 <h2 id="architecture">1. アーキテクチャ概要</h2>
-<p>FunASR is built around three core ideas: a <strong>registry</strong> for component discovery, <strong>AutoModel</strong> as the unified entry point, and <strong>config.yaml</strong> as the declarative model definition.</p>
+<p>FunASR は 3 つのコアコンセプトを中心に構築されています：コンポーネント発見のための<strong>レジストリ</strong>、統一エントリポイントとしての <strong>AutoModel</strong>、モデルの宣言的定義としての <strong>config.yaml</strong>。</p>
 
-<div class="arch-box">User Code                         FunASR Framework                    Model Hub
+<div class="arch-box">ユーザーコード                      FunASR フレームワーク                  モデルハブ
 ─────────                         ────────────────                    ─────────
 AutoModel(model="name")
     │
     ├─→ download_model()  ──────→  ModelScope / HuggingFace
     │       ↓                          ↓
-    │   read config.yaml          download model.pt
+    │   config.yaml を読み込み    model.pt をダウンロード
     │       ↓
-    ├─→ tables.model_classes["Name"]   ← @tables.register decorator
+    ├─→ tables.model_classes["Name"]   ← @tables.register デコレータ
     │       ↓
-    ├─→ model_class(**config)          ← __init__: build encoder/decoder
+    ├─→ model_class(**config)          ← __init__: encoder/decoder を構築
     │       ↓
-    ├─→ load_pretrained_model()        ← load weights from model.pt
+    ├─→ load_pretrained_model()        ← model.pt から重みを読み込み
     │       ↓
-    └─→ model.eval()                   ← ready for inference
+    └─→ model.eval()                   ← 推論可能状態
 
 generate(input="audio.wav")
     │
-    ├─ No VAD  → inference()           ← single utterance
+    ├─ VAD なし → inference()           ← 単一発話
     │               ↓
     │           model.inference(data_in, tokenizer, frontend, **kwargs)
     │               ↓
-    │           return [{"key", "text", "timestamp", ...}]
+    │           返り値 [{"key", "text", "timestamp", ...}]
     │
-    └─ With VAD → inference_with_vad()  ← long audio
+    └─ VAD あり → inference_with_vad()  ← 長時間音声
                     ↓
-                1. VAD: segment audio → [[start_ms, end_ms], ...]
-                2. Sort segments by length (for efficient batching)
-                3. ASR: recognize each segment
-                4. Merge timestamps (add VAD offset)
-                5. Punctuation (optional)
-                6. Speaker diarization (optional)
+                1. VAD：音声をセグメント分割 → [[開始ms, 終了ms], ...]
+                2. 長さでソート（バッチング効率化）
+                3. ASR：各セグメントを認識
+                4. タイムスタンプをマージ（VAD オフセットを加算）
+                5. 句読点復元（オプション）
+                6. 話者分離（オプション）
                     ↓
-                return [{"key", "text", "timestamp", "sentence_info"}]
+                返り値 [{"key", "text", "timestamp", "sentence_info"}]
 </div>
 
-<h3>Registry System</h3>
-<p>Every component in FunASR is registered by name. The registry is the lookup table that connects config strings to Python classes:</p>
+<h3>レジストリシステム</h3>
+<p>FunASR のすべてのコンポーネントは名前で登録されます。レジストリは設定文字列を Python クラスにマッピングするルックアップテーブルです：</p>
 
 <table>
-<tr><th>Registry</th><th>Purpose</th><th>Example</th></tr>
-<tr><td><code>model_classes</code></td><td>ASR, VAD, PUNC, SPK models</td><td>"Paraformer", "FsmnVADStreaming"</td></tr>
-<tr><td><code>encoder_classes</code></td><td>Encoder architectures</td><td>"SANMEncoder", "ConformerEncoder"</td></tr>
-<tr><td><code>decoder_classes</code></td><td>Decoder architectures</td><td>"ParaformerSANMDecoder"</td></tr>
-<tr><td><code>frontend_classes</code></td><td>Audio feature extraction</td><td>"WavFrontend", "WhisperFrontend"</td></tr>
-<tr><td><code>tokenizer_classes</code></td><td>Text tokenization</td><td>"SentencepiecesTokenizer"</td></tr>
-<tr><td><code>dataset_classes</code></td><td>Training data loading</td><td>"AudioDataset"</td></tr>
+<tr><th>レジストリ</th><th>用途</th><th>例</th></tr>
+<tr><td><code>model_classes</code></td><td>ASR、VAD、句読点、話者モデル</td><td>"Paraformer", "FsmnVADStreaming"</td></tr>
+<tr><td><code>encoder_classes</code></td><td>エンコーダアーキテクチャ</td><td>"SANMEncoder", "ConformerEncoder"</td></tr>
+<tr><td><code>decoder_classes</code></td><td>デコーダアーキテクチャ</td><td>"ParaformerSANMDecoder"</td></tr>
+<tr><td><code>frontend_classes</code></td><td>音声特徴量抽出</td><td>"WavFrontend", "WhisperFrontend"</td></tr>
+<tr><td><code>tokenizer_classes</code></td><td>テキストトークン化</td><td>"SentencepiecesTokenizer"</td></tr>
+<tr><td><code>dataset_classes</code></td><td>トレーニングデータ読み込み</td><td>"AudioDataset"</td></tr>
 </table>
 
 <pre>from funasr.register import tables
 
-# Register a new model
+# 新しいモデルを登録
 @tables.register("model_classes", "MyModel")
 class MyModel(nn.Module):
     ...
 
-# View all registered models
+# 登録済みモデルの一覧を表示
 tables.print("model")</pre>
 
-<!-- 2. Setup -->
+<!-- 2. セットアップ -->
 <h2 id="setup">2. 開発環境セットアップ</h2>
 
 <div class="step">
-<h4>Clone and install in development mode</h4>
+<h4>クローンして開発モードでインストール</h4>
 <pre>git clone https://github.com/modelscope/FunASR.git
 cd FunASR
-pip install -e .              # editable install
-pip install -e ".[train]"     # with training dependencies</pre>
+pip install -e .              # 編集可能インストール
+pip install -e ".[train]"     # トレーニング依存関係も含む</pre>
 </div>
 
 <div class="step">
-<h4>Verify installation</h4>
+<h4>インストールの確認</h4>
 <pre>python -c "from funasr import AutoModel; print('OK')"
 python -c "from funasr.register import tables; tables.print('model')"</pre>
 </div>
 
 <div class="step">
-<h4>Run existing tests</h4>
-<pre># Quick smoke test
+<h4>既存テストの実行</h4>
+<pre># クイックスモークテスト
 python tests_models/test_fsmn_vad.py
 python tests_models/test_paraformer.py
 
-# Full test suite
+# フルテストスイート
 cd tests_models && python run_all_tests.py</pre>
 </div>
 
-<!-- 3. How Inference Works -->
-<h2 id="understand">3. How Inference Works (Deep Dive)</h2>
+<!-- 3. 推論の仕組み -->
+<h2 id="understand">3. 推論の仕組み（詳細解説）</h2>
 
-<p>Understanding the inference data flow is essential before adding a new model. Here's what happens when you call <code>model.generate(input="audio.wav")</code>:</p>
+<p>新しいモデルを追加する前に、推論のデータフローを理解することが不可欠です。<code>model.generate(input="audio.wav")</code> を呼び出した際の全体の流れ：</p>
 
-<h4>Step 1: Input Preparation</h4>
-<p><code>prepare_data_iterator()</code> normalizes any input type (file path, URL, numpy, bytes, list) into a uniform <code>(key_list, data_list)</code> format.</p>
+<h4>ステップ 1：入力の準備</h4>
+<p><code>prepare_data_iterator()</code> が様々な入力タイプ（ファイルパス、URL、numpy 配列、bytes、リスト）を統一的な <code>(key_list, data_list)</code> フォーマットに正規化します。</p>
 
-<h4>Step 2: Model Inference</h4>
-<p>Each model's <code>inference()</code> method receives:</p>
+<h4>ステップ 2：モデル推論</h4>
+<p>各モデルの <code>inference()</code> メソッドは以下を受け取ります：</p>
 <pre>def inference(self, data_in, data_lengths=None, key=None,
               tokenizer=None, frontend=None, **kwargs):
-    # data_in: list of audio samples (numpy arrays)
-    # tokenizer: for decoding token IDs → text
-    # frontend: for extracting fbank features
-    # **kwargs: all config.yaml params + user runtime params
+    # data_in: 音声サンプルのリスト（numpy 配列）
+    # tokenizer: トークン ID をテキストにデコード
+    # frontend: fbank 特徴量を抽出
+    # **kwargs: config.yaml の全パラメータ + ユーザーのランタイムパラメータ
 
-    # Must return: (results_list, meta_data_dict)
+    # 返り値は必ず：(結果リスト, メタデータ辞書)
     return [{"key": "id", "text": "hello", "timestamp": [...]}], {"batch_data_time": 5.5}</pre>
 
-<h4>Step 3: Output Format</h4>
-<p>The <code>results_list</code> must be a list of dicts. Required/optional fields:</p>
+<h4>ステップ 3：出力フォーマット</h4>
+<p><code>results_list</code> は辞書のリストでなければなりません。必須/オプションフィールド：</p>
 <table>
-<tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr>
-<tr><td><code>key</code></td><td>str</td><td>Yes</td><td>Sample identifier</td></tr>
-<tr><td><code>text</code></td><td>str</td><td>Yes (ASR)</td><td>Recognized text</td></tr>
-<tr><td><code>timestamp</code></td><td>list</td><td>For SPK</td><td><code>[[start_ms, end_ms], ...]</code> per character</td></tr>
-<tr><td><code>value</code></td><td>list</td><td>VAD only</td><td><code>[[start_ms, end_ms], ...]</code> speech segments</td></tr>
-<tr><td><code>spk_embedding</code></td><td>Tensor</td><td>SPK only</td><td>Shape <code>[N, 192]</code></td></tr>
+<tr><th>フィールド</th><th>型</th><th>必須</th><th>説明</th></tr>
+<tr><td><code>key</code></td><td>str</td><td>はい</td><td>サンプル識別子</td></tr>
+<tr><td><code>text</code></td><td>str</td><td>はい（ASR）</td><td>認識テキスト</td></tr>
+<tr><td><code>timestamp</code></td><td>list</td><td>話者分離時</td><td><code>[[開始ms, 終了ms], ...]</code> 文字単位タイムスタンプ</td></tr>
+<tr><td><code>value</code></td><td>list</td><td>VAD のみ</td><td><code>[[開始ms, 終了ms], ...]</code> 音声区間</td></tr>
+<tr><td><code>spk_embedding</code></td><td>Tensor</td><td>話者モデルのみ</td><td>形状 <code>[N, 192]</code></td></tr>
 </table>
 
 <div class="warning">
-<strong>Timestamp format matters!</strong> If your model outputs timestamps differently (e.g., dict format like Fun-ASR-Nano), FunASR's <code>inference_with_vad</code> will auto-convert it. But the standard expected format is <code>[[start_ms, end_ms], ...]</code> (list of 2-element lists in milliseconds).
+<strong>タイムスタンプのフォーマットは重要です！</strong>モデルがタイムスタンプを辞書形式（Fun-ASR-Nano の <code>{"start_time": 0.5, "end_time": 0.8}</code> のような形式）で出力する場合、FunASR の <code>inference_with_vad</code> が自動変換します。ただし、標準的に期待されるフォーマットは <code>[[開始ms, 終了ms], ...]</code>（ミリ秒単位の 2 要素リスト）です。
 </div>
 
-<!-- 4. Add a New Model -->
+<!-- 4. 新しいモデルの追加 -->
 <h2 id="add-model">4. 新しいモデルの追加</h2>
 
 <div class="step">
-<h4>Create model directory</h4>
+<h4>モデルディレクトリの作成</h4>
 <pre>funasr/models/my_model/
-├── __init__.py      # empty file
-├── model.py         # main model class
-├── encoder.py       # (optional) custom encoder
-└── decoder.py       # (optional) custom decoder</pre>
-<div class="warning"><strong>Rule:</strong> Each model directory is self-contained. Never import from other model directories. Never modify existing models.</div>
+├── __init__.py      # 空ファイル
+├── model.py         # メインモデルクラス
+├── encoder.py       # （オプション）カスタムエンコーダ
+└── decoder.py       # （オプション）カスタムデコーダ</pre>
+<div class="warning"><strong>ルール：</strong>各モデルディレクトリは自己完結でなければなりません。他のモデルディレクトリからインポートしないこと。既存モデルを変更しないこと。</div>
 </div>
 
 <div class="step">
-<h4>Implement the model class</h4>
+<h4>モデルクラスの実装</h4>
 <pre>import torch.nn as nn
 from funasr.register import tables
 
@@ -181,29 +181,29 @@ from funasr.register import tables
 class MyModel(nn.Module):
 
     def __init__(self, **kwargs):
-        super().__init__()    # ← MUST call super().__init__()
-        # Build your architecture from kwargs (comes from config.yaml)
-        # kwargs includes: input_size, vocab_size, tokenizer, frontend, etc.
+        super().__init__()    # ← 必ず super().__init__() を呼ぶこと
+        # kwargs からネットワーク構造を構築（kwargs は config.yaml から来る）
+        # kwargs に含まれるもの：input_size, vocab_size, tokenizer, frontend 等
 
     def forward(self, speech, speech_lengths, text, text_lengths, **kwargs):
-        """Training forward pass. Return (loss, stats_dict, weight)."""
+        """トレーニングの順伝播。(loss, stats_dict, weight) を返す。"""
         ...
 
     def inference(self, data_in, data_lengths=None, key=None,
                   tokenizer=None, frontend=None, **kwargs):
-        """Inference. Return (results_list, meta_data)."""
+        """推論。(results_list, meta_data) を返す。"""
         ...
 </pre>
 </div>
 
 <div class="step">
-<h4>Create config.yaml</h4>
-<pre># This file defines what components to use
-model: MyModel              # matches @tables.register key
+<h4>config.yaml の作成</h4>
+<pre># このファイルで使用するコンポーネントを定義
+model: MyModel              # @tables.register のキーと一致
 model_conf:
     hidden_size: 512
 
-frontend: WavFrontend       # reuse existing frontend
+frontend: WavFrontend       # 既存のフロントエンドを再利用
 frontend_conf:
     fs: 16000
     n_mels: 80
@@ -217,7 +217,7 @@ tokenizer_conf:
 </div>
 
 <div class="step">
-<h4>Create configuration.json (for Hub upload)</h4>
+<h4>configuration.json の作成（Hub アップロード用）</h4>
 <pre>{
   "framework": "pytorch",
   "task": "auto-speech-recognition",
@@ -229,22 +229,22 @@ tokenizer_conf:
     "frontend_conf": {"cmvn_file": "am.mvn"}
   }
 }</pre>
-<p>This file tells AutoModel how to resolve relative paths. When the model is downloaded, each path in <code>file_path_metas</code> gets the model directory prepended.</p>
+<p>このファイルは AutoModel に相対パスの解決方法を伝えます。モデルがダウンロードされると、<code>file_path_metas</code> 内の各パスにモデルディレクトリが前置されます。</p>
 </div>
 
 <div class="step">
-<h4>Test locally</h4>
+<h4>ローカルテスト</h4>
 <pre>from funasr import AutoModel
 
-# From local directory
+# ローカルディレクトリから読み込み
 model = AutoModel(model="./my_model_dir")
 res = model.generate(input="test.wav")
 print(res)</pre>
 </div>
 
-<!-- 5. Add Component -->
-<h2 id="add-component">5. Add a New Frontend / Tokenizer / Dataset</h2>
-<p>The same registry pattern applies to all components. Example — adding a new frontend:</p>
+<!-- 5. フロントエンド/トークナイザーの追加 -->
+<h2 id="add-component">5. 新しいフロントエンド / トークナイザー / データセットの追加</h2>
+<p>すべてのコンポーネントに同じレジストリパターンが適用されます。新しいフロントエンドの追加例：</p>
 
 <pre>from funasr.register import tables
 
@@ -255,54 +255,54 @@ class MyFrontend(nn.Module):
         self.fs = fs
 
     def output_size(self):
-        return 80  # feature dimension
+        return 80  # 特徴量の次元数
 
     def forward(self, input, input_lengths):
-        # input: raw waveform (batch, samples)
-        # return: features (batch, frames, dim), lengths
+        # input: 生波形 (batch, samples)
+        # 返り値: 特徴量 (batch, frames, dim), 長さ
         ...</pre>
 
-<p>Then reference it in config.yaml:</p>
+<p>config.yaml で参照：</p>
 <pre>frontend: MyFrontend
 frontend_conf:
     fs: 16000</pre>
 
-<p>Same pattern for tokenizer (<code>tokenizer_classes</code>), dataset (<code>dataset_classes</code>), encoder (<code>encoder_classes</code>), etc.</p>
+<p>トークナイザー（<code>tokenizer_classes</code>）、データセット（<code>dataset_classes</code>）、エンコーダ（<code>encoder_classes</code>）なども同じパターンです。</p>
 
-<!-- 6. Standalone -->
-<h2 id="standalone">6. Standalone Repository Mode</h2>
-<p>Your model doesn't need to live inside the FunASR source tree. With <code>trust_remote_code=True</code>, FunASR dynamically loads your model class from an external file:</p>
+<!-- 6. スタンドアロンリポジトリ -->
+<h2 id="standalone">6. スタンドアロンリポジトリモード</h2>
+<p>モデルを FunASR のソースツリー内に置く必要はありません。<code>trust_remote_code=True</code> を使用すると、FunASR は外部ファイルからモデルクラスを動的に読み込みます：</p>
 
-<pre># User code — loads YOUR model.py from a separate repo
+<pre># ユーザーコード — 独立リポジトリからモデルを読み込む
 model = AutoModel(
-    model="your-org/your-model",      # HuggingFace/ModelScope repo
+    model="your-org/your-model",      # HuggingFace/ModelScope リポジトリ
     trust_remote_code=True,
-    remote_code="./model.py",          # path to model class definition
+    remote_code="./model.py",          # モデルクラス定義ファイルのパス
     hub="hf",
 )</pre>
 
-<p><strong>How it works:</strong></p>
+<p><strong>動作の仕組み：</strong></p>
 <ol>
-<li>FunASR downloads the model repo (weights + config + model.py)</li>
-<li><code>remote_code="./model.py"</code> is dynamically imported</li>
-<li>The <code>@tables.register</code> decorator in that file registers the model class</li>
-<li>Normal <code>build_model()</code> flow proceeds with the registered class</li>
+<li>FunASR がモデルリポジトリをダウンロード（重み + 設定 + model.py）</li>
+<li><code>remote_code="./model.py"</code> が動的にインポートされる</li>
+<li>そのファイル内の <code>@tables.register</code> デコレータがモデルクラスをレジストリに登録</li>
+<li>通常の <code>build_model()</code> フローが登録されたクラスで進行</li>
 </ol>
 
-<p><strong>Your repo structure:</strong></p>
+<p><strong>リポジトリ構成：</strong></p>
 <pre>your-model-repo/
-├── model.py              # model class with @tables.register
-├── config.yaml           # model architecture config
-├── configuration.json    # path resolution
-├── model.pt              # trained weights
-└── example/test.wav      # demo audio</pre>
+├── model.py              # @tables.register 付きモデルクラス
+├── config.yaml           # モデルアーキテクチャ設定
+├── configuration.json    # パス解決設定
+├── model.pt              # 学習済み重み
+└── example/test.wav      # デモ音声</pre>
 
-<p>Examples: <a href="https://github.com/FunAudioLLM/Fun-ASR">Fun-ASR-Nano</a>, <a href="https://github.com/FunAudioLLM/SenseVoice">SenseVoice</a></p>
+<p>参考実装：<a href="https://github.com/FunAudioLLM/Fun-ASR">Fun-ASR-Nano</a>、<a href="https://github.com/FunAudioLLM/SenseVoice">SenseVoice</a></p>
 
-<!-- 7. Testing -->
+<!-- 7. テスト -->
 <h2 id="testing">7. モデルのテスト</h2>
 
-<h4>Write a test script</h4>
+<h4>テストスクリプトの作成</h4>
 <pre># tests_models/test_my_model.py
 import sys, time
 from funasr import AutoModel
@@ -311,16 +311,16 @@ def main():
     model = AutoModel(model="path/to/model", device="cpu", disable_update=True)
     res = model.generate(input="test.wav")
 
-    assert res and len(res) > 0, "empty result"
-    assert "text" in res[0], "missing text field"
+    assert res and len(res) > 0, "結果が空です"
+    assert "text" in res[0], "text フィールドがありません"
     print("PASSED")
     return 0
 
 if __name__ == "__main__":
     sys.exit(main())</pre>
 
-<h4>Test with VAD + SPK pipeline</h4>
-<pre># If your model should work with speaker diarization:
+<h4>VAD + 話者分離パイプラインのテスト</h4>
+<pre># モデルが話者分離をサポートする場合：
 model = AutoModel(
     model="path/to/model",
     vad_model="fsmn-vad",
@@ -330,68 +330,68 @@ res = model.generate(input="meeting.wav", cache={})
 assert "sentence_info" in res[0]
 assert "spk" in res[0]["sentence_info"][0]</pre>
 
-<h4>Test streaming (if applicable)</h4>
+<h4>ストリーミング推論のテスト（該当する場合）</h4>
 <pre>cache = {}
 for i in range(total_chunks):
     chunk = audio[i*stride:(i+1)*stride]
     res = model.generate(input=chunk, cache=cache,
                          is_final=(i == total_chunks-1), ...)
-# Verify: same audio gives same result across multiple sessions</pre>
+# 検証：同じ音声で複数セッションにわたり同じ結果が得られること</pre>
 
-<!-- 8. Pitfalls -->
+<!-- 8. よくある落とし穴 -->
 <h2 id="pitfalls">8. よくある落とし穴</h2>
 
-<h4>❌ Forgetting <code>super().__init__()</code></h4>
-<pre># WRONG — causes "object has no attribute '_state_dict_pre_hooks'"
+<h4>❌ <code>super().__init__()</code> の呼び忘れ</h4>
+<pre># 間違い — "object has no attribute '_state_dict_pre_hooks'" エラーの原因
 class MyEncoder(nn.Module):
     def __init__(self):
         pass
 
-# CORRECT
+# 正しい
 class MyEncoder(nn.Module):
     def __init__(self):
         super().__init__()</pre>
 
-<h4>❌ Checking <code>kwargs["batch_size"]</code> in your model</h4>
-<p><code>batch_size</code> in kwargs is set by <code>inference_with_vad</code> for segment batching (a large number in ms). Don't use it to check actual data batch size. Use <code>len(data_in)</code> instead.</p>
+<h4>❌ モデル内で <code>kwargs["batch_size"]</code> をチェック</h4>
+<p>kwargs の <code>batch_size</code> は <code>inference_with_vad</code> がセグメントバッチング用に設定した値（ミリ秒単位の大きな数値）です。実際のデータバッチサイズの判定には使わないでください。代わりに <code>len(data_in)</code> を使用します。</p>
 
-<h4>❌ Not handling empty/short input</h4>
-<p>VAD may produce empty segments. Your <code>inference()</code> should handle <code>data_in = []</code> gracefully.</p>
+<h4>❌ 空入力・短い入力の未処理</h4>
+<p>VAD が空のセグメントを生成する可能性があります。<code>inference()</code> は <code>data_in = []</code> を適切に処理できなければなりません。</p>
 
-<h4>❌ Timestamp format mismatch</h4>
-<p>If your model returns timestamps as dicts (<code>{"start_time": 0.5, "end_time": 0.8}</code>), the pipeline handles conversion. But if you output <code>[start_time, end_time, text]</code> (3 elements), strip the text — downstream expects <code>[start_ms, end_ms]</code> (2 elements, in milliseconds).</p>
+<h4>❌ タイムスタンプフォーマットの不一致</h4>
+<p>モデルが辞書形式のタイムスタンプ（<code>{"start_time": 0.5, "end_time": 0.8}</code>）を返す場合、パイプラインが自動変換します。ただし <code>[start_time, end_time, text]</code>（3 要素）を出力する場合は、テキストを除去してください——ダウンストリームは <code>[開始ms, 終了ms]</code>（2 要素、ミリ秒単位）を期待しています。</p>
 
-<h4>❌ Importing from other model directories</h4>
-<pre># WRONG — creates tight coupling
+<h4>❌ 他のモデルディレクトリからのインポート</h4>
+<pre># 間違い — 密結合を生む
 from funasr.models.paraformer.model import Paraformer
 
-# CORRECT — copy what you need into your own directory
-# Or inherit via the registry name in config.yaml</pre>
+# 正しい — 必要なコードを自分のディレクトリにコピーする
+# または config.yaml でレジストリ名を通じて参照</pre>
 
-<h4>❌ Modifying <code>self.kwargs</code> during inference</h4>
-<p>Don't mutate <code>kwargs</code> that came from AutoModel. The framework resets state between calls, but persistent mutations can leak between sessions.</p>
+<h4>❌ 推論中に <code>self.kwargs</code> を変更する</h4>
+<p>AutoModel から渡された kwargs を変更しないでください。フレームワークは呼び出し間で状態をリセットしますが、永続的な変更はセッション間で漏洩する可能性があります。</p>
 
-<!-- 9. Contributing -->
+<!-- 9. コントリビューション -->
 <h2 id="contribute">9. コントリビューション</h2>
 
-<h4>Code Style</h4>
+<h4>コードスタイル</h4>
 <ul>
-<li>Follow existing patterns — look at <code>paraformer/model.py</code> as reference</li>
-<li>Add docstrings to all public methods (Args, Returns)</li>
-<li>No comments explaining WHAT — use clear naming. Comments for WHY only.</li>
+<li>既存のパターンに従う——<code>paraformer/model.py</code> を参考にする</li>
+<li>すべてのパブリックメソッドに docstring を追加（Args と Returns を含む）</li>
+<li>コメントは「なぜ」のみ——「何を」の説明は明確な命名で代替</li>
 </ul>
 
-<h4>PR Checklist</h4>
+<h4>PR チェックリスト</h4>
 <ul>
-<li>New model: self-contained directory, no cross-model imports</li>
-<li>Include a test script in <code>tests_models/</code></li>
-<li>Include a demo in <code>examples/industrial_data_pretraining/</code></li>
-<li>All existing tests still pass</li>
-<li>Add entry to README What's New if user-facing</li>
+<li>新モデル：自己完結したディレクトリ、他モデルへのインポートなし</li>
+<li><code>tests_models/</code> にテストスクリプトを含める</li>
+<li><code>examples/industrial_data_pretraining/</code> にデモを含める</li>
+<li>既存のテストがすべてパスすること</li>
+<li>ユーザー向け機能の場合、README の What's New にエントリを追加</li>
 </ul>
 
-<h4>License</h4>
-<p>Code: MIT. Model weights: FunASR Model License (commercial use allowed with attribution).</p>
+<h4>ライセンス</h4>
+<p>コード：MIT ライセンス。モデルの重み：FunASR モデルライセンス（帰属表示付きで商用利用可）。</p>
 
 </div></div>
 

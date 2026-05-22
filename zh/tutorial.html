@@ -6,24 +6,24 @@
 </head><body>
 <nav class="nav"><div class="container">
 <a href="index.html" class="nav-logo">FunASR</a>
-            <div class="nav-links">
-                <a href="index.html">首页</a>
-                <a href="tutorial.html" class="active">教程</a>
-                <a href="training.html">训练</a>
-                <a href="model-registration.html">开发</a>
-                <a href="../api.html">API</a>
-            </div>
+<div class="nav-links">
+<a href="index.html">首页</a>
+<a href="tutorial.html" class="active">教程</a>
+<a href="training.html">训练</a>
+<a href="model-registration.html">开发</a>
+<a href="../api.html">API</a>
+</div>
 
-<div class="lang-dropdown"><button class="lang-btn">English</button><div class="lang-menu"><a href="tutorial.html" class="current">English</a><a href="zh/tutorial.html">中文</a><a href="ja/tutorial.html">日本語</a></div></div>
+<div class="lang-dropdown"><button class="lang-btn">中文</button><div class="lang-menu"><a href="../tutorial.html">English</a><a href="tutorial.html" class="current">中文</a><a href="../ja/tutorial.html">日本語</a></div></div>
 <a href="https://github.com/modelscope/FunASR" class="nav-github">GitHub</a>
 </div></nav>
 
 <div class="content"><div class="container narrow">
 <h1>使用教程</h1>
-<p>从零开始，10分钟掌握 FunASR 的完整使用方法。</p>
+<p>从零开始，10 分钟掌握 FunASR 的完整使用方法。</p>
 
 <div class="toc-grid">
-<a href="#quick">30秒快速体验</a>
+<a href="#quick">30 秒快速体验</a>
 <a href="#install">安装</a>
 <a href="#choose">模型选择</a>
 <a href="#scenarios">应用场景</a>
@@ -32,13 +32,13 @@
 <a href="#spk">说话人分离</a>
 <a href="#emotion">情感检测</a>
 <a href="#vad">语音活动检测</a>
-<a href="#punc">标点输出</a>
+<a href="#punc">标点恢复</a>
 <a href="#export">ONNX 模型导出</a>
 <a href="#faq">常见问题</a>
 </div>
 
-<!-- 30-Second Demo -->
-<h2 id="quick">30秒快速体验</h2>
+<!-- 30秒快速体验 -->
+<h2 id="quick">30 秒快速体验</h2>
 <p>复制以下代码直接运行即可。无需任何配置，FunASR 会自动下载所需的模型：</p>
 <pre>pip install funasr
 
@@ -53,25 +53,25 @@ print(res[0]['text'])
 
 <p>就是这么简单。一个模型对象搞定所有事情：音频加载、语音分段、语音识别和标点添加。</p>
 
-<!-- Install -->
+<!-- 安装 -->
 <h2 id="install">安装</h2>
-<pre># Stable release
+<pre># 稳定版
 pip install funasr
 
-# Latest (recommended — has newest models and bug fixes)
+# 最新版（推荐——包含最新模型和 bug 修复）
 pip install git+https://github.com/modelscope/FunASR.git</pre>
 
-<div class="tip"><strong>中国用户：</strong>模型默认从 ModelScope 下载（国内快速）。海外用户：添加 <code>hub="hf"</code> 以从 HuggingFace 下载。</div>
+<div class="tip"><strong>中国用户：</strong>模型默认从 ModelScope 下载（国内速度快）。海外用户：添加 <code>hub="hf"</code> 切换到 HuggingFace 下载。</div>
 
-<!-- Choose a Model -->
+<!-- 模型选择 -->
 <h2 id="choose">我应该用哪个模型？</h2>
 
 <table>
-<tr><th>Model</th><th>适用场景</th><th>支持语言</th><th>推理速度</th><th>标点输出</th></tr>
+<tr><th>模型</th><th>适用场景</th><th>支持语言</th><th>速度</th><th>标点</th></tr>
 <tr><td><strong>Paraformer</strong></td><td>中文生产级识别</td><td>中文、英文</td><td>快</td><td>需要 punc_model</td></tr>
-<tr><td><strong>Fun-ASR-Nano</strong></td><td>多语言、方言、歌词识别</td><td>31种语言</td><td>中等</td><td>Built-in ✓</td></tr>
-<tr><td><strong>SenseVoice</strong></td><td>情感+音频事件+语音识别</td><td>5种语言</td><td>极快（10秒音频仅需70ms）</td><td>Built-in ✓</td></tr>
-<tr><td><strong>Qwen3-ASR</strong></td><td>最高精度，上下文理解</td><td>52种语言</td><td>较慢（大模型）</td><td>Built-in ✓</td></tr>
+<tr><td><strong>Fun-ASR-Nano</strong></td><td>多语言、方言、歌词</td><td>31 种语言</td><td>中等</td><td>内置 ✓</td></tr>
+<tr><td><strong>SenseVoice</strong></td><td>情感 + 音频事件 + 识别</td><td>5 种语言</td><td>极快（10s 音频仅需 70ms）</td><td>内置 ✓</td></tr>
+<tr><td><strong>Qwen3-ASR</strong></td><td>最高精度，上下文理解</td><td>52 种语言</td><td>较慢（大模型）</td><td>内置 ✓</td></tr>
 <tr><td><strong>Paraformer-Streaming</strong></td><td>实时转写</td><td>中文</td><td>实时</td><td>需要 punc_model</td></tr>
 </table>
 
@@ -84,7 +84,7 @@ pip install git+https://github.com/modelscope/FunASR.git</pre>
 • 最高质量，不在乎延迟 → <code>Qwen3-ASR</code>
 </div>
 
-<!-- Scenarios -->
+<!-- 应用场景 -->
 <h2 id="scenarios">应用场景</h2>
 
 <div class="scenario-card">
@@ -94,7 +94,7 @@ pip install git+https://github.com/modelscope/FunASR.git</pre>
 
 <div class="scenario-card">
 <h4>📺 "我想为直播生成实时字幕"</h4>
-<p>→ Paraformer-Streaming，每600ms送入一段音频 → <a href="#streaming">跳转到流式识别</a></p>
+<p>→ Paraformer-Streaming，每 600ms 送入一段音频 → <a href="#streaming">跳转到流式识别</a></p>
 </div>
 
 <div class="scenario-card">
@@ -104,31 +104,31 @@ pip install git+https://github.com/modelscope/FunASR.git</pre>
 
 <div class="scenario-card">
 <h4>🌍 "我的音频是日语/韩语/阿拉伯语等外语"</h4>
-<p>→ Fun-ASR-Nano（31种语言）或 Qwen3-ASR（52种语言）→ <a href="#offline">跳转到离线识别</a></p>
+<p>→ Fun-ASR-Nano（31 种语言）或 Qwen3-ASR（52 种语言）→ <a href="#offline">跳转到离线识别</a></p>
 </div>
 
 <div class="scenario-card">
 <h4>✂️ "我想根据语音内容来剪辑视频"</h4>
-<p>→ Use <a href="https://github.com/modelscope/FunClip">FunClip</a> （集成了 FunASR 的智能视频剪辑工具）</p>
+<p>→ 使用 <a href="https://github.com/modelscope/FunClip">FunClip</a>（集成了 FunASR 的智能视频剪辑工具）</p>
 </div>
 
-<!-- Offline ASR -->
+<!-- 离线识别 -->
 <h2 id="offline">离线语音识别</h2>
 
-<h3>Paraformer（中文识别）</h3>
+<h3>Paraformer（中文）</h3>
 <pre>from funasr import AutoModel
 
 model = AutoModel(
-    model="paraformer-zh",          # Chinese ASR
-    vad_model="fsmn-vad",           # handles any audio length
+    model="paraformer-zh",          # 中文 ASR
+    vad_model="fsmn-vad",           # 支持任意长度音频
     vad_kwargs={"max_single_segment_time": 60000},
-    punc_model="ct-punc",           # adds punctuation
+    punc_model="ct-punc",           # 添加标点
 )
 res = model.generate(input="meeting.wav", batch_size_s=300, hotword='达摩院 语音识别')
 print(res[0]["text"])       # "欢迎大家来体验达摩院推出的语音识别模型。"
-print(res[0]["timestamp"])  # [[880,1120],[1120,1360],...] (ms per character)</pre>
+print(res[0]["timestamp"])  # [[880,1120],[1120,1360],...] (每个字的毫秒时间戳)</pre>
 
-<h3>Fun-ASR-Nano（31种语言）</h3>
+<h3>Fun-ASR-Nano（31 种语言）</h3>
 <pre>from funasr import AutoModel
 
 model = AutoModel(
@@ -142,12 +142,12 @@ model = AutoModel(
 )
 res = model.generate(input=["audio.wav"], cache={}, batch_size=1,
                      hotwords=["keyword"], language="中文")
-print(res[0]["text"])        # recognized text with punctuation
+print(res[0]["text"])        # 带标点的识别文本
 print(res[0]["timestamps"])  # [{"token":"开","start_time":0.42,"end_time":0.48}, ...]</pre>
 
-<div class="note"><strong>Fun-ASR-Nano 自带标点输出</strong> — 无需额外添加 <code>punc_model</code>.</div>
+<div class="note"><strong>Fun-ASR-Nano 自带标点输出</strong>——无需额外添加 <code>punc_model</code>。</div>
 
-<h3>SenseVoice（语音识别 + 情感 + 音频事件）</h3>
+<h3>SenseVoice（识别 + 情感 + 音频事件）</h3>
 <pre>from funasr import AutoModel
 from funasr.utils.postprocess_utils import rich_transcription_postprocess
 
@@ -160,20 +160,20 @@ model = AutoModel(
 res = model.generate(input="audio.wav", cache={}, language="auto",
                      use_itn=True, batch_size_s=60, merge_vad=True, merge_length_s=15)
 
-# Raw output contains emotion/event tags: <|zh|><|HAPPY|><|Speech|>你好
+# 原始输出包含情感/事件标签：<|zh|><|HAPPY|><|Speech|>你好
 text = rich_transcription_postprocess(res[0]["text"])
-print(text)  # "你好" (clean text)</pre>
+print(text)  # "你好"（干净文本）</pre>
 
-<h3>Qwen3-ASR（52种语言，最高精度）</h3>
+<h3>Qwen3-ASR（52 种语言，最高精度）</h3>
 <pre># pip install qwen-asr
 from funasr import AutoModel
 
 model = AutoModel(model="Qwen/Qwen3-ASR-1.7B", hub="hf", device="cuda:0")
 res = model.generate(input="audio.wav")
-print(res[0]["text"])             # recognized text
-print(res[0].get("language"))    # auto-detected language</pre>
+print(res[0]["text"])             # 识别文本
+print(res[0].get("language"))    # 自动检测到的语言</pre>
 
-<!-- Streaming -->
+<!-- 流式识别 -->
 <h2 id="streaming">流式语音识别（实时）</h2>
 <p>逐块处理音频实现实时转写。每送入一小段音频，立即返回识别出的部分文字。</p>
 
@@ -183,8 +183,8 @@ import soundfile
 model = AutoModel(model="paraformer-zh-streaming")
 
 speech, sr = soundfile.read("audio.wav")
-chunk_size = [0, 10, 5]          # 600ms display, 300ms lookahead
-chunk_stride = chunk_size[1] * 960  # 9600 samples per chunk
+chunk_size = [0, 10, 5]          # 600ms 显示，300ms 前瞻
+chunk_stride = chunk_size[1] * 960  # 每块 9600 个采样点
 
 cache = {}
 total_chunks = int((len(speech) - 1) / chunk_stride + 1)
@@ -197,7 +197,7 @@ for i in range(total_chunks):
                          encoder_chunk_look_back=4,
                          decoder_chunk_look_back=1)
     if res[0]["text"]:
-        print(res[0]["text"], end="", flush=True)  # incremental output</pre>
+        print(res[0]["text"], end="", flush=True)  # 增量输出</pre>
 
 <p><strong>输出（逐步打印）：</strong></p>
 <div class="output-box">欢迎大 | 家来 | 体验达 | 摩院推 | 出的语 | 音识 | 别模型</div>
@@ -205,13 +205,13 @@ for i in range(total_chunks):
 <div class="note">
 <strong>要点：</strong><br>
 • <code>cache={}</code> 必须在所有 chunk 间保持（不要重新创建）<br>
-• <code>is_final=True</code> 在最后一个 chunk 设置此参数，强制输出剩余缓存文字<br>
-• <code>chunk_size=[0,10,5]</code>: 第一个数字未使用，第二个=显示粒度 (×60ms), 第三个=前瞻 (×60ms)
+• 最后一个 chunk 设置 <code>is_final=True</code>，强制输出剩余缓存文字<br>
+• <code>chunk_size=[0,10,5]</code>：第一个数未使用，第二个=显示粒度（×60ms），第三个=前瞻（×60ms）
 </div>
 
-<!-- Speaker Diarization -->
+<!-- 说话人分离 -->
 <h2 id="spk">说话人分离（"谁说了什么"）</h2>
-<p>支持<strong>三个主要模型</strong>：Paraformer、Fun-ASR-Nano 和 SenseVoice。 Add <code>spk_model="cam++"</code> 即可为每句话标注说话人。</p>
+<p>支持<strong>三个主要模型</strong>：Paraformer、Fun-ASR-Nano 和 SenseVoice。添加 <code>spk_model="cam++"</code> 即可为每句话标注说话人。</p>
 
 <h3>Paraformer + 说话人分离</h3>
 <pre>from funasr import AutoModel
@@ -219,42 +219,42 @@ for i in range(total_chunks):
 model = AutoModel(
     model="paraformer-zh",
     vad_model="fsmn-vad",
-    punc_model="ct-punc",      # Paraformer needs this for sentence segmentation
+    punc_model="ct-punc",      # Paraformer 需要标点模型来做句子切分
     spk_model="cam++",
 )
 res = model.generate(input="meeting.wav", batch_size_s=300)
 
 for sent in res[0]["sentence_info"]:
-    print(f"[Speaker {sent['spk']}] [{sent['start']}-{sent['end']}ms] {sent['text']}")</pre>
+    print(f"[说话人 {sent['spk']}] [{sent['start']}-{sent['end']}ms] {sent['text']}")</pre>
 
-<p><strong>输出结果：</strong></p>
-<div class="output-box">[Speaker 0] [880-5195ms] 欢迎大家来体验达摩院推出的语音识别模型。</div>
+<p><strong>输出：</strong></p>
+<div class="output-box">[说话人 0] [880-5195ms] 欢迎大家来体验达摩院推出的语音识别模型。</div>
 
 <h3>Fun-ASR-Nano + 说话人分离（无需标点模型）</h3>
 <pre>model = AutoModel(
     model="FunAudioLLM/Fun-ASR-Nano-2512",
     trust_remote_code=True, remote_code="./model.py",
     vad_model="fsmn-vad", vad_kwargs={"max_single_segment_time": 30000},
-    spk_model="cam++",     # no punc_model needed!
+    spk_model="cam++",     # 不需要 punc_model！
     device="cuda:0", hub="hf",
 )
 res = model.generate(input=["meeting.wav"], cache={}, batch_size=1, language="中文")
 for sent in res[0]["sentence_info"]:
-    print(f"Speaker {sent['spk']}: {sent.get('text', sent.get('sentence', ''))}")</pre>
+    print(f"说话人 {sent['spk']}: {sent.get('text', sent.get('sentence', ''))}")</pre>
 
 <h3>SenseVoice + 说话人分离（无需标点模型）</h3>
 <pre>model = AutoModel(
     model="iic/SenseVoiceSmall",
     vad_model="fsmn-vad", vad_kwargs={"max_single_segment_time": 30000},
-    spk_model="cam++",    # no punc_model needed!
+    spk_model="cam++",    # 不需要 punc_model！
     device="cuda:0",
 )
 res = model.generate(input="meeting.wav", cache={}, language="auto",
                      use_itn=True, batch_size_s=60, merge_vad=True, merge_length_s=15)
 for sent in res[0]["sentence_info"]:
-    print(f"Speaker {sent['spk']}: {rich_transcription_postprocess(sent['text'])}")</pre>
+    print(f"说话人 {sent['spk']}: {rich_transcription_postprocess(sent['text'])}")</pre>
 
-<!-- Emotion -->
+<!-- 情感检测 -->
 <h2 id="emotion">情感检测</h2>
 
 <h3>专用情感模型（emotion2vec）</h3>
@@ -265,13 +265,13 @@ res = model.generate(input="audio.wav", granularity="utterance")
 
 print(res[0]["labels"])  # ['angry', 'happy', 'neutral', 'sad', ...]
 print(res[0]["scores"])  # [0.01,   0.03,   0.89,      0.05, ...]
-# → This audio is "neutral" with 89% confidence</pre>
+# → 该音频为"中性"情感，置信度 89%</pre>
 
 <h3>SenseVoice（一次推理同时完成识别和情感检测）</h3>
 <p>SenseVoice 会在识别结果中直接嵌入情感标签：</p>
-<pre># Raw output: "<|zh|><|HAPPY|><|Speech|><|withitn|>今天真是太开心了。"
-# The <|HAPPY|> tag tells you the emotion
-# Use rich_transcription_postprocess() to get clean text</pre>
+<pre># 原始输出："<|zh|><|HAPPY|><|Speech|><|withitn|>今天真是太开心了。"
+# <|HAPPY|> 标签表示该段语音的情感
+# 使用 rich_transcription_postprocess() 获取干净文本</pre>
 
 <!-- VAD -->
 <h2 id="vad">语音活动检测（VAD）</h2>
@@ -282,7 +282,7 @@ print(res[0]["scores"])  # [0.01,   0.03,   0.89,      0.05, ...]
 model = AutoModel(model="fsmn-vad")
 res = model.generate(input="audio.wav")
 print(res[0]["value"])  # [[610, 5530], [7200, 12400], ...]
-                         # Each pair: [start_ms, end_ms] of speech</pre>
+                         # 每对数字：[起始ms, 结束ms] 表示有声段</pre>
 
 <h3>流式模式（逐块处理）</h3>
 <pre>import soundfile
@@ -290,7 +290,7 @@ from funasr import AutoModel
 
 model = AutoModel(model="fsmn-vad")
 speech, sr = soundfile.read("audio.wav")
-chunk_stride = int(200 * sr / 1000)  # 200ms chunks
+chunk_stride = int(200 * sr / 1000)  # 200ms 每块
 
 cache = {}
 for i in range(int((len(speech)-1)/chunk_stride+1)):
@@ -299,11 +299,11 @@ for i in range(int((len(speech)-1)/chunk_stride+1)):
     res = model.generate(input=chunk, cache=cache, is_final=is_final, chunk_size=200)
     if res[0]["value"]:
         print(res[0]["value"])
-        # [[610, -1]]   → speech started at 610ms
-        # [[-1, 5530]]  → speech ended at 5530ms
-        # [[610, 5530]] → complete segment</pre>
+        # [[610, -1]]   → 语音在 610ms 处开始
+        # [[-1, 5530]]  → 语音在 5530ms 处结束
+        # [[610, 5530]] → 完整的有声段</pre>
 
-<!-- Punctuation -->
+<!-- 标点恢复 -->
 <h2 id="punc">标点恢复</h2>
 <pre>from funasr import AutoModel
 
@@ -312,14 +312,14 @@ res = model.generate(input="那今天的会就到这里吧 happy new year 明年
 print(res[0]["text"])  # "那今天的会就到这里吧，happy new year，明年见。"</pre>
 <div class="note"><strong>什么时候需要标点模型？</strong>仅在使用 Paraformer 时需要（它输出不带标点的纯文本）。Fun-ASR-Nano、SenseVoice 和 Qwen3-ASR 自带标点输出。</div>
 
-<!-- Export -->
+<!-- ONNX 导出 -->
 <h2 id="export">ONNX 模型导出</h2>
-<pre># Export model to ONNX format
+<pre># 将模型导出为 ONNX 格式
 from funasr import AutoModel
 model = AutoModel(model="paraformer", device="cpu")
-model.export(quantize=False)   # saves to model cache directory
+model.export(quantize=False)   # 保存到模型缓存目录
 
-# Use ONNX model (faster, no PyTorch needed)
+# 使用 ONNX 模型（更快，无需 PyTorch）
 # pip install funasr-onnx
 from funasr_onnx import Paraformer
 model = Paraformer("damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch",
@@ -327,49 +327,49 @@ model = Paraformer("damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8
 result = model(["audio.wav"])
 print(result)</pre>
 
-<!-- FAQ -->
+<!-- 常见问题 -->
 <h2 id="faq">常见问题与故障排除</h2>
 
-<h4>模型下载很慢</h4>
-<p>Set <code>hub="hf"</code> 切换到 HuggingFace（海外更快），或者下载一次后使用本地路径：</p>
+<h4>模型下载慢</h4>
+<p>设置 <code>hub="hf"</code> 切换到 HuggingFace（海外更快），或者下载一次后使用本地路径：</p>
 <pre>model = AutoModel(model="/path/to/local/model", disable_update=True)</pre>
 
 <h4>显存/内存溢出（OOM）</h4>
 <p>三个降低内存占用的方法：</p>
 <ol>
-<li>Reduce <code>batch_size_s</code> (e.g., from 300 to 60)</li>
-<li>Reduce <code>max_single_segment_time</code> in vad_kwargs (e.g., 30000 → 15000)</li>
-<li>Add <code>batch_size_threshold_s=30</code> to force batch=1 for long segments</li>
+<li>减小 <code>batch_size_s</code>（例如从 300 减到 60）</li>
+<li>减小 vad_kwargs 中的 <code>max_single_segment_time</code>（例如 30000 → 15000）</li>
+<li>添加 <code>batch_size_threshold_s=30</code> 强制对长段使用 batch=1</li>
 </ol>
 
 <h4>每次启动都显示 "Downloading Model..."</h4>
-<p>并非真的在重新下载，只是在校验本地缓存。要完全跳过这一步：</p>
+<p>并非真的在重新下载，只是在校验本地缓存。要完全跳过：</p>
 <pre>model = AutoModel(model="/local/path/to/model", disable_update=True)</pre>
 
 <h4>报错 "ModelName is not registered"</h4>
 <p>通常是因为 pip 安装的版本太旧。请从源码安装最新版：</p>
 <pre>pip install git+https://github.com/modelscope/FunASR.git</pre>
 
-<h4>想关闭所有进度条和日志输出？</h4>
+<h4>想关闭所有进度条和日志？</h4>
 <pre>model = AutoModel(model="...", disable_update=True, disable_pbar=True, log_level="ERROR")</pre>
 
 <h4>如何传入已加载的 numpy 音频数据？</h4>
 <pre>import soundfile as sf
-audio, sr = sf.read("audio.wav")  # numpy array, 16kHz
-res = model.generate(input=audio)  # pass directly — no file needed</pre>
+audio, sr = sf.read("audio.wav")  # numpy 数组，16kHz
+res = model.generate(input=audio)  # 直接传入——不需要文件</pre>
 
 <h4>GPU 没有被使用？</h4>
-<pre># Check:
+<pre># 检查：
 import torch
-print(torch.cuda.is_available())  # must be True
+print(torch.cuda.is_available())  # 必须为 True
 
-# Specify GPU explicitly:
+# 显式指定 GPU：
 model = AutoModel(model="...", device="cuda:0")</pre>
 
 </div></div>
 
 <footer>
-<p>FunASR &middot; Tongyi Lab, Alibaba Group</p>
+<p>FunASR &middot; 通义实验室，阿里巴巴集团</p>
 <p><a href="index.html">首页</a> &middot; <a href="tutorial.html">教程</a> &middot; <a href="training.html">训练</a> &middot; <a href="model-registration.html">开发</a> &middot; <a href="../api.html">API</a> &middot; <a href="https://github.com/modelscope/FunASR">GitHub</a></p>
 </footer>
 </body></html>

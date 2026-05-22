@@ -6,21 +6,21 @@
 </head><body>
 <nav class="nav"><div class="container">
 <a href="index.html" class="nav-logo">FunASR</a>
-            <div class="nav-links">
-                <a href="index.html">首页</a>
-                <a href="tutorial.html">教程</a>
-                <a href="training.html">训练</a>
-                <a href="model-registration.html" class="active">开发</a>
-                <a href="../api.html">API</a>
-            </div>
+<div class="nav-links">
+<a href="index.html">首页</a>
+<a href="tutorial.html">教程</a>
+<a href="training.html">训练</a>
+<a href="model-registration.html" class="active">开发</a>
+<a href="../api.html">API</a>
+</div>
 
-<div class="lang-dropdown"><button class="lang-btn">English</button><div class="lang-menu"><a href="model-registration.html" class="current">English</a><a href="zh/model-registration.html">中文</a><a href="ja/model-registration.html">日本語</a></div></div>
+<div class="lang-dropdown"><button class="lang-btn">中文</button><div class="lang-menu"><a href="../model-registration.html">English</a><a href="model-registration.html" class="current">中文</a><a href="../ja/model-registration.html">日本語</a></div></div>
 <a href="https://github.com/modelscope/FunASR" class="nav-github">GitHub</a>
 </div></nav>
 
 <div class="content"><div class="container narrow">
 <h1>开发指南</h1>
-<p>从理解框架架构到贡献你自己的模型——循序渐进的引导。</p>
+<p>从理解框架架构到贡献你自己的模型——循序渐进的完整指南。</p>
 
 <div class="toc-grid">
 <a href="#architecture">1. 架构概览</a>
@@ -34,78 +34,78 @@
 <a href="#contribute">9. 贡献代码</a>
 </div>
 
-<!-- 1. Architecture -->
+<!-- 1. 架构概览 -->
 <h2 id="architecture">1. 架构概览</h2>
-<p>FunASR is built around three core ideas: a <strong>registry</strong> for component discovery, <strong>AutoModel</strong> as the unified entry point, and <strong>config.yaml</strong> as the declarative model definition.</p>
+<p>FunASR 围绕三个核心概念构建：<strong>注册表</strong>（Registry）用于组件发现，<strong>AutoModel</strong> 作为统一入口，<strong>config.yaml</strong> 作为模型的声明式定义。</p>
 
-<div class="arch-box">User Code                         FunASR Framework                    Model Hub
+<div class="arch-box">用户代码                          FunASR 框架                         模型仓库
 ─────────                         ────────────────                    ─────────
 AutoModel(model="name")
     │
     ├─→ download_model()  ──────→  ModelScope / HuggingFace
     │       ↓                          ↓
-    │   read config.yaml          download model.pt
+    │   读取 config.yaml          下载 model.pt
     │       ↓
-    ├─→ tables.model_classes["Name"]   ← @tables.register decorator
+    ├─→ tables.model_classes["Name"]   ← @tables.register 装饰器
     │       ↓
-    ├─→ model_class(**config)          ← __init__: build encoder/decoder
+    ├─→ model_class(**config)          ← __init__: 构建 encoder/decoder
     │       ↓
-    ├─→ load_pretrained_model()        ← load weights from model.pt
+    ├─→ load_pretrained_model()        ← 从 model.pt 加载权重
     │       ↓
-    └─→ model.eval()                   ← ready for inference
+    └─→ model.eval()                   ← 准备就绪，可以推理
 
 generate(input="audio.wav")
     │
-    ├─ No VAD  → inference()           ← single utterance
+    ├─ 无 VAD  → inference()           ← 单条语音
     │               ↓
     │           model.inference(data_in, tokenizer, frontend, **kwargs)
     │               ↓
-    │           return [{"key", "text", "timestamp", ...}]
+    │           返回 [{"key", "text", "timestamp", ...}]
     │
-    └─ With VAD → inference_with_vad()  ← long audio
+    └─ 有 VAD → inference_with_vad()   ← 长音频
                     ↓
-                1. VAD: segment audio → [[start_ms, end_ms], ...]
-                2. Sort segments by length (for efficient batching)
-                3. ASR: recognize each segment
-                4. Merge timestamps (add VAD offset)
-                5. Punctuation (optional)
-                6. Speaker diarization (optional)
+                1. VAD：切分音频 → [[起始ms, 结束ms], ...]
+                2. 按长度排序（提高批处理效率）
+                3. ASR：逐段识别
+                4. 合并时间戳（加上 VAD 偏移量）
+                5. 标点恢复（可选）
+                6. 说话人分离（可选）
                     ↓
-                return [{"key", "text", "timestamp", "sentence_info"}]
+                返回 [{"key", "text", "timestamp", "sentence_info"}]
 </div>
 
 <h3>注册表系统</h3>
-<p>Every component in FunASR is registered by name. The registry is the lookup table that connects config strings to Python classes:</p>
+<p>FunASR 中的每个组件都通过名称注册。注册表是将配置字符串映射到 Python 类的查找表：</p>
 
 <table>
-<tr><th>Registry</th><th>Purpose</th><th>Example</th></tr>
-<tr><td><code>model_classes</code></td><td>ASR, VAD, PUNC, SPK models</td><td>"Paraformer", "FsmnVADStreaming"</td></tr>
-<tr><td><code>encoder_classes</code></td><td>Encoder architectures</td><td>"SANMEncoder", "ConformerEncoder"</td></tr>
-<tr><td><code>decoder_classes</code></td><td>Decoder architectures</td><td>"ParaformerSANMDecoder"</td></tr>
-<tr><td><code>frontend_classes</code></td><td>Audio feature extraction</td><td>"WavFrontend", "WhisperFrontend"</td></tr>
-<tr><td><code>tokenizer_classes</code></td><td>Text tokenization</td><td>"SentencepiecesTokenizer"</td></tr>
-<tr><td><code>dataset_classes</code></td><td>Training data loading</td><td>"AudioDataset"</td></tr>
+<tr><th>注册表</th><th>用途</th><th>示例</th></tr>
+<tr><td><code>model_classes</code></td><td>ASR、VAD、标点、说话人模型</td><td>"Paraformer", "FsmnVADStreaming"</td></tr>
+<tr><td><code>encoder_classes</code></td><td>编码器架构</td><td>"SANMEncoder", "ConformerEncoder"</td></tr>
+<tr><td><code>decoder_classes</code></td><td>解码器架构</td><td>"ParaformerSANMDecoder"</td></tr>
+<tr><td><code>frontend_classes</code></td><td>音频特征提取</td><td>"WavFrontend", "WhisperFrontend"</td></tr>
+<tr><td><code>tokenizer_classes</code></td><td>文本分词</td><td>"SentencepiecesTokenizer"</td></tr>
+<tr><td><code>dataset_classes</code></td><td>训练数据加载</td><td>"AudioDataset"</td></tr>
 </table>
 
 <pre>from funasr.register import tables
 
-# Register a new model
+# 注册一个新模型
 @tables.register("model_classes", "MyModel")
 class MyModel(nn.Module):
     ...
 
-# View all registered models
+# 查看所有已注册的模型
 tables.print("model")</pre>
 
-<!-- 2. Setup -->
+<!-- 2. 开发环境配置 -->
 <h2 id="setup">2. 开发环境配置</h2>
 
 <div class="step">
 <h4>克隆并以开发模式安装</h4>
 <pre>git clone https://github.com/modelscope/FunASR.git
 cd FunASR
-pip install -e .              # editable install
-pip install -e ".[train]"     # with training dependencies</pre>
+pip install -e .              # 可编辑安装
+pip install -e ".[train]"     # 包含训练依赖</pre>
 </div>
 
 <div class="step">
@@ -115,48 +115,48 @@ python -c "from funasr.register import tables; tables.print('model')"</pre>
 </div>
 
 <div class="step">
-<h4>运行现有测试</h4>
-<pre># Quick smoke test
+<h4>运行已有测试</h4>
+<pre># 快速冒烟测试
 python tests_models/test_fsmn_vad.py
 python tests_models/test_paraformer.py
 
-# Full test suite
+# 完整测试套件
 cd tests_models && python run_all_tests.py</pre>
 </div>
 
-<!-- 3. How Inference Works -->
+<!-- 3. 推理流程详解 -->
 <h2 id="understand">3. 推理流程详解</h2>
 
-<p>Understanding the inference data flow is essential before adding a new model. Here's what happens when you call <code>model.generate(input="audio.wav")</code>:</p>
+<p>在添加新模型之前，必须理解推理的数据流。以下是调用 <code>model.generate(input="audio.wav")</code> 时的完整流程：</p>
 
-<h4>Step 1: Input Preparation</h4>
-<p><code>prepare_data_iterator()</code> normalizes any input type (file path, URL, numpy, bytes, list) into a uniform <code>(key_list, data_list)</code> format.</p>
+<h4>步骤 1：输入准备</h4>
+<p><code>prepare_data_iterator()</code> 将各种输入类型（文件路径、URL、numpy 数组、bytes、列表）统一为 <code>(key_list, data_list)</code> 格式。</p>
 
-<h4>Step 2: Model Inference</h4>
-<p>Each model's <code>inference()</code> method receives:</p>
+<h4>步骤 2：模型推理</h4>
+<p>每个模型的 <code>inference()</code> 方法接收以下参数：</p>
 <pre>def inference(self, data_in, data_lengths=None, key=None,
               tokenizer=None, frontend=None, **kwargs):
-    # data_in: list of audio samples (numpy arrays)
-    # tokenizer: for decoding token IDs → text
-    # frontend: for extracting fbank features
-    # **kwargs: all config.yaml params + user runtime params
+    # data_in: 音频样本列表（numpy 数组）
+    # tokenizer: 将 token ID 解码为文本
+    # frontend: 提取 fbank 特征
+    # **kwargs: config.yaml 中的所有参数 + 用户运行时参数
 
-    # Must return: (results_list, meta_data_dict)
+    # 必须返回：(结果列表, 元数据字典)
     return [{"key": "id", "text": "hello", "timestamp": [...]}], {"batch_data_time": 5.5}</pre>
 
-<h4>Step 3: Output Format</h4>
-<p>The <code>results_list</code> must be a list of dicts. Required/optional fields:</p>
+<h4>步骤 3：输出格式</h4>
+<p><code>results_list</code> 必须是字典列表。必填/可选字段：</p>
 <table>
-<tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr>
-<tr><td><code>key</code></td><td>str</td><td>Yes</td><td>Sample identifier</td></tr>
-<tr><td><code>text</code></td><td>str</td><td>Yes (ASR)</td><td>Recognized text</td></tr>
-<tr><td><code>timestamp</code></td><td>list</td><td>For SPK</td><td><code>[[start_ms, end_ms], ...]</code> per character</td></tr>
-<tr><td><code>value</code></td><td>list</td><td>VAD only</td><td><code>[[start_ms, end_ms], ...]</code> speech segments</td></tr>
-<tr><td><code>spk_embedding</code></td><td>Tensor</td><td>SPK only</td><td>Shape <code>[N, 192]</code></td></tr>
+<tr><th>字段</th><th>类型</th><th>是否必填</th><th>说明</th></tr>
+<tr><td><code>key</code></td><td>str</td><td>是</td><td>样本标识符</td></tr>
+<tr><td><code>text</code></td><td>str</td><td>是（ASR）</td><td>识别文本</td></tr>
+<tr><td><code>timestamp</code></td><td>list</td><td>说话人分离时需要</td><td><code>[[起始ms, 结束ms], ...]</code> 逐字时间戳</td></tr>
+<tr><td><code>value</code></td><td>list</td><td>仅 VAD</td><td><code>[[起始ms, 结束ms], ...]</code> 有声段</td></tr>
+<tr><td><code>spk_embedding</code></td><td>Tensor</td><td>仅说话人模型</td><td>形状 <code>[N, 192]</code></td></tr>
 </table>
 
 <div class="warning">
-<strong>Timestamp format matters!</strong> If your model outputs timestamps differently (e.g., dict format like Fun-ASR-Nano), FunASR's <code>inference_with_vad</code> will auto-convert it. But the standard expected format is <code>[[start_ms, end_ms], ...]</code> (list of 2-element lists in milliseconds).
+<strong>时间戳格式很重要！</strong>如果你的模型输出的时间戳是字典格式（如 Fun-ASR-Nano 的 <code>{"start_time": 0.5, "end_time": 0.8}</code>），FunASR 的 <code>inference_with_vad</code> 会自动转换。但标准的期望格式是 <code>[[起始ms, 结束ms], ...]</code>（毫秒级的二元列表）。
 </div>
 
 <!-- 4. 添加新模型 -->
@@ -165,11 +165,11 @@ cd tests_models && python run_all_tests.py</pre>
 <div class="step">
 <h4>创建模型目录</h4>
 <pre>funasr/models/my_model/
-├── __init__.py      # empty file
-├── model.py         # main model class
-├── encoder.py       # (optional) custom encoder
-└── decoder.py       # (optional) custom decoder</pre>
-<div class="warning"><strong>Rule:</strong> Each model directory is self-contained. Never import from other model directories. Never modify existing models.</div>
+├── __init__.py      # 空文件
+├── model.py         # 主模型类
+├── encoder.py       # （可选）自定义编码器
+└── decoder.py       # （可选）自定义解码器</pre>
+<div class="warning"><strong>规则：</strong>每个模型目录必须是自包含的。不要从其他模型目录导入。不要修改已有模型。</div>
 </div>
 
 <div class="step">
@@ -181,29 +181,29 @@ from funasr.register import tables
 class MyModel(nn.Module):
 
     def __init__(self, **kwargs):
-        super().__init__()    # ← MUST call super().__init__()
-        # Build your architecture from kwargs (comes from config.yaml)
-        # kwargs includes: input_size, vocab_size, tokenizer, frontend, etc.
+        super().__init__()    # ← 必须调用 super().__init__()
+        # 从 kwargs 构建你的网络结构（kwargs 来自 config.yaml）
+        # kwargs 包含：input_size, vocab_size, tokenizer, frontend 等
 
     def forward(self, speech, speech_lengths, text, text_lengths, **kwargs):
-        """Training forward pass. Return (loss, stats_dict, weight)."""
+        """训练前向传播。返回 (loss, stats_dict, weight)。"""
         ...
 
     def inference(self, data_in, data_lengths=None, key=None,
                   tokenizer=None, frontend=None, **kwargs):
-        """Inference. Return (results_list, meta_data)."""
+        """推理。返回 (results_list, meta_data)。"""
         ...
 </pre>
 </div>
 
 <div class="step">
-<h4>Create config.yaml</h4>
-<pre># This file defines what components to use
-model: MyModel              # matches @tables.register key
+<h4>创建 config.yaml</h4>
+<pre># 该文件定义使用哪些组件
+model: MyModel              # 与 @tables.register 中的名称对应
 model_conf:
     hidden_size: 512
 
-frontend: WavFrontend       # reuse existing frontend
+frontend: WavFrontend       # 复用已有的前端
 frontend_conf:
     fs: 16000
     n_mels: 80
@@ -217,7 +217,7 @@ tokenizer_conf:
 </div>
 
 <div class="step">
-<h4>Create configuration.json (for Hub upload)</h4>
+<h4>创建 configuration.json（用于上传到 Hub）</h4>
 <pre>{
   "framework": "pytorch",
   "task": "auto-speech-recognition",
@@ -229,22 +229,22 @@ tokenizer_conf:
     "frontend_conf": {"cmvn_file": "am.mvn"}
   }
 }</pre>
-<p>This file tells AutoModel how to resolve relative paths. When the model is downloaded, each path in <code>file_path_metas</code> gets the model directory prepended.</p>
+<p>该文件告诉 AutoModel 如何解析相对路径。模型下载后，<code>file_path_metas</code> 中的每个路径都会加上模型目录前缀。</p>
 </div>
 
 <div class="step">
 <h4>本地测试</h4>
 <pre>from funasr import AutoModel
 
-# From local directory
+# 从本地目录加载
 model = AutoModel(model="./my_model_dir")
 res = model.generate(input="test.wav")
 print(res)</pre>
 </div>
 
-<!-- 5. Add Component -->
-<h2 id="add-component">5. Add a New Frontend / Tokenizer / Dataset</h2>
-<p>The same registry pattern applies to all components. Example — adding a new frontend:</p>
+<!-- 5. 添加前端/分词器 -->
+<h2 id="add-component">5. 添加新的前端 / 分词器 / 数据集</h2>
+<p>所有组件都使用相同的注册表模式。以添加新前端为例：</p>
 
 <pre>from funasr.register import tables
 
@@ -255,51 +255,51 @@ class MyFrontend(nn.Module):
         self.fs = fs
 
     def output_size(self):
-        return 80  # feature dimension
+        return 80  # 特征维度
 
     def forward(self, input, input_lengths):
-        # input: raw waveform (batch, samples)
-        # return: features (batch, frames, dim), lengths
+        # input: 原始波形 (batch, samples)
+        # 返回: 特征 (batch, frames, dim), 长度
         ...</pre>
 
-<p>Then reference it in config.yaml:</p>
+<p>然后在 config.yaml 中引用：</p>
 <pre>frontend: MyFrontend
 frontend_conf:
     fs: 16000</pre>
 
-<p>Same pattern for tokenizer (<code>tokenizer_classes</code>), dataset (<code>dataset_classes</code>), encoder (<code>encoder_classes</code>), etc.</p>
+<p>分词器（<code>tokenizer_classes</code>）、数据集（<code>dataset_classes</code>）、编码器（<code>encoder_classes</code>）等都是同样的模式。</p>
 
-<!-- 6. Standalone -->
+<!-- 6. 独立仓库模式 -->
 <h2 id="standalone">6. 独立仓库模式</h2>
-<p>Your model doesn't need to live inside the FunASR source tree. With <code>trust_remote_code=True</code>, FunASR dynamically loads your model class from an external file:</p>
+<p>你的模型不需要放在 FunASR 源码树内。通过 <code>trust_remote_code=True</code>，FunASR 可以从外部文件动态加载模型类：</p>
 
-<pre># User code — loads YOUR model.py from a separate repo
+<pre># 用户代码 — 从独立仓库加载你的 model.py
 model = AutoModel(
-    model="your-org/your-model",      # HuggingFace/ModelScope repo
+    model="your-org/your-model",      # HuggingFace/ModelScope 仓库
     trust_remote_code=True,
-    remote_code="./model.py",          # path to model class definition
+    remote_code="./model.py",          # 模型类定义文件路径
     hub="hf",
 )</pre>
 
-<p><strong>How it works:</strong></p>
+<p><strong>工作原理：</strong></p>
 <ol>
-<li>FunASR downloads the model repo (weights + config + model.py)</li>
-<li><code>remote_code="./model.py"</code> is dynamically imported</li>
-<li>The <code>@tables.register</code> decorator in that file registers the model class</li>
-<li>Normal <code>build_model()</code> flow proceeds with the registered class</li>
+<li>FunASR 下载模型仓库（权重 + 配置 + model.py）</li>
+<li><code>remote_code="./model.py"</code> 被动态导入</li>
+<li>该文件中的 <code>@tables.register</code> 装饰器将模型类注册到注册表</li>
+<li>后续正常执行 <code>build_model()</code> 流程</li>
 </ol>
 
-<p><strong>Your repo structure:</strong></p>
+<p><strong>你的仓库结构：</strong></p>
 <pre>your-model-repo/
-├── model.py              # model class with @tables.register
-├── config.yaml           # model architecture config
-├── configuration.json    # path resolution
-├── model.pt              # trained weights
-└── example/test.wav      # demo audio</pre>
+├── model.py              # 带 @tables.register 的模型类
+├── config.yaml           # 模型架构配置
+├── configuration.json    # 路径解析配置
+├── model.pt              # 训练好的权重
+└── example/test.wav      # 示例音频</pre>
 
-<p>Examples: <a href="https://github.com/FunAudioLLM/Fun-ASR">Fun-ASR-Nano</a>, <a href="https://github.com/FunAudioLLM/SenseVoice">SenseVoice</a></p>
+<p>参考实现：<a href="https://github.com/FunAudioLLM/Fun-ASR">Fun-ASR-Nano</a>、<a href="https://github.com/FunAudioLLM/SenseVoice">SenseVoice</a></p>
 
-<!-- 7. Testing -->
+<!-- 7. 测试你的模型 -->
 <h2 id="testing">7. 测试你的模型</h2>
 
 <h4>编写测试脚本</h4>
@@ -311,16 +311,16 @@ def main():
     model = AutoModel(model="path/to/model", device="cpu", disable_update=True)
     res = model.generate(input="test.wav")
 
-    assert res and len(res) > 0, "empty result"
-    assert "text" in res[0], "missing text field"
+    assert res and len(res) > 0, "结果为空"
+    assert "text" in res[0], "缺少 text 字段"
     print("PASSED")
     return 0
 
 if __name__ == "__main__":
     sys.exit(main())</pre>
 
-<h4>Test with VAD + SPK pipeline</h4>
-<pre># If your model should work with speaker diarization:
+<h4>测试 VAD + 说话人分离流水线</h4>
+<pre># 如果你的模型需要支持说话人分离：
 model = AutoModel(
     model="path/to/model",
     vad_model="fsmn-vad",
@@ -330,73 +330,73 @@ res = model.generate(input="meeting.wav", cache={})
 assert "sentence_info" in res[0]
 assert "spk" in res[0]["sentence_info"][0]</pre>
 
-<h4>Test streaming (if applicable)</h4>
+<h4>测试流式推理（如果支持）</h4>
 <pre>cache = {}
 for i in range(total_chunks):
     chunk = audio[i*stride:(i+1)*stride]
     res = model.generate(input=chunk, cache=cache,
                          is_final=(i == total_chunks-1), ...)
-# Verify: same audio gives same result across multiple sessions</pre>
+# 验证：相同音频在多次会话中应产生相同结果</pre>
 
-<!-- 8. Pitfalls -->
+<!-- 8. 常见陷阱 -->
 <h2 id="pitfalls">8. 常见陷阱</h2>
 
-<h4>❌ Forgetting <code>super().__init__()</code></h4>
-<pre># WRONG — causes "object has no attribute '_state_dict_pre_hooks'"
+<h4>❌ 忘记调用 <code>super().__init__()</code></h4>
+<pre># 错误 — 会导致 "object has no attribute '_state_dict_pre_hooks'"
 class MyEncoder(nn.Module):
     def __init__(self):
         pass
 
-# CORRECT
+# 正确
 class MyEncoder(nn.Module):
     def __init__(self):
         super().__init__()</pre>
 
-<h4>❌ Checking <code>kwargs["batch_size"]</code> in your model</h4>
-<p><code>batch_size</code> in kwargs is set by <code>inference_with_vad</code> for segment batching (a large number in ms). Don't use it to check actual data batch size. Use <code>len(data_in)</code> instead.</p>
+<h4>❌ 在模型中检查 <code>kwargs["batch_size"]</code></h4>
+<p>kwargs 中的 <code>batch_size</code> 是 <code>inference_with_vad</code> 用于分段批处理的值（一个很大的毫秒数）。不要用它来判断实际的数据批量大小，应该使用 <code>len(data_in)</code>。</p>
 
-<h4>❌ Not handling empty/short input</h4>
-<p>VAD may produce empty segments. Your <code>inference()</code> should handle <code>data_in = []</code> gracefully.</p>
+<h4>❌ 未处理空输入或极短输入</h4>
+<p>VAD 可能产生空的片段。你的 <code>inference()</code> 应该能优雅地处理 <code>data_in = []</code> 的情况。</p>
 
-<h4>❌ Timestamp format mismatch</h4>
-<p>If your model returns timestamps as dicts (<code>{"start_time": 0.5, "end_time": 0.8}</code>), the pipeline handles conversion. But if you output <code>[start_time, end_time, text]</code> (3 elements), strip the text — downstream expects <code>[start_ms, end_ms]</code> (2 elements, in milliseconds).</p>
+<h4>❌ 时间戳格式不匹配</h4>
+<p>如果你的模型返回字典格式的时间戳（<code>{"start_time": 0.5, "end_time": 0.8}</code>），流水线会自动转换。但如果你输出 <code>[start_time, end_time, text]</code>（3 个元素），需要去掉文本——下游期望的是 <code>[起始ms, 结束ms]</code>（2 个元素，毫秒单位）。</p>
 
-<h4>❌ Importing from other model directories</h4>
-<pre># WRONG — creates tight coupling
+<h4>❌ 从其他模型目录导入</h4>
+<pre># 错误 — 产生紧耦合
 from funasr.models.paraformer.model import Paraformer
 
-# CORRECT — copy what you need into your own directory
-# Or inherit via the registry name in config.yaml</pre>
+# 正确 — 将需要的代码复制到自己的目录
+# 或者在 config.yaml 中通过注册名引用</pre>
 
-<h4>❌ Modifying <code>self.kwargs</code> during inference</h4>
-<p>Don't mutate <code>kwargs</code> that came from AutoModel. The framework resets state between calls, but persistent mutations can leak between sessions.</p>
+<h4>❌ 在推理过程中修改 <code>self.kwargs</code></h4>
+<p>不要改动 AutoModel 传入的 kwargs。框架会在每次调用之间重置状态，但持久性的修改可能在不同会话间泄漏。</p>
 
 <!-- 9. 贡献代码 -->
 <h2 id="contribute">9. 贡献代码</h2>
 
 <h4>代码风格</h4>
 <ul>
-<li>Follow existing patterns — look at <code>paraformer/model.py</code> as reference</li>
-<li>Add docstrings to all public methods (Args, Returns)</li>
-<li>No comments explaining WHAT — use clear naming. Comments for WHY only.</li>
+<li>遵循已有模式——以 <code>paraformer/model.py</code> 作为参考</li>
+<li>所有公开方法添加 docstring（包含 Args 和 Returns）</li>
+<li>注释只说明"为什么"，不解释"是什么"——用清晰的命名代替注释</li>
 </ul>
 
 <h4>PR 检查清单</h4>
 <ul>
-<li>New model: self-contained directory, no cross-model imports</li>
-<li>Include a test script in <code>tests_models/</code></li>
-<li>Include a demo in <code>examples/industrial_data_pretraining/</code></li>
-<li>All existing tests still pass</li>
-<li>Add entry to README What's New if user-facing</li>
+<li>新模型：自包含目录，无跨模型导入</li>
+<li>在 <code>tests_models/</code> 中包含测试脚本</li>
+<li>在 <code>examples/industrial_data_pretraining/</code> 中包含示例</li>
+<li>所有已有测试仍然通过</li>
+<li>如果是面向用户的功能，在 README 的 What's New 中添加条目</li>
 </ul>
 
-<h4>License</h4>
-<p>Code: MIT. Model weights: FunASR Model License (commercial use allowed with attribution).</p>
+<h4>许可证</h4>
+<p>代码：MIT 许可。模型权重：FunASR 模型许可（允许商业使用，需注明出处）。</p>
 
 </div></div>
 
 <footer>
-<p>FunASR &middot; Tongyi Lab, Alibaba Group</p>
+<p>FunASR &middot; 通义实验室，阿里巴巴集团</p>
 <p><a href="index.html">首页</a> &middot; <a href="tutorial.html">教程</a> &middot; <a href="training.html">训练</a> &middot; <a href="model-registration.html">开发</a> &middot; <a href="../api.html">API</a> &middot; <a href="https://github.com/modelscope/FunASR">GitHub</a></p>
 </footer>
 </body></html>

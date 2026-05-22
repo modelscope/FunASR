@@ -19,7 +19,7 @@
                 <a href="../api.html">API</a>
             </div>
             
-<div class="lang-dropdown"><button class="lang-btn">English</button><div class="lang-menu"><a href="index.html" class="current">English</a><a href="zh/index.html">中文</a><a href="ja/index.html">日本語</a></div></div>
+<div class="lang-dropdown"><button class="lang-btn">日本語</button><div class="lang-menu"><a href="../index.html">English</a><a href="../zh/index.html">中文</a><a href="index.html" class="current">日本語</a></div></div>
 <a href="https://github.com/modelscope/FunASR" class="nav-github">GitHub</a>
         </div>
     </nav>
@@ -29,7 +29,7 @@
             <div class="hero-copy">
                 <p class="eyebrow">オープンソース音声理解ツールキット</p>
                 <h1>FunASR</h1>
-                <p>本番環境対応のASR、VAD、句読点復元、話者分離、感情検出、音声イベント認識を統一Pythonインターフェースで提供。</p>
+                <p>本番環境対応の音声認識、VAD、句読点復元、話者分離、感情検出、音声イベント認識を統一 Python インターフェースで提供。</p>
                 <div class="hero-badges">
                     <a href="https://pypi.org/project/funasr/"><img src="https://img.shields.io/pypi/v/funasr?style=flat-square&color=2563eb" alt="PyPI"></a>
                     <a href="https://github.com/modelscope/FunASR/stargazers"><img src="https://img.shields.io/github/stars/modelscope/FunASR?style=flat-square&color=b45309" alt="Stars"></a>
@@ -38,11 +38,11 @@
                 <div class="hero-actions">
                     <a href="tutorial.html" class="btn btn-white">始める</a>
                     <a href="training.html" class="btn btn-outline-white">トレーニングガイド</a>
-                    <a href="../api.html" class="btn btn-outline-white">APIリファレンス</a>
+                    <a href="../api.html" class="btn btn-outline-white">API リファレンス</a>
                 </div>
             </div>
 
-            <div class="hero-panel" aria-label="FunASR recognition preview">
+            <div class="hero-panel" aria-label="FunASR 認識プレビュー">
                 <div class="terminal-bar">
                     <span class="terminal-dots"><span></span><span></span><span></span></span>
                     <span>funasr-pipeline.py</span>
@@ -70,17 +70,17 @@ print(res[0]["sentence_info"])</pre>
     <section class="docs-band">
         <div class="container">
             <h2 class="section-title">ドキュメント</h2>
-            <p class="section-subtitle">サンプルから始めて、自分のデータでチューニングし、レジストリを拡張するか、ソースリンク付きAPIドキュメントへ。</p>
+            <p class="section-subtitle">サンプルから始めて、自分のデータでチューニングし、レジストリを拡張するか、ソースリンク付き API ドキュメントへ。</p>
             <div class="doc-grid">
                 <a class="doc-card" href="tutorial.html">
                     <span class="doc-kicker">学ぶ</span>
                     <h3>チュートリアル</h3>
-                    <p>FunASRをインストールし、モデルを選択、ASR/VAD/話者分離/エクスポートを実行。</p>
+                    <p>FunASR をインストールし、モデルを選択、ASR・VAD・話者分離・エクスポートを実行。</p>
                 </a>
                 <a class="doc-card" href="training.html">
                     <span class="doc-kicker">調整</span>
                     <h3>トレーニング</h3>
-                    <p>JSONLデータを準備し、Paraformer/SenseVoice/Fun-ASR-Nanoをファインチューニング、実行を監視。</p>
+                    <p>JSONL データを準備し、Paraformer・SenseVoice・Fun-ASR-Nano をファインチューニング、実行を監視。</p>
                 </a>
                 <a class="doc-card" href="model-registration.html">
                     <span class="doc-kicker">拡張</span>
@@ -90,7 +90,7 @@ print(res[0]["sentence_info"])</pre>
                 <a class="doc-card" href="../api.html">
                     <span class="doc-kicker">参照</span>
                     <h3>API</h3>
-                    <p>自動生成されたクラス、メソッド、ソースプレビュー、GitHub行リンクを閲覧。</p>
+                    <p>自動生成されたクラス・メソッドドキュメント、ソースプレビュー、GitHub 行リンクを閲覧。</p>
                 </a>
             </div>
         </div>
@@ -98,38 +98,38 @@ print(res[0]["sentence_info"])</pre>
 
     <section>
         <div class="container">
-            <h2 class="section-title">Capabilities</h2>
-            <p class="section-subtitle">Everything needed for speech understanding, from raw audio segmentation to speaker-aware transcripts.</p>
+            <h2 class="section-title">機能</h2>
+            <p class="section-subtitle">音声理解に必要なすべて——音声セグメンテーションから話者付き書き起こしまで。</p>
             <div class="grid-3">
                 <div class="card">
                     <div class="card-icon">ASR</div>
-                    <h3>Speech Recognition</h3>
-                    <p>Streaming and offline ASR with VAD segmentation. Process long-form audio with a single API call.</p>
+                    <h3>音声認識</h3>
+                    <p>VAD セグメンテーション付きのストリーミング/オフライン ASR。1回の API 呼び出しで長時間音声を処理。</p>
                 </div>
                 <div class="card">
                     <div class="card-icon">50+</div>
-                    <h3>Multilingual モデル</h3>
-                    <p>Fun-ASR-Nano covers 31 languages and Qwen3-ASR covers 52 languages with language detection.</p>
+                    <h3>多言語モデル</h3>
+                    <p>Fun-ASR-Nano は方言を含む 31 言語、Qwen3-ASR は 52 言語に対応し自動言語検出が可能。</p>
                 </div>
                 <div class="card">
                     <div class="card-icon">SPK</div>
-                    <h3>Speaker Diarization</h3>
-                    <p>Identify who spoke when, then attach speaker labels to sentence-level ASR output.</p>
+                    <h3>話者分離</h3>
+                    <p>「誰がいつ何を言ったか」を特定し、文レベルの ASR 出力に話者ラベルを付与。</p>
                 </div>
                 <div class="card">
                     <div class="card-icon">SFX</div>
-                    <h3>Emotion & Events</h3>
-                    <p>SenseVoice detects emotion and audio events including background music, applause, laughter, and crying.</p>
+                    <h3>感情・音声イベント</h3>
+                    <p>SenseVoice が感情と音声イベントを検出——BGM、拍手、笑い、泣き。</p>
                 </div>
                 <div class="card">
                     <div class="card-icon">RTF</div>
-                    <h3>Low Latency</h3>
-                    <p>Non-autoregressive models support fast batch and realtime workloads across common deployment targets.</p>
+                    <h3>低レイテンシ</h3>
+                    <p>非自己回帰モデルにより高効率なバッチ処理とリアルタイムワークロードをサポート。</p>
                 </div>
                 <div class="card">
                     <div class="card-icon">OPS</div>
-                    <h3>Train & Deploy</h3>
-                    <p>Fine-tune with DeepSpeed, export to ONNX, and deploy through Docker runtime or the Python SDK.</p>
+                    <h3>トレーニング・デプロイ</h3>
+                    <p>DeepSpeed でファインチューニング、ONNX にエクスポート、Docker ランタイムまたは Python SDK でデプロイ。</p>
                 </div>
             </div>
         </div>
@@ -138,46 +138,46 @@ print(res[0]["sentence_info"])</pre>
     <section class="alt">
         <div class="container">
             <h2 class="section-title">モデル</h2>
-            <p class="section-subtitle">Pre-trained industrial models ready for recognition, segmentation, and speech understanding workflows.</p>
+            <p class="section-subtitle">認識・セグメンテーション・音声理解ワークフロー用の事前学習済み産業モデル。</p>
             <div class="grid-2">
                 <div class="card">
                     <h3>Fun-ASR-Nano</h3>
-                    <p>End-to-end ASR trained on tens of millions of hours. 31 languages, dialects, accents, lyrics, timestamps, and hotwords.</p>
+                    <p>数千万時間のデータで学習したエンドツーエンド ASR。31 言語、方言、歌詞、タイムスタンプ、ホットワードに対応。</p>
                     <div class="card-tags">
-                        <span class="tag">800M</span>
-                        <span class="tag">31 Languages</span>
-                        <span class="tag">Timestamps</span>
-                        <span class="tag">Speaker Diarization</span>
-                        <span class="tag">Hotwords</span>
+                        <span class="tag">8億パラメータ</span>
+                        <span class="tag">31言語</span>
+                        <span class="tag">タイムスタンプ</span>
+                        <span class="tag">話者分離</span>
+                        <span class="tag">ホットワード</span>
                     </div>
                 </div>
                 <div class="card">
                     <h3>Paraformer</h3>
-                    <p>非自己回帰型の中国語・英語ASR、ストリーミングとオフラインの両方に対応。</p>
+                    <p>非自己回帰型の中国語・英語 ASR。ストリーミングとオフラインの両方に対応し、本番システムに最適。</p>
                     <div class="card-tags">
-                        <span class="tag">Streaming</span>
-                        <span class="tag">Offline</span>
-                        <span class="tag">Hotwords</span>
+                        <span class="tag">ストリーミング</span>
+                        <span class="tag">オフライン</span>
+                        <span class="tag">ホットワード</span>
                         <span class="tag">ONNX</span>
                     </div>
                 </div>
                 <div class="card">
                     <h3>SenseVoice</h3>
-                    <p>ASR、言語ID、感情、音声イベントのマルチタスク音声理解、5言語対応。</p>
+                    <p>マルチタスク音声理解：音声認識、言語識別、感情検出、音声イベント検出。5 言語対応。</p>
                     <div class="card-tags">
-                        <span class="tag">Emotion</span>
-                        <span class="tag">Audio Events</span>
-                        <span class="tag">Speaker Diarization</span>
+                        <span class="tag">感情</span>
+                        <span class="tag">音声イベント</span>
+                        <span class="tag">話者分離</span>
                         <span class="tag">70ms/10s</span>
                     </div>
                 </div>
                 <div class="card">
                     <h3>Qwen3-ASR</h3>
-                    <p>LLMベースのASR、52言語対応、文脈理解と自動言語検出。</p>
+                    <p>LLM ベースの音声認識。52 言語に対応し、文脈理解と自動言語検出機能を搭載。</p>
                     <div class="card-tags">
-                        <span class="tag">52 Languages</span>
+                        <span class="tag">52言語</span>
                         <span class="tag">0.6B / 1.7B</span>
-                        <span class="tag">Context-aware</span>
+                        <span class="tag">文脈理解</span>
                     </div>
                 </div>
             </div>
@@ -187,9 +187,9 @@ print(res[0]["sentence_info"])</pre>
     <section>
         <div class="container narrow">
             <h2 class="section-title">クイックスタート</h2>
-            <p class="section-subtitle">パッケージをインストールし、パイプラインを構成、Pythonから認識を実行。</p>
+            <p class="section-subtitle">パッケージをインストールし、パイプラインを構成、Python から認識を実行。</p>
 <pre>pip install funasr
-# Or latest: pip install git+https://github.com/modelscope/FunASR.git</pre>
+# または最新版：pip install git+https://github.com/modelscope/FunASR.git</pre>
 <pre>from funasr import AutoModel
 
 model = AutoModel(
@@ -201,7 +201,7 @@ model = AutoModel(
 res = model.generate(input="meeting.wav", batch_size_s=300)
 
 for sent in res[0]["sentence_info"]:
-    print(f"[Speaker {sent['spk']}] {sent['text']}")</pre>
+    print(f"[話者 {sent['spk']}] {sent['text']}")</pre>
             <div class="section-cta">
                 <a href="tutorial.html" class="btn btn-primary">完全チュートリアル</a>
             </div>
@@ -215,15 +215,15 @@ for sent in res[0]["sentence_info"]:
             <div class="grid-2">
                 <div class="card">
                     <h3><a class="card-title-link" href="https://github.com/FunAudioLLM/Fun-ASR">Fun-ASR-Nano</a></h3>
-                    <p>最新のASR大規模モデル、多言語認識・タイムスタンプ・話者分離・ホットワードに対応。</p>
+                    <p>最新の ASR 大規模モデル。多言語認識・タイムスタンプ・話者分離・ホットワードに対応。</p>
                 </div>
                 <div class="card">
                     <h3><a class="card-title-link" href="https://github.com/FunAudioLLM/SenseVoice">SenseVoice</a></h3>
-                    <p>ASR、感情検出、音声イベント認識のマルチタスク音声理解。</p>
+                    <p>マルチタスク音声理解：音声認識、感情検出、音声イベント認識。</p>
                 </div>
                 <div class="card">
                     <h3><a class="card-title-link" href="https://github.com/modelscope/FunClip">FunClip</a></h3>
-                    <p>FunASRとLLM支援の編集ワークフローによるAI動画クリッピング。</p>
+                    <p>FunASR と LLM 支援の編集ワークフローによる AI 動画クリッピング。</p>
                 </div>
                 <div class="card">
                     <h3><a class="card-title-link" href="https://github.com/FunAudioLLM/CosyVoice">CosyVoice</a></h3>
@@ -239,7 +239,7 @@ for sent in res[0]["sentence_info"]:
             <a href="https://github.com/modelscope/FunASR">GitHub</a> &middot;
             <a href="training.html">トレーニング</a> &middot;
             <a href="../api.html">API</a> &middot;
-            <a href="https://github.com/modelscope/FunASR/blob/main/MODEL_LICENSE">License</a> &middot;
+            <a href="https://github.com/modelscope/FunASR/blob/main/MODEL_LICENSE">ライセンス</a> &middot;
             <a href="https://pypi.org/project/funasr/">PyPI</a> &middot;
             <a href="https://github.com/modelscope/FunASR/issues">Issues</a>
         </p>
