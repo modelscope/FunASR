@@ -112,10 +112,16 @@ with open(version_file, "r") as f:
 setup(
     name="funasr",
     version=version,
-    url="https://github.com/alibaba-damo-academy/FunASR.git",
+    url="https://github.com/modelscope/FunASR",
     author="Speech Lab of Alibaba Group",
     author_email="funasr@list.alibaba-inc.com",
-    description="FunASR: A Fundamental End-to-End Speech Recognition Toolkit",
+    description="Industrial-grade speech recognition: 170x realtime, 50+ languages, speaker diarization, emotion detection.",
+    keywords=["speech-recognition", "asr", "speaker-diarization", "vad", "pytorch", "whisper-alternative", "multilingual"],
+    project_urls={
+        "Homepage": "https://github.com/modelscope/FunASR",
+        "Documentation": "https://modelscope.github.io/FunASR/",
+        "Bug Tracker": "https://github.com/modelscope/FunASR/issues",
+    },
     long_description=open(os.path.join(dirname, "README.md"), encoding="utf-8").read(),
     long_description_content_type="text/markdown",
     license="The MIT License",
