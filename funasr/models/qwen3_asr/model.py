@@ -53,10 +53,13 @@ class Qwen3ASR(nn.Module):
 
         try:
             from qwen_asr import Qwen3ASRModel
-        except ImportError:
-            raise ImportError(
-                "qwen-asr package is required. Install with: pip install qwen-asr"
-            )
+        except ImportError as e:
+            # Only catch if the package itself is missing, not if its dependencies are broken
+            if "qwen_asr" in str(e):
+                raise ImportError(
+                    "qwen-asr package is required. Install with: pip install qwen-asr"
+                ) from e
+            raise e
 
         torch_dtype = self._dtype_map.get(dtype, torch.bfloat16)
         fa_kwargs = None
