@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FunASR Agent Integration — Give Your AI Agent Ears</title>
+    <meta name="description" content="FunASR OpenAI-compatible API and MCP Server for AI agents. One command to add speech recognition to LangChain, AutoGen, CrewAI, Dify, Claude, Cursor.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .agent-hero{background:linear-gradient(120deg,#0b1020 0%,#1a0f2e 100%);color:#fff;padding:100px 0 80px}
+        .agent-hero h1{font-size:clamp(2rem,4vw,3rem);font-weight:800;margin-bottom:16px}
+        .agent-hero p{color:rgba(255,255,255,0.7);font-size:1.1rem;max-width:600px}
+        .code-block{background:#1e293b;border-radius:12px;padding:24px;color:#e2e8f0;font-family:'JetBrains Mono',monospace;font-size:0.85rem;line-height:1.8;overflow-x:auto;margin:20px 0}
+        .code-block .comment{color:#64748b}
+        .code-block .kw{color:#7dd3fc}
+        .code-block .str{color:#86efac}
+        .section{padding:60px 0}
+        .section h2{font-size:1.8rem;font-weight:800;margin-bottom:16px}
+        .section p.lead{color:var(--muted);font-size:1.05rem;margin-bottom:32px;max-width:600px}
+        .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+        .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:28px}
+        .card h3{font-size:1.1rem;font-weight:700;margin-bottom:8px}
+        .card p{color:var(--muted);font-size:0.9rem;line-height:1.6}
+        .badge{display:inline-block;padding:4px 10px;border-radius:6px;font-size:0.75rem;font-weight:700;margin-right:6px}
+        .badge-green{background:rgba(5,150,105,0.1);color:#059669}
+        .badge-blue{background:rgba(37,99,235,0.1);color:#2563eb}
+        .badge-purple{background:rgba(124,58,237,0.1);color:#7c3aed}
+        table{width:100%;border-collapse:collapse;font-size:0.9rem;margin:20px 0}
+        th{text-align:left;padding:12px;border-bottom:2px solid var(--line);font-weight:700;color:var(--muted);font-size:0.8rem;text-transform:uppercase}
+        td{padding:12px;border-bottom:1px solid var(--line)}
+        @media(max-width:768px){.grid-2{grid-template-columns:1fr}}
+    </style>
+</head>
+<body>
+    <nav class="nav"><div class="container">
+        <a href="index.html" class="nav-logo">FunASR</a>
+        <div class="nav-links">
+            <a href="index.html">Home</a>
+            <a href="tutorial.html">Tutorial</a>
+            <a href="benchmark.html">Benchmark</a>
+            <a href="agent.html" class="active">Agent</a>
+            <a href="api.html">API</a>
+        </div>
+        <a href="https://github.com/modelscope/FunASR" class="nav-github">GitHub</a>
+    </div></nav>
+
+    <section class="agent-hero">
+        <div class="container">
+            <h1>Give Your AI Agent Ears</h1>
+            <p>One command turns FunASR into a speech backend for any AI framework. OpenAI-compatible API, MCP server, self-hosted, 170x realtime.</p>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container">
+            <h2>Quick Start</h2>
+            <p class="lead">Two lines to add speech recognition to your agent stack:</p>
+            <div class="code-block">
+<span class="comment"># Install & start</span>
+$ pip install funasr fastapi uvicorn python-multipart
+$ funasr-server --device cuda --port 8000
+
+<span class="comment"># Now any OpenAI SDK client works</span>
+<span class="kw">from</span> openai <span class="kw">import</span> OpenAI
+client = OpenAI(base_url=<span class="str">"http://localhost:8000/v1"</span>, api_key=<span class="str">"not-needed"</span>)
+result = client.audio.transcriptions.create(
+    model=<span class="str">"sensevoice"</span>, file=open(<span class="str">"audio.wav"</span>, <span class="str">"rb"</span>)
+)
+print(result.text)
+            </div>
+        </div>
+    </section>
+
+    <section class="section" style="background:var(--surface);">
+        <div class="container">
+            <h2>Integration Methods</h2>
+            <div class="grid-2">
+                <div class="card">
+                    <span class="badge badge-green">REST API</span>
+                    <h3>OpenAI-Compatible Server</h3>
+                    <p>Drop-in replacement for <code>/v1/audio/transcriptions</code>. Works with LangChain, AutoGen, CrewAI, Dify, Flowise, Open WebUI — any framework using OpenAI audio API.</p>
+                    <div class="code-block" style="font-size:0.8rem;margin-top:12px">
+funasr-server --device cuda --port 8000
+                    </div>
+                </div>
+                <div class="card">
+                    <span class="badge badge-purple">MCP</span>
+                    <h3>Model Context Protocol</h3>
+                    <p>Add FunASR as a tool in Claude Code, Cursor, or Windsurf. Your AI assistant can transcribe any audio file directly.</p>
+                    <div class="code-block" style="font-size:0.8rem;margin-top:12px">
+<span class="comment">// claude_desktop_config.json</span>
+{"mcpServers": {"funasr": {
+  "command": "python",
+  "args": ["funasr_mcp.py"]
+}}}
+                    </div>
+                </div>
+                <div class="card">
+                    <span class="badge badge-blue">WebSocket</span>
+                    <h3>Streaming Server</h3>
+                    <p>Real-time voice input via WebSocket. 2Pass mode: instant partial results + high-accuracy final correction. For voice agents that need low latency.</p>
+                    <div class="code-block" style="font-size:0.8rem;margin-top:12px">
+docker run -p 10095:10095 \
+  funasr-runtime-sdk-online-cpu
+                    </div>
+                </div>
+                <div class="card">
+                    <span class="badge badge-green">Python</span>
+                    <h3>Direct SDK</h3>
+                    <p>Use FunASR directly as a Python function in your agent code. No server needed for single-process applications.</p>
+                    <div class="code-block" style="font-size:0.8rem;margin-top:12px">
+<span class="kw">from</span> funasr <span class="kw">import</span> AutoModel
+model = AutoModel(model=<span class="str">"iic/SenseVoiceSmall"</span>)
+text = model.generate(input=<span class="str">"a.wav"</span>)[0][<span class="str">"text"</span>]
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container">
+            <h2>Compatible Frameworks</h2>
+            <table>
+                <thead><tr><th>Framework</th><th>Stars</th><th>Integration</th><th>Method</th></tr></thead>
+                <tbody>
+                    <tr><td><strong>LangChain</strong></td><td>137K</td><td>OpenAI audio tool</td><td>Change base_url</td></tr>
+                    <tr><td><strong>Dify</strong></td><td>142K</td><td>STT provider</td><td>OpenAI-compatible endpoint</td></tr>
+                    <tr><td><strong>Open WebUI</strong></td><td>138K</td><td>Speech-to-text</td><td>OpenAI-compatible endpoint</td></tr>
+                    <tr><td><strong>AutoGen</strong></td><td>47K</td><td>Agent tool function</td><td>OpenAI SDK</td></tr>
+                    <tr><td><strong>Flowise</strong></td><td>30K</td><td>STT node</td><td>OpenAI-compatible endpoint</td></tr>
+                    <tr><td><strong>Claude / Cursor</strong></td><td>—</td><td>Audio transcription tool</td><td>MCP Server</td></tr>
+                    <tr><td><strong>Pipecat</strong></td><td>12K</td><td>STT service</td><td>WebSocket / OpenAI</td></tr>
+                    <tr><td><strong>LiveKit Agents</strong></td><td>—</td><td>STT plugin</td><td>WebSocket streaming</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="section" style="background:var(--surface);">
+        <div class="container">
+            <h2>Available Models</h2>
+            <table>
+                <thead><tr><th>Model</th><th>Speed (GPU)</th><th>Speed (CPU)</th><th>Languages</th><th>Best For</th></tr></thead>
+                <tbody>
+                    <tr><td><strong>sensevoice</strong></td><td>170x realtime</td><td>17x realtime</td><td>zh/en/ja/ko/yue</td><td>General + emotion</td></tr>
+                    <tr><td><strong>paraformer</strong></td><td>120x realtime</td><td>15x realtime</td><td>zh/en</td><td>Chinese production</td></tr>
+                    <tr><td><strong>fun-asr-nano</strong></td><td>17x realtime</td><td>3.6x realtime</td><td>31 languages</td><td>Multilingual + LLM</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="section" style="text-align:center;padding:60px 0;">
+        <div class="container">
+            <h2>Get Started</h2>
+            <p style="color:var(--muted);margin-bottom:24px;">Two commands. No config files. No Docker required.</p>
+            <div class="code-block" style="display:inline-block;text-align:left;">
+pip install funasr fastapi uvicorn python-multipart
+funasr-server --device cuda
+            </div>
+            <div style="margin-top:24px;">
+                <a href="https://github.com/modelscope/FunASR/tree/main/examples/openai_api" class="btn btn-primary" style="padding:12px 28px;background:#2563eb;color:white;border-radius:10px;font-weight:600;text-decoration:none;">OpenAI API Docs</a>
+                <a href="https://github.com/modelscope/FunASR/tree/main/examples/mcp_server" class="btn btn-outline" style="padding:12px 28px;border:1px solid #e2e8f0;border-radius:10px;font-weight:600;text-decoration:none;margin-left:12px;">MCP Server Docs</a>
+            </div>
+        </div>
+    </section>
+
+    <footer style="padding:40px 0;border-top:1px solid var(--line);text-align:center;color:var(--muted);font-size:0.85rem;">
+        <div class="container">
+            <p>FunASR · <a href="https://github.com/modelscope/FunASR">GitHub</a> · <a href="https://pypi.org/project/funasr/">PyPI</a> · MIT License</p>
+        </div>
+    </footer>
+</body>
+</html>
