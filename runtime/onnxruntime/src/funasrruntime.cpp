@@ -548,8 +548,6 @@
 			}else if(mode == ASR_TWO_PASS){
 				p_result->msg += msg;
 			}
-			delete[] buff;
-			delete[] len;
 			if(frame != nullptr){
 				delete frame;
 				frame = nullptr;
@@ -623,8 +621,6 @@
 			if (!(p_result->stamp).empty()){
 				p_result->stamp_sents = funasr::TimestampSentence(p_result->tpass_msg, p_result->stamp);
 			}
-			delete[] buff;
-			delete[] len;
 			if(frame != nullptr){
 				delete frame;
 				frame = nullptr;

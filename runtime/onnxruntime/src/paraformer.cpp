@@ -509,14 +509,7 @@ std::vector<std::string> Paraformer::Forward(float** din, int* len, bool input_f
 
         int64_t outputCount = std::accumulate(outputShape.begin(), outputShape.end(), 1, std::multiplies<int64_t>());
         float* floatData = outputTensor[0].GetTensorMutableData<float>();
-        auto enc_lens_type = outputTensor[1].GetTensorTypeAndShapeInfo().GetElementType();
-        int64_t encoder_out_lens_val;
-        if (enc_lens_type == ONNX_TENSOR_ELEMENT_DATA_TYPE_INT32) {
-            encoder_out_lens_val = static_cast<int64_t>(*outputTensor[1].GetTensorMutableData<int32_t>());
-        } else {
-            encoder_out_lens_val = *outputTensor[1].GetTensorMutableData<int64_t>();
-        }
-        auto encoder_out_lens = &encoder_out_lens_val;
+        auto encoder_out_lens = outputTensor[1].GetTensorMutableData<int64_t>();
         // timestamp
         if(outputTensor.size() == 4){
             std::vector<int64_t> us_alphas_shape = outputTensor[2].GetTensorTypeAndShapeInfo().GetShape();
