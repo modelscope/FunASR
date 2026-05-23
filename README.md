@@ -34,7 +34,7 @@
 
 <a name="benchmark"></a>
 
-## Benchmark: Comprehensive ASR Comparison (PyTorch, NVIDIA H100)
+## Benchmark: Comprehensive ASR Comparison (PyTorch, GPU)
 
 > 7 models on GPU, 3 models on CPU. 184 long-form Chinese audio files (192 min total). [Full report](https://modelscope.github.io/FunASR/benchmark.html)
 
