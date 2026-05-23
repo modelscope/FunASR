@@ -17,7 +17,7 @@ nj=32
 inference_device="cuda" #"cpu", "cuda:0", "cuda:1"
 inference_checkpoint="model.pt.avg10"
 inference_scp="wav.scp"
-inference_batch_size=1
+inference_batch_size=32
 
 # data
 raw_data=../raw_data
@@ -136,7 +136,7 @@ if [ ${stage} -le 5 ] && [ ${stop_stage} -ge 5 ]; then
   if [ ${inference_device} == "cuda" ]; then
       nj=$(echo $CUDA_VISIBLE_DEVICES | awk -F "," '{print NF}')
   else
-      inference_batch_size=1
+      inference_batch_size=32
       CUDA_VISIBLE_DEVICES=""
       for JOB in $(seq ${nj}); do
           CUDA_VISIBLE_DEVICES=$CUDA_VISIBLE_DEVICES"-1,"
