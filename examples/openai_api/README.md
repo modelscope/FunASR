@@ -9,18 +9,29 @@ pip install funasr fastapi uvicorn python-multipart
 python server.py --model sensevoice --device cuda --port 8000
 ```
 
-## Usage with OpenAI SDK
+Server starts in ~20s (model loading). Health check: `GET /health`
+
+## Usage with OpenAI SDK (Python)
 
 ```python
 from openai import OpenAI
 
 client = OpenAI(base_url="http://localhost:8000/v1", api_key="not-needed")
 
+# Basic transcription
 result = client.audio.transcriptions.create(
-    model="sensevoice",  # or "paraformer", "fun-asr-nano"
+    model="sensevoice",  # or "paraformer", "paraformer-en", "fun-asr-nano"
     file=open("meeting.wav", "rb"),
 )
 print(result.text)
+
+# With timestamps/segments
+result = client.audio.transcriptions.create(
+    model="sensevoice",
+    file=open("meeting.wav", "rb"),
+    response_format="verbose_json",
+)
+# Returns: text, segments (with start/end/speaker), duration
 ```
 
 ## Usage with curl
@@ -29,22 +40,65 @@ print(result.text)
 curl http://localhost:8000/v1/audio/transcriptions \
   -F file=@audio.wav \
   -F model=sensevoice
+
+# With verbose output
+curl http://localhost:8000/v1/audio/transcriptions \
+  -F file=@audio.wav \
+  -F model=sensevoice \
+  -F response_format=verbose_json
 ```
 
 ## Available Models
 
-| Model | Speed | Languages | Features |
-|-------|-------|-----------|----------|
-| `sensevoice` | 170x realtime | 5 | Emotion detection |
-| `paraformer` | 120x realtime | zh/en | Punctuation, streaming |
-| `fun-asr-nano` | 17x realtime | 31 | LLM-based, timestamps |
+| Model | Speed (GPU) | Speed (CPU) | Languages | Features |
+|-------|-------------|-------------|-----------|----------|
+| `sensevoice` | 170x realtime | 17x realtime | zh/en/ja/ko/yue | Emotion detection |
+| `paraformer` | 120x realtime | 15x realtime | zh/en | Punctuation |
+| `paraformer-en` | 120x realtime | 15x realtime | en | English only |
+| `fun-asr-nano` | 17x realtime | 3.6x realtime | 31 languages | LLM-based, timestamps |
+
+## API Endpoints
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/v1/audio/transcriptions` | POST | Transcribe audio (OpenAI-compatible) |
+| `/v1/models` | GET | List available models |
+| `/health` | GET | Health check + loaded models |
+| `/docs` | GET | Interactive API documentation (Swagger) |
 
 ## Agent Framework Integration
 
-Works with: LangChain, LlamaIndex, AutoGen, CrewAI, Semantic Kernel, or any framework supporting OpenAI audio API.
+Works with: **LangChain**, **LlamaIndex**, **AutoGen**, **CrewAI**, **Semantic Kernel**, **Dify**, or any framework using OpenAI audio API.
 
+### LangChain Example
 ```python
-# LangChain example
-from langchain_openai import ChatOpenAI
-# Just point your audio transcription to localhost:8000
+from openai import OpenAI
+
+client = OpenAI(base_url="http://localhost:8000/v1", api_key="x")
+
+def transcribe_for_agent(audio_path: str) -> str:
+    """Tool function for LangChain agent."""
+    result = client.audio.transcriptions.create(
+        model="sensevoice", file=open(audio_path, "rb")
+    )
+    return result.text
 ```
+
+## Docker Deployment
+
+```bash
+# Build
+docker build -t funasr-api .
+
+# Run with GPU
+docker run --gpus all -p 8000:8000 funasr-api
+```
+
+## Configuration
+
+| Arg | Default | Description |
+|-----|---------|-------------|
+| `--host` | 0.0.0.0 | Bind address |
+| `--port` | 8000 | Port |
+| `--device` | cuda | Device (cuda/cpu/mps) |
+| `--model` | sensevoice | Pre-load model at startup |
