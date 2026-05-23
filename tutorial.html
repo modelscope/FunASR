@@ -1,95 +1,134 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FunASR Tutorial</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-    <nav class="nav">
-        <div class="container">
-            <a href="index.html" class="nav-logo">FunASR</a>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>FunASR Tutorial</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head><body>
+<nav class="nav"><div class="container">
+<a href="index.html" class="nav-logo">FunASR</a>
             <div class="nav-links">
                 <a href="index.html">Home</a>
                 <a href="tutorial.html" class="active">Tutorial</a>
-                <a href="benchmark.html">Benchmark</a>
-                <a href="benchmark.html">Benchmark</a>
+                <a href="training.html">Training</a>
                 <a href="model-registration.html">Develop</a>
+                <a href="api.html">API</a>
             </div>
-            <a href="https://github.com/modelscope/FunASR" class="nav-github">GitHub</a>
-        </div>
-    </nav>
 
-    <div class="content container narrow">
-        <h1>FunASR Tutorial</h1>
-        <p>This guide covers everything from installation to advanced usage — streaming ASR, speaker diarization, emotion detection, and model export.</p>
+<div class="lang-dropdown"><button class="lang-btn">English</button><div class="lang-menu"><a href="tutorial.html" class="current">English</a><a href="zh/tutorial.html">中文</a><a href="ja/tutorial.html">日本語</a></div></div>
+<a href="https://github.com/modelscope/FunASR" class="nav-github">GitHub</a>
+</div></nav>
 
-        <nav class="quick-nav" aria-label="Tutorial sections">
-            <a href="#install">Installation</a>
-            <a href="#asr-offline">Paraformer offline</a>
-            <a href="#fun-asr-nano">Fun-ASR-Nano</a>
-            <a href="#sensevoice">SenseVoice</a>
-            <a href="#asr-streaming">Streaming ASR</a>
-            <a href="#vad">VAD</a>
-            <a href="#punc">Punctuation</a>
-            <a href="#spk">Speaker diarization</a>
-            <a href="#qwen3-asr">Qwen3-ASR</a>
-            <a href="#export">ONNX export</a>
-            <a href="#api">API reference</a>
-        </nav>
+<div class="content"><div class="container narrow">
+<h1>Tutorial</h1>
+<p>From zero to production — learn FunASR in 10 minutes.</p>
 
-        <!-- Installation -->
-        <h2 id="install">Installation</h2>
-        <p>FunASR can be installed from PyPI or from source. The source install is recommended to get the latest bug fixes and new model support.</p>
+<div class="toc-grid">
+<a href="#quick">30-Second Demo</a>
+<a href="#install">Install</a>
+<a href="#choose">Choose a Model</a>
+<a href="#scenarios">Usage Scenarios</a>
+<a href="#offline">Offline ASR</a>
+<a href="#streaming">Streaming ASR</a>
+<a href="#spk">Speaker Diarization</a>
+<a href="#emotion">Emotion Detection</a>
+<a href="#vad">VAD</a>
+<a href="#punc">Punctuation</a>
+<a href="#export">ONNX Export</a>
+<a href="#faq">FAQ & Troubleshooting</a>
+</div>
+
+<!-- 30-Second Demo -->
+<h2 id="quick">30-Second Demo</h2>
+<p>Copy-paste this and run. No config needed — FunASR downloads everything automatically:</p>
 <pre>pip install funasr
 
-# Install from source (recommended for latest features)
+python -c "
+from funasr import AutoModel
+model = AutoModel(model='paraformer-zh', vad_model='fsmn-vad', punc_model='ct-punc')
+res = model.generate(input='https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav')
+print(res[0]['text'])
+"</pre>
+<p><strong>Output:</strong></p>
+<div class="output-box">欢迎大家来体验达摩院推出的语音识别模型。</div>
+
+<p>That's it. One model object handles everything: loading audio, VAD segmentation, ASR, and punctuation.</p>
+
+<!-- Install -->
+<h2 id="install">Install</h2>
+<pre># Stable release
+pip install funasr
+
+# Latest (recommended — has newest models and bug fixes)
 pip install git+https://github.com/modelscope/FunASR.git</pre>
-        <p>FunASR automatically downloads models from <a href="https://www.modelscope.cn">ModelScope</a> (default) or <a href="https://huggingface.co">HuggingFace</a>. Set <code>hub="hf"</code> to use HuggingFace.</p>
 
-        <!-- Offline ASR -->
-        <h2 id="asr-offline">Speech Recognition (Offline)</h2>
-        <p>The most common use case: transcribe a complete audio file. FunASR's <code>AutoModel</code> provides a unified interface for all models. Combined with a VAD model, it handles audio of any length by automatically segmenting it into manageable chunks.</p>
+<div class="tip"><strong>China users:</strong> Models download from ModelScope by default (fast in China). International users: add <code>hub="hf"</code> to download from HuggingFace.</div>
 
-        <h3>Paraformer — Chinese/English ASR</h3>
-        <p>Paraformer is a non-autoregressive model optimized for Chinese speech recognition. It offers the best balance of accuracy and speed for production use.</p>
+<!-- Choose a Model -->
+<h2 id="choose">Which Model Should I Use?</h2>
+
+<table>
+<tr><th>Model</th><th>Best For</th><th>Languages</th><th>Speed</th><th>Punctuation</th></tr>
+<tr><td><strong>Paraformer</strong></td><td>Chinese production ASR</td><td>Chinese, English</td><td>Fast</td><td>Needs punc_model</td></tr>
+<tr><td><strong>Fun-ASR-Nano</strong></td><td>Multi-language, dialects, lyrics</td><td>31 languages</td><td>Medium</td><td>Built-in ✓</td></tr>
+<tr><td><strong>SenseVoice</strong></td><td>Emotion + events + ASR</td><td>5 languages</td><td>Ultra-fast (70ms/10s)</td><td>Built-in ✓</td></tr>
+<tr><td><strong>Qwen3-ASR</strong></td><td>Highest accuracy, context-aware</td><td>52 languages</td><td>Slow (LLM)</td><td>Built-in ✓</td></tr>
+<tr><td><strong>Paraformer-Streaming</strong></td><td>Real-time transcription</td><td>Chinese</td><td>Real-time</td><td>Needs punc_model</td></tr>
+</table>
+
+<div class="note">
+<strong>Quick recommendation:</strong><br>
+• Chinese meeting/call → <code>paraformer-zh</code> + <code>fsmn-vad</code> + <code>ct-punc</code> + <code>cam++</code><br>
+• Multi-language → <code>Fun-ASR-Nano</code><br>
+• Need emotion/sound events → <code>SenseVoice</code><br>
+• Real-time subtitles → <code>paraformer-zh-streaming</code><br>
+• Highest quality, no latency concern → <code>Qwen3-ASR</code>
+</div>
+
+<!-- Scenarios -->
+<h2 id="scenarios">Usage Scenarios</h2>
+
+<div class="scenario-card">
+<h4>🎤 "I have a meeting recording and want text + who said what"</h4>
+<p>→ Paraformer + VAD + Punctuation + Speaker Diarization → <a href="#spk">Jump to Speaker Diarization</a></p>
+</div>
+
+<div class="scenario-card">
+<h4>📺 "I want real-time subtitles for a live stream"</h4>
+<p>→ Paraformer-Streaming, feed audio chunks every 600ms → <a href="#streaming">Jump to Streaming ASR</a></p>
+</div>
+
+<div class="scenario-card">
+<h4>😊 "I want to detect user emotions from voice"</h4>
+<p>→ SenseVoice (outputs emotion tags: happy, sad, angry, neutral) → <a href="#emotion">Jump to Emotion Detection</a></p>
+</div>
+
+<div class="scenario-card">
+<h4>🌍 "I have audio in Japanese/Korean/Arabic/etc."</h4>
+<p>→ Fun-ASR-Nano (31 languages) or Qwen3-ASR (52 languages) → <a href="#offline">Jump to Offline ASR</a></p>
+</div>
+
+<div class="scenario-card">
+<h4>✂️ "I want to clip a video by spoken content"</h4>
+<p>→ Use <a href="https://github.com/modelscope/FunClip">FunClip</a> which integrates FunASR for smart video editing</p>
+</div>
+
+<!-- Offline ASR -->
+<h2 id="offline">Offline ASR</h2>
+
+<h3>Paraformer (Chinese)</h3>
 <pre>from funasr import AutoModel
 
 model = AutoModel(
-    model="paraformer-zh",
-    vad_model="fsmn-vad",
+    model="paraformer-zh",          # Chinese ASR
+    vad_model="fsmn-vad",           # handles any audio length
     vad_kwargs={"max_single_segment_time": 60000},
-    punc_model="ct-punc",
-    # spk_model="cam++",  # uncomment for speaker diarization
+    punc_model="ct-punc",           # adds punctuation
 )
-res = model.generate(input="audio.wav", batch_size_s=300, hotword='魔搭')
-print(res)</pre>
-        <p><strong>Key parameters:</strong></p>
-        <ul>
-            <li><code>vad_model="fsmn-vad"</code> — enables Voice Activity Detection to split long audio into segments. Without this, input is limited to ~30 seconds.</li>
-            <li><code>max_single_segment_time=60000</code> — maximum VAD segment length in milliseconds (60s).</li>
-            <li><code>punc_model="ct-punc"</code> — adds punctuation to the output text.</li>
-            <li><code>batch_size_s=300</code> — dynamic batching by total audio duration (seconds). Larger values use more memory but are faster.</li>
-            <li><code>hotword</code> — recognition keywords to boost accuracy for domain-specific terms.</li>
-        </ul>
+res = model.generate(input="meeting.wav", batch_size_s=300, hotword='达摩院 语音识别')
+print(res[0]["text"])       # "欢迎大家来体验达摩院推出的语音识别模型。"
+print(res[0]["timestamp"])  # [[880,1120],[1120,1360],...] (ms per character)</pre>
 
-        <div class="note">
-            <strong>OOM (Out of Memory)?</strong> Reduce <code>batch_size_s</code>, or reduce <code>max_single_segment_time</code> in vad_kwargs. For extremely long segments, set <code>batch_size_threshold_s=30</code> to force batch_size=1 when a segment exceeds this threshold.
-        </div>
-
-        <!-- Fun-ASR-Nano -->
-        <h2 id="fun-asr-nano">Fun-ASR-Nano — 31 Languages</h2>
-        <p>Fun-ASR-Nano is the latest end-to-end ASR model trained on tens of millions of hours of real speech data. It excels at:</p>
-        <ul>
-            <li>31 languages including Chinese dialects (Wu, Cantonese, Min, etc.) and regional accents</li>
-            <li>Character-level timestamps</li>
-            <li>Lyrics and rap recognition</li>
-            <li>Hotword customization</li>
-        </ul>
-
-        <h3>Basic Usage</h3>
+<h3>Fun-ASR-Nano (31 Languages)</h3>
 <pre>from funasr import AutoModel
 
 model = AutoModel(
@@ -101,47 +140,14 @@ model = AutoModel(
     device="cuda:0",
     hub="hf",
 )
-res = model.generate(
-    input=["audio.wav"],
-    cache={},
-    batch_size=1,
-    hotwords=["keyword1", "keyword2"],
-    language="中文",  # or "英文", "日文", etc.
-)
-print(res[0]["text"])        # recognized text
-print(res[0]["timestamps"])  # character-level timestamps</pre>
-        <p>The output includes <code>timestamps</code> — a list of dictionaries with <code>token</code>, <code>start_time</code>, and <code>end_time</code> (in seconds) for each character.</p>
+res = model.generate(input=["audio.wav"], cache={}, batch_size=1,
+                     hotwords=["keyword"], language="中文")
+print(res[0]["text"])        # recognized text with punctuation
+print(res[0]["timestamps"])  # [{"token":"开","start_time":0.42,"end_time":0.48}, ...]</pre>
 
-        <h3>With Speaker Diarization</h3>
-        <p>Add <code>spk_model</code> and <code>punc_model</code> to get per-sentence speaker labels. The output <code>sentence_info</code> contains text, timestamps, and speaker ID for each sentence.</p>
-<pre>model = AutoModel(
-    model="FunAudioLLM/Fun-ASR-Nano-2512",
-    trust_remote_code=True,
-    remote_code="./model.py",
-    vad_model="fsmn-vad",
-    vad_kwargs={"max_single_segment_time": 30000},
-    spk_model="cam++",
-    punc_model="ct-punc",
-    device="cuda:0",
-    hub="hf",
-)
-res = model.generate(input=["meeting.wav"], cache={}, batch_size=1, language="中文")
+<div class="note"><strong>Fun-ASR-Nano outputs punctuation natively</strong> — no need for <code>punc_model</code>.</div>
 
-for sent in res[0]["sentence_info"]:
-    print(f"Speaker {sent['spk']}: [{sent['start']}ms-{sent['end']}ms] {sent['text']}")</pre>
-        <div class="note">
-            <strong>Requirements:</strong> <code>pip install tiktoken huggingface_hub</code>. The model is downloaded from HuggingFace (~1.6GB).
-        </div>
-
-        <!-- SenseVoice -->
-        <h2 id="sensevoice">SenseVoice — ASR + Emotion + Audio Events</h2>
-        <p>SenseVoice is a multi-task speech understanding model. Beyond ASR, it detects:</p>
-        <ul>
-            <li><strong>Emotions:</strong> happy, sad, angry, neutral</li>
-            <li><strong>Audio events:</strong> BGM, applause, laughter, crying, coughing, sneezing</li>
-            <li><strong>Languages:</strong> Chinese, English, Cantonese, Japanese, Korean</li>
-        </ul>
-        <p>It uses a non-autoregressive architecture — processing 10 seconds of audio in just 70ms on GPU.</p>
+<h3>SenseVoice (ASR + Emotion + Events)</h3>
 <pre>from funasr import AutoModel
 from funasr.utils.postprocess_utils import rich_transcription_postprocess
 
@@ -151,249 +157,219 @@ model = AutoModel(
     vad_kwargs={"max_single_segment_time": 30000},
     device="cuda:0",
 )
-res = model.generate(
-    input="audio.wav",
-    cache={},
-    language="auto",   # auto-detect language
-    use_itn=True,      # inverse text normalization (numbers, dates)
-    batch_size_s=60,
-    merge_vad=True,
-    merge_length_s=15,
-)
-text = rich_transcription_postprocess(res[0]["text"])
-print(text)</pre>
-        <p>The <code>rich_transcription_postprocess</code> function removes the internal tags (like <code>&lt;|zh|&gt;</code>, <code>&lt;|NEUTRAL|&gt;</code>) and returns clean text.</p>
-
-        <h3>SenseVoice + Speaker Diarization</h3>
-        <p>SenseVoice also supports speaker diarization when combined with <code>spk_model</code>:</p>
-<pre>model = AutoModel(
-    model="iic/SenseVoiceSmall",
-    vad_model="fsmn-vad",
-    vad_kwargs={"max_single_segment_time": 30000},
-    spk_model="cam++",
-    punc_model="ct-punc",
-    device="cuda:0",
-)
-res = model.generate(input="meeting.wav", cache={}, language="auto",
+res = model.generate(input="audio.wav", cache={}, language="auto",
                      use_itn=True, batch_size_s=60, merge_vad=True, merge_length_s=15)
 
-for sent in res[0]["sentence_info"]:
-    text = rich_transcription_postprocess(sent["text"])
-    print(f"Speaker {sent['spk']}: {text}")</pre>
+# Raw output contains emotion/event tags: <|zh|><|HAPPY|><|Speech|>你好
+text = rich_transcription_postprocess(res[0]["text"])
+print(text)  # "你好" (clean text)</pre>
 
-        <!-- Streaming ASR -->
-        <h2 id="asr-streaming">Speech Recognition (Streaming)</h2>
-        <p>For real-time transcription, use the streaming Paraformer model. Audio is processed chunk-by-chunk, and partial results are returned incrementally. This is ideal for live captioning, voice assistants, and real-time meeting transcription.</p>
-        <p>The <code>cache</code> dictionary maintains state between chunks — it must persist across the entire session.</p>
+<h3>Qwen3-ASR (52 Languages, Highest Accuracy)</h3>
+<pre># pip install qwen-asr
+from funasr import AutoModel
+
+model = AutoModel(model="Qwen/Qwen3-ASR-1.7B", hub="hf", device="cuda:0")
+res = model.generate(input="audio.wav")
+print(res[0]["text"])             # recognized text
+print(res[0].get("language"))    # auto-detected language</pre>
+
+<!-- Streaming -->
+<h2 id="streaming">Streaming ASR (Real-time)</h2>
+<p>Process audio chunk-by-chunk for real-time transcription. Each chunk produces partial text immediately.</p>
+
 <pre>from funasr import AutoModel
 import soundfile
-
-chunk_size = [0, 10, 5]  # [0, 10, 5] = 600ms chunks, 300ms lookahead
-encoder_chunk_look_back = 4
-decoder_chunk_look_back = 1
 
 model = AutoModel(model="paraformer-zh-streaming")
 
-speech, sample_rate = soundfile.read("audio.wav")
-chunk_stride = chunk_size[1] * 960  # 600ms = 9600 samples at 16kHz
+speech, sr = soundfile.read("audio.wav")
+chunk_size = [0, 10, 5]          # 600ms display, 300ms lookahead
+chunk_stride = chunk_size[1] * 960  # 9600 samples per chunk
 
 cache = {}
-total_chunk_num = int((len(speech) - 1) / chunk_stride + 1)
-for i in range(total_chunk_num):
-    speech_chunk = speech[i * chunk_stride:(i + 1) * chunk_stride]
-    is_final = i == total_chunk_num - 1
-    res = model.generate(
-        input=speech_chunk, cache=cache, is_final=is_final,
-        chunk_size=chunk_size,
-        encoder_chunk_look_back=encoder_chunk_look_back,
-        decoder_chunk_look_back=decoder_chunk_look_back,
-    )
-    print(res)  # partial results for each chunk</pre>
-        <p><strong>How it works:</strong></p>
-        <ul>
-            <li><code>chunk_size=[0, 10, 5]</code> — display granularity is 10×60ms=600ms, lookahead is 5×60ms=300ms</li>
-            <li>Each iteration feeds 600ms of audio (9600 samples at 16kHz)</li>
-            <li><code>is_final=True</code> on the last chunk forces output of any remaining buffered text</li>
-            <li>The <code>cache</code> dict maintains encoder/decoder state — do NOT reset it between chunks</li>
-        </ul>
+total_chunks = int((len(speech) - 1) / chunk_stride + 1)
+for i in range(total_chunks):
+    chunk = speech[i * chunk_stride:(i + 1) * chunk_stride]
+    is_final = (i == total_chunks - 1)
 
-        <!-- VAD -->
-        <h2 id="vad">Voice Activity Detection (Offline)</h2>
-        <p>VAD detects speech segments in audio, returning start/end times in milliseconds. Useful for pre-processing before ASR, or for skipping silence in long recordings.</p>
-<pre>from funasr import AutoModel
+    res = model.generate(input=chunk, cache=cache, is_final=is_final,
+                         chunk_size=chunk_size,
+                         encoder_chunk_look_back=4,
+                         decoder_chunk_look_back=1)
+    if res[0]["text"]:
+        print(res[0]["text"], end="", flush=True)  # incremental output</pre>
 
-model = AutoModel(model="fsmn-vad")
-res = model.generate(input="audio.wav")
-print(res)
-# [{"key": "audio", "value": [[610, 5530], [7200, 12400], ...]}]
-# Each [start_ms, end_ms] is a speech segment</pre>
+<p><strong>Output (printed incrementally):</strong></p>
+<div class="output-box">欢迎大 | 家来 | 体验达 | 摩院推 | 出的语 | 音识 | 别模型</div>
 
-        <h2 id="vad-streaming">Voice Activity Detection (Streaming)</h2>
-        <p>For real-time voice activity detection (e.g., detecting when a user starts/stops speaking), use the streaming VAD mode. Audio is fed in small chunks (e.g., 200ms), and the model reports speech boundaries as they are detected.</p>
-<pre>from funasr import AutoModel
-import soundfile
+<div class="note">
+<strong>Key points:</strong><br>
+• <code>cache={}</code> must persist across all chunks (don't recreate it)<br>
+• <code>is_final=True</code> on last chunk flushes remaining buffered text<br>
+• <code>chunk_size=[0,10,5]</code>: first number unused, second=display granularity (×60ms), third=lookahead (×60ms)
+</div>
 
-chunk_size = 200  # process 200ms at a time
-model = AutoModel(model="fsmn-vad")
+<!-- Speaker Diarization -->
+<h2 id="spk">Speaker Diarization ("Who Said What")</h2>
+<p>Works with <strong>all three major models</strong>: Paraformer, Fun-ASR-Nano, and SenseVoice. Add <code>spk_model="cam++"</code> to get speaker labels per sentence.</p>
 
-speech, sample_rate = soundfile.read("audio.wav")
-chunk_stride = int(chunk_size * sample_rate / 1000)
-
-cache = {}
-total_chunk_num = int((len(speech) - 1) / chunk_stride + 1)
-for i in range(total_chunk_num):
-    speech_chunk = speech[i * chunk_stride:(i + 1) * chunk_stride]
-    is_final = i == total_chunk_num - 1
-    res = model.generate(input=speech_chunk, cache=cache,
-                         is_final=is_final, chunk_size=chunk_size)
-    if len(res[0]["value"]):
-        print(res)</pre>
-        <p><strong>Streaming VAD output formats:</strong></p>
-        <ul>
-            <li><code>[[beg, end]]</code> — complete speech segment detected</li>
-            <li><code>[[beg, -1]]</code> — speech started but not yet ended</li>
-            <li><code>[[-1, end]]</code> — speech ended (paired with previous start)</li>
-            <li><code>[]</code> — no event detected in this chunk</li>
-        </ul>
-
-        <!-- Punctuation -->
-        <h2 id="punc">Punctuation Restoration</h2>
-        <p>ASR output typically lacks punctuation. The CT-Transformer model adds commas, periods, and question marks to raw text. It supports both Chinese and English.</p>
-<pre>from funasr import AutoModel
-
-model = AutoModel(model="ct-punc")
-res = model.generate(input="那今天的会就到这里吧 happy new year 明年见")
-print(res[0]["text"])
-# "那今天的会就到这里吧，happy new year，明年见。"</pre>
-        <p>The punctuation model is usually used as part of the pipeline (via <code>punc_model="ct-punc"</code> in AutoModel), but can also be used standalone for post-processing text from other sources.</p>
-
-        <!-- Speaker Diarization -->
-        <h2 id="spk">Speaker Diarization</h2>
-        <p>Speaker diarization answers "who spoke when" by clustering audio segments by speaker identity. FunASR supports this for <strong>all three major ASR models</strong>: Paraformer, Fun-ASR-Nano, and SenseVoice.</p>
-        <p>The pipeline works as follows:</p>
-        <ol>
-            <li>VAD segments the audio into speech regions</li>
-            <li>Each region is split into 1.5-second chunks</li>
-            <li>CAM++ extracts a 192-dimensional speaker embedding for each chunk</li>
-            <li>Spectral clustering groups chunks by speaker</li>
-            <li>Punctuation model segments text into sentences</li>
-            <li>Each sentence is assigned a speaker label based on time overlap</li>
-        </ol>
+<h3>Paraformer + Speaker</h3>
 <pre>from funasr import AutoModel
 
 model = AutoModel(
     model="paraformer-zh",
     vad_model="fsmn-vad",
-    punc_model="ct-punc",
-    spk_model="cam++",  # or "iic/speech_eres2netv2_sv_zh-cn_16k-common"
+    punc_model="ct-punc",      # Paraformer needs this for sentence segmentation
+    spk_model="cam++",
 )
 res = model.generate(input="meeting.wav", batch_size_s=300)
 
 for sent in res[0]["sentence_info"]:
     print(f"[Speaker {sent['spk']}] [{sent['start']}-{sent['end']}ms] {sent['text']}")</pre>
-        <p>You can also specify the number of speakers with <code>preset_spk_num=N</code> if known in advance.</p>
 
-        <!-- Qwen3-ASR -->
-        <h2 id="qwen3-asr">Qwen3-ASR — 52 Languages</h2>
-        <p>Qwen3-ASR is a large language model based ASR system supporting 52 languages with auto language detection. It leverages LLM's contextual understanding for improved accuracy on complex speech.</p>
-<pre># First install: pip install qwen-asr
-from funasr import AutoModel
+<p><strong>Output:</strong></p>
+<div class="output-box">[Speaker 0] [880-5195ms] 欢迎大家来体验达摩院推出的语音识别模型。</div>
 
-model = AutoModel(
-    model="Qwen/Qwen3-ASR-1.7B",  # or Qwen/Qwen3-ASR-0.6B for smaller model
-    hub="hf",
+<h3>Fun-ASR-Nano + Speaker (no punc needed)</h3>
+<pre>model = AutoModel(
+    model="FunAudioLLM/Fun-ASR-Nano-2512",
+    trust_remote_code=True, remote_code="./model.py",
+    vad_model="fsmn-vad", vad_kwargs={"max_single_segment_time": 30000},
+    spk_model="cam++",     # no punc_model needed!
+    device="cuda:0", hub="hf",
+)
+res = model.generate(input=["meeting.wav"], cache={}, batch_size=1, language="中文")
+for sent in res[0]["sentence_info"]:
+    print(f"Speaker {sent['spk']}: {sent.get('text', sent.get('sentence', ''))}")</pre>
+
+<h3>SenseVoice + Speaker (no punc needed)</h3>
+<pre>model = AutoModel(
+    model="iic/SenseVoiceSmall",
+    vad_model="fsmn-vad", vad_kwargs={"max_single_segment_time": 30000},
+    spk_model="cam++",    # no punc_model needed!
     device="cuda:0",
 )
+res = model.generate(input="meeting.wav", cache={}, language="auto",
+                     use_itn=True, batch_size_s=60, merge_vad=True, merge_length_s=15)
+for sent in res[0]["sentence_info"]:
+    print(f"Speaker {sent['spk']}: {rich_transcription_postprocess(sent['text'])}")</pre>
 
-# Auto language detection
+<!-- Emotion -->
+<h2 id="emotion">Emotion Detection</h2>
+
+<h3>Dedicated Emotion Model (emotion2vec)</h3>
+<pre>from funasr import AutoModel
+
+model = AutoModel(model="iic/emotion2vec_plus_large", device="cuda:0")
+res = model.generate(input="audio.wav", granularity="utterance")
+
+print(res[0]["labels"])  # ['angry', 'happy', 'neutral', 'sad', ...]
+print(res[0]["scores"])  # [0.01,   0.03,   0.89,      0.05, ...]
+# → This audio is "neutral" with 89% confidence</pre>
+
+<h3>SenseVoice (ASR + Emotion in one shot)</h3>
+<p>SenseVoice embeds emotion tags directly in the transcription output:</p>
+<pre># Raw output: "<|zh|><|HAPPY|><|Speech|><|withitn|>今天真是太开心了。"
+# The <|HAPPY|> tag tells you the emotion
+# Use rich_transcription_postprocess() to get clean text</pre>
+
+<!-- VAD -->
+<h2 id="vad">Voice Activity Detection</h2>
+
+<h3>Offline (full audio)</h3>
+<pre>from funasr import AutoModel
+
+model = AutoModel(model="fsmn-vad")
 res = model.generate(input="audio.wav")
-print(res[0]["text"], "| Language:", res[0].get("language", ""))
+print(res[0]["value"])  # [[610, 5530], [7200, 12400], ...]
+                         # Each pair: [start_ms, end_ms] of speech</pre>
 
-# With specified language (slightly faster, more accurate)
-res = model.generate(input="audio_zh.wav", language="Chinese")</pre>
-        <div class="note">
-            Requires <code>pip install qwen-asr</code> and a GPU with sufficient memory (~4GB for 0.6B, ~8GB for 1.7B).
-        </div>
+<h3>Streaming (chunk-by-chunk)</h3>
+<pre>import soundfile
+from funasr import AutoModel
 
-        <!-- ONNX Export -->
-        <h2 id="export">ONNX Export</h2>
-        <p>Export models to ONNX format for deployment with ONNX Runtime. This enables inference without PyTorch and supports additional optimizations like quantization.</p>
-<pre># Export via command line
-funasr-export ++model=paraformer ++quantize=false ++device=cpu
+model = AutoModel(model="fsmn-vad")
+speech, sr = soundfile.read("audio.wav")
+chunk_stride = int(200 * sr / 1000)  # 200ms chunks
 
-# Or via Python
+cache = {}
+for i in range(int((len(speech)-1)/chunk_stride+1)):
+    chunk = speech[i*chunk_stride:(i+1)*chunk_stride]
+    is_final = i == int((len(speech)-1)/chunk_stride)
+    res = model.generate(input=chunk, cache=cache, is_final=is_final, chunk_size=200)
+    if res[0]["value"]:
+        print(res[0]["value"])
+        # [[610, -1]]   → speech started at 610ms
+        # [[-1, 5530]]  → speech ended at 5530ms
+        # [[610, 5530]] → complete segment</pre>
+
+<!-- Punctuation -->
+<h2 id="punc">Punctuation Restoration</h2>
+<pre>from funasr import AutoModel
+
+model = AutoModel(model="ct-punc")
+res = model.generate(input="那今天的会就到这里吧 happy new year 明年见")
+print(res[0]["text"])  # "那今天的会就到这里吧，happy new year，明年见。"</pre>
+<div class="note"><strong>When do you need this?</strong> Only with Paraformer (which outputs raw text without punctuation). Fun-ASR-Nano, SenseVoice, and Qwen3-ASR output punctuation natively.</div>
+
+<!-- Export -->
+<h2 id="export">ONNX Export</h2>
+<pre># Export model to ONNX format
 from funasr import AutoModel
 model = AutoModel(model="paraformer", device="cpu")
-export_dir = model.export(quantize=False)
-print(f"Exported to: {export_dir}")</pre>
+model.export(quantize=False)   # saves to model cache directory
 
-        <h3>Using the ONNX Model</h3>
-<pre># pip install funasr-onnx
+# Use ONNX model (faster, no PyTorch needed)
+# pip install funasr-onnx
 from funasr_onnx import Paraformer
-
-model = Paraformer(
-    "damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch",
-    batch_size=1, quantize=True
-)
+model = Paraformer("damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch",
+                   batch_size=1, quantize=True)
 result = model(["audio.wav"])
 print(result)</pre>
-        <p>ONNX models can be further optimized with <code>onnxslim</code>:</p>
-<pre>pip install onnxslim
-onnxslim model.onnx model_optimized.onnx</pre>
 
-        <!-- API Reference -->
-        <h2 id="api">API Reference</h2>
-        <p>Complete reference for the two main interfaces: <code>AutoModel()</code> for initialization and <code>model.generate()</code> for inference.</p>
+<!-- FAQ -->
+<h2 id="faq">FAQ & Troubleshooting</h2>
 
-        <h3>AutoModel() Parameters</h3>
-        <table>
-            <tr><th>Parameter</th><th>Type</th><th>Default</th><th>Description</th></tr>
-            <tr><td><code>model</code></td><td>str</td><td>—</td><td>Model name (from Hub) or local path</td></tr>
-            <tr><td><code>device</code></td><td>str</td><td>"cuda:0"</td><td>Device: "cuda:0", "cpu", "mps", "npu:0"</td></tr>
-            <tr><td><code>vad_model</code></td><td>str</td><td>None</td><td>VAD model for long audio segmentation</td></tr>
-            <tr><td><code>vad_kwargs</code></td><td>dict</td><td>{}</td><td>VAD config, e.g. {"max_single_segment_time": 60000}</td></tr>
-            <tr><td><code>punc_model</code></td><td>str</td><td>None</td><td>Punctuation restoration model</td></tr>
-            <tr><td><code>spk_model</code></td><td>str</td><td>None</td><td>Speaker model for diarization ("cam++" or full model ID)</td></tr>
-            <tr><td><code>hub</code></td><td>str</td><td>"ms"</td><td>"ms" (ModelScope) or "hf" (HuggingFace)</td></tr>
-            <tr><td><code>ncpu</code></td><td>int</td><td>4</td><td>CPU threads for parallel operations</td></tr>
-            <tr><td><code>disable_update</code></td><td>bool</td><td>False</td><td>Skip version check on startup</td></tr>
-            <tr><td><code>disable_pbar</code></td><td>bool</td><td>False</td><td>Disable tqdm progress bars</td></tr>
-        </table>
+<h4>Model download is slow</h4>
+<p>Set <code>hub="hf"</code> for HuggingFace (faster outside China), or download once and use local path:</p>
+<pre>model = AutoModel(model="/path/to/local/model", disable_update=True)</pre>
 
-        <h3>model.generate() Parameters</h3>
-        <table>
-            <tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
-            <tr><td><code>input</code></td><td>str / array / list</td><td>Audio: file path, URL, numpy array, or list of arrays</td></tr>
-            <tr><td><code>cache</code></td><td>dict</td><td>State cache for streaming. Pass <code>{}</code> for first call.</td></tr>
-            <tr><td><code>hotword</code></td><td>str / list</td><td>Keywords to boost recognition accuracy</td></tr>
-            <tr><td><code>language</code></td><td>str</td><td>Language hint: "auto", "zh", "en", "中文", "Chinese", etc.</td></tr>
-            <tr><td><code>batch_size_s</code></td><td>int</td><td>Dynamic batch total duration (seconds)</td></tr>
-            <tr><td><code>is_final</code></td><td>bool</td><td>Last chunk flag for streaming mode</td></tr>
-            <tr><td><code>return_spk_res</code></td><td>bool</td><td>Return speaker diarization in sentence_info</td></tr>
-            <tr><td><code>sentence_timestamp</code></td><td>bool</td><td>Return sentence-level timestamps</td></tr>
-            <tr><td><code>use_itn</code></td><td>bool</td><td>Apply inverse text normalization (SenseVoice)</td></tr>
-        </table>
+<h4>Out of Memory (OOM)</h4>
+<p>Three knobs to reduce memory:</p>
+<ol>
+<li>Reduce <code>batch_size_s</code> (e.g., from 300 to 60)</li>
+<li>Reduce <code>max_single_segment_time</code> in vad_kwargs (e.g., 30000 → 15000)</li>
+<li>Add <code>batch_size_threshold_s=30</code> to force batch=1 for long segments</li>
+</ol>
 
-        <h3>Output Fields</h3>
-        <table>
-            <tr><th>Field</th><th>Format</th><th>Description</th></tr>
-            <tr><td><code>text</code></td><td>str</td><td>Recognized text (all ASR models)</td></tr>
-            <tr><td><code>timestamp</code></td><td>[[start_ms, end_ms], ...]</td><td>Character/word timestamps</td></tr>
-            <tr><td><code>sentence_info</code></td><td>[{text, start, end, spk, timestamp}, ...]</td><td>Sentences with speaker labels</td></tr>
-            <tr><td><code>value</code></td><td>[[start_ms, end_ms], ...]</td><td>VAD speech segments</td></tr>
-            <tr><td><code>spk_embedding</code></td><td>Tensor [N, 192]</td><td>Speaker embeddings (CAM++/ERes2NetV2)</td></tr>
-        </table>
+<h4>Every startup shows "Downloading Model..."</h4>
+<p>Not actually re-downloading — just verifying cache. To skip entirely:</p>
+<pre>model = AutoModel(model="/local/path/to/model", disable_update=True)</pre>
 
-        <div class="warning callout-spaced">
-            <strong>Model Aliases:</strong> You can use short names like <code>"paraformer-zh"</code>, <code>"fsmn-vad"</code>, <code>"ct-punc"</code>, <code>"cam++"</code> instead of full model IDs. FunASR resolves them automatically via the built-in alias map.
-        </div>
-    </div>
+<h4>"ModelName is not registered"</h4>
+<p>Usually means pypi version is outdated. Install from source:</p>
+<pre>pip install git+https://github.com/modelscope/FunASR.git</pre>
 
-    <footer>
-        <p>FunASR &middot; Tongyi Lab, Alibaba Group</p>
-        <p><a href="index.html">Home</a> &middot; <a href="benchmark.html">Benchmark</a>
-                <a href="benchmark.html">Benchmark</a>
-                <a href="model-registration.html">Develop</a> &middot; <a href="https://github.com/modelscope/FunASR">GitHub</a></p>
-    </footer>
-</body>
-</html>
+<h4>Want to suppress all progress bars and logs?</h4>
+<pre>model = AutoModel(model="...", disable_update=True, disable_pbar=True, log_level="ERROR")</pre>
+
+<h4>How to pass pre-loaded numpy audio?</h4>
+<pre>import soundfile as sf
+audio, sr = sf.read("audio.wav")  # numpy array, 16kHz
+res = model.generate(input=audio)  # pass directly — no file needed</pre>
+
+<h4>GPU not being used?</h4>
+<pre># Check:
+import torch
+print(torch.cuda.is_available())  # must be True
+
+# Specify GPU explicitly:
+model = AutoModel(model="...", device="cuda:0")</pre>
+
+</div></div>
+
+<footer>
+<p>FunASR &middot; Tongyi Lab, Alibaba Group</p>
+<p><a href="index.html">Home</a> &middot; <a href="tutorial.html">Tutorial</a> &middot; <a href="training.html">Training</a> &middot; <a href="model-registration.html">Develop</a> &middot; <a href="api.html">API</a> &middot; <a href="https://github.com/modelscope/FunASR">GitHub</a></p>
+</footer>
+</body></html>
