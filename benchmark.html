@@ -359,10 +359,10 @@
             <div class="headline-stat">
                 <strong>170x</strong> realtime on GPU &middot; <strong>8.92%</strong> CER &middot; <strong>7</strong> models compared
             </div>
-            <h1 style="margin-top:24px;">ASR Benchmark 2025<br>Comprehensive Comparison</h1>
+            <h1 style="margin-top:24px;">ASR Benchmark 2025<br>PyTorch Inference</h1>
             <p class="subtitle">
                 7 models tested on GPU, 3 on CPU. 184 real-world Chinese audio files (192 minutes total).
-                FunASR models vs Whisper variants — speed and accuracy head-to-head on NVIDIA H100.
+                FunASR models vs Whisper variants — speed and accuracy head-to-head on NVIDIA H100. All models run under PyTorch inference.
             </p>
         </div>
     </section>
@@ -370,7 +370,7 @@
     <!-- GPU Results -->
     <section class="results-section">
         <div class="container">
-            <h2>GPU Results (NVIDIA H100)</h2>
+            <h2>GPU Results (PyTorch, NVIDIA H100)</h2>
             <p class="lead">
                 All models tested on 184 long-form Chinese audio files (44-83 seconds each, 192 minutes total).
                 Sorted by speed. Lower RTF = faster. Lower CER = more accurate.
@@ -689,6 +689,10 @@
                 <div class="setup-card">
                     <dt>FunASR Version</dt>
                     <dd>1.3.1</dd>
+                </div>
+                <div class="setup-card">
+                    <dt>Backend</dt>
+                    <dd>PyTorch 2.x (no vLLM)</dd>
                 </div>
                 <div class="setup-card">
                     <dt>CUDA</dt>

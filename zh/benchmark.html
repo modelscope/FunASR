@@ -353,10 +353,10 @@
             <div class="headline-stat">
                 GPU <strong>170倍</strong>实时 &middot; CER <strong>8.92%</strong> &middot; <strong>7</strong> 个模型全面对比
             </div>
-            <h1 style="margin-top:24px;">ASR 性能评测 2025<br>全面对比</h1>
+            <h1 style="margin-top:24px;">ASR 性能评测 2025<br>PyTorch 推理</h1>
             <p class="subtitle">
                 7个模型GPU评测，3个模型CPU评测。184条真实中文长音频（共192分钟）。
-                FunASR系列 vs Whisper系列 —— 速度与精度的正面较量，NVIDIA H100实测。
+                FunASR系列 vs Whisper系列 —— 速度与精度的正面较量，NVIDIA H100实测。全部模型基于 PyTorch 推理。
             </p>
         </div>
     </section>
@@ -364,7 +364,7 @@
     <!-- GPU 结果 -->
     <section class="results-section">
         <div class="container">
-            <h2>GPU 评测结果（NVIDIA H100）</h2>
+            <h2>GPU 评测结果（PyTorch，NVIDIA H100）</h2>
             <p class="lead">
                 全部模型在184条中文长音频上测试（每条44-83秒，共192分钟）。
                 按速度排序。RTF越低越快，CER越低越准。
@@ -682,6 +682,10 @@
                 <div class="setup-card">
                     <dt>FunASR 版本</dt>
                     <dd>1.3.1</dd>
+                </div>
+                <div class="setup-card">
+                    <dt>推理后端</dt>
+                    <dd>PyTorch 2.x（非 vLLM）</dd>
                 </div>
                 <div class="setup-card">
                     <dt>CUDA</dt>
