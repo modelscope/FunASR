@@ -357,7 +357,7 @@
     <section class="bench-hero">
         <div class="container" style="position:relative;z-index:1;">
             <div class="headline-stat">
-                <strong>170x</strong> realtime on GPU &middot; <strong>8.92%</strong> CER &middot; <strong>7</strong> models compared
+                <strong>170x</strong> realtime on GPU &middot; <strong>7</strong> models compared
             </div>
             <h1 style="margin-top:24px;">ASR Benchmark 2025<br>PyTorch Inference</h1>
             <p class="subtitle">
@@ -383,7 +383,7 @@
                         <th>Type</th>
                         <th>Speed (RTF)</th>
                         <th>Realtime Factor</th>
-                        <th>CER</th>
+                        
                     </tr>
                 </thead>
                 <tbody>
@@ -397,7 +397,6 @@
                                 <span class="speed-bar-label">170x</span>
                             </div>
                         </td>
-                        <td><span class="cer-value cer-best">8.92%</span></td>
                     </tr>
                     <tr class="highlight-row">
                         <td class="model-name">Paraformer-Large</td>
@@ -409,7 +408,6 @@
                                 <span class="speed-bar-label">120x</span>
                             </div>
                         </td>
-                        <td><span class="cer-value">12.71%</span></td>
                     </tr>
                     <tr>
                         <td class="model-name">Whisper-large-v3-turbo</td>
@@ -421,7 +419,6 @@
                                 <span class="speed-bar-label">46x</span>
                             </div>
                         </td>
-                        <td><span class="cer-value">21.71%</span></td>
                     </tr>
 
                     <tr>
@@ -434,7 +431,6 @@
                                 <span class="speed-bar-label">26x</span>
                             </div>
                         </td>
-                        <td><span class="cer-value">22.70%</span></td>
                     </tr>
                     <tr>
                         <td class="model-name">faster-whisper-large-v3</td>
@@ -446,7 +442,6 @@
                                 <span class="speed-bar-label">21.5x</span>
                             </div>
                         </td>
-                        <td><span class="cer-value">17.00%</span></td>
                     </tr>
                     <tr class="highlight-row">
                         <td class="model-name">Fun-ASR-Nano</td>
@@ -458,7 +453,6 @@
                                 <span class="speed-bar-label">17x</span>
                             </div>
                         </td>
-                        <td><span class="cer-value">10.56%</span></td>
                     </tr>
                     <tr>
                         <td class="model-name">Whisper-large-v3</td>
@@ -470,7 +464,6 @@
                                 <span class="speed-bar-label">13.4x</span>
                             </div>
                         </td>
-                        <td><span class="cer-value">20.02%</span></td>
                     </tr>
                 </tbody>
             </table>
@@ -492,7 +485,7 @@
                         <th>Type</th>
                         <th>Speed (RTF)</th>
                         <th>Realtime Factor</th>
-                        <th>CER</th>
+                        
                     </tr>
                 </thead>
                 <tbody>
@@ -506,7 +499,6 @@
                                 <span class="speed-bar-label">17.2x</span>
                             </div>
                         </td>
-                        <td><span class="cer-value cer-best">5.14%</span></td>
                     </tr>
                     <tr class="highlight-row">
                         <td class="model-name">Paraformer-Large</td>
@@ -518,7 +510,6 @@
                                 <span class="speed-bar-label">15.6x</span>
                             </div>
                         </td>
-                        <td><span class="cer-value">9.30%</span></td>
                     </tr>
                     <tr class="highlight-row">
                         <td class="model-name">Fun-ASR-Nano</td>
@@ -530,7 +521,6 @@
                                 <span class="speed-bar-label">3.6x</span>
                             </div>
                         </td>
-                        <td><span class="cer-value">7.60%</span></td>
                     </tr>
                 </tbody>
             </table>
@@ -612,11 +602,7 @@
                     <h3>Realtime on GPU</h3>
                     <p>SenseVoice-Small processes 192 minutes of audio in just 68 seconds on H100. 12.7x faster than Whisper-large-v3.</p>
                 </div>
-                <div class="takeaway-card">
-                    <div class="takeaway-number">8.92%</div>
-                    <h3>Lowest Error Rate</h3>
-                    <p>SenseVoice achieves the best CER among all tested models. Fun-ASR-Nano (10.56%) also outperforms all Whisper variants on Chinese.</p>
-                </div>
+                
                 <div class="takeaway-card">
                     <div class="takeaway-number">17.2x</div>
                     <h3>Realtime on CPU</h3>
@@ -702,10 +688,7 @@
                     <dt>CPU</dt>
                     <dd>Intel Xeon (server-grade)</dd>
                 </div>
-                <div class="setup-card">
-                    <dt>Metric</dt>
-                    <dd>CER (lower is better)</dd>
-                </div>
+                
             </dl>
         </div>
     </section>

@@ -351,7 +351,7 @@
     <section class="bench-hero">
         <div class="container" style="position:relative;z-index:1;">
             <div class="headline-stat">
-                GPU <strong>170倍</strong>实时 &middot; CER <strong>8.92%</strong> &middot; <strong>7</strong> 个模型全面对比
+                GPU <strong>170倍</strong>实时 &middot; <strong>7</strong> 个模型全面对比
             </div>
             <h1 style="margin-top:24px;">ASR 性能评测 2025<br>PyTorch 推理</h1>
             <p class="subtitle">
@@ -377,7 +377,7 @@
                         <th>类型</th>
                         <th>RTF</th>
                         <th>实时倍率</th>
-                        <th>CER</th>
+                        
                     </tr>
                 </thead>
                 <tbody>
@@ -391,7 +391,6 @@
                                 <span class="speed-bar-label">170x</span>
                             </div>
                         </td>
-                        <td><span class="cer-value cer-best">8.92%</span></td>
                     </tr>
                     <tr class="highlight-row">
                         <td class="model-name">Paraformer-Large</td>
@@ -403,7 +402,6 @@
                                 <span class="speed-bar-label">120x</span>
                             </div>
                         </td>
-                        <td><span class="cer-value">12.71%</span></td>
                     </tr>
                     <tr>
                         <td class="model-name">Whisper-large-v3-turbo</td>
@@ -415,7 +413,6 @@
                                 <span class="speed-bar-label">46x</span>
                             </div>
                         </td>
-                        <td><span class="cer-value">21.71%</span></td>
                     </tr>
 
                     <tr>
@@ -428,7 +425,6 @@
                                 <span class="speed-bar-label">26x</span>
                             </div>
                         </td>
-                        <td><span class="cer-value">22.70%</span></td>
                     </tr>
                     <tr>
                         <td class="model-name">faster-whisper-large-v3</td>
@@ -440,7 +436,6 @@
                                 <span class="speed-bar-label">21.5x</span>
                             </div>
                         </td>
-                        <td><span class="cer-value">17.00%</span></td>
                     </tr>
                     <tr class="highlight-row">
                         <td class="model-name">Fun-ASR-Nano</td>
@@ -452,7 +447,6 @@
                                 <span class="speed-bar-label">17x</span>
                             </div>
                         </td>
-                        <td><span class="cer-value">10.56%</span></td>
                     </tr>
                     <tr>
                         <td class="model-name">Whisper-large-v3</td>
@@ -464,7 +458,6 @@
                                 <span class="speed-bar-label">13.4x</span>
                             </div>
                         </td>
-                        <td><span class="cer-value">20.02%</span></td>
                     </tr>
                 </tbody>
             </table>
@@ -486,7 +479,7 @@
                         <th>类型</th>
                         <th>RTF</th>
                         <th>实时倍率</th>
-                        <th>CER</th>
+                        
                     </tr>
                 </thead>
                 <tbody>
@@ -500,7 +493,6 @@
                                 <span class="speed-bar-label">17.2x</span>
                             </div>
                         </td>
-                        <td><span class="cer-value cer-best">5.14%</span></td>
                     </tr>
                     <tr class="highlight-row">
                         <td class="model-name">Paraformer-Large</td>
@@ -512,7 +504,6 @@
                                 <span class="speed-bar-label">15.6x</span>
                             </div>
                         </td>
-                        <td><span class="cer-value">9.30%</span></td>
                     </tr>
                     <tr class="highlight-row">
                         <td class="model-name">Fun-ASR-Nano</td>
@@ -524,7 +515,6 @@
                                 <span class="speed-bar-label">3.6x</span>
                             </div>
                         </td>
-                        <td><span class="cer-value">7.60%</span></td>
                     </tr>
                 </tbody>
             </table>
@@ -605,11 +595,7 @@
                     <h3>GPU实时倍率</h3>
                     <p>SenseVoice-Small在H100上仅需68秒处理192分钟音频，比Whisper-large-v3快12.7倍。</p>
                 </div>
-                <div class="takeaway-card">
-                    <div class="takeaway-number">8.92%</div>
-                    <h3>最低错误率</h3>
-                    <p>SenseVoice在所有测试模型中CER最低。Fun-ASR-Nano（10.56%）也优于所有Whisper变体。</p>
-                </div>
+                
                 <div class="takeaway-card">
                     <div class="takeaway-number">17.2x</div>
                     <h3>CPU也能超实时</h3>
@@ -695,10 +681,7 @@
                     <dt>CPU</dt>
                     <dd>Intel Xeon（服务器级）</dd>
                 </div>
-                <div class="setup-card">
-                    <dt>评估指标</dt>
-                    <dd>CER（越低越好）</dd>
-                </div>
+                
             </dl>
         </div>
     </section>
