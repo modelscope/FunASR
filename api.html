@@ -923,7 +923,7 @@
         &quot;&quot;&quot;
         try:
             from funasr.utils.version_checker import check_for_update
-</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/auto/auto_model.py#L182" target="_blank" class="src-more">View full source on GitHub →</a></details><h3 class="mt">Methods</h3><div class="mblk"><code>.build_model(**kwargs)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/auto/auto_model.py#L275" target="_blank" class="gh-link">L275</a><div class="mdoc"><p>Download model from hub, build all components, and load pretrained weights.</p>
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/auto/auto_model.py#L182" target="_blank" class="src-more">View full source on GitHub →</a></details><h3 class="mt">Methods</h3><div class="mblk"><code>.build_model(**kwargs)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/auto/auto_model.py#L281" target="_blank" class="gh-link">L281</a><div class="mdoc"><p>Download model from hub, build all components, and load pretrained weights.</p>
 <p>This method handles the full model construction pipeline:</p>
 <p>1. Download model files from ModelScope/HuggingFace (if not local)</p>
 <p>2. Parse config.yaml to determine model class, tokenizer, frontend</p>
@@ -968,7 +968,7 @@
             or (device.startswith(&quot;mps&quot;) and not torch.backends.mps.is_available())
             or (device.startswith(&quot;npu&quot;) and not is_npu_available())
             or kwargs.get(&quot;ngpu&quot;, 1) == 0
-</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/auto/auto_model.py#L275" target="_blank" class="src-more">View full source →</a></details></div><div class="mblk"><code>.generate(input, input_len, progress_callback, **cfg)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/auto/auto_model.py#L436" target="_blank" class="gh-link">L436</a><div class="mdoc"><p>Run speech recognition on input audio.</p>
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/auto/auto_model.py#L281" target="_blank" class="src-more">View full source →</a></details></div><div class="mblk"><code>.generate(input, input_len, progress_callback, **cfg)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/auto/auto_model.py#L442" target="_blank" class="gh-link">L442</a><div class="mdoc"><p>Run speech recognition on input audio.</p>
 <p>This is the primary user-facing method. It automatically routes to:</p>
 <ul>
 <li>inference() if no vad_model is configured (single utterance)</li>
@@ -1032,7 +1032,7 @@
             list[dict]: Results for each input sample. Common fields:
                 - &quot;key&quot; (str): Sample identifier
                 - &quot;text&quot; (str): Recognized text
-</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/auto/auto_model.py#L436" target="_blank" class="src-more">View full source →</a></details></div><div class="mblk"><code>.inference(input, input_len, model, kwargs, key, progress_callback, **cfg)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/auto/auto_model.py#L490" target="_blank" class="gh-link">L490</a><div class="mdoc"><p>Run model inference on input data (internal method).</p>
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/auto/auto_model.py#L442" target="_blank" class="src-more">View full source →</a></details></div><div class="mblk"><code>.inference(input, input_len, model, kwargs, key, progress_callback, **cfg)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/auto/auto_model.py#L496" target="_blank" class="gh-link">L496</a><div class="mdoc"><p>Run model inference on input data (internal method).</p>
 <p>Handles batching, timing, and progress reporting. Called by generate()</p>
 <p>and inference_with_vad(). Typically not called directly by users.</p>
 <h4>Args:</h4>
@@ -1077,7 +1077,7 @@
         if kwargs is None:
             self._reset_runtime_configs()
         kwargs = self.kwargs if kwargs is None else kwargs
-</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/auto/auto_model.py#L490" target="_blank" class="src-more">View full source →</a></details></div><div class="mblk"><code>.inference_with_vad(input, input_len, **cfg)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/auto/auto_model.py#L592" target="_blank" class="gh-link">L592</a><div class="mdoc"><p>Run ASR with VAD segmentation, punctuation, and optional speaker diarization.</p>
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/auto/auto_model.py#L496" target="_blank" class="src-more">View full source →</a></details></div><div class="mblk"><code>.inference_with_vad(input, input_len, **cfg)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/auto/auto_model.py#L598" target="_blank" class="gh-link">L598</a><div class="mdoc"><p>Run ASR with VAD segmentation, punctuation, and optional speaker diarization.</p>
 <p>Pipeline:</p>
 <p>1. VAD: Segment audio into speech regions</p>
 <p>2. ASR: Recognize each segment (sorted by length for efficient batching)</p>
@@ -1122,7 +1122,7 @@
             input, input_len=input_len, model=self.vad_model, kwargs=self.vad_kwargs, **cfg
         )
         end_vad = time.time()
-</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/auto/auto_model.py#L592" target="_blank" class="src-more">View full source →</a></details></div><div class="mblk"><code>.export(input, **cfg)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/auto/auto_model.py#L911" target="_blank" class="gh-link">L911</a><div class="mdoc"><p>Export model to ONNX format.</p>
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/auto/auto_model.py#L598" target="_blank" class="src-more">View full source →</a></details></div><div class="mblk"><code>.export(input, **cfg)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/auto/auto_model.py#L917" target="_blank" class="gh-link">L917</a><div class="mdoc"><p>Export model to ONNX format.</p>
 <p>Creates a deep copy of the model to isolate ONNX operator monkey-patching,</p>
 <p>then runs torch.onnx.export. The original model remains usable after export.</p>
 <h4>Args:</h4>
@@ -1167,8 +1167,8 @@
 
         device = cfg.get(&quot;device&quot;, &quot;cpu&quot;)
         
-</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/auto/auto_model.py#L911" target="_blank" class="src-more">View full source →</a></details></div></div>
-<div class="api-detail" id="e4"><span class="dtag badge-m">method</span><h2><code>AutoModel.build_model(**kwargs)</code></h2><div class="dmod">funasr.auto.auto_model.AutoModel · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/auto/auto_model.py#L275" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Download model from hub, build all components, and load pretrained weights.</p>
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/auto/auto_model.py#L917" target="_blank" class="src-more">View full source →</a></details></div></div>
+<div class="api-detail" id="e4"><span class="dtag badge-m">method</span><h2><code>AutoModel.build_model(**kwargs)</code></h2><div class="dmod">funasr.auto.auto_model.AutoModel · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/auto/auto_model.py#L281" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Download model from hub, build all components, and load pretrained weights.</p>
 <p>This method handles the full model construction pipeline:</p>
 <p>1. Download model files from ModelScope/HuggingFace (if not local)</p>
 <p>2. Parse config.yaml to determine model class, tokenizer, frontend</p>
@@ -1213,8 +1213,8 @@
             or (device.startswith(&quot;mps&quot;) and not torch.backends.mps.is_available())
             or (device.startswith(&quot;npu&quot;) and not is_npu_available())
             or kwargs.get(&quot;ngpu&quot;, 1) == 0
-</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/auto/auto_model.py#L275" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
-<div class="api-detail" id="e5"><span class="dtag badge-m">method</span><h2><code>AutoModel.generate(input, input_len, progress_callback, **cfg)</code></h2><div class="dmod">funasr.auto.auto_model.AutoModel · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/auto/auto_model.py#L436" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Run speech recognition on input audio.</p>
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/auto/auto_model.py#L281" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
+<div class="api-detail" id="e5"><span class="dtag badge-m">method</span><h2><code>AutoModel.generate(input, input_len, progress_callback, **cfg)</code></h2><div class="dmod">funasr.auto.auto_model.AutoModel · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/auto/auto_model.py#L442" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Run speech recognition on input audio.</p>
 <p>This is the primary user-facing method. It automatically routes to:</p>
 <ul>
 <li>inference() if no vad_model is configured (single utterance)</li>
@@ -1278,8 +1278,8 @@
             list[dict]: Results for each input sample. Common fields:
                 - &quot;key&quot; (str): Sample identifier
                 - &quot;text&quot; (str): Recognized text
-</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/auto/auto_model.py#L436" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
-<div class="api-detail" id="e6"><span class="dtag badge-m">method</span><h2><code>AutoModel.inference(input, input_len, model, kwargs, key, progress_callback, **cfg)</code></h2><div class="dmod">funasr.auto.auto_model.AutoModel · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/auto/auto_model.py#L490" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Run model inference on input data (internal method).</p>
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/auto/auto_model.py#L442" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
+<div class="api-detail" id="e6"><span class="dtag badge-m">method</span><h2><code>AutoModel.inference(input, input_len, model, kwargs, key, progress_callback, **cfg)</code></h2><div class="dmod">funasr.auto.auto_model.AutoModel · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/auto/auto_model.py#L496" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Run model inference on input data (internal method).</p>
 <p>Handles batching, timing, and progress reporting. Called by generate()</p>
 <p>and inference_with_vad(). Typically not called directly by users.</p>
 <h4>Args:</h4>
@@ -1324,8 +1324,8 @@
         if kwargs is None:
             self._reset_runtime_configs()
         kwargs = self.kwargs if kwargs is None else kwargs
-</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/auto/auto_model.py#L490" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
-<div class="api-detail" id="e7"><span class="dtag badge-m">method</span><h2><code>AutoModel.inference_with_vad(input, input_len, **cfg)</code></h2><div class="dmod">funasr.auto.auto_model.AutoModel · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/auto/auto_model.py#L592" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Run ASR with VAD segmentation, punctuation, and optional speaker diarization.</p>
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/auto/auto_model.py#L496" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
+<div class="api-detail" id="e7"><span class="dtag badge-m">method</span><h2><code>AutoModel.inference_with_vad(input, input_len, **cfg)</code></h2><div class="dmod">funasr.auto.auto_model.AutoModel · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/auto/auto_model.py#L598" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Run ASR with VAD segmentation, punctuation, and optional speaker diarization.</p>
 <p>Pipeline:</p>
 <p>1. VAD: Segment audio into speech regions</p>
 <p>2. ASR: Recognize each segment (sorted by length for efficient batching)</p>
@@ -1370,8 +1370,8 @@
             input, input_len=input_len, model=self.vad_model, kwargs=self.vad_kwargs, **cfg
         )
         end_vad = time.time()
-</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/auto/auto_model.py#L592" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
-<div class="api-detail" id="e8"><span class="dtag badge-m">method</span><h2><code>AutoModel.export(input, **cfg)</code></h2><div class="dmod">funasr.auto.auto_model.AutoModel · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/auto/auto_model.py#L911" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Export model to ONNX format.</p>
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/auto/auto_model.py#L598" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
+<div class="api-detail" id="e8"><span class="dtag badge-m">method</span><h2><code>AutoModel.export(input, **cfg)</code></h2><div class="dmod">funasr.auto.auto_model.AutoModel · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/auto/auto_model.py#L917" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Export model to ONNX format.</p>
 <p>Creates a deep copy of the model to isolate ONNX operator monkey-patching,</p>
 <p>then runs torch.onnx.export. The original model remains usable after export.</p>
 <h4>Args:</h4>
@@ -1416,7 +1416,7 @@
 
         device = cfg.get(&quot;device&quot;, &quot;cpu&quot;)
         
-</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/auto/auto_model.py#L911" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/auto/auto_model.py#L917" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
 <div class="api-detail" id="e9"><span class="dtag badge-c">class</span><h2>RegisterTables</h2><div class="dmod">funasr.register.register · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/register.py#L8" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Registry system for classes.</p>
 </div><details class="src-block"><summary>📄 Source code</summary><pre><code>class RegisterTables:
     &quot;&quot;&quot;Registry system for classes.&quot;&quot;&quot;
