@@ -17,7 +17,7 @@ nj=32
 inference_device="cuda" #"cpu", "cuda:0", "cuda:1"
 inference_checkpoint="model.pt.avg10"
 inference_scp="wav.scp"
-inference_batch_size=32
+inference_batch_size=1
 
 # data
 raw_data=../raw_data
