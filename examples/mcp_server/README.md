@@ -1,53 +1,91 @@
 # FunASR MCP Server
 
-[Model Context Protocol](https://modelcontextprotocol.io/) server for FunASR.
-Enables AI assistants (Claude, Cursor, Windsurf, etc.) to transcribe audio.
+[Model Context Protocol](https://modelcontextprotocol.io/) server that gives AI assistants the ability to transcribe audio.
 
 ## Setup
+
+### 1. Install dependencies
 
 ```bash
 pip install funasr
 ```
 
-Add to your MCP config (e.g. `~/.claude.json` or `claude_desktop_config.json`):
+### 2. Configure your AI tool
 
+**Claude Code** (`~/.claude.json`):
+```json
+{
+    "mcpServers": {
+        "funasr": {
+            "command": "python",
+            "args": ["/path/to/examples/mcp_server/funasr_mcp.py"],
+            "env": {"FUNASR_DEVICE": "cuda"}
+        }
+    }
+}
+```
+
+**Claude Desktop** (`claude_desktop_config.json`):
 ```json
 {
     "mcpServers": {
         "funasr": {
             "command": "python",
             "args": ["/path/to/funasr_mcp.py"],
-            "env": {
-                "FUNASR_DEVICE": "cuda"
-            }
+            "env": {"FUNASR_DEVICE": "cpu"}
         }
     }
 }
 ```
 
-## Available Tools
+**Cursor** (Settings → MCP Servers → Add):
+- Command: `python /path/to/funasr_mcp.py`
+- Environment: `FUNASR_DEVICE=cuda`
+
+## Tools
 
 ### `transcribe_audio`
 
-Transcribe speech audio to text.
+Transcribe a speech audio file to text.
 
-**Input:**
-- `audio_path` (required): Path to audio file (wav, mp3, flac, etc.)
-- `language` (optional): Language hint, auto-detected by default
+**Parameters:**
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `audio_path` | string | Yes | Path to audio file (wav, mp3, flac, m4a, ogg) |
+| `language` | string | No | Language hint (auto-detected by default) |
 
-**Output:** Transcribed text with optional speaker labels and timestamps.
+**Returns:** Transcribed text with timestamps and speaker labels (when available).
 
-## Example
+## Example Usage
 
-Once configured, you can ask your AI assistant:
+Once configured, ask your AI assistant:
 
-> "Transcribe the audio file at /path/to/meeting.wav"
+- "Transcribe the meeting recording at ~/Downloads/meeting.wav"
+- "What was said in this audio file? /path/to/interview.mp3"
+- "Convert this voice memo to text: ~/voice_note.m4a"
 
-The assistant will use the `transcribe_audio` tool and return the transcription with speaker labels.
+## Environment Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `FUNASR_DEVICE` | `cpu` | Device: `cuda`, `cpu`, or `mps` |
+| `FUNASR_MODEL` | `iic/SenseVoiceSmall` | ASR model to use |
 
 ## Features
 
-- 50+ languages with auto-detection
-- Speaker diarization (who said what)
-- Timestamps per segment
-- 170x realtime on GPU, 17x on CPU
+- **50+ languages** with automatic detection
+- **Speaker diarization** — identifies who said what
+- **Timestamps** — per-segment timing
+- **170x realtime on GPU**, 17x on CPU
+- **No API key needed** — fully local inference
+- MIT licensed, privacy-friendly (audio never leaves your machine)
+
+## Verified Compatibility
+
+| Tool | Status |
+|------|--------|
+| Claude Code | ✅ Tested |
+| Claude Desktop | ✅ Compatible |
+| Cursor | ✅ Compatible |
+| Windsurf | ✅ Compatible |
+| Any MCP client | ✅ Standard protocol |
