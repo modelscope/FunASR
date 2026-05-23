@@ -36,7 +36,7 @@
 
 ## Benchmark: Comprehensive ASR Comparison (NVIDIA H100)
 
-> 8 models on GPU, 3 models on CPU. 184 long-form Chinese audio files (192 min total). [Full report](https://modelscope.github.io/FunASR/benchmark.html)
+> 7 models on GPU, 3 models on CPU. 184 long-form Chinese audio files (192 min total). [Full report](https://modelscope.github.io/FunASR/benchmark.html)
 
 ### GPU Results
 
@@ -45,7 +45,6 @@
 | **SenseVoice-Small** | NAR | **170x** realtime | **8.92%** | Fastest + most accurate |
 | **Paraformer-Large** | NAR | **120x** realtime | 12.71% | Best speed/accuracy tradeoff |
 | Whisper-large-v3-turbo (OpenAI) | AR | 46x realtime | 21.71% | Fastest Whisper variant |
-| **GLM-ASR-Nano** | LLM | 37x realtime | 31.07% | Multi-language LLM-based |
 | Whisper-large-v3-turbo (FunASR) | AR | 26x realtime | 22.70% | With VAD pipeline |
 | faster-whisper-large-v3 | AR | 21.5x realtime | 17.00% | CTranslate2 optimized |
 | **Fun-ASR-Nano** | LLM | 17x realtime | 10.56% | Best LLM-based accuracy |
