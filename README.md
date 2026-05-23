@@ -72,6 +72,7 @@ result = model.generate(input="meeting.wav")
 
 ## What's new:
 
+- 2026/05/24: **v1.3.2 released** — Fixed `hub="hf"` parameter propagation for HuggingFace users; added [comprehensive benchmark](https://modelscope.github.io/FunASR/benchmark.html) (7 GPU models + 3 CPU models compared). `pip install --upgrade funasr`
 - 2026/05/20: Added Qwen3-ASR (0.6B/1.7B) multi-language speech recognition models, supporting 52 languages with auto language detection. [usage](examples/industrial_data_pretraining/qwen3_asr).
 - 2026/05/20: Added GLM-ASR-Nano (1.5B) robust speech recognition model, supporting 17 languages with dialect and low-volume speech optimization. [usage](examples/industrial_data_pretraining/glm_asr).
 - 2026/05/19: Fun-ASR-Nano and SenseVoice now support speaker diarization. Use with `vad_model` + `spk_model` + `punc_model` to get per-sentence speaker labels. See [Fun-ASR-Nano demo](examples/industrial_data_pretraining/fun_asr_nano/demo_spk.py), [SenseVoice demo](examples/industrial_data_pretraining/sense_voice/demo_spk.py).
