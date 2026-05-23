@@ -1,18 +1,30 @@
-[//]: # '<div align="left"><img src="docs/images/funasr_logo.jpg" width="400"/></div>'
+<div align="center">
 
-([简体中文](./README_zh.md)|English)
+# FunASR
 
-[//]: # "# FunASR: A Fundamental End-to-End Speech Recognition Toolkit"
-
-[![SVG Banners](https://svg-banners.vercel.app/api?type=origin&text1=FunASR🤠&text2=💖%20A%20Fundamental%20End-to-End%20Speech%20Recognition%20Toolkit&width=800&height=210)](https://github.com/Akshay090/svg-banners)
+**Speech Understanding in One API Call**
 
 [![PyPI](https://img.shields.io/pypi/v/funasr)](https://pypi.org/project/funasr/)
+[![Stars](https://img.shields.io/github/stars/modelscope/FunASR?style=social)](https://github.com/modelscope/FunASR)
+[![Downloads](https://img.shields.io/pypi/dm/funasr)](https://pypi.org/project/funasr/)
+[![License](https://img.shields.io/github/license/modelscope/FunASR)](LICENSE)
+
+[English](./README.md) | [简体中文](./README_zh.md) | [Docs](https://modelscope.github.io/FunASR/) | [Benchmark](https://modelscope.github.io/FunASR/benchmark.html)
+
+</div>
+
+> **170x realtime** on GPU · **50+ languages** · **Speaker diarization** · **Emotion detection** — all in 3 lines of Python.
+
+```python
+from funasr import AutoModel
+model = AutoModel(model="iic/SenseVoiceSmall", vad_model="fsmn-vad", spk_model="cam++", device="cuda")
+result = model.generate(input="meeting.wav")
+# → Timestamped text with speaker labels, punctuation, and emotion tags
+```
 
 <p align="center">
 <a href="https://trendshift.io/repositories/3839" target="_blank"><img src="https://trendshift.io/api/badge/repositories/3839" alt="modelscope%2FFunASR | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
 </p>
-
-<strong>FunASR</strong> hopes to build a bridge between academic research and industrial applications on speech recognition. By supporting the training & finetuning of the industrial-grade speech recognition model, researchers and developers can conduct research and production of speech recognition models more conveniently, and promote the development of speech recognition ecology. ASR for Fun！
 
 [**Highlights**](#highlights)
 | [**Benchmark**](#benchmark)
