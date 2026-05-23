@@ -34,23 +34,39 @@
 
 <a name="benchmark"></a>
 
-## Benchmark: FunASR vs Whisper (NVIDIA H100)
+## Benchmark: Comprehensive ASR Comparison (NVIDIA H100)
 
-> Tested on 184 long-form Chinese audio files (192 min total). [Full report](https://modelscope.github.io/FunASR/benchmark.html)
+> 8 models on GPU, 3 models on CPU. 184 long-form Chinese audio files (192 min total). [Full report](https://modelscope.github.io/FunASR/benchmark.html)
 
-| Model | Speed | CER | vs Whisper-large-v3 |
-|-------|-------|-----|--------------------|
-| **SenseVoice-Small** (FunASR) | **212x** realtime | **8.92%** | 🚀 **15x faster, 55% lower error** |
-| **Paraformer-Large** (FunASR) | **128x** realtime | 12.71% | 🚀 **9x faster, 37% lower error** |
-| faster-whisper-large-v3 | 21.5x realtime | 17.00% | 1.6x faster |
-| Whisper-small (OpenAI) | 37.6x realtime | 26.79% | Faster but much worse accuracy |
-| Whisper-large-v3 (OpenAI) | 13.7x realtime | 20.02% | Baseline |
+### GPU Results
+
+| Model | Type | Speed | CER | Highlights |
+|-------|------|-------|-----|-----------|
+| **SenseVoice-Small** | NAR | **170x** realtime | **8.92%** | Fastest + most accurate |
+| **Paraformer-Large** | NAR | **120x** realtime | 12.71% | Best speed/accuracy tradeoff |
+| Whisper-large-v3-turbo (OpenAI) | AR | 46x realtime | 21.71% | Fastest Whisper variant |
+| **GLM-ASR-Nano** | LLM | 37x realtime | 31.07% | Multi-language LLM-based |
+| Whisper-large-v3-turbo (FunASR) | AR | 26x realtime | 22.70% | With VAD pipeline |
+| faster-whisper-large-v3 | AR | 21.5x realtime | 17.00% | CTranslate2 optimized |
+| **Fun-ASR-Nano** | LLM | 17x realtime | 10.56% | Best LLM-based accuracy |
+| Whisper-large-v3 (OpenAI) | AR | 13.4x realtime | 20.02% | Baseline |
+
+### CPU Results
+
+| Model | Speed | CER | Note |
+|-------|-------|-----|------|
+| **SenseVoice-Small** | **17.2x** realtime | 5.14% | Production-ready on CPU |
+| **Paraformer-Large** | **15.6x** realtime | 9.30% | Production-ready on CPU |
+| **Fun-ASR-Nano** | 3.6x realtime | 7.60% | Still faster than realtime |
+| Whisper models | - | - | Impractical on CPU (>2h for 192min audio) |
+
+
 
 ```python
-# 3 lines to beat Whisper
+# 3 lines to beat Whisper - 170x realtime, 55% lower error rate
 from funasr import AutoModel
 model = AutoModel(model="iic/SenseVoiceSmall", vad_model="fsmn-vad", device="cuda")
-result = model.generate(input="meeting.wav")  # 15x faster, better accuracy
+result = model.generate(input="meeting.wav")
 ```
 
 <a name="whats-new"></a>
