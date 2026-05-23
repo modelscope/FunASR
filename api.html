@@ -25962,10 +25962,14 @@
     dataloader_args[&quot;batch_sampler&quot;] = batch_sampler
     dataloader_args[&quot;num_workers&quot;] = kwargs.get(&quot;num_workers&quot;, 4)
     dataloader_args[&quot;pin_memory&quot;] = kwargs.get(&quot;pin_memory&quot;, True)
+    num_workers = dataloader_args.get(&quot;num_workers&quot;, 4)
+    if num_workers &gt; 0:
+        dataloader_args[&quot;persistent_workers&quot;] = kwargs.get(&quot;persistent_workers&quot;, True)
+        dataloader_args[&quot;prefetch_factor&quot;] = kwargs.get(&quot;prefetch_factor&quot;, 2)
 
     return dataloader_args
 </code></pre></details></div>
-<div class="api-detail" id="e529"><span class="dtag badge-c">class</span><h2>EspnetStyleBatchSampler</h2><div class="dmod">funasr.datasets.espnet_samplers · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/datasets/audio_datasets/espnet_samplers.py#L37" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source code</summary><pre><code>class EspnetStyleBatchSampler(DistributedSampler):
+<div class="api-detail" id="e529"><span class="dtag badge-c">class</span><h2>EspnetStyleBatchSampler</h2><div class="dmod">funasr.datasets.espnet_samplers · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/datasets/audio_datasets/espnet_samplers.py#L41" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source code</summary><pre><code>class EspnetStyleBatchSampler(DistributedSampler):
     def __init__(
         self,
         dataset,
@@ -25995,7 +25999,7 @@
                 drop_last: TODO.
                 is_training: Boolean flag for training.
                 sort_size: Size/dimension parameter.
-</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/datasets/audio_datasets/espnet_samplers.py#L37" target="_blank" class="src-more">View full source on GitHub →</a></details><h3 class="mt">Methods</h3><div class="mblk"><code>.set_epoch(epoch)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/datasets/audio_datasets/espnet_samplers.py#L187" target="_blank" class="gh-link">L187</a><div class="mdoc"><p>Set epoch.</p>
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/datasets/audio_datasets/espnet_samplers.py#L41" target="_blank" class="src-more">View full source on GitHub →</a></details><h3 class="mt">Methods</h3><div class="mblk"><code>.set_epoch(epoch)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/datasets/audio_datasets/espnet_samplers.py#L191" target="_blank" class="gh-link">L191</a><div class="mdoc"><p>Set epoch.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>epoch</code> — TODO.</li>
@@ -26009,7 +26013,7 @@
             &quot;&quot;&quot;
         self.epoch = epoch
 </code></pre></details></div></div>
-<div class="api-detail" id="e530"><span class="dtag badge-m">method</span><h2><code>EspnetStyleBatchSampler.set_epoch(epoch)</code></h2><div class="dmod">funasr.datasets.espnet_samplers.EspnetStyleBatchSampler · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/datasets/audio_datasets/espnet_samplers.py#L187" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Set epoch.</p>
+<div class="api-detail" id="e530"><span class="dtag badge-m">method</span><h2><code>EspnetStyleBatchSampler.set_epoch(epoch)</code></h2><div class="dmod">funasr.datasets.espnet_samplers.EspnetStyleBatchSampler · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/datasets/audio_datasets/espnet_samplers.py#L191" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Set epoch.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>epoch</code> — TODO.</li>
@@ -26350,10 +26354,14 @@
     dataloader_args[&quot;batch_sampler&quot;] = batch_sampler
     dataloader_args[&quot;num_workers&quot;] = kwargs.get(&quot;num_workers&quot;, 4)
     dataloader_args[&quot;pin_memory&quot;] = kwargs.get(&quot;pin_memory&quot;, True)
+    num_workers = dataloader_args.get(&quot;num_workers&quot;, 4)
+    if num_workers &gt; 0:
+        dataloader_args[&quot;persistent_workers&quot;] = kwargs.get(&quot;persistent_workers&quot;, True)
+        dataloader_args[&quot;prefetch_factor&quot;] = kwargs.get(&quot;prefetch_factor&quot;, 2)
 
     return dataloader_args
 </code></pre></details></div>
-<div class="api-detail" id="e541"><span class="dtag badge-c">class</span><h2>CustomDistributedBatchSampler</h2><div class="dmod">funasr.datasets.samplers · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/datasets/audio_datasets/samplers.py#L46" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source code</summary><pre><code>class CustomDistributedBatchSampler(Sampler):
+<div class="api-detail" id="e541"><span class="dtag badge-c">class</span><h2>CustomDistributedBatchSampler</h2><div class="dmod">funasr.datasets.samplers · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/datasets/audio_datasets/samplers.py#L50" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source code</summary><pre><code>class CustomDistributedBatchSampler(Sampler):
     def __init__(
         self,
         dataset,
@@ -26383,7 +26391,7 @@
             num_replicas = dist.get_world_size()
         except:
             rank = 0
-</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/datasets/audio_datasets/samplers.py#L46" target="_blank" class="src-more">View full source on GitHub →</a></details><h3 class="mt">Methods</h3><div class="mblk"><code>.set_epoch(epoch)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/datasets/audio_datasets/samplers.py#L148" target="_blank" class="gh-link">L148</a><div class="mdoc"><p>Set epoch.</p>
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/datasets/audio_datasets/samplers.py#L50" target="_blank" class="src-more">View full source on GitHub →</a></details><h3 class="mt">Methods</h3><div class="mblk"><code>.set_epoch(epoch)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/datasets/audio_datasets/samplers.py#L152" target="_blank" class="gh-link">L152</a><div class="mdoc"><p>Set epoch.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>epoch</code> — TODO.</li>
@@ -26396,7 +26404,7 @@
             &quot;&quot;&quot;
         self.epoch = epoch
 </code></pre></details></div></div>
-<div class="api-detail" id="e542"><span class="dtag badge-m">method</span><h2><code>CustomDistributedBatchSampler.set_epoch(epoch)</code></h2><div class="dmod">funasr.datasets.samplers.CustomDistributedBatchSampler · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/datasets/audio_datasets/samplers.py#L148" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Set epoch.</p>
+<div class="api-detail" id="e542"><span class="dtag badge-m">method</span><h2><code>CustomDistributedBatchSampler.set_epoch(epoch)</code></h2><div class="dmod">funasr.datasets.samplers.CustomDistributedBatchSampler · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/datasets/audio_datasets/samplers.py#L152" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Set epoch.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>epoch</code> — TODO.</li>
@@ -26409,7 +26417,7 @@
             &quot;&quot;&quot;
         self.epoch = epoch
 </code></pre></details></div>
-<div class="api-detail" id="e543"><span class="dtag badge-c">class</span><h2>CustomDistributedBufferBatchSampler</h2><div class="dmod">funasr.datasets.samplers · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/datasets/audio_datasets/samplers.py#L157" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source code</summary><pre><code>class CustomDistributedBufferBatchSampler(Sampler):
+<div class="api-detail" id="e543"><span class="dtag badge-c">class</span><h2>CustomDistributedBufferBatchSampler</h2><div class="dmod">funasr.datasets.samplers · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/datasets/audio_datasets/samplers.py#L161" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source code</summary><pre><code>class CustomDistributedBufferBatchSampler(Sampler):
     def __init__(
         self,
         dataset,
@@ -26439,7 +26447,7 @@
         try:
             rank = dist.get_rank()
             num_replicas = dist.get_world_size()
-</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/datasets/audio_datasets/samplers.py#L157" target="_blank" class="src-more">View full source on GitHub →</a></details><h3 class="mt">Methods</h3><div class="mblk"><code>.set_epoch(epoch)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/datasets/audio_datasets/samplers.py#L284" target="_blank" class="gh-link">L284</a><div class="mdoc"><p>Set epoch.</p>
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/datasets/audio_datasets/samplers.py#L161" target="_blank" class="src-more">View full source on GitHub →</a></details><h3 class="mt">Methods</h3><div class="mblk"><code>.set_epoch(epoch)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/datasets/audio_datasets/samplers.py#L288" target="_blank" class="gh-link">L288</a><div class="mdoc"><p>Set epoch.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>epoch</code> — TODO.</li>
@@ -26452,7 +26460,7 @@
             &quot;&quot;&quot;
         self.epoch = epoch
 </code></pre></details></div></div>
-<div class="api-detail" id="e544"><span class="dtag badge-m">method</span><h2><code>CustomDistributedBufferBatchSampler.set_epoch(epoch)</code></h2><div class="dmod">funasr.datasets.samplers.CustomDistributedBufferBatchSampler · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/datasets/audio_datasets/samplers.py#L284" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Set epoch.</p>
+<div class="api-detail" id="e544"><span class="dtag badge-m">method</span><h2><code>CustomDistributedBufferBatchSampler.set_epoch(epoch)</code></h2><div class="dmod">funasr.datasets.samplers.CustomDistributedBufferBatchSampler · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/datasets/audio_datasets/samplers.py#L288" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Set epoch.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>epoch</code> — TODO.</li>
@@ -26465,7 +26473,7 @@
             &quot;&quot;&quot;
         self.epoch = epoch
 </code></pre></details></div>
-<div class="api-detail" id="e545"><span class="dtag badge-c">class</span><h2>CustomDistributedDynamicBatchSampler</h2><div class="dmod">funasr.datasets.samplers · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/datasets/audio_datasets/samplers.py#L293" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source code</summary><pre><code>class CustomDistributedDynamicBatchSampler(DistributedSampler):
+<div class="api-detail" id="e545"><span class="dtag badge-c">class</span><h2>CustomDistributedDynamicBatchSampler</h2><div class="dmod">funasr.datasets.samplers · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/datasets/audio_datasets/samplers.py#L297" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source code</summary><pre><code>class CustomDistributedDynamicBatchSampler(DistributedSampler):
     def __init__(
         self,
         dataset,
@@ -26495,7 +26503,7 @@
             num_replicas = dist.get_world_size()
         except:
             rank = 0
-</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/datasets/audio_datasets/samplers.py#L293" target="_blank" class="src-more">View full source on GitHub →</a></details><h3 class="mt">Methods</h3><div class="mblk"><code>.set_epoch(epoch)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/datasets/audio_datasets/samplers.py#L384" target="_blank" class="gh-link">L384</a><div class="mdoc"><p>Set epoch.</p>
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/datasets/audio_datasets/samplers.py#L297" target="_blank" class="src-more">View full source on GitHub →</a></details><h3 class="mt">Methods</h3><div class="mblk"><code>.set_epoch(epoch)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/datasets/audio_datasets/samplers.py#L388" target="_blank" class="gh-link">L388</a><div class="mdoc"><p>Set epoch.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>epoch</code> — TODO.</li>
@@ -26508,7 +26516,7 @@
             &quot;&quot;&quot;
         self.epoch = epoch
 </code></pre></details></div></div>
-<div class="api-detail" id="e546"><span class="dtag badge-m">method</span><h2><code>CustomDistributedDynamicBatchSampler.set_epoch(epoch)</code></h2><div class="dmod">funasr.datasets.samplers.CustomDistributedDynamicBatchSampler · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/datasets/audio_datasets/samplers.py#L384" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Set epoch.</p>
+<div class="api-detail" id="e546"><span class="dtag badge-m">method</span><h2><code>CustomDistributedDynamicBatchSampler.set_epoch(epoch)</code></h2><div class="dmod">funasr.datasets.samplers.CustomDistributedDynamicBatchSampler · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/datasets/audio_datasets/samplers.py#L388" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Set epoch.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>epoch</code> — TODO.</li>
@@ -26521,7 +26529,7 @@
             &quot;&quot;&quot;
         self.epoch = epoch
 </code></pre></details></div>
-<div class="api-detail" id="e547"><span class="dtag badge-c">class</span><h2>CustomDistributedBufferDynamicBatchSampler</h2><div class="dmod">funasr.datasets.samplers · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/datasets/audio_datasets/samplers.py#L393" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source code</summary><pre><code>class CustomDistributedBufferDynamicBatchSampler(DistributedSampler):
+<div class="api-detail" id="e547"><span class="dtag badge-c">class</span><h2>CustomDistributedBufferDynamicBatchSampler</h2><div class="dmod">funasr.datasets.samplers · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/datasets/audio_datasets/samplers.py#L397" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source code</summary><pre><code>class CustomDistributedBufferDynamicBatchSampler(DistributedSampler):
     def __init__(
         self,
         dataset,
@@ -26551,7 +26559,7 @@
                 drop_last: TODO.
                 is_training: Boolean flag for training.
                 sort_size: Size/dimension parameter.
-</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/datasets/audio_datasets/samplers.py#L393" target="_blank" class="src-more">View full source on GitHub →</a></details><h3 class="mt">Methods</h3><div class="mblk"><code>.set_epoch(epoch)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/datasets/audio_datasets/samplers.py#L526" target="_blank" class="gh-link">L526</a><div class="mdoc"><p>Set epoch.</p>
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/datasets/audio_datasets/samplers.py#L397" target="_blank" class="src-more">View full source on GitHub →</a></details><h3 class="mt">Methods</h3><div class="mblk"><code>.set_epoch(epoch)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/datasets/audio_datasets/samplers.py#L530" target="_blank" class="gh-link">L530</a><div class="mdoc"><p>Set epoch.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>epoch</code> — TODO.</li>
@@ -26564,7 +26572,7 @@
             &quot;&quot;&quot;
         self.epoch = epoch
 </code></pre></details></div></div>
-<div class="api-detail" id="e548"><span class="dtag badge-m">method</span><h2><code>CustomDistributedBufferDynamicBatchSampler.set_epoch(epoch)</code></h2><div class="dmod">funasr.datasets.samplers.CustomDistributedBufferDynamicBatchSampler · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/datasets/audio_datasets/samplers.py#L526" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Set epoch.</p>
+<div class="api-detail" id="e548"><span class="dtag badge-m">method</span><h2><code>CustomDistributedBufferDynamicBatchSampler.set_epoch(epoch)</code></h2><div class="dmod">funasr.datasets.samplers.CustomDistributedBufferDynamicBatchSampler · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/datasets/audio_datasets/samplers.py#L530" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Set epoch.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>epoch</code> — TODO.</li>
@@ -26577,7 +26585,7 @@
             &quot;&quot;&quot;
         self.epoch = epoch
 </code></pre></details></div>
-<div class="api-detail" id="e549"><span class="dtag badge-c">class</span><h2>DistributedSamplerWarp</h2><div class="dmod">funasr.datasets.samplers · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/datasets/audio_datasets/samplers.py#L535" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source code</summary><pre><code>class DistributedSamplerWarp(BatchSampler):
+<div class="api-detail" id="e549"><span class="dtag badge-c">class</span><h2>DistributedSamplerWarp</h2><div class="dmod">funasr.datasets.samplers · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/datasets/audio_datasets/samplers.py#L539" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source code</summary><pre><code>class DistributedSamplerWarp(BatchSampler):
     def __init__(
         self, dataset, batch_size, num_replicas=None, rank=None, shuffle=True, drop_last=False
     ):
@@ -26607,7 +26615,7 @@
         self.shuffle = shuffle
         self.drop_last = drop_last
 
-</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/datasets/audio_datasets/samplers.py#L535" target="_blank" class="src-more">View full source on GitHub →</a></details><h3 class="mt">Methods</h3><div class="mblk"><code>.set_epoch(epoch)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/datasets/audio_datasets/samplers.py#L582" target="_blank" class="gh-link">L582</a><div class="mdoc"><p>Set epoch.</p>
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/datasets/audio_datasets/samplers.py#L539" target="_blank" class="src-more">View full source on GitHub →</a></details><h3 class="mt">Methods</h3><div class="mblk"><code>.set_epoch(epoch)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/datasets/audio_datasets/samplers.py#L586" target="_blank" class="gh-link">L586</a><div class="mdoc"><p>Set epoch.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>epoch</code> — TODO.</li>
@@ -26620,7 +26628,7 @@
             &quot;&quot;&quot;
         self.epoch = epoch
 </code></pre></details></div></div>
-<div class="api-detail" id="e550"><span class="dtag badge-m">method</span><h2><code>DistributedSamplerWarp.set_epoch(epoch)</code></h2><div class="dmod">funasr.datasets.samplers.DistributedSamplerWarp · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/datasets/audio_datasets/samplers.py#L582" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Set epoch.</p>
+<div class="api-detail" id="e550"><span class="dtag badge-m">method</span><h2><code>DistributedSamplerWarp.set_epoch(epoch)</code></h2><div class="dmod">funasr.datasets.samplers.DistributedSamplerWarp · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/datasets/audio_datasets/samplers.py#L586" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Set epoch.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>epoch</code> — TODO.</li>
