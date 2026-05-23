@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FunASR Benchmark - Comprehensive ASR Speed &amp; Accuracy Comparison</title>
-    <meta name="description" content="Comprehensive ASR benchmark: 8 models tested on GPU, 3 on CPU. FunASR SenseVoice is 170x realtime on GPU with 8.92% CER. Tested on 184 long-form Chinese audio files (192 minutes) on NVIDIA H100.">
+    <meta name="description" content="Comprehensive ASR benchmark: 7 models tested on GPU, 3 on CPU. FunASR SenseVoice is 170x realtime on GPU with 8.92% CER. Tested on 184 long-form Chinese audio files (192 minutes) on NVIDIA H100.">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <style>
@@ -357,11 +357,11 @@
     <section class="bench-hero">
         <div class="container" style="position:relative;z-index:1;">
             <div class="headline-stat">
-                <strong>170x</strong> realtime on GPU &middot; <strong>8.92%</strong> CER &middot; <strong>8</strong> models compared
+                <strong>170x</strong> realtime on GPU &middot; <strong>8.92%</strong> CER &middot; <strong>7</strong> models compared
             </div>
             <h1 style="margin-top:24px;">ASR Benchmark 2025<br>Comprehensive Comparison</h1>
             <p class="subtitle">
-                8 models tested on GPU, 3 on CPU. 184 real-world Chinese audio files (192 minutes total).
+                7 models tested on GPU, 3 on CPU. 184 real-world Chinese audio files (192 minutes total).
                 FunASR models vs Whisper variants — speed and accuracy head-to-head on NVIDIA H100.
             </p>
         </div>
@@ -423,18 +423,7 @@
                         </td>
                         <td><span class="cer-value">21.71%</span></td>
                     </tr>
-                    <tr class="highlight-row">
-                        <td class="model-name">GLM-ASR-Nano</td>
-                        <td><span class="model-type-badge badge-llm">LLM</span></td>
-                        <td>0.0270</td>
-                        <td>
-                            <div class="speed-bar">
-                                <div class="speed-bar-fill" style="width: 22%"></div>
-                                <span class="speed-bar-label">37x</span>
-                            </div>
-                        </td>
-                        <td><span class="cer-value">31.07%</span></td>
-                    </tr>
+
                     <tr>
                         <td class="model-name">Whisper-large-v3-turbo (FunASR)</td>
                         <td><span class="model-type-badge badge-ar">AR</span></td>
@@ -547,7 +536,7 @@
             </table>
 
             <div class="cpu-note">
-                <strong>Note:</strong> Whisper models (autoregressive decoding) and LLM-based models (GLM-ASR) are impractical on CPU — 
+                <strong>Note:</strong> Whisper models (autoregressive decoding) are impractical on CPU — 
                 decoding 192 minutes of audio would take over 2 hours. Only non-autoregressive FunASR models 
                 achieve real-time or faster CPU inference.
             </div>
@@ -580,13 +569,7 @@
                     </div>
                     <div class="bar-row-value">46x</div>
                 </div>
-                <div class="bar-row">
-                    <div class="bar-row-label">GLM-ASR-Nano</div>
-                    <div class="bar-row-track">
-                        <div class="bar-row-fill" style="width:22%;background:#d97706;">37x</div>
-                    </div>
-                    <div class="bar-row-value">37x</div>
-                </div>
+
                 <div class="bar-row">
                     <div class="bar-row-label">Whisper-turbo (FunASR)</div>
                     <div class="bar-row-track">
