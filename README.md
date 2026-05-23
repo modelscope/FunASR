@@ -40,24 +40,24 @@
 
 ### GPU Results
 
-| Model | Type | Speed | CER | Highlights |
-|-------|------|-------|-----|-----------|
-| **SenseVoice-Small** | NAR | **170x** realtime | **8.92%** | Fastest + most accurate |
-| **Paraformer-Large** | NAR | **120x** realtime | 12.71% | Best speed/accuracy tradeoff |
-| Whisper-large-v3-turbo (OpenAI) | AR | 46x realtime | 21.71% | Fastest Whisper variant |
-| Whisper-large-v3-turbo (FunASR) | AR | 26x realtime | 22.70% | With VAD pipeline |
-| faster-whisper-large-v3 | AR | 21.5x realtime | 17.00% | CTranslate2 optimized |
-| **Fun-ASR-Nano** | LLM | 17x realtime | 10.56% | Best LLM-based accuracy |
-| Whisper-large-v3 (OpenAI) | AR | 13.4x realtime | 20.02% | Baseline |
+| Model | Type | Speed | Highlights |
+|-------|------|-------|-----------|
+| **SenseVoice-Small** | NAR | **170x** realtime | Fastest + most accurate |
+| **Paraformer-Large** | NAR | **120x** realtime | Best speed/accuracy tradeoff |
+| Whisper-large-v3-turbo (OpenAI) | AR | 46x realtime | Fastest Whisper variant |
+| Whisper-large-v3-turbo (FunASR) | AR | 26x realtime | With VAD pipeline |
+| faster-whisper-large-v3 | AR | 21.5x realtime | CTranslate2 optimized |
+| **Fun-ASR-Nano** | LLM | 17x realtime | Best LLM-based accuracy |
+| Whisper-large-v3 (OpenAI) | AR | 13.4x realtime | Baseline |
 
 ### CPU Results
 
-| Model | Speed | CER | Note |
-|-------|-------|-----|------|
-| **SenseVoice-Small** | **17.2x** realtime | 5.14% | Production-ready on CPU |
-| **Paraformer-Large** | **15.6x** realtime | 9.30% | Production-ready on CPU |
-| **Fun-ASR-Nano** | 3.6x realtime | 7.60% | Still faster than realtime |
-| Whisper models | - | - | Impractical on CPU (>2h for 192min audio) |
+| Model | Speed | Note |
+|-------|-------|------|
+| **SenseVoice-Small** | **17.2x** realtime | Production-ready on CPU |
+| **Paraformer-Large** | **15.6x** realtime | Production-ready on CPU |
+| **Fun-ASR-Nano** | 3.6x realtime | Still faster than realtime |
+| Whisper models | - | Impractical on CPU (>2h for 192min audio) |
 
 
 
