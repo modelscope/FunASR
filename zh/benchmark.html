@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FunASR 性能评测 - 全面ASR速度与精度对比</title>
-    <meta name="description" content="全面ASR评测：8个模型GPU对比，3个模型CPU对比。FunASR SenseVoice GPU上170倍实时，CER仅8.92%。基于184条真实中文长音频（共192分钟），NVIDIA H100测试。">
+    <meta name="description" content="全面ASR评测：8个模型GPU对比，3个模型CPU对比。FunASR SenseVoice GPU上170倍实时，CER仅8.92%。基于184条真实中文长音频（共192分钟），GPU测试。">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../style.css">
     <style>
@@ -356,7 +356,7 @@
             <h1 style="margin-top:24px;">ASR 性能评测 2025<br>PyTorch 推理</h1>
             <p class="subtitle">
                 7个模型GPU评测，3个模型CPU评测。184条真实中文长音频（共192分钟）。
-                FunASR系列 vs Whisper系列 —— 速度与精度的正面较量，NVIDIA H100实测。全部模型基于 PyTorch 推理。
+                FunASR系列 vs Whisper系列 —— 速度与精度的正面较量，GPU实测。全部模型基于 PyTorch 推理。
             </p>
         </div>
     </section>
@@ -364,7 +364,7 @@
     <!-- GPU 结果 -->
     <section class="results-section">
         <div class="container">
-            <h2>GPU 评测结果（PyTorch，NVIDIA H100）</h2>
+            <h2>GPU 评测结果（PyTorch，GPU）</h2>
             <p class="lead">
                 全部模型在184条中文长音频上测试（每条44-83秒，共192分钟）。
                 按速度排序。RTF越低越快，CER越低越准。
@@ -593,7 +593,7 @@
                 <div class="takeaway-card">
                     <div class="takeaway-number">170x</div>
                     <h3>GPU实时倍率</h3>
-                    <p>SenseVoice-Small在H100上仅需68秒处理192分钟音频，比Whisper-large-v3快12.7倍。</p>
+                    <p>SenseVoice-Small在GPU上仅需68秒处理192分钟音频，比Whisper-large-v3快12.7倍。</p>
                 </div>
                 
                 <div class="takeaway-card">
@@ -651,7 +651,7 @@
             <dl class="setup-grid">
                 <div class="setup-card">
                     <dt>GPU</dt>
-                    <dd>NVIDIA H100 80GB HBM3</dd>
+                    <dd>High-end NVIDIA GPU</dd>
                 </div>
                 <div class="setup-card">
                     <dt>音频数据</dt>

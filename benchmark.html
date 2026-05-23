@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FunASR Benchmark - Comprehensive ASR Speed &amp; Accuracy Comparison</title>
-    <meta name="description" content="Comprehensive ASR benchmark: 7 models tested on GPU, 3 on CPU. FunASR SenseVoice is 170x realtime on GPU with 8.92% CER. Tested on 184 long-form Chinese audio files (192 minutes) on NVIDIA H100.">
+    <meta name="description" content="Comprehensive ASR benchmark: 7 models tested on GPU, 3 on CPU. FunASR SenseVoice is 170x realtime on GPU with 8.92% CER. Tested on 184 long-form Chinese audio files (192 minutes) on GPU.">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <style>
@@ -362,7 +362,7 @@
             <h1 style="margin-top:24px;">ASR Benchmark 2025<br>PyTorch Inference</h1>
             <p class="subtitle">
                 7 models tested on GPU, 3 on CPU. 184 real-world Chinese audio files (192 minutes total).
-                FunASR models vs Whisper variants — speed and accuracy head-to-head on NVIDIA H100. All models run under PyTorch inference.
+                FunASR models vs Whisper variants — speed and accuracy head-to-head on GPU. All models run under PyTorch inference.
             </p>
         </div>
     </section>
@@ -370,7 +370,7 @@
     <!-- GPU Results -->
     <section class="results-section">
         <div class="container">
-            <h2>GPU Results (PyTorch, NVIDIA H100)</h2>
+            <h2>GPU Results (PyTorch, GPU)</h2>
             <p class="lead">
                 All models tested on 184 long-form Chinese audio files (44-83 seconds each, 192 minutes total).
                 Sorted by speed. Lower RTF = faster. Lower CER = more accurate.
@@ -600,7 +600,7 @@
                 <div class="takeaway-card">
                     <div class="takeaway-number">170x</div>
                     <h3>Realtime on GPU</h3>
-                    <p>SenseVoice-Small processes 192 minutes of audio in just 68 seconds on H100. 12.7x faster than Whisper-large-v3.</p>
+                    <p>SenseVoice-Small processes 192 minutes of audio in just 68 seconds on GPU. 12.7x faster than Whisper-large-v3.</p>
                 </div>
                 
                 <div class="takeaway-card">
@@ -658,7 +658,7 @@
             <dl class="setup-grid">
                 <div class="setup-card">
                     <dt>GPU</dt>
-                    <dd>NVIDIA H100 80GB HBM3</dd>
+                    <dd>High-end NVIDIA GPU</dd>
                 </div>
                 <div class="setup-card">
                     <dt>Audio Dataset</dt>
