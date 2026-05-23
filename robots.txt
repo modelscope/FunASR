@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://modelscope.github.io/FunASR/sitemap.xml
