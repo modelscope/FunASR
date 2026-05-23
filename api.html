@@ -22149,7 +22149,9 @@
     else:
         print(f&quot;You are using the latest version of funasr-{current_version}&quot;)
 </code></pre></details></div>
-<div class="api-detail" id="e435"><span class="dtag badge-f">function</span><h2><code>create_app(device, preload_model)</code></h2><div class="dmod">funasr.bin._server_app · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/_server_app.py#L40" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source code</summary><pre><code>def create_app(device: str = &quot;cuda&quot;, preload_model: str = &quot;sensevoice&quot;) -&gt; FastAPI:
+<div class="api-detail" id="e435"><span class="dtag badge-f">function</span><h2><code>create_app(device, preload_model)</code></h2><div class="dmod">funasr.bin._server_app · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/_server_app.py#L40" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source code</summary><pre><code>def create_app(device: str = &quot;cuda&quot;, preload_model: str = &quot;auto&quot;) -&gt; FastAPI:
+    if preload_model == &quot;auto&quot;:
+        preload_model = &quot;fun-asr-nano&quot; if device.startswith(&quot;cuda&quot;) else &quot;sensevoice&quot;
     app = FastAPI(title=&quot;FunASR Server&quot;, version=&quot;1.3.2&quot;)
     app.state.models = {}
     app.state.device = device
@@ -22177,8 +22179,6 @@
     async def transcribe(
         file: UploadFile = File(...),
         model: str = Form(default=&quot;sensevoice&quot;),
-        language: Optional[str] = Form(default=None),
-        response_format: Optional[str] = Form(default=&quot;json&quot;),
 </code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/_server_app.py#L40" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
 <div class="api-detail" id="e436"><span class="dtag badge-f">function</span><h2><code>main_hydra(kwargs)</code></h2><div class="dmod">funasr.bin.compute_audio_cmvn · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/compute_audio_cmvn.py#L15" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Main hydra.</p>
 <h4>Args:</h4>
@@ -22329,7 +22329,7 @@ Then use with OpenAI SDK:
     parser.add_argument(&quot;--host&quot;, default=&quot;0.0.0.0&quot;, help=&quot;Bind address (default: 0.0.0.0)&quot;)
     parser.add_argument(&quot;--port&quot;, type=int, default=8000, help=&quot;Port (default: 8000)&quot;)
     parser.add_argument(&quot;--device&quot;, default=&quot;cuda&quot;, help=&quot;Device: cuda, cpu, mps (default: cuda)&quot;)
-    parser.add_argument(&quot;--model&quot;, default=&quot;sensevoice&quot;, help=&quot;Pre-load model: sensevoice, paraformer, fun-asr-nano (default: sensevoice)&quot;)
+    parser.add_argument(&quot;--model&quot;, default=&quot;auto&quot;, help=&quot;Pre-load model: auto (GPU=fun-asr-nano, CPU=sensevoice), sensevoice, paraformer, fun-asr-nano&quot;)
     args = parser.parse_args()
 
     try:
