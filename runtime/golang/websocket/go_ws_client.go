@@ -330,9 +330,9 @@ func message(id string) {
 				text_print += fmt.Sprintf("%s ", text)
 			}
 			fmt.Println("\rpid" + id + ": " + wav_name + ": " + text_print)
-			offline_msg_done = true
 		}
 	}
+	offline_msg_done = true
 }
 
 func wsClient(id, chunk_begin, chunk_size int, done chan bool) {
