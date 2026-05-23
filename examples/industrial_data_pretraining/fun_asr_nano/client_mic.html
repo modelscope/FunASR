@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>Fun-ASR-Nano vLLM - Real-time ASR</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh; display: flex; align-items: center; justify-content: center;
+            color: #e0e0e0;
+        }
+        .container {
+            background: rgba(255,255,255,0.05); backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1); border-radius: 20px;
+            padding: 40px; width: 90%; max-width: 700px;
+        }
+        h1 { text-align: center; font-size: 24px; margin-bottom: 8px; color: #64ffda; }
+        .subtitle { text-align: center; color: #aaa; margin-bottom: 30px; font-size: 14px; }
+        .config { display: flex; gap: 12px; margin-bottom: 20px; align-items: center; flex-wrap: wrap; }
+        .config label { font-size: 13px; color: #aaa; }
+        .config input, .config select {
+            background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 8px; padding: 8px 12px; color: #fff; font-size: 14px;
+        }
+        .config input { width: 280px; }
+        .btn {
+            display: block; width: 200px; margin: 0 auto 20px; padding: 14px 0;
+            border: none; border-radius: 50px; font-size: 16px; font-weight: 600;
+            cursor: pointer; transition: all 0.3s;
+        }
+        .btn-start { background: #64ffda; color: #1a1a2e; }
+        .btn-start:hover { background: #4de8c2; transform: scale(1.05); }
+        .btn-stop { background: #ff6b6b; color: #fff; }
+        .btn-stop:hover { background: #ee5a5a; transform: scale(1.05); }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        .status {
+            text-align: center; margin-bottom: 20px; font-size: 14px;
+            padding: 8px; border-radius: 8px;
+        }
+        .status.connected { background: rgba(100,255,218,0.1); color: #64ffda; }
+        .status.recording { background: rgba(255,107,107,0.1); color: #ff6b6b; }
+        .status.error { background: rgba(255,107,107,0.1); color: #ff6b6b; }
+        .result-box {
+            background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px; padding: 20px; min-height: 150px; max-height: 400px; overflow-y: auto;
+            font-size: 18px; line-height: 1.8; word-break: break-all;
+        }
+        .result-box .final { color: #64ffda; }
+        .result-box .partial { color: #aaa; font-style: italic; }
+        .result-box .placeholder { color: #555; }
+        .visualizer { height: 60px; margin: 15px 0; display: flex; align-items: center; justify-content: center; gap: 3px; }
+        .visualizer .bar {
+            width: 4px; background: #64ffda; border-radius: 2px;
+            transition: height 0.1s; min-height: 4px;
+        }
+        .footer { text-align: center; margin-top: 20px; font-size: 12px; color: #666; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Fun-ASR-Nano vLLM</h1>
+    <p class="subtitle">Real-time Speech Recognition</p>
+
+    <div class="config">
+        <label>Server:</label>
+        <input type="text" id="serverUrl" value="ws://localhost:10095" placeholder="ws://host:port">
+        <label>Language:</label>
+        <select id="language">
+            <option value="中文" selected>中文</option>
+            <option value="英文">English</option>
+            <option value="日文">日本語</option>
+        </select>
+    </div>
+
+    <div id="status" class="status">Click "Start" to begin</div>
+
+    <div class="visualizer" id="visualizer"></div>
+
+    <button class="btn btn-start" id="btnStart" onclick="startRecording()">Start Recording</button>
+    <button class="btn btn-stop" id="btnStop" onclick="stopRecording()" style="display:none">Stop</button>
+
+    <div class="result-box" id="resultBox">
+        <span class="placeholder">Recognition results will appear here...</span>
+    </div>
+
+    <p class="footer">Fun-ASR-Nano powered by vLLM | Audio: 16kHz PCM16 mono</p>
+</div>
+
+<script>
+let ws = null;
+let mediaStream = null;
+let audioContext = null;
+let processor = null;
+let isRecording = false;
+let finalText = '';
+
+// Create visualizer bars
+const visualizer = document.getElementById('visualizer');
+for (let i = 0; i < 40; i++) {
+    const bar = document.createElement('div');
+    bar.className = 'bar';
+    bar.style.height = '4px';
+    visualizer.appendChild(bar);
+}
+const bars = visualizer.querySelectorAll('.bar');
+
+function setStatus(msg, cls) {
+    const el = document.getElementById('status');
+    el.textContent = msg;
+    el.className = 'status ' + (cls || '');
+}
+
+function renderSentences(sentences, partial, partialStartMs, durationMs, isFinal) {
+    const box = document.getElementById('resultBox');
+    let html = '';
+    sentences.forEach(s => {
+        let startS = (s.start_ms / 1000).toFixed(1);
+        let endS = (s.end_ms / 1000).toFixed(1);
+        html += '<div style="margin:8px 0;display:flex;align-items:baseline">' +
+            '<span style="color:#64ffda;font-size:12px;min-width:100px;font-family:monospace">' + startS + 's - ' + endS + 's</span>' +
+            '<span style="color:#e0e0e0;font-size:16px;margin-left:10px">' + s.text + '</span></div>';
+    });
+    if (partial) {
+        let startS = (partialStartMs / 1000).toFixed(1);
+        html += '<div style="margin:8px 0;display:flex;align-items:baseline">' +
+            '<span style="color:#ffb74d;font-size:12px;min-width:100px;font-family:monospace">' + startS + 's - ...</span>' +
+            '<span style="color:#aaa;font-size:16px;margin-left:10px;font-style:italic">' + partial + '</span></div>';
+    }
+    if (!html) { html = '<span class="placeholder">Listening...</span>'; }
+    box.innerHTML = html;
+    box.scrollTop = box.scrollHeight;
+}
+
+async function startRecording() {
+    const serverUrl = document.getElementById('serverUrl').value;
+    finalText = '';
+    document.getElementById('resultBox').innerHTML = '<span class="placeholder">Connecting...</span>';
+
+    // Connect WebSocket
+    try {
+        ws = new WebSocket(serverUrl);
+    } catch(e) {
+        setStatus('Connection failed: ' + e.message, 'error');
+        return;
+    }
+
+    ws.onopen = async () => {
+        setStatus('Connected. Recording...', 'recording');
+        ws.send('START');
+
+        // Get microphone
+        try {
+            mediaStream = await navigator.mediaDevices.getUserMedia({
+                audio: { sampleRate: 16000, channelCount: 1, echoCancellation: true }
+            });
+        } catch(e) {
+            setStatus('Microphone access denied', 'error');
+            ws.close();
+            return;
+        }
+
+        audioContext = new AudioContext({ sampleRate: 16000 });
+        const source = audioContext.createMediaStreamSource(mediaStream);
+
+        // AudioWorklet or ScriptProcessor
+        processor = audioContext.createScriptProcessor(4096, 1, 1);
+        processor.onaudioprocess = (e) => {
+            if (!isRecording) return;
+            const float32 = e.inputBuffer.getChannelData(0);
+
+            // Update visualizer
+            const rms = Math.sqrt(float32.reduce((sum, x) => sum + x*x, 0) / float32.length);
+            bars.forEach((bar, i) => {
+                const h = Math.max(4, Math.min(50, rms * 500 * (0.5 + Math.random())));
+                bar.style.height = h + 'px';
+            });
+
+            // Convert to PCM16 and send
+            const int16 = new Int16Array(float32.length);
+            for (let i = 0; i < float32.length; i++) {
+                int16[i] = Math.max(-32768, Math.min(32767, Math.round(float32[i] * 32768)));
+            }
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.send(int16.buffer);
+            }
+        };
+        source.connect(processor);
+        processor.connect(audioContext.destination);
+
+        isRecording = true;
+        document.getElementById('btnStart').style.display = 'none';
+        document.getElementById('btnStop').style.display = 'block';
+        document.getElementById('resultBox').innerHTML = '<span class="placeholder">Listening...</span>';
+    };
+
+    ws.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        if (data.sentences !== undefined) {
+            renderSentences(data.sentences, data.partial, data.partial_start_ms, data.duration_ms, data.is_final);
+        }
+        if (data.event === 'stopped') {
+            setStatus('Stopped', 'connected');
+        }
+    };
+
+    ws.onerror = (e) => {
+        setStatus('WebSocket error', 'error');
+    };
+
+    ws.onclose = () => {
+        if (isRecording) {
+            stopRecording();
+        }
+    };
+}
+
+function stopRecording() {
+    isRecording = false;
+
+    if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.send('STOP');
+    }
+
+    if (processor) { processor.disconnect(); processor = null; }
+    if (audioContext) { audioContext.close(); audioContext = null; }
+    if (mediaStream) { mediaStream.getTracks().forEach(t => t.stop()); mediaStream = null; }
+
+    // Reset visualizer
+    bars.forEach(bar => bar.style.height = '4px');
+
+    setTimeout(() => {
+        if (ws) { ws.close(); ws = null; }
+    }, 1000);
+
+    document.getElementById('btnStart').style.display = 'block';
+    document.getElementById('btnStop').style.display = 'none';
+    setStatus('Stopped. Click Start to record again.', '');
+}
+</script>
+</body>
+</html>
