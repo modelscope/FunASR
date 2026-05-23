@@ -3,7 +3,6 @@
 <title>FunASR API</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
-    <meta name="description" content="FunASR API reference: AutoModel, generate(), inference options, model configuration, batch processing.">
 </head><body class="api-page">
 <nav class="nav"><div class="container">
 <a href="index.html" class="nav-logo">FunASR</a>
@@ -11769,7 +11768,7 @@
         max_inference_batch_size = kwargs.get(&quot;max_inference_batch_size&quot;, 32)
         forced_aligner = kwargs.get(&quot;forced_aligner&quot;, None)
         forced_aligner_kwargs = kwargs.get(&quot;forced_aligner_kwargs&quot;, None)
-</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/qwen3_asr/model.py#L16" target="_blank" class="src-more">View full source on GitHub →</a></details><h3 class="mt">Methods</h3><div class="mblk"><code>.forward(**kwargs)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/qwen3_asr/model.py#L105" target="_blank" class="gh-link">L105</a><div class="mdoc"><p>Forward pass for training.</p>
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/qwen3_asr/model.py#L16" target="_blank" class="src-more">View full source on GitHub →</a></details><h3 class="mt">Methods</h3><div class="mblk"><code>.forward(**kwargs)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/qwen3_asr/model.py#L108" target="_blank" class="gh-link">L108</a><div class="mdoc"><p>Forward pass for training.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>**kwargs</code> — Additional keyword arguments.</li>
@@ -11781,7 +11780,7 @@
                 **kwargs: Additional keyword arguments.
             &quot;&quot;&quot;
         raise NotImplementedError(&quot;Qwen3ASR only supports inference mode&quot;)
-</code></pre></details></div><div class="mblk"><code>.inference(data_in, data_lengths, key, tokenizer, frontend, **kwargs)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/qwen3_asr/model.py#L113" target="_blank" class="gh-link">L113</a><div class="mdoc"><p>Run Qwen3-ASR speech recognition.</p>
+</code></pre></details></div><div class="mblk"><code>.inference(data_in, data_lengths, key, tokenizer, frontend, **kwargs)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/qwen3_asr/model.py#L116" target="_blank" class="gh-link">L116</a><div class="mdoc"><p>Run Qwen3-ASR speech recognition.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>data_in</code> — Audio input. Accepts:</li>
@@ -11836,8 +11835,8 @@
             tuple: (results, meta_data) where results is list of dicts:
                 - &quot;key&quot; (str): Sample ID
                 - &quot;text&quot; (str): Recognized text (with punctuation)
-</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/qwen3_asr/model.py#L113" target="_blank" class="src-more">View full source →</a></details></div></div>
-<div class="api-detail" id="e188"><span class="dtag badge-m">method</span><h2><code>Qwen3ASR.forward(**kwargs)</code></h2><div class="dmod">funasr.models.qwen3_asr.Qwen3ASR · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/qwen3_asr/model.py#L105" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Forward pass for training.</p>
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/qwen3_asr/model.py#L116" target="_blank" class="src-more">View full source →</a></details></div></div>
+<div class="api-detail" id="e188"><span class="dtag badge-m">method</span><h2><code>Qwen3ASR.forward(**kwargs)</code></h2><div class="dmod">funasr.models.qwen3_asr.Qwen3ASR · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/qwen3_asr/model.py#L108" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Forward pass for training.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>**kwargs</code> — Additional keyword arguments.</li>
@@ -11850,7 +11849,7 @@
             &quot;&quot;&quot;
         raise NotImplementedError(&quot;Qwen3ASR only supports inference mode&quot;)
 </code></pre></details></div>
-<div class="api-detail" id="e189"><span class="dtag badge-m">method</span><h2><code>Qwen3ASR.inference(data_in, data_lengths, key, tokenizer, frontend, **kwargs)</code></h2><div class="dmod">funasr.models.qwen3_asr.Qwen3ASR · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/qwen3_asr/model.py#L113" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Run Qwen3-ASR speech recognition.</p>
+<div class="api-detail" id="e189"><span class="dtag badge-m">method</span><h2><code>Qwen3ASR.inference(data_in, data_lengths, key, tokenizer, frontend, **kwargs)</code></h2><div class="dmod">funasr.models.qwen3_asr.Qwen3ASR · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/qwen3_asr/model.py#L116" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Run Qwen3-ASR speech recognition.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>data_in</code> — Audio input. Accepts:</li>
@@ -11905,7 +11904,7 @@
             tuple: (results, meta_data) where results is list of dicts:
                 - &quot;key&quot; (str): Sample ID
                 - &quot;text&quot; (str): Recognized text (with punctuation)
-</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/qwen3_asr/model.py#L113" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/qwen3_asr/model.py#L116" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
 <div class="api-detail" id="e190"><span class="dtag badge-c">class</span><h2>QwenAudioWarp</h2><div class="dmod">funasr.models.qwen_audio · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/qwen_audio/model.py#L22" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><ul>
 <li><code>Qwen</code> — Audio: Advancing Universal Audio Understanding via Unified Large-Scale Audio-Language Models</li>
 </ul>
