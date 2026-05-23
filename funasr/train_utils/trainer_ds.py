@@ -600,7 +600,7 @@ class Trainer:
             time1 = time.perf_counter()
             loss_dict["speed_stats"]["data_load"] = f"{time1-time_beg:0.3f}"
 
-            batch = to_device(batch, self.device)
+            batch = to_device(batch, self.device, non_blocking=True)
 
             my_context = nullcontext
             if self.use_ddp or self.use_fsdp:
@@ -798,7 +798,7 @@ class Trainer:
                 time1 = time.perf_counter()
                 loss_dict["speed_stats"]["data_load"] = f"{time1 - time_beg:0.3f}"
 
-                batch = to_device(batch, self.device)
+                batch = to_device(batch, self.device, non_blocking=True)
 
                 time2 = time.perf_counter()
 

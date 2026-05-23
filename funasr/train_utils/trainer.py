@@ -380,7 +380,7 @@ class Trainer:
             time1 = time.perf_counter()
             speed_stats["data_load"] = f"{time1-time_beg:0.3f}"
 
-            batch = to_device(batch, self.device)
+            batch = to_device(batch, self.device, non_blocking=True)
 
             my_context = nullcontext
             if self.use_ddp or self.use_fsdp:
@@ -461,7 +461,7 @@ class Trainer:
                 # Clear gradients for the next accumulation stage
                 optim.zero_grad(set_to_none=True)
 
-                if self.use_ddp or self.use_fsdp:
+                if (self.use_ddp or self.use_fsdp) and (batch_idx + 1) % self.log_interval == 0:
                     train_loss_avg = torch.tensor(self.train_loss_avg, dtype=torch.float32).to(
                         self.device
                     )
@@ -567,7 +567,7 @@ class Trainer:
                         break
                 time1 = time.perf_counter()
                 speed_stats["data_load"] = f"{time1 - time5:0.3f}"
-                batch = to_device(batch, self.device)
+                batch = to_device(batch, self.device, non_blocking=True)
 
                 time2 = time.perf_counter()
                 retval = model(**batch)

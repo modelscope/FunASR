@@ -39,6 +39,10 @@ def CustomDistributedBatchSampler_fn(dataset, **kwargs):
     dataloader_args["batch_sampler"] = batch_sampler
     dataloader_args["num_workers"] = kwargs.get("num_workers", 4)
     dataloader_args["pin_memory"] = kwargs.get("pin_memory", True)
+    num_workers = dataloader_args.get("num_workers", 4)
+    if num_workers > 0:
+        dataloader_args["persistent_workers"] = kwargs.get("persistent_workers", True)
+        dataloader_args["prefetch_factor"] = kwargs.get("prefetch_factor", 2)
 
     return dataloader_args
 
