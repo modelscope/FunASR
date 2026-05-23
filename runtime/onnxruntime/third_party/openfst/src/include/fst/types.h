@@ -35,7 +35,11 @@ using uint64 = uint64_t;
 #ifdef _MSC_VER
 // Not really Windows-specific: they should have used ptrdiff_t in the first
 // place. But on Windows there has never been ssize_t.
+// Check if ssize_t/SSIZE_T is already defined by the SDK
+#if !defined(_SSIZE_T_) && !defined(_SSIZE_T_DEFINED)
+// Use ptrdiff_t as ssize_t (same size as pointer)
 using ssize_t = std::ptrdiff_t;
+#endif  // !defined(_SSIZE_T_) && !defined(_SSIZE_T_DEFINED)
 #endif  // _MSC_VER
 
 #endif  // FST_LIB_TYPES_H_

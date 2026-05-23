@@ -13,7 +13,7 @@
 #pragma warning(disable:4996)
 #endif
 
-#if defined(__APPLE__)
+#if defined(__APPLE__) || !defined(ENABLE_FFMPEG)
 #include <string.h>
 #else
 
@@ -292,7 +292,8 @@ void Audio::WavResample(int32_t sampling_rate, const float *waveform,
 }
 
 bool Audio::FfmpegLoad(const char *filename, bool copy2char){
-#if defined(__APPLE__)
+#if defined(__APPLE__) || !defined(ENABLE_FFMPEG)
+    LOG(ERROR) << "FFmpeg audio decoding is disabled in this build.";
     return false;
 #else
     // from file
@@ -454,7 +455,8 @@ bool Audio::FfmpegLoad(const char *filename, bool copy2char){
 }
 
 bool Audio::FfmpegLoad(const char* buf, int n_file_len){
-#if defined(__APPLE__)
+#if defined(__APPLE__) || !defined(ENABLE_FFMPEG)
+    LOG(ERROR) << "FFmpeg audio decoding is disabled in this build.";
     return false;
 #else
     // from buf

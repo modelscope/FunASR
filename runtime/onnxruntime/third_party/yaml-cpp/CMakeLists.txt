@@ -3,14 +3,14 @@
 ###
 ## Due to Mac OSX we need to keep compatibility with CMake 2.6
 # see http://www.cmake.org/Wiki/CMake_Policies
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 2.8.12)
 # see http://www.cmake.org/cmake/help/cmake-2-8-docs.html#policy:CMP0012
 if(POLICY CMP0012)
-	cmake_policy(SET CMP0012 OLD)
+	cmake_policy(SET CMP0012 NEW)
 endif()
 # see http://www.cmake.org/cmake/help/cmake-2-8-docs.html#policy:CMP0015
 if(POLICY CMP0015)
-	cmake_policy(SET CMP0015 OLD)
+	cmake_policy(SET CMP0015 NEW)
 endif()
 # see https://cmake.org/cmake/help/latest/policy/CMP0042.html
 if(POLICY CMP0042)

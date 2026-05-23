@@ -32,7 +32,8 @@ typedef float   BaseFloat;
 
 #ifdef _MSC_VER
 #include <basetsd.h>
-#define ssize_t SSIZE_T
+// Don't define ssize_t as macro - let fst/types.h handle it
+// #define ssize_t SSIZE_T  // This causes conflicts with fst/types.h
 #endif
 
 // we can do this a different way if some platform
