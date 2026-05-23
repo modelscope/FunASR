@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FunASR vs Whisper Benchmark - Speed & Accuracy Comparison</title>
+    <meta name="description" content="Independent benchmark: FunASR SenseVoice is 15x faster than Whisper with 55% lower error rate on Chinese speech recognition. Tested on 184 long-form audio files (192 minutes) on NVIDIA H100.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .bench-hero {
+            background: linear-gradient(120deg, #0b1020 0%, #0d1f3c 58%, #1a0f2e 100%);
+            color: #fff;
+            padding: 100px 0 80px;
+            position: relative;
+            overflow: hidden;
+        }
+        .bench-hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background:
+                linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+            mask-image: linear-gradient(180deg, rgba(0,0,0,0.6), transparent);
+            pointer-events: none;
+        }
+        .bench-hero h1 {
+            font-size: clamp(2.2rem, 5vw, 3.6rem);
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 16px;
+        }
+        .bench-hero .subtitle {
+            font-size: 1.15rem;
+            color: rgba(255,255,255,0.75);
+            max-width: 680px;
+            margin-bottom: 32px;
+        }
+        .headline-stat {
+            display: inline-flex;
+            align-items: baseline;
+            gap: 8px;
+            background: rgba(5, 150, 105, 0.15);
+            border: 1px solid rgba(5, 150, 105, 0.3);
+            border-radius: 999px;
+            padding: 8px 20px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #a7f3d0;
+        }
+        .headline-stat strong {
+            font-size: 1.3rem;
+            color: #6ee7b7;
+        }
+
+        .results-section {
+            padding: 80px 0;
+        }
+        .results-section h2 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            margin-bottom: 12px;
+        }
+        .results-section .lead {
+            color: var(--muted);
+            font-size: 1.05rem;
+            margin-bottom: 40px;
+            max-width: 700px;
+        }
+
+        .bench-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.92rem;
+            background: var(--surface);
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--line);
+        }
+        .bench-table thead {
+            background: var(--surface-2);
+        }
+        .bench-table th {
+            padding: 14px 18px;
+            text-align: left;
+            font-weight: 700;
+            font-size: 0.82rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--muted);
+            border-bottom: 1px solid var(--line);
+        }
+        .bench-table td {
+            padding: 16px 18px;
+            border-bottom: 1px solid var(--line);
+            vertical-align: middle;
+        }
+        .bench-table tr:last-child td {
+            border-bottom: none;
+        }
+        .bench-table .model-name {
+            font-weight: 700;
+            color: var(--ink);
+        }
+        .bench-table .highlight-row {
+            background: rgba(5, 150, 105, 0.04);
+        }
+        .bench-table .highlight-row .model-name {
+            color: var(--teal);
+        }
+
+        .speed-bar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .speed-bar-fill {
+            height: 8px;
+            border-radius: 4px;
+            background: var(--primary);
+            min-width: 4px;
+        }
+        .highlight-row .speed-bar-fill {
+            background: var(--teal);
+        }
+        .speed-bar-label {
+            font-weight: 700;
+            font-size: 0.88rem;
+            white-space: nowrap;
+        }
+
+        .cer-value {
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+        }
+        .cer-best {
+            color: var(--teal);
+        }
+
+        .chart-section {
+            padding: 60px 0 80px;
+            background: var(--surface-2);
+        }
+        .chart-section h2 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 32px;
+        }
+        .bar-chart {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            max-width: 700px;
+        }
+        .bar-row {
+            display: grid;
+            grid-template-columns: 200px 1fr 60px;
+            align-items: center;
+            gap: 16px;
+        }
+        .bar-row-label {
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-align: right;
+        }
+        .bar-row-track {
+            height: 32px;
+            background: var(--line);
+            border-radius: 6px;
+            overflow: hidden;
+            position: relative;
+        }
+        .bar-row-fill {
+            height: 100%;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            padding-left: 12px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: #fff;
+        }
+        .bar-row-value {
+            font-weight: 800;
+            font-size: 0.95rem;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .setup-section {
+            padding: 60px 0 80px;
+        }
+        .setup-section h2 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 24px;
+        }
+        .setup-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+        }
+        .setup-card {
+            background: var(--surface);
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            padding: 20px 24px;
+        }
+        .setup-card dt {
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--muted);
+            margin-bottom: 4px;
+        }
+        .setup-card dd {
+            font-weight: 600;
+            color: var(--ink);
+        }
+
+        .takeaway {
+            padding: 60px 0 80px;
+            background: linear-gradient(180deg, var(--surface-2) 0%, var(--page) 100%);
+        }
+        .takeaway h2 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 24px;
+        }
+        .takeaway-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+        .takeaway-card {
+            background: var(--surface);
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            padding: 24px;
+            box-shadow: var(--shadow);
+        }
+        .takeaway-card h3 {
+            font-size: 1.05rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        .takeaway-card p {
+            color: var(--muted);
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+        .takeaway-number {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--teal);
+            margin-bottom: 8px;
+        }
+
+        .cta-section {
+            padding: 60px 0;
+            text-align: center;
+        }
+        .cta-section h2 {
+            font-size: 1.6rem;
+            font-weight: 800;
+            margin-bottom: 12px;
+        }
+        .cta-section p {
+            color: var(--muted);
+            margin-bottom: 24px;
+        }
+        .cta-actions {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        @media (max-width: 768px) {
+            .bar-row {
+                grid-template-columns: 120px 1fr 50px;
+                gap: 8px;
+            }
+            .bar-row-label {
+                font-size: 0.8rem;
+            }
+            .bench-table {
+                font-size: 0.82rem;
+            }
+            .bench-table th, .bench-table td {
+                padding: 10px 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="nav">
+        <div class="container">
+            <a href="index.html" class="nav-logo">FunASR</a>
+            <div class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="tutorial.html">Tutorial</a>
+                <a href="training.html">Training</a>
+                <a href="benchmark.html" class="active">Benchmark</a>
+                <a href="model-registration.html">Develop</a>
+                <a href="api.html">API</a>
+            </div>
+            
+<div class="lang-dropdown"><button class="lang-btn">English</button><div class="lang-menu"><a href="benchmark.html" class="current">English</a><a href="zh/benchmark.html">中文</a></div></div>
+<a href="https://github.com/modelscope/FunASR" class="nav-github">GitHub</a>
+        </div>
+    </nav>
+
+    <section class="bench-hero">
+        <div class="container" style="position:relative;z-index:1;">
+            <div class="headline-stat">
+                <strong>15x</strong> faster than Whisper &middot; <strong>55%</strong> lower error rate
+            </div>
+            <h1 style="margin-top:24px;">FunASR vs Whisper<br>Benchmark 2025</h1>
+            <p class="subtitle">
+                Independent speed and accuracy comparison on 192 minutes of real-world Chinese speech.
+                Tested on NVIDIA H100 with identical audio inputs.
+            </p>
+        </div>
+    </section>
+
+    <section class="results-section">
+        <div class="container">
+            <h2>Results at a Glance</h2>
+            <p class="lead">
+                All models tested on 184 long-form Chinese audio files (44-83 seconds each, 192 minutes total).
+                Lower RTF = faster. Lower CER = more accurate.
+            </p>
+
+            <table class="bench-table">
+                <thead>
+                    <tr>
+                        <th>Model</th>
+                        <th>Framework</th>
+                        <th>Speed (RTF)</th>
+                        <th>Realtime Factor</th>
+                        <th>CER</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="highlight-row">
+                        <td class="model-name">SenseVoice-Small</td>
+                        <td>FunASR</td>
+                        <td>0.0047</td>
+                        <td>
+                            <div class="speed-bar">
+                                <div class="speed-bar-fill" style="width: 100%"></div>
+                                <span class="speed-bar-label">212x</span>
+                            </div>
+                        </td>
+                        <td><span class="cer-value cer-best">8.92%</span></td>
+                    </tr>
+                    <tr class="highlight-row">
+                        <td class="model-name">Paraformer-Large</td>
+                        <td>FunASR</td>
+                        <td>0.0078</td>
+                        <td>
+                            <div class="speed-bar">
+                                <div class="speed-bar-fill" style="width: 60%"></div>
+                                <span class="speed-bar-label">128x</span>
+                            </div>
+                        </td>
+                        <td><span class="cer-value">12.71%</span></td>
+                    </tr>
+                    <tr>
+                        <td class="model-name">Whisper-small</td>
+                        <td>OpenAI</td>
+                        <td>0.0266</td>
+                        <td>
+                            <div class="speed-bar">
+                                <div class="speed-bar-fill" style="width: 18%"></div>
+                                <span class="speed-bar-label">37.6x</span>
+                            </div>
+                        </td>
+                        <td><span class="cer-value">26.79%</span></td>
+                    </tr>
+                    <tr>
+                        <td class="model-name">faster-whisper-large-v3</td>
+                        <td>CTranslate2</td>
+                        <td>0.0464</td>
+                        <td>
+                            <div class="speed-bar">
+                                <div class="speed-bar-fill" style="width: 10%"></div>
+                                <span class="speed-bar-label">21.5x</span>
+                            </div>
+                        </td>
+                        <td><span class="cer-value">17.00%</span></td>
+                    </tr>
+                    <tr>
+                        <td class="model-name">Whisper-large-v3</td>
+                        <td>OpenAI</td>
+                        <td>0.0727</td>
+                        <td>
+                            <div class="speed-bar">
+                                <div class="speed-bar-fill" style="width: 6%"></div>
+                                <span class="speed-bar-label">13.7x</span>
+                            </div>
+                        </td>
+                        <td><span class="cer-value">20.02%</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="chart-section">
+        <div class="container">
+            <h2>Speed Comparison (Realtime Factor)</h2>
+            <div class="bar-chart">
+                <div class="bar-row">
+                    <div class="bar-row-label">SenseVoice-Small</div>
+                    <div class="bar-row-track">
+                        <div class="bar-row-fill" style="width:100%;background:var(--teal);">212x</div>
+                    </div>
+                    <div class="bar-row-value" style="color:var(--teal)">212x</div>
+                </div>
+                <div class="bar-row">
+                    <div class="bar-row-label">Paraformer-Large</div>
+                    <div class="bar-row-track">
+                        <div class="bar-row-fill" style="width:60%;background:var(--teal);">128x</div>
+                    </div>
+                    <div class="bar-row-value" style="color:var(--teal)">128x</div>
+                </div>
+                <div class="bar-row">
+                    <div class="bar-row-label">Whisper-small</div>
+                    <div class="bar-row-track">
+                        <div class="bar-row-fill" style="width:18%;background:var(--muted);">37.6x</div>
+                    </div>
+                    <div class="bar-row-value">37.6x</div>
+                </div>
+                <div class="bar-row">
+                    <div class="bar-row-label">faster-whisper-large-v3</div>
+                    <div class="bar-row-track">
+                        <div class="bar-row-fill" style="width:10%;background:var(--muted);">21.5x</div>
+                    </div>
+                    <div class="bar-row-value">21.5x</div>
+                </div>
+                <div class="bar-row">
+                    <div class="bar-row-label">Whisper-large-v3</div>
+                    <div class="bar-row-track">
+                        <div class="bar-row-fill" style="width:6.5%;background:var(--muted);"></div>
+                    </div>
+                    <div class="bar-row-value">13.7x</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="takeaway">
+        <div class="container">
+            <h2>Key Findings</h2>
+            <div class="takeaway-grid">
+                <div class="takeaway-card">
+                    <div class="takeaway-number">15.5x</div>
+                    <h3>Faster than Whisper</h3>
+                    <p>SenseVoice processes 192 minutes of audio in just 54 seconds. Whisper-large-v3 takes 14 minutes for the same data.</p>
+                </div>
+                <div class="takeaway-card">
+                    <div class="takeaway-number">8.92%</div>
+                    <h3>Lowest Error Rate</h3>
+                    <p>SenseVoice achieves the best CER among all tested models, beating Whisper-large-v3 (20.02%) by a wide margin on Chinese.</p>
+                </div>
+                <div class="takeaway-card">
+                    <div class="takeaway-number">3 lines</div>
+                    <h3>One API for Everything</h3>
+                    <p>FunASR includes VAD, punctuation, and speaker diarization in one call. No pipeline glue code needed.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="setup-section">
+        <div class="container">
+            <h2>Test Setup</h2>
+            <dl class="setup-grid">
+                <div class="setup-card">
+                    <dt>GPU</dt>
+                    <dd>NVIDIA H100 80GB HBM3</dd>
+                </div>
+                <div class="setup-card">
+                    <dt>Audio</dt>
+                    <dd>184 files, 192 min total</dd>
+                </div>
+                <div class="setup-card">
+                    <dt>Language</dt>
+                    <dd>Mandarin Chinese</dd>
+                </div>
+                <div class="setup-card">
+                    <dt>Duration Range</dt>
+                    <dd>44 - 83 seconds per file</dd>
+                </div>
+                <div class="setup-card">
+                    <dt>FunASR Version</dt>
+                    <dd>1.3.1</dd>
+                </div>
+                <div class="setup-card">
+                    <dt>CUDA</dt>
+                    <dd>12.8 / Driver 550.127</dd>
+                </div>
+            </dl>
+        </div>
+    </section>
+
+    <section class="cta-section">
+        <div class="container">
+            <h2>Try FunASR Today</h2>
+            <p>Get started with a single pip install and three lines of code.</p>
+            <div class="cta-actions">
+                <a href="tutorial.html" class="btn btn-primary">Get Started</a>
+                <a href="https://github.com/modelscope/FunASR" class="btn btn-outline">View on GitHub</a>
+            </div>
+        </div>
+    </section>
+
+    <footer style="padding:40px 0;border-top:1px solid var(--line);text-align:center;color:var(--muted);font-size:0.85rem;">
+        <div class="container">
+            <p>FunASR &middot; Open-source speech recognition toolkit &middot; <a href="https://github.com/modelscope/FunASR">GitHub</a></p>
+            <p style="margin-top:8px;font-size:0.78rem;">Benchmark conducted May 2025. Results may vary by hardware and audio characteristics.</p>
+        </div>
+    </footer>
+</body>
+</html>
