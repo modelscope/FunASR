@@ -37,7 +37,9 @@ MODEL_CONFIGS = {
 }
 
 
-def create_app(device: str = "cuda", preload_model: str = "sensevoice") -> FastAPI:
+def create_app(device: str = "cuda", preload_model: str = "auto") -> FastAPI:
+    if preload_model == "auto":
+        preload_model = "fun-asr-nano" if device.startswith("cuda") else "sensevoice"
     app = FastAPI(title="FunASR Server", version="1.3.2")
     app.state.models = {}
     app.state.device = device
