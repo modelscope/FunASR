@@ -15,6 +15,7 @@
 <strong>FunASR</strong> hopes to build a bridge between academic research and industrial applications on speech recognition. By supporting the training & finetuning of the industrial-grade speech recognition model, researchers and developers can conduct research and production of speech recognition models more conveniently, and promote the development of speech recognition ecology. ASR for Fun！
 
 [**Highlights**](#highlights)
+| [**Benchmark**](#benchmark)
 | [**News**](https://github.com/alibaba-damo-academy/FunASR#whats-new)
 | [**Installation**](#installation)
 | [**Quick Start**](#quick-start)
@@ -29,6 +30,28 @@
 
 - FunASR is a fundamental speech recognition toolkit that offers a variety of features, including speech recognition (ASR), Voice Activity Detection (VAD), Punctuation Restoration, Language Models, Speaker Verification, Speaker Diarization and multi-talker ASR. FunASR provides convenient scripts and tutorials, supporting inference and fine-tuning of pre-trained models.
 - We have released a vast collection of academic and industrial pretrained models on the [ModelScope](https://www.modelscope.cn/models?page=1&tasks=auto-speech-recognition) and [huggingface](https://huggingface.co/FunASR), which can be accessed through our [Model Zoo](https://github.com/alibaba-damo-academy/FunASR/blob/main/docs/model_zoo/modelscope_models.md). The representative [Paraformer-large](https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary), a non-autoregressive end-to-end speech recognition model, has the advantages of high accuracy, high efficiency, and convenient deployment, supporting the rapid construction of speech recognition services. For more details on service deployment, please refer to the [service deployment document](runtime/readme_cn.md).
+
+
+<a name="benchmark"></a>
+
+## Benchmark: FunASR vs Whisper (NVIDIA H100)
+
+> Tested on 184 long-form Chinese audio files (192 min total). [Full report](https://modelscope.github.io/FunASR/benchmark.html)
+
+| Model | Speed | CER | vs Whisper-large-v3 |
+|-------|-------|-----|--------------------|
+| **SenseVoice-Small** (FunASR) | **212x** realtime | **8.92%** | 🚀 **15x faster, 55% lower error** |
+| **Paraformer-Large** (FunASR) | **128x** realtime | 12.71% | 🚀 **9x faster, 37% lower error** |
+| faster-whisper-large-v3 | 21.5x realtime | 17.00% | 1.6x faster |
+| Whisper-small (OpenAI) | 37.6x realtime | 26.79% | Faster but much worse accuracy |
+| Whisper-large-v3 (OpenAI) | 13.7x realtime | 20.02% | Baseline |
+
+```python
+# 3 lines to beat Whisper
+from funasr import AutoModel
+model = AutoModel(model="iic/SenseVoiceSmall", vad_model="fsmn-vad", device="cuda")
+result = model.generate(input="meeting.wav")  # 15x faster, better accuracy
+```
 
 <a name="whats-new"></a>
 
