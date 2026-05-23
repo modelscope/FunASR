@@ -228,6 +228,8 @@ class AutoModel:
             vad_kwargs["model_revision"] = kwargs.get("vad_model_revision", "master")
             vad_kwargs["device"] = kwargs["device"]
             vad_kwargs.setdefault("ncpu", kwargs.get("ncpu", 4))
+            if "hub" in kwargs:
+                vad_kwargs.setdefault("hub", kwargs["hub"])
             vad_model, vad_kwargs = self.build_model(**vad_kwargs)
 
         # if punc_model is not None, build punc model else None
@@ -239,6 +241,8 @@ class AutoModel:
             punc_kwargs["model_revision"] = kwargs.get("punc_model_revision", "master")
             punc_kwargs["device"] = kwargs["device"]
             punc_kwargs.setdefault("ncpu", kwargs.get("ncpu", 4))
+            if "hub" in kwargs:
+                punc_kwargs.setdefault("hub", kwargs["hub"])
             punc_model, punc_kwargs = self.build_model(**punc_kwargs)
 
         # if spk_model is not None, build spk model else None
@@ -253,6 +257,8 @@ class AutoModel:
             spk_kwargs["model_revision"] = kwargs.get("spk_model_revision", "master")
             spk_kwargs["device"] = kwargs["device"]
             spk_kwargs.setdefault("ncpu", kwargs.get("ncpu", 4))
+            if "hub" in kwargs:
+                spk_kwargs.setdefault("hub", kwargs["hub"])
             spk_model, spk_kwargs = self.build_model(**spk_kwargs)
             self.cb_model = ClusterBackend(**cb_kwargs).to(kwargs["device"])
             spk_mode = kwargs.get("spk_mode", "punc_segment")
