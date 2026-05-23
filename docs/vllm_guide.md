@@ -233,3 +233,69 @@ python demo_vllm.py --input audio.wav --hotwords 开放时间 周一 --language 
 
 ### Q: 支持哪些音频格式？
 wav、mp3、flac 等主流格式，采样率会自动转为 16kHz。
+
+## VAD + ASR(vLLM) + Speaker Pipeline
+
+对于长音频（会议、电话录音等），使用 VAD + Speaker 组合流水线：
+
+### 用法
+
+```python
+from funasr.models.fun_asr_nano.inference_vllm_pipeline import FunASRNanoVLLMPipeline
+
+pipeline = FunASRNanoVLLMPipeline(
+    model="FunAudioLLM/Fun-ASR-Nano-2512",
+    vad_model="fsmn-vad",
+    vad_kwargs={"max_single_segment_time": 30000},
+    spk_model="cam++",          # 说话人分离，可选
+    tensor_parallel_size=2,
+)
+
+results = pipeline.generate("meeting.wav", language="中文")
+print(results[0]["text"])             # 完整文本
+print(results[0]["sentence_info"])    # 带说话人标签的分句结果
+```
+
+### 输出格式
+
+```python
+{
+    "key": "meeting",
+    "text": "开放时间早上九点至下午五点。开放时间早上九点至下午五点。",
+    "timestamp": [...],  # 字级别时间戳（CTC forced alignment）
+    "sentence_info": [
+        {"text": "开放时间早上九点至下午五点。", "start": 420, "end": 5450, "spk": 0},
+        {"text": "开放时间早上九点至下午五点。", "start": 6340, "end": 11360, "spk": 0},
+        ...
+    ]
+}
+```
+
+### Pipeline 参数
+
+| 参数 | 默认值 | 说明 |
+|------|--------|------|
+| `model` | `"FunAudioLLM/Fun-ASR-Nano-2512"` | ASR 模型 |
+| `vad_model` | `None` | VAD 模型，如 `"fsmn-vad"` |
+| `vad_kwargs` | `{}` | VAD 配置，如 `{"max_single_segment_time": 30000}` |
+| `spk_model` | `None` | 说话人模型，如 `"cam++"` |
+| `tensor_parallel_size` | `1` | vLLM GPU 并行数 |
+| `gpu_memory_utilization` | `0.8` | vLLM 显存比例 |
+
+### 支持的 Speaker 模型
+
+| 模型 | ModelScope ID | 说明 |
+|------|--------------|------|
+| cam++ | `iic/speech_campplus_sv_zh-cn_16k-common` | 推荐，轻量高效 |
+| ERes2NetV2 | `iic/speech_eres2netv2_sv_zh-cn_16k-common` | 更高精度 |
+
+### 性能优势
+
+Pipeline 的核心加速在于：VAD 产生 N 个语音段后，vLLM **一次性** 批量处理所有段（而非逐段串行）。
+
+| 场景 | Torch (串行) | vLLM (批量) | 加速 |
+|------|-------------|-------------|------|
+| 10段 x 5s | ~9s | ~1.5s | **6x** |
+| 20段 x 5s | ~18s | ~2.5s | **7x** |
+| VAD 分段越多，vLLM 批量优势越大 |
+
