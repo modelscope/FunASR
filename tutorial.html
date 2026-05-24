@@ -20,15 +20,14 @@
 <a href="https://github.com/modelscope/FunASR" class="nav-github">GitHub</a>
 </div></nav>
 
-<div class="content"><div class="container narrow">
-<h1>Tutorial</h1>
-<p>From zero to production — learn FunASR in 10 minutes.</p>
-
-<div class="toc-grid">
+<div class="doc-layout">
+<nav class="doc-sidebar">
+<div class="sb-title">Tutorial</div>
 <a href="#quick">30-Second Demo</a>
 <a href="#install">Install</a>
 <a href="#choose">Choose a Model</a>
-<a href="#scenarios">Usage Scenarios</a>
+<div class="sb-title">Usage</div>
+<a href="#scenarios">Scenarios</a>
 <a href="#offline">Offline ASR</a>
 <a href="#streaming">Streaming ASR</a>
 <a href="#spk">Speaker Diarization</a>
@@ -36,9 +35,15 @@
 <a href="#vad">VAD</a>
 <a href="#punc">Punctuation</a>
 <a href="#export">ONNX Export</a>
-<a href="#config">Configuration Reference</a>
-<a href="#faq">FAQ & Troubleshooting</a>
-</div>
+<div class="sb-title">Reference</div>
+<a href="#config">Configuration</a>
+<a href="#faq">FAQ</a>
+</nav>
+<div class="doc-content">
+<h1>Tutorial</h1>
+<p>From zero to production — learn FunASR in 10 minutes.</p>
+
+
 
 <!-- 30-Second Demo -->
 <h2 id="quick">30-Second Demo</h2>
@@ -488,7 +493,8 @@ print(torch.cuda.is_available())  # must be True
 # Specify GPU explicitly:
 model = AutoModel(model="...", device="cuda:0")</pre>
 
-</div></div>
+</div><!-- doc-content -->
+</div><!-- doc-layout -->
 
 <footer>
 <p>FunASR &middot; Tongyi Lab, Alibaba Group</p>
