@@ -104,6 +104,8 @@ Overview
    :maxdepth: 1
    :caption: Application
 
+   ./use_case_showcase.md
+   ./use_case_showcase_zh.md
    ./reference/application.md
 
 .. toctree::
