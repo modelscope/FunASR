@@ -133,3 +133,8 @@ results = engine.generate(["audio.wav"], language="中文")
 |------|---------|----------|----------|
 | Offline (`FunASRNanoVLLM`) | Full audio | Best | Batch transcription |
 | Streaming (`FunASRNanoStreamingVLLM`) | Per-chunk | Good (after ~3s) | Real-time display |
+
+## Related
+
+- **[Offline vLLM Inference](vllm_inference.md)** — Batch inference with maximum accuracy
+- **[Real-time WebSocket Server](realtime_demo.md)** — Production-ready streaming service with VAD + Speaker Diarization + Hotwords (uses vLLM as backend via `AutoModelVLLM`)

@@ -193,3 +193,8 @@ The first call includes vLLM's CUDA graph warmup. Subsequent calls will be faste
 
 ### Tokenizer warnings
 These are typically harmless warnings from the Qwen3 tokenizer about special tokens and can be ignored.
+
+## Related
+
+- **[Streaming vLLM Inference](vllm_streaming.md)** — Chunk-by-chunk streaming (SDK level)
+- **[Real-time WebSocket Server](realtime_demo.md)** — Production-ready streaming service with VAD + Speaker Diarization + Hotwords (uses vLLM as backend)

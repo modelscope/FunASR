@@ -277,3 +277,8 @@ Fun-ASR-Nano
 4. **显存占用**：vLLM 引擎 + VAD + SPK 共约 8-10GB 显存（gpu_memory_utilization=0.8 时）
 5. **说话人分离**：Beta 功能，短音频或单人场景可能不准确
 6. **模型来源**：默认从 ModelScope 下载，可用 `--hub hf` 切换 HuggingFace
+
+## Related
+
+- **[vLLM Offline Inference](vllm_inference.md)** — Batch inference API (FunASRNanoVLLM)
+- **[vLLM Streaming Inference](vllm_streaming.md)** — Chunk-by-chunk streaming SDK (FunASRNanoStreamingVLLM)
