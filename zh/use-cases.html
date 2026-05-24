@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="description" content="FunASR 场景速览：私有语音 API、Agent 语音输入、流式 ASR、vLLM 加速、字幕、批处理和性能评测的快速入口。">
+<meta property="og:title" content="FunASR 场景速览">
+<meta property="og:description" content="面向评测、部署、Agent、流式服务和生产迁移的 FunASR 路径图。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://modelscope.github.io/FunASR/zh/use-cases.html">
+<title>FunASR 场景速览</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../style.css">
+</head><body>
+<nav class="nav"><div class="container">
+<a href="index.html" class="nav-logo">FunASR</a>
+<div class="nav-links"><a href="index.html">首页</a><a href="tutorial.html">教程</a><a href="training.html">训练</a><a href="model-registration.html">开发</a><a href="../api.html">API</a><a href="vllm.html">vLLM</a><a href="agent.html">Agent</a><a href="benchmark.html">Benchmark</a></div>
+<div class="lang-dropdown"><button class="lang-btn">中文</button><div class="lang-menu"><a href="../use-cases.html">English</a><a href="use-cases.html" class="current">中文</a><a href="../ja/index.html">日本語</a></div></div>
+<a href="https://github.com/modelscope/FunASR" class="nav-github">GitHub</a>
+</div></nav>
+<div class="content"><div class="container narrow">
+<h1>场景速览</h1>
+<p>从评测到生产，选择最短路径。FunASR 覆盖本地转写、私有 OpenAI 兼容 API、Agent 语音输入、流式服务、vLLM 加速、字幕生成和批处理。</p>
+<div class="toc-grid"><a href="#paths">选择路径</a><a href="#recipes">生产配方</a><a href="#models">模型建议</a><a href="#share">分享结果</a></div>
+<section id="paths"><h2>选择合适路径</h2>
+<table><tr><th>目标</th><th>从这里开始</th><th>为什么重要</th></tr>
+<tr><td>本地转写一个文件</td><td><a href="tutorial.html">使用教程</a></td><td>几分钟内验证安装、模型下载和首次推理。</td></tr>
+<tr><td>对比准确率和速度</td><td><a href="benchmark.html">性能评测报告</a></td><td>选型前查看长音频速度和 CER。</td></tr>
+<tr><td>搭建私有语音 API</td><td><a href="agent.html#server">OpenAI 兼容 API</a></td><td>复用 OpenAI 风格客户端，音频不出内网。</td></tr>
+<tr><td>给 Agent 增加语音输入</td><td><a href="agent.html#mcp">MCP 服务</a></td><td>将本地 ASR 接入 Claude、Cursor、桌面工具和内部助手。</td></tr>
+<tr><td>部署流式 ASR</td><td><a href="tutorial.html#real-time-speech-recognition">实时示例</a></td><td>面向实时字幕、会议和客服类低延迟场景。</td></tr>
+<tr><td>加速 LLM-based ASR</td><td><a href="vllm.html">vLLM 指南</a></td><td>为 Fun-ASR-Nano 使用 tensor parallel 解码和流式服务能力。</td></tr>
+<tr><td>生成字幕</td><td><a href="agent.html#subtitle">字幕生成器</a></td><td>将音频或视频生成 SRT/VTT，需要时添加说话人标签。</td></tr>
+<tr><td>批量处理录音</td><td><a href="https://github.com/modelscope/FunASR/blob/main/examples/batch_asr_improved.py">批处理示例</a></td><td>为录音归档、会议纪要和数据集处理搭建可重复流水线。</td></tr></table>
+</section>
+<section id="recipes"><h2>面向生产的配方</h2>
+<div class="grid-2"><div class="card"><h3>私有转写 API</h3><p>当应用已经兼容 OpenAI 风格接口，或音频不能离开私有环境时，优先使用这个路径。</p><pre><code>pip install funasr fastapi uvicorn python-multipart
+funasr-server --model sensevoice --device cuda
+
+curl http://localhost:8000/v1/audio/transcriptions \
+  -F file=@sample.wav \
+  -F model=sensevoice \
+  -F response_format=verbose_json</code></pre></div>
+<div class="card"><h3>Agent 语音输入</h3><p>当你想把语音输入接到编码助手、内部助手或工作流工具时，可以从 MCP 服务开始。</p><pre><code>pip install funasr
+python examples/mcp_server/funasr_mcp.py
+
+# 设置 FUNASR_DEVICE=cuda 使用 GPU 推理</code></pre></div></div>
+<div class="grid-2"><div class="card"><h3>流式与客服场景</h3><p>需要给人阅读时，把 ASR 与 VAD、标点恢复、说话人分离一起使用。</p><p>用真实音频验证：背景噪声、长静音、多人重叠、不同麦克风质量。</p></div>
+<div class="card"><h3>迁移前先评测</h3><p>评估是否替代 Whisper 或云端 ASR 时，用自己的样本集同时记录吞吐、CPU 可用性、下载体积和部署复杂度。</p><p><a href="benchmark.html">打开公开评测报告</a></p></div></div>
+</section>
+<section id="models"><h2>模型选择建议</h2>
+<table><tr><th>需求</th><th>推荐先试</th><th>说明</th></tr>
+<tr><td>快速多语种转写</td><td>SenseVoice-Small</td><td>本地 demo 和私有 API 的稳妥默认选择。</td></tr>
+<tr><td>中文生产 ASR</td><td>Paraformer-Large</td><td>中文语音识别的成熟选择。</td></tr>
+<tr><td>LLM-based ASR 实验</td><td>Fun-ASR-Nano</td><td>吞吐敏感时配合 <a href="vllm.html">vLLM</a>。</td></tr>
+<tr><td>带说话人信息的转写</td><td>SenseVoice 或 Paraformer + <code>spk_model="cam++"</code></td><td>适合会议、访谈、客服录音。</td></tr>
+<tr><td>实时音频</td><td>Runtime WebSocket 服务</td><td>用真实流量验证分块、VAD 和断句。</td></tr></table>
+</section>
+<section id="share"><h2>分享你的结果</h2>
+<p>如果 FunASR 在你的项目里效果不错，欢迎分享使用场景、模型、设备、处理速度、音频领域，以及可以公开的 demo 或 benchmark 摘要。</p>
+<p><a href="https://github.com/modelscope/FunASR/issues">提交 issue</a> 或 <a href="https://github.com/modelscope/FunASR/discussions">发起讨论</a>。具体使用反馈能帮助新用户更快选型，也能帮助维护者决定下一批文档和示例优先级。</p>
+</section>
+</div></div>
+<footer><p>FunASR &middot; 通义实验室，阿里巴巴集团</p><p><a href="index.html">首页</a> &middot; <a href="use-cases.html">场景速览</a> &middot; <a href="agent.html">Agent</a> &middot; <a href="benchmark.html">Benchmark</a> &middot; <a href="vllm.html">vLLM</a> &middot; <a href="https://github.com/modelscope/FunASR">GitHub</a></p></footer>
+</body></html>
