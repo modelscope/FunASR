@@ -197,6 +197,8 @@ We evaluated Fun-ASR against other state-of-the-art models on open-source benchm
 
 ## Remarkable Third-Party Work
 
+- **Built-in vLLM Inference Engine**: 2-3x faster decoding with AutoModelVLLM, streaming WebSocket service, tensor parallel. [Guide →](../../../docs/vllm_guide.md)
+- **Streaming WebSocket Service**: Real-time ASR with VAD + Speaker Diarization + Hotwords. [Quick Start →](docs/realtime_demo.md)
 - vLLM (GPU) Deployment Best Practices: An accelerated implementation of Fun-ASR using vLLM. [Repository](https://github.com/yuekaizhang/Fun-ASR-vllm)
 
 ## Citations

@@ -61,6 +61,7 @@ That's it. **One model, one call** — VAD segmentation, speech recognition, pun
 | Emotion | ✅ Happy/Sad/Angry | ❌ | ❌ |
 | Languages | 50+ | 57 | Varies |
 | Streaming | ✅ WebSocket | ❌ | ✅ |
+| vLLM Acceleration | ✅ 2-3x faster | ❌ | N/A |
 | Self-hosted | ✅ MIT license | ✅ MIT license | ❌ Cloud only |
 | Cost | Free | Free | $0.006/min+ |
 | CPU viable | ✅ 17x realtime | ❌ Too slow | N/A |
@@ -87,6 +88,8 @@ That's it. **One model, one call** — VAD segmentation, speech recognition, pun
 
 ## What's new
 
+- 2026/05/24: **vLLM Inference Engine** — 2-3x faster LLM decoding for Fun-ASR-Nano. Streaming WebSocket service with VAD + Speaker Diarization. [Guide →](docs/vllm_guide.md)
+- 2026/05/24: **Dynamic VAD** — adaptive silence threshold (default on). Short sentences stay intact, long segments get auto-split. [Details →](docs/vllm_guide.md#附录dynamicstreamingvad)
 - 2026/05/24: **v1.3.3** — `funasr-server` CLI, OpenAI-compatible API, MCP Server for AI agents. `pip install --upgrade funasr`
 - 2026/05/20: Added Qwen3-ASR (0.6B/1.7B) — 52 languages, auto detection. [usage](examples/industrial_data_pretraining/qwen3_asr)
 - 2026/05/20: Added GLM-ASR-Nano (1.5B) — 17 languages, dialect support. [usage](examples/industrial_data_pretraining/glm_asr)

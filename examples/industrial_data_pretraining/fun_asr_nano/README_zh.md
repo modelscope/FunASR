@@ -196,6 +196,8 @@ if __name__ == "__main__":
 
 ## 优秀三方工作
 
+- **内置 vLLM 推理引擎**：AutoModelVLLM 解码加速 2-3 倍，流式 WebSocket 服务，tensor parallel 多卡并行。[文档 →](../../../docs/vllm_guide.md)
+- **流式 WebSocket 服务**：实时语音识别 + VAD 分句 + 说话人分离 + 热词定制。[快速上手 →](docs/realtime_demo.md)
 - vLLM (GPU) 最佳部署实践: 使用 vLLM 实现对 Fun-ASR 的加速. [Repository](https://github.com/yuekaizhang/Fun-ASR-vllm)
 
 ## Citations
