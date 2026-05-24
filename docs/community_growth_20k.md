@@ -74,6 +74,17 @@ For each launch, prepare:
 - Add third-party integrations and community projects to README when they are maintained and runnable.
 - Keep citations and paper links visible for researchers.
 
+## Tracking cadence
+
+Use the lightweight metrics script before and after major README, homepage, release, or demo updates:
+
+```bash
+python scripts/collect_growth_metrics.py
+python scripts/collect_growth_metrics.py --format json
+```
+
+The script captures GitHub stars, forks, watchers, open issues, latest push time, and the current PyPI version using public APIs. Set `GITHUB_TOKEN` when running it from CI or a shared network to avoid public GitHub API rate limits. Paste the Markdown output into launch notes, weekly community updates, or release retrospectives so the 20k-star effort stays measurable.
+
 ## 30-day execution checklist
 
 ### Week 1: Repository conversion
