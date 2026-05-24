@@ -1,22 +1,172 @@
-# FQA
+# FAQ and Troubleshooting
 
-## How to use VAD model by modelscope pipeline
-Ref to [docs](https://github.com/alibaba-damo-academy/FunASR/discussions/236)
+This page collects the questions that most often block new FunASR users. Start here before opening an issue.
 
-## How to use Punctuation model by modelscope pipeline
-Ref to [docs](https://github.com/alibaba-damo-academy/FunASR/discussions/238)
+## Which install command should I use?
 
-## How to use Parafomrer model for streaming by modelscope pipeline
-Ref to [docs](https://github.com/alibaba-damo-academy/FunASR/discussions/241)
+For most users:
 
-## How to use vad, asr and punc model by modelscope pipeline
-Ref to [docs](https://github.com/alibaba-damo-academy/FunASR/discussions/278)
+```bash
+pip install -U funasr
+```
 
-## How to combine vad, asr, punc and nnlm models inside modelscope pipeline
-Ref to [docs](https://github.com/alibaba-damo-academy/FunASR/discussions/134)
+For the newest examples, server CLI, or unreleased fixes:
 
-## How to combine timestamp prediction model by modelscope pipeline
-Ref to [docs](https://github.com/alibaba-damo-academy/FunASR/discussions/246)
+```bash
+git clone https://github.com/modelscope/FunASR.git
+cd FunASR
+pip install -e ./
+```
 
-## How to switch decoding mode between online and offline for UniASR model
-Ref to [docs](https://github.com/alibaba-damo-academy/FunASR/discussions/151)
+For the OpenAI-compatible API server, install the web runtime dependencies too:
+
+```bash
+pip install funasr fastapi uvicorn python-multipart
+```
+
+## Which Python and PyTorch versions are recommended?
+
+Use Python 3.8 or later and install a PyTorch/torchaudio pair that matches your CUDA runtime. If CUDA is not configured, start with CPU to verify the workflow first:
+
+```bash
+funasr-server --model sensevoice --device cpu
+```
+
+After the CPU smoke test works, switch to CUDA:
+
+```bash
+funasr-server --model sensevoice --device cuda
+```
+
+## Model download is slow or fails. What should I check?
+
+FunASR models are available from ModelScope and Hugging Face. Choose the hub that is fastest in your network environment, and make sure the machine can reach it before debugging model code.
+
+Common checks:
+
+```bash
+python -c "import torch; print(torch.__version__, torch.cuda.is_available())"
+python -c "import funasr; print(funasr.__version__)"
+```
+
+If a model is already downloaded on another machine, use the local model path instead of the remote model name.
+
+## `funasr-server` says FastAPI or multipart packages are missing
+
+Install the server dependencies:
+
+```bash
+pip install fastapi uvicorn python-multipart
+```
+
+Then start again:
+
+```bash
+funasr-server --model sensevoice --device cuda
+```
+
+## Port 8000 is already in use
+
+Start the service on another port:
+
+```bash
+funasr-server --model sensevoice --device cuda --port 9000
+```
+
+Then point clients to the new base URL:
+
+```bash
+curl http://localhost:9000/health
+```
+
+## How do I verify the OpenAI-compatible API quickly?
+
+Start the server:
+
+```bash
+funasr-server --model sensevoice --device cuda
+```
+
+In another terminal:
+
+```bash
+curl -L https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/BAC009S0764W0121.wav -o sample.wav
+curl http://localhost:8000/v1/audio/transcriptions \
+  -F file=@sample.wav \
+  -F model=sensevoice \
+  -F response_format=verbose_json
+```
+
+The response should include `text`. With `verbose_json`, supported models may also return segment-level information.
+
+## Long audio is slow, split incorrectly, or runs out of memory
+
+Use VAD segmentation for long audio and tune segment length for your hardware:
+
+```python
+from funasr import AutoModel
+
+model = AutoModel(
+    model="paraformer-zh",
+    vad_model="fsmn-vad",
+    punc_model="ct-punc",
+    vad_kwargs={"max_single_segment_time": 30000},
+    device="cuda",
+)
+result = model.generate(input="long_meeting.wav", batch_size_s=300)
+```
+
+If memory is limited, reduce `batch_size_s`, use CPU for verification, or split very long recordings before batch processing.
+
+## Speaker diarization has no speaker labels
+
+Use a model pipeline that includes both VAD and speaker models:
+
+```python
+from funasr import AutoModel
+
+model = AutoModel(
+    model="paraformer-zh",
+    vad_model="fsmn-vad",
+    punc_model="ct-punc",
+    spk_model="cam++",
+    device="cuda",
+)
+result = model.generate(input="meeting.wav")
+```
+
+Then inspect `result[0]["sentence_info"]`. Each sentence should include fields such as `text`, `start`, `end`, and `spk` when diarization is available.
+
+## The same command works on CPU but fails on CUDA
+
+This usually points to a CUDA, driver, PyTorch, or GPU memory mismatch. Include these checks in your issue:
+
+```bash
+nvidia-smi
+python -c "import torch; print(torch.__version__, torch.version.cuda, torch.cuda.is_available())"
+python -c "import torchaudio; print(torchaudio.__version__)"
+```
+
+Try a smaller model or lower batch size to rule out GPU memory pressure.
+
+## What information should I include in an issue?
+
+Please include:
+
+- OS and Python version
+- FunASR version and install method (`pip`, source, Docker)
+- PyTorch, torchaudio, CUDA, and GPU information
+- Exact command or minimal Python snippet
+- Full traceback or server logs
+- Model name and hub (`modelscope`, `hf`, or local path)
+- Audio duration, sample rate, format, language, speaker count, and whether the audio can be shared
+
+## Existing ModelScope pipeline examples
+
+- [VAD model with ModelScope pipeline](https://github.com/modelscope/FunASR/discussions/236)
+- [Punctuation model with ModelScope pipeline](https://github.com/modelscope/FunASR/discussions/238)
+- [Paraformer streaming with ModelScope pipeline](https://github.com/modelscope/FunASR/discussions/241)
+- [VAD + ASR + punctuation with ModelScope pipeline](https://github.com/modelscope/FunASR/discussions/278)
+- [VAD + ASR + punctuation + NNLM with ModelScope pipeline](https://github.com/modelscope/FunASR/discussions/134)
+- [Timestamp prediction with ModelScope pipeline](https://github.com/modelscope/FunASR/discussions/246)
+- [Switch online/offline decoding for UniASR](https://github.com/modelscope/FunASR/discussions/151)

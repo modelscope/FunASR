@@ -108,7 +108,7 @@ Overview
 
 .. toctree::
    :maxdepth: 1
-   :caption: FQA
+   :caption: FAQ and Troubleshooting
 
    ./reference/FQA.md
 
