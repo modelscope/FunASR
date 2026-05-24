@@ -15,7 +15,7 @@ This architecture allows vLLM to efficiently batch multiple requests and leverag
 ```bash
 # Core dependencies
 pip install funasr>=1.3.0
-pip install vllm>=0.11.0
+pip install vllm>=0.12.0
 pip install safetensors
 pip install tiktoken
 
@@ -25,7 +25,23 @@ pip install modelscope
 
 ## Quick Start
 
-### Python API
+### AutoModelVLLM (Recommended)
+
+```python
+from funasr.auto.auto_model_vllm import AutoModelVLLM
+
+# Generic interface - auto-detects model type, works for all LLM-based ASR models
+model = AutoModelVLLM(
+    model="FunAudioLLM/Fun-ASR-Nano-2512",
+    hub="ms",
+    tensor_parallel_size=1,
+)
+
+results = model.generate(["audio.wav"], language="中文")
+print(results[0]["text"])
+```
+
+### FunASRNanoVLLM (Direct API)
 
 ```python
 from funasr.models.fun_asr_nano.inference_vllm import FunASRNanoVLLM
