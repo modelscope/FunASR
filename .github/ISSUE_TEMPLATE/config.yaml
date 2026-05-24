@@ -1,1 +1,11 @@
 blank_issues_enabled: false
+contact_links:
+  - name: FunASR documentation
+    url: https://modelscope.github.io/FunASR/
+    about: Read installation, tutorial, deployment, benchmark, and API docs.
+  - name: GitHub Discussions
+    url: https://github.com/modelscope/FunASR/discussions
+    about: Share ideas, showcase usage, and ask open-ended community questions.
+  - name: Hugging Face models
+    url: https://huggingface.co/funasr
+    about: Browse FunASR checkpoints on Hugging Face.

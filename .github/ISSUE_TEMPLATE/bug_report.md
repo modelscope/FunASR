@@ -1,47 +1,64 @@
 ---
 name: 🐛 Bug Report
-about: Submit a bug report to help us improve
+about: Submit a reproducible bug report to help us improve FunASR
 labels: 'bug, needs triage'
 ---
 
-Notice: In order to resolve issues more efficiently, please raise issue following the template.
-（注意：为了更加高效率解决您遇到的问题，请按照模板提问，补充细节）
+Notice: In order to resolve issues efficiently, please follow the template and include reproducible details.
+（注意：为了更加高效率解决您遇到的问题，请按照模板提问，补充可复现细节。）
 
 ## 🐛 Bug
 
-<!-- A clear and concise description of what the bug is. -->
+<!-- A clear and concise description of the bug. -->
 
-### To Reproduce
+## To Reproduce
 
-Steps to reproduce the behavior (**always include the command you ran**):
+Steps to reproduce the behavior. Always include the exact command you ran.
 
-1. Run cmd '....'
-2. See error
+1. Install with: `...`
+2. Run: `...`
+3. See error: `...`
 
-<!-- If you have a code sample, error messages, stack traces, please provide it here as well -->
+## Code sample
 
+<!-- Paste the smallest code sample that still reproduces the issue. -->
 
-#### Code sample
-<!-- Ideally attach a minimal code sample to reproduce the decried issue.
-Minimal means having the shortest code but still preserving the bug. -->
+```python
 
-### Expected behavior
+```
+
+## Expected behavior
 
 <!-- A clear and concise description of what you expected to happen. -->
 
-### Environment
+## Error logs
 
- - OS (e.g., Linux):
- - FunASR Version (e.g., 1.0.0):
- - ModelScope Version (e.g., 1.11.0):
- - PyTorch Version (e.g., 2.0.0):
- - How you installed funasr (`pip`, source):
- - Python version:
- - GPU (e.g., V100M32)
- - CUDA/cuDNN version (e.g., cuda11.7):
- - Docker version (e.g., funasr-runtime-sdk-cpu-0.4.1)
- - Any other relevant information:
+<!-- Paste the full traceback or relevant logs. Remove private tokens and paths. -->
 
-### Additional context
+```text
 
-<!-- Add any other context about the problem here. -->
+```
+
+## Environment
+
+- OS:
+- Python version:
+- FunASR version:
+- ModelScope version:
+- PyTorch / torchaudio version:
+- Install method (`pip`, source, Docker):
+- Device (`cuda`, `cpu`, `mps`):
+- GPU model:
+- CUDA/cuDNN version:
+- Docker image tag, if used:
+
+## Audio details
+
+If the audio cannot be shared, please describe:
+
+- Duration:
+- Sample rate:
+- Format:
+- Language/dialect:
+- Speaker count:
+- Background noise/music:
