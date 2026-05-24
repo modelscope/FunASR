@@ -69,28 +69,17 @@ That's it. **One model, one call** — VAD segmentation, speech recognition, pun
 
 ## Benchmark
 
-> 7 models on GPU, 3 on CPU. 184 long-form Chinese audio files (192 min total). [Full report →](https://modelscope.github.io/FunASR/benchmark.html)
+> 184 long-form audio files (192 min). [Full report →](https://modelscope.github.io/FunASR/benchmark.html)
 
-### GPU Results (PyTorch)
+| Model | GPU Speed | CPU Speed | vs Whisper-large-v3 |
+|-------|-----------|-----------|-------------------|
+| **SenseVoice-Small** | **170x** realtime | **17x** realtime | 🚀 **13x faster** |
+| **Paraformer-Large** | **120x** realtime | **15x** realtime | 🚀 **9x faster** |
+| Whisper-large-v3-turbo | 46x realtime | ❌ | 3.4x faster |
+| **Fun-ASR-Nano** | 17x realtime | 3.6x realtime | 1.3x faster |
+| Whisper-large-v3 | 13x realtime | ❌ | baseline |
 
-| Model | Type | Speed | Highlights |
-|-------|------|-------|-----------|
-| **SenseVoice-Small** | NAR | **170x** realtime | Fastest + most accurate |
-| **Paraformer-Large** | NAR | **120x** realtime | Best speed/accuracy tradeoff |
-| Whisper-large-v3-turbo (OpenAI) | AR | 46x realtime | Fastest Whisper variant |
-| Whisper-large-v3-turbo (FunASR) | AR | 26x realtime | With VAD pipeline |
-| faster-whisper-large-v3 | AR | 21.5x realtime | CTranslate2 optimized |
-| **Fun-ASR-Nano** | LLM | 17x realtime | Best LLM-based accuracy |
-| Whisper-large-v3 (OpenAI) | AR | 13.4x realtime | Baseline |
-
-### CPU Results
-
-| Model | Speed | Note |
-|-------|-------|------|
-| **SenseVoice-Small** | **17.2x** realtime | Production-ready on CPU |
-| **Paraformer-Large** | **15.6x** realtime | Production-ready on CPU |
-| **Fun-ASR-Nano** | 3.6x realtime | Still faster than realtime |
-| Whisper models | - | Impractical on CPU (>2h for 192min audio) |
+> **Key takeaway:** FunASR models run on CPU faster than Whisper runs on GPU.
 
 ---
 
