@@ -71,40 +71,7 @@ def _clean_asr_text(text):
     return text.strip()
 
 
-class StreamingVAD:
-    """Streaming VAD with dynamic silence threshold."""
-
-    def __init__(self, vad_model):
-        self.model = vad_model
-        self.cache = {}
-        self.confirmed_segments = []
-        self.current_speech_start = None
-
-    def feed(self, audio_chunk_tensor, is_final=False):
-        res = self.model.generate(
-            input=[audio_chunk_tensor], cache=self.cache,
-            is_final=is_final, chunk_size=60,
-        )
-        signals = res[0].get("value", [])
-        new_confirmed = []
-        for sig in signals:
-            if sig[0] >= 0 and sig[1] == -1:
-                self.current_speech_start = sig[0]
-            elif sig[0] == -1 and sig[1] >= 0:
-                start = self.current_speech_start if self.current_speech_start is not None else 0
-                self.confirmed_segments.append([start, sig[1]])
-                new_confirmed.append([start, sig[1]])
-                self.current_speech_start = None
-            elif sig[0] >= 0 and sig[1] >= 0:
-                self.confirmed_segments.append(sig)
-                new_confirmed.append(sig)
-                self.current_speech_start = None
-        return new_confirmed
-
-    def reset(self):
-        self.cache = {}
-        self.confirmed_segments = []
-        self.current_speech_start = None
+from funasr.utils.dynamic_vad import DynamicStreamingVAD
 
 
 class HybridSpeakerTracker:
@@ -275,7 +242,6 @@ class RealtimeASRSession:
         self.last_decode_samples = 0
         self.locked_sentences = []
         self.prev_seg_text = ""
-        self.accumulated_since_cut_ms = 0
         self.spk_tracker = spk_tracker
         self.use_context = True
         self.is_active = False
@@ -287,31 +253,12 @@ class RealtimeASRSession:
 
         new_audio = self.audio_buffer[self.vad_fed_samples:]
         if len(new_audio) > 0:
-            self.accumulated_since_cut_ms += len(new_audio) * 1000 // self.sample_rate
-            if "stats" in self.vad.cache:
-                self.vad.cache["stats"].speech_noise_thres = 0.5
-                if self.accumulated_since_cut_ms <= 5000:
-                    desired_silence_ms = 2000
-                elif self.accumulated_since_cut_ms <= 10000:
-                    desired_silence_ms = 1500
-                elif self.accumulated_since_cut_ms <= 15000:
-                    desired_silence_ms = 1000
-                elif self.accumulated_since_cut_ms <= 30000:
-                    desired_silence_ms = 800
-                elif self.accumulated_since_cut_ms <= 45000:
-                    desired_silence_ms = 400
-                else:
-                    desired_silence_ms = 100
-                new_thresh = max(desired_silence_ms - 150, 0)
-                self.vad.cache["stats"].max_end_sil_frame_cnt_thresh = new_thresh
-
             new_confirmed = self.vad.feed(torch.from_numpy(new_audio).float(), is_final=False)
             self.vad_fed_samples = len(self.audio_buffer)
 
             for seg in new_confirmed:
                 seg_text = self._decode_segment(seg)
                 self.prev_text = ""
-                self.accumulated_since_cut_ms = 0
                 if not seg_text.strip():
                     continue
                 self.locked_sentences.append({"text": seg_text, "start": int(seg[0]), "end": int(seg[1])})
@@ -442,7 +389,6 @@ class RealtimeASRSession:
         self.last_partial_text = ""
         self.last_decode_samples = 0
         self.locked_sentences = []
-        self.accumulated_since_cut_ms = 0
         if self.spk_tracker:
             self.spk_tracker.reset()
 
@@ -492,7 +438,7 @@ def load_models(args):
 
 async def handle_client(websocket, args):
     vllm_engine, asr_kwargs, vad_model, spk_model = load_models(args)
-    vad = StreamingVAD(vad_model)
+    vad = DynamicStreamingVAD(vad_model)
     spk_tracker = HybridSpeakerTracker(spk_model, args.device)
     session = RealtimeASRSession(vllm_engine, asr_kwargs, vad, spk_tracker=spk_tracker)
     logger.info(f"Client connected: {websocket.remote_address}")

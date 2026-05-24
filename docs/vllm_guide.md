@@ -512,3 +512,91 @@ Chrome 要求 HTTPS 或 localhost。远程服务器用 SSH 端口转发：`ssh -
 
 ### Q: 多个并发连接会互相影响吗？
 不会。每个 WebSocket 连接有独立的 session（VAD/ASR 状态隔离）。vLLM 内部会自动调度。
+
+---
+
+## 附录：DynamicStreamingVAD
+
+`funasr.utils.dynamic_vad.DynamicStreamingVAD` 是通用的动态阈值流式 VAD 封装，
+在 fsmn-vad 基础上根据当前语音段的累积时长动态调整静音切分阈值。
+
+### 设计动机
+
+fsmn-vad 默认使用固定静音阈值（800ms）。实际场景中：
+- 短句（如"好的"）需要等更长的静音才切，否则会把一句话切碎
+- 长段（如会议发言 30s+）需要更快切分，否则 ASR 输入过长导致质量下降
+
+### 用法
+
+```python
+from funasr import AutoModel
+from funasr.utils.dynamic_vad import DynamicStreamingVAD
+
+vad_model = AutoModel(model="fsmn-vad", device="cuda:0")
+
+# 使用默认阈值配置
+vad = DynamicStreamingVAD(vad_model)
+
+# 或自定义阈值
+vad = DynamicStreamingVAD(
+    vad_model,
+    silence_schedule=[
+        (3000, 1500),       # 累积 <=3s: 等 1.5s 静音
+        (10000, 800),       # 累积 3-10s: 等 0.8s
+        (float('inf'), 300), # 累积 >10s: 等 0.3s
+    ],
+    speech_noise_thres=0.5,
+)
+```
+
+#### 流式调用
+
+```python
+import torch
+
+for audio_chunk in audio_stream:  # 实时音频流
+    segments = vad.feed(torch.from_numpy(audio_chunk).float())
+    for seg in segments:
+        print(f"Speech: {seg[0]}-{seg[1]}ms")
+
+# 结束时
+final_segments = vad.finalize()
+```
+
+#### 非流式调用
+
+```python
+segments = vad.process(full_audio_tensor)
+for seg in segments:
+    print(f"Speech: {seg[0]}-{seg[1]}ms")
+```
+
+### 默认阈值配置
+
+| 累积时长 | 静音阈值 | 说明 |
+|---------|---------|------|
+| ≤ 5s | 2.0s | 短句不切碎 |
+| 5-10s | 1.5s | 正常分句 |
+| 10-15s | 1.0s | 开始收紧 |
+| 15-30s | 0.8s | 较快切分 |
+| 30-45s | 0.4s | 防止过长 |
+| > 45s | 0.1s | 强制切分 |
+
+### 参数
+
+| 参数 | 默认值 | 说明 |
+|------|--------|------|
+| `vad_model` | - | FunASR AutoModel 加载的 fsmn-vad 实例 |
+| `chunk_size_ms` | 60 | VAD 内部处理 chunk 大小 |
+| `speech_noise_thres` | 0.5 | 语音/噪声判别阈值 |
+| `speech_to_sil_thres_ms` | 150 | 语音转静音基础时间 |
+| `silence_schedule` | 见上表 | 动态阈值配置 `[(上限ms, 静音ms), ...]` |
+| `sample_rate` | 16000 | 采样率 |
+
+### 属性
+
+| 属性 | 说明 |
+|------|------|
+| `vad.is_speaking` | 当前是否在语音状态中 |
+| `vad.current_duration_ms` | 当前段已累积时长 |
+| `vad.current_threshold_ms` | 当前使用的静音阈值 |
