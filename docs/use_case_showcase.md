@@ -10,6 +10,7 @@ FunASR is useful far beyond a single offline transcription command. This page co
 | Compare accuracy and speed | [Benchmark report](https://modelscope.github.io/FunASR/benchmark.html) | Reproduce the 184-file long-audio benchmark before choosing a model. |
 | Build a private speech API | [OpenAI-compatible API example](../examples/openai_api/) and [client recipes](../examples/openai_api/CLIENTS.md) | Reuse LangChain, Dify, AutoGen, and other OpenAI-style clients without sending audio to a cloud ASR provider. |
 | Add speech input to agents | [MCP server](../examples/mcp_server/) and [voice input](../examples/voice_input/) | Connect local ASR to Claude, Cursor, and desktop agent workflows. |
+| Choose a deployment path | [Deployment matrix](./deployment_matrix.md) | Compare Python API, OpenAI API, Docker Compose, WebSocket, vLLM, MCP, batch, subtitles, and Triton. |
 | Serve streaming ASR | [Runtime service docs](../runtime/readme.md) | Run WebSocket or service-mode ASR for live captioning and call-center style workloads. |
 | Accelerate LLM-based ASR | [vLLM guide](./vllm_guide.md) | Use tensor parallel decoding and streaming service support for Fun-ASR-Nano. |
 | Generate subtitles | [Subtitle example](../examples/subtitle/) | Turn long audio or video into subtitle files for media workflows. |
