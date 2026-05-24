@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="description" content="Choose the right FunASR deployment path: Python API, OpenAI-compatible API, Docker Compose, WebSocket runtime, vLLM, MCP, subtitles, batch ASR, or Triton.">
+<meta property="og:title" content="FunASR Deployment Matrix">
+<meta property="og:description" content="A practical deployment decision table for FunASR products, demos, benchmarks, and internal workflows.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://modelscope.github.io/FunASR/deployment-matrix.html">
+<title>FunASR Deployment Matrix</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head><body>
+<nav class="nav"><div class="container">
+<a href="index.html" class="nav-logo">FunASR</a>
+<div class="nav-links"><a href="index.html">Home</a><a href="tutorial.html">Tutorial</a><a href="training.html">Training</a><a href="model-registration.html">Develop</a><a href="api.html">API</a><a href="vllm.html">vLLM</a><a href="agent.html">Agent</a><a href="benchmark.html">Benchmark</a></div>
+<div class="lang-dropdown"><button class="lang-btn">English</button><div class="lang-menu"><a href="deployment-matrix.html" class="current">English</a><a href="zh/deployment-matrix.html">中文</a><a href="ja/index.html">日本語</a></div></div>
+<a href="https://github.com/modelscope/FunASR" class="nav-github">GitHub</a>
+</div></nav>
+<div class="content"><div class="container narrow">
+<h1>Deployment Matrix</h1>
+<p>Choose the shortest path for a product, demo, benchmark, or internal workflow. Start with the smallest surface that satisfies the job, then move to heavier runtimes only when throughput, latency, or integration requirements demand it.</p>
+<div class="toc-grid"><a href="#matrix">Decision table</a><a href="#choices">Common choices</a><a href="#checklist">Readiness checklist</a><a href="#help">Get help</a></div>
+<section id="matrix"><h2>Quick decision table</h2>
+<table><tr><th>Path</th><th>Best for</th><th>Start here</th><th>Operational notes</th></tr>
+<tr><td>Python API</td><td>Notebooks, offline jobs, first model evaluation</td><td><a href="tutorial.html">Tutorial</a></td><td>Lowest ceremony; caller owns batching, retries, and files.</td></tr>
+<tr><td>OpenAI-compatible API</td><td>Private speech API, agents, Dify/LangChain/AutoGen-style clients</td><td><a href="agent.html#server">OpenAI API</a></td><td>Easiest integration for apps that already support OpenAI audio APIs.</td></tr>
+<tr><td>Docker Compose API</td><td>Reproducible local smoke test or small internal service</td><td><a href="https://github.com/modelscope/FunASR/tree/main/examples/openai_api#docker-deployment">OpenAI API Docker docs</a></td><td>CPU by default; adapt the image before using CUDA in containers.</td></tr>
+<tr><td>Runtime WebSocket service</td><td>Live captions, meetings, call-center streams</td><td><a href="https://github.com/modelscope/FunASR/tree/main/runtime">Runtime docs</a></td><td>Use when partial results, endpointing, or long-lived audio streams matter.</td></tr>
+<tr><td>vLLM acceleration</td><td>Higher-throughput LLM-based ASR with Fun-ASR-Nano</td><td><a href="vllm.html">vLLM guide</a></td><td>Use for LLM decoder throughput; does not apply to non-autoregressive Paraformer.</td></tr>
+<tr><td>MCP server</td><td>Claude/Cursor/desktop agent speech tools</td><td><a href="agent.html#mcp">MCP example</a></td><td>Good when the ASR result should be exposed as a local tool.</td></tr>
+<tr><td>Subtitle generator</td><td>SRT/VTT from long audio or video</td><td><a href="agent.html#subtitle">Subtitle generator</a></td><td>Use verbose segments and speaker labels when readability matters.</td></tr>
+<tr><td>Batch ASR script</td><td>Archives, meetings, datasets, repeated offline runs</td><td><a href="https://github.com/modelscope/FunASR/blob/main/examples/batch_asr_improved.py">Batch example</a></td><td>Add queueing, manifests, and retry logs for production use.</td></tr>
+<tr><td>Triton runtime</td><td>Specialized high-performance serving</td><td><a href="https://github.com/modelscope/FunASR/tree/main/runtime/triton_gpu">Triton runtime docs</a></td><td>Heavier setup; choose when your team already operates Triton/GPU serving.</td></tr></table>
+</section>
+<section id="choices"><h2>Common choices</h2>
+<div class="grid-2"><div class="card"><h3>Try FunASR in five minutes</h3><p>Use the Python API from the tutorial. It is the shortest route for validating installation, model download, device selection, and output shape.</p></div>
+<div class="card"><h3>Replace cloud transcription locally</h3><p>Use the OpenAI-compatible API. Start with <code>sensevoice</code>, run the smoke test, then connect existing SDK or HTTP clients using the client recipes.</p></div></div>
+<div class="grid-2"><div class="card"><h3>Run a repeatable container demo</h3><pre><code>cd examples/openai_api
+cp .env.example .env
+docker compose up --build</code></pre><p>Keep CPU mode until you have a CUDA-capable PyTorch/FunASR image.</p></div>
+<div class="card"><h3>Serve live audio</h3><p>Use the runtime WebSocket service. Validate chunk size, VAD, endpointing, punctuation, speaker diarization, reconnect behavior, and client backpressure with real audio.</p></div></div>
+</section>
+<section id="checklist"><h2>Readiness checklist</h2>
+<ul><li>Pick a model alias and pin it in deployment notes.</li><li>Record FunASR version, model version, device, CUDA/PyTorch version, Docker image tag, and command line.</li><li>Run a short public smoke sample and at least one realistic private sample.</li><li>Log audio duration, model, device, latency, response format, and error type for every request.</li><li>Add upload-size limits, authentication, TLS, and rate limits before exposing an API outside a trusted network.</li><li>For streaming, test silence, noise, overlapping speakers, long sessions, reconnects, and slow clients.</li></ul>
+</section>
+<section id="help"><h2>When to open an issue</h2>
+<p>Use <a href="https://github.com/modelscope/FunASR/issues/new?template=deployment_help.md">Deployment Help</a> for runtime, Docker, vLLM, Triton, Android, browser, or agent integration problems. Include your deployment path, exact command/config, logs, model, device, and audio characteristics.</p>
+</section>
+</div></div>
+<footer><p>FunASR &middot; Tongyi Lab, Alibaba Group</p><p><a href="index.html">Home</a> &middot; <a href="use-cases.html">Use Cases</a> &middot; <a href="deployment-matrix.html">Deployment</a> &middot; <a href="agent.html">Agent</a> &middot; <a href="benchmark.html">Benchmark</a> &middot; <a href="vllm.html">vLLM</a> &middot; <a href="https://github.com/modelscope/FunASR">GitHub</a></p></footer>
+</body></html>

@@ -25,6 +25,7 @@
 <tr><td>对比准确率和速度</td><td><a href="benchmark.html">性能评测报告</a></td><td>选型前查看长音频速度和 CER。</td></tr>
 <tr><td>搭建私有语音 API</td><td><a href="agent.html#server">OpenAI 兼容 API</a></td><td>复用 OpenAI 风格客户端，音频不出内网。</td></tr>
 <tr><td>给 Agent 增加语音输入</td><td><a href="agent.html#mcp">MCP 服务</a></td><td>将本地 ASR 接入 Claude、Cursor、桌面工具和内部助手。</td></tr>
+<tr><td>选择部署路径</td><td><a href="deployment-matrix.html">部署选型表</a></td><td>对比 Python API、OpenAI API、Docker Compose、WebSocket、vLLM、MCP、字幕、批处理和 Triton。</td></tr>
 <tr><td>部署流式 ASR</td><td><a href="tutorial.html#real-time-speech-recognition">实时示例</a></td><td>面向实时字幕、会议和客服类低延迟场景。</td></tr>
 <tr><td>加速 LLM-based ASR</td><td><a href="vllm.html">vLLM 指南</a></td><td>为 Fun-ASR-Nano 使用 tensor parallel 解码和流式服务能力。</td></tr>
 <tr><td>生成字幕</td><td><a href="agent.html#subtitle">字幕生成器</a></td><td>将音频或视频生成 SRT/VTT，需要时添加说话人标签。</td></tr>
@@ -58,5 +59,5 @@ python examples/mcp_server/funasr_mcp.py
 <p><a href="https://github.com/modelscope/FunASR/issues/new?template=showcase.md">提交 showcase issue</a> 或 <a href="https://github.com/modelscope/FunASR/discussions">发起讨论</a>。具体使用反馈能帮助新用户更快选型，也能帮助维护者决定下一批文档和示例优先级。</p>
 </section>
 </div></div>
-<footer><p>FunASR &middot; 通义实验室，阿里巴巴集团</p><p><a href="index.html">首页</a> &middot; <a href="use-cases.html">场景速览</a> &middot; <a href="agent.html">Agent</a> &middot; <a href="benchmark.html">Benchmark</a> &middot; <a href="vllm.html">vLLM</a> &middot; <a href="https://github.com/modelscope/FunASR">GitHub</a></p></footer>
+<footer><p>FunASR &middot; 通义实验室，阿里巴巴集团</p><p><a href="index.html">首页</a> &middot; <a href="use-cases.html">场景速览</a> &middot; <a href="deployment-matrix.html">部署选型</a> &middot; <a href="agent.html">Agent</a> &middot; <a href="benchmark.html">Benchmark</a> &middot; <a href="vllm.html">vLLM</a> &middot; <a href="https://github.com/modelscope/FunASR">GitHub</a></p></footer>
 </body></html>

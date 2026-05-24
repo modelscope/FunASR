@@ -122,6 +122,11 @@ curl http://localhost:8000/v1/audio/transcriptions \
             <h2 class="section-title">文档中心</h2>
             <p class="section-subtitle">从示例开始，在自己的数据上微调，扩展模型注册表，或查阅带源码链接的 API 文档。</p>
             <div class="doc-grid">
+                <a class="doc-card" href="deployment-matrix.html">
+                    <span class="doc-kicker">部署</span>
+                    <h3>部署选型</h3>
+                    <p>对比 Python API、OpenAI API、Docker Compose、WebSocket、vLLM、MCP、批处理、字幕和 Triton。</p>
+                </a>
                 <a class="doc-card" href="use-cases.html">
                     <span class="doc-kicker">选型</span>
                     <h3>场景速览</h3>
@@ -309,6 +314,7 @@ for sent in res[0]["sentence_info"]:
             <a href="https://github.com/modelscope/FunASR">GitHub</a> &middot;
             <a href="training.html">训练</a> &middot;
             <a href="use-cases.html">场景速览</a> &middot;
+            <a href="deployment-matrix.html">部署选型</a> &middot;
             <a href="../api.html">API</a> &middot;
             <a href="vllm.html">vLLM</a> &middot;
             <a href="agent.html">Agent</a> &middot;
