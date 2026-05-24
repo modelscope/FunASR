@@ -299,3 +299,58 @@ Pipeline 的核心加速在于：VAD 产生 N 个语音段后，vLLM **一次性
 | 20段 x 5s | ~18s | ~2.5s | **7x** |
 | VAD 分段越多，vLLM 批量优势越大 |
 
+
+## 实时 WebSocket 服务（Streaming Server）
+
+除了离线批量和流式推理，FunASR 还提供基于 vLLM 的**实时 WebSocket ASR 服务**，支持麦克风/文件实时识别、VAD 分句、说话人分离、热词定制。
+
+### 启动服务
+
+```bash
+cd examples/industrial_data_pretraining/fun_asr_nano
+
+# 单卡
+CUDA_VISIBLE_DEVICES=0 python serve_realtime_ws.py --port 10095 --language 中文
+
+# 多卡 tensor parallel
+CUDA_VISIBLE_DEVICES=0,1 python serve_realtime_ws.py \
+    --port 10095 \
+    --tensor-parallel-size 2 \
+    --language 中文 \
+    --hotword-file 热词列表
+```
+
+### 客户端
+
+- **浏览器**：`client_mic.html`（麦克风/文件上传/热词/说话人显示）
+- **Python CLI**：`client_python.py --server ws://localhost:10095 --mic`
+- **测试脚本**：`client_test.py --server ws://localhost:10095 --file audio.wav`
+
+### WebSocket 协议
+
+```
+Client → Server:
+    "START"                     开始会话
+    "HOTWORDS:词1,词2"          设置热词（可选）
+    "LANGUAGE:中文"             设置语种（可选）
+    bytes                       PCM16 16kHz 单声道音频
+    "STOP"                      结束会话
+
+Server → Client:
+    {"event": "started"}
+    {"event": "hotwords_set", "hotwords": [...]}
+    {"event": "language_set", "language": "..."}
+    {"sentences": [...], "partial": "...", "is_final": false}   实时结果
+    {"sentences": [...], "partial": "", "is_final": true}       最终结果
+    {"event": "stopped"}
+```
+
+### 性能
+
+| 指标 | 数值 |
+|------|------|
+| RTF | < 0.08（30s 音频 2.3s 完成） |
+| 首字延迟 | ~480ms（first chunk） |
+| 并发 | 支持多 WebSocket 连接 |
+
+详细文档参见：[`examples/industrial_data_pretraining/fun_asr_nano/docs/realtime_demo.md`](../examples/industrial_data_pretraining/fun_asr_nano/docs/realtime_demo.md)
