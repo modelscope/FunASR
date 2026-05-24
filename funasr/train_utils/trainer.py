@@ -22,14 +22,15 @@ except:
 
 
 @contextmanager
-def maybe_autocast(enabled):
-    """Maybe autocast.
+def maybe_autocast(enabled, dtype=None):
+    """Context manager for mixed precision training.
     
-        Args:
-            enabled: TODO.
-        """
+    Args:
+        enabled: Whether to enable autocast.
+        dtype: torch.float16 or torch.bfloat16. If None, defaults to float16.
+    """
     if enabled:
-        with autocast():
+        with autocast(dtype=dtype):
             yield
     else:
         yield
@@ -57,6 +58,7 @@ class Trainer:
         use_ddp: bool = False,
         use_fsdp: bool = False,
         use_fp16: bool = False,
+        use_bf16: bool = False,
         output_dir: str = "./",
         **kwargs,
     ):
@@ -89,6 +91,9 @@ class Trainer:
         self.log_interval = kwargs.get("log_interval", 50)
         self.batch_total = 0
         self.use_fp16 = use_fp16
+        self.use_bf16 = use_bf16
+        self.amp_enabled = use_fp16 or use_bf16
+        self.amp_dtype = torch.bfloat16 if use_bf16 else (torch.float16 if use_fp16 else None)
         self.save_checkpoint_interval = kwargs.get("save_checkpoint_interval", 5000)
         self.validate_interval = kwargs.get("validate_interval", -1)
         if self.validate_interval < 0:
@@ -387,7 +392,7 @@ class Trainer:
                 my_context = model.no_sync if batch_idx % accum_grad != 0 else my_context
             with my_context():
                 time2 = time.perf_counter()
-                with maybe_autocast(self.use_fp16):
+                with maybe_autocast(self.amp_enabled, dtype=self.amp_dtype):
                     retval = model(**batch)
 
                     # if (
@@ -416,7 +421,7 @@ class Trainer:
 
                 time3 = time.perf_counter()
                 speed_stats["forward_time"] = f"{time3 - time2:0.3f}"
-                if self.use_fp16:
+                if self.use_fp16 and scaler is not None:
                     scaler.scale(loss).backward()
                 else:
                     loss.backward()
@@ -452,7 +457,7 @@ class Trainer:
                 # Execute an optimization step (update model parameters)
                 if self.use_ddp or self.use_fsdp:
                     dist.barrier()
-                if self.use_fp16:
+                if self.use_fp16 and scaler is not None:
                     scaler.step(optim)
                     scaler.update()
                 else:
