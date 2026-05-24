@@ -1,0 +1,11 @@
+__pycache__/
+*.py[cod]
+*.wav
+*.mp3
+*.flac
+*.m4a
+*.ogg
+*.webm
+*.log
+.cache/
+.pytest_cache/
