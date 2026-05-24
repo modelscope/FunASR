@@ -25,6 +25,15 @@ import io
 import wave
 import numpy as np
 
+# Named provider shortcuts for OpenAI-compatible ASR backends.
+# Each entry maps a provider name to its (base_url, api_key_env) pair.
+# Astraflow (by UCloud) is an OpenAI-compatible platform supporting 200+ models.
+PROVIDER_CONFIGS = {
+    "local":        ("http://localhost:8000/v1", None),
+    "astraflow":    ("https://api-us-ca.umodelverse.ai/v1", "ASTRAFLOW_API_KEY"),
+    "astraflow-cn": ("https://api.modelverse.cn/v1",        "ASTRAFLOW_CN_API_KEY"),
+}
+
 def main():
     parser = argparse.ArgumentParser(
         description="FunASR Voice Input - 语音输入法",
@@ -39,16 +48,49 @@ def main():
   python funasr_input.py                          # 默认配置
   python funasr_input.py --server http://gpu:8000/v1  # 远程服务器
   python funasr_input.py --model paraformer       # 指定模型
+  python funasr_input.py --provider astraflow     # Astraflow 全球节点 (需要 ASTRAFLOW_API_KEY)
+  python funasr_input.py --provider astraflow-cn  # Astraflow 中国节点 (需要 ASTRAFLOW_CN_API_KEY)
 """,
     )
-    parser.add_argument("--server", default="http://localhost:8000/v1", help="FunASR server URL")
+    parser.add_argument(
+        "--provider",
+        default=None,
+        choices=list(PROVIDER_CONFIGS.keys()),
+        help=(
+            "Named provider shortcut. Supported: local (default, self-hosted FunASR), "
+            "astraflow (Astraflow global endpoint, requires ASTRAFLOW_API_KEY), "
+            "astraflow-cn (Astraflow China endpoint, requires ASTRAFLOW_CN_API_KEY). "
+            "When set, overrides --server and --apikey."
+        ),
+    )
+    parser.add_argument("--server", default="http://localhost:8000/v1", help="FunASR server URL (overridden by --provider)")
+    parser.add_argument("--apikey", default=None, help="API key for the ASR backend (overridden by --provider)")
     parser.add_argument("--model", default="sensevoice", help="ASR model")
     parser.add_argument("--lang", default="auto", help="Language hint")
     parser.add_argument("--rate", type=int, default=16000, help="Sample rate")
     parser.add_argument("--hotkey", default="ctrl+shift+space", help="Hotkey to toggle recording")
     args = parser.parse_args()
 
-    try:
+    # Resolve provider shortcut before any other logic.
+    if args.provider is not None:
+        base_url, key_env = PROVIDER_CONFIGS[args.provider]
+        args.server = base_url
+        if key_env is not None:
+            api_key = os.environ.get(key_env)
+            if not api_key:
+                print(
+                    f"Error: environment variable {key_env} is not set. "
+                    f"Sign up at https://astraflow.ucloud-global.com (global) "
+                    f"or https://astraflow.ucloud.cn (China) to obtain an API key."
+                )
+                sys.exit(1)
+            args.apikey = api_key
+        else:
+            args.apikey = args.apikey or "not-needed"
+
+    api_key = getattr(args, "apikey", None) or "not-needed"
+
+        try:
         import sounddevice as sd
     except ImportError:
         print("Error: sounddevice required. Install: pip install sounddevice")
@@ -69,7 +111,7 @@ def main():
         print("Error: pynput required. Install: pip install pynput")
         sys.exit(1)
 
-    client = OpenAI(base_url=args.server, api_key="not-needed")
+    client = OpenAI(base_url=args.server, api_key=api_key)
 
     # State
     recording = False
