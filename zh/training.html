@@ -3,7 +3,6 @@
 <title>FunASR 训练与微调</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../style.css">
-    <meta name="description" content="FunASR 模型训练教程：数据准备、DeepSpeed分布式训练、模型微调、ONNX导出完整流程。">
 </head><body>
 <nav class="nav"><div class="container">
 <a href="index.html" class="nav-logo">FunASR</a>
@@ -11,36 +10,34 @@
 <a href="index.html">首页</a>
 <a href="tutorial.html">教程</a>
 <a href="training.html" class="active">训练</a>
-<a href="benchmark.html">评测</a>
 <a href="model-registration.html">开发</a>
-<a href="api.html">API</a>
+<a href="../api.html">API</a>
+<a href="vllm.html">vLLM</a>
+                <a href="agent.html">Agent</a>
+                <a href="benchmark.html">Benchmark</a>
 </div>
 
 <div class="lang-dropdown"><button class="lang-btn">中文</button><div class="lang-menu"><a href="../training.html">English</a><a href="training.html" class="current">中文</a><a href="../ja/training.html">日本語</a></div></div>
 <a href="https://github.com/modelscope/FunASR" class="nav-github">GitHub</a>
 </div></nav>
 
-<div class="doc-layout">
-<nav class="doc-sidebar">
-<div class="sb-title">训练</div>
-<a href="#overview">概述</a>
-<a href="#data">数据准备</a>
-<div class="sb-title">模型</div>
-<a href="#paraformer">Paraformer</a>
-<a href="#sensevoice">SenseVoice</a>
-<a href="#nano">Fun-ASR-Nano</a>
-<div class="sb-title">进阶</div>
-<a href="#params">参数配置</a>
-<a href="#multi-gpu">多卡训练</a>
-<a href="#deepspeed">DeepSpeed</a>
-<a href="#monitor">监控</a>
-<a href="#inference-after">推理验证</a>
-</nav>
-<div class="doc-content">
+<div class="content"><div class="container narrow">
 <h1>训练与微调</h1>
 <p>使用 FunASR 训练框架，在你自己的数据上微调预训练模型。</p>
 
-
+<div class="toc-grid">
+<a href="#overview">概览</a>
+<a href="#data">数据准备</a>
+<a href="#paraformer">微调 Paraformer</a>
+<a href="#sensevoice">微调 SenseVoice</a>
+<a href="#nano">微调 Fun-ASR-Nano</a>
+<a href="#params">参数参考</a>
+<a href="#multi-gpu">多 GPU 训练</a>
+<a href="#deepspeed">DeepSpeed</a>
+<a href="#monitor">训练监控</a>
+<a href="#inference-after">使用微调后的模型</a>
+<a href="#tips">技巧与常见问题</a>
+</div>
 
 <!-- 概览 -->
 <h2 id="overview">概览</h2>
@@ -324,11 +321,10 @@ print(res[0]["text"])</pre>
 <h4>崩溃后恢复训练</h4>
 <p>设置 <code>++train_conf.resume=true</code>（默认已开启）。训练会自动从 <code>output_dir</code> 中最新的 checkpoint 恢复。</p>
 
-</div>
-</div>
+</div></div>
 
 <footer>
 <p>FunASR &middot; 通义实验室，阿里巴巴集团</p>
-<p><a href="index.html">首页</a> &middot; <a href="tutorial.html">教程</a> &middot; <a href="training.html">训练</a> &middot; <a href="model-registration.html">开发</a> &middot; <a href="api.html">API</a> &middot; <a href="https://github.com/modelscope/FunASR">GitHub</a></p>
+<p><a href="index.html">首页</a> &middot; <a href="tutorial.html">教程</a> &middot; <a href="training.html">训练</a> &middot; <a href="model-registration.html">开发</a> &middot; <a href="../api.html">API</a> &middot; <a href="vllm.html">vLLM</a> &middot; <a href="agent.html">Agent</a> &middot; <a href="benchmark.html">Benchmark</a> &middot; <a href="https://github.com/modelscope/FunASR">GitHub</a></p>
 </footer>
 </body></html>

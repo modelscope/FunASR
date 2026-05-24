@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>FunASR Agent 集成</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../style.css">
+</head><body>
+<nav class="nav"><div class="container">
+<a href="index.html" class="nav-logo">FunASR</a>
+<div class="nav-links"><a href="index.html">首页</a><a href="tutorial.html">教程</a><a href="training.html">训练</a><a href="model-registration.html">开发</a><a href="../api.html">API</a><a href="vllm.html">vLLM</a><a href="agent.html" class="active">Agent</a><a href="benchmark.html">Benchmark</a></div>
+<div class="lang-dropdown"><button class="lang-btn">中文</button><div class="lang-menu"><a href="../agent.html">English</a><a href="agent.html" class="current">中文</a><a href="../ja/agent.html">日本語</a></div></div>
+<a href="https://github.com/modelscope/FunASR" class="nav-github">GitHub</a>
+</div></nav>
+<div class="content"><div class="container narrow">
+<h1>Agent 集成</h1>
+<p>把语音识别作为本地基础设施接入 Agent、产品和桌面工作流：OpenAI 兼容 API、MCP 服务、语音输入和字幕生成。</p>
+<div class="toc-grid"><a href="#server">OpenAI API</a><a href="#sdk">SDK 与 curl</a><a href="#mcp">MCP 服务</a><a href="#voice">语音输入</a><a href="#subtitle">字幕生成</a></div>
+<section id="server"><h2>OpenAI 兼容 API 服务</h2>
+<p><code>funasr-server</code> 提供 <code>/v1/audio/transcriptions</code>、<code>/v1/models</code>、<code>/health</code>，并在 <code>/docs</code> 提供 Swagger 文档。任何支持 OpenAI audio API 的框架都可以接入。</p>
+<pre><code>pip install funasr fastapi uvicorn python-multipart
+funasr-server --device cuda --port 8000
+
+# CPU fallback
+funasr-server --device cpu --model sensevoice --port 8000</code></pre>
+<table><tr><th>模型别名</th><th>后端</th><th>适用场景</th></tr><tr><td><code>sensevoice</code></td><td><code>iic/SenseVoiceSmall</code></td><td>高速多语种 ASR，支持语种、情感和事件标签。</td></tr><tr><td><code>paraformer</code></td><td><code>paraformer-zh</code> + VAD + punctuation</td><td>中文生产转写。</td></tr><tr><td><code>paraformer-en</code></td><td><code>paraformer-en</code> + VAD</td><td>英文转写。</td></tr><tr><td><code>fun-asr-nano</code></td><td><code>FunAudioLLM/Fun-ASR-Nano-2512</code></td><td>31 语种 LLM-based ASR，支持时间戳。</td></tr></table>
+</section>
+<section id="sdk"><h2>OpenAI SDK 与 curl</h2>
+<pre><code>from openai import OpenAI
+
+client = OpenAI(base_url="http://localhost:8000/v1", api_key="not-needed")
+result = client.audio.transcriptions.create(
+    model="sensevoice",
+    file=open("meeting.wav", "rb"),
+)
+print(result.text)
+
+verbose = client.audio.transcriptions.create(
+    model="sensevoice",
+    file=open("meeting.wav", "rb"),
+    response_format="verbose_json",
+)
+print(verbose.segments)</code></pre>
+<pre><code>curl http://localhost:8000/v1/audio/transcriptions \
+  -F file=@audio.wav \
+  -F model=sensevoice \
+  -F response_format=verbose_json</code></pre>
+</section>
+<section id="mcp"><h2>MCP 服务</h2>
+<p>MCP 服务为 Claude Code、Claude Desktop、Cursor、Windsurf 和其他 MCP 客户端提供本地 <code>transcribe_audio</code> 工具。</p>
+<pre><code>pip install funasr
+python examples/mcp_server/funasr_mcp.py</code></pre>
+<pre><code>{
+  "mcpServers": {
+    "funasr": {
+      "command": "python",
+      "args": ["/path/to/examples/mcp_server/funasr_mcp.py"],
+      "env": {"FUNASR_DEVICE": "cuda"}
+    }
+  }
+}</code></pre>
+<table><tr><th>变量</th><th>默认值</th><th>说明</th></tr><tr><td><code>FUNASR_DEVICE</code></td><td><code>cpu</code></td><td><code>cuda</code>, <code>cpu</code>, or <code>mps</code>.</td></tr><tr><td><code>FUNASR_MODEL</code></td><td><code>iic/SenseVoiceSmall</code></td><td>MCP 工具使用的 ASR 模型。</td></tr></table>
+</section>
+<section id="voice"><h2>Desktop 语音输入</h2>
+<p>语音输入示例会从麦克风录音，把音频发送到 <code>funasr-server</code>，再把识别结果粘贴到当前光标位置。</p>
+<pre><code>pip install funasr sounddevice numpy pyperclip openai pynput
+funasr-server --device cuda
+
+cd examples/voice_input
+python funasr_input.py --server http://localhost:8000/v1 --model sensevoice</code></pre>
+<table><tr><th>平台</th><th>录音</th><th>粘贴</th></tr><tr><td>macOS</td><td>Yes</td><td>AppleScript</td></tr><tr><td>Linux</td><td>Yes</td><td>xdotool</td></tr><tr><td>Windows</td><td>Yes</td><td>必要时手动 Ctrl+V</td></tr></table>
+</section>
+<section id="subtitle"><h2>字幕生成</h2>
+<p>字幕示例可以把音频或视频文件转成 SRT/VTT，并可选择加入说话人标签。</p>
+<pre><code>cd examples/subtitle
+python generate_subtitle.py video.mp4
+python generate_subtitle.py meeting.wav --spk
+python generate_subtitle.py podcast.mp3 --format vtt
+python generate_subtitle.py audio.wav --device cpu</code></pre>
+<table><tr><th>选项</th><th>默认值</th><th>说明</th></tr><tr><td><code>--format</code></td><td><code>srt</code></td><td><code>srt</code> or <code>vtt</code>.</td></tr><tr><td><code>--model</code></td><td><code>iic/SenseVoiceSmall</code></td><td>ASR 模型。</td></tr><tr><td><code>--spk</code></td><td>off</td><td>添加说话人标签。</td></tr><tr><td><code>--lang</code></td><td><code>auto</code></td><td>语种提示。</td></tr></table>
+</section>
+</div></div>
+<footer><p>FunASR &middot; 通义实验室，阿里巴巴集团</p><p><a href="index.html">首页</a> &middot; <a href="tutorial.html">教程</a> &middot; <a href="agent.html">Agent</a> &middot; <a href="benchmark.html">Benchmark</a> &middot; <a href="vllm.html">vLLM</a> &middot; <a href="https://github.com/modelscope/FunASR">GitHub</a></p></footer>
+</body></html>

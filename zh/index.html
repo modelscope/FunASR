@@ -3,10 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="FunASR 是工业级开源语音识别工具包，支持 GPU 170x 实时、50+ 语言、说话人分离、情感检测、OpenAI 兼容 API、vLLM 加速和 Agent 集成。">
+    <meta property="og:title" content="FunASR - 开源语音理解工具包">
+    <meta property="og:description" content="GPU 170x 实时、50+ 语言、说话人分离、vLLM 加速和本地 OpenAI 兼容语音 API。">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://modelscope.github.io/FunASR/zh/">
     <title>FunASR - 端到端语音识别工具包</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../style.css">
-    <meta name="description" content="FunASR：阿里通义实验室开源的工业级语音识别工具包，支持50+语言、说话人分离、情感检测和 OpenAI 兼容私有语音 API。">
 </head>
 <body>
     <nav class="nav">
@@ -16,9 +20,11 @@
                 <a href="index.html" class="active">首页</a>
                 <a href="tutorial.html">教程</a>
                 <a href="training.html">训练</a>
-                <a href="../benchmark.html">Benchmark</a>
                 <a href="model-registration.html">开发</a>
-                <a href="api.html">API</a>
+                <a href="../api.html">API</a>
+                <a href="vllm.html">vLLM</a>
+                <a href="agent.html">Agent</a>
+                <a href="benchmark.html">Benchmark</a>
             </div>
             
 <div class="lang-dropdown"><button class="lang-btn">中文</button><div class="lang-menu"><a href="../index.html">English</a><a href="index.html" class="current">中文</a><a href="../ja/index.html">日本語</a></div></div>
@@ -40,7 +46,7 @@
                 <div class="hero-actions">
                     <a href="tutorial.html" class="btn btn-white">快速开始</a>
                     <a href="training.html" class="btn btn-outline-white">训练指南</a>
-                    <a href="api.html" class="btn btn-outline-white">API 文档</a>
+                    <a href="../api.html" class="btn btn-outline-white">API 文档</a>
                 </div>
             </div>
 
@@ -71,18 +77,31 @@ print(res[0]["sentence_info"])</pre>
 
     <section class="alt">
         <div class="container">
+            <h2 class="section-title">最新动态</h2>
+            <p class="section-subtitle">网站文档已对齐 README 和 main 分支最新能力。</p>
+            <div class="grid-3">
+                <div class="card"><h3>vLLM 推理引擎</h3><p>Fun-ASR-Nano LLM 解码加速 2-3 倍，支持 tensor parallel 批量推理和实时 WebSocket 服务。</p><p><a href="vllm.html">阅读 vLLM 文档</a></p></div>
+                <div class="card"><h3>Agent 基础设施</h3><p><code>funasr-server</code> 提供 OpenAI 兼容转写 API；MCP 和语音输入示例可把本地 ASR 接入 AI 工具。</p><p><a href="agent.html">配置 Agent 集成</a></p></div>
+                <div class="card"><h3>性能评测</h3><p>长音频评测覆盖 SenseVoice、Paraformer、Fun-ASR-Nano、GLM-ASR 和 Whisper 变体，包含 GPU/CPU 结果。</p><p><a href="benchmark.html">查看评测</a></p></div>
+            </div>
+        </div>
+    </section>
+
+
+    <section class="alt">
+        <div class="container">
             <h2 class="section-title">几分钟部署私有语音 API</h2>
-            <p class="section-subtitle">在本地运行 OpenAI 兼容的转写接口，直接接入 Agent、应用和批处理流水线，音频无需发送到云端 ASR 服务。</p>
+            <p class="section-subtitle">在本地启动 OpenAI 兼容的转写接口，将语音能力接入 Agent、应用和批处理流水线，无需把音频发送到云端 ASR 服务。</p>
             <div class="grid-2">
                 <div class="card">
                     <h3>启动服务</h3>
-                    <p>用 SenseVoice 快速完成首次验证，服务运行后也可以切换其它模型。</p>
+                    <p>先用 SenseVoice 快速验证，服务启动后也可以切换到其他模型。</p>
 <pre>pip install funasr fastapi uvicorn python-multipart
 funasr-server --model sensevoice --device cuda</pre>
                 </div>
                 <div class="card">
                     <h3>用 curl 验证</h3>
-                    <p>下载公开样例音频，调用与 OpenAI 兼容客户端一致的转写接口。</p>
+                    <p>下载公开测试音频，调用与 OpenAI 兼容客户端一致的接口路径。</p>
 <pre>curl -L https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/BAC009S0764W0121.wav -o sample.wav
 curl http://localhost:8000/v1/audio/transcriptions \
   -F file=@sample.wav \
@@ -92,7 +111,7 @@ curl http://localhost:8000/v1/audio/transcriptions \
             </div>
             <div class="section-cta">
                 <a href="https://github.com/modelscope/FunASR/tree/main/examples/openai_api" class="btn btn-primary">OpenAI API 示例</a>
-                <a href="../agent.html" class="btn btn-primary">Agent 集成</a>
+                <a href="agent.html" class="btn btn-primary">Agent 集成</a>
             </div>
         </div>
     </section>
@@ -118,7 +137,22 @@ curl http://localhost:8000/v1/audio/transcriptions \
                     <h3>开发指南</h3>
                     <p>理解注册表机制，添加新模型，打包独立仓库代码，避免集成陷阱。</p>
                 </a>
-                <a class="doc-card" href="api.html">
+                <a class="doc-card" href="vllm.html">
+                    <span class="doc-kicker">加速</span>
+                    <h3>vLLM 推理</h3>
+                    <p>使用 vLLM 加速 LLM-based ASR，支持多卡批量解码、流式 SDK 和 WebSocket 服务。</p>
+                </a>
+                <a class="doc-card" href="agent.html">
+                    <span class="doc-kicker">集成</span>
+                    <h3>Agent 与 API</h3>
+                    <p>将 FunASR 暴露为 OpenAI 兼容接口、MCP 工具、语音输入法或字幕生成器。</p>
+                </a>
+                <a class="doc-card" href="benchmark.html">
+                    <span class="doc-kicker">评测</span>
+                    <h3>性能评测</h3>
+                    <p>对比 FunASR 与 Whisper 在长音频上的 GPU/CPU 速度和 CER。</p>
+                </a>
+                <a class="doc-card" href="../api.html">
                     <span class="doc-kicker">参考</span>
                     <h3>API</h3>
                     <p>浏览自动生成的类、方法文档，查看源码预览和 GitHub 行号链接。</p>
@@ -269,7 +303,10 @@ for sent in res[0]["sentence_info"]:
         <p>
             <a href="https://github.com/modelscope/FunASR">GitHub</a> &middot;
             <a href="training.html">训练</a> &middot;
-            <a href="api.html">API</a> &middot;
+            <a href="../api.html">API</a> &middot;
+            <a href="vllm.html">vLLM</a> &middot;
+            <a href="agent.html">Agent</a> &middot;
+            <a href="benchmark.html">Benchmark</a> &middot;
             <a href="https://github.com/modelscope/FunASR/blob/main/MODEL_LICENSE">许可证</a> &middot;
             <a href="https://pypi.org/project/funasr/">PyPI</a> &middot;
             <a href="https://github.com/modelscope/FunASR/issues">问题反馈</a>

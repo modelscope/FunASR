@@ -17,6 +17,9 @@
                 <a href="training.html">トレーニング</a>
                 <a href="model-registration.html">開発</a>
                 <a href="../api.html">API</a>
+                <a href="vllm.html">vLLM</a>
+                <a href="agent.html">Agent</a>
+                <a href="benchmark.html">Benchmark</a>
             </div>
             
 <div class="lang-dropdown"><button class="lang-btn">日本語</button><div class="lang-menu"><a href="../index.html">English</a><a href="../zh/index.html">中文</a><a href="index.html" class="current">日本語</a></div></div>
@@ -67,6 +70,19 @@ print(res[0]["sentence_info"])</pre>
     </div>
 
 
+    <section class="alt">
+        <div class="container">
+            <h2 class="section-title">最新情報</h2>
+            <p class="section-subtitle">Web ドキュメントを README と main branch の最新機能に合わせました。</p>
+            <div class="grid-3">
+                <div class="card"><h3>vLLM 推論エンジン</h3><p>Fun-ASR-Nano の LLM decode を 2-3 倍高速化し、tensor parallel batch 推論と WebSocket サービスに対応。</p><p><a href="vllm.html">vLLM ガイドを見る</a></p></div>
+                <div class="card"><h3>Agent 基盤</h3><p><code>funasr-server</code> は OpenAI 互換 transcription API を提供し、MCP と音声入力サンプルで AI tool に接続できます。</p><p><a href="agent.html">Agent 連携を見る</a></p></div>
+                <div class="card"><h3>ベンチマーク</h3><p>SenseVoice、Paraformer、Fun-ASR-Nano、GLM-ASR、Whisper variants の GPU/CPU 結果を掲載。</p><p><a href="benchmark.html">結果を見る</a></p></div>
+            </div>
+        </div>
+    </section>
+
+
     <section class="docs-band">
         <div class="container">
             <h2 class="section-title">ドキュメント</h2>
@@ -86,6 +102,21 @@ print(res[0]["sentence_info"])</pre>
                     <span class="doc-kicker">拡張</span>
                     <h3>開発者ガイド</h3>
                     <p>レジストリを理解し、モデルを追加、リモートコードをパッケージ化、統合の落とし穴を回避。</p>
+                </a>
+                <a class="doc-card" href="vllm.html">
+                    <span class="doc-kicker">高速化</span>
+                    <h3>vLLM 推論</h3>
+                    <p>LLM-based ASR を vLLM で高速化し、マルチ GPU 一括 decode、Streaming SDK、WebSocket サービスを利用。</p>
+                </a>
+                <a class="doc-card" href="agent.html">
+                    <span class="doc-kicker">連携</span>
+                    <h3>Agent / API</h3>
+                    <p>FunASR を OpenAI 互換 endpoint、MCP tool、音声入力、字幕生成として利用。</p>
+                </a>
+                <a class="doc-card" href="benchmark.html">
+                    <span class="doc-kicker">測定</span>
+                    <h3>ベンチマーク</h3>
+                    <p>長時間音声で FunASR と Whisper の GPU/CPU 速度と CER を比較。</p>
                 </a>
                 <a class="doc-card" href="../api.html">
                     <span class="doc-kicker">参照</span>
@@ -239,6 +270,9 @@ for sent in res[0]["sentence_info"]:
             <a href="https://github.com/modelscope/FunASR">GitHub</a> &middot;
             <a href="training.html">トレーニング</a> &middot;
             <a href="../api.html">API</a> &middot;
+            <a href="vllm.html">vLLM</a> &middot;
+            <a href="agent.html">Agent</a> &middot;
+            <a href="benchmark.html">Benchmark</a> &middot;
             <a href="https://github.com/modelscope/FunASR/blob/main/MODEL_LICENSE">ライセンス</a> &middot;
             <a href="https://pypi.org/project/funasr/">PyPI</a> &middot;
             <a href="https://github.com/modelscope/FunASR/issues">Issues</a>

@@ -3,43 +3,39 @@
 <title>FunASR Developer Guide</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
-    <meta name="description" content="FunASR developer guide: register custom models, add new architectures, contribute to the toolkit.">
 </head><body>
 <nav class="nav"><div class="container">
 <a href="index.html" class="nav-logo">FunASR</a>
             <div class="nav-links">
-<a href="index.html">Home</a>
-<a href="tutorial.html">Tutorial</a>
-<a href="training.html">Training</a>
-<a href="benchmark.html">Benchmark</a>
-<a href="model-registration.html" class="active">Develop</a>
-<a href="api.html">API</a>
-</div>
+                <a href="index.html">Home</a>
+                <a href="tutorial.html">Tutorial</a>
+                <a href="training.html">Training</a>
+                <a href="model-registration.html" class="active">Develop</a>
+                <a href="api.html">API</a>
+                <a href="vllm.html">vLLM</a>
+                <a href="agent.html">Agent</a>
+                <a href="benchmark.html">Benchmark</a>
+            </div>
 
 <div class="lang-dropdown"><button class="lang-btn">English</button><div class="lang-menu"><a href="model-registration.html" class="current">English</a><a href="zh/model-registration.html">中文</a><a href="ja/model-registration.html">日本語</a></div></div>
 <a href="https://github.com/modelscope/FunASR" class="nav-github">GitHub</a>
 </div></nav>
 
-<div class="doc-layout">
-<nav class="doc-sidebar">
-<div class="sb-title">Development</div>
-<a href="#architecture">Architecture</a>
-<a href="#setup">Setup</a>
-<a href="#understand">Understanding</a>
-<div class="sb-title">How To</div>
-<a href="#add-model">Add a Model</a>
-<a href="#add-component">Add Component</a>
-<a href="#standalone">Standalone</a>
-<a href="#testing">Testing</a>
-<div class="sb-title">Tips</div>
-<a href="#pitfalls">Pitfalls</a>
-<a href="#contribute">Contributing</a>
-</nav>
-<div class="doc-content">
+<div class="content"><div class="container narrow">
 <h1>Developer Guide</h1>
 <p>From understanding the architecture to contributing your own model — a step-by-step guide.</p>
 
-
+<div class="toc-grid">
+<a href="#architecture">1. Architecture Overview</a>
+<a href="#setup">2. Development Setup</a>
+<a href="#understand">3. How Inference Works</a>
+<a href="#add-model">4. Add a New Model</a>
+<a href="#add-component">5. Add Frontend/Tokenizer</a>
+<a href="#standalone">6. Standalone Repository</a>
+<a href="#testing">7. Testing Your Model</a>
+<a href="#pitfalls">8. Common Pitfalls</a>
+<a href="#contribute">9. Contributing</a>
+</div>
 
 <!-- 1. Architecture -->
 <h2 id="architecture">1. Architecture Overview</h2>
@@ -400,11 +396,13 @@ from funasr.models.paraformer.model import Paraformer
 <h4>License</h4>
 <p>Code: MIT. Model weights: FunASR Model License (commercial use allowed with attribution).</p>
 
-</div>
-</div>
+</div></div>
 
 <footer>
 <p>FunASR &middot; Tongyi Lab, Alibaba Group</p>
-<p><a href="index.html">Home</a> &middot; <a href="tutorial.html">Tutorial</a> &middot; <a href="training.html">Training</a> &middot; <a href="model-registration.html">Develop</a> &middot; <a href="api.html">API</a> &middot; <a href="https://github.com/modelscope/FunASR">GitHub</a></p>
+<p><a href="index.html">Home</a> &middot; <a href="tutorial.html">Tutorial</a> &middot; <a href="training.html">Training</a> &middot; <a href="model-registration.html">Develop</a> &middot; <a href="api.html">API</a> &middot;
+            <a href="vllm.html">vLLM</a> &middot;
+            <a href="agent.html">Agent</a> &middot;
+            <a href="benchmark.html">Benchmark</a> &middot; <a href="https://github.com/modelscope/FunASR">GitHub</a></p>
 </footer>
 </body></html>
