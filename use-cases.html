@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="description" content="Choose the right FunASR path for private speech APIs, agent voice input, streaming ASR, vLLM acceleration, subtitles, batch transcription, and benchmarks.">
+<meta property="og:title" content="FunASR Use Cases">
+<meta property="og:description" content="A practical route map for deploying FunASR in products, agents, streaming services, and benchmark-driven migrations.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://modelscope.github.io/FunASR/use-cases.html">
+<title>FunASR Use Cases</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head><body>
+<nav class="nav"><div class="container">
+<a href="index.html" class="nav-logo">FunASR</a>
+<div class="nav-links"><a href="index.html">Home</a><a href="tutorial.html">Tutorial</a><a href="training.html">Training</a><a href="model-registration.html">Develop</a><a href="api.html">API</a><a href="vllm.html">vLLM</a><a href="agent.html">Agent</a><a href="benchmark.html">Benchmark</a></div>
+<div class="lang-dropdown"><button class="lang-btn">English</button><div class="lang-menu"><a href="use-cases.html" class="current">English</a><a href="zh/use-cases.html">中文</a><a href="ja/index.html">日本語</a></div></div>
+<a href="https://github.com/modelscope/FunASR" class="nav-github">GitHub</a>
+</div></nav>
+<div class="content"><div class="container narrow">
+<h1>Use Cases</h1>
+<p>Pick the shortest path from evaluation to production. FunASR covers local transcription, private OpenAI-compatible APIs, agent voice input, streaming services, vLLM acceleration, subtitles, and batch processing.</p>
+<div class="toc-grid"><a href="#paths">Choose a path</a><a href="#recipes">Production recipes</a><a href="#models">Model hints</a><a href="#share">Share results</a></div>
+<section id="paths"><h2>Choose the right path</h2>
+<table><tr><th>Goal</th><th>Start here</th><th>Why it matters</th></tr>
+<tr><td>Transcribe one file locally</td><td><a href="tutorial.html">Tutorial</a></td><td>Verify install and model download in minutes.</td></tr>
+<tr><td>Compare accuracy and speed</td><td><a href="benchmark.html">Benchmark report</a></td><td>Review long-audio speed and CER before choosing a model.</td></tr>
+<tr><td>Build a private speech API</td><td><a href="agent.html#server">OpenAI-compatible API</a></td><td>Reuse OpenAI-style clients without sending audio to a cloud ASR provider.</td></tr>
+<tr><td>Add speech input to agents</td><td><a href="agent.html#mcp">MCP server</a></td><td>Connect local ASR to Claude, Cursor, desktop tools, and internal assistants.</td></tr>
+<tr><td>Serve streaming ASR</td><td><a href="tutorial.html#real-time-speech-recognition">Realtime examples</a></td><td>Handle live captioning, meetings, and call-center style workloads.</td></tr>
+<tr><td>Accelerate LLM-based ASR</td><td><a href="vllm.html">vLLM guide</a></td><td>Use tensor parallel decoding and streaming service support for Fun-ASR-Nano.</td></tr>
+<tr><td>Generate subtitles</td><td><a href="agent.html#subtitle">Subtitle generator</a></td><td>Create SRT/VTT files from audio or video, with speaker labels when needed.</td></tr>
+<tr><td>Process many recordings</td><td><a href="https://github.com/modelscope/FunASR/blob/main/examples/batch_asr_improved.py">Batch ASR example</a></td><td>Build repeatable offline jobs for archives, meetings, and datasets.</td></tr></table>
+</section>
+<section id="recipes"><h2>Production recipes</h2>
+<div class="grid-2"><div class="card"><h3>Private transcription API</h3><p>Use this path when an application already speaks OpenAI-style APIs or when audio cannot leave your environment.</p><pre><code>pip install funasr fastapi uvicorn python-multipart
+funasr-server --model sensevoice --device cuda
+
+curl http://localhost:8000/v1/audio/transcriptions \
+  -F file=@sample.wav \
+  -F model=sensevoice \
+  -F response_format=verbose_json</code></pre></div>
+<div class="card"><h3>Agent speech input</h3><p>Start from the MCP server when you want to talk to coding agents, internal assistants, or workflow tools.</p><pre><code>pip install funasr
+python examples/mcp_server/funasr_mcp.py
+
+# Set FUNASR_DEVICE=cuda for GPU inference</code></pre></div></div>
+<div class="grid-2"><div class="card"><h3>Streaming workloads</h3><p>Pair ASR with VAD, punctuation, and speaker diarization when partial transcripts need to be readable by humans.</p><p>Validate with real audio: background noise, long silence, overlapping speakers, and different microphone quality.</p></div>
+<div class="card"><h3>Benchmark before migration</h3><p>Compare FunASR against Whisper or cloud ASR using your own sample set. Track throughput, CPU viability, download size, and deployment complexity together.</p><p><a href="benchmark.html">Open the public benchmark report</a></p></div></div>
+</section>
+<section id="models"><h2>Model selection hints</h2>
+<table><tr><th>Need</th><th>Good first choice</th><th>Notes</th></tr>
+<tr><td>Fast multilingual transcription</td><td>SenseVoice-Small</td><td>Strong default for local demos and private APIs.</td></tr>
+<tr><td>Mandarin production ASR</td><td>Paraformer-Large</td><td>Mature choice for Chinese speech recognition.</td></tr>
+<tr><td>LLM-based ASR experiments</td><td>Fun-ASR-Nano</td><td>Pair with <a href="vllm.html">vLLM</a> when throughput matters.</td></tr>
+<tr><td>Speaker-aware transcripts</td><td>SenseVoice or Paraformer with <code>spk_model="cam++"</code></td><td>Useful for meetings, interviews, and customer calls.</td></tr>
+<tr><td>Live audio</td><td>Runtime WebSocket service</td><td>Validate chunking, VAD, and endpointing with real traffic.</td></tr></table>
+</section>
+<section id="share"><h2>Share your result</h2>
+<p>If FunASR works well in your project, share the use case, model, device, processing speed, audio domain, and a public demo or benchmark summary when possible.</p>
+<p><a href="https://github.com/modelscope/FunASR/issues">Open an issue</a> or <a href="https://github.com/modelscope/FunASR/discussions">start a discussion</a>. Concrete usage reports help new users choose the right path and help maintainers prioritize docs and examples.</p>
+</section>
+</div></div>
+<footer><p>FunASR &middot; Tongyi Lab, Alibaba Group</p><p><a href="index.html">Home</a> &middot; <a href="use-cases.html">Use Cases</a> &middot; <a href="agent.html">Agent</a> &middot; <a href="benchmark.html">Benchmark</a> &middot; <a href="vllm.html">vLLM</a> &middot; <a href="https://github.com/modelscope/FunASR">GitHub</a></p></footer>
+</body></html>
