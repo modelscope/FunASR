@@ -6,7 +6,7 @@
     <title>FunASR - 端到端语音识别工具包</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../style.css">
-    <meta name="description" content="FunASR：阿里通义实验室开源的工业级语音识别工具包，支持50+语言、说话人分离、情感检测，GPU上170倍实时。">
+    <meta name="description" content="FunASR：阿里通义实验室开源的工业级语音识别工具包，支持50+语言、说话人分离、情感检测和 OpenAI 兼容私有语音 API。">
 </head>
 <body>
     <nav class="nav">
@@ -61,12 +61,41 @@ res = model.generate(input="meeting.wav")
 print(res[0]["sentence_info"])</pre>
                 <div class="hero-metrics">
                     <div><strong>50+</strong><span>语言</span></div>
-                    <div><strong>15x</strong><span>更快</span></div>
+                    <div><strong>170x</strong><span>实时</span></div>
                     <div><strong>1个API</strong><span>全流程</span></div>
                 </div>
             </div>
         </div>
     </div>
+
+
+    <section class="alt">
+        <div class="container">
+            <h2 class="section-title">几分钟部署私有语音 API</h2>
+            <p class="section-subtitle">在本地运行 OpenAI 兼容的转写接口，直接接入 Agent、应用和批处理流水线，音频无需发送到云端 ASR 服务。</p>
+            <div class="grid-2">
+                <div class="card">
+                    <h3>启动服务</h3>
+                    <p>用 SenseVoice 快速完成首次验证，服务运行后也可以切换其它模型。</p>
+<pre>pip install funasr fastapi uvicorn python-multipart
+funasr-server --model sensevoice --device cuda</pre>
+                </div>
+                <div class="card">
+                    <h3>用 curl 验证</h3>
+                    <p>下载公开样例音频，调用与 OpenAI 兼容客户端一致的转写接口。</p>
+<pre>curl -L https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/BAC009S0764W0121.wav -o sample.wav
+curl http://localhost:8000/v1/audio/transcriptions \
+  -F file=@sample.wav \
+  -F model=sensevoice \
+  -F response_format=verbose_json</pre>
+                </div>
+            </div>
+            <div class="section-cta">
+                <a href="https://github.com/modelscope/FunASR/tree/main/examples/openai_api" class="btn btn-primary">OpenAI API 示例</a>
+                <a href="../agent.html" class="btn btn-primary">Agent 集成</a>
+            </div>
+        </div>
+    </section>
 
 
     <section class="docs-band">
