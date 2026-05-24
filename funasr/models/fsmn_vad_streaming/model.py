@@ -18,6 +18,26 @@ from typing import List, Tuple, Dict, Any, Optional
 from funasr.utils.datadir_writer import DatadirWriter
 from funasr.utils.load_utils import load_audio_text_image_video, extract_fbank
 
+# Dynamic silence threshold schedule: (accumulated_speech_ms, silence_threshold_ms)
+# Streaming mode: longer initial patience (waiting for user to continue)
+STREAMING_SILENCE_SCHEDULE = [
+    (5000, 2000),
+    (10000, 1500),
+    (15000, 1000),
+    (30000, 800),
+    (45000, 400),
+    (float("inf"), 100),
+]
+
+# Non-streaming mode: shorter patience (audio already complete, cut by natural pauses)
+DEFAULT_SILENCE_SCHEDULE = [
+    (5000, 800),
+    (10000, 600),
+    (20000, 500),
+    (30000, 400),
+    (float("inf"), 300),
+]
+
 
 class VadStateMachine(Enum):
     kVadInStateStartPointNotDetected = 1
@@ -914,9 +934,31 @@ class FsmnVADStreaming(nn.Module):
         n = int(len(audio_sample) // chunk_stride_samples + int(_is_final))
         m = int(len(audio_sample) % chunk_stride_samples * (1 - int(_is_final)))
         segments = []
+        # Dynamic silence threshold
+        dynamic_silence = kwargs.get("dynamic_silence", True)
+        silence_schedule = kwargs.get("silence_schedule", DEFAULT_SILENCE_SCHEDULE)
+        speech_to_sil_ms = self.vad_opts.speech_to_sil_time_thres
+        accumulated_ms = cache.get("_dynamic_accumulated_ms", 0)
+        in_speech = cache.get("_dynamic_in_speech", False)
+
         for i in range(n):
             kwargs["is_final"] = _is_final and i == n - 1
             audio_sample_i = audio_sample[i * chunk_stride_samples : (i + 1) * chunk_stride_samples]
+
+            # Apply dynamic silence threshold (only accumulate while in speech)
+            if dynamic_silence and "stats" in cache:
+                vad_state = cache["stats"].vad_state_machine
+                # VadStateMachine: 2=kVadInStateStartPointNotDetected, 3=kVadInStateInSpeechSegment
+                if vad_state.value == 2 or in_speech:  # kVadInStateInSpeechSegment
+                    accumulated_ms += chunk_size
+                    in_speech = True
+                for limit_ms, silence_ms in silence_schedule:
+                    if accumulated_ms <= limit_ms:
+                        cache["stats"].max_end_sil_frame_cnt_thresh = max(silence_ms - speech_to_sil_ms, 0)
+                        cache["stats"].speech_noise_thres = 0.5
+                        break
+                cache["_dynamic_accumulated_ms"] = accumulated_ms
+                cache["_dynamic_in_speech"] = in_speech
 
             # extract fbank feats
             speech, speech_lengths = extract_fbank(
@@ -944,6 +986,11 @@ class FsmnVADStreaming(nn.Module):
             segments_i = self.forward(**batch)
             if len(segments_i) > 0:
                 segments.extend(*segments_i)
+                if dynamic_silence:
+                    accumulated_ms = 0
+                    in_speech = False
+                    cache["_dynamic_accumulated_ms"] = 0
+                    cache["_dynamic_in_speech"] = False
 
         cache["prev_samples"] = audio_sample[-m:] if m > 0 else torch.empty(0)
         if _is_final:
