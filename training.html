@@ -10,35 +10,29 @@
 <a href="index.html">Home</a>
 <a href="tutorial.html">Tutorial</a>
 <a href="training.html" class="active">Training</a>
-<a href="benchmark.html">Benchmark</a>
 <a href="model-registration.html">Develop</a>
 <a href="api.html">API</a>
 </div>
-<div class="lang-dropdown"><button class="lang-btn">English</button><div class="lang-menu"><a href="training.html" class="current">English</a><a href="zh/training.html">中文</a><a href="ja/training.html">日本語</a></div></div>
 <a href="https://github.com/modelscope/FunASR" class="nav-github">GitHub</a>
 </div></nav>
 
-<div class="doc-layout">
-<nav class="doc-sidebar">
-<div class="sb-title">Training</div>
-<a href="#overview">Overview</a>
-<a href="#data">Data Preparation</a>
-<div class="sb-title">Models</div>
-<a href="#paraformer">Paraformer</a>
-<a href="#sensevoice">SenseVoice</a>
-<a href="#nano">Fun-ASR-Nano</a>
-<div class="sb-title">Advanced</div>
-<a href="#params">Parameters</a>
-<a href="#multi-gpu">Multi-GPU</a>
-<a href="#deepspeed">DeepSpeed</a>
-<a href="#monitor">Monitoring</a>
-<a href="#inference-after">Inference</a>
-</nav>
-<div class="doc-content">
+<div class="content"><div class="container narrow">
 <h1>Training & Fine-tuning</h1>
 <p>Fine-tune pretrained models on your own data using FunASR's training framework.</p>
 
-
+<div class="toc-grid">
+<a href="#overview">Overview</a>
+<a href="#data">Data Preparation</a>
+<a href="#paraformer">Fine-tune Paraformer</a>
+<a href="#sensevoice">Fine-tune SenseVoice</a>
+<a href="#nano">Fine-tune Fun-ASR-Nano</a>
+<a href="#params">Parameter Reference</a>
+<a href="#multi-gpu">Multi-GPU Training</a>
+<a href="#deepspeed">DeepSpeed</a>
+<a href="#monitor">Monitoring</a>
+<a href="#inference-after">Use Fine-tuned Model</a>
+<a href="#tips">Tips & Troubleshooting</a>
+</div>
 
 <!-- Overview -->
 <h2 id="overview">Overview</h2>
@@ -322,8 +316,7 @@ print(res[0]["text"])</pre>
 <h4>Resume after crash</h4>
 <p>Set <code>++train_conf.resume=true</code> (default). Training automatically restarts from the latest checkpoint in <code>output_dir</code>.</p>
 
-</div>
-</div>
+</div></div>
 
 <footer>
 <p>FunASR &middot; Tongyi Lab, Alibaba Group</p>
