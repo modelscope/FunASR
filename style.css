@@ -1415,10 +1415,12 @@ footer a:hover {
 
 /* Doc sidebar layout - for tutorial, training, etc */
 .doc-layout {
-    display: flex;
+    display: flex !important;
+    flex-direction: row !important;
     gap: 0;
     max-width: 1400px;
     margin: 0 auto;
+    min-height: calc(100vh - 60px);
 }
 
 .doc-sidebar {
@@ -1426,12 +1428,16 @@ footer a:hover {
     top: 60px;
     width: 240px;
     min-width: 240px;
+    max-width: 240px;
+    flex-shrink: 0;
     height: calc(100vh - 60px);
     overflow-y: auto;
     border-right: 1px solid var(--line);
     background: var(--surface-2);
     padding: 20px 0;
     font-size: 0.84rem;
+    display: flex;
+    flex-direction: column;
 }
 
 .doc-sidebar a {
@@ -1472,23 +1478,27 @@ footer a:hover {
     max-width: 820px;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 768px) {
     .doc-layout {
         flex-direction: column;
     }
     .doc-sidebar {
         position: static;
         width: 100%;
-        min-width: 100%;
+        min-width: unset;
+        max-width: unset;
         height: auto;
+        flex-shrink: unset;
         border-right: none;
         border-bottom: 1px solid var(--line);
         display: flex;
+        flex-direction: row;
         flex-wrap: wrap;
         padding: 12px;
         gap: 4px;
     }
     .doc-sidebar a {
+        display: inline-block;
         padding: 6px 12px;
         border-left: none;
         border-radius: 6px;
@@ -1500,5 +1510,6 @@ footer a:hover {
     }
     .doc-content {
         padding: 24px;
+        max-width: 100%;
     }
 }
