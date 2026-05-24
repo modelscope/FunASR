@@ -1,9 +1,10 @@
-torch>=2.9.0
-torchaudio>=2.9.0
-transformers>=4.51.3
-funasr>=1.3.0
-zhconv
-whisper_normalizer
-pyopenjtalk-plus
-compute-wer
-openai-whisper
+torch>=2.0
+funasr
+websockets>=12.0
+regex
+numpy
+soundfile
+
+# Optional: for Python client microphone mode
+# sounddevice
+# librosa

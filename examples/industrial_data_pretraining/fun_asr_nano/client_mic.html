@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>Fun-ASR-Nano · Streaming ASR with Speaker Diarization</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+html, body { height:100%; }
+body { font-family:'Inter',system-ui,sans-serif; background:#080810; color:#e0e0e0; display:flex; justify-content:center; height:100vh; overflow:hidden; }
+
+/* === Hero Section === */
+.hero { padding:24px 28px 16px; flex-shrink:0; }
+.hero-top { display:flex; align-items:center; gap:16px; margin-bottom:14px; }
+.logo { font-size:30px; font-weight:900; letter-spacing:-1px; }
+.logo .g { background:linear-gradient(135deg,#64ffda,#00bfa5); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+.logo .w { color:#fff; }
+.logo .s { color:rgba(255,255,255,0.3); font-weight:400; font-size:15px; margin-left:8px; }
+.hero-links { margin-left:auto; display:flex; gap:10px; }
+.hero-links a { font-size:12px; color:#aaa; text-decoration:none; padding:6px 14px; border-radius:8px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); transition:all 0.2s; font-weight:500; }
+.hero-links a:hover { color:#64ffda; border-color:rgba(100,255,218,0.3); }
+
+.features { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:14px; }
+.feat { font-size:11px; padding:5px 12px; border-radius:20px; font-weight:500; }
+.feat-green { color:#64ffda; background:rgba(100,255,218,0.08); border:1px solid rgba(100,255,218,0.2); }
+.feat-yellow { color:#fbbf24; background:rgba(251,191,36,0.08); border:1px solid rgba(251,191,36,0.2); }
+.feat-purple { color:#a78bfa; background:rgba(167,139,250,0.08); border:1px solid rgba(167,139,250,0.2); }
+.feat-blue { color:#38bdf8; background:rgba(56,189,248,0.08); border:1px solid rgba(56,189,248,0.2); }
+
+.hero-desc { font-size:13px; color:rgba(255,255,255,0.45); line-height:1.8; }
+.hero-desc b { color:rgba(255,255,255,0.75); font-weight:600; }
+.hero-desc a { color:#64ffda; text-decoration:none; font-weight:600; }
+.hero-desc a:hover { text-decoration:underline; }
+
+/* === Main Panel === */
+.main { flex:1; display:flex; flex-direction:column; padding:0 28px 20px; min-height:0; }
+.panel { flex:1; display:flex; flex-direction:column; background:rgba(16,16,24,0.95); border:1px solid rgba(255,255,255,0.05); border-radius:16px; box-shadow:0 10px 40px rgba(0,0,0,0.4); min-height:0; }
+
+.controls { padding:14px 20px; display:flex; align-items:center; gap:12px; border-bottom:1px solid rgba(255,255,255,0.04); flex-shrink:0; }
+.controls input[type=text] { background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:8px; padding:8px 12px; color:#ccc; font-size:12px; width:180px; outline:none; }
+.controls input[type=text]:focus { border-color:rgba(100,255,218,0.4); }
+.controls input[type=file] { display:none; }
+.controls label { font-size:11px; color:#888; display:flex; align-items:center; gap:5px; cursor:pointer; }
+.controls input[type=checkbox] { accent-color:#64ffda; }
+.btn { padding:8px 18px; border:none; border-radius:10px; font-size:12px; cursor:pointer; font-weight:600; transition:all 0.12s; }
+.btn:hover { transform:scale(1.04); }
+.btn:active { transform:scale(0.97); }
+.btn-mic { background:linear-gradient(135deg,#64ffda,#00bfa5); color:#080810; }
+.btn-file { background:linear-gradient(135deg,#fbbf24,#f59e0b); color:#1a1a2e; }
+.btn-hw { background:rgba(167,139,250,0.12); color:#a78bfa; border:1px solid rgba(167,139,250,0.3); }
+.btn-stop { background:linear-gradient(135deg,#ef4444,#dc2626); color:#fff; }
+.sta { margin-left:auto; display:flex; align-items:center; gap:6px; }
+.dot { width:7px; height:7px; border-radius:50%; background:#222; }
+.dot.on { background:#64ffda; box-shadow:0 0 10px rgba(100,255,218,0.6); animation:g 1.5s infinite; }
+@keyframes g { 0%,100%{opacity:1} 50%{opacity:0.3} }
+.sta span { font-size:10px; color:#555; }
+.hw-info { font-size:10px; color:#a78bfa; margin-left:2px; }
+
+.result { flex:1; overflow-y:auto; padding:18px 22px; min-height:0; }
+.result::-webkit-scrollbar { width:4px; }
+.result::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.06); border-radius:2px; }
+.line { padding:6px 0; border-bottom:1px solid rgba(255,255,255,0.02); display:flex; align-items:baseline; gap:0; word-break:break-all; }
+.time { color:rgba(100,255,218,0.5); font-size:11px; font-family:'SF Mono','Menlo',monospace; width:100px; min-width:100px; flex-shrink:0; padding-top:2px; }
+.spk { font-size:10px; font-weight:600; padding:2px 8px; border-radius:5px; flex-shrink:0; margin-right:10px; }
+.text { color:rgba(255,255,255,0.88); font-size:15px; line-height:1.7; flex:1; }
+.partial .text { color:rgba(255,255,255,0.25); font-style:italic; }
+.ph { color:rgba(255,255,255,0.1); text-align:center; padding:50px 20px; font-size:14px; line-height:2; }
+</style>
+</head>
+<body><div style="width:920px;height:100%;display:flex;flex-direction:column">
+
+<div class="hero">
+    <div class="hero-top">
+        <div class="logo"><span class="g">Fun-ASR-Nano</span><span class="s">vLLM Engine</span></div>
+        <div class="hero-links">
+            <a href="https://github.com/modelscope/FunASR" target="_blank">GitHub</a>
+            <a href="https://modelscope.cn/models/FunAudioLLM/Fun-ASR-Nano-2512" target="_blank">ModelScope</a>
+            <a href="https://huggingface.co/FunAudioLLM/Fun-ASR-Nano-2512" target="_blank">HuggingFace</a>
+        </div>
+    </div>
+    <div class="features">
+        <span class="feat feat-green">Streaming ASR</span>
+        <span class="feat feat-yellow">Speaker Diarization <span style="font-size:9px;opacity:0.7">(Beta)</span></span>
+        <span class="feat feat-purple">Hotword Customization</span>
+        <span class="feat feat-blue">31 Languages · 7 Dialects</span>
+    </div>
+    <p class="hero-desc">
+        基于 <b>FunASR</b> 的 <b>vLLM 推理引擎</b>，实现流式语音识别服务。支持实时 VAD 分句、说话人分离 <span style="color:#f59e0b;font-size:11px">(Beta)</span>、<b>热词定制化</b>（加载人名、地名等实体词列表，提升专有名词识别准确率）、31种语言及中文方言。所有代码与模型已全部开源。<br>
+        <span style="font-size:12px">Streaming ASR with vLLM engine, real-time VAD, speaker diarization <span style="color:#f59e0b">(Beta)</span>, <b>hotword customization</b> (names, places, entities), 31 languages &amp; Chinese dialects. Fully open-sourced.</span>
+        &nbsp;·&nbsp; <a href="https://www.funasr.com" target="_blank">www.funasr.com</a>
+    </p>
+</div>
+
+<div class="main">
+<div class="panel">
+    <div class="controls">
+        <input type="text" id="serverUrl" value="ws://localhost:10095">
+        <label><input type="checkbox" id="showSpk" checked> Speaker <span style="font-size:9px;color:#f59e0b;background:rgba(245,158,11,0.08);padding:1px 5px;border-radius:4px">Beta</span></label>
+        <button class="btn btn-mic" id="btnMic" onclick="startMic()">Mic</button>
+        <input type="file" id="fileInput" accept="audio/*,.wav,.mp3,.flac,.mp4,.m4a">
+        <button class="btn btn-file" id="btnFile" onclick="document.getElementById('fileInput').click()">Audio File</button>
+        <input type="file" id="hotwordFile" accept=".txt" style="display:none">
+        <button class="btn btn-hw" id="btnHw" onclick="document.getElementById('hotwordFile').click()">Hotwords</button>
+        <span class="hw-info" id="hwInfo"></span>
+        <select id="langSelect" style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:6px 10px;color:#ccc;font-size:11px;outline:none">
+            <option value="">Auto</option>
+            <option value="中文">中文</option>
+            <option value="English">English</option>
+            <option value="日本語">日本語</option>
+            <option value="한국어">한국어</option>
+            <option value="Deutsch">Deutsch</option>
+            <option value="Français">Français</option>
+            <option value="Español">Español</option>
+            <option value="Русский">Русский</option>
+            <option value="العربية">العربية</option>
+            <option value="Português">Português</option>
+            <option value="Italiano">Italiano</option>
+        </select>
+        <button class="btn btn-stop" id="btnStop" onclick="stopAll()" style="display:none">Stop</button>
+        <div class="sta"><div class="dot" id="dot"></div><span id="status">Ready</span></div>
+    </div>
+    <div class="result" id="resultBox">
+        <div class="ph">Click <b>Mic</b> for real-time recognition or <b>Audio File</b> to transcribe a file<br>Load a <b>Hotwords</b> file (.txt, one word per line) to boost recognition of names, places &amp; entities</div>
+    </div>
+</div>
+</div>
+
+<input type="text" id="hotwords" style="display:none">
+<script>
+let ws=null,mediaStream=null,audioContext=null,processor=null,isRecording=false;
+const C=['#64ffda','#f472b6','#fbbf24','#34d399','#a78bfa','#fb923c','#67e8f9','#f87171','#38bdf8','#c084fc'];
+
+document.getElementById('hotwordFile').addEventListener('change',function(e){
+    const f=e.target.files[0];if(!f)return;
+    const r=new FileReader();r.onload=ev=>{
+        const words=ev.target.result.split('\n').map(l=>l.trim()).filter(l=>l);
+        document.getElementById('hotwords').value=words.join(',');
+        document.getElementById('hwInfo').textContent=words.length+' words loaded';
+        setS('Hotwords: '+words.length+' loaded');
+    };r.readAsText(f);
+});
+document.getElementById('fileInput').addEventListener('change',function(){if(this.files.length)startFile();});
+
+function setS(m,on){document.getElementById('status').textContent=m;document.getElementById('dot').className=on?'dot on':'dot';}
+function sStop(){document.getElementById('btnMic').style.display='none';document.getElementById('btnFile').style.display='none';document.getElementById('btnHw').style.display='none';document.getElementById('btnStop').style.display='inline';}
+function sStart(){document.getElementById('btnMic').style.display='inline';document.getElementById('btnFile').style.display='inline';document.getElementById('btnHw').style.display='inline';document.getElementById('btnStop').style.display='none';}
+function render(ss,p,ps,d,f){
+    const b=document.getElementById('resultBox'),sk=document.getElementById('showSpk').checked;let h='';
+    ss.forEach(s=>{let st=s.start!==undefined?s.start:(s.start_ms||0),en=s.end!==undefined?s.end:(s.end_ms||0),sp=s.spk!==undefined?s.spk:-1,sh='';
+        if(sk&&sp>=0){let c=C[sp%C.length];sh='<span class="spk" style="color:'+c+';background:'+c+'12;border:1px solid '+c+'30">SPK'+sp+'</span>';}
+        h+='<div class="line"><span class="time">'+(st/1000).toFixed(1)+' - '+(en/1000).toFixed(1)+'s</span>'+sh+'<span class="text">'+s.text+'</span></div>';});
+    if(p)h+='<div class="line partial"><span class="time">'+(ps/1000).toFixed(1)+'s ...</span><span class="text">'+p+'</span></div>';
+    if(!h)h='<div class="ph">Listening...</div>';b.innerHTML=h;b.scrollTop=b.scrollHeight;}
+function con(cb){ws=new WebSocket(document.getElementById('serverUrl').value);ws.onopen=()=>{ws.send('START');var hw=document.getElementById('hotwords').value.trim();if(hw)ws.send('HOTWORDS:'+hw);var lang=document.getElementById('langSelect').value;if(lang)ws.send('LANGUAGE:'+lang);cb();};ws.onmessage=e=>{const d=JSON.parse(e.data);if(d.sentences!==undefined)render(d.sentences,d.partial,d.partial_start_ms,d.duration_ms,d.is_final);};ws.onerror=()=>setS('Error');ws.onclose=()=>{if(isRecording)stopAll();};}
+function startMic(){con(async()=>{setS('Recording',true);sStop();document.getElementById('resultBox').innerHTML='<div class="ph">Listening...</div>';try{mediaStream=await navigator.mediaDevices.getUserMedia({audio:{sampleRate:16000,channelCount:1,echoCancellation:true}});}catch(e){setS('Mic denied');ws.close();sStart();return;}audioContext=new AudioContext({sampleRate:16000});const s=audioContext.createMediaStreamSource(mediaStream);processor=audioContext.createScriptProcessor(4096,1,1);processor.onaudioprocess=e=>{if(!isRecording)return;const f=e.inputBuffer.getChannelData(0),i=new Int16Array(f.length);for(let j=0;j<f.length;j++)i[j]=Math.max(-32768,Math.min(32767,Math.round(f[j]*32768)));if(ws&&ws.readyState===1)ws.send(i.buffer);};s.connect(processor);processor.connect(audioContext.destination);isRecording=true;});}
+function startFile(){const fi=document.getElementById('fileInput');if(!fi.files.length){setS('Pick a file');return;}const file=fi.files[0];setS('Decoding...');document.getElementById('resultBox').innerHTML='<div class="ph">Decoding '+file.name+'...</div>';const r=new FileReader();r.onload=async e=>{const a=new AudioContext({sampleRate:16000});let buf;try{buf=await a.decodeAudioData(e.target.result);}catch(err){setS('Decode failed');return;}const p=buf.getChannelData(0),i=new Int16Array(p.length);for(let j=0;j<p.length;j++)i[j]=Math.max(-32768,Math.min(32767,Math.round(p[j]*32768)));a.close();con(async()=>{setS('Streaming '+(p.length/16000|0)+'s',true);sStop();isRecording=true;for(let j=0;j<i.length&&isRecording;j+=4096){if(ws&&ws.readyState===1)ws.send(i.slice(j,j+4096).buffer);await new Promise(r=>setTimeout(r,50));}if(isRecording)stopAll();});};r.readAsArrayBuffer(file);}
+function stopAll(){isRecording=false;if(ws&&ws.readyState===1)ws.send('STOP');if(processor){processor.disconnect();processor=null;}if(audioContext){audioContext.close();audioContext=null;}if(mediaStream){mediaStream.getTracks().forEach(t=>t.stop());mediaStream=null;}setTimeout(()=>{if(ws){ws.close();ws=null;}},2000);sStart();setS('Done');}
+</script>
+</div></body>
+</html>
