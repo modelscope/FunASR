@@ -6,7 +6,7 @@
     <title>FunASR - End-to-End Speech Recognition Toolkit</title>
     <meta name="description" content="FunASR: Industrial-grade speech recognition toolkit. 170x realtime on GPU, 50+ languages, speaker diarization, emotion detection. Open source, production ready.">
     <meta property="og:title" content="FunASR - Speech Recognition Toolkit">
-    <meta property="og:description" content="170x realtime, 50+ languages, speaker diarization — all in 3 lines of Python.">
+    <meta property="og:description" content="170x realtime, 50+ languages, speaker diarization, and an OpenAI-compatible local speech API.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://modelscope.github.io/FunASR/">
     <link rel="canonical" href="https://modelscope.github.io/FunASR/">
@@ -66,12 +66,41 @@ res = model.generate(input="meeting.wav")
 print(res[0]["sentence_info"])</pre>
                 <div class="hero-metrics">
                     <div><strong>50+</strong><span>languages</span></div>
-                    <div><strong>15x</strong><span>faster</span></div>
+                    <div><strong>170x</strong><span>realtime</span></div>
                     <div><strong>1 API</strong><span>pipeline</span></div>
                 </div>
             </div>
         </div>
     </div>
+
+
+    <section class="alt">
+        <div class="container">
+            <h2 class="section-title">Private Speech API in Minutes</h2>
+            <p class="section-subtitle">Run an OpenAI-compatible transcription endpoint locally, then plug it into agents, apps, and batch pipelines without sending audio to a cloud ASR provider.</p>
+            <div class="grid-2">
+                <div class="card">
+                    <h3>Start the server</h3>
+                    <p>Use SenseVoice for a fast first test, or switch models after the endpoint is running.</p>
+<pre>pip install funasr fastapi uvicorn python-multipart
+funasr-server --model sensevoice --device cuda</pre>
+                </div>
+                <div class="card">
+                    <h3>Verify with curl</h3>
+                    <p>Download a public sample and call the same route used by OpenAI-compatible clients.</p>
+<pre>curl -L https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/BAC009S0764W0121.wav -o sample.wav
+curl http://localhost:8000/v1/audio/transcriptions \
+  -F file=@sample.wav \
+  -F model=sensevoice \
+  -F response_format=verbose_json</pre>
+                </div>
+            </div>
+            <div class="section-cta">
+                <a href="https://github.com/modelscope/FunASR/tree/main/examples/openai_api" class="btn btn-primary">OpenAI API example</a>
+                <a href="agent.html" class="btn btn-primary">Agent integration</a>
+            </div>
+        </div>
+    </section>
 
 
     <section class="docs-band">
