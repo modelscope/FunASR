@@ -71,6 +71,8 @@ Overview
    :maxdepth: 1
    :caption: Runtime and Service
 
+   ./deployment_matrix.md
+   ./deployment_matrix_zh.md
    ./runtime/readme.md
    ./runtime/docs/SDK_tutorial_online.md
    ./runtime/docs/SDK_tutorial.md
