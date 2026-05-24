@@ -111,6 +111,14 @@ Build the example image from this directory. The default image starts in CPU mod
 
 ```bash
 cd examples/openai_api
+cp .env.example .env
+
+docker compose up --build
+```
+
+Equivalent one-off `docker run` command:
+
+```bash
 docker build -t funasr-api .
 
 docker run --rm -p 8000:8000 \
@@ -119,7 +127,7 @@ docker run --rm -p 8000:8000 \
   funasr-api
 ```
 
-For GPU hosts, use NVIDIA Container Toolkit and a CUDA-capable PyTorch/FunASR environment, then run the same server with `FUNASR_DEVICE=cuda`:
+For GPU hosts, use NVIDIA Container Toolkit and a CUDA-capable PyTorch/FunASR image. After adapting the image dependencies for CUDA, run the same server with `FUNASR_DEVICE=cuda`:
 
 ```bash
 docker run --rm --gpus all -p 8000:8000 \
