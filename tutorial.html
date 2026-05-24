@@ -147,6 +147,19 @@ res = model.generate(input=["audio.wav"], cache={}, batch_size=1,
                      hotwords=["keyword"], language="中文")
 print(res[0]["text"])        # recognized text with punctuation
 print(res[0]["timestamps"])  # [{"token":"开","start_time":0.42,"end_time":0.48}, ...]</pre>
+<div class="param-info" style="margin:12px 0 24px;padding:14px 18px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;font-size:0.85rem;">
+<strong>Parameters:</strong>
+<ul style="margin:8px 0 0;padding-left:20px;line-height:1.8;">
+<li><code>model</code> — Model name or HuggingFace ID. Use <code>"FunAudioLLM/Fun-ASR-Nano-2512"</code> for 31 languages.</li>
+<li><code>trust_remote_code=True</code> — Required for Fun-ASR-Nano (loads custom model code from repo).</li>
+<li><code>vad_model="fsmn-vad"</code> — Enable VAD segmentation. Required for audio longer than 30s.</li>
+<li><code>vad_kwargs</code> — <code>max_single_segment_time</code>: max segment length in ms. Use 30000 for LLM models.</li>
+<li><code>hub="hf"</code> — Download from HuggingFace. Use <code>"ms"</code> for ModelScope (faster in China).</li>
+<li><code>batch_size=1</code> — Must be 1 for LLM-based models (Fun-ASR-Nano, Qwen3-ASR).</li>
+<li><code>hotwords</code> — List of hotwords with weight: <code>["keyword 20", "name 30"]</code>. Higher weight = stronger bias.</li>
+<li><code>language</code> — Language hint: <code>"中文"</code>, <code>"英文"</code>, <code>"日文"</code>, or auto-detect if omitted.</li>
+</ul></div>
+
 
 <div class="note"><strong>Fun-ASR-Nano outputs punctuation natively</strong> — no need for <code>punc_model</code>.</div>
 
@@ -166,6 +179,17 @@ res = model.generate(input="audio.wav", cache={}, language="auto",
 # Raw output contains emotion/event tags: <|zh|><|HAPPY|><|Speech|>你好
 text = rich_transcription_postprocess(res[0]["text"])
 print(text)  # "你好" (clean text)</pre>
+<div class="param-info" style="margin:12px 0 24px;padding:14px 18px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;font-size:0.85rem;">
+<strong>Parameters:</strong>
+<ul style="margin:8px 0 0;padding-left:20px;line-height:1.8;">
+<li><code>model="iic/SenseVoiceSmall"</code> — SenseVoice model. Ultra-fast (170x realtime GPU, 17x CPU). Supports zh/en/ja/ko/yue.</li>
+<li><code>use_itn=True</code> — Enable inverse text normalization + punctuation in output.</li>
+<li><code>batch_size_s=60</code> — Dynamic batching: total audio seconds per batch. Higher = faster but more memory.</li>
+<li><code>merge_vad=True</code> — Merge short VAD segments for cleaner output. Use with merge_length_s.</li>
+<li><code>merge_length_s=15</code> — Max merged segment length in seconds.</li>
+<li><code>language="auto"</code> — Auto-detect language. Or specify: <code>"zh"</code>, <code>"en"</code>, <code>"yue"</code>, <code>"ja"</code>, <code>"ko"</code>.</li>
+</ul></div>
+
 
 <h3>Qwen3-ASR (52 Languages, Highest Accuracy)</h3>
 <pre># pip install qwen-asr
@@ -201,6 +225,16 @@ for i in range(total_chunks):
                          decoder_chunk_look_back=1)
     if res[0]["text"]:
         print(res[0]["text"], end="", flush=True)  # incremental output</pre>
+<div class="param-info" style="margin:12px 0 24px;padding:14px 18px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;font-size:0.85rem;">
+<strong>Parameters:</strong>
+<ul style="margin:8px 0 0;padding-left:20px;line-height:1.8;">
+<li><code>chunk_size=[0, 10, 5]</code> — Streaming config: [lookback, chunk, lookahead] in 60ms frames. <code>[0,10,5]</code> = 600ms chunks with 300ms lookahead.</li>
+<li><code>encoder_chunk_look_back=4</code> — Number of past chunks for encoder self-attention context.</li>
+<li><code>decoder_chunk_look_back=1</code> — Number of encoder chunks for decoder cross-attention.</li>
+<li><code>cache={}</code> — Streaming state. Pass empty dict on first call, reuse for subsequent chunks.</li>
+<li><code>is_final=True</code> — Set on last chunk to flush remaining output.</li>
+</ul></div>
+
 
 <p><strong>Output (printed incrementally):</strong></p>
 <div class="output-box">欢迎大 | 家来 | 体验达 | 摩院推 | 出的语 | 音识 | 别模型</div>
@@ -229,6 +263,13 @@ res = model.generate(input="meeting.wav", batch_size_s=300)
 
 for sent in res[0]["sentence_info"]:
     print(f"[Speaker {sent['spk']}] [{sent['start']}-{sent['end']}ms] {sent['text']}")</pre>
+<div class="param-info" style="margin:12px 0 24px;padding:14px 18px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;font-size:0.85rem;">
+<strong>Parameters:</strong>
+<ul style="margin:8px 0 0;padding-left:20px;line-height:1.8;">
+<li><code>spk_model="cam++"</code> — Enable speaker diarization. Adds <code>spk</code> field to each sentence in output.</li>
+<li><code>punc_model="ct-punc"</code> — Punctuation model. Needed for Paraformer; not needed for SenseVoice/Fun-ASR-Nano.</li>
+</ul></div>
+
 
 <p><strong>Output:</strong></p>
 <div class="output-box">[Speaker 0] [880-5195ms] 欢迎大家来体验达摩院推出的语音识别模型。</div>
