@@ -1,6 +1,8 @@
 ([English](./README.md)|[简体中文](./README_zh.md)|[日本語](./README_ja.md)|한국어)
 
-[![SVG Banners](https://svg-banners.vercel.app/api?type=origin&text1=FunASR🤠&text2=💖%20A%20Fundamental%20End-to-End%20Speech%20Recognition%20Toolkit&width=800&height=210)](https://github.com/Akshay090/svg-banners)
+<p align="center">
+<a href="https://github.com/modelscope/FunASR"><img src="https://svg-banners.vercel.app/api?type=origin&text1=FunASR🤠&text2=💖%20A%20Fundamental%20End-to-End%20Speech%20Recognition%20Toolkit&width=800&height=210" alt="FunASR"></a>
+</p>
 
 <p align="center">
   <strong>산업용 음성인식. Whisper보다 170배 빠름. 50개 이상 언어 지원.</strong><br>

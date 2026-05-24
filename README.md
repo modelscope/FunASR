@@ -1,6 +1,8 @@
 ([简体中文](./README_zh.md)|English|[日本語](./README_ja.md)|[한국어](./README_ko.md))
 
-[![SVG Banners](https://svg-banners.vercel.app/api?type=origin&text1=FunASR🤠&text2=💖%20A%20Fundamental%20End-to-End%20Speech%20Recognition%20Toolkit&width=800&height=210)](https://github.com/Akshay090/svg-banners)
+<p align="center">
+<a href="https://github.com/modelscope/FunASR"><img src="https://svg-banners.vercel.app/api?type=origin&text1=FunASR🤠&text2=💖%20A%20Fundamental%20End-to-End%20Speech%20Recognition%20Toolkit&width=800&height=210" alt="FunASR"></a>
+</p>
 
 <p align="center">
   <strong>Industrial speech recognition. 170x faster than Whisper. 50+ languages.</strong><br>
