@@ -176,14 +176,26 @@ result = model.generate(input="audio.wav", granularity="utterance")
 ```bash
 # OpenAI 兼容 API（推荐）
 pip install funasr fastapi uvicorn python-multipart
-funasr-server --device cuda
+funasr-server --model sensevoice --device cuda
 # → POST /v1/audio/transcriptions，地址 localhost:8000
+```
 
+使用公开样例音频验证服务：
+
+```bash
+curl -L https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/BAC009S0764W0121.wav -o sample.wav
+curl http://localhost:8000/v1/audio/transcriptions \
+  -F file=@sample.wav \
+  -F model=sensevoice \
+  -F response_format=verbose_json
+```
+
+```bash
 # Docker 流式服务
 docker pull registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-online-cpu-0.1.12
 ```
 
-[部署文档 →](./runtime/readme_cn.md) · [Agent 集成 →](https://modelscope.github.io/FunASR/agent.html)
+[OpenAI API 示例 →](./examples/openai_api/) · [部署文档 →](./runtime/readme_cn.md) · [Agent 集成 →](https://modelscope.github.io/FunASR/agent.html)
 
 ---
 

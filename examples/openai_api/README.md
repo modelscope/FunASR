@@ -11,6 +11,25 @@ python server.py --model sensevoice --device cuda --port 8000
 
 Server starts in ~20s (model loading). Health check: `GET /health`
 
+### End-to-end smoke test
+
+In another terminal, download a public sample and verify both health and transcription:
+
+```bash
+bash smoke_test.sh
+```
+
+Equivalent manual commands:
+
+```bash
+curl -L https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/BAC009S0764W0121.wav -o sample.wav
+curl http://localhost:8000/health
+curl http://localhost:8000/v1/audio/transcriptions \
+  -F file=@sample.wav \
+  -F model=sensevoice \
+  -F response_format=verbose_json
+```
+
 ## Usage with OpenAI SDK (Python)
 
 ```python
@@ -102,3 +121,9 @@ docker run --gpus all -p 8000:8000 funasr-api
 | `--port` | 8000 | Port |
 | `--device` | cuda | Device (cuda/cpu/mps) |
 | `--model` | sensevoice | Pre-load model at startup |
+
+## Troubleshooting
+
+- If CUDA is unavailable, use `--device cpu` for a slower but simple smoke test.
+- If port 8000 is occupied, start with `--port 9000` and run `BASE_URL=http://localhost:9000 bash smoke_test.sh`.
+- If model download is slow, retry with a stable network or pre-download the model from ModelScope/Hugging Face.
