@@ -107,12 +107,31 @@ def transcribe_for_agent(audio_path: str) -> str:
 
 ## Docker Deployment
 
+Build the example image from this directory. The default image starts in CPU mode so it can be used as a portable smoke test.
+
 ```bash
-# Build
+cd examples/openai_api
 docker build -t funasr-api .
 
-# Run with GPU
-docker run --gpus all -p 8000:8000 funasr-api
+docker run --rm -p 8000:8000 \
+  -e FUNASR_DEVICE=cpu \
+  -e FUNASR_MODEL=sensevoice \
+  funasr-api
+```
+
+For GPU hosts, use NVIDIA Container Toolkit and a CUDA-capable PyTorch/FunASR environment, then run the same server with `FUNASR_DEVICE=cuda`:
+
+```bash
+docker run --rm --gpus all -p 8000:8000 \
+  -e FUNASR_DEVICE=cuda \
+  -e FUNASR_MODEL=sensevoice \
+  funasr-api
+```
+
+Verify the container from another terminal:
+
+```bash
+BASE_URL=http://localhost:8000 bash smoke_test.sh
 ```
 
 ## Configuration
@@ -123,6 +142,14 @@ docker run --gpus all -p 8000:8000 funasr-api
 | `--port` | 8000 | Port |
 | `--device` | cuda | Device (cuda/cpu/mps) |
 | `--model` | sensevoice | Pre-load model at startup |
+
+Docker environment variables:
+
+| Env | Default | Description |
+|-----|---------|-------------|
+| `FUNASR_PORT` | 8000 | Container port passed to `server.py` |
+| `FUNASR_DEVICE` | cpu | Container device mode; set to `cuda` only when the image has CUDA-capable dependencies |
+| `FUNASR_MODEL` | sensevoice | Model alias loaded at container startup |
 
 ## Troubleshooting
 
