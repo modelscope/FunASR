@@ -20,7 +20,23 @@
 <a href="https://github.com/modelscope/FunASR" class="nav-github">GitHub</a>
 </div></nav>
 
-<div class="content"><div class="container narrow">
+<div class="doc-layout">
+<nav class="doc-sidebar">
+<div class="sb-title">训练</div>
+<a href="#overview">概述</a>
+<a href="#data">数据准备</a>
+<div class="sb-title">模型</div>
+<a href="#paraformer">Paraformer</a>
+<a href="#sensevoice">SenseVoice</a>
+<a href="#nano">Fun-ASR-Nano</a>
+<div class="sb-title">进阶</div>
+<a href="#params">参数配置</a>
+<a href="#multi-gpu">多卡训练</a>
+<a href="#deepspeed">DeepSpeed</a>
+<a href="#monitor">监控</a>
+<a href="#inference-after">推理验证</a>
+</nav>
+<div class="doc-content">
 <h1>训练与微调</h1>
 <p>使用 FunASR 训练框架，在你自己的数据上微调预训练模型。</p>
 
@@ -320,7 +336,8 @@ print(res[0]["text"])</pre>
 <h4>崩溃后恢复训练</h4>
 <p>设置 <code>++train_conf.resume=true</code>（默认已开启）。训练会自动从 <code>output_dir</code> 中最新的 checkpoint 恢复。</p>
 
-</div></div>
+</div>
+</div>
 
 <footer>
 <p>FunASR &middot; 通义实验室，阿里巴巴集团</p>

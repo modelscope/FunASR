@@ -20,7 +20,26 @@
 <a href="https://github.com/modelscope/FunASR" class="nav-github">GitHub</a>
 </div></nav>
 
-<div class="content"><div class="container narrow">
+<div class="doc-layout">
+<nav class="doc-sidebar">
+<div class="sb-title">教程</div>
+<a href="#quick">快速体验</a>
+<a href="#install">安装</a>
+<a href="#choose">模型选择</a>
+<div class="sb-title">使用</div>
+<a href="#scenarios">场景</a>
+<a href="#offline">离线识别</a>
+<a href="#streaming">流式识别</a>
+<a href="#spk">说话人分离</a>
+<a href="#emotion">情感识别</a>
+<a href="#vad">语音检测</a>
+<a href="#punc">标点恢复</a>
+<a href="#export">ONNX导出</a>
+<div class="sb-title">参考</div>
+<a href="#config">参数配置</a>
+<a href="#faq">常见问题</a>
+</nav>
+<div class="doc-content">
 <h1>使用教程</h1>
 <p>从零开始，10 分钟掌握 FunASR 的完整使用方法。</p>
 
@@ -368,7 +387,8 @@ print(torch.cuda.is_available())  # 必须为 True
 # 显式指定 GPU：
 model = AutoModel(model="...", device="cuda:0")</pre>
 
-</div></div>
+</div>
+</div>
 
 <footer>
 <p>FunASR &middot; 通义实验室，阿里巴巴集团</p>
