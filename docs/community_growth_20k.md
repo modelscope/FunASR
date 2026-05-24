@@ -70,7 +70,7 @@ For each launch, prepare:
 ## Workstream 5: External proof
 
 - Publish reproducible benchmark scripts and raw configuration for the 184-file benchmark.
-- Encourage users to share production stories, dashboards, or public demos.
+- Encourage users to share production stories, dashboards, public demos, or benchmark notes through the showcase issue template.
 - Add third-party integrations and community projects to README when they are maintained and runnable.
 - Keep citations and paper links visible for researchers.
 
