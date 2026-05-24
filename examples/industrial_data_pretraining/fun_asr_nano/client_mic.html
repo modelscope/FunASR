@@ -102,6 +102,20 @@ body { font-family:'Inter',system-ui,sans-serif; background:#080810; color:#e0e0
         <input type="file" id="hotwordFile" accept=".txt" style="display:none">
         <button class="btn btn-hw" id="btnHw" onclick="document.getElementById('hotwordFile').click()">Hotwords</button>
         <span class="hw-info" id="hwInfo"></span>
+        <select id="langSelect" style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:6px 10px;color:#ccc;font-size:11px;outline:none">
+            <option value="">Auto</option>
+            <option value="中文">中文</option>
+            <option value="English">English</option>
+            <option value="日本語">日本語</option>
+            <option value="한국어">한국어</option>
+            <option value="Deutsch">Deutsch</option>
+            <option value="Français">Français</option>
+            <option value="Español">Español</option>
+            <option value="Русский">Русский</option>
+            <option value="العربية">العربية</option>
+            <option value="Português">Português</option>
+            <option value="Italiano">Italiano</option>
+        </select>
         <button class="btn btn-stop" id="btnStop" onclick="stopAll()" style="display:none">Stop</button>
         <div class="sta"><div class="dot" id="dot"></div><span id="status">Ready</span></div>
     </div>
@@ -137,7 +151,7 @@ function render(ss,p,ps,d,f){
         h+='<div class="line"><span class="time">'+(st/1000).toFixed(1)+' - '+(en/1000).toFixed(1)+'s</span>'+sh+'<span class="text">'+s.text+'</span></div>';});
     if(p)h+='<div class="line partial"><span class="time">'+(ps/1000).toFixed(1)+'s ...</span><span class="text">'+p+'</span></div>';
     if(!h)h='<div class="ph">Listening...</div>';b.innerHTML=h;b.scrollTop=b.scrollHeight;}
-function con(cb){ws=new WebSocket(document.getElementById('serverUrl').value);ws.onopen=()=>{ws.send('START');var hw=document.getElementById('hotwords').value.trim();if(hw)ws.send('HOTWORDS:'+hw);cb();};ws.onmessage=e=>{const d=JSON.parse(e.data);if(d.sentences!==undefined)render(d.sentences,d.partial,d.partial_start_ms,d.duration_ms,d.is_final);};ws.onerror=()=>setS('Error');ws.onclose=()=>{if(isRecording)stopAll();};}
+function con(cb){ws=new WebSocket(document.getElementById('serverUrl').value);ws.onopen=()=>{ws.send('START');var hw=document.getElementById('hotwords').value.trim();if(hw)ws.send('HOTWORDS:'+hw);var lang=document.getElementById('langSelect').value;if(lang)ws.send('LANGUAGE:'+lang);cb();};ws.onmessage=e=>{const d=JSON.parse(e.data);if(d.sentences!==undefined)render(d.sentences,d.partial,d.partial_start_ms,d.duration_ms,d.is_final);};ws.onerror=()=>setS('Error');ws.onclose=()=>{if(isRecording)stopAll();};}
 function startMic(){con(async()=>{setS('Recording',true);sStop();document.getElementById('resultBox').innerHTML='<div class="ph">Listening...</div>';try{mediaStream=await navigator.mediaDevices.getUserMedia({audio:{sampleRate:16000,channelCount:1,echoCancellation:true}});}catch(e){setS('Mic denied');ws.close();sStart();return;}audioContext=new AudioContext({sampleRate:16000});const s=audioContext.createMediaStreamSource(mediaStream);processor=audioContext.createScriptProcessor(4096,1,1);processor.onaudioprocess=e=>{if(!isRecording)return;const f=e.inputBuffer.getChannelData(0),i=new Int16Array(f.length);for(let j=0;j<f.length;j++)i[j]=Math.max(-32768,Math.min(32767,Math.round(f[j]*32768)));if(ws&&ws.readyState===1)ws.send(i.buffer);};s.connect(processor);processor.connect(audioContext.destination);isRecording=true;});}
 function startFile(){const fi=document.getElementById('fileInput');if(!fi.files.length){setS('Pick a file');return;}const file=fi.files[0];setS('Decoding...');document.getElementById('resultBox').innerHTML='<div class="ph">Decoding '+file.name+'...</div>';const r=new FileReader();r.onload=async e=>{const a=new AudioContext({sampleRate:16000});let buf;try{buf=await a.decodeAudioData(e.target.result);}catch(err){setS('Decode failed');return;}const p=buf.getChannelData(0),i=new Int16Array(p.length);for(let j=0;j<p.length;j++)i[j]=Math.max(-32768,Math.min(32767,Math.round(p[j]*32768)));a.close();con(async()=>{setS('Streaming '+(p.length/16000|0)+'s',true);sStop();isRecording=true;for(let j=0;j<i.length&&isRecording;j+=4096){if(ws&&ws.readyState===1)ws.send(i.slice(j,j+4096).buffer);await new Promise(r=>setTimeout(r,50));}if(isRecording)stopAll();});};r.readAsArrayBuffer(file);}
 function stopAll(){isRecording=false;if(ws&&ws.readyState===1)ws.send('STOP');if(processor){processor.disconnect();processor=null;}if(audioContext){audioContext.close();audioContext=null;}if(mediaStream){mediaStream.getTracks().forEach(t=>t.stop());mediaStream=null;}setTimeout(()=>{if(ws){ws.close();ws=null;}},2000);sStart();setS('Done');}

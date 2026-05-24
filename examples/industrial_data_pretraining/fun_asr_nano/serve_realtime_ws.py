@@ -459,6 +459,10 @@ def load_models(args):
             _asr_kwargs["hotwords"] = hotwords
             logger.info(f"Loaded {len(hotwords)} hotwords from '{hw_file}'")
 
+        if getattr(args, 'language', None):
+            _asr_kwargs["language"] = args.language
+            logger.info(f"Language: {args.language}")
+
         logger.info("All models ready!")
     return _asr_model, _asr_kwargs, _tokenizer, _vad_model, _spk_model
 
@@ -489,6 +493,12 @@ async def handle_client(websocket, args):
                     session.asr_kwargs["hotwords"] = hotwords
                     await websocket.send(json.dumps({"event": "hotwords_set", "hotwords": hotwords}))
                     logger.info(f"Hotwords set: {len(hotwords)} words")
+                elif cmd.upper().startswith("LANGUAGE:"):
+                    lang = cmd[9:].strip()
+                    session.asr_kwargs = dict(session.asr_kwargs)
+                    session.asr_kwargs["language"] = lang if lang else None
+                    await websocket.send(json.dumps({"event": "language_set", "language": lang}))
+                    logger.info(f"Language set: {lang}")
                 elif cmd.upper() == "STOP":
                     if session.is_active and len(session.audio_buffer) > 0:
                         result = session.decode(is_final=True)
@@ -530,5 +540,6 @@ if __name__ == "__main__":
     parser.add_argument("--no-context", dest="use_context", action="store_false")
     parser.add_argument("--decode-interval", type=float, default=0.48)
     parser.add_argument("--hotword-file", type=str, default="热词列表")
+    parser.add_argument("--language", type=str, default=None, help="Language hint (e.g. 中文, English, 日本語)")
     args = parser.parse_args()
     asyncio.run(main(args))
