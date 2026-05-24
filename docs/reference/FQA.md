@@ -99,6 +99,49 @@ curl http://localhost:8000/v1/audio/transcriptions \
 
 The response should include `text`. With `verbose_json`, supported models may also return segment-level information.
 
+## How do I run the OpenAI-compatible API with Docker Compose?
+
+Use the example Compose setup when you want a reproducible local smoke test before wiring the API into a product or agent workflow:
+
+```bash
+cd examples/openai_api
+cp .env.example .env
+docker compose up --build
+```
+
+Then verify it from another terminal:
+
+```bash
+BASE_URL=http://localhost:8000 bash smoke_test.sh
+```
+
+The example container defaults to `FUNASR_DEVICE=cpu` so it can start on machines without NVIDIA Container Toolkit. For CUDA, first adapt the image to use CUDA-capable PyTorch/FunASR dependencies, then set `FUNASR_DEVICE=cuda`.
+
+See also:
+
+- [OpenAI API example](../../examples/openai_api/)
+- [Client recipes](../../examples/openai_api/CLIENTS.md)
+- [Deployment matrix](../deployment_matrix.md)
+
+## Docker starts but `/health` or transcription fails
+
+Check the container logs first:
+
+```bash
+docker compose logs -f funasr-api
+```
+
+Common causes:
+
+- The first startup is still downloading or loading the model.
+- Port 8000 is already in use; set `FUNASR_HOST_PORT=9000` in `.env` and use `BASE_URL=http://localhost:9000`.
+- The container is running in CPU mode but `.env` or the command expects CUDA.
+- CUDA is requested but the image does not include CUDA-capable PyTorch/FunASR dependencies.
+- The model cache volume is empty or corrupted; retry after removing the `funasr-cache` Docker volume.
+- The uploaded audio file is too large for the machine; verify with the public sample before testing long recordings.
+
+When opening a Deployment Help issue, include your `.env` values without secrets, the `docker compose` command, container logs, model alias, device, and audio duration.
+
 ## Long audio is slow, split incorrectly, or runs out of memory
 
 Use VAD segmentation for long audio and tune segment length for your hardware:
