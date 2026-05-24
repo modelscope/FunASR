@@ -195,7 +195,7 @@ curl http://localhost:8000/v1/audio/transcriptions \
 docker pull registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-online-cpu-0.1.12
 ```
 
-[OpenAI API 示例 →](./examples/openai_api/) · [部署文档 →](./runtime/readme_cn.md) · [Agent 集成 →](https://modelscope.github.io/FunASR/agent.html)
+[OpenAI API 示例 →](./examples/openai_api/) · [客户端配方 →](./examples/openai_api/CLIENTS.md) · [部署文档 →](./runtime/readme_cn.md) · [Agent 集成 →](https://modelscope.github.io/FunASR/agent.html)
 
 ---
 
