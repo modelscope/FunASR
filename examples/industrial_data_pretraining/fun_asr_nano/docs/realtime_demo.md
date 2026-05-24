@@ -77,6 +77,7 @@ CUDA_VISIBLE_DEVICES=0 python serve_realtime_ws.py \
 | `--device` | `cuda:0` | GPU 设备 |
 | `--decode-interval` | 0.48 | 实时解码间隔（秒） |
 | `--hotword-file` | `热词列表` | 热词文件路径（一行一个词） |
+| `--language` | `None` (auto) | 指定语种（如 中文、English、日本語） |
 | `--use-context` | True | 使用上下文辅助解码 |
 | `--no-context` | - | 禁用上下文 |
 
@@ -152,6 +153,7 @@ WebSocket URL: ws://<host>:<port>
 |---------|------|------|
 | 开始会话 | `"START"` (text) | 初始化/重置 session |
 | 设置热词 | `"HOTWORDS:词1,词2,词3"` (text) | 可选，在 START 后发送 |
+| 设置语种 | `"LANGUAGE:中文"` (text) | 可选，指定识别语种 |
 | 音频数据 | `bytes` (binary) | PCM16 音频帧，任意长度 |
 | 结束会话 | `"STOP"` (text) | 触发最终解码，返回完整结果 |
 
@@ -162,6 +164,7 @@ WebSocket URL: ws://<host>:<port>
 ```json
 {"event": "started"}
 {"event": "hotwords_set", "hotwords": ["词1", "词2"]}
+{"event": "language_set", "language": "中文"}
 {"event": "stopped"}
 ```
 
@@ -218,6 +221,9 @@ Client                          Server
   │                               │
   │──── "HOTWORDS:张三,北京" ────→│  (可选)
   │←── {"event":"hotwords_set"} ──│
+  │                               │
+  │──── "LANGUAGE:中文" ─────────→│  (可选)
+  │←── {"event":"language_set"} ──│
   │                               │
   │──── [audio bytes] ───────────→│
   │──── [audio bytes] ───────────→│
