@@ -1,30 +1,54 @@
 # Give Your AI Agent Ears: FunASR as a Drop-in Speech Backend
 
-**TL;DR**: One Python file turns FunASR into an OpenAI-compatible `/v1/audio/transcriptions` endpoint. Any agent framework (LangChain, AutoGen, CrewAI) can use it with zero code changes — just change the base URL.
+**TL;DR**: `funasr-server` turns FunASR into an OpenAI-compatible `/v1/audio/transcriptions` endpoint. Agent frameworks such as LangChain, AutoGen, CrewAI, Dify, and MCP-based assistants can use it by changing the base URL.
 
 ---
 
 ## The Problem
 
 Every voice-enabled AI agent needs speech-to-text. Most developers default to:
-- **OpenAI Whisper API** — costs money per minute, data leaves your network
-- **Local Whisper** — slow (13x realtime), no speaker diarization built-in
-- **Google/Azure STT** — vendor lock-in, complex auth
 
-What if you could get **170x realtime speed**, **50+ languages**, **speaker diarization**, and **emotion detection** — all self-hosted, MIT licensed, and compatible with existing OpenAI SDK code?
+- **OpenAI Whisper API** - convenient, but paid per minute and sends audio to a hosted service
+- **Local Whisper** - self-hosted, but slower and does not include speaker diarization by default
+- **Google/Azure STT** - mature, but adds vendor lock-in and service-specific authentication
+
+What if you could get **170x realtime speed**, **50+ languages**, **speaker diarization**, **emotion detection**, and **private deployment** while keeping OpenAI SDK compatibility?
 
 ## The Solution: FunASR + OpenAI-Compatible Server
 
 ```bash
 pip install funasr fastapi uvicorn python-multipart
-python server.py --model sensevoice --device cuda --port 8000
+funasr-server --model sensevoice --device cuda --port 8000
 ```
 
-That's it. You now have a local API that speaks the same language as OpenAI.
+That is it. You now have a local speech API at `http://localhost:8000/v1`.
+
+## Verify It in 60 Seconds
+
+In another terminal, use the bundled smoke test:
+
+```bash
+git clone https://github.com/modelscope/FunASR
+cd FunASR/examples/openai_api
+bash smoke_test.sh
+```
+
+Or run the equivalent commands manually:
+
+```bash
+curl -L https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/BAC009S0764W0121.wav -o sample.wav
+curl http://localhost:8000/v1/audio/transcriptions \
+  -F file=@sample.wav \
+  -F model=sensevoice \
+  -F response_format=verbose_json
+```
+
+The response includes `text`; with `verbose_json`, supported models can also return segment-level metadata.
 
 ## Use with Any Agent Framework
 
 ### OpenAI SDK
+
 ```python
 from openai import OpenAI
 
@@ -37,28 +61,30 @@ print(result.text)
 ```
 
 ### LangChain
+
 ```python
-# Just override the base_url in your audio chain
+# Just override the base_url in your audio chain.
 transcription = openai_client.audio.transcriptions.create(
-    model="sensevoice", file=audio_file
+    model="sensevoice",
+    file=audio_file,
 )
-# Feed to your agent as context
 agent.invoke({"input": transcription.text})
 ```
 
 ### MCP (Claude, Cursor, Windsurf)
+
 ```json
 {
-    "mcpServers": {
-        "funasr": {
-            "command": "python",
-            "args": ["funasr_mcp.py"]
-        }
+  "mcpServers": {
+    "funasr": {
+      "command": "python",
+      "args": ["funasr_mcp.py"]
     }
+  }
 }
 ```
 
-Now your AI assistant can transcribe any audio file by just asking.
+Now your AI assistant can transcribe local audio files while keeping the audio inside your environment.
 
 ## Why FunASR Over Whisper?
 
@@ -70,6 +96,7 @@ Now your AI assistant can transcribe any audio file by just asking.
 | Emotion | Detects happy/sad/angry | No |
 | CPU viable | 17x realtime on CPU | Impractical |
 | Cost | Free (MIT) | $0.006/min (API) |
+| Deployment | Self-hosted API server | Local model or hosted API |
 
 ## Available Models
 
@@ -77,23 +104,25 @@ Now your AI assistant can transcribe any audio file by just asking.
 |-------|----------|-------|
 | `sensevoice` | General purpose, emotion | 170x GPU / 17x CPU |
 | `paraformer` | Chinese production | 120x GPU / 15x CPU |
+| `paraformer-en` | English production | 120x GPU / 15x CPU |
 | `fun-asr-nano` | 31 languages, LLM-based | 17x GPU |
 
 ## Get Started
 
 ```bash
-git clone https://github.com/modelscope/FunASR
-cd FunASR/examples/openai_api
 pip install funasr fastapi uvicorn python-multipart
-python server.py --device cuda
+funasr-server --model sensevoice --device cuda
 ```
 
-Then point your agent's audio transcription to `http://localhost:8000/v1`.
+Then point your agent's audio transcription client to `http://localhost:8000/v1`.
 
 ---
 
 **Links:**
+
 - GitHub: https://github.com/modelscope/FunASR
+- OpenAI API example: https://github.com/modelscope/FunASR/tree/main/examples/openai_api
+- Agent integration: https://modelscope.github.io/FunASR/agent.html
 - Benchmark: https://modelscope.github.io/FunASR/benchmark.html
-- Live Demo: https://huggingface.co/spaces/FunAudioLLM/Fun-ASR-Nano-GPU-Debug
+- Live demo: https://huggingface.co/spaces/FunAudioLLM/Fun-ASR-Nano-GPU-Debug
 - PyPI: `pip install funasr`
