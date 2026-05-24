@@ -3,47 +3,44 @@
 <title>FunASR Tutorial</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
-    <meta name="description" content="FunASR tutorial: installation, model loading, speech recognition, speaker diarization, streaming ASR. Get started in 3 lines of Python.">
 </head><body>
 <nav class="nav"><div class="container">
 <a href="index.html" class="nav-logo">FunASR</a>
             <div class="nav-links">
-<a href="index.html">Home</a>
-<a href="tutorial.html" class="active">Tutorial</a>
-<a href="training.html">Training</a>
-<a href="benchmark.html">Benchmark</a>
-<a href="model-registration.html">Develop</a>
-<a href="api.html">API</a>
-</div>
+                <a href="index.html">Home</a>
+                <a href="tutorial.html" class="active">Tutorial</a>
+                <a href="training.html">Training</a>
+                <a href="model-registration.html">Develop</a>
+                <a href="api.html">API</a>
+                <a href="vllm.html">vLLM</a>
+                <a href="agent.html">Agent</a>
+                <a href="benchmark.html">Benchmark</a>
+            </div>
 
 <div class="lang-dropdown"><button class="lang-btn">English</button><div class="lang-menu"><a href="tutorial.html" class="current">English</a><a href="zh/tutorial.html">中文</a><a href="ja/tutorial.html">日本語</a></div></div>
 <a href="https://github.com/modelscope/FunASR" class="nav-github">GitHub</a>
 </div></nav>
 
-<div class="doc-layout">
-<nav class="doc-sidebar">
-<div class="sb-title">Tutorial</div>
+<div class="content"><div class="container narrow">
+<h1>Tutorial</h1>
+<p>From zero to production — learn FunASR in 10 minutes.</p>
+
+<div class="toc-grid">
 <a href="#quick">30-Second Demo</a>
 <a href="#install">Install</a>
 <a href="#choose">Choose a Model</a>
-<div class="sb-title">Usage</div>
-<a href="#scenarios">Scenarios</a>
+<a href="#scenarios">Usage Scenarios</a>
 <a href="#offline">Offline ASR</a>
 <a href="#streaming">Streaming ASR</a>
 <a href="#spk">Speaker Diarization</a>
 <a href="#emotion">Emotion Detection</a>
 <a href="#vad">VAD</a>
 <a href="#punc">Punctuation</a>
+<a href="#deploy-agent">Deploy & Agent</a>
+<a href="#subtitle">Subtitles</a>
 <a href="#export">ONNX Export</a>
-<div class="sb-title">Reference</div>
-<a href="#config">Configuration</a>
-<a href="#faq">FAQ</a>
-</nav>
-<div class="doc-content">
-<h1>Tutorial</h1>
-<p>From zero to production — learn FunASR in 10 minutes.</p>
-
-
+<a href="#faq">FAQ & Troubleshooting</a>
+</div>
 
 <!-- 30-Second Demo -->
 <h2 id="quick">30-Second Demo</h2>
@@ -152,19 +149,6 @@ res = model.generate(input=["audio.wav"], cache={}, batch_size=1,
                      hotwords=["keyword"], language="中文")
 print(res[0]["text"])        # recognized text with punctuation
 print(res[0]["timestamps"])  # [{"token":"开","start_time":0.42,"end_time":0.48}, ...]</pre>
-<div class="param-info" style="margin:12px 0 24px;padding:14px 18px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;font-size:0.85rem;">
-<strong>Parameters:</strong>
-<ul style="margin:8px 0 0;padding-left:20px;line-height:1.8;">
-<li><code>model</code> — Model name or HuggingFace ID. Use <code>"FunAudioLLM/Fun-ASR-Nano-2512"</code> for 31 languages.</li>
-<li><code>trust_remote_code=True</code> — Required for Fun-ASR-Nano (loads custom model code from repo).</li>
-<li><code>vad_model="fsmn-vad"</code> — Enable VAD segmentation. Required for audio longer than 30s.</li>
-<li><code>vad_kwargs</code> — <code>max_single_segment_time</code>: max segment length in ms. Use 30000 for LLM models.</li>
-<li><code>hub="hf"</code> — Download from HuggingFace. Use <code>"ms"</code> for ModelScope (faster in China).</li>
-<li><code>batch_size=1</code> — Must be 1 for LLM-based models (Fun-ASR-Nano, Qwen3-ASR).</li>
-<li><code>hotwords</code> — List of hotwords with weight: <code>["keyword 20", "name 30"]</code>. Higher weight = stronger bias.</li>
-<li><code>language</code> — Language hint: <code>"中文"</code>, <code>"英文"</code>, <code>"日文"</code>, or auto-detect if omitted.</li>
-</ul></div>
-
 
 <div class="note"><strong>Fun-ASR-Nano outputs punctuation natively</strong> — no need for <code>punc_model</code>.</div>
 
@@ -184,17 +168,6 @@ res = model.generate(input="audio.wav", cache={}, language="auto",
 # Raw output contains emotion/event tags: <|zh|><|HAPPY|><|Speech|>你好
 text = rich_transcription_postprocess(res[0]["text"])
 print(text)  # "你好" (clean text)</pre>
-<div class="param-info" style="margin:12px 0 24px;padding:14px 18px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;font-size:0.85rem;">
-<strong>Parameters:</strong>
-<ul style="margin:8px 0 0;padding-left:20px;line-height:1.8;">
-<li><code>model="iic/SenseVoiceSmall"</code> — SenseVoice model. Ultra-fast (170x realtime GPU, 17x CPU). Supports zh/en/ja/ko/yue.</li>
-<li><code>use_itn=True</code> — Enable inverse text normalization + punctuation in output.</li>
-<li><code>batch_size_s=60</code> — Dynamic batching: total audio seconds per batch. Higher = faster but more memory.</li>
-<li><code>merge_vad=True</code> — Merge short VAD segments for cleaner output. Use with merge_length_s.</li>
-<li><code>merge_length_s=15</code> — Max merged segment length in seconds.</li>
-<li><code>language="auto"</code> — Auto-detect language. Or specify: <code>"zh"</code>, <code>"en"</code>, <code>"yue"</code>, <code>"ja"</code>, <code>"ko"</code>.</li>
-</ul></div>
-
 
 <h3>Qwen3-ASR (52 Languages, Highest Accuracy)</h3>
 <pre># pip install qwen-asr
@@ -230,16 +203,6 @@ for i in range(total_chunks):
                          decoder_chunk_look_back=1)
     if res[0]["text"]:
         print(res[0]["text"], end="", flush=True)  # incremental output</pre>
-<div class="param-info" style="margin:12px 0 24px;padding:14px 18px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;font-size:0.85rem;">
-<strong>Parameters:</strong>
-<ul style="margin:8px 0 0;padding-left:20px;line-height:1.8;">
-<li><code>chunk_size=[0, 10, 5]</code> — Streaming config: [lookback, chunk, lookahead] in 60ms frames. <code>[0,10,5]</code> = 600ms chunks with 300ms lookahead.</li>
-<li><code>encoder_chunk_look_back=4</code> — Number of past chunks for encoder self-attention context.</li>
-<li><code>decoder_chunk_look_back=1</code> — Number of encoder chunks for decoder cross-attention.</li>
-<li><code>cache={}</code> — Streaming state. Pass empty dict on first call, reuse for subsequent chunks.</li>
-<li><code>is_final=True</code> — Set on last chunk to flush remaining output.</li>
-</ul></div>
-
 
 <p><strong>Output (printed incrementally):</strong></p>
 <div class="output-box">欢迎大 | 家来 | 体验达 | 摩院推 | 出的语 | 音识 | 别模型</div>
@@ -268,13 +231,6 @@ res = model.generate(input="meeting.wav", batch_size_s=300)
 
 for sent in res[0]["sentence_info"]:
     print(f"[Speaker {sent['spk']}] [{sent['start']}-{sent['end']}ms] {sent['text']}")</pre>
-<div class="param-info" style="margin:12px 0 24px;padding:14px 18px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;font-size:0.85rem;">
-<strong>Parameters:</strong>
-<ul style="margin:8px 0 0;padding-left:20px;line-height:1.8;">
-<li><code>spk_model="cam++"</code> — Enable speaker diarization. Adds <code>spk</code> field to each sentence in output.</li>
-<li><code>punc_model="ct-punc"</code> — Punctuation model. Needed for Paraformer; not needed for SenseVoice/Fun-ASR-Nano.</li>
-</ul></div>
-
 
 <p><strong>Output:</strong></p>
 <div class="output-box">[Speaker 0] [880-5195ms] 欢迎大家来体验达摩院推出的语音识别模型。</div>
@@ -362,6 +318,27 @@ print(res[0]["text"])  # "那今天的会就到这里吧，happy new year，明�
 <div class="note"><strong>When do you need this?</strong> Only with Paraformer (which outputs raw text without punctuation). Fun-ASR-Nano, SenseVoice, and Qwen3-ASR output punctuation natively.</div>
 
 <!-- Export -->
+
+<h2 id="deploy-agent">Deploy & Agent Integration</h2>
+<p>Use <code>funasr-server</code> when you need a local OpenAI-compatible endpoint for applications and agents.</p>
+<pre>pip install funasr fastapi uvicorn python-multipart
+funasr-server --device cuda --port 8000</pre>
+<pre>from openai import OpenAI
+client = OpenAI(base_url="http://localhost:8000/v1", api_key="x")
+result = client.audio.transcriptions.create(
+    model="sensevoice",
+    file=open("meeting.wav", "rb"),
+    response_format="verbose_json",
+)</pre>
+<p>For Claude Code, Cursor, and other MCP clients, configure <code>examples/mcp_server/funasr_mcp.py</code>. See the <a href="agent.html">Agent integration guide</a>.</p>
+
+<h2 id="subtitle">Subtitle Generation</h2>
+<p>Generate SRT or VTT subtitles from audio/video files, with optional speaker labels.</p>
+<pre>cd examples/subtitle
+python generate_subtitle.py video.mp4
+python generate_subtitle.py meeting.wav --spk
+python generate_subtitle.py podcast.mp3 --format vtt</pre>
+
 <h2 id="export">ONNX Export</h2>
 <pre># Export model to ONNX format
 from funasr import AutoModel
@@ -377,84 +354,6 @@ result = model(["audio.wav"])
 print(result)</pre>
 
 <!-- FAQ -->
-
-<h2 id="config">Configuration Reference</h2>
-<p>Complete parameter reference for <code>AutoModel()</code> and <code>model.generate()</code>.</p>
-
-<h3>AutoModel() — Model Initialization</h3>
-<table>
-<tr><th>Parameter</th><th>Type</th><th>Default</th><th>Description</th></tr>
-<tr><td><code>model</code></td><td>str</td><td>—</td><td>Model name or local path. Examples: <code>"paraformer-zh"</code>, <code>"iic/SenseVoiceSmall"</code>, <code>"FunAudioLLM/Fun-ASR-Nano-2512"</code></td></tr>
-<tr><td><code>hub</code></td><td>str</td><td><code>"ms"</code></td><td>Model hub: <code>"ms"</code> (ModelScope, fast in China) or <code>"hf"</code> (HuggingFace, international)</td></tr>
-<tr><td><code>device</code></td><td>str</td><td><code>"cuda"</code></td><td>Device: <code>"cuda"</code>, <code>"cuda:0"</code>, <code>"cpu"</code>, <code>"mps"</code> (Apple Silicon)</td></tr>
-<tr><td><code>vad_model</code></td><td>str</td><td><code>None</code></td><td>VAD model for long audio segmentation. Set <code>"fsmn-vad"</code> to enable. Required for audio &gt; 30s.</td></tr>
-<tr><td><code>vad_kwargs</code></td><td>dict</td><td><code>{}</code></td><td>VAD configuration. See VAD parameters below.</td></tr>
-<tr><td><code>punc_model</code></td><td>str</td><td><code>None</code></td><td>Punctuation model. Set <code>"ct-punc"</code> to enable. Not needed for SenseVoice/Fun-ASR-Nano (built-in).</td></tr>
-<tr><td><code>spk_model</code></td><td>str</td><td><code>None</code></td><td>Speaker diarization model. Set <code>"cam++"</code> to enable speaker labels.</td></tr>
-<tr><td><code>trust_remote_code</code></td><td>bool</td><td><code>False</code></td><td>Required for Fun-ASR-Nano, Qwen3-ASR, GLM-ASR. Set <code>True</code>.</td></tr>
-<tr><td><code>dtype</code></td><td>str</td><td><code>None</code></td><td>Precision: <code>"bf16"</code>, <code>"fp16"</code>, or default (fp32). Use bf16 for LLM models on Ampere+ GPU.</td></tr>
-<tr><td><code>disable_update</code></td><td>bool</td><td><code>False</code></td><td>Skip version check on startup. Set <code>True</code> for production.</td></tr>
-</table>
-
-<h3>VAD Parameters (vad_kwargs)</h3>
-<table>
-<tr><th>Parameter</th><th>Type</th><th>Default</th><th>Description</th></tr>
-<tr><td><code>max_single_segment_time</code></td><td>int</td><td><code>60000</code></td><td>Max segment length in ms. Lower = less memory, more segments. Recommended: 30000 for LLM models, 60000 for NAR models.</td></tr>
-</table>
-
-<h3>model.generate() — Inference</h3>
-<table>
-<tr><th>Parameter</th><th>Type</th><th>Default</th><th>Description</th></tr>
-<tr><td><code>input</code></td><td>str/list/np.array</td><td>—</td><td>Audio file path, URL, list of paths, or numpy array (16kHz float32).</td></tr>
-<tr><td><code>batch_size</code></td><td>int</td><td><code>1</code></td><td>Batch size. LLM models (Fun-ASR-Nano, Qwen3) must use 1. NAR models (Paraformer, SenseVoice) can use higher values.</td></tr>
-<tr><td><code>batch_size_s</code></td><td>int</td><td><code>0</code></td><td>Dynamic batching by total audio seconds. Set e.g. <code>300</code> for automatic batching. Mutually exclusive with batch_size.</td></tr>
-<tr><td><code>language</code></td><td>str</td><td><code>"auto"</code></td><td>Language hint. Examples: <code>"zh"</code>, <code>"en"</code>, <code>"ja"</code>, <code>"ko"</code>, <code>"yue"</code> (Cantonese), <code>"中文"</code>, <code>"英文"</code></td></tr>
-<tr><td><code>use_itn</code></td><td>bool</td><td><code>False</code></td><td>Inverse text normalization (e.g., "一百二十三" → "123"). Set True for production.</td></tr>
-<tr><td><code>hotwords</code></td><td>list</td><td><code>None</code></td><td>Hotword list with weights: <code>["keyword 20", "name 30"]</code>. Higher weight = stronger bias.</td></tr>
-<tr><td><code>cache</code></td><td>dict</td><td><code>{}</code></td><td>Streaming cache. Pass empty dict <code>{}</code> for first call, reuse for subsequent chunks.</td></tr>
-<tr><td><code>chunk_size</code></td><td>list</td><td><code>None</code></td><td>Streaming chunk config: <code>[lookback, chunk, lookahead]</code> in 60ms frames. E.g. <code>[0, 10, 5]</code></td></tr>
-<tr><td><code>merge_vad</code></td><td>bool</td><td><code>False</code></td><td>Merge short VAD segments. Useful with SenseVoice for cleaner output.</td></tr>
-<tr><td><code>merge_length_s</code></td><td>int</td><td><code>15</code></td><td>Max merged segment length in seconds. Used with merge_vad=True.</td></tr>
-</table>
-
-<h3>Output Format</h3>
-<pre># Basic output
-result = model.generate(input="audio.wav")
-result[0]["text"]       # Full text
-result[0]["timestamp"]  # [[start_ms, end_ms], ...] (if model supports)
-
-# With speaker diarization
-result[0]["sentence_info"]
-# [{"text": "Hello", "start": 420, "end": 1800, "timestamp": [...], "spk": 0}, ...]
-
-# With emotion (SenseVoice)
-# Text contains tags: &lt;|HAPPY|&gt;, &lt;|SAD|&gt;, &lt;|ANGRY|&gt;, &lt;|NEUTRAL|&gt;
-# Audio events: &lt;|Speech|&gt;, &lt;|Music|&gt;, &lt;|Laughter|&gt;, &lt;|Applause|&gt;</pre>
-
-<h3>Common Configurations</h3>
-<pre># Chinese meeting transcription (best quality)
-model = AutoModel(model="paraformer-zh", vad_model="fsmn-vad",
-                  punc_model="ct-punc", spk_model="cam++", device="cuda")
-
-# Multi-language (31 langs) with timestamps
-model = AutoModel(model="FunAudioLLM/Fun-ASR-Nano-2512", hub="hf",
-                  trust_remote_code=True, vad_model="fsmn-vad",
-                  vad_kwargs={"max_single_segment_time": 30000}, device="cuda")
-
-# Ultra-fast (emotion + events)
-model = AutoModel(model="iic/SenseVoiceSmall", vad_model="fsmn-vad", device="cuda")
-
-# CPU deployment (no GPU needed)
-model = AutoModel(model="iic/SenseVoiceSmall", vad_model="fsmn-vad", device="cpu")
-
-# HuggingFace download (international users)
-model = AutoModel(model="FunAudioLLM/SenseVoiceSmall", hub="hf",
-                  vad_model="funasr/fsmn-vad", device="cuda")
-
-# Streaming real-time
-model = AutoModel(model="paraformer-zh-streaming", device="cuda")
-result = model.generate(input="chunk.wav", cache={}, chunk_size=[0, 10, 5])</pre>
-
 <h2 id="faq">FAQ & Troubleshooting</h2>
 
 <h4>Model download is slow</h4>
@@ -493,11 +392,13 @@ print(torch.cuda.is_available())  # must be True
 # Specify GPU explicitly:
 model = AutoModel(model="...", device="cuda:0")</pre>
 
-</div><!-- doc-content -->
-</div><!-- doc-layout -->
+</div></div>
 
 <footer>
 <p>FunASR &middot; Tongyi Lab, Alibaba Group</p>
-<p><a href="index.html">Home</a> &middot; <a href="tutorial.html">Tutorial</a> &middot; <a href="training.html">Training</a> &middot; <a href="model-registration.html">Develop</a> &middot; <a href="api.html">API</a> &middot; <a href="https://github.com/modelscope/FunASR">GitHub</a></p>
+<p><a href="index.html">Home</a> &middot; <a href="tutorial.html">Tutorial</a> &middot; <a href="training.html">Training</a> &middot; <a href="model-registration.html">Develop</a> &middot; <a href="api.html">API</a> &middot;
+            <a href="vllm.html">vLLM</a> &middot;
+            <a href="agent.html">Agent</a> &middot;
+            <a href="benchmark.html">Benchmark</a> &middot; <a href="https://github.com/modelscope/FunASR">GitHub</a></p>
 </footer>
 </body></html>

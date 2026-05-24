@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>FunASR vLLM Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head><body>
+<nav class="nav"><div class="container">
+<a href="index.html" class="nav-logo">FunASR</a>
+<div class="nav-links">
+<a href="index.html">Home</a>
+<a href="tutorial.html">Tutorial</a>
+<a href="training.html">Training</a>
+<a href="model-registration.html">Develop</a>
+<a href="api.html">API</a>
+<a href="vllm.html" class="active">vLLM</a><a href="agent.html">Agent</a><a href="benchmark.html">Benchmark</a>
+</div>
+<div class="lang-dropdown"><button class="lang-btn">English</button><div class="lang-menu"><a href="vllm.html" class="current">English</a><a href="zh/vllm.html">中文</a><a href="ja/vllm.html">日本語</a></div></div>
+<a href="https://github.com/modelscope/FunASR" class="nav-github">GitHub</a>
+</div></nav>
+
+<div class="content"><div class="container narrow">
+<h1>vLLM Inference Engine</h1>
+<p>Use vLLM to accelerate autoregressive, LLM-based ASR models. The new engine supports offline batch transcription, SDK-style chunked streaming, and a production WebSocket service with VAD, hotwords, and speaker labels.</p>
+
+<div class="toc-grid">
+<a href="#overview">Overview</a>
+<a href="#install">Installation</a>
+<a href="#offline">Offline Batch</a>
+<a href="#streaming-sdk">Streaming SDK</a>
+<a href="#websocket">WebSocket Service</a>
+<a href="#dynamic-vad">Dynamic VAD</a>
+<a href="#performance">Performance</a>
+<a href="#api-reference">API Reference</a>
+<a href="#faq">FAQ</a>
+</div>
+
+<section id="overview">
+<h2>Overview</h2>
+<p>The audio frontend, encoder, adaptor, and optional CTC timestamp decoder still run in PyTorch. The LLM decoder runs in vLLM with prompt-embedding input, PagedAttention, continuous batching, and optional tensor parallelism.</p>
+
+<h3>Supported Models</h3>
+<table>
+<tr><th>Model family</th><th>vLLM support</th><th>Why</th></tr>
+<tr><td><b>FunASRNano</b></td><td>Yes</td><td>Audio encoder + adaptor + Qwen3-0.6B LLM.</td></tr>
+<tr><td><b>LLMASR / LLMASRNAR</b></td><td>Yes</td><td>Whisper-style audio encoder followed by Qwen, Vicuna, or LLaMA decoding.</td></tr>
+<tr><td><b>GLMASR</b></td><td>Yes</td><td>GLM-ASR-Nano uses autoregressive LLM decoding.</td></tr>
+<tr><td><b>QwenAudioWarp</b></td><td>Yes</td><td>LLM-based audio generation path.</td></tr>
+<tr><td>Paraformer, SenseVoice, Conformer, Transformer</td><td>No</td><td>These are non-LLM or encoder-decoder/CTC models; use the standard <code>AutoModel</code>.</td></tr>
+</table>
+
+<h3>Three Entry Points</h3>
+<table>
+<tr><th>Mode</th><th>Entry point</th><th>Best for</th></tr>
+<tr><td>Offline batch</td><td><code>AutoModelVLLM</code> or <code>FunASRNanoVLLM</code></td><td>Large file sets and throughput-oriented transcription.</td></tr>
+<tr><td>Streaming SDK</td><td><code>FunASRNanoStreamingVLLM</code></td><td>Applications that want chunk-level incremental text in Python.</td></tr>
+<tr><td>WebSocket service</td><td><code>serve_realtime_ws.py</code></td><td>Production real-time clients with VAD segmentation and speaker labels.</td></tr>
+</table>
+</section>
+
+<section id="install">
+<h2>Installation</h2>
+<pre><code>pip install "funasr&gt;=1.3.0"
+pip install "vllm&gt;=0.12.0"
+pip install safetensors tiktoken websockets regex
+
+# Development install if you are using the source tree
+cd /path/to/FunASR
+pip install -e .</code></pre>
+<table>
+<tr><th>Resource</th><th>Minimum</th><th>Recommended</th></tr>
+<tr><td>GPU memory</td><td>8 GB</td><td>16 GB or more for comfortable KV cache space.</td></tr>
+<tr><td>CUDA</td><td>11.8</td><td>12.x</td></tr>
+<tr><td>GPUs</td><td>1</td><td>2 or more when using tensor parallelism.</td></tr>
+</table>
+<p>On first use, FunASR extracts the LLM weights from <code>model.pt</code> into a vLLM-compatible directory such as <code>Qwen3-0.6B-vllm</code>. Later starts reuse the prepared weights.</p>
+</section>
+
+<section id="offline">
+<h2>Offline Batch Inference</h2>
+<h3>Recommended Generic API</h3>
+<pre><code>from funasr.auto.auto_model_vllm import AutoModelVLLM
+
+model = AutoModelVLLM(
+    model="FunAudioLLM/Fun-ASR-Nano-2512",
+    hub="ms",                    # or "hf"
+    tensor_parallel_size=2,
+    gpu_memory_utilization=0.8,
+)
+
+results = model.generate(
+    ["audio1.wav", "audio2.wav"],
+    language="中文",
+    hotwords=["张三", "北京"],
+)
+for item in results:
+    print(f"[{item['key']}] {item['text']}")</code></pre>
+
+<h3>Fun-ASR-Nano Direct API</h3>
+<pre><code>from funasr.models.fun_asr_nano.inference_vllm import FunASRNanoVLLM
+
+engine = FunASRNanoVLLM.from_pretrained(
+    model="FunAudioLLM/Fun-ASR-Nano-2512",
+    tensor_parallel_size=4,
+)
+
+results = engine.generate(
+    inputs="wav.scp",
+    language="中文",
+    hotwords=["开放时间"],
+    max_new_tokens=512,
+)</code></pre>
+
+<h3>Command Line</h3>
+<pre><code>cd examples/industrial_data_pretraining/fun_asr_nano
+
+# Single file
+python demo_vllm.py --input audio.wav --language 中文
+
+# Batch + multi-GPU tensor parallel
+python demo_vllm.py --input wav.scp --tensor-parallel-size 4 --batch-size 32
+
+# Hotwords + JSONL output
+python demo_vllm.py --input audio.wav --hotwords 张三 北京 --output results.jsonl</code></pre>
+</section>
+
+<section id="streaming-sdk">
+<h2>Streaming SDK</h2>
+<p><code>FunASRNanoStreamingVLLM</code> slices audio into 720 ms chunks, re-encodes cumulative audio, batches the chunk prompts into vLLM, and returns a fixed/unfixed text split. It is useful when a Python application wants progressive subtitles without running a service.</p>
+<pre><code>from funasr.models.fun_asr_nano.inference_vllm_streaming import FunASRNanoStreamingVLLM
+
+engine = FunASRNanoStreamingVLLM.from_pretrained(
+    model="FunAudioLLM/Fun-ASR-Nano-2512",
+    chunk_ms=720,
+    rollback_chars=8,
+)
+
+for result in engine.streaming_generate("audio.wav", language="中文"):
+    if result["is_final"]:
+        print(f"Final: {result['text']}")
+    else:
+        print(f"[{result['audio_duration_ms']:.0f} ms] fixed: {result['fixed_text']}")</code></pre>
+<table>
+<tr><th>Behavior</th><th>Details</th></tr>
+<tr><td>Stage 1</td><td>The first 10 chunks are decoded without <code>prev_text</code> to find a stable prefix.</td></tr>
+<tr><td>Stage 2</td><td>Remaining chunks use the stable prefix as assistant context.</td></tr>
+<tr><td>Rollback</td><td>The last <code>rollback_chars</code> characters stay unfixed until later chunks.</td></tr>
+<tr><td>Short audio</td><td>The first 1.5 to 3 seconds may be empty or unstable; this is expected for the model.</td></tr>
+</table>
+</section>
+
+<section id="websocket">
+<h2>WebSocket Service</h2>
+<p>The real-time service combines streaming VAD, vLLM segment decoding, partial previews, hallucination cleanup, hotwords, language hints, and speaker diarization.</p>
+
+<h3>Start the Service</h3>
+<pre><code>cd examples/industrial_data_pretraining/fun_asr_nano
+
+# Single GPU
+CUDA_VISIBLE_DEVICES=0 python serve_realtime_ws.py --port 10095 --language 中文
+
+# Multi-GPU tensor parallel
+CUDA_VISIBLE_DEVICES=0,1 python serve_realtime_ws.py \
+    --port 10095 \
+    --tensor-parallel-size 2 \
+    --language 中文
+
+# Full parameter example
+python serve_realtime_ws.py \
+    --port 10095 \
+    --model FunAudioLLM/Fun-ASR-Nano-2512 \
+    --hub ms \
+    --device cuda:0 \
+    --decode-interval 0.48 \
+    --hotword-file 热词列表 \
+    --language 中文 \
+    --dtype bf16 \
+    --tensor-parallel-size 1 \
+    --gpu-memory-utilization 0.8 \
+    --max-model-len 2048</code></pre>
+
+<h3>Clients</h3>
+<table>
+<tr><th>Client</th><th>Usage</th></tr>
+<tr><td>Browser</td><td>Open <code>client_mic.html</code> for microphone, file upload, hotwords, and speaker labels.</td></tr>
+<tr><td>Python CLI</td><td><code>python client_python.py --server ws://localhost:10095 --mic</code></td></tr>
+<tr><td>Test script</td><td><code>python client_test.py --server ws://localhost:10095 --file audio.wav</code></td></tr>
+</table>
+<p>For a remote GPU server, forward the port first: <code>ssh -L 10095:localhost:10095 &lt;server&gt;</code>.</p>
+
+<h3>Protocol</h3>
+<pre><code>Client -&gt; Server:
+  "START"                 initialize a session
+  "HOTWORDS:word1,word2"  set hotwords, optional
+  "LANGUAGE:中文"          set language, optional
+  [binary bytes]          PCM16 16 kHz mono audio
+  "STOP"                  finalize the session
+
+Server -&gt; Client:
+  {"event": "started"}
+  {"event": "hotwords_set", "hotwords": ["word1", "word2"]}
+  {"event": "language_set", "language": "中文"}
+  {"sentences": [...], "partial": "...", "is_final": false}
+  {"sentences": [...], "partial": "", "is_final": true}
+  {"event": "stopped"}</code></pre>
+
+<h3>Inference Logic</h3>
+<table>
+<tr><th>Path</th><th>Trigger</th><th>Output</th></tr>
+<tr><td>Confirmed segment</td><td>Dynamic VAD detects an endpoint.</td><td>The full segment is decoded and locked in <code>sentences</code>.</td></tr>
+<tr><td>Partial preview</td><td><code>--decode-interval</code>, default 0.48 s, and enough new audio.</td><td>Temporary <code>partial</code> text that may be overwritten.</td></tr>
+<tr><td>Finalization</td><td><code>STOP</code>.</td><td>Flush remaining VAD audio, force-end active speech, run final speaker re-clustering, return <code>is_final: true</code>.</td></tr>
+</table>
+</section>
+
+<section id="dynamic-vad">
+<h2>Dynamic VAD</h2>
+<p>Dynamic VAD adjusts the silence threshold from the current speech duration: short utterances wait longer before cutting, while long utterances are split faster to protect ASR quality.</p>
+<h3>Streaming Wrapper Schedule</h3>
+<table>
+<tr><th>Accumulated speech</th><th>Silence threshold</th><th>Effect</th></tr>
+<tr><td>&le; 5 s</td><td>2.0 s</td><td>Avoid cutting short turns too early.</td></tr>
+<tr><td>5-10 s</td><td>1.5 s</td><td>Normal conversational segmentation.</td></tr>
+<tr><td>10-15 s</td><td>1.0 s</td><td>Start tightening long turns.</td></tr>
+<tr><td>15-30 s</td><td>0.8 s</td><td>Faster cuts.</td></tr>
+<tr><td>30-45 s</td><td>0.4 s</td><td>Prevent very long ASR segments.</td></tr>
+<tr><td>&gt; 45 s</td><td>0.1 s</td><td>Force splitting.</td></tr>
+</table>
+<h3>Native fsmn-vad Schedule</h3>
+<table>
+<tr><th>Accumulated speech</th><th>Silence threshold</th></tr>
+<tr><td>&le; 5 s</td><td>800 ms</td></tr>
+<tr><td>5-10 s</td><td>600 ms</td></tr>
+<tr><td>10-20 s</td><td>500 ms</td></tr>
+<tr><td>20-30 s</td><td>400 ms</td></tr>
+<tr><td>&gt; 30 s</td><td>300 ms</td></tr>
+</table>
+<pre><code># Default: dynamic_silence=True
+model.generate(input="audio.wav")
+
+# Disable dynamic silence thresholds
+model.generate(input="audio.wav", dynamic_silence=False)
+
+# Custom schedule: (duration_limit_ms, silence_threshold_ms)
+model.generate(input="audio.wav", silence_schedule=[
+    (5000, 1000),
+    (15000, 500),
+    (float("inf"), 200),
+])</code></pre>
+<pre><code>from funasr import AutoModel
+from funasr.models.fsmn_vad_streaming.dynamic_vad import DynamicStreamingVAD
+
+vad_model = AutoModel(model="fsmn-vad", device="cuda:0")
+vad = DynamicStreamingVAD(vad_model)
+
+for chunk in audio_stream:
+    segments = vad.feed(chunk)
+    for start_ms, end_ms in segments:
+        print(f"Speech: {start_ms}-{end_ms} ms")
+
+final_segments = vad.finalize()</code></pre>
+</section>
+
+<section id="performance">
+<h2>Performance</h2>
+<table>
+<tr><th>Scenario</th><th>PyTorch baseline</th><th>vLLM</th><th>Speedup</th></tr>
+<tr><td>Offline, 5.6 s audio</td><td>0.89 s</td><td>0.30 s</td><td><b>3x</b></td></tr>
+<tr><td>Offline, 2-GPU tensor parallel</td><td>0.89 s</td><td>~0.20 s</td><td><b>4.5x</b></td></tr>
+<tr><td>Batch 16 files</td><td>~16x serial cost</td><td>~4x</td><td><b>4x</b></td></tr>
+<tr><td>Batch 32 files</td><td>~32x serial cost</td><td>~5x</td><td><b>6x</b></td></tr>
+<tr><td>WebSocket RTF</td><td>0.156</td><td>0.078</td><td><b>2x</b></td></tr>
+</table>
+</section>
+
+<section id="api-reference">
+<h2>API Reference</h2>
+<h3>AutoModelVLLM</h3>
+<table>
+<tr><th>Parameter</th><th>Default</th><th>Description</th></tr>
+<tr><td><code>model</code></td><td>-</td><td>ModelScope/Hugging Face id or local model directory.</td></tr>
+<tr><td><code>hub</code></td><td><code>"ms"</code></td><td><code>"ms"</code>, <code>"modelscope"</code>, <code>"hf"</code>, or <code>"huggingface"</code>.</td></tr>
+<tr><td><code>device</code></td><td><code>"cuda:0"</code></td><td>PyTorch audio encoder and adaptor device.</td></tr>
+<tr><td><code>dtype</code></td><td><code>"bf16"</code></td><td><code>"bf16"</code>, <code>"fp16"</code>, or <code>"fp32"</code>.</td></tr>
+<tr><td><code>tensor_parallel_size</code></td><td><code>1</code></td><td>Number of GPUs used by vLLM tensor parallelism.</td></tr>
+<tr><td><code>gpu_memory_utilization</code></td><td><code>0.8</code></td><td>Fraction of GPU memory reserved for the vLLM KV cache.</td></tr>
+<tr><td><code>max_model_len</code></td><td><code>4096</code></td><td>Maximum vLLM sequence length.</td></tr>
+</table>
+
+<h3><code>generate()</code></h3>
+<table>
+<tr><th>Parameter</th><th>Default</th><th>Description</th></tr>
+<tr><td><code>inputs</code></td><td>-</td><td>Audio path, path list, numpy array, tensor, <code>wav.scp</code>, or JSONL.</td></tr>
+<tr><td><code>language</code></td><td><code>None</code></td><td>Language hint, for example <code>"中文"</code>, <code>"English"</code>, or <code>"日本語"</code>.</td></tr>
+<tr><td><code>hotwords</code></td><td><code>None</code></td><td>List of hotwords to include in the ASR prompt.</td></tr>
+<tr><td><code>itn</code></td><td><code>True</code></td><td>Apply inverse text normalization.</td></tr>
+<tr><td><code>max_new_tokens</code></td><td><code>512</code></td><td>Maximum generated tokens per sample.</td></tr>
+<tr><td><code>temperature</code></td><td><code>0.0</code></td><td>Greedy decoding by default.</td></tr>
+<tr><td><code>repetition_penalty</code></td><td><code>1.0</code></td><td>Penalty used by vLLM generation.</td></tr>
+</table>
+<p>Return format: <code>[{"key": str, "text": str, "timestamps": [...]}]</code>. Timestamps are emitted when the model includes the optional CTC decoder and tokenizer.</p>
+</section>
+
+<section id="faq">
+<h2>FAQ</h2>
+<dl>
+<dt>Q: Why is the first startup slow?</dt>
+<dd>vLLM initializes the KV cache and CUDA graphs, and FunASR may extract LLM weights from <code>model.pt</code>. This can take about 60-90 seconds on the first run.</dd>
+<dt>Q: What should I do for CUDA OOM?</dt>
+<dd>Lower <code>gpu_memory_utilization</code>, lower <code>max_model_len</code>, or increase <code>tensor_parallel_size</code>.</dd>
+<dt>Q: Can Paraformer use vLLM?</dt>
+<dd>No. Paraformer is non-autoregressive and does not benefit from vLLM KV-cache decoding.</dd>
+<dt>Q: WebSocket service or <code>streaming_generate()</code>?</dt>
+<dd>Use the WebSocket service for production real-time ASR with VAD endpoints. Use <code>streaming_generate()</code> for SDK integration or chunk-level demos.</dd>
+<dt>Q: The browser cannot access my microphone on a remote server.</dt>
+<dd>Chrome requires HTTPS or localhost for microphone access. Use <code>ssh -L 10095:localhost:10095 &lt;server&gt;</code> and open the client from localhost.</dd>
+</dl>
+</section>
+
+</div></div>
+
+<footer>
+<p>FunASR &middot; Tongyi Lab, Alibaba Group</p>
+<p><a href="index.html">Home</a> &middot; <a href="tutorial.html">Tutorial</a> &middot; <a href="training.html">Training</a> &middot; <a href="model-registration.html">Develop</a> &middot; <a href="api.html">API</a> &middot; <a href="vllm.html">vLLM</a> &middot; <a href="agent.html">Agent</a> &middot; <a href="benchmark.html">Benchmark</a> &middot; <a href="https://github.com/modelscope/FunASR">GitHub</a></p>
+</footer>
+</body></html>

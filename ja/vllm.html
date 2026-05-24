@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>FunASR vLLM 推論エンジン</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../style.css">
+</head><body>
+<nav class="nav"><div class="container">
+<a href="index.html" class="nav-logo">FunASR</a>
+<div class="nav-links">
+<a href="index.html">ホーム</a>
+<a href="tutorial.html">チュートリアル</a>
+<a href="training.html">トレーニング</a>
+<a href="model-registration.html">開発</a>
+<a href="../api.html">API</a>
+<a href="vllm.html" class="active">vLLM</a><a href="agent.html">Agent</a><a href="benchmark.html">Benchmark</a>
+</div>
+<div class="lang-dropdown"><button class="lang-btn">日本語</button><div class="lang-menu"><a href="../vllm.html">English</a><a href="../zh/vllm.html">中文</a><a href="vllm.html" class="current">日本語</a></div></div>
+<a href="https://github.com/modelscope/FunASR" class="nav-github">GitHub</a>
+</div></nav>
+
+<div class="content"><div class="container narrow">
+<h1>vLLM 推論エンジン</h1>
+<p>vLLM を使って自己回帰型の LLM-based ASR モデルを高速化します。新しいエンジンは、オフライン一括書き起こし、SDK 形式のチャンクストリーミング、VAD・ホットワード・話者ラベル付きの本番向け WebSocket サービスを提供します。</p>
+
+<div class="toc-grid">
+<a href="#overview">概要</a>
+<a href="#install">インストール</a>
+<a href="#offline">オフライン一括</a>
+<a href="#streaming-sdk">Streaming SDK</a>
+<a href="#websocket">WebSocket サービス</a>
+<a href="#dynamic-vad">Dynamic VAD</a>
+<a href="#performance">性能</a>
+<a href="#api-reference">API リファレンス</a>
+<a href="#faq">FAQ</a>
+</div>
+
+<section id="overview">
+<h2>概要</h2>
+<p>音声 frontend、encoder、adaptor、任意の CTC タイムスタンプ decoder は PyTorch で実行されます。LLM decoder は prompt embedding として vLLM に渡され、PagedAttention、continuous batching、tensor parallel による高速化を利用します。</p>
+
+<h3>対応モデル</h3>
+<table>
+<tr><th>モデル系列</th><th>vLLM 対応</th><th>理由</th></tr>
+<tr><td><b>FunASRNano</b></td><td>対応</td><td>Audio encoder + adaptor + Qwen3-0.6B LLM。</td></tr>
+<tr><td><b>LLMASR / LLMASRNAR</b></td><td>対応</td><td>Whisper-style audio encoder の後段に Qwen、Vicuna、LLaMA decoder を持つ構成。</td></tr>
+<tr><td><b>GLMASR</b></td><td>対応</td><td>GLM-ASR-Nano は自己回帰 LLM decoding を使用。</td></tr>
+<tr><td><b>QwenAudioWarp</b></td><td>対応</td><td>LLM-based audio generation path。</td></tr>
+<tr><td>Paraformer、SenseVoice、Conformer、Transformer</td><td>非対応</td><td>LLM 自己回帰 decoding ではないため、通常の <code>AutoModel</code> を使用してください。</td></tr>
+</table>
+
+<h3>3 つの入口</h3>
+<table>
+<tr><th>モード</th><th>入口</th><th>用途</th></tr>
+<tr><td>オフライン一括推論</td><td><code>AutoModelVLLM</code> / <code>FunASRNanoVLLM</code></td><td>大量ファイルの書き起こし、スループット重視の処理。</td></tr>
+<tr><td>Streaming SDK</td><td><code>FunASRNanoStreamingVLLM</code></td><td>Python アプリで chunk 単位の逐次テキストが必要な場合。</td></tr>
+<tr><td>WebSocket リアルタイムサービス</td><td><code>serve_realtime_ws.py</code></td><td>VAD 分割、話者ラベル付きの本番リアルタイムクライアント。</td></tr>
+</table>
+</section>
+
+<section id="install">
+<h2>インストール</h2>
+<pre><code>pip install "funasr&gt;=1.3.0"
+pip install "vllm&gt;=0.12.0"
+pip install safetensors tiktoken websockets regex
+
+# ソースツリーの AutoModelVLLM を使う場合
+cd /path/to/FunASR
+pip install -e .</code></pre>
+<table>
+<tr><th>リソース</th><th>最小</th><th>推奨</th></tr>
+<tr><td>GPU メモリ</td><td>8 GB</td><td>KV cache に余裕を持たせるため 16 GB 以上。</td></tr>
+<tr><td>CUDA</td><td>11.8</td><td>12.x</td></tr>
+<tr><td>GPU 数</td><td>1</td><td>tensor parallel 使用時は 2 枚以上。</td></tr>
+</table>
+<p>初回実行時、FunASR は <code>model.pt</code> から LLM 重みを抽出し、<code>Qwen3-0.6B-vllm</code> のような vLLM 互換ディレクトリを作成します。以後は準備済みの重みを再利用します。</p>
+</section>
+
+<section id="offline">
+<h2>オフライン一括推論</h2>
+<h3>推奨の汎用 API</h3>
+<pre><code>from funasr.auto.auto_model_vllm import AutoModelVLLM
+
+model = AutoModelVLLM(
+    model="FunAudioLLM/Fun-ASR-Nano-2512",
+    hub="ms",                    # または "hf"
+    tensor_parallel_size=2,
+    gpu_memory_utilization=0.8,
+)
+
+results = model.generate(
+    ["audio1.wav", "audio2.wav"],
+    language="中文",
+    hotwords=["张三", "北京"],
+)
+for item in results:
+    print(f"[{item['key']}] {item['text']}")</code></pre>
+
+<h3>Fun-ASR-Nano 直接 API</h3>
+<pre><code>from funasr.models.fun_asr_nano.inference_vllm import FunASRNanoVLLM
+
+engine = FunASRNanoVLLM.from_pretrained(
+    model="FunAudioLLM/Fun-ASR-Nano-2512",
+    tensor_parallel_size=4,
+)
+
+results = engine.generate(
+    inputs="wav.scp",
+    language="中文",
+    hotwords=["开放时间"],
+    max_new_tokens=512,
+)</code></pre>
+
+<h3>コマンドライン</h3>
+<pre><code>cd examples/industrial_data_pretraining/fun_asr_nano
+
+# 単一ファイル
+python demo_vllm.py --input audio.wav --language 中文
+
+# 一括 + マルチ GPU tensor parallel
+python demo_vllm.py --input wav.scp --tensor-parallel-size 4 --batch-size 32
+
+# ホットワード + JSONL 出力
+python demo_vllm.py --input audio.wav --hotwords 张三 北京 --output results.jsonl</code></pre>
+</section>
+
+<section id="streaming-sdk">
+<h2>Streaming SDK</h2>
+<p><code>FunASRNanoStreamingVLLM</code> は音声を 720 ms chunk に分割し、累積音声を再エンコードして、各 chunk の prompt を vLLM にバッチ投入します。fixed/unfixed のテキスト領域を返すため、Python アプリで逐次字幕を表示する用途に向いています。</p>
+<pre><code>from funasr.models.fun_asr_nano.inference_vllm_streaming import FunASRNanoStreamingVLLM
+
+engine = FunASRNanoStreamingVLLM.from_pretrained(
+    model="FunAudioLLM/Fun-ASR-Nano-2512",
+    chunk_ms=720,
+    rollback_chars=8,
+)
+
+for result in engine.streaming_generate("audio.wav", language="中文"):
+    if result["is_final"]:
+        print(f"Final: {result['text']}")
+    else:
+        print(f"[{result['audio_duration_ms']:.0f} ms] fixed: {result['fixed_text']}")</code></pre>
+<table>
+<tr><th>動作</th><th>説明</th></tr>
+<tr><td>Stage 1</td><td>最初の 10 chunk は <code>prev_text</code> なしで decode し、安定した prefix を探します。</td></tr>
+<tr><td>Stage 2</td><td>以後の chunk は安定 prefix を assistant context として使用します。</td></tr>
+<tr><td>Rollback</td><td>末尾 <code>rollback_chars</code> 文字は未確定として保持し、後続 chunk で修正可能にします。</td></tr>
+<tr><td>短い音声</td><td>最初の 1.5-3 秒は空または不安定な場合があります。これはモデル特性です。</td></tr>
+</table>
+</section>
+
+<section id="websocket">
+<h2>WebSocket サービス</h2>
+<p>リアルタイムサービスは streaming VAD、vLLM によるセグメント decode、partial preview、反復 hallucination の抑制、ホットワード、言語ヒント、話者分離を統合します。</p>
+
+<h3>サービス起動</h3>
+<pre><code>cd examples/industrial_data_pretraining/fun_asr_nano
+
+# 単一 GPU
+CUDA_VISIBLE_DEVICES=0 python serve_realtime_ws.py --port 10095 --language 中文
+
+# マルチ GPU tensor parallel
+CUDA_VISIBLE_DEVICES=0,1 python serve_realtime_ws.py \
+    --port 10095 \
+    --tensor-parallel-size 2 \
+    --language 中文
+
+# 全パラメータ例
+python serve_realtime_ws.py \
+    --port 10095 \
+    --model FunAudioLLM/Fun-ASR-Nano-2512 \
+    --hub ms \
+    --device cuda:0 \
+    --decode-interval 0.48 \
+    --hotword-file 热词列表 \
+    --language 中文 \
+    --dtype bf16 \
+    --tensor-parallel-size 1 \
+    --gpu-memory-utilization 0.8 \
+    --max-model-len 2048</code></pre>
+
+<h3>クライアント</h3>
+<table>
+<tr><th>クライアント</th><th>使い方</th></tr>
+<tr><td>ブラウザ</td><td><code>client_mic.html</code> を開く。マイク、ファイルアップロード、ホットワード、話者ラベルに対応。</td></tr>
+<tr><td>Python CLI</td><td><code>python client_python.py --server ws://localhost:10095 --mic</code></td></tr>
+<tr><td>テストスクリプト</td><td><code>python client_test.py --server ws://localhost:10095 --file audio.wav</code></td></tr>
+</table>
+<p>リモート GPU サーバーでは、先にポートフォワードします: <code>ssh -L 10095:localhost:10095 &lt;server&gt;</code></p>
+
+<h3>プロトコル</h3>
+<pre><code>Client -&gt; Server:
+  "START"                 セッション初期化
+  "HOTWORDS:word1,word2"  ホットワード設定、任意
+  "LANGUAGE:中文"          言語設定、任意
+  [binary bytes]          PCM16 16 kHz mono audio
+  "STOP"                  最終 decode
+
+Server -&gt; Client:
+  {"event": "started"}
+  {"event": "hotwords_set", "hotwords": ["word1", "word2"]}
+  {"event": "language_set", "language": "中文"}
+  {"sentences": [...], "partial": "...", "is_final": false}
+  {"sentences": [...], "partial": "", "is_final": true}
+  {"event": "stopped"}</code></pre>
+
+<h3>推論ロジック</h3>
+<table>
+<tr><th>経路</th><th>トリガー</th><th>出力</th></tr>
+<tr><td>確定セグメント</td><td>Dynamic VAD が endpoint を検出。</td><td>セグメント全体を vLLM で decode し、<code>sentences</code> にロック。</td></tr>
+<tr><td>Partial preview</td><td><code>--decode-interval</code>、デフォルト 0.48 秒、かつ十分な新規音声。</td><td>後で上書きされる可能性がある一時的な <code>partial</code> テキスト。</td></tr>
+<tr><td>Finalization</td><td><code>STOP</code>。</td><td>残り音声を flush し、進行中の発話を強制終了、話者再クラスタリング後に <code>is_final: true</code> を返します。</td></tr>
+</table>
+</section>
+
+<section id="dynamic-vad">
+<h2>Dynamic VAD</h2>
+<p>Dynamic VAD は現在の発話の長さに応じて無音閾値を調整します。短い発話では長めに待って切りすぎを防ぎ、長い発話では早めに分割して ASR 品質を保ちます。</p>
+<h3>Streaming wrapper のデフォルト</h3>
+<table>
+<tr><th>累積発話時間</th><th>無音閾値</th><th>効果</th></tr>
+<tr><td>&le; 5 秒</td><td>2.0 秒</td><td>短いターンを早く切りすぎない。</td></tr>
+<tr><td>5-10 秒</td><td>1.5 秒</td><td>通常の会話分割。</td></tr>
+<tr><td>10-15 秒</td><td>1.0 秒</td><td>長い発話を少しずつ締める。</td></tr>
+<tr><td>15-30 秒</td><td>0.8 秒</td><td>より速い分割。</td></tr>
+<tr><td>30-45 秒</td><td>0.4 秒</td><td>ASR セグメントが長くなりすぎるのを防ぐ。</td></tr>
+<tr><td>&gt; 45 秒</td><td>0.1 秒</td><td>強制的に分割。</td></tr>
+</table>
+<h3>fsmn-vad ネイティブのデフォルト</h3>
+<table>
+<tr><th>累積発話時間</th><th>無音閾値</th></tr>
+<tr><td>&le; 5 秒</td><td>800 ms</td></tr>
+<tr><td>5-10 秒</td><td>600 ms</td></tr>
+<tr><td>10-20 秒</td><td>500 ms</td></tr>
+<tr><td>20-30 秒</td><td>400 ms</td></tr>
+<tr><td>&gt; 30 秒</td><td>300 ms</td></tr>
+</table>
+<pre><code># デフォルト: dynamic_silence=True
+model.generate(input="audio.wav")
+
+# 動的閾値を無効化
+model.generate(input="audio.wav", dynamic_silence=False)
+
+# カスタム schedule: (duration_limit_ms, silence_threshold_ms)
+model.generate(input="audio.wav", silence_schedule=[
+    (5000, 1000),
+    (15000, 500),
+    (float("inf"), 200),
+])</code></pre>
+</section>
+
+<section id="performance">
+<h2>性能</h2>
+<table>
+<tr><th>シナリオ</th><th>PyTorch baseline</th><th>vLLM</th><th>高速化</th></tr>
+<tr><td>オフライン、5.6 秒音声</td><td>0.89 秒</td><td>0.30 秒</td><td><b>3x</b></td></tr>
+<tr><td>オフライン、2-GPU tensor parallel</td><td>0.89 秒</td><td>~0.20 秒</td><td><b>4.5x</b></td></tr>
+<tr><td>Batch 16 files</td><td>~16x serial cost</td><td>~4x</td><td><b>4x</b></td></tr>
+<tr><td>Batch 32 files</td><td>~32x serial cost</td><td>~5x</td><td><b>6x</b></td></tr>
+<tr><td>WebSocket RTF</td><td>0.156</td><td>0.078</td><td><b>2x</b></td></tr>
+</table>
+</section>
+
+<section id="api-reference">
+<h2>API リファレンス</h2>
+<h3>AutoModelVLLM</h3>
+<table>
+<tr><th>パラメータ</th><th>デフォルト</th><th>説明</th></tr>
+<tr><td><code>model</code></td><td>-</td><td>ModelScope/Hugging Face の id、またはローカルモデルディレクトリ。</td></tr>
+<tr><td><code>hub</code></td><td><code>"ms"</code></td><td><code>"ms"</code>、<code>"modelscope"</code>、<code>"hf"</code>、<code>"huggingface"</code>。</td></tr>
+<tr><td><code>device</code></td><td><code>"cuda:0"</code></td><td>PyTorch audio encoder/adaptor の実行デバイス。</td></tr>
+<tr><td><code>dtype</code></td><td><code>"bf16"</code></td><td><code>"bf16"</code>、<code>"fp16"</code>、<code>"fp32"</code>。</td></tr>
+<tr><td><code>tensor_parallel_size</code></td><td><code>1</code></td><td>vLLM tensor parallel に使う GPU 数。</td></tr>
+<tr><td><code>gpu_memory_utilization</code></td><td><code>0.8</code></td><td>vLLM KV cache に使用する GPU メモリ比率。</td></tr>
+<tr><td><code>max_model_len</code></td><td><code>4096</code></td><td>vLLM の最大 sequence length。</td></tr>
+</table>
+
+<h3><code>generate()</code></h3>
+<table>
+<tr><th>パラメータ</th><th>デフォルト</th><th>説明</th></tr>
+<tr><td><code>inputs</code></td><td>-</td><td>音声パス、パスリスト、numpy array、tensor、<code>wav.scp</code>、JSONL。</td></tr>
+<tr><td><code>language</code></td><td><code>None</code></td><td>言語ヒント。例: <code>"中文"</code>、<code>"English"</code>、<code>"日本語"</code>。</td></tr>
+<tr><td><code>hotwords</code></td><td><code>None</code></td><td>ASR prompt に入れるホットワード一覧。</td></tr>
+<tr><td><code>itn</code></td><td><code>True</code></td><td>逆テキスト正規化を適用。</td></tr>
+<tr><td><code>max_new_tokens</code></td><td><code>512</code></td><td>サンプルごとの最大生成 token 数。</td></tr>
+<tr><td><code>temperature</code></td><td><code>0.0</code></td><td>デフォルトは greedy decoding。</td></tr>
+<tr><td><code>repetition_penalty</code></td><td><code>1.0</code></td><td>vLLM generation の repetition penalty。</td></tr>
+</table>
+<p>戻り値: <code>[{"key": str, "text": str, "timestamps": [...]}]</code>。モデルに任意の CTC decoder/tokenizer が含まれる場合、タイムスタンプも返ります。</p>
+</section>
+
+<section id="faq">
+<h2>FAQ</h2>
+<dl>
+<dt>Q: 初回起動が遅いのはなぜですか？</dt>
+<dd>vLLM が KV cache と CUDA graph を初期化し、FunASR が <code>model.pt</code> から LLM 重みを抽出する場合があります。初回は 60-90 秒程度かかることがあります。</dd>
+<dt>Q: CUDA OOM の対処は？</dt>
+<dd><code>gpu_memory_utilization</code> または <code>max_model_len</code> を下げるか、<code>tensor_parallel_size</code> を増やしてください。</dd>
+<dt>Q: Paraformer は vLLM を使えますか？</dt>
+<dd>いいえ。Paraformer は非自己回帰モデルであり、vLLM の KV-cache decoding の恩恵を受けません。</dd>
+<dt>Q: WebSocket と <code>streaming_generate()</code> の使い分けは？</dt>
+<dd>本番のリアルタイム ASR には VAD endpoint ベースの WebSocket サービスを使います。SDK 組み込みや chunk 単位デモには <code>streaming_generate()</code> が便利です。</dd>
+<dt>Q: リモートサーバーでブラウザのマイクが使えません。</dt>
+<dd>Chrome はマイク利用に HTTPS または localhost を要求します。<code>ssh -L 10095:localhost:10095 &lt;server&gt;</code> で転送し、localhost からクライアントを開いてください。</dd>
+</dl>
+</section>
+
+</div></div>
+
+<footer>
+<p>FunASR &middot; Tongyi Lab, Alibaba Group</p>
+<p><a href="index.html">ホーム</a> &middot; <a href="tutorial.html">チュートリアル</a> &middot; <a href="training.html">トレーニング</a> &middot; <a href="model-registration.html">開発</a> &middot; <a href="../api.html">API</a> &middot; <a href="vllm.html">vLLM</a> &middot; <a href="agent.html">Agent</a> &middot; <a href="benchmark.html">Benchmark</a> &middot; <a href="https://github.com/modelscope/FunASR">GitHub</a></p>
+</footer>
+</body></html>

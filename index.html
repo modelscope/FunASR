@@ -3,13 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FunASR - End-to-End Speech Recognition Toolkit</title>
-    <meta name="description" content="FunASR: Industrial-grade speech recognition toolkit. 170x realtime on GPU, 50+ languages, speaker diarization, emotion detection. Open source, production ready.">
-    <meta property="og:title" content="FunASR - Speech Recognition Toolkit">
-    <meta property="og:description" content="170x realtime, 50+ languages, speaker diarization, and an OpenAI-compatible local speech API.">
+    <meta name="description" content="FunASR: Industrial-grade speech recognition toolkit. 170x realtime on GPU, 50+ languages, speaker diarization, emotion detection, OpenAI-compatible API, vLLM acceleration, and agent integration.">
+    <meta property="og:title" content="FunASR - Open-source speech understanding toolkit">
+    <meta property="og:description" content="170x realtime, 50+ languages, speaker diarization, vLLM acceleration, and an OpenAI-compatible local speech API.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://modelscope.github.io/FunASR/">
-    <link rel="canonical" href="https://modelscope.github.io/FunASR/">
+    <title>FunASR - End-to-End Speech Recognition Toolkit</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
@@ -22,8 +21,10 @@
                 <a href="tutorial.html">Tutorial</a>
                 <a href="training.html">Training</a>
                 <a href="model-registration.html">Develop</a>
-                <a href="benchmark.html">Benchmark</a>
                 <a href="api.html">API</a>
+                <a href="vllm.html">vLLM</a>
+                <a href="agent.html">Agent</a>
+                <a href="benchmark.html">Benchmark</a>
             </div>
             
 <div class="lang-dropdown"><button class="lang-btn">English</button><div class="lang-menu"><a href="index.html" class="current">English</a><a href="zh/index.html">中文</a><a href="ja/index.html">日本語</a></div></div>
@@ -76,6 +77,19 @@ print(res[0]["sentence_info"])</pre>
 
     <section class="alt">
         <div class="container">
+            <h2 class="section-title">What's New</h2>
+            <p class="section-subtitle">The public docs now track the latest README and main-branch capabilities.</p>
+            <div class="grid-3">
+                <div class="card"><h3>vLLM Inference Engine</h3><p>2-3x faster LLM decoding for Fun-ASR-Nano, with tensor parallel batch inference and real-time WebSocket service.</p><p><a href="vllm.html">Read the vLLM guide</a></p></div>
+                <div class="card"><h3>Agent Infrastructure</h3><p><code>funasr-server</code> exposes OpenAI-compatible transcription APIs; MCP and voice-input examples connect local ASR to AI tools.</p><p><a href="agent.html">Set up Agent integration</a></p></div>
+                <div class="card"><h3>Benchmark Report</h3><p>Long-form benchmark results cover SenseVoice, Paraformer, Fun-ASR-Nano, GLM-ASR, and Whisper variants on GPU and CPU.</p><p><a href="benchmark.html">View benchmark</a></p></div>
+            </div>
+        </div>
+    </section>
+
+
+    <section class="alt">
+        <div class="container">
             <h2 class="section-title">Private Speech API in Minutes</h2>
             <p class="section-subtitle">Run an OpenAI-compatible transcription endpoint locally, then plug it into agents, apps, and batch pipelines without sending audio to a cloud ASR provider.</p>
             <div class="grid-2">
@@ -122,6 +136,21 @@ curl http://localhost:8000/v1/audio/transcriptions \
                     <span class="doc-kicker">Extend</span>
                     <h3>Developer Guide</h3>
                     <p>Understand the registry, add a model, package remote code, and avoid integration pitfalls.</p>
+                </a>
+                <a class="doc-card" href="vllm.html">
+                    <span class="doc-kicker">Accelerate</span>
+                    <h3>vLLM Inference</h3>
+                    <p>Run LLM-based ASR with vLLM, tensor parallel batch decoding, streaming SDK, and WebSocket service.</p>
+                </a>
+                <a class="doc-card" href="agent.html">
+                    <span class="doc-kicker">Integrate</span>
+                    <h3>Agent & API</h3>
+                    <p>Expose FunASR as an OpenAI-compatible endpoint, MCP tool, voice input, or subtitle generator.</p>
+                </a>
+                <a class="doc-card" href="benchmark.html">
+                    <span class="doc-kicker">Measure</span>
+                    <h3>Benchmark</h3>
+                    <p>Compare FunASR and Whisper on long-form audio, including GPU and CPU speed/CER numbers.</p>
                 </a>
                 <a class="doc-card" href="api.html">
                     <span class="doc-kicker">Reference</span>
@@ -269,38 +298,15 @@ for sent in res[0]["sentence_info"]:
         </div>
     </section>
 
-
-
-    <!-- Live Demo -->
-    <section style="padding:60px 0;background:var(--surface);">
-        <div class="container" style="text-align:center;">
-            <h2 style="font-size:1.8rem;font-weight:800;margin-bottom:12px;">Try It Now</h2>
-            <p style="color:var(--muted);margin-bottom:24px;">Upload audio or record with your microphone — powered by FunASR</p>
-            <iframe
-                src="https://FunAudioLLM-Fun-ASR-Nano.hf.space"
-                frameborder="0"
-                width="100%"
-                height="600"
-                style="border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.1);max-width:800px;"
-            ></iframe>
-        </div>
-    </section>
-
-    <!-- Star History -->
-    <section style="padding:60px 0;text-align:center;">
-        <div class="container">
-            <h2 style="font-size:1.8rem;font-weight:800;margin-bottom:24px;">Star History</h2>
-            <a href="https://star-history.com/#modelscope/FunASR&Date" target="_blank">
-                <img src="https://api.star-history.com/svg?repos=modelscope/FunASR&type=Date" alt="Star History Chart" style="max-width:700px;width:100%;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,0.1);">
-            </a>
-        </div>
-    </section>
     <footer>
         <p>FunASR &middot; Tongyi Lab, Alibaba Group</p>
         <p>
             <a href="https://github.com/modelscope/FunASR">GitHub</a> &middot;
             <a href="training.html">Training</a> &middot;
             <a href="api.html">API</a> &middot;
+            <a href="vllm.html">vLLM</a> &middot;
+            <a href="agent.html">Agent</a> &middot;
+            <a href="benchmark.html">Benchmark</a> &middot;
             <a href="https://github.com/modelscope/FunASR/blob/main/MODEL_LICENSE">License</a> &middot;
             <a href="https://pypi.org/project/funasr/">PyPI</a> &middot;
             <a href="https://github.com/modelscope/FunASR/issues">Issues</a>
