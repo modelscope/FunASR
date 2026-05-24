@@ -33,23 +33,35 @@ pip install funasr
 ```python
 from funasr import AutoModel
 
-# One line: ASR + VAD + punctuation + speaker diarization
-model = AutoModel(
-    model="iic/SenseVoiceSmall",
-    vad_model="fsmn-vad",
-    spk_model="cam++",
-    device="cuda",
-)
+model = AutoModel(model="iic/SenseVoiceSmall", vad_model="fsmn-vad", spk_model="cam++", device="cuda")
 result = model.generate(input="meeting.wav")
-
-# result[0]["sentence_info"]:
-# [{"text": "Let's discuss the Q3 plan.", "start": 420, "end": 3800, "spk": 0},
-#  {"text": "Sounds good. I have three points.", "start": 4200, "end": 7100, "spk": 1}]
 ```
+
+**Output** — structured text with speaker labels, timestamps, and punctuation:
+```
+[00:00.4 → 00:03.8] Speaker 0: Let's discuss the Q3 plan.
+[00:04.2 → 00:07.1] Speaker 1: Sounds good. I have three points.
+[00:07.5 → 00:12.3] Speaker 0: Go ahead. We have 30 minutes.
+```
+
+That's it. **One model, one call** — VAD segmentation, speech recognition, punctuation, speaker diarization all happen automatically.
 
 > **Deploy as API server:** `funasr-server --device cuda` → OpenAI-compatible endpoint at localhost:8000
 >
 > **Use with AI agents:** [MCP Server](examples/mcp_server/) for Claude/Cursor · [OpenAI API](examples/openai_api/) for LangChain/Dify/AutoGen
+
+### Why FunASR?
+
+| | FunASR | Whisper | Cloud APIs |
+|---|---|---|---|
+| Speed | **170x realtime** | 13x realtime | ~1x realtime |
+| Speaker ID | ✅ Built-in | ❌ Needs pyannote | ✅ Extra cost |
+| Emotion | ✅ Happy/Sad/Angry | ❌ | ❌ |
+| Languages | 50+ | 57 | Varies |
+| Streaming | ✅ WebSocket | ❌ | ✅ |
+| Self-hosted | ✅ MIT license | ✅ MIT license | ❌ Cloud only |
+| Cost | Free | Free | $0.006/min+ |
+| CPU viable | ✅ 17x realtime | ❌ Too slow | N/A |
 
 ---
 
