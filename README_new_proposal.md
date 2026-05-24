@@ -130,6 +130,8 @@ Requirements: Python ≥ 3.8, PyTorch ≥ 1.13, torchaudio
 | Paraformer-zh-streaming | Streaming ASR | zh/en | 220M | [⭐](https://modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online/summary) [🤗](https://huggingface.co/funasr/paraformer-zh-streaming) |
 | Qwen3-ASR | ASR, 52 languages | multilingual | 1.7B | [usage](examples/industrial_data_pretraining/qwen3_asr) |
 | GLM-ASR-Nano | ASR, 17 languages | multilingual | 1.5B | [usage](examples/industrial_data_pretraining/glm_asr) |
+| Whisper-large-v3 | ASR + translation | multilingual | 1550M | [usage](examples/industrial_data_pretraining/whisper) |
+| Whisper-large-v3-turbo | ASR + translation | multilingual | 809M | [usage](examples/industrial_data_pretraining/whisper) |
 | ct-punc | Punctuation | zh/en | 290M | [⭐](https://modelscope.cn/models/damo/punc_ct-transformer_cn-en-common-vocab471067-large/summary) [🤗](https://huggingface.co/funasr/ct-punc) |
 | fsmn-vad | VAD | zh/en | 0.4M | [⭐](https://modelscope.cn/models/damo/speech_fsmn_vad_zh-cn-16k-common-pytorch/summary) [🤗](https://huggingface.co/funasr/fsmn-vad) |
 | cam++ | Speaker diarization | — | 7.2M | [⭐](https://modelscope.cn/models/iic/speech_campplus_sv_zh-cn_16k-common/summary) [🤗](https://huggingface.co/funasr/campplus) |
