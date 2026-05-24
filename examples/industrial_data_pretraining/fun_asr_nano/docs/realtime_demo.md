@@ -1,12 +1,12 @@
-# Fun-ASR-Nano 流式语音识别服务（Streaming ASR）
+# Fun-ASR-Nano 流式语音识别服务（Streaming ASR + vLLM）
 
-基于 WebSocket 的实时流式语音识别服务，支持 VAD 分句、说话人分离（Beta）、热词定制化。
+基于 WebSocket 的实时流式语音识别服务，使用 **vLLM 推理引擎**加速 LLM 解码。支持 VAD 分句、说话人分离（Beta）、热词定制化、语种指定。
 
 ## 功能特性
 
 | 功能 | 说明 |
 |------|------|
-| 流式 ASR | 基于 Fun-ASR-Nano + vLLM 推理引擎，实时输出识别结果 |
+| 流式 ASR (vLLM) | 基于 Fun-ASR-Nano + **vLLM 推理引擎**（PagedAttention, 连续批处理），RTF < 0.1 |
 | 流式 VAD | fsmn-vad 增量检测语音端点，动态调整静音阈值 |
 | 说话人分离 (Beta) | eres2netv2 + ClusterBackend，流式分配+最终重聚类 |
 | 热词定制化 | 加载人名、地名等实体词列表，提升专有名词识别准确率 |
@@ -40,13 +40,20 @@
 
 - Python >= 3.8
 - CUDA >= 11.8
-- GPU 显存 >= 4GB
+- GPU 显存 >= 8GB（vLLM 引擎需要分配 KV Cache）
+- vLLM >= 0.6.0
 
 ### 安装依赖
 
 ```bash
 cd examples/industrial_data_pretraining/fun_asr_nano
 pip install -r requirements.txt
+
+# 安装 vLLM（如未安装）
+pip install vllm
+
+# 安装 FunASR（开发模式，需要 auto_model_vllm）
+cd /path/to/FunASR && pip install -e .
 ```
 
 ### 启动服务
@@ -62,7 +69,14 @@ CUDA_VISIBLE_DEVICES=0 python serve_realtime_ws.py \
     --hub ms \
     --device cuda:0 \
     --decode-interval 0.48 \
-    --hotword-file 热词列表
+    --hotword-file 热词列表 \
+    --language 中文
+
+# 多卡 tensor parallel（大模型场景）
+CUDA_VISIBLE_DEVICES=0,1 python serve_realtime_ws.py \
+    --port 10095 \
+    --tensor-parallel-size 2 \
+    --gpu-memory-utilization 0.8
 ```
 
 首次启动会自动下载模型（约 30 秒），之后即可接受连接。
@@ -78,6 +92,10 @@ CUDA_VISIBLE_DEVICES=0 python serve_realtime_ws.py \
 | `--decode-interval` | 0.48 | 实时解码间隔（秒） |
 | `--hotword-file` | `热词列表` | 热词文件路径（一行一个词） |
 | `--language` | `None` (auto) | 指定语种（如 中文、English、日本語） |
+| `--dtype` | `bf16` | 推理精度（bf16/fp16/fp32） |
+| `--tensor-parallel-size` | 1 | vLLM tensor parallel GPU 数量 |
+| `--gpu-memory-utilization` | 0.8 | vLLM KV Cache GPU 显存占比 |
+| `--max-model-len` | 2048 | vLLM 最大序列长度 |
 | `--use-context` | True | 使用上下文辅助解码 |
 | `--no-context` | - | 禁用上下文 |
 
@@ -252,9 +270,10 @@ Fun-ASR-Nano
 
 ## 注意事项
 
-1. **HTTPS 限制**：浏览器麦克风需要 HTTPS 或 localhost（Chrome 安全策略）
+1. **vLLM 引擎**：首次启动时 vLLM 需要初始化 KV Cache，约需 60-90 秒，之后即可服务
+2. **HTTPS 限制**：浏览器麦克风需要 HTTPS 或 localhost（Chrome 安全策略）
 2. **远程访问**：使用 SSH 端口转发 `ssh -L 10095:localhost:10095 <server>`
 3. **并发支持**：单个服务实例支持多个并发 WebSocket 连接（每个连接独立 session）
-4. **显存占用**：ASR + VAD + SPK 模型共约 3-4GB 显存
+4. **显存占用**：vLLM 引擎 + VAD + SPK 共约 8-10GB 显存（gpu_memory_utilization=0.8 时）
 5. **说话人分离**：Beta 功能，短音频或单人场景可能不准确
 6. **模型来源**：默认从 ModelScope 下载，可用 `--hub hf` 切换 HuggingFace
