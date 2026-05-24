@@ -62,10 +62,13 @@ for result in engine.streaming_generate("audio.wav", language="中文"):
 |-----------|---------|-------------|
 | `model` | `"FunAudioLLM/Fun-ASR-Nano-2512"` | Model name or local path |
 | `hub` | `"ms"` | `"ms"` or `"hf"` |
+| `device` | `"cuda:0"` | Device for audio encoder/adaptor |
+| `dtype` | `"bf16"` | Compute precision |
 | `tensor_parallel_size` | `1` | GPUs for vLLM |
+| `gpu_memory_utilization` | `0.8` | GPU memory fraction for vLLM KV cache |
+| `max_model_len` | `2048` | Maximum sequence length |
 | `chunk_ms` | `720` | Chunk duration in ms |
 | `rollback_chars` | `8` | Unfixed region size |
-| `dtype` | `"bf16"` | Compute precision |
 
 ### `engine.streaming_generate()`
 
@@ -79,6 +82,8 @@ for result in engine.streaming_generate("audio.wav", language="中文"):
 | `itn` | `True` | Inverse text normalization |
 | `max_new_tokens` | `200` | Max tokens per chunk |
 | `temperature` | `0.0` | Sampling temperature |
+
+> Note: `repetition_penalty=1.3` is applied internally to prevent degenerate repetitions on short chunks.
 
 **Yields** per chunk:
 ```python
@@ -118,21 +123,30 @@ The model needs ~3 seconds of cumulative audio before producing accurate results
 [FINAL]  5616ms | "期限，开放时间早上九点至下午五点。"
 ```
 
-## Compared with Offline Mode
+## Compared with Other Modes
 
-For non-streaming (offline) inference with maximum accuracy, use `FunASRNanoVLLM`:
+| Mode | Class | Latency | Accuracy | Use Case |
+|------|-------|---------|----------|----------|
+| Offline | `AutoModelVLLM` / `FunASRNanoVLLM` | Full audio | Best | Batch transcription |
+| Streaming SDK | `FunASRNanoStreamingVLLM` | Per-chunk | Good (after ~3s) | Real-time display (SDK) |
+| WebSocket Server | `serve_realtime_ws.py` | Per-VAD-segment | Best | Production service with VAD+SPK |
+
+For offline batch inference:
 
 ```python
-from funasr.models.fun_asr_nano.inference_vllm import FunASRNanoVLLM
+from funasr.auto.auto_model_vllm import AutoModelVLLM
 
-engine = FunASRNanoVLLM.from_pretrained("FunAudioLLM/Fun-ASR-Nano-2512")
-results = engine.generate(["audio.wav"], language="中文")
+model = AutoModelVLLM(model="FunAudioLLM/Fun-ASR-Nano-2512")
+results = model.generate(["audio.wav"], language="中文")
 ```
 
-| Mode | Latency | Accuracy | Use Case |
-|------|---------|----------|----------|
-| Offline (`FunASRNanoVLLM`) | Full audio | Best | Batch transcription |
-| Streaming (`FunASRNanoStreamingVLLM`) | Per-chunk | Good (after ~3s) | Real-time display |
+For real-time WebSocket service (VAD + ASR + Speaker Diarization):
+
+```bash
+python serve_realtime_ws.py --port 10095 --language 中文
+```
+
+> Note: `serve_realtime_ws.py` uses `AutoModelVLLM.generate()` per-segment (not `streaming_generate`), because VAD already provides natural sentence boundaries. This gives better accuracy than chunk-level streaming.
 
 ## Related
 
