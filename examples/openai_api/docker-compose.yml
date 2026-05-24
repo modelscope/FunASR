@@ -1,0 +1,17 @@
+services:
+  funasr-api:
+    build:
+      context: .
+    image: funasr-api:local
+    ports:
+      - "${FUNASR_HOST_PORT:-8000}:8000"
+    environment:
+      FUNASR_PORT: "8000"
+      FUNASR_DEVICE: "${FUNASR_DEVICE:-cpu}"
+      FUNASR_MODEL: "${FUNASR_MODEL:-sensevoice}"
+    volumes:
+      - funasr-cache:/root/.cache
+    shm_size: "2gb"
+
+volumes:
+  funasr-cache:
