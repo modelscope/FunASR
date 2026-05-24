@@ -60,6 +60,17 @@ def detect_and_fix_hallucination(text, max_ngram_length=12, max_occurrences=3):
     return text, False
 
 
+def _clean_asr_text(text):
+    """Remove timestamp tags and artifacts from vLLM output."""
+    import re
+    text = re.sub(r'<[^>]*>', '', text)
+    text = re.sub(r'\[.*?\]', '', text)
+    text = re.sub(r'[Ｏ\[\]&＆|｜]', '', text)
+    text = re.sub(r'/sil|endofbreak|FFFF', '', text)
+    text = re.sub(r'\s+', ' ', text)
+    return text.strip()
+
+
 class StreamingVAD:
     """Streaming VAD with dynamic silence threshold."""
 
@@ -248,10 +259,9 @@ class HybridSpeakerTracker:
 class RealtimeASRSession:
     """Manages a single streaming ASR session."""
 
-    def __init__(self, asr_model, asr_kwargs, tokenizer, vad, spk_tracker=None, sample_rate=16000, chunk_ms=960):
-        self.asr_model = asr_model
+    def __init__(self, vllm_engine, asr_kwargs, vad, spk_tracker=None, sample_rate=16000, chunk_ms=960):
+        self.vllm_engine = vllm_engine
         self.asr_kwargs = asr_kwargs
-        self.tokenizer = tokenizer
         self.vad = vad
         self.sample_rate = sample_rate
         self.chunk_samples = int(sample_rate * chunk_ms / 1000)
@@ -356,10 +366,14 @@ class RealtimeASRSession:
 
         audio_tensor = torch.from_numpy(seg_audio).float()
         try:
-            res = self.asr_model.inference(
-                [audio_tensor], prev_text=self.prev_text, **self.asr_kwargs
+            results = self.vllm_engine.generate(
+                inputs=[audio_tensor],
+                hotwords=self.asr_kwargs.get("hotwords"),
+                language=self.asr_kwargs.get("language"),
+                max_new_tokens=200,
             )
-            text = res[0][0]["text"]
+            text = results[0]["text"] if results else ""
+            text = _clean_asr_text(text)
         except Exception as e:
             logger.error(f"ASR error: {e}")
             return self._build_response(is_final)
@@ -373,9 +387,10 @@ class RealtimeASRSession:
         if text.strip() and not self.first_decode_done:
             self.first_decode_done = True
 
-        encoded = self.tokenizer.encode(text)
+        tokenizer = self.vllm_engine._engine.tokenizer
+        encoded = tokenizer.encode(text)
         if len(encoded) > 5:
-            self.prev_text = self.tokenizer.decode(encoded[:-5]).replace("�", "")
+            self.prev_text = tokenizer.decode(encoded[:-5], skip_special_tokens=True)
         else:
             self.prev_text = ""
 
@@ -383,17 +398,24 @@ class RealtimeASRSession:
 
     @torch.no_grad()
     def _decode_segment(self, seg):
-        """Decode a completed VAD segment with optional context."""
+        """Decode a completed VAD segment via vLLM."""
         start_sample = int(seg[0] * self.sample_rate / 1000)
         end_sample = min(int(seg[1] * self.sample_rate / 1000), len(self.audio_buffer))
         seg_audio = self.audio_buffer[start_sample:end_sample]
         if len(seg_audio) < 1600:
             return ""
         audio_tensor = torch.from_numpy(seg_audio).float()
-        ctx = self.prev_seg_text if self.use_context and self.prev_seg_text else ""
         try:
-            res = self.asr_model.inference([audio_tensor], prev_text=ctx, **self.asr_kwargs)
-            return res[0][0]["text"]
+            results = self.vllm_engine.generate(
+                inputs=[audio_tensor],
+                hotwords=self.asr_kwargs.get("hotwords"),
+                language=self.asr_kwargs.get("language"),
+                max_new_tokens=512,
+            )
+            text = results[0]["text"] if results else ""
+            text = _clean_asr_text(text)
+            self.prev_seg_text = text
+            return text
         except Exception as e:
             logger.error(f"Segment decode error: {e}")
             return ""
@@ -425,33 +447,28 @@ class RealtimeASRSession:
             self.spk_tracker.reset()
 
 
-_asr_model = None
+_vllm_engine = None
 _asr_kwargs = None
-_tokenizer = None
 _vad_model = None
 _spk_model = None
 
 
 def load_models(args):
-    global _asr_model, _asr_kwargs, _tokenizer, _vad_model, _spk_model
-    if _asr_model is None:
+    global _vllm_engine, _asr_kwargs, _vad_model, _spk_model
+    if _vllm_engine is None:
         from funasr import AutoModel
-        logger.info(f"Loading ASR: {args.model}")
-        model = AutoModel(
-            model=args.model, trust_remote_code=True,
-            remote_code=os.path.join(os.path.dirname(__file__), "model.py"),
-            device=args.device, hub=args.hub, disable_update=True,
+        from funasr.auto.auto_model_vllm import AutoModelVLLM
+
+        logger.info(f"Loading ASR (vLLM): {args.model}")
+        _vllm_engine = AutoModelVLLM(
+            model=args.model, hub=args.hub, device=args.device,
+            dtype=getattr(args, 'dtype', 'bf16'),
+            tensor_parallel_size=getattr(args, 'tensor_parallel_size', 1),
+            gpu_memory_utilization=getattr(args, 'gpu_memory_utilization', 0.8),
+            max_model_len=getattr(args, 'max_model_len', 2048),
         )
-        _asr_model = model.model
-        _asr_kwargs = model.kwargs
-        _tokenizer = model.kwargs["tokenizer"]
 
-        logger.info("Loading VAD: fsmn-vad (streaming)")
-        _vad_model = AutoModel(model="fsmn-vad", device=args.device, disable_update=True)
-
-        logger.info("Loading SPK: eres2netv2")
-        _spk_model = AutoModel(model="iic/speech_eres2netv2_sv_zh-cn_16k-common", device=args.device, disable_update=True)
-
+        _asr_kwargs = {}
         hw_file = getattr(args, 'hotword_file', '热词列表')
         if hw_file and os.path.isfile(hw_file):
             with open(hw_file, "r", encoding="utf-8") as hf:
@@ -463,15 +480,21 @@ def load_models(args):
             _asr_kwargs["language"] = args.language
             logger.info(f"Language: {args.language}")
 
+        logger.info("Loading VAD: fsmn-vad (streaming)")
+        _vad_model = AutoModel(model="fsmn-vad", device=args.device, disable_update=True)
+
+        logger.info("Loading SPK: eres2netv2")
+        _spk_model = AutoModel(model="iic/speech_eres2netv2_sv_zh-cn_16k-common", device=args.device, disable_update=True)
+
         logger.info("All models ready!")
-    return _asr_model, _asr_kwargs, _tokenizer, _vad_model, _spk_model
+    return _vllm_engine, _asr_kwargs, _vad_model, _spk_model
 
 
 async def handle_client(websocket, args):
-    asr_model, asr_kwargs, tokenizer, vad_model, spk_model = load_models(args)
+    vllm_engine, asr_kwargs, vad_model, spk_model = load_models(args)
     vad = StreamingVAD(vad_model)
     spk_tracker = HybridSpeakerTracker(spk_model, args.device)
-    session = RealtimeASRSession(asr_model, asr_kwargs, tokenizer, vad, spk_tracker=spk_tracker)
+    session = RealtimeASRSession(vllm_engine, asr_kwargs, vad, spk_tracker=spk_tracker)
     logger.info(f"Client connected: {websocket.remote_address}")
 
     decode_interval = args.decode_interval
@@ -541,5 +564,9 @@ if __name__ == "__main__":
     parser.add_argument("--decode-interval", type=float, default=0.48)
     parser.add_argument("--hotword-file", type=str, default="热词列表")
     parser.add_argument("--language", type=str, default=None, help="Language hint (e.g. 中文, English, 日本語)")
+    parser.add_argument("--dtype", type=str, default="bf16", choices=["bf16", "fp16", "fp32"])
+    parser.add_argument("--tensor-parallel-size", type=int, default=1)
+    parser.add_argument("--gpu-memory-utilization", type=float, default=0.8)
+    parser.add_argument("--max-model-len", type=int, default=2048)
     args = parser.parse_args()
     asyncio.run(main(args))
