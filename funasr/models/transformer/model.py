@@ -365,6 +365,80 @@ class Transformer(nn.Module):
             cer_ctc = self.error_calculator(ys_hat.cpu(), ys_pad.cpu(), is_ctc=True)
         return loss_ctc, cer_ctc
 
+    def inference_batch_ctc(
+        self,
+        data_in,
+        data_lengths=None,
+        key: list = None,
+        tokenizer=None,
+        frontend=None,
+        **kwargs,
+    ):
+        """Batch CTC greedy decoding for fast inference.
+
+        Uses CTC output with greedy decoding (argmax + collapse repeats + remove blanks).
+        Much faster than autoregressive beam search, with comparable accuracy.
+        """
+        meta_data = {}
+
+        # extract fbank feats
+        time1 = time.perf_counter()
+        audio_sample_list = load_audio_text_image_video(
+            data_in,
+            fs=frontend.fs,
+            audio_fs=kwargs.get("fs", 16000),
+            data_type=kwargs.get("data_type", "sound"),
+            tokenizer=tokenizer,
+        )
+        time2 = time.perf_counter()
+        meta_data["load_data"] = f"{time2 - time1:0.3f}"
+        speech, speech_lengths = extract_fbank(
+            audio_sample_list, data_type=kwargs.get("data_type", "sound"), frontend=frontend
+        )
+        time3 = time.perf_counter()
+        meta_data["extract_feat"] = f"{time3 - time2:0.3f}"
+        meta_data["batch_data_time"] = (
+            speech_lengths.sum().item() * frontend.frame_shift * frontend.lfr_n / 1000
+        )
+
+        speech = speech.to(device=kwargs["device"])
+        speech_lengths = speech_lengths.to(device=kwargs["device"])
+
+        # Encoder
+        encoder_out, encoder_out_lens = self.encode(speech, speech_lengths)
+        if isinstance(encoder_out, tuple):
+            encoder_out = encoder_out[0]
+
+        # CTC log probs
+        ctc_logprobs = self.ctc.log_softmax(encoder_out)
+
+        results = []
+        b = encoder_out.size(0)
+        if key is None:
+            key = [f"utt_{i}" for i in range(b)]
+
+        for i in range(b):
+            x = ctc_logprobs[i, :encoder_out_lens[i].item(), :]
+            yseq = x.argmax(dim=-1)
+            yseq = torch.unique_consecutive(yseq, dim=-1)
+            mask = yseq != self.blank_id
+            token_int = yseq[mask].tolist()
+
+            token = tokenizer.ids2tokens(token_int)
+            text_postprocessed, _ = postprocess_utils.sentence_postprocess(token)
+
+            result_i = {"key": key[i], "text": text_postprocessed}
+            results.append(result_i)
+
+            if kwargs.get("output_dir") is not None:
+                if not hasattr(self, "writer"):
+                    self.writer = DatadirWriter(kwargs.get("output_dir"))
+                ibest_writer = self.writer["1best_recog"]
+                ibest_writer["token"][key[i]] = " ".join(token)
+                ibest_writer["text"][key[i]] = text_postprocessed
+
+        return results, meta_data
+
     def init_beam_search(
         self,
         **kwargs,
@@ -436,7 +510,10 @@ class Transformer(nn.Module):
                 **kwargs: Additional keyword arguments.
             """
         if kwargs.get("batch_size", 1) > 1:
-            raise NotImplementedError("batch decoding is not implemented")
+            return self.inference_batch_ctc(
+                data_in, data_lengths=data_lengths, key=key,
+                tokenizer=tokenizer, frontend=frontend, **kwargs
+            )
 
         # init beamsearch
         if self.beam_search is None:
