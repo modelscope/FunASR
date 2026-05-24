@@ -71,7 +71,7 @@ def _clean_asr_text(text):
     return text.strip()
 
 
-from funasr.utils.dynamic_vad import DynamicStreamingVAD
+from funasr.models.fsmn_vad_streaming.dynamic_vad import DynamicStreamingVAD
 
 
 class HybridSpeakerTracker:

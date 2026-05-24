@@ -517,7 +517,7 @@ Chrome 要求 HTTPS 或 localhost。远程服务器用 SSH 端口转发：`ssh -
 
 ## 附录：DynamicStreamingVAD
 
-`funasr.utils.dynamic_vad.DynamicStreamingVAD` 是通用的动态阈值流式 VAD 封装，
+`funasr.models.fsmn_vad_streaming.dynamic_vad.DynamicStreamingVAD` 是通用的动态阈值流式 VAD 封装，
 在 fsmn-vad 基础上根据当前语音段的累积时长动态调整静音切分阈值。
 
 ### 设计动机
@@ -530,7 +530,7 @@ fsmn-vad 默认使用固定静音阈值（800ms）。实际场景中：
 
 ```python
 from funasr import AutoModel
-from funasr.utils.dynamic_vad import DynamicStreamingVAD
+from funasr.models.fsmn_vad_streaming.dynamic_vad import DynamicStreamingVAD
 
 vad_model = AutoModel(model="fsmn-vad", device="cuda:0")
 

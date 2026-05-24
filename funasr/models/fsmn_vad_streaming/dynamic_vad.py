@@ -8,7 +8,7 @@
 
 Usage (流式):
     from funasr import AutoModel
-    from funasr.utils.dynamic_vad import DynamicStreamingVAD
+    from funasr.models.fsmn_vad_streaming.dynamic_vad import DynamicStreamingVAD
 
     vad_model = AutoModel(model="fsmn-vad", device="cuda:0")
     vad = DynamicStreamingVAD(vad_model)
