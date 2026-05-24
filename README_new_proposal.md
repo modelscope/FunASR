@@ -189,9 +189,15 @@ docker pull registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-
 | 📖 [Documentation](https://modelscope.github.io/FunASR/) | 🐛 [Issues](https://github.com/modelscope/FunASR/issues) |
 | 💬 [Discussions](https://github.com/modelscope/FunASR/discussions) | 🤗 [HuggingFace](https://huggingface.co/funasr) |
 
-## Contributors
+## Star History
 
-<a href="https://github.com/modelscope/FunASR/graphs/contributors"><img src="https://contrib.rocks/image?repo=modelscope/FunASR" /></a>
+<a href="https://star-history.com/#modelscope/FunASR&Date">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=modelscope/FunASR&type=Date&theme=dark" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=modelscope/FunASR&type=Date" />
+   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=modelscope/FunASR&type=Date" width="600" />
+ </picture>
+</a>
 
 ## License
 
