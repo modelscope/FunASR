@@ -13,7 +13,7 @@
 <div class="content"><div class="container narrow">
 <h1>Agent 集成</h1>
 <p>把语音识别作为本地基础设施接入 Agent、产品和桌面工作流：OpenAI 兼容 API、MCP 服务、语音输入和字幕生成。</p>
-<div class="toc-grid"><a href="#server">OpenAI API</a><a href="#sdk">SDK 与 curl</a><a href="#mcp">MCP 服务</a><a href="#voice">语音输入</a><a href="#subtitle">字幕生成</a></div>
+<div class="toc-grid"><a href="#server">OpenAI API</a><a href="#sdk">SDK 与 curl</a><a href="#workflows">工作流</a><a href="#mcp">MCP 服务</a><a href="#voice">语音输入</a><a href="#subtitle">字幕生成</a></div>
 <section id="server"><h2>OpenAI 兼容 API 服务</h2>
 <p><code>funasr-server</code> 提供 <code>/v1/audio/transcriptions</code>、<code>/v1/models</code>、<code>/health</code>，并在 <code>/docs</code> 提供 Swagger 文档。任何支持 OpenAI audio API 的框架都可以接入。</p>
 <pre><code>pip install funasr fastapi uvicorn python-multipart
@@ -44,6 +44,7 @@ print(verbose.segments)</code></pre>
   -F model=sensevoice \
   -F response_format=verbose_json</code></pre>
 </section>
+<section id="workflows"><h2>Dify、n8n 与工作流引擎</h2><p>低代码工具如果通过 HTTP 节点或 webhook worker 调用语音 API，请参考 <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/WORKFLOWS.md">工作流配方</a>。其中覆盖 multipart 上传配置、Dify custom tool、n8n binary file 字段、音频 URL worker、超时设置和生产防护。</p><p><a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/WORKFLOWS.md">打开工作流配方</a></p></section>
 <section id="mcp"><h2>MCP 服务</h2>
 <p>MCP 服务为 Claude Code、Claude Desktop、Cursor、Windsurf 和其他 MCP 客户端提供本地 <code>transcribe_audio</code> 工具。</p>
 <pre><code>pip install funasr
