@@ -9,6 +9,7 @@ Use this page to choose the shortest deployment path for a product, demo, benchm
 | Python API | Notebooks, offline jobs, first model evaluation | [README quick start](../README.md#quick-start) | Lowest ceremony; caller owns batching, retries, and files. |
 | OpenAI-compatible API | Private speech API, agents, Dify/LangChain/AutoGen-style clients | [OpenAI API example](../examples/openai_api/) | Easiest integration for apps that already support OpenAI audio APIs. |
 | Docker Compose API | Reproducible local smoke test or small internal service | [OpenAI API Docker docs](../examples/openai_api/#docker-deployment) | CPU by default; adapt the image before using CUDA in containers. |
+| Kubernetes API | Internal speech API for cluster services | [Kubernetes template](../examples/openai_api/kubernetes/) | Starts as private `ClusterIP`; add auth, TLS, network policy, and GPU scheduling before broader exposure. |
 | Runtime WebSocket service | Live captions, meetings, call-center streams | [Runtime service docs](../runtime/readme.md) | Use when partial results, endpointing, or long-lived audio streams matter. |
 | vLLM acceleration | Higher-throughput LLM-based ASR with Fun-ASR-Nano | [vLLM guide](./vllm_guide.md) | Use for LLM decoder throughput; does not apply to non-autoregressive Paraformer. |
 | MCP server | Claude/Cursor/desktop agent speech tools | [MCP example](../examples/mcp_server/) | Good when the ASR result should be exposed as a local tool. |
@@ -37,6 +38,10 @@ docker compose up --build
 ```
 
 Keep CPU mode until you have a CUDA-capable PyTorch/FunASR image. After that, set `FUNASR_DEVICE=cuda` and verify with the same smoke test. Use `python examples/openai_api/smoke_test.py --base-url http://localhost:8000` on systems without bash/curl.
+
+### I want an internal Kubernetes service
+
+Use the [Kubernetes template](../examples/openai_api/kubernetes/) for a private `ClusterIP` OpenAI-compatible API with persistent model cache, `/health` probes, and a port-forward smoke-test path. Keep the CPU default until you have a CUDA-capable image and cluster GPU scheduling in place.
 
 ### I need streaming or live captioning
 

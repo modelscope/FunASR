@@ -1,0 +1,8 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - funasr-api.yaml
+images:
+  - name: funasr-api
+    newName: registry.example.com/speech/funasr-api
+    newTag: cpu-latest

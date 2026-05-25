@@ -9,6 +9,7 @@
 | Python API | Notebook、离线任务、首次模型评测 | [README 快速开始](../README_zh.md#快速开始) | 最简单；调用方自己负责批处理、重试和文件管理。 |
 | OpenAI 兼容 API | 私有语音 API、Agent、Dify/LangChain/AutoGen 风格客户端 | [OpenAI API 示例](../examples/openai_api/README_zh.md) | 已支持 OpenAI audio API 的应用最容易接入。 |
 | Docker Compose API | 可复现本地 smoke test 或小型内部服务 | [OpenAI API Docker 文档](../examples/openai_api/README_zh.md) | 默认 CPU；容器里使用 CUDA 前需要先适配 CUDA-capable 镜像。 |
+| Kubernetes API | 集群内私有语音 API | [Kubernetes 模板](../examples/openai_api/kubernetes/README_zh.md) | 默认私有 `ClusterIP`；对外开放前补齐鉴权、TLS、网络策略和 GPU 调度。 |
 | Runtime WebSocket 服务 | 实时字幕、会议、客服流式音频 | [Runtime 服务文档](../runtime/readme_cn.md) | 需要中间结果、断句或长连接音频流时选择。 |
 | vLLM 加速 | Fun-ASR-Nano 等 LLM-based ASR 高吞吐 | [vLLM 指南](./vllm_guide.md) | 适合 LLM 解码吞吐；不适用于非自回归 Paraformer。 |
 | MCP 服务 | Claude/Cursor/桌面 Agent 语音工具 | [MCP 示例](../examples/mcp_server/) | 适合把 ASR 结果暴露成一个本地工具。 |
@@ -37,6 +38,10 @@ docker compose up --build
 ```
 
 在没有 CUDA-capable PyTorch/FunASR 镜像前保持 CPU 模式。准备好 CUDA 镜像后，再设置 `FUNASR_DEVICE=cuda` 并用同一个 smoke test 验证。没有 bash/curl 时可运行 `python examples/openai_api/smoke_test.py --base-url http://localhost:8000`。
+
+### 我想部署集群内服务
+
+使用 [Kubernetes 模板](../examples/openai_api/kubernetes/README_zh.md) 部署私有 `ClusterIP` OpenAI 兼容 API，包含持久化模型缓存、`/health` probes 和 port-forward smoke test 路径。在没有 CUDA-capable 镜像和集群 GPU 调度前，请保持默认 CPU 模式。
 
 ### 我需要流式识别或实时字幕
 
