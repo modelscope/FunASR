@@ -371,20 +371,24 @@ Client                          Server
 
 ### Benchmark 结果（184 files, 11541s audio, 1947 VAD segments）
 
-| 模型 | 方法 | RTFx | CER | 加速 |
-|------|------|------|-----|------|
-| Fun-ASR-Nano | PyTorch (fixed VAD) | 19.6 | 8.94% | 基准 |
-| Fun-ASR-Nano | **vLLM batch (fixed VAD)** | **393.9** | **8.91%** | **20.7x** |
-| Fun-ASR-Nano | **vLLM server (dynamic VAD)** | **68.3** | **8.14%** | **3.5x** |
-| Fun-ASR-Nano | yuekaizhang vLLM | 273.0 | 17.07% | 14.3x |
-| GLM-ASR-Nano | PyTorch | 34.4 | 12.94% | 基准 |
-| GLM-ASR-Nano | **vLLM (ours)** | **263.2** | **12.92%** | **7.6x** |
+| 模型 | 引擎 | VAD | RTFx | CER | 备注 |
+|------|------|-----|------|-----|------|
+| Fun-ASR-Nano | PyTorch | fixed | 17.1 | 8.90% | 基准 |
+| Fun-ASR-Nano | PyTorch | dynamic | 21.2 | 8.06% | |
+| Fun-ASR-Nano | **vLLM batch** | fixed | **371** | 8.88% | 21.7x 加速 |
+| Fun-ASR-Nano | **vLLM batch** | dynamic | **340** | **8.20%** | 19.9x 加速 |
+| Fun-ASR-Nano | **Service (no SPK)** | dynamic | **102** | 8.14% | 含 VAD + 时间戳 |
+| Fun-ASR-Nano | **Service (with SPK)** | dynamic | **46** | 8.19% | 含 VAD + 时间戳 + 说话人 |
+| Fun-ASR-Nano | yuekaizhang vLLM | fixed | 273 | 17.07% | 第三方实现 |
+| GLM-ASR-Nano | **vLLM batch** | fixed | **265** | 12.93% | 7.6x 加速 |
+| GLM-ASR-Nano | vLLM batch | dynamic | - | - | 不支持长音频推理 |
 
 **关键结论：**
-- vLLM batch 与 PyTorch CER 完全一致（差 < 0.05%）
-- 新动态 VAD（保留长段 ≤60s）CER 降至 **8.14%**，优于 PyTorch 的 8.94%
-- Fun-ASR-Nano batch 加速 20.7x，服务模式加速 3.5x
-- 比第三方 yuekaizhang/Fun-ASR-vllm 快 44%，且 CER 优 9%
+- vLLM 与 PyTorch CER 完全一致（Fun-ASR-Nano 差 < 0.02%）
+- 新动态 VAD 对 Fun-ASR-Nano 有效（CER 8.90% → 8.20%），不适用于 GLM-ASR（不支持长音频）
+- Fun-ASR-Nano vLLM batch 加速 21.7x，Service 模式加速 6x
+- SPK 默认关闭（RTFx 102），开启后 RTFx 46（增加说话人聚类开销）
+- 比第三方 yuekaizhang/Fun-ASR-vllm 快 36%，且 CER 优 8%
 
 ### 统一 vLLM 服务（serve_vllm.py）
 
