@@ -406,6 +406,17 @@ class FunASRNanoVLLM:
         encoder_out, encoder_out_lens = self.audio_encoder(speech, speech_lengths)
         encoder_out_for_adaptor = encoder_out.to(dtype=self.torch_dtype)
         adaptor_out, adaptor_out_lens = self.audio_adaptor(encoder_out_for_adaptor, encoder_out_lens)
+
+        # Apply low frame rate: compute effective token count from fbank length
+        # Matches PyTorch model.py data_load_speech formula exactly
+        if self.use_low_frame_rate:
+            for i in range(adaptor_out.shape[0]):
+                fbank_len = speech_lengths[i].item()
+                olens = 1 + (fbank_len - 3 + 2 * 1) // 2
+                olens = 1 + (olens - 3 + 2 * 1) // 2
+                fake_token_len = (olens - 1) // 2 + 1
+                adaptor_out_lens[i] = fake_token_len
+
         return adaptor_out, adaptor_out_lens, encoder_out, encoder_out_lens
 
     def _build_prompt_text(
@@ -450,12 +461,12 @@ class FunASRNanoVLLM:
         """
         prompt = self._build_prompt_text(hotwords, language, itn)
 
-        # ChatML format
+        # ChatML format with speech markers and thinking prefix
         prefix_text = (
             f"<|im_start|>system\n{system_prompt}<|im_end|>\n"
             f"<|im_start|>user\n{prompt}<|startofspeech|>"
         )
-        suffix_text = "<|endofspeech|><|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n"
+        suffix_text = "<|endofspeech|><|im_end|>\n<|im_start|>assistant\n"
 
         # Tokenize
         prefix_ids = self.tokenizer.encode(prefix_text, add_special_tokens=False)
@@ -522,21 +533,67 @@ class FunASRNanoVLLM:
             skip_special_tokens=True,
         )
 
-        # Encode all audio samples and build embedding prompts
+        # Batch encode audio and build embedding prompts
         prompts = []
         encoder_outputs = []
 
         t0 = time.perf_counter()
-        for audio_input in inputs:
-            adaptor_out, adaptor_out_lens, encoder_out, encoder_out_lens = self._encode_audio(
-                audio_input
-            )
-            encoder_outputs.append((encoder_out, encoder_out_lens))
 
-            input_embeds = self._build_input_embeds(
-                adaptor_out, adaptor_out_lens, hotwords, language, itn
+        # Pre-compute text embeddings (shared across batch)
+        prompt_text = self._build_prompt_text(hotwords, language, itn)
+        prefix_text = f"<|im_start|>system\nYou are a helpful assistant.<|im_end|>\n<|im_start|>user\n{prompt_text}"
+        suffix_text = "<|im_end|>\n<|im_start|>assistant\n"
+        prefix_ids = self.tokenizer.encode(prefix_text, add_special_tokens=False)
+        suffix_ids = self.tokenizer.encode(suffix_text, add_special_tokens=False)
+        prefix_emb = self.embed_tokens(torch.tensor(prefix_ids, dtype=torch.long, device=self.device))
+        suffix_emb = self.embed_tokens(torch.tensor(suffix_ids, dtype=torch.long, device=self.device))
+
+        # Batch encode audio (groups of 8 for memory efficiency)
+        batch_size_enc = 8
+        all_adaptor_outs = []
+        all_adaptor_lens = []
+        for i in range(0, len(inputs), batch_size_enc):
+            batch_inputs = inputs[i:i+batch_size_enc]
+            # Load and extract fbank for batch
+            from funasr.utils.load_utils import load_audio_text_image_video, extract_fbank
+            audio_tensors = []
+            for audio_input in batch_inputs:
+                if isinstance(audio_input, str):
+                    data_src = load_audio_text_image_video(audio_input, fs=self.frontend.fs)
+                elif isinstance(audio_input, np.ndarray):
+                    data_src = torch.from_numpy(audio_input).float()
+                elif isinstance(audio_input, torch.Tensor):
+                    data_src = audio_input.float()
+                else:
+                    raise ValueError(f"Unsupported audio input type: {type(audio_input)}")
+                audio_tensors.append(data_src)
+
+            speech, speech_lengths = extract_fbank(
+                audio_tensors, data_type="sound", frontend=self.frontend, is_final=True
             )
-            # vLLM EmbedsPrompt expects float32 or the model's dtype
+            speech = speech.to(self.device, dtype=torch.float32)
+            speech_lengths = speech_lengths.to(self.device)
+
+            with torch.no_grad():
+                enc_out, enc_lens = self.audio_encoder(speech, speech_lengths)
+                adp_out, adp_lens = self.audio_adaptor(enc_out.to(dtype=self.torch_dtype), enc_lens)
+
+            # Apply low frame rate token length correction
+            if self.use_low_frame_rate:
+                for j in range(len(batch_inputs)):
+                    fbank_len = speech_lengths[j].item()
+                    olens = 1 + (fbank_len - 3 + 2 * 1) // 2
+                    olens = 1 + (olens - 3 + 2 * 1) // 2
+                    adp_lens[j] = (olens - 1) // 2 + 1
+
+            for j in range(len(batch_inputs)):
+                all_adaptor_outs.append(adp_out[j, :adp_lens[j], :])
+                all_adaptor_lens.append(adp_lens[j])
+                encoder_outputs.append((enc_out[j:j+1, :enc_lens[j], :], enc_lens[j:j+1]))
+
+        # Build prompts
+        for audio_emb in all_adaptor_outs:
+            input_embeds = torch.cat([prefix_emb, audio_emb, suffix_emb], dim=0)
             prompts.append(EmbedsPrompt(prompt_embeds=input_embeds.float()))
 
         t1 = time.perf_counter()
@@ -551,10 +608,15 @@ class FunASRNanoVLLM:
         # Process results
         results = []
         for i, output in enumerate(outputs):
-            text = output.outputs[0].text
-            if not text and output.outputs[0].token_ids:
-                text = self.tokenizer.decode(list(output.outputs[0].token_ids), skip_special_tokens=True)
-            text_clean = re.sub(r"\s+", " ", text.replace("/sil", " ")).strip()
+            token_ids = list(output.outputs[0].token_ids)
+            text = self.tokenizer.decode(token_ids, skip_special_tokens=True)
+            # Clean vLLM artifacts: remove garbage prefix/tags
+            text = re.sub(r'<[^>]*>', '', text)
+            text = re.sub(r'\[[^\]]*\]', '', text)
+            text = re.sub(r'endofpatch|/sil|FFFF|</strong>', '', text)
+            # Strip non-CJK/non-alnum prefix garbage
+            text = re.sub(r'^[^\w一-鿿]+', '', text)
+            text_clean = re.sub(r"\s+", " ", text).strip()
 
             key = (
                 os.path.splitext(os.path.basename(inputs[i]))[0]
