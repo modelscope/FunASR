@@ -22,16 +22,16 @@
 </div></nav>
 <div class="content"><div class="container narrow">
 <h1>场景速览</h1>
-<p>从评测到生产，选择最短路径。FunASR 覆盖本地转写、私有 OpenAI 兼容 API、Agent 语音输入、流式服务、vLLM 加速、字幕生成和批处理。</p>
+<p>从评测到生产，选择最短路径。FunASR 覆盖本地转写、私有 OpenAI 兼容 API、Kubernetes 服务、Agent 语音输入、流式服务、vLLM 加速、字幕生成和批处理。</p>
 <div class="toc-grid"><a href="#paths">选择路径</a><a href="#recipes">生产配方</a><a href="#models">模型建议</a><a href="#share">分享结果</a></div>
 <section id="paths"><h2>选择合适路径</h2>
 <table><tr><th>目标</th><th>从这里开始</th><th>为什么重要</th></tr>
 <tr><td>本地转写一个文件</td><td><a href="tutorial.html">使用教程</a></td><td>几分钟内验证安装、模型下载和首次推理。</td></tr>
 <tr><td>对比准确率和速度</td><td><a href="benchmark.html">性能评测报告</a></td><td>选型前查看长音频速度和 CER。</td></tr>
 <tr><td>从 Whisper/云端 ASR 迁移</td><td><a href="migration.html">迁移指南</a> · <a href="https://github.com/modelscope/FunASR/tree/main/examples/migration">评测示例</a></td><td>将现有流水线映射到 FunASR，用代表性音频评测并规划安全上线。</td></tr>
-<tr><td>搭建私有语音 API</td><td><a href="agent.html#server">OpenAI 兼容 API</a> · <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/README_zh.md">中文快速上手</a> · <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/JAVASCRIPT_zh.md">JS/TS 配方</a> · <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/WORKFLOWS_zh.md">工作流配方</a></td><td>复用 OpenAI 风格客户端、Dify、n8n 和 HTTP 工作流节点，音频不出内网。</td></tr>
+<tr><td>搭建私有语音 API</td><td><a href="agent.html#server">OpenAI 兼容 API</a> · <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/README_zh.md">中文快速上手</a> · <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/kubernetes/README_zh.md">Kubernetes 模板</a> · <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/JAVASCRIPT_zh.md">JS/TS 配方</a> · <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/WORKFLOWS_zh.md">工作流配方</a></td><td>复用 OpenAI 风格客户端、Dify、n8n 和 HTTP 工作流节点，音频不出内网。</td></tr>
 <tr><td>给 Agent 增加语音输入</td><td><a href="agent.html#mcp">MCP 服务</a></td><td>将本地 ASR 接入 Claude、Cursor、桌面工具和内部助手。</td></tr>
-<tr><td>选择部署路径</td><td><a href="deployment-matrix.html">部署选型表</a></td><td>对比 Python API、OpenAI API、Docker Compose、WebSocket、vLLM、MCP、字幕、批处理和 Triton。</td></tr>
+<tr><td>选择部署路径</td><td><a href="deployment-matrix.html">部署选型表</a></td><td>对比 Python API、OpenAI API、Docker Compose、Kubernetes、WebSocket、vLLM、MCP、字幕、批处理和 Triton。</td></tr>
 <tr><td>部署流式 ASR</td><td><a href="tutorial.html#real-time-speech-recognition">实时示例</a></td><td>面向实时字幕、会议和客服类低延迟场景。</td></tr>
 <tr><td>加速 LLM-based ASR</td><td><a href="vllm.html">vLLM 指南</a></td><td>为 Fun-ASR-Nano 使用 tensor parallel 解码和流式服务能力。</td></tr>
 <tr><td>生成字幕</td><td><a href="agent.html#subtitle">字幕生成器</a></td><td>将音频或视频生成 SRT/VTT，需要时添加说话人标签。</td></tr>
