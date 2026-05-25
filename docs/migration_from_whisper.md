@@ -93,4 +93,4 @@ Track these fields for both the old pipeline and FunASR:
 
 ## Share the result
 
-If FunASR replaces or complements your existing ASR stack, consider opening a [showcase issue](https://github.com/modelscope/FunASR/issues/new?template=showcase.md). Migration reports with hardware, speed, quality notes, and deployment details help new users choose the right path faster.
+If FunASR replaces or complements your existing ASR stack, consider opening a [Migration Benchmark Report](https://github.com/modelscope/FunASR/issues/new?template=migration_benchmark.md) or [showcase issue](https://github.com/modelscope/FunASR/issues/new?template=showcase.md). Migration reports with hardware, speed, quality notes, and deployment details help new users choose the right path faster.

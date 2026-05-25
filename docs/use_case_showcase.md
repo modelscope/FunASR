@@ -78,7 +78,7 @@ Use this path when deciding whether FunASR is a good replacement for Whisper or 
 
 ## Share your result
 
-If FunASR works well in your project, consider opening a [showcase issue](https://github.com/modelscope/FunASR/issues/new?template=showcase.md) or GitHub Discussion with:
+If FunASR works well in your project, consider opening a [showcase issue](https://github.com/modelscope/FunASR/issues/new?template=showcase.md), [Migration Benchmark Report](https://github.com/modelscope/FunASR/issues/new?template=migration_benchmark.md), or GitHub Discussion with:
 
 - Use case and deployment mode.
 - Model, device, and processing speed.
