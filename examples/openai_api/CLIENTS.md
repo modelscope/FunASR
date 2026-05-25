@@ -1,6 +1,6 @@
 # Client Recipes for the FunASR OpenAI-Compatible API
 
-Use this page when `funasr-server` is already running and you want to connect an existing application, agent tool, or workflow engine to local speech recognition. For JavaScript, TypeScript, and Next.js examples, see the [JavaScript/TypeScript recipes](JAVASCRIPT.md) or [Chinese JavaScript/TypeScript recipes](JAVASCRIPT_zh.md). For Dify, n8n, HTTP nodes, and webhook workers, see the [workflow recipes](WORKFLOWS.md) or [Chinese workflow recipes](WORKFLOWS_zh.md). For browser upload or microphone demos, use the [Gradio browser demo](GRADIO.md). For no-code API smoke tests, import the [Postman collection](POSTMAN.md). For schema-driven imports or client generation, use the [OpenAPI spec](OPENAPI.md).
+Use this page when `funasr-server` is already running and you want to connect an existing application, agent tool, or workflow engine to local speech recognition. For JavaScript, TypeScript, and Next.js examples, see the [JavaScript/TypeScript recipes](JAVASCRIPT.md) or [Chinese JavaScript/TypeScript recipes](JAVASCRIPT_zh.md). For Dify, n8n, HTTP nodes, and webhook workers, see the [workflow recipes](WORKFLOWS.md) or [Chinese workflow recipes](WORKFLOWS_zh.md). For browser upload or microphone demos, use the [Gradio browser demo](GRADIO.md). For no-code API smoke tests, import the [Postman collection](POSTMAN.md). For schema-driven imports or client generation, use the [OpenAPI spec](OPENAPI.md). Before sharing the service, review the [security and gateway guide](SECURITY.md).
 
 ## Preflight
 
@@ -146,7 +146,7 @@ When the workflow system cannot send files directly, upload audio to an internal
 
 ## Production checklist
 
-- Put TLS, authentication, rate limits, and upload-size limits in front of the service before exposing it outside a trusted network.
+- Put TLS, authentication, rate limits, and upload-size limits in front of the service before exposing it outside a trusted network; use the [security and gateway guide](SECURITY.md) as the rollout checklist.
 - Preload the default model at startup and use `/health` for readiness checks.
 - Set client timeouts based on maximum audio duration; long recordings need longer HTTP timeouts.
 - Log audio duration, model alias, device, latency, response format, and error type for every request.

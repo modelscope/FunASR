@@ -13,7 +13,7 @@ python server.py --model sensevoice --device cuda --port 8000
 
 服务通常会在模型加载后启动。健康检查：`GET /health`。
 
-需要直接复制的接入示例？可以继续查看 [客户端配方](CLIENTS.md)、[JavaScript/TypeScript 配方](JAVASCRIPT_zh.md)、[Gradio 浏览器 Demo](GRADIO_zh.md)、[工作流配方](WORKFLOWS_zh.md)、[Postman 集合](POSTMAN_zh.md)、[OpenAPI 规范](OPENAPI_zh.md) 和 [Kubernetes 部署模板](kubernetes/README_zh.md)。
+需要直接复制的接入示例？可以继续查看 [客户端配方](CLIENTS.md)、[JavaScript/TypeScript 配方](JAVASCRIPT_zh.md)、[Gradio 浏览器 Demo](GRADIO_zh.md)、[工作流配方](WORKFLOWS_zh.md)、[Postman 集合](POSTMAN_zh.md)、[OpenAPI 规范](OPENAPI_zh.md)、[安全与网关指南](SECURITY_zh.md) 和 [Kubernetes 部署模板](kubernetes/README_zh.md)。
 
 ### 端到端 smoke test
 
@@ -149,6 +149,8 @@ python smoke_test.py --base-url http://localhost:8000
 ```
 
 ## Kubernetes 部署
+
+在跨团队共享服务或通过网关暴露服务前，请先阅读 [安全与网关指南](SECURITY_zh.md)，补齐 TLS、鉴权、上传限制、限流和日志策略。
 
 如果需要在集群内部提供带持久化模型缓存、健康检查和私有 `ClusterIP` 的语音 API，可以从 [Kubernetes 部署模板](kubernetes/README_zh.md) 开始。先构建并推送示例镜像，应用 manifests，再通过 `kubectl port-forward` 和 `python smoke_test.py --base-url http://localhost:8000` 验证。
 

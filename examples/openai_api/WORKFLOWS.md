@@ -147,7 +147,7 @@ This worker is also the right place to add audio conversion, file-size checks, r
 
 ## Production guardrails
 
-- Put authentication, TLS, upload-size limits, and rate limits in front of FunASR before sharing it across teams.
+- Put authentication, TLS, upload-size limits, and rate limits in front of FunASR before sharing it across teams; use the [security and gateway guide](SECURITY.md) for proxy and gateway patterns.
 - Use `/health` for workflow readiness checks and `/v1/models` to validate model aliases.
 - Log request id, audio duration, model alias, response format, device, latency, and error type.
 - Set workflow timeouts according to maximum audio duration; split very long recordings before sending them through low-code tools.

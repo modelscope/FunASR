@@ -147,7 +147,7 @@ def transcribe_bytes(filename: str, payload: bytes, content_type: str = "audio/w
 
 ## 生产环境护栏
 
-- 在跨团队共享 FunASR 服务前，先加好鉴权、TLS、上传大小限制和限流。
+- 在跨团队共享 FunASR 服务前，先加好鉴权、TLS、上传大小限制和限流；代理和网关模式见 [安全与网关指南](SECURITY_zh.md)。
 - 使用 `/health` 做工作流 readiness check，使用 `/v1/models` 校验模型别名。
 - 记录 request id、音频时长、模型别名、响应格式、设备、延迟和错误类型。
 - 按最长音频时长设置工作流超时；超长录音建议先切分，再交给低代码工具处理。

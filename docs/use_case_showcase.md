@@ -41,7 +41,7 @@ Recommended next steps:
 - For browser upload or microphone demos, start from the [Gradio browser demo](../examples/openai_api/GRADIO.md).
 - For Node.js or Next.js services, start from the [JavaScript/TypeScript recipes](../examples/openai_api/JAVASCRIPT.md).
 - For cluster services, start from the [Kubernetes deployment template](../examples/openai_api/kubernetes/).
-- Add authentication and network controls at your service boundary.
+- Add authentication and network controls at your service boundary; start from the [security and gateway guide](../examples/openai_api/SECURITY.md).
 - Record model name, device, driver, and audio duration in bug reports and benchmarks.
 
 ### Agent speech input
