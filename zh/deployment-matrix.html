@@ -27,7 +27,7 @@
 <section id="matrix"><h2>快速决策表</h2>
 <table><tr><th>路径</th><th>适合场景</th><th>从这里开始</th><th>运维提示</th></tr>
 <tr><td>Python API</td><td>Notebook、离线任务、首次模型评测</td><td><a href="tutorial.html">使用教程</a></td><td>最简单；调用方自己负责批处理、重试和文件管理。</td></tr>
-<tr><td>OpenAI 兼容 API</td><td>私有语音 API、Agent、Dify/LangChain/AutoGen/n8n 风格客户端</td><td><a href="agent.html#server">OpenAI API</a> · <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/WORKFLOWS_zh.md">工作流配方</a> · <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/POSTMAN.md">Postman 集合</a></td><td>已支持 OpenAI audio API 或 multipart HTTP 节点的应用和工作流引擎最容易接入。</td></tr>
+<tr><td>OpenAI 兼容 API</td><td>私有语音 API、Agent、Dify/LangChain/AutoGen/n8n 风格客户端</td><td><a href="agent.html#server">OpenAI API</a> · <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/WORKFLOWS_zh.md">工作流配方</a> · <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/POSTMAN.md">Postman 集合</a> · <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/OPENAPI.md">OpenAPI 规范</a></td><td>已支持 OpenAI audio API 或 multipart HTTP 节点的应用和工作流引擎最容易接入。</td></tr>
 <tr><td>Docker Compose API</td><td>可复现本地 smoke test 或小型内部服务</td><td><a href="https://github.com/modelscope/FunASR/tree/main/examples/openai_api#docker-deployment">OpenAI API Docker 文档</a></td><td>默认 CPU；容器里使用 CUDA 前需要先适配 CUDA-capable 镜像。</td></tr>
 <tr><td>Runtime WebSocket 服务</td><td>实时字幕、会议、客服流式音频</td><td><a href="https://github.com/modelscope/FunASR/tree/main/runtime">Runtime 文档</a></td><td>需要中间结果、断句或长连接音频流时选择。</td></tr>
 <tr><td>vLLM 加速</td><td>Fun-ASR-Nano 等 LLM-based ASR 高吞吐</td><td><a href="vllm.html">vLLM 指南</a></td><td>适合 LLM 解码吞吐；不适用于非自回归 Paraformer。</td></tr>
@@ -38,7 +38,7 @@
 </section>
 <section id="choices"><h2>常见选择</h2>
 <div class="grid-2"><div class="card"><h3>五分钟内试跑 FunASR</h3><p>使用教程里的 Python API。它是验证安装、模型下载、设备选择和基础输出格式的最短路径。</p></div>
-<div class="card"><h3>本地替代云端转写</h3><p>使用 OpenAI 兼容 API。先用 <code>sensevoice</code> 跑通 smoke test，再根据客户端配方接入 SDK 或 HTTP 客户端。Dify、n8n 或 webhook worker 可参考 <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/WORKFLOWS_zh.md">工作流配方</a>；图形界面 API 检查可导入 <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/POSTMAN.md">Postman 集合</a>。</p></div></div>
+<div class="card"><h3>本地替代云端转写</h3><p>使用 OpenAI 兼容 API。先用 <code>sensevoice</code> 跑通 smoke test，再根据客户端配方接入 SDK 或 HTTP 客户端。Dify、n8n 或 webhook worker 可参考 <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/WORKFLOWS_zh.md">工作流配方</a>；图形界面 API 检查可导入 <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/POSTMAN.md">Postman 集合</a>；网关和开发者门户可使用 <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/OPENAPI.md">OpenAPI 规范</a>。</p></div></div>
 <div class="grid-2"><div class="card"><h3>可复现容器 demo</h3><pre><code>cd examples/openai_api
 cp .env.example .env
 docker compose up --build</code></pre><p>在没有 CUDA-capable PyTorch/FunASR 镜像前保持 CPU 模式。</p></div>
