@@ -363,21 +363,26 @@ Client                          Server
 
 ## 6. 性能对比
 
-### 离线推理
+### Benchmark 结果（184 files, 11541s audio, 1947 VAD segments）
 
-| 配置 | 5.6s 音频延迟 | 相对加速 |
-|------|-------------|---------|
-| PyTorch (baseline) | 0.89s | 1x |
-| vLLM 1-GPU | 0.30s | **3x** |
-| vLLM 2-GPU TP | ~0.20s | **4.5x** |
+| 方法 | 耗时 | RTFx | CER |
+|------|------|------|-----|
+| PyTorch native | 589s | 19.6 | 8.94% |
+| **Our vLLM (batch)** | **29.3s** | **393.9** | **8.91%** |
+| yuekaizhang vLLM | 42.7s | 273.0 | 17.07% |
 
-### 批量吞吐
+- **加速比**: 20.7x (vs PyTorch)
+- **CER 一致性**: 8.91% vs 8.94%（差异 < 0.05%，完全对齐）
+- **vs 第三方实现**: 比 yuekaizhang/Fun-ASR-vllm 快 44%，CER 优 8%
 
-| Batch Size | 1-GPU | 2-GPU | 4-GPU |
-|-----------|-------|-------|-------|
-| 1 | ~1.5x | ~2x | ~2.5x |
-| 16 | ~4x | ~7x | ~12x |
-| 32 | ~5x | ~9x | ~15x |
+### 关键优化
+
+| 优化项 | 效果 |
+|--------|------|
+| `use_low_frame_rate` token 截断 | CER 19.68% → 8.91% |
+| Batch audio encode (groups of 8) | 音频编码加速 ~8x |
+| vLLM batch generate (all prompts) | LLM 解码加速 ~20x |
+| 去掉 `<think>` tokens | 减少无效生成步骤 |
 
 ### WebSocket 实时服务
 
@@ -388,12 +393,13 @@ Client                          Server
 | 30s 音频总耗时 | ~2.3s |
 | 并发 | 多 WebSocket 连接 |
 
-### VAD + vLLM Pipeline
+### 复现 Benchmark
 
-| 场景 | PyTorch 串行 | vLLM 批量 | 加速 |
-|------|-------------|-----------|------|
-| 10 段 x 5s | ~9s | ~1.5s | **6x** |
-| 20 段 x 5s | ~18s | ~2.5s | **7x** |
+```bash
+CUDA_VISIBLE_DEVICES=0 python examples/industrial_data_pretraining/fun_asr_nano/benchmark_vllm.py \
+    --audio-dir /path/to/benchmark_audio \
+    --label-json /path/to/benchmark_testset.json
+```
 
 ---
 
