@@ -1,6 +1,6 @@
 # Client Recipes for the FunASR OpenAI-Compatible API
 
-Use this page when `funasr-server` is already running and you want to connect an existing application, agent tool, or workflow engine to local speech recognition.
+Use this page when `funasr-server` is already running and you want to connect an existing application, agent tool, or workflow engine to local speech recognition. For Dify, n8n, HTTP nodes, and webhook workers, see the [workflow recipes](WORKFLOWS.md).
 
 ## Preflight
 
@@ -96,7 +96,7 @@ Use a multipart HTTP node or custom tool:
 | Text fields | `model=sensevoice`, `response_format=verbose_json` |
 | Result path | `text` for transcript, `segments` for timestamps/speakers |
 
-When the workflow system cannot send files directly, upload audio to an internal object store first, then run a small worker that downloads the object and calls FunASR with the `requests` recipe above.
+When the workflow system cannot send files directly, upload audio to an internal object store first, then run a small worker that downloads the object and calls FunASR with the `requests` recipe above. See [workflow recipes](WORKFLOWS.md) for Dify, n8n, and webhook-worker patterns.
 
 ## Response formats
 
