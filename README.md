@@ -21,7 +21,7 @@
 </p>
 
 <p align="center">
-  <a href="#quick-start">Quick Start</a> · <a href="#benchmark">Benchmark</a> · <a href="./docs/migration_from_whisper.md">Migration guide</a> · <a href="./docs/use_case_showcase.md">Use cases</a> · <a href="./docs/deployment_matrix.md">Deployment matrix</a> · <a href="#model-zoo">Models</a> · <a href="https://modelscope.github.io/FunASR/agent.html">Agent Integration</a> · <a href="https://modelscope.github.io/FunASR/">Docs</a> · <a href="./CONTRIBUTING.md">Contribute</a>
+  <a href="#quick-start">Quick Start</a> · <a href="#benchmark">Benchmark</a> · <a href="./docs/model_selection.md">Model selection</a> · <a href="./docs/migration_from_whisper.md">Migration guide</a> · <a href="./docs/use_case_showcase.md">Use cases</a> · <a href="./docs/deployment_matrix.md">Deployment matrix</a> · <a href="#model-zoo">Models</a> · <a href="https://modelscope.github.io/FunASR/agent.html">Agent Integration</a> · <a href="https://modelscope.github.io/FunASR/">Docs</a> · <a href="./CONTRIBUTING.md">Contribute</a>
 </p>
 
 ---
@@ -66,7 +66,7 @@ That's it. **One model, one call** — VAD segmentation, speech recognition, pun
 | Cost | Free | Free | $0.006/min+ |
 | CPU viable | ✅ 17x realtime | ❌ Too slow | N/A |
 
-Planning a switch from Whisper or a cloud ASR provider? Use the [migration guide](./docs/migration_from_whisper.md) and [benchmark example](./examples/migration/) to test representative audio, map features, and roll out safely.
+Choosing a first model? Start with the [model selection guide](./docs/model_selection.md). Planning a switch from Whisper or a cloud ASR provider? Use the [migration guide](./docs/migration_from_whisper.md) and [benchmark example](./examples/migration/) to test representative audio, map features, and roll out safely.
 
 ---
 

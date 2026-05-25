@@ -28,7 +28,7 @@ Stay on your current pipeline if you need a managed service with no operations w
 
 | Existing workflow | FunASR path | What to validate |
 |---|---|---|
-| Whisper file transcription | [README quick start](../README.md#quick-start) with SenseVoice, Paraformer, or Fun-ASR-Nano | Transcript quality, timestamps, speed, model download, CPU/GPU behavior. |
+| Whisper file transcription | [README quick start](../README.md#quick-start) and [model selection guide](./model_selection.md) with SenseVoice, Paraformer, or Fun-ASR-Nano | Transcript quality, timestamps, speed, model download, CPU/GPU behavior. |
 | Whisper plus pyannote | `spk_model="cam++"` with VAD and punctuation | Speaker labels, speaker changes, overlapping speech, long silences. |
 | OpenAI audio API or cloud batch ASR | [OpenAI-compatible API example](../examples/openai_api/) | `/v1/audio/transcriptions`, response format, client compatibility, upload limits. |
 | Dify/LangChain/AutoGen agent audio | [Client recipes](../examples/openai_api/CLIENTS.md) or [MCP server](../examples/mcp_server/) | Tool latency, file handling, auth boundary, error reporting. |
