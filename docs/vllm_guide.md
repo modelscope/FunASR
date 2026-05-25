@@ -25,7 +25,7 @@ FunASR 集成 vLLM 高吞吐推理引擎，用于加速 LLM-based ASR 模型的�
 |------|-----------|------|
 | **FunASRNano** | ✓ | Qwen3-0.6B LLM，支持离线和流式 |
 | **LLMASR** | ✓ | Whisper + Qwen/Vicuna/LLaMA |
-| **GLMASR** | ✓ | GLM-ASR-Nano |
+| **GLMASR** | ✓ | GLM-ASR-Nano (RTFx 263, CER 12.92%) |
 | **QwenAudioWarp** | ✓ | Qwen-Audio |
 | Paraformer | ✗ | 非自回归模型（CIF predictor），无 LLM 解码 |
 | SenseVoice | ✗ | Whisper-like encoder-decoder，非 LLM |
@@ -383,6 +383,26 @@ Client                          Server
 | Batch audio encode (groups of 8) | 音频编码加速 ~8x |
 | vLLM batch generate (all prompts) | LLM 解码加速 ~20x |
 | 去掉 `<think>` tokens | 减少无效生成步骤 |
+
+### GLM-ASR-Nano
+
+| 方法 | RTFx | CER | 加速 |
+|------|------|-----|------|
+| PyTorch native | 34.4 | 12.94% | 基准 |
+| **vLLM (ours)** | **263.2** | **12.92%** | **7.6x** |
+
+```python
+from funasr.models.glm_asr.inference_vllm import GLMASRVLLMEngine
+
+engine = GLMASRVLLMEngine.from_pretrained(
+    model="zai-org/GLM-ASR-Nano-2512",
+    hub="ms",
+    gpu_memory_utilization=0.4,
+    max_model_len=4096,
+)
+results = engine.generate(inputs=["audio.wav"])
+print(results[0]["text"])
+```
 
 ### WebSocket 实时服务
 
