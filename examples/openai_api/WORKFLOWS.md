@@ -23,7 +23,7 @@ If the workflow engine runs in Docker, `localhost` usually means the workflow co
 
 ## Postman smoke test
 
-Before configuring a low-code tool, you can import the [Postman collection](POSTMAN.md) and run health, model-list, and transcription requests from a GUI. Set `FUNASR_BASE_URL`, choose a local audio file for the multipart `file` field, and keep `MODEL_ALIAS=sensevoice` for the first test.
+Before configuring a low-code tool, you can import the [Postman collection](POSTMAN.md) and run health, model-list, and transcription requests from a GUI. For schema-driven imports, use the [OpenAPI spec](OPENAPI.md). Set `FUNASR_BASE_URL`, choose a local audio file for the multipart `file` field, and keep `MODEL_ALIAS=sensevoice` for the first test.
 
 ## Multipart HTTP request
 

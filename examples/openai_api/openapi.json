@@ -1,0 +1,374 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "FunASR OpenAI-Compatible API",
+    "version": "1.0.0",
+    "description": "Static OpenAPI description for the FunASR OpenAI-compatible speech transcription server. The running FastAPI service also exposes Swagger UI at /docs and an OpenAPI document at /openapi.json."
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8000",
+      "description": "Local development server"
+    },
+    {
+      "url": "http://funasr-api:8000",
+      "description": "Example Docker Compose or internal service name"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Transcription",
+      "description": "OpenAI-compatible speech transcription"
+    },
+    {
+      "name": "Models",
+      "description": "Model discovery"
+    },
+    {
+      "name": "Health",
+      "description": "Readiness and loaded model status"
+    }
+  ],
+  "paths": {
+    "/v1/audio/transcriptions": {
+      "post": {
+        "tags": [
+          "Transcription"
+        ],
+        "summary": "Transcribe an audio file",
+        "description": "Upload an audio file with multipart/form-data and receive an OpenAI-compatible transcript response. Set response_format=verbose_json to include segments and timing metadata.",
+        "operationId": "createTranscription",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/TranscriptionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Transcription result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/TranscriptionTextResponse"
+                    },
+                    {
+                      "$ref": "#/components/schemas/VerboseTranscriptionResponse"
+                    }
+                  ]
+                },
+                "examples": {
+                  "json": {
+                    "summary": "Default text response",
+                    "value": {
+                      "text": "Welcome to FunASR."
+                    }
+                  },
+                  "verbose_json": {
+                    "summary": "Verbose response",
+                    "value": {
+                      "text": "Welcome to FunASR.",
+                      "segments": [
+                        {
+                          "start": 0.0,
+                          "end": 1.6,
+                          "text": "Welcome to FunASR.",
+                          "speaker": null
+                        }
+                      ],
+                      "language": "auto",
+                      "duration": 0.843,
+                      "model": "sensevoice"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Unknown model alias",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid multipart request"
+          },
+          "500": {
+            "description": "Transcription runtime error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/models": {
+      "get": {
+        "tags": [
+          "Models"
+        ],
+        "summary": "List model aliases",
+        "description": "Return OpenAI-style model objects for the aliases configured by the FunASR server.",
+        "operationId": "listModels",
+        "responses": {
+          "200": {
+            "description": "Model list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ModelsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "tags": [
+          "Health"
+        ],
+        "summary": "Health check",
+        "description": "Check server readiness, selected device, loaded models, and available model aliases.",
+        "operationId": "getHealth",
+        "responses": {
+          "200": {
+            "description": "Server health",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "TranscriptionRequest": {
+        "type": "object",
+        "required": [
+          "file"
+        ],
+        "properties": {
+          "file": {
+            "type": "string",
+            "format": "binary",
+            "description": "Audio file such as wav, mp3, flac, m4a, ogg, or webm."
+          },
+          "model": {
+            "type": "string",
+            "enum": [
+              "sensevoice",
+              "paraformer",
+              "paraformer-en",
+              "fun-asr-nano"
+            ],
+            "default": "sensevoice",
+            "description": "FunASR model alias."
+          },
+          "language": {
+            "type": "string",
+            "nullable": true,
+            "description": "Optional language hint passed to FunASR."
+          },
+          "response_format": {
+            "type": "string",
+            "enum": [
+              "json",
+              "verbose_json"
+            ],
+            "default": "json",
+            "description": "Use verbose_json to include segments and timing metadata."
+          }
+        }
+      },
+      "TranscriptionTextResponse": {
+        "type": "object",
+        "required": [
+          "text"
+        ],
+        "properties": {
+          "text": {
+            "type": "string",
+            "description": "Cleaned transcript text."
+          }
+        }
+      },
+      "VerboseTranscriptionResponse": {
+        "type": "object",
+        "required": [
+          "text",
+          "segments",
+          "language",
+          "duration",
+          "model"
+        ],
+        "properties": {
+          "text": {
+            "type": "string"
+          },
+          "segments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TranscriptionSegment"
+            }
+          },
+          "language": {
+            "type": "string",
+            "example": "auto"
+          },
+          "duration": {
+            "type": "number",
+            "format": "float",
+            "description": "Server-side transcription latency in seconds."
+          },
+          "model": {
+            "type": "string",
+            "example": "sensevoice"
+          }
+        }
+      },
+      "TranscriptionSegment": {
+        "type": "object",
+        "required": [
+          "start",
+          "end",
+          "text"
+        ],
+        "properties": {
+          "start": {
+            "type": "number",
+            "format": "float",
+            "description": "Segment start time in seconds."
+          },
+          "end": {
+            "type": "number",
+            "format": "float",
+            "description": "Segment end time in seconds."
+          },
+          "text": {
+            "type": "string"
+          },
+          "speaker": {
+            "type": "string",
+            "nullable": true,
+            "description": "Speaker label when available."
+          }
+        }
+      },
+      "ModelObject": {
+        "type": "object",
+        "required": [
+          "id",
+          "object",
+          "created",
+          "owned_by",
+          "ready"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "sensevoice"
+          },
+          "object": {
+            "type": "string",
+            "example": "model"
+          },
+          "created": {
+            "type": "integer",
+            "example": 1700000000
+          },
+          "owned_by": {
+            "type": "string",
+            "example": "funasr"
+          },
+          "ready": {
+            "type": "boolean",
+            "description": "Whether this alias is already loaded in memory."
+          }
+        }
+      },
+      "ModelsResponse": {
+        "type": "object",
+        "required": [
+          "object",
+          "data"
+        ],
+        "properties": {
+          "object": {
+            "type": "string",
+            "example": "list"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ModelObject"
+            }
+          }
+        }
+      },
+      "HealthResponse": {
+        "type": "object",
+        "required": [
+          "status",
+          "device",
+          "models_loaded",
+          "models_available"
+        ],
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "ok"
+          },
+          "device": {
+            "type": "string",
+            "example": "cuda"
+          },
+          "models_loaded": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "models_available": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "required": [
+          "detail"
+        ],
+        "properties": {
+          "detail": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

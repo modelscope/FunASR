@@ -1,6 +1,6 @@
 # Postman Collection for the FunASR OpenAI-Compatible API
 
-Use the Postman collection when you want to verify a private FunASR speech API before wiring it into Dify, n8n, an agent framework, or an internal service.
+Use the Postman collection when you want to verify a private FunASR speech API before wiring it into Dify, n8n, an agent framework, or an internal service. If you prefer schema-driven imports, use the [OpenAPI spec](OPENAPI.md).
 
 ## Import
 
