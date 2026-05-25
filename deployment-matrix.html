@@ -22,7 +22,7 @@
 <section id="matrix"><h2>Quick decision table</h2>
 <table><tr><th>Path</th><th>Best for</th><th>Start here</th><th>Operational notes</th></tr>
 <tr><td>Python API</td><td>Notebooks, offline jobs, first model evaluation</td><td><a href="tutorial.html">Tutorial</a></td><td>Lowest ceremony; caller owns batching, retries, and files.</td></tr>
-<tr><td>OpenAI-compatible API</td><td>Private speech API, agents, Dify/LangChain/AutoGen-style clients</td><td><a href="agent.html#server">OpenAI API</a></td><td>Easiest integration for apps that already support OpenAI audio APIs.</td></tr>
+<tr><td>OpenAI-compatible API</td><td>Private speech API, agents, Dify/LangChain/AutoGen/n8n-style clients</td><td><a href="agent.html#server">OpenAI API</a> · <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/WORKFLOWS.md">Workflow recipes</a></td><td>Easiest integration for apps and workflow engines that already support OpenAI audio APIs or multipart HTTP nodes.</td></tr>
 <tr><td>Docker Compose API</td><td>Reproducible local smoke test or small internal service</td><td><a href="https://github.com/modelscope/FunASR/tree/main/examples/openai_api#docker-deployment">OpenAI API Docker docs</a></td><td>CPU by default; adapt the image before using CUDA in containers.</td></tr>
 <tr><td>Runtime WebSocket service</td><td>Live captions, meetings, call-center streams</td><td><a href="https://github.com/modelscope/FunASR/tree/main/runtime">Runtime docs</a></td><td>Use when partial results, endpointing, or long-lived audio streams matter.</td></tr>
 <tr><td>vLLM acceleration</td><td>Higher-throughput LLM-based ASR with Fun-ASR-Nano</td><td><a href="vllm.html">vLLM guide</a></td><td>Use for LLM decoder throughput; does not apply to non-autoregressive Paraformer.</td></tr>
@@ -33,7 +33,7 @@
 </section>
 <section id="choices"><h2>Common choices</h2>
 <div class="grid-2"><div class="card"><h3>Try FunASR in five minutes</h3><p>Use the Python API from the tutorial. It is the shortest route for validating installation, model download, device selection, and output shape.</p></div>
-<div class="card"><h3>Replace cloud transcription locally</h3><p>Use the OpenAI-compatible API. Start with <code>sensevoice</code>, run the smoke test, then connect existing SDK or HTTP clients using the client recipes.</p></div></div>
+<div class="card"><h3>Replace cloud transcription locally</h3><p>Use the OpenAI-compatible API. Start with <code>sensevoice</code>, run the smoke test, then connect existing SDK or HTTP clients using the client recipes. For Dify, n8n, or webhook workers, use the <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/WORKFLOWS.md">workflow recipes</a>.</p></div></div>
 <div class="grid-2"><div class="card"><h3>Run a repeatable container demo</h3><pre><code>cd examples/openai_api
 cp .env.example .env
 docker compose up --build</code></pre><p>Keep CPU mode until you have a CUDA-capable PyTorch/FunASR image.</p></div>

@@ -13,7 +13,7 @@
 <div class="content"><div class="container narrow">
 <h1>Agent Integration</h1>
 <p>Run speech recognition as local infrastructure for agents, products, and desktop workflows: OpenAI-compatible API, MCP server, voice input, and subtitle generation.</p>
-<div class="toc-grid"><a href="#server">OpenAI API</a><a href="#sdk">SDK & curl</a><a href="#mcp">MCP Server</a><a href="#voice">Voice Input</a><a href="#subtitle">Subtitle Generator</a></div>
+<div class="toc-grid"><a href="#server">OpenAI API</a><a href="#sdk">SDK & curl</a><a href="#workflows">Workflows</a><a href="#mcp">MCP Server</a><a href="#voice">Voice Input</a><a href="#subtitle">Subtitle Generator</a></div>
 <section id="server"><h2>OpenAI-Compatible API Server</h2>
 <p><code>funasr-server</code> exposes <code>/v1/audio/transcriptions</code>, <code>/v1/models</code>, <code>/health</code>, and Swagger docs at <code>/docs</code>. It works with frameworks that already know the OpenAI audio API.</p>
 <pre><code>pip install funasr fastapi uvicorn python-multipart
@@ -44,6 +44,7 @@ print(verbose.segments)</code></pre>
   -F model=sensevoice \
   -F response_format=verbose_json</code></pre>
 </section>
+<section id="workflows"><h2>Dify, n8n, and workflow engines</h2><p>For low-code tools that call HTTP nodes or webhook workers, use the <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/WORKFLOWS.md">workflow recipes</a>. They cover multipart upload settings, Dify custom tools, n8n binary file fields, audio URL workers, timeouts, and production guardrails.</p><p><a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/WORKFLOWS.md">Open workflow recipes</a></p></section>
 <section id="mcp"><h2>MCP Server</h2>
 <p>The MCP server gives Claude Code, Claude Desktop, Cursor, Windsurf, and other MCP clients a local <code>transcribe_audio</code> tool.</p>
 <pre><code>pip install funasr
