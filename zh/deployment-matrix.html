@@ -38,7 +38,7 @@
 <tr><td>Triton Runtime</td><td>专门的高性能推理服务</td><td><a href="https://github.com/modelscope/FunASR/tree/main/runtime/triton_gpu">Triton 文档</a></td><td>配置更重；适合已经在运维 Triton/GPU serving 的团队。</td></tr></table>
 </section>
 <section id="choices"><h2>常见选择</h2>
-<div class="grid-2"><div class="card"><h3>五分钟内试跑 FunASR</h3><p>使用教程里的 Python API。它是验证安装、模型下载、设备选择和基础输出格式的最短路径。</p></div>
+<div class="grid-2"><div class="card"><h3>五分钟内试跑 FunASR</h3><p>使用教程里的 Python API。它是验证安装、模型下载、设备选择和基础输出格式的最短路径。如果还不确定先用哪个模型，请看 <a href="model-selection.html">模型选择指南</a>。</p></div>
 <div class="card"><h3>本地替代云端转写</h3><p>使用 OpenAI 兼容 API。先用 <code>sensevoice</code> 跑通 bash smoke test 或 <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/smoke_test.py">Python 烟测脚本</a>，再根据客户端配方或 <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/JAVASCRIPT_zh.md">JavaScript/TypeScript 配方</a> 接入 SDK 或 HTTP 客户端。集群上线可使用 <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/kubernetes/README_zh.md">Kubernetes 模板</a>。Dify、n8n 或 webhook worker 可参考 <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/WORKFLOWS_zh.md">工作流配方</a>；图形界面 API 检查可导入 <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/POSTMAN_zh.md">Postman 集合</a>；网关和开发者门户可使用 <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/OPENAPI_zh.md">OpenAPI 规范</a>。</p></div></div>
 <div class="grid-2"><div class="card"><h3>可复现容器 demo</h3><pre><code>cd examples/openai_api
 cp .env.example .env

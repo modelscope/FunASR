@@ -31,11 +31,11 @@
 <ol><li>选择 20-50 条有代表性的音频，覆盖短音频、长录音、噪声、多说话人、目标语言和方言。</li><li>按生产方式运行当前 Whisper 或云端 ASR，保存转写结果、延迟、成本和失败样例。</li><li>用教程跑 FunASR，再根据 <a href="deployment-matrix.html">部署选型表</a> 选择服务路径。</li><li>用人工审阅或现有 WER/CER 流程比较结果，不要只看一个干净 demo 音频。</li><li>运行 <a href="https://github.com/modelscope/FunASR/tree/main/examples/migration">迁移评测示例</a>，为自己的音频目录生成 JSONL 和 Markdown 汇总。</li><li>如果应用已经使用 OpenAI 风格客户端，运行 <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/smoke_test.py">OpenAI 兼容 API Python 烟测脚本</a>。</li><li>分开记录 warmup、模型下载、设备、GPU/CPU 型号、batch size、音频时长和稳定吞吐。</li></ol></section>
 <section id="mapping"><h2>功能映射</h2>
 <table><tr><th>现有流程</th><th>FunASR 路径</th><th>需要验证什么</th></tr>
-<tr><td>Whisper 文件转写</td><td>使用 SenseVoice、Paraformer 或 Fun-ASR-Nano 的 <a href="tutorial.html">教程</a></td><td>转写质量、时间戳、速度、模型下载、CPU/GPU 行为。</td></tr>
+<tr><td>Whisper 文件转写</td><td><a href="tutorial.html">教程</a> · <a href="model-selection.html">模型选择</a></td><td>转写质量、时间戳、速度、模型下载、CPU/GPU 行为。</td></tr>
 <tr><td>Whisper + pyannote</td><td>VAD、标点和 <code>spk_model="cam++"</code></td><td>说话人标签、换人位置、重叠说话、长静音。</td></tr>
 <tr><td>OpenAI 音频 API 或云端批量 ASR</td><td><a href="agent.html#server">OpenAI 兼容 API</a> · <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/kubernetes/README_zh.md">Kubernetes 模板</a> · <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/JAVASCRIPT_zh.md">JS/TS 配方</a></td><td><code>/v1/audio/transcriptions</code>、响应格式、客户端兼容性、上传限制。</td></tr>
 <tr><td>Dify/LangChain/AutoGen Agent 音频</td><td><a href="agent.html">Agent 与 API 配方</a> 或 MCP 服务</td><td>工具延迟、文件处理、鉴权边界、错误返回。</td></tr>
-<tr><td>实时字幕或客服流式识别</td><td><a href="tutorial.html#real-time-speech-recognition">实时示例</a></td><td>分块、断句、重连、背压、中间/最终结果行为。</td></tr>
+<tr><td>实时字幕或客服流式识别</td><td><a href="tutorial.html#streaming">实时示例</a></td><td>分块、断句、重连、背压、中间/最终结果行为。</td></tr>
 <tr><td>字幕生成</td><td><a href="agent.html#subtitle">字幕生成器</a></td><td>分段可读性、行长、说话人标签、SRT/VTT 兼容性。</td></tr>
 <tr><td>离线归档处理</td><td><a href="https://github.com/modelscope/FunASR/blob/main/examples/batch_asr_improved.py">批处理示例</a></td><td>manifest、重试、进度日志、吞吐、失败文件恢复。</td></tr></table></section>
 <section id="compare"><h2>最小本地对比</h2>
