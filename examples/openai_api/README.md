@@ -11,7 +11,7 @@ python server.py --model sensevoice --device cuda --port 8000
 
 Server starts in ~20s (model loading). Health check: `GET /health`
 
-Need copy-paste integration snippets for Python SDK, HTTP clients, agent tools, or Dify/n8n-style workflows? See [Client recipes](CLIENTS.md) and [workflow recipes](WORKFLOWS.md).
+Need copy-paste integration snippets for Python SDK, HTTP clients, agent tools, or Dify/n8n-style workflows? See [Client recipes](CLIENTS.md), [workflow recipes](WORKFLOWS.md), and the [Chinese workflow recipes](WORKFLOWS_zh.md).
 
 ### End-to-end smoke test
 
@@ -89,7 +89,7 @@ curl http://localhost:8000/v1/audio/transcriptions \
 
 ## Agent Framework Integration
 
-Works with: **LangChain**, **LlamaIndex**, **AutoGen**, **CrewAI**, **Semantic Kernel**, **Dify**, **n8n**, or any framework using OpenAI audio API. See [Client recipes](CLIENTS.md) for SDK and agent-tool patterns, plus [workflow recipes](WORKFLOWS.md) for low-code HTTP nodes and webhook workers.
+Works with: **LangChain**, **LlamaIndex**, **AutoGen**, **CrewAI**, **Semantic Kernel**, **Dify**, **n8n**, or any framework using OpenAI audio API. See [Client recipes](CLIENTS.md) for SDK and agent-tool patterns, plus [workflow recipes](WORKFLOWS.md) for low-code HTTP nodes and webhook workers ([中文](WORKFLOWS_zh.md)).
 
 ### LangChain Example
 ```python

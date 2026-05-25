@@ -1,5 +1,7 @@
 # Low-code Workflow Recipes for the FunASR OpenAI-Compatible API
 
+[中文](WORKFLOWS_zh.md)
+
 Use this guide when you want Dify, n8n, webhook workers, or another workflow engine to call a private FunASR speech API. Start with the local smoke test in this directory, then replace `localhost` with the reachable service name inside your network.
 
 ## Server preflight
