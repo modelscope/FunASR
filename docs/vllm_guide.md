@@ -158,9 +158,9 @@ CUDA_VISIBLE_DEVICES=0 python examples/industrial_data_pretraining/fun_asr_nano/
     --gpu-memory-utilization 0.5
 ```
 
-### 3.3 服务协议
+### 3.3 协议一：HTTP REST — `POST /asr`
 
-#### HTTP REST — `POST /asr`
+功能最全的接口，支持 SPK、时间戳、热词。
 
 **请求**：`multipart/form-data`
 
@@ -195,14 +195,45 @@ CUDA_VISIBLE_DEVICES=0 python examples/industrial_data_pretraining/fun_asr_nano/
 }
 ```
 
-#### OpenAI Whisper 兼容 — `POST /v1/audio/transcriptions`
+**客户端示例**：
+
+```bash
+# cURL
+curl -X POST http://localhost:8899/asr \
+    -F "file=@meeting.wav" -F "language=中文" -F "spk=true"
+```
+
+```python
+# Python requests
+import requests
+resp = requests.post("http://localhost:8899/asr",
+    files={"file": open("audio.wav", "rb")},
+    data={"language": "中文", "spk": "true"})
+result = resp.json()
+```
+
+```javascript
+// JavaScript fetch
+const form = new FormData();
+form.append("file", audioBlob, "audio.wav");
+form.append("language", "中文");
+form.append("spk", "true");
+const resp = await fetch("http://localhost:8899/asr", { method: "POST", body: form });
+const result = await resp.json();
+```
+
+### 3.4 协议二：OpenAI Whisper 兼容 — `POST /v1/audio/transcriptions`
+
+兼容 OpenAI Whisper API 标准，可直接用 OpenAI SDK 接入。
+
+> 注意：OpenAI 标准不支持 SPK 参数。如需说话人分离，请用 HTTP REST 接口。
 
 **请求**：`multipart/form-data`
 
 | 参数 | 类型 | 默认值 | 说明 |
 |------|------|--------|------|
 | `file` | file | 必填 | 音频文件 |
-| `model` | string | "fun-asr-nano" | 模型名 |
+| `model` | string | "fun-asr-nano" | 模型名（兼容字段） |
 | `language` | string | None | 语种 |
 | `response_format` | string | "json" | "json" / "text" / "verbose_json" |
 | `timestamp_granularities` | string | "word" | "word" / "segment" |
@@ -225,42 +256,77 @@ CUDA_VISIBLE_DEVICES=0 python examples/industrial_data_pretraining/fun_asr_nano/
 }
 ```
 
-### 3.4 客户端调用示例
+**客户端示例**：
 
-**Python**：
 ```python
-import requests
-
-resp = requests.post("http://localhost:8899/asr",
-    files={"file": open("audio.wav", "rb")},
-    data={"language": "中文", "spk": "true"})
-result = resp.json()
-print(result["text"])
-for seg in result["segments"]:
-    print(f"  [{seg['start']:.1f}-{seg['end']:.1f}s] {seg.get('speaker','')}: {seg['text']}")
-```
-
-**OpenAI SDK**：
-```python
+# OpenAI SDK（推荐）
 from openai import OpenAI
 client = OpenAI(base_url="http://localhost:8899/v1", api_key="none")
-result = client.audio.transcriptions.create(model="fun-asr-nano", file=open("audio.wav", "rb"))
+result = client.audio.transcriptions.create(
+    model="fun-asr-nano",
+    file=open("audio.wav", "rb"),
+    response_format="verbose_json",
+)
 print(result.text)
 ```
 
-**cURL**：
 ```bash
-curl -X POST http://localhost:8899/asr \
-    -F "file=@meeting.wav" -F "language=中文" -F "spk=true"
+# cURL
+curl -X POST http://localhost:8899/v1/audio/transcriptions \
+    -F "file=@audio.wav" -F "model=fun-asr-nano" -F "response_format=verbose_json"
 ```
 
-**JavaScript**：
-```javascript
-const form = new FormData();
-form.append("file", audioBlob, "audio.wav");
-form.append("language", "中文");
-const resp = await fetch("http://localhost:8899/asr", { method: "POST", body: form });
-const result = await resp.json();
+### 3.5 协议三：WebSocket — `ws://host:port/ws`
+
+离线服务的 WebSocket 接口，发送完整音频后获取结果（非流式）。
+
+**客户端 → 服务端**：
+
+| 消息 | 说明 |
+|------|------|
+| `"START"` | 开始会话 |
+| `"LANGUAGE:中文"` | 设置语种（可选） |
+| `"HOTWORDS:词1,词2"` | 设置热词（可选） |
+| `[binary]` | PCM16 16kHz mono 音频数据 |
+| `"STOP"` | 结束，请求识别结果 |
+
+**服务端 → 客户端**：
+
+```json
+{"event": "started"}
+{"event": "language_set", "language": "中文"}
+{"sentences": [{"text":"...","start":..,"end":..}], "is_final": true, "duration_ms": 5170}
+{"event": "stopped"}
+```
+
+**客户端示例**：
+
+```python
+import asyncio, websockets, json, numpy as np, soundfile as sf
+
+async def offline_ws(audio_path):
+    audio, sr = sf.read(audio_path)
+    pcm = (audio * 32768).astype(np.int16)
+
+    async with websockets.connect("ws://localhost:8899/ws") as ws:
+        await ws.send("START")
+        await ws.recv()
+        await ws.send("LANGUAGE:中文")
+        await ws.recv()
+
+        # 发送完整音频
+        await ws.send(pcm.tobytes())
+        await ws.send("STOP")
+
+        # 接收结果
+        async for msg in ws:
+            data = json.loads(msg)
+            if data.get("is_final"):
+                for s in data["sentences"]:
+                    print(f"[{s['start']/1000:.1f}s] {s['text']}")
+                break
+
+asyncio.run(offline_ws("audio.wav"))
 ```
 
 ---
