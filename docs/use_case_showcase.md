@@ -6,6 +6,7 @@ FunASR is useful far beyond a single offline transcription command. This page co
 
 | Goal | Start here | Why it matters |
 |---|---|---|
+| Try FunASR in a browser | [Colab quickstart](../examples/colab/) | Run a public sample and upload your own audio before setting up a local environment. |
 | Transcribe one file locally | [README quick start](../README.md#quick-start) and [model selection guide](./model_selection.md) | Verify install, model choice, and model download in minutes. |
 | Compare accuracy and speed | [Benchmark report](https://modelscope.github.io/FunASR/benchmark.html) | Reproduce the 184-file long-audio benchmark before choosing a model. |
 | Migrate from Whisper/cloud ASR | [Migration guide](./migration_from_whisper.md) | Map existing pipelines to FunASR, benchmark representative audio, and plan a safe rollout. |

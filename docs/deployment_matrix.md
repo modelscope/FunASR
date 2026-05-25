@@ -6,6 +6,7 @@ Use this page to choose the shortest deployment path for a product, demo, benchm
 
 | Path | Best for | Start here | Operational notes |
 |---|---|---|---|
+| Colab notebook | Browser smoke tests, first evaluation, shareable demos | [Colab quickstart](../examples/colab/) | No local setup; first run downloads model files, GPU runtime is faster. |
 | Python API | Notebooks, offline jobs, first model evaluation | [README quick start](../README.md#quick-start) | Lowest ceremony; caller owns batching, retries, and files. |
 | OpenAI-compatible API | Private speech API, agents, Dify/LangChain/AutoGen-style clients | [OpenAI API example](../examples/openai_api/) | Easiest integration for apps that already support OpenAI audio APIs. |
 | Docker Compose API | Reproducible local smoke test or small internal service | [OpenAI API Docker docs](../examples/openai_api/#docker-deployment) | CPU by default; adapt the image before using CUDA in containers. |
@@ -21,7 +22,7 @@ Use this page to choose the shortest deployment path for a product, demo, benchm
 
 ### I want to try FunASR in five minutes
 
-Use the Python API from the README. It is the shortest route for validating installation, model download, device selection, and basic output shape. If you are unsure which model to start with, use the [model selection guide](./model_selection.md).
+Use the [Colab quickstart](../examples/colab/) when you want a browser-only smoke test, or use the Python API from the README for local work. It is the shortest route for validating installation, model download, device selection, and basic output shape. If you are unsure which model to start with, use the [model selection guide](./model_selection.md).
 
 ### I want a local replacement for cloud transcription
 
