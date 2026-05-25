@@ -21,7 +21,7 @@
 </p>
 
 <p align="center">
-  <a href="#빠른-시작">빠른 시작</a> · <a href="#벤치마크">벤치마크</a> · <a href="./docs/migration_from_whisper.md">Migration guide</a> · <a href="./docs/use_case_showcase.md">Use cases</a> · <a href="./docs/deployment_matrix.md">Deployment matrix</a> · <a href="#모델-목록">모델 목록</a> · <a href="https://modelscope.github.io/FunASR/agent.html">Agent 연동</a> · <a href="https://modelscope.github.io/FunASR/">문서</a>
+  <a href="#빠른-시작">빠른 시작</a> · <a href="./examples/colab/README_ko.md">Colab</a> · <a href="#벤치마크">벤치마크</a> · <a href="./docs/migration_from_whisper.md">Migration guide</a> · <a href="./docs/use_case_showcase.md">Use cases</a> · <a href="./docs/deployment_matrix.md">Deployment matrix</a> · <a href="#모델-목록">모델 목록</a> · <a href="https://modelscope.github.io/FunASR/agent.html">Agent 연동</a> · <a href="https://modelscope.github.io/FunASR/">문서</a>
 </p>
 
 ---
@@ -132,7 +132,7 @@ funasr-server --device cuda
 docker pull registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-online-cpu-0.1.12
 ```
 
-[Colab quickstart →](./examples/colab/) · [OpenAI API example →](./examples/openai_api/) · [Client recipes →](./examples/openai_api/CLIENTS.md) · [Workflow recipes →](./examples/openai_api/WORKFLOWS.md) · [Postman collection →](./examples/openai_api/POSTMAN.md) · [OpenAPI spec →](./examples/openai_api/OPENAPI.md) · [Security guide →](./examples/openai_api/SECURITY.md) · [Deployment matrix →](./docs/deployment_matrix.md) · [배포 문서 →](./runtime/readme.md) · [Agent 연동 →](https://modelscope.github.io/FunASR/agent.html)
+[Colab quickstart →](./examples/colab/README_ko.md) · [OpenAI API example →](./examples/openai_api/README_ko.md) · [Client recipes →](./examples/openai_api/CLIENTS.md) · [Workflow recipes →](./examples/openai_api/WORKFLOWS.md) · [Postman collection →](./examples/openai_api/POSTMAN.md) · [OpenAPI spec →](./examples/openai_api/OPENAPI.md) · [Security guide →](./examples/openai_api/SECURITY.md) · [Deployment matrix →](./docs/deployment_matrix.md) · [배포 문서 →](./runtime/readme.md) · [Agent 연동 →](https://modelscope.github.io/FunASR/agent.html)
 
 ---
 
