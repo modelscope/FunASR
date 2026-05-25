@@ -23,7 +23,7 @@
 <ul><li>Private or self-hosted transcription where audio should stay inside your environment.</li><li>High-throughput long-form transcription for meetings, archives, media, or call recordings.</li><li>Speaker-aware transcripts with VAD, punctuation, timestamps, and diarization in one pipeline.</li><li>An OpenAI-compatible audio endpoint for agents, Dify, LangChain, AutoGen, or internal apps.</li><li>Streaming ASR or live captions with WebSocket/runtime service support.</li><li>CPU-viable smoke tests before moving to GPU deployment.</li></ul>
 <p>Stay on your current pipeline if you need a fully managed service, a vendor SLA, or a language/domain that your own benchmark shows FunASR does not handle well enough yet.</p></section>
 <section id="plan"><h2>Fast evaluation plan</h2>
-<ol><li>Pick 20-50 representative audio files, including short clips, long recordings, noisy samples, different speakers, and target languages or dialects.</li><li>Run your current Whisper or cloud ASR pipeline exactly as you use it in production. Save transcripts, latency, cost, and failure cases.</li><li>Run FunASR locally with the tutorial, then choose a deployment path from the <a href="deployment-matrix.html">deployment matrix</a>.</li><li>Compare output with human review or your normal WER/CER process. Do not compare only one clean demo file.</li><li>Run the OpenAI-compatible API smoke test if your application already uses OpenAI-style clients.</li><li>Record warmup time, model download time, device, GPU/CPU type, batch size, and audio duration separately from steady-state throughput.</li></ol></section>
+<ol><li>Pick 20-50 representative audio files, including short clips, long recordings, noisy samples, different speakers, and target languages or dialects.</li><li>Run your current Whisper or cloud ASR pipeline exactly as you use it in production. Save transcripts, latency, cost, and failure cases.</li><li>Run FunASR locally with the tutorial, then choose a deployment path from the <a href="deployment-matrix.html">deployment matrix</a>.</li><li>Compare output with human review or your normal WER/CER process. Do not compare only one clean demo file.</li><li>Run the <a href="https://github.com/modelscope/FunASR/tree/main/examples/migration">migration benchmark example</a> to write JSONL and Markdown summaries for your own audio folder.</li><li>Run the OpenAI-compatible API smoke test if your application already uses OpenAI-style clients.</li><li>Record warmup time, model download time, device, GPU/CPU type, batch size, and audio duration separately from steady-state throughput.</li></ol></section>
 <section id="mapping"><h2>Feature mapping</h2>
 <table><tr><th>Existing workflow</th><th>FunASR path</th><th>What to validate</th></tr>
 <tr><td>Whisper file transcription</td><td><a href="tutorial.html">Tutorial</a> with SenseVoice, Paraformer, or Fun-ASR-Nano</td><td>Transcript quality, timestamps, speed, model download, CPU/GPU behavior.</td></tr>
@@ -34,7 +34,7 @@
 <tr><td>Subtitle generation</td><td><a href="agent.html#subtitle">Subtitle generator</a></td><td>Segment readability, line length, speaker labels, SRT/VTT compatibility.</td></tr>
 <tr><td>Offline archive processing</td><td><a href="https://github.com/modelscope/FunASR/blob/main/examples/batch_asr_improved.py">Batch ASR example</a></td><td>Manifest handling, retries, progress logs, throughput, failed-file recovery.</td></tr></table></section>
 <section id="compare"><h2>Minimal local comparison</h2>
-<p>Install FunASR and run the same file you used for your baseline:</p>
+<p>Install FunASR and run the same file you used for your baseline. For a folder-level evaluation, use <a href="https://github.com/modelscope/FunASR/blob/main/examples/migration/benchmark_funasr.py">benchmark_funasr.py</a> to generate <code>results.jsonl</code> and <code>summary.md</code>.</p>
 <pre><code>pip install funasr</code></pre>
 <pre><code>from funasr import AutoModel
 
@@ -46,6 +46,14 @@ model = AutoModel(
 )
 result = model.generate(input="sample.wav")
 print(result)</code></pre>
+<p>For a repeatable folder benchmark:</p>
+<pre><code>python examples/migration/benchmark_funasr.py \
+  --input /path/to/audio_samples \
+  --recursive \
+  --model iic/SenseVoiceSmall \
+  --device cuda \
+  --spk-model cam++ \
+  --output-dir outputs/funasr_migration_eval</code></pre>
 <p>For an API-style comparison:</p>
 <pre><code>pip install funasr fastapi uvicorn python-multipart
 funasr-server --model sensevoice --device cuda

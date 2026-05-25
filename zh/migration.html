@@ -23,7 +23,7 @@
 <ul><li>音频需要留在私有环境内，不能上传到外部云服务。</li><li>会议、归档、媒体、客服录音等长音频需要高吞吐转写。</li><li>希望一条流水线内完成 VAD、标点、时间戳和说话人分离。</li><li>需要 OpenAI 兼容音频接口，接入 Agent、Dify、LangChain、AutoGen 或内部应用。</li><li>需要 WebSocket/runtime 服务支撑流式识别或实时字幕。</li><li>希望先用 CPU 做可复现 smoke test，再迁移到 GPU 服务。</li></ul>
 <p>如果你更需要完全托管服务、厂商 SLA，或你的自有评测显示目标语言/领域还不够好，可以暂时保留现有方案。</p></section>
 <section id="plan"><h2>快速评估计划</h2>
-<ol><li>选择 20-50 条有代表性的音频，覆盖短音频、长录音、噪声、多说话人、目标语言和方言。</li><li>按生产方式运行当前 Whisper 或云端 ASR，保存转写结果、延迟、成本和失败样例。</li><li>用教程跑 FunASR，再根据 <a href="deployment-matrix.html">部署选型表</a> 选择服务路径。</li><li>用人工审阅或现有 WER/CER 流程比较结果，不要只看一个干净 demo 音频。</li><li>如果应用已经使用 OpenAI 风格客户端，运行 OpenAI 兼容 API smoke test。</li><li>分开记录 warmup、模型下载、设备、GPU/CPU 型号、batch size、音频时长和稳定吞吐。</li></ol></section>
+<ol><li>选择 20-50 条有代表性的音频，覆盖短音频、长录音、噪声、多说话人、目标语言和方言。</li><li>按生产方式运行当前 Whisper 或云端 ASR，保存转写结果、延迟、成本和失败样例。</li><li>用教程跑 FunASR，再根据 <a href="deployment-matrix.html">部署选型表</a> 选择服务路径。</li><li>用人工审阅或现有 WER/CER 流程比较结果，不要只看一个干净 demo 音频。</li><li>运行 <a href="https://github.com/modelscope/FunASR/tree/main/examples/migration">迁移评测示例</a>，为自己的音频目录生成 JSONL 和 Markdown 汇总。</li><li>如果应用已经使用 OpenAI 风格客户端，运行 OpenAI 兼容 API smoke test。</li><li>分开记录 warmup、模型下载、设备、GPU/CPU 型号、batch size、音频时长和稳定吞吐。</li></ol></section>
 <section id="mapping"><h2>功能映射</h2>
 <table><tr><th>现有流程</th><th>FunASR 路径</th><th>需要验证什么</th></tr>
 <tr><td>Whisper 文件转写</td><td>使用 SenseVoice、Paraformer 或 Fun-ASR-Nano 的 <a href="tutorial.html">教程</a></td><td>转写质量、时间戳、速度、模型下载、CPU/GPU 行为。</td></tr>
@@ -34,7 +34,7 @@
 <tr><td>字幕生成</td><td><a href="agent.html#subtitle">字幕生成器</a></td><td>分段可读性、行长、说话人标签、SRT/VTT 兼容性。</td></tr>
 <tr><td>离线归档处理</td><td><a href="https://github.com/modelscope/FunASR/blob/main/examples/batch_asr_improved.py">批处理示例</a></td><td>manifest、重试、进度日志、吞吐、失败文件恢复。</td></tr></table></section>
 <section id="compare"><h2>最小本地对比</h2>
-<p>安装 FunASR，并用你基线评测里的同一条音频运行：</p>
+<p>安装 FunASR，并用你基线评测里的同一条音频运行。若要评测整个目录，可以使用 <a href="https://github.com/modelscope/FunASR/blob/main/examples/migration/benchmark_funasr.py">benchmark_funasr.py</a> 生成 <code>results.jsonl</code> 和 <code>summary.md</code>。</p>
 <pre><code>pip install funasr</code></pre>
 <pre><code>from funasr import AutoModel
 
@@ -46,6 +46,14 @@ model = AutoModel(
 )
 result = model.generate(input="sample.wav")
 print(result)</code></pre>
+<p>若要做可复现的目录级评测：</p>
+<pre><code>python examples/migration/benchmark_funasr.py \
+  --input /path/to/audio_samples \
+  --recursive \
+  --model iic/SenseVoiceSmall \
+  --device cuda \
+  --spk-model cam++ \
+  --output-dir outputs/funasr_migration_eval</code></pre>
 <p>如果要按 API 服务方式对比：</p>
 <pre><code>pip install funasr fastapi uvicorn python-multipart
 funasr-server --model sensevoice --device cuda
