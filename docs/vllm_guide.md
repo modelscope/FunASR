@@ -226,8 +226,6 @@ const result = await resp.json();
 
 兼容 OpenAI Whisper API 标准，可直接用 OpenAI SDK 接入。
 
-> 注意：OpenAI 标准不支持 SPK 参数。如需说话人分离，请用 HTTP REST 接口。
-
 **请求**：`multipart/form-data`
 
 | 参数 | 类型 | 默认值 | 说明 |
@@ -237,6 +235,7 @@ const result = await resp.json();
 | `language` | string | None | 语种 |
 | `response_format` | string | "json" | "json" / "text" / "verbose_json" |
 | `timestamp_granularities` | string | "word" | "word" / "segment" |
+| `spk` | bool | false | 说话人分离（FunASR 扩展字段） |
 
 **响应**（`verbose_json`）：
 
@@ -278,9 +277,8 @@ curl -X POST http://localhost:8899/v1/audio/transcriptions \
 
 ### 3.5 协议三：WebSocket — `ws://host:port/ws`
 
-> 注意：WebSocket 接口当前不支持 SPK。如需说话人分离，请用 HTTP REST 接口。
 
-离线服务的 WebSocket 接口，发送完整音频后获取结果（非流式）。
+离线服务的 WebSocket 接口，发送完整音频后获取结果。STOP 时自动进行说话人聚类，结果中包含 `spk` 字段。
 
 **客户端 → 服务端**：
 
@@ -451,28 +449,18 @@ asyncio.run(stream("audio.wav"))
 
 fsmn-vad 默认启用动态静音阈值。离线和流式使用不同配置。
 
-### 离线配置（保留长段 ≤60s）
+| 累积时长 | 离线（保留长段 ≤60s） | 流式（平衡延迟） |
+|---------|-------------------|----------------|
+| ≤ 5s | 2000ms | 2000ms |
+| 5-10s | 2000ms | 1500ms |
+| 10-15s | 1000ms | 1000ms |
+| 15-20s | 1000ms | 800ms |
+| 20-30s | 800ms | 800ms |
+| 30-45s | 600ms | 400ms |
+| 45-60s | 200-400ms | 100ms |
+| > 60s | 100ms | 100ms |
 
-| 累积时长 | 静音阈值 |
-|---------|---------|
-| ≤ 10s | 2000ms |
-| 10-20s | 1000ms |
-| 20-30s | 800ms |
-| 30-40s | 600ms |
-| 40-50s | 400ms |
-| 50-60s | 200ms |
-| > 60s | 100ms |
-
-### 流式配置（平衡延迟）
-
-| 累积时长 | 静音阈值 |
-|---------|---------|
-| ≤ 5s | 2000ms |
-| 5-10s | 1500ms |
-| 10-15s | 1000ms |
-| 15-30s | 800ms |
-| 30-45s | 400ms |
-| > 45s | 100ms |
+离线倾向保留长段减少边界损失；流式更快收紧以降低延迟。
 
 ### 自定义
 

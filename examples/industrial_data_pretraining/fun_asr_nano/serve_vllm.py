@@ -210,13 +210,14 @@ async def openai_transcriptions(
     language: str = Form(default=None),
     response_format: str = Form(default="json"),
     timestamp_granularities: str = Form(default="word"),
+    spk: bool = Form(default=False),
 ):
-    """OpenAI Whisper-compatible transcription API."""
+    """OpenAI Whisper-compatible transcription API (extended with spk support)."""
     content = await file.read()
     audio_data, sr = sf.read(io.BytesIO(content))
 
     use_ts = "word" in timestamp_granularities or "segment" in timestamp_granularities
-    result = process_audio(audio_data, sr=sr, language=language, use_timestamp=use_ts)
+    result = process_audio(audio_data, sr=sr, language=language, use_spk=spk, use_timestamp=use_ts)
 
     if response_format == "text":
         return JSONResponse(content=result["text"])
@@ -303,6 +304,34 @@ async def websocket_endpoint(websocket: WebSocket):
                                     locked_sentences.append({
                                         "text": res[0]["text"], "start": start_ms, "end": end_ms
                                     })
+
+                        # SPK: run full clustering on all sentences
+                        if locked_sentences and _spk_model is not None:
+                            try:
+                                from funasr.models.campplus.utils import sv_chunk, postprocess, distribute_spk
+                                from funasr.models.campplus.cluster_backend import ClusterBackend
+                                vad_segs = [[s["start"]/1000, s["end"]/1000, 
+                                            audio_buffer[int(s["start"]*16):int(s["end"]*16)]]
+                                           for s in locked_sentences]
+                                chunks = sv_chunk(vad_segs)
+                                if chunks:
+                                    speech_list = [ch[2] for ch in chunks]
+                                    spk_res = _spk_model.generate(input=speech_list, cache={}, is_final=True)
+                                    import torch as _torch
+                                    embs = _torch.cat([r["spk_embedding"] for r in spk_res], dim=0)
+                                    cluster = ClusterBackend(merge_thr=0.78).to(_args.device)
+                                    labels = cluster(embs.cpu(), oracle_num=None)
+                                    if not isinstance(labels, np.ndarray):
+                                        labels = np.array(labels)
+                                    all_sorted = sorted(chunks, key=lambda x: x[0])
+                                    sv_output = postprocess(all_sorted, None, labels, embs.cpu())
+                                    spk_sents = [{"text": s["text"], "start": int(s["start"]), "end": int(s["end"])}
+                                                for s in locked_sentences]
+                                    distribute_spk(spk_sents, sv_output)
+                                    for i, ss in enumerate(spk_sents):
+                                        locked_sentences[i]["spk"] = ss.get("spk", 0)
+                            except Exception as e:
+                                logger.warning(f"SPK failed: {e}")
 
                         await websocket.send_json({
                             "sentences": locked_sentences,
