@@ -132,7 +132,7 @@ funasr-server --device cuda
 docker pull registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-online-cpu-0.1.12
 ```
 
-[OpenAI API example →](./examples/openai_api/) · [Client recipes →](./examples/openai_api/CLIENTS.md) · [Deployment matrix →](./docs/deployment_matrix.md) · [배포 문서 →](./runtime/readme.md) · [Agent 연동 →](https://modelscope.github.io/FunASR/agent.html)
+[OpenAI API example →](./examples/openai_api/) · [Client recipes →](./examples/openai_api/CLIENTS.md) · [Workflow recipes →](./examples/openai_api/WORKFLOWS.md) · [Deployment matrix →](./docs/deployment_matrix.md) · [배포 문서 →](./runtime/readme.md) · [Agent 연동 →](https://modelscope.github.io/FunASR/agent.html)
 
 ---
 
