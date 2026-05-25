@@ -13,6 +13,7 @@ from funasr.metrics.compute_acc import th_accuracy
 
 # from funasr.models.e2e_asr_common import ErrorCalculator
 from funasr.train_utils.device_funcs import force_gatherable
+from funasr.losses.cr_ctc import cr_ctc_loss
 from funasr.utils.load_utils import load_audio_text_image_video, extract_fbank
 from funasr.utils import postprocess_utils
 from funasr.utils.datadir_writer import DatadirWriter
@@ -127,6 +128,7 @@ class Transformer(nn.Module):
         self.vocab_size = vocab_size
         self.ignore_id = ignore_id
         self.ctc_weight = ctc_weight
+        self.cr_ctc_weight = kwargs.get("cr_ctc_weight", 0.0)
         self.specaug = specaug
         self.normalize = normalize
         self.encoder = encoder
@@ -235,6 +237,22 @@ class Transformer(nn.Module):
             # calculate whole encoder loss
             loss_ctc = (1 - self.interctc_weight) * loss_ctc + self.interctc_weight * loss_interctc
 
+        # CR-CTC: consistency regularization
+        loss_cr_ctc = None
+        if self.cr_ctc_weight > 0.0 and self.training and self.ctc_weight != 0.0:
+            # Second forward pass WITHOUT SpecAug
+            specaug_backup = self.specaug
+            self.specaug = None
+            encoder_out_clean, encoder_out_lens_clean = self.encode(speech, speech_lengths)
+            self.specaug = specaug_backup
+            if isinstance(encoder_out_clean, tuple):
+                encoder_out_clean = encoder_out_clean[0]
+            # Compute CTC log probs for both augmented and clean
+            ctc_logprobs_aug = self.ctc.log_softmax(encoder_out)
+            ctc_logprobs_clean = self.ctc.log_softmax(encoder_out_clean).detach()
+            loss_cr_ctc = cr_ctc_loss(ctc_logprobs_aug, ctc_logprobs_clean, encoder_out_lens)
+            stats["loss_cr_ctc"] = loss_cr_ctc.detach()
+
         # decoder: Attention decoder branch
         loss_att, acc_att, cer_att, wer_att = self._calc_att_loss(
             encoder_out, encoder_out_lens, text, text_lengths
@@ -247,6 +265,10 @@ class Transformer(nn.Module):
             loss = loss_ctc
         else:
             loss = self.ctc_weight * loss_ctc + (1 - self.ctc_weight) * loss_att
+
+        # Add CR-CTC loss
+        if loss_cr_ctc is not None:
+            loss = loss + self.cr_ctc_weight * loss_cr_ctc
 
         # Collect Attn branch stats
         stats["loss_att"] = loss_att.detach() if loss_att is not None else None

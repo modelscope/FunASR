@@ -29,3 +29,24 @@ def add_sos_eos(ys_pad, sos, eos, ignore_id):
     ys_in = [torch.cat([_sos, y], dim=0) for y in ys]
     ys_out = [torch.cat([y, _eos], dim=0) for y in ys]
     return pad_list(ys_in, eos), pad_list(ys_out, ignore_id)
+
+def add_sos_and_eos(ys_pad, sos, eos, ignore_id):
+    """Add <sos> at the beginning and <eos> at the end (length + 2).
+
+    Unlike add_sos_eos which returns (ys_in, ys_out) separately,
+    this returns a single sequence with both sos and eos added.
+
+    :param torch.Tensor ys_pad: batch of padded target sequences (B, Lmax)
+    :param int sos: index of <sos>
+    :param int eos: index of <eos>
+    :param int ignore_id: index of padding
+    :return: ys_in with sos prepended (B, Lmax+1)
+    :return: ys with both sos and eos (B, Lmax+2)
+    """
+    _sos = ys_pad.new([sos])
+    _eos = ys_pad.new([eos])
+    ys = [y[y != ignore_id] for y in ys_pad]
+    ys_in = [torch.cat([_sos, y], dim=0) for y in ys]
+    ys_both = [torch.cat([_sos, y, _eos], dim=0) for y in ys]
+    return pad_list(ys_in, eos), pad_list(ys_both, ignore_id)
+
