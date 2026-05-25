@@ -21,6 +21,10 @@ curl -fsS "$FUNASR_BASE_URL/v1/models"
 
 If the workflow engine runs in Docker, `localhost` usually means the workflow container itself. Use a Docker Compose service name, Kubernetes service name, or LAN host name instead.
 
+## Postman smoke test
+
+Before configuring a low-code tool, you can import the [Postman collection](POSTMAN.md) and run health, model-list, and transcription requests from a GUI. Set `FUNASR_BASE_URL`, choose a local audio file for the multipart `file` field, and keep `MODEL_ALIAS=sensevoice` for the first test.
+
 ## Multipart HTTP request
 
 Every workflow engine eventually needs to send this request shape:

@@ -1,0 +1,185 @@
+{
+  "info": {
+    "name": "FunASR OpenAI-Compatible API",
+    "description": "Smoke-test the FunASR OpenAI-compatible speech API. Start the server, set FUNASR_BASE_URL, choose a local audio file for multipart requests, then run health, model list, and transcription checks.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "FUNASR_BASE_URL",
+      "value": "http://localhost:8000",
+      "type": "string"
+    },
+    {
+      "key": "MODEL_ALIAS",
+      "value": "sensevoice",
+      "type": "string"
+    },
+    {
+      "key": "RESPONSE_FORMAT",
+      "value": "verbose_json",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{FUNASR_BASE_URL}}/health",
+          "host": [
+            "{{FUNASR_BASE_URL}}"
+          ],
+          "path": [
+            "health"
+          ]
+        },
+        "description": "Confirm the FunASR API server is reachable and ready."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('health returns 200', function () { pm.response.to.have.status(200); });",
+              "pm.test('health response is JSON', function () { pm.response.to.be.json; });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "List model aliases",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{FUNASR_BASE_URL}}/v1/models",
+          "host": [
+            "{{FUNASR_BASE_URL}}"
+          ],
+          "path": [
+            "v1",
+            "models"
+          ]
+        },
+        "description": "List OpenAI-compatible model aliases exposed by the server."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('models returns 200', function () { pm.response.to.have.status(200); });",
+              "pm.test('models response is JSON', function () { pm.response.to.be.json; });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Transcribe audio - verbose JSON",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "file",
+              "type": "file",
+              "src": "sample.wav",
+              "description": "Choose a local wav, mp3, m4a, or other supported audio file before sending."
+            },
+            {
+              "key": "model",
+              "value": "{{MODEL_ALIAS}}",
+              "type": "text"
+            },
+            {
+              "key": "response_format",
+              "value": "{{RESPONSE_FORMAT}}",
+              "type": "text"
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{FUNASR_BASE_URL}}/v1/audio/transcriptions",
+          "host": [
+            "{{FUNASR_BASE_URL}}"
+          ],
+          "path": [
+            "v1",
+            "audio",
+            "transcriptions"
+          ]
+        },
+        "description": "Upload an audio file with multipart/form-data and return transcript text plus segments when RESPONSE_FORMAT is verbose_json."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('transcription returns 200', function () { pm.response.to.have.status(200); });",
+              "pm.test('transcription response is JSON', function () { pm.response.to.be.json; });",
+              "pm.test('transcription has text', function () { var data = pm.response.json(); pm.expect(data.text).to.be.a('string'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Transcribe audio - text only",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "file",
+              "type": "file",
+              "src": "sample.wav",
+              "description": "Choose a local audio file before sending."
+            },
+            {
+              "key": "model",
+              "value": "{{MODEL_ALIAS}}",
+              "type": "text"
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{FUNASR_BASE_URL}}/v1/audio/transcriptions",
+          "host": [
+            "{{FUNASR_BASE_URL}}"
+          ],
+          "path": [
+            "v1",
+            "audio",
+            "transcriptions"
+          ]
+        },
+        "description": "Minimal OpenAI-compatible transcription request."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('transcription returns 200', function () { pm.response.to.have.status(200); });",
+              "pm.test('transcription response is JSON', function () { pm.response.to.be.json; });"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

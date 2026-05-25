@@ -11,7 +11,7 @@ python server.py --model sensevoice --device cuda --port 8000
 
 Server starts in ~20s (model loading). Health check: `GET /health`
 
-Need copy-paste integration snippets for Python SDK, HTTP clients, agent tools, or Dify/n8n-style workflows? See [Client recipes](CLIENTS.md), [workflow recipes](WORKFLOWS.md), and the [Chinese workflow recipes](WORKFLOWS_zh.md).
+Need copy-paste integration snippets for Python SDK, HTTP clients, agent tools, Postman, or Dify/n8n-style workflows? See [Client recipes](CLIENTS.md), [workflow recipes](WORKFLOWS.md), the [Chinese workflow recipes](WORKFLOWS_zh.md), and the [Postman collection](POSTMAN.md).
 
 ### End-to-end smoke test
 
@@ -86,6 +86,8 @@ curl http://localhost:8000/v1/audio/transcriptions \
 | `/v1/models` | GET | List available models |
 | `/health` | GET | Health check + loaded models |
 | `/docs` | GET | Interactive API documentation (Swagger) |
+
+Prefer no-code API checks? Import the [Postman collection](POSTMAN.md) and run health, model-list, and transcription requests from Postman.
 
 ## Agent Framework Integration
 

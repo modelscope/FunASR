@@ -21,6 +21,10 @@ curl -fsS "$FUNASR_BASE_URL/v1/models"
 
 如果工作流引擎运行在 Docker 中，`localhost` 通常指的是工作流容器自身。请改用 Docker Compose service name、Kubernetes service name 或内网主机名。
 
+## Postman smoke test
+
+在配置低代码工具前，可以先导入 [Postman collection](POSTMAN.md)，从图形界面跑通 health、模型列表和转写请求。设置 `FUNASR_BASE_URL`，在 multipart `file` 字段选择本地音频文件，第一次测试建议保持 `MODEL_ALIAS=sensevoice`。
+
 ## Multipart HTTP 请求
 
 所有工作流引擎最终都需要发出下面这种请求：
