@@ -13,7 +13,7 @@ python server.py --model sensevoice --device cuda --port 8000
 
 服务通常会在模型加载后启动。健康检查：`GET /health`。
 
-需要直接复制的接入示例？可以继续查看 [客户端配方](CLIENTS.md)、[工作流配方](WORKFLOWS_zh.md)、[Postman 集合](POSTMAN.md) 和 [OpenAPI 规范](OPENAPI.md)。
+需要直接复制的接入示例？可以继续查看 [客户端配方](CLIENTS.md)、[工作流配方](WORKFLOWS_zh.md)、[Postman 集合](POSTMAN_zh.md) 和 [OpenAPI 规范](OPENAPI_zh.md)。
 
 ### 端到端 smoke test
 
@@ -86,7 +86,7 @@ curl http://localhost:8000/v1/audio/transcriptions \
 | `/health` | GET | 健康检查、已加载模型和可用模型 |
 | `/docs` | GET | FastAPI Swagger 文档 |
 
-不想写代码验证接口时，可以导入 [Postman 集合](POSTMAN.md)。如果要接入 API 网关、开发者门户或生成内部客户端，可以使用 [OpenAPI 规范](OPENAPI.md)。
+不想写代码验证接口时，可以导入 [Postman 集合](POSTMAN_zh.md)。如果要接入 API 网关、开发者门户或生成内部客户端，可以使用 [OpenAPI 规范](OPENAPI_zh.md)。
 
 ## Agent 与低代码工作流
 
@@ -94,8 +94,8 @@ curl http://localhost:8000/v1/audio/transcriptions \
 
 - SDK 和 Agent tool 写法见 [客户端配方](CLIENTS.md)。
 - Dify、n8n、HTTP 节点和 webhook worker 见 [工作流配方](WORKFLOWS_zh.md)。
-- 图形界面 smoke test 见 [Postman 集合](POSTMAN.md)。
-- schema 驱动导入见 [OpenAPI 规范](OPENAPI.md)。
+- 图形界面 smoke test 见 [Postman 集合](POSTMAN_zh.md)。
+- schema 驱动导入见 [OpenAPI 规范](OPENAPI_zh.md)。
 
 ## Docker 部署
 

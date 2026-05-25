@@ -23,7 +23,7 @@ curl -fsS "$FUNASR_BASE_URL/v1/models"
 
 ## Postman smoke test
 
-在配置低代码工具前，可以先导入 [Postman collection](POSTMAN.md)，从图形界面跑通 health、模型列表和转写请求；需要按 schema 导入时可使用 [OpenAPI spec](OPENAPI.md)。设置 `FUNASR_BASE_URL`，在 multipart `file` 字段选择本地音频文件，第一次测试建议保持 `MODEL_ALIAS=sensevoice`。
+在配置低代码工具前，可以先导入 [Postman collection](POSTMAN_zh.md)，从图形界面跑通 health、模型列表和转写请求；需要按 schema 导入时可使用 [OpenAPI spec](OPENAPI_zh.md)。设置 `FUNASR_BASE_URL`，在 multipart `file` 字段选择本地音频文件，第一次测试建议保持 `MODEL_ALIAS=sensevoice`。
 
 ## Multipart HTTP 请求
 
