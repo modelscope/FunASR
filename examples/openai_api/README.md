@@ -13,7 +13,7 @@ python server.py --model sensevoice --device cuda --port 8000
 
 Server starts in ~20s (model loading). Health check: `GET /health`
 
-Need copy-paste integration snippets for Python SDK, JavaScript/TypeScript, HTTP clients, agent tools, a browser demo, Postman, OpenAPI imports, Kubernetes deployment, or Dify/n8n-style workflows? See [Client recipes](CLIENTS.md), [JavaScript/TypeScript recipes](JAVASCRIPT.md), [Gradio browser demo](GRADIO.md), [workflow recipes](WORKFLOWS.md), the [Chinese workflow recipes](WORKFLOWS_zh.md), the [Postman collection](POSTMAN.md), the [OpenAPI spec](OPENAPI.md), and the [Kubernetes deployment template](kubernetes/README.md).
+Need copy-paste integration snippets for Python SDK, JavaScript/TypeScript, HTTP clients, agent tools, a browser demo, Postman, OpenAPI imports, Kubernetes deployment, or Dify/n8n-style workflows? See [Client recipes](CLIENTS.md), [JavaScript/TypeScript recipes](JAVASCRIPT.md), [Gradio browser demo](GRADIO.md), [workflow recipes](WORKFLOWS.md), the [Chinese workflow recipes](WORKFLOWS_zh.md), the [Postman collection](POSTMAN.md), the [OpenAPI spec](OPENAPI.md), the [security and gateway guide](SECURITY.md), and the [Kubernetes deployment template](kubernetes/README.md).
 
 ### End-to-end smoke test
 
@@ -161,6 +161,8 @@ python smoke_test.py --base-url http://localhost:8000
 ```
 
 ## Kubernetes Deployment
+
+Before sharing the service across a team or exposing it through a gateway, review the [security and gateway guide](SECURITY.md) for TLS, authentication, upload limits, rate limits, and logging.
 
 For an internal cluster service with persistent model cache, health probes, and a private `ClusterIP`, start from the [Kubernetes deployment template](kubernetes/README.md). Build and push the example image, apply the manifests, then verify through `kubectl port-forward` with `python smoke_test.py --base-url http://localhost:8000`.
 

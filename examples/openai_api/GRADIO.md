@@ -57,6 +57,6 @@ See the [model selection guide](../../docs/model_selection.md) for a deeper comp
 ## Production notes
 
 - Treat the Gradio app as a demo or internal operator UI, not a public production frontend.
-- Add authentication, TLS, upload-size limits, and rate limits before exposing any audio upload UI outside a trusted network.
+- Add authentication, TLS, upload-size limits, and rate limits before exposing any audio upload UI outside a trusted network; see the [security and gateway guide](SECURITY.md).
 - Keep browser uploads close to your backend; do not send private audio to an unauthenticated public endpoint.
 - Log model alias, audio duration, latency, response format, and error text when debugging.
