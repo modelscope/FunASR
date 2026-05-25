@@ -254,6 +254,7 @@ async def websocket_endpoint(websocket: WebSocket):
     locked_sentences = []
     language = None
     hotwords = None
+    use_spk = False
     is_active = False
 
     try:
@@ -274,6 +275,9 @@ async def websocket_endpoint(websocket: WebSocket):
                 elif cmd.upper().startswith("HOTWORDS:"):
                     hotwords = [w.strip() for w in cmd[9:].split(",") if w.strip()]
                     await websocket.send_json({"event": "hotwords_set", "hotwords": hotwords})
+                elif cmd.upper().startswith("SPK:"):
+                    use_spk = cmd[4:].strip().lower() in ("true", "1", "on", "yes")
+                    await websocket.send_json({"event": "spk_set", "spk": use_spk})
                 elif cmd.upper() == "STOP":
                     if is_active and len(audio_buffer) > 0:
                         # Final: process remaining audio
@@ -305,8 +309,8 @@ async def websocket_endpoint(websocket: WebSocket):
                                         "text": res[0]["text"], "start": start_ms, "end": end_ms
                                     })
 
-                        # SPK: run full clustering on all sentences
-                        if locked_sentences and _spk_model is not None:
+                        # SPK: run full clustering on all sentences (only if enabled)
+                        if use_spk and locked_sentences and _spk_model is not None:
                             try:
                                 from funasr.models.campplus.utils import sv_chunk, postprocess, distribute_spk
                                 from funasr.models.campplus.cluster_backend import ClusterBackend
