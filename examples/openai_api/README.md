@@ -13,7 +13,7 @@ python server.py --model sensevoice --device cuda --port 8000
 
 Server starts in ~20s (model loading). Health check: `GET /health`
 
-Need copy-paste integration snippets for Python SDK, HTTP clients, agent tools, Postman, OpenAPI imports, or Dify/n8n-style workflows? See [Client recipes](CLIENTS.md), [workflow recipes](WORKFLOWS.md), the [Chinese workflow recipes](WORKFLOWS_zh.md), the [Postman collection](POSTMAN.md), and the [OpenAPI spec](OPENAPI.md).
+Need copy-paste integration snippets for Python SDK, JavaScript/TypeScript, HTTP clients, agent tools, Postman, OpenAPI imports, or Dify/n8n-style workflows? See [Client recipes](CLIENTS.md), [JavaScript/TypeScript recipes](JAVASCRIPT.md), [workflow recipes](WORKFLOWS.md), the [Chinese workflow recipes](WORKFLOWS_zh.md), the [Postman collection](POSTMAN.md), and the [OpenAPI spec](OPENAPI.md).
 
 ### End-to-end smoke test
 
@@ -95,7 +95,7 @@ Prefer no-code API checks? Import the [Postman collection](POSTMAN.md) and run h
 
 ## Agent Framework Integration
 
-Works with: **LangChain**, **LlamaIndex**, **AutoGen**, **CrewAI**, **Semantic Kernel**, **Dify**, **n8n**, or any framework using OpenAI audio API. See [Client recipes](CLIENTS.md) for SDK and agent-tool patterns, plus [workflow recipes](WORKFLOWS.md) for low-code HTTP nodes and webhook workers ([中文](WORKFLOWS_zh.md)).
+Works with: **LangChain**, **LlamaIndex**, **AutoGen**, **CrewAI**, **Semantic Kernel**, **Dify**, **n8n**, or any framework using OpenAI audio API. See [Client recipes](CLIENTS.md) and [JavaScript/TypeScript recipes](JAVASCRIPT.md) for SDK and agent-tool patterns, plus [workflow recipes](WORKFLOWS.md) for low-code HTTP nodes and webhook workers ([中文](WORKFLOWS_zh.md)).
 
 ### LangChain Example
 ```python
