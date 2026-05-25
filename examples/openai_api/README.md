@@ -13,7 +13,7 @@ python server.py --model sensevoice --device cuda --port 8000
 
 Server starts in ~20s (model loading). Health check: `GET /health`
 
-Need copy-paste integration snippets for Python SDK, JavaScript/TypeScript, HTTP clients, agent tools, Postman, OpenAPI imports, Kubernetes deployment, or Dify/n8n-style workflows? See [Client recipes](CLIENTS.md), [JavaScript/TypeScript recipes](JAVASCRIPT.md), [workflow recipes](WORKFLOWS.md), the [Chinese workflow recipes](WORKFLOWS_zh.md), the [Postman collection](POSTMAN.md), the [OpenAPI spec](OPENAPI.md), and the [Kubernetes deployment template](kubernetes/README.md).
+Need copy-paste integration snippets for Python SDK, JavaScript/TypeScript, HTTP clients, agent tools, a browser demo, Postman, OpenAPI imports, Kubernetes deployment, or Dify/n8n-style workflows? See [Client recipes](CLIENTS.md), [JavaScript/TypeScript recipes](JAVASCRIPT.md), [Gradio browser demo](GRADIO.md), [workflow recipes](WORKFLOWS.md), the [Chinese workflow recipes](WORKFLOWS_zh.md), the [Postman collection](POSTMAN.md), the [OpenAPI spec](OPENAPI.md), and the [Kubernetes deployment template](kubernetes/README.md).
 
 ### End-to-end smoke test
 
@@ -35,6 +35,17 @@ curl http://localhost:8000/v1/audio/transcriptions \
   -F model=sensevoice \
   -F response_format=verbose_json
 ```
+
+## Browser demo with Gradio
+
+If you want a local browser UI for upload or microphone testing, run the API server first and then launch the optional Gradio frontend:
+
+```bash
+pip install gradio
+python gradio_app.py --base-url http://localhost:8000
+```
+
+The browser demo calls the same OpenAI-compatible API endpoints as the smoke tests. See [Gradio browser demo](GRADIO.md) for Docker, Kubernetes, and production notes.
 
 ## Usage with OpenAI SDK (Python)
 
@@ -91,7 +102,7 @@ curl http://localhost:8000/v1/audio/transcriptions \
 | `/health` | GET | Health check + loaded models |
 | `/docs` | GET | Interactive API documentation (Swagger) |
 
-Prefer no-code API checks? Import the [Postman collection](POSTMAN.md) and run health, model-list, and transcription requests from Postman. For API gateways, developer portals, or client generation, use the [OpenAPI spec](OPENAPI.md).
+Prefer no-code API checks? Use the [Gradio browser demo](GRADIO.md) for local upload or microphone testing, or import the [Postman collection](POSTMAN.md) and run health, model-list, and transcription requests from Postman. For API gateways, developer portals, or client generation, use the [OpenAPI spec](OPENAPI.md).
 
 ## Agent Framework Integration
 

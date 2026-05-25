@@ -13,7 +13,7 @@ python server.py --model sensevoice --device cuda --port 8000
 
 服务通常会在模型加载后启动。健康检查：`GET /health`。
 
-需要直接复制的接入示例？可以继续查看 [客户端配方](CLIENTS.md)、[JavaScript/TypeScript 配方](JAVASCRIPT_zh.md)、[工作流配方](WORKFLOWS_zh.md)、[Postman 集合](POSTMAN_zh.md)、[OpenAPI 规范](OPENAPI_zh.md) 和 [Kubernetes 部署模板](kubernetes/README_zh.md)。
+需要直接复制的接入示例？可以继续查看 [客户端配方](CLIENTS.md)、[JavaScript/TypeScript 配方](JAVASCRIPT_zh.md)、[Gradio 浏览器 Demo](GRADIO_zh.md)、[工作流配方](WORKFLOWS_zh.md)、[Postman 集合](POSTMAN_zh.md)、[OpenAPI 规范](OPENAPI_zh.md) 和 [Kubernetes 部署模板](kubernetes/README_zh.md)。
 
 ### 端到端 smoke test
 
@@ -35,6 +35,17 @@ curl http://localhost:8000/v1/audio/transcriptions \
   -F model=sensevoice \
   -F response_format=verbose_json
 ```
+
+## Gradio 浏览器 Demo
+
+如果希望用本地浏览器上传音频或测试麦克风，先启动 API 服务，再运行可选 Gradio 前端：
+
+```bash
+pip install gradio
+python gradio_app.py --base-url http://localhost:8000
+```
+
+这个浏览器 demo 调用的就是 smoke test 使用的 OpenAI 兼容 API 端点。Docker、Kubernetes 和生产注意事项见 [Gradio 浏览器 Demo](GRADIO_zh.md)。
 
 ## 使用 OpenAI SDK
 
@@ -88,7 +99,7 @@ curl http://localhost:8000/v1/audio/transcriptions \
 | `/health` | GET | 健康检查、已加载模型和可用模型 |
 | `/docs` | GET | FastAPI Swagger 文档 |
 
-不想写代码验证接口时，可以导入 [Postman 集合](POSTMAN_zh.md)。如果要接入 API 网关、开发者门户或生成内部客户端，可以使用 [OpenAPI 规范](OPENAPI_zh.md)。
+不想写代码验证接口时，可以使用 [Gradio 浏览器 Demo](GRADIO_zh.md) 做本地上传或麦克风测试，也可以导入 [Postman 集合](POSTMAN_zh.md)。如果要接入 API 网关、开发者门户或生成内部客户端，可以使用 [OpenAPI 规范](OPENAPI_zh.md)。
 
 ## Agent 与低代码工作流
 

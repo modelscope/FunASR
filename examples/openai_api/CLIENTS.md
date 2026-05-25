@@ -1,6 +1,6 @@
 # Client Recipes for the FunASR OpenAI-Compatible API
 
-Use this page when `funasr-server` is already running and you want to connect an existing application, agent tool, or workflow engine to local speech recognition. For JavaScript, TypeScript, and Next.js examples, see the [JavaScript/TypeScript recipes](JAVASCRIPT.md) or [Chinese JavaScript/TypeScript recipes](JAVASCRIPT_zh.md). For Dify, n8n, HTTP nodes, and webhook workers, see the [workflow recipes](WORKFLOWS.md) or [Chinese workflow recipes](WORKFLOWS_zh.md). For no-code API smoke tests, import the [Postman collection](POSTMAN.md). For schema-driven imports or client generation, use the [OpenAPI spec](OPENAPI.md).
+Use this page when `funasr-server` is already running and you want to connect an existing application, agent tool, or workflow engine to local speech recognition. For JavaScript, TypeScript, and Next.js examples, see the [JavaScript/TypeScript recipes](JAVASCRIPT.md) or [Chinese JavaScript/TypeScript recipes](JAVASCRIPT_zh.md). For Dify, n8n, HTTP nodes, and webhook workers, see the [workflow recipes](WORKFLOWS.md) or [Chinese workflow recipes](WORKFLOWS_zh.md). For browser upload or microphone demos, use the [Gradio browser demo](GRADIO.md). For no-code API smoke tests, import the [Postman collection](POSTMAN.md). For schema-driven imports or client generation, use the [OpenAPI spec](OPENAPI.md).
 
 ## Preflight
 
