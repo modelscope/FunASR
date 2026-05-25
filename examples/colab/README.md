@@ -1,5 +1,7 @@
 # FunASR Colab Quickstart
 
+English | [简体中文](README_zh.md)
+
 Run FunASR in a browser without preparing a local Python environment.
 
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/modelscope/FunASR/blob/main/examples/colab/funasr_quickstart.ipynb)
