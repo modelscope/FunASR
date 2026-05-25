@@ -9,7 +9,7 @@ FunASR is useful far beyond a single offline transcription command. This page co
 | Transcribe one file locally | [README quick start](../README.md#quick-start) | Verify install and model download in minutes. |
 | Compare accuracy and speed | [Benchmark report](https://modelscope.github.io/FunASR/benchmark.html) | Reproduce the 184-file long-audio benchmark before choosing a model. |
 | Migrate from Whisper/cloud ASR | [Migration guide](./migration_from_whisper.md) | Map existing pipelines to FunASR, benchmark representative audio, and plan a safe rollout. |
-| Build a private speech API | [OpenAI-compatible API example](../examples/openai_api/), [client recipes](../examples/openai_api/CLIENTS.md), and [workflow recipes](../examples/openai_api/WORKFLOWS.md) | Reuse LangChain, Dify, n8n, AutoGen, and other OpenAI-style clients without sending audio to a cloud ASR provider. |
+| Build a private speech API | [OpenAI-compatible API example](../examples/openai_api/), [client recipes](../examples/openai_api/CLIENTS.md), [JavaScript/TypeScript recipes](../examples/openai_api/JAVASCRIPT.md), and [workflow recipes](../examples/openai_api/WORKFLOWS.md) | Reuse LangChain, Dify, n8n, AutoGen, and other OpenAI-style clients without sending audio to a cloud ASR provider. |
 | Add speech input to agents | [MCP server](../examples/mcp_server/) and [voice input](../examples/voice_input/) | Connect local ASR to Claude, Cursor, and desktop agent workflows. |
 | Choose a deployment path | [Deployment matrix](./deployment_matrix.md) | Compare Python API, OpenAI API, Docker Compose, WebSocket, vLLM, MCP, batch, subtitles, and Triton. |
 | Serve streaming ASR | [Runtime service docs](../runtime/readme.md) | Run WebSocket or service-mode ASR for live captioning and call-center style workloads. |
@@ -37,7 +37,8 @@ curl http://localhost:8000/v1/audio/transcriptions \
 
 Recommended next steps:
 
-- Run the [OpenAI-compatible API smoke test](../examples/openai_api/smoke_test.sh).
+- Run the [OpenAI-compatible API smoke test](../examples/openai_api/smoke_test.sh) or the cross-platform [Python smoke test](../examples/openai_api/smoke_test.py).
+- For Node.js or Next.js services, start from the [JavaScript/TypeScript recipes](../examples/openai_api/JAVASCRIPT.md).
 - Add authentication and network controls at your service boundary.
 - Record model name, device, driver, and audio duration in bug reports and benchmarks.
 

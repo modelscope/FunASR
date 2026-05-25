@@ -1,6 +1,6 @@
 # Client Recipes for the FunASR OpenAI-Compatible API
 
-Use this page when `funasr-server` is already running and you want to connect an existing application, agent tool, or workflow engine to local speech recognition. For Dify, n8n, HTTP nodes, and webhook workers, see the [workflow recipes](WORKFLOWS.md) or [Chinese workflow recipes](WORKFLOWS_zh.md). For no-code API smoke tests, import the [Postman collection](POSTMAN.md). For schema-driven imports or client generation, use the [OpenAPI spec](OPENAPI.md).
+Use this page when `funasr-server` is already running and you want to connect an existing application, agent tool, or workflow engine to local speech recognition. For JavaScript, TypeScript, and Next.js examples, see the [JavaScript/TypeScript recipes](JAVASCRIPT.md) or [Chinese JavaScript/TypeScript recipes](JAVASCRIPT_zh.md). For Dify, n8n, HTTP nodes, and webhook workers, see the [workflow recipes](WORKFLOWS.md) or [Chinese workflow recipes](WORKFLOWS_zh.md). For no-code API smoke tests, import the [Postman collection](POSTMAN.md). For schema-driven imports or client generation, use the [OpenAPI spec](OPENAPI.md).
 
 ## Preflight
 
@@ -41,6 +41,30 @@ for segment in getattr(result, "segments", []):
 ```
 
 Most OpenAI SDKs require an API key value even when the local FunASR server does not check it. Use any placeholder for local development, then add real authentication at your gateway if the service is shared.
+
+## JavaScript and TypeScript
+
+Use the [JavaScript/TypeScript recipes](JAVASCRIPT.md) for OpenAI JS SDK, built-in `fetch`, TypeScript helper functions, and Next.js route handlers. Minimal OpenAI SDK shape:
+
+```javascript
+import OpenAI from "openai";
+import { createReadStream } from "node:fs";
+
+const client = new OpenAI({
+  baseURL: "http://localhost:8000/v1",
+  apiKey: "local-development",
+});
+
+const result = await client.audio.transcriptions.create({
+  model: "sensevoice",
+  file: createReadStream("meeting.wav"),
+  response_format: "verbose_json",
+});
+
+console.log(result.text);
+```
+
+For browser uploads, send audio to your backend first, then proxy to FunASR with authentication and upload limits. See the [Chinese JavaScript/TypeScript recipes](JAVASCRIPT_zh.md) for localized guidance.
 
 ## Plain Python requests
 

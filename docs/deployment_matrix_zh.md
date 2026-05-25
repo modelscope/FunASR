@@ -24,7 +24,7 @@
 
 ### 我想替代云端转写服务
 
-使用 OpenAI 兼容 API。它提供 `/v1/audio/transcriptions`、`/v1/models`、`/health` 和 Swagger docs。先用 `sensevoice` 跑通 `examples/openai_api/smoke_test.sh` 或 `examples/openai_api/smoke_test.py`，再根据 [客户端配方](../examples/openai_api/CLIENTS.md) 接入 SDK 或 HTTP 客户端。Dify、n8n、HTTP 节点或 webhook worker 可参考 [工作流配方](../examples/openai_api/WORKFLOWS_zh.md)。API 网关、开发者门户或按 schema 导入时可使用 [OpenAPI 规范](../examples/openai_api/OPENAPI_zh.md)。
+使用 OpenAI 兼容 API。它提供 `/v1/audio/transcriptions`、`/v1/models`、`/health` 和 Swagger docs。先用 `sensevoice` 跑通 `examples/openai_api/smoke_test.sh` 或 `examples/openai_api/smoke_test.py`，再根据 [客户端配方](../examples/openai_api/CLIENTS.md) 和 [JavaScript/TypeScript 配方](../examples/openai_api/JAVASCRIPT_zh.md) 接入 SDK 或 HTTP 客户端。Dify、n8n、HTTP 节点或 webhook worker 可参考 [工作流配方](../examples/openai_api/WORKFLOWS_zh.md)。API 网关、开发者门户或按 schema 导入时可使用 [OpenAPI 规范](../examples/openai_api/OPENAPI_zh.md)。
 
 ### 我想要可复现的容器 demo
 

@@ -13,7 +13,7 @@ python server.py --model sensevoice --device cuda --port 8000
 
 服务通常会在模型加载后启动。健康检查：`GET /health`。
 
-需要直接复制的接入示例？可以继续查看 [客户端配方](CLIENTS.md)、[工作流配方](WORKFLOWS_zh.md)、[Postman 集合](POSTMAN_zh.md) 和 [OpenAPI 规范](OPENAPI_zh.md)。
+需要直接复制的接入示例？可以继续查看 [客户端配方](CLIENTS.md)、[JavaScript/TypeScript 配方](JAVASCRIPT_zh.md)、[工作流配方](WORKFLOWS_zh.md)、[Postman 集合](POSTMAN_zh.md) 和 [OpenAPI 规范](OPENAPI_zh.md)。
 
 ### 端到端 smoke test
 
@@ -94,7 +94,7 @@ curl http://localhost:8000/v1/audio/transcriptions \
 
 适用场景包括 **LangChain**、**LlamaIndex**、**AutoGen**、**CrewAI**、**Semantic Kernel**、**Dify**、**n8n** 和任何支持 OpenAI audio API 或 multipart HTTP 的系统。
 
-- SDK 和 Agent tool 写法见 [客户端配方](CLIENTS.md)。
+- SDK、JavaScript/TypeScript 和 Agent tool 写法见 [客户端配方](CLIENTS.md) 与 [JavaScript/TypeScript 配方](JAVASCRIPT_zh.md)。
 - Dify、n8n、HTTP 节点和 webhook worker 见 [工作流配方](WORKFLOWS_zh.md)。
 - 图形界面 smoke test 见 [Postman 集合](POSTMAN_zh.md)。
 - schema 驱动导入见 [OpenAPI 规范](OPENAPI_zh.md)。
