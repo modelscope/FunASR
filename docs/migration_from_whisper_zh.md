@@ -19,7 +19,7 @@
 
 1. 选择 20-50 条有代表性的音频，覆盖短音频、长录音、噪声、多说话人、目标语言和方言。
 2. 按生产方式运行当前 Whisper 或云端 ASR，保存转写结果、延迟、成本和失败样例。
-3. 用 README 快速开始跑 FunASR，再根据 [部署选型表](./deployment_matrix_zh.md) 选择服务路径。
+3. 用 README 快速开始跑 FunASR，也可以用 [迁移评测示例](../examples/migration/) 测量一组代表性音频。然后根据 [部署选型表](./deployment_matrix_zh.md) 选择服务路径。
 4. 用人工审阅或现有 WER/CER 流程比较结果，不要只看一个干净 demo 音频。
 5. 如果应用已经使用 OpenAI 风格客户端，运行 OpenAI 兼容 API smoke test。
 6. 分开记录 warmup、模型下载、设备、GPU/CPU 型号、batch size、音频时长和稳定吞吐。
@@ -69,7 +69,7 @@ curl http://localhost:8000/v1/audio/transcriptions \
   -F response_format=verbose_json
 ```
 
-如果需要可复现的容器 smoke test，可以从 `examples/openai_api/docker-compose.yml` 开始，并用 `BASE_URL=http://localhost:8000 bash examples/openai_api/smoke_test.sh` 验证。
+如果要对自己的音频目录做可复现评测，可以运行 [`examples/migration/benchmark_funasr.py`](../examples/migration/benchmark_funasr.py) 生成 `results.jsonl` 和 `summary.md`。如果需要容器 smoke test，可以从 `examples/openai_api/docker-compose.yml` 开始，并用 `BASE_URL=http://localhost:8000 bash examples/openai_api/smoke_test.sh` 验证。
 
 ## 质量与速度检查清单
 

@@ -19,7 +19,7 @@ Stay on your current pipeline if you need a managed service with no operations w
 
 1. Pick 20-50 representative audio files. Include short clips, long recordings, noisy samples, different speakers, and the languages or dialects you care about.
 2. Run your current Whisper or cloud ASR pipeline exactly as you use it in production. Save transcripts, latency, cost, and failure cases.
-3. Run FunASR locally with the README quick start, then choose a deployment path from the [deployment matrix](./deployment_matrix.md).
+3. Run FunASR locally with the README quick start, or use the [migration benchmark example](../examples/migration/) to measure a representative audio folder. Then choose a deployment path from the [deployment matrix](./deployment_matrix.md).
 4. Compare output with human review or your normal WER/CER process. Do not compare only one clean demo file.
 5. Run the OpenAI-compatible API smoke test if your application already uses OpenAI-style clients.
 6. Record warmup time, model download time, device, GPU/CPU type, batch size, and audio duration separately from steady-state throughput.
@@ -69,7 +69,7 @@ curl http://localhost:8000/v1/audio/transcriptions \
   -F response_format=verbose_json
 ```
 
-If you want a repeatable container smoke test, start from `examples/openai_api/docker-compose.yml` and verify it with `BASE_URL=http://localhost:8000 bash examples/openai_api/smoke_test.sh`.
+If you want a repeatable folder-level benchmark, run [`examples/migration/benchmark_funasr.py`](../examples/migration/benchmark_funasr.py) to produce `results.jsonl` and `summary.md` for your own audio set. For a container smoke test, start from `examples/openai_api/docker-compose.yml` and verify it with `BASE_URL=http://localhost:8000 bash examples/openai_api/smoke_test.sh`.
 
 ## Quality and speed checklist
 

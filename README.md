@@ -66,7 +66,7 @@ That's it. **One model, one call** — VAD segmentation, speech recognition, pun
 | Cost | Free | Free | $0.006/min+ |
 | CPU viable | ✅ 17x realtime | ❌ Too slow | N/A |
 
-Planning a switch from Whisper or a cloud ASR provider? Use the [migration guide](./docs/migration_from_whisper.md) to benchmark representative audio, map features, and roll out safely.
+Planning a switch from Whisper or a cloud ASR provider? Use the [migration guide](./docs/migration_from_whisper.md) and [benchmark example](./examples/migration/) to test representative audio, map features, and roll out safely.
 
 ---
 
