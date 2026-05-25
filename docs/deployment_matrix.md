@@ -24,7 +24,7 @@ Use the Python API from the README. It is the shortest route for validating inst
 
 ### I want a local replacement for cloud transcription
 
-Use the OpenAI-compatible API. It exposes `/v1/audio/transcriptions`, `/v1/models`, `/health`, and Swagger docs. Start with `sensevoice`, run `examples/openai_api/smoke_test.sh`, then connect existing SDK or HTTP clients using [client recipes](../examples/openai_api/CLIENTS.md). For Dify, n8n, HTTP nodes, or webhook workers, follow the [workflow recipes](../examples/openai_api/WORKFLOWS.md).
+Use the OpenAI-compatible API. It exposes `/v1/audio/transcriptions`, `/v1/models`, `/health`, and Swagger docs. Start with `sensevoice`, run `examples/openai_api/smoke_test.sh`, then connect existing SDK or HTTP clients using [client recipes](../examples/openai_api/CLIENTS.md). For Dify, n8n, HTTP nodes, or webhook workers, follow the [workflow recipes](../examples/openai_api/WORKFLOWS.md). For API gateways, developer portals, and schema-driven imports, use the [OpenAPI spec](../examples/openai_api/OPENAPI.md).
 
 ### I want a repeatable container demo
 
