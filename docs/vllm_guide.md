@@ -115,7 +115,13 @@ results = model.generate(
 )
 for r in results:
     print(f"[{r['key']}] {r['text']}")
+    # 字级别时间戳（CTC forced alignment）
+    if "timestamps" in r:
+        for ts in r["timestamps"]:
+            print(f"  {ts['token']} [{ts['start_time']:.2f}-{ts['end_time']:.2f}s]")
 ```
+
+> Fun-ASR-Nano 自动输出字级别时间戳（CTC forced alignment），无需额外配置。
 
 ### 直接接口
 
