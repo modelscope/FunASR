@@ -365,44 +365,18 @@ Client                          Server
 
 ### Benchmark 结果（184 files, 11541s audio, 1947 VAD segments）
 
-| 方法 | 耗时 | RTFx | CER |
-|------|------|------|-----|
-| PyTorch native | 589s | 19.6 | 8.94% |
-| **Our vLLM (batch)** | **29.3s** | **393.9** | **8.91%** |
-| yuekaizhang vLLM | 42.7s | 273.0 | 17.07% |
+| 模型 | 方法 | 耗时 | RTFx | CER | 加速 |
+|------|------|------|------|-----|------|
+| Fun-ASR-Nano | PyTorch | 589s | 19.6 | 8.94% | 基准 |
+| Fun-ASR-Nano | **vLLM (ours)** | **29.3s** | **393.9** | **8.91%** | **20.7x** |
+| Fun-ASR-Nano | yuekaizhang vLLM | 42.7s | 273.0 | 17.07% | 14.3x |
+| GLM-ASR-Nano | PyTorch | 338s | 34.4 | 12.94% | 基准 |
+| GLM-ASR-Nano | **vLLM (ours)** | **43.9s** | **263.2** | **12.92%** | **7.6x** |
 
-- **加速比**: 20.7x (vs PyTorch)
-- **CER 一致性**: 8.91% vs 8.94%（差异 < 0.05%，完全对齐）
-- **vs 第三方实现**: 比 yuekaizhang/Fun-ASR-vllm 快 44%，CER 优 8%
-
-### 关键优化
-
-| 优化项 | 效果 |
-|--------|------|
-| `use_low_frame_rate` token 截断 | CER 19.68% → 8.91% |
-| Batch audio encode (groups of 8) | 音频编码加速 ~8x |
-| vLLM batch generate (all prompts) | LLM 解码加速 ~20x |
-| 去掉 `<think>` tokens | 减少无效生成步骤 |
-
-### GLM-ASR-Nano
-
-| 方法 | RTFx | CER | 加速 |
-|------|------|-----|------|
-| PyTorch native | 34.4 | 12.94% | 基准 |
-| **vLLM (ours)** | **263.2** | **12.92%** | **7.6x** |
-
-```python
-from funasr.models.glm_asr.inference_vllm import GLMASRVLLMEngine
-
-engine = GLMASRVLLMEngine.from_pretrained(
-    model="zai-org/GLM-ASR-Nano-2512",
-    hub="ms",
-    gpu_memory_utilization=0.4,
-    max_model_len=4096,
-)
-results = engine.generate(inputs=["audio.wav"])
-print(results[0]["text"])
-```
+**关键结论：**
+- vLLM 与 PyTorch CER 完全一致（Fun-ASR-Nano 差 0.03%，GLM-ASR 差 0.02%）
+- Fun-ASR-Nano 加速 20.7x，GLM-ASR 加速 7.6x
+- 比第三方 yuekaizhang/Fun-ASR-vllm 快 44%，且 CER 优 8%
 
 ### WebSocket 实时服务
 
