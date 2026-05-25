@@ -6,7 +6,7 @@ FunASR is useful far beyond a single offline transcription command. This page co
 
 | Goal | Start here | Why it matters |
 |---|---|---|
-| Transcribe one file locally | [README quick start](../README.md#quick-start) | Verify install and model download in minutes. |
+| Transcribe one file locally | [README quick start](../README.md#quick-start) and [model selection guide](./model_selection.md) | Verify install, model choice, and model download in minutes. |
 | Compare accuracy and speed | [Benchmark report](https://modelscope.github.io/FunASR/benchmark.html) | Reproduce the 184-file long-audio benchmark before choosing a model. |
 | Migrate from Whisper/cloud ASR | [Migration guide](./migration_from_whisper.md) | Map existing pipelines to FunASR, benchmark representative audio, and plan a safe rollout. |
 | Build a private speech API | [OpenAI-compatible API example](../examples/openai_api/), [client recipes](../examples/openai_api/CLIENTS.md), [JavaScript/TypeScript recipes](../examples/openai_api/JAVASCRIPT.md), and [workflow recipes](../examples/openai_api/WORKFLOWS.md) | Reuse LangChain, Dify, n8n, AutoGen, and other OpenAI-style clients without sending audio to a cloud ASR provider. |
@@ -69,6 +69,8 @@ Use this path when deciding whether FunASR is a good replacement for Whisper or 
 - Track cost and throughput together: GPU speed, CPU viability, model download size, and deployment complexity.
 
 ## Model selection hints
+
+For a deeper comparison of SenseVoice, Paraformer, Fun-ASR-Nano, streaming runtime, and OpenAI API aliases, use the [model selection guide](./model_selection.md).
 
 | Need | Good first choice | Notes |
 |---|---|---|

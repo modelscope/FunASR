@@ -21,7 +21,7 @@ Use this page to choose the shortest deployment path for a product, demo, benchm
 
 ### I want to try FunASR in five minutes
 
-Use the Python API from the README. It is the shortest route for validating installation, model download, device selection, and basic output shape.
+Use the Python API from the README. It is the shortest route for validating installation, model download, device selection, and basic output shape. If you are unsure which model to start with, use the [model selection guide](./model_selection.md).
 
 ### I want a local replacement for cloud transcription
 

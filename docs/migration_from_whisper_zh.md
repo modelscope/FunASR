@@ -28,7 +28,7 @@
 
 | 现有流程 | FunASR 路径 | 需要验证什么 |
 |---|---|---|
-| Whisper 文件转写 | 使用 SenseVoice、Paraformer 或 Fun-ASR-Nano 的 [README 快速开始](../README_zh.md#快速开始) | 转写质量、时间戳、速度、模型下载、CPU/GPU 行为。 |
+| Whisper 文件转写 | 使用 [README 快速开始](../README_zh.md#快速开始) 和 [模型选择指南](./model_selection_zh.md)，在 SenseVoice、Paraformer 或 Fun-ASR-Nano 中选型 | 转写质量、时间戳、速度、模型下载、CPU/GPU 行为。 |
 | Whisper + pyannote | VAD、标点和 `spk_model="cam++"` | 说话人标签、换人位置、重叠说话、长静音。 |
 | OpenAI 音频 API 或云端批量 ASR | [OpenAI 兼容 API 示例](../examples/openai_api/README_zh.md) | `/v1/audio/transcriptions`、响应格式、客户端兼容性、上传限制。 |
 | Dify/LangChain/AutoGen Agent 音频 | [客户端配方](../examples/openai_api/CLIENTS.md) 或 [MCP 服务](../examples/mcp_server/) | 工具延迟、文件处理、鉴权边界、错误返回。 |
