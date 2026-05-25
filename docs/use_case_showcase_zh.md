@@ -41,7 +41,7 @@ curl http://localhost:8000/v1/audio/transcriptions \
 - 浏览器上传或麦克风 demo 可从 [Gradio 浏览器 Demo](../examples/openai_api/GRADIO_zh.md) 开始。
 - Node.js 或 Next.js 服务可从 [JavaScript/TypeScript 配方](../examples/openai_api/JAVASCRIPT_zh.md) 开始。
 - 集群内服务可从 [Kubernetes 部署模板](../examples/openai_api/kubernetes/README_zh.md) 开始。
-- 在服务边界增加鉴权、限流和网络访问控制。
+- 在服务边界增加鉴权、限流和网络访问控制；可从 [安全与网关指南](../examples/openai_api/SECURITY_zh.md) 开始。
 - 记录模型、设备、驱动、音频时长和处理耗时，便于复现问题和 benchmark。
 
 ### Agent 语音输入

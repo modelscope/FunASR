@@ -25,7 +25,7 @@
 
 ### 我想替代云端转写服务
 
-使用 OpenAI 兼容 API。它提供 `/v1/audio/transcriptions`、`/v1/models`、`/health` 和 Swagger docs。先用 `sensevoice` 跑通 `examples/openai_api/smoke_test.sh` 或 `examples/openai_api/smoke_test.py`，再根据 [客户端配方](../examples/openai_api/CLIENTS.md) 和 [JavaScript/TypeScript 配方](../examples/openai_api/JAVASCRIPT_zh.md) 接入 SDK 或 HTTP 客户端。浏览器上传或麦克风 demo 可使用 [Gradio 浏览器 Demo](../examples/openai_api/GRADIO_zh.md)。Dify、n8n、HTTP 节点或 webhook worker 可参考 [工作流配方](../examples/openai_api/WORKFLOWS_zh.md)。API 网关、开发者门户或按 schema 导入时可使用 [OpenAPI 规范](../examples/openai_api/OPENAPI_zh.md)。
+使用 OpenAI 兼容 API。它提供 `/v1/audio/transcriptions`、`/v1/models`、`/health` 和 Swagger docs。先用 `sensevoice` 跑通 `examples/openai_api/smoke_test.sh` 或 `examples/openai_api/smoke_test.py`，再根据 [客户端配方](../examples/openai_api/CLIENTS.md) 和 [JavaScript/TypeScript 配方](../examples/openai_api/JAVASCRIPT_zh.md) 接入 SDK 或 HTTP 客户端。浏览器上传或麦克风 demo 可使用 [Gradio 浏览器 Demo](../examples/openai_api/GRADIO_zh.md)。Dify、n8n、HTTP 节点或 webhook worker 可参考 [工作流配方](../examples/openai_api/WORKFLOWS_zh.md)。API 网关、开发者门户或按 schema 导入时可使用 [OpenAPI 规范](../examples/openai_api/OPENAPI_zh.md)。跨团队共享服务前，请先阅读 [安全与网关指南](../examples/openai_api/SECURITY_zh.md)。
 
 ### 我想要可复现的容器 demo
 
@@ -57,7 +57,7 @@ Fun-ASR-Nano 走 vLLM 路径。请用自己的音频分布做 benchmark，并关
 - 记录 FunASR 版本、模型版本、设备、CUDA/PyTorch 版本、Docker 镜像 tag 和启动命令。
 - 跑一个公开短音频 smoke sample，再跑至少一个真实私有样本。
 - 每次请求记录音频时长、模型、设备、延迟、响应格式和错误类型。
-- API 暴露到可信网络外之前，增加上传大小限制、鉴权、TLS 和限流。
+- API 暴露到可信网络外之前，增加上传大小限制、鉴权、TLS 和限流；可用 [安全与网关指南](../examples/openai_api/SECURITY_zh.md) 规划边界。
 - 流式场景需要测试静音、噪声、多人重叠、长连接、重连和慢客户端。
 - 发布 benchmark 结论时，说明输入时长、硬件、batch size、模型、运行路径，以及是否排除模型下载和 warmup 时间。
 
