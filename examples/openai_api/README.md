@@ -1,3 +1,5 @@
+(English|[简体中文](README_zh.md))
+
 # FunASR OpenAI-Compatible API Server
 
 Drop-in replacement for OpenAI's `/v1/audio/transcriptions` endpoint. Works with **any agent framework** that supports OpenAI audio API.
