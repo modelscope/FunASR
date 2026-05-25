@@ -384,14 +384,31 @@ Client                          Server
 - Fun-ASR-Nano 加速 20.7x，GLM-ASR 加速 7.6x
 - 比第三方 yuekaizhang/Fun-ASR-vllm 快 44%，且 CER 优 8%
 
-### WebSocket 实时服务
+### 统一 vLLM 服务（serve_vllm.py）
 
-| 指标 | 数值 |
-|------|------|
-| RTF | < 0.08 |
-| 首字延迟 | ~480ms |
-| 30s 音频总耗时 | ~2.3s |
-| 并发 | 多 WebSocket 连接 |
+集成动态 VAD + SPK + 时间戳 + vLLM 推理的统一服务，提供三种接口：
+
+```bash
+CUDA_VISIBLE_DEVICES=0 python examples/industrial_data_pretraining/fun_asr_nano/serve_vllm.py --port 8899
+```
+
+| 接口 | 路径 | 功能 |
+|------|------|------|
+| HTTP REST | `POST /asr` | 文件上传，返回 text + segments + timestamps + speaker |
+| OpenAI API | `POST /v1/audio/transcriptions` | Whisper 兼容，支持 verbose_json |
+| WebSocket | `ws://host:port/ws` | 流式音频，实时返回结果 |
+
+**HTTP REST 示例：**
+```bash
+curl -X POST http://localhost:8899/asr     -F "file=@audio.wav"     -F "language=中文"     -F "spk=true"     -F "timestamp=true"
+```
+
+**OpenAI API 示例：**
+```bash
+curl -X POST http://localhost:8899/v1/audio/transcriptions     -F "file=@audio.wav"     -F "model=fun-asr-nano"     -F "response_format=verbose_json"
+```
+
+**性能（227s 音频）：** RTF=0.015，处理时间 3.4s
 
 ### 复现 Benchmark
 
