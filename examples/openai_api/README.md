@@ -21,6 +21,8 @@ In another terminal, download a public sample and verify both health and transcr
 
 ```bash
 bash smoke_test.sh
+# Cross-platform alternative without curl/bash:
+python smoke_test.py
 ```
 
 Equivalent manual commands:
@@ -144,6 +146,7 @@ Verify the container from another terminal:
 
 ```bash
 BASE_URL=http://localhost:8000 bash smoke_test.sh
+python smoke_test.py --base-url http://localhost:8000
 ```
 
 ## Configuration
@@ -166,5 +169,5 @@ Docker environment variables:
 ## Troubleshooting
 
 - If CUDA is unavailable, use `--device cpu` for a slower but simple smoke test.
-- If port 8000 is occupied, start with `--port 9000` and run `BASE_URL=http://localhost:9000 bash smoke_test.sh`.
+- If port 8000 is occupied, start with `--port 9000` and run `BASE_URL=http://localhost:9000 bash smoke_test.sh` or `python smoke_test.py --base-url http://localhost:9000`.
 - If model download is slow, retry with a stable network or pre-download the model from ModelScope/Hugging Face.

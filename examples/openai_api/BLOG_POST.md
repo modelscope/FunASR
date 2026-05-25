@@ -31,6 +31,8 @@ In another terminal, use the bundled smoke test:
 git clone https://github.com/modelscope/FunASR
 cd FunASR/examples/openai_api
 bash smoke_test.sh
+# Cross-platform alternative:
+python smoke_test.py
 ```
 
 Or run the equivalent commands manually:
