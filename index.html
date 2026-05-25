@@ -122,6 +122,7 @@ curl http://localhost:8000/v1/audio/transcriptions \
                 </div>
             </div>
             <div class="section-cta">
+                <a href="https://colab.research.google.com/github/modelscope/FunASR/blob/main/examples/colab/funasr_quickstart.ipynb" class="btn btn-primary">Open in Colab</a>
                 <a href="https://github.com/modelscope/FunASR/tree/main/examples/openai_api" class="btn btn-primary">OpenAI API example</a>
                 <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/WORKFLOWS.md" class="btn btn-primary">Workflow recipes</a>
                 <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/GRADIO.md" class="btn btn-primary">Gradio demo</a>
@@ -287,7 +288,7 @@ curl http://localhost:8000/v1/audio/transcriptions \
     <section>
         <div class="container narrow">
             <h2 class="section-title">Quick Start</h2>
-            <p class="section-subtitle">Install the package, compose the pipeline, and run recognition from Python.</p>
+            <p class="section-subtitle">Install locally, or run the <a href="https://github.com/modelscope/FunASR/tree/main/examples/colab">Colab quickstart</a> first to transcribe a sample in your browser.</p>
 <pre>pip install funasr
 # Or latest: pip install git+https://github.com/modelscope/FunASR.git</pre>
 <pre>from funasr import AutoModel
@@ -303,6 +304,7 @@ res = model.generate(input="meeting.wav", batch_size_s=300)
 for sent in res[0]["sentence_info"]:
     print(f"[Speaker {sent['spk']}] {sent['text']}")</pre>
             <div class="section-cta">
+                <a href="https://colab.research.google.com/github/modelscope/FunASR/blob/main/examples/colab/funasr_quickstart.ipynb" class="btn btn-primary">Open in Colab</a>
                 <a href="tutorial.html" class="btn btn-primary">Full tutorial</a>
             </div>
         </div>

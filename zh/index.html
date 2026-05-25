@@ -122,6 +122,7 @@ curl http://localhost:8000/v1/audio/transcriptions \
                 </div>
             </div>
             <div class="section-cta">
+                <a href="https://colab.research.google.com/github/modelscope/FunASR/blob/main/examples/colab/funasr_quickstart.ipynb" class="btn btn-primary">打开 Colab</a>
                 <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/README_zh.md" class="btn btn-primary">OpenAI API 示例</a>
                 <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/WORKFLOWS_zh.md" class="btn btn-primary">工作流配方</a>
                 <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/GRADIO_zh.md" class="btn btn-primary">Gradio 演示</a>
@@ -287,7 +288,7 @@ curl http://localhost:8000/v1/audio/transcriptions \
     <section>
         <div class="container narrow">
             <h2 class="section-title">快速开始</h2>
-            <p class="section-subtitle">安装包、组合流水线、用 Python 运行识别。</p>
+            <p class="section-subtitle">可以本地安装，也可以先运行 <a href="https://github.com/modelscope/FunASR/tree/main/examples/colab">Colab 快速体验</a>，在浏览器里转写样例音频。</p>
 <pre>pip install funasr
 # 或安装最新版：pip install git+https://github.com/modelscope/FunASR.git</pre>
 <pre>from funasr import AutoModel
@@ -303,6 +304,7 @@ res = model.generate(input="meeting.wav", batch_size_s=300)
 for sent in res[0]["sentence_info"]:
     print(f"[说话人 {sent['spk']}] {sent['text']}")</pre>
             <div class="section-cta">
+                <a href="https://colab.research.google.com/github/modelscope/FunASR/blob/main/examples/colab/funasr_quickstart.ipynb" class="btn btn-primary">打开 Colab</a>
                 <a href="tutorial.html" class="btn btn-primary">完整教程</a>
             </div>
         </div>
