@@ -13,7 +13,7 @@ python server.py --model sensevoice --device cuda --port 8000
 
 Server starts in ~20s (model loading). Health check: `GET /health`
 
-Need copy-paste integration snippets for Python SDK, JavaScript/TypeScript, HTTP clients, agent tools, Postman, OpenAPI imports, or Dify/n8n-style workflows? See [Client recipes](CLIENTS.md), [JavaScript/TypeScript recipes](JAVASCRIPT.md), [workflow recipes](WORKFLOWS.md), the [Chinese workflow recipes](WORKFLOWS_zh.md), the [Postman collection](POSTMAN.md), and the [OpenAPI spec](OPENAPI.md).
+Need copy-paste integration snippets for Python SDK, JavaScript/TypeScript, HTTP clients, agent tools, Postman, OpenAPI imports, Kubernetes deployment, or Dify/n8n-style workflows? See [Client recipes](CLIENTS.md), [JavaScript/TypeScript recipes](JAVASCRIPT.md), [workflow recipes](WORKFLOWS.md), the [Chinese workflow recipes](WORKFLOWS_zh.md), the [Postman collection](POSTMAN.md), the [OpenAPI spec](OPENAPI.md), and the [Kubernetes deployment template](kubernetes/README.md).
 
 ### End-to-end smoke test
 
@@ -148,6 +148,12 @@ Verify the container from another terminal:
 BASE_URL=http://localhost:8000 bash smoke_test.sh
 python smoke_test.py --base-url http://localhost:8000
 ```
+
+## Kubernetes Deployment
+
+For an internal cluster service with persistent model cache, health probes, and a private `ClusterIP`, start from the [Kubernetes deployment template](kubernetes/README.md). Build and push the example image, apply the manifests, then verify through `kubectl port-forward` with `python smoke_test.py --base-url http://localhost:8000`.
+
+Keep the default CPU mode until you have built a CUDA-capable image and configured GPU scheduling for your cluster.
 
 ## Configuration
 
