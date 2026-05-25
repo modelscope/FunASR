@@ -21,6 +21,8 @@ python server.py --model sensevoice --device cuda --port 8000
 
 ```bash
 bash smoke_test.sh
+# 不依赖 curl/bash 的跨平台方式：
+python smoke_test.py
 ```
 
 等价手动命令：
@@ -132,6 +134,7 @@ docker run --rm --gpus all -p 8000:8000 \
 
 ```bash
 BASE_URL=http://localhost:8000 bash smoke_test.sh
+python smoke_test.py --base-url http://localhost:8000
 ```
 
 ## 配置
@@ -156,7 +159,7 @@ Docker 环境变量：
 | 现象 | 处理方式 |
 |---|---|
 | CUDA 不可用 | 先用 `--device cpu` 跑通 smoke test。 |
-| 8000 端口被占用 | 改用 `--port 9000`，并运行 `BASE_URL=http://localhost:9000 bash smoke_test.sh`。 |
+| 8000 端口被占用 | 改用 `--port 9000`，并运行 `BASE_URL=http://localhost:9000 bash smoke_test.sh` 或 `python smoke_test.py --base-url http://localhost:9000`。 |
 | 模型下载很慢 | 换稳定网络，或提前从 ModelScope/Hugging Face 下载模型。 |
 | Dify/n8n 容器里访问 `localhost` 失败 | 使用工作流运行时可访问的主机名、Compose service name 或 Kubernetes service name。 |
 | 响应中没有 `segments` | 设置 `response_format=verbose_json`。 |
