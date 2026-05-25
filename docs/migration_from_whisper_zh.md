@@ -30,7 +30,7 @@
 |---|---|---|
 | Whisper 文件转写 | 使用 SenseVoice、Paraformer 或 Fun-ASR-Nano 的 [README 快速开始](../README_zh.md#快速开始) | 转写质量、时间戳、速度、模型下载、CPU/GPU 行为。 |
 | Whisper + pyannote | VAD、标点和 `spk_model="cam++"` | 说话人标签、换人位置、重叠说话、长静音。 |
-| OpenAI 音频 API 或云端批量 ASR | [OpenAI 兼容 API 示例](../examples/openai_api/) | `/v1/audio/transcriptions`、响应格式、客户端兼容性、上传限制。 |
+| OpenAI 音频 API 或云端批量 ASR | [OpenAI 兼容 API 示例](../examples/openai_api/README_zh.md) | `/v1/audio/transcriptions`、响应格式、客户端兼容性、上传限制。 |
 | Dify/LangChain/AutoGen Agent 音频 | [客户端配方](../examples/openai_api/CLIENTS.md) 或 [MCP 服务](../examples/mcp_server/) | 工具延迟、文件处理、鉴权边界、错误返回。 |
 | 实时字幕或客服流式识别 | [Runtime 服务文档](../runtime/readme_cn.md) | 分块、断句、重连、背压、中间/最终结果行为。 |
 | 字幕生成 | [字幕示例](../examples/subtitle/) | 分段可读性、行长、说话人标签、SRT/VTT 兼容性。 |

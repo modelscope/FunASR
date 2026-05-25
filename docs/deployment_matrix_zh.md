@@ -7,8 +7,8 @@
 | 路径 | 适合场景 | 从这里开始 | 运维提示 |
 |---|---|---|---|
 | Python API | Notebook、离线任务、首次模型评测 | [README 快速开始](../README_zh.md#快速开始) | 最简单；调用方自己负责批处理、重试和文件管理。 |
-| OpenAI 兼容 API | 私有语音 API、Agent、Dify/LangChain/AutoGen 风格客户端 | [OpenAI API 示例](../examples/openai_api/) | 已支持 OpenAI audio API 的应用最容易接入。 |
-| Docker Compose API | 可复现本地 smoke test 或小型内部服务 | [OpenAI API Docker 文档](../examples/openai_api/#docker-deployment) | 默认 CPU；容器里使用 CUDA 前需要先适配 CUDA-capable 镜像。 |
+| OpenAI 兼容 API | 私有语音 API、Agent、Dify/LangChain/AutoGen 风格客户端 | [OpenAI API 示例](../examples/openai_api/README_zh.md) | 已支持 OpenAI audio API 的应用最容易接入。 |
+| Docker Compose API | 可复现本地 smoke test 或小型内部服务 | [OpenAI API Docker 文档](../examples/openai_api/README_zh.md) | 默认 CPU；容器里使用 CUDA 前需要先适配 CUDA-capable 镜像。 |
 | Runtime WebSocket 服务 | 实时字幕、会议、客服流式音频 | [Runtime 服务文档](../runtime/readme_cn.md) | 需要中间结果、断句或长连接音频流时选择。 |
 | vLLM 加速 | Fun-ASR-Nano 等 LLM-based ASR 高吞吐 | [vLLM 指南](./vllm_guide.md) | 适合 LLM 解码吞吐；不适用于非自回归 Paraformer。 |
 | MCP 服务 | Claude/Cursor/桌面 Agent 语音工具 | [MCP 示例](../examples/mcp_server/) | 适合把 ASR 结果暴露成一个本地工具。 |
