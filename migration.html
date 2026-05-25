@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="description" content="Evaluate migration from Whisper or cloud ASR to FunASR with representative audio, feature mapping, OpenAI-compatible APIs, and rollout checklists.">
+<meta property="og:title" content="Migrate from Whisper or Cloud ASR to FunASR">
+<meta property="og:description" content="A practical benchmark and rollout guide for teams comparing Whisper, cloud ASR, and self-hosted FunASR.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://modelscope.github.io/FunASR/migration.html">
+<title>Migrate from Whisper or Cloud ASR to FunASR</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head><body>
+<nav class="nav"><div class="container">
+<a href="index.html" class="nav-logo">FunASR</a>
+<div class="nav-links"><a href="index.html">Home</a><a href="tutorial.html">Tutorial</a><a href="training.html">Training</a><a href="model-registration.html">Develop</a><a href="api.html">API</a><a href="vllm.html">vLLM</a><a href="agent.html">Agent</a><a href="benchmark.html">Benchmark</a></div>
+<div class="lang-dropdown"><button class="lang-btn">English</button><div class="lang-menu"><a href="migration.html" class="current">English</a><a href="zh/migration.html">中文</a><a href="ja/index.html">日本語</a></div></div>
+<a href="https://github.com/modelscope/FunASR" class="nav-github">GitHub</a>
+</div></nav>
+<div class="content"><div class="container narrow">
+<h1>Migrate from Whisper or Cloud ASR to FunASR</h1>
+<p>Use this guide when you already have a Whisper, OpenAI or cloud ASR, or custom speech pipeline and want to decide whether FunASR is worth switching to. Compare quality, speed, cost, and deployment fit on audio that looks like your real workload.</p>
+<div class="toc-grid"><a href="#fit">When it fits</a><a href="#plan">Evaluation plan</a><a href="#mapping">Feature mapping</a><a href="#rollout">Rollout</a></div>
+<section id="fit"><h2>When FunASR is a good fit</h2>
+<ul><li>Private or self-hosted transcription where audio should stay inside your environment.</li><li>High-throughput long-form transcription for meetings, archives, media, or call recordings.</li><li>Speaker-aware transcripts with VAD, punctuation, timestamps, and diarization in one pipeline.</li><li>An OpenAI-compatible audio endpoint for agents, Dify, LangChain, AutoGen, or internal apps.</li><li>Streaming ASR or live captions with WebSocket/runtime service support.</li><li>CPU-viable smoke tests before moving to GPU deployment.</li></ul>
+<p>Stay on your current pipeline if you need a fully managed service, a vendor SLA, or a language/domain that your own benchmark shows FunASR does not handle well enough yet.</p></section>
+<section id="plan"><h2>Fast evaluation plan</h2>
+<ol><li>Pick 20-50 representative audio files, including short clips, long recordings, noisy samples, different speakers, and target languages or dialects.</li><li>Run your current Whisper or cloud ASR pipeline exactly as you use it in production. Save transcripts, latency, cost, and failure cases.</li><li>Run FunASR locally with the tutorial, then choose a deployment path from the <a href="deployment-matrix.html">deployment matrix</a>.</li><li>Compare output with human review or your normal WER/CER process. Do not compare only one clean demo file.</li><li>Run the OpenAI-compatible API smoke test if your application already uses OpenAI-style clients.</li><li>Record warmup time, model download time, device, GPU/CPU type, batch size, and audio duration separately from steady-state throughput.</li></ol></section>
+<section id="mapping"><h2>Feature mapping</h2>
+<table><tr><th>Existing workflow</th><th>FunASR path</th><th>What to validate</th></tr>
+<tr><td>Whisper file transcription</td><td><a href="tutorial.html">Tutorial</a> with SenseVoice, Paraformer, or Fun-ASR-Nano</td><td>Transcript quality, timestamps, speed, model download, CPU/GPU behavior.</td></tr>
+<tr><td>Whisper plus pyannote</td><td><code>spk_model="cam++"</code> with VAD and punctuation</td><td>Speaker labels, speaker changes, overlapping speech, long silences.</td></tr>
+<tr><td>OpenAI audio API or cloud batch ASR</td><td><a href="agent.html#server">OpenAI-compatible API</a></td><td><code>/v1/audio/transcriptions</code>, response format, client compatibility, upload limits.</td></tr>
+<tr><td>Dify/LangChain/AutoGen agent audio</td><td><a href="agent.html">Agent and API recipes</a> or MCP server</td><td>Tool latency, file handling, auth boundary, error reporting.</td></tr>
+<tr><td>Live captions or call-center streaming</td><td><a href="tutorial.html#real-time-speech-recognition">Realtime examples</a></td><td>Chunking, endpointing, reconnects, backpressure, partial/final result behavior.</td></tr>
+<tr><td>Subtitle generation</td><td><a href="agent.html#subtitle">Subtitle generator</a></td><td>Segment readability, line length, speaker labels, SRT/VTT compatibility.</td></tr>
+<tr><td>Offline archive processing</td><td><a href="https://github.com/modelscope/FunASR/blob/main/examples/batch_asr_improved.py">Batch ASR example</a></td><td>Manifest handling, retries, progress logs, throughput, failed-file recovery.</td></tr></table></section>
+<section id="compare"><h2>Minimal local comparison</h2>
+<p>Install FunASR and run the same file you used for your baseline:</p>
+<pre><code>pip install funasr</code></pre>
+<pre><code>from funasr import AutoModel
+
+model = AutoModel(
+    model="iic/SenseVoiceSmall",
+    vad_model="fsmn-vad",
+    spk_model="cam++",
+    device="cuda",  # use "cpu" for a portable smoke test
+)
+result = model.generate(input="sample.wav")
+print(result)</code></pre>
+<p>For an API-style comparison:</p>
+<pre><code>pip install funasr fastapi uvicorn python-multipart
+funasr-server --model sensevoice --device cuda
+
+curl http://localhost:8000/v1/audio/transcriptions \
+  -F file=@sample.wav \
+  -F model=sensevoice \
+  -F response_format=verbose_json</code></pre></section>
+<section id="quality"><h2>Quality and speed checklist</h2>
+<ul><li>Audio duration, language, domain, sample rate, channel count, and speaker count.</li><li>Model name, model version, FunASR version, Python/PyTorch/CUDA versions, and Docker image tag if used.</li><li>Hardware, device mode, batch size, streaming chunk size, and whether warmup/model download is excluded.</li><li>WER/CER or human review notes for names, numbers, punctuation, diarization, timestamps, and domain terms.</li><li>Latency, throughput, GPU/CPU memory, cost per hour of audio, and failed-file rate.</li><li>Operational requirements: authentication, upload limits, TLS, logs, monitoring, retries, and retention rules.</li></ul></section>
+<section id="rollout"><h2>Rollout checklist</h2>
+<ul><li>Keep the old pipeline available until FunASR passes your representative benchmark.</li><li>Start with an internal endpoint or batch job before exposing a public API.</li><li>Add request IDs and log audio duration, model, device, latency, and error type for every request.</li><li>Pin the model alias and deployment command in your runbook.</li><li>Test noisy audio, silence, overlapping speakers, long files, non-UTF-8 filenames, and network interruptions.</li><li>Open a <a href="https://github.com/modelscope/FunASR/issues/new?template=deployment_help.md">Deployment Help issue</a> with your command, logs, model, device, and sample characteristics if you hit a blocker.</li></ul></section>
+<section id="share"><h2>Share the result</h2><p>If FunASR replaces or complements your existing ASR stack, consider opening a <a href="https://github.com/modelscope/FunASR/issues/new?template=showcase.md">showcase issue</a>. Migration reports with hardware, speed, quality notes, and deployment details help new users choose the right path faster.</p></section>
+</div></div>
+<footer><p>FunASR &middot; Tongyi Lab, Alibaba Group</p><p><a href="index.html">Home</a> &middot; <a href="migration.html">Migration</a> &middot; <a href="use-cases.html">Use Cases</a> &middot; <a href="deployment-matrix.html">Deployment</a> &middot; <a href="agent.html">Agent</a> &middot; <a href="benchmark.html">Benchmark</a> &middot; <a href="https://github.com/modelscope/FunASR">GitHub</a></p></footer>
+</body></html>

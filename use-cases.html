@@ -23,6 +23,7 @@
 <table><tr><th>Goal</th><th>Start here</th><th>Why it matters</th></tr>
 <tr><td>Transcribe one file locally</td><td><a href="tutorial.html">Tutorial</a></td><td>Verify install and model download in minutes.</td></tr>
 <tr><td>Compare accuracy and speed</td><td><a href="benchmark.html">Benchmark report</a></td><td>Review long-audio speed and CER before choosing a model.</td></tr>
+<tr><td>Migrate from Whisper/cloud ASR</td><td><a href="migration.html">Migration guide</a></td><td>Map existing pipelines to FunASR, benchmark representative audio, and plan a safe rollout.</td></tr>
 <tr><td>Build a private speech API</td><td><a href="agent.html#server">OpenAI-compatible API</a></td><td>Reuse OpenAI-style clients without sending audio to a cloud ASR provider.</td></tr>
 <tr><td>Add speech input to agents</td><td><a href="agent.html#mcp">MCP server</a></td><td>Connect local ASR to Claude, Cursor, desktop tools, and internal assistants.</td></tr>
 <tr><td>Choose a deployment path</td><td><a href="deployment-matrix.html">Deployment matrix</a></td><td>Compare Python API, OpenAI API, Docker Compose, WebSocket, vLLM, MCP, subtitles, batch jobs, and Triton.</td></tr>
@@ -44,7 +45,7 @@ python examples/mcp_server/funasr_mcp.py
 
 # Set FUNASR_DEVICE=cuda for GPU inference</code></pre></div></div>
 <div class="grid-2"><div class="card"><h3>Streaming workloads</h3><p>Pair ASR with VAD, punctuation, and speaker diarization when partial transcripts need to be readable by humans.</p><p>Validate with real audio: background noise, long silence, overlapping speakers, and different microphone quality.</p></div>
-<div class="card"><h3>Benchmark before migration</h3><p>Compare FunASR against Whisper or cloud ASR using your own sample set. Track throughput, CPU viability, download size, and deployment complexity together.</p><p><a href="benchmark.html">Open the public benchmark report</a></p></div></div>
+<div class="card"><h3>Benchmark before migration</h3><p>Compare FunASR against Whisper or cloud ASR using your own sample set. Track throughput, CPU viability, download size, and deployment complexity together.</p><p><a href="migration.html">Open the migration guide</a> · <a href="benchmark.html">Public benchmark</a></p></div></div>
 </section>
 <section id="models"><h2>Model selection hints</h2>
 <table><tr><th>Need</th><th>Good first choice</th><th>Notes</th></tr>
@@ -59,5 +60,5 @@ python examples/mcp_server/funasr_mcp.py
 <p><a href="https://github.com/modelscope/FunASR/issues/new?template=showcase.md">Share a showcase issue</a> or <a href="https://github.com/modelscope/FunASR/discussions">start a discussion</a>. Concrete usage reports help new users choose the right path and help maintainers prioritize docs and examples.</p>
 </section>
 </div></div>
-<footer><p>FunASR &middot; Tongyi Lab, Alibaba Group</p><p><a href="index.html">Home</a> &middot; <a href="use-cases.html">Use Cases</a> &middot; <a href="deployment-matrix.html">Deployment</a> &middot; <a href="agent.html">Agent</a> &middot; <a href="benchmark.html">Benchmark</a> &middot; <a href="vllm.html">vLLM</a> &middot; <a href="https://github.com/modelscope/FunASR">GitHub</a></p></footer>
+<footer><p>FunASR &middot; Tongyi Lab, Alibaba Group</p><p><a href="index.html">Home</a> &middot; <a href="migration.html">Migration</a> &middot; <a href="use-cases.html">Use Cases</a> &middot; <a href="deployment-matrix.html">Deployment</a> &middot; <a href="agent.html">Agent</a> &middot; <a href="benchmark.html">Benchmark</a> &middot; <a href="vllm.html">vLLM</a> &middot; <a href="https://github.com/modelscope/FunASR">GitHub</a></p></footer>
 </body></html>
