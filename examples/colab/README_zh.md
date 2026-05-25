@@ -1,6 +1,6 @@
 # FunASR Colab 快速体验
 
-[English](README.md) | 简体中文
+[English](README.md) | 简体中文 | [日本語](README_ja.md) | [한국어](README_ko.md)
 
 无需提前配置本地 Python 环境，直接在浏览器里运行 FunASR。
 
