@@ -1,4 +1,4 @@
-([English](README.md)|简体中文)
+([English](README.md)|简体中文|[日本語](README_ja.md)|[한국어](README_ko.md))
 
 # FunASR OpenAI 兼容 API 服务
 
