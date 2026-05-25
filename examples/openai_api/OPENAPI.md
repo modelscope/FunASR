@@ -1,5 +1,7 @@
 # OpenAPI Spec for the FunASR OpenAI-Compatible API
 
+(English|[简体中文](OPENAPI_zh.md))
+
 Use [`openapi.json`](openapi.json) when you want to inspect, mock, document, or import the FunASR speech API before wiring it into an application, API gateway, workflow engine, or SDK generator.
 
 The running FastAPI server also exposes live docs at `/docs` and a generated schema at `/openapi.json`. This checked-in spec is a portable reference for the example server in this directory.
