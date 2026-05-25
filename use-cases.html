@@ -26,13 +26,13 @@
 <div class="toc-grid"><a href="#paths">Choose a path</a><a href="#recipes">Production recipes</a><a href="#models">Model hints</a><a href="#share">Share results</a></div>
 <section id="paths"><h2>Choose the right path</h2>
 <table><tr><th>Goal</th><th>Start here</th><th>Why it matters</th></tr>
-<tr><td>Transcribe one file locally</td><td><a href="tutorial.html">Tutorial</a></td><td>Verify install and model download in minutes.</td></tr>
+<tr><td>Transcribe one file locally</td><td><a href="tutorial.html">Tutorial</a> · <a href="model-selection.html">Model selection</a></td><td>Verify install, model choice, and model download in minutes.</td></tr>
 <tr><td>Compare accuracy and speed</td><td><a href="benchmark.html">Benchmark report</a></td><td>Review long-audio speed and CER before choosing a model.</td></tr>
 <tr><td>Migrate from Whisper/cloud ASR</td><td><a href="migration.html">Migration guide</a> · <a href="https://github.com/modelscope/FunASR/tree/main/examples/migration">Benchmark example</a></td><td>Map existing pipelines to FunASR, benchmark representative audio, and plan a safe rollout.</td></tr>
 <tr><td>Build a private speech API</td><td><a href="agent.html#server">OpenAI-compatible API</a> · <a href="https://github.com/modelscope/FunASR/tree/main/examples/openai_api/kubernetes">Kubernetes template</a> · <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/JAVASCRIPT.md">JS/TS recipes</a> · <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/WORKFLOWS.md">Workflow recipes</a></td><td>Reuse OpenAI-style clients, Dify, n8n, and HTTP workflow nodes without sending audio to a cloud ASR provider.</td></tr>
 <tr><td>Add speech input to agents</td><td><a href="agent.html#mcp">MCP server</a></td><td>Connect local ASR to Claude, Cursor, desktop tools, and internal assistants.</td></tr>
 <tr><td>Choose a deployment path</td><td><a href="deployment-matrix.html">Deployment matrix</a></td><td>Compare Python API, OpenAI API, Docker Compose, Kubernetes, WebSocket, vLLM, MCP, subtitles, batch jobs, and Triton.</td></tr>
-<tr><td>Serve streaming ASR</td><td><a href="tutorial.html#real-time-speech-recognition">Realtime examples</a></td><td>Handle live captioning, meetings, and call-center style workloads.</td></tr>
+<tr><td>Serve streaming ASR</td><td><a href="tutorial.html#streaming">Realtime examples</a></td><td>Handle live captioning, meetings, and call-center style workloads.</td></tr>
 <tr><td>Accelerate LLM-based ASR</td><td><a href="vllm.html">vLLM guide</a></td><td>Use tensor parallel decoding and streaming service support for Fun-ASR-Nano.</td></tr>
 <tr><td>Generate subtitles</td><td><a href="agent.html#subtitle">Subtitle generator</a></td><td>Create SRT/VTT files from audio or video, with speaker labels when needed.</td></tr>
 <tr><td>Process many recordings</td><td><a href="https://github.com/modelscope/FunASR/blob/main/examples/batch_asr_improved.py">Batch ASR example</a></td><td>Build repeatable offline jobs for archives, meetings, and datasets.</td></tr></table>
@@ -53,6 +53,7 @@ python examples/mcp_server/funasr_mcp.py
 <div class="card"><h3>Benchmark before migration</h3><p>Compare FunASR against Whisper or cloud ASR using your own sample set. Track throughput, CPU viability, download size, and deployment complexity together.</p><p><a href="migration.html">Open the migration guide</a> · <a href="benchmark.html">Public benchmark</a></p></div></div>
 </section>
 <section id="models"><h2>Model selection hints</h2>
+<p>For a deeper comparison of SenseVoice, Paraformer, Fun-ASR-Nano, streaming runtime, and OpenAI API aliases, use the <a href="model-selection.html">model selection guide</a>.</p>
 <table><tr><th>Need</th><th>Good first choice</th><th>Notes</th></tr>
 <tr><td>Fast multilingual transcription</td><td>SenseVoice-Small</td><td>Strong default for local demos and private APIs.</td></tr>
 <tr><td>Mandarin production ASR</td><td>Paraformer-Large</td><td>Mature choice for Chinese speech recognition.</td></tr>
