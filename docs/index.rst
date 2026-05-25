@@ -106,6 +106,8 @@ Overview
    :maxdepth: 1
    :caption: Application
 
+   ./migration_from_whisper.md
+   ./migration_from_whisper_zh.md
    ./use_case_showcase.md
    ./use_case_showcase_zh.md
    ./reference/application.md
