@@ -21,7 +21,7 @@
 </p>
 
 <p align="center">
-  <a href="#快速开始">快速开始</a> · <a href="#性能评测">性能评测</a> · <a href="./docs/use_case_showcase_zh.md">场景速览</a> · <a href="#模型列表">模型列表</a> · <a href="https://modelscope.github.io/FunASR/agent.html">Agent 集成</a> · <a href="https://modelscope.github.io/FunASR/zh/">文档</a> · <a href="./CONTRIBUTING.md">贡献</a>
+  <a href="#快速开始">快速开始</a> · <a href="#性能评测">性能评测</a> · <a href="./docs/migration_from_whisper_zh.md">迁移指南</a> · <a href="./docs/use_case_showcase_zh.md">场景速览</a> · <a href="./docs/deployment_matrix_zh.md">部署选型</a> · <a href="#模型列表">模型列表</a> · <a href="https://modelscope.github.io/FunASR/agent.html">Agent 集成</a> · <a href="https://modelscope.github.io/FunASR/zh/">文档</a> · <a href="./CONTRIBUTING.md">贡献</a>
 </p>
 
 ---
@@ -64,6 +64,8 @@ result = model.generate(input="meeting.wav")
 | 私有部署 | ✅ MIT 开源 | ✅ MIT 开源 | ❌ 仅云端 |
 | 费用 | 免费 | 免费 | ¥0.04/分钟起 |
 | CPU 可用 | ✅ 17 倍实时 | ❌ 太慢 | 不适用 |
+
+计划从 Whisper 或云端 ASR 切换？请按 [迁移指南](./docs/migration_from_whisper_zh.md) 用代表性音频评测、映射功能并安全上线。
 
 ---
 

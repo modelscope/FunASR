@@ -21,7 +21,7 @@
 </p>
 
 <p align="center">
-  <a href="#빠른-시작">빠른 시작</a> · <a href="#벤치마크">벤치마크</a> · <a href="./docs/use_case_showcase.md">Use cases</a> · <a href="./docs/deployment_matrix.md">Deployment matrix</a> · <a href="#모델-목록">모델 목록</a> · <a href="https://modelscope.github.io/FunASR/agent.html">Agent 연동</a> · <a href="https://modelscope.github.io/FunASR/">문서</a>
+  <a href="#빠른-시작">빠른 시작</a> · <a href="#벤치마크">벤치마크</a> · <a href="./docs/migration_from_whisper.md">Migration guide</a> · <a href="./docs/use_case_showcase.md">Use cases</a> · <a href="./docs/deployment_matrix.md">Deployment matrix</a> · <a href="#모델-목록">모델 목록</a> · <a href="https://modelscope.github.io/FunASR/agent.html">Agent 연동</a> · <a href="https://modelscope.github.io/FunASR/">문서</a>
 </p>
 
 ---
