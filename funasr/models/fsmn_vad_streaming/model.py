@@ -31,11 +31,13 @@ STREAMING_SILENCE_SCHEDULE = [
 
 # Non-streaming mode: shorter patience (audio already complete, cut by natural pauses)
 DEFAULT_SILENCE_SCHEDULE = [
-    (5000, 800),
-    (10000, 600),
-    (20000, 500),
-    (30000, 400),
-    (float("inf"), 300),
+    (10000, 2000),
+    (20000, 1000),
+    (30000, 800),
+    (40000, 600),
+    (50000, 400),
+    (60000, 200),
+    (float("inf"), 100),
 ]
 
 
