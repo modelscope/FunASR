@@ -66,7 +66,7 @@ curl http://localhost:8000/v1/audio/transcriptions \
 <ul><li>音频时长、语言、领域、采样率、声道数和说话人数。</li><li>模型名、模型版本、FunASR 版本、Python/PyTorch/CUDA 版本，以及 Docker 镜像 tag。</li><li>硬件、设备模式、batch size、流式 chunk size，以及是否排除 warmup/模型下载时间。</li><li>WER/CER 或人工审阅记录：姓名、数字、标点、说话人分离、时间戳、领域词。</li><li>延迟、吞吐、GPU/CPU 内存、每小时音频成本、失败文件比例。</li><li>运维要求：鉴权、上传限制、TLS、日志、监控、重试和数据留存规则。</li></ul></section>
 <section id="rollout"><h2>上线检查清单</h2>
 <ul><li>在代表性评测通过前，保留旧流水线作为回退。</li><li>先做内部 endpoint 或离线批处理，再对外暴露 API。</li><li>为每个请求记录 request id、音频时长、模型、设备、延迟和错误类型。</li><li>在 runbook 中固定模型别名和部署命令。</li><li>测试噪声、静音、多人重叠、长文件、非 UTF-8 文件名和网络中断。</li><li>遇到阻塞时，通过 <a href="https://github.com/modelscope/FunASR/issues/new?template=deployment_help.md">Deployment Help issue</a> 提交命令、日志、模型、设备和样本特征。</li></ul></section>
-<section id="share"><h2>分享迁移结果</h2><p>如果 FunASR 替代或补充了你的现有 ASR 栈，欢迎开一个 <a href="https://github.com/modelscope/FunASR/issues/new?template=showcase.md">showcase issue</a>。包含硬件、速度、质量记录和部署细节的迁移报告，能帮助新用户更快选型。</p></section>
+<section id="share"><h2>分享迁移结果</h2><p>如果 FunASR 替代或补充了你的现有 ASR 栈，欢迎提交 <a href="https://github.com/modelscope/FunASR/issues/new?template=migration_benchmark.md">Migration Benchmark Report</a> 或 <a href="https://github.com/modelscope/FunASR/issues/new?template=showcase.md">showcase issue</a>。包含硬件、速度、质量记录和部署细节的迁移报告，能帮助新用户更快选型。</p></section>
 </div></div>
 <footer><p>FunASR &middot; 通义实验室，阿里巴巴集团</p><p><a href="index.html">首页</a> &middot; <a href="migration.html">迁移指南</a> &middot; <a href="use-cases.html">场景速览</a> &middot; <a href="deployment-matrix.html">部署选型</a> &middot; <a href="agent.html">Agent</a> &middot; <a href="benchmark.html">Benchmark</a> &middot; <a href="https://github.com/modelscope/FunASR">GitHub</a></p></footer>
 </body></html>
