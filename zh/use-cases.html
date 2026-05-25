@@ -23,6 +23,7 @@
 <table><tr><th>目标</th><th>从这里开始</th><th>为什么重要</th></tr>
 <tr><td>本地转写一个文件</td><td><a href="tutorial.html">使用教程</a></td><td>几分钟内验证安装、模型下载和首次推理。</td></tr>
 <tr><td>对比准确率和速度</td><td><a href="benchmark.html">性能评测报告</a></td><td>选型前查看长音频速度和 CER。</td></tr>
+<tr><td>从 Whisper/云端 ASR 迁移</td><td><a href="migration.html">迁移指南</a></td><td>将现有流水线映射到 FunASR，用代表性音频评测并规划安全上线。</td></tr>
 <tr><td>搭建私有语音 API</td><td><a href="agent.html#server">OpenAI 兼容 API</a></td><td>复用 OpenAI 风格客户端，音频不出内网。</td></tr>
 <tr><td>给 Agent 增加语音输入</td><td><a href="agent.html#mcp">MCP 服务</a></td><td>将本地 ASR 接入 Claude、Cursor、桌面工具和内部助手。</td></tr>
 <tr><td>选择部署路径</td><td><a href="deployment-matrix.html">部署选型表</a></td><td>对比 Python API、OpenAI API、Docker Compose、WebSocket、vLLM、MCP、字幕、批处理和 Triton。</td></tr>
@@ -44,7 +45,7 @@ python examples/mcp_server/funasr_mcp.py
 
 # 设置 FUNASR_DEVICE=cuda 使用 GPU 推理</code></pre></div></div>
 <div class="grid-2"><div class="card"><h3>流式与客服场景</h3><p>需要给人阅读时，把 ASR 与 VAD、标点恢复、说话人分离一起使用。</p><p>用真实音频验证：背景噪声、长静音、多人重叠、不同麦克风质量。</p></div>
-<div class="card"><h3>迁移前先评测</h3><p>评估是否替代 Whisper 或云端 ASR 时，用自己的样本集同时记录吞吐、CPU 可用性、下载体积和部署复杂度。</p><p><a href="benchmark.html">打开公开评测报告</a></p></div></div>
+<div class="card"><h3>迁移前先评测</h3><p>评估是否替代 Whisper 或云端 ASR 时，用自己的样本集同时记录吞吐、CPU 可用性、下载体积和部署复杂度。</p><p><a href="migration.html">打开迁移指南</a> · <a href="benchmark.html">公开评测</a></p></div></div>
 </section>
 <section id="models"><h2>模型选择建议</h2>
 <table><tr><th>需求</th><th>推荐先试</th><th>说明</th></tr>
@@ -59,5 +60,5 @@ python examples/mcp_server/funasr_mcp.py
 <p><a href="https://github.com/modelscope/FunASR/issues/new?template=showcase.md">提交 showcase issue</a> 或 <a href="https://github.com/modelscope/FunASR/discussions">发起讨论</a>。具体使用反馈能帮助新用户更快选型，也能帮助维护者决定下一批文档和示例优先级。</p>
 </section>
 </div></div>
-<footer><p>FunASR &middot; 通义实验室，阿里巴巴集团</p><p><a href="index.html">首页</a> &middot; <a href="use-cases.html">场景速览</a> &middot; <a href="deployment-matrix.html">部署选型</a> &middot; <a href="agent.html">Agent</a> &middot; <a href="benchmark.html">Benchmark</a> &middot; <a href="vllm.html">vLLM</a> &middot; <a href="https://github.com/modelscope/FunASR">GitHub</a></p></footer>
+<footer><p>FunASR &middot; 通义实验室，阿里巴巴集团</p><p><a href="index.html">首页</a> &middot; <a href="migration.html">迁移指南</a> &middot; <a href="use-cases.html">场景速览</a> &middot; <a href="deployment-matrix.html">部署选型</a> &middot; <a href="agent.html">Agent</a> &middot; <a href="benchmark.html">Benchmark</a> &middot; <a href="vllm.html">vLLM</a> &middot; <a href="https://github.com/modelscope/FunASR">GitHub</a></p></footer>
 </body></html>
