@@ -278,6 +278,8 @@ curl -X POST http://localhost:8899/v1/audio/transcriptions \
 
 ### 3.5 协议三：WebSocket — `ws://host:port/ws`
 
+> 注意：WebSocket 接口当前不支持 SPK。如需说话人分离，请用 HTTP REST 接口。
+
 离线服务的 WebSocket 接口，发送完整音频后获取结果（非流式）。
 
 **客户端 → 服务端**：
