@@ -246,6 +246,15 @@ class AutoModelVLLM:
                 max_model_len=max_model_len, enforce_eager=enforce_eager,
                 **kwargs,
             )
+        elif self.model_type in ("GLMASR", "glmasr"):
+            from funasr.models.glm_asr.inference_vllm import GLMASRVLLMEngine
+            self._engine = GLMASRVLLMEngine(
+                model_dir=self.model_dir, device=device, dtype=dtype,
+                tensor_parallel_size=tensor_parallel_size,
+                gpu_memory_utilization=gpu_memory_utilization,
+                max_model_len=max_model_len,
+                **kwargs,
+            )
         elif self.model_type in ("LLMASR", "LLMASRNAR"):
             self._engine = self._build_llmasr_engine(
                 config, tensor_parallel_size, gpu_memory_utilization,
