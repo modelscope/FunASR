@@ -65,7 +65,7 @@ result = model.generate(input="meeting.wav")
 | 费用 | 免费 | 免费 | ¥0.04/分钟起 |
 | CPU 可用 | ✅ 17 倍实时 | ❌ 太慢 | 不适用 |
 
-计划从 Whisper 或云端 ASR 切换？请按 [迁移指南](./docs/migration_from_whisper_zh.md) 用代表性音频评测、映射功能并安全上线。
+计划从 Whisper 或云端 ASR 切换？请按 [迁移指南](./docs/migration_from_whisper_zh.md) 和 [评测示例](./examples/migration/) 用代表性音频评测、映射功能并安全上线。
 
 ---
 
