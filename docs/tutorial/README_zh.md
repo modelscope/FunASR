@@ -16,6 +16,8 @@ FunASR开源了大量在工业数据上预训练模型，您可以在 [模型许
 
 ### 快速使用
 
+不想先配置本地环境？可以先跑 [Colab 快速体验](../../examples/colab/)，确认模型和输出格式后再切到命令行。
+
 命令行方式调用：
 ```shell
 funasr ++model=paraformer-zh ++vad_model="fsmn-vad" ++punc_model="ct-punc" ++input=asr_example_zh.wav

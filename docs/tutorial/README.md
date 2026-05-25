@@ -16,6 +16,8 @@ FunASR has open-sourced a large number of pre-trained models on industrial data.
 
 ### Quick Start
 
+No local setup? Run the [Colab quickstart](../../examples/colab/) first, then move to the command line when you are ready.
+
 For command-line invocation:
 ```shell
 funasr ++model=paraformer-zh ++vad_model="fsmn-vad" ++punc_model="ct-punc" ++input=asr_example_zh.wav

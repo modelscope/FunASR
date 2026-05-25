@@ -6,6 +6,7 @@
 
 | 路径 | 适合场景 | 从这里开始 | 运维提示 |
 |---|---|---|---|
+| Colab Notebook | 浏览器 smoke test、首次评估、可分享 demo | [Colab 快速体验](../examples/colab/) | 不需要本地环境；首次运行会下载模型，GPU runtime 更快。 |
 | Python API | Notebook、离线任务、首次模型评测 | [README 快速开始](../README_zh.md#快速开始) | 最简单；调用方自己负责批处理、重试和文件管理。 |
 | OpenAI 兼容 API | 私有语音 API、Agent、Dify/LangChain/AutoGen 风格客户端 | [OpenAI API 示例](../examples/openai_api/README_zh.md) | 已支持 OpenAI audio API 的应用最容易接入。 |
 | Docker Compose API | 可复现本地 smoke test 或小型内部服务 | [OpenAI API Docker 文档](../examples/openai_api/README_zh.md) | 默认 CPU；容器里使用 CUDA 前需要先适配 CUDA-capable 镜像。 |
@@ -21,7 +22,7 @@
 
 ### 我想五分钟内试跑 FunASR
 
-使用 README 里的 Python API。它是验证安装、模型下载、设备选择和基础输出格式的最短路径。如果还不确定先用哪个模型，请看 [模型选择指南](./model_selection_zh.md)。
+如果只想在浏览器里 smoke test，可以先用 [Colab 快速体验](../examples/colab/)；本地工作再使用 README 里的 Python API。它是验证安装、模型下载、设备选择和基础输出格式的最短路径。如果还不确定先用哪个模型，请看 [模型选择指南](./model_selection_zh.md)。
 
 ### 我想替代云端转写服务
 
