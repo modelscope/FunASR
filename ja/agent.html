@@ -32,6 +32,7 @@ funasr-server --device cuda --port 8000
 # CPU fallback
 funasr-server --device cpu --model sensevoice --port 8000</code></pre>
 <table><tr><th>Model alias</th><th>Backend</th><th>Best for</th></tr><tr><td><code>sensevoice</code></td><td><code>iic/SenseVoiceSmall</code></td><td>Fast multilingual ASR with language/emotion/event tags.</td></tr><tr><td><code>paraformer</code></td><td><code>paraformer-zh</code> + VAD + punctuation</td><td>Chinese production transcription.</td></tr><tr><td><code>paraformer-en</code></td><td><code>paraformer-en</code> + VAD</td><td>English transcription.</td></tr><tr><td><code>fun-asr-nano</code></td><td><code>FunAudioLLM/Fun-ASR-Nano-2512</code></td><td>31-language LLM-based ASR with timestamps.</td></tr></table>
+<p>日本語の導入手順は <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/README_ja.md">OpenAI API 日本語クイックスタート</a> を参照してください。ローカルで動作確認する場合は <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/smoke_test.py">Python smoke test</a> も利用できます。</p>
 </section>
 <section id="sdk"><h2>OpenAI SDK と curl</h2>
 <pre><code>from openai import OpenAI
