@@ -416,7 +416,22 @@ print(results[0]["text"])
 ### 复现 Benchmark
 
 ```bash
-CUDA_VISIBLE_DEVICES=0 python examples/industrial_data_pretraining/fun_asr_nano/benchmark_vllm.py \
+# Fun-ASR-Nano
+CUDA_VISIBLE_DEVICES=0 python benchmark_vllm.py \
+    --model FunAudioLLM/Fun-ASR-Nano-2512 \
+    --audio-dir /path/to/benchmark_audio \
+    --label-json /path/to/benchmark_testset.json
+
+# GLM-ASR-Nano
+CUDA_VISIBLE_DEVICES=0 python benchmark_vllm.py \
+    --model zai-org/GLM-ASR-Nano-2512 \
+    --audio-dir /path/to/benchmark_audio \
+    --label-json /path/to/benchmark_testset.json
+
+# Quick test (first 20 files, skip PyTorch)
+CUDA_VISIBLE_DEVICES=0 python benchmark_vllm.py \
+    --model FunAudioLLM/Fun-ASR-Nano-2512 \
+    --max-files 20 --skip-pytorch \
     --audio-dir /path/to/benchmark_audio \
     --label-json /path/to/benchmark_testset.json
 ```
