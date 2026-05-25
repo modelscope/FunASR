@@ -371,18 +371,20 @@ Client                          Server
 
 ### Benchmark 结果（184 files, 11541s audio, 1947 VAD segments）
 
-| 模型 | 方法 | 耗时 | RTFx | CER | 加速 |
-|------|------|------|------|-----|------|
-| Fun-ASR-Nano | PyTorch | 589s | 19.6 | 8.94% | 基准 |
-| Fun-ASR-Nano | **vLLM (ours)** | **29.3s** | **393.9** | **8.91%** | **20.7x** |
-| Fun-ASR-Nano | yuekaizhang vLLM | 42.7s | 273.0 | 17.07% | 14.3x |
-| GLM-ASR-Nano | PyTorch | 338s | 34.4 | 12.94% | 基准 |
-| GLM-ASR-Nano | **vLLM (ours)** | **43.9s** | **263.2** | **12.92%** | **7.6x** |
+| 模型 | 方法 | RTFx | CER | 加速 |
+|------|------|------|-----|------|
+| Fun-ASR-Nano | PyTorch (fixed VAD) | 19.6 | 8.94% | 基准 |
+| Fun-ASR-Nano | **vLLM batch (fixed VAD)** | **393.9** | **8.91%** | **20.7x** |
+| Fun-ASR-Nano | **vLLM server (dynamic VAD)** | **68.3** | **8.14%** | **3.5x** |
+| Fun-ASR-Nano | yuekaizhang vLLM | 273.0 | 17.07% | 14.3x |
+| GLM-ASR-Nano | PyTorch | 34.4 | 12.94% | 基准 |
+| GLM-ASR-Nano | **vLLM (ours)** | **263.2** | **12.92%** | **7.6x** |
 
 **关键结论：**
-- vLLM 与 PyTorch CER 完全一致（Fun-ASR-Nano 差 0.03%，GLM-ASR 差 0.02%）
-- Fun-ASR-Nano 加速 20.7x，GLM-ASR 加速 7.6x
-- 比第三方 yuekaizhang/Fun-ASR-vllm 快 44%，且 CER 优 8%
+- vLLM batch 与 PyTorch CER 完全一致（差 < 0.05%）
+- 新动态 VAD（保留长段 ≤60s）CER 降至 **8.14%**，优于 PyTorch 的 8.94%
+- Fun-ASR-Nano batch 加速 20.7x，服务模式加速 3.5x
+- 比第三方 yuekaizhang/Fun-ASR-vllm 快 44%，且 CER 优 9%
 
 ### 统一 vLLM 服务（serve_vllm.py）
 

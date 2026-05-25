@@ -84,7 +84,7 @@ def process_audio(audio_data, sr=16000, language=None, hotwords=None,
 
     # VAD segmentation
     if use_vad and len(audio_data) > sr * 1:
-        vad_res = _vad_model.generate(input=audio_data, fs=sr, dynamic_silence=True)
+        vad_res = _vad_model.generate(input=audio_data, fs=sr)
         segments = vad_res[0]["value"]
     else:
         segments = [[0, int(len(audio_data) * 1000 / sr)]]
