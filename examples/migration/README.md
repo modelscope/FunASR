@@ -55,6 +55,8 @@ python examples/migration/benchmark_funasr.py \
 - `results.jsonl`：每条音频的文本、耗时、音频时长、实时倍速和错误信息。
 - `summary.md`：运行配置、总体速度、逐文件预览和下一步对比建议。
 
+如果结果可以公开，欢迎提交 [Migration Benchmark Report](https://github.com/modelscope/FunASR/issues/new?template=migration_benchmark.md)，帮助其他用户参考你的硬件、音频领域和质量记录。
+
 ## What to compare
 
 Track the same fields for your old ASR stack and FunASR:
@@ -67,4 +69,4 @@ Track the same fields for your old ASR stack and FunASR:
 | WER/CER or human review notes | Captures quality beyond speed. |
 | Failed-file rate and error messages | Shows operational risk before rollout. |
 
-See the [migration guide](../../docs/migration_from_whisper.md) for the full evaluation and rollout checklist.
+See the [migration guide](../../docs/migration_from_whisper.md) for the full evaluation and rollout checklist. If you can share results publicly, open a [Migration Benchmark Report](https://github.com/modelscope/FunASR/issues/new?template=migration_benchmark.md) so others can learn from your hardware, audio domain, and quality notes.

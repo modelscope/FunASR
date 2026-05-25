@@ -78,7 +78,7 @@ curl http://localhost:8000/v1/audio/transcriptions \
 
 ## 分享你的结果
 
-如果 FunASR 在你的项目里效果不错，欢迎通过 [showcase issue](https://github.com/modelscope/FunASR/issues/new?template=showcase.md) 或 GitHub Discussion 分享：
+如果 FunASR 在你的项目里效果不错，欢迎通过 [showcase issue](https://github.com/modelscope/FunASR/issues/new?template=showcase.md)、[Migration Benchmark Report](https://github.com/modelscope/FunASR/issues/new?template=migration_benchmark.md) 或 GitHub Discussion 分享：
 
 - 使用场景和部署方式。
 - 模型、设备和处理速度。

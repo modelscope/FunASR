@@ -93,4 +93,4 @@ curl http://localhost:8000/v1/audio/transcriptions \
 
 ## 分享迁移结果
 
-如果 FunASR 替代或补充了你的现有 ASR 栈，欢迎开一个 [showcase issue](https://github.com/modelscope/FunASR/issues/new?template=showcase.md)。包含硬件、速度、质量记录和部署细节的迁移报告，能帮助新用户更快选型。
+如果 FunASR 替代或补充了你的现有 ASR 栈，欢迎提交 [Migration Benchmark Report](https://github.com/modelscope/FunASR/issues/new?template=migration_benchmark.md) 或 [showcase issue](https://github.com/modelscope/FunASR/issues/new?template=showcase.md)。包含硬件、速度、质量记录和部署细节的迁移报告，能帮助新用户更快选型。
