@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="description" content="FunASR 배포 선택표: Python API, OpenAI 호환 API, Docker Compose, Kubernetes, WebSocket runtime, vLLM, MCP, 자막, batch ASR, Triton 중 적합한 경로를 고릅니다.">
+<meta property="og:title" content="FunASR 배포 선택표">
+<meta property="og:description" content="제품, 데모, 벤치마크, 내부 워크플로를 위한 FunASR 배포 의사결정 표입니다.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://modelscope.github.io/FunASR/ko/deployment-matrix.html">
+<link rel="canonical" href="https://modelscope.github.io/FunASR/ko/deployment-matrix.html">
+<meta property="og:site_name" content="FunASR">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="FunASR 배포 선택표">
+<meta name="twitter:description" content="FunASR 배포 선택표: Python API, OpenAI 호환 API, Docker Compose, Kubernetes, WebSocket runtime, vLLM, MCP, 자막, batch ASR, Triton.">
+<title>FunASR 배포 선택표</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../style.css">
+</head><body>
+<nav class="nav"><div class="container">
+<a href="index.html" class="nav-logo">FunASR</a>
+<div class="nav-links"><a href="index.html">홈</a><a href="https://github.com/modelscope/FunASR/blob/main/README_ko.md">README</a><a href="https://github.com/modelscope/FunASR/blob/main/docs/model_selection_ko.md">모델 선택</a><a href="deployment-matrix.html">배포</a><a href="../api.html">API</a><a href="../vllm.html">vLLM</a><a href="../agent.html">Agent</a><a href="../benchmark.html">Benchmark</a></div>
+<div class="lang-dropdown"><button class="lang-btn">한국어</button><div class="lang-menu"><a href="../deployment-matrix.html">English</a><a href="../zh/deployment-matrix.html">中文</a><a href="../ja/deployment-matrix.html">日本語</a><a href="deployment-matrix.html" class="current">한국어</a></div></div>
+<a href="https://github.com/modelscope/FunASR" class="nav-github">GitHub</a>
+</div></nav>
+<div class="content"><div class="container narrow">
+<h1>배포 선택표</h1>
+<p>제품, 데모, 벤치마크, 내부 워크플로에 가장 짧은 FunASR 배포 경로를 고릅니다. 먼저 목적을 만족하는 가장 작은 구성을 선택하고, 처리량, 지연 시간, 연동 요구가 명확해질 때 더 무거운 runtime으로 이동합니다.</p>
+<div class="toc-grid"><a href="#matrix">결정표</a><a href="#choices">자주 고르는 경로</a><a href="#checklist">운영 전 점검</a><a href="#help">도움 요청</a></div>
+<section id="matrix"><h2>빠른 결정표</h2>
+<table><tr><th>경로</th><th>적합한 상황</th><th>시작 위치</th><th>운영 메모</th></tr>
+<tr><td>Colab notebook</td><td>브라우저 smoke test, 첫 평가, 공유 가능한 데모</td><td><a href="https://colab.research.google.com/github/modelscope/FunASR/blob/main/examples/colab/funasr_quickstart.ipynb">Colab quickstart</a></td><td>로컬 환경이 필요 없습니다. 첫 실행은 모델을 내려받으며 GPU runtime이 더 빠릅니다.</td></tr>
+<tr><td>Python API</td><td>Notebook, 오프라인 작업, 첫 모델 평가</td><td><a href="https://github.com/modelscope/FunASR/blob/main/README_ko.md#빠른-시작">README quickstart</a></td><td>가장 단순한 시작점입니다. batching, retry, 파일 관리는 호출자가 담당합니다.</td></tr>
+<tr><td>OpenAI 호환 API</td><td>사내 음성 API, Agent, Dify/LangChain/AutoGen/n8n 스타일 클라이언트</td><td><a href="../agent.html#server">OpenAI API</a> · <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/README_ko.md">한국어 quickstart</a> · <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/smoke_test.py">Python smoke test</a> · <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/JAVASCRIPT.md">JS/TS recipes</a> · <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/WORKFLOWS.md">Workflow recipes</a> · <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/GRADIO.md">Gradio demo</a> · <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/SECURITY.md">Security guide</a> · <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/POSTMAN.md">Postman collection</a> · <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/OPENAPI.md">OpenAPI spec</a></td><td>OpenAI audio API나 multipart HTTP node를 이미 지원하는 앱과 workflow engine에 가장 쉽게 붙습니다.</td></tr>
+<tr><td>Docker Compose API</td><td>재현 가능한 로컬 smoke test, 작은 사내 서비스</td><td><a href="https://github.com/modelscope/FunASR/tree/main/examples/openai_api#docker-deployment">OpenAI API Docker docs</a> · <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/smoke_test.py">Python smoke test</a></td><td>기본은 CPU입니다. 컨테이너에서 CUDA를 쓰기 전 CUDA 지원 PyTorch/FunASR image를 확인합니다.</td></tr>
+<tr><td>Kubernetes API</td><td>클러스터 내부 사내 음성 API</td><td><a href="https://github.com/modelscope/FunASR/tree/main/examples/openai_api/kubernetes">Kubernetes template</a> · <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/smoke_test.py">Python smoke test</a></td><td>기본은 private <code>ClusterIP</code>입니다. 넓게 노출하기 전 auth, TLS, network policy, GPU scheduling을 추가합니다.</td></tr>
+<tr><td>Runtime WebSocket service</td><td>실시간 자막, 회의, 콜센터 스트리밍 음성</td><td><a href="https://github.com/modelscope/FunASR/tree/main/runtime">Runtime docs</a></td><td>partial result, endpointing, 긴 오디오 스트림이 중요할 때 선택합니다.</td></tr>
+<tr><td>vLLM acceleration</td><td>Fun-ASR-Nano 같은 LLM-based ASR의 고처리량 추론</td><td><a href="../vllm.html">vLLM guide</a></td><td>LLM decoder 처리량을 높이는 경로입니다. non-autoregressive Paraformer에는 적용하지 않습니다.</td></tr>
+<tr><td>MCP server</td><td>Claude/Cursor/desktop agent 음성 도구</td><td><a href="../agent.html#mcp">MCP example</a></td><td>ASR 결과를 로컬 tool로 노출하고 싶을 때 적합합니다.</td></tr>
+<tr><td>Subtitle generator</td><td>긴 오디오나 비디오에서 SRT/VTT 생성</td><td><a href="../agent.html#subtitle">Subtitle generator</a></td><td>가독성이 중요하면 verbose segments와 speaker label을 사용합니다.</td></tr>
+<tr><td>Batch ASR script</td><td>아카이브, 회의록, 데이터셋, 반복 오프라인 처리</td><td><a href="https://github.com/modelscope/FunASR/blob/main/examples/batch_asr_improved.py">Batch example</a></td><td>운영 환경에서는 queue, manifest, retry log를 추가합니다.</td></tr>
+<tr><td>Triton runtime</td><td>전용 고성능 serving</td><td><a href="https://github.com/modelscope/FunASR/tree/main/runtime/triton_gpu">Triton runtime docs</a></td><td>설정이 무겁습니다. 이미 Triton/GPU serving을 운영하는 팀에 적합합니다.</td></tr></table>
+</section>
+<section id="choices"><h2>자주 고르는 경로</h2>
+<div class="grid-2"><div class="card"><h3>5분 안에 FunASR 시험하기</h3><p>브라우저만으로 smoke test를 하려면 <a href="https://colab.research.google.com/github/modelscope/FunASR/blob/main/examples/colab/funasr_quickstart.ipynb">Colab quickstart</a>를 사용합니다. 로컬 작업은 README의 Python API가 가장 짧습니다. 설치, 모델 다운로드, 장치 선택, 출력 형식을 빠르게 확인할 수 있습니다. 어떤 모델부터 쓸지 모르겠다면 <a href="https://github.com/modelscope/FunASR/blob/main/docs/model_selection_ko.md">모델 선택 가이드</a>를 보세요.</p></div>
+<div class="card"><h3>클라우드 전사를 로컬 API로 대체하기</h3><p>OpenAI 호환 API를 사용합니다. 먼저 <code>sensevoice</code>로 bash smoke test나 <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/smoke_test.py">Python smoke test</a>를 통과시키고, 기존 SDK 또는 HTTP 클라이언트를 연결합니다. 클러스터 배포는 <a href="https://github.com/modelscope/FunASR/tree/main/examples/openai_api/kubernetes">Kubernetes template</a>에서 시작합니다. Dify, n8n, webhook worker에는 <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/WORKFLOWS.md">workflow recipes</a>를, GUI API 확인에는 <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/POSTMAN.md">Postman collection</a> 또는 <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/GRADIO.md">Gradio demo</a>를 사용할 수 있습니다. gateway와 developer portal에는 <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/OPENAPI.md">OpenAPI spec</a>과 <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/SECURITY.md">security guide</a>를 참고합니다.</p></div></div>
+<div class="grid-2"><div class="card"><h3>재현 가능한 container demo</h3><pre><code>cd examples/openai_api
+cp .env.example .env
+docker compose up --build</code></pre><p>CUDA 지원 PyTorch/FunASR image를 확정하기 전에는 CPU mode로 검증합니다.</p></div>
+<div class="card"><h3>실시간 음성 서비스</h3><p>Runtime WebSocket service를 사용합니다. 운영 전에 실제 오디오로 chunk size, VAD, endpointing, punctuation, speaker diarization, reconnect, client backpressure를 검증하세요.</p></div></div>
+</section>
+<section id="checklist"><h2>운영 전 체크리스트</h2>
+<ul><li>사용할 model alias를 정하고 deployment note에 고정합니다.</li><li>FunASR version, model version, device, CUDA/PyTorch version, Docker image tag, 시작 명령을 기록합니다.</li><li>짧은 공개 오디오로 <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/smoke_test.py">Python smoke test</a>를 실행하고, 실제 private sample도 최소 1개 확인합니다. Kubernetes는 <a href="https://github.com/modelscope/FunASR/tree/main/examples/openai_api/kubernetes">deployment template</a>를 사용해 먼저 <code>kubectl port-forward</code>로 검증합니다.</li><li>각 request에서 audio duration, model, device, latency, response format, error type을 기록합니다.</li><li>신뢰 네트워크 밖으로 API를 노출하기 전 upload size limit, authentication, TLS, rate limit을 추가합니다. 경계 설계는 <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/SECURITY.md">security guide</a>를 사용합니다.</li><li>Streaming은 silence, noise, overlapping speakers, long sessions, reconnect, slow clients를 테스트합니다.</li></ul>
+</section>
+<section id="help"><h2>issue를 열 때</h2>
+<p>Runtime, Docker, vLLM, Triton, Android, browser, agent integration 문제는 <a href="https://github.com/modelscope/FunASR/issues/new?template=deployment_help.md">Deployment Help</a>를 사용하세요. deployment path, 정확한 command/config, logs, model, device, audio characteristics를 포함하면 재현이 쉬워집니다.</p>
+</section>
+</div></div>
+<footer><p>FunASR &middot; Tongyi Lab, Alibaba Group</p><p><a href="index.html">홈</a> &middot; <a href="https://github.com/modelscope/FunASR/blob/main/README_ko.md">README</a> &middot; <a href="deployment-matrix.html">배포</a> &middot; <a href="../agent.html">Agent</a> &middot; <a href="../benchmark.html">Benchmark</a> &middot; <a href="../vllm.html">vLLM</a> &middot; <a href="https://github.com/modelscope/FunASR">GitHub</a></p></footer>
+</body></html>
