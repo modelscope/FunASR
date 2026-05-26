@@ -21,7 +21,7 @@
 </p>
 
 <p align="center">
-  <a href="#빠른-시작">빠른 시작</a> · <a href="./examples/colab/README_ko.md">Colab</a> · <a href="#벤치마크">벤치마크</a> · <a href="./docs/migration_from_whisper.md">Migration guide</a> · <a href="./docs/use_case_showcase.md">Use cases</a> · <a href="./docs/deployment_matrix.md">Deployment matrix</a> · <a href="#모델-목록">모델 목록</a> · <a href="https://modelscope.github.io/FunASR/agent.html">Agent 연동</a> · <a href="https://modelscope.github.io/FunASR/">문서</a>
+  <a href="#빠른-시작">빠른 시작</a> · <a href="./examples/colab/README_ko.md">Colab</a> · <a href="./docs/model_selection_ko.md">모델 선택</a> · <a href="#벤치마크">벤치마크</a> · <a href="./docs/migration_from_whisper.md">Migration guide</a> · <a href="./docs/use_case_showcase.md">Use cases</a> · <a href="./docs/deployment_matrix.md">Deployment matrix</a> · <a href="#모델-목록">모델 목록</a> · <a href="https://modelscope.github.io/FunASR/agent.html">Agent 연동</a> · <a href="https://modelscope.github.io/FunASR/">문서</a>
 </p>
 
 ---
@@ -49,6 +49,8 @@ result = model.generate(input="meeting.wav")
 ```
 
 하나의 모델, 한 번의 호출 — VAD 분할, 음성인식, 구두점 복원, 화자 분리가 모두 자동으로 수행됩니다.
+
+처음 사용한다면 [Colab 빠른 시작](./examples/colab/README_ko.md)으로 먼저 확인할 수 있습니다. 어떤 모델을 선택할지 고민된다면 [모델 선택 가이드](./docs/model_selection_ko.md)를 참고하세요.
 
 > **API 서버로 배포:** `funasr-server --device cuda` → localhost:8000에서 OpenAI 호환 엔드포인트
 >
