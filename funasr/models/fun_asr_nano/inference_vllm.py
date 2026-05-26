@@ -167,7 +167,10 @@ class FunASRNanoVLLM:
         **kwargs,
     ):
         from vllm import LLM, SamplingParams
-        from vllm.inputs.data import EmbedsPrompt
+        try:
+            from vllm.inputs import EmbedsPrompt
+        except ImportError:
+            from vllm.inputs.data import EmbedsPrompt
 
         self.device = device
         self.dtype = dtype
@@ -519,7 +522,10 @@ class FunASRNanoVLLM:
             List of result dicts: [{"key": str, "text": str, "timestamps": [...]}]
         """
         from vllm import SamplingParams
-        from vllm.inputs.data import EmbedsPrompt
+        try:
+            from vllm.inputs import EmbedsPrompt
+        except ImportError:
+            from vllm.inputs.data import EmbedsPrompt
 
         if isinstance(inputs, (str, np.ndarray, torch.Tensor)):
             inputs = [inputs]

@@ -192,7 +192,10 @@ class GLMASRVLLMEngine:
             List of {"key": str, "text": str}
         """
         from vllm import SamplingParams
-        from vllm.inputs.data import EmbedsPrompt
+        try:
+            from vllm.inputs import EmbedsPrompt
+        except ImportError:
+            from vllm.inputs.data import EmbedsPrompt
 
         if isinstance(inputs, (str, np.ndarray, torch.Tensor)):
             inputs = [inputs]

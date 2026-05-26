@@ -199,7 +199,10 @@ class FunASRNanoVLLMPipeline:
         # Step 3: Batch ASR via vLLM
         # Encode all segments and build prompts
         from vllm import SamplingParams
-        from vllm.inputs.data import EmbedsPrompt
+        try:
+            from vllm.inputs import EmbedsPrompt
+        except ImportError:
+            from vllm.inputs.data import EmbedsPrompt
 
         prompts = []
         for seg_audio in segment_audios:

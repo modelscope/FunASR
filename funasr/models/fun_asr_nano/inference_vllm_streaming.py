@@ -210,7 +210,10 @@ class FunASRNanoStreamingVLLM:
              "is_final": bool, "chunk_idx": int, "audio_duration_ms": float}
         """
         from vllm import SamplingParams
-        from vllm.inputs.data import EmbedsPrompt
+        try:
+            from vllm.inputs import EmbedsPrompt
+        except ImportError:
+            from vllm.inputs.data import EmbedsPrompt
         from funasr.utils.load_utils import load_audio_text_image_video
 
         chunk_ms = chunk_ms or self.chunk_ms
