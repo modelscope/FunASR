@@ -22,7 +22,7 @@
 
 1. [安装与环境](#1-安装与环境)
 2. [vLLM 推理引擎架构](#2-vllm-推理引擎架构)
-3. [离线批量推理](#3-离线批量推理)
+3. [离线 SDK 批量推理](#3-离线-sdk-批量推理)
 4. [流式 SDK 推理](#4-流式-sdk-推理)
 5. [离线语音识别服务](#5-离线语音识别服务)
 6. [流式语音识别服务](#6-流式语音识别服务)
@@ -125,9 +125,75 @@ FunASR 的 vLLM 集成将 ASR 模型拆分为两部分独立运行：
 ---
 
 
-## 3. 离线批量推理
+## 3. 离线 SDK 批量推理
 
 适用于大规模音频转写、离线批量处理。vLLM 的批处理能力在此场景优势最大。
+
+### 设计原理
+
+离线 SDK 批量推理将 ASR 流水线拆分为两阶段独立执行：
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                  阶段 1: 音频编码（PyTorch, 单 GPU）                   │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                     │
+│  音频文件列表 ──→ 分组（每 8 条）──→ Frontend(Fbank)                 │
+│       │                                     │                       │
+│       │                                     ▼                       │
+│       │                            SenseVoice Encoder               │
+│       │                                     │                       │
+│       │                                     ▼                       │
+│       │                            Audio Adaptor                    │
+│       │                            (dim 转换 + low_frame_rate 截断)  │
+│       │                                     │                       │
+│       └─── 共享文本 prompt 预编码 ─────┐      ▼                       │
+│            (system/hotwords/language)  │  audio_embeds               │
+│                     │                 │      │                       │
+│                     ▼                 │      ▼                       │
+│                prefix_emb ──→ [concat: prefix | audio | suffix]      │
+│                                              │                       │
+│                                              ▼                       │
+│                                     EmbedsPrompt（N 条）             │
+└──────────────────────────────────────────────┼──────────────────────┘
+                                               │
+                                               ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│              阶段 2: LLM 解码（vLLM, 多 GPU Tensor Parallel）         │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                     │
+│  EmbedsPrompt × N ──→ vLLM Continuous Batching                      │
+│                        (PagedAttention + CUDA Graph)                 │
+│                              │                                      │
+│                              ▼                                      │
+│                     Generated token_ids × N                          │
+│                              │                                      │
+│                              ▼                                      │
+│                     Decode + 后处理（去特殊标记、清洗）               │
+│                              │                                      │
+│                              ▼                                      │
+│                     (可选) CTC Forced Alignment → 字级别时间戳       │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+**关键设计决策：**
+
+1. **权重分离**：首次运行时从 `model.pt` 提取 `llm.*` 前缀的权重，保存为 HuggingFace safetensors 格式供 vLLM 加载（缓存到 `Qwen3-0.6B-vllm/` 目录）
+2. **Embedding 拼接**：文本 prompt 通过 LLM 的 `embed_tokens` 层编码为 embedding，与音频 adaptor 输出在序列维度拼接：`[prefix_emb | audio_emb | suffix_emb]`，以 `EmbedsPrompt` 形式送入 vLLM
+3. **Low Frame Rate 截断**：adaptor 输出需按公式 `fake_token_len = ((((fbank_len - 3 + 2) // 2 - 3 + 2) // 2) - 1) // 2 + 1` 截断到正确长度，确保与 PyTorch 训练时一致
+4. **批量音频编码**：多条音频按 batch_size=8 分组通过 encoder + adaptor 前向，减少 GPU kernel launch 开销
+5. **文本 prompt 共享**：同一批次内 hotwords/language 相同时，prefix_emb 和 suffix_emb 只计算一次
+6. **CTC 时间戳**：保留 encoder_out，LLM 生成文本后做 forced alignment 得到字级别时间
+
+**为什么比 PyTorch generate() 快？**
+
+| 维度 | PyTorch | vLLM |
+|------|---------|------|
+| KV Cache | 固定预分配（浪费显存） | PagedAttention 按需分配 |
+| 批处理 | 需手动 padding 对齐 | Continuous Batching 自动调度 |
+| CUDA | 逐 sample 串行 | CUDA Graph + 算子融合 |
+| 多卡 | 需手动实现 | Tensor Parallel 一行配置 |
+| 结果 | RTFx ~20 | **RTFx 340+**（16倍加速） |
 
 ### 通用接口（推荐）
 
