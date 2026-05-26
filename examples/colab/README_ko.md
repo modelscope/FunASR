@@ -21,4 +21,14 @@
 - 프로덕션 배포를 검토하려면 notebook을 먼저 실행한 뒤 [deployment matrix](../../docs/deployment_matrix.md)를 확인하세요.
 - OpenAI 호환 HTTP 서비스를 테스트하려면 [examples/openai_api](../openai_api/README_ko.md)를 사용하세요.
 
+## 문제 해결
+
+| 증상 | 해결 방법 |
+|---|---|
+| Colab runtime이 끊기거나 재설정됨 | runtime에 다시 연결한 뒤 install cell을 먼저 실행하고 model cell을 다시 실행하세요. runtime이 재설정되면 설치된 Python 패키지가 유지되지 않습니다. |
+| GPU를 사용할 수 없음 | `Runtime > Change runtime type > GPU`로 변경하세요. GPU가 배정되지 않아도 짧은 smoke test는 CPU로 실행할 수 있습니다. |
+| 모델 다운로드가 느림 | 네트워크가 안정된 뒤 cell을 다시 실행하세요. 첫 실행은 모델 파일을 다운로드하며, 같은 runtime의 이후 실행은 더 빠릅니다. |
+| 업로드한 오디오가 실패하거나 너무 큼 | 먼저 짧은 WAV/MP3로 확인하세요. 긴 오디오는 대표 구간을 잘라 Colab에서 테스트하는 것이 좋습니다. |
+| 출력이 예상과 다름 | transcript JSON cell 출력을 저장하고 issue를 열 때 함께 첨부하세요. |
+
 Notebook source: [funasr_quickstart.ipynb](https://github.com/modelscope/FunASR/blob/main/examples/colab/funasr_quickstart.ipynb).
