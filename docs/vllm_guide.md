@@ -1,6 +1,6 @@
 # FunASR vLLM Inference Engine Guide
 
-FunASR integrates the vLLM high-throughput inference engine to accelerate autoregressive decoding of LLM-based ASR models. Three modes are supported: offline batch inference, streaming SDK inference, and production-grade WebSocket real-time service.
+FunASR integrates the vLLM high-throughput inference engine to accelerate autoregressive decoding of LLM-based ASR models. Three modes are supported: offline SDK inference, streaming SDK inference, and production-grade WebSocket real-time service.
 
 ---
 
@@ -8,7 +8,7 @@ FunASR integrates the vLLM high-throughput inference engine to accelerate autore
 
 1. [Overview](#1-overview)
 2. [Installation & Environment](#2-installation--environment)
-3. [Offline Batch Inference](#3-offline-batch-inference)
+3. [Offline SDK Inference](#3-offline-sdk-inference)
 4. [Streaming SDK Inference](#4-streaming-sdk-inference)
 5. [Real-time WebSocket Service](#5-real-time-websocket-service)
 6. [Performance Comparison](#6-performance-comparison)
@@ -64,7 +64,7 @@ FunASR integrates the vLLM high-throughput inference engine to accelerate autore
 
 | Mode | Entry Point | Use Case |
 |------|-------------|----------|
-| [Offline Batch Inference](#3-offline-batch-inference) | `AutoModelVLLM` / `FunASRNanoVLLM` | Large-scale transcription, batch processing |
+| [Offline SDK Inference](#3-offline-sdk-inference) | `AutoModelVLLM` / `FunASRNanoVLLM` | Large-scale transcription, batch processing |
 | [Streaming SDK Inference](#4-streaming-sdk-inference) | `FunASRNanoStreamingVLLM` | Real-time subtitles (SDK integration) |
 | [WebSocket Real-time Service](#5-real-time-websocket-service) | `serve_realtime_ws.py` | Production deployment, multi-client access |
 
@@ -93,9 +93,75 @@ cd /path/to/FunASR && pip install -e .
 
 ---
 
-## 3. Offline Batch Inference
+## 3. Offline SDK Inference
 
 Best for large-scale audio transcription and offline batch processing. vLLM's batching capability provides the greatest advantage in this scenario.
+
+### Design Principles
+
+The offline SDK inference splits the ASR pipeline into two stages executed independently:
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│           Stage 1: Audio Encoding (PyTorch, single GPU)              │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                     │
+│  Audio file list ──→ Group (batch=8) ──→ Frontend (Fbank)           │
+│       │                                      │                      │
+│       │                                      ▼                      │
+│       │                             SenseVoice Encoder              │
+│       │                                      │                      │
+│       │                                      ▼                      │
+│       │                             Audio Adaptor                   │
+│       │                             (dim transform + LFR truncation)│
+│       │                                      │                      │
+│       └─── Shared text prompt encoding ─┐    ▼                      │
+│            (system/hotwords/language)    │ audio_embeds              │
+│                     │                   │    │                       │
+│                     ▼                   │    ▼                       │
+│                prefix_emb ──→ [concat: prefix | audio | suffix]     │
+│                                              │                      │
+│                                              ▼                      │
+│                                    EmbedsPrompt (N samples)          │
+└──────────────────────────────────────────────┼─────────────────────┘
+                                               │
+                                               ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│         Stage 2: LLM Decoding (vLLM, multi-GPU Tensor Parallel)     │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                     │
+│  EmbedsPrompt × N ──→ vLLM Continuous Batching                      │
+│                        (PagedAttention + CUDA Graph)                 │
+│                              │                                      │
+│                              ▼                                      │
+│                     Generated token_ids × N                          │
+│                              │                                      │
+│                              ▼                                      │
+│                     Decode + post-processing (clean special tokens)  │
+│                              │                                      │
+│                              ▼                                      │
+│                     (Optional) CTC Forced Alignment → char timestamps│
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+**Key design decisions:**
+
+1. **Weight separation**: On first run, extracts `llm.*` prefixed weights from `model.pt` and saves them in HuggingFace safetensors format for vLLM (cached in `Qwen3-0.6B-vllm/` directory)
+2. **Embedding concatenation**: Text prompt is encoded via the LLM's `embed_tokens` layer, then concatenated with audio adaptor output along the sequence dimension: `[prefix_emb | audio_emb | suffix_emb]`, submitted to vLLM as `EmbedsPrompt`
+3. **Low Frame Rate truncation**: Adaptor output is truncated to the correct length using: `fake_token_len = ((((fbank_len - 3 + 2) // 2 - 3 + 2) // 2) - 1) // 2 + 1`, ensuring consistency with PyTorch training
+4. **Batch audio encoding**: Multiple audio files are grouped (batch_size=8) through encoder + adaptor forward pass, reducing GPU kernel launch overhead
+5. **Shared text prompt**: When hotwords/language are the same within a batch, prefix_emb and suffix_emb are computed only once
+6. **CTC timestamps**: Encoder output is preserved; after LLM generates text, forced alignment produces character-level timestamps
+
+**Why faster than PyTorch generate()?**
+
+| Dimension | PyTorch | vLLM |
+|-----------|---------|------|
+| KV Cache | Fixed pre-allocation (wastes memory) | PagedAttention on-demand allocation |
+| Batching | Manual padding required | Continuous Batching auto-scheduling |
+| CUDA | Sequential per-sample | CUDA Graph + operator fusion |
+| Multi-GPU | Manual implementation | Tensor Parallel one-line config |
+| Result | RTFx ~20 | **RTFx 340+** (16x speedup) |
 
 ### Universal Interface (Recommended)
 
