@@ -97,6 +97,12 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://modelscope.github.io/FunASR/ja/deployment-matrix.html</loc>
+    <lastmod>2026-05-26</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://modelscope.github.io/FunASR/ja/model-registration.html</loc>
     <lastmod>2026-05-25</lastmod>
     <changefreq>weekly</changefreq>
