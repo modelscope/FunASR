@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="description" content="음성 인식을 Agent, 제품, 데스크톱 워크플로의 로컬 인프라로 연결합니다: OpenAI 호환 API, MCP server, 음성 입력, 자막 생성.">
+<meta property="og:title" content="FunASR Agent 연동">
+<meta property="og:description" content="음성 인식을 Agent, 제품, 데스크톱 워크플로의 로컬 인프라로 연결합니다: OpenAI 호환 API, MCP server, 음성 입력, 자막 생성.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://modelscope.github.io/FunASR/ko/agent.html">
+<link rel="canonical" href="https://modelscope.github.io/FunASR/ko/agent.html">
+<meta property="og:site_name" content="FunASR">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="FunASR Agent 연동">
+<meta name="twitter:description" content="OpenAI 호환 API, MCP server, 음성 입력, 자막 생성으로 FunASR를 Agent 워크플로에 연결합니다.">
+<title>FunASR Agent 연동</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../style.css">
+</head><body>
+<nav class="nav"><div class="container">
+<a href="index.html" class="nav-logo">FunASR</a>
+<div class="nav-links"><a href="index.html">홈</a><a href="https://github.com/modelscope/FunASR/blob/main/README_ko.md">README</a><a href="model-selection.html">모델 선택</a><a href="deployment-matrix.html">배포</a><a href="../api.html">API</a><a href="../vllm.html">vLLM</a><a href="agent.html" class="active">Agent</a><a href="../benchmark.html">Benchmark</a></div>
+<div class="lang-dropdown"><button class="lang-btn">한국어</button><div class="lang-menu"><a href="../agent.html">English</a><a href="../zh/agent.html">中文</a><a href="../ja/agent.html">日本語</a><a href="agent.html" class="current">한국어</a></div></div>
+<a href="https://github.com/modelscope/FunASR" class="nav-github">GitHub</a>
+</div></nav>
+<div class="content"><div class="container narrow">
+<h1>Agent 연동</h1>
+<p>음성 인식을 Agent, 제품, 데스크톱 워크플로의 로컬 인프라로 연결합니다. OpenAI 호환 API, MCP server, 음성 입력, 자막 생성 흐름을 한 번에 확인할 수 있습니다.</p>
+<div class="toc-grid"><a href="#server">OpenAI API</a><a href="#sdk">SDK & curl</a><a href="#workflows">워크플로</a><a href="#mcp">MCP Server</a><a href="#voice">음성 입력</a><a href="#subtitle">자막 생성</a></div>
+<section id="server"><h2>OpenAI 호환 API 서버</h2>
+<p><code>funasr-server</code>는 <code>/v1/audio/transcriptions</code>, <code>/v1/models</code>, <code>/health</code>를 제공하고 <code>/docs</code>에서 Swagger 문서를 보여줍니다. OpenAI audio API를 이미 지원하는 framework와 바로 연결할 수 있습니다.</p>
+<pre><code>pip install funasr fastapi uvicorn python-multipart
+funasr-server --device cuda --port 8000
+
+# CPU fallback
+funasr-server --device cpu --model sensevoice --port 8000</code></pre>
+<table><tr><th>Model alias</th><th>Backend</th><th>적합한 사용처</th></tr><tr><td><code>sensevoice</code></td><td><code>iic/SenseVoiceSmall</code></td><td>언어, 감정, 이벤트 태그가 필요한 빠른 다국어 ASR.</td></tr><tr><td><code>paraformer</code></td><td><code>paraformer-zh</code> + VAD + punctuation</td><td>중국어 production transcription.</td></tr><tr><td><code>paraformer-en</code></td><td><code>paraformer-en</code> + VAD</td><td>영어 transcription.</td></tr><tr><td><code>fun-asr-nano</code></td><td><code>FunAudioLLM/Fun-ASR-Nano-2512</code></td><td>timestamp가 필요한 31개 언어 LLM-based ASR.</td></tr></table>
+</section>
+<section id="sdk"><h2>OpenAI SDK와 curl</h2>
+<pre><code>from openai import OpenAI
+
+client = OpenAI(base_url="http://localhost:8000/v1", api_key="not-needed")
+result = client.audio.transcriptions.create(
+    model="sensevoice",
+    file=open("meeting.wav", "rb"),
+)
+print(result.text)
+
+verbose = client.audio.transcriptions.create(
+    model="sensevoice",
+    file=open("meeting.wav", "rb"),
+    response_format="verbose_json",
+)
+print(verbose.segments)</code></pre>
+<pre><code>curl http://localhost:8000/v1/audio/transcriptions \
+  -F file=@audio.wav \
+  -F model=sensevoice \
+  -F response_format=verbose_json</code></pre>
+</section>
+<section id="workflows"><h2>Dify, n8n, workflow engine</h2><p>한국어 빠른 시작은 <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/README_ko.md">OpenAI API 예제</a>에서 시작합니다. HTTP node나 webhook worker로 음성 API를 호출하는 low-code tool은 <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/WORKFLOWS.md">workflow recipes</a>를 참고하세요. multipart upload 설정, Dify custom tool, n8n binary file field, audio URL worker, timeout, production guardrail을 다룹니다. Node.js, TypeScript, Next.js service는 <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/JAVASCRIPT.md">JavaScript/TypeScript recipes</a>에서 시작할 수 있습니다. GUI smoke test에는 <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/POSTMAN.md">Postman collection</a>, CLI 확인에는 <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/smoke_test.py">Python smoke test</a>, 브라우저 업로드와 마이크 확인에는 <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/GRADIO.md">Gradio demo</a>를 사용하세요. 서비스를 공유하기 전에는 <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/SECURITY.md">security and gateway guide</a>를 확인하고, schema-driven import에는 <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/OPENAPI.md">OpenAPI spec</a>을 사용합니다.</p><p><a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/README_ko.md">한국어 API quickstart</a> · <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/WORKFLOWS.md">Workflow recipes</a> · <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/JAVASCRIPT.md">JS/TS recipes</a> · <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/smoke_test.py">Python smoke test</a> · <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/GRADIO.md">Gradio demo</a> · <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/SECURITY.md">Security guide</a> · <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/POSTMAN.md">Postman collection</a> · <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/OPENAPI.md">OpenAPI spec</a></p></section>
+<section id="mcp"><h2>MCP Server</h2>
+<p>MCP server는 Claude Code, Claude Desktop, Cursor, Windsurf, 기타 MCP client에 로컬 <code>transcribe_audio</code> tool을 제공합니다.</p>
+<pre><code>pip install funasr
+python examples/mcp_server/funasr_mcp.py</code></pre>
+<pre><code>{
+  "mcpServers": {
+    "funasr": {
+      "command": "python",
+      "args": ["/path/to/examples/mcp_server/funasr_mcp.py"],
+      "env": {"FUNASR_DEVICE": "cuda"}
+    }
+  }
+}</code></pre>
+<table><tr><th>변수</th><th>기본값</th><th>설명</th></tr><tr><td><code>FUNASR_DEVICE</code></td><td><code>cpu</code></td><td><code>cuda</code>, <code>cpu</code>, <code>mps</code>.</td></tr><tr><td><code>FUNASR_MODEL</code></td><td><code>iic/SenseVoiceSmall</code></td><td>MCP tool이 사용하는 ASR model.</td></tr></table>
+</section>
+<section id="voice"><h2>Desktop 음성 입력</h2>
+<p>voice input 예제는 마이크에서 녹음하고, 오디오를 <code>funasr-server</code>로 보내고, 인식한 텍스트를 현재 커서 위치에 붙여넣습니다.</p>
+<pre><code>pip install funasr sounddevice numpy pyperclip openai pynput
+funasr-server --device cuda
+
+cd examples/voice_input
+python funasr_input.py --server http://localhost:8000/v1 --model sensevoice</code></pre>
+<table><tr><th>Platform</th><th>Recording</th><th>Paste</th></tr><tr><td>macOS</td><td>Yes</td><td>AppleScript</td></tr><tr><td>Linux</td><td>Yes</td><td>xdotool</td></tr><tr><td>Windows</td><td>Yes</td><td>필요하면 수동 Ctrl+V</td></tr></table>
+</section>
+<section id="subtitle"><h2>자막 생성</h2>
+<p>subtitle 예제는 오디오나 비디오 파일을 SRT/VTT로 변환하고, 선택적으로 speaker label을 추가합니다.</p>
+<pre><code>cd examples/subtitle
+python generate_subtitle.py video.mp4
+python generate_subtitle.py meeting.wav --spk
+python generate_subtitle.py podcast.mp3 --format vtt
+python generate_subtitle.py audio.wav --device cpu</code></pre>
+<table><tr><th>Option</th><th>Default</th><th>Description</th></tr><tr><td><code>--format</code></td><td><code>srt</code></td><td><code>srt</code> 또는 <code>vtt</code>.</td></tr><tr><td><code>--model</code></td><td><code>iic/SenseVoiceSmall</code></td><td>ASR model.</td></tr><tr><td><code>--spk</code></td><td>off</td><td>speaker label 추가.</td></tr><tr><td><code>--lang</code></td><td><code>auto</code></td><td>언어 hint.</td></tr></table>
+</section>
+</div></div>
+<footer><p>FunASR &middot; Tongyi Lab, Alibaba Group</p><p><a href="index.html">홈</a> &middot; <a href="model-selection.html">모델 선택</a> &middot; <a href="deployment-matrix.html">배포</a> &middot; <a href="agent.html">Agent</a> &middot; <a href="../benchmark.html">Benchmark</a> &middot; <a href="../vllm.html">vLLM</a> &middot; <a href="https://github.com/modelscope/FunASR">GitHub</a></p></footer>
+</body></html>
