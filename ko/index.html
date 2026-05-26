@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="FunASR는 산업용 오픈소스 음성 인식 및 음성 이해 툴킷입니다. GPU 170x 실시간, 50개 이상 언어, 화자 분리, 감정 감지, OpenAI 호환 API, vLLM 가속, Agent 연동을 지원합니다.">
+    <meta property="og:title" content="FunASR - 오픈소스 음성 이해 툴킷">
+    <meta property="og:description" content="GPU 170x 실시간, 50개 이상 언어, 화자 분리, vLLM 가속, 로컬 OpenAI 호환 음성 API를 제공하는 FunASR.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://modelscope.github.io/FunASR/ko/">
+    <link rel="canonical" href="https://modelscope.github.io/FunASR/ko/">
+    <link rel="alternate" hreflang="en" href="https://modelscope.github.io/FunASR/">
+    <link rel="alternate" hreflang="zh" href="https://modelscope.github.io/FunASR/zh/">
+    <link rel="alternate" hreflang="ja" href="https://modelscope.github.io/FunASR/ja/">
+    <link rel="alternate" hreflang="ko" href="https://modelscope.github.io/FunASR/ko/">
+    <link rel="alternate" hreflang="x-default" href="https://modelscope.github.io/FunASR/">
+    <meta property="og:site_name" content="FunASR">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="FunASR - 오픈소스 음성 이해 툴킷">
+    <meta name="twitter:description" content="GPU 170x 실시간, 50개 이상 언어, 화자 분리, vLLM 가속, 로컬 OpenAI 호환 음성 API.">
+    <script type="application/ld+json">
+{"@context":"https://schema.org","@type":"SoftwareSourceCode","name":"FunASR","description":"FunASR는 ASR, VAD, 문장부호 복원, 화자 분리, 감정 감지, vLLM 가속, OpenAI 호환 API 예제를 제공하는 오픈소스 음성 인식 및 음성 이해 툴킷입니다.","url":"https://modelscope.github.io/FunASR/ko/","codeRepository":"https://github.com/modelscope/FunASR","programmingLanguage":"Python","license":"https://github.com/modelscope/FunASR/blob/main/LICENSE","applicationCategory":"Speech recognition toolkit","operatingSystem":["Linux","macOS","Windows"]}
+    </script>
+    <title>FunASR - 엔드투엔드 음성 인식 툴킷</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <nav class="nav">
+        <div class="container">
+            <a href="index.html" class="nav-logo">FunASR</a>
+            <div class="nav-links">
+                <a href="index.html" class="active">홈</a>
+                <a href="https://github.com/modelscope/FunASR/blob/main/README_ko.md">README</a>
+                <a href="https://github.com/modelscope/FunASR/blob/main/docs/model_selection_ko.md">모델 선택</a>
+                <a href="https://github.com/modelscope/FunASR/blob/main/docs/deployment_matrix_ko.md">배포</a>
+                <a href="../api.html">API</a>
+                <a href="../vllm.html">vLLM</a>
+                <a href="../agent.html">Agent</a>
+                <a href="../benchmark.html">Benchmark</a>
+            </div>
+            <div class="lang-dropdown"><button class="lang-btn">한국어</button><div class="lang-menu"><a href="../index.html">English</a><a href="../zh/index.html">中文</a><a href="../ja/index.html">日本語</a><a href="index.html" class="current">한국어</a></div></div>
+            <a href="https://github.com/modelscope/FunASR" class="nav-github">GitHub</a>
+        </div>
+    </nav>
+
+    <div class="hero">
+        <div class="container hero-content">
+            <div class="hero-copy">
+                <p class="eyebrow">오픈소스 음성 이해 툴킷</p>
+                <h1>FunASR</h1>
+                <p>프로덕션 환경을 위한 ASR, VAD, 문장부호 복원, 화자 분리, 감정 감지, 음성 이벤트 인식을 하나의 Python 인터페이스로 제공합니다.</p>
+                <div class="hero-badges">
+                    <a href="https://pypi.org/project/funasr/"><img src="https://img.shields.io/pypi/v/funasr?style=flat-square&color=2563eb" alt="PyPI"></a>
+                    <a href="https://github.com/modelscope/FunASR/stargazers"><img src="https://img.shields.io/github/stars/modelscope/FunASR?style=flat-square&color=b45309" alt="Stars"></a>
+                    <a href="https://github.com/modelscope/FunASR/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-059669?style=flat-square" alt="License"></a>
+                </div>
+                <div class="hero-actions">
+                    <a href="https://github.com/modelscope/FunASR/blob/main/README_ko.md#빠른-시작" class="btn btn-white">시작하기</a>
+                    <a href="https://github.com/modelscope/FunASR/blob/main/docs/model_selection_ko.md" class="btn btn-outline-white">모델 선택</a>
+                    <a href="https://github.com/modelscope/FunASR/blob/main/docs/deployment_matrix_ko.md" class="btn btn-outline-white">배포 선택</a>
+                </div>
+            </div>
+
+            <div class="hero-panel" aria-label="FunASR recognition preview">
+                <div class="terminal-bar">
+                    <span class="terminal-dots"><span></span><span></span><span></span></span>
+                    <span>funasr-pipeline.py</span>
+                </div>
+<pre>from funasr import AutoModel
+
+model = AutoModel(
+    model="paraformer-zh",
+    vad_model="fsmn-vad",
+    punc_model="ct-punc",
+    spk_model="cam++",
+)
+res = model.generate(input="meeting.wav")
+print(res[0]["sentence_info"])</pre>
+                <div class="hero-metrics">
+                    <div><strong>50+</strong><span>언어</span></div>
+                    <div><strong>170x</strong><span>실시간</span></div>
+                    <div><strong>1 API</strong><span>파이프라인</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <section class="alt">
+        <div class="container">
+            <h2 class="section-title">빠르게 시작</h2>
+            <p class="section-subtitle">브라우저 데모, 로컬 API, 배포 경로를 한국어 문서에서 바로 선택할 수 있습니다.</p>
+            <div class="grid-3">
+                <div class="card"><h3>Colab으로 체험</h3><p>설치 없이 FunASR 파이프라인을 실행하고 모델 다운로드, 장치 선택, 기본 출력 형식을 확인합니다.</p><p><a href="https://github.com/modelscope/FunASR/blob/main/examples/colab/README_ko.md">Colab 빠른 시작</a></p></div>
+                <div class="card"><h3>OpenAI 호환 API</h3><p><code>funasr-server</code>로 로컬 전사 API를 띄우고 Agent, workflow, SDK, HTTP 클라이언트에 연결합니다.</p><p><a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/README_ko.md">API 예제 보기</a></p></div>
+                <div class="card"><h3>배포 선택</h3><p>Python API, Docker Compose, Kubernetes, WebSocket runtime, vLLM, MCP, 자막, batch ASR 중 가장 짧은 경로를 고릅니다.</p><p><a href="https://github.com/modelscope/FunASR/blob/main/docs/deployment_matrix_ko.md">배포 매트릭스</a></p></div>
+            </div>
+        </div>
+    </section>
+
+    <section class="docs-band">
+        <div class="container">
+            <h2 class="section-title">한국어 문서</h2>
+            <p class="section-subtitle">모델 선택, 첫 실행, API 연동, 배포 판단을 한 화면에서 이어 봅니다.</p>
+            <div class="doc-grid">
+                <a class="doc-card" href="https://github.com/modelscope/FunASR/blob/main/README_ko.md">
+                    <span class="doc-kicker">개요</span>
+                    <h3>README</h3>
+                    <p>주요 모델, 빠른 시작, 벤치마크, 배포 링크를 한국어로 확인합니다.</p>
+                </a>
+                <a class="doc-card" href="https://github.com/modelscope/FunASR/blob/main/docs/model_selection_ko.md">
+                    <span class="doc-kicker">선택</span>
+                    <h3>모델 선택</h3>
+                    <p>SenseVoice, Paraformer, Fun-ASR-Nano, OpenAI API alias 중 첫 모델을 고릅니다.</p>
+                </a>
+                <a class="doc-card" href="https://github.com/modelscope/FunASR/blob/main/docs/deployment_matrix_ko.md">
+                    <span class="doc-kicker">운영</span>
+                    <h3>배포 매트릭스</h3>
+                    <p>Colab, Python API, Docker, Kubernetes, WebSocket, vLLM, MCP 경로를 비교합니다.</p>
+                </a>
+                <a class="doc-card" href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/README_ko.md">
+                    <span class="doc-kicker">연동</span>
+                    <h3>OpenAI API 예제</h3>
+                    <p>로컬 음성 API 서버를 실행하고 curl, SDK, workflow 클라이언트와 연결합니다.</p>
+                </a>
+                <a class="doc-card" href="../benchmark.html">
+                    <span class="doc-kicker">측정</span>
+                    <h3>Benchmark</h3>
+                    <p>SenseVoice, Paraformer, Fun-ASR-Nano, Whisper 계열 모델의 GPU/CPU 결과를 비교합니다.</p>
+                </a>
+                <a class="doc-card" href="../agent.html">
+                    <span class="doc-kicker">Agent</span>
+                    <h3>Agent 연동</h3>
+                    <p>OpenAI 호환 endpoint, MCP tool, 음성 입력, 자막 생성 흐름을 확인합니다.</p>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <div class="container">
+            <h2 class="section-title">주요 기능</h2>
+            <p class="section-subtitle">짧은 데모부터 회의, 콜센터, 자막, 데이터셋 처리까지 같은 툴킷으로 확장합니다.</p>
+            <div class="grid-3">
+                <div class="card"><div class="card-icon">ASR</div><h3>음성 인식</h3><p>VAD 세그멘테이션과 함께 스트리밍 및 오프라인 ASR을 처리합니다.</p></div>
+                <div class="card"><div class="card-icon">50+</div><h3>다국어 모델</h3><p>Fun-ASR-Nano와 Qwen3-ASR 계열로 여러 언어와 자동 언어 감지를 지원합니다.</p></div>
+                <div class="card"><div class="card-icon">SPK</div><h3>화자 분리</h3><p>누가 언제 말했는지 문장 단위 출력에 화자 라벨을 붙입니다.</p></div>
+                <div class="card"><div class="card-icon">SFX</div><h3>감정 및 이벤트</h3><p>SenseVoice로 감정, 배경음, 박수, 웃음, 울음 같은 음성 이벤트를 감지합니다.</p></div>
+                <div class="card"><div class="card-icon">vLLM</div><h3>고속 추론</h3><p>Fun-ASR-Nano의 LLM decode를 vLLM으로 가속하고 multi-GPU batch inference에 연결합니다.</p></div>
+                <div class="card"><div class="card-icon">API</div><h3>로컬 음성 API</h3><p>OpenAI 호환 transcription endpoint를 내부 서비스와 Agent tool에 연결합니다.</p></div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <p>FunASR &middot; Tongyi Lab, Alibaba Group</p>
+        <p>
+            <a href="https://github.com/modelscope/FunASR">GitHub</a> &middot;
+            <a href="https://github.com/modelscope/FunASR/blob/main/README_ko.md">README</a> &middot;
+            <a href="https://github.com/modelscope/FunASR/blob/main/docs/model_selection_ko.md">모델 선택</a> &middot;
+            <a href="https://github.com/modelscope/FunASR/blob/main/docs/deployment_matrix_ko.md">배포</a> &middot;
+            <a href="../api.html">API</a> &middot;
+            <a href="https://pypi.org/project/funasr/">PyPI</a> &middot;
+            <a href="https://github.com/modelscope/FunASR/issues">Issues</a>
+        </p>
+    </footer>
+</body>
+</html>
