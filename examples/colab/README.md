@@ -21,4 +21,14 @@ Run FunASR in a browser without preparing a local Python environment.
 - If you are evaluating production deployment, use the [deployment matrix](../../docs/deployment_matrix.md) after the notebook works.
 - For OpenAI-compatible HTTP service testing, use [examples/openai_api](../openai_api/).
 
+## Troubleshooting
+
+| Symptom | What to try |
+|---|---|
+| Colab runtime disconnects or resets | Reconnect the runtime, rerun the install cell, then rerun the model cell. The notebook does not persist Python packages across runtime resets. |
+| GPU is unavailable | Use `Runtime > Change runtime type > GPU`. If no GPU is assigned, the notebook still works on CPU for a short smoke test. |
+| Model download is slow | Rerun the cell after the network recovers. The first run downloads model files and later runs in the same runtime are faster. |
+| Uploaded audio fails or is too large | Try a short WAV/MP3 first. For long files, trim a representative sample before using Colab. |
+| Output is unexpected | Save the transcript JSON cell output and include it when opening an issue. |
+
 Notebook source: [funasr_quickstart.ipynb](https://github.com/modelscope/FunASR/blob/main/examples/colab/funasr_quickstart.ipynb).
