@@ -549,7 +549,7 @@ class FunASRNanoVLLM:
         suffix_emb = self.embed_tokens(torch.tensor(suffix_ids, dtype=torch.long, device=self.device))
 
         # Batch encode audio (groups of 8 for memory efficiency)
-        batch_size_enc = 8
+        batch_size_enc = 16
         all_adaptor_outs = []
         all_adaptor_lens = []
         for i in range(0, len(inputs), batch_size_enc):
