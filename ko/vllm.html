@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="description" content="vLLM으로 autoregressive LLM-based ASR 모델을 가속합니다. FunASR는 offline batch transcription, SDK-style chunked streaming, VAD와 hotword가 포함된 WebSocket 서비스를 지원합니다.">
+<meta property="og:title" content="FunASR vLLM Guide">
+<meta property="og:description" content="vLLM으로 Fun-ASR-Nano 같은 LLM-based ASR 모델을 가속하고 batch, streaming, WebSocket serving 경로를 선택합니다.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://modelscope.github.io/FunASR/ko/vllm.html">
+<link rel="canonical" href="https://modelscope.github.io/FunASR/ko/vllm.html">
+<meta property="og:site_name" content="FunASR">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="FunASR vLLM Guide">
+<meta name="twitter:description" content="vLLM으로 LLM-based ASR를 가속하고 batch, streaming, WebSocket serving 경로를 선택합니다.">
+<title>FunASR vLLM Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../style.css">
+</head><body>
+<nav class="nav"><div class="container">
+<a href="index.html" class="nav-logo">FunASR</a>
+<div class="nav-links"><a href="index.html">홈</a><a href="https://github.com/modelscope/FunASR/blob/main/README_ko.md">README</a><a href="model-selection.html">모델 선택</a><a href="deployment-matrix.html">배포</a><a href="../api.html">API</a><a href="vllm.html" class="active">vLLM</a><a href="agent.html">Agent</a><a href="benchmark.html">Benchmark</a></div>
+<div class="lang-dropdown"><button class="lang-btn">한국어</button><div class="lang-menu"><a href="../vllm.html">English</a><a href="../zh/vllm.html">中文</a><a href="../ja/vllm.html">日本語</a><a href="vllm.html" class="current">한국어</a></div></div>
+<a href="https://github.com/modelscope/FunASR" class="nav-github">GitHub</a>
+</div></nav>
+<div class="content"><div class="container narrow">
+<h1>vLLM Inference Engine</h1>
+<p>vLLM으로 autoregressive LLM-based ASR 모델을 가속합니다. FunASR는 offline batch transcription, SDK-style chunked streaming, 그리고 VAD, hotword, speaker label을 포함한 WebSocket service 경로를 제공합니다.</p>
+<div class="toc-grid"><a href="#overview">개요</a><a href="#support">지원 범위</a><a href="#install">설치</a><a href="#batch">Batch</a><a href="#streaming">Streaming</a><a href="#service">Service</a><a href="#tuning">Tuning</a><a href="#faq">FAQ</a></div>
+<section id="overview"><h2>언제 vLLM을 쓰나</h2>
+<p>vLLM은 Fun-ASR-Nano처럼 LLM decoder가 포함된 autoregressive ASR 경로의 decode throughput을 높입니다. audio frontend, encoder, adaptor, optional CTC timestamp decoder는 PyTorch에서 실행되고, LLM decoder는 prompt embedding을 vLLM에 전달해 PagedAttention, continuous batching, tensor parallelism을 활용합니다.</p>
+<table><tr><th>상황</th><th>추천</th></tr><tr><td>Fun-ASR-Nano batch transcription</td><td>vLLM path를 우선 평가합니다.</td></tr><tr><td>Python app에서 progressive subtitle 필요</td><td>Streaming SDK를 사용합니다.</td></tr><tr><td>실시간 서비스, hotword, speaker label 필요</td><td>WebSocket service를 사용합니다.</td></tr><tr><td>Paraformer 또는 SenseVoice만 사용</td><td>vLLM보다 기존 PyTorch path가 맞습니다.</td></tr></table>
+</section>
+<section id="support"><h2>지원 범위</h2>
+<table><tr><th>Model family</th><th>vLLM support</th><th>이유</th></tr><tr><td>Fun-ASR-Nano</td><td>Yes</td><td>LLM decoder가 있어 vLLM KV-cache decoding과 continuous batching의 이점을 받습니다.</td></tr><tr><td>Paraformer</td><td>No</td><td>non-autoregressive model이라 vLLM KV-cache가 병목을 해결하지 않습니다.</td></tr><tr><td>SenseVoice</td><td>No</td><td>기본 inference path가 이미 compact하고 vLLM LLM decoder 경로가 아닙니다.</td></tr></table>
+<p>처음 모델을 고르는 중이면 <a href="model-selection.html">모델 선택 가이드</a>를 먼저 보고, 운영 경로를 고르는 중이면 <a href="deployment-matrix.html">배포 선택표</a>를 함께 확인하세요.</p>
+</section>
+<section id="install"><h2>설치와 첫 실행</h2>
+<pre><code>pip install funasr vllm
+
+# first run prepares vLLM-compatible LLM weights
+python - <<'PY'
+from funasr import AutoModel
+model = AutoModel(model="FunAudioLLM/Fun-ASR-Nano-2512", backend="vllm", device="cuda")
+print(model.generate(input="sample.wav"))
+PY</code></pre>
+<p>첫 실행에서는 FunASR가 <code>model.pt</code>에서 LLM weights를 추출해 <code>Qwen3-0.6B-vllm</code> 같은 vLLM-compatible directory를 만들 수 있습니다. 이후 시작은 준비된 weights를 재사용합니다.</p>
+</section>
+<section id="batch"><h2>Offline batch transcription</h2>
+<p>긴 파일 묶음, benchmark, archive transcription에는 batch path가 가장 단순합니다. GPU memory와 batch size를 조정하면서 throughput과 latency를 함께 기록하세요.</p>
+<pre><code>python examples/funasr_nano_vllm/offline_infer.py \
+  --model FunAudioLLM/Fun-ASR-Nano-2512 \
+  --input wav.scp \
+  --output results.jsonl \
+  --tensor-parallel-size 1</code></pre>
+</section>
+<section id="streaming"><h2>SDK-style chunked streaming</h2>
+<p><code>FunASRNanoStreamingVLLM</code>은 audio를 720 ms chunk로 나누고, cumulative audio를 re-encode한 뒤 chunk prompt를 vLLM에 batch로 넣습니다. fixed/unfixed text split을 반환하므로 Python app에서 progressive subtitle을 보여주기 좋습니다.</p>
+<pre><code>from funasr import FunASRNanoStreamingVLLM
+
+stream = FunASRNanoStreamingVLLM(model="FunAudioLLM/Fun-ASR-Nano-2512", device="cuda")
+for event in stream.generate("meeting.wav"):
+    print(event["fixed"], event["unfixed"])</code></pre>
+</section>
+<section id="service"><h2>WebSocket service</h2>
+<p>Real-time service는 streaming VAD, vLLM segment decoding, partial preview, hallucination cleanup, hotword, language hint, speaker diarization을 함께 제공합니다. 제품 API나 browser client에 붙이기 전에 실제 회의/콜센터 오디오로 reconnect와 slow client를 검증하세요.</p>
+<pre><code>python examples/funasr_nano_vllm/websocket_server.py \
+  --host 0.0.0.0 \
+  --port 10095 \
+  --model FunAudioLLM/Fun-ASR-Nano-2512 \
+  --device cuda</code></pre>
+<p>OpenAI-compatible transcription endpoint가 필요하면 <a href="agent.html">Agent 연동 페이지</a>의 <code>funasr-server</code> 경로가 더 짧습니다.</p>
+</section>
+<section id="tuning"><h2>성능과 운영 parameter</h2>
+<table><tr><th>Parameter</th><th>Default</th><th>설명</th></tr><tr><td><code>tensor_parallel_size</code></td><td><code>1</code></td><td>vLLM tensor parallel에 사용할 GPU 수.</td></tr><tr><td><code>gpu_memory_utilization</code></td><td><code>0.8</code></td><td>vLLM KV cache에 예약할 GPU memory 비율.</td></tr><tr><td><code>max_model_len</code></td><td><code>4096</code></td><td>vLLM maximum sequence length.</td></tr><tr><td><code>repetition_penalty</code></td><td><code>1.0</code></td><td>반복 transcript를 줄이기 위한 generation penalty.</td></tr></table>
+<p>성능을 확정하기 전에는 <a href="benchmark.html">Benchmark</a> 페이지의 RTF/throughput 기록 방식처럼 model, device, CUDA/PyTorch/vLLM version, batch size, audio duration, warmup 제외 여부를 함께 남기세요.</p>
+</section>
+<section id="faq"><h2>FAQ</h2>
+<dl><dt>첫 실행이 느린 이유는?</dt><dd>vLLM이 KV cache와 CUDA graph를 초기화하고, FunASR가 <code>model.pt</code>에서 LLM weights를 추출할 수 있습니다. 첫 실행은 60-90초 정도 걸릴 수 있습니다.</dd><dt>Paraformer도 vLLM을 쓰나요?</dt><dd>아니요. Paraformer는 non-autoregressive model이라 vLLM KV-cache decoding의 이점을 받지 않습니다.</dd><dt>어떤 경로부터 시험해야 하나요?</dt><dd>모델 선택은 <a href="model-selection.html">모델 선택 가이드</a>, deployment target은 <a href="deployment-matrix.html">배포 선택표</a>, API/Agent 연동은 <a href="agent.html">Agent 연동</a>을 기준으로 고릅니다.</dd></dl>
+</section>
+</div></div>
+<footer><p>FunASR &middot; Tongyi Lab, Alibaba Group</p><p><a href="index.html">홈</a> &middot; <a href="model-selection.html">모델 선택</a> &middot; <a href="deployment-matrix.html">배포</a> &middot; <a href="agent.html">Agent</a> &middot; <a href="benchmark.html">Benchmark</a> &middot; <a href="vllm.html">vLLM</a> &middot; <a href="https://github.com/modelscope/FunASR">GitHub</a></p></footer>
+</body></html>
