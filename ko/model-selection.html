@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="description" content="FunASR 모델 선택 가이드: SenseVoice, Paraformer, Fun-ASR-Nano, streaming runtime, OpenAI API alias, 배포 경로를 비교합니다.">
+<meta property="og:title" content="FunASR 모델 선택 가이드">
+<meta property="og:description" content="배포 전에 FunASR 모델, API alias, runtime, benchmark 경로를 고르는 실용 가이드입니다.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://modelscope.github.io/FunASR/ko/model-selection.html">
+<link rel="canonical" href="https://modelscope.github.io/FunASR/ko/model-selection.html">
+<meta property="og:site_name" content="FunASR">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="FunASR 모델 선택 가이드">
+<meta name="twitter:description" content="FunASR 모델 선택 가이드: SenseVoice, Paraformer, Fun-ASR-Nano, streaming runtime, OpenAI API alias, 배포 경로.">
+<title>FunASR 모델 선택 가이드</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../style.css">
+</head><body>
+<nav class="nav"><div class="container">
+<a href="index.html" class="nav-logo">FunASR</a>
+<div class="nav-links"><a href="index.html">홈</a><a href="https://github.com/modelscope/FunASR/blob/main/README_ko.md">README</a><a href="model-selection.html">모델 선택</a><a href="deployment-matrix.html">배포</a><a href="../api.html">API</a><a href="../vllm.html">vLLM</a><a href="../agent.html">Agent</a><a href="../benchmark.html">Benchmark</a></div>
+<div class="lang-dropdown"><button class="lang-btn">한국어</button><div class="lang-menu"><a href="../model-selection.html">English</a><a href="../zh/model-selection.html">中文</a><a href="../ja/model-selection.html">日本語</a><a href="model-selection.html" class="current">한국어</a></div></div>
+<a href="https://github.com/modelscope/FunASR" class="nav-github">GitHub</a>
+</div></nav>
+<div class="content"><div class="container narrow">
+<h1>모델 선택 가이드</h1>
+<p>첫 모델을 고르고, Whisper 또는 cloud ASR와 비교하고, OpenAI 호환 API에서 노출할 model alias를 결정합니다.</p>
+<div class="toc-grid"><a href="#default">기본 선택</a><a href="#decision">결정표</a><a href="#aliases">API alias</a><a href="#runtime">runtime</a><a href="#benchmark">benchmark</a></div>
+<section id="default"><h2>망설이면 SenseVoice-Small</h2>
+<p>아직 확실하지 않다면 <strong>SenseVoice-Small</strong>부터 시작합니다. 데모, private API, 다국어 transcription, 화자 정보가 필요한 회의록, agent voice input에 좋은 기본값입니다.</p>
+<pre><code>from funasr import AutoModel
+
+model = AutoModel(
+    model="iic/SenseVoiceSmall",
+    vad_model="fsmn-vad",
+    spk_model="cam++",
+    device="cuda",  # portable smoke test에서는 "cpu"
+)
+result = model.generate(input="meeting.wav")</code></pre>
+</section>
+<section id="decision"><h2>결정표</h2>
+<table><tr><th>목적</th><th>먼저 시도</th><th>이유</th><th>다음 문서</th></tr>
+<tr><td>빠른 다국어 private transcription</td><td>SenseVoice-Small</td><td>ASR, emotion tag, audio event tag, CPU viability의 균형이 좋습니다.</td><td><a href="https://github.com/modelscope/FunASR/blob/main/README_ko.md#빠른-시작">README quickstart</a></td></tr>
+<tr><td>중국어 production ASR</td><td>Paraformer-Large</td><td>VAD와 punctuation을 조합하기 쉬운 성숙한 중국어 ASR 경로입니다.</td><td><a href="https://github.com/modelscope/FunASR/blob/main/README_ko.md#빠른-시작">README quickstart</a></td></tr>
+<tr><td>API example에서 영어 route 확인</td><td><code>paraformer-en</code></td><td>OpenAI 스타일 client에서 가벼운 영어 route를 확인하기 좋습니다.</td><td><a href="../agent.html#server">OpenAI API</a></td></tr>
+<tr><td>LLM-based ASR 또는 31개 언어 실험</td><td>Fun-ASR-Nano</td><td>LLM-based path입니다. decoder throughput이 중요하면 vLLM을 함께 씁니다.</td><td><a href="../vllm.html">vLLM guide</a></td></tr>
+<tr><td>실시간 자막 또는 call-center stream</td><td>Runtime WebSocket service</td><td>long-lived streaming session과 partial result에 맞습니다.</td><td><a href="https://github.com/modelscope/FunASR/tree/main/runtime">Runtime docs</a></td></tr>
+<tr><td>Whisper/cloud ASR에서 이전</td><td>먼저 SenseVoice-Small</td><td>모델별 tuning 전에 강한 baseline을 만들 수 있습니다.</td><td><a href="https://github.com/modelscope/FunASR/blob/main/docs/migration_from_whisper.md">Migration guide</a></td></tr></table>
+</section>
+<section id="aliases"><h2>OpenAI 호환 API alias</h2>
+<p><code>examples/openai_api</code> server는 짧은 alias를 제공합니다. application team은 model repository ID를 몰라도 연결할 수 있습니다.</p>
+<table><tr><th>Alias</th><th>실제 경로</th><th>사용 상황</th></tr>
+<tr><td><code>sensevoice</code></td><td><code>iic/SenseVoiceSmall</code></td><td>다국어 ASR, event tag, CPU/GPU behavior가 균형 잡힌 default private speech API.</td></tr>
+<tr><td><code>paraformer</code></td><td><code>paraformer-zh</code></td><td>중국어 production route.</td></tr>
+<tr><td><code>paraformer-en</code></td><td><code>paraformer-en</code></td><td>OpenAI 스타일 client의 가벼운 영어 route.</td></tr>
+<tr><td><code>fun-asr-nano</code></td><td><code>FunAudioLLM/Fun-ASR-Nano-2512</code></td><td>LLM-based ASR, 31개 언어 coverage, vLLM acceleration 평가.</td></tr></table>
+<pre><code>curl http://localhost:8000/v1/models
+python examples/openai_api/smoke_test.py --base-url http://localhost:8000 --model sensevoice</code></pre>
+</section>
+<section id="runtime"><h2>workload별 runtime</h2>
+<table><tr><th>workload</th><th>runtime path</th><th>메모</th></tr>
+<tr><td>Notebook 또는 일회성 평가</td><td>Python <code>AutoModel</code></td><td>install, model download, output shape를 확인하는 가장 짧은 경로입니다.</td></tr>
+<tr><td>사내 HTTP service</td><td>OpenAI 호환 API</td><td>OpenAI-style clients, Dify, n8n, LangChain, AutoGen, HTTP node를 재사용합니다.</td></tr>
+<tr><td>재현 가능한 local container demo</td><td>Docker Compose API</td><td>CPU-first smoke test입니다. CUDA 전에 image를 조정합니다.</td></tr>
+<tr><td>cluster 내부 private service</td><td>Kubernetes API template</td><td>private ClusterIP, persistent model cache, health probes, port-forward smoke test.</td></tr>
+<tr><td>live audio</td><td>Runtime WebSocket service</td><td>실제 오디오로 chunking, VAD, endpointing, reconnect, client backpressure를 검증합니다.</td></tr>
+<tr><td>LLM-based ASR throughput</td><td>Fun-ASR-Nano의 vLLM path</td><td>vLLM은 autoregressive decoding을 가속하며, non-autoregressive Paraformer에는 쓰지 않습니다.</td></tr></table>
+<p>runtime과 deployment target을 고를 때는 <a href="deployment-matrix.html">배포 선택표</a>도 확인하세요.</p>
+</section>
+<section id="benchmark"><h2>결정 전 benchmark</h2>
+<ul><li>짧은 clip, 긴 회의, silence, noise, overlapping speakers, domain vocabulary, target languages를 포함한 대표 오디오 20-50개를 준비합니다.</li><li>model name, model revision, FunASR version, device, CPU/GPU type, CUDA/PyTorch version, runtime path, batch size, warmup/model download time 제외 여부를 기록합니다.</li><li>transcript가 읽기 좋은지뿐 아니라 WER/CER 또는 human review로 품질을 확인합니다.</li><li>latency, throughput, memory, failures, upload size limit을 함께 추적합니다.</li><li>public smoke sample과 realistic private sample을 최소 1개씩 남깁니다.</li></ul>
+<p>migration work에서는 <a href="https://github.com/modelscope/FunASR/tree/main/examples/migration">migration benchmark example</a>과 <a href="https://github.com/modelscope/FunASR/blob/main/docs/migration_from_whisper.md">migration guide</a>를 사용합니다.</p>
+</section>
+</div></div>
+<footer><p>FunASR &middot; Tongyi Lab, Alibaba Group</p><p><a href="index.html">홈</a> &middot; <a href="model-selection.html">모델 선택</a> &middot; <a href="deployment-matrix.html">배포</a> &middot; <a href="../agent.html">Agent</a> &middot; <a href="../benchmark.html">Benchmark</a> &middot; <a href="../vllm.html">vLLM</a> &middot; <a href="https://github.com/modelscope/FunASR">GitHub</a></p></footer>
+</body></html>

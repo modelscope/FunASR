@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="description" content="FunASR モデル選択ガイド：SenseVoice、Paraformer、Fun-ASR-Nano、streaming runtime、OpenAI API alias、デプロイ経路を比較します。">
+<meta property="og:title" content="FunASR モデル選択ガイド">
+<meta property="og:description" content="デプロイ前に FunASR のモデル、API alias、runtime、benchmark 経路を選ぶための実用ガイド。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://modelscope.github.io/FunASR/ja/model-selection.html">
+<link rel="canonical" href="https://modelscope.github.io/FunASR/ja/model-selection.html">
+<meta property="og:site_name" content="FunASR">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="FunASR モデル選択ガイド">
+<meta name="twitter:description" content="FunASR モデル選択ガイド：SenseVoice、Paraformer、Fun-ASR-Nano、streaming runtime、OpenAI API alias、デプロイ経路。">
+<title>FunASR モデル選択ガイド</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../style.css">
+</head><body>
+<nav class="nav"><div class="container">
+<a href="index.html" class="nav-logo">FunASR</a>
+<div class="nav-links"><a href="index.html">ホーム</a><a href="tutorial.html">チュートリアル</a><a href="training.html">トレーニング</a><a href="model-registration.html">開発</a><a href="../api.html">API</a><a href="vllm.html">vLLM</a><a href="agent.html">Agent</a><a href="benchmark.html">Benchmark</a></div>
+<div class="lang-dropdown"><button class="lang-btn">日本語</button><div class="lang-menu"><a href="../model-selection.html">English</a><a href="../zh/model-selection.html">中文</a><a href="model-selection.html" class="current">日本語</a><a href="../ko/model-selection.html">한국어</a></div></div>
+<a href="https://github.com/modelscope/FunASR" class="nav-github">GitHub</a>
+</div></nav>
+<div class="content"><div class="container narrow">
+<h1>モデル選択ガイド</h1>
+<p>最初に使うモデルを選び、Whisper やクラウド ASR との比較を行い、OpenAI 互換 API で公開する model alias を決めます。</p>
+<div class="toc-grid"><a href="#default">最初の選択</a><a href="#decision">判断表</a><a href="#aliases">API alias</a><a href="#runtime">runtime</a><a href="#benchmark">benchmark</a></div>
+<section id="default"><h2>迷ったら SenseVoice-Small</h2>
+<p>まだ決めきれない場合は <strong>SenseVoice-Small</strong> から始めます。デモ、社内 API、多言語 transcription、話者情報付き会議録、agent voice input の強い初期値です。</p>
+<pre><code>from funasr import AutoModel
+
+model = AutoModel(
+    model="iic/SenseVoiceSmall",
+    vad_model="fsmn-vad",
+    spk_model="cam++",
+    device="cuda",  # portable smoke test では "cpu"
+)
+result = model.generate(input="meeting.wav")</code></pre>
+</section>
+<section id="decision"><h2>判断表</h2>
+<table><tr><th>目的</th><th>最初に試すもの</th><th>理由</th><th>次の文書</th></tr>
+<tr><td>高速な多言語 private transcription</td><td>SenseVoice-Small</td><td>ASR、emotion tag、audio event tag、CPU viability のバランスがよい。</td><td><a href="tutorial.html">チュートリアル</a></td></tr>
+<tr><td>中国語 production ASR</td><td>Paraformer-Large</td><td>VAD と punctuation を組み合わせやすい成熟した中国語 ASR 経路。</td><td><a href="tutorial.html">チュートリアル</a></td></tr>
+<tr><td>API example で英語 route を確認</td><td><code>paraformer-en</code></td><td>OpenAI 形式 client で軽量な英語 route を確認しやすい。</td><td><a href="agent.html#server">OpenAI API</a></td></tr>
+<tr><td>LLM-based ASR や 31 言語実験</td><td>Fun-ASR-Nano</td><td>LLM-based path。decoder throughput が重要なら vLLM を併用。</td><td><a href="vllm.html">vLLM guide</a></td></tr>
+<tr><td>ライブ字幕や call-center stream</td><td>Runtime WebSocket service</td><td>long-lived streaming session と partial result 向け。</td><td><a href="tutorial.html#streaming">Realtime examples</a></td></tr>
+<tr><td>Whisper/cloud ASR からの移行</td><td>まず SenseVoice-Small</td><td>個別 tuning の前に強い baseline を作れる。</td><td><a href="https://github.com/modelscope/FunASR/blob/main/docs/migration_from_whisper.md">Migration guide</a></td></tr></table>
+</section>
+<section id="aliases"><h2>OpenAI 互換 API alias</h2>
+<p><code>examples/openai_api</code> server は短い alias を提供します。application team は model repository ID を意識せずに接続できます。</p>
+<table><tr><th>Alias</th><th>実体</th><th>使う場面</th></tr>
+<tr><td><code>sensevoice</code></td><td><code>iic/SenseVoiceSmall</code></td><td>多言語 ASR、event tag、CPU/GPU behavior を含む default private speech API。</td></tr>
+<tr><td><code>paraformer</code></td><td><code>paraformer-zh</code></td><td>中国語 production route。</td></tr>
+<tr><td><code>paraformer-en</code></td><td><code>paraformer-en</code></td><td>OpenAI 形式 client の英語軽量 route。</td></tr>
+<tr><td><code>fun-asr-nano</code></td><td><code>FunAudioLLM/Fun-ASR-Nano-2512</code></td><td>LLM-based ASR、31 言語 coverage、vLLM acceleration の評価。</td></tr></table>
+<pre><code>curl http://localhost:8000/v1/models
+python examples/openai_api/smoke_test.py --base-url http://localhost:8000 --model sensevoice</code></pre>
+</section>
+<section id="runtime"><h2>workload 別 runtime</h2>
+<table><tr><th>workload</th><th>runtime path</th><th>メモ</th></tr>
+<tr><td>Notebook または一回限りの評価</td><td>Python <code>AutoModel</code></td><td>install、model download、output shape を確認する最短経路。</td></tr>
+<tr><td>社内 HTTP service</td><td>OpenAI 互換 API</td><td>OpenAI-style clients、Dify、n8n、LangChain、AutoGen、HTTP node を再利用。</td></tr>
+<tr><td>再現可能な local container demo</td><td>Docker Compose API</td><td>CPU-first smoke test。CUDA の前に image を調整。</td></tr>
+<tr><td>cluster 内 private service</td><td>Kubernetes API template</td><td>private ClusterIP、persistent model cache、health probes、port-forward smoke test。</td></tr>
+<tr><td>live audio</td><td>Runtime WebSocket service</td><td>実音声で chunking、VAD、endpointing、reconnect、client backpressure を検証。</td></tr>
+<tr><td>LLM-based ASR throughput</td><td>Fun-ASR-Nano の vLLM path</td><td>vLLM は autoregressive decoding を高速化し、non-autoregressive Paraformer には使いません。</td></tr></table>
+<p>runtime と deployment target を選ぶ場合は <a href="deployment-matrix.html">デプロイ選択表</a> も確認してください。</p>
+</section>
+<section id="benchmark"><h2>決める前に benchmark</h2>
+<ul><li>短い clip、長い会議、silence、noise、overlapping speakers、domain vocabulary、target languages を含む 20-50 件の代表音声を用意します。</li><li>model name、model revision、FunASR version、device、CPU/GPU type、CUDA/PyTorch version、runtime path、batch size、warmup/model download time を除外したかを記録します。</li><li>transcript の読みやすさだけではなく、通常の WER/CER または human review で品質を見ます。</li><li>latency、throughput、memory、failures、upload size limit を一緒に追跡します。</li><li>public smoke sample と realistic private sample を少なくとも 1 つずつ残します。</li></ul>
+<p>migration work では <a href="https://github.com/modelscope/FunASR/tree/main/examples/migration">migration benchmark example</a> と <a href="https://github.com/modelscope/FunASR/blob/main/docs/migration_from_whisper.md">migration guide</a> を使います。</p>
+</section>
+</div></div>
+<footer><p>FunASR &middot; Tongyi Lab, Alibaba Group</p><p><a href="index.html">ホーム</a> &middot; <a href="model-selection.html">モデル選択</a> &middot; <a href="deployment-matrix.html">デプロイ</a> &middot; <a href="agent.html">Agent</a> &middot; <a href="benchmark.html">Benchmark</a> &middot; <a href="vllm.html">vLLM</a> &middot; <a href="https://github.com/modelscope/FunASR">GitHub</a></p></footer>
+</body></html>
