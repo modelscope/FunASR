@@ -61,7 +61,7 @@
 <h3>三种入口</h3>
 <table>
 <tr><th>模式</th><th>入口</th><th>适用场景</th></tr>
-<tr><td>离线批量推理</td><td><code>AutoModelVLLM</code> 或 <code>FunASRNanoVLLM</code></td><td>大规模文件转写、吞吐优先的任务。</td></tr>
+<tr><td>离线 SDK 推理</td><td><code>AutoModelVLLM</code> 或 <code>FunASRNanoVLLM</code></td><td>大规模文件转写、吞吐优先的任务。</td></tr>
 <tr><td>流式 SDK 推理</td><td><code>FunASRNanoStreamingVLLM</code></td><td>Python 应用中需要 chunk 级增量文本。</td></tr>
 <tr><td>WebSocket 实时服务</td><td><code>serve_realtime_ws.py</code></td><td>生产实时客户端，支持 VAD 分句和说话人标签。</td></tr>
 </table>
@@ -86,7 +86,7 @@ pip install -e .</code></pre>
 </section>
 
 <section id="offline">
-<h2>离线批量推理</h2>
+<h2>离线 SDK 推理</h2>
 <h3>推荐通用接口</h3>
 <pre><code>from funasr.auto.auto_model_vllm import AutoModelVLLM
 
