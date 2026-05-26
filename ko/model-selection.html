@@ -16,7 +16,7 @@
 </head><body>
 <nav class="nav"><div class="container">
 <a href="index.html" class="nav-logo">FunASR</a>
-<div class="nav-links"><a href="index.html">홈</a><a href="https://github.com/modelscope/FunASR/blob/main/README_ko.md">README</a><a href="model-selection.html">모델 선택</a><a href="deployment-matrix.html">배포</a><a href="../api.html">API</a><a href="../vllm.html">vLLM</a><a href="../agent.html">Agent</a><a href="../benchmark.html">Benchmark</a></div>
+<div class="nav-links"><a href="index.html">홈</a><a href="https://github.com/modelscope/FunASR/blob/main/README_ko.md">README</a><a href="model-selection.html">모델 선택</a><a href="deployment-matrix.html">배포</a><a href="../api.html">API</a><a href="vllm.html">vLLM</a><a href="agent.html">Agent</a><a href="benchmark.html">Benchmark</a></div>
 <div class="lang-dropdown"><button class="lang-btn">한국어</button><div class="lang-menu"><a href="../model-selection.html">English</a><a href="../zh/model-selection.html">中文</a><a href="../ja/model-selection.html">日本語</a><a href="model-selection.html" class="current">한국어</a></div></div>
 <a href="https://github.com/modelscope/FunASR" class="nav-github">GitHub</a>
 </div></nav>
@@ -41,7 +41,7 @@ result = model.generate(input="meeting.wav")</code></pre>
 <tr><td>빠른 다국어 private transcription</td><td>SenseVoice-Small</td><td>ASR, emotion tag, audio event tag, CPU viability의 균형이 좋습니다.</td><td><a href="https://github.com/modelscope/FunASR/blob/main/README_ko.md#빠른-시작">README quickstart</a></td></tr>
 <tr><td>중국어 production ASR</td><td>Paraformer-Large</td><td>VAD와 punctuation을 조합하기 쉬운 성숙한 중국어 ASR 경로입니다.</td><td><a href="https://github.com/modelscope/FunASR/blob/main/README_ko.md#빠른-시작">README quickstart</a></td></tr>
 <tr><td>API example에서 영어 route 확인</td><td><code>paraformer-en</code></td><td>OpenAI 스타일 client에서 가벼운 영어 route를 확인하기 좋습니다.</td><td><a href="../agent.html#server">OpenAI API</a></td></tr>
-<tr><td>LLM-based ASR 또는 31개 언어 실험</td><td>Fun-ASR-Nano</td><td>LLM-based path입니다. decoder throughput이 중요하면 vLLM을 함께 씁니다.</td><td><a href="../vllm.html">vLLM guide</a></td></tr>
+<tr><td>LLM-based ASR 또는 31개 언어 실험</td><td>Fun-ASR-Nano</td><td>LLM-based path입니다. decoder throughput이 중요하면 vLLM을 함께 씁니다.</td><td><a href="vllm.html">vLLM guide</a></td></tr>
 <tr><td>실시간 자막 또는 call-center stream</td><td>Runtime WebSocket service</td><td>long-lived streaming session과 partial result에 맞습니다.</td><td><a href="https://github.com/modelscope/FunASR/tree/main/runtime">Runtime docs</a></td></tr>
 <tr><td>Whisper/cloud ASR에서 이전</td><td>먼저 SenseVoice-Small</td><td>모델별 tuning 전에 강한 baseline을 만들 수 있습니다.</td><td><a href="https://github.com/modelscope/FunASR/blob/main/docs/migration_from_whisper.md">Migration guide</a></td></tr></table>
 </section>
@@ -70,5 +70,5 @@ python examples/openai_api/smoke_test.py --base-url http://localhost:8000 --mode
 <p>migration work에서는 <a href="https://github.com/modelscope/FunASR/tree/main/examples/migration">migration benchmark example</a>과 <a href="https://github.com/modelscope/FunASR/blob/main/docs/migration_from_whisper.md">migration guide</a>를 사용합니다.</p>
 </section>
 </div></div>
-<footer><p>FunASR &middot; Tongyi Lab, Alibaba Group</p><p><a href="index.html">홈</a> &middot; <a href="model-selection.html">모델 선택</a> &middot; <a href="deployment-matrix.html">배포</a> &middot; <a href="../agent.html">Agent</a> &middot; <a href="../benchmark.html">Benchmark</a> &middot; <a href="../vllm.html">vLLM</a> &middot; <a href="https://github.com/modelscope/FunASR">GitHub</a></p></footer>
+<footer><p>FunASR &middot; Tongyi Lab, Alibaba Group</p><p><a href="index.html">홈</a> &middot; <a href="model-selection.html">모델 선택</a> &middot; <a href="deployment-matrix.html">배포</a> &middot; <a href="agent.html">Agent</a> &middot; <a href="benchmark.html">Benchmark</a> &middot; <a href="vllm.html">vLLM</a> &middot; <a href="https://github.com/modelscope/FunASR">GitHub</a></p></footer>
 </body></html>
