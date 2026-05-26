@@ -7,8 +7,13 @@ import re
 import logging
 from typing import Optional
 
-from fastapi import FastAPI, UploadFile, File, Form, HTTPException
-from fastapi.responses import JSONResponse
+try:
+    from fastapi import FastAPI, UploadFile, File, Form, HTTPException
+    from fastapi.responses import JSONResponse
+except ImportError:
+    raise ImportError(
+        "funasr-server requires fastapi. Install with: pip install fastapi uvicorn python-multipart"
+    )
 
 logger = logging.getLogger("funasr.server")
 

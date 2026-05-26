@@ -8,7 +8,11 @@ from typing import List
 from typing import Optional
 
 
-from funasr.utils.cli_utils import get_commandline_args
+try:
+    from funasr.utils.cli_utils import get_commandline_args
+except ImportError:
+    def get_commandline_args():
+        return {}
 from funasr.tokenizer.build_tokenizer import build_tokenizer
 from funasr.tokenizer.cleaner import TextCleaner
 from funasr.tokenizer.phoneme_tokenizer import g2p_classes

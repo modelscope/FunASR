@@ -3,7 +3,10 @@ from typing import Optional
 from typing import Tuple
 from typing import Union
 
-import humanfriendly
+try:
+    import humanfriendly
+except ImportError:
+    humanfriendly = None
 
 
 def str2bool(value: str) -> bool:
@@ -95,6 +98,8 @@ def humanfriendly_parse_size_or_none(value) -> Optional[float]:
         """
     if value.strip().lower() in ("none", "null", "nil"):
         return None
+    if humanfriendly is None:
+        raise ImportError("humanfriendly is required for parse_size. Install with: pip install humanfriendly")
     return humanfriendly.parse_size(value)
 
 

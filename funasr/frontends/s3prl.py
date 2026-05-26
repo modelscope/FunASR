@@ -6,7 +6,10 @@ from typing import Optional
 from typing import Tuple
 from typing import Union
 
-import humanfriendly
+try:
+    import humanfriendly
+except ImportError:
+    humanfriendly = None
 import torch
 import torch.nn as nn
 
@@ -50,7 +53,10 @@ class S3prlFrontend(nn.Module):
             """
         super().__init__()
         if isinstance(fs, str):
-            fs = humanfriendly.parse_size(fs)
+            if humanfriendly is not None:
+                fs = humanfriendly.parse_size(fs)
+            else:
+                fs = int(fs)
 
         if download_dir is not None:
             torch.hub.set_dir(download_dir)

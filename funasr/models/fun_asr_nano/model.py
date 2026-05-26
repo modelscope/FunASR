@@ -15,7 +15,11 @@ from funasr.register import tables
 from funasr.train_utils.device_funcs import force_gatherable, to_device
 from funasr.utils.datadir_writer import DatadirWriter
 from funasr.utils.load_utils import extract_fbank, load_audio_text_image_video
-from transformers import AutoConfig, AutoModelForCausalLM
+try:
+    from transformers import AutoConfig, AutoModelForCausalLM
+except ImportError:
+    AutoConfig = None
+    AutoModelForCausalLM = None
 
 from .ctc import CTC
 from .tools.utils import forced_align
