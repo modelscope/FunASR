@@ -35,6 +35,7 @@
 ## 1. Installation & Environment
 
 ```bash
+pip install torch torchaudio
 pip install funasr>=1.3.0
 pip install vllm>=0.12.0
 pip install safetensors tiktoken websockets regex fastapi uvicorn python-multipart
