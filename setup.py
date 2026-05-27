@@ -10,38 +10,38 @@ from setuptools import setup
 
 requirements = {
     "install": [
+        # Core
+        "torchaudio",
         "scipy>=1.4.1",
         "librosa",
-        "jamo",  # For kss
-        "PyYAML>=5.1.2",
         "soundfile>=0.12.1",
-        "kaldiio>=2.17.0",
-        "torch_complex",
-        # "nltk>=3.4.5",
-        "sentencepiece",  # train
-        "jieba",
-        # "rotary_embedding_torch",
-        # "ffmpeg-python",
-        # "pypinyin>=0.44.0",
-        # "espnet_tts_frontend",
-        # ENH
-        "pytorch_wpe",
-        "editdistance>=0.5.2",
-        # "g2p",
-        # "nara_wpe",
-        # PAI
-        "oss2",
-        # "edit-distance",
-        # "textgrid",
-        # "protobuf",
+        "numpy",
+        "PyYAML>=5.1.2",
         "tqdm",
-        "umap_learn",
-        "jaconv",
-        "hydra-core>=1.3.2",
-        "tensorboardX",
-        # "rotary_embedding_torch",
         "requests",
+        # Model loading
+        "omegaconf>=2.0",
+        "hydra-core>=1.3.2",
         "modelscope",
+        "huggingface_hub",
+        "safetensors",
+        # ASR models
+        "transformers",
+        "tiktoken",
+        "sentencepiece",
+        "kaldiio>=2.17.0",
+        # Multilingual tokenizers
+        "jieba",
+        "jamo",
+        "jaconv",
+        # Speaker & evaluation
+        "umap_learn",
+        "editdistance>=0.5.2",
+        # Optional (training/enhancement)
+        "torch_complex",
+        "tensorboardX",
+        # PAI/Aliyun
+        "oss2",
     ],
     # train: The modules invoked when training only.
     "train": [
