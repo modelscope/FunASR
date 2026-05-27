@@ -33,6 +33,7 @@
 No local setup? Open the [Colab quickstart](./examples/colab/) to transcribe a public sample or upload your own audio in a browser.
 
 ```bash
+pip install torch torchaudio
 pip install funasr
 ```
 
@@ -115,6 +116,7 @@ Trying FunASR for the first time? Use the [Colab quickstart](./examples/colab/) 
 ## Installation
 
 ```bash
+pip install torch torchaudio
 pip install funasr
 ```
 
@@ -124,7 +126,7 @@ pip install funasr
 git clone https://github.com/modelscope/FunASR.git && cd FunASR
 pip install -e ./
 ```
-Requirements: Python ≥ 3.8, PyTorch ≥ 1.13, torchaudio
+Requirements: Python ≥ 3.8. Install [PyTorch + torchaudio](https://pytorch.org/get-started/locally/) first (matching your CUDA version), then `pip install funasr`.
 
 </details>
 
@@ -182,8 +184,9 @@ result = model.generate(input="audio.wav", granularity="utterance")
 
 ```bash
 # OpenAI-compatible API (recommended)
-pip install funasr fastapi uvicorn python-multipart
-funasr-server --model sensevoice --device cuda
+pip install torch torchaudio
+pip install funasr vllm fastapi uvicorn python-multipart
+funasr-server --device cuda
 # → POST /v1/audio/transcriptions at localhost:8000
 ```
 
