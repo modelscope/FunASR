@@ -86,6 +86,7 @@ def create_app(device: str = "cuda", preload_model: str = "auto") -> FastAPI:
             kwargs = {"input": tmp_path, "batch_size": 1}
             if language:
                 kwargs["language"] = language
+            kwargs["repetition_penalty"] = 1.3
             result = asr.generate(**kwargs)
             text = re.sub(r'<\|[^|]*\|>', '', result[0]["text"]).strip()
             if response_format == "verbose_json":
