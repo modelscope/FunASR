@@ -39,7 +39,7 @@ Then use with OpenAI SDK:
         import fastapi
     except ImportError:
         print("Error: funasr-server requires additional packages.")
-        print("Install with: pip install fastapi uvicorn python-multipart")
+        print("Install with: pip install vllm fastapi uvicorn python-multipart")
         sys.exit(1)
 
     # Import and configure the app
@@ -52,7 +52,7 @@ Then use with OpenAI SDK:
     app = create_app(device=args.device, preload_model=args.model)
 
     print(f"╔══════════════════════════════════════════════╗")
-    print(f"║  FunASR Server v1.3.2                        ║")
+    print(f"║  FunASR Server v1.3.6                        ║")
     print(f"║  Device: {args.device:<8}                          ║")
     print(f"║  Model:  {args.model:<12}                      ║")
     print(f"║  URL:    http://{args.host}:{args.port}/v1          ║")

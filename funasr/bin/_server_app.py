@@ -20,7 +20,7 @@ try:
     from fastapi.responses import JSONResponse
 except ImportError:
     raise ImportError(
-        "funasr-server requires fastapi. Install with: pip install fastapi uvicorn python-multipart"
+        "funasr-server requires additional packages. Install with: pip install vllm fastapi uvicorn python-multipart"
     )
 
 logger = logging.getLogger("funasr.server")
