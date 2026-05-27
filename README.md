@@ -116,7 +116,6 @@ Trying FunASR for the first time? Use the [Colab quickstart](./examples/colab/) 
 ## Installation
 
 ```bash
-pip install torch torchaudio
 pip install funasr
 ```
 
@@ -126,7 +125,7 @@ pip install funasr
 git clone https://github.com/modelscope/FunASR.git && cd FunASR
 pip install -e ./
 ```
-Requirements: Python ≥ 3.8. Install [PyTorch + torchaudio](https://pytorch.org/get-started/locally/) first (matching your CUDA version), then `pip install funasr`.
+Requirements: Python ≥ 3.8. Install PyTorch + torchaudio first ([pytorch.org](https://pytorch.org/get-started/locally/)), then `pip install funasr`.
 
 </details>
 
