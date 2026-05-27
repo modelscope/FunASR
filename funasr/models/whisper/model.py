@@ -65,9 +65,48 @@ class WhisperWarp(nn.Module):
 
     def forward(
         self,
+        speech: torch.Tensor = None,
+        speech_lengths: torch.Tensor = None,
+        text: torch.Tensor = None,
+        text_lengths: torch.Tensor = None,
+        **kwargs,
     ):
-        """Forward pass for training."""
-        pass
+        """Forward pass for training. Computes cross-entropy loss.
+
+        Args:
+            speech: (B, T, D) mel-spectrogram features
+            speech_lengths: (B,) lengths of each audio
+            text: (B, U) token IDs (with SOT/EOT tokens)
+            text_lengths: (B,) lengths of each text sequence
+        Returns:
+            dict with "loss" and optionally "stats"
+        """
+        if speech is None or text is None:
+            raise ValueError("forward() requires speech and text for training")
+
+        # Encoder
+        audio_features = self.model.encoder(speech)
+
+        # Decoder: shift text right for teacher forcing
+        # text format: [SOT, lang, task, ..., tokens, EOT]
+        decoder_input = text[:, :-1]
+        decoder_target = text[:, 1:]
+
+        # Decoder forward
+        logits = self.model.decoder(decoder_input, audio_features)
+
+        # Cross-entropy loss (ignore padding, token_id = -1 or pad)
+        loss = F.cross_entropy(
+            logits.reshape(-1, logits.size(-1)),
+            decoder_target.reshape(-1),
+            ignore_index=-100,
+        )
+
+        stats = {
+            "loss": loss.detach().item(),
+            "batch_size": speech.size(0),
+        }
+        return {"loss": loss, "stats": stats}
 
     def inference(
         self,
