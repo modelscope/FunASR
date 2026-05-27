@@ -318,6 +318,7 @@ class RealtimeASRSession:
                 hotwords=self.asr_kwargs.get("hotwords"),
                 language=self.asr_kwargs.get("language"),
                 max_new_tokens=200,
+                repetition_penalty=1.3,
             )
             text = results[0]["text"] if results else ""
             text = _clean_asr_text(text)
@@ -358,6 +359,7 @@ class RealtimeASRSession:
                 hotwords=self.asr_kwargs.get("hotwords"),
                 language=self.asr_kwargs.get("language"),
                 max_new_tokens=512,
+                repetition_penalty=1.3,
             )
             text = results[0]["text"] if results else ""
             text = _clean_asr_text(text)
