@@ -11,7 +11,6 @@ from setuptools import setup
 requirements = {
     "install": [
         # Core
-        "torchaudio",
         "scipy>=1.4.1",
         "librosa",
         "soundfile>=0.12.1",
