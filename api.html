@@ -16175,13 +16175,47 @@
             model = whisper.model.Whisper(dims=dims)
 
         self.model = model
-</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/whisper/model.py#L33" target="_blank" class="src-more">View full source on GitHub →</a></details><h3 class="mt">Methods</h3><div class="mblk"><code>.forward()</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/whisper/model.py#L66" target="_blank" class="gh-link">L66</a><div class="mdoc"><p>Forward pass for training.</p>
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/whisper/model.py#L33" target="_blank" class="src-more">View full source on GitHub →</a></details><h3 class="mt">Methods</h3><div class="mblk"><code>.forward(speech, speech_lengths, text, text_lengths, **kwargs)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/whisper/model.py#L66" target="_blank" class="gh-link">L66</a><div class="mdoc"><p>Forward pass for training. Computes cross-entropy loss.</p>
+<h4>Args:</h4>
+<ul>
+<li><code>speech</code> — (B, T, D) mel-spectrogram features</li>
+<li><code>speech_lengths</code> — (B,) lengths of each audio</li>
+<li><code>text</code> — (B, U) token IDs (with SOT/EOT tokens)</li>
+<li><code>text_lengths</code> — (B,) lengths of each text sequence</li>
+</ul>
+<h4>Returns:</h4>
+<p>dict with &quot;loss&quot; and optionally &quot;stats&quot;</p>
 </div><details class="src-block"><summary>📄 Source</summary><pre><code>    def forward(
         self,
+        speech: torch.Tensor = None,
+        speech_lengths: torch.Tensor = None,
+        text: torch.Tensor = None,
+        text_lengths: torch.Tensor = None,
+        **kwargs,
     ):
-        &quot;&quot;&quot;Forward pass for training.&quot;&quot;&quot;
-        pass
-</code></pre></details></div><div class="mblk"><code>.inference(data_in, data_lengths, key, tokenizer, frontend, **kwargs)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/whisper/model.py#L72" target="_blank" class="gh-link">L72</a><div class="mdoc"><p>Run inference on input data.</p>
+        &quot;&quot;&quot;Forward pass for training. Computes cross-entropy loss.
+
+        Args:
+            speech: (B, T, D) mel-spectrogram features
+            speech_lengths: (B,) lengths of each audio
+            text: (B, U) token IDs (with SOT/EOT tokens)
+            text_lengths: (B,) lengths of each text sequence
+        Returns:
+            dict with &quot;loss&quot; and optionally &quot;stats&quot;
+        &quot;&quot;&quot;
+        if speech is None or text is None:
+            raise ValueError(&quot;forward() requires speech and text for training&quot;)
+
+        # Encoder
+        audio_features = self.model.encoder(speech)
+
+        # Decoder: shift text right for teacher forcing
+        # text format: [SOT, lang, task, ..., tokens, EOT]
+        decoder_input = text[:, :-1]
+        decoder_target = text[:, 1:]
+
+        # Decoder forward
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/whisper/model.py#L66" target="_blank" class="src-more">View full source →</a></details></div><div class="mblk"><code>.inference(data_in, data_lengths, key, tokenizer, frontend, **kwargs)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/whisper/model.py#L111" target="_blank" class="gh-link">L111</a><div class="mdoc"><p>Run inference on input data.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>data_in</code> — Input data (audio samples, file paths, or text).</li>
@@ -16221,15 +16255,49 @@
             self.frontend = frontend
         else:
             frontend = frontend if frontend is not None else self.frontend
-</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/whisper/model.py#L72" target="_blank" class="src-more">View full source →</a></details></div></div>
-<div class="api-detail" id="e260"><span class="dtag badge-m">method</span><h2><code>WhisperWarp.forward()</code></h2><div class="dmod">funasr.models.whisper.WhisperWarp · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/whisper/model.py#L66" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Forward pass for training.</p>
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/whisper/model.py#L111" target="_blank" class="src-more">View full source →</a></details></div></div>
+<div class="api-detail" id="e260"><span class="dtag badge-m">method</span><h2><code>WhisperWarp.forward(speech, speech_lengths, text, text_lengths, **kwargs)</code></h2><div class="dmod">funasr.models.whisper.WhisperWarp · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/whisper/model.py#L66" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Forward pass for training. Computes cross-entropy loss.</p>
+<h4>Args:</h4>
+<ul>
+<li><code>speech</code> — (B, T, D) mel-spectrogram features</li>
+<li><code>speech_lengths</code> — (B,) lengths of each audio</li>
+<li><code>text</code> — (B, U) token IDs (with SOT/EOT tokens)</li>
+<li><code>text_lengths</code> — (B,) lengths of each text sequence</li>
+</ul>
+<h4>Returns:</h4>
+<p>dict with &quot;loss&quot; and optionally &quot;stats&quot;</p>
 </div><details class="src-block"><summary>📄 Source code</summary><pre><code>    def forward(
         self,
+        speech: torch.Tensor = None,
+        speech_lengths: torch.Tensor = None,
+        text: torch.Tensor = None,
+        text_lengths: torch.Tensor = None,
+        **kwargs,
     ):
-        &quot;&quot;&quot;Forward pass for training.&quot;&quot;&quot;
-        pass
-</code></pre></details></div>
-<div class="api-detail" id="e261"><span class="dtag badge-m">method</span><h2><code>WhisperWarp.inference(data_in, data_lengths, key, tokenizer, frontend, **kwargs)</code></h2><div class="dmod">funasr.models.whisper.WhisperWarp · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/whisper/model.py#L72" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Run inference on input data.</p>
+        &quot;&quot;&quot;Forward pass for training. Computes cross-entropy loss.
+
+        Args:
+            speech: (B, T, D) mel-spectrogram features
+            speech_lengths: (B,) lengths of each audio
+            text: (B, U) token IDs (with SOT/EOT tokens)
+            text_lengths: (B,) lengths of each text sequence
+        Returns:
+            dict with &quot;loss&quot; and optionally &quot;stats&quot;
+        &quot;&quot;&quot;
+        if speech is None or text is None:
+            raise ValueError(&quot;forward() requires speech and text for training&quot;)
+
+        # Encoder
+        audio_features = self.model.encoder(speech)
+
+        # Decoder: shift text right for teacher forcing
+        # text format: [SOT, lang, task, ..., tokens, EOT]
+        decoder_input = text[:, :-1]
+        decoder_target = text[:, 1:]
+
+        # Decoder forward
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/whisper/model.py#L66" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
+<div class="api-detail" id="e261"><span class="dtag badge-m">method</span><h2><code>WhisperWarp.inference(data_in, data_lengths, key, tokenizer, frontend, **kwargs)</code></h2><div class="dmod">funasr.models.whisper.WhisperWarp · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/whisper/model.py#L111" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Run inference on input data.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>data_in</code> — Input data (audio samples, file paths, or text).</li>
@@ -16269,7 +16337,7 @@
             self.frontend = frontend
         else:
             frontend = frontend if frontend is not None else self.frontend
-</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/whisper/model.py#L72" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/whisper/model.py#L111" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
 <div class="api-detail" id="e262"><span class="dtag badge-c">class</span><h2>OpenAIWhisperModel</h2><div class="dmod">funasr.models.whisper_lid · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/whisper_lid/model.py#L22" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><ul>
 <li><code>Whisper</code> — LID: Language Identification using OpenAI Whisper encoder.</li>
 </ul>
@@ -22222,37 +22290,37 @@
     else:
         print(f&quot;You are using the latest version of funasr-{current_version}&quot;)
 </code></pre></details></div>
-<div class="api-detail" id="e436"><span class="dtag badge-f">function</span><h2><code>create_app(device, preload_model)</code></h2><div class="dmod">funasr.bin._server_app · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/_server_app.py#L45" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source code</summary><pre><code>def create_app(device: str = &quot;cuda&quot;, preload_model: str = &quot;auto&quot;) -&gt; FastAPI:
+<div class="api-detail" id="e436"><span class="dtag badge-f">function</span><h2><code>create_app(device, preload_model)</code></h2><div class="dmod">funasr.bin._server_app · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/_server_app.py#L29" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source code</summary><pre><code>def create_app(device: str = &quot;cuda&quot;, preload_model: str = &quot;auto&quot;) -&gt; FastAPI:
     if preload_model == &quot;auto&quot;:
         preload_model = &quot;fun-asr-nano&quot; if device.startswith(&quot;cuda&quot;) else &quot;sensevoice&quot;
-    app = FastAPI(title=&quot;FunASR Server&quot;, version=&quot;1.3.2&quot;)
-    app.state.models = {}
+
+    app = FastAPI(title=&quot;FunASR Server&quot;, version=&quot;1.3.6&quot;)
     app.state.device = device
+    app.state.engine = None
+    app.state.vad_model = None
+    app.state.fallback_models = {}
 
-    def _load_model(name: str):
-        if name in app.state.models:
-            return app.state.models[name]
-        if name not in MODEL_CONFIGS:
-            raise ValueError(f&quot;Unknown model: {name}. Available: {list(MODEL_CONFIGS.keys())}&quot;)
-        from funasr import AutoModel
-        cfg = MODEL_CONFIGS[name].copy()
-        cfg[&quot;device&quot;] = app.state.device
-        cfg[&quot;disable_update&quot;] = True
-        logger.info(f&quot;Loading &#x27;{name}&#x27; on {device}...&quot;)
-        t0 = time.time()
-        model = AutoModel(**cfg)
-        logger.info(f&quot;&#x27;{name}&#x27; ready in {time.time()-t0:.1f}s&quot;)
-        app.state.models[name] = model
-        return model
+    # Non-LLM model configs (use AutoModel, no vLLM)
+    FALLBACK_CONFIGS = {
+        &quot;sensevoice&quot;: {
+            &quot;model&quot;: &quot;iic/SenseVoiceSmall&quot;,
+            &quot;vad_model&quot;: &quot;fsmn-vad&quot;,
+            &quot;vad_kwargs&quot;: {&quot;max_single_segment_time&quot;: 30000},
+        },
+        &quot;paraformer&quot;: {
+            &quot;model&quot;: &quot;paraformer-zh&quot;,
+            &quot;vad_model&quot;: &quot;fsmn-vad&quot;,
+            &quot;punc_model&quot;: &quot;ct-punc&quot;,
+        },
+    }
 
-    # Pre-load
-    _load_model(preload_model)
-
-    @app.post(&quot;/v1/audio/transcriptions&quot;)
-    async def transcribe(
-        file: UploadFile = File(...),
-        model: str = Form(default=&quot;sensevoice&quot;),
-</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/_server_app.py#L45" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
+    def _load_vllm_engine():
+        &quot;&quot;&quot;Load Fun-ASR-Nano vLLM engine. Falls back to AutoModel if vLLM unavailable.&quot;&quot;&quot;
+        if app.state.engine is not None:
+            return
+        try:
+            from funasr.models.fun_asr_nano.inference_vllm import FunASRNanoVLLM
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/_server_app.py#L29" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
 <div class="api-detail" id="e437"><span class="dtag badge-f">function</span><h2><code>main_hydra(kwargs)</code></h2><div class="dmod">funasr.bin.compute_audio_cmvn · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/compute_audio_cmvn.py#L15" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Main hydra.</p>
 <h4>Args:</h4>
 <ul>
@@ -22410,7 +22478,7 @@ Then use with OpenAI SDK:
         import fastapi
     except ImportError:
         print(&quot;Error: funasr-server requires additional packages.&quot;)
-        print(&quot;Install with: pip install fastapi uvicorn python-multipart&quot;)
+        print(&quot;Install with: pip install vllm fastapi uvicorn python-multipart&quot;)
         sys.exit(1)
 </code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/server.py#L14" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
 <div class="api-detail" id="e442"><span class="dtag badge-f">function</span><h2><code>field2slice(field)</code></h2><div class="dmod">funasr.bin.tokenize_text · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/tokenize_text.py#L23" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Convert field string to slice</p>
