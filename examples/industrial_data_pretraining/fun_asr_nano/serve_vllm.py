@@ -107,7 +107,7 @@ def process_audio(audio_data, sr=16000, language=None, hotwords=None,
         return {"text": "", "segments": [], "duration": len(audio_data) / sr}
 
     # vLLM batch ASR
-    gen_kwargs = {"max_new_tokens": 500}
+    gen_kwargs = {"max_new_tokens": 500, "repetition_penalty": 1.3}
     if language:
         gen_kwargs["language"] = language
     if hotwords:
