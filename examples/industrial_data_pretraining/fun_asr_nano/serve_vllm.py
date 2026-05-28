@@ -32,6 +32,20 @@ warnings.filterwarnings('ignore')
 logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)s] %(message)s')
 logger = logging.getLogger(__name__)
 
+def truncate_repetition(text, min_repeat_len=3, max_repeats=3):
+    """Detect and truncate repetitive patterns in ASR output."""
+    if not text or len(text) < 20:
+        return text
+    n = len(text)
+    for length in range(min_repeat_len, min(n // max_repeats, 30)):
+        for start in range(n - length * max_repeats):
+            chunk = text[start:start + length]
+            if text[start:start + length * max_repeats] == chunk * max_repeats:
+                return text[:start + length]
+    return text
+
+
+
 try:
     from fastapi import FastAPI, File, UploadFile, Form, WebSocket, WebSocketDisconnect
     from fastapi.responses import JSONResponse
@@ -107,7 +121,7 @@ def process_audio(audio_data, sr=16000, language=None, hotwords=None,
         return {"text": "", "segments": [], "duration": len(audio_data) / sr}
 
     # vLLM batch ASR
-    gen_kwargs = {"max_new_tokens": 500, "repetition_penalty": 1.3}
+    gen_kwargs = {"max_new_tokens": 500}
     if language:
         gen_kwargs["language"] = language
     if hotwords:
@@ -120,6 +134,7 @@ def process_audio(audio_data, sr=16000, language=None, hotwords=None,
     full_text_parts = []
 
     for i, (r, (start_ms, end_ms)) in enumerate(zip(results, seg_times)):
+        r["text"] = truncate_repetition(r["text"])
         seg_info = {
             "text": r["text"],
             "start": start_ms / 1000,
