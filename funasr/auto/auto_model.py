@@ -819,6 +819,9 @@ class AutoModel:
                 )
                 # del result['spk_embedding']
                 sv_output = postprocess(all_segments, None, labels, spk_embedding.cpu())
+                if self.spk_mode == "punc_segment" and "timestamp" not in result and "timestamps" not in result:
+                    logging.warning("No timestamps in ASR result (e.g. SenseVoice), falling back to vad_segment mode for speaker diarization.")
+                    self.spk_mode = "vad_segment"
                 if self.spk_mode == "vad_segment":  # recover sentence_list
                     sentence_list = []
                     for rest, vadsegment in zip(restored_data, vadsegments):

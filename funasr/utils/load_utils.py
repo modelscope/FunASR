@@ -113,10 +113,17 @@ def load_audio_text_image_video(
                 if kwargs.get("reduce_channels", True):
                     data_or_path_or_list = data_or_path_or_list.mean(0)
             except:
-                data_or_path_or_list = _load_audio_ffmpeg(data_or_path_or_list, sr=fs)
-                data_or_path_or_list = torch.from_numpy(
-                    data_or_path_or_list
-                ).squeeze()  # [n_samples,]
+                try:
+                    import soundfile as sf
+                    data_np, audio_fs = sf.read(data_or_path_or_list, dtype="float32")
+                    data_or_path_or_list = torch.from_numpy(data_np).squeeze()
+                    if data_or_path_or_list.ndim > 1 and kwargs.get("reduce_channels", True):
+                        data_or_path_or_list = data_or_path_or_list.mean(-1)
+                except:
+                    data_or_path_or_list = _load_audio_ffmpeg(data_or_path_or_list, sr=fs)
+                    data_or_path_or_list = torch.from_numpy(
+                        data_or_path_or_list
+                    ).squeeze()  # [n_samples,]
         elif data_type == "text" and tokenizer is not None:
             with open(data_or_path_or_list, "r") as f:
                 data_or_path_or_list = tokenizer.encode(f.read().strip())
