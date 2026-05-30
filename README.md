@@ -53,6 +53,26 @@ result = model.generate(input="meeting.wav")
 
 That's it. **One model, one call** — VAD segmentation, speech recognition, punctuation, speaker diarization all happen automatically.
 
+### LLM-powered ASR: Fun-ASR-Nano
+
+For highest accuracy across 31 languages (including Chinese dialects), use [Fun-ASR-Nano](https://github.com/FunAudioLLM/Fun-ASR) — an LLM-based ASR combining SenseVoice encoder with Qwen3-0.6B decoder:
+
+```python
+from funasr import AutoModel
+
+model = AutoModel(model="FunAudioLLM/Fun-ASR-Nano-2512", vad_model="fsmn-vad", device="cuda")
+result = model.generate(input="meeting.wav")
+```
+
+With vLLM acceleration (16x faster, batch processing):
+
+```python
+from funasr.auto.auto_model_vllm import AutoModelVLLM
+
+model = AutoModelVLLM(model="FunAudioLLM/Fun-ASR-Nano-2512", tensor_parallel_size=1)
+results = model.generate(["audio1.wav", "audio2.wav"], language="auto")
+```
+
 > **Deploy as API server:** `funasr-server --device cuda` → OpenAI-compatible endpoint at localhost:8000
 >
 > **Use with AI agents:** [MCP Server](examples/mcp_server/) for Claude/Cursor · [OpenAI API](examples/openai_api/) for LangChain/Dify/AutoGen
