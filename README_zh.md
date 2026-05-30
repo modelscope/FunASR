@@ -52,6 +52,26 @@ result = model.generate(input="meeting.wav")
 
 一个模型、一次调用 — VAD 分段、语音识别、标点恢复、说话人分离全部自动完成。
 
+### LLM 语音识别：Fun-ASR-Nano
+
+追求更高精度、支持 31 种语言（含中文方言），使用 [Fun-ASR-Nano](https://github.com/FunAudioLLM/Fun-ASR) — SenseVoice 编码器 + Qwen3-0.6B 解码器的 LLM-based ASR：
+
+```python
+from funasr import AutoModel
+
+model = AutoModel(model="FunAudioLLM/Fun-ASR-Nano-2512", vad_model="fsmn-vad", device="cuda")
+result = model.generate(input="meeting.wav")
+```
+
+使用 vLLM 加速（批量处理快 16 倍）：
+
+```python
+from funasr.auto.auto_model_vllm import AutoModelVLLM
+
+model = AutoModelVLLM(model="FunAudioLLM/Fun-ASR-Nano-2512", tensor_parallel_size=1)
+results = model.generate(["audio1.wav", "audio2.wav"], language="auto")
+```
+
 > **部署为 API 服务：** `funasr-server --device cuda` → 本地 OpenAI 兼容接口 localhost:8000
 >
 > **接入 AI Agent：** [MCP 服务](examples/mcp_server/) 支持 Claude/Cursor · [OpenAI API](examples/openai_api/README_zh.md) 支持 LangChain/Dify/AutoGen
