@@ -375,6 +375,9 @@ class FsmnVADStreaming(nn.Module):
         self.vad_opts = VADXOptions(**kwargs)
 
         encoder_class = tables.encoder_classes.get(encoder)
+        # Fix: Ensure encoder_conf is a dictionary
+        if encoder_conf is None:
+            encoder_conf = {}
         encoder = encoder_class(**encoder_conf)
         self.encoder = encoder
         self.encoder_conf = encoder_conf
