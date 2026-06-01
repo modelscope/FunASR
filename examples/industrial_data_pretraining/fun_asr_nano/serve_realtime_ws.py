@@ -41,7 +41,7 @@ def detect_and_fix_hallucination(text, max_ngram_length=12, max_occurrences=3):
         if pos >= 0:
             end_pos = text.find(repeated, pos + len(repeated))
             if end_pos >= 0:
-                return text[:end_pos + len(repeated)], True
+                return text[:end_pos], True
         return text[:len(text)//2], True
 
     for length in range(1, max_ngram_length):
@@ -54,7 +54,7 @@ def detect_and_fix_hallucination(text, max_ngram_length=12, max_occurrences=3):
             if pos >= 0:
                 end_pos = text.find(repeated, pos + len(repeated))
                 if end_pos >= 0:
-                    return text[:end_pos + len(repeated)], True
+                    return text[:end_pos], True
             return text[:len(text)//2], True
 
     return text, False
@@ -235,7 +235,9 @@ class RealtimeASRSession:
         self.first_chunk_samples = int(sample_rate * 480 / 1000)
         self.first_decode_done = False
 
-        self.audio_buffer = np.array([], dtype=np.float32)
+        self._audio_buffer = np.array([], dtype=np.float32)
+        self.audio_chunks = []
+        self._audio_buffer_dirty = False
         self.vad_fed_samples = 0
         self.prev_text = ""
         self.last_partial_text = ""
@@ -246,29 +248,46 @@ class RealtimeASRSession:
         self.use_context = True
         self.is_active = False
 
+    @property
+    def audio_buffer(self):
+        if getattr(self, '_audio_buffer_dirty', False):
+            if self.audio_chunks:
+                self._audio_buffer = np.concatenate([self._audio_buffer, *self.audio_chunks])
+                self.audio_chunks = []
+            self._audio_buffer_dirty = False
+        return self._audio_buffer
+
+    @audio_buffer.setter
+    def audio_buffer(self, value):
+        self._audio_buffer = value
+        self.audio_chunks = []
+        self._audio_buffer_dirty = False
+
     def add_audio(self, pcm_bytes):
         if len(pcm_bytes) % 2 != 0:
             pcm_bytes = pcm_bytes[:len(pcm_bytes) - (len(pcm_bytes) % 2)]
+        if not pcm_bytes:
+            return
         audio_int16 = np.frombuffer(pcm_bytes, dtype=np.int16)
         audio_float = audio_int16.astype(np.float32) / 32768.0
-        self.audio_buffer = np.concatenate([self.audio_buffer, audio_float])
+        
+        self.audio_chunks.append(audio_float)
+        self._audio_buffer_dirty = True
 
-        new_audio = self.audio_buffer[self.vad_fed_samples:]
-        if len(new_audio) > 0:
-            new_confirmed = self.vad.feed(torch.from_numpy(new_audio).float(), is_final=False)
-            self.vad_fed_samples = len(self.audio_buffer)
+        new_confirmed = self.vad.feed(torch.from_numpy(audio_float).float(), is_final=False)
+        self.vad_fed_samples += len(audio_float)
 
-            for seg in new_confirmed:
-                seg_text = self._decode_segment(seg)
-                self.prev_text = ""
-                if not seg_text.strip():
-                    continue
-                self.locked_sentences.append({"text": seg_text, "start": int(seg[0]), "end": int(seg[1])})
-                if self.spk_tracker:
-                    s0 = int(seg[0] * self.sample_rate / 1000)
-                    s1 = min(int(seg[1] * self.sample_rate / 1000), len(self.audio_buffer))
-                    self.spk_tracker.assign_streaming(self.audio_buffer[s0:s1], seg[0]/1000, seg[1]/1000, self.locked_sentences[-1])
-                logger.info(f"Locked: [{seg[0]}-{seg[1]}ms] \"{seg_text[:40]}\"")
+        for seg in new_confirmed:
+            seg_text = self._decode_segment(seg)
+            self.prev_text = ""
+            if not seg_text.strip():
+                continue
+            self.locked_sentences.append({"text": seg_text, "start": int(seg[0]), "end": int(seg[1])})
+            if self.spk_tracker:
+                s0 = int(seg[0] * self.sample_rate / 1000)
+                s1 = min(int(seg[1] * self.sample_rate / 1000), len(self.audio_buffer))
+                self.spk_tracker.assign_streaming(self.audio_buffer[s0:s1], seg[0]/1000, seg[1]/1000, self.locked_sentences[-1])
+            logger.info(f"Locked: [{seg[0]}-{seg[1]}ms] \"{seg_text[:40]}\"")
 
     def should_decode(self):
         threshold = self.first_chunk_samples if not self.first_decode_done else self.chunk_samples
@@ -319,7 +338,7 @@ class RealtimeASRSession:
                 # Standard AutoModel: returns list of dicts with 'text'
                 results = self.vllm_engine.generate(
                     input=audio_tensor,
-                    hotwords=self.asr_kwargs.get("hotwords"),
+                    hotword=self.asr_kwargs.get("hotwords"),
                     language=self.asr_kwargs.get("language"),
                 )
                 # AutoModel results format is typically: [{'text': '...'}]
@@ -354,16 +373,20 @@ class RealtimeASRSession:
         if hasattr(self.vllm_engine, '_engine'):
             tokenizer = self.vllm_engine._engine.tokenizer
         else:
-            tokenizer = self.vllm_engine.kwargs.get("tokenizer")
+            tokenizer = getattr(self.vllm_engine, 'kwargs', {}).get("tokenizer")
 
         if tokenizer is not None:
-            encoded = tokenizer.encode(text)
-            if len(encoded) > 5:
-                try:
-                    self.prev_text = tokenizer.decode(encoded[:-5], skip_special_tokens=True)
-                except TypeError:
-                    self.prev_text = tokenizer.decode(encoded[:-5])
-            else:
+            try:
+                encoded = tokenizer.encode(text)
+                if len(encoded) > 5:
+                    try:
+                        self.prev_text = tokenizer.decode(encoded[:-5], skip_special_tokens=True)
+                    except TypeError:
+                        self.prev_text = tokenizer.decode(encoded[:-5])
+                else:
+                    self.prev_text = ""
+            except Exception as e:
+                logger.warning(f"Failed to encode/decode text with tokenizer: {e}")
                 self.prev_text = ""
         else:
             self.prev_text = ""
@@ -384,7 +407,7 @@ class RealtimeASRSession:
                 # Standard AutoModel
                 results = self.vllm_engine.generate(
                     input=audio_tensor,
-                    hotwords=self.asr_kwargs.get("hotwords"),
+                    hotword=self.asr_kwargs.get("hotwords"),
                     language=self.asr_kwargs.get("language"),
                 )
                 text = results[0].get('text', '') if (isinstance(results, list) and len(results) > 0) else str(results)
