@@ -464,12 +464,15 @@ def load_models(args):
     global _vllm_engine, _asr_kwargs, _vad_model, _spk_model
     if _vllm_engine is None:
         from funasr import AutoModel
-        from funasr.auto.auto_model_vllm import AutoModelVLLM
-
-        if "cuda" not in args.device:
-            logger.info("Using standard AutoModel for non-CUDA device (vLLM bypassed)")
-            _vllm_engine = AutoModel(model=args.model, hub=args.hub, device=args.device, disable_update=True)
+        
+        if args.device == "cpu":
+            logger.info(f"CPU detected: Loading ASR (AutoModel) instead of vLLM")
+            _vllm_engine = AutoModel(
+                model=args.model, hub=args.hub, device=args.device,
+                trust_remote_code=True, disable_update=True
+            )
         else:
+            from funasr.auto.auto_model_vllm import AutoModelVLLM
             logger.info(f"Loading ASR (vLLM): {args.model}")
             _vllm_engine = AutoModelVLLM(
                 model=args.model, hub=args.hub, device=args.device,
