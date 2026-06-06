@@ -818,7 +818,16 @@ class AutoModel:
                     spk_embedding.cpu(), oracle_num=kwargs.get("preset_spk_num", None)
                 )
                 # del result['spk_embedding']
-                sv_output = postprocess(all_segments, None, labels, spk_embedding.cpu())
+                if kwargs.get("return_spk_center", False):
+                    sv_output, spk_center = postprocess(
+                        all_segments, None, labels, spk_embedding.cpu(), return_spk_center=True
+                    )
+                    # Per-speaker ERes2NetV2 centroids, indexed by the `spk` id in
+                    # sentence_info. Kept on the result for downstream voiceprint use
+                    # (the per-chunk spk_embedding below is still deleted to keep output small).
+                    result["spk_embedding_center"] = spk_center
+                else:
+                    sv_output = postprocess(all_segments, None, labels, spk_embedding.cpu())
                 if self.spk_mode == "punc_segment" and "timestamp" not in result and "timestamps" not in result:
                     logging.warning("No timestamps in ASR result (e.g. SenseVoice), falling back to vad_segment mode for speaker diarization.")
                     self.spk_mode = "vad_segment"

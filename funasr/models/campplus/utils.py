@@ -138,7 +138,11 @@ def extract_feature(audio):
 
 
 def postprocess(
-    segments: list, vad_segments: list, labels: np.ndarray, embeddings: np.ndarray
+    segments: list,
+    vad_segments: list,
+    labels: np.ndarray,
+    embeddings: np.ndarray,
+    return_spk_center: bool = False,
 ) -> list:
     """Postprocess.
     
@@ -184,6 +188,10 @@ def postprocess(
     # smooth the result
     distribute_res = smooth(distribute_res)
 
+    if return_spk_center:
+        # spk_embs[i] is the centroid (mean of clustered chunk embeddings) for
+        # corrected speaker label i, aligned with the `spk` ids in sentence_info.
+        return distribute_res, spk_embs
     return distribute_res
 
 
