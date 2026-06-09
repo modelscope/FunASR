@@ -138,8 +138,12 @@ def extract_feature(audio):
 
 
 def postprocess(
-    segments: list, vad_segments: list, labels: np.ndarray, embeddings: np.ndarray
-) -> list:
+    segments: list,
+    vad_segments: list,
+    labels: np.ndarray,
+    embeddings: np.ndarray,
+    return_spk_center: bool = False,
+) -> Union[list, tuple]:
     """Postprocess.
     
         Args:
@@ -155,13 +159,6 @@ def postprocess(
         distribute_res.append([segments[i][0], segments[i][1], labels[i]])
     # merge the same speakers chronologically
     distribute_res = merge_seque(distribute_res)
-
-    # accquire speaker center
-    spk_embs = []
-    for i in range(labels.max() + 1):
-        spk_emb = embeddings[labels == i].mean(0)
-        spk_embs.append(spk_emb)
-    spk_embs = np.stack(spk_embs)
 
     def is_overlapped(t1, t2):
         """Is overlapped.
@@ -184,6 +181,14 @@ def postprocess(
     # smooth the result
     distribute_res = smooth(distribute_res)
 
+    if return_spk_center:
+        # spk_embs[i] is the centroid (mean of clustered chunk embeddings) for
+        # corrected speaker label i, aligned with the `spk` ids in sentence_info.
+        # Computed lazily: only when the caller requests speaker centers.
+        spk_embs = np.stack(
+            [embeddings[labels == i].mean(0) for i in range(labels.max() + 1)]
+        )
+        return distribute_res, spk_embs
     return distribute_res
 
 
