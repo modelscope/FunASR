@@ -1,9 +1,6 @@
 .idea
-./__pycache__/
-*/__pycache__/
-*/*/__pycache__/
-*/*/*/__pycache__/
-.DS_Store
+**/__pycache__/
+**/.DS_Store
 init_model/
 *.tar.gz
 test_local/
