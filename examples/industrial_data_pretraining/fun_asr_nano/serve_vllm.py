@@ -77,10 +77,13 @@ def load_engine(args):
             max_model_len=args.max_model_len,
             gpu_memory_utilization=args.gpu_memory_utilization,
         )
-        logger.info("Loading VAD: fsmn-vad")
-        _vad_model = AutoModel(model="fsmn-vad", device=args.device, disable_update=True)
-        logger.info("Loading SPK: eres2netv2")
-        _spk_model = AutoModel(model="iic/speech_eres2netv2_sv_zh-cn_16k-common", device=args.device, disable_update=True)
+        logger.info(f"Loading VAD: {args.vad_model}")
+        _vad_model = AutoModel(model=args.vad_model, device=args.device, disable_update=True)
+        if args.spk_model:
+            logger.info(f"Loading SPK: {args.spk_model}")
+            _spk_model = AutoModel(model=args.spk_model, device=args.device, disable_update=True)
+        else:
+            logger.info("SPK disabled")
         logger.info("All models ready!")
 
 
@@ -404,6 +407,8 @@ if __name__ == "__main__":
     parser.add_argument("--dtype", type=str, default="bf16")
     parser.add_argument("--max-model-len", type=int, default=4096)
     parser.add_argument("--gpu-memory-utilization", type=float, default=0.5)
+    parser.add_argument("--vad-model", type=str, default="fsmn-vad", help="VAD model name or local path")
+    parser.add_argument("--spk-model", type=str, default="iic/speech_eres2netv2_sv_zh-cn_16k-common", help="Speaker model name or local path (set empty to disable)")
     _args = parser.parse_args()
 
     load_engine(_args)
