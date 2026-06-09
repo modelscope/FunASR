@@ -1132,7 +1132,7 @@
             input, input_len=input_len, model=self.vad_model, kwargs=self.vad_kwargs, **cfg
         )
         end_vad = time.time()
-</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/auto/auto_model.py#L598" target="_blank" class="src-more">View full source →</a></details></div><div class="mblk"><code>.export(input, **cfg)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/auto/auto_model.py#L920" target="_blank" class="gh-link">L920</a><div class="mdoc"><p>Export model to ONNX format.</p>
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/auto/auto_model.py#L598" target="_blank" class="src-more">View full source →</a></details></div><div class="mblk"><code>.export(input, **cfg)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/auto/auto_model.py#L931" target="_blank" class="gh-link">L931</a><div class="mdoc"><p>Export model to ONNX format.</p>
 <p>Creates a deep copy of the model to isolate ONNX operator monkey-patching,</p>
 <p>then runs torch.onnx.export. The original model remains usable after export.</p>
 <h4>Args:</h4>
@@ -1177,7 +1177,7 @@
 
         device = cfg.get(&quot;device&quot;, &quot;cpu&quot;)
         
-</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/auto/auto_model.py#L920" target="_blank" class="src-more">View full source →</a></details></div></div>
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/auto/auto_model.py#L931" target="_blank" class="src-more">View full source →</a></details></div></div>
 <div class="api-detail" id="e4"><span class="dtag badge-m">method</span><h2><code>AutoModel.build_model(**kwargs)</code></h2><div class="dmod">funasr.auto.auto_model.AutoModel · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/auto/auto_model.py#L281" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Download model from hub, build all components, and load pretrained weights.</p>
 <p>This method handles the full model construction pipeline:</p>
 <p>1. Download model files from ModelScope/HuggingFace (if not local)</p>
@@ -1381,7 +1381,7 @@
         )
         end_vad = time.time()
 </code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/auto/auto_model.py#L598" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
-<div class="api-detail" id="e8"><span class="dtag badge-m">method</span><h2><code>AutoModel.export(input, **cfg)</code></h2><div class="dmod">funasr.auto.auto_model.AutoModel · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/auto/auto_model.py#L920" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Export model to ONNX format.</p>
+<div class="api-detail" id="e8"><span class="dtag badge-m">method</span><h2><code>AutoModel.export(input, **cfg)</code></h2><div class="dmod">funasr.auto.auto_model.AutoModel · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/auto/auto_model.py#L931" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Export model to ONNX format.</p>
 <p>Creates a deep copy of the model to isolate ONNX operator monkey-patching,</p>
 <p>then runs torch.onnx.export. The original model remains usable after export.</p>
 <h4>Args:</h4>
@@ -1426,7 +1426,7 @@
 
         device = cfg.get(&quot;device&quot;, &quot;cpu&quot;)
         
-</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/auto/auto_model.py#L920" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/auto/auto_model.py#L931" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
 <div class="api-detail" id="e9"><span class="dtag badge-c">class</span><h2>RegisterTables</h2><div class="dmod">funasr.register.register · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/register.py#L8" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Registry system for classes.</p>
 </div><details class="src-block"><summary>📄 Source code</summary><pre><code>class RegisterTables:
     &quot;&quot;&quot;Registry system for classes.&quot;&quot;&quot;
