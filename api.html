@@ -25526,7 +25526,7 @@ Then use with OpenAI SDK:
         scheduler = kwargs.get(&quot;scheduler&quot;, &quot;warmuplr&quot;)
         assert scheduler in scheduler_classes
         scheduler_class = scheduler_classes.get(scheduler)
-        scheduler = scheduler_class(optim, **kwargs.get(&quot;scheduler_conf&quot;))
+        scheduler = scheduler_class(optim, **(kwargs.get(&quot;scheduler_conf&quot;) or {}))
 
         if self.use_deepspeed:
             import deepspeed
@@ -25898,7 +25898,7 @@ Then use with OpenAI SDK:
         scheduler = kwargs.get(&quot;scheduler&quot;, &quot;warmuplr&quot;)
         assert scheduler in scheduler_classes
         scheduler_class = scheduler_classes.get(scheduler)
-        scheduler = scheduler_class(optim, **kwargs.get(&quot;scheduler_conf&quot;))
+        scheduler = scheduler_class(optim, **(kwargs.get(&quot;scheduler_conf&quot;) or {}))
 
         if self.use_deepspeed:
             import deepspeed
