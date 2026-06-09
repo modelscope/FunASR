@@ -61,4 +61,6 @@ torchrun \
 ++train_conf.avg_nbest_model=3 \
 ++train_conf.use_deepspeed=false \
 ++optim_conf.lr=0.00005 \
+++scheduler="warmuplr" \
+++scheduler_conf.warmup_steps=1000 \
 ++output_dir="${output_dir}" &> ${log_file}
