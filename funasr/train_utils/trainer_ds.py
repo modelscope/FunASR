@@ -1018,7 +1018,7 @@ class Trainer:
         scheduler = kwargs.get("scheduler", "warmuplr")
         assert scheduler in scheduler_classes
         scheduler_class = scheduler_classes.get(scheduler)
-        scheduler = scheduler_class(optim, **kwargs.get("scheduler_conf"))
+        scheduler = scheduler_class(optim, **(kwargs.get("scheduler_conf") or {}))
 
         if self.use_deepspeed:
             import deepspeed
@@ -1047,7 +1047,7 @@ class Trainer:
                             Args:
                                 opt: TODO.
                             """
-                        return scheduler_class(opt, **kwargs.get("scheduler_conf"))
+                        return scheduler_class(opt, **(kwargs.get("scheduler_conf") or {}))
 
             model, optimizer, _, scheduler = deepspeed.initialize(
                 args=args,
