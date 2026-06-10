@@ -110,6 +110,7 @@ Overview
    ./model_selection_zh.md
    ./migration_from_whisper.md
    ./migration_from_whisper_zh.md
+   ./cli.md
    ./use_case_showcase.md
    ./use_case_showcase_zh.md
    ./reference/application.md
