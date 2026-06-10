@@ -152,7 +152,8 @@ setup(
     ],
     entry_points={
         "console_scripts": [
-            "funasr = funasr.bin.inference:main_hydra",
+            "funasr = funasr.cli:main",
+            "funasr-hydra = funasr.bin.inference:main_hydra",
             "funasr-server = funasr.bin.server:main",
             "funasr-train = funasr.bin.train:main_hydra",
             "funasr-train-ds = funasr.bin.train_ds:main_hydra",

@@ -197,6 +197,31 @@ model = AutoModel(model="emotion2vec_plus_large", device="cuda")
 result = model.generate(input="audio.wav", granularity="utterance")
 ```
 
+
+### CLI (Agent-Friendly)
+
+```bash
+# Transcribe audio (simplest)
+funasr audio.wav
+
+# JSON output (for AI agents)
+funasr audio.wav --output-format json
+
+# SRT subtitles
+funasr audio.wav --output-format srt --output-dir ./subs
+
+# Speaker diarization + timestamps
+funasr audio.wav --spk --timestamps -f json
+
+# Choose model and language
+funasr audio.wav --model paraformer --language zh
+
+# Batch transcribe
+funasr *.wav --output-format srt --output-dir ./output
+```
+
+Available models: `sensevoice` (default), `paraformer`, `paraformer-en`, `fun-asr-nano`
+
 ---
 
 ## Deploy

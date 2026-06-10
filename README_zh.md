@@ -195,6 +195,31 @@ model = AutoModel(model="emotion2vec_plus_large", device="cuda")
 result = model.generate(input="audio.wav", granularity="utterance")
 ```
 
+### 命令行工具（Agent 友好）
+
+```bash
+# 转写音频（最简用法）
+funasr audio.wav
+
+# JSON 输出（适合 AI Agent 调用）
+funasr audio.wav --output-format json
+
+# 生成 SRT 字幕
+funasr audio.wav --output-format srt --output-dir ./subs
+
+# 说话人分离 + 时间戳
+funasr audio.wav --spk --timestamps -f json
+
+# 指定模型和语言
+funasr audio.wav --model paraformer --language zh
+
+# 批量转写
+funasr *.wav --output-format srt --output-dir ./output
+```
+
+可用模型：`sensevoice`（默认）、`paraformer`、`paraformer-en`、`fun-asr-nano`
+
+
 ---
 
 ## 部署
