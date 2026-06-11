@@ -45,6 +45,14 @@ cd /path/to/FunASR && pip install -e .
 
 **Hardware**: GPU ≥ 8 GB VRAM, CUDA ≥ 11.8. 16 GB+ recommended.
 
+Install a PyTorch/torchaudio/vLLM combination that matches your NVIDIA driver and
+CUDA runtime. Do not blindly keep the newest wheel if it was built for a newer
+CUDA runtime than your driver supports; PyTorch can fail during CUDA
+initialization with `The NVIDIA driver on your system is too old` before FunASR
+starts. If that happens, reinstall compatible PyTorch, torchaudio, and vLLM
+wheels for the CUDA version reported by `nvidia-smi`, or update the NVIDIA
+driver first.
+
 ---
 
 ## 2. vLLM Engine Architecture

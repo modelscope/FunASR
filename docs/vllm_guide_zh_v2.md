@@ -45,6 +45,13 @@ cd /path/to/FunASR && pip install -e .
 
 **硬件**：GPU ≥ 8GB VRAM，CUDA ≥ 11.8。推荐 16GB+。
 
+请根据 NVIDIA 驱动和 `nvidia-smi` 显示的 CUDA 版本选择匹配的
+PyTorch/torchaudio/vLLM 组合，不要无条件保留 pip 拉到的最新 wheel。若
+vLLM 或 PyTorch wheel 依赖的 CUDA runtime 高于当前驱动支持范围，可能在
+FunASR 启动前就报 `The NVIDIA driver on your system is too old`。遇到该错误时，
+优先重装与当前驱动/CUDA 匹配的 PyTorch、torchaudio、vLLM wheel，或先升级
+NVIDIA 驱动。
+
 ---
 
 ## 2. vLLM 推理引擎架构

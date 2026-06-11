@@ -938,8 +938,10 @@ class FsmnVADStreaming(nn.Module):
         n = int(len(audio_sample) // chunk_stride_samples + int(_is_final))
         m = int(len(audio_sample) % chunk_stride_samples * (1 - int(_is_final)))
         segments = []
-        # Dynamic silence threshold
-        dynamic_silence = kwargs.get("dynamic_silence", True)
+        # Keep explicit fixed-threshold requests from being overwritten by the dynamic schedule.
+        dynamic_silence = kwargs.get(
+            "dynamic_silence", kwargs.get("max_end_silence_time") is None
+        )
         silence_schedule = kwargs.get("silence_schedule", DEFAULT_SILENCE_SCHEDULE)
         speech_to_sil_ms = self.vad_opts.speech_to_sil_time_thres
         accumulated_ms = cache.get("_dynamic_accumulated_ms", 0)
