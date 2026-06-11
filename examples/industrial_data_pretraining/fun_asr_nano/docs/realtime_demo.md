@@ -9,7 +9,7 @@ cd examples/industrial_data_pretraining/fun_asr_nano
 
 # 安装依赖
 pip install -r requirements.txt
-pip install vllm>=0.12.0
+# 按主文档选择并安装与当前 NVIDIA 驱动、CUDA runtime 和 PyTorch wheel 匹配的 vLLM 版本。
 
 # 启动服务
 CUDA_VISIBLE_DEVICES=0 python serve_realtime_ws.py --port 10095 --language 中文

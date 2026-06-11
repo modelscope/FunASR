@@ -37,7 +37,7 @@
 ```bash
 pip install torch torchaudio
 pip install funasr>=1.3.0
-pip install vllm>=0.12.0
+# 先确认 NVIDIA 驱动、CUDA runtime 和 PyTorch wheel 组合，再固定安装匹配的 vLLM 版本。
 pip install safetensors tiktoken websockets regex fastapi uvicorn python-multipart
 
 cd /path/to/FunASR && pip install -e .
