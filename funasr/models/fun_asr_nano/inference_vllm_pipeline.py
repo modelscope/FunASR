@@ -204,6 +204,8 @@ class FunASRNanoVLLMPipeline:
         except ImportError:
             from vllm.inputs.data import EmbedsPrompt
 
+        from funasr.models.fun_asr_nano.vllm_utils import resolve_repetition_penalty
+
         prompts = []
         for seg_audio in segment_audios:
             seg_tensor = torch.from_numpy(seg_audio).float()
@@ -219,7 +221,10 @@ class FunASRNanoVLLMPipeline:
         params = SamplingParams(
             max_tokens=kwargs.get("max_new_tokens", 512),
             temperature=0.0,
-            repetition_penalty=1.3,
+            # Prompt-embeds mode has no token IDs to penalize; see #2948.
+            repetition_penalty=resolve_repetition_penalty(
+                kwargs.get("repetition_penalty", 1.0)
+            ),
             skip_special_tokens=True,
         )
 

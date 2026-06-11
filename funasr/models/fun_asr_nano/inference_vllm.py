@@ -527,6 +527,8 @@ class FunASRNanoVLLM:
         except ImportError:
             from vllm.inputs.data import EmbedsPrompt
 
+        from funasr.models.fun_asr_nano.vllm_utils import resolve_repetition_penalty
+
         if isinstance(inputs, (str, np.ndarray, torch.Tensor)):
             inputs = [inputs]
 
@@ -535,7 +537,8 @@ class FunASRNanoVLLM:
             temperature=temperature,
             top_p=top_p,
             top_k=top_k if top_k > 0 else -1,
-            repetition_penalty=repetition_penalty,
+            # Prompt-embeds mode has no token IDs to penalize; see #2948.
+            repetition_penalty=resolve_repetition_penalty(repetition_penalty),
             skip_special_tokens=True,
         )
 
