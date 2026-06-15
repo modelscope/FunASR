@@ -234,8 +234,15 @@ class FunASRNanoStreamingVLLM:
         chunk_samples = int(self.sample_rate * chunk_ms / 1000)
         num_chunks = (total_samples + chunk_samples - 1) // chunk_samples
 
-        params = SamplingParams(max_tokens=max_new_tokens, temperature=temperature,
-                                repetition_penalty=1.3, skip_special_tokens=True)
+        from funasr.models.fun_asr_nano.vllm_utils import resolve_repetition_penalty
+
+        # Prompt-embeds mode has no token IDs to penalize; see #2948.
+        params = SamplingParams(
+            max_tokens=max_new_tokens, temperature=temperature,
+            repetition_penalty=resolve_repetition_penalty(
+                kwargs.get("repetition_penalty", 1.0)
+            ),
+            skip_special_tokens=True)
 
         # Two-stage approach for long audio:
         # Stage 1: batch first N chunks fresh (no prev_text) to find stable output

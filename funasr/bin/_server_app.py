@@ -132,8 +132,10 @@ def create_app(device: str = "cuda", preload_model: str = "auto") -> FastAPI:
         if not seg_audios:
             return {"text": "", "segments": [], "duration": len(audio_data)/sr}
 
-        # vLLM generate with repetition_penalty
-        gen_kwargs = {"max_new_tokens": 500, "repetition_penalty": 1.3}
+        # repetition_penalty is left at the neutral 1.0: the Fun-ASR-Nano vLLM
+        # engine runs in prompt-embeds mode, where any other value crashes the
+        # CUDA kernel (see issue #2948 and fun_asr_nano.vllm_utils).
+        gen_kwargs = {"max_new_tokens": 500, "repetition_penalty": 1.0}
         if language:
             gen_kwargs["language"] = language
         if hotwords:
