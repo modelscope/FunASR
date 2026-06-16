@@ -727,6 +727,9 @@ class FunASRNano(nn.Module):
         decoder (the per-segment, batch_size=1 path underuses the GPU).
         CTC timestamps are not produced in batched mode.
         """
+        # normalize nested key (e.g. [[k1, k2, ...]]) like the single-sample path
+        if key is not None and len(key) > 0 and isinstance(key[0], (list, tuple)):
+            key = list(key[0])
         embs = []
         keys = []
         for i, d in enumerate(data_in):
@@ -770,7 +773,11 @@ class FunASRNano(nn.Module):
                 attention_mask=attn,
                 position_ids=position_ids,
                 max_new_tokens=kwargs.get("max_length", 512),
-                pad_token_id=self.llm.config.pad_token_id or self.llm.config.eos_token_id,
+                pad_token_id=(
+                    self.llm.config.pad_token_id
+                    if self.llm.config.pad_token_id is not None
+                    else self.llm.config.eos_token_id
+                ),
                 **kwargs.get("llm_kwargs", {}),
             )
         texts = tokenizer.batch_decode(
@@ -807,7 +814,10 @@ class FunASRNano(nn.Module):
                 frontend: Audio frontend for feature extraction.
                 **kwargs: Additional keyword arguments.
             """
-        if len(data_in) > 1:
+        # Only batch when CTC timestamps are not needed; the batched path does not
+        # produce ctc_timestamps, so fall back to the single-sample path when a CTC
+        # decoder is loaded (preserves timestamp behavior).
+        if len(data_in) > 1 and self.ctc_decoder is None:
             return self._inference_llm_batch(
                 data_in, data_lengths, key, tokenizer, frontend, **kwargs
             )
