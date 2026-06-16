@@ -571,11 +571,11 @@ class FunASRNano(nn.Module):
                 encoder_out_lens = kwargs["audio_embedding_lens"]
             else:
                 speech_lengths = batch["speech_lengths"][:, 0]
-                # fp16
-                if kwargs.get("fp16", False):
-                    speech = speech.to(torch.float16)
-                elif kwargs.get("bf16", False):
-                    speech = speech.to(torch.bfloat16)
+                # NOTE: the audio encoder contains fp32-only ops, so casting its
+                # input to fp16/bf16 here raises a dtype mismatch. The encoder
+                # therefore always runs in fp32; low precision (fp16/bf16) is
+                # applied to the LLM decoder only. The audio embeddings are cast
+                # to the LLM dtype automatically when written into inputs_embeds.
                 # audio encoder
                 encoder_out, encoder_out_lens = self.encode(speech, speech_lengths)
 
