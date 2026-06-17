@@ -175,6 +175,13 @@ class FunASRNanoVLLM:
         self.device = device
         self.dtype = dtype
         self.torch_dtype = dtype_map.get(dtype, torch.bfloat16)
+        if self.torch_dtype == torch.float16:
+            logger.warning(
+                "dtype='fp16' can produce degraded or garbage transcription for "
+                "Fun-ASR-Nano (numerical overflow in the audio embedding path). "
+                "Use dtype='bf16' (recommended) or dtype='fp32'. On GPUs without "
+                "bfloat16 support (e.g. NVIDIA V100), use 'fp32'."
+            )
         self.model_dir = model_dir
 
         # Step 1: Prepare LLM weights for vLLM (extract from model.pt if needed)
