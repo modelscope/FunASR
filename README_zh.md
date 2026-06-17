@@ -38,16 +38,19 @@ pip install funasr
 
 ```python
 from funasr import AutoModel
+from funasr.utils.postprocess_utils import rich_transcription_postprocess
 
 model = AutoModel(model="iic/SenseVoiceSmall", vad_model="fsmn-vad", spk_model="cam++", device="cuda")
-result = model.generate(input="meeting.wav")
+result = model.generate(input="https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav")
+
+# 一次调用即返回带说话人 id 和时间戳的 VAD 分段，可自由渲染：
+for seg in result[0]["sentence_info"]:
+    print(f"[{seg['start']/1000:.1f}s] 说话人{seg['spk']}: {rich_transcription_postprocess(seg['sentence'])}")
 ```
 
 **输出** — 带说话人标签、时间戳和标点的结构化文本：
 ```
-[00:00.4 → 00:03.8] 说话人0: 我们今天讨论一下 Q3 的计划。
-[00:04.2 → 00:07.1] 说话人1: 好的，我有三个要点。
-[00:07.5 → 00:12.3] 说话人0: 请讲，我们还有 30 分钟。
+[0.6s] 说话人0: 欢迎大家来体验达摩院推出的语音识别模型
 ```
 
 一个模型、一次调用 — VAD 分段、语音识别、标点恢复、说话人分离全部自动完成。
@@ -60,7 +63,7 @@ result = model.generate(input="meeting.wav")
 from funasr import AutoModel
 
 model = AutoModel(model="FunAudioLLM/Fun-ASR-Nano-2512", vad_model="fsmn-vad", device="cuda")
-result = model.generate(input="meeting.wav")
+result = model.generate(input="https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav")
 ```
 
 使用 vLLM 加速（批量处理快 16 倍）：
@@ -179,7 +182,7 @@ from funasr import AutoModel
 
 # 中文生产级（VAD + 识别 + 标点 + 说话人）
 model = AutoModel(model="paraformer-zh", vad_model="fsmn-vad", punc_model="ct-punc", spk_model="cam++", device="cuda")
-result = model.generate(input="meeting.wav", hotword="关键词 20")
+result = model.generate(input="https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav", hotword="关键词 20")
 
 # 31 种语言 + 时间戳
 model = AutoModel(model="FunAudioLLM/Fun-ASR-Nano-2512", hub="hf", trust_remote_code=True,
