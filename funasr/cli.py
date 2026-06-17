@@ -48,10 +48,24 @@ def _format_output(text, segments, timestamps, fmt, audio_path, model_name, lang
             obj["segments"] = segments
         if timestamps:
             obj["timestamps"] = timestamps
-        obj.update({"file": os.path.basename(audio_path), "model": model_name, "language": language or "auto", "duration_s": round(elapsed, 3)})
+        try:
+            import soundfile as sf
+            audio_dur = round(sf.info(audio_path).duration, 3)
+        except Exception:
+            audio_dur = None
+        obj.update({"file": os.path.basename(audio_path), "model": model_name, "language": language or "auto", "audio_duration_s": audio_dur, "processing_s": round(elapsed, 3)})
         return json.dumps(obj, ensure_ascii=False, indent=2)
     elif fmt == "srt":
-        return format_srt(segments) if segments else f"1\n00:00:00,000 --> 99:59:59,999\n{text}\n"
+        if segments:
+            return format_srt(segments)
+        # No per-sentence timestamps: emit one valid cue spanning the whole audio
+        # (instead of a bogus 99:59:59 end time).
+        try:
+            import soundfile as sf
+            dur_ms = int(sf.info(audio_path).duration * 1000)
+        except Exception:
+            dur_ms = 0
+        return f"1\n00:00:00,000 --> {_srt_time(dur_ms)}\n{text}\n"
     elif fmt == "tsv":
         return format_tsv(segments) if segments else f"start\tend\ttext\n0.000\t0.000\t{text}"
 
