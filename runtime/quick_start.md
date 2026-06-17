@@ -11,7 +11,7 @@ You can use FunASR in the following ways:
 ## Service Deployment SDK
 
 ### Python version Example
-Supports real-time streaming speech recognition, uses non-streaming models for error correction, and outputs text with punctuation. Currently, only single client is supported. For multi-concurrency, please refer to the C++ version service deployment SDK below.
+Supports real-time streaming speech recognition, uses non-streaming models for error correction, and outputs text with punctuation. It now supports multiple concurrent clients with non-blocking inference (tune per-stage concurrency via --concurrent_vad / --concurrent_asr_online / --concurrent_asr_offline / --concurrent_punc / --concurrent_sv). For maximum throughput, the C++ version service deployment SDK below is still recommended.
 
 #### Server Deployment
 
