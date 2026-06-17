@@ -145,7 +145,7 @@ def main():
         segments = []
         if "sentence_info" in result[0]:
             for seg in result[0]["sentence_info"]:
-                s = {"start": seg.get("start", 0), "end": seg.get("end", 0), "text": clean_text(seg.get("text", ""))}
+                s = {"start": seg.get("start", 0), "end": seg.get("end", 0), "text": clean_text(seg.get("sentence") or seg.get("text", ""))}
                 if args.spk and "spk" in seg:
                     s["speaker"] = seg["spk"]
                 segments.append(s)
