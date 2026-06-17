@@ -20700,7 +20700,7 @@
                 ):
                     data_or_path_or_list_j = load_audio_text_image_video(
 </code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/load_utils.py#L48" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
-<div class="api-detail" id="e381"><span class="dtag badge-f">function</span><h2><code>load_bytes(input)</code></h2><div class="dmod">funasr.utils.load_utils · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/load_utils.py#L194" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Convert audio bytes to numpy array.</p>
+<div class="api-detail" id="e381"><span class="dtag badge-f">function</span><h2><code>load_bytes(input)</code></h2><div class="dmod">funasr.utils.load_utils · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/load_utils.py#L207" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Convert audio bytes to numpy array.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>input (bytes)</code> — Raw audio bytes.</li>
@@ -20739,8 +20739,8 @@
     abs_max = 2 ** (i.bits - 1)
     offset = i.min + abs_max
     array = np.frombuffer((middle_data.astype(dtype) - offset) / abs_max, dtype=np.float32)
-</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/load_utils.py#L194" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
-<div class="api-detail" id="e382"><span class="dtag badge-f">function</span><h2><code>validate_frame_rate(input, fs)</code></h2><div class="dmod">funasr.utils.load_utils · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/load_utils.py#L227" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Validate frame rate.</p>
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/load_utils.py#L207" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
+<div class="api-detail" id="e382"><span class="dtag badge-f">function</span><h2><code>validate_frame_rate(input, fs)</code></h2><div class="dmod">funasr.utils.load_utils · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/load_utils.py#L240" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Validate frame rate.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>input</code> — Input audio/text data.</li>
@@ -20776,8 +20776,8 @@
         output = BytesIO()
         audio.export(output, format=&quot;wav&quot;)
         output.seek(0)
-</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/load_utils.py#L227" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
-<div class="api-detail" id="e383"><span class="dtag badge-f">function</span><h2><code>extract_fbank(data, data_len, data_type, frontend, **kwargs)</code></h2><div class="dmod">funasr.utils.load_utils · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/load_utils.py#L264" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Extract filter-bank features from audio data.</p>
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/load_utils.py#L240" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
+<div class="api-detail" id="e383"><span class="dtag badge-f">function</span><h2><code>extract_fbank(data, data_len, data_type, frontend, **kwargs)</code></h2><div class="dmod">funasr.utils.load_utils · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/load_utils.py#L277" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Extract filter-bank features from audio data.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>data</code> — Audio samples (list of numpy arrays or tensors).</li>
@@ -20819,7 +20819,7 @@
         for data_i in data:
             if isinstance(data_i, np.ndarray):
                 data_i = torch.from_numpy(data_i)
-</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/load_utils.py#L264" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/load_utils.py#L277" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
 <div class="api-detail" id="e384"><span class="dtag badge-f">function</span><h2><code>statistic_model_parameters(model, prefix)</code></h2><div class="dmod">funasr.utils.misc · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/misc.py#L10" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Statistic model parameters.</p>
 <h4>Args:</h4>
 <ul>
