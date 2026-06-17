@@ -97,6 +97,19 @@ def load_audio_text_image_video(
     ):  # download url to local file
         data_or_path_or_list = download_from_url(data_or_path_or_list)
 
+    # Fail fast with a clear error if an audio file path does not exist, instead of
+    # silently passing the string downstream (which later crashes with a cryptic
+    # "expected Tensor ... but got str" deep inside the model).
+    if (
+        isinstance(data_or_path_or_list, str)
+        and data_type in (None, "sound")
+        and not data_or_path_or_list.startswith(("http://", "https://"))
+        and not os.path.exists(data_or_path_or_list)
+    ):
+        raise FileNotFoundError(
+            f"Audio file not found: {data_or_path_or_list!r}. Pass a valid local file "
+            f"path, URL, numpy array, torch.Tensor, or bytes."
+        )
     if (isinstance(data_or_path_or_list, str) and os.path.exists(data_or_path_or_list)) or hasattr(data_or_path_or_list, 'read'):  # local file or bytes io
         if data_type is None or data_type == "sound":
             if hasattr(data_or_path_or_list, "read") and hasattr(data_or_path_or_list, "seek"):
