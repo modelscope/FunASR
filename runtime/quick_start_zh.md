@@ -13,7 +13,7 @@
 
 #### python版本示例
 
-支持实时流式语音识别，并且会用非流式模型进行纠错，输出文本带有标点。目前只支持单个client，如需多并发请参考下方c++版本服务部署SDK
+支持实时流式语音识别，并且会用非流式模型进行纠错，输出文本带有标点。现已支持多个客户端并发(非阻塞推理,可用 --concurrent_vad / --concurrent_asr_online / --concurrent_asr_offline / --concurrent_punc / --concurrent_sv 调节各阶段并发度);如需更高吞吐,仍推荐下方 c++ 版本服务部署 SDK
 
 ##### 服务端部署
 ```shell
