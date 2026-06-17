@@ -11,7 +11,7 @@ MODEL_CONFIGS = {
     "sensevoice": {"model": "iic/SenseVoiceSmall", "vad_model": "fsmn-vad", "vad_kwargs": {"max_single_segment_time": 30000}},
     "paraformer": {"model": "paraformer-zh", "vad_model": "fsmn-vad", "punc_model": "ct-punc"},
     "paraformer-en": {"model": "paraformer-en", "vad_model": "fsmn-vad"},
-    "fun-asr-nano": {"model": "FunAudioLLM/Fun-ASR-Nano"},
+    "fun-asr-nano": {"model": "FunAudioLLM/Fun-ASR-Nano-2512", "vad_model": "fsmn-vad"},
 }
 
 
