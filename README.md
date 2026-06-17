@@ -39,16 +39,19 @@ pip install funasr
 
 ```python
 from funasr import AutoModel
+from funasr.utils.postprocess_utils import rich_transcription_postprocess
 
 model = AutoModel(model="iic/SenseVoiceSmall", vad_model="fsmn-vad", spk_model="cam++", device="cuda")
-result = model.generate(input="meeting.wav")
+result = model.generate(input="https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav")
+
+# One call returns VAD segments with speaker id + timestamps — render them however you like:
+for seg in result[0]["sentence_info"]:
+    print(f"[{seg['start']/1000:.1f}s] Speaker {seg['spk']}: {rich_transcription_postprocess(seg['sentence'])}")
 ```
 
 **Output** — structured text with speaker labels, timestamps, and punctuation:
 ```
-[00:00.4 → 00:03.8] Speaker 0: Let's discuss the Q3 plan.
-[00:04.2 → 00:07.1] Speaker 1: Sounds good. I have three points.
-[00:07.5 → 00:12.3] Speaker 0: Go ahead. We have 30 minutes.
+[0.6s] Speaker 0: 欢迎大家来体验达摩院推出的语音识别模型
 ```
 
 That's it. **One model, one call** — VAD segmentation, speech recognition, punctuation, speaker diarization all happen automatically.
@@ -61,7 +64,7 @@ For highest accuracy across 31 languages (including Chinese dialects), use [Fun-
 from funasr import AutoModel
 
 model = AutoModel(model="FunAudioLLM/Fun-ASR-Nano-2512", vad_model="fsmn-vad", device="cuda")
-result = model.generate(input="meeting.wav")
+result = model.generate(input="https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav")
 ```
 
 With vLLM acceleration (16x faster, batch processing):
@@ -181,7 +184,7 @@ from funasr import AutoModel
 
 # Chinese production (VAD + ASR + punctuation + speaker)
 model = AutoModel(model="paraformer-zh", vad_model="fsmn-vad", punc_model="ct-punc", spk_model="cam++", device="cuda")
-result = model.generate(input="meeting.wav", hotword="关键词 20")
+result = model.generate(input="https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav", hotword="关键词 20")
 
 # 31 languages with timestamps
 model = AutoModel(model="FunAudioLLM/Fun-ASR-Nano-2512", hub="hf", trust_remote_code=True,
