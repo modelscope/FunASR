@@ -718,6 +718,83 @@ class FunASRNano(nn.Module):
             **kwargs,
         )
 
+    def _inference_llm_batch(self, data_in, data_lengths, key, tokenizer, frontend, **kwargs):
+        """Batched LLM decoding for multiple VAD segments at once.
+
+        Builds each segment's inputs_embeds via the single-sample
+        inference_prepare, left-pads them into one batch, and runs a single
+        llm.generate. This greatly improves GPU utilization for the small LLM
+        decoder (the per-segment, batch_size=1 path underuses the GPU).
+        CTC timestamps are not produced in batched mode.
+        """
+        # normalize nested key (e.g. [[k1, k2, ...]]) like the single-sample path
+        if key is not None and len(key) > 0 and isinstance(key[0], (list, tuple)):
+            key = list(key[0])
+        embs = []
+        keys = []
+        for i, d in enumerate(data_in):
+            k_i = [key[i]] if key is not None and i < len(key) else None
+            emb_i, _c, _b, _s, _m = self.inference_prepare(
+                [d], data_lengths, k_i, tokenizer, frontend, **kwargs
+            )
+            embs.append(emb_i)
+            keys.append(key[i] if key is not None and i < len(key) else f"rand_{i}")
+
+        llm_dtype = kwargs.get("llm_dtype", "fp32")
+        if llm_dtype == "fp32":
+            llm_dtype = "fp16" if kwargs.get("fp16", False) else llm_dtype
+            llm_dtype = "bf16" if kwargs.get("bf16", False) else llm_dtype
+        dt = dtype_map[llm_dtype]
+        device = embs[0].device
+        self.llm = self.llm.to(dt)
+
+        B = len(embs)
+        D = embs[0].shape[-1]
+        Tmax = max(e.shape[1] for e in embs)
+        padded = torch.zeros(B, Tmax, D, device=device, dtype=dt)
+        attn = torch.zeros(B, Tmax, dtype=torch.long, device=device)
+        for i, e in enumerate(embs):
+            Ti = e.shape[1]
+            padded[i, Tmax - Ti :, :] = e[0].to(dt)  # left padding
+            attn[i, Tmax - Ti :] = 1
+
+        device_type = torch.device(kwargs.get("device", "cuda")).type
+        with torch.autocast(
+            device_type=device_type if device_type in ["cuda", "xpu", "mps"] else "cpu",
+            enabled=True if llm_dtype != "fp32" else False,
+            dtype=dt,
+        ):
+            # left padding requires explicit position_ids so each segment's real
+            # tokens get positions 0,1,2,... regardless of the padding length.
+            position_ids = attn.long().cumsum(-1) - 1
+            position_ids.masked_fill_(attn == 0, 1)
+            generated_ids = self.llm.generate(
+                inputs_embeds=padded,
+                attention_mask=attn,
+                position_ids=position_ids,
+                max_new_tokens=kwargs.get("max_length", 512),
+                pad_token_id=(
+                    self.llm.config.pad_token_id
+                    if self.llm.config.pad_token_id is not None
+                    else self.llm.config.eos_token_id
+                ),
+                **kwargs.get("llm_kwargs", {}),
+            )
+        texts = tokenizer.batch_decode(
+            generated_ids, skip_special_tokens=kwargs.get("skip_special_tokens", True)
+        )
+        results = []
+        for i, t in enumerate(texts):
+            t = kwargs.get("prev_text", "") + t
+            results.append(
+                {
+                    "key": keys[i],
+                    "text": re.sub(r"\s+", " ", t.replace("/sil", " ")),
+                    "text_tn": re.sub(r"[^\w\s\u3000\u4e00-\u9fff]+", "", t),
+                }
+            )
+        return results, {}
+
     def inference_llm(
         self,
         data_in,
@@ -737,6 +814,13 @@ class FunASRNano(nn.Module):
                 frontend: Audio frontend for feature extraction.
                 **kwargs: Additional keyword arguments.
             """
+        # Only batch when CTC timestamps are not needed; the batched path does not
+        # produce ctc_timestamps, so fall back to the single-sample path when a CTC
+        # decoder is loaded (preserves timestamp behavior).
+        if len(data_in) > 1 and self.ctc_decoder is None:
+            return self._inference_llm_batch(
+                data_in, data_lengths, key, tokenizer, frontend, **kwargs
+            )
         inputs_embeds, contents, batch, source_ids, meta_data = self.inference_prepare(
             data_in, data_lengths, key, tokenizer, frontend, **kwargs
         )
