@@ -48,3 +48,7 @@ CER matches PyTorch within 0.02% under identical conditions). See per-model READ
 - For long audio, Fun-ASR-Nano supports `--chunk` windowing; a proper VAD front end
   is on the roadmap.
 - This adds a new `runtime/llama.cpp/` directory only; no existing code is modified.
+
+## Further reading
+
+See [DESIGN.md](DESIGN.md) for the full system design — architecture, the shared SAN-M encoder, GGUF weight format, numerical-fidelity and validation methodology, design trade-offs, and gotchas.
