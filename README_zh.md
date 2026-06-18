@@ -189,9 +189,20 @@ model = AutoModel(model="FunAudioLLM/Fun-ASR-Nano-2512", hub="hf", trust_remote_
                   vad_model="fsmn-vad", vad_kwargs={"max_single_segment_time": 30000}, device="cuda")
 result = model.generate(input="audio.wav", batch_size=1)
 
-# 流式实时识别
+# 流式实时识别(逐块喂音频)
+import soundfile as sf
 model = AutoModel(model="paraformer-zh-streaming", device="cuda")
-result = model.generate(input="chunk.wav", cache={}, chunk_size=[0, 10, 5])
+audio, sr = sf.read("speech.wav", dtype="float32")   # 16 kHz 单声道
+chunk_size = [0, 10, 5]                               # 每块 600ms
+chunk_stride = chunk_size[1] * 960
+cache = {}
+n_chunks = (len(audio) - 1) // chunk_stride + 1
+for i in range(n_chunks):
+    chunk = audio[i * chunk_stride : (i + 1) * chunk_stride]
+    res = model.generate(input=chunk, cache=cache, is_final=(i == n_chunks - 1),
+                         chunk_size=chunk_size, encoder_chunk_look_back=4, decoder_chunk_look_back=1)
+    if res[0]["text"]:
+        print(res[0]["text"], end="", flush=True)
 
 # 情感识别
 model = AutoModel(model="emotion2vec_plus_large", device="cuda")
