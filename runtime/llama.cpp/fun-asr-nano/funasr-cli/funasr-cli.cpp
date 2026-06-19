@@ -23,34 +23,9 @@
 #include <string>
 #include <vector>
 
-// ======================= WAV (16 kHz mono PCM16) =======================
-static bool read_wav16(const char * path, std::vector<float> & out) {
-    FILE * f = fopen(path, "rb"); if (!f) return false;
-    char riff[4]; fread(riff, 1, 4, f);
-    if (strncmp(riff, "RIFF", 4)) { fclose(f); return false; }
-    fseek(f, 4, SEEK_CUR); char wave[4]; fread(wave, 1, 4, f);
-    if (strncmp(wave, "WAVE", 4)) { fclose(f); return false; }
-    uint16_t ch = 1, bits = 16; uint32_t sr = 16000;
-    while (!feof(f)) {
-        char id[4]; if (fread(id, 1, 4, f) != 4) break;
-        uint32_t sz; if (fread(&sz, 4, 1, f) != 1) break;
-        if (!strncmp(id, "fmt ", 4)) {
-            uint16_t fmt; fread(&fmt, 2, 1, f); fread(&ch, 2, 1, f);
-            fread(&sr, 4, 1, f); fseek(f, 6, SEEK_CUR); fread(&bits, 2, 1, f);
-            if (sz > 16) fseek(f, sz - 16, SEEK_CUR);
-        } else if (!strncmp(id, "data", 4)) {
-            if (ch < 1 || bits != 16) { fclose(f); fprintf(stderr, "only 16-bit PCM WAV supported (ch=%u bits=%u)\n", ch, bits); return false; }
-            int n = sz / (bits / 8);
-            std::vector<int16_t> pcm(n); fread(pcm.data(), 2, n, f);
-            out.resize(n / ch);
-            for (int i = 0; i < n / ch; i++) out[i] = pcm[i * ch] / 32768.0f; // ch0
-            fclose(f);
-            if (sr != 16000) fprintf(stderr, "warning: sample rate %u != 16000\n", sr);
-            return true;
-        } else fseek(f, sz, SEEK_CUR);
-    }
-    fclose(f); return false;
-}
+// any audio (wav/mp3/flac, any rate/channels) -> 16 kHz mono f32, via miniaudio
+#define FUNASR_AUDIO_IMPLEMENTATION
+#include "funasr_audio.h"
 
 // ======================= kaldi fbank + LFR =======================
 static const int FS=16000, WINLEN=400, SHIFT=160, NFFT=512, NMEL=80, LFR_M=7, LFR_N=6;
@@ -202,7 +177,7 @@ int main(int argc,char**argv){
     if(enc_path.empty()||llm_path.empty()||wav_path.empty()){fprintf(stderr,"missing args\n");return 1;}
 
     std::vector<float> wav;
-    if(!read_wav16(wav_path.c_str(),wav)){fprintf(stderr,"failed to read wav\n");return 1;}
+    if(!funasr_load_audio_16k_mono(wav_path.c_str(),wav)){fprintf(stderr,"failed to read audio\n");return 1;}
     int64_t t0=ggml_time_us();
 
     enc_model em; if(!load_enc(enc_path.c_str(),em))return 1;
