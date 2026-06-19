@@ -19,13 +19,9 @@
 
 static const float LN_EPS = 1e-5f;
 
-// ===== WAV + kaldi fbank (shared) =====
-static bool read_wav16(const char*p,std::vector<float>&o){FILE*f=fopen(p,"rb");if(!f)return false;char r[4];fread(r,1,4,f);
-  if(strncmp(r,"RIFF",4)){fclose(f);return false;}fseek(f,4,SEEK_CUR);char wv[4];fread(wv,1,4,f);if(strncmp(wv,"WAVE",4)){fclose(f);return false;}
-  uint16_t ch=1,bits=16;uint32_t sr=16000;while(!feof(f)){char id[4];if(fread(id,1,4,f)!=4)break;uint32_t sz;if(fread(&sz,4,1,f)!=1)break;
-    if(!strncmp(id,"fmt ",4)){uint16_t fm;fread(&fm,2,1,f);fread(&ch,2,1,f);fread(&sr,4,1,f);fseek(f,6,SEEK_CUR);fread(&bits,2,1,f);if(sz>16)fseek(f,sz-16,SEEK_CUR);}
-    else if(!strncmp(id,"data",4)){if(ch<1||bits!=16){fclose(f);fprintf(stderr,"only 16-bit PCM WAV (ch=%u bits=%u)\n",ch,bits);return false;}int n=sz/(bits/8);std::vector<int16_t>pc(n);fread(pc.data(),2,n,f);o.resize(n/ch);for(int i=0;i<n/ch;i++)o[i]=pc[i*ch]/32768.0f;fclose(f);return true;}
-    else fseek(f,sz,SEEK_CUR);}fclose(f);return false;}
+// ===== audio loader: any wav/mp3/flac, any rate/channels -> 16k mono (miniaudio) =====
+#define FUNASR_AUDIO_IMPLEMENTATION
+#include "funasr_audio.h"
 static const int FS=16000,WINLEN=400,SHIFT=160,NFFT=512,NMEL=80,LFR_M=7,LFR_N=6;
 static const float PREEMPH=0.97f,LOWF=20.0f,HIGHF=8000.0f;
 static inline float melf(float f){return 1127.0f*logf(1.0f+f/700.0f);}
@@ -135,7 +131,7 @@ int main(int argc,char**argv){
   const int D=m.c.d_model,F=560,V=m.c.vocab;
 
   // fbank
-  std::vector<float>wav;if(!read_wav16(wav_path.c_str(),wav)){fprintf(stderr,"read wav failed\n");return 1;}
+  std::vector<float>wav;if(!funasr_load_audio_16k_mono(wav_path.c_str(),wav)){fprintf(stderr,"read audio failed\n");return 1;}
   int64_t t0=ggml_time_us();int T=0;auto fb=compute_fbank(wav,T);
   // CMVN (Paraformer applies it): (x+shift)*scale
   float*shift=(float*)m.g("cmvn.shift")->data,*scale=(float*)m.g("cmvn.scale")->data;
