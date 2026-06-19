@@ -31,6 +31,7 @@ build/convert/run quickstart, validation numbers, and gotchas.
 ## Build (shared)
 ```bash
 git clone https://github.com/ggml-org/llama.cpp && cd llama.cpp
+cp -r /path/to/runtime/llama.cpp/funasr-common examples/   # shared audio loader (miniaudio); each example CMake adds ../funasr-common
 cp -r /path/to/runtime/llama.cpp/<model>/<example-dir> examples/
 echo 'add_subdirectory(<example-dir>)' >> examples/CMakeLists.txt
 cmake -B build -DGGML_NATIVE=ON -DLLAMA_CURL=OFF
