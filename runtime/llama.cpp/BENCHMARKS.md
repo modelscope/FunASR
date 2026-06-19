@@ -13,14 +13,19 @@ Same machine, **CPU only, 8 threads**, greedy decoding. Accuracy = character err
 rate (CER, lower is better); speed = real-time factor `compute_time / audio_duration`
 (higher `×` is faster, model-load time excluded); whisper forced to Chinese (`-l zh`).
 
-| system | model size (f16 / f32) | **CER** ↓ | **speed** ↑ |
+| system | GGUF size² | **CER** ↓ | **speed** ↑ |
 |---|---|---|---|
-| **FunASR Fun-ASR-Nano** (encoder+adaptor+Qwen3-0.6B) | 0.9 + 0.8 GB | **5.71 %** | LLM decode¹ |
-| **FunASR SenseVoiceSmall** | **449 MB** / 893 MB | **7.20 %** | **19.8× real-time** |
-| **FunASR Paraformer** | **401 MB** / 824 MB | **9.18 %** | **20.9× real-time** |
+| **FunASR Fun-ASR-Nano** (encoder+adaptor+Qwen3-0.6B) | 0.95 GB (f16 enc + Q4 LLM) … 1.7 GB (f32 enc + Q8 LLM) | **5.71 %** | LLM decode¹ |
+| **FunASR SenseVoiceSmall** | 449 MB (f16) / 893 MB (f32) | **7.20 %** | **19.8× real-time** |
+| **FunASR Paraformer** | 401 MB (f16) / 824 MB (f32) | **9.18 %** | **20.9× real-time** |
 | whisper.cpp base | 142 MB | 22.96 % | 12.7× |
 | whisper.cpp small | 466 MB | 17.46 % | 4.8× |
 | whisper.cpp large-v3-turbo | 1.6 GB | 16.33 % | 3.0× |
+
+² FunASR sizes are encoder(+adaptor/CTC) GGUF; f16 stores the matmul weights at half
+precision (norms/biases stay f32). Fun-ASR-Nano additionally ships a Qwen3-0.6B LLM
+GGUF (Q4_K_M ≈ 0.48 GB / Q8_0 ≈ 0.8 GB), hence the range. whisper sizes are the single
+ggml model file.
 
 ¹ Fun-ASR-Nano has an autoregressive 0.6B LLM decoder, so it is slower than the
 encoder-only SenseVoice/Paraformer (and is the accuracy leader). A clean RTF will be
