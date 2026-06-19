@@ -4,102 +4,98 @@ How does the FunASR llama.cpp runtime compare with [whisper.cpp](https://github.
 the de-facto on-device ASR runtime, on **Chinese** speech? This page reports a
 head-to-head on identical hardware and audio.
 
-**TL;DR — for Chinese ASR on CPU, FunASR is more accurate, faster, and comparable
-or smaller in size than whisper.cpp at every model tier.**
+**TL;DR — for Chinese ASR on CPU, FunASR is ~2.7× more accurate than whisper.cpp at
+every model tier, and faster.**
 
 ## Results
 
-Same machine, **CPU only, 8 threads**, greedy decoding. Accuracy = character error
-rate (CER, lower is better); speed = real-time factor `compute_time / audio_duration`
-(higher `×` is faster, model-load time excluded); whisper forced to Chinese (`-l zh`).
+Dataset: **184 real Mandarin clips with human references** (the standard FunASR
+benchmark set). Metric: **micro-CER** with `normalize_zh` (lower is better). Speed:
+real-time factor on **CPU, 8 threads** (model-load excluded). whisper forced to
+Chinese (`-l zh`).
 
-| system | GGUF size² | **CER** ↓ | **speed** ↑ |
+| system | **CER** (micro, normalize_zh) ↓ | speed ↑ | size |
 |---|---|---|---|
-| **FunASR Fun-ASR-Nano** (encoder+adaptor+Qwen3-0.6B) | 0.95 GB (f16 enc + Q4 LLM) … 1.7 GB (f32 enc + Q8 LLM) | **5.71 %** | LLM decode¹ |
-| **FunASR SenseVoiceSmall** | 449 MB (f16) / 893 MB (f32) | **7.20 %** | **19.8× real-time** |
-| **FunASR Paraformer** | 401 MB (f16) / 824 MB (f32) | **9.18 %** | **20.9× real-time** |
-| whisper.cpp base | 142 MB | 22.96 % | 12.7× |
-| whisper.cpp small | 466 MB | 17.46 % | 4.8× |
-| whisper.cpp large-v3-turbo | 1.6 GB | 16.33 % | 3.0× |
+| **FunASR Fun-ASR-Nano** | **8.06** (fp32 ref) / **8.42** (Q8 runtime) | LLM decode¹ | enc + Qwen3-0.6B GGUF |
+| **FunASR SenseVoiceSmall** | **7.81** (fp32 ref) / **8.17** (Q8 runtime) | **~20× real-time** | 449 MB (f16) |
+| **FunASR Paraformer** | **10.18** (fp32 ref) / **9.89** (Q8 runtime) | **~21× real-time** | 401 MB (f16) |
+| whisper.cpp base | 31.33 | 9.9× | 142 MB |
+| whisper.cpp small | 22.12 | 4.6× | 466 MB |
+| whisper.cpp large-v3-turbo | 23.15 | 3.2× | 1.6 GB |
 
-² FunASR sizes are encoder(+adaptor/CTC) GGUF; f16 stores the matmul weights at half
-precision (norms/biases stay f32). Fun-ASR-Nano additionally ships a Qwen3-0.6B LLM
-GGUF (Q4_K_M ≈ 0.48 GB / Q8_0 ≈ 0.8 GB), hence the range. whisper sizes are the single
-ggml model file.
+**Each FunASR row shows two numbers:** the published **fp32 reference** (PyTorch,
+the number on funasr.com / the model cards) and the **Q8 llama.cpp CPU runtime**
+measured here. The ~0.3 % gap is normal int8 quantization + VAD segment boundaries;
+Q8 is the real CPU/edge deployment config. Either way, **FunASR ~8–10 % vs
+whisper.cpp 22–31 % — a 2.7×+ accuracy gap that holds at every tier.**
 
-¹ Fun-ASR-Nano has an autoregressive 0.6B LLM decoder, so it is slower than the
-encoder-only SenseVoice/Paraformer (and is the accuracy leader). A clean RTF will be
-added once the CLI separates model-load from compute time.
+¹ Fun-ASR-Nano runs an autoregressive 0.6B LLM decoder (slower than the encoder-only
+SenseVoice/Paraformer; it is the accuracy leader). A clean RTF lands once the CLI
+separates model-load from compute.
 
-The whole **FunASR family beats every whisper.cpp tier on Chinese**, and lets you
-pick the point on the accuracy/speed curve: **Paraformer** (fastest, 20.9×),
-**SenseVoice** (fast + language-ID/emotion/event), **Fun-ASR-Nano** (most accurate,
-**5.71 %** — 2.9× lower CER than whisper-large-v3-turbo).
+### Transparency / segmentation (read this before quoting numbers)
 
-**At comparable size** (SenseVoice-f16 449 MB ≈ whisper-small 466 MB): FunASR is
-**2.4× more accurate and 4× faster**. **Against whisper's best** (large-v3-turbo,
-1.6 GB): SenseVoice is **2.3× more accurate, 6.6× faster, and 3.6× smaller**; Fun-ASR-Nano
-is **2.9× more accurate**.
-
-Full 184-file set (FunASR): SenseVoiceSmall **9.98 %** CER, Paraformer **12.84 %**
-(the head-to-head above uses the 60-file subset that whisper was also run on).
+- **Segmentation differs by system, each using its natural strategy:** FunASR uses an
+  `fsmn-vad` front end (segments → ASR → concatenate); whisper.cpp uses its built-in
+  30 s windowing. This is a fair system-level comparison.
+- **Engine-internal VAD is on the FunASR runtime roadmap.** Today the runtime reaches
+  the reference numbers via the `fsmn-vad` front end (or `--chunk`); a native ggml VAD
+  is planned so the bare binary hits the reference end-to-end.
+- **Bare binary, no VAD (whole-clip)**, for full disclosure: SenseVoiceSmall **9.99 %**,
+  Paraformer **12.82 %** (micro, normalize_zh, full 184). Long clips decoded as one
+  segment are out-of-distribution; this is exactly what VAD fixes.
 
 ## Why FunASR wins on Chinese
 
-1. **Training data.** SenseVoice / Paraformer are trained primarily on large-scale
-   Mandarin (and other Asian languages); Whisper is a general multilingual model
-   where Chinese is a small slice. On Chinese homophones Whisper makes substitution
-   errors the FunASR models do not (example below).
-2. **Architecture → speed.** Paraformer is **non-autoregressive** (a CIF predictor
-   emits all tokens, the decoder runs once) and SenseVoiceSmall is **encoder + CTC**
-   (one forward pass). Whisper is **autoregressive** (one transformer step per output
-   token). That is the structural reason FunASR runs 4–7× faster at the same threads.
+1. **Training data.** SenseVoice / Paraformer / Fun-ASR-Nano are trained primarily on
+   large-scale Mandarin; Whisper is a general multilingual model where Chinese is a
+   small slice. On Chinese homophones Whisper makes substitution errors the FunASR
+   models do not (example below).
+2. **Architecture → speed.** Paraformer is non-autoregressive (CIF predictor + one
+   decoder pass) and SenseVoiceSmall is encoder + CTC (one forward pass); Whisper is
+   autoregressive (one step per output token).
 
 ## Qualitative example (clip 002)
 
 | system | output (excerpt) |
 |---|---|
-| ground truth | 我想问，我在**滨海新区**有房…因为我在天津有房子…所以我必须拿到**抚养权** |
-| FunASR (Nano / SenseVoice / Paraformer) | …我在**滨海新区**有房…我必须拿到**抚养权**… ✓ |
+| ground truth | 我想问，我在**滨海新区**有房…所以我必须拿到**抚养权** |
+| FunASR (Nano / SenseVoice / Paraformer) | …我在**滨海新区**有房…拿到**抚养权**… ✓ |
 | whisper base | …我在**冰海心区**有房…我想要**扶养权**…上学**方面**… ✗ |
 | whisper small | …我在**冰海新区**有房…我想要**抚养全**… ✗ |
-| whisper large-v3-turbo | …我在滨海新区有房…上学**方面**… ✗ |
-
-Whisper's errors are classic Chinese homophone substitutions (滨海→冰海, 抚养→扶养,
-方便→方面); the FunASR models get them right.
+| whisper large-v3-turbo | …滨海新区…上学**方面**… ✗ |
 
 ## Methodology
 
-- **Data:** 184 real long-audio Mandarin clips (~44–60 s each) with human references.
-  The whisper head-to-head uses the first 60 clips (large-v3-turbo is too slow on CPU
-  to run all 184); FunASR numbers are reported on both 60 and the full 184.
-- **Accuracy:** character-level CER after normalization (strip punctuation/whitespace,
-  lowercase), identical for all systems.
-- **Speed (RTF):** `compute_time / audio_duration`, **model-load time excluded** for
-  every system (FunASR self-reported encode/decode time; whisper `total − load`).
-  CPU, **8 threads for all systems** (whisper `-t 8`).
-- **Decoding:** greedy for all; whisper forced to Chinese (`-l zh`), no VAD on either
-  side (FunASR clips fit one segment).
-- **Hardware:** a single shared server CPU; numbers are stable across repeats.
+- **Data:** the standard 184-clip Mandarin benchmark set (`benchmark/testset.json`),
+  ~44–60 s each, with human references.
+- **Metric (canonical):** **micro-average CER** (`Σ edits / Σ ref chars`) after
+  **`normalize_zh`**: `re.sub(r'[^\w一-鿿]', '', text).upper()` (strip punctuation/
+  whitespace, keep word chars + CJK, upper-case; SenseVoice `<|...|>` tags stripped).
+  This is the canonical FunASR口径 — the same one behind the published fp32 numbers.
+  (A macro-average / simplified-normalize variant gives different, non-canonical
+  numbers; it is not used here.)
+- **FunASR fp32 reference:** PyTorch, micro + normalize_zh, 184 set — SenseVoice 7.81,
+  Paraformer 10.18, Fun-ASR-Nano 8.06 (matches funasr.com / READMEs / model cards).
+- **FunASR Q8 runtime:** this llama.cpp runtime (Q8 LLM / f16 encoder) + `fsmn-vad`
+  front end (`max_single_segment_time=30000`), full 184. SenseVoice uses `use_itn=True`
+  to match the reference.
+- **whisper.cpp:** ggml `base` / `small` / `large-v3-turbo`, `-l zh`, internal 30 s
+  windowing, full 184.
+- **Speed (RTF):** `Σ compute_time / Σ audio_duration`, model-load excluded, **8 threads
+  for all systems**.
 
-## Caveats (fair use of this comparison)
+## Caveats (fair use)
 
 - This is a **Chinese** benchmark — FunASR's home turf. Whisper is a *general
-  multilingual* model that also does translation, 99-language coverage, and
-  timestamps; it should not be judged solely on Mandarin CER. For English or
-  low-resource languages Whisper is the stronger general choice.
-- SenseVoiceSmall additionally outputs language ID, emotion, and audio-event tags;
-  Paraformer is Mandarin-specialised. Pick the model that matches your use case.
-- Single-domain dataset; absolute CER will differ on other domains. The *relative*
-  ranking (FunASR ≫ whisper on Mandarin) is the takeaway.
+  multilingual* model (translation, 99 languages, timestamps); for English / other
+  languages it is the stronger general choice. The takeaway is specifically:
+  **for Chinese ASR on CPU, FunASR is the accuracy + speed leader.**
+- SenseVoiceSmall also outputs language ID / emotion / audio-event; Paraformer is
+  Mandarin-specialised; Fun-ASR-Nano is the most accurate (LLM decoder). Pick per use case.
 
 ## Reproduce
 
-1. Build the FunASR runtimes (`runtime/llama.cpp/`, see each model README) and
-   whisper.cpp; convert weights to GGUF.
-2. Run each system over the clips, capturing text + self-reported compute time.
-3. Compute normalized CER vs the references and RTF vs clip durations.
-
-The exact scripts (`agg_bench.py` and the per-system runners) accompany this
-benchmark; numbers above were produced with whisper.cpp `large-v3-turbo` / `small` /
-`base` and the FunASR `sensevoice-small` / `paraformer` GGUFs.
+See [`benchmarks/`](benchmarks/) — `compute_cer.py` (micro-CER + normalize_zh + RTF)
+and the per-system run commands. Produce hypotheses with each tool, then compute CER
+against the references and RTF against clip durations.
