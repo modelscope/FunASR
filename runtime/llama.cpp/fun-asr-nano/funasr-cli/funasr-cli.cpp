@@ -39,6 +39,7 @@ static bool read_wav16(const char * path, std::vector<float> & out) {
             fread(&sr, 4, 1, f); fseek(f, 6, SEEK_CUR); fread(&bits, 2, 1, f);
             if (sz > 16) fseek(f, sz - 16, SEEK_CUR);
         } else if (!strncmp(id, "data", 4)) {
+            if (ch < 1 || bits != 16) { fclose(f); fprintf(stderr, "only 16-bit PCM WAV supported (ch=%u bits=%u)\n", ch, bits); return false; }
             int n = sz / (bits / 8);
             std::vector<int16_t> pcm(n); fread(pcm.data(), 2, n, f);
             out.resize(n / ch);
@@ -212,6 +213,7 @@ int main(int argc,char**argv){
     llama_context_params cp=llama_context_default_params();
     cp.n_ctx=2048; cp.n_batch=2048; cp.n_ubatch=2048;
     llama_context*ctx=llama_init_from_model(model,cp);
+    if(!ctx){fprintf(stderr,"failed to create llama context\n");llama_model_free(model);return 1;}
     auto sp=llama_sampler_chain_default_params(); llama_sampler*smpl=llama_sampler_chain_init(sp);
     if(rep!=1.0f) llama_sampler_chain_add(smpl,llama_sampler_init_penalties(256,rep,0.0f,0.0f));
     llama_sampler_chain_add(smpl,llama_sampler_init_greedy());
@@ -223,7 +225,7 @@ int main(int argc,char**argv){
     auto pre=tokenize(prefix); auto suf=tokenize(suffix);
 
     // split into chunks (chunk_sec<=0 -> whole file)
-    int chunk_n = chunk_sec > 0 ? (int)(chunk_sec*16000) : (int)wav.size();
+    int chunk_n = chunk_sec > 0 ? std::max(1, (int)(chunk_sec*16000)) : (int)wav.size();
     std::string full;
     for (size_t off = 0; off < wav.size(); off += chunk_n) {
         int len = std::min((size_t)chunk_n, wav.size()-off);
@@ -251,5 +253,6 @@ int main(int argc,char**argv){
     int64_t t2=ggml_time_us();
     fprintf(stderr,"[done] %.2fs ; chunk=%.0fs\n",(t2-t0)/1e6, chunk_sec);
     llama_sampler_free(smpl); llama_free(ctx); llama_model_free(model);
+    if(em.ctx_w) ggml_free(em.ctx_w);
     return 0;
 }

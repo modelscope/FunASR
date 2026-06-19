@@ -196,9 +196,9 @@ int main(int argc, char ** argv) {
     // read fbank.bin (T x F)
     FILE * f = fopen(fbank_path.c_str(), "rb");
     if (!f) { fprintf(stderr, "cannot open %s\n", fbank_path.c_str()); return 1; }
-    int32_t T, F; if (fread(&T, 4, 1, f) != 1 || fread(&F, 4, 1, f) != 1) return 1;
+    int32_t T, F; if (fread(&T, 4, 1, f) != 1 || fread(&F, 4, 1, f) != 1) { fclose(f); return 1; }
     std::vector<float> fbank((size_t) T * F);
-    if (fread(fbank.data(), sizeof(float), fbank.size(), f) != fbank.size()) return 1;
+    if (fread(fbank.data(), sizeof(float), fbank.size(), f) != fbank.size()) { fclose(f); return 1; }
     fclose(f);
     fprintf(stderr, "fbank: T=%d F=%d\n", T, F);
 
@@ -264,9 +264,12 @@ int main(int argc, char ** argv) {
     std::vector<float> out((size_t) D * T);
     ggml_backend_tensor_get(x, out.data(), 0, ggml_nbytes(x));
     FILE * fo = fopen(out_path.c_str(), "wb");
+    if (!fo) { fprintf(stderr, "failed to open output file %s\n", out_path.c_str()); return 1; }
     fwrite(&T, 4, 1, fo); fwrite(&D, 4, 1, fo); fwrite(out.data(), sizeof(float), out.size(), fo);
     fclose(fo);
     fprintf(stderr, "done: wrote %s [%d x %d] in %.2f s (layers run=%d, adaptor=%d)\n",
             out_path.c_str(), T, D, (t1 - t0)/1e6, done, run_adaptor && !stop);
+    ggml_gallocr_free(galloc); ggml_free(ctx); ggml_backend_free(backend);
+    if (m.ctx_w) ggml_free(m.ctx_w);
     return 0;
 }

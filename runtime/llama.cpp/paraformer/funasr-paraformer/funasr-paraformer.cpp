@@ -24,7 +24,7 @@ static bool read_wav16(const char*p,std::vector<float>&o){FILE*f=fopen(p,"rb");i
   if(strncmp(r,"RIFF",4)){fclose(f);return false;}fseek(f,4,SEEK_CUR);char wv[4];fread(wv,1,4,f);if(strncmp(wv,"WAVE",4)){fclose(f);return false;}
   uint16_t ch=1,bits=16;uint32_t sr=16000;while(!feof(f)){char id[4];if(fread(id,1,4,f)!=4)break;uint32_t sz;if(fread(&sz,4,1,f)!=1)break;
     if(!strncmp(id,"fmt ",4)){uint16_t fm;fread(&fm,2,1,f);fread(&ch,2,1,f);fread(&sr,4,1,f);fseek(f,6,SEEK_CUR);fread(&bits,2,1,f);if(sz>16)fseek(f,sz-16,SEEK_CUR);}
-    else if(!strncmp(id,"data",4)){int n=sz/(bits/8);std::vector<int16_t>pc(n);fread(pc.data(),2,n,f);o.resize(n/ch);for(int i=0;i<n/ch;i++)o[i]=pc[i*ch]/32768.0f;fclose(f);return true;}
+    else if(!strncmp(id,"data",4)){if(ch<1||bits!=16){fclose(f);fprintf(stderr,"only 16-bit PCM WAV (ch=%u bits=%u)\n",ch,bits);return false;}int n=sz/(bits/8);std::vector<int16_t>pc(n);fread(pc.data(),2,n,f);o.resize(n/ch);for(int i=0;i<n/ch;i++)o[i]=pc[i*ch]/32768.0f;fclose(f);return true;}
     else fseek(f,sz,SEEK_CUR);}fclose(f);return false;}
 static const int FS=16000,WINLEN=400,SHIFT=160,NFFT=512,NMEL=80,LFR_M=7,LFR_N=6;
 static const float PREEMPH=0.97f,LOWF=20.0f,HIGHF=8000.0f;
@@ -208,5 +208,6 @@ int main(int argc,char**argv){
   for(int n=0;n<N;n++){const float*col=&logits[(size_t)n*V];int am=0;float best=col[0];for(int v=1;v<V;v++)if(col[v]>best){best=col[v];am=v;}printf("%d ",am);}
   printf("\n");
   fprintf(stderr,"[paraformer] T=%d N_tok=%d enc %.2fs dec %.2fs\n",T,N,(t1-t0)/1e6,(t2-t1)/1e6);
+  if(m.ctx_w) ggml_free(m.ctx_w);
   return 0;
 }

@@ -27,7 +27,7 @@ static bool read_wav16(const char*path,std::vector<float>&out){
   if(strncmp(wv,"WAVE",4)){fclose(f);return false;} uint16_t ch=1,bits=16; uint32_t sr=16000;
   while(!feof(f)){char id[4]; if(fread(id,1,4,f)!=4)break; uint32_t sz; if(fread(&sz,4,1,f)!=1)break;
     if(!strncmp(id,"fmt ",4)){uint16_t fmt; fread(&fmt,2,1,f); fread(&ch,2,1,f); fread(&sr,4,1,f); fseek(f,6,SEEK_CUR); fread(&bits,2,1,f); if(sz>16)fseek(f,sz-16,SEEK_CUR);}
-    else if(!strncmp(id,"data",4)){int n=sz/(bits/8); std::vector<int16_t> pcm(n); fread(pcm.data(),2,n,f); out.resize(n/ch);
+    else if(!strncmp(id,"data",4)){if(ch<1||bits!=16){fclose(f);fprintf(stderr,"only 16-bit PCM WAV (ch=%u bits=%u)\n",ch,bits);return false;} int n=sz/(bits/8); std::vector<int16_t> pcm(n); fread(pcm.data(),2,n,f); out.resize(n/ch);
       for(int i=0;i<n/ch;i++)out[i]=pcm[i*ch]/32768.0f; fclose(f); if(sr!=16000)fprintf(stderr,"warn: sr %u\n",sr); return true;}
     else fseek(f,sz,SEEK_CUR);}
   fclose(f); return false;
@@ -126,8 +126,8 @@ int main(int argc,char**argv){
     int t=0; fb=compute_fbank(wav,t); T=t;
   } else {
     FILE*f=fopen(fbank_path.c_str(),"rb"); if(!f){fprintf(stderr,"open fbank\n");return 1;}
-    if(fread(&T,4,1,f)!=1||fread(&Fc,4,1,f)!=1)return 1;
-    fb.resize((size_t)T*Fc); if((int)fread(fb.data(),4,fb.size(),f)!=(int)fb.size())return 1; fclose(f);
+    if(fread(&T,4,1,f)!=1||fread(&Fc,4,1,f)!=1){fclose(f);return 1;}
+    fb.resize((size_t)T*Fc); if((int)fread(fb.data(),4,fb.size(),f)!=(int)fb.size()){fclose(f);return 1;} fclose(f);
   }
 
   // NOTE: SenseVoiceSmall inference() feeds the RAW log-mel fbank to the encoder;
@@ -174,5 +174,6 @@ int main(int argc,char**argv){
   printf("\n");
   fprintf(stderr,"[sensevoice] N=%d (q%d+T%d) encode %.2fs\n",N,nq,T,(t1-t0)/1e6);
   ggml_gallocr_free(ga); ggml_free(c); ggml_backend_free(be);
+  if(m.ctx_w) ggml_free(m.ctx_w);
   return 0;
 }
