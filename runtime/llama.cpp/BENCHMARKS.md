@@ -73,8 +73,6 @@ separates model-load from compute.
   **`normalize_zh`**: `re.sub(r'[^\w一-鿿]', '', text).upper()` (strip punctuation/
   whitespace, keep word chars + CJK, upper-case; SenseVoice `<|...|>` tags stripped).
   This is the canonical FunASR口径 — the same one behind the published fp32 numbers.
-  (A macro-average / simplified-normalize variant gives different, non-canonical
-  numbers; it is not used here.)
 - **FunASR fp32 reference:** PyTorch, micro + normalize_zh, 184 set — SenseVoice 7.81,
   Paraformer 10.18, Fun-ASR-Nano 8.06 (matches funasr.com / READMEs / model cards).
 - **FunASR Q8 runtime:** this llama.cpp runtime (Q8 LLM / f16 encoder) + `fsmn-vad`
