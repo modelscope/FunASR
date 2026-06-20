@@ -10,6 +10,22 @@ import torch.nn as nn
 from funasr.register import tables
 
 
+# qwen-asr's validate_language() only accepts canonical full names ("Chinese", "English",
+# ...), but FunASR documents short/ISO codes ("zh", "en", "auto") as valid language hints.
+# Defined at module level so the lookup table is built once, not on every inference call.
+_ISO_LANG_ALIASES = {
+    "zh": "Chinese", "zh-cn": "Chinese", "zho": "Chinese", "cmn": "Chinese",
+    "en": "English", "yue": "Cantonese", "ar": "Arabic", "de": "German",
+    "fr": "French", "es": "Spanish", "pt": "Portuguese", "id": "Indonesian",
+    "it": "Italian", "ko": "Korean", "ru": "Russian", "th": "Thai",
+    "vi": "Vietnamese", "ja": "Japanese", "tr": "Turkish", "hi": "Hindi",
+    "ms": "Malay", "nl": "Dutch", "sv": "Swedish", "da": "Danish",
+    "fi": "Finnish", "pl": "Polish", "cs": "Czech", "fil": "Filipino",
+    "fa": "Persian", "el": "Greek", "ro": "Romanian", "hu": "Hungarian",
+    "mk": "Macedonian",
+}
+
+
 @tables.register("model_classes", "Qwen3ASR")
 @tables.register("model_classes", "Qwen/Qwen3-ASR-1.7B")
 @tables.register("model_classes", "Qwen/Qwen3-ASR-0.6B")
@@ -150,6 +166,14 @@ class Qwen3ASR(nn.Module):
         time1 = time.perf_counter()
 
         language = kwargs.get("language", None)
+        # Normalize FunASR's documented short/ISO codes (and "auto") to qwen-asr full names
+        # so a hint like language="zh" doesn't raise "Unsupported language: Zh".
+        if language is not None:
+            _lk = str(language).strip().lower()
+            if _lk in ("auto", "none", ""):
+                language = None
+            else:
+                language = _ISO_LANG_ALIASES.get(_lk, language)
         return_time_stamps = kwargs.get("return_time_stamps", False) or kwargs.get("output_timestamp", False)
         context = kwargs.get("context", "")
 
