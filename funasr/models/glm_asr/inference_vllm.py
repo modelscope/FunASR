@@ -26,6 +26,36 @@ import torch
 logger = logging.getLogger(__name__)
 dtype_map = {"bf16": torch.bfloat16, "fp16": torch.float16, "fp32": torch.float32}
 
+# Warn only once per process so batch loops do not spam the log.
+_warned_rep_penalty = False
+
+
+def _safe_repetition_penalty(repetition_penalty):
+    """Force ``repetition_penalty`` to the neutral value for prompt-embeds mode.
+
+    GLM-ASR feeds vLLM precomputed embeddings (``enable_prompt_embeds=True``), so
+    a request carries no prompt token IDs. vLLM applies ``repetition_penalty`` by
+    scattering over those IDs, so any value other than 1.0 indexes an empty
+    token-id tensor and aborts the engine with a CUDA
+    ``scatter gather index out of bounds`` assertion (issue #2948). We therefore
+    warn once and fall back to the neutral value of 1.0.
+    """
+    global _warned_rep_penalty
+
+    if repetition_penalty is None or repetition_penalty == 1.0:
+        return 1.0
+
+    if not _warned_rep_penalty:
+        logger.warning(
+            "repetition_penalty=%s is not supported in vLLM prompt-embeds mode "
+            "(no prompt token IDs to penalize) and would trigger a CUDA scatter "
+            "index-out-of-bounds crash; using repetition_penalty=1.0 instead. "
+            "See https://github.com/modelscope/FunASR/issues/2948.",
+            repetition_penalty,
+        )
+        _warned_rep_penalty = True
+    return 1.0
+
 
 def prepare_glmasr_vllm_dir(model_dir: str) -> str:
     """Extract language_model weights into vLLM-compatible Llama format."""
@@ -182,13 +212,22 @@ class GLMASRVLLMEngine:
         audio_emb = audio_embeds[0] if audio_embeds.dim() == 3 else audio_embeds
         return torch.cat([prefix_emb, audio_emb, suffix_emb], dim=0)
 
-    def generate(self, inputs, prompt="转录以下音频内容", max_new_tokens=500, **kwargs):
+    def generate(self, inputs, prompt="转录以下音频内容", max_new_tokens=500,
+                 temperature=0.0, top_p=1.0, top_k=-1, repetition_penalty=1.0,
+                 **kwargs):
         """Run batch ASR inference.
 
         Args:
             inputs: Audio file path(s), numpy arrays, or tensors.
             prompt: Instruction prompt for ASR.
             max_new_tokens: Maximum tokens to generate per sample.
+            temperature: Sampling temperature (0 = greedy decoding).
+            top_p: Nucleus sampling parameter.
+            top_k: Top-k sampling (-1 = disabled).
+            repetition_penalty: Repetition penalty factor. Non-neutral values are
+                forced back to 1.0 here because this engine feeds vLLM precomputed
+                embeddings (``enable_prompt_embeds=True``); see
+                ``resolve_repetition_penalty`` and issue #2948.
 
         Returns:
             List of {"key": str, "text": str}
@@ -204,7 +243,10 @@ class GLMASRVLLMEngine:
 
         sampling_params = SamplingParams(
             max_tokens=max_new_tokens,
-            temperature=0,
+            temperature=temperature,
+            top_p=top_p,
+            top_k=top_k if top_k > 0 else -1,
+            repetition_penalty=_safe_repetition_penalty(repetition_penalty),
             skip_special_tokens=True,
         )
 
