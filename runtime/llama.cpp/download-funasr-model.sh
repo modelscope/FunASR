@@ -14,10 +14,13 @@ case "$MODEL" in
   fsmn-vad|vad) REPO="FunAudioLLM/fsmn-vad-GGUF" ;;
   *) usage ;;
 esac
-command -v hf >/dev/null 2>&1 || { echo "install first: pip install -U huggingface_hub"; exit 1; }
+# huggingface_hub ships `hf` (new CLI); older versions only have `huggingface-cli` (deprecated). Use whichever exists.
+if   command -v hf              >/dev/null 2>&1; then HF=hf
+elif command -v huggingface-cli >/dev/null 2>&1; then HF=huggingface-cli
+else echo "need the Hugging Face CLI: pip install -U huggingface_hub"; exit 1; fi
 mkdir -p "$OUT"
-echo "downloading $REPO ..."; hf download "$REPO" --include "*.gguf" --local-dir "$OUT"
+echo "downloading $REPO ..."; "$HF" download "$REPO" --include "*.gguf" --local-dir "$OUT"
 if [ "$MODEL" != "fsmn-vad" ] && [ "$MODEL" != "vad" ]; then
-  echo "downloading FSMN-VAD (for --vad) ..."; hf download FunAudioLLM/fsmn-vad-GGUF --include "*.gguf" --local-dir "$OUT"
+  echo "downloading FSMN-VAD (for --vad) ..."; "$HF" download FunAudioLLM/fsmn-vad-GGUF --include "*.gguf" --local-dir "$OUT"
 fi
 echo "done -> $OUT"; ls -1 "$OUT"/*.gguf
