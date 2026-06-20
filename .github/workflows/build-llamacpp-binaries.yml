@@ -1,0 +1,73 @@
+name: Build llama.cpp runtime binaries
+
+# Cross-platform prebuilt binaries for the FunASR llama.cpp / GGUF runtime,
+# like whisper.cpp's whisper-bin-*. Push a `runtime-llamacpp-v*` tag to publish
+# a GitHub Release with the binaries; or run manually (workflow_dispatch) to test
+# the build without creating a release.
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'runtime-llamacpp-v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: build-${{ matrix.name }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: ubuntu-latest,    name: linux-x64 }
+          - { os: ubuntu-24.04-arm, name: linux-arm64 }
+          - { os: macos-13,         name: macos-x64 }
+          - { os: macos-latest,     name: macos-arm64 }
+          - { os: windows-latest,   name: windows-x64 }
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+        working-directory: runtime/llama.cpp
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure and build
+        run: |
+          cmake -B build -DCMAKE_BUILD_TYPE=Release
+          cmake --build build --config Release -j
+      - name: Package
+        run: |
+          mkdir -p pkg
+          cp build/bin/llama-funasr-* pkg/ 2>/dev/null || true
+          cp build/bin/Release/llama-funasr-* pkg/ 2>/dev/null || true
+          cp README.md download-funasr-model.sh pkg/ 2>/dev/null || true
+          echo "--- packaged binaries ---"; ls -la pkg
+          if [ "${{ runner.os }}" = "Windows" ]; then
+            7z a "funasr-llamacpp-${{ matrix.name }}.zip" ./pkg/*
+          else
+            tar czf "funasr-llamacpp-${{ matrix.name }}.tar.gz" -C pkg .
+          fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: funasr-llamacpp-${{ matrix.name }}
+          path: runtime/llama.cpp/funasr-llamacpp-${{ matrix.name }}.*
+          if-no-files-found: error
+
+  release:
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${{ github.ref_name }}" dist/* \
+            --repo "${{ github.repository }}" \
+            --title "FunASR llama.cpp runtime ${{ github.ref_name }}" \
+            --notes "Prebuilt self-contained binaries for the FunASR llama.cpp / GGUF runtime — SenseVoice, Paraformer and Fun-ASR-Nano with built-in FSMN-VAD (a whisper.cpp-style on-device ASR, strong on Chinese). Get a model with \`bash download-funasr-model.sh <sensevoice|paraformer|nano>\`, then run \`llama-funasr-cli\` / \`llama-funasr-sensevoice\` / \`llama-funasr-paraformer\`. No Python, no build. Docs: runtime/llama.cpp/README.md"
