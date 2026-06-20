@@ -4,7 +4,8 @@ import argparse, os, re
 import numpy as np, torch, gguf
 
 def parse_mvn(path):
-    b=[np.array([float(x) for x in m.split()],np.float32) for m in re.findall(r"\[([^\]]*)\]",open(path).read())]
+    with open(path) as f: txt=f.read()
+    b=[np.array([float(x) for x in m.split()],np.float32) for m in re.findall(r"\[([^\]]*)\]",txt)]
     v=[x for x in b if x.size>1]; return v[0], v[1]   # shift, scale (both 400-dim)
 
 def main():

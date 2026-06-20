@@ -17,6 +17,9 @@
 #include <string>
 #include <utility>
 #include <vector>
+#ifndef M_PI
+#define M_PI 3.14159265358979323846   // not guaranteed by <cmath> on MSVC
+#endif
 
 namespace funasr_vad_impl {
 static const int FS=16000,WINLEN=400,SHIFT=160,NFFT=512,NMEL=80;
@@ -40,7 +43,8 @@ static std::vector<std::vector<float>> fbank80(std::vector<float> wav){
   return feat;
 }
 static std::vector<float> lfr(const std::vector<std::vector<float>>&feat,int m,int n,int&T_out){
-  int T=feat.size(),D=NMEL,pad=(m-1)/2; int Tl=T>0?(T+n-1)/n:0;
+  int T=feat.size(); if(T<1){T_out=0;return {};}     // empty (audio shorter than one frame)
+  int D=NMEL,pad=(m-1)/2; int Tl=(T+n-1)/n;
   std::vector<std::vector<float>> pf; pf.reserve(T+pad+m);
   for(int i=0;i<pad;i++)pf.push_back(feat[0]);
   for(int t=0;t<T;t++)pf.push_back(feat[t]);
@@ -68,20 +72,32 @@ inline bool funasr_vad_segments(const std::string& gguf_path, const std::vector<
   for(int i=0;i<gguf_get_n_tensors(gg);i++){const char*nm=gguf_get_tensor_name(gg,i);m.t[nm]=ggml_get_tensor(m.ctx,nm);}
   gguf_free(gg);
 
+  // fail fast (not segfault) if the GGUF is missing tensors the graph dereferences
+  auto need=[&](const std::string&n){ return m.g(n)!=nullptr; };
+  bool ok_t = need("cmvn.shift")&&need("cmvn.scale")&&need("encoder.in_linear1.linear.weight")
+            &&need("encoder.in_linear2.linear.weight")&&need("encoder.out_linear1.linear.weight")
+            &&need("encoder.out_linear2.linear.weight");
+  for(int i=0;i<nl&&ok_t;i++){std::string p="encoder.fsmn."+std::to_string(i)+".";
+    ok_t=need(p+"linear.linear.weight")&&need(p+"fsmn_block.conv_left.weight")&&need(p+"affine.linear.weight");}
+  if(!ok_t){fprintf(stderr,"vad: gguf missing required tensors\n"); if(m.ctx)ggml_free(m.ctx); return false;}
+
   auto feat=fbank80(wav); int T=0; auto feats=lfr(feat,lm,ln,T);   // [T,400]
   if(T<1){if(m.ctx)ggml_free(m.ctx);return true;}                  // too short -> no speech
   float*shift=(float*)m.g("cmvn.shift")->data,*scale=(float*)m.g("cmvn.scale")->data;
   for(int t=0;t<T;t++)for(int d=0;d<idim;d++)feats[(size_t)t*idim+d]=(feats[(size_t)t*idim+d]+shift[d])*scale[d];
 
   ggml_backend_t be=ggml_backend_cpu_init();
-  ggml_init_params cp={(size_t)512*1024*1024,nullptr,true}; ggml_context*c=ggml_init(cp);
+  // no_alloc=true -> ctx holds only tensor/graph metadata (the real compute buffer is
+  // allocated by gallocr below), so a few MB is plenty regardless of clip length.
+  ggml_init_params cp={(size_t)16*1024*1024,nullptr,true}; ggml_context*c=ggml_init(cp);
   ggml_tensor*x=ggml_new_tensor_2d(c,GGML_TYPE_F32,idim,T); ggml_set_input(x);
   ggml_tensor*h=lin(c,m.g("encoder.in_linear1.linear.weight"),m.g("encoder.in_linear1.linear.bias"),x);
   h=lin(c,m.g("encoder.in_linear2.linear.weight"),m.g("encoder.in_linear2.linear.bias"),h); h=ggml_relu(c,h);
   for(int i=0;i<nl;i++){std::string p="encoder.fsmn."+std::to_string(i)+".";
     ggml_tensor*z=ggml_mul_mat(c,m.g(p+"linear.linear.weight"),h);
     ggml_tensor*fk=m.g(p+"fsmn_block.conv_left.weight"); ggml_tensor*zp=ggml_pad_ext(c,z,0,0,lorder-1,0,0,0,0,0); ggml_tensor*acc=z;
-    for(int j=0;j<lorder;j++){auto sl=ggml_view_2d(c,zp,pd,T,zp->nb[1],(size_t)j*zp->nb[1]);auto wj=ggml_view_1d(c,fk,pd,(size_t)j*fk->nb[1]);acc=ggml_add(c,acc,ggml_mul(c,ggml_cont(c,sl),wj));}
+    // sl is a full-row slice of the contiguous padded tensor -> already contiguous, no ggml_cont needed
+    for(int j=0;j<lorder;j++){auto sl=ggml_view_2d(c,zp,pd,T,zp->nb[1],(size_t)j*zp->nb[1]);auto wj=ggml_view_1d(c,fk,pd,(size_t)j*fk->nb[1]);acc=ggml_add(c,acc,ggml_mul(c,sl,wj));}
     ggml_tensor*a=lin(c,m.g(p+"affine.linear.weight"),m.g(p+"affine.linear.bias"),acc); h=ggml_relu(c,a);}
   h=lin(c,m.g("encoder.out_linear1.linear.weight"),m.g("encoder.out_linear1.linear.bias"),h);
   h=lin(c,m.g("encoder.out_linear2.linear.weight"),m.g("encoder.out_linear2.linear.bias"),h);
