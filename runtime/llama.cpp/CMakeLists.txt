@@ -14,6 +14,9 @@ project(funasr-llamacpp CXX C)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+if(MSVC)
+    add_compile_definitions(NOMINMAX _USE_MATH_DEFINES)   # min/max macros + M_PI on MSVC
+endif()
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)   # static deps -> self-contained binaries
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
