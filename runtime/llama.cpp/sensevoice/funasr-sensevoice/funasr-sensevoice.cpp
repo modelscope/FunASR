@@ -23,6 +23,8 @@ static const float LN_EPS = 1e-5f;
 // ---- audio loader: any wav/mp3/flac, any rate/channels -> 16k mono (miniaudio) ----
 #define FUNASR_AUDIO_IMPLEMENTATION
 #include "funasr_audio.h"
+#include "funasr_vad.h"     // built-in FSMN-VAD front end (--vad segmentation)
+#include <utility>
 static const int FS=16000,WINLEN=400,SHIFT=160,NFFT=512,NMEL=80,LFR_M=7,LFR_N=6;
 static const float PREEMPH=0.97f,LOWF=20.0f,HIGHF=8000.0f;
 static inline float melf(float f){return 1127.0f*logf(1.0f+f/700.0f);}
@@ -90,11 +92,13 @@ static void add_posenc(std::vector<float>&x,int T,int depth){
 }
 
 int main(int argc,char**argv){
-  std::string gguf_path,fbank_path,wav_path;
+  std::string gguf_path,fbank_path,wav_path,vad_path; int vad_maxseg=30000;
   for(int i=1;i<argc;i++){ if(!strcmp(argv[i],"-m")&&i+1<argc)gguf_path=argv[++i];
     else if(!strcmp(argv[i],"-f")&&i+1<argc)fbank_path=argv[++i];
     else if(!strcmp(argv[i],"-a")&&i+1<argc)wav_path=argv[++i];
-    else {fprintf(stderr,"usage: %s -m sensevoice.gguf (-a audio.wav | -f fbank.bin)\n",argv[0]);return 1;} }
+    else if(!strcmp(argv[i],"--vad")&&i+1<argc)vad_path=argv[++i];
+    else if(!strcmp(argv[i],"--vad-maxseg")&&i+1<argc)vad_maxseg=atoi(argv[++i]);
+    else {fprintf(stderr,"usage: %s -m sensevoice.gguf (-a audio.wav | -f fbank.bin) [--vad fsmn-vad.gguf [--vad-maxseg ms]]\n",argv[0]);return 1;} }
   if(gguf_path.empty()||(fbank_path.empty()&&wav_path.empty())){fprintf(stderr,"missing args\n");return 1;}
 
   // load model
@@ -110,61 +114,61 @@ int main(int argc,char**argv){
   gguf_free(gg);
   const int F=560, D=m.c.d_model, V=m.c.vocab;
 
-  // fbank [T,F]: from wav (-a) or precomputed (-f)
-  int32_t T=0,Fc=F; std::vector<float> fb;
-  if(!wav_path.empty()){
-    std::vector<float> wav; if(!funasr_load_audio_16k_mono(wav_path.c_str(),wav)){fprintf(stderr,"read audio failed\n");return 1;}
-    int t=0; fb=compute_fbank(wav,t); T=t;
-  } else {
-    FILE*f=fopen(fbank_path.c_str(),"rb"); if(!f){fprintf(stderr,"open fbank\n");return 1;}
-    if(fread(&T,4,1,f)!=1||fread(&Fc,4,1,f)!=1){fclose(f);return 1;}
-    fb.resize((size_t)T*Fc); if((int)fread(fb.data(),4,fb.size(),f)!=(int)fb.size()){fclose(f);return 1;} fclose(f);
-  }
-
   // NOTE: SenseVoiceSmall inference() feeds the RAW log-mel fbank to the encoder;
   // it does NOT apply am.mvn CMVN (that path is unused at inference). Applying it
   // makes the encoder predict <|nospeech|>. So no CMVN here.
-
-  // prepend nq query tokens (rows of embed.weight) -> input [nq+T, F]
   float*emb=(float*)m.g("embed.weight")->data;   // [16, 560] row-major
-  int N=nq+T; std::vector<float> inp((size_t)N*F);
-  for(int i=0;i<nq;i++) memcpy(&inp[(size_t)i*F], &emb[(size_t)qtok[i]*F], F*sizeof(float));
-  memcpy(&inp[(size_t)nq*F], fb.data(), (size_t)T*F*sizeof(float));
+  // Run encoder+CTC on one fbank window [T,F]; prints greedy-CTC token IDs (no newline).
+  auto run_seg=[&](const std::vector<float>& fb,int T){
+    int N=nq+T; std::vector<float> inp((size_t)N*F);
+    for(int i=0;i<nq;i++) memcpy(&inp[(size_t)i*F], &emb[(size_t)qtok[i]*F], F*sizeof(float));
+    memcpy(&inp[(size_t)nq*F], fb.data(), (size_t)T*F*sizeof(float));
+    float sc=sqrtf((float)D); for(auto&v:inp)v*=sc; add_posenc(inp,N,F);
+    ggml_backend_t be=ggml_backend_cpu_init();
+    ggml_init_params cp={(size_t)1024*1024*1024,nullptr,true}; ggml_context*c=ggml_init(cp);
+    ggml_tensor*x=ggml_new_tensor_2d(c,GGML_TYPE_F32,F,N); ggml_set_input(x);
+    ggml_tensor*h=sanm_layer(c,m,"encoder.encoders0.0.",x,N,false);
+    for(int i=0;i<m.c.num_blocks-1;i++) h=sanm_layer(c,m,"encoder.encoders."+std::to_string(i)+".",h,N,true);
+    h=lnorm(c,h,m.g("encoder.after_norm.weight"),m.g("encoder.after_norm.bias"));
+    for(int i=0;i<m.c.tp_blocks;i++) h=sanm_layer(c,m,"encoder.tp_encoders."+std::to_string(i)+".",h,N,true);
+    h=lnorm(c,h,m.g("encoder.tp_norm.weight"),m.g("encoder.tp_norm.bias"));
+    ggml_tensor*logits=lin(c,m.g("ctc.ctc_lo.weight"),m.g("ctc.ctc_lo.bias"),h);  // [V, N]
+    ggml_set_output(logits);
+    ggml_cgraph*gf=ggml_new_graph_custom(c,32768,false); ggml_build_forward_expand(gf,logits);
+    ggml_gallocr_t ga=ggml_gallocr_new(ggml_backend_cpu_buffer_type()); ggml_gallocr_alloc_graph(ga,gf);
+    ggml_backend_tensor_set(x,inp.data(),0,ggml_nbytes(x)); ggml_backend_cpu_set_n_threads(be,8);
+    if(ggml_backend_graph_compute(be,gf)!=GGML_STATUS_SUCCESS){fprintf(stderr,"compute failed\n");}
+    std::vector<float> lg((size_t)V*N); ggml_backend_tensor_get(logits,lg.data(),0,ggml_nbytes(logits));
+    int prev=-1;   // greedy CTC: argmax per frame -> collapse consecutive -> drop blank
+    for(int n=0;n<N;n++){ const float*col=&lg[(size_t)n*V]; int am=0; float best=col[0];
+      for(int v=1;v<V;v++) if(col[v]>best){best=col[v];am=v;}
+      if(am!=prev && am!=m.c.blank) printf("%d ", am); prev=am; }
+    ggml_gallocr_free(ga); ggml_free(c); ggml_backend_free(be);
+  };
 
-  // encoder pre-scale + posenc
-  float sc=sqrtf((float)D); for(auto&v:inp)v*=sc; add_posenc(inp,N,F);
-
-  // build graph
-  ggml_backend_t be=ggml_backend_cpu_init();
-  ggml_init_params cp={(size_t)1024*1024*1024,nullptr,true}; ggml_context*c=ggml_init(cp);
-  ggml_tensor*x=ggml_new_tensor_2d(c,GGML_TYPE_F32,F,N); ggml_set_input(x);
-  ggml_tensor*h=sanm_layer(c,m,"encoder.encoders0.0.",x,N,false);
-  for(int i=0;i<m.c.num_blocks-1;i++) h=sanm_layer(c,m,"encoder.encoders."+std::to_string(i)+".",h,N,true);
-  h=lnorm(c,h,m.g("encoder.after_norm.weight"),m.g("encoder.after_norm.bias"));
-  for(int i=0;i<m.c.tp_blocks;i++) h=sanm_layer(c,m,"encoder.tp_encoders."+std::to_string(i)+".",h,N,true);
-  h=lnorm(c,h,m.g("encoder.tp_norm.weight"),m.g("encoder.tp_norm.bias"));
-  ggml_tensor*logits=lin(c,m.g("ctc.ctc_lo.weight"),m.g("ctc.ctc_lo.bias"),h);  // [V, N]
-  ggml_set_output(logits);
-  ggml_cgraph*gf=ggml_new_graph_custom(c,32768,false); ggml_build_forward_expand(gf,logits);
-  ggml_gallocr_t ga=ggml_gallocr_new(ggml_backend_cpu_buffer_type()); ggml_gallocr_alloc_graph(ga,gf);
-  ggml_backend_tensor_set(x,inp.data(),0,ggml_nbytes(x));
-  ggml_backend_cpu_set_n_threads(be,8);
   int64_t t0=ggml_time_us();
-  if(ggml_backend_graph_compute(be,gf)!=GGML_STATUS_SUCCESS){fprintf(stderr,"compute failed\n");return 1;}
-  int64_t t1=ggml_time_us();
-
-  std::vector<float> lg((size_t)V*N); ggml_backend_tensor_get(logits,lg.data(),0,ggml_nbytes(logits));
-  // greedy CTC: argmax per frame -> collapse consecutive -> drop blank
-  int prev=-1;
-  for(int n=0;n<N;n++){
-    const float*col=&lg[(size_t)n*V]; int am=0; float best=col[0];
-    for(int v=1;v<V;v++) if(col[v]>best){best=col[v];am=v;}
-    if(am!=prev && am!=m.c.blank) printf("%d ", am);
-    prev=am;
+  if(!vad_path.empty()){
+    std::vector<float> wav; if(!funasr_load_audio_16k_mono(wav_path.c_str(),wav)){fprintf(stderr,"read audio failed\n");return 1;}
+    std::vector<std::pair<int,int>> segs;
+    if(!funasr_vad_segments(vad_path,wav,vad_maxseg,segs)){fprintf(stderr,"vad failed\n");return 1;}
+    for(auto&s:segs){ int off=(int)((int64_t)s.first*16000/1000), end=(int)((int64_t)s.second*16000/1000);
+      if(end>(int)wav.size())end=wav.size(); if(end-off<WINLEN)continue;
+      std::vector<float> seg(wav.begin()+off,wav.begin()+end); int t=0; auto fb=compute_fbank(seg,t); run_seg(fb,t); }
+    fprintf(stderr,"[sensevoice] %zu vad segments\n",segs.size());
+  } else {
+    int32_t T=0,Fc=F; std::vector<float> fb;
+    if(!wav_path.empty()){
+      std::vector<float> wav; if(!funasr_load_audio_16k_mono(wav_path.c_str(),wav)){fprintf(stderr,"read audio failed\n");return 1;}
+      int t=0; fb=compute_fbank(wav,t); T=t;
+    } else {
+      FILE*f=fopen(fbank_path.c_str(),"rb"); if(!f){fprintf(stderr,"open fbank\n");return 1;}
+      if(fread(&T,4,1,f)!=1||fread(&Fc,4,1,f)!=1){fclose(f);return 1;}
+      fb.resize((size_t)T*Fc); if((int)fread(fb.data(),4,fb.size(),f)!=(int)fb.size()){fclose(f);return 1;} fclose(f);
+    }
+    run_seg(fb,T);
   }
   printf("\n");
-  fprintf(stderr,"[sensevoice] N=%d (q%d+T%d) encode %.2fs\n",N,nq,T,(t1-t0)/1e6);
-  ggml_gallocr_free(ga); ggml_free(c); ggml_backend_free(be);
+  fprintf(stderr,"[sensevoice] done %.2fs\n",(ggml_time_us()-t0)/1e6);
   if(m.ctx_w) ggml_free(m.ctx_w);
   return 0;
 }

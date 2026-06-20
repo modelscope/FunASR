@@ -38,12 +38,15 @@ separates model-load from compute.
 - **Segmentation differs by system, each using its natural strategy:** FunASR uses an
   `fsmn-vad` front end (segments → ASR → concatenate); whisper.cpp uses its built-in
   30 s windowing. This is a fair system-level comparison.
-- **Engine-internal VAD is on the FunASR runtime roadmap.** Today the runtime reaches
-  the reference numbers via the `fsmn-vad` front end (or `--chunk`); a native ggml VAD
-  is planned so the bare binary hits the reference end-to-end.
-- **Bare binary, no VAD (whole-clip)**, for full disclosure: SenseVoiceSmall **9.99 %**,
-  Paraformer **12.82 %** (micro, normalize_zh, full 184). Long clips decoded as one
-  segment are out-of-distribution; this is exactly what VAD fixes.
+- **Engine-internal VAD is now implemented** — a native ggml FSMN-VAD built into the
+  binaries (`--vad fsmn-vad.gguf`). The **bare binary, with no Python front end**, now
+  reaches the reference end-to-end: SenseVoiceSmall **8.01 %**, Paraformer **9.85 %**,
+  Fun-ASR-Nano **8.30 %** (micro, normalize_zh, full 184). The built-in C++ VAD matches
+  the PyTorch `fsmn-vad` front end (segment boundaries within ~10 ms, slightly better
+  CER), so the runtime is now fully self-contained.
+- For full disclosure, **bare binary with no VAD at all (whole-clip)** is higher —
+  SenseVoiceSmall 9.99 %, Paraformer 12.82 % — because long clips decoded as one segment
+  are out-of-distribution; that is exactly what the built-in VAD fixes.
 
 ## Why FunASR wins on Chinese
 

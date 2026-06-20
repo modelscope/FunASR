@@ -26,6 +26,9 @@
 // any audio (wav/mp3/flac, any rate/channels) -> 16 kHz mono f32, via miniaudio
 #define FUNASR_AUDIO_IMPLEMENTATION
 #include "funasr_audio.h"
+// built-in FSMN-VAD front end (single-binary --vad segmentation)
+#include "funasr_vad.h"
+#include <utility>
 
 // ======================= kaldi fbank + LFR =======================
 static const int FS=16000, WINLEN=400, SHIFT=160, NFFT=512, NMEL=80, LFR_M=7, LFR_N=6;
@@ -164,15 +167,18 @@ static int decode_batch(llama_context*ctx,int n,llama_token*tok,float*embd,int n
 }
 
 int main(int argc,char**argv){
-    std::string enc_path,llm_path,wav_path; int npred=512; double chunk_sec=0; float rep=1.0f;
+    std::string enc_path,llm_path,wav_path,vad_path; int npred=512; double chunk_sec=0; float rep=1.0f;
+    int vad_maxseg=30000;
     for(int i=1;i<argc;i++){
         if(!strcmp(argv[i],"--enc")&&i+1<argc)enc_path=argv[++i];
         else if(!strcmp(argv[i],"-m")&&i+1<argc)llm_path=argv[++i];
         else if(!strcmp(argv[i],"-a")&&i+1<argc)wav_path=argv[++i];
         else if(!strcmp(argv[i],"-n")&&i+1<argc)npred=atoi(argv[++i]);
         else if(!strcmp(argv[i],"--chunk")&&i+1<argc)chunk_sec=atof(argv[++i]);
+        else if(!strcmp(argv[i],"--vad")&&i+1<argc)vad_path=argv[++i];
+        else if(!strcmp(argv[i],"--vad-maxseg")&&i+1<argc)vad_maxseg=atoi(argv[++i]);
         else if(!strcmp(argv[i],"--rep")&&i+1<argc)rep=atof(argv[++i]);
-        else {fprintf(stderr,"usage: %s --enc enc.gguf -m llm.gguf -a audio.wav [-n npred] [--chunk sec]\n",argv[0]);return 1;}
+        else {fprintf(stderr,"usage: %s --enc enc.gguf -m llm.gguf -a audio.wav [-n npred] [--chunk sec] [--vad fsmn-vad.gguf [--vad-maxseg ms]]\n",argv[0]);return 1;}
     }
     if(enc_path.empty()||llm_path.empty()||wav_path.empty()){fprintf(stderr,"missing args\n");return 1;}
 
@@ -199,12 +205,24 @@ int main(int argc,char**argv){
         std::vector<llama_token> v(n); llama_tokenize(vocab,s,strlen(s),v.data(),n,false,true); return v;};
     auto pre=tokenize(prefix); auto suf=tokenize(suffix);
 
-    // split into chunks (chunk_sec<=0 -> whole file)
-    int chunk_n = chunk_sec > 0 ? std::max(1, (int)(chunk_sec*16000)) : (int)wav.size();
+    // Build the list of [offset,len] windows to transcribe (in samples).
+    //   --vad : FSMN-VAD speech segments (single-binary front end, replaces fixed chunking)
+    //   --chunk sec : fixed-size chunks ; otherwise the whole file in one window
+    std::vector<std::pair<int,int>> wins;   // {sample offset, sample len}
+    if(!vad_path.empty()){
+        std::vector<std::pair<int,int>> segs; // ms
+        if(!funasr_vad_segments(vad_path,wav,vad_maxseg,segs)){fprintf(stderr,"vad failed\n");return 1;}
+        for(auto&s:segs){ int off=(int)((int64_t)s.first*16000/1000), end=(int)((int64_t)s.second*16000/1000);
+            if(end>(int)wav.size())end=wav.size(); if(end-off>0) wins.push_back({off,end-off}); }
+        fprintf(stderr,"[vad] %zu segments\n",wins.size());
+    } else {
+        int chunk_n = chunk_sec > 0 ? std::max(1, (int)(chunk_sec*16000)) : (int)wav.size();
+        for(size_t off=0; off<wav.size(); off+=chunk_n) wins.push_back({(int)off,(int)std::min((size_t)chunk_n,wav.size()-off)});
+    }
     std::string full;
-    for (size_t off = 0; off < wav.size(); off += chunk_n) {
-        int len = std::min((size_t)chunk_n, wav.size()-off);
-        if (len < WINLEN) break;                       // too short for one frame
+    for (auto& w : wins) {
+        int off = w.first, len = w.second;
+        if (len < WINLEN) continue;                    // too short for one frame
         std::vector<float> seg(wav.begin()+off, wav.begin()+off+len);
         int T=0; auto fbank=compute_fbank(seg,T);
         int D=0; auto adp=run_encoder(em,fbank,T,560,D);
