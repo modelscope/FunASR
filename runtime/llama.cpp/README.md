@@ -28,6 +28,17 @@ and the audio embeddings are injected into it via `llama_decode`'s embedding inp
 (the llava/mtmd mechanism). See each model's README for the architecture diagram,
 build/convert/run quickstart, validation numbers, and gotchas.
 
+## Download pre-built GGUF (fastest — no Python ML env)
+```bash
+./download-funasr-model.sh sensevoice          # or: paraformer | nano | fsmn-vad
+```
+Pre-converted GGUF on Hugging Face: [SenseVoiceSmall-GGUF](https://huggingface.co/FunAudioLLM/SenseVoiceSmall-GGUF) · [Paraformer-GGUF](https://huggingface.co/FunAudioLLM/Paraformer-GGUF) · [Fun-ASR-Nano-GGUF](https://huggingface.co/FunAudioLLM/Fun-ASR-Nano-GGUF) · [fsmn-vad-GGUF](https://huggingface.co/FunAudioLLM/fsmn-vad-GGUF). Or convert yourself with `convert-funasr-to-gguf.py`.
+
+## Build (standalone, CI-friendly)
+```bash
+cmake -B build -DCMAKE_BUILD_TYPE=Release      # fetches pinned llama.cpp; static, self-contained
+cmake --build build -j                          # -> build/bin/llama-funasr-* (all tools)
+```
 ## Build (shared)
 ```bash
 git clone https://github.com/ggml-org/llama.cpp && cd llama.cpp
