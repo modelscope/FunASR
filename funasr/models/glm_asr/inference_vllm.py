@@ -101,8 +101,10 @@ class GLMASRVLLMEngine:
         from vllm import LLM
         from transformers import AutoProcessor, AutoConfig, AutoModel as HFAutoModel
 
+        from funasr.models.glm_asr.vllm_utils import warn_if_degraded_dtype
+
         self.device = device
-        self.torch_dtype = dtype_map.get(dtype, torch.bfloat16)
+        self.torch_dtype = dtype_map.get(warn_if_degraded_dtype(dtype), torch.bfloat16)
         self.model_dir = model_dir
 
         logger.info(f"Loading GLM-ASR audio components from {model_dir}")
