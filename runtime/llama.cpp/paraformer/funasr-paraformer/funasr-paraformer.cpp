@@ -141,7 +141,7 @@ int main(int argc,char**argv){
   auto rdf=[&](const char*k,float d){int i=gguf_find_key(gg,k);return i<0?d:gguf_get_val_f32(gg,i);};
   m.c.enc_blocks=rdi("pf.enc.num_blocks",50);m.c.dec_blocks=rdi("pf.dec.num_blocks",16);m.c.dec_att=rdi("pf.dec.att_layer_num",16);
   m.c.dec3=rdi("pf.dec.decoders3",1);m.c.vocab=rdi("pf.vocab_size",8404);m.c.tail=rdf("pf.predictor.tail_threshold",0.45f);m.c.thresh=rdf("pf.predictor.threshold",1.0f);
-  std::vector<std::string> vocab; {int ki=gguf_find_key(gg,"pf.vocab"); if(ki>=0){int nv=gguf_get_arr_n(gg,ki); vocab.resize(nv); for(int i=0;i<nv;i++)vocab[i]=gguf_get_arr_str(gg,ki,i);}}
+  std::vector<std::string> vocab; {int ki=gguf_find_key(gg,"pf.vocab"); if(ki>=0){int nv=gguf_get_arr_n(gg,ki); vocab.resize(nv); for(int i=0;i<nv;i++){const char*s=gguf_get_arr_str(gg,ki,i); vocab[i]=s?s:"";}}}
   for(int i=0;i<gguf_get_n_tensors(gg);i++){const char*nm=gguf_get_tensor_name(gg,i);m.t[nm]=ggml_get_tensor(m.ctx_w,nm);}gguf_free(gg);
   const int D=m.c.d_model,F=560,V=m.c.vocab;
   bool emit_ids = ids_mode || vocab.empty();   // fall back to ids if the gguf has no vocab
