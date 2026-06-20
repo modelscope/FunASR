@@ -22,7 +22,6 @@ jobs:
         include:
           - { os: ubuntu-latest,    name: linux-x64 }
           - { os: ubuntu-24.04-arm, name: linux-arm64 }
-          - { os: macos-13,         name: macos-x64 }
           - { os: macos-latest,     name: macos-arm64 }
           - { os: windows-latest,   name: windows-x64 }
     runs-on: ${{ matrix.os }}
