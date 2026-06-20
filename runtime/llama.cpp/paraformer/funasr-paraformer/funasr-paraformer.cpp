@@ -22,6 +22,8 @@ static const float LN_EPS = 1e-5f;
 // ===== audio loader: any wav/mp3/flac, any rate/channels -> 16k mono (miniaudio) =====
 #define FUNASR_AUDIO_IMPLEMENTATION
 #include "funasr_audio.h"
+#include "funasr_vad.h"     // built-in FSMN-VAD front end (--vad segmentation)
+#include <utility>
 static const int FS=16000,WINLEN=400,SHIFT=160,NFFT=512,NMEL=80,LFR_M=7,LFR_N=6;
 static const float PREEMPH=0.97f,LOWF=20.0f,HIGHF=8000.0f;
 static inline float melf(float f){return 1127.0f*logf(1.0f+f/700.0f);}
@@ -118,9 +120,11 @@ static std::vector<float> run_graph(ggml_context*c,ggml_tensor*out,ggml_tensor*i
   ggml_gallocr_free(ga);ggml_backend_free(be);return r;}
 
 int main(int argc,char**argv){
-  std::string gguf_path,wav_path;
+  std::string gguf_path,wav_path,vad_path; int vad_maxseg=30000;
   for(int i=1;i<argc;i++){if(!strcmp(argv[i],"-m")&&i+1<argc)gguf_path=argv[++i];else if(!strcmp(argv[i],"-a")&&i+1<argc)wav_path=argv[++i];
-    else{fprintf(stderr,"usage: %s -m paraformer.gguf -a audio.wav\n",argv[0]);return 1;}}
+    else if(!strcmp(argv[i],"--vad")&&i+1<argc)vad_path=argv[++i];
+    else if(!strcmp(argv[i],"--vad-maxseg")&&i+1<argc)vad_maxseg=atoi(argv[++i]);
+    else{fprintf(stderr,"usage: %s -m paraformer.gguf -a audio.wav [--vad fsmn-vad.gguf [--vad-maxseg ms]]\n",argv[0]);return 1;}}
   if(gguf_path.empty()||wav_path.empty()){fprintf(stderr,"missing args\n");return 1;}
   model m;gguf_init_params gp={false,&m.ctx_w};gguf_context*gg=gguf_init_from_file(gguf_path.c_str(),gp);if(!gg){fprintf(stderr,"gguf load failed\n");return 1;}
   auto rdi=[&](const char*k,int d){int i=gguf_find_key(gg,k);return i<0?d:(int)gguf_get_val_u32(gg,i);};
@@ -130,80 +134,70 @@ int main(int argc,char**argv){
   for(int i=0;i<gguf_get_n_tensors(gg);i++){const char*nm=gguf_get_tensor_name(gg,i);m.t[nm]=ggml_get_tensor(m.ctx_w,nm);}gguf_free(gg);
   const int D=m.c.d_model,F=560,V=m.c.vocab;
 
-  // fbank
-  std::vector<float>wav;if(!funasr_load_audio_16k_mono(wav_path.c_str(),wav)){fprintf(stderr,"read audio failed\n");return 1;}
-  int64_t t0=ggml_time_us();int T=0;auto fb=compute_fbank(wav,T);
-  // CMVN (Paraformer applies it): (x+shift)*scale
   float*shift=(float*)m.g("cmvn.shift")->data,*scale=(float*)m.g("cmvn.scale")->data;
-  for(int t=0;t<T;t++)for(int d=0;d<F;d++)fb[(size_t)t*F+d]=(fb[(size_t)t*F+d]+shift[d])*scale[d];
-  // encoder pre-scale + posenc
-  {float sc=sqrtf((float)D);for(auto&v:fb)v*=sc;}add_posenc(fb,T,F);
-
-  // ===== encoder graph =====
-  std::vector<float>enc;
-  {ggml_init_params cp={(size_t)1024*1024*1024,nullptr,true};ggml_context*c=ggml_init(cp);
-   ggml_tensor*x=ggml_new_tensor_2d(c,GGML_TYPE_F32,F,T);ggml_set_input(x);
-   ggml_tensor*h=enc_layer(c,m,"encoder.encoders0.0.",x,T,false);
-   for(int i=0;i<m.c.enc_blocks-1;i++)h=enc_layer(c,m,"encoder.encoders."+std::to_string(i)+".",h,T,true);
-   h=lnorm(c,h,m.g("encoder.after_norm.weight"),m.g("encoder.after_norm.bias"));ggml_set_output(h);
-   enc=run_graph(c,h,x,fb.data(),nullptr,nullptr);ggml_free(c);}   // enc: [D, T] -> stored row-major as T rows? ggml out ne0=D,ne1=T
-  // run_graph returns row-major [N=ne1 rows, D=ne0]; here rows=T, cols=D
-  int64_t t1=ggml_time_us();
-  // enc[t*D + d]
-
-  // ===== CIF predictor (host) =====
   float*cw=(float*)m.g("predictor.cif_conv1d.weight")->data; // [512,512,3] = [o][i][j]
   float*cb=(float*)m.g("predictor.cif_conv1d.bias")->data;   // [512]
   float*ow=(float*)m.g("predictor.cif_output.weight")->data; // [1,512]
   float ob=((float*)m.g("predictor.cif_output.bias")->data)[0];
-  // conv1d (k=3,pad1) + residual + relu, then cif_output -> sigmoid -> alpha
-  std::vector<float> alphas(T);
-  std::vector<float> outp((size_t)T*D);
-  for(int t=0;t<T;t++){
-    for(int o=0;o<D;o++){
-      float acc=cb[o];
-      for(int j=0;j<3;j++){int tt=t+j-1; if(tt<0||tt>=T)continue; const float*ev=&enc[(size_t)tt*D];
-        const float*wo=&cw[(size_t)o*D*3]; for(int i=0;i<D;i++) acc+=wo[i*3+j]*ev[i];}
-      outp[(size_t)t*D+o]=acc+enc[(size_t)t*D+o];          // + context residual
-    }
-    float a=ob; for(int o=0;o<D;o++){float r=outp[(size_t)t*D+o]; if(r<0)r=0; a+=ow[o]*r;} // relu then linear
-    float s=1.0f/(1.0f+expf(-a)); alphas[t]=s>0?s:0;       // sigmoid, smooth=1 noise=0 -> relu(s)=s
-  }
-  // tail: append zero hidden frame + alpha=tail_threshold
-  std::vector<float> hid=enc; hid.resize((size_t)(T+1)*D,0.0f);
-  std::vector<float> al=alphas; al.push_back(m.c.tail);
-  int L=T+1;
-  // integrate-and-fire
-  std::vector<float> acoustic; acoustic.reserve(64*D);
-  float integrate=0; std::vector<float> frame(D,0.0f);
-  for(int t=0;t<L;t++){
-    float alpha=al[t]; float dc=1.0f-integrate; integrate+=alpha;
-    bool fire=integrate>=m.c.thresh; float cur=fire?dc:alpha; float rem=alpha-cur;
-    for(int d=0;d<D;d++) frame[d]+=cur*hid[(size_t)t*D+d];
-    if(fire){ acoustic.insert(acoustic.end(),frame.begin(),frame.end()); integrate-=1.0f;
-      for(int d=0;d<D;d++) frame[d]=rem*hid[(size_t)t*D+d]; }
-  }
-  int N=acoustic.size()/D;
-  if(N<1){printf("\n");fprintf(stderr,"[paraformer] no tokens\n");return 0;}
 
-  // ===== decoder graph =====
-  std::vector<float> logits;
-  {ggml_init_params cp={(size_t)2048*1024*1024,nullptr,true};ggml_context*c=ggml_init(cp);
-   ggml_tensor*tgt=ggml_new_tensor_2d(c,GGML_TYPE_F32,D,N);ggml_set_input(tgt);
-   ggml_tensor*mem=ggml_new_tensor_2d(c,GGML_TYPE_F32,D,T);ggml_set_input(mem);
-   ggml_tensor*x=tgt;
-   for(int i=0;i<m.c.dec_att;i++)x=dec_layer(c,m,"decoder.decoders."+std::to_string(i)+".",x,mem,N,T);
-   for(int i=0;i<m.c.dec3;i++)x=dec3_layer(c,m,"decoder.decoders3."+std::to_string(i)+".",x);
-   x=lnorm(c,x,m.g("decoder.after_norm.weight"),m.g("decoder.after_norm.bias"));
-   x=lin(c,m.g("decoder.output_layer.weight"),m.g("decoder.output_layer.bias"),x); // [V,N]
-   ggml_set_output(x);
-   logits=run_graph(c,x,tgt,acoustic.data(),mem,enc.data());ggml_free(c);}
-  int64_t t2=ggml_time_us();
+  // Full pipeline (fbank -> CMVN -> encoder -> CIF -> decoder) on one wav window; prints token IDs.
+  auto run_seg=[&](const std::vector<float>& wav){
+    int T=0;auto fb=compute_fbank(wav,T); if(T<1)return;
+    for(int t=0;t<T;t++)for(int d=0;d<F;d++)fb[(size_t)t*F+d]=(fb[(size_t)t*F+d]+shift[d])*scale[d];  // CMVN
+    {float sc=sqrtf((float)D);for(auto&v:fb)v*=sc;}add_posenc(fb,T,F);
+    std::vector<float>enc;
+    {ggml_init_params cp={(size_t)1024*1024*1024,nullptr,true};ggml_context*c=ggml_init(cp);
+     ggml_tensor*x=ggml_new_tensor_2d(c,GGML_TYPE_F32,F,T);ggml_set_input(x);
+     ggml_tensor*h=enc_layer(c,m,"encoder.encoders0.0.",x,T,false);
+     for(int i=0;i<m.c.enc_blocks-1;i++)h=enc_layer(c,m,"encoder.encoders."+std::to_string(i)+".",h,T,true);
+     h=lnorm(c,h,m.g("encoder.after_norm.weight"),m.g("encoder.after_norm.bias"));ggml_set_output(h);
+     enc=run_graph(c,h,x,fb.data(),nullptr,nullptr);ggml_free(c);}   // enc row-major [T,D]
+    // ===== CIF predictor (host): conv1d(k3,pad1)+residual+relu -> cif_output -> sigmoid -> alpha =====
+    std::vector<float> outp((size_t)T*D); std::vector<float> alphas(T);
+    for(int t=0;t<T;t++){
+      for(int o=0;o<D;o++){ float acc=cb[o];
+        for(int j=0;j<3;j++){int tt=t+j-1; if(tt<0||tt>=T)continue; const float*ev=&enc[(size_t)tt*D];
+          const float*wo=&cw[(size_t)o*D*3]; for(int i=0;i<D;i++) acc+=wo[i*3+j]*ev[i];}
+        outp[(size_t)t*D+o]=acc+enc[(size_t)t*D+o]; }
+      float a=ob; for(int o=0;o<D;o++){float r=outp[(size_t)t*D+o]; if(r<0)r=0; a+=ow[o]*r;}
+      float s=1.0f/(1.0f+expf(-a)); alphas[t]=s>0?s:0; }
+    std::vector<float> hid=enc; hid.resize((size_t)(T+1)*D,0.0f);
+    std::vector<float> al=alphas; al.push_back(m.c.tail); int L=T+1;
+    std::vector<float> acoustic; acoustic.reserve(64*D);
+    float integrate=0; std::vector<float> frame(D,0.0f);
+    for(int t=0;t<L;t++){
+      float alpha=al[t]; float dc=1.0f-integrate; integrate+=alpha;
+      bool fire=integrate>=m.c.thresh; float cur=fire?dc:alpha; float rem=alpha-cur;
+      for(int d=0;d<D;d++) frame[d]+=cur*hid[(size_t)t*D+d];
+      if(fire){ acoustic.insert(acoustic.end(),frame.begin(),frame.end()); integrate-=1.0f;
+        for(int d=0;d<D;d++) frame[d]=rem*hid[(size_t)t*D+d]; } }
+    int N=acoustic.size()/D; if(N<1)return;
+    std::vector<float> logits;
+    {ggml_init_params cp={(size_t)2048*1024*1024,nullptr,true};ggml_context*c=ggml_init(cp);
+     ggml_tensor*tgt=ggml_new_tensor_2d(c,GGML_TYPE_F32,D,N);ggml_set_input(tgt);
+     ggml_tensor*mem=ggml_new_tensor_2d(c,GGML_TYPE_F32,D,T);ggml_set_input(mem);
+     ggml_tensor*x=tgt;
+     for(int i=0;i<m.c.dec_att;i++)x=dec_layer(c,m,"decoder.decoders."+std::to_string(i)+".",x,mem,N,T);
+     for(int i=0;i<m.c.dec3;i++)x=dec3_layer(c,m,"decoder.decoders3."+std::to_string(i)+".",x);
+     x=lnorm(c,x,m.g("decoder.after_norm.weight"),m.g("decoder.after_norm.bias"));
+     x=lin(c,m.g("decoder.output_layer.weight"),m.g("decoder.output_layer.bias"),x); // [V,N]
+     ggml_set_output(x);
+     logits=run_graph(c,x,tgt,acoustic.data(),mem,enc.data());ggml_free(c);}
+    for(int n=0;n<N;n++){const float*col=&logits[(size_t)n*V];int am=0;float best=col[0];for(int v=1;v<V;v++)if(col[v]>best){best=col[v];am=v;}printf("%d ",am);}
+  };
 
-  // argmax per slot -> ids
-  for(int n=0;n<N;n++){const float*col=&logits[(size_t)n*V];int am=0;float best=col[0];for(int v=1;v<V;v++)if(col[v]>best){best=col[v];am=v;}printf("%d ",am);}
+  int64_t t0=ggml_time_us();
+  std::vector<float>wav;if(!funasr_load_audio_16k_mono(wav_path.c_str(),wav)){fprintf(stderr,"read audio failed\n");return 1;}
+  if(!vad_path.empty()){
+    std::vector<std::pair<int,int>> segs;
+    if(!funasr_vad_segments(vad_path,wav,vad_maxseg,segs)){fprintf(stderr,"vad failed\n");return 1;}
+    for(auto&s:segs){ int off=(int)((int64_t)s.first*16000/1000), end=(int)((int64_t)s.second*16000/1000);
+      if(end>(int)wav.size())end=wav.size(); if(end-off<WINLEN)continue;
+      std::vector<float> seg(wav.begin()+off,wav.begin()+end); run_seg(seg); }
+    fprintf(stderr,"[paraformer] %zu vad segments\n",segs.size());
+  } else { run_seg(wav); }
   printf("\n");
-  fprintf(stderr,"[paraformer] T=%d N_tok=%d enc %.2fs dec %.2fs\n",T,N,(t1-t0)/1e6,(t2-t1)/1e6);
+  fprintf(stderr,"[paraformer] done %.2fs\n",(ggml_time_us()-t0)/1e6);
   if(m.ctx_w) ggml_free(m.ctx_w);
   return 0;
 }

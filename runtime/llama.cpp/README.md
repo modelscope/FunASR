@@ -36,6 +36,9 @@ echo 'add_subdirectory(<example-dir>)' >> examples/CMakeLists.txt
 cmake -B build -DGGML_NATIVE=ON -DLLAMA_CURL=OFF
 cmake --build build -j --target <target>
 ```
+The shared **FSMN-VAD** front end builds the same way (`funasr-vad/` + `funasr-common/`,
+target `llama-funasr-vad`); export weights with `export_vad_gguf.py`. Pass
+`--vad fsmn-vad.gguf` to any of the three tools for built-in long-audio segmentation.
 
 ## Validation
 
@@ -44,9 +47,11 @@ SenseVoice CTC token ids identical; Paraformer text identical; Fun-ASR-Nano aggr
 CER matches PyTorch within 0.02% under identical conditions). See per-model READMEs.
 
 ## Status / notes
-- WAV input currently assumes 16 kHz mono PCM16.
-- For long audio, Fun-ASR-Nano supports `--chunk` windowing; a proper VAD front end
-  is on the roadmap.
+- Any audio in (wav/mp3/flac, any rate/channels) via the bundled miniaudio loader.
+- **Built-in FSMN-VAD (`--vad fsmn-vad.gguf`)** segments long audio inside the binary
+  (native ggml, no Python front end); all three tools support it. Bare-binary full-184
+  micro-CER: SenseVoice **8.01** / Paraformer **9.85** / Fun-ASR-Nano **8.30** (see
+  [BENCHMARKS.md](BENCHMARKS.md)). `--chunk` fixed-window remains a simpler fallback.
 - This adds a new `runtime/llama.cpp/` directory only; no existing code is modified.
 
 ## Further reading
