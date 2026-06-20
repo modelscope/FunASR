@@ -23,6 +23,7 @@ def main():
     ap.add_argument("--mvn", required=True)
     ap.add_argument("--out", required=True)
     ap.add_argument("--wtype", default="f32", choices=["f32", "f16"])
+    ap.add_argument("--spm", default=None, help="sentencepiece .bpe.model; default: next to model_pt")
     args = ap.parse_args()
 
     sd = torch.load(args.model_pt, map_location="cpu"); sd = sd.get("state_dict", sd)
@@ -36,7 +37,17 @@ def main():
     w.add_uint32("sv.vocab_size", 25055)
     w.add_uint32("sv.blank_id", 0)
     # query token embed indices used at inference: [lid(auto=0), 1, 2, textnorm(woitn=15)]
-    w.add_array("sv.query_tokens", [0, 1, 2, 15])
+    w.add_array("sv.query_tokens", [0, 1, 2, 14])  # 14=withitn (use_itn=True), matches authoritative
+    import glob
+    spm_path = args.spm or (glob.glob(os.path.join(os.path.dirname(args.model_pt), "*.bpe.model")) + [None])[0]
+    if spm_path and os.path.exists(spm_path):
+        import sentencepiece as spm
+        sp = spm.SentencePieceProcessor(model_file=spm_path)
+        pieces = [sp.id_to_piece(i) for i in range(sp.get_piece_size())]
+        w.add_array("sv.vocab", pieces)
+        print(f"embedded sv.vocab ({len(pieces)} pieces) from {spm_path}")
+    else:
+        print("WARNING: *.bpe.model not found - gguf will have no vocab (binary falls back to ids)")
 
     shift, scale = parse_mvn(args.mvn)
     w.add_tensor("cmvn.shift", shift)   # (560,)

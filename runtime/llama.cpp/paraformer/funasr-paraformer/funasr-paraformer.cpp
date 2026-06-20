@@ -119,20 +119,32 @@ static std::vector<float> run_graph(ggml_context*c,ggml_tensor*out,ggml_tensor*i
   int D=out->ne[0],N=out->ne[1];std::vector<float>r((size_t)D*N);ggml_backend_tensor_get(out,r.data(),0,ggml_nbytes(out));
   ggml_gallocr_free(ga);ggml_backend_free(be);return r;}
 
+// Paraformer detok: tokens.json is BPE; join, drop "@@" continuations, "▁"(U+2581)->space.
+static std::string pf_trim(const std::string&s){size_t a=s.find_first_not_of(' ');if(a==std::string::npos)return "";size_t b=s.find_last_not_of(' ');return s.substr(a,b-a+1);}
+static std::string detok_pf(const std::vector<int>&ids,const std::vector<std::string>&vocab){
+  std::string s; for(int id:ids){ if(id==1||id==2)continue; if(id>=0&&id<(int)vocab.size())s+=vocab[id]; }
+  size_t p; while((p=s.find("@@"))!=std::string::npos)s.erase(p,2);
+  const std::string lb="\xe2\x96\x81"; while((p=s.find(lb))!=std::string::npos)s.replace(p,3," ");
+  return pf_trim(s);
+}
+
 int main(int argc,char**argv){
-  std::string gguf_path,wav_path,vad_path; int vad_maxseg=30000;
+  std::string gguf_path,wav_path,vad_path; int vad_maxseg=30000; bool ids_mode=false;
   for(int i=1;i<argc;i++){if(!strcmp(argv[i],"-m")&&i+1<argc)gguf_path=argv[++i];else if(!strcmp(argv[i],"-a")&&i+1<argc)wav_path=argv[++i];
     else if(!strcmp(argv[i],"--vad")&&i+1<argc)vad_path=argv[++i];
     else if(!strcmp(argv[i],"--vad-maxseg")&&i+1<argc)vad_maxseg=atoi(argv[++i]);
-    else{fprintf(stderr,"usage: %s -m paraformer.gguf -a audio.wav [--vad fsmn-vad.gguf [--vad-maxseg ms]]\n",argv[0]);return 1;}}
+    else if(!strcmp(argv[i],"--ids"))ids_mode=true;
+    else{fprintf(stderr,"usage: %s -m paraformer.gguf -a audio.wav [--vad fsmn-vad.gguf [--vad-maxseg ms]] [--ids]\n",argv[0]);return 1;}}
   if(gguf_path.empty()||wav_path.empty()){fprintf(stderr,"missing args\n");return 1;}
   model m;gguf_init_params gp={false,&m.ctx_w};gguf_context*gg=gguf_init_from_file(gguf_path.c_str(),gp);if(!gg){fprintf(stderr,"gguf load failed\n");return 1;}
   auto rdi=[&](const char*k,int d){int i=gguf_find_key(gg,k);return i<0?d:(int)gguf_get_val_u32(gg,i);};
   auto rdf=[&](const char*k,float d){int i=gguf_find_key(gg,k);return i<0?d:gguf_get_val_f32(gg,i);};
   m.c.enc_blocks=rdi("pf.enc.num_blocks",50);m.c.dec_blocks=rdi("pf.dec.num_blocks",16);m.c.dec_att=rdi("pf.dec.att_layer_num",16);
   m.c.dec3=rdi("pf.dec.decoders3",1);m.c.vocab=rdi("pf.vocab_size",8404);m.c.tail=rdf("pf.predictor.tail_threshold",0.45f);m.c.thresh=rdf("pf.predictor.threshold",1.0f);
+  std::vector<std::string> vocab; {int ki=gguf_find_key(gg,"pf.vocab"); if(ki>=0){int nv=gguf_get_arr_n(gg,ki); vocab.resize(nv); for(int i=0;i<nv;i++)vocab[i]=gguf_get_arr_str(gg,ki,i);}}
   for(int i=0;i<gguf_get_n_tensors(gg);i++){const char*nm=gguf_get_tensor_name(gg,i);m.t[nm]=ggml_get_tensor(m.ctx_w,nm);}gguf_free(gg);
   const int D=m.c.d_model,F=560,V=m.c.vocab;
+  bool emit_ids = ids_mode || vocab.empty();   // fall back to ids if the gguf has no vocab
 
   float*shift=(float*)m.g("cmvn.shift")->data,*scale=(float*)m.g("cmvn.scale")->data;
   float*cw=(float*)m.g("predictor.cif_conv1d.weight")->data; // [512,512,3] = [o][i][j]
@@ -183,7 +195,10 @@ int main(int argc,char**argv){
      x=lin(c,m.g("decoder.output_layer.weight"),m.g("decoder.output_layer.bias"),x); // [V,N]
      ggml_set_output(x);
      logits=run_graph(c,x,tgt,acoustic.data(),mem,enc.data());ggml_free(c);}
-    for(int n=0;n<N;n++){const float*col=&logits[(size_t)n*V];int am=0;float best=col[0];for(int v=1;v<V;v++)if(col[v]>best){best=col[v];am=v;}printf("%d ",am);}
+    std::vector<int> seg_ids; seg_ids.reserve(N);
+    for(int n=0;n<N;n++){const float*col=&logits[(size_t)n*V];int am=0;float best=col[0];for(int v=1;v<V;v++)if(col[v]>best){best=col[v];am=v;}seg_ids.push_back(am);}
+    if(emit_ids){ for(int id:seg_ids) printf("%d ",id); }
+    else { std::string t=detok_pf(seg_ids,vocab); printf("%s",t.c_str()); }
   };
 
   int64_t t0=ggml_time_us();
