@@ -35,7 +35,7 @@ jobs:
       - name: Configure and build
         run: |
           cmake -B build -DCMAKE_BUILD_TYPE=Release
-          cmake --build build --config Release -j
+          cmake --build build --config Release -j 2
       - name: Package
         run: |
           mkdir -p pkg
