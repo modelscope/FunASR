@@ -306,7 +306,6 @@ for result in engine.streaming_generate("audio.wav", language="中文"):
 | 1.5-3.0s | 部分正确 |
 | > 3.0s | 准确输出 |
 
-> Note: `repetition_penalty=1.3` 内部硬编码，防止短 chunk 重复退化。
 
 ---
 
