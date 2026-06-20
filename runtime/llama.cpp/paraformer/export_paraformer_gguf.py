@@ -32,7 +32,8 @@ def main():
     import json, glob
     tp = a.tokens or (glob.glob(os.path.join(os.path.dirname(a.model_pt), "tokens.json")) + [None])[0]
     if tp and os.path.exists(tp):
-        toks = json.load(open(tp)); w.add_array("pf.vocab", toks)
+        with open(tp, encoding="utf-8") as f: toks = json.load(f)
+        w.add_array("pf.vocab", toks)
         print(f"embedded pf.vocab ({len(toks)} tokens) from {tp}")
     else:
         print("WARNING: tokens.json not found - gguf will have no vocab (binary falls back to ids)")
