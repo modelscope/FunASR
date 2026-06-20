@@ -42,11 +42,15 @@ def find_script(name):
 
 def download(key, src):
     hf_repo, ms_id, _, _, _ = MODELS[key]
-    if src == "modelscope":
-        from modelscope import snapshot_download
-        return snapshot_download(ms_id)
-    from huggingface_hub import snapshot_download
-    return snapshot_download(hf_repo)
+    try:
+        if src == "modelscope":
+            from modelscope import snapshot_download
+            return snapshot_download(ms_id)
+        from huggingface_hub import snapshot_download
+        return snapshot_download(hf_repo)
+    except ModuleNotFoundError as e:
+        pkg = "modelscope" if src == "modelscope" else "huggingface_hub"
+        sys.exit(f"error: missing {e.name} - install it with: pip install -U {pkg}")
 
 def pick(d, *names):
     for n in names:
