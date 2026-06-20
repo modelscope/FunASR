@@ -20,6 +20,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--model_pt", required=True); ap.add_argument("--mvn", required=True)
     ap.add_argument("--out", required=True); ap.add_argument("--wtype", default="f32", choices=["f32","f16"])
+    ap.add_argument("--tokens", default=None, help="tokens.json (id->token); default: next to model_pt")
     a = ap.parse_args()
     sd = torch.load(a.model_pt, map_location="cpu"); sd = sd.get("state_dict", sd)
     w = gguf.GGUFWriter(a.out, "paraformer")
@@ -28,6 +29,13 @@ def main():
     w.add_uint32("pf.dec.num_blocks", 16); w.add_uint32("pf.dec.att_layer_num", 16)
     w.add_uint32("pf.dec.decoders3", 1); w.add_uint32("pf.dec.attention_heads", 4)
     w.add_uint32("pf.dec.kernel_size", 11); w.add_uint32("pf.vocab_size", 8404)
+    import json, glob
+    tp = a.tokens or (glob.glob(os.path.join(os.path.dirname(a.model_pt), "tokens.json")) + [None])[0]
+    if tp and os.path.exists(tp):
+        toks = json.load(open(tp)); w.add_array("pf.vocab", toks)
+        print(f"embedded pf.vocab ({len(toks)} tokens) from {tp}")
+    else:
+        print("WARNING: tokens.json not found - gguf will have no vocab (binary falls back to ids)")
     w.add_float32("pf.predictor.tail_threshold", 0.45)
     w.add_float32("pf.predictor.threshold", 1.0)
     shift, scale = parse_mvn(a.mvn)

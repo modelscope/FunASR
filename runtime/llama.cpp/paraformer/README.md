@@ -60,8 +60,7 @@ python runtime/llama.cpp/export_paraformer_gguf.py --wtype f16 \
 
 **3. Transcribe:**
 ```bash
-build/bin/llama-funasr-paraformer -m paraformer.gguf -a audio.wav > ids.txt
-python runtime/llama.cpp/detok.py <model>/tokens.json ids.txt
+build/bin/llama-funasr-paraformer -m paraformer.gguf -a audio.wav   # prints transcription text (--ids for raw)
 ```
 Expected output:
 ```

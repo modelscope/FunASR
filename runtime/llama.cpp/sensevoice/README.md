@@ -61,13 +61,12 @@ python runtime/llama.cpp/export_sensevoice_gguf.py --wtype f16 \
 
 **3. Transcribe:**
 ```bash
-build/bin/llama-funasr-sensevoice -m sensevoice-small.gguf -a audio.wav > ids.txt
-python runtime/llama.cpp/detok.py <model>/chn_jpn_yue_eng_ko_spectok.bpe.model ids.txt
+build/bin/llama-funasr-sensevoice -m sensevoice-small.gguf -a audio.wav   # prints transcription text
+# --keep-tags keeps the <|lang|>/<|emotion|>/<|event|> tags; --ids prints raw CTC ids
 ```
 Expected output:
 ```
-<|zh|><|NEUTRAL|><|Speech|><|woitn|>我想问我在滨海新区有房我一直没有照顾孩子...你觉得这是正常的想法吗
-[sensevoice] N=746 (q4+T742) encode 1.32s
+我想问我在滨海新区有房我一直没有照顾孩子...你觉得这是正常的想法吗
 ```
 The leading `<|...|>` tags are the predicted language / emotion / event / ITN.
 

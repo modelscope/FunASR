@@ -91,14 +91,27 @@ static void add_posenc(std::vector<float>&x,int T,int depth){
     x[(size_t)t*depth+i]+=(float)sin(st);x[(size_t)t*depth+depth/2+i]+=(float)cos(st);}}
 }
 
+// SenseVoice detok: sentencepiece pieces (no byte-fallback in this vocab) -> join,
+// "▁"(U+2581)->space; meta tokens <|lang|>/<|emo|>/<|event|>/<|itn|> dropped unless --keep-tags.
+static std::string sv_trim(const std::string&s){size_t a=s.find_first_not_of(' ');if(a==std::string::npos)return "";size_t b=s.find_last_not_of(' ');return s.substr(a,b-a+1);}
+static std::string detok_sv(const std::vector<int>&ids,const std::vector<std::string>&vocab,bool keep_tags){
+  std::string s; for(int id:ids){ if(id<0||id>=(int)vocab.size())continue; const std::string&p=vocab[id];
+    if(!keep_tags && p.size()>=2 && p[0]=='<' && p[1]=='|') continue;   // skip <|...|> meta
+    s+=p; }
+  const std::string lb="\xe2\x96\x81"; size_t pp; while((pp=s.find(lb))!=std::string::npos)s.replace(pp,3," ");
+  return sv_trim(s);
+}
+
 int main(int argc,char**argv){
-  std::string gguf_path,fbank_path,wav_path,vad_path; int vad_maxseg=30000;
+  std::string gguf_path,fbank_path,wav_path,vad_path; int vad_maxseg=30000; bool ids_mode=false,keep_tags=false;
   for(int i=1;i<argc;i++){ if(!strcmp(argv[i],"-m")&&i+1<argc)gguf_path=argv[++i];
     else if(!strcmp(argv[i],"-f")&&i+1<argc)fbank_path=argv[++i];
     else if(!strcmp(argv[i],"-a")&&i+1<argc)wav_path=argv[++i];
     else if(!strcmp(argv[i],"--vad")&&i+1<argc)vad_path=argv[++i];
     else if(!strcmp(argv[i],"--vad-maxseg")&&i+1<argc)vad_maxseg=atoi(argv[++i]);
-    else {fprintf(stderr,"usage: %s -m sensevoice.gguf (-a audio.wav | -f fbank.bin) [--vad fsmn-vad.gguf [--vad-maxseg ms]]\n",argv[0]);return 1;} }
+    else if(!strcmp(argv[i],"--ids"))ids_mode=true;
+    else if(!strcmp(argv[i],"--keep-tags"))keep_tags=true;
+    else {fprintf(stderr,"usage: %s -m sensevoice.gguf (-a audio.wav | -f fbank.bin) [--vad fsmn-vad.gguf [--vad-maxseg ms]] [--ids] [--keep-tags]\n",argv[0]);return 1;} }
   if(gguf_path.empty()||(fbank_path.empty()&&wav_path.empty())){fprintf(stderr,"missing args\n");return 1;}
 
   // load model
@@ -110,9 +123,11 @@ int main(int argc,char**argv){
   m.c.kernel=rd("sv.kernel_size",11); m.c.vocab=rd("sv.vocab_size",25055); m.c.blank=rd("sv.blank_id",0);
   int qi=gguf_find_key(gg,"sv.query_tokens"); int nq=qi<0?0:(int)gguf_get_arr_n(gg,qi);
   std::vector<int> qtok(nq); for(int i=0;i<nq;i++) qtok[i]=((const int32_t*)gguf_get_arr_data(gg,qi))[i];
+  std::vector<std::string> vocab; {int ki=gguf_find_key(gg,"sv.vocab"); if(ki>=0){int nv=gguf_get_arr_n(gg,ki); vocab.resize(nv); for(int i=0;i<nv;i++)vocab[i]=gguf_get_arr_str(gg,ki,i);}}
   for(int i=0;i<gguf_get_n_tensors(gg);i++){const char*nm=gguf_get_tensor_name(gg,i);m.t[nm]=ggml_get_tensor(m.ctx_w,nm);}
   gguf_free(gg);
   const int F=560, D=m.c.d_model, V=m.c.vocab;
+  bool emit_ids = ids_mode || vocab.empty();   // fall back to ids if the gguf has no vocab
 
   // NOTE: SenseVoiceSmall inference() feeds the RAW log-mel fbank to the encoder;
   // it does NOT apply am.mvn CMVN (that path is unused at inference). Applying it
@@ -139,10 +154,12 @@ int main(int argc,char**argv){
     ggml_backend_tensor_set(x,inp.data(),0,ggml_nbytes(x)); ggml_backend_cpu_set_n_threads(be,8);
     if(ggml_backend_graph_compute(be,gf)!=GGML_STATUS_SUCCESS){fprintf(stderr,"compute failed\n");}
     std::vector<float> lg((size_t)V*N); ggml_backend_tensor_get(logits,lg.data(),0,ggml_nbytes(logits));
-    int prev=-1;   // greedy CTC: argmax per frame -> collapse consecutive -> drop blank
+    std::vector<int> seg_ids; int prev=-1;   // greedy CTC: argmax per frame -> collapse -> drop blank
     for(int n=0;n<N;n++){ const float*col=&lg[(size_t)n*V]; int am=0; float best=col[0];
       for(int v=1;v<V;v++) if(col[v]>best){best=col[v];am=v;}
-      if(am!=prev && am!=m.c.blank) printf("%d ", am); prev=am; }
+      if(am!=prev && am!=m.c.blank) seg_ids.push_back(am); prev=am; }
+    if(emit_ids){ for(int id:seg_ids) printf("%d ",id); }
+    else { std::string t=detok_sv(seg_ids,vocab,keep_tags); printf("%s",t.c_str()); }
     ggml_gallocr_free(ga); ggml_free(c); ggml_backend_free(be);
   };
 
