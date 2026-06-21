@@ -34,24 +34,24 @@
 
 ## 1. Installation & Environment
 
+Install vLLM first, choosing a version compatible with your NVIDIA driver's CUDA. vLLM pins and installs a matching torch / torchaudio / torchvision trio automatically, so do not install torch/torchaudio yourself — the three are ABI-locked, i.e. they must be the matching set built against each other (e.g. torch 2.10.0 ↔ torchaudio 2.10.0 ↔ torchvision 0.25.0). 
+
 ```bash
-pip install torch torchaudio
+# 1) Install vLLM first. Pick the version by the CUDA version shown in `nvidia-smi`
+#    (the driver's max CUDA), NOT the runtime CUDA. vLLM brings a matching torch/torchaudio/torchvision.
+#    driver CUDA 12.x  -> pip install vllm==0.19.1   (ships torch 2.10 / cu128)
+#    driver CUDA >= 13 -> pip install vllm           (latest; ships torch 2.11 / cu130)
+pip install "vllm==0.19.1"   # adjust to your driver CUDA; see note below
+
+# 2) Then FunASR and the rest.
 pip install funasr>=1.3.0
-# Install vLLM separately after choosing a version compatible with your NVIDIA driver, CUDA runtime, and PyTorch wheel.
-pip install safetensors tiktoken websockets regex fastapi uvicorn python-multipart
 
 cd /path/to/FunASR && pip install -e .
 ```
 
 **Hardware**: GPU ≥ 8 GB VRAM, CUDA ≥ 11.8. 16 GB+ recommended.
 
-Install a PyTorch/torchaudio/vLLM combination that matches your NVIDIA driver and
-CUDA runtime. Do not blindly keep the newest wheel if it was built for a newer
-CUDA runtime than your driver supports; PyTorch can fail during CUDA
-initialization with `The NVIDIA driver on your system is too old` before FunASR
-starts. If that happens, reinstall compatible PyTorch, torchaudio, and vLLM
-wheels for the CUDA version reported by `nvidia-smi`, or update the NVIDIA
-driver first.
+Why not pip install torch torchaudio? The torch/torchaudio/torchvision versions are determined by the vLLM release — each major vLLM version bumps them together (see vLLM's requirements/cuda.txt). Installing them by hand pulls the newest wheel, which may be built for a newer CUDA runtime than your driver supports; PyTorch then fails during CUDA initialization with The NVIDIA driver on your system is too old before FunASR even starts. Letting vLLM own the trio avoids this. If you still hit a driver-too-old error, install a vLLM version whose CUDA build matches the CUDA reported by nvidia-smi (e.g. vllm==0.19.1 for CUDA 12.x), or update the NVIDIA driver first.
 
 ---
 
