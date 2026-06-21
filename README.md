@@ -268,7 +268,18 @@ curl http://localhost:8000/v1/audio/transcriptions \
 docker pull registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-online-cpu-0.1.12
 ```
 
-> **CPU / edge (no GPU, no Python):** run Fun-ASR-Nano / SenseVoice / Paraformer via **llama.cpp / GGUF** — a single self-contained binary, like whisper.cpp. See [runtime/llama.cpp/](./runtime/llama.cpp/).
+### CPU / Edge — llama.cpp / GGUF (no GPU, no Python)
+
+Run **SenseVoice / Paraformer / Fun-ASR-Nano** as a **single self-contained binary** on CPU and edge devices — this is to FunASR what [whisper.cpp](https://github.com/ggml-org/whisper.cpp) is to Whisper, but with **~3× lower CER than whisper.cpp on Chinese**. Built-in FSMN-VAD, no Python at runtime.
+
+```bash
+# 1) Grab a prebuilt binary from Releases (Linux / macOS / Windows), then:
+bash download-funasr-model.sh sensevoice ./gguf        # or: paraformer | nano
+llama-funasr-sensevoice -m ./gguf/SenseVoiceSmall-f16.gguf --vad ./gguf/fsmn-vad.gguf -a audio.wav
+# → 欢迎大家来体验达摩院推出的语音识别模型
+```
+
+**Prebuilt binaries:** [Releases](../../releases) · **Download & quickstart:** [funasr.com/llama-cpp](https://www.funasr.com/llama-cpp.html) · **GGUF models:** [Hugging Face](https://huggingface.co/FunAudioLLM) · **Docs & benchmarks:** [runtime/llama.cpp/](./runtime/llama.cpp/)
 
 [OpenAI API example →](./examples/openai_api/) · [Gradio demo →](./examples/openai_api/GRADIO.md) · [Client recipes →](./examples/openai_api/CLIENTS.md) · [JavaScript/TypeScript recipes →](./examples/openai_api/JAVASCRIPT.md) · [Kubernetes template →](./examples/openai_api/kubernetes/) · [Workflow recipes →](./examples/openai_api/WORKFLOWS.md) · [Postman collection →](./examples/openai_api/POSTMAN.md) · [OpenAPI spec →](./examples/openai_api/OPENAPI.md) · [Security guide →](./examples/openai_api/SECURITY.md) · [Deployment matrix →](./docs/deployment_matrix.md) · [Deployment docs →](./runtime/readme.md) · [Agent integration →](https://modelscope.github.io/FunASR/agent.html)
 
