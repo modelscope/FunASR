@@ -22,7 +22,7 @@ def main():
     ap.add_argument("--model_pt", required=True)
     ap.add_argument("--mvn", required=True)
     ap.add_argument("--out", required=True)
-    ap.add_argument("--wtype", default="f32", choices=["f32", "f16"])
+    ap.add_argument("--wtype", default="f32", choices=["f32", "f16", "q8_0"])
     ap.add_argument("--spm", default=None, help="sentencepiece .bpe.model; default: next to model_pt")
     args = ap.parse_args()
 
@@ -62,7 +62,11 @@ def main():
             arr = np.ascontiguousarray(arr[:, 0, :].T)
         elif args.wtype == "f16" and arr.ndim == 2 and "norm" not in k:
             arr = arr.astype(np.float16)
-        w.add_tensor(k, arr)
+        if args.wtype == "q8_0" and arr.ndim == 2 and "norm" not in k and "fsmn_block" not in k and k != "embed.weight" and arr.shape[1] % 32 == 0:
+            from gguf import quants as _q, GGMLQuantizationType as _QT
+            w.add_tensor(k, _q.quantize(arr, _QT.Q8_0), raw_dtype=_QT.Q8_0)
+        else:
+            w.add_tensor(k, arr)
         n += 1
     print(f"writing {n} tensors (+cmvn) to {args.out}")
     w.write_header_to_file(); w.write_kv_data_to_file(); w.write_tensors_to_file(); w.close()
