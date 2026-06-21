@@ -34,10 +34,18 @@
 
 ## 1. 安装与环境
 
+先安装 vLLM,按 NVIDIA 驱动的 CUDA 版本选对应版本;vLLM 会自动钉定并安装匹配的 torch / torchaudio / torchvision 三件套,所以不要自己装 torch/torchaudio——三者 ABI 锁死,必须是互相编译匹配的同一组(如 torch 2.10.0 ↔ torchaudio 2.10.0 ↔ torchvision 0.25.0),只能随 vLLM 一起来。
+
 ```bash
-pip install torch torchaudio
+# 1) 先装 vLLM。按 `nvidia-smi` 显示的 CUDA 版本(驱动支持的最高 CUDA,不是 runtime CUDA)选版本,
+#    vLLM 会带来匹配的 torch/torchaudio/torchvision。
+#    驱动 CUDA 12.x  -> pip install vllm==0.19.1   (附带 torch 2.10 / cu128)
+#    驱动 CUDA >= 13 -> pip install vllm           (最新版;附带 torch 2.11 / cu130)
+
+pip install "vllm==0.19.1"   # 按你的驱动 CUDA 调整;见下方说明
+
+# 2) 再装 FunASR 与其余依赖。
 pip install funasr>=1.3.0
-# 先确认 NVIDIA 驱动、CUDA runtime 和 PyTorch wheel 组合，再固定安装匹配的 vLLM 版本。
 pip install safetensors tiktoken websockets regex fastapi uvicorn python-multipart
 
 cd /path/to/FunASR && pip install -e .
@@ -45,12 +53,7 @@ cd /path/to/FunASR && pip install -e .
 
 **硬件**：GPU ≥ 8GB VRAM，CUDA ≥ 11.8。推荐 16GB+。
 
-请根据 NVIDIA 驱动和 `nvidia-smi` 显示的 CUDA 版本选择匹配的
-PyTorch/torchaudio/vLLM 组合，不要无条件保留 pip 拉到的最新 wheel。若
-vLLM 或 PyTorch wheel 依赖的 CUDA runtime 高于当前驱动支持范围，可能在
-FunASR 启动前就报 `The NVIDIA driver on your system is too old`。遇到该错误时，
-优先重装与当前驱动/CUDA 匹配的 PyTorch、torchaudio、vLLM wheel，或先升级
-NVIDIA 驱动。
+为什么不要 pip install torch torchaudio? torch/torchaudio/torchvision 的版本由 vLLM 版本决定—— 每个大版本会一起升级(见 vLLM 的 requirements/cuda.txt)。手动安装会拉到最新 wheel,可能是为比你驱动更新的 CUDA runtime 编译的;PyTorch 会在 CUDA 初始化阶段、FunASR 启动前就报 The NVIDIA driver on your system is too old。让 vLLM 统一钉定这三件套即可避免。若仍遇到该错误,请安装其 CUDA 构建与 nvidia-smi 显示的 CUDA 匹配的 vLLM 版本(如 CUDA 12.x 用 vllm==0.19.1),或先升级 NVIDIA 驱动。
 
 ---
 
