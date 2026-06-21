@@ -16,7 +16,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--model_pt", required=True)
     ap.add_argument("--out", required=True)
-    ap.add_argument("--wtype", default="f32", choices=["f32", "f16"],
+    ap.add_argument("--wtype", default="f32", choices=["f32", "f16", "q8_0"],
                     help="dtype for 2D Linear (matmul) weights; norms/bias/fsmn stay f32")
     args = ap.parse_args()
 
@@ -57,7 +57,11 @@ def main():
         # matmul (Linear) weights -> optional f16; norms/biases/fsmn stay f32
         elif args.wtype == "f16" and arr.ndim == 2 and "norm" not in k:
             arr = arr.astype(np.float16)
-        w.add_tensor(k, arr)
+        if args.wtype == "q8_0" and arr.ndim == 2 and "norm" not in k and "fsmn_block" not in k and arr.shape[1] % 32 == 0:
+            from gguf import quants as _q, GGMLQuantizationType as _QT
+            w.add_tensor(k, _q.quantize(arr, _QT.Q8_0), raw_dtype=_QT.Q8_0)
+        else:
+            w.add_tensor(k, arr)
         n += 1
     print(f"writing {n} tensors to {args.out}")
 
