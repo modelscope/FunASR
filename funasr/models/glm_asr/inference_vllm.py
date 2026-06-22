@@ -80,6 +80,63 @@ def prepare_glmasr_vllm_dir(model_dir: str) -> str:
     return output_dir
 
 
+# Warn only once per process so batch loops do not spam the log.
+_warned_dup_keys = False
+
+
+def _dedup_keys(keys):
+    """Make result keys unique while preserving order and first-occurrence names.
+
+    Each result key is derived from the audio file basename
+    (``os.path.splitext(os.path.basename(path))[0]``), so two inputs that live
+    in different directories but share a basename -- e.g. ``spk1/segment.wav``
+    and ``spk2/segment.wav`` -- both map to ``"segment"``. A downstream
+    ``{r["key"]: r["text"]}`` mapping (the canonical FunASR result shape) would
+    then silently drop all but the last colliding entry, returning fewer
+    transcripts than inputs with no error. Appending a deterministic ``_N``
+    suffix to later collisions keeps every transcript addressable.
+
+    Args:
+        keys: Result keys in input order.
+
+    Returns:
+        A new list of unique keys, same length and order as ``keys``. The first
+        occurrence of each key is preserved unchanged; the n-th repeat becomes
+        ``"<key>_<n-1>"`` (e.g. ``"seg"`` -> ``"seg"``, ``"seg_1"``, ``"seg_2"``).
+    """
+    global _warned_dup_keys
+
+    seen = set()
+    out = []
+    collided = False
+    for key in keys:
+        if key not in seen:
+            seen.add(key)
+            out.append(key)
+            continue
+        # Find the first free "<key>_<n>" so a suffixed key cannot itself clash
+        # with an existing one (e.g. inputs "seg", "seg_1", "seg").
+        collided = True
+        n = 1
+        candidate = f"{key}_{n}"
+        while candidate in seen:
+            n += 1
+            candidate = f"{key}_{n}"
+        seen.add(candidate)
+        out.append(candidate)
+
+    if collided and not _warned_dup_keys:
+        logger.warning(
+            "Duplicate result keys from audio basenames were made unique with "
+            "'_N' suffixes (e.g. two files named 'segment.wav' in different "
+            "directories map to the same key); pass distinct filenames if you "
+            "rely on the basename as the result key."
+        )
+        _warned_dup_keys = True
+
+    return out
+
+
 class GLMASRVLLMEngine:
     """GLM-ASR with vLLM backend.
 
@@ -219,13 +276,18 @@ class GLMASRVLLMEngine:
         t2 = time.perf_counter()
         logger.info(f"vLLM generation: {t2-t1:.3f}s")
 
+        raw_keys = [
+            os.path.splitext(os.path.basename(x))[0] if isinstance(x, str) else f"sample_{i}"
+            for i, x in enumerate(inputs)
+        ]
+        keys = _dedup_keys(raw_keys)
+
         results = []
         for i, output in enumerate(outputs):
             token_ids = list(output.outputs[0].token_ids)
             text = self.tokenizer.decode(token_ids, skip_special_tokens=True)
             text = re.sub(r'\s+', ' ', text).strip()
-            key = os.path.splitext(os.path.basename(inputs[i]))[0] if isinstance(inputs[i], str) else f"sample_{i}"
-            results.append({"key": key, "text": text})
+            results.append({"key": keys[i], "text": text})
 
         return results
 
