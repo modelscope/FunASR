@@ -37,6 +37,19 @@ pip install torch torchaudio
 pip install funasr
 ```
 
+**Flagship model — Fun-ASR-Nano** (LLM-ASR, 31 languages; the default recommendation, needs a GPU):
+
+```python
+from funasr import AutoModel
+
+model = AutoModel(model="FunAudioLLM/Fun-ASR-Nano-2512", device="cuda")
+result = model.generate(input="https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav")
+print(result[0]["text"])
+# 欢迎大家来体验达摩院推出的语音识别模型。
+```
+
+On CPU (or for multilingual + emotion in one pass), use **SenseVoice** — which also returns speaker diarization and timestamps:
+
 ```python
 from funasr import AutoModel
 from funasr.utils.postprocess_utils import rich_transcription_postprocess
