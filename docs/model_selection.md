@@ -4,7 +4,17 @@ Use this guide when you are choosing a first model, comparing FunASR with Whispe
 
 ## Fast default path
 
-If you are unsure, start with **SenseVoice-Small**:
+If you have a GPU, start with the flagship **Fun-ASR-Nano** — an LLM-based ASR model (SenseVoice encoder + a Qwen3 decoder) covering 31 languages, with the strongest accuracy on hard cases, context, and proper nouns:
+
+```python
+from funasr import AutoModel
+
+model = AutoModel(model="FunAudioLLM/Fun-ASR-Nano-2512", device="cuda")
+result = model.generate(input="meeting.wav")
+print(result[0]["text"])
+```
+
+On CPU, or when you want multilingual + emotion/event tags and speaker-aware meeting transcripts in one fast non-autoregressive pass, use **SenseVoice-Small**:
 
 ```python
 from funasr import AutoModel
@@ -18,7 +28,7 @@ model = AutoModel(
 result = model.generate(input="meeting.wav")
 ```
 
-It is the best first choice for demos, private APIs, multilingual transcription, speaker-aware meeting transcripts, and agent voice input. Switch only when your workload has a clear requirement such as Mandarin production accuracy, streaming latency, or LLM-based ASR experiments.
+Switch to Paraformer when your workload is Mandarin-only and you want character-level timestamps or hotwords.
 
 ## Decision table
 
@@ -79,9 +89,9 @@ For migration work, use the [migration benchmark example](../examples/migration/
 
 ## Practical recommendations
 
-- Start with SenseVoice-Small for demos, private APIs, agent voice input, and multilingual workloads.
-- Use Paraformer when your production traffic is primarily Mandarin and you want the mature non-autoregressive ASR path.
-- Use Fun-ASR-Nano when you specifically want the LLM-based model path or vLLM acceleration experiments.
+- With a GPU, default to Fun-ASR-Nano — the flagship LLM-based model (31 languages), strongest on hard, contextual, and proper-noun-heavy audio.
+- On CPU, or for multilingual + emotion workloads, use SenseVoice-Small (fast non-autoregressive, CPU-viable).
+- Use Paraformer when your production traffic is primarily Mandarin and you want timestamps or hotwords.
 - Use the streaming runtime when partial results and long-lived connections matter more than a single final transcript.
 - Keep model aliases stable in production runbooks so benchmark results and bug reports are reproducible.
 - Open a [Deployment Help issue](https://github.com/modelscope/FunASR/issues/new?template=deployment_help.md) with model, device, command, logs, audio duration, and runtime path when you get stuck.

@@ -4,7 +4,17 @@
 
 ## 默认快速路径
 
-如果还不确定，先从 **SenseVoice-Small** 开始：
+如果有 GPU，先从旗舰 **Fun-ASR-Nano** 开始 —— 基于 LLM 的识别模型（SenseVoice 编码器 + Qwen3 解码），覆盖 31 语种，在难例、上下文和专名上精度最强：
+
+```python
+from funasr import AutoModel
+
+model = AutoModel(model="FunAudioLLM/Fun-ASR-Nano-2512", device="cuda")
+result = model.generate(input="meeting.wav")
+print(result[0]["text"])
+```
+
+在 CPU 上，或当你想要多语种 + 情感/事件标签、带说话人信息的会议转写一次完成时，用 **SenseVoice-Small**：
 
 ```python
 from funasr import AutoModel
@@ -18,7 +28,7 @@ model = AutoModel(
 result = model.generate(input="meeting.wav")
 ```
 
-它适合 demo、私有 API、多语种转写、带说话人信息的会议转写和 Agent 语音输入。只有当你的场景明确需要中文生产识别、低延迟流式结果或 LLM-based ASR 实验时，再切换到其他路径。
+当你的场景是纯中文、需要字级时间戳或热词时，切换到 Paraformer。
 
 ## 决策表
 
