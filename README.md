@@ -94,7 +94,7 @@ results = model.generate(["audio1.wav", "audio2.wav"], language="auto")
 | Emotion | ✅ Happy/Sad/Angry | ❌ | ❌ |
 | Languages | 50+ | 57 | Varies |
 | Streaming | ✅ WebSocket | ❌ | ✅ |
-| vLLM Acceleration | ✅ 2-3x faster | ❌ | N/A |
+| vLLM Acceleration | ✅ up to 16x faster | ❌ | N/A |
 | Self-hosted | ✅ MIT license | ✅ MIT license | ❌ Cloud only |
 | Cost | Free | Free | $0.006/min+ |
 | CPU viable | ✅ 17x realtime | ❌ Too slow | N/A |
@@ -293,7 +293,7 @@ llama-funasr-sensevoice -m ./gguf/SenseVoiceSmall-f16.gguf --vad ./gguf/fsmn-vad
 |---|---|
 | 📖 [Documentation](https://modelscope.github.io/FunASR/) | 🐛 [Issues](https://github.com/modelscope/FunASR/issues) |
 | 💬 [Discussions](https://github.com/modelscope/FunASR/discussions) | 🤗 [HuggingFace](https://huggingface.co/funasr) |
-| 🤝 [Contributing](./CONTRIBUTING.md) | 📈 [20k growth plan](./docs/community_growth_20k.md) |
+| 🤝 [Contributing](./CONTRIBUTING.md) | 🌐 [funasr.com](https://www.funasr.com) |
 
 ## Star History
 
