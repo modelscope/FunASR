@@ -111,13 +111,13 @@ Trying FunASR for the first time? Use the [Colab quickstart](./examples/colab/) 
 
 > 184 long-form audio files (192 min). [Full report →](https://modelscope.github.io/FunASR/benchmark.html)
 
-| Model | GPU Speed | CPU Speed | vs Whisper-large-v3 |
-|-------|-----------|-----------|-------------------|
-| **Fun-ASR-Nano** (vLLM) | **340x** realtime | — | 🚀 **26x faster** |
-| **SenseVoice-Small** | **170x** realtime | **17x** realtime | 🚀 **13x faster** |
-| **Paraformer-Large** | **120x** realtime | **15x** realtime | 🚀 **9x faster** |
-| Whisper-large-v3-turbo | 46x realtime | ❌ | 3.4x faster |
-| Whisper-large-v3 | 13x realtime | ❌ | baseline |
+| Model | Chinese CER ↓ | GPU Speed | CPU Speed | vs Whisper-large-v3 |
+|-------|------|-----------|-----------|-------------------|
+| **Fun-ASR-Nano** (vLLM) | **8.20%** | **340x** realtime | — | 🚀 **26x faster** |
+| **SenseVoice-Small** | **7.81%** | **170x** realtime | **17x** realtime | 🚀 **13x faster** |
+| **Paraformer-Large** | 10.18% | **120x** realtime | **15x** realtime | 🚀 **9x faster** |
+| Whisper-large-v3-turbo | 21.71% | 46x realtime | ❌ | 3.4x faster |
+| Whisper-large-v3 | 20.02% | 13x realtime | ❌ | baseline |
 
 > **Key takeaway:** FunASR models run on CPU faster than Whisper runs on GPU.
 
