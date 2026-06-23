@@ -77,13 +77,13 @@ result = model.generate(input="meeting.wav")
 
 > 184개 장시간 오디오(총 192분). [상세 보고서 →](https://modelscope.github.io/FunASR/benchmark.html)
 
-| 모델 | GPU 속도 | CPU 속도 | Whisper-large-v3 대비 |
-|------|----------|----------|---------------------|
-| **SenseVoice-Small** | **170배** 실시간 | **17배** 실시간 | 🚀 **13배 빠름** |
-| **Paraformer-Large** | **120배** 실시간 | **15배** 실시간 | 🚀 **9배 빠름** |
-| Whisper-large-v3-turbo | 46배 실시간 | ❌ | 3.4배 빠름 |
-| **Fun-ASR-Nano** | 17배 실시간 | 3.6배 실시간 | 1.3배 빠름 |
-| Whisper-large-v3 | 13배 실시간 | ❌ | 기준선 |
+| 모델 | 중국어 CER ↓ | GPU 속도 | CPU 속도 | Whisper-large-v3 대비 |
+|------|------|----------|----------|---------------------|
+| **Fun-ASR-Nano**(vLLM) | **8.20%** | **340배** 실시간 | — | 🚀 **26배 빠름** |
+| **SenseVoice-Small** | **7.81%** | **170배** 실시간 | **17배** 실시간 | 🚀 **13배 빠름** |
+| **Paraformer-Large** | 10.18% | **120배** 실시간 | **15배** 실시간 | 🚀 **9배 빠름** |
+| Whisper-large-v3-turbo | 21.71% | 46배 실시간 | ❌ | 3.4배 빠름 |
+| Whisper-large-v3 | 20.02% | 13배 실시간 | ❌ | 기준선 |
 
 > **핵심:** FunASR의 CPU 속도가 Whisper의 GPU 속도보다 빠릅니다.
 
