@@ -113,10 +113,10 @@ Trying FunASR for the first time? Use the [Colab quickstart](./examples/colab/) 
 
 | Model | GPU Speed | CPU Speed | vs Whisper-large-v3 |
 |-------|-----------|-----------|-------------------|
+| **Fun-ASR-Nano** (vLLM) | **340x** realtime | — | 🚀 **26x faster** |
 | **SenseVoice-Small** | **170x** realtime | **17x** realtime | 🚀 **13x faster** |
 | **Paraformer-Large** | **120x** realtime | **15x** realtime | 🚀 **9x faster** |
 | Whisper-large-v3-turbo | 46x realtime | ❌ | 3.4x faster |
-| **Fun-ASR-Nano** | 17x realtime | 3.6x realtime | 1.3x faster |
 | Whisper-large-v3 | 13x realtime | ❌ | baseline |
 
 > **Key takeaway:** FunASR models run on CPU faster than Whisper runs on GPU.
