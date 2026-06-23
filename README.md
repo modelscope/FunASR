@@ -105,46 +105,6 @@ Trying FunASR for the first time? Use the [Colab quickstart](./examples/colab/) 
 
 ---
 
-<a name="benchmark"></a>
-
-## Benchmark
-
-> 184 long-form audio files (192 min). [Full report →](https://modelscope.github.io/FunASR/benchmark.html)
-
-| Model | Chinese CER ↓ | GPU Speed | CPU Speed | vs Whisper-large-v3 |
-|-------|------|-----------|-----------|-------------------|
-| **Fun-ASR-Nano** (vLLM) | **8.20%** | **340x** realtime | — | 🚀 **26x faster** |
-| **SenseVoice-Small** | **7.81%** | **170x** realtime | **17x** realtime | 🚀 **13x faster** |
-| **Paraformer-Large** | 10.18% | **120x** realtime | **15x** realtime | 🚀 **9x faster** |
-| Whisper-large-v3-turbo | 21.71% | 46x realtime | ❌ | 3.4x faster |
-| Whisper-large-v3 | 20.02% | 13x realtime | ❌ | baseline |
-
-> **Key takeaway:** FunASR models run on CPU faster than Whisper runs on GPU.
-
----
-
-## What's new
-
-- 2026/06/20: **llama.cpp / GGUF runtime** — run SenseVoice / Paraformer / Fun-ASR-Nano on CPU & edge as a single self-contained binary (a whisper.cpp-style alternative), built-in FSMN-VAD, no Python at runtime. Prebuilt binaries for Linux / macOS / Windows + **q8 quantized models (~half the size, same accuracy)**. [runtime/llama.cpp/](./runtime/llama.cpp/) · [Releases](../../releases)
-- 2026/06/21: **v1.3.12** on PyPI — rolling fixes (qwen3-asr language codes, glm_asr, vLLM repetition_penalty). `pip install --upgrade funasr`
-- 2026/05/24: **vLLM Inference Engine** — 2-3x faster LLM decoding for Fun-ASR-Nano. Streaming WebSocket service with VAD + Speaker Diarization. [Guide →](docs/vllm_guide.md)
-- 2026/05/24: **Dynamic VAD** — adaptive silence threshold (default on). Short sentences stay intact, long segments get auto-split. [Details →](docs/vllm_guide.md#附录dynamicstreamingvad)
-- 2026/05/24: **v1.3.3** — `funasr-server` CLI, OpenAI-compatible API, MCP Server for AI agents. `pip install --upgrade funasr`
-- 2026/05/20: Added Qwen3-ASR (0.6B/1.7B) — 52 languages, auto detection. [usage](examples/industrial_data_pretraining/qwen3_asr)
-- 2026/05/20: Added GLM-ASR-Nano (1.5B) — 17 languages, dialect support. [usage](examples/industrial_data_pretraining/glm_asr)
-- 2026/05/19: Fun-ASR-Nano and SenseVoice now support speaker diarization.
-- 2025/12/15: [Fun-ASR-Nano-2512](https://github.com/FunAudioLLM/Fun-ASR) — 31 languages, tens of millions of hours training.
-
-<details><summary>Older</summary>
-
-- 2024/10/10: Whisper-large-v3-turbo support added.
-- 2024/07/04: [SenseVoice](https://github.com/FunAudioLLM/SenseVoice) — ASR + emotion + audio events.
-- 2024/01/30: FunASR 1.0 released.
-
-</details>
-
----
-
 ## Installation
 
 ```bash
@@ -162,8 +122,6 @@ Requirements: Python ≥ 3.8. Install PyTorch + torchaudio first ([pytorch.org](
 </details>
 
 ---
-
-<a name="model-zoo"></a>
 
 ## Model Zoo
 
@@ -195,10 +153,6 @@ from funasr import AutoModel
 model = AutoModel(model="paraformer-zh", vad_model="fsmn-vad", punc_model="ct-punc", spk_model="cam++", device="cuda")
 result = model.generate(input="https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav", hotword="关键词 20")
 
-# 31 languages with timestamps
-model = AutoModel(model="FunAudioLLM/Fun-ASR-Nano-2512",
-                  vad_model="fsmn-vad", vad_kwargs={"max_single_segment_time": 30000}, device="cuda")
-result = model.generate(input="audio.wav", batch_size=1)
 
 # Streaming real-time (feed audio chunk by chunk)
 import soundfile as sf
@@ -286,6 +240,44 @@ llama-funasr-sensevoice -m ./gguf/SenseVoiceSmall-f16.gguf --vad ./gguf/fsmn-vad
 **Prebuilt binaries:** [Releases](../../releases) · **Download & quickstart:** [funasr.com/llama-cpp](https://www.funasr.com/llama-cpp.html) · **GGUF models:** [Hugging Face](https://huggingface.co/FunAudioLLM) · **Docs & benchmarks:** [runtime/llama.cpp/](./runtime/llama.cpp/)
 
 [OpenAI API example →](./examples/openai_api/) · [Gradio demo →](./examples/openai_api/GRADIO.md) · [Client recipes →](./examples/openai_api/CLIENTS.md) · [JavaScript/TypeScript recipes →](./examples/openai_api/JAVASCRIPT.md) · [Kubernetes template →](./examples/openai_api/kubernetes/) · [Workflow recipes →](./examples/openai_api/WORKFLOWS.md) · [Postman collection →](./examples/openai_api/POSTMAN.md) · [OpenAPI spec →](./examples/openai_api/OPENAPI.md) · [Security guide →](./examples/openai_api/SECURITY.md) · [Deployment matrix →](./docs/deployment_matrix.md) · [Deployment docs →](./runtime/readme.md) · [Agent integration →](https://modelscope.github.io/FunASR/agent.html)
+
+---
+
+## Benchmark
+
+> 184 long-form audio files (192 min). [Full report →](https://modelscope.github.io/FunASR/benchmark.html)
+
+| Model | Chinese CER ↓ | GPU Speed | CPU Speed | vs Whisper-large-v3 |
+|-------|------|-----------|-----------|-------------------|
+| **Fun-ASR-Nano** (vLLM) | **8.20%** | **340x** realtime | — | 🚀 **26x faster** |
+| **SenseVoice-Small** | **7.81%** | **170x** realtime | **17x** realtime | 🚀 **13x faster** |
+| **Paraformer-Large** | 10.18% | **120x** realtime | **15x** realtime | 🚀 **9x faster** |
+| Whisper-large-v3-turbo | 21.71% | 46x realtime | ❌ | 3.4x faster |
+| Whisper-large-v3 | 20.02% | 13x realtime | ❌ | baseline |
+
+> **Key takeaway:** FunASR models run on CPU faster than Whisper runs on GPU.
+
+---
+
+## What's new
+
+- 2026/06/20: **llama.cpp / GGUF runtime** — run SenseVoice / Paraformer / Fun-ASR-Nano on CPU & edge as a single self-contained binary (a whisper.cpp-style alternative), built-in FSMN-VAD, no Python at runtime. Prebuilt binaries for Linux / macOS / Windows + **q8 quantized models (~half the size, same accuracy)**. [runtime/llama.cpp/](./runtime/llama.cpp/) · [Releases](../../releases)
+- 2026/06/21: **v1.3.12** on PyPI — rolling fixes (qwen3-asr language codes, glm_asr, vLLM repetition_penalty). `pip install --upgrade funasr`
+- 2026/05/24: **vLLM Inference Engine** — 2-3x faster LLM decoding for Fun-ASR-Nano. Streaming WebSocket service with VAD + Speaker Diarization. [Guide →](docs/vllm_guide.md)
+- 2026/05/24: **Dynamic VAD** — adaptive silence threshold (default on). Short sentences stay intact, long segments get auto-split. [Details →](docs/vllm_guide.md#附录dynamicstreamingvad)
+- 2026/05/24: **v1.3.3** — `funasr-server` CLI, OpenAI-compatible API, MCP Server for AI agents. `pip install --upgrade funasr`
+- 2026/05/20: Added Qwen3-ASR (0.6B/1.7B) — 52 languages, auto detection. [usage](examples/industrial_data_pretraining/qwen3_asr)
+- 2026/05/20: Added GLM-ASR-Nano (1.5B) — 17 languages, dialect support. [usage](examples/industrial_data_pretraining/glm_asr)
+- 2026/05/19: Fun-ASR-Nano and SenseVoice now support speaker diarization.
+- 2025/12/15: [Fun-ASR-Nano-2512](https://github.com/FunAudioLLM/Fun-ASR) — 31 languages, tens of millions of hours training.
+
+<details><summary>Older</summary>
+
+- 2024/10/10: Whisper-large-v3-turbo support added.
+- 2024/07/04: [SenseVoice](https://github.com/FunAudioLLM/SenseVoice) — ASR + emotion + audio events.
+- 2024/01/30: FunASR 1.0 released.
+
+</details>
 
 ---
 
