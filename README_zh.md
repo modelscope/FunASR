@@ -102,13 +102,13 @@ results = model.generate(["audio1.wav", "audio2.wav"], language="auto")
 
 > 184 条长音频（共 192 分钟）。[完整报告 →](https://modelscope.github.io/FunASR/zh/benchmark.html)
 
-| 模型 | GPU 速度 | CPU 速度 | 对比 Whisper-large-v3 |
-|------|----------|----------|---------------------|
-| **SenseVoice-Small** | **170 倍**实时 | **17 倍**实时 | 🚀 **快 13 倍** |
-| **Paraformer-Large** | **120 倍**实时 | **15 倍**实时 | 🚀 **快 9 倍** |
-| Whisper-large-v3-turbo | 46 倍实时 | ❌ | 快 3.4 倍 |
-| **Fun-ASR-Nano** | 17 倍实时 | 3.6 倍实时 | 快 1.3 倍 |
-| Whisper-large-v3 | 13 倍实时 | ❌ | 基准 |
+| 模型 | 中文 CER ↓ | GPU 速度 | CPU 速度 | 对比 Whisper-large-v3 |
+|------|------|----------|----------|---------------------|
+| **Fun-ASR-Nano**（vLLM） | **8.20%** | **340 倍**实时 | — | 🚀 **快 26 倍** |
+| **SenseVoice-Small** | **7.81%** | **170 倍**实时 | **17 倍**实时 | 🚀 **快 13 倍** |
+| **Paraformer-Large** | 10.18% | **120 倍**实时 | **15 倍**实时 | 🚀 **快 9 倍** |
+| Whisper-large-v3-turbo | 21.71% | 46 倍实时 | ❌ | 快 3.4 倍 |
+| Whisper-large-v3 | 20.02% | 13 倍实时 | ❌ | 基准 |
 
 > **一句话：** FunASR 在 CPU 上的速度，比 Whisper 在 GPU 上还快。
 
