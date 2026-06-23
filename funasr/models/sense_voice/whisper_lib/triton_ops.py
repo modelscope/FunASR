@@ -54,11 +54,6 @@ def dtw_kernel(cost, trace, x, x_stride, cost_stride, trace_stride, N, M, BLOCK_
 @lru_cache(maxsize=None)
 def median_kernel(filter_width: int):
     @triton.jit
-    """Median kernel.
-    
-        Args:
-            filter_width: TODO.
-        """
     def kernel(y, x, x_stride, y_stride, BLOCK_SIZE: tl.constexpr):  # x.shape[-1] == filter_width
         """Kernel.
         
