@@ -77,13 +77,13 @@ result = model.generate(input="meeting.wav")
 
 > 184件の長時間音声（計192分）。[詳細レポート →](https://modelscope.github.io/FunASR/benchmark.html)
 
-| モデル | GPU速度 | CPU速度 | Whisper-large-v3比 |
-|--------|---------|---------|-------------------|
-| **SenseVoice-Small** | **170倍**リアルタイム | **17倍**リアルタイム | 🚀 **13倍高速** |
-| **Paraformer-Large** | **120倍**リアルタイム | **15倍**リアルタイム | 🚀 **9倍高速** |
-| Whisper-large-v3-turbo | 46倍リアルタイム | ❌ | 3.4倍高速 |
-| **Fun-ASR-Nano** | 17倍リアルタイム | 3.6倍リアルタイム | 1.3倍高速 |
-| Whisper-large-v3 | 13倍リアルタイム | ❌ | ベースライン |
+| モデル | 中国語 CER ↓ | GPU速度 | CPU速度 | Whisper-large-v3比 |
+|--------|------|---------|---------|-------------------|
+| **Fun-ASR-Nano**（vLLM） | **8.20%** | **340倍**リアルタイム | — | 🚀 **26倍高速** |
+| **SenseVoice-Small** | **7.81%** | **170倍**リアルタイム | **17倍**リアルタイム | 🚀 **13倍高速** |
+| **Paraformer-Large** | 10.18% | **120倍**リアルタイム | **15倍**リアルタイム | 🚀 **9倍高速** |
+| Whisper-large-v3-turbo | 21.71% | 46倍リアルタイム | ❌ | 3.4倍高速 |
+| Whisper-large-v3 | 20.02% | 13倍リアルタイム | ❌ | ベースライン |
 
 > **ポイント：** FunASRのCPU速度は、WhisperのGPU速度より速い。
 
