@@ -55,8 +55,6 @@ from funasr import AutoModel
 from funasr.utils.postprocess_utils import rich_transcription_postprocess
 
 model = AutoModel(model="iic/SenseVoiceSmall", vad_model="fsmn-vad", spk_model="cam++", device="cuda")  # use device="cpu" if you don't have a GPU
-result = model.generate(input="https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav")
-
 result = model.generate(
     input="https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav",
     batch_size_s=300,
@@ -74,18 +72,9 @@ for seg in result[0]["sentence_info"]:
 
 That's it. **One model, one call** — VAD segmentation, speech recognition, punctuation, speaker diarization all happen automatically.
 
-### LLM-powered ASR: Fun-ASR-Nano
+### Scale & deploy the flagship
 
-For highest accuracy across 31 languages (including Chinese dialects), use [Fun-ASR-Nano](https://github.com/FunAudioLLM/Fun-ASR) — an LLM-based ASR combining SenseVoice encoder with Qwen3-0.6B decoder:
-
-```python
-from funasr import AutoModel
-
-model = AutoModel(model="FunAudioLLM/Fun-ASR-Nano-2512", vad_model="fsmn-vad", device="cuda")
-result = model.generate(input="https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav")
-```
-
-With vLLM acceleration (16x faster, batch processing):
+At scale, accelerate Fun-ASR-Nano with vLLM (batch processing):
 
 ```python
 from funasr.auto.auto_model_vllm import AutoModelVLLM
@@ -207,7 +196,7 @@ model = AutoModel(model="paraformer-zh", vad_model="fsmn-vad", punc_model="ct-pu
 result = model.generate(input="https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav", hotword="关键词 20")
 
 # 31 languages with timestamps
-model = AutoModel(model="FunAudioLLM/Fun-ASR-Nano-2512", hub="hf", trust_remote_code=True,
+model = AutoModel(model="FunAudioLLM/Fun-ASR-Nano-2512",
                   vad_model="fsmn-vad", vad_kwargs={"max_single_segment_time": 30000}, device="cuda")
 result = model.generate(input="audio.wav", batch_size=1)
 
