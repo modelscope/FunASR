@@ -89,17 +89,18 @@ results = model.generate(["audio1.wav", "audio2.wav"], language="auto")
 
 ### Why FunASR?
 
-| | FunASR | Whisper | Cloud APIs |
+Whisper is a single model; **FunASR is a toolkit** — you pick the right model per job: **Fun-ASR-Nano** (flagship LLM-ASR, GPU, 340x realtime with vLLM, 31 languages), **SenseVoice** (CPU-friendly, + emotion & audio events), **Paraformer** (low-latency streaming). The table shows what the toolkit delivers vs one Whisper model — each capability is labelled with the model that provides it:
+
+| | FunASR (toolkit) | Whisper | Cloud APIs |
 |---|---|---|---|
-| Speed | **170x realtime** | 13x realtime | ~1x realtime |
+| Top speed | **340x realtime** (Fun-ASR-Nano + vLLM) | 13x realtime | ~1x realtime |
 | Speaker ID | ✅ Built-in | ❌ Needs pyannote | ✅ Extra cost |
-| Emotion | ✅ Happy/Sad/Angry | ❌ | ❌ |
-| Languages | 50+ | 57 | Varies |
-| Streaming | ✅ WebSocket | ❌ | ✅ |
-| vLLM Acceleration | ✅ up to 16x faster | ❌ | N/A |
+| Emotion | ✅ via SenseVoice | ❌ | ❌ |
+| Languages | 50+ (Qwen3-ASR 52, Nano 31) | 57 | Varies |
+| Streaming | ✅ WebSocket (Paraformer) | ❌ | ✅ |
+| CPU viable | ✅ 17x realtime (SenseVoice) | ❌ Too slow | N/A |
 | Self-hosted | ✅ MIT license | ✅ MIT license | ❌ Cloud only |
 | Cost | Free | Free | $0.006/min+ |
-| CPU viable | ✅ 17x realtime | ❌ Too slow | N/A |
 
 Trying FunASR for the first time? Use the [Colab quickstart](./examples/colab/) before setting up a local environment. Choosing a first model? Start with the [model selection guide](./docs/model_selection.md). Planning a switch from Whisper or a cloud ASR provider? Use the [migration guide](./docs/migration_from_whisper.md) and [benchmark example](./examples/migration/) to test representative audio, map features, and roll out safely.
 
