@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <strong>Industrial speech recognition. 170x faster than Whisper. 50+ languages.</strong><br>
+  <strong>Industrial speech recognition. Up to 340x realtime, 26x faster than Whisper. 50+ languages.</strong><br>
   <em>Speaker diarization · Emotion detection · Streaming · One API call</em>
 </p>
 

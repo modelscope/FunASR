@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <strong>산업용 음성인식. Whisper보다 170배 빠름. 50개 이상 언어 지원.</strong><br>
+  <strong>산업용 음성인식. 최대 340배 실시간, Whisper보다 26배 빠름. 50개 이상 언어 지원.</strong><br>
   <em>화자 분리 · 감정 인식 · 스트리밍 · 한 번의 호출로 해결</em>
 </p>
 

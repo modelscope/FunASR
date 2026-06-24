@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <strong>工业级语音识别。比 Whisper 快 170 倍。支持 50+ 语言。</strong><br>
+  <strong>工业级语音识别。最高 340 倍实时，比 Whisper 快 26 倍。支持 50+ 语言。</strong><br>
   <em>说话人分离 · 情感识别 · 流式转写 · 一次调用搞定</em>
 </p>
 
