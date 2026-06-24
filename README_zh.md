@@ -81,16 +81,18 @@ results = model.generate(["audio1.wav", "audio2.wav"], language="auto")
 
 ### 为什么选 FunASR？
 
-| | FunASR | Whisper | 云端 API |
+Whisper 是单个模型，**FunASR 是一个工具箱**——按场景挑模型：**Fun-ASR-Nano**（旗舰 LLM-ASR，需 GPU，vLLM 下 340 倍实时，31 种语言）、**SenseVoice**（CPU 友好，额外带情感与音频事件）、**Paraformer**（低延迟流式）。下表是工具箱相比单个 Whisper 模型能提供什么——每项能力都标注了由哪个模型提供：
+
+| | FunASR（工具箱） | Whisper | 云端 API |
 |---|---|---|---|
-| 速度 | **170 倍实时** | 13 倍实时 | ~1 倍实时 |
+| 最高速度 | **340 倍实时**（Fun-ASR-Nano + vLLM） | 13 倍实时 | ~1 倍实时 |
 | 说话人识别 | ✅ 内置 | ❌ 需要 pyannote | ✅ 额外付费 |
-| 情感识别 | ✅ 开心/悲伤/愤怒 | ❌ | ❌ |
-| 语言数 | 50+ | 57 | 因服务而异 |
-| 流式识别 | ✅ WebSocket | ❌ | ✅ |
+| 情感识别 | ✅ 由 SenseVoice 提供 | ❌ | ❌ |
+| 语言数 | 50+（Qwen3-ASR 52、Nano 31） | 57 | 因服务而异 |
+| 流式识别 | ✅ WebSocket（Paraformer） | ❌ | ✅ |
+| CPU 可用 | ✅ 17 倍实时（SenseVoice） | ❌ 太慢 | 不适用 |
 | 私有部署 | ✅ MIT 开源 | ✅ MIT 开源 | ❌ 仅云端 |
 | 费用 | 免费 | 免费 | ¥0.04/分钟起 |
-| CPU 可用 | ✅ 17 倍实时 | ❌ 太慢 | 不适用 |
 
 第一次试用 FunASR？可以先跑 [Colab 快速体验](./examples/colab/README_zh.md)，再配置本地环境。还不确定先用哪个模型？先看 [模型选择指南](./docs/model_selection_zh.md)。计划从 Whisper 或云端 ASR 切换？请按 [迁移指南](./docs/migration_from_whisper_zh.md) 和 [评测示例](./examples/migration/) 用代表性音频评测、映射功能并安全上线。
 

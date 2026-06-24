@@ -58,16 +58,18 @@ result = model.generate(input="meeting.wav")
 
 ### 왜 FunASR인가?
 
-| | FunASR | Whisper | 클라우드 API |
+Whisper는 단일 모델이지만, **FunASR는 툴킷**입니다 — 용도에 맞는 모델을 고르세요: **Fun-ASR-Nano**(플래그십 LLM-ASR, GPU 필요, vLLM로 340배 실시간, 31개 언어), **SenseVoice**(CPU 친화적, 감정·오디오 이벤트 포함), **Paraformer**(저지연 스트리밍). 아래 표는 단일 Whisper 모델 대비 툴킷이 제공하는 것이며, 각 기능에는 이를 제공하는 모델을 표기했습니다:
+
+| | FunASR(툴킷) | Whisper | 클라우드 API |
 |---|---|---|---|
-| 속도 | **170배 실시간** | 13배 실시간 | ~1배 실시간 |
+| 최고 속도 | **340배 실시간**(Fun-ASR-Nano + vLLM) | 13배 실시간 | ~1배 실시간 |
 | 화자 인식 | ✅ 내장 | ❌ pyannote 필요 | ✅ 추가 비용 |
-| 감정 인식 | ✅ 기쁨/슬픔/분노 | ❌ | ❌ |
-| 언어 수 | 50개 이상 | 57개 | 서비스마다 다름 |
-| 스트리밍 | ✅ WebSocket | ❌ | ✅ |
+| 감정 인식 | ✅ SenseVoice 제공 | ❌ | ❌ |
+| 언어 수 | 50개 이상(Qwen3-ASR 52, Nano 31) | 57개 | 서비스마다 다름 |
+| 스트리밍 | ✅ WebSocket(Paraformer) | ❌ | ✅ |
+| CPU 사용 | ✅ 17배 실시간(SenseVoice) | ❌ 너무 느림 | 해당 없음 |
 | 자체 호스팅 | ✅ MIT 라이선스 | ✅ MIT 라이선스 | ❌ 클라우드만 |
 | 비용 | 무료 | 무료 | $0.006/분~ |
-| CPU 사용 | ✅ 17배 실시간 | ❌ 너무 느림 | 해당 없음 |
 
 ---
 
