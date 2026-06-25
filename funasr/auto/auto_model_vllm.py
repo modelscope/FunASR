@@ -296,7 +296,46 @@ class AutoModelVLLM:
         Returns:
             List of result dicts with "key" and "text" fields.
         """
+        self._warn_if_audio_too_long(inputs)
         return self._engine.generate(inputs, **kwargs)
+
+    def _warn_if_audio_too_long(self, inputs, max_safe_sec=40.0):
+        """Warn (once) if a single audio input is long enough to be truncated.
+
+        Fun-ASR-Nano is a segment-level (LLM-)ASR model. Decoding very long
+        audio in a single pass can silently truncate or degrade the output -- the
+        decode hits ``max_new_tokens`` long before the audio ends, so the user
+        gets a partial transcript with no error. The right usage is to
+        pre-segment with VAD; this warning points users there instead of letting
+        them get a silently truncated result. It does not change the output.
+        """
+        if getattr(self, "_warned_audio_too_long", False):
+            return
+        items = inputs if isinstance(inputs, (list, tuple)) else [inputs]
+        for item in items:
+            duration = None
+            try:
+                if isinstance(item, str):
+                    import soundfile as sf
+
+                    duration = sf.info(item).duration
+                elif isinstance(item, np.ndarray):
+                    duration = item.shape[-1] / 16000.0
+                elif isinstance(item, torch.Tensor):
+                    duration = item.shape[-1] / 16000.0
+            except Exception:
+                continue
+            if duration is not None and duration > max_safe_sec:
+                logger.warning(
+                    "AutoModelVLLM received a %.0fs audio input. Fun-ASR-Nano is a "
+                    "segment-level model; decoding very long audio in a single pass can "
+                    "truncate or degrade the result. Pre-segment with VAD and pass the "
+                    "segments, or use the high-level `funasr.AutoModel(model=..., "
+                    'vad_model="fsmn-vad")`, which segments long audio automatically.',
+                    duration,
+                )
+                self._warned_audio_too_long = True
+                break
 
     @classmethod
     def supported_models(cls):
