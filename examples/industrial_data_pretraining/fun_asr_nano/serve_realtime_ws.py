@@ -226,13 +226,23 @@ class HybridSpeakerTracker:
 class RealtimeASRSession:
     """Manages a single streaming ASR session."""
 
-    def __init__(self, vllm_engine, asr_kwargs, vad, spk_tracker=None, sample_rate=16000, chunk_ms=960):
+    def __init__(self, vllm_engine, asr_kwargs, vad, spk_tracker=None, sample_rate=16000, chunk_ms=960,
+                 partial_window_sec=15.0):
         self.vllm_engine = vllm_engine
         self.asr_kwargs = asr_kwargs
         self.vad = vad
         self.sample_rate = sample_rate
         self.chunk_samples = int(sample_rate * chunk_ms / 1000)
         self.first_chunk_samples = int(sample_rate * 480 / 1000)
+        # Bound the interim (partial) re-decode window. While a speech segment has
+        # not yet hit a VAD pause it keeps growing, and the partial path re-encodes
+        # it from the start on every chunk -> O(L^2) total re-encoding for a
+        # length-L segment. Under concurrency that saturates the GPU and long-segment
+        # requests time out. Capping the partial window to the most recent
+        # `partial_window_sec` seconds makes interim re-decoding ~O(L) per segment
+        # without changing the final result (completed segments are always decoded
+        # in full by _decode_segment / the is_final path). Set <=0 to disable.
+        self.partial_window_samples = int(sample_rate * partial_window_sec) if partial_window_sec and partial_window_sec > 0 else 0
         self.first_decode_done = False
 
         self.audio_buffer = np.array([], dtype=np.float32)
@@ -303,6 +313,12 @@ class RealtimeASRSession:
         if self.vad.current_speech_start is not None:
             seg_start_sample = int(self.vad.current_speech_start * self.sample_rate / 1000)
             seg_audio = self.audio_buffer[seg_start_sample:]
+            # Bound the interim re-decode cost for a long ongoing segment: only
+            # re-encode the most recent partial_window_samples. The full segment is
+            # still decoded once the VAD boundary fires (see _decode_segment and the
+            # is_final path), so only the interim hypothesis is affected.
+            if self.partial_window_samples and len(seg_audio) > self.partial_window_samples:
+                seg_audio = seg_audio[-self.partial_window_samples:]
         else:
             self.last_decode_samples = len(self.audio_buffer)
             self.last_partial_text = ""
@@ -440,7 +456,8 @@ async def handle_client(websocket, args):
     vllm_engine, asr_kwargs, vad_model, spk_model = load_models(args)
     vad = DynamicStreamingVAD(vad_model)
     spk_tracker = HybridSpeakerTracker(spk_model, args.device)
-    session = RealtimeASRSession(vllm_engine, asr_kwargs, vad, spk_tracker=spk_tracker)
+    session = RealtimeASRSession(vllm_engine, asr_kwargs, vad, spk_tracker=spk_tracker,
+                                 partial_window_sec=getattr(args, 'partial_window_sec', 15.0))
     logger.info(f"Client connected: {websocket.remote_address}")
 
     decode_interval = args.decode_interval
@@ -508,6 +525,12 @@ if __name__ == "__main__":
     parser.add_argument("--use-context", action="store_true", default=True)
     parser.add_argument("--no-context", dest="use_context", action="store_false")
     parser.add_argument("--decode-interval", type=float, default=0.48)
+    parser.add_argument("--partial-window-sec", type=float, default=15.0,
+                        help="Cap the interim partial re-decode window to the most recent N seconds. "
+                             "A long ongoing speech segment is otherwise re-encoded from its start on "
+                             "every chunk (O(L^2)), which saturates the GPU under concurrency and times "
+                             "out long-segment requests. Lower it (e.g. 8-10) for high-concurrency "
+                             "self-hosting; <=0 disables (legacy behaviour). Final transcripts are unaffected.")
     parser.add_argument("--hotword-file", type=str, default="热词列表")
     parser.add_argument("--language", type=str, default=None, help="Language hint (e.g. 中文, English, 日本語)")
     parser.add_argument("--dtype", type=str, default="bf16", choices=["bf16", "fp16", "fp32"])
