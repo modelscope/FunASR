@@ -13,7 +13,6 @@ only keeps one-line comments pointing here; details live in this file.
 > ```json
 > "turn_detection": { "type": "server_vad", "threshold": 0.2, "silence_duration_ms": 800 }
 > ```
-> The following is my personal understanding.
 
 VAD actually serves two completely different purposes in ASR, which are easy to conflate:
 

@@ -11,7 +11,6 @@
 > ```json
 > "turn_detection": { "type": "server_vad", "threshold": 0.2, "silence_duration_ms": 800 }
 > ```
-> 以下是我的个人理解
 
 VAD 在 ASR 里其实有两种完全不同的用途，容易混为一谈：
 

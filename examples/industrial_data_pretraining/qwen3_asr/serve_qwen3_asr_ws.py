@@ -106,6 +106,8 @@ async def handle_client(ws, path=None):  # path 兼容老版本 websockets 的�
 
     except websockets.exceptions.ConnectionClosed:
         pass
+    except Exception:
+        logging.exception("Unexpected error in Qwen3-ASR WebSocket handler")
 
 
 async def amain(args):
