@@ -137,6 +137,35 @@ funasr's `AutoModelVLLM` cannot accelerate Qwen3-ASR; you must use
 
 > This answers the question in `#3026`.
 
+### 2.2 about download model weights
+
+As in [Qwen3-ASR README](https://github.com/QwenLM/Qwen3-ASR#released-models-description-and-download) suggests: when the runtime can't download online, **pre-download the weights to a local dir, then pass that local path as `--model`**:
+
+ ```bash 
+# Option 1: ModelScope (recommended in Mainland China) 
+pip install -U modelscope 
+modelscope download --model Qwen/Qwen3-ASR-1.7B --local_dir ./Qwen3-ASR-1.7B 
+# Option 2: Hugging Face 
+pip install -U "huggingface_hub[cli]" 
+huggingface-cli download Qwen/Qwen3-ASR-1.7B --local-dir ./Qwen3-ASR-1.7B 
+
+#Then start the ws server with the pre-downloaded weights 
+python serve_qwen3_asr_ws.py --model ./Qwen3-ASR-1.7B ...
+ ```
+
+Note: **On `VLLM_USE_MODELSCOPE=True` With this var set + `pip install modelscope`, **only take over part of the download — the vLLM layer fetches config / tokenizer / merges / vocab / `model.safetensors.index.json` from ModelScope (log: `Downloading Model from https://www.modelscope.cn ... Finish downloading 10 files`), but the step that fetches the actual weights `model.safetensors` **still goes back to huggingface.co**:
+
+**This should be a Qwen-ASR bug**:
+
+```
+Downloading Model from https://www.modelscope.cn to directory: /home/vllm/.cache/modelscope/hub/models/Qwen/Qwen3-ASR-1.7B
+2026-06-28 10:15:56,301 - modelscope - INFO - Got 10 files, start to download ...
+Downloading [configuration.json]: 100%|
+...
+INFO 06-28 10:15:59 [model.py:530] Resolved architecture: Qwen3ASRForConditionalGeneration
+'(MaxRetryError('HTTPSConnectionPool(host=\'huggingface.co\', port=443): Max retries exceeded with url: /Qwen/Qwen3-ASR-1.7B/resolve/main/model.safetensors (Caused by NewConnectionError("HTTPSConnection(host=\'huggingface.co\', port=443): Failed to establish a new connection: [Errno 101] Network is unreachable"))'), '(Request ID: f4f58ad5-e161-42ec-baad-cb2b8dbb63b9)')' thrown while requesting HEAD https://huggingface.co/Qwen/Qwen3-ASR-1.7B/resolve/main/model.safetensors
+```
+
 ---
 
 ## 3. tokenizer `fix_mistral_regex` warning (harmless, ignorable)

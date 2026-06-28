@@ -110,7 +110,34 @@ thinker 子配置，回退到默认参数。
 funasr 的`AutoModelVLLM` 不能加速 Qwen3-ASR , 必须要用 `from qwen_asr import Qwen3ASRModel`
 
 >  这解答 `#3026`  的问题
->  
+### 2.2 关于模型下载
+
+**官方推荐做法（[Qwen3-ASR README](https://github.com/QwenLM/Qwen3-ASR#released-models-description-and-download)）**：运行环境不允许在线下载(或者无法访问 Hugging Face)，**先手动把权重下到 本地目录，再用本地路径作为 `--model`**： 
+
+```bash 
+# ModelScope（国内推荐） 
+pip install -U modelscope 
+modelscope download --model Qwen/Qwen3-ASR-1.7B --local_dir ./Qwen3-ASR-1.7B
+# 启动时候指定下载到本地的模型
+python serve_qwen3_asr_ws.py --model ./Qwen3-ASR-1.7B ...
+```
+
+注: `export VLLM_USE_MODELSCOPE=True` 会从 ModelScope 把 **10 个文件**(config、tokenizer、merges、vocab、**safetensors 的 index**)下全了。**第二段:真正的权重 `model.safetensors`——又去连 HF 了 **
+
+这应该是 Qwen-ASR代码的bug:
+
+```
+Downloading Model from https://www.modelscope.cn to directory: /home/vllm/.cache/modelscope/hub/models/Qwen/Qwen3-ASR-1.7B
+2026-06-28 10:15:56,301 - modelscope - INFO - Got 10 files, start to download ...
+...
+2026-06-28 10:15:57,023 - modelscope - INFO - Finish downloading 10 files for repo 'Qwen/Qwen3-ASR-1.7B'███████████| 12.2k/12.2k [00:00<00:00, 38.6kB/s]
+...
+INFO 06-28 10:15:59 [model.py:530] Resolved architecture: Qwen3ASRForConditionalGeneration
+'(MaxRetryError('HTTPSConnectionPool(host=\'huggingface.co\', port=443): Max retries exceeded with url: /Qwen/Qwen3-ASR-1.7B/resolve/main/model.safetensors (Caused by NewConnectionError("HTTPSConnection(host=\'huggingface.co\', port=443): Failed to establish a new connection: [Errno 101] Network is unreachable"))'), '(Request ID: f4f58ad5-e161-42ec-baad-cb2b8dbb63b9)')' thrown while requesting HEAD https://huggingface.co/Qwen/Qwen3-ASR-1.7B/resolve/main/model.safetensors
+```
+
+---
+
 ## 3. tokenizer 的 `fix_mistral_regex` 警告（无害，可忽略）
 
 启动时可能出现：
