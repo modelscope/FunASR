@@ -137,25 +137,26 @@ funasr's `AutoModelVLLM` cannot accelerate Qwen3-ASR; you must use
 
 > This answers the question in `#3026`.
 
-### 2.2 about download model weights
+### 2.2 Downloading model weights
 
-As in [Qwen3-ASR README](https://github.com/QwenLM/Qwen3-ASR#released-models-description-and-download) suggests: when the runtime can't download online, **pre-download the weights to a local dir, then pass that local path as `--model`**:
+The [Qwen3-ASR README](https://github.com/QwenLM/Qwen3-ASR#released-models-description-and-download) recommends pre-downloading weights when the runtime cannot access remote model hubs. Download the model to a local directory first, then pass that path as `--model`:
 
- ```bash 
-# Option 1: ModelScope (recommended in Mainland China) 
-pip install -U modelscope 
-modelscope download --model Qwen/Qwen3-ASR-1.7B --local_dir ./Qwen3-ASR-1.7B 
-# Option 2: Hugging Face 
-pip install -U "huggingface_hub[cli]" 
-huggingface-cli download Qwen/Qwen3-ASR-1.7B --local-dir ./Qwen3-ASR-1.7B 
+```bash
+# Option 1: ModelScope (recommended in Mainland China)
+pip install -U modelscope
+modelscope download --model Qwen/Qwen3-ASR-1.7B --local_dir ./Qwen3-ASR-1.7B
 
-#Then start the ws server with the pre-downloaded weights 
+# Option 2: Hugging Face
+pip install -U "huggingface_hub[cli]"
+huggingface-cli download Qwen/Qwen3-ASR-1.7B --local-dir ./Qwen3-ASR-1.7B
+
+# Start the WebSocket server with the pre-downloaded weights
 python serve_qwen3_asr_ws.py --model ./Qwen3-ASR-1.7B ...
- ```
+```
 
-Note: **On `VLLM_USE_MODELSCOPE=True` With this var set + `pip install modelscope`, **only take over part of the download — the vLLM layer fetches config / tokenizer / merges / vocab / `model.safetensors.index.json` from ModelScope (log: `Downloading Model from https://www.modelscope.cn ... Finish downloading 10 files`), but the step that fetches the actual weights `model.safetensors` **still goes back to huggingface.co**:
+Note: setting `VLLM_USE_MODELSCOPE=True` together with `pip install modelscope` only covers part of the download path. The vLLM layer fetches config, tokenizer, merges, vocab, and `model.safetensors.index.json` from ModelScope (log: `Downloading Model from https://www.modelscope.cn ... Finish downloading 10 files`), but the step that resolves the actual weights `model.safetensors` may still go back to `huggingface.co`:
 
-**This should be a Qwen-ASR bug**:
+This appears to be an issue in the current Qwen-ASR download path:
 
 ```
 Downloading Model from https://www.modelscope.cn to directory: /home/vllm/.cache/modelscope/hub/models/Qwen/Qwen3-ASR-1.7B

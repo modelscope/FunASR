@@ -110,21 +110,23 @@ thinker 子配置，回退到默认参数。
 funasr 的`AutoModelVLLM` 不能加速 Qwen3-ASR , 必须要用 `from qwen_asr import Qwen3ASRModel`
 
 >  这解答 `#3026`  的问题
+
 ### 2.2 关于模型下载
 
-**官方推荐做法（[Qwen3-ASR README](https://github.com/QwenLM/Qwen3-ASR#released-models-description-and-download)）**：运行环境不允许在线下载(或者无法访问 Hugging Face)，**先手动把权重下到 本地目录，再用本地路径作为 `--model`**： 
+**官方推荐做法（[Qwen3-ASR README](https://github.com/QwenLM/Qwen3-ASR#released-models-description-and-download)）**：如果运行环境不能在线下载，或无法访问 Hugging Face，先手动把权重下载到本地目录，再把本地路径传给 `--model`：
 
-```bash 
-# ModelScope（国内推荐） 
-pip install -U modelscope 
+```bash
+# ModelScope（国内推荐）
+pip install -U modelscope
 modelscope download --model Qwen/Qwen3-ASR-1.7B --local_dir ./Qwen3-ASR-1.7B
-# 启动时候指定下载到本地的模型
+
+# 启动时指定本地模型目录
 python serve_qwen3_asr_ws.py --model ./Qwen3-ASR-1.7B ...
 ```
 
-注: `export VLLM_USE_MODELSCOPE=True` 会从 ModelScope 把 **10 个文件**(config、tokenizer、merges、vocab、**safetensors 的 index**)下全了。**第二段:真正的权重 `model.safetensors`——又去连 HF 了 **
+注意：仅设置 `VLLM_USE_MODELSCOPE=True` 并安装 `modelscope` 只能接管一部分下载流程。vLLM 会从 ModelScope 拉取 config、tokenizer、merges、vocab、`model.safetensors.index.json` 等文件，但真正的权重 `model.safetensors` 仍可能回到 `huggingface.co` 拉取：
 
-这应该是 Qwen-ASR代码的bug:
+这看起来是 Qwen-ASR 当前下载链路的一个问题：
 
 ```
 Downloading Model from https://www.modelscope.cn to directory: /home/vllm/.cache/modelscope/hub/models/Qwen/Qwen3-ASR-1.7B
