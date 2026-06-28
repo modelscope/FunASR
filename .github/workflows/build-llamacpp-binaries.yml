@@ -33,7 +33,23 @@ jobs:
       - uses: actions/checkout@v4
       - name: Configure and build
         run: |
-          cmake -B build -DCMAKE_BUILD_TYPE=Release
+          # Release binaries must be portable across user machines, not tuned to
+          # the ephemeral CI runner CPU. A native ggml build may emit AVX512 or
+          # AVX-VNNI instructions and then crash with SIGILL on ordinary CPUs.
+          # Keep the prebuilt x64 package conservative; optimized AVX2/AVX512
+          # builds can be published as separate assets later.
+          cmake -B build -DCMAKE_BUILD_TYPE=Release \
+            -DGGML_NATIVE=OFF \
+            -DGGML_AVX=OFF \
+            -DGGML_AVX2=OFF \
+            -DGGML_AVX_VNNI=OFF \
+            -DGGML_AVX512=OFF \
+            -DGGML_AVX512_VBMI=OFF \
+            -DGGML_AVX512_VNNI=OFF \
+            -DGGML_AVX512_BF16=OFF \
+            -DGGML_FMA=OFF \
+            -DGGML_F16C=OFF \
+            -DGGML_BMI2=OFF
           cmake --build build --config Release -j 2
       - name: Package
         run: |
