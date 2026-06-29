@@ -53,6 +53,8 @@ result = model.generate(input="meeting.wav")
 | `paraformer-en` | `paraformer-en` + VAD | OpenAI 风格客户端里的英文轻量路由。 |
 | `fun-asr-nano` | `FunAudioLLM/Fun-ASR-Nano-2512` | 评估 LLM-based ASR、31 语种覆盖或 vLLM 加速。 |
 
+如果部署目标是昇腾 NPU，请把 `fun-asr-nano` 和 SenseVoice / Paraformer 分开看。Fun-ASR-Nano 路径目前尚未在 `torch_npu` 上官方验证；除非正在做后端适配，否则优先使用 CUDA/vLLM、标准 PyTorch CPU/GPU 或 GGUF runtime。
+
 接入客户端前先检查在线服务：
 
 ```bash

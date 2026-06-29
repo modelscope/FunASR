@@ -52,6 +52,10 @@ docker compose up --build
 
 Fun-ASR-Nano 走 vLLM 路径。请用自己的音频分布做 benchmark，并关注 GPU 显存、tensor parallel size、首 token 延迟和 warmup 时间。
 
+### 我想在昇腾 NPU 上跑 Fun-ASR-Nano
+
+Fun-ASR-Nano 的 LLM-based 路径目前主要按 CUDA/vLLM、标准 PyTorch CPU/GPU，以及 CPU/边缘 GGUF runtime 记录和验证；Ascend NPU（`torch_npu`）还不是这个模型的官方验证运行时。不要因为 SenseVoice 或 Paraformer 能在 NPU 上跑，就默认 Fun-ASR-Nano 也能直接跑通，因为 Nano 还会经过 Qwen 解码器、`inputs_embeds` 和 autocast 路径。若要适配，请先从 `torch.bfloat16` 开始，记录 `torch` / `torch_npu` / CANN 版本，并在最小 PR 或 deployment issue 里附上最小命令和完整错误栈。
+
 ## 上线检查清单
 
 - 选择模型 alias，并写入部署说明。
