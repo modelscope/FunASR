@@ -1,6 +1,9 @@
 import logging
 import os
 import time
+from importlib.metadata import PackageNotFoundError
+from importlib.metadata import requires as _package_requires
+from importlib.metadata import version as _package_version
 from typing import List, Optional, Union
 
 import numpy as np
@@ -8,6 +11,71 @@ import torch
 import torch.nn as nn
 
 from funasr.register import tables
+
+
+def _qwen_asr_transformers_specifier():
+    try:
+        from packaging.requirements import InvalidRequirement, Requirement
+    except ImportError:
+        return None
+
+    requirements = _package_requires("qwen-asr") or []
+    for requirement_text in requirements:
+        try:
+            requirement = Requirement(requirement_text)
+        except InvalidRequirement:
+            continue
+        if requirement.name.lower() == "transformers":
+            return requirement.specifier
+    return None
+
+
+def _qwen_asr_install_command(qwen_asr_version, transformers_specifier=None):
+    if transformers_specifier:
+        transformers_requirement = f"transformers{transformers_specifier}"
+        return (
+            f'pip install -U "qwen-asr=={qwen_asr_version}" '
+            f'"{transformers_requirement}" accelerate'
+        )
+    return 'pip install -U "qwen-asr" transformers accelerate'
+
+
+def _check_qwen3_asr_dependencies():
+    try:
+        qwen_asr_version = _package_version("qwen-asr")
+    except PackageNotFoundError as e:
+        raise ImportError(
+            'qwen-asr package is required for Qwen3-ASR. Install with: pip install -U "qwen-asr"'
+        ) from e
+
+    try:
+        transformers_version = _package_version("transformers")
+    except PackageNotFoundError as e:
+        raise ImportError(
+            "transformers is required by qwen-asr. "
+            f"Install with: {_qwen_asr_install_command(qwen_asr_version)}"
+        ) from e
+
+    transformers_specifier = _qwen_asr_transformers_specifier()
+    if transformers_specifier:
+        try:
+            from packaging.version import InvalidVersion, Version
+
+            Version(transformers_version)
+            is_compatible = transformers_version in transformers_specifier
+        except InvalidVersion:
+            is_compatible = True
+
+        if not is_compatible:
+            install_command = _qwen_asr_install_command(qwen_asr_version, transformers_specifier)
+            raise ImportError(
+                "Qwen3-ASR dependency mismatch: "
+                f"qwen-asr=={qwen_asr_version} requires transformers{transformers_specifier}, "
+                f"but the active environment has transformers=={transformers_version}. "
+                "This can trigger qwen_asr errors such as "
+                "`AttributeError: 'Qwen3ASRConfig' object has no attribute 'thinker_config'`. "
+                f"Run: {install_command}"
+            )
 
 
 # qwen-asr's validate_language() only accepts canonical full names ("Chinese", "English",
@@ -37,7 +105,7 @@ class Qwen3ASR(nn.Module):
     for character-level timestamps.
 
     Requirements:
-        pip install qwen-asr
+        pip install -U "qwen-asr==0.0.6" "transformers==4.57.6" accelerate
 
     Models:
         - Qwen/Qwen3-ASR-0.6B (lighter, ~4GB GPU memory)
@@ -67,13 +135,14 @@ class Qwen3ASR(nn.Module):
         model_path = self._resolve_model_path(model_path, hub, kwargs)
         self.model_path = model_path
 
+        _check_qwen3_asr_dependencies()
         try:
             from qwen_asr import Qwen3ASRModel
         except ImportError as e:
             # Only catch if the package itself is missing, not if its dependencies are broken
             if "qwen_asr" in str(e):
                 raise ImportError(
-                    "qwen-asr package is required. Install with: pip install qwen-asr"
+                    'qwen-asr package is required. Install with: pip install -U "qwen-asr"'
                 ) from e
             raise e
 

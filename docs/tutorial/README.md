@@ -258,7 +258,7 @@ print(res[0]["text"])
 res = model.generate(input="audio.wav")
 print(res[0]["text"], res[0].get("language", ""))
 ```
-Notes: Requires `pip install qwen-asr`. Supports 0.6B and 1.7B model sizes.
+Notes: Use `pip install -U "qwen-asr==0.0.6" "transformers==4.57.6" accelerate`. `qwen-asr==0.0.6` pins `transformers==4.57.6`; newer incompatible Transformers builds may fail with nested `thinker_config` errors. Supports 0.6B and 1.7B model sizes.
 
 #### Multi-language ASR (GLM-ASR)
 ```python

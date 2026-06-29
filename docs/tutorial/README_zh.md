@@ -237,7 +237,7 @@ print(res[0]["text"])
 res = model.generate(input="audio.wav")
 print(res[0]["text"], res[0].get("language", ""))
 ```
-注：需要安装 `pip install qwen-asr`。支持 0.6B 和 1.7B 两种模型规格。
+注：请使用 `pip install -U "qwen-asr==0.0.6" "transformers==4.57.6" accelerate`。`qwen-asr==0.0.6` 锁定 `transformers==4.57.6`；若环境中混入不兼容的新版 Transformers，可能触发嵌套 `thinker_config` 报错。支持 0.6B 和 1.7B 两种模型规格。
 
 #### 多语言语音识别 (GLM-ASR)
 ```python
