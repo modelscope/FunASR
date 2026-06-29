@@ -7,7 +7,6 @@ from importlib.metadata import version as _package_version
 from typing import List, Optional, Union
 
 import numpy as np
-from packaging.requirements import InvalidRequirement, Requirement
 import torch
 import torch.nn as nn
 
@@ -15,13 +14,18 @@ from funasr.register import tables
 
 
 def _qwen_asr_transformers_specifier():
+    try:
+        from packaging.requirements import InvalidRequirement, Requirement
+    except ImportError:
+        return None
+
     requirements = _package_requires("qwen-asr") or []
     for requirement_text in requirements:
         try:
             requirement = Requirement(requirement_text)
         except InvalidRequirement:
             continue
-        if requirement.name == "transformers":
+        if requirement.name.lower() == "transformers":
             return requirement.specifier
     return None
 
@@ -53,16 +57,25 @@ def _check_qwen3_asr_dependencies():
         ) from e
 
     transformers_specifier = _qwen_asr_transformers_specifier()
-    if transformers_specifier and transformers_version not in transformers_specifier:
-        install_command = _qwen_asr_install_command(qwen_asr_version, transformers_specifier)
-        raise ImportError(
-            "Qwen3-ASR dependency mismatch: "
-            f"qwen-asr=={qwen_asr_version} requires transformers{transformers_specifier}, "
-            f"but the active environment has transformers=={transformers_version}. "
-            "This can trigger qwen_asr errors such as "
-            "`AttributeError: 'Qwen3ASRConfig' object has no attribute 'thinker_config'`. "
-            f"Run: {install_command}"
-        )
+    if transformers_specifier:
+        try:
+            from packaging.version import InvalidVersion, Version
+
+            Version(transformers_version)
+            is_compatible = transformers_version in transformers_specifier
+        except InvalidVersion:
+            is_compatible = True
+
+        if not is_compatible:
+            install_command = _qwen_asr_install_command(qwen_asr_version, transformers_specifier)
+            raise ImportError(
+                "Qwen3-ASR dependency mismatch: "
+                f"qwen-asr=={qwen_asr_version} requires transformers{transformers_specifier}, "
+                f"but the active environment has transformers=={transformers_version}. "
+                "This can trigger qwen_asr errors such as "
+                "`AttributeError: 'Qwen3ASRConfig' object has no attribute 'thinker_config'`. "
+                f"Run: {install_command}"
+            )
 
 
 # qwen-asr's validate_language() only accepts canonical full names ("Chinese", "English",
