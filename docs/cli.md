@@ -29,6 +29,7 @@ funasr audio.wav --output-format srt --output-dir ./subs
 | Option | Short | Default | Description |
 |--------|-------|---------|-------------|
 | `--model` | `-m` | sensevoice | Model: sensevoice, paraformer, paraformer-en, fun-asr-nano |
+| `--hub` | `-H` | ms | Model hub: ms (ModelScope) or hf (Hugging Face) |
 | `--language` | `-l` | auto | Language: zh, en, ja, ko, yue, auto |
 | `--device` | | auto | Device: cuda:0, cpu |
 | `--output-format` | `-f` | text | Output: text, json, srt, tsv |
@@ -90,6 +91,9 @@ funasr audio.wav --model paraformer --language zh --hotwords "FunASR,达摩院"
 
 # Pipe to jq for processing
 funasr audio.wav -f json | jq '.text'
+
+# Load models from Hugging Face instead of ModelScope
+funasr audio.wav --hub hf --model fun-asr-nano
 
 # Use with AI agents
 result=$(funasr audio.wav -f json)
