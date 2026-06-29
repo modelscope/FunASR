@@ -3,7 +3,7 @@
 # Copyright FunASR (https://github.com/alibaba-damo-academy/FunASR). All Rights Reserved.
 #  MIT License  (https://opensource.org/licenses/MIT)
 
-# To install requirements: pip install qwen-asr
+# To install requirements: pip install -U "qwen-asr==0.0.6" "transformers==4.57.6" accelerate
 
 from funasr import AutoModel
 
