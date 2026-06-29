@@ -53,6 +53,8 @@ The `examples/openai_api` server exposes short aliases so application teams do n
 | `paraformer-en` | `paraformer-en` with VAD | You want a compact English route in OpenAI-style clients. |
 | `fun-asr-nano` | `FunAudioLLM/Fun-ASR-Nano-2512` | You are evaluating LLM-based ASR, 31-language coverage, or vLLM acceleration. |
 
+For Ascend NPU deployments, treat `fun-asr-nano` separately from SenseVoice / Paraformer. The Fun-ASR-Nano path is not officially validated on `torch_npu` yet; use CUDA/vLLM, standard PyTorch CPU/GPU, or GGUF runtime unless you are doing a backend adaptation.
+
 Check the live service before wiring clients:
 
 ```bash

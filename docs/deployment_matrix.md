@@ -52,6 +52,10 @@ Use the runtime WebSocket service. Validate chunk size, VAD, endpointing, punctu
 
 Use the vLLM path for Fun-ASR-Nano. Benchmark with your own audio distribution and watch GPU memory, tensor parallel size, first-token latency, and warmup time.
 
+### I want to run Fun-ASR-Nano on Ascend NPU
+
+Fun-ASR-Nano's LLM-based path is currently documented and validated for CUDA/vLLM, standard PyTorch CPU/GPU runs, and CPU/edge GGUF runtimes. Ascend NPU (`torch_npu`) is not an officially validated runtime for this model yet. Do not assume that a SenseVoice or Paraformer NPU deployment means Fun-ASR-Nano will also work, because Nano also exercises the Qwen decoder, `inputs_embeds`, and autocast path. If you are adapting it, start with `torch.bfloat16`, capture the `torch` / `torch_npu` / CANN versions, and open a focused PR or deployment issue with a minimal command and full stack trace.
+
 ## Readiness checklist
 
 - Pick a model alias and pin it in deployment notes.
