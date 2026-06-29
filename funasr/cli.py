@@ -86,11 +86,13 @@ def main():
                "  funasr audio.wav\n"
                "  funasr audio.wav --model sensevoice -f json\n"
                "  funasr audio.wav -f srt -o ./subs\n"
-               "  funasr audio.wav --spk --timestamps\n",
+               "  funasr audio.wav --spk --timestamps\n"
+               "  funasr audio.wav --hub hf --model fun-asr-nano\n",
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     p.add_argument("audio", nargs="+", help="Audio file(s) to transcribe")
     p.add_argument("--model", "-m", default="sensevoice", choices=list(MODEL_CONFIGS), help="Model (default: sensevoice)")
+    p.add_argument("--hub", "-H", default="ms", choices=["ms", "hf"], help="Model hub: ms (ModelScope) or hf (Hugging Face). Default: ms")
     p.add_argument("--language", "-l", default=None, help="Language: zh, en, ja, ko, yue, auto")
     p.add_argument("--device", default=None, help="Device: cuda:0, cpu (default: auto)")
     p.add_argument("--output-format", "-f", default="text", choices=["text", "json", "srt", "tsv"], help="Output format (default: text)")
@@ -110,6 +112,7 @@ def main():
 
     device = args.device or ("cuda:0" if torch.cuda.is_available() else "cpu")
     config = MODEL_CONFIGS[args.model].copy()
+    config["hub"] = args.hub
     if args.spk and "spk_model" not in config:
         config["spk_model"] = "cam++"
     if "punc_model" not in config and args.model not in ("fun-asr-nano", "sensevoice"):
