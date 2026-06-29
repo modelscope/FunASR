@@ -20,10 +20,68 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { os: ubuntu-latest,    name: linux-x64 }
-          - { os: ubuntu-24.04-arm, name: linux-arm64 }
-          - { os: macos-latest,     name: macos-arm64 }
-          - { os: windows-latest,   name: windows-x64 }
+          - os: ubuntu-latest
+            name: linux-x64
+            cmake_flags: >-
+              -DGGML_NATIVE=OFF
+              -DGGML_AVX=OFF
+              -DGGML_AVX2=OFF
+              -DGGML_AVX_VNNI=OFF
+              -DGGML_AVX512=OFF
+              -DGGML_AVX512_VBMI=OFF
+              -DGGML_AVX512_VNNI=OFF
+              -DGGML_AVX512_BF16=OFF
+              -DGGML_FMA=OFF
+              -DGGML_F16C=OFF
+              -DGGML_BMI2=OFF
+          - os: ubuntu-latest
+            name: linux-x64-avx2
+            cmake_flags: >-
+              -DGGML_NATIVE=OFF
+              -DGGML_AVX=ON
+              -DGGML_AVX2=ON
+              -DGGML_AVX_VNNI=OFF
+              -DGGML_AVX512=OFF
+              -DGGML_AVX512_VBMI=OFF
+              -DGGML_AVX512_VNNI=OFF
+              -DGGML_AVX512_BF16=OFF
+              -DGGML_FMA=ON
+              -DGGML_F16C=ON
+              -DGGML_BMI2=ON
+          - os: ubuntu-24.04-arm
+            name: linux-arm64
+            cmake_flags: -DGGML_NATIVE=OFF
+          - os: macos-latest
+            name: macos-arm64
+            cmake_flags: -DGGML_NATIVE=OFF
+          - os: windows-latest
+            name: windows-x64
+            cmake_flags: >-
+              -DGGML_NATIVE=OFF
+              -DGGML_AVX=OFF
+              -DGGML_AVX2=OFF
+              -DGGML_AVX_VNNI=OFF
+              -DGGML_AVX512=OFF
+              -DGGML_AVX512_VBMI=OFF
+              -DGGML_AVX512_VNNI=OFF
+              -DGGML_AVX512_BF16=OFF
+              -DGGML_FMA=OFF
+              -DGGML_F16C=OFF
+              -DGGML_BMI2=OFF
+          - os: windows-latest
+            name: windows-x64-avx2
+            cmake_flags: >-
+              -DGGML_NATIVE=OFF
+              -DGGML_AVX=ON
+              -DGGML_AVX2=ON
+              -DGGML_AVX_VNNI=OFF
+              -DGGML_AVX512=OFF
+              -DGGML_AVX512_VBMI=OFF
+              -DGGML_AVX512_VNNI=OFF
+              -DGGML_AVX512_BF16=OFF
+              -DGGML_FMA=ON
+              -DGGML_F16C=ON
+              -DGGML_BMI2=ON
     runs-on: ${{ matrix.os }}
     defaults:
       run:
@@ -36,20 +94,9 @@ jobs:
           # Release binaries must be portable across user machines, not tuned to
           # the ephemeral CI runner CPU. A native ggml build may emit AVX512 or
           # AVX-VNNI instructions and then crash with SIGILL on ordinary CPUs.
-          # Keep the prebuilt x64 package conservative; optimized AVX2/AVX512
-          # builds can be published as separate assets later.
-          cmake -B build -DCMAKE_BUILD_TYPE=Release \
-            -DGGML_NATIVE=OFF \
-            -DGGML_AVX=OFF \
-            -DGGML_AVX2=OFF \
-            -DGGML_AVX_VNNI=OFF \
-            -DGGML_AVX512=OFF \
-            -DGGML_AVX512_VBMI=OFF \
-            -DGGML_AVX512_VNNI=OFF \
-            -DGGML_AVX512_BF16=OFF \
-            -DGGML_FMA=OFF \
-            -DGGML_F16C=OFF \
-            -DGGML_BMI2=OFF
+          # Keep the default x64 package conservative, and publish explicit
+          # x64-avx2 assets for machines that support AVX2/FMA/F16C/BMI2.
+          cmake -B build -DCMAKE_BUILD_TYPE=Release ${{ matrix.cmake_flags }}
           cmake --build build --config Release -j 2
       - name: Package
         run: |
@@ -85,4 +132,4 @@ jobs:
           gh release create "${{ github.ref_name }}" dist/* \
             --repo "${{ github.repository }}" \
             --title "FunASR llama.cpp runtime ${{ github.ref_name }}" \
-            --notes "Prebuilt self-contained binaries for the FunASR llama.cpp / GGUF runtime — SenseVoice, Paraformer and Fun-ASR-Nano with built-in FSMN-VAD (a whisper.cpp-style on-device ASR, strong on Chinese). Get a model with \`bash download-funasr-model.sh <sensevoice|paraformer|nano>\`, then run \`llama-funasr-cli\` / \`llama-funasr-sensevoice\` / \`llama-funasr-paraformer\`. No Python, no build. Docs: runtime/llama.cpp/README.md"
+            --notes "Prebuilt self-contained binaries for the FunASR llama.cpp / GGUF runtime — SenseVoice, Paraformer and Fun-ASR-Nano with built-in FSMN-VAD (a whisper.cpp-style on-device ASR, strong on Chinese). Get a model with \`bash download-funasr-model.sh <sensevoice|paraformer|nano>\`, then run \`llama-funasr-cli\` / \`llama-funasr-sensevoice\` / \`llama-funasr-paraformer\`. Use the default x64 asset for maximum CPU compatibility; use the x64-avx2 asset on CPUs with AVX2/FMA/F16C/BMI2 for higher throughput. No Python, no build. Docs: runtime/llama.cpp/README.md"
