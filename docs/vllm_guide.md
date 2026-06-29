@@ -309,6 +309,31 @@ for result in engine.streaming_generate("audio.wav", language="中文"):
 
 > **Note: `repetition_penalty` cannot be used with EmbedsPrompt.** Here the prompt is a sequence of embedding vectors with no corresponding token IDs, whereas `repetition_penalty` needs the prompt's token IDs to down-weight already-seen tokens in the logits; applying it under EmbedsPrompt **indexes out of bounds and triggers a CUDA device-side assert**. 
 
+### Production API Stability Checklist
+
+When wrapping `AutoModelVLLM` in a long-running API service, keep request state isolated and pin safe decoding defaults:
+
+```python
+common = dict(
+    language="auto",
+    temperature=0.0,
+    repetition_penalty=1.0,
+    max_new_tokens=200,
+)
+
+for _ in range(2):
+    results = model.generate(["vad_segment_01.wav", "vad_segment_02.wav"], **common)
+    print([r["text"] for r in results])
+```
+
+If the same audio is normal on the first request but repeats on the second request:
+
+1. Run the minimal script above outside the API layer with the same VAD segments.
+2. If the script is stable, check whether the API wrapper reuses per-request variables, previous VAD segment lists, previous `results`, or accumulated text across requests.
+3. If the script also repeats, capture the exact `funasr`, `vllm`, and `torch` versions, plus the first and second outputs, before tuning any decoding parameter.
+
+Do not increase `repetition_penalty` to suppress repeats on Fun-ASR-Nano vLLM. The prompt-embeds path should stay at the neutral value `1.0`.
+
 ---
 
 ## 5. Offline Speech Recognition Service
