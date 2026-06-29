@@ -132,8 +132,8 @@ def create_app(device: str = "cuda", preload_model: str = "auto") -> FastAPI:
         if not seg_audios:
             return {"text": "", "segments": [], "duration": len(audio_data)/sr}
 
-        # vLLM generate with repetition_penalty
-        gen_kwargs = {"max_new_tokens": 500, "repetition_penalty": 1.3}
+        # Keep repetition penalty neutral by default; prompt-embeds generation can be destabilized by penalties.
+        gen_kwargs = {"max_new_tokens": 500, "repetition_penalty": 1.0}
         if language:
             gen_kwargs["language"] = language
         if hotwords:

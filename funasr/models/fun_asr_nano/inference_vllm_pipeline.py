@@ -219,7 +219,7 @@ class FunASRNanoVLLMPipeline:
         params = SamplingParams(
             max_tokens=kwargs.get("max_new_tokens", 512),
             temperature=0.0,
-            repetition_penalty=1.3,
+            repetition_penalty=kwargs.get("repetition_penalty", 1.0),
             skip_special_tokens=True,
         )
 

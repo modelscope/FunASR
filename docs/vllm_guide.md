@@ -307,7 +307,7 @@ for result in engine.streaming_generate("audio.wav", language="中文"):
 | 1.5–3.0 s | Partially correct |
 | > 3.0 s | Accurate output |
 
-> Note: `repetition_penalty=1.3` is hardcoded internally to prevent short-chunk repetition degradation.
+> Note: `repetition_penalty` defaults to `1.0` for Fun-ASR-Nano vLLM paths. Tune it explicitly only after validating that it improves your workload.
 
 ---
 

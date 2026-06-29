@@ -189,7 +189,8 @@ class FunASRNanoStreamingVLLM:
 
     def streaming_generate(self, audio_input, chunk_ms=None, rollback_chars=None,
                            hotwords=None, language=None, itn=True,
-                           max_new_tokens=200, temperature=0.0, **kwargs):
+                           max_new_tokens=200, temperature=0.0,
+                           repetition_penalty=1.0, **kwargs):
         """Streaming ASR: process all chunks and yield results per chunk.
 
         All chunks are batched into a single vLLM generate() call for
@@ -204,6 +205,7 @@ class FunASRNanoStreamingVLLM:
             itn: Inverse text normalization.
             max_new_tokens: Max tokens per chunk generation.
             temperature: Sampling temperature (0 = greedy).
+            repetition_penalty: Repetition penalty factor (default 1.0).
 
         Yields:
             {"text": full_text, "fixed_text": confirmed_text,
@@ -235,7 +237,7 @@ class FunASRNanoStreamingVLLM:
         num_chunks = (total_samples + chunk_samples - 1) // chunk_samples
 
         params = SamplingParams(max_tokens=max_new_tokens, temperature=temperature,
-                                repetition_penalty=1.3, skip_special_tokens=True)
+                                repetition_penalty=repetition_penalty, skip_special_tokens=True)
 
         # Two-stage approach for long audio:
         # Stage 1: batch first N chunks fresh (no prev_text) to find stable output
