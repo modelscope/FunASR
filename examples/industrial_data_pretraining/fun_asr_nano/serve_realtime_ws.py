@@ -249,6 +249,7 @@ class RealtimeASRSession:
         self.vad_fed_samples = 0
         self.prev_text = ""
         self.last_partial_text = ""
+        self.last_partial_start_ms = 0
         self.last_decode_samples = 0
         self.locked_sentences = []
         self.prev_seg_text = ""
@@ -311,14 +312,7 @@ class RealtimeASRSession:
             return self._build_response(is_final)
 
         if self.vad.current_speech_start is not None:
-            seg_start_sample = int(self.vad.current_speech_start * self.sample_rate / 1000)
-            seg_audio = self.audio_buffer[seg_start_sample:]
-            # Bound the interim re-decode cost for a long ongoing segment: only
-            # re-encode the most recent partial_window_samples. The full segment is
-            # still decoded once the VAD boundary fires (see _decode_segment and the
-            # is_final path), so only the interim hypothesis is affected.
-            if self.partial_window_samples and len(seg_audio) > self.partial_window_samples:
-                seg_audio = seg_audio[-self.partial_window_samples:]
+            seg_audio, partial_start_ms = self.get_partial_decode_audio()
         else:
             self.last_decode_samples = len(self.audio_buffer)
             self.last_partial_text = ""
@@ -347,6 +341,7 @@ class RealtimeASRSession:
 
         self.last_decode_samples = len(self.audio_buffer)
         self.last_partial_text = text
+        self.last_partial_start_ms = partial_start_ms
         if text.strip() and not self.first_decode_done:
             self.first_decode_done = True
 
@@ -358,6 +353,20 @@ class RealtimeASRSession:
             self.prev_text = ""
 
         return self._build_response(is_final)
+
+    def get_partial_decode_audio(self):
+        """Return the bounded audio window used for unstable partial decoding."""
+        seg_start_sample = int(self.vad.current_speech_start * self.sample_rate / 1000)
+        decode_start_sample = seg_start_sample
+
+        if self.partial_window_samples:
+            min_start = len(self.audio_buffer) - self.partial_window_samples
+            if min_start > decode_start_sample:
+                decode_start_sample = min_start
+
+        decode_start_sample = max(0, decode_start_sample)
+        start_ms = int(decode_start_sample * 1000 / self.sample_rate)
+        return self.audio_buffer[decode_start_sample:], start_ms
 
     @torch.no_grad()
     def _decode_segment(self, seg):
@@ -387,7 +396,12 @@ class RealtimeASRSession:
         duration_ms = int(len(self.audio_buffer) * 1000 / self.sample_rate)
         sentences = list(self.locked_sentences)
         partial = self.last_partial_text
-        partial_start = self.vad.current_speech_start or duration_ms
+        if partial:
+            partial_start = self.last_partial_start_ms
+        elif self.vad.current_speech_start is not None:
+            partial_start = self.vad.current_speech_start
+        else:
+            partial_start = duration_ms
 
         if is_final:
             return {"sentences": sentences, "partial": "", "partial_start_ms": 0,
@@ -403,6 +417,7 @@ class RealtimeASRSession:
         self.vad.reset()
         self.prev_text = ""
         self.last_partial_text = ""
+        self.last_partial_start_ms = 0
         self.last_decode_samples = 0
         self.locked_sentences = []
         if self.spk_tracker:
@@ -445,19 +460,34 @@ def load_models(args):
         logger.info("Loading VAD: fsmn-vad (streaming)")
         _vad_model = AutoModel(model="fsmn-vad", device=args.device, disable_update=True)
 
-        logger.info("Loading SPK: eres2netv2")
-        _spk_model = AutoModel(model="iic/speech_eres2netv2_sv_zh-cn_16k-common", device=args.device, disable_update=True)
+        if getattr(args, "enable_spk", False):
+            logger.info(f"Loading SPK: {args.spk_model}")
+            _spk_model = AutoModel(model=args.spk_model, device=args.device, disable_update=True)
+        else:
+            _spk_model = None
+            logger.info("SPK disabled; use --enable-spk to include speaker diarization")
 
         logger.info("All models ready!")
     return _vllm_engine, _asr_kwargs, _vad_model, _spk_model
 
 
+def create_speaker_tracker(spk_model, args):
+    if not getattr(args, "enable_spk", False) or spk_model is None:
+        return None
+    return HybridSpeakerTracker(spk_model, args.device)
+
+
 async def handle_client(websocket, args):
     vllm_engine, asr_kwargs, vad_model, spk_model = load_models(args)
     vad = DynamicStreamingVAD(vad_model)
-    spk_tracker = HybridSpeakerTracker(spk_model, args.device)
-    session = RealtimeASRSession(vllm_engine, asr_kwargs, vad, spk_tracker=spk_tracker,
-                                 partial_window_sec=getattr(args, 'partial_window_sec', 15.0))
+    spk_tracker = create_speaker_tracker(spk_model, args)
+    session = RealtimeASRSession(
+        vllm_engine,
+        asr_kwargs,
+        vad,
+        spk_tracker=spk_tracker,
+        partial_window_sec=getattr(args, 'partial_window_sec', 15.0),
+    )
     logger.info(f"Client connected: {websocket.remote_address}")
 
     decode_interval = args.decode_interval
@@ -516,7 +546,7 @@ async def main(args):
         await asyncio.Future()
 
 
-if __name__ == "__main__":
+def build_arg_parser():
     parser = argparse.ArgumentParser(description="Fun-ASR-Nano Streaming WebSocket Server")
     parser.add_argument("--port", type=int, default=10095)
     parser.add_argument("--model", type=str, default="FunAudioLLM/Fun-ASR-Nano-2512")
@@ -531,11 +561,17 @@ if __name__ == "__main__":
                              "every chunk (O(L^2)), which saturates the GPU under concurrency and times "
                              "out long-segment requests. Lower it (e.g. 8-10) for high-concurrency "
                              "self-hosting; <=0 disables (legacy behaviour). Final transcripts are unaffected.")
+    parser.add_argument("--enable-spk", action="store_true", help="Enable streaming speaker diarization.")
+    parser.add_argument("--spk-model", type=str, default="iic/speech_eres2netv2_sv_zh-cn_16k-common")
     parser.add_argument("--hotword-file", type=str, default="热词列表")
     parser.add_argument("--language", type=str, default=None, help="Language hint (e.g. 中文, English, 日本語)")
     parser.add_argument("--dtype", type=str, default="bf16", choices=["bf16", "fp16", "fp32"])
     parser.add_argument("--tensor-parallel-size", type=int, default=1)
     parser.add_argument("--gpu-memory-utilization", type=float, default=0.8)
     parser.add_argument("--max-model-len", type=int, default=2048)
-    args = parser.parse_args()
+    return parser
+
+
+if __name__ == "__main__":
+    args = build_arg_parser().parse_args()
     asyncio.run(main(args))

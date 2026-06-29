@@ -549,7 +549,7 @@ Client (microphone / audio stream)     serve_realtime_ws.py
 - Audio arrives frame by frame; processing starts immediately
 - Natural sentence segmentation based on VAD endpoints
 - Confirmed segment text is locked and never changes; partial text updates in real time
-- Streaming speaker assignment + global re-clustering on STOP
+- Optional streaming speaker assignment (`--enable-spk`) + global re-clustering on STOP
 - First-word latency ~480 ms
 
 ### 6.2 Starting the Service
@@ -558,6 +558,16 @@ Client (microphone / audio stream)     serve_realtime_ws.py
 CUDA_VISIBLE_DEVICES=0 python examples/industrial_data_pretraining/fun_asr_nano/serve_realtime_ws.py \
     --port 10095 --language 中文 --hotword-file hotword_list
 ```
+
+For multi-client or long continuous-speech workloads, start by bounding partial previews and lowering the refresh rate:
+
+```bash
+CUDA_VISIBLE_DEVICES=0 python examples/industrial_data_pretraining/fun_asr_nano/serve_realtime_ws.py \
+    --port 10095 --language 中文 \
+    --partial-window-sec 8 --decode-interval 0.8
+```
+
+Speaker diarization is disabled by default; add `--enable-spk` only when the `spk` field is required.
 
 ### 6.3 WebSocket Protocol
 
@@ -571,18 +581,18 @@ CUDA_VISIBLE_DEVICES=0 python examples/industrial_data_pretraining/fun_asr_nano/
 | Hotwords | `"HOTWORDS:word1,word2"` | Optional |
 | Language | `"LANGUAGE:中文"` | Optional |
 | Audio | `binary` | PCM16 16 kHz mono |
-| End | `"STOP"` | Final decode + SPK re-clustering |
+| End | `"STOP"` | Final decode; SPK re-clustering only when `--enable-spk` is enabled |
 
 **Server → Client**:
 
 ```json
 {"event": "started"}
-{"sentences": [{"text":"你好","start":300,"end":1200,"spk":0}], "partial": "世界", "is_final": false}
+{"sentences": [{"text":"你好","start":300,"end":1200}], "partial": "世界", "is_final": false}
 {"sentences": [...], "is_final": true}
 {"event": "stopped"}
 ```
 
-**Fields**: `sentences[]` = locked segments, `partial` = text being spoken (may change), `is_final` = true after STOP.
+**Fields**: `sentences[]` = locked segments, `partial` = text being spoken (may change), `is_final` = true after STOP. When `--enable-spk` is enabled, `sentences[]` also includes `spk`.
 
 **Sequence diagram**:
 ```
@@ -651,16 +661,15 @@ Because each refresh re-encodes from the sentence start, the longer a sentence, 
 
 **Usage guidance**
 - Normal conversational speech has natural pauses, so VAD splits it into relatively short utterances and each partial's cost is naturally bounded — **usually nothing to worry about**.
-- Only **very long, pauseless continuous speech** (e.g. reading aloud) makes a single utterance keep growing and the partial preview progressively slower — this is an inherent property of the full-context encoder, **not a configuration issue**. If your scenario has such audio and is sensitive to preview latency, you can bound the partial encoding window in code (e.g. encode only the last few seconds); this is a **code change, not a config option**, and it does not affect locked sentences (which still run on the full audio, with identical final transcripts).
+- Only **very long, pauseless continuous speech** (e.g. reading aloud) makes a single utterance keep growing and the partial preview progressively slower. `serve_realtime_ws.py` bounds provisional previews with `--partial-window-sec 15` by default; for multi-client or continuous-monologue load tests, try `8-10` and raise `--decode-interval` to `0.8-1.0`. This only affects provisional `partial`; VAD-locked sentences and STOP final output still run on the full audio.
 
-### 6.6 Cost of speaker diarization (SPK) and how to disable it
+### 6.6 Cost of speaker diarization (SPK) and how to enable it
 
-At startup, `serve_realtime_ws.py` **loads the SPK model by default** (hardcoded to `iic/speech_eres2netv2_sv_zh-cn_16k-common`) and runs speaker assignment for each VAD-completed sentence during streaming. Note:
+`serve_realtime_ws.py` **does not load** the SPK model by default. It loads `--spk-model` (default `iic/speech_eres2netv2_sv_zh-cn_16k-common`) only when started with `--enable-spk`, then runs speaker assignment for each VAD-completed sentence during streaming. Note:
 
 - **SPK is of limited effectiveness on Fun-ASR-Nano** (see #2944); most real-time ASR scenarios do not need speaker separation.
 - **Streaming SPK is expensive and grows with the session**: each sentence re-clusters **all historical embeddings** (**O(N²)**, more expensive per sentence as the session grows) and **synchronously blocks the event loop**; the session also **re-clusters everything again** at the end, so the per-sentence clustering during streaming is overwritten by the final result — redundant as far as the final output is concerned. This is especially pronounced under long sessions + high concurrency.
-- **Disabling currently requires a code change**: `spk_model` is loaded by default and hardcoded in `serve_realtime_ws.py`, with no flag.
-- **Recommendation**: don't load `spk_model` when speaker separation isn't needed; if diarization is required, take labels from the final result, or use a Paraformer + cam++ pipeline.
+- **Recommendation**: keep the default off for multi-client live ASR; if diarization is required, add `--enable-spk` and treat the final STOP-time labels as authoritative.
 
 ### 6.7 Production concurrency and multi-process deployment
 
