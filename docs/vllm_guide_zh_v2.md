@@ -304,6 +304,31 @@ for result in engine.streaming_generate("audio.wav", language="中文"):
 
 **注意：EmbedsPrompt 下不能用 `repetition_penalty`。** 此时 prompt 是 embedding 向量、没有对应的 token ID，而 `repetition_penalty` 要靠 prompt 的 token ID 在 logits 上给已出现的词降分；用在 EmbedsPrompt 上会**索引越界、触发 CUDA device-side assert**。
 
+### 生产 API 稳定性清单
+
+把 `AutoModelVLLM` 封装成长驻 API 服务时，请隔离每次请求的状态，并固定安全的解码默认值：
+
+```python
+common = dict(
+    language="auto",
+    temperature=0.0,
+    repetition_penalty=1.0,
+    max_new_tokens=200,
+)
+
+for _ in range(2):
+    results = model.generate(["vad_segment_01.wav", "vad_segment_02.wav"], **common)
+    print([r["text"] for r in results])
+```
+
+如果同一个音频第一次请求正常、第二次请求开始重复：
+
+1. 先把 API 层拿掉，用相同 VAD 分段跑上面的最小脚本。
+2. 如果最小脚本稳定，优先检查 API 封装是否复用了请求级变量、上一轮 VAD 分段列表、上一轮 `results` 或累积文本。
+3. 如果最小脚本也重复，再记录完整的 `funasr`、`vllm`、`torch` 版本，以及第一次和第二次输出文本，再调整其它解码参数。
+
+不要通过调大 `repetition_penalty` 来压制 Fun-ASR-Nano vLLM 重复输出；prompt-embeds 路径应保持中性值 `1.0`。
+
 ### 输出特性
 
 | 累积音频 | 输出质量 |
