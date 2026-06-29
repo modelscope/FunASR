@@ -396,7 +396,12 @@ class RealtimeASRSession:
         duration_ms = int(len(self.audio_buffer) * 1000 / self.sample_rate)
         sentences = list(self.locked_sentences)
         partial = self.last_partial_text
-        partial_start = self.last_partial_start_ms if partial else (self.vad.current_speech_start or duration_ms)
+        if partial:
+            partial_start = self.last_partial_start_ms
+        elif self.vad.current_speech_start is not None:
+            partial_start = self.vad.current_speech_start
+        else:
+            partial_start = duration_ms
 
         if is_final:
             return {"sentences": sentences, "partial": "", "partial_start_ms": 0,

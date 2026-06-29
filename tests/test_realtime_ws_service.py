@@ -93,3 +93,30 @@ def test_partial_decode_audio_keeps_short_current_segment():
 
     audio, start_ms = session.get_partial_decode_audio()
     assert start_ms == 1500
+    np.testing.assert_array_equal(audio, session.audio_buffer[int(sample_rate * 1.5):])
+
+
+def test_empty_partial_response_preserves_zero_speech_start():
+    module = load_service_module()
+
+    class DummyVad:
+        current_speech_start = 0
+
+        def reset(self):
+            pass
+
+    sample_rate = 16000
+    session = module.RealtimeASRSession(
+        vllm_engine=object(),
+        asr_kwargs={},
+        vad=DummyVad(),
+        spk_tracker=None,
+        sample_rate=sample_rate,
+        chunk_ms=960,
+    )
+    session.audio_buffer = np.zeros(sample_rate, dtype=np.float32)
+    session.last_partial_text = ""
+
+    response = session._build_response(is_final=False)
+
+    assert response["partial_start_ms"] == 0
