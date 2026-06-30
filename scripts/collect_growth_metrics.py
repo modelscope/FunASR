@@ -109,6 +109,12 @@ KNOWN_ASSISTED_REVIEW_REQUESTS = {
     "GetStream/Vision-Agents#606": {
         "reason": "review feedback addressed and checks are green; avoid duplicate pings",
     },
+    "Uberi/speech_recognition#903": {
+        "reason": "review evidence already posted; no repo checks exposed",
+    },
+    "huggingface/speech-to-speech#319": {
+        "reason": "ruff blocker fixed and validation posted; no repo checks exposed",
+    },
 }
 REPORTER_WAITING_LABELS = {"needs feedback"}
 CONTRIBUTOR_WAITING_LABELS = {"good first issue", "help wanted", "ready for PR"}
