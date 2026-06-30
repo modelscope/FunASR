@@ -241,6 +241,7 @@ for sentence in res:
     print(f"[Speaker {sentence['spk']}] {sentence['text']}")
 ```
 Notes: `spk_model` can also be `"cam++"` (CAM++ model). ERes2NetV2 provides improved short-duration speaker feature extraction.
+Custom `spk_model` values can be ModelScope model ids or local model paths. The model must load through FunASR `AutoModel` and return `spk_embedding` from `generate()` because downstream speaker clustering uses those embeddings to assign `spk` labels.
 
 #### Multi-language ASR (Qwen3-ASR)
 ```python

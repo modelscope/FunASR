@@ -180,6 +180,27 @@ result = model.generate(input="meeting.wav")
 
 Then inspect `result[0]["sentence_info"]`. Each sentence should include fields such as `text`, `start`, `end`, and `spk` when diarization is available.
 
+## Can I use a speaker model other than cam++?
+
+Yes. `spk_model` can be any FunASR `AutoModel` speaker embedding model, including a ModelScope model id or a local model path. For example, ERes2NetV2 can be used directly:
+
+```python
+from funasr import AutoModel
+
+model = AutoModel(
+    model="paraformer-zh",
+    vad_model="fsmn-vad",
+    punc_model="ct-punc",
+    spk_model="iic/speech_eres2netv2_sv_zh-cn_16k-common",
+    device="cuda",
+)
+result = model.generate(input="meeting.wav")
+```
+
+For a fully custom speaker model, make sure its `generate()` output provides `spk_embedding`; the diarization post-processing and clustering steps use those embeddings to assign speaker labels. If your diarization model emits speaker segments directly instead of embeddings, add an adapter layer that converts its output to the current speaker-label structure.
+
+The tutorial has a longer ERes2NetV2 example: [Speaker Verification / Diarization](../tutorial/README.md#speaker-verification--diarization-eres2netv2).
+
 ## The same command works on CPU but fails on CUDA
 
 This usually points to a CUDA, driver, PyTorch, or GPU memory mismatch. Include these checks in your issue:
