@@ -10,7 +10,23 @@
 pip install funasr
 ```
 
-### 2. Configure your AI tool
+### 2. Optional: run with Docker
+
+The Dockerfile starts the MCP server over stdio and is suitable for MCP directory
+checks that initialize the server and call `tools/list`.
+
+```bash
+docker build -t funasr-mcp examples/mcp_server
+docker run --rm -i \
+  -e FUNASR_DEVICE=cpu \
+  -v /path/to/audio:/audio:ro \
+  funasr-mcp
+```
+
+When submitting this server to MCP directories such as Glama, use this folder as
+the Docker build context so the container entrypoint runs `funasr_mcp.py`.
+
+### 3. Configure your AI tool
 
 **Claude Code** (`~/.claude.json`):
 ```json
