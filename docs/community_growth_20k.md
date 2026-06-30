@@ -1,12 +1,21 @@
-# FunASR Community Growth Plan: 20,000+ GitHub Stars
+# FunASR Ecosystem Growth Plan: +20,000 GitHub Stars
 
-Baseline on 2026-05-24: `modelscope/FunASR` has about 16.2k GitHub stars. The next target is 20k+ stars, which means earning roughly 3.8k additional stars through better onboarding, stronger proof, and repeatable launches.
+Baseline on 2026-06-27: the FunASR ecosystem repositories had 31,224 combined GitHub stars. The next target is earning 20,000 additional stars across the ecosystem by 2026-09-30, reaching 51,224+ combined stars through better onboarding, stronger proof, and repeatable launches.
 
 This plan focuses on useful adoption work rather than vanity marketing: if more users can install, evaluate, deploy, and share FunASR successfully, stars follow naturally.
 
+## Repository scope
+
+| Repository | Role in the ecosystem | Growth surface |
+|---|---|---|
+| `modelscope/FunASR` | Core toolkit, Python package, runtime services, deployment docs | First-run success, production deployment, issue/PR operations |
+| `FunAudioLLM/Fun-ASR` | Fun-ASR-Nano model family and LLM-ASR identity | Model cards, Transformers integration, benchmarks, vLLM/GGUF stories |
+| `FunAudioLLM/SenseVoice` | CPU-friendly multilingual ASR with emotion and audio events | Quick demos, edge use cases, app integrations |
+| `modelscope/FunClip` | Video clipping and transcription workflow | Creator workflows, local GUI/API recipes, showcase stories |
+
 ## North-star metrics
 
-- GitHub stars: 20,000+
+- GitHub stars: +20,000 across the four-repository ecosystem by 2026-09-30
 - Monthly PyPI downloads: sustained growth after each release
 - README quick-start success: first transcription in under 5 minutes
 - Deployment success: API server, WebSocket, Docker, and vLLM examples verified on fresh machines
@@ -22,6 +31,18 @@ This plan focuses on useful adoption work rather than vanity marketing: if more 
 | Researchers | Benchmarks, reproducibility, citations, model details | benchmark report, docs, model cards |
 | Chinese users | Chinese docs, ModelScope path, deployment in China | README_zh, docs/zh, ModelScope links |
 | International users | English docs, Hugging Face path, comparison with Whisper | README, HF models, benchmark story |
+
+## Current campaign snapshot
+
+As of 2026-06-30, the ecosystem has 34,622 combined GitHub stars, or 3,398 additional stars since the 31,224 baseline. The remaining gap to the +20,000 target is 16,602 stars by 2026-09-30.
+
+Keep this snapshot fresh during weekly planning:
+
+```bash
+for repo in modelscope/FunASR FunAudioLLM/Fun-ASR FunAudioLLM/SenseVoice modelscope/FunClip; do
+  gh api "repos/$repo" --jq '{repo: .full_name, stars: .stargazers_count}'
+done | jq -s '{total_stars: (map(.stars) | add), repositories: .}'
+```
 
 ## Workstream 1: Convert first-time visitors
 
@@ -67,12 +88,21 @@ For each launch, prepare:
 - Keep 5-10 `good first issue` tasks ready for contributors.
 - Thank external contributors in release notes.
 
+Daily maintainer loop:
+
+- Check open issues and PRs in `modelscope/FunASR`, `FunAudioLLM/Fun-ASR`, `FunAudioLLM/SenseVoice`, and `modelscope/FunClip`.
+- Prioritize blockers that stop a first transcription, an API server launch, a WebSocket deployment, or a model download.
+- Keep external ecosystem PRs unblocked, especially integrations in high-visibility AI, agent, workflow, ASR, and video repositories.
+- Turn repeated answers into docs or examples before closing the loop.
+- Keep actionable issues labelled as `good first issue`, `help wanted`, or `ready for PR` so contributors can help without guessing.
+
 ## Workstream 5: External proof
 
 - Publish reproducible benchmark scripts and raw configuration for the 184-file benchmark.
 - Encourage users to share production stories, dashboards, public demos, or benchmark notes through the showcase issue template.
 - Add third-party integrations and community projects to README when they are maintained and runnable.
 - Keep citations and paper links visible for researchers.
+- Track and unblock integrations in Hugging Face Transformers, inference runtimes, agent frameworks, workflow tools, video tools, and speech-recognition libraries.
 
 ## Tracking cadence
 
@@ -155,4 +185,4 @@ funasr-server --device cuda
 
 ## 中文摘要
 
-目标不是单纯“求 Star”，而是让更多用户能更快完成安装、转写、部署和分享。FunASR 距离 20k stars 还需要约 3.8k 增量，最有效的抓手是：首屏转化、可复现 benchmark、OpenAI 兼容 API/流式/vLLM/Docker 部署闭环、HF/ModelScope/官网同步更新，以及高效的 issue/PR 社区运营。
+目标不是单纯“求 Star”，而是让更多用户能更快完成安装、转写、部署和分享。当前增长目标按 FunASR / Fun-ASR / SenseVoice / FunClip 四仓生态统一跟踪：以 2026-06-27 的 31,224 combined stars 为基线，到 2026-09-30 累计新增 20,000 stars。最有效的抓手是：首屏转化、可复现 benchmark、OpenAI 兼容 API/流式/vLLM/Docker 部署闭环、HF/ModelScope/官网同步更新、高星生态集成，以及高效的 issue/PR 社区运营。
