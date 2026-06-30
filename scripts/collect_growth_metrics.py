@@ -38,6 +38,7 @@ DEFAULT_INTEGRATION_PRS = [
     "run-llama/llama_index#21996",
     "xinnan-tech/xiaozhi-esp32-server#3255",
     "mem0ai/mem0#5571",
+    "tmoroney/auto-subs#629",
     "infiniflow/ragflow#16473",
     "pipecat-ai/pipecat#4844",
     "mudler/LocalAI#10090",
@@ -47,6 +48,7 @@ DEFAULT_INTEGRATION_PRS = [
     "activepieces/activepieces#13985",
     "Uberi/speech_recognition#903",
     "ai4s-research/awesome-ai-for-science#69",
+    "mahseema/awesome-ai-tools#1689",
 ]
 FAILED_CHECK_CONCLUSIONS = {"action_required", "cancelled", "failure", "startup_failure", "timed_out"}
 REPORTER_WAITING_LABELS = {"needs feedback"}
