@@ -63,6 +63,12 @@ KNOWN_EXTERNAL_CHECK_FAILURES = {
         "reason": "LightOnOCR shared hub-cache read-only failure; PR CI status is the aggregate failure",
     }
 }
+KNOWN_REVIEW_GATES = {
+    "punkpeye/awesome-mcp-servers#7153": {
+        "action": "submit Glama",
+        "reason": "Glama listing and score badge required before review",
+    }
+}
 REPORTER_WAITING_LABELS = {"needs feedback"}
 CONTRIBUTOR_WAITING_LABELS = {"good first issue", "help wanted", "ready for PR"}
 
@@ -232,6 +238,7 @@ def recommend_integration_action(
     pull_request: Dict[str, Any],
     checks: Dict[str, Any],
     known_external_failure_reason: Optional[str] = None,
+    known_review_gate_action: Optional[str] = None,
 ) -> str:
     if pull_request.get("state") != "open":
         return "archive"
@@ -263,6 +270,8 @@ def recommend_integration_action(
         return "fix checks"
     if check_state == "pending":
         return "wait for checks"
+    if known_review_gate_action:
+        return known_review_gate_action
 
     if check_state in {"success", "unknown"} and mergeable_state == "clean":
         return "request review"
@@ -282,6 +291,7 @@ def collect_pull_request_metrics(spec: str, now: Optional[dt.datetime] = None) -
     head_sha = head.get("sha")
     checks = summarize_commit_checks(repo, head_sha) if head_sha else {"state": "unknown"}
     known_external_failure_reason = classify_known_external_failure(spec, checks)
+    known_review_gate = KNOWN_REVIEW_GATES.get(spec) or {}
     updated_at = pull_request.get("updated_at")
     return {
         "pr": f"{repo}#{pr_number}",
@@ -303,7 +313,13 @@ def collect_pull_request_metrics(spec: str, now: Optional[dt.datetime] = None) -
         "author": author.get("login"),
         "checks": checks,
         "known_external_failure_reason": known_external_failure_reason,
-        "next_action": recommend_integration_action(pull_request, checks, known_external_failure_reason),
+        "known_review_gate_reason": known_review_gate.get("reason"),
+        "next_action": recommend_integration_action(
+            pull_request,
+            checks,
+            known_external_failure_reason,
+            known_review_gate.get("action"),
+        ),
     }
 
 
@@ -533,6 +549,16 @@ def format_integration_markdown(metrics: Dict[str, Any]) -> str:
                 f"- [{integration['pr']}]({integration.get('html_url')}): "
                 f"{int(integration['repo_stars']):,} stars, "
                 f"{integration.get('next_action') or 'inspect'}"
+            )
+    review_gate_integrations = [
+        integration for integration in metrics["integrations"] if integration.get("known_review_gate_reason")
+    ]
+    if review_gate_integrations:
+        lines.extend(["", "## Manual review gates", ""])
+        for integration in review_gate_integrations:
+            lines.append(
+                f"- [{integration['pr']}]({integration.get('html_url')}): "
+                f"{integration['known_review_gate_reason']}"
             )
     lines.extend(["", "## Failed or pending checks", ""])
     for integration in metrics["integrations"]:
