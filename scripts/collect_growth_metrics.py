@@ -42,7 +42,9 @@ DEFAULT_INTEGRATION_PRS = [
     "tmoroney/auto-subs#629",
     "infiniflow/ragflow#16473",
     "pipecat-ai/pipecat#4844",
+    "speaches-ai/speaches#658",
     "mudler/LocalAI#10090",
+    "getpaseo/paseo#1634",
     "agno-agi/agno#8501",
     "GetStream/Vision-Agents#606",
     "TEN-framework/ten-framework#2191",
@@ -201,6 +203,9 @@ def recommend_integration_action(pull_request: Dict[str, Any], checks: Dict[str,
         return "archive"
     if pull_request.get("draft"):
         return "finish draft"
+    mergeable_state = pull_request.get("mergeable_state")
+    if mergeable_state == "dirty":
+        return "resolve conflicts"
 
     check_state = checks.get("state")
     pending_names = " ".join(
@@ -223,7 +228,6 @@ def recommend_integration_action(pull_request: Dict[str, Any], checks: Dict[str,
     if check_state == "pending":
         return "wait for checks"
 
-    mergeable_state = pull_request.get("mergeable_state")
     if check_state in {"success", "unknown"} and mergeable_state == "clean":
         return "request review"
     if check_state in {"success", "unknown"} and mergeable_state in {"blocked", "unstable"}:
