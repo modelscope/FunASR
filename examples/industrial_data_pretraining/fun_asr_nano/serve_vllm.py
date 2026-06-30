@@ -184,6 +184,30 @@ def process_audio(audio_data, sr=16000, language=None, hotwords=None,
     }
 
 
+def build_openai_verbose_json(result, language=None):
+    """Build OpenAI-compatible verbose_json while preserving FunASR extensions."""
+    segments = []
+    for i, seg in enumerate(result["segments"]):
+        item = {
+            "id": i,
+            "start": seg["start"],
+            "end": seg["end"],
+            "text": seg["text"],
+            "words": seg.get("words", []),
+        }
+        if "speaker" in seg:
+            item["speaker"] = seg["speaker"]
+        segments.append(item)
+
+    return {
+        "task": "transcribe",
+        "language": language or "zh",
+        "duration": result["duration"],
+        "text": result["text"],
+        "segments": segments,
+    }
+
+
 # ============================================================
 # FastAPI App
 # ============================================================
@@ -240,22 +264,7 @@ async def openai_transcriptions(
     if response_format == "text":
         return JSONResponse(content=result["text"])
     elif response_format == "verbose_json":
-        return JSONResponse(content={
-            "task": "transcribe",
-            "language": language or "zh",
-            "duration": result["duration"],
-            "text": result["text"],
-            "segments": [
-                {
-                    "id": i,
-                    "start": seg["start"],
-                    "end": seg["end"],
-                    "text": seg["text"],
-                    "words": seg.get("words", []),
-                }
-                for i, seg in enumerate(result["segments"])
-            ],
-        })
+        return JSONResponse(content=build_openai_verbose_json(result, language=language))
     else:
         return JSONResponse(content={"text": result["text"]})
 
