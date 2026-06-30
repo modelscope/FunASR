@@ -27,6 +27,12 @@ DEFAULT_PACKAGE = "funasr"
 DEFAULT_BASELINE_STARS = 31224
 DEFAULT_TARGET_ADDITIONAL_STARS = 20000
 DEFAULT_TARGET_DATE = "2026-09-30"
+DEFAULT_INTEGRATION_PRS = [
+    "huggingface/transformers#46180",
+    "ray-project/ray#64053",
+    "huggingface/optimum-intel#1801",
+]
+FAILED_CHECK_CONCLUSIONS = {"action_required", "cancelled", "failure", "startup_failure", "timed_out"}
 
 
 def fetch_json(url: str, headers: Optional[Dict[str, str]] = None) -> Any:
@@ -65,6 +71,90 @@ def collect_github_repo_metrics(repo: str) -> Dict[str, Any]:
         "default_branch": github.get("default_branch"),
         "pushed_at": github.get("pushed_at"),
         "html_url": github.get("html_url"),
+    }
+
+
+def parse_pull_request_spec(spec: str) -> tuple[str, int]:
+    if "#" not in spec:
+        raise ValueError(f"pull request spec must look like owner/repo#number: {spec}")
+    repo, number = spec.split("#", 1)
+    repo = repo.strip("/")
+    try:
+        pr_number = int(number)
+    except ValueError as exc:
+        raise ValueError(f"pull request number must be an integer: {spec}") from exc
+    if repo.count("/") != 1 or pr_number <= 0:
+        raise ValueError(f"pull request spec must look like owner/repo#number: {spec}")
+    return repo, pr_number
+
+
+def summarize_commit_checks(repo: str, head_sha: str) -> Dict[str, Any]:
+    status = fetch_json(f"https://api.github.com/repos/{repo}/commits/{head_sha}/status", github_headers())
+    check_runs_payload = fetch_json(
+        f"https://api.github.com/repos/{repo}/commits/{head_sha}/check-runs?per_page=100",
+        github_headers(),
+    )
+    check_runs = check_runs_payload.get("check_runs", [])
+    failed_check_runs = []
+    pending_check_runs = []
+    for check_run in check_runs:
+        name = check_run.get("name")
+        url = check_run.get("html_url") or check_run.get("details_url")
+        if check_run.get("status") != "completed":
+            pending_check_runs.append({"name": name, "status": check_run.get("status"), "url": url})
+        elif check_run.get("conclusion") in FAILED_CHECK_CONCLUSIONS:
+            failed_check_runs.append({"name": name, "conclusion": check_run.get("conclusion"), "url": url})
+
+    status_state = status.get("state")
+    if failed_check_runs or status_state in {"error", "failure"}:
+        state = "failure"
+    elif pending_check_runs or status_state == "pending":
+        state = "pending"
+    elif check_runs or status.get("statuses"):
+        state = "success"
+    else:
+        state = "unknown"
+
+    return {
+        "state": state,
+        "commit_status_state": status_state,
+        "total_check_runs": check_runs_payload.get("total_count", len(check_runs)),
+        "failed_check_runs": failed_check_runs,
+        "pending_check_runs": pending_check_runs,
+    }
+
+
+def collect_pull_request_metrics(spec: str) -> Dict[str, Any]:
+    repo, pr_number = parse_pull_request_spec(spec)
+    pull_request = fetch_json(f"https://api.github.com/repos/{repo}/pulls/{pr_number}", github_headers())
+    head = pull_request.get("head") or {}
+    base = pull_request.get("base") or {}
+    author = pull_request.get("user") or {}
+    head_sha = head.get("sha")
+    checks = summarize_commit_checks(repo, head_sha) if head_sha else {"state": "unknown"}
+    return {
+        "pr": f"{repo}#{pr_number}",
+        "repo": repo,
+        "number": pr_number,
+        "title": pull_request.get("title"),
+        "state": pull_request.get("state"),
+        "draft": pull_request.get("draft"),
+        "mergeable": pull_request.get("mergeable"),
+        "mergeable_state": pull_request.get("mergeable_state"),
+        "updated_at": pull_request.get("updated_at"),
+        "html_url": pull_request.get("html_url"),
+        "head_ref": head.get("ref"),
+        "head_sha": head_sha,
+        "base_ref": base.get("ref"),
+        "author": author.get("login"),
+        "checks": checks,
+    }
+
+
+def collect_integration_metrics(prs: Sequence[str]) -> Dict[str, Any]:
+    return {
+        "collected_at_utc": dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat(),
+        "integrations": [collect_pull_request_metrics(pr) for pr in prs],
     }
 
 
@@ -190,6 +280,48 @@ def format_ecosystem_markdown(metrics: Dict[str, Any]) -> str:
     return "\n".join(lines) + "\n"
 
 
+def format_integration_markdown(metrics: Dict[str, Any]) -> str:
+    lines = [
+        f"# FunASR External Integration Snapshot ({metrics['collected_at_utc']})",
+        "",
+        "| Pull request | State | Mergeable | Checks | Failed | Pending | Updated |",
+        "|---|---|---|---|---:|---:|---|",
+    ]
+    for integration in metrics["integrations"]:
+        checks = integration.get("checks", {})
+        failed_count = len(checks.get("failed_check_runs") or [])
+        pending_count = len(checks.get("pending_check_runs") or [])
+        lines.append(
+            f"| [{integration['pr']}]({integration.get('html_url')}) | "
+            f"{integration.get('state')} | "
+            f"{integration.get('mergeable_state') or integration.get('mergeable')} | "
+            f"{checks.get('state')} | "
+            f"{failed_count:,} | "
+            f"{pending_count:,} | "
+            f"`{integration.get('updated_at')}` |"
+        )
+    lines.extend(["", "## Failed or pending checks", ""])
+    for integration in metrics["integrations"]:
+        checks = integration.get("checks", {})
+        failed = checks.get("failed_check_runs") or []
+        pending = checks.get("pending_check_runs") or []
+        if not failed and not pending:
+            continue
+        lines.append(f"### {integration['pr']}")
+        for check in failed:
+            url = check.get("url")
+            suffix = f" ({url})" if url else ""
+            lines.append(f"- Failed: {check.get('name')} [{check.get('conclusion')}]{suffix}")
+        for check in pending:
+            url = check.get("url")
+            suffix = f" ({url})" if url else ""
+            lines.append(f"- Pending: {check.get('name')} [{check.get('status')}]{suffix}")
+        lines.append("")
+    if lines[-1] == "## Failed or pending checks":
+        lines.append("")
+    return "\n".join(lines).rstrip() + "\n"
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Collect FunASR growth metrics.")
     parser.add_argument("--repo", default=DEFAULT_REPO, help="GitHub repository, e.g. modelscope/FunASR")
@@ -200,6 +332,13 @@ def parse_args() -> argparse.Namespace:
         help="GitHub repositories for --ecosystem mode",
     )
     parser.add_argument("--ecosystem", action="store_true", help="Collect the four-repository FunASR ecosystem")
+    parser.add_argument("--integrations", action="store_true", help="Collect tracked external integration PRs")
+    parser.add_argument(
+        "--integration-prs",
+        nargs="+",
+        default=DEFAULT_INTEGRATION_PRS,
+        help="GitHub pull requests for --integrations mode, e.g. owner/repo#123",
+    )
     parser.add_argument("--pypi-package", default=DEFAULT_PACKAGE, help="PyPI package name")
     parser.add_argument("--star-goal", type=int, default=20000, help="Target GitHub star count")
     parser.add_argument("--baseline-stars", type=int, default=DEFAULT_BASELINE_STARS, help="Ecosystem baseline stars")
@@ -217,7 +356,9 @@ def parse_args() -> argparse.Namespace:
 def main() -> int:
     args = parse_args()
     try:
-        if args.ecosystem:
+        if args.integrations:
+            metrics = collect_integration_metrics(args.integration_prs)
+        elif args.ecosystem:
             metrics = collect_ecosystem_metrics(
                 args.repos,
                 args.pypi_package,
@@ -227,12 +368,14 @@ def main() -> int:
             )
         else:
             metrics = collect_metrics(args.repo, args.pypi_package)
-    except RuntimeError as exc:
+    except (RuntimeError, ValueError) as exc:
         print(exc, file=sys.stderr)
         return 1
 
     if args.format == "json":
         print(json.dumps(metrics, ensure_ascii=False, indent=2))
+    elif args.integrations:
+        print(format_integration_markdown(metrics), end="")
     elif args.ecosystem:
         print(format_ecosystem_markdown(metrics), end="")
     else:
