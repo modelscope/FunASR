@@ -203,6 +203,9 @@ def recommend_integration_action(pull_request: Dict[str, Any], checks: Dict[str,
         return "archive"
     if pull_request.get("draft"):
         return "finish draft"
+    mergeable_state = pull_request.get("mergeable_state")
+    if mergeable_state == "dirty":
+        return "resolve conflicts"
 
     check_state = checks.get("state")
     pending_names = " ".join(
@@ -225,9 +228,6 @@ def recommend_integration_action(pull_request: Dict[str, Any], checks: Dict[str,
     if check_state == "pending":
         return "wait for checks"
 
-    mergeable_state = pull_request.get("mergeable_state")
-    if mergeable_state == "dirty":
-        return "resolve conflicts"
     if check_state in {"success", "unknown"} and mergeable_state == "clean":
         return "request review"
     if check_state in {"success", "unknown"} and mergeable_state in {"blocked", "unstable"}:

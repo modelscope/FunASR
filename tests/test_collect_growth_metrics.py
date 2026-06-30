@@ -566,6 +566,36 @@ def test_recommend_integration_action_treats_dirty_merge_state_as_conflict_resol
     assert action == "resolve conflicts"
 
 
+def test_recommend_integration_action_prioritizes_dirty_merge_state_over_failed_checks():
+    module = load_growth_metrics_module()
+
+    action = module.recommend_integration_action(
+        {"state": "open", "draft": False, "mergeable_state": "dirty"},
+        {
+            "state": "failure",
+            "failed_check_runs": [{"name": "ci", "conclusion": "failure"}],
+            "pending_check_runs": [],
+        },
+    )
+
+    assert action == "resolve conflicts"
+
+
+def test_recommend_integration_action_prioritizes_dirty_merge_state_over_pending_checks():
+    module = load_growth_metrics_module()
+
+    action = module.recommend_integration_action(
+        {"state": "open", "draft": False, "mergeable_state": "dirty"},
+        {
+            "state": "pending",
+            "failed_check_runs": [],
+            "pending_check_runs": [{"name": "ci", "status": "queued"}],
+        },
+    )
+
+    assert action == "resolve conflicts"
+
+
 def test_collect_integration_metrics_treats_empty_pending_status_as_review_gate(monkeypatch):
     module = load_growth_metrics_module()
 
