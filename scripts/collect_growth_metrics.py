@@ -68,6 +68,10 @@ KNOWN_REVIEW_GATES = {
     "punkpeye/awesome-mcp-servers#7153": {
         "action": "submit Glama",
         "reason": "Glama listing and score badge required before review",
+    },
+    "TEN-framework/ten-framework#2191": {
+        "action": "wait for maintainer review",
+        "reason": "Claude review action requires maintainer permissions for fork PRs",
     }
 }
 KNOWN_ASSISTED_REVIEW_REQUESTS = {
@@ -313,6 +317,10 @@ def recommend_integration_action(
     ).lower()
     if "cla" in pending_names:
         return "resolve CLA"
+    if known_review_gate_action and (
+        "claude-review" in failed_names or "review bot" in failed_names
+    ):
+        return known_review_gate_action
     if "claude-review" in failed_names or "review bot" in failed_names:
         return "review bot gate"
     if "vercel" in failed_names and "vercel.com/git/authorize" in failed_urls:
