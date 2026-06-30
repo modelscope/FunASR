@@ -58,7 +58,6 @@ def test_default_integration_prs_include_new_growth_lanes():
         "huggingface/speech-to-speech#319",
         "run-llama/llama_index#21958",
         "run-llama/llama_index#21996",
-        "xinnan-tech/xiaozhi-esp32-server#3255",
         "mem0ai/mem0#5571",
         "mudler/LocalAI#10090",
         "agno-agi/agno#8501",
@@ -89,6 +88,12 @@ def test_default_integration_prs_include_voice_agent_and_ml_discovery_lanes():
     }
 
     assert expected_prs.issubset(set(module.DEFAULT_INTEGRATION_PRS))
+
+
+def test_default_integration_prs_exclude_archived_integration_prs():
+    module = load_growth_metrics_module()
+
+    assert "xinnan-tech/xiaozhi-esp32-server#3255" not in module.DEFAULT_INTEGRATION_PRS
 
 
 def test_collect_github_repo_metrics_splits_open_issues_and_pull_requests(monkeypatch):
