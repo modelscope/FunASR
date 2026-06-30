@@ -61,6 +61,7 @@ KNOWN_EXTERNAL_CHECK_FAILURES = {
         "failed_check_names": {"pr-ci / tests_processors / tests_processors [shard 3/8]"},
         "aggregate_check_names": AGGREGATE_FAILURE_CHECK_NAMES,
         "reason": "LightOnOCR shared hub-cache read-only failure; PR CI status is the aggregate failure",
+        "action": "wait for maintainer rerun",
     }
 }
 KNOWN_REVIEW_GATES = {
@@ -288,6 +289,7 @@ def recommend_integration_action(
     pull_request: Dict[str, Any],
     checks: Dict[str, Any],
     known_external_failure_reason: Optional[str] = None,
+    known_external_failure_action: Optional[str] = None,
     known_review_gate_action: Optional[str] = None,
     known_assisted_review_reason: Optional[str] = None,
 ) -> str:
@@ -316,7 +318,7 @@ def recommend_integration_action(
     if "vercel" in failed_names and "vercel.com/git/authorize" in failed_urls:
         return "preview auth gate"
     if check_state == "failure" and known_external_failure_reason:
-        return "request rerun"
+        return known_external_failure_action or "request rerun"
     if check_state == "failure":
         return "fix checks"
     if check_state == "pending":
@@ -348,6 +350,12 @@ def collect_pull_request_metrics(spec: str, now: Optional[dt.datetime] = None) -
     head_sha = head.get("sha")
     checks = summarize_commit_checks(repo, head_sha) if head_sha else {"state": "unknown"}
     known_external_failure_reason = classify_known_external_failure(spec, checks)
+    known_external_failure = KNOWN_EXTERNAL_CHECK_FAILURES.get(spec) or {}
+    known_external_failure_action = (
+        str(known_external_failure.get("action"))
+        if known_external_failure_reason and known_external_failure.get("action")
+        else None
+    )
     known_review_gate = KNOWN_REVIEW_GATES.get(spec) or {}
     known_assisted_review = KNOWN_ASSISTED_REVIEW_REQUESTS.get(spec) or {}
     updated_at = pull_request.get("updated_at")
@@ -371,12 +379,14 @@ def collect_pull_request_metrics(spec: str, now: Optional[dt.datetime] = None) -
         "author": author.get("login"),
         "checks": checks,
         "known_external_failure_reason": known_external_failure_reason,
+        "known_external_failure_action": known_external_failure_action,
         "known_review_gate_reason": known_review_gate.get("reason"),
         "known_assisted_review_reason": known_assisted_review.get("reason"),
         "next_action": recommend_integration_action(
             pull_request,
             checks,
             known_external_failure_reason,
+            known_external_failure_action,
             known_review_gate.get("action"),
             known_assisted_review.get("reason"),
         ),
