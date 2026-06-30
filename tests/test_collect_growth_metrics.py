@@ -311,6 +311,59 @@ def test_collect_integration_metrics_recommends_review_for_clean_success_pr(monk
     assert metrics["integrations"][0]["next_action"] == "request review"
 
 
+def test_collect_integration_metrics_surfaces_pending_cla_status(monkeypatch):
+    module = load_growth_metrics_module()
+
+    def fake_fetch_json(url, headers=None):
+        if url == "https://api.github.com/repos/activepieces/activepieces/pulls/13985":
+            return {
+                "number": 13985,
+                "title": "feat: add FunASR speech recognition piece",
+                "state": "open",
+                "draft": False,
+                "mergeable": True,
+                "mergeable_state": "blocked",
+                "html_url": "https://github.com/activepieces/activepieces/pull/13985",
+                "updated_at": "2026-06-30T01:17:07Z",
+                "head": {"sha": "f9d22ee", "ref": "funasr/activepieces-13450-conflict-fix"},
+                "base": {"ref": "main"},
+                "user": {"login": "LauraGPT"},
+            }
+        if url == "https://api.github.com/repos/activepieces/activepieces/commits/f9d22ee/status":
+            return {
+                "state": "pending",
+                "statuses": [
+                    {
+                        "context": "license/cla",
+                        "state": "pending",
+                        "target_url": "https://cla-assistant.io/activepieces/activepieces?pullRequest=13985",
+                    }
+                ],
+            }
+        if url == "https://api.github.com/repos/activepieces/activepieces/commits/f9d22ee/check-runs?per_page=100":
+            return {
+                "total_count": 1,
+                "check_runs": [
+                    {"name": "GitGuardian Security Checks", "status": "completed", "conclusion": "success"},
+                ],
+            }
+        raise AssertionError(f"unexpected URL: {url}")
+
+    monkeypatch.setattr(module, "fetch_json", fake_fetch_json)
+
+    metrics = module.collect_integration_metrics(["activepieces/activepieces#13985"])
+
+    integration = metrics["integrations"][0]
+    assert integration["next_action"] == "resolve CLA"
+    assert integration["checks"]["pending_check_runs"] == [
+        {
+            "name": "license/cla",
+            "status": "pending",
+            "url": "https://cla-assistant.io/activepieces/activepieces?pullRequest=13985",
+        }
+    ]
+
+
 def test_format_integration_markdown_includes_update_age_and_next_action():
     module = load_growth_metrics_module()
     metrics = {
