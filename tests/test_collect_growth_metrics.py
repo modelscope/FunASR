@@ -96,6 +96,17 @@ def test_default_integration_prs_include_mcp_discovery_lanes():
     assert "punkpeye/awesome-mcp-servers#7153" in module.DEFAULT_INTEGRATION_PRS
 
 
+def test_default_integration_prs_include_speech_server_lanes():
+    module = load_growth_metrics_module()
+
+    expected_prs = {
+        "speaches-ai/speaches#658",
+        "getpaseo/paseo#1634",
+    }
+
+    assert expected_prs.issubset(set(module.DEFAULT_INTEGRATION_PRS))
+
+
 def test_default_integration_prs_exclude_archived_integration_prs():
     module = load_growth_metrics_module()
 
@@ -542,6 +553,17 @@ def test_recommend_integration_action_treats_clean_unknown_checks_as_request_rev
     )
 
     assert action == "request review"
+
+
+def test_recommend_integration_action_treats_dirty_merge_state_as_conflict_resolution():
+    module = load_growth_metrics_module()
+
+    action = module.recommend_integration_action(
+        {"state": "open", "draft": False, "mergeable_state": "dirty"},
+        {"state": "unknown", "failed_check_runs": [], "pending_check_runs": []},
+    )
+
+    assert action == "resolve conflicts"
 
 
 def test_collect_integration_metrics_treats_empty_pending_status_as_review_gate(monkeypatch):
