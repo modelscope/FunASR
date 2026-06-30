@@ -39,9 +39,8 @@ As of 2026-06-30, the ecosystem has 34,622 combined GitHub stars, or 3,398 addit
 Keep this snapshot fresh during weekly planning:
 
 ```bash
-for repo in modelscope/FunASR FunAudioLLM/Fun-ASR FunAudioLLM/SenseVoice modelscope/FunClip; do
-  gh api "repos/$repo" --jq '{repo: .full_name, stars: .stargazers_count}'
-done | jq -s '{total_stars: (map(.stars) | add), repositories: .}'
+python scripts/collect_growth_metrics.py --ecosystem
+python scripts/collect_growth_metrics.py --ecosystem --format json
 ```
 
 ## Workstream 1: Convert first-time visitors
