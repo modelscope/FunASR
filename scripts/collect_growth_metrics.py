@@ -37,7 +37,6 @@ DEFAULT_INTEGRATION_PRS = [
     "livekit/agents#6176",
     "run-llama/llama_index#21958",
     "run-llama/llama_index#21996",
-    "xinnan-tech/xiaozhi-esp32-server#3255",
     "mem0ai/mem0#5571",
     "tmoroney/auto-subs#629",
     "infiniflow/ragflow#16473",

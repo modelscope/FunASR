@@ -133,7 +133,6 @@ Set `GITHUB_TOKEN` when running this from CI or a shared network so GitHub's pub
 | `livekit/agents#6176` FunASR/SenseVoice realtime STT plugin | Opens a path into LiveKit's realtime voice-agent ecosystem where local STT is evaluated alongside hosted providers | CI and CLA are green; avoid duplicate pings and monitor for maintainer review on plugin scope, package metadata, or optional dependency expectations. |
 | `run-llama/llama_index#21958` FunASR endpoint reader | Puts FunASR behind a LlamaIndex reader for OpenAI-compatible transcription endpoints used in RAG and agent pipelines | Keep the endpoint contract clear, avoid forcing local `funasr` dependencies into the main package, and validate one request/response example when the author updates. |
 | `run-llama/llama_index#21996` local FunASR reader | Gives LlamaIndex users a local SenseVoice/FunASR reader for private transcription workflows | Keep optional dependencies isolated, verify the reader does not affect default installs, and watch for maintainer guidance on package extras. |
-| `xinnan-tech/xiaozhi-esp32-server#3255` configurable FunASR language | Improves a high-star ESP32 voice-agent backend by letting users pin SenseVoice/FunASR language for short utterances | Keep the single-module config and multi-module database migration aligned, then watch for maintainer review on the dynamic config form. |
 | `mem0ai/mem0#5571` optional FunASR transcription helper | Adds local FunASR transcription to a high-star memory layer used by agent builders | Keep FunASR optional, make examples clear about local model downloads, and separate unrelated preview/deployment failures from code review. |
 | `tmoroney/auto-subs#629` SenseVoice engine for subtitle workflows | Adds SenseVoice to an on-device subtitle generation app used by video editors and creators | Keep the declarative model manifest and SenseVoice engine wiring reviewable, and distinguish runtime model-download gaps from manifest/frontend validation. |
 | `infiniflow/ragflow#16473` FunASR / SenseVoice STT provider | Adds FunASR to a high-star RAG workflow product where local STT can become a visible configuration choice | Track duplicate/conflict cleanup, keep provider naming consistent, and verify that skipped CI is expected rather than a hidden regression. |
@@ -147,6 +146,12 @@ Set `GITHUB_TOKEN` when running this from CI or a shared network so GitHub's pub
 | `ai4s-research/awesome-ai-for-science#69` FunASR science toolkit listing | Creates a discovery path from scientific AI tooling lists to FunASR for transcription and field-recording workflows | Validate the link, keep the description technically accurate, and avoid extra comments unless maintainers ask for category or wording changes. |
 | `lukasmasuch/best-of-ml-python#455` FunASR project listing | Adds FunASR to a high-star ranked Python ML discovery list that is refreshed weekly | The PR is mergeable and already has prior pings; keep monitoring without adding more comments unless new maintainer feedback or validation evidence appears. |
 | `mahseema/awesome-ai-tools#1689` FunClip video-tool listing | Adds FunClip to a high-visibility AI tools list where video creators discover clipping and subtitle workflows | Validate the FunClip link, keep the description aligned with local transcription/SRT/AI clipping capabilities, and avoid status pings after evidence is posted. |
+
+Completed external wins:
+
+| Integration | Growth reason | Result |
+|---|---|---|
+| `xinnan-tech/xiaozhi-esp32-server#3255` configurable FunASR language | Improves a high-star ESP32 voice-agent backend by letting users pin SenseVoice/FunASR language for short utterances | Merged on 2026-06-30 after adding the multi-module management-console database migration requested by maintainers. |
 
 Operating rules:
 
