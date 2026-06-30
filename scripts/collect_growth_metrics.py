@@ -237,6 +237,7 @@ def collect_pull_request_metrics(spec: str, now: Optional[dt.datetime] = None) -
     pull_request = fetch_json(f"https://api.github.com/repos/{repo}/pulls/{pr_number}", github_headers())
     head = pull_request.get("head") or {}
     base = pull_request.get("base") or {}
+    base_repo = base.get("repo") or {}
     author = pull_request.get("user") or {}
     head_sha = head.get("sha")
     checks = summarize_commit_checks(repo, head_sha) if head_sha else {"state": "unknown"}
@@ -250,6 +251,8 @@ def collect_pull_request_metrics(spec: str, now: Optional[dt.datetime] = None) -
         "draft": pull_request.get("draft"),
         "mergeable": pull_request.get("mergeable"),
         "mergeable_state": pull_request.get("mergeable_state"),
+        "repo_stars": base_repo.get("stargazers_count"),
+        "repo_forks": base_repo.get("forks_count"),
         "updated_at": updated_at,
         "updated_age_days": days_since(updated_at, now),
         "next_action": recommend_integration_action(pull_request, checks),
@@ -446,8 +449,8 @@ def format_integration_markdown(metrics: Dict[str, Any]) -> str:
     lines = [
         f"# FunASR External Integration Snapshot ({metrics['collected_at_utc']})",
         "",
-        "| Pull request | State | Mergeable | Checks | Failed | Pending | Age | Action | Updated |",
-        "|---|---|---|---|---:|---:|---:|---|---|",
+        "| Pull request | Stars | Forks | State | Mergeable | Checks | Failed | Pending | Age | Action | Updated |",
+        "|---|---:|---:|---|---|---|---:|---:|---:|---|---|",
     ]
     for integration in metrics["integrations"]:
         checks = integration.get("checks", {})
@@ -455,8 +458,14 @@ def format_integration_markdown(metrics: Dict[str, Any]) -> str:
         pending_count = len(checks.get("pending_check_runs") or [])
         updated_age_days = integration.get("updated_age_days")
         age = f"{updated_age_days}d" if updated_age_days is not None else "n/a"
+        repo_stars = integration.get("repo_stars")
+        repo_stars = f"{repo_stars:,}" if repo_stars is not None else "n/a"
+        repo_forks = integration.get("repo_forks")
+        repo_forks = f"{repo_forks:,}" if repo_forks is not None else "n/a"
         lines.append(
             f"| [{integration['pr']}]({integration.get('html_url')}) | "
+            f"{repo_stars} | "
+            f"{repo_forks} | "
             f"{integration.get('state')} | "
             f"{integration.get('mergeable_state') or integration.get('mergeable')} | "
             f"{checks.get('state')} | "
@@ -466,6 +475,23 @@ def format_integration_markdown(metrics: Dict[str, Any]) -> str:
             f"{integration.get('next_action') or 'inspect'} | "
             f"`{integration.get('updated_at')}` |"
         )
+    priority_integrations = sorted(
+        (
+            integration
+            for integration in metrics["integrations"]
+            if integration.get("state") == "open" and integration.get("repo_stars") is not None
+        ),
+        key=lambda integration: int(integration.get("repo_stars") or 0),
+        reverse=True,
+    )
+    if priority_integrations:
+        lines.extend(["", "## High-exposure priorities", ""])
+        for integration in priority_integrations[:5]:
+            lines.append(
+                f"- [{integration['pr']}]({integration.get('html_url')}): "
+                f"{int(integration['repo_stars']):,} stars, "
+                f"{integration.get('next_action') or 'inspect'}"
+            )
     lines.extend(["", "## Failed or pending checks", ""])
     for integration in metrics["integrations"]:
         checks = integration.get("checks", {})
