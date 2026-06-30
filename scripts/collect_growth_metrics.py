@@ -73,6 +73,18 @@ KNOWN_ASSISTED_REVIEW_REQUESTS = {
     "infiniflow/ragflow#16473": {
         "reason": "review evidence already posted; avoid duplicate pings",
     },
+    "run-llama/llama_index#21958": {
+        "reason": "review evidence already posted; avoid duplicate pings",
+    },
+    "mudler/LocalAI#10090": {
+        "reason": "review evidence already posted; avoid duplicate pings",
+    },
+    "ray-project/ray#64053": {
+        "reason": "review evidence already posted; avoid duplicate pings",
+    },
+    "agno-agi/agno#8501": {
+        "reason": "review evidence already posted; avoid duplicate pings",
+    },
     "lukasmasuch/best-of-ml-python#455": {
         "reason": "review evidence already posted; avoid duplicate pings",
     },
@@ -83,6 +95,9 @@ KNOWN_ASSISTED_REVIEW_REQUESTS = {
         "reason": "review evidence already posted; avoid duplicate pings",
     },
     "tmoroney/auto-subs#629": {
+        "reason": "review evidence already posted; avoid duplicate pings",
+    },
+    "pipecat-ai/pipecat#4844": {
         "reason": "review evidence already posted; avoid duplicate pings",
     },
 }
@@ -293,7 +308,7 @@ def recommend_integration_action(
     if (
         known_assisted_review_reason
         and check_state in {"success", "unknown"}
-        and mergeable_state in {"clean", "unknown", None}
+        and mergeable_state in {"blocked", "clean", "unknown", "unstable", None}
     ):
         return "wait for maintainer review"
 

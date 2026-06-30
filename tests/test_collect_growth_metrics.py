@@ -497,6 +497,20 @@ def test_known_assisted_review_requests_include_validated_discovery_prs():
     assert expected_prs.issubset(set(module.KNOWN_ASSISTED_REVIEW_REQUESTS))
 
 
+def test_known_assisted_review_requests_include_validated_review_gate_prs():
+    module = load_growth_metrics_module()
+
+    expected_prs = {
+        "run-llama/llama_index#21958",
+        "mudler/LocalAI#10090",
+        "ray-project/ray#64053",
+        "agno-agi/agno#8501",
+        "pipecat-ai/pipecat#4844",
+    }
+
+    assert expected_prs.issubset(set(module.KNOWN_ASSISTED_REVIEW_REQUESTS))
+
+
 def test_collect_integration_metrics_marks_known_assisted_review_request(monkeypatch):
     module = load_growth_metrics_module()
 
@@ -728,6 +742,18 @@ def test_recommend_integration_action_treats_blocked_unknown_checks_as_review_ga
     )
 
     assert action == "review gate"
+
+
+def test_recommend_integration_action_waits_for_maintainer_after_assisted_blocked_review_gate():
+    module = load_growth_metrics_module()
+
+    action = module.recommend_integration_action(
+        {"state": "open", "draft": False, "mergeable_state": "blocked"},
+        {"state": "success", "failed_check_runs": [], "pending_check_runs": []},
+        known_assisted_review_reason="review evidence already posted; avoid duplicate pings",
+    )
+
+    assert action == "wait for maintainer review"
 
 
 def test_recommend_integration_action_treats_clean_unknown_checks_as_request_review():
@@ -1221,4 +1247,5 @@ def test_main_outputs_integrations_json(monkeypatch):
     assert integration["repo_stars"] == 36_000
     assert integration["repo_forks"] == 6_800
     assert integration["checks"]["state"] == "success"
-    assert integration["next_action"] == "request review"
+    assert integration["next_action"] == "wait for maintainer review"
+    assert integration["known_assisted_review_reason"] == "review evidence already posted; avoid duplicate pings"
