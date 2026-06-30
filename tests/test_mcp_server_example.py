@@ -39,3 +39,15 @@ def test_repository_root_has_glama_metadata_for_mcp_directory_scanners():
     assert metadata["mcpServers"]["funasr"]["args"] == [
         "examples/mcp_server/funasr_mcp.py"
     ]
+
+
+def test_mcp_server_readme_has_glama_submission_checklist():
+    example_dir = Path(__file__).resolve().parents[1] / "examples" / "mcp_server"
+    readme = (example_dir / "README.md").read_text()
+
+    assert "### Glama submission checklist" in readme
+    assert "https://github.com/modelscope/FunASR" in readme
+    assert "`examples/mcp_server`" in readme
+    assert "`python /app/funasr_mcp.py`" in readme
+    assert "`transcribe_audio`" in readme
+    assert "https://glama.ai/mcp/servers/modelscope/FunASR/badges/score.svg" in readme
