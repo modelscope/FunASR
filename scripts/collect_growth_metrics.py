@@ -120,6 +120,15 @@ def summarize_commit_checks(repo: str, head_sha: str) -> Dict[str, Any]:
         elif check_run.get("conclusion") in FAILED_CHECK_CONCLUSIONS:
             failed_check_runs.append({"name": name, "conclusion": check_run.get("conclusion"), "url": url})
 
+    for status_context in status.get("statuses", []):
+        name = status_context.get("context")
+        url = status_context.get("target_url")
+        state = status_context.get("state")
+        if state in {"error", "failure"}:
+            failed_check_runs.append({"name": name, "conclusion": state, "url": url})
+        elif state == "pending":
+            pending_check_runs.append({"name": name, "status": state, "url": url})
+
     status_state = status.get("state")
     if failed_check_runs or status_state in {"error", "failure"}:
         state = "failure"
@@ -166,6 +175,11 @@ def recommend_integration_action(pull_request: Dict[str, Any], checks: Dict[str,
         return "finish draft"
 
     check_state = checks.get("state")
+    pending_names = " ".join(
+        str(check.get("name") or "") for check in checks.get("pending_check_runs") or []
+    ).lower()
+    if "cla" in pending_names:
+        return "resolve CLA"
     if check_state == "failure":
         return "fix checks"
     if check_state == "pending":
