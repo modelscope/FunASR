@@ -221,7 +221,7 @@ def classify_known_external_failure(spec: str, checks: Dict[str, Any]) -> Option
 
     direct_names = set(known_failure["failed_check_names"])
     aggregate_names = set(known_failure.get("aggregate_check_names") or [])
-    if failed_names <= direct_names | aggregate_names and direct_names <= failed_names:
+    if direct_names.issubset(failed_names) and failed_names.issubset(direct_names | aggregate_names):
         return str(known_failure["reason"])
     return None
 
