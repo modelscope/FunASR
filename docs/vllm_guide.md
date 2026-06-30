@@ -617,7 +617,7 @@ Speaker diarization is disabled by default; add `--enable-spk` only when the `sp
 {"event": "stopped"}
 ```
 
-**Fields**: `sentences[]` = locked segments, `partial` = text being spoken (may change), `is_final` = true after STOP. When `--enable-spk` is enabled, `sentences[]` also includes `spk`.
+**Fields**: `sentences[]` = locked segments, `partial` = text being spoken (may change), `partial_start_ms` = where the current provisional `partial` begins, `is_final` = true after STOP. When `--enable-spk` is enabled, `sentences[]` also includes `spk`.
 
 **Sequence diagram**:
 ```
@@ -678,6 +678,17 @@ While the user is speaking, the streaming service periodically (default `decode_
 
 > Note: `serve_vllm.py`'s `/ws` (§5) has **no partial** and only returns at sentence end; use `serve_realtime_ws.py` for live preview.
 
+**Frontend rendering rule**
+Treat `partial` as a replaceable preview, not as text to append. A good UI keeps locked text and preview text separate:
+
+```js
+const committed = data.sentences.map((s) => s.text).join("");
+const preview = data.partial || "";
+render(committed + preview);
+```
+
+If `partial_start_ms` moves forward because `--partial-window-sec` is active, the preview only describes the current bounded decode window. Replace the preview area on each message; append only VAD-locked `sentences` or the final `is_final=true` result.
+
 **Principle: why each partial re-encodes the whole segment from the start**
 Fun-ASR-Nano's acoustic encoder (SenseVoice) is a **full-context, non-streaming** encoder — each frame's representation depends on the context of the entire segment. When the sentence continues and the audio grows, the context of the earlier frames changes, so **the previously computed encoding no longer holds**. It therefore cannot cache history and encode only the new frames the way a streaming / causal encoder would; it must run the whole "start → now" segment through the encoder again.
 
@@ -702,6 +713,7 @@ Because each refresh re-encodes from the sentence start, the longer a sentence, 
 
 - **The single-process concurrency ceiling comes from event-loop serialization, not GPU compute.** Under high concurrency GPU utilization stays low and the encoder runs at ~86× real time; mistaking this for insufficient GPU and adding cards or tensor parallelism yields little (TP only splits the LLM, not the standalone encoder).
 - **The right way to scale (currently) = multiple independent processes on one card + CUDA MPS + nginx round-robin**: each process has its own GIL and CUDA context, sidestepping the single-loop serialization; MPS lets the processes truly share the GPU concurrently and fill the idle compute; nginx round-robins across the WebSocket backends. Beyond a single card's headroom, scale out horizontally (one instance per card + a load balancer).
+- **vLLM is not always more efficient for small real-time streams than several PyTorch processes.** vLLM helps most when requests can be batched or when LLM token decoding dominates. The current real-time WebSocket path submits many small, synchronous per-connection decode calls through one event loop, so it may reserve much more memory while still leaving GPU utilization modest. For a small number of continuous microphone streams, several lighter PyTorch processes can be easier to pack on one card. For vLLM, benchmark with the real traffic shape and start with lower `--gpu-memory-utilization` plus multiple service processes instead of assuming one vLLM process should carry every stream.
 - **Sustainable concurrency has no universal "supports N connections" number.** The ceiling is set not by the number of connections but by **how many are speaking at the same moment** — each speaking connection triggers a partial decode roughly once per second, all serialized on that single event loop. It mainly varies with: **① silence ratio** — in real turn-taking users spend most of the time listening, so far fewer are decoding simultaneously than are connected, whereas a continuous monologue keeps nearly every connection decoding; **② sentence length** — longer sentences make each partial encode more expensive (see 6.5's O(L²)), raising load at the same connection count. So the same "single L20 + multi-process + MPS" setup can sustain dozens of connections under turn-taking-like load but markedly fewer under long, pauseless speech. **Any "supports X connections" figure holds only for the traffic profile it was measured under** — benchmark with your own real traffic (sentence length, pauses, continuous or not) rather than treating someone else's number as your spec.
 
 ---
