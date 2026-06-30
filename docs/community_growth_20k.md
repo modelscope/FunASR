@@ -110,10 +110,11 @@ High-visibility external integrations can create more qualified traffic than a o
 Refresh this table before weekly planning and after any reviewer or CI change:
 
 ```bash
-gh pr view 46180 -R huggingface/transformers --json state,mergeable,reviewDecision,statusCheckRollup,updatedAt,url
-gh pr view 64053 -R ray-project/ray --json state,mergeable,reviewDecision,statusCheckRollup,updatedAt,url
-gh pr view 1801 -R huggingface/optimum-intel --json state,mergeable,reviewDecision,statusCheckRollup,updatedAt,url
+python scripts/collect_growth_metrics.py --integrations
+python scripts/collect_growth_metrics.py --integrations --format json
 ```
+
+Set `GITHUB_TOKEN` when running this from CI or a shared network so GitHub's public API rate limit does not hide the real PR state.
 
 | Integration PR | Growth reason | Current maintainer action |
 |---|---|---|
