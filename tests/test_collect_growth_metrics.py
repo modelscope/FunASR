@@ -756,6 +756,47 @@ def test_format_integration_markdown_includes_update_age_and_next_action():
     ) in output
 
 
+def test_format_integration_markdown_includes_known_external_failure_reason():
+    module = load_growth_metrics_module()
+    metrics = {
+        "collected_at_utc": "2026-07-02T00:00:00+00:00",
+        "integrations": [
+            {
+                "pr": "huggingface/transformers#46180",
+                "html_url": "https://github.com/huggingface/transformers/pull/46180",
+                "state": "open",
+                "mergeable_state": "blocked",
+                "repo_stars": 162_000,
+                "repo_forks": 33_000,
+                "updated_at": "2026-06-30T04:24:15Z",
+                "updated_age_days": 0,
+                "next_action": "request rerun",
+                "known_external_failure_reason": (
+                    "LightOnOCR shared hub-cache read-only failure; PR CI status is the aggregate failure"
+                ),
+                "checks": {
+                    "state": "failure",
+                    "failed_check_runs": [
+                        {
+                            "name": "pr-ci / tests_processors / tests_processors [shard 3/8]",
+                            "conclusion": "failure",
+                            "url": "https://github.com/huggingface/transformers/actions/runs/28419525291/job/84209871338",
+                        }
+                    ],
+                    "pending_check_runs": [],
+                },
+            }
+        ],
+    }
+
+    output = module.format_integration_markdown(metrics)
+
+    assert (
+        "- Known external failure: LightOnOCR shared hub-cache read-only failure; "
+        "PR CI status is the aggregate failure"
+    ) in output
+
+
 def test_format_integration_markdown_marks_missing_exposure_metrics_as_unavailable():
     module = load_growth_metrics_module()
     metrics = {

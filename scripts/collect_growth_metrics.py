@@ -550,6 +550,8 @@ def format_integration_markdown(metrics: Dict[str, Any]) -> str:
             url = check.get("url")
             suffix = f" ({url})" if url else ""
             lines.append(f"- Pending: {check.get('name')} [{check.get('status')}]{suffix}")
+        if integration.get("known_external_failure_reason"):
+            lines.append(f"- Known external failure: {integration['known_external_failure_reason']}")
         lines.append("")
     if lines[-1] == "## Failed or pending checks":
         lines.append("")
