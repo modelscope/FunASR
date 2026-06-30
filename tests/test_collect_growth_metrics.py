@@ -21,6 +21,20 @@ def test_default_integration_prs_include_sglang_omni_fun_asr():
     assert "sgl-project/sglang-omni#898" in module.DEFAULT_INTEGRATION_PRS
 
 
+def test_default_integration_prs_include_high_visibility_external_queue():
+    module = load_growth_metrics_module()
+
+    expected_prs = {
+        "infiniflow/ragflow#16473",
+        "pipecat-ai/pipecat#4844",
+        "TEN-framework/ten-framework#2191",
+        "activepieces/activepieces#13985",
+        "Uberi/speech_recognition#903",
+    }
+
+    assert expected_prs.issubset(set(module.DEFAULT_INTEGRATION_PRS))
+
+
 def test_collect_github_repo_metrics_splits_open_issues_and_pull_requests(monkeypatch):
     module = load_growth_metrics_module()
 

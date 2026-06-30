@@ -32,6 +32,11 @@ DEFAULT_INTEGRATION_PRS = [
     "sgl-project/sglang-omni#898",
     "ray-project/ray#64053",
     "huggingface/optimum-intel#1801",
+    "infiniflow/ragflow#16473",
+    "pipecat-ai/pipecat#4844",
+    "TEN-framework/ten-framework#2191",
+    "activepieces/activepieces#13985",
+    "Uberi/speech_recognition#903",
 ]
 FAILED_CHECK_CONCLUSIONS = {"action_required", "cancelled", "failure", "startup_failure", "timed_out"}
 REPORTER_WAITING_LABELS = {"needs feedback"}
