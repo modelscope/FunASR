@@ -11,6 +11,7 @@ import argparse
 import datetime as dt
 import json
 import os
+import subprocess
 import sys
 import urllib.error
 import urllib.request
@@ -62,6 +63,20 @@ def github_headers() -> Dict[str, str]:
         "User-Agent": "funasr-growth-metrics",
     }
     token = os.environ.get("GITHUB_TOKEN")
+    if not token:
+        try:
+            completed = subprocess.run(
+                ["gh", "auth", "token"],
+                check=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.DEVNULL,
+                text=True,
+                timeout=5,
+            )
+        except (OSError, subprocess.SubprocessError):
+            token = None
+        else:
+            token = completed.stdout.strip()
     if token:
         headers["Authorization"] = f"Bearer {token}"
     return headers

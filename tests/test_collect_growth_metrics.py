@@ -1,6 +1,7 @@
 import importlib.util
 import io
 import json
+import os
 import sys
 from datetime import date, datetime, timezone
 from contextlib import redirect_stdout
@@ -19,6 +20,19 @@ def test_default_integration_prs_include_sglang_omni_fun_asr():
     module = load_growth_metrics_module()
 
     assert "sgl-project/sglang-omni#898" in module.DEFAULT_INTEGRATION_PRS
+
+
+def test_github_headers_falls_back_to_gh_auth_token(tmp_path, monkeypatch):
+    module = load_growth_metrics_module()
+    gh = tmp_path / "gh"
+    gh.write_text("#!/bin/sh\nprintf 'cli-token\\n'\n")
+    gh.chmod(0o755)
+    monkeypatch.delenv("GITHUB_TOKEN", raising=False)
+    monkeypatch.setenv("PATH", f"{tmp_path}{os.pathsep}{os.environ.get('PATH', '')}")
+
+    headers = module.github_headers()
+
+    assert headers["Authorization"] == "Bearer cli-token"
 
 
 def test_default_integration_prs_include_high_visibility_external_queue():
