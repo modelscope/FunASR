@@ -139,14 +139,36 @@ def summarize_commit_checks(repo: str, head_sha: str) -> Dict[str, Any]:
     }
 
 
-def collect_pull_request_metrics(spec: str) -> Dict[str, Any]:
+def parse_github_datetime(value: Optional[str]) -> Optional[dt.datetime]:
+    if not value:
+        return None
+    normalized = value.replace("Z", "+00:00")
+    try:
+        parsed = dt.datetime.fromisoformat(normalized)
+    except ValueError:
+        return None
+    if parsed.tzinfo is None:
+        return parsed.replace(tzinfo=dt.timezone.utc)
+    return parsed.astimezone(dt.timezone.utc)
+
+
+def days_since(value: Optional[str], now: dt.datetime) -> Optional[int]:
+    parsed = parse_github_datetime(value)
+    if parsed is None:
+        return None
+    return max((now - parsed).days, 0)
+
+
+def collect_pull_request_metrics(spec: str, now: Optional[dt.datetime] = None) -> Dict[str, Any]:
     repo, pr_number = parse_pull_request_spec(spec)
+    now = now or dt.datetime.now(dt.timezone.utc)
     pull_request = fetch_json(f"https://api.github.com/repos/{repo}/pulls/{pr_number}", github_headers())
     head = pull_request.get("head") or {}
     base = pull_request.get("base") or {}
     author = pull_request.get("user") or {}
     head_sha = head.get("sha")
     checks = summarize_commit_checks(repo, head_sha) if head_sha else {"state": "unknown"}
+    updated_at = pull_request.get("updated_at")
     return {
         "pr": f"{repo}#{pr_number}",
         "repo": repo,
@@ -156,7 +178,8 @@ def collect_pull_request_metrics(spec: str) -> Dict[str, Any]:
         "draft": pull_request.get("draft"),
         "mergeable": pull_request.get("mergeable"),
         "mergeable_state": pull_request.get("mergeable_state"),
-        "updated_at": pull_request.get("updated_at"),
+        "updated_at": updated_at,
+        "updated_age_days": days_since(updated_at, now),
         "html_url": pull_request.get("html_url"),
         "head_ref": head.get("ref"),
         "head_sha": head_sha,
@@ -166,10 +189,11 @@ def collect_pull_request_metrics(spec: str) -> Dict[str, Any]:
     }
 
 
-def collect_integration_metrics(prs: Sequence[str]) -> Dict[str, Any]:
+def collect_integration_metrics(prs: Sequence[str], now: Optional[dt.datetime] = None) -> Dict[str, Any]:
+    collected_at = (now or dt.datetime.now(dt.timezone.utc)).replace(microsecond=0)
     return {
-        "collected_at_utc": dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat(),
-        "integrations": [collect_pull_request_metrics(pr) for pr in prs],
+        "collected_at_utc": collected_at.isoformat(),
+        "integrations": [collect_pull_request_metrics(pr, collected_at) for pr in prs],
     }
 
 
@@ -349,13 +373,15 @@ def format_integration_markdown(metrics: Dict[str, Any]) -> str:
     lines = [
         f"# FunASR External Integration Snapshot ({metrics['collected_at_utc']})",
         "",
-        "| Pull request | State | Mergeable | Checks | Failed | Pending | Updated |",
-        "|---|---|---|---|---:|---:|---|",
+        "| Pull request | State | Mergeable | Checks | Failed | Pending | Age | Updated |",
+        "|---|---|---|---|---:|---:|---:|---|",
     ]
     for integration in metrics["integrations"]:
         checks = integration.get("checks", {})
         failed_count = len(checks.get("failed_check_runs") or [])
         pending_count = len(checks.get("pending_check_runs") or [])
+        updated_age_days = integration.get("updated_age_days")
+        age = f"{updated_age_days}d" if updated_age_days is not None else "n/a"
         lines.append(
             f"| [{integration['pr']}]({integration.get('html_url')}) | "
             f"{integration.get('state')} | "
@@ -363,6 +389,7 @@ def format_integration_markdown(metrics: Dict[str, Any]) -> str:
             f"{checks.get('state')} | "
             f"{failed_count:,} | "
             f"{pending_count:,} | "
+            f"{age} | "
             f"`{integration.get('updated_at')}` |"
         )
     lines.extend(["", "## Failed or pending checks", ""])
