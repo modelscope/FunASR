@@ -441,6 +441,54 @@ def test_collect_integration_metrics_classifies_review_bot_failure(monkeypatch):
     assert integration["checks"]["failed_check_runs"][0]["name"] == "claude-review"
 
 
+def test_collect_integration_metrics_classifies_vercel_authorization_gate(monkeypatch):
+    module = load_growth_metrics_module()
+
+    def fake_fetch_json(url, headers=None):
+        if url == "https://api.github.com/repos/mem0ai/mem0/pulls/5571":
+            return {
+                "number": 5571,
+                "title": "feat: add optional FunASR audio transcription helper",
+                "state": "open",
+                "draft": False,
+                "mergeable": True,
+                "mergeable_state": "blocked",
+                "html_url": "https://github.com/mem0ai/mem0/pull/5571",
+                "updated_at": "2026-06-30T05:20:27Z",
+                "head": {"sha": "d0b1cfa", "ref": "funasr-audio-helper"},
+                "base": {"ref": "main"},
+                "user": {"login": "anneheartrecord"},
+            }
+        if url == "https://api.github.com/repos/mem0ai/mem0/commits/d0b1cfa/status":
+            return {
+                "state": "failure",
+                "statuses": [
+                    {
+                        "context": "Vercel",
+                        "state": "failure",
+                        "target_url": "https://vercel.com/git/authorize?team=Mem0&slug=mem0&pullRequest=5571",
+                    }
+                ],
+            }
+        if url == "https://api.github.com/repos/mem0ai/mem0/commits/d0b1cfa/check-runs?per_page=100":
+            return {"total_count": 0, "check_runs": []}
+        raise AssertionError(f"unexpected URL: {url}")
+
+    monkeypatch.setattr(module, "fetch_json", fake_fetch_json)
+
+    metrics = module.collect_integration_metrics(["mem0ai/mem0#5571"])
+
+    integration = metrics["integrations"][0]
+    assert integration["next_action"] == "preview auth gate"
+    assert integration["checks"]["failed_check_runs"] == [
+        {
+            "name": "Vercel",
+            "conclusion": "failure",
+            "url": "https://vercel.com/git/authorize?team=Mem0&slug=mem0&pullRequest=5571",
+        }
+    ]
+
+
 def test_collect_integration_metrics_treats_empty_pending_status_as_unknown(monkeypatch):
     module = load_growth_metrics_module()
 
