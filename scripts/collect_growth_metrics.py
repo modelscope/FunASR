@@ -55,6 +55,14 @@ DEFAULT_INTEGRATION_PRS = [
     "mahseema/awesome-ai-tools#1689",
 ]
 FAILED_CHECK_CONCLUSIONS = {"action_required", "cancelled", "failure", "startup_failure", "timed_out"}
+AGGREGATE_FAILURE_CHECK_NAMES = {"pr-ci / PR CI status"}
+KNOWN_EXTERNAL_CHECK_FAILURES = {
+    "huggingface/transformers#46180": {
+        "failed_check_names": {"pr-ci / tests_processors / tests_processors [shard 3/8]"},
+        "aggregate_check_names": AGGREGATE_FAILURE_CHECK_NAMES,
+        "reason": "LightOnOCR shared hub-cache read-only failure; PR CI status is the aggregate failure",
+    }
+}
 REPORTER_WAITING_LABELS = {"needs feedback"}
 CONTRIBUTOR_WAITING_LABELS = {"good first issue", "help wanted", "ready for PR"}
 
@@ -198,7 +206,33 @@ def days_since(value: Optional[str], now: dt.datetime) -> Optional[int]:
     return max((now - parsed).days, 0)
 
 
-def recommend_integration_action(pull_request: Dict[str, Any], checks: Dict[str, Any]) -> str:
+def classify_known_external_failure(spec: str, checks: Dict[str, Any]) -> Optional[str]:
+    known_failure = KNOWN_EXTERNAL_CHECK_FAILURES.get(spec)
+    if not known_failure:
+        return None
+
+    failed_names = {
+        str(check.get("name") or "")
+        for check in checks.get("failed_check_runs") or []
+        if check.get("name")
+    }
+    if not failed_names:
+        return None
+    if checks.get("pending_check_runs"):
+        return None
+
+    direct_names = set(known_failure["failed_check_names"])
+    aggregate_names = set(known_failure.get("aggregate_check_names") or [])
+    if direct_names.issubset(failed_names) and failed_names.issubset(direct_names | aggregate_names):
+        return str(known_failure["reason"])
+    return None
+
+
+def recommend_integration_action(
+    pull_request: Dict[str, Any],
+    checks: Dict[str, Any],
+    known_external_failure_reason: Optional[str] = None,
+) -> str:
     if pull_request.get("state") != "open":
         return "archive"
     if pull_request.get("draft"):
@@ -223,6 +257,8 @@ def recommend_integration_action(pull_request: Dict[str, Any], checks: Dict[str,
         return "review bot gate"
     if "vercel" in failed_names and "vercel.com/git/authorize" in failed_urls:
         return "preview auth gate"
+    if check_state == "failure" and known_external_failure_reason:
+        return "request rerun"
     if check_state == "failure":
         return "fix checks"
     if check_state == "pending":
@@ -245,6 +281,7 @@ def collect_pull_request_metrics(spec: str, now: Optional[dt.datetime] = None) -
     author = pull_request.get("user") or {}
     head_sha = head.get("sha")
     checks = summarize_commit_checks(repo, head_sha) if head_sha else {"state": "unknown"}
+    known_external_failure_reason = classify_known_external_failure(spec, checks)
     updated_at = pull_request.get("updated_at")
     return {
         "pr": f"{repo}#{pr_number}",
@@ -259,13 +296,14 @@ def collect_pull_request_metrics(spec: str, now: Optional[dt.datetime] = None) -
         "repo_forks": base_repo.get("forks_count"),
         "updated_at": updated_at,
         "updated_age_days": days_since(updated_at, now),
-        "next_action": recommend_integration_action(pull_request, checks),
         "html_url": pull_request.get("html_url"),
         "head_ref": head.get("ref"),
         "head_sha": head_sha,
         "base_ref": base.get("ref"),
         "author": author.get("login"),
         "checks": checks,
+        "known_external_failure_reason": known_external_failure_reason,
+        "next_action": recommend_integration_action(pull_request, checks, known_external_failure_reason),
     }
 
 
