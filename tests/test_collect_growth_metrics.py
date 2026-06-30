@@ -364,6 +364,49 @@ def test_collect_integration_metrics_surfaces_pending_cla_status(monkeypatch):
     ]
 
 
+def test_collect_integration_metrics_classifies_review_bot_failure(monkeypatch):
+    module = load_growth_metrics_module()
+
+    def fake_fetch_json(url, headers=None):
+        if url == "https://api.github.com/repos/TEN-framework/ten-framework/pulls/2191":
+            return {
+                "number": 2191,
+                "title": "feat: add funasr_asr_python local FunASR ASR extension",
+                "state": "open",
+                "draft": False,
+                "mergeable": True,
+                "mergeable_state": "blocked",
+                "html_url": "https://github.com/TEN-framework/ten-framework/pull/2191",
+                "updated_at": "2026-06-29T23:02:41Z",
+                "head": {"sha": "43cbedc", "ref": "add-funasr-asr-extension"},
+                "base": {"ref": "main"},
+                "user": {"login": "LauraGPT"},
+            }
+        if url == "https://api.github.com/repos/TEN-framework/ten-framework/commits/43cbedc/status":
+            return {"state": "pending", "statuses": []}
+        if url == "https://api.github.com/repos/TEN-framework/ten-framework/commits/43cbedc/check-runs?per_page=100":
+            return {
+                "total_count": 1,
+                "check_runs": [
+                    {
+                        "name": "claude-review",
+                        "status": "completed",
+                        "conclusion": "failure",
+                        "html_url": "https://github.com/TEN-framework/ten-framework/actions/runs/27985905295/job/82827178776",
+                    },
+                ],
+            }
+        raise AssertionError(f"unexpected URL: {url}")
+
+    monkeypatch.setattr(module, "fetch_json", fake_fetch_json)
+
+    metrics = module.collect_integration_metrics(["TEN-framework/ten-framework#2191"])
+
+    integration = metrics["integrations"][0]
+    assert integration["next_action"] == "review bot gate"
+    assert integration["checks"]["failed_check_runs"][0]["name"] == "claude-review"
+
+
 def test_format_integration_markdown_includes_update_age_and_next_action():
     module = load_growth_metrics_module()
     metrics = {
