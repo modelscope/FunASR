@@ -640,6 +640,8 @@ def test_format_integration_markdown_includes_update_age_and_next_action():
                 "html_url": "https://github.com/huggingface/transformers/pull/46180",
                 "state": "open",
                 "mergeable_state": "blocked",
+                "repo_stars": 155_000,
+                "repo_forks": 31_000,
                 "updated_at": "2026-06-29T23:45:57Z",
                 "updated_age_days": 2,
                 "next_action": "fix checks",
@@ -650,11 +652,90 @@ def test_format_integration_markdown_includes_update_age_and_next_action():
 
     output = module.format_integration_markdown(metrics)
 
-    assert "| Pull request | State | Mergeable | Checks | Failed | Pending | Age | Action | Updated |" in output
+    assert "| Pull request | Stars | Forks | State | Mergeable | Checks | Failed | Pending | Age | Action | Updated |" in output
     assert (
         "| [huggingface/transformers#46180](https://github.com/huggingface/transformers/pull/46180) | "
-        "open | blocked | failure | 0 | 0 | 2d | fix checks | `2026-06-29T23:45:57Z` |"
+        "155,000 | 31,000 | open | blocked | failure | 0 | 0 | 2d | fix checks | `2026-06-29T23:45:57Z` |"
     ) in output
+
+
+def test_format_integration_markdown_marks_missing_exposure_metrics_as_unavailable():
+    module = load_growth_metrics_module()
+    metrics = {
+        "collected_at_utc": "2026-07-02T00:00:00+00:00",
+        "integrations": [
+            {
+                "pr": "deleted-org/deleted-repo#1",
+                "html_url": "https://github.com/deleted-org/deleted-repo/pull/1",
+                "state": "open",
+                "mergeable_state": "unknown",
+                "updated_at": "2026-06-29T23:45:57Z",
+                "updated_age_days": None,
+                "next_action": "inspect",
+                "checks": {"state": "unknown", "failed_check_runs": [], "pending_check_runs": []},
+            }
+        ],
+    }
+
+    output = module.format_integration_markdown(metrics)
+
+    assert (
+        "| [deleted-org/deleted-repo#1](https://github.com/deleted-org/deleted-repo/pull/1) | "
+        "n/a | n/a | open | unknown | unknown | 0 | 0 | n/a | inspect | `2026-06-29T23:45:57Z` |"
+    ) in output
+
+
+def test_format_integration_markdown_lists_high_exposure_priorities_by_stars():
+    module = load_growth_metrics_module()
+    metrics = {
+        "collected_at_utc": "2026-07-02T00:00:00+00:00",
+        "integrations": [
+            {
+                "pr": "ray-project/ray#64053",
+                "html_url": "https://github.com/ray-project/ray/pull/64053",
+                "state": "open",
+                "mergeable_state": "blocked",
+                "repo_stars": 43_000,
+                "repo_forks": 7_700,
+                "updated_at": "2026-06-30T07:02:58Z",
+                "updated_age_days": 0,
+                "next_action": "review gate",
+                "checks": {"state": "success", "failed_check_runs": [], "pending_check_runs": []},
+            },
+            {
+                "pr": "huggingface/transformers#46180",
+                "html_url": "https://github.com/huggingface/transformers/pull/46180",
+                "state": "open",
+                "mergeable_state": "blocked",
+                "repo_stars": 162_000,
+                "repo_forks": 33_000,
+                "updated_at": "2026-06-30T04:24:15Z",
+                "updated_age_days": 0,
+                "next_action": "request rerun",
+                "checks": {"state": "failure", "failed_check_runs": [], "pending_check_runs": []},
+            },
+            {
+                "pr": "deleted-org/deleted-repo#1",
+                "html_url": "https://github.com/deleted-org/deleted-repo/pull/1",
+                "state": "open",
+                "mergeable_state": "unknown",
+                "updated_at": "2026-06-29T23:45:57Z",
+                "updated_age_days": None,
+                "next_action": "inspect",
+                "checks": {"state": "unknown", "failed_check_runs": [], "pending_check_runs": []},
+            },
+        ],
+    }
+
+    output = module.format_integration_markdown(metrics)
+
+    assert "## High-exposure priorities" in output
+    transformers = "- [huggingface/transformers#46180](https://github.com/huggingface/transformers/pull/46180): 162,000 stars, request rerun"
+    ray = "- [ray-project/ray#64053](https://github.com/ray-project/ray/pull/64053): 43,000 stars, review gate"
+    assert transformers in output
+    assert ray in output
+    assert output.index(transformers) < output.index(ray)
+    assert "deleted-org/deleted-repo#1" not in output.split("## High-exposure priorities", 1)[1].split("## Failed or pending checks", 1)[0]
 
 
 def test_collect_issue_metrics_filters_pull_requests_and_assigns_waiting_on(monkeypatch):
@@ -810,7 +891,13 @@ def test_main_outputs_integrations_json(monkeypatch):
                 "html_url": "https://github.com/ray-project/ray/pull/64053",
                 "updated_at": "2026-06-30T01:53:52Z",
                 "head": {"sha": "780eb4c", "ref": "issue-64052"},
-                "base": {"ref": "master"},
+                "base": {
+                    "ref": "master",
+                    "repo": {
+                        "stargazers_count": 36_000,
+                        "forks_count": 6_800,
+                    },
+                },
                 "user": {"login": "nh-atuan"},
             }
         if url == "https://api.github.com/repos/ray-project/ray/commits/780eb4c/status":
@@ -844,5 +931,7 @@ def test_main_outputs_integrations_json(monkeypatch):
     payload = json.loads(stdout.getvalue())
     integration = payload["integrations"][0]
     assert integration["pr"] == "ray-project/ray#64053"
+    assert integration["repo_stars"] == 36_000
+    assert integration["repo_forks"] == 6_800
     assert integration["checks"]["state"] == "success"
     assert integration["next_action"] == "request review"
