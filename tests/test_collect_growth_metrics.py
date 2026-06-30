@@ -489,7 +489,29 @@ def test_collect_integration_metrics_classifies_vercel_authorization_gate(monkey
     ]
 
 
-def test_collect_integration_metrics_treats_empty_pending_status_as_unknown(monkeypatch):
+def test_recommend_integration_action_treats_blocked_unknown_checks_as_review_gate():
+    module = load_growth_metrics_module()
+
+    action = module.recommend_integration_action(
+        {"state": "open", "draft": False, "mergeable_state": "blocked"},
+        {"state": "unknown", "failed_check_runs": [], "pending_check_runs": []},
+    )
+
+    assert action == "review gate"
+
+
+def test_recommend_integration_action_treats_clean_unknown_checks_as_request_review():
+    module = load_growth_metrics_module()
+
+    action = module.recommend_integration_action(
+        {"state": "open", "draft": False, "mergeable_state": "clean"},
+        {"state": "unknown", "failed_check_runs": [], "pending_check_runs": []},
+    )
+
+    assert action == "request review"
+
+
+def test_collect_integration_metrics_treats_empty_pending_status_as_review_gate(monkeypatch):
     module = load_growth_metrics_module()
 
     def fake_fetch_json(url, headers=None):
@@ -520,7 +542,7 @@ def test_collect_integration_metrics_treats_empty_pending_status_as_unknown(monk
     integration = metrics["integrations"][0]
     assert integration["checks"]["state"] == "unknown"
     assert integration["checks"]["pending_check_runs"] == []
-    assert integration["next_action"] == "inspect"
+    assert integration["next_action"] == "review gate"
 
 
 def test_format_integration_markdown_includes_update_age_and_next_action():

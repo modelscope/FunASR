@@ -220,9 +220,9 @@ def recommend_integration_action(pull_request: Dict[str, Any], checks: Dict[str,
         return "wait for checks"
 
     mergeable_state = pull_request.get("mergeable_state")
-    if check_state == "success" and mergeable_state == "clean":
+    if check_state in {"success", "unknown"} and mergeable_state == "clean":
         return "request review"
-    if check_state == "success" and mergeable_state in {"blocked", "unstable"}:
+    if check_state in {"success", "unknown"} and mergeable_state in {"blocked", "unstable"}:
         return "review gate"
     return "inspect"
 
