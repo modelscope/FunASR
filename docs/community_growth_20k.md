@@ -34,7 +34,7 @@ This plan focuses on useful adoption work rather than vanity marketing: if more 
 
 ## Current campaign snapshot
 
-As of 2026-06-30, the ecosystem has 34,623 combined GitHub stars, or 3,399 additional stars since the 31,224 baseline. The remaining gap to the +20,000 target is 16,601 stars by 2026-09-30.
+As of 2026-06-30, the ecosystem has 34,625 combined GitHub stars, or 3,401 additional stars since the 31,224 baseline. The remaining gap to the +20,000 target is 16,599 stars by 2026-09-30.
 
 Keep this snapshot fresh during weekly planning. The ecosystem mode also reports the remaining gap, days left to 2026-09-30, and the required daily average:
 
@@ -138,7 +138,7 @@ python scripts/collect_growth_metrics.py
 python scripts/collect_growth_metrics.py --format json
 ```
 
-The script captures GitHub stars, forks, watchers, open issues, latest push time, and the current PyPI version using public APIs. Set `GITHUB_TOKEN` when running it from CI or a shared network to avoid public GitHub API rate limits. Paste the Markdown output into launch notes, weekly community updates, or release retrospectives so the 20k-star effort stays measurable.
+The script captures GitHub stars, forks, watchers, open issues, open pull requests, latest push time, and the current PyPI version using public APIs. Set `GITHUB_TOKEN` when running it from CI or a shared network to avoid public GitHub API rate limits. Paste the Markdown output into launch notes, weekly community updates, or release retrospectives so the 20k-star effort stays measurable.
 
 ## 30-day execution checklist
 
