@@ -1002,6 +1002,74 @@ def test_format_integration_markdown_lists_high_exposure_priorities_by_stars():
     assert "deleted-org/deleted-repo#1" not in output.split("## High-exposure priorities", 1)[1].split("## Failed or pending checks", 1)[0]
 
 
+def test_format_integration_markdown_lists_active_operator_queue():
+    module = load_growth_metrics_module()
+    metrics = {
+        "collected_at_utc": "2026-07-02T00:00:00+00:00",
+        "integrations": [
+            {
+                "pr": "getpaseo/paseo#1634",
+                "html_url": "https://github.com/getpaseo/paseo/pull/1634",
+                "state": "open",
+                "mergeable_state": "dirty",
+                "repo_stars": 9_500,
+                "repo_forks": 900,
+                "updated_at": "2026-06-30T09:47:12Z",
+                "updated_age_days": 0,
+                "next_action": "resolve conflicts",
+                "checks": {"state": "unknown", "failed_check_runs": [], "pending_check_runs": []},
+            },
+            {
+                "pr": "huggingface/optimum-intel#1801",
+                "html_url": "https://github.com/huggingface/optimum-intel/pull/1801",
+                "state": "open",
+                "mergeable_state": "unstable",
+                "repo_stars": 600,
+                "repo_forks": 240,
+                "updated_at": "2026-06-30T04:20:02Z",
+                "updated_age_days": 0,
+                "next_action": "review gate",
+                "checks": {"state": "unknown", "failed_check_runs": [], "pending_check_runs": []},
+            },
+            {
+                "pr": "livekit/agents#6176",
+                "html_url": "https://github.com/livekit/agents/pull/6176",
+                "state": "open",
+                "mergeable_state": "blocked",
+                "repo_stars": 11_000,
+                "repo_forks": 3_200,
+                "updated_at": "2026-06-30T10:55:17Z",
+                "updated_age_days": 0,
+                "next_action": "wait for maintainer review",
+                "checks": {"state": "success", "failed_check_runs": [], "pending_check_runs": []},
+            },
+            {
+                "pr": "activepieces/activepieces#13985",
+                "html_url": "https://github.com/activepieces/activepieces/pull/13985",
+                "state": "open",
+                "mergeable_state": "blocked",
+                "repo_stars": 23_000,
+                "repo_forks": 3_800,
+                "updated_at": "2026-06-30T08:46:39Z",
+                "updated_age_days": 0,
+                "next_action": "resolve CLA",
+                "checks": {"state": "pending", "failed_check_runs": [], "pending_check_runs": []},
+            },
+        ],
+    }
+
+    output = module.format_integration_markdown(metrics)
+
+    active_queue = output.split("## Active operator queue", 1)[1].split("## Failed or pending checks", 1)[0]
+    assert "- [getpaseo/paseo#1634](https://github.com/getpaseo/paseo/pull/1634): resolve conflicts" in active_queue
+    assert (
+        "- [huggingface/optimum-intel#1801](https://github.com/huggingface/optimum-intel/pull/1801): review gate"
+        in active_queue
+    )
+    assert "livekit/agents#6176" not in active_queue
+    assert "activepieces/activepieces#13985" not in active_queue
+
+
 def test_format_integration_markdown_lists_known_review_gates():
     module = load_growth_metrics_module()
     metrics = {
