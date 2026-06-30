@@ -454,23 +454,23 @@ def test_collect_integration_metrics_recommends_review_for_clean_success_pr(monk
     module = load_growth_metrics_module()
 
     def fake_fetch_json(url, headers=None):
-        if url == "https://api.github.com/repos/mahseema/awesome-ai-tools/pulls/1689":
+        if url == "https://api.github.com/repos/example/clean-pr/pulls/42":
             return {
-                "number": 1689,
+                "number": 42,
                 "title": "Add FunASR",
                 "state": "open",
                 "draft": False,
                 "mergeable": True,
                 "mergeable_state": "clean",
-                "html_url": "https://github.com/mahseema/awesome-ai-tools/pull/1689",
+                "html_url": "https://github.com/example/clean-pr/pull/42",
                 "updated_at": "2026-06-30T06:44:34Z",
                 "head": {"sha": "9a19b5e", "ref": "add-funasr"},
                 "base": {"ref": "main"},
                 "user": {"login": "LauraGPT"},
             }
-        if url == "https://api.github.com/repos/mahseema/awesome-ai-tools/commits/9a19b5e/status":
+        if url == "https://api.github.com/repos/example/clean-pr/commits/9a19b5e/status":
             return {"state": "success", "statuses": []}
-        if url == "https://api.github.com/repos/mahseema/awesome-ai-tools/commits/9a19b5e/check-runs?per_page=100":
+        if url == "https://api.github.com/repos/example/clean-pr/commits/9a19b5e/check-runs?per_page=100":
             return {
                 "total_count": 1,
                 "check_runs": [
@@ -481,9 +481,20 @@ def test_collect_integration_metrics_recommends_review_for_clean_success_pr(monk
 
     monkeypatch.setattr(module, "fetch_json", fake_fetch_json)
 
-    metrics = module.collect_integration_metrics(["mahseema/awesome-ai-tools#1689"])
+    metrics = module.collect_integration_metrics(["example/clean-pr#42"])
 
     assert metrics["integrations"][0]["next_action"] == "request review"
+
+
+def test_known_assisted_review_requests_include_validated_discovery_prs():
+    module = load_growth_metrics_module()
+
+    expected_prs = {
+        "mahseema/awesome-ai-tools#1689",
+        "ai4s-research/awesome-ai-for-science#69",
+    }
+
+    assert expected_prs.issubset(set(module.KNOWN_ASSISTED_REVIEW_REQUESTS))
 
 
 def test_collect_integration_metrics_marks_known_assisted_review_request(monkeypatch):
