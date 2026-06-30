@@ -182,7 +182,7 @@ Then inspect `result[0]["sentence_info"]`. Each sentence should include fields s
 
 ## Can I use a speaker model other than cam++?
 
-Yes. `spk_model` can be any FunASR `AutoModel` speaker embedding model, including a ModelScope model id or a local model path. For example, ERes2NetV2 can be used directly:
+Yes. `spk_model` can be any FunASR `AutoModel` speaker embedding model, including a ModelScope model ID or a local model path. For example, ERes2NetV2 can be used directly:
 
 ```python
 from funasr import AutoModel
