@@ -126,6 +126,15 @@ KNOWN_ASSISTED_REVIEW_REQUESTS = {
 }
 REPORTER_WAITING_LABELS = {"needs feedback"}
 CONTRIBUTOR_WAITING_LABELS = {"good first issue", "help wanted", "ready for PR"}
+PASSIVE_INTEGRATION_ACTIONS = {
+    "archive",
+    "finish draft",
+    "preview auth gate",
+    "resolve CLA",
+    "wait for checks",
+    "wait for maintainer rerun",
+    "wait for maintainer review",
+}
 
 
 def fetch_json(url: str, headers: Optional[Dict[str, str]] = None) -> Any:
@@ -626,6 +635,24 @@ def format_integration_markdown(metrics: Dict[str, Any]) -> str:
             lines.append(
                 f"- [{integration['pr']}]({integration.get('html_url')}): "
                 f"{int(integration['repo_stars']):,} stars, "
+                f"{integration.get('next_action') or 'inspect'}"
+            )
+    active_operator_integrations = sorted(
+        (
+            integration
+            for integration in metrics["integrations"]
+            if integration.get("state") == "open"
+            and integration.get("repo_stars") is not None
+            and (integration.get("next_action") or "inspect") not in PASSIVE_INTEGRATION_ACTIONS
+        ),
+        key=lambda integration: int(integration.get("repo_stars") or 0),
+        reverse=True,
+    )
+    if active_operator_integrations:
+        lines.extend(["", "## Active operator queue", ""])
+        for integration in active_operator_integrations:
+            lines.append(
+                f"- [{integration['pr']}]({integration.get('html_url')}): "
                 f"{integration.get('next_action') or 'inspect'}"
             )
     review_gate_integrations = [
