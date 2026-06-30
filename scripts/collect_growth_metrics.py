@@ -34,6 +34,7 @@ DEFAULT_INTEGRATION_PRS = [
     "ray-project/ray#64053",
     "huggingface/optimum-intel#1801",
     "huggingface/speech-to-speech#319",
+    "livekit/agents#6176",
     "run-llama/llama_index#21958",
     "run-llama/llama_index#21996",
     "xinnan-tech/xiaozhi-esp32-server#3255",
@@ -48,6 +49,7 @@ DEFAULT_INTEGRATION_PRS = [
     "activepieces/activepieces#13985",
     "Uberi/speech_recognition#903",
     "ai4s-research/awesome-ai-for-science#69",
+    "lukasmasuch/best-of-ml-python#455",
     "mahseema/awesome-ai-tools#1689",
 ]
 FAILED_CHECK_CONCLUSIONS = {"action_required", "cancelled", "failure", "startup_failure", "timed_out"}

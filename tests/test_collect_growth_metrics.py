@@ -80,6 +80,17 @@ def test_default_integration_prs_include_video_discovery_lanes():
     assert expected_prs.issubset(set(module.DEFAULT_INTEGRATION_PRS))
 
 
+def test_default_integration_prs_include_voice_agent_and_ml_discovery_lanes():
+    module = load_growth_metrics_module()
+
+    expected_prs = {
+        "livekit/agents#6176",
+        "lukasmasuch/best-of-ml-python#455",
+    }
+
+    assert expected_prs.issubset(set(module.DEFAULT_INTEGRATION_PRS))
+
+
 def test_collect_github_repo_metrics_splits_open_issues_and_pull_requests(monkeypatch):
     module = load_growth_metrics_module()
 
