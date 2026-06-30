@@ -15,6 +15,12 @@ def load_growth_metrics_module():
     return module
 
 
+def test_default_integration_prs_include_sglang_omni_fun_asr():
+    module = load_growth_metrics_module()
+
+    assert "sgl-project/sglang-omni#898" in module.DEFAULT_INTEGRATION_PRS
+
+
 def test_collect_github_repo_metrics_splits_open_issues_and_pull_requests(monkeypatch):
     module = load_growth_metrics_module()
 
