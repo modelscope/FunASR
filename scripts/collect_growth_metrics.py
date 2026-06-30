@@ -126,9 +126,13 @@ KNOWN_ASSISTED_REVIEW_REQUESTS = {
 }
 REPORTER_WAITING_LABELS = {"needs feedback"}
 CONTRIBUTOR_WAITING_LABELS = {"good first issue", "help wanted", "ready for PR"}
+MANUAL_HANDOFF_ACTIONS = {
+    "submit Glama",
+}
 PASSIVE_INTEGRATION_ACTIONS = {
     "archive",
     "finish draft",
+    *MANUAL_HANDOFF_ACTIONS,
     "preview auth gate",
     "resolve CLA",
     "wait for checks",
@@ -654,6 +658,24 @@ def format_integration_markdown(metrics: Dict[str, Any]) -> str:
             lines.append(
                 f"- [{integration['pr']}]({integration.get('html_url')}): "
                 f"{integration.get('next_action') or 'inspect'}"
+            )
+    manual_handoff_integrations = sorted(
+        (
+            integration
+            for integration in metrics["integrations"]
+            if integration.get("state") == "open"
+            and (integration.get("next_action") or "inspect") in MANUAL_HANDOFF_ACTIONS
+        ),
+        key=lambda integration: int(integration.get("repo_stars") or 0),
+        reverse=True,
+    )
+    if manual_handoff_integrations:
+        lines.extend(["", "## Manual handoff gates", ""])
+        for integration in manual_handoff_integrations:
+            reason = integration.get("known_review_gate_reason") or "manual action required"
+            lines.append(
+                f"- [{integration['pr']}]({integration.get('html_url')}): "
+                f"{integration.get('next_action') or 'inspect'}; {reason}"
             )
     review_gate_integrations = [
         integration for integration in metrics["integrations"] if integration.get("known_review_gate_reason")
