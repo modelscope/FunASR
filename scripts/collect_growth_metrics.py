@@ -115,6 +115,9 @@ KNOWN_ASSISTED_REVIEW_REQUESTS = {
     "huggingface/speech-to-speech#319": {
         "reason": "ruff blocker fixed and validation posted; no repo checks exposed",
     },
+    "speaches-ai/speaches#658": {
+        "reason": "lightweight validation evidence posted; no repo checks exposed",
+    },
 }
 REPORTER_WAITING_LABELS = {"needs feedback"}
 CONTRIBUTOR_WAITING_LABELS = {"good first issue", "help wanted", "ready for PR"}
