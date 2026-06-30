@@ -34,7 +34,7 @@ This plan focuses on useful adoption work rather than vanity marketing: if more 
 
 ## Current campaign snapshot
 
-As of 2026-06-30, the ecosystem has 34,629 combined GitHub stars, or 3,405 additional stars since the 31,224 baseline. The remaining gap to the +20,000 target is 16,595 stars by 2026-09-30.
+As of 2026-06-30, the ecosystem has 34,634 combined GitHub stars, or 3,410 additional stars since the 31,224 baseline. The remaining gap to the +20,000 target is 16,590 stars by 2026-09-30.
 
 Keep this snapshot fresh during weekly planning. The ecosystem mode also reports the remaining gap, days left to 2026-09-30, and the required daily average:
 
@@ -129,11 +129,20 @@ Set `GITHUB_TOKEN` when running this from CI or a shared network so GitHub's pub
 | `sgl-project/sglang-omni#898` Fun-ASR serving support | Exposes Fun-ASR-Nano through a high-visibility serving runtime for ASR benchmarks and GPU deployment | Help keep benchmark claims precise: exact checkpoint/revision, dtype, GPU, concurrency, SeedTTS EN full-set comparison against Qwen3-ASR, and a copy-paste smoke command. |
 | `ray-project/ray#64053` Ray Serve FunASR ASR example | Puts FunASR in production serving docs for teams already using Ray | Monitor review, answer questions quickly, and keep the example command aligned with the current OpenAI-compatible API behavior. |
 | `huggingface/optimum-intel#1801` OpenVINO support | Helps CPU and edge users evaluate Fun-ASR on Intel hardware | Watch for CI or reviewer feedback, then validate a minimal inference path before promoting it in FunASR docs. |
+| `huggingface/speech-to-speech#319` SenseVoice STT handler | Adds SenseVoice/FunASR to local open-source voice-agent pipelines where low-latency STT is a core comparison point | Keep lint/import fixes on the PR head, explain optional `speech-to-speech[sensevoice]` install behavior, and answer handler-scope review quickly. |
+| `run-llama/llama_index#21958` FunASR endpoint reader | Puts FunASR behind a LlamaIndex reader for OpenAI-compatible transcription endpoints used in RAG and agent pipelines | Keep the endpoint contract clear, avoid forcing local `funasr` dependencies into the main package, and validate one request/response example when the author updates. |
+| `run-llama/llama_index#21996` local FunASR reader | Gives LlamaIndex users a local SenseVoice/FunASR reader for private transcription workflows | Keep optional dependencies isolated, verify the reader does not affect default installs, and watch for maintainer guidance on package extras. |
+| `xinnan-tech/xiaozhi-esp32-server#3255` configurable FunASR language | Improves a high-star ESP32 voice-agent backend by letting users pin SenseVoice/FunASR language for short utterances | Keep the single-module config and multi-module database migration aligned, then watch for maintainer review on the dynamic config form. |
+| `mem0ai/mem0#5571` optional FunASR transcription helper | Adds local FunASR transcription to a high-star memory layer used by agent builders | Keep FunASR optional, make examples clear about local model downloads, and separate unrelated preview/deployment failures from code review. |
 | `infiniflow/ragflow#16473` FunASR / SenseVoice STT provider | Adds FunASR to a high-star RAG workflow product where local STT can become a visible configuration choice | Track duplicate/conflict cleanup, keep provider naming consistent, and verify that skipped CI is expected rather than a hidden regression. |
 | `pipecat-ai/pipecat#4844` FunASR local STT service | Puts SenseVoice/FunASR into realtime voice agent pipelines used by builders comparing local STT backends | Watch review, keep docs/readthedocs evidence fresh, and make sure the service degrades clearly when optional FunASR dependencies are missing. |
+| `mudler/LocalAI#10090` FunASR backend | Exposes FunASR through a high-star local AI engine used by self-hosters and edge deployments | Keep the backend registry conflict-free after upstream changes, ensure DCO stays green, and maintain one CPU smoke path plus GPU requirements notes. |
+| `agno-agi/agno#8501` FunASR transcription tool | Places FunASR in a high-star agent platform as a local multilingual transcription tool | Keep issue linkage and formatting gates green, avoid heavy default dependencies, and respond to review scope requests quickly. |
+| `GetStream/Vision-Agents#606` FunASR STT plugin | Adds SenseVoice/FunASR to multimodal voice and vision agent examples | Keep package include paths and tests aligned with upstream conventions, then watch review threads for optional dependency or documentation requests. |
 | `TEN-framework/ten-framework#2191` FunASR ASR extension | Places SenseVoice/FunASR in a realtime multimodal agent framework with extension discovery | Resolve review comments and failing review automation with concrete code/doc fixes rather than status pings. |
 | `activepieces/activepieces#13985` FunASR speech recognition piece | Gives no-code workflow users a direct FunASR speech recognition action | The CLA status is author-controlled; monitor only for maintainer feedback or test failures until the author-side gate clears. |
 | `Uberi/speech_recognition#903` FunASR recognizer | Exposes FunASR through a widely known Python speech-recognition wrapper | Keep the recognizer optional and lightweight, and be ready with a minimal install/import smoke test if maintainers ask for scope reduction. |
+| `ai4s-research/awesome-ai-for-science#69` FunASR science toolkit listing | Creates a discovery path from scientific AI tooling lists to FunASR for transcription and field-recording workflows | Validate the link, keep the description technically accurate, and avoid extra comments unless maintainers ask for category or wording changes. |
 
 Operating rules:
 

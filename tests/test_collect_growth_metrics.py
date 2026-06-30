@@ -51,6 +51,24 @@ def test_default_integration_prs_include_high_visibility_external_queue():
     assert expected_prs.issubset(set(module.DEFAULT_INTEGRATION_PRS))
 
 
+def test_default_integration_prs_include_new_growth_lanes():
+    module = load_growth_metrics_module()
+
+    expected_prs = {
+        "huggingface/speech-to-speech#319",
+        "run-llama/llama_index#21958",
+        "run-llama/llama_index#21996",
+        "xinnan-tech/xiaozhi-esp32-server#3255",
+        "mem0ai/mem0#5571",
+        "mudler/LocalAI#10090",
+        "agno-agi/agno#8501",
+        "GetStream/Vision-Agents#606",
+        "ai4s-research/awesome-ai-for-science#69",
+    }
+
+    assert expected_prs.issubset(set(module.DEFAULT_INTEGRATION_PRS))
+
+
 def test_collect_github_repo_metrics_splits_open_issues_and_pull_requests(monkeypatch):
     module = load_growth_metrics_module()
 
