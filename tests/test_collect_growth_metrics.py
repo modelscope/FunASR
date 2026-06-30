@@ -2,7 +2,7 @@ import importlib.util
 import io
 import json
 import sys
-from datetime import date
+from datetime import date, datetime, timezone
 from contextlib import redirect_stdout
 from pathlib import Path
 
@@ -216,11 +216,15 @@ def test_collect_integration_metrics_summarizes_pull_request_checks(monkeypatch)
 
     monkeypatch.setattr(module, "fetch_json", fake_fetch_json)
 
-    metrics = module.collect_integration_metrics(["huggingface/transformers#46180"])
+    metrics = module.collect_integration_metrics(
+        ["huggingface/transformers#46180"],
+        now=datetime(2026, 7, 2, 0, 0, 0, tzinfo=timezone.utc),
+    )
 
     integration = metrics["integrations"][0]
     assert integration["pr"] == "huggingface/transformers#46180"
     assert integration["title"] == "Add Fun-ASR-Nano model"
+    assert integration["updated_age_days"] == 2
     assert integration["mergeable"] is True
     assert integration["checks"]["state"] == "failure"
     assert integration["checks"]["total_check_runs"] == 3
@@ -268,6 +272,32 @@ def test_format_ecosystem_markdown_includes_open_pull_requests():
 
     assert "| Repository | Stars | Forks | Open issues | Open PRs | Last push |" in output
     assert "| [modelscope/FunASR](https://github.com/modelscope/FunASR) | 18,716 | 3,100 | 3 | 2 |" in output
+
+
+def test_format_integration_markdown_includes_update_age():
+    module = load_growth_metrics_module()
+    metrics = {
+        "collected_at_utc": "2026-07-02T00:00:00+00:00",
+        "integrations": [
+            {
+                "pr": "huggingface/transformers#46180",
+                "html_url": "https://github.com/huggingface/transformers/pull/46180",
+                "state": "open",
+                "mergeable_state": "blocked",
+                "updated_at": "2026-06-29T23:45:57Z",
+                "updated_age_days": 2,
+                "checks": {"state": "failure", "failed_check_runs": [], "pending_check_runs": []},
+            }
+        ],
+    }
+
+    output = module.format_integration_markdown(metrics)
+
+    assert "| Pull request | State | Mergeable | Checks | Failed | Pending | Age | Updated |" in output
+    assert (
+        "| [huggingface/transformers#46180](https://github.com/huggingface/transformers/pull/46180) | "
+        "open | blocked | failure | 0 | 0 | 2d | `2026-06-29T23:45:57Z` |"
+    ) in output
 
 
 def test_collect_issue_metrics_filters_pull_requests_and_assigns_waiting_on(monkeypatch):
