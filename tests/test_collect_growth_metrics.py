@@ -368,7 +368,8 @@ def test_collect_integration_metrics_classifies_known_external_ci_failure(monkey
     assert integration["known_external_failure_reason"] == (
         "LightOnOCR shared hub-cache read-only failure; PR CI status is the aggregate failure"
     )
-    assert integration["next_action"] == "request rerun"
+    assert integration["known_external_failure_action"] == "wait for maintainer rerun"
+    assert integration["next_action"] == "wait for maintainer rerun"
 
 
 def test_collect_integration_metrics_handles_known_external_ci_aggregate_race(monkeypatch):
@@ -413,7 +414,8 @@ def test_collect_integration_metrics_handles_known_external_ci_aggregate_race(mo
     assert integration["known_external_failure_reason"] == (
         "LightOnOCR shared hub-cache read-only failure; PR CI status is the aggregate failure"
     )
-    assert integration["next_action"] == "request rerun"
+    assert integration["known_external_failure_action"] == "wait for maintainer rerun"
+    assert integration["next_action"] == "wait for maintainer rerun"
 
 
 def test_format_ecosystem_markdown_includes_open_pull_requests():
