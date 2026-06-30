@@ -511,6 +511,7 @@ def test_known_assisted_review_requests_include_validated_review_gate_prs():
         "GetStream/Vision-Agents#606",
         "Uberi/speech_recognition#903",
         "huggingface/speech-to-speech#319",
+        "speaches-ai/speaches#658",
     }
 
     assert expected_prs.issubset(set(module.KNOWN_ASSISTED_REVIEW_REQUESTS))
