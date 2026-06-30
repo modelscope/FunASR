@@ -26,6 +26,7 @@ DEFAULT_ECOSYSTEM_REPOS = [
 DEFAULT_PACKAGE = "funasr"
 DEFAULT_BASELINE_STARS = 31224
 DEFAULT_TARGET_ADDITIONAL_STARS = 20000
+DEFAULT_TARGET_DATE = "2026-09-30"
 
 
 def fetch_json(url: str, headers: Optional[Dict[str, str]] = None) -> Any:
@@ -88,12 +89,20 @@ def collect_ecosystem_metrics(
     package: str,
     baseline_stars: int,
     target_additional_stars: int,
+    target_date: str = DEFAULT_TARGET_DATE,
+    today: Optional[dt.date] = None,
 ) -> Dict[str, Any]:
     repositories = [collect_github_repo_metrics(repo) for repo in repos]
     pypi = fetch_json(f"https://pypi.org/pypi/{package}/json", {"User-Agent": "funasr-growth-metrics"})
     total_stars = sum(repo.get("stars") or 0 for repo in repositories)
     added_stars = total_stars - baseline_stars
     remaining_to_target = max(target_additional_stars - added_stars, 0)
+    target_day = dt.date.fromisoformat(target_date)
+    current_day = today or dt.datetime.now(dt.timezone.utc).date()
+    days_remaining = max((target_day - current_day).days, 0)
+    required_daily_average = (
+        (remaining_to_target + days_remaining - 1) // days_remaining if days_remaining else remaining_to_target
+    )
     return {
         "collected_at_utc": dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat(),
         "ecosystem": {
@@ -103,6 +112,9 @@ def collect_ecosystem_metrics(
             "target_additional_stars": target_additional_stars,
             "added_stars": added_stars,
             "remaining_to_target": remaining_to_target,
+            "target_date": target_date,
+            "days_remaining": days_remaining,
+            "required_daily_average": required_daily_average,
         },
         "pypi": {
             "package": package,
@@ -148,6 +160,8 @@ def format_ecosystem_markdown(metrics: Dict[str, Any]) -> str:
         f"- Baseline stars: **{ecosystem['baseline_stars']:,}**",
         f"- Added since baseline: **{ecosystem['added_stars']:,}** / {ecosystem['target_additional_stars']:,}",
         f"- Remaining to target: **{ecosystem['remaining_to_target']:,}**",
+        f"- Target date: **{ecosystem['target_date']}** ({ecosystem['days_remaining']:,} days remaining)",
+        f"- Required daily average: **{ecosystem['required_daily_average']:,}** stars/day",
         f"- PyPI package: **{pypi.get('package')} {pypi.get('version')}**",
         "",
         "## Repositories",
@@ -195,6 +209,7 @@ def parse_args() -> argparse.Namespace:
         default=DEFAULT_TARGET_ADDITIONAL_STARS,
         help="Ecosystem added-star target",
     )
+    parser.add_argument("--target-date", default=DEFAULT_TARGET_DATE, help="Ecosystem target date in YYYY-MM-DD format")
     parser.add_argument("--format", choices=["markdown", "json"], default="markdown", help="Output format")
     return parser.parse_args()
 
@@ -208,6 +223,7 @@ def main() -> int:
                 args.pypi_package,
                 args.baseline_stars,
                 args.target_additional_stars,
+                args.target_date,
             )
         else:
             metrics = collect_metrics(args.repo, args.pypi_package)
