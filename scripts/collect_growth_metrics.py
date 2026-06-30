@@ -76,6 +76,9 @@ KNOWN_ASSISTED_REVIEW_REQUESTS = {
     "run-llama/llama_index#21958": {
         "reason": "review evidence already posted; avoid duplicate pings",
     },
+    "run-llama/llama_index#21996": {
+        "reason": "FunASR dependency gate addressed; avoid duplicate pings",
+    },
     "mudler/LocalAI#10090": {
         "reason": "review evidence already posted; avoid duplicate pings",
     },
