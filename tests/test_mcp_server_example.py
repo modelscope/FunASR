@@ -26,3 +26,16 @@ def test_mcp_server_example_has_glama_metadata():
     assert metadata["license"] == "MIT"
     assert metadata["mcpServers"]["funasr"]["command"] == "python"
     assert metadata["mcpServers"]["funasr"]["args"] == ["/app/funasr_mcp.py"]
+
+
+def test_repository_root_has_glama_metadata_for_mcp_directory_scanners():
+    repo_root = Path(__file__).resolve().parents[1]
+    metadata = json.loads((repo_root / "glama.json").read_text())
+
+    assert metadata["repository"] == "https://github.com/modelscope/FunASR"
+    assert metadata["runtime"] == "python"
+    assert metadata["license"] == "MIT"
+    assert metadata["mcpServers"]["funasr"]["command"] == "python"
+    assert metadata["mcpServers"]["funasr"]["args"] == [
+        "examples/mcp_server/funasr_mcp.py"
+    ]
