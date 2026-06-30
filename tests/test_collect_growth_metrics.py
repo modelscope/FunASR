@@ -224,6 +224,7 @@ def test_collect_integration_metrics_summarizes_pull_request_checks(monkeypatch)
     integration = metrics["integrations"][0]
     assert integration["pr"] == "huggingface/transformers#46180"
     assert integration["title"] == "Add Fun-ASR-Nano model"
+    assert integration["next_action"] == "fix checks"
     assert integration["updated_age_days"] == 2
     assert integration["mergeable"] is True
     assert integration["checks"]["state"] == "failure"
@@ -274,7 +275,43 @@ def test_format_ecosystem_markdown_includes_open_pull_requests():
     assert "| [modelscope/FunASR](https://github.com/modelscope/FunASR) | 18,716 | 3,100 | 3 | 2 |" in output
 
 
-def test_format_integration_markdown_includes_update_age():
+def test_collect_integration_metrics_recommends_review_for_clean_success_pr(monkeypatch):
+    module = load_growth_metrics_module()
+
+    def fake_fetch_json(url, headers=None):
+        if url == "https://api.github.com/repos/infiniflow/ragflow/pulls/16473":
+            return {
+                "number": 16473,
+                "title": "feat(stt): add FunASR / SenseVoice provider",
+                "state": "open",
+                "draft": False,
+                "mergeable": True,
+                "mergeable_state": "clean",
+                "html_url": "https://github.com/infiniflow/ragflow/pull/16473",
+                "updated_at": "2026-06-30T03:16:39Z",
+                "head": {"sha": "818a295", "ref": "funasr/ragflow-15526-conflict-fix"},
+                "base": {"ref": "main"},
+                "user": {"login": "LauraGPT"},
+            }
+        if url == "https://api.github.com/repos/infiniflow/ragflow/commits/818a295/status":
+            return {"state": "success", "statuses": []}
+        if url == "https://api.github.com/repos/infiniflow/ragflow/commits/818a295/check-runs?per_page=100":
+            return {
+                "total_count": 1,
+                "check_runs": [
+                    {"name": "CodeRabbit", "status": "completed", "conclusion": "success"},
+                ],
+            }
+        raise AssertionError(f"unexpected URL: {url}")
+
+    monkeypatch.setattr(module, "fetch_json", fake_fetch_json)
+
+    metrics = module.collect_integration_metrics(["infiniflow/ragflow#16473"])
+
+    assert metrics["integrations"][0]["next_action"] == "request review"
+
+
+def test_format_integration_markdown_includes_update_age_and_next_action():
     module = load_growth_metrics_module()
     metrics = {
         "collected_at_utc": "2026-07-02T00:00:00+00:00",
@@ -286,6 +323,7 @@ def test_format_integration_markdown_includes_update_age():
                 "mergeable_state": "blocked",
                 "updated_at": "2026-06-29T23:45:57Z",
                 "updated_age_days": 2,
+                "next_action": "fix checks",
                 "checks": {"state": "failure", "failed_check_runs": [], "pending_check_runs": []},
             }
         ],
@@ -293,10 +331,10 @@ def test_format_integration_markdown_includes_update_age():
 
     output = module.format_integration_markdown(metrics)
 
-    assert "| Pull request | State | Mergeable | Checks | Failed | Pending | Age | Updated |" in output
+    assert "| Pull request | State | Mergeable | Checks | Failed | Pending | Age | Action | Updated |" in output
     assert (
         "| [huggingface/transformers#46180](https://github.com/huggingface/transformers/pull/46180) | "
-        "open | blocked | failure | 0 | 0 | 2d | `2026-06-29T23:45:57Z` |"
+        "open | blocked | failure | 0 | 0 | 2d | fix checks | `2026-06-29T23:45:57Z` |"
     ) in output
 
 
@@ -488,3 +526,4 @@ def test_main_outputs_integrations_json(monkeypatch):
     integration = payload["integrations"][0]
     assert integration["pr"] == "ray-project/ray#64053"
     assert integration["checks"]["state"] == "success"
+    assert integration["next_action"] == "request review"

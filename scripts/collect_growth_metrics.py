@@ -159,6 +159,26 @@ def days_since(value: Optional[str], now: dt.datetime) -> Optional[int]:
     return max((now - parsed).days, 0)
 
 
+def recommend_integration_action(pull_request: Dict[str, Any], checks: Dict[str, Any]) -> str:
+    if pull_request.get("state") != "open":
+        return "archive"
+    if pull_request.get("draft"):
+        return "finish draft"
+
+    check_state = checks.get("state")
+    if check_state == "failure":
+        return "fix checks"
+    if check_state == "pending":
+        return "wait for checks"
+
+    mergeable_state = pull_request.get("mergeable_state")
+    if check_state == "success" and mergeable_state == "clean":
+        return "request review"
+    if check_state == "success" and mergeable_state in {"blocked", "unstable"}:
+        return "review gate"
+    return "inspect"
+
+
 def collect_pull_request_metrics(spec: str, now: Optional[dt.datetime] = None) -> Dict[str, Any]:
     repo, pr_number = parse_pull_request_spec(spec)
     now = now or dt.datetime.now(dt.timezone.utc)
@@ -180,6 +200,7 @@ def collect_pull_request_metrics(spec: str, now: Optional[dt.datetime] = None) -
         "mergeable_state": pull_request.get("mergeable_state"),
         "updated_at": updated_at,
         "updated_age_days": days_since(updated_at, now),
+        "next_action": recommend_integration_action(pull_request, checks),
         "html_url": pull_request.get("html_url"),
         "head_ref": head.get("ref"),
         "head_sha": head_sha,
@@ -373,8 +394,8 @@ def format_integration_markdown(metrics: Dict[str, Any]) -> str:
     lines = [
         f"# FunASR External Integration Snapshot ({metrics['collected_at_utc']})",
         "",
-        "| Pull request | State | Mergeable | Checks | Failed | Pending | Age | Updated |",
-        "|---|---|---|---|---:|---:|---:|---|",
+        "| Pull request | State | Mergeable | Checks | Failed | Pending | Age | Action | Updated |",
+        "|---|---|---|---|---:|---:|---:|---|---|",
     ]
     for integration in metrics["integrations"]:
         checks = integration.get("checks", {})
@@ -390,6 +411,7 @@ def format_integration_markdown(metrics: Dict[str, Any]) -> str:
             f"{failed_count:,} | "
             f"{pending_count:,} | "
             f"{age} | "
+            f"{integration.get('next_action') or 'inspect'} | "
             f"`{integration.get('updated_at')}` |"
         )
     lines.extend(["", "## Failed or pending checks", ""])
