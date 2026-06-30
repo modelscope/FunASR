@@ -64,9 +64,7 @@ def load_service_module(monkeypatch):
     monkeypatch.setitem(
         sys.modules,
         "funasr.models.fun_asr_nano",
-        types.ModuleType(
-        "funasr.models.fun_asr_nano"
-        ),
+        types.ModuleType("funasr.models.fun_asr_nano"),
     )
     monkeypatch.setitem(
         sys.modules, "funasr.models.fun_asr_nano.inference_vllm", nano_stub
