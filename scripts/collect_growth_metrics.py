@@ -33,6 +33,8 @@ DEFAULT_INTEGRATION_PRS = [
     "huggingface/optimum-intel#1801",
 ]
 FAILED_CHECK_CONCLUSIONS = {"action_required", "cancelled", "failure", "startup_failure", "timed_out"}
+REPORTER_WAITING_LABELS = {"needs feedback"}
+CONTRIBUTOR_WAITING_LABELS = {"good first issue", "help wanted", "ready for PR"}
 
 
 def fetch_json(url: str, headers: Optional[Dict[str, str]] = None) -> Any:
@@ -162,6 +164,52 @@ def collect_integration_metrics(prs: Sequence[str]) -> Dict[str, Any]:
     return {
         "collected_at_utc": dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat(),
         "integrations": [collect_pull_request_metrics(pr) for pr in prs],
+    }
+
+
+def classify_issue_waiting_on(labels: Sequence[str]) -> str:
+    normalized = {label.lower() for label in labels}
+    if normalized & REPORTER_WAITING_LABELS:
+        return "reporter"
+    if normalized & CONTRIBUTOR_WAITING_LABELS:
+        return "contributor"
+    return "maintainer"
+
+
+def collect_open_issues(repo: str) -> list[Dict[str, Any]]:
+    owner_repo = repo.strip("/")
+    payload = fetch_json(f"https://api.github.com/repos/{owner_repo}/issues?state=open&per_page=100", github_headers())
+    issues = []
+    for issue in payload:
+        if issue.get("pull_request"):
+            continue
+        labels = [label.get("name") for label in issue.get("labels", []) if label.get("name")]
+        author = issue.get("user") or {}
+        issues.append(
+            {
+                "repo": owner_repo,
+                "number": issue.get("number"),
+                "title": issue.get("title"),
+                "html_url": issue.get("html_url"),
+                "updated_at": issue.get("updated_at"),
+                "comments": issue.get("comments"),
+                "author": author.get("login"),
+                "labels": labels,
+                "waiting_on": classify_issue_waiting_on(labels),
+            }
+        )
+    return issues
+
+
+def collect_issue_metrics(repos: Sequence[str]) -> Dict[str, Any]:
+    repositories = []
+    for repo in repos:
+        owner_repo = repo.strip("/")
+        issues = collect_open_issues(owner_repo)
+        repositories.append({"repo": owner_repo, "open_issue_count": len(issues), "open_issues": issues})
+    return {
+        "collected_at_utc": dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat(),
+        "repositories": repositories,
     }
 
 
@@ -333,6 +381,31 @@ def format_integration_markdown(metrics: Dict[str, Any]) -> str:
     return "\n".join(lines).rstrip() + "\n"
 
 
+def format_issue_markdown(metrics: Dict[str, Any]) -> str:
+    lines = [
+        f"# FunASR Open Issue Snapshot ({metrics['collected_at_utc']})",
+        "",
+        "| Repository | Issue | Waiting on | Labels | Comments | Updated |",
+        "|---|---|---|---|---:|---|",
+    ]
+    any_issue = False
+    for repository in metrics["repositories"]:
+        for issue in repository["open_issues"]:
+            any_issue = True
+            labels = ", ".join(issue.get("labels") or [])
+            lines.append(
+                f"| {repository['repo']} | "
+                f"[#{issue['number']} {issue.get('title')}]({issue.get('html_url')}) | "
+                f"{issue.get('waiting_on')} | "
+                f"{labels} | "
+                f"{issue.get('comments') or 0:,} | "
+                f"`{issue.get('updated_at')}` |"
+            )
+    if not any_issue:
+        lines.append("| n/a | No open issues | n/a | n/a | 0 | n/a |")
+    return "\n".join(lines) + "\n"
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Collect FunASR growth metrics.")
     parser.add_argument("--repo", default=DEFAULT_REPO, help="GitHub repository, e.g. modelscope/FunASR")
@@ -344,6 +417,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--ecosystem", action="store_true", help="Collect the four-repository FunASR ecosystem")
     parser.add_argument("--integrations", action="store_true", help="Collect tracked external integration PRs")
+    parser.add_argument("--issues", action="store_true", help="Collect open issue triage status for repositories")
     parser.add_argument(
         "--integration-prs",
         nargs="+",
@@ -369,6 +443,8 @@ def main() -> int:
     try:
         if args.integrations:
             metrics = collect_integration_metrics(args.integration_prs)
+        elif args.issues:
+            metrics = collect_issue_metrics(args.repos)
         elif args.ecosystem:
             metrics = collect_ecosystem_metrics(
                 args.repos,
@@ -387,6 +463,8 @@ def main() -> int:
         print(json.dumps(metrics, ensure_ascii=False, indent=2))
     elif args.integrations:
         print(format_integration_markdown(metrics), end="")
+    elif args.issues:
+        print(format_issue_markdown(metrics), end="")
     elif args.ecosystem:
         print(format_ecosystem_markdown(metrics), end="")
     else:

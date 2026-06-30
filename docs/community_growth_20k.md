@@ -95,6 +95,13 @@ Daily maintainer loop:
 - Turn repeated answers into docs or examples before closing the loop.
 - Keep actionable issues labelled as `good first issue`, `help wanted`, or `ready for PR` so contributors can help without guessing.
 
+Use the issue snapshot before each maintainer pass so waiting-on-reporter, waiting-on-contributor, and maintainer-owned items stay separate:
+
+```bash
+python scripts/collect_growth_metrics.py --issues
+python scripts/collect_growth_metrics.py --issues --format json
+```
+
 ## Workstream 5: External proof
 
 - Publish reproducible benchmark scripts and raw configuration for the 184-file benchmark.
