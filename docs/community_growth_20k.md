@@ -126,6 +126,7 @@ Set `GITHUB_TOKEN` when running this from CI or a shared network so GitHub's pub
 | Integration PR | Growth reason | Current maintainer action |
 |---|---|---|
 | `huggingface/transformers#46180` Fun-ASR-Nano model support | Makes Fun-ASR-Nano usable through the default HF API surface and model docs | Keep CI evidence current, address only actionable review threads, and avoid repeating maintainer pings unless new evidence appears. If `tests_processors` fails only in unrelated LightOnOCR cache setup, ask for a rerun once with the exact failing job. |
+| `sgl-project/sglang-omni#898` Fun-ASR serving support | Exposes Fun-ASR-Nano through a high-visibility serving runtime for ASR benchmarks and GPU deployment | Help keep benchmark claims precise: exact checkpoint/revision, dtype, GPU, concurrency, SeedTTS EN full-set comparison against Qwen3-ASR, and a copy-paste smoke command. |
 | `ray-project/ray#64053` Ray Serve FunASR ASR example | Puts FunASR in production serving docs for teams already using Ray | Monitor review, answer questions quickly, and keep the example command aligned with the current OpenAI-compatible API behavior. |
 | `huggingface/optimum-intel#1801` OpenVINO support | Helps CPU and edge users evaluate Fun-ASR on Intel hardware | Watch for CI or reviewer feedback, then validate a minimal inference path before promoting it in FunASR docs. |
 

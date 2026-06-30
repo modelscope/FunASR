@@ -29,6 +29,7 @@ DEFAULT_TARGET_ADDITIONAL_STARS = 20000
 DEFAULT_TARGET_DATE = "2026-09-30"
 DEFAULT_INTEGRATION_PRS = [
     "huggingface/transformers#46180",
+    "sgl-project/sglang-omni#898",
     "ray-project/ray#64053",
     "huggingface/optimum-intel#1801",
 ]
