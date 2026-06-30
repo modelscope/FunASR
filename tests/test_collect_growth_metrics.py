@@ -360,6 +360,51 @@ def test_collect_integration_metrics_classifies_known_external_ci_failure(monkey
     assert integration["next_action"] == "request rerun"
 
 
+def test_collect_integration_metrics_handles_known_external_ci_aggregate_race(monkeypatch):
+    module = load_growth_metrics_module()
+
+    def fake_fetch_json(url, headers=None):
+        if url == "https://api.github.com/repos/huggingface/transformers/pulls/46180":
+            return {
+                "number": 46180,
+                "title": "Add Fun-ASR-Nano model",
+                "state": "open",
+                "draft": False,
+                "mergeable": True,
+                "mergeable_state": "blocked",
+                "html_url": "https://github.com/huggingface/transformers/pull/46180",
+                "updated_at": "2026-06-30T04:15:07Z",
+                "head": {"sha": "8ed336b", "ref": "add-fun-asr-nano"},
+                "base": {"ref": "main"},
+                "user": {"login": "LauraGPT"},
+            }
+        if url == "https://api.github.com/repos/huggingface/transformers/commits/8ed336b/status":
+            return {"state": "success", "statuses": []}
+        if url == "https://api.github.com/repos/huggingface/transformers/commits/8ed336b/check-runs?per_page=100":
+            return {
+                "total_count": 98,
+                "check_runs": [
+                    {
+                        "name": "pr-ci / tests_processors / tests_processors [shard 3/8]",
+                        "status": "completed",
+                        "conclusion": "failure",
+                        "html_url": "https://github.com/huggingface/transformers/actions/runs/28419525291/job/84209871338",
+                    },
+                ],
+            }
+        raise AssertionError(f"unexpected URL: {url}")
+
+    monkeypatch.setattr(module, "fetch_json", fake_fetch_json)
+
+    metrics = module.collect_integration_metrics(["huggingface/transformers#46180"])
+
+    integration = metrics["integrations"][0]
+    assert integration["known_external_failure_reason"] == (
+        "LightOnOCR shared hub-cache read-only failure; PR CI status is the aggregate failure"
+    )
+    assert integration["next_action"] == "request rerun"
+
+
 def test_format_ecosystem_markdown_includes_open_pull_requests():
     module = load_growth_metrics_module()
     metrics = {

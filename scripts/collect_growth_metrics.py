@@ -216,10 +216,12 @@ def classify_known_external_failure(spec: str, checks: Dict[str, Any]) -> Option
     }
     if not failed_names:
         return None
+    if checks.get("pending_check_runs"):
+        return None
 
     direct_names = set(known_failure["failed_check_names"])
     aggregate_names = set(known_failure.get("aggregate_check_names") or [])
-    if failed_names == direct_names | aggregate_names:
+    if failed_names <= direct_names | aggregate_names and direct_names <= failed_names:
         return str(known_failure["reason"])
     return None
 
