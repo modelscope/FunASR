@@ -147,7 +147,7 @@ def summarize_commit_checks(repo: str, head_sha: str) -> Dict[str, Any]:
     status_state = status.get("state")
     if failed_check_runs or status_state in {"error", "failure"}:
         state = "failure"
-    elif pending_check_runs or status_state == "pending":
+    elif pending_check_runs:
         state = "pending"
     elif check_runs or status.get("statuses"):
         state = "success"

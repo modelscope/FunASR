@@ -423,6 +423,40 @@ def test_collect_integration_metrics_classifies_review_bot_failure(monkeypatch):
     assert integration["checks"]["failed_check_runs"][0]["name"] == "claude-review"
 
 
+def test_collect_integration_metrics_treats_empty_pending_status_as_unknown(monkeypatch):
+    module = load_growth_metrics_module()
+
+    def fake_fetch_json(url, headers=None):
+        if url == "https://api.github.com/repos/sgl-project/sglang-omni/pulls/898":
+            return {
+                "number": 898,
+                "title": "Add Fun-ASR serving support",
+                "state": "open",
+                "draft": False,
+                "mergeable": True,
+                "mergeable_state": "blocked",
+                "html_url": "https://github.com/sgl-project/sglang-omni/pull/898",
+                "updated_at": "2026-06-30T04:48:08Z",
+                "head": {"sha": "c081a79", "ref": "funasr-serving"},
+                "base": {"ref": "main"},
+                "user": {"login": "PoTaTo-Mika"},
+            }
+        if url == "https://api.github.com/repos/sgl-project/sglang-omni/commits/c081a79/status":
+            return {"state": "pending", "statuses": []}
+        if url == "https://api.github.com/repos/sgl-project/sglang-omni/commits/c081a79/check-runs?per_page=100":
+            return {"total_count": 0, "check_runs": []}
+        raise AssertionError(f"unexpected URL: {url}")
+
+    monkeypatch.setattr(module, "fetch_json", fake_fetch_json)
+
+    metrics = module.collect_integration_metrics(["sgl-project/sglang-omni#898"])
+
+    integration = metrics["integrations"][0]
+    assert integration["checks"]["state"] == "unknown"
+    assert integration["checks"]["pending_check_runs"] == []
+    assert integration["next_action"] == "inspect"
+
+
 def test_format_integration_markdown_includes_update_age_and_next_action():
     module = load_growth_metrics_module()
     metrics = {
