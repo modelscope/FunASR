@@ -1,0 +1,19 @@
+{
+  "$schema": "https://glama.ai/api/mcp/v1/schemas/glama.json",
+  "name": "funasr",
+  "display_name": "FunASR MCP Server",
+  "description": "Local speech recognition MCP server powered by FunASR and SenseVoice. It exposes a transcribe_audio tool for privacy-friendly audio transcription from local files.",
+  "repository": "https://github.com/modelscope/FunASR",
+  "license": "MIT",
+  "runtime": "python",
+  "tags": ["speech-to-text", "asr", "audio", "funasr", "sensevoice", "local", "mcp"],
+  "mcpServers": {
+    "funasr": {
+      "command": "python",
+      "args": ["/app/funasr_mcp.py"],
+      "env": {
+        "FUNASR_DEVICE": "cpu"
+      }
+    }
+  }
+}
