@@ -36,7 +36,7 @@ This plan focuses on useful adoption work rather than vanity marketing: if more 
 
 As of 2026-06-30, the ecosystem has 34,622 combined GitHub stars, or 3,398 additional stars since the 31,224 baseline. The remaining gap to the +20,000 target is 16,602 stars by 2026-09-30.
 
-Keep this snapshot fresh during weekly planning:
+Keep this snapshot fresh during weekly planning. The ecosystem mode also reports the remaining gap, days left to 2026-09-30, and the required daily average:
 
 ```bash
 python scripts/collect_growth_metrics.py --ecosystem

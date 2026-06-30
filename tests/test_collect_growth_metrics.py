@@ -2,6 +2,7 @@ import importlib.util
 import io
 import json
 import sys
+from datetime import date
 from contextlib import redirect_stdout
 from pathlib import Path
 
@@ -83,6 +84,47 @@ def test_collect_ecosystem_metrics_sums_repositories_and_target_gap(monkeypatch)
         "FunAudioLLM/SenseVoice",
         "modelscope/FunClip",
     ]
+
+
+def test_collect_ecosystem_metrics_calculates_daily_target(monkeypatch):
+    module = load_growth_metrics_module()
+
+    def fake_fetch_json(url, headers=None):
+        if url.startswith("https://api.github.com/repos/"):
+            repo = url.removeprefix("https://api.github.com/repos/")
+            stars = {
+                "modelscope/FunASR": 18715,
+                "FunAudioLLM/Fun-ASR": 1318,
+                "FunAudioLLM/SenseVoice": 8718,
+                "modelscope/FunClip": 5872,
+            }[repo]
+            return {
+                "stargazers_count": stars,
+                "forks_count": 0,
+                "subscribers_count": 0,
+                "open_issues_count": 0,
+                "default_branch": "main",
+                "pushed_at": "2026-06-30T00:00:00Z",
+                "html_url": f"https://github.com/{repo}",
+            }
+        if url == "https://pypi.org/pypi/funasr/json":
+            return {"info": {"version": "1.3.14", "summary": "FunASR", "project_url": "https://pypi.org/project/funasr/"}}
+        raise AssertionError(f"unexpected URL: {url}")
+
+    monkeypatch.setattr(module, "fetch_json", fake_fetch_json)
+
+    metrics = module.collect_ecosystem_metrics(
+        ["modelscope/FunASR", "FunAudioLLM/Fun-ASR", "FunAudioLLM/SenseVoice", "modelscope/FunClip"],
+        package="funasr",
+        baseline_stars=31224,
+        target_additional_stars=20000,
+        target_date="2026-09-30",
+        today=date(2026, 6, 30),
+    )
+
+    assert metrics["ecosystem"]["target_date"] == "2026-09-30"
+    assert metrics["ecosystem"]["days_remaining"] == 92
+    assert metrics["ecosystem"]["required_daily_average"] == 181
 
 
 def test_main_outputs_ecosystem_json(monkeypatch):
