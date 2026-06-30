@@ -28,6 +28,28 @@ the Docker build context so the container entrypoint runs `funasr_mcp.py`.
 The `glama.json` file in this directory declares the MCP server command and
 metadata for directory scanners.
 
+### Glama submission checklist
+
+Use these values when adding the server at <https://glama.ai/mcp/servers>:
+
+| Field | Value |
+|------|-------|
+| Repository URL | <https://github.com/modelscope/FunASR> |
+| Docker build context | `examples/mcp_server` |
+| Dockerfile path | `examples/mcp_server/Dockerfile` |
+| Server command | `python /app/funasr_mcp.py` |
+| Expected MCP tool | `transcribe_audio` |
+
+After Glama finishes evaluation, verify that the score badge endpoint returns
+success before adding it to directory PRs:
+
+```markdown
+[![modelscope/FunASR MCP server](https://glama.ai/mcp/servers/modelscope/FunASR/badges/score.svg)](https://glama.ai/mcp/servers/modelscope/FunASR)
+```
+
+If the badge endpoint still returns 404, keep the badge out of external
+directory submissions until the Glama listing is live.
+
 ### 3. Configure your AI tool
 
 **Claude Code** (`~/.claude.json`):
