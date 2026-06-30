@@ -486,6 +486,46 @@ def test_collect_integration_metrics_recommends_review_for_clean_success_pr(monk
     assert metrics["integrations"][0]["next_action"] == "request review"
 
 
+def test_collect_integration_metrics_applies_known_review_gate(monkeypatch):
+    module = load_growth_metrics_module()
+
+    def fake_fetch_json(url, headers=None):
+        if url == "https://api.github.com/repos/punkpeye/awesome-mcp-servers/pulls/7153":
+            return {
+                "number": 7153,
+                "title": "Add FunASR speech recognition MCP server",
+                "state": "open",
+                "draft": False,
+                "mergeable": True,
+                "mergeable_state": "clean",
+                "html_url": "https://github.com/punkpeye/awesome-mcp-servers/pull/7153",
+                "updated_at": "2026-06-16T04:21:55Z",
+                "head": {"sha": "d28680e", "ref": "add-funasr-mcp-server"},
+                "base": {"ref": "main"},
+                "user": {"login": "LauraGPT"},
+            }
+        if url == "https://api.github.com/repos/punkpeye/awesome-mcp-servers/commits/d28680e/status":
+            return {"state": "success", "statuses": []}
+        if url == "https://api.github.com/repos/punkpeye/awesome-mcp-servers/commits/d28680e/check-runs?per_page=100":
+            return {
+                "total_count": 2,
+                "check_runs": [
+                    {"name": "check-submission", "status": "completed", "conclusion": "success"},
+                    {"name": "welcome", "status": "completed", "conclusion": "skipped"},
+                ],
+            }
+        raise AssertionError(f"unexpected URL: {url}")
+
+    monkeypatch.setattr(module, "fetch_json", fake_fetch_json)
+
+    metrics = module.collect_integration_metrics(["punkpeye/awesome-mcp-servers#7153"])
+
+    integration = metrics["integrations"][0]
+    assert integration["checks"]["state"] == "success"
+    assert integration["known_review_gate_reason"] == "Glama listing and score badge required before review"
+    assert integration["next_action"] == "submit Glama"
+
+
 def test_collect_integration_metrics_surfaces_pending_cla_status(monkeypatch):
     module = load_growth_metrics_module()
 
@@ -874,6 +914,36 @@ def test_format_integration_markdown_lists_high_exposure_priorities_by_stars():
     assert ray in output
     assert output.index(transformers) < output.index(ray)
     assert "deleted-org/deleted-repo#1" not in output.split("## High-exposure priorities", 1)[1].split("## Failed or pending checks", 1)[0]
+
+
+def test_format_integration_markdown_lists_known_review_gates():
+    module = load_growth_metrics_module()
+    metrics = {
+        "collected_at_utc": "2026-07-02T00:00:00+00:00",
+        "integrations": [
+            {
+                "pr": "punkpeye/awesome-mcp-servers#7153",
+                "html_url": "https://github.com/punkpeye/awesome-mcp-servers/pull/7153",
+                "state": "open",
+                "mergeable_state": "clean",
+                "repo_stars": 90_000,
+                "repo_forks": 12_000,
+                "updated_at": "2026-06-16T04:21:55Z",
+                "updated_age_days": 14,
+                "next_action": "submit Glama",
+                "known_review_gate_reason": "Glama listing and score badge required before review",
+                "checks": {"state": "success", "failed_check_runs": [], "pending_check_runs": []},
+            }
+        ],
+    }
+
+    output = module.format_integration_markdown(metrics)
+
+    assert "## Manual review gates" in output
+    assert (
+        "- [punkpeye/awesome-mcp-servers#7153](https://github.com/punkpeye/awesome-mcp-servers/pull/7153): "
+        "Glama listing and score badge required before review"
+    ) in output
 
 
 def test_collect_issue_metrics_filters_pull_requests_and_assigns_waiting_on(monkeypatch):
