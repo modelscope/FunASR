@@ -34,7 +34,7 @@ This plan focuses on useful adoption work rather than vanity marketing: if more 
 
 ## Current campaign snapshot
 
-As of 2026-06-30, the ecosystem has 34,622 combined GitHub stars, or 3,398 additional stars since the 31,224 baseline. The remaining gap to the +20,000 target is 16,602 stars by 2026-09-30.
+As of 2026-06-30, the ecosystem has 34,623 combined GitHub stars, or 3,399 additional stars since the 31,224 baseline. The remaining gap to the +20,000 target is 16,601 stars by 2026-09-30.
 
 Keep this snapshot fresh during weekly planning. The ecosystem mode also reports the remaining gap, days left to 2026-09-30, and the required daily average:
 
@@ -102,6 +102,31 @@ Daily maintainer loop:
 - Add third-party integrations and community projects to README when they are maintained and runnable.
 - Keep citations and paper links visible for researchers.
 - Track and unblock integrations in Hugging Face Transformers, inference runtimes, agent frameworks, workflow tools, video tools, and speech-recognition libraries.
+
+## External integration tracker
+
+High-visibility external integrations can create more qualified traffic than a one-off announcement because they put FunASR in the workflow users already trust. Track them as an operations queue, not as a comment-ping list.
+
+Refresh this table before weekly planning and after any reviewer or CI change:
+
+```bash
+gh pr view 46180 -R huggingface/transformers --json state,mergeable,reviewDecision,statusCheckRollup,updatedAt,url
+gh pr view 64053 -R ray-project/ray --json state,mergeable,reviewDecision,statusCheckRollup,updatedAt,url
+gh pr view 1801 -R huggingface/optimum-intel --json state,mergeable,reviewDecision,statusCheckRollup,updatedAt,url
+```
+
+| Integration PR | Growth reason | Current maintainer action |
+|---|---|---|
+| `huggingface/transformers#46180` Fun-ASR-Nano model support | Makes Fun-ASR-Nano usable through the default HF API surface and model docs | Keep CI evidence current, address only actionable review threads, and avoid repeating maintainer pings unless new evidence appears. If `tests_processors` fails only in unrelated LightOnOCR cache setup, ask for a rerun once with the exact failing job. |
+| `ray-project/ray#64053` Ray Serve FunASR ASR example | Puts FunASR in production serving docs for teams already using Ray | Monitor review, answer questions quickly, and keep the example command aligned with the current OpenAI-compatible API behavior. |
+| `huggingface/optimum-intel#1801` OpenVINO support | Helps CPU and edge users evaluate Fun-ASR on Intel hardware | Watch for CI or reviewer feedback, then validate a minimal inference path before promoting it in FunASR docs. |
+
+Operating rules:
+
+- Comment on external PRs only when there is new evidence, a reviewer question, or a concrete unblock; avoid low-signal status bumps.
+- Keep each integration's local verification command, CI link, and latest reviewer decision in the weekly notes.
+- Promote an integration in FunASR README or release notes only after it is merged or has a maintained, runnable branch.
+- When a third-party PR stalls, look for a smaller docs/example PR in that upstream instead of forcing a large runtime integration.
 
 ## Tracking cadence
 
