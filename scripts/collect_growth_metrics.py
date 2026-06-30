@@ -62,12 +62,19 @@ def github_headers() -> Dict[str, str]:
 def collect_github_repo_metrics(repo: str) -> Dict[str, Any]:
     owner_repo = repo.strip("/")
     github = fetch_json(f"https://api.github.com/repos/{owner_repo}", github_headers())
+    open_pull_requests = len(
+        fetch_json(f"https://api.github.com/repos/{owner_repo}/pulls?state=open&per_page=100", github_headers())
+    )
+    open_items = github.get("open_issues_count")
+    open_issues = max((open_items or 0) - open_pull_requests, 0) if open_items is not None else None
     return {
         "repo": owner_repo,
         "stars": github.get("stargazers_count"),
         "forks": github.get("forks_count"),
         "watchers": github.get("subscribers_count"),
-        "open_issues": github.get("open_issues_count"),
+        "open_items": open_items,
+        "open_issues": open_issues,
+        "open_pull_requests": open_pull_requests,
         "default_branch": github.get("default_branch"),
         "pushed_at": github.get("pushed_at"),
         "html_url": github.get("html_url"),
@@ -227,6 +234,9 @@ def format_markdown(metrics: Dict[str, Any], star_goal: int) -> str:
         f"- GitHub forks: **{github.get('forks'):,}**" if github.get("forks") is not None else "- GitHub forks: n/a",
         f"- GitHub watchers: **{github.get('watchers'):,}**" if github.get("watchers") is not None else "- GitHub watchers: n/a",
         f"- Open issues: **{github.get('open_issues'):,}**" if github.get("open_issues") is not None else "- Open issues: n/a",
+        f"- Open pull requests: **{github.get('open_pull_requests'):,}**"
+        if github.get("open_pull_requests") is not None
+        else "- Open pull requests: n/a",
         f"- PyPI package: **{pypi.get('package')} {pypi.get('version')}**",
         f"- Last GitHub push: `{github.get('pushed_at')}`",
         "",
@@ -256,8 +266,8 @@ def format_ecosystem_markdown(metrics: Dict[str, Any]) -> str:
         "",
         "## Repositories",
         "",
-        "| Repository | Stars | Forks | Open issues | Last push |",
-        "|---|---:|---:|---:|---|",
+        "| Repository | Stars | Forks | Open issues | Open PRs | Last push |",
+        "|---|---:|---:|---:|---:|---|",
     ]
     for repo in ecosystem["repositories"]:
         lines.append(
@@ -265,6 +275,7 @@ def format_ecosystem_markdown(metrics: Dict[str, Any]) -> str:
             f"{(repo.get('stars') or 0):,} | "
             f"{(repo.get('forks') or 0):,} | "
             f"{(repo.get('open_issues') or 0):,} | "
+            f"{(repo.get('open_pull_requests') or 0):,} | "
             f"`{repo.get('pushed_at')}` |"
         )
     lines.extend(

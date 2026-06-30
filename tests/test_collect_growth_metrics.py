@@ -15,6 +15,33 @@ def load_growth_metrics_module():
     return module
 
 
+def test_collect_github_repo_metrics_splits_open_issues_and_pull_requests(monkeypatch):
+    module = load_growth_metrics_module()
+
+    def fake_fetch_json(url, headers=None):
+        if url == "https://api.github.com/repos/modelscope/FunASR":
+            return {
+                "stargazers_count": 18716,
+                "forks_count": 3100,
+                "subscribers_count": 210,
+                "open_issues_count": 5,
+                "default_branch": "main",
+                "pushed_at": "2026-06-30T02:26:33Z",
+                "html_url": "https://github.com/modelscope/FunASR",
+            }
+        if url == "https://api.github.com/repos/modelscope/FunASR/pulls?state=open&per_page=100":
+            return [{"number": 3056}, {"number": 3057}]
+        raise AssertionError(f"unexpected URL: {url}")
+
+    monkeypatch.setattr(module, "fetch_json", fake_fetch_json)
+
+    metrics = module.collect_github_repo_metrics("modelscope/FunASR")
+
+    assert metrics["open_items"] == 5
+    assert metrics["open_pull_requests"] == 2
+    assert metrics["open_issues"] == 3
+
+
 def test_collect_ecosystem_metrics_sums_repositories_and_target_gap(monkeypatch):
     module = load_growth_metrics_module()
 
@@ -58,6 +85,8 @@ def test_collect_ecosystem_metrics_sums_repositories_and_target_gap(monkeypatch)
     }
 
     def fake_fetch_json(url, headers=None):
+        if url.endswith("/pulls?state=open&per_page=100"):
+            return []
         if url.startswith("https://api.github.com/repos/"):
             repo = url.removeprefix("https://api.github.com/repos/")
             return github_payloads[repo]
@@ -90,6 +119,8 @@ def test_collect_ecosystem_metrics_calculates_daily_target(monkeypatch):
     module = load_growth_metrics_module()
 
     def fake_fetch_json(url, headers=None):
+        if url.endswith("/pulls?state=open&per_page=100"):
+            return []
         if url.startswith("https://api.github.com/repos/"):
             repo = url.removeprefix("https://api.github.com/repos/")
             stars = {
@@ -185,6 +216,40 @@ def test_collect_integration_metrics_summarizes_pull_request_checks(monkeypatch)
     ]
 
 
+def test_format_ecosystem_markdown_includes_open_pull_requests():
+    module = load_growth_metrics_module()
+    metrics = {
+        "collected_at_utc": "2026-06-30T02:30:00+00:00",
+        "ecosystem": {
+            "repositories": [
+                {
+                    "repo": "modelscope/FunASR",
+                    "stars": 18716,
+                    "forks": 3100,
+                    "open_issues": 3,
+                    "open_pull_requests": 2,
+                    "pushed_at": "2026-06-30T02:26:33Z",
+                    "html_url": "https://github.com/modelscope/FunASR",
+                }
+            ],
+            "total_stars": 18716,
+            "baseline_stars": 31224,
+            "added_stars": -12508,
+            "target_additional_stars": 20000,
+            "remaining_to_target": 32508,
+            "target_date": "2026-09-30",
+            "days_remaining": 92,
+            "required_daily_average": 354,
+        },
+        "pypi": {"package": "funasr", "version": "1.3.14", "project_url": "https://pypi.org/project/funasr/"},
+    }
+
+    output = module.format_ecosystem_markdown(metrics)
+
+    assert "| Repository | Stars | Forks | Open issues | Open PRs | Last push |" in output
+    assert "| [modelscope/FunASR](https://github.com/modelscope/FunASR) | 18,716 | 3,100 | 3 | 2 |" in output
+
+
 def test_main_outputs_ecosystem_json(monkeypatch):
     module = load_growth_metrics_module()
 
@@ -196,6 +261,8 @@ def test_main_outputs_ecosystem_json(monkeypatch):
     }
 
     def fake_fetch_json(url, headers=None):
+        if url.endswith("/pulls?state=open&per_page=100"):
+            return []
         if url.startswith("https://api.github.com/repos/"):
             repo = url.removeprefix("https://api.github.com/repos/")
             return {
