@@ -76,6 +76,12 @@ KNOWN_ASSISTED_REVIEW_REQUESTS = {
     "lukasmasuch/best-of-ml-python#455": {
         "reason": "review evidence already posted; avoid duplicate pings",
     },
+    "mahseema/awesome-ai-tools#1689": {
+        "reason": "review evidence already posted; avoid duplicate pings",
+    },
+    "ai4s-research/awesome-ai-for-science#69": {
+        "reason": "review evidence already posted; avoid duplicate pings",
+    },
     "tmoroney/auto-subs#629": {
         "reason": "review evidence already posted; avoid duplicate pings",
     },
