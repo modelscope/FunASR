@@ -34,7 +34,7 @@ This plan focuses on useful adoption work rather than vanity marketing: if more 
 
 ## Current campaign snapshot
 
-As of 2026-06-30, the ecosystem has 34,634 combined GitHub stars, or 3,410 additional stars since the 31,224 baseline. The remaining gap to the +20,000 target is 16,590 stars by 2026-09-30.
+As of 2026-06-30 11:42 UTC, the ecosystem has 34,660 combined GitHub stars, or 3,436 additional stars since the 31,224 baseline. The remaining gap to the +20,000 target is 16,564 stars by 2026-09-30, which requires roughly 181 stars/day across the remaining 92 days.
 
 Keep this snapshot fresh during weekly planning. The ecosystem mode also reports the remaining gap, days left to 2026-09-30, and the required daily average:
 
@@ -125,7 +125,7 @@ Set `GITHUB_TOKEN` when running this from CI or a shared network so GitHub's pub
 
 | Integration PR | Growth reason | Current maintainer action |
 |---|---|---|
-| `huggingface/transformers#46180` Fun-ASR-Nano model support | Makes Fun-ASR-Nano usable through the default HF API surface and model docs | Keep CI evidence current, address only actionable review threads, and avoid repeating maintainer pings unless new evidence appears. If `tests_processors` fails only in unrelated LightOnOCR cache setup, ask for a rerun once with the exact failing job. |
+| `huggingface/transformers#46180` Fun-ASR-Nano model support | Makes Fun-ASR-Nano usable through the default HF API surface and model docs | Current blocker is an unrelated LightOnOCR shared-cache failure in `tests_processors`; the account cannot rerun Hugging Face Actions jobs, so wait for a maintainer rerun and avoid duplicate comments unless new CI evidence appears. |
 | `sgl-project/sglang-omni#898` Fun-ASR serving support | Exposes Fun-ASR-Nano through a high-visibility serving runtime for ASR benchmarks and GPU deployment | Help keep benchmark claims precise: exact checkpoint/revision, dtype, GPU, concurrency, SeedTTS EN full-set comparison against Qwen3-ASR, and a copy-paste smoke command. |
 | `ray-project/ray#64053` Ray Serve FunASR ASR example | Puts FunASR in production serving docs for teams already using Ray | Monitor review, answer questions quickly, and keep the example command aligned with the current OpenAI-compatible API behavior. |
 | `huggingface/optimum-intel#1801` OpenVINO support | Helps CPU and edge users evaluate Fun-ASR on Intel hardware | Watch for CI or reviewer feedback, then validate a minimal inference path before promoting it in FunASR docs. |
@@ -141,7 +141,7 @@ Set `GITHUB_TOKEN` when running this from CI or a shared network so GitHub's pub
 | `mudler/LocalAI#10090` FunASR backend | Exposes FunASR through a high-star local AI engine used by self-hosters and edge deployments | Keep the backend registry conflict-free after upstream changes, ensure DCO stays green, and maintain one CPU smoke path plus GPU requirements notes. |
 | `agno-agi/agno#8501` FunASR transcription tool | Places FunASR in a high-star agent platform as a local multilingual transcription tool | Keep issue linkage and formatting gates green, avoid heavy default dependencies, and respond to review scope requests quickly. |
 | `GetStream/Vision-Agents#606` FunASR STT plugin | Adds SenseVoice/FunASR to multimodal voice and vision agent examples | Keep package include paths and tests aligned with upstream conventions, then watch review threads for optional dependency or documentation requests. |
-| `TEN-framework/ten-framework#2191` FunASR ASR extension | Places SenseVoice/FunASR in a realtime multimodal agent framework with extension discovery | Resolve review comments and failing review automation with concrete code/doc fixes rather than status pings. |
+| `TEN-framework/ten-framework#2191` FunASR ASR extension | Places SenseVoice/FunASR in a realtime multimodal agent framework with extension discovery | The failing `claude-review` action is a fork-permission gate, not a code failure; wait for maintainer-side review or rerun, and respond only to concrete code/doc feedback. |
 | `activepieces/activepieces#13985` FunASR speech recognition piece | Gives no-code workflow users a direct FunASR speech recognition action | The CLA status is author-controlled; monitor only for maintainer feedback or test failures until the author-side gate clears. |
 | `Uberi/speech_recognition#903` FunASR recognizer | Exposes FunASR through a widely known Python speech-recognition wrapper | Keep the recognizer optional and lightweight, and be ready with a minimal install/import smoke test if maintainers ask for scope reduction. |
 | `ai4s-research/awesome-ai-for-science#69` FunASR science toolkit listing | Creates a discovery path from scientific AI tooling lists to FunASR for transcription and field-recording workflows | Validate the link, keep the description technically accurate, and avoid extra comments unless maintainers ask for category or wording changes. |
