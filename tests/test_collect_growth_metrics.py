@@ -250,6 +250,92 @@ def test_format_ecosystem_markdown_includes_open_pull_requests():
     assert "| [modelscope/FunASR](https://github.com/modelscope/FunASR) | 18,716 | 3,100 | 3 | 2 |" in output
 
 
+def test_collect_issue_metrics_filters_pull_requests_and_assigns_waiting_on(monkeypatch):
+    module = load_growth_metrics_module()
+
+    def fake_fetch_json(url, headers=None):
+        if url == "https://api.github.com/repos/modelscope/FunASR/issues?state=open&per_page=100":
+            return [
+                {
+                    "number": 3038,
+                    "title": "realtime websocket falls behind with two clients",
+                    "html_url": "https://github.com/modelscope/FunASR/issues/3038",
+                    "updated_at": "2026-06-29T19:22:38Z",
+                    "comments": 4,
+                    "user": {"login": "liujixingit"},
+                    "labels": [{"name": "bug"}, {"name": "needs feedback"}],
+                },
+                {
+                    "number": 3034,
+                    "title": "Fun-ASR-Nano on Ascend NPU",
+                    "html_url": "https://github.com/modelscope/FunASR/issues/3034",
+                    "updated_at": "2026-06-29T19:49:07Z",
+                    "comments": 3,
+                    "user": {"login": "pubulichen"},
+                    "labels": [{"name": "help wanted"}, {"name": "ready for PR"}],
+                },
+                {
+                    "number": 3057,
+                    "title": "open pull request should be ignored",
+                    "pull_request": {"url": "https://api.github.com/repos/modelscope/FunASR/pulls/3057"},
+                    "labels": [],
+                },
+            ]
+        raise AssertionError(f"unexpected URL: {url}")
+
+    monkeypatch.setattr(module, "fetch_json", fake_fetch_json)
+
+    metrics = module.collect_issue_metrics(["modelscope/FunASR"])
+
+    repository = metrics["repositories"][0]
+    assert repository["repo"] == "modelscope/FunASR"
+    assert repository["open_issue_count"] == 2
+    assert [issue["number"] for issue in repository["open_issues"]] == [3038, 3034]
+    assert repository["open_issues"][0]["labels"] == ["bug", "needs feedback"]
+    assert repository["open_issues"][0]["waiting_on"] == "reporter"
+    assert repository["open_issues"][1]["waiting_on"] == "contributor"
+
+
+def test_main_outputs_issues_json(monkeypatch):
+    module = load_growth_metrics_module()
+
+    def fake_fetch_json(url, headers=None):
+        if url == "https://api.github.com/repos/modelscope/FunASR/issues?state=open&per_page=100":
+            return [
+                {
+                    "number": 2959,
+                    "title": "postprocess hotwords",
+                    "html_url": "https://github.com/modelscope/FunASR/issues/2959",
+                    "updated_at": "2026-06-29T19:46:28Z",
+                    "comments": 2,
+                    "user": {"login": "HaujetZhao"},
+                    "labels": [{"name": "good first issue"}, {"name": "ready for PR"}],
+                }
+            ]
+        raise AssertionError(f"unexpected URL: {url}")
+
+    monkeypatch.setattr(module, "fetch_json", fake_fetch_json)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "collect_growth_metrics.py",
+            "--issues",
+            "--repos",
+            "modelscope/FunASR",
+            "--format",
+            "json",
+        ],
+    )
+
+    with redirect_stdout(io.StringIO()) as stdout:
+        assert module.main() == 0
+
+    payload = json.loads(stdout.getvalue())
+    assert payload["repositories"][0]["open_issues"][0]["number"] == 2959
+    assert payload["repositories"][0]["open_issues"][0]["waiting_on"] == "contributor"
+
+
 def test_main_outputs_ecosystem_json(monkeypatch):
     module = load_growth_metrics_module()
 
