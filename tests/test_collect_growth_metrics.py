@@ -508,6 +508,7 @@ def test_known_assisted_review_requests_include_validated_review_gate_prs():
         "ray-project/ray#64053",
         "agno-agi/agno#8501",
         "pipecat-ai/pipecat#4844",
+        "GetStream/Vision-Agents#606",
     }
 
     assert expected_prs.issubset(set(module.KNOWN_ASSISTED_REVIEW_REQUESTS))

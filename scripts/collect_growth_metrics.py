@@ -106,6 +106,9 @@ KNOWN_ASSISTED_REVIEW_REQUESTS = {
     "pipecat-ai/pipecat#4844": {
         "reason": "review evidence already posted; avoid duplicate pings",
     },
+    "GetStream/Vision-Agents#606": {
+        "reason": "review feedback addressed and checks are green; avoid duplicate pings",
+    },
 }
 REPORTER_WAITING_LABELS = {"needs feedback"}
 CONTRIBUTOR_WAITING_LABELS = {"good first issue", "help wanted", "ready for PR"}
