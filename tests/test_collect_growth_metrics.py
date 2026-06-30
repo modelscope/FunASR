@@ -501,6 +501,7 @@ def test_known_assisted_review_requests_include_validated_review_gate_prs():
     module = load_growth_metrics_module()
 
     expected_prs = {
+        "livekit/agents#6176",
         "run-llama/llama_index#21958",
         "run-llama/llama_index#21996",
         "mudler/LocalAI#10090",

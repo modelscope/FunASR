@@ -73,6 +73,9 @@ KNOWN_ASSISTED_REVIEW_REQUESTS = {
     "infiniflow/ragflow#16473": {
         "reason": "review evidence already posted; avoid duplicate pings",
     },
+    "livekit/agents#6176": {
+        "reason": "review feedback addressed and checks are green; avoid duplicate pings",
+    },
     "run-llama/llama_index#21958": {
         "reason": "review evidence already posted; avoid duplicate pings",
     },
