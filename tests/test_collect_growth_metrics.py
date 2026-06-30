@@ -689,7 +689,10 @@ def test_collect_integration_metrics_classifies_review_bot_failure(monkeypatch):
     metrics = module.collect_integration_metrics(["TEN-framework/ten-framework#2191"])
 
     integration = metrics["integrations"][0]
-    assert integration["next_action"] == "review bot gate"
+    assert integration["known_review_gate_reason"] == (
+        "Claude review action requires maintainer permissions for fork PRs"
+    )
+    assert integration["next_action"] == "wait for maintainer review"
     assert integration["checks"]["failed_check_runs"][0]["name"] == "claude-review"
 
 
