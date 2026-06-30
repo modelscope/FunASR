@@ -178,8 +178,13 @@ def recommend_integration_action(pull_request: Dict[str, Any], checks: Dict[str,
     pending_names = " ".join(
         str(check.get("name") or "") for check in checks.get("pending_check_runs") or []
     ).lower()
+    failed_names = " ".join(
+        str(check.get("name") or "") for check in checks.get("failed_check_runs") or []
+    ).lower()
     if "cla" in pending_names:
         return "resolve CLA"
+    if "claude-review" in failed_names or "review bot" in failed_names:
+        return "review bot gate"
     if check_state == "failure":
         return "fix checks"
     if check_state == "pending":
