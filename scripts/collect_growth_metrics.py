@@ -35,6 +35,7 @@ DEFAULT_INTEGRATION_PRS = [
     "huggingface/optimum-intel#1801",
     "huggingface/speech-to-speech#319",
     "livekit/agents#6176",
+    "punkpeye/awesome-mcp-servers#7153",
     "run-llama/llama_index#21958",
     "run-llama/llama_index#21996",
     "mem0ai/mem0#5571",

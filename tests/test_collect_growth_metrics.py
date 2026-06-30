@@ -90,6 +90,12 @@ def test_default_integration_prs_include_voice_agent_and_ml_discovery_lanes():
     assert expected_prs.issubset(set(module.DEFAULT_INTEGRATION_PRS))
 
 
+def test_default_integration_prs_include_mcp_discovery_lanes():
+    module = load_growth_metrics_module()
+
+    assert "punkpeye/awesome-mcp-servers#7153" in module.DEFAULT_INTEGRATION_PRS
+
+
 def test_default_integration_prs_exclude_archived_integration_prs():
     module = load_growth_metrics_module()
 
