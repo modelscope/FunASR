@@ -69,6 +69,17 @@ KNOWN_REVIEW_GATES = {
         "reason": "Glama listing and score badge required before review",
     }
 }
+KNOWN_ASSISTED_REVIEW_REQUESTS = {
+    "infiniflow/ragflow#16473": {
+        "reason": "review evidence already posted; avoid duplicate pings",
+    },
+    "lukasmasuch/best-of-ml-python#455": {
+        "reason": "review evidence already posted; avoid duplicate pings",
+    },
+    "tmoroney/auto-subs#629": {
+        "reason": "review evidence already posted; avoid duplicate pings",
+    },
+}
 REPORTER_WAITING_LABELS = {"needs feedback"}
 CONTRIBUTOR_WAITING_LABELS = {"good first issue", "help wanted", "ready for PR"}
 
@@ -239,6 +250,7 @@ def recommend_integration_action(
     checks: Dict[str, Any],
     known_external_failure_reason: Optional[str] = None,
     known_review_gate_action: Optional[str] = None,
+    known_assisted_review_reason: Optional[str] = None,
 ) -> str:
     if pull_request.get("state") != "open":
         return "archive"
@@ -272,6 +284,12 @@ def recommend_integration_action(
         return "wait for checks"
     if known_review_gate_action:
         return known_review_gate_action
+    if (
+        known_assisted_review_reason
+        and check_state in {"success", "unknown"}
+        and mergeable_state in {"clean", "unknown", None}
+    ):
+        return "wait for maintainer review"
 
     if check_state in {"success", "unknown"} and mergeable_state == "clean":
         return "request review"
@@ -292,6 +310,7 @@ def collect_pull_request_metrics(spec: str, now: Optional[dt.datetime] = None) -
     checks = summarize_commit_checks(repo, head_sha) if head_sha else {"state": "unknown"}
     known_external_failure_reason = classify_known_external_failure(spec, checks)
     known_review_gate = KNOWN_REVIEW_GATES.get(spec) or {}
+    known_assisted_review = KNOWN_ASSISTED_REVIEW_REQUESTS.get(spec) or {}
     updated_at = pull_request.get("updated_at")
     return {
         "pr": f"{repo}#{pr_number}",
@@ -314,11 +333,13 @@ def collect_pull_request_metrics(spec: str, now: Optional[dt.datetime] = None) -
         "checks": checks,
         "known_external_failure_reason": known_external_failure_reason,
         "known_review_gate_reason": known_review_gate.get("reason"),
+        "known_assisted_review_reason": known_assisted_review.get("reason"),
         "next_action": recommend_integration_action(
             pull_request,
             checks,
             known_external_failure_reason,
             known_review_gate.get("action"),
+            known_assisted_review.get("reason"),
         ),
     }
 
@@ -559,6 +580,16 @@ def format_integration_markdown(metrics: Dict[str, Any]) -> str:
             lines.append(
                 f"- [{integration['pr']}]({integration.get('html_url')}): "
                 f"{integration['known_review_gate_reason']}"
+            )
+    assisted_review_integrations = [
+        integration for integration in metrics["integrations"] if integration.get("known_assisted_review_reason")
+    ]
+    if assisted_review_integrations:
+        lines.extend(["", "## Assisted review waits", ""])
+        for integration in assisted_review_integrations:
+            lines.append(
+                f"- [{integration['pr']}]({integration.get('html_url')}): "
+                f"{integration['known_assisted_review_reason']}"
             )
     lines.extend(["", "## Failed or pending checks", ""])
     for integration in metrics["integrations"]:

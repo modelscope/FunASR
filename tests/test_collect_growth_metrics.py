@@ -454,36 +454,74 @@ def test_collect_integration_metrics_recommends_review_for_clean_success_pr(monk
     module = load_growth_metrics_module()
 
     def fake_fetch_json(url, headers=None):
-        if url == "https://api.github.com/repos/infiniflow/ragflow/pulls/16473":
+        if url == "https://api.github.com/repos/mahseema/awesome-ai-tools/pulls/1689":
             return {
-                "number": 16473,
-                "title": "feat(stt): add FunASR / SenseVoice provider",
+                "number": 1689,
+                "title": "Add FunASR",
                 "state": "open",
                 "draft": False,
                 "mergeable": True,
                 "mergeable_state": "clean",
-                "html_url": "https://github.com/infiniflow/ragflow/pull/16473",
-                "updated_at": "2026-06-30T03:16:39Z",
-                "head": {"sha": "818a295", "ref": "funasr/ragflow-15526-conflict-fix"},
+                "html_url": "https://github.com/mahseema/awesome-ai-tools/pull/1689",
+                "updated_at": "2026-06-30T06:44:34Z",
+                "head": {"sha": "9a19b5e", "ref": "add-funasr"},
                 "base": {"ref": "main"},
                 "user": {"login": "LauraGPT"},
             }
-        if url == "https://api.github.com/repos/infiniflow/ragflow/commits/818a295/status":
+        if url == "https://api.github.com/repos/mahseema/awesome-ai-tools/commits/9a19b5e/status":
             return {"state": "success", "statuses": []}
-        if url == "https://api.github.com/repos/infiniflow/ragflow/commits/818a295/check-runs?per_page=100":
+        if url == "https://api.github.com/repos/mahseema/awesome-ai-tools/commits/9a19b5e/check-runs?per_page=100":
             return {
                 "total_count": 1,
                 "check_runs": [
-                    {"name": "CodeRabbit", "status": "completed", "conclusion": "success"},
+                    {"name": "validate", "status": "completed", "conclusion": "success"},
                 ],
             }
         raise AssertionError(f"unexpected URL: {url}")
 
     monkeypatch.setattr(module, "fetch_json", fake_fetch_json)
 
-    metrics = module.collect_integration_metrics(["infiniflow/ragflow#16473"])
+    metrics = module.collect_integration_metrics(["mahseema/awesome-ai-tools#1689"])
 
     assert metrics["integrations"][0]["next_action"] == "request review"
+
+
+def test_collect_integration_metrics_marks_known_assisted_review_request(monkeypatch):
+    module = load_growth_metrics_module()
+
+    def fake_fetch_json(url, headers=None):
+        if url == "https://api.github.com/repos/lukasmasuch/best-of-ml-python/pulls/455":
+            return {
+                "number": 455,
+                "title": "Add FunASR",
+                "state": "open",
+                "draft": False,
+                "mergeable": True,
+                "mergeable_state": "clean",
+                "html_url": "https://github.com/lukasmasuch/best-of-ml-python/pull/455",
+                "updated_at": "2026-06-30T09:16:59Z",
+                "head": {"sha": "48f3070", "ref": "add-funasr"},
+                "base": {"ref": "main"},
+                "user": {"login": "LauraGPT"},
+            }
+        if url == "https://api.github.com/repos/lukasmasuch/best-of-ml-python/commits/48f3070/status":
+            return {"state": "success", "statuses": []}
+        if url == "https://api.github.com/repos/lukasmasuch/best-of-ml-python/commits/48f3070/check-runs?per_page=100":
+            return {
+                "total_count": 1,
+                "check_runs": [
+                    {"name": "tests", "status": "completed", "conclusion": "success"},
+                ],
+            }
+        raise AssertionError(f"unexpected URL: {url}")
+
+    monkeypatch.setattr(module, "fetch_json", fake_fetch_json)
+
+    metrics = module.collect_integration_metrics(["lukasmasuch/best-of-ml-python#455"])
+
+    integration = metrics["integrations"][0]
+    assert integration["known_assisted_review_reason"] == "review evidence already posted; avoid duplicate pings"
+    assert integration["next_action"] == "wait for maintainer review"
 
 
 def test_collect_integration_metrics_applies_known_review_gate(monkeypatch):
@@ -943,6 +981,36 @@ def test_format_integration_markdown_lists_known_review_gates():
     assert (
         "- [punkpeye/awesome-mcp-servers#7153](https://github.com/punkpeye/awesome-mcp-servers/pull/7153): "
         "Glama listing and score badge required before review"
+    ) in output
+
+
+def test_format_integration_markdown_lists_assisted_review_waits():
+    module = load_growth_metrics_module()
+    metrics = {
+        "collected_at_utc": "2026-07-02T00:00:00+00:00",
+        "integrations": [
+            {
+                "pr": "lukasmasuch/best-of-ml-python#455",
+                "html_url": "https://github.com/lukasmasuch/best-of-ml-python/pull/455",
+                "state": "open",
+                "mergeable_state": "clean",
+                "repo_stars": 23_652,
+                "repo_forks": 3_800,
+                "updated_at": "2026-06-30T09:16:59Z",
+                "updated_age_days": 0,
+                "next_action": "wait for maintainer review",
+                "known_assisted_review_reason": "review evidence already posted; avoid duplicate pings",
+                "checks": {"state": "success", "failed_check_runs": [], "pending_check_runs": []},
+            }
+        ],
+    }
+
+    output = module.format_integration_markdown(metrics)
+
+    assert "## Assisted review waits" in output
+    assert (
+        "- [lukasmasuch/best-of-ml-python#455](https://github.com/lukasmasuch/best-of-ml-python/pull/455): "
+        "review evidence already posted; avoid duplicate pings"
     ) in output
 
 
