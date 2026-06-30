@@ -220,7 +220,7 @@ for sentence in res:
     print(f"[说话人 {sentence['spk']}] {sentence['text']}")
 ```
 注：`spk_model` 也可以使用 `"cam++"` (CAM++ 模型)。ERes2NetV2 在短时说话人特征提取方面有所改进。
-自定义 `spk_model` 可以传 ModelScope 模型 ID 或本地模型路径；模型需要能通过 FunASR `AutoModel` 加载，并在 `generate()` 结果中返回 `spk_embedding`，后续说话人聚类会使用这些 embedding 分配 `spk` 标签。
+自定义 `spk_model` 可以传 ModelScope 模型 ID 或本地模型路径；模型需要能通过 FunASR `AutoModel` 加载，并在自身 `inference()` 方法中返回 `spk_embedding`，用户侧仍调用 `AutoModel.generate()`。后续说话人聚类会使用这些 embedding 分配 `spk` 标签。
 
 #### 多语言语音识别 (Qwen3-ASR)
 ```python

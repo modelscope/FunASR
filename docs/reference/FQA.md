@@ -197,7 +197,7 @@ model = AutoModel(
 result = model.generate(input="meeting.wav")
 ```
 
-For a fully custom speaker model, make sure its `generate()` output provides `spk_embedding`; the diarization post-processing and clustering steps use those embeddings to assign speaker labels. If your diarization model emits speaker segments directly instead of embeddings, add an adapter layer that converts its output to the current speaker-label structure.
+For a fully custom speaker model, make sure the model can be loaded by FunASR `AutoModel` and that its `inference()` method returns `spk_embedding`; the user-facing call still goes through `AutoModel.generate()`. The diarization post-processing and clustering steps use those embeddings to assign speaker labels. If your diarization model emits speaker segments directly instead of embeddings, add an adapter layer that converts its output to the current speaker-label structure.
 
 The tutorial has a longer ERes2NetV2 example: [Speaker Verification / Diarization](../tutorial/README.md#speaker-verification--diarization-eres2netv2).
 
