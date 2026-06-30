@@ -1070,6 +1070,51 @@ def test_format_integration_markdown_lists_active_operator_queue():
     assert "activepieces/activepieces#13985" not in active_queue
 
 
+def test_format_integration_markdown_lists_manual_handoff_gates():
+    module = load_growth_metrics_module()
+    metrics = {
+        "collected_at_utc": "2026-07-02T00:00:00+00:00",
+        "integrations": [
+            {
+                "pr": "punkpeye/awesome-mcp-servers#7153",
+                "html_url": "https://github.com/punkpeye/awesome-mcp-servers/pull/7153",
+                "state": "open",
+                "mergeable_state": "clean",
+                "repo_stars": 90_000,
+                "repo_forks": 12_000,
+                "updated_at": "2026-06-16T04:21:55Z",
+                "updated_age_days": 16,
+                "next_action": "submit Glama",
+                "known_review_gate_reason": "Glama listing and score badge required before review",
+                "checks": {"state": "success", "failed_check_runs": [], "pending_check_runs": []},
+            },
+            {
+                "pr": "huggingface/optimum-intel#1801",
+                "html_url": "https://github.com/huggingface/optimum-intel/pull/1801",
+                "state": "open",
+                "mergeable_state": "unstable",
+                "repo_stars": 600,
+                "repo_forks": 240,
+                "updated_at": "2026-06-30T04:20:02Z",
+                "updated_age_days": 0,
+                "next_action": "review gate",
+                "checks": {"state": "unknown", "failed_check_runs": [], "pending_check_runs": []},
+            },
+        ],
+    }
+
+    output = module.format_integration_markdown(metrics)
+
+    active_queue = output.split("## Active operator queue", 1)[1].split("## Manual handoff gates", 1)[0]
+    manual_gates = output.split("## Manual handoff gates", 1)[1].split("## Manual review gates", 1)[0]
+    assert "punkpeye/awesome-mcp-servers#7153" not in active_queue
+    assert (
+        "- [punkpeye/awesome-mcp-servers#7153](https://github.com/punkpeye/awesome-mcp-servers/pull/7153): "
+        "submit Glama; Glama listing and score badge required before review"
+    ) in manual_gates
+    assert "huggingface/optimum-intel#1801" not in manual_gates
+
+
 def test_format_integration_markdown_lists_known_review_gates():
     module = load_growth_metrics_module()
     metrics = {
