@@ -9,9 +9,9 @@
 import json
 import logging
 import sys
+from itertools import groupby
 
 from rapidfuzz.distance import Levenshtein
-from itertools import groupby
 import numpy as np
 import six
 
@@ -222,7 +222,7 @@ class ErrorCalculator(object):
             ref_chars = seq_true_text.replace(" ", "")
             char_eds.append(Levenshtein.distance(hyp_chars, ref_chars))
             char_ref_lens.append(len(ref_chars))
-        return float(sum(char_eds)) / sum(char_ref_lens)
+        return float(sum(char_eds)) / sum(char_ref_lens) if char_eds else None
 
     def calculate_wer(self, seqs_hat, seqs_true):
         """Calculate sentence-level WER score.
@@ -240,4 +240,4 @@ class ErrorCalculator(object):
             ref_words = seq_true_text.split()
             word_eds.append(Levenshtein.distance(hyp_words, ref_words))
             word_ref_lens.append(len(ref_words))
-        return float(sum(word_eds)) / sum(word_ref_lens)
+        return float(sum(word_eds)) / sum(word_ref_lens) if word_eds else None
