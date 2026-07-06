@@ -20,6 +20,10 @@ HotwordInput = Union[str, Sequence[str], Mapping[str, str], None]
 _EXPLICIT_SEPARATORS = ("=>", "->", "→")
 _TOKEN_PATTERN = re.compile(r"[\u4e00-\u9fff]|[a-zA-Z]+|[0-9]+")
 
+_LAZY_PINYIN = None
+_PINYIN_STYLE = None
+_RAPIDFUZZ_FUZZ = None
+
 
 @dataclass(frozen=True)
 class HotwordMatch:
@@ -42,25 +46,32 @@ class HotwordMatch:
 
 
 def _require_pypinyin():
-    try:
-        from pypinyin import Style, lazy_pinyin
-    except ImportError as exc:
-        raise ImportError(
-            "postprocess hotword fuzzy matching requires pypinyin. "
-            "Install it with: pip install pypinyin"
-        ) from exc
-    return lazy_pinyin, Style
+    global _LAZY_PINYIN, _PINYIN_STYLE
+    if _LAZY_PINYIN is None:
+        try:
+            from pypinyin import Style, lazy_pinyin
+        except ImportError as exc:
+            raise ImportError(
+                "postprocess hotword fuzzy matching requires pypinyin. "
+                "Install it with: pip install pypinyin"
+            ) from exc
+        _LAZY_PINYIN = lazy_pinyin
+        _PINYIN_STYLE = Style
+    return _LAZY_PINYIN, _PINYIN_STYLE
 
 
 def _require_rapidfuzz():
-    try:
-        from rapidfuzz import fuzz
-    except ImportError as exc:
-        raise ImportError(
-            "postprocess hotword fuzzy matching requires rapidfuzz. "
-            "Install it with: pip install rapidfuzz"
-        ) from exc
-    return fuzz
+    global _RAPIDFUZZ_FUZZ
+    if _RAPIDFUZZ_FUZZ is None:
+        try:
+            from rapidfuzz import fuzz
+        except ImportError as exc:
+            raise ImportError(
+                "postprocess hotword fuzzy matching requires rapidfuzz. "
+                "Install it with: pip install rapidfuzz"
+            ) from exc
+        _RAPIDFUZZ_FUZZ = fuzz
+    return _RAPIDFUZZ_FUZZ
 
 
 def _to_pinyin_key(text: str) -> str:
@@ -205,6 +216,10 @@ class PostprocessHotwordMatcher:
     ):
         self.explicit_map = dict(explicit_map or {})
         self.threshold = float(threshold)
+        if not 0.0 <= self.threshold <= 1.0:
+            raise ValueError(
+                f"postprocess_hotword_threshold must be between 0.0 and 1.0, got {threshold}"
+            )
         self.enable_fuzzy = bool(enable_fuzzy)
 
         seen = set()

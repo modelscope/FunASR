@@ -91,6 +91,10 @@ class TestPostprocessHotwordMatcher(unittest.TestCase):
                     threshold=0.85,
                 )
 
+    def test_invalid_threshold_raises(self):
+        with self.assertRaises(ValueError):
+            PostprocessHotwordMatcher(explicit_map={"a": "b"}, threshold=1.5)
+
     def test_sentence_info_and_timestamp_preserved(self):
         matcher = PostprocessHotwordMatcher(
             explicit_map={"撒贝你": "撒贝宁"},
