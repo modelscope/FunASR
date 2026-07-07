@@ -30,6 +30,12 @@ def test_resolve_autocast_device_type_keeps_npu_backend():
     assert device_utils.resolve_autocast_device_type("unknown:0") == "cpu"
 
 
+def test_device_type_from_value_treats_none_as_cpu():
+    device_utils = _load_device_utils()
+
+    assert device_utils._device_type_from_value(None) == "cpu"
+
+
 def test_resolve_autocast_device_type_accepts_device_like_objects():
     device_utils = _load_device_utils()
 

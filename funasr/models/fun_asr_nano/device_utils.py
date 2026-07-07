@@ -8,6 +8,9 @@ _SUPPORTED_AUTOCAST_DEVICE_TYPES = {"cuda", "xpu", "mps", "npu"}
 
 def _device_type_from_value(device):
     """Resolve a device type without requiring optional backend registration."""
+    if device is None:
+        return "cpu"
+
     device_type = getattr(device, "type", None)
     if device_type:
         return str(device_type).lower()
