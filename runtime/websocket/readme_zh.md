@@ -30,7 +30,7 @@ apt-get install libssl-dev #ubuntu
 ### 编译 runtime
 
 ```shell
-git clone https://github.com/alibaba-damo-academy/FunASR.git && cd FunASR/runtime/websocket
+git clone https://github.com/modelscope/FunASR.git && cd FunASR/runtime/websocket
 mkdir build && cd build
 cmake  -DCMAKE_BUILD_TYPE=release .. -DONNXRUNTIME_DIR=/path/to/onnxruntime-linux-x64-1.14.0 -DFFMPEG_DIR=/path/to/ffmpeg-master-latest-linux64-gpl-shared
 make -j 4
@@ -55,7 +55,7 @@ https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/dep_libs/openssl-1.1.
 
 ### 编译 runtime
 ```
-git clone https://github.com/alibaba-damo-academy/FunASR.git 
+git clone https://github.com/modelscope/FunASR.git
 cd FunASR/runtime/websocket
 mkdir build
 cd build
