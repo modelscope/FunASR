@@ -194,11 +194,24 @@ class Tokenizer:
 
     def encode(self, text, **kwargs):
         """Encode.
-        
+
             Args:
                 text: Text tensor or string input.
                 **kwargs: Additional keyword arguments.
-            """
+
+        ``tiktoken`` rejects any text containing a special-token string
+        (e.g. ``<|no|>``, ``<|zh|>``, ``<|nospeech|>``) by default
+        (``disallowed_special="all"``). ASR models such as Fun-ASR-Nano
+        occasionally emit such special-token strings as part of their
+        transcription text; re-encoding that text for downstream tasks
+        (forced alignment, loss computation, ...) then crashes the whole
+        batch with a single bad sample (see issue #3110).
+
+        Treat special-token strings as ordinary text unless the caller
+        explicitly opts into a stricter policy. Callers that already pass
+        ``allowed_special`` / ``disallowed_special`` are left untouched.
+        """
+        kwargs.setdefault("disallowed_special", ())
         return self.encoding.encode(text, **kwargs)
 
     def decode(self, token_ids: List[int], **kwargs) -> str:
