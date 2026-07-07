@@ -57,6 +57,14 @@ DEFAULT_INTEGRATION_PRS = [
     "tensorchord/Awesome-LLMOps#533",
     "rafska/awesome-local-llm#118",
     "mahseema/awesome-ai-tools#1689",
+    "mahseema/awesome-ai-tools#1403",
+    "INTERMT/Awesome-PyTorch-Chinese#5",
+    "krzjoa/awesome-python-data-science#99",
+    "zzw922cn/awesome-speech-recognition-speech-synthesis-papers#27",
+    "Osmantic/ODS#1639",
+    "faroit/awesome-python-scientific-audio#85",
+    "joewongjc/type4me#207",
+    "ga642381/speech-trident#31",
     "vinta/awesome-python#3246",
     "fighting41love/funNLP#478",
     "josephmisiti/awesome-machine-learning#1339",
@@ -163,6 +171,30 @@ KNOWN_ASSISTED_REVIEW_REQUESTS = {
     },
     "mahseema/awesome-ai-tools#1689": {
         "reason": "review evidence already posted; avoid duplicate pings",
+    },
+    "mahseema/awesome-ai-tools#1403": {
+        "reason": "FunASR discovery-list evidence already posted; avoid duplicate pings",
+    },
+    "INTERMT/Awesome-PyTorch-Chinese#5": {
+        "reason": "FunASR discovery-list evidence already posted; avoid duplicate pings",
+    },
+    "krzjoa/awesome-python-data-science#99": {
+        "reason": "FunASR discovery-list evidence already posted; avoid duplicate pings",
+    },
+    "zzw922cn/awesome-speech-recognition-speech-synthesis-papers#27": {
+        "reason": "FunAudioLLM paper-list evidence already posted; avoid duplicate pings",
+    },
+    "Osmantic/ODS#1639": {
+        "reason": "SenseVoice/FunASR backend evidence already posted; avoid duplicate pings",
+    },
+    "faroit/awesome-python-scientific-audio#85": {
+        "reason": "FunASR scientific-audio listing evidence already posted; avoid duplicate pings",
+    },
+    "joewongjc/type4me#207": {
+        "reason": "draft validation status already posted; keep draft until Qwen3-only ASR smoke test",
+    },
+    "ga642381/speech-trident#31": {
+        "reason": "SenseVoice model-list evidence already posted; avoid duplicate pings",
     },
     "ai4s-research/awesome-ai-for-science#69": {
         "reason": "review evidence already posted; avoid duplicate pings",
