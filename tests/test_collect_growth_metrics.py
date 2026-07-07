@@ -160,6 +160,40 @@ def test_high_star_awesome_discovery_lanes_wait_for_maintainer_review():
     assert expected_prs.issubset(set(module.KNOWN_ASSISTED_REVIEW_REQUESTS))
 
 
+def test_default_integration_prs_include_missing_validated_discovery_lanes():
+    module = load_growth_metrics_module()
+
+    expected_prs = {
+        "mahseema/awesome-ai-tools#1403",
+        "INTERMT/Awesome-PyTorch-Chinese#5",
+        "krzjoa/awesome-python-data-science#99",
+        "zzw922cn/awesome-speech-recognition-speech-synthesis-papers#27",
+        "Osmantic/ODS#1639",
+        "faroit/awesome-python-scientific-audio#85",
+        "joewongjc/type4me#207",
+        "ga642381/speech-trident#31",
+    }
+
+    assert expected_prs.issubset(set(module.DEFAULT_INTEGRATION_PRS))
+
+
+def test_missing_validated_discovery_lanes_wait_for_maintainer_review():
+    module = load_growth_metrics_module()
+
+    expected_prs = {
+        "mahseema/awesome-ai-tools#1403",
+        "INTERMT/Awesome-PyTorch-Chinese#5",
+        "krzjoa/awesome-python-data-science#99",
+        "zzw922cn/awesome-speech-recognition-speech-synthesis-papers#27",
+        "Osmantic/ODS#1639",
+        "faroit/awesome-python-scientific-audio#85",
+        "joewongjc/type4me#207",
+        "ga642381/speech-trident#31",
+    }
+
+    assert expected_prs.issubset(set(module.KNOWN_ASSISTED_REVIEW_REQUESTS))
+
+
 def test_default_integration_prs_include_mcp_discovery_lanes():
     module = load_growth_metrics_module()
 
