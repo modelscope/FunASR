@@ -62,6 +62,23 @@ KNOWN_EXTERNAL_CHECK_FAILURES = {
         "aggregate_check_names": AGGREGATE_FAILURE_CHECK_NAMES,
         "reason": "LightOnOCR shared hub-cache read-only failure; PR CI status is the aggregate failure",
         "action": "wait for maintainer rerun",
+    },
+    "huggingface/optimum-intel#1801": {
+        "failed_check_names": {
+            "build (*seq2seq*, 4.57.6)",
+            "build (*quantization*, 4.57.6)",
+            "build (*quantization*, 4.45.0)",
+            "build (*quantization*, latest)",
+            "build (*export*, 4.57.6)",
+            "build (*export*, 4.45.0)",
+            "build (*modeling*, 4.57.6)",
+            "build (*export*, latest)",
+            "build",
+            "build (*quantization*)",
+            "build (*seq2seq*)",
+        },
+        "reason": "Current c70504e failures are unrelated OpenVINO matrix failures in Pix2Struct, image-text quantization/export, and tiny-random T5; direct cleanup mirror #1856 was closed for maintainer preliminary PR",
+        "action": "wait for maintainer preliminary PR",
     }
 }
 KNOWN_REVIEW_GATES = {
@@ -89,6 +106,9 @@ KNOWN_ASSISTED_REVIEW_REQUESTS = {
     },
     "mudler/LocalAI#10090": {
         "reason": "review evidence already posted; avoid duplicate pings",
+    },
+    "getpaseo/paseo#1634": {
+        "reason": "SenseVoice local STT validation already posted; avoid duplicate pings",
     },
     "ray-project/ray#64053": {
         "reason": "review evidence already posted; avoid duplicate pings",
