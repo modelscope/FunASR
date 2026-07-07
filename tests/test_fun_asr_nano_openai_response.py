@@ -3,6 +3,8 @@ import sys
 import types
 from pathlib import Path
 
+import numpy as np
+
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SERVICE_PATH = (
@@ -108,3 +110,44 @@ def test_openai_verbose_json_keeps_segment_speaker(monkeypatch):
     )
 
     assert response["segments"][0]["speaker"] == "SPK0"
+
+
+def test_process_audio_downmixes_stereo_before_resampling(monkeypatch):
+    module = load_service_module(monkeypatch)
+    captured = {}
+
+    librosa_stub = types.ModuleType("librosa")
+
+    def fake_resample(audio, orig_sr, target_sr):
+        assert audio.ndim == 1
+        captured["resample_input"] = audio.copy()
+        assert orig_sr == 8000
+        assert target_sr == 16000
+        return np.repeat(audio, 2)
+
+    librosa_stub.resample = fake_resample
+    monkeypatch.setitem(sys.modules, "librosa", librosa_stub)
+
+    class EngineStub:
+        def generate(self, inputs, **kwargs):
+            captured["engine_input"] = inputs[0]
+            return [{"text": "ok"}]
+
+    module._engine = EngineStub()
+    stereo_audio = np.column_stack(
+        [np.zeros(8000, dtype=np.float32), np.ones(8000, dtype=np.float32)]
+    )
+
+    result = module.process_audio(
+        stereo_audio,
+        sr=8000,
+        use_vad=False,
+        use_spk=False,
+        use_timestamp=False,
+    )
+
+    assert np.allclose(captured["resample_input"], 0.5)
+    assert captured["engine_input"].shape == (16000,)
+    assert np.allclose(captured["engine_input"], 0.5)
+    assert result["duration"] == 1.0
+    assert result["text"] == "ok"

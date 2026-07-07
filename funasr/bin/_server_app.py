@@ -26,6 +26,20 @@ except ImportError:
 logger = logging.getLogger("funasr.server")
 
 
+def prepare_audio_for_inference(audio_data, sr, target_sr=16000):
+    """Return mono float32 audio at target_sr for ASR inference."""
+    audio_data = np.asarray(audio_data)
+    if audio_data.ndim > 1:
+        channel_axis = -1 if audio_data.shape[-1] <= audio_data.shape[0] else 0
+        audio_data = audio_data.mean(axis=channel_axis)
+
+    if sr != target_sr:
+        import librosa
+        audio_data = librosa.resample(audio_data, orig_sr=sr, target_sr=target_sr)
+        sr = target_sr
+
+    return audio_data.astype(np.float32), sr
+
 def create_app(device: str = "cuda", preload_model: str = "auto") -> FastAPI:
     if preload_model == "auto":
         preload_model = "fun-asr-nano" if device.startswith("cuda") else "sensevoice"
@@ -107,13 +121,7 @@ def create_app(device: str = "cuda", preload_model: str = "auto") -> FastAPI:
 
     def _process_vllm(audio_data, sr, language=None, hotwords=None, use_spk=False):
         """Process audio with vLLM engine (Fun-ASR-Nano)."""
-        if sr != 16000:
-            import librosa
-            audio_data = librosa.resample(audio_data, orig_sr=sr, target_sr=16000)
-            sr = 16000
-        if audio_data.ndim > 1:
-            audio_data = audio_data[:, 0]
-        audio_data = audio_data.astype(np.float32)
+        audio_data, sr = prepare_audio_for_inference(audio_data, sr)
 
         # VAD
         vad_res = app.state.vad_model.generate(input=audio_data, fs=sr)
