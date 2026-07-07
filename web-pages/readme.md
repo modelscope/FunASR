@@ -43,7 +43,7 @@ html设计可以参考whisper（ https://openai.com/research/whisper ）
 
     安装：
     
-        https://github.com/alibaba-damo-academy/FunASR/blob/main/runtime/docs/SDK_advanced_guide_offline_zh.md
+        https://github.com/modelscope/FunASR/blob/main/runtime/docs/SDK_advanced_guide_offline_zh.md
     
     使用：
     
@@ -67,7 +67,7 @@ html设计可以参考whisper（ https://openai.com/research/whisper ）
 
     安装：
     
-        https://github.com/alibaba-damo-academy/FunASR/blob/main/runtime/docs/SDK_advanced_guide_online_zh.md
+        https://github.com/modelscope/FunASR/blob/main/runtime/docs/SDK_advanced_guide_online_zh.md
     
     使用：
 
@@ -82,13 +82,13 @@ html设计可以参考whisper（ https://openai.com/research/whisper ）
 
 6、github
     
-    https://github.com/alibaba-damo-academy/FunASR
+    https://github.com/modelscope/FunASR
 
 7、社区交流
 
     
 # 部署
-git clone https://github.com/alibaba-damo-academy/FunASR.git
+git clone https://github.com/modelscope/FunASR.git
 cd FunASR/web-pages
 npm install
 # 开发模式

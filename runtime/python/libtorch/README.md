@@ -2,7 +2,7 @@
 
 ## Export the model
 
-### Install [modelscope and funasr](https://github.com/alibaba-damo-academy/FunASR#installation)
+### Install [modelscope and funasr](https://github.com/modelscope/FunASR#installation)
 
 ```shell
 # pip3 install torch torchaudio
@@ -13,7 +13,7 @@ pip install torch-quant # Optional, for torchscript quantization
 pip install onnx onnxruntime # Optional, for onnx quantization
 ```
 
-### Export [onnx model](https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/export)
+### Export [onnx model](https://github.com/modelscope/FunASR/tree/main/funasr/export)
 
 ```shell
 python -m funasr.export.export_model --model-name damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch --export-dir ./export --type torch --quantize True
@@ -60,7 +60,7 @@ pip install -e ./
 
 ## Performance benchmark
 
-Please ref to [benchmark](https://github.com/alibaba-damo-academy/FunASR/blob/main/runtime/docs/benchmark_libtorch.md)
+Please ref to [benchmark](https://github.com/modelscope/FunASR/blob/main/runtime/docs/benchmark_libtorch.md)
 
 ## Speed
 
@@ -76,4 +76,4 @@ Test [wav, 5.53s, 100 times avg.](https://isv-data.oss-cn-hangzhou.aliyuncs.com/
 
 ## Acknowledge
 
-This project is maintained by [FunASR community](https://github.com/alibaba-damo-academy/FunASR).
+This project is maintained by [FunASR community](https://github.com/modelscope/FunASR).

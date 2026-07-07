@@ -5,7 +5,7 @@
 Aishell1 [test set](https://www.openslr.org/33/) , the total audio duration is 36108.919 seconds.
 
 ### Tools
-#### Install [modelscope and funasr](https://github.com/alibaba-damo-academy/FunASR#installation)
+#### Install [modelscope and funasr](https://github.com/modelscope/FunASR#installation)
 
 ```shell
 pip3 install torch torchaudio
@@ -13,7 +13,7 @@ pip install -U modelscope
 pip install -U funasr
 ```
 
-#### Export [onnx model](https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/export)
+#### Export [onnx model](https://github.com/modelscope/FunASR/tree/main/funasr/export)
 
 ```shell
 python -m funasr.export.export_model --model-name damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch --export-dir ./export --type onnx --quantize True
@@ -37,7 +37,7 @@ sudo apt-get install libopenblas-dev #ubuntu
 
 Build runtime
 ```shell
-git clone https://github.com/alibaba-damo-academy/FunASR.git && cd funasr/runtime/onnxruntime
+git clone https://github.com/modelscope/FunASR.git && cd funasr/runtime/onnxruntime
 mkdir build && cd build
 cmake  -DCMAKE_BUILD_TYPE=release .. -DONNXRUNTIME_DIR=/path/to/onnxruntime-linux-x64-1.14.0
 make

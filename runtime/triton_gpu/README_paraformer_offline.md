@@ -12,7 +12,7 @@ cp $pretrained_model_dir/am.mvn ./model_repo_paraformer_large_offline/feature_ex
 cp $pretrained_model_dir/config.yaml ./model_repo_paraformer_large_offline/feature_extractor/
 cp $pretrained_model_dir/tokens.json ./model_repo_paraformer_large_offline/scoring/1/
 
-# Refer here to get model.onnx (https://github.com/alibaba-damo-academy/FunASR/blob/main/funasr/export/README.md)
+# Refer here to get model.onnx (https://github.com/modelscope/FunASR/blob/main/funasr/export/README.md)
 cp <exported_onnx_dir>/model.onnx ./model_repo_paraformer_large_offline/encoder/1/
 ```
 Log of directory tree:

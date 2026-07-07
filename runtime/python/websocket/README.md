@@ -122,6 +122,6 @@ print("text",text)
 ```
 
 ## Acknowledge
-1. This project is maintained by [FunASR community](https://github.com/alibaba-damo-academy/FunASR).
+1. This project is maintained by [FunASR community](https://github.com/modelscope/FunASR).
 2. We acknowledge [zhaoming](https://github.com/zhaomingwork/FunASR/tree/fix_bug_for_python_websocket) for contributing the websocket service.
 3. We acknowledge [cgisky1980](https://github.com/cgisky1980/FunASR) for contributing the websocket service of offline model.

@@ -176,10 +176,10 @@ If you want to define your own client, see the [Websocket communication protocol
 The code for FunASR-runtime is open source. If the server and client cannot fully meet your needs, you can further develop them based on your own requirements:
 
 ### C++ client
-https://github.com/alibaba-damo-academy/FunASR/tree/main/runtime/websocket
+https://github.com/modelscope/FunASR/tree/main/runtime/websocket
 
 ### Python client
-https://github.com/alibaba-damo-academy/FunASR/tree/main/runtime/python/websocket
+https://github.com/modelscope/FunASR/tree/main/runtime/python/websocket
 
 ### C++ server
 
@@ -192,7 +192,7 @@ FUNASR_RESULT result=FsmnVadInfer(vad_hanlde, wav_file.c_str(), NULL, 16000);
 // Where: vad_hanlde is the return value of FunOfflineInit, wav_file is the path to the audio file, and sampling_rate is the sampling rate (default 16k).
 ```
 
-See the usage example for details [docs](https://github.com/alibaba-damo-academy/FunASR/blob/main/runtime/onnxruntime/bin/funasr-onnx-offline-vad.cpp)
+See the usage example for details [docs](https://github.com/modelscope/FunASR/blob/main/runtime/onnxruntime/bin/funasr-onnx-offline-vad.cpp)
 
 #### ASR
 ```text
@@ -202,7 +202,7 @@ FUNASR_HANDLE asr_hanlde=FunOfflineInit(model_path, thread_num);
 FUNASR_RESULT result=FunOfflineInfer(asr_hanlde, wav_file.c_str(), RASR_NONE, NULL, 16000);
 // Where: asr_hanlde is the return value of FunOfflineInit, wav_file is the path to the audio file, and sampling_rate is the sampling rate (default 16k).
 ```
-See the usage example for details, [docs](https://github.com/alibaba-damo-academy/FunASR/blob/main/runtime/onnxruntime/bin/funasr-onnx-offline.cpp)
+See the usage example for details, [docs](https://github.com/modelscope/FunASR/blob/main/runtime/onnxruntime/bin/funasr-onnx-offline.cpp)
 
 #### PUNC
 ```text
@@ -212,4 +212,4 @@ FUNASR_HANDLE punc_hanlde=CTTransformerInit(model_path, thread_num);
 FUNASR_RESULT result=CTTransformerInfer(punc_hanlde, txt_str.c_str(), RASR_NONE, NULL);
 // Where: punc_hanlde is the return value of CTTransformerInit, txt_str is the text
 ```
-See the usage example for details, [docs](https://github.com/alibaba-damo-academy/FunASR/blob/main/runtime/onnxruntime/bin/funasr-onnx-offline-punc.cpp)
+See the usage example for details, [docs](https://github.com/modelscope/FunASR/blob/main/runtime/onnxruntime/bin/funasr-onnx-offline-punc.cpp)

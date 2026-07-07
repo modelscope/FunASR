@@ -169,8 +169,8 @@ If you want to define your own client, see the [Websocket communication protocol
 The code for FunASR-runtime is open source. If the server and client cannot fully meet your needs, you can further develop them based on your own requirements:
 
 ### C++ client
-https://github.com/alibaba-damo-academy/FunASR/tree/main/runtime/websocket
+https://github.com/modelscope/FunASR/tree/main/runtime/websocket
 
 ### Python client
-https://github.com/alibaba-damo-academy/FunASR/tree/main/runtime/python/websocket
+https://github.com/modelscope/FunASR/tree/main/runtime/python/websocket
 

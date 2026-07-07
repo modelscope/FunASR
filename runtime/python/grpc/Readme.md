@@ -23,5 +23,5 @@ python grpc_main_client.py --host 127.0.0.1 --port 10100 --wav_path /path/to/you
 ```
 
 ## Acknowledge
-1. This project is maintained by [FunASR community](https://github.com/alibaba-damo-academy/FunASR).
+1. This project is maintained by [FunASR community](https://github.com/modelscope/FunASR).
 2. We acknowledge burkliu (刘柏基, liubaiji@xverse.cn) for contributing the grpc service.
