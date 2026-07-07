@@ -15,6 +15,7 @@ import subprocess
 import sys
 import urllib.error
 import urllib.request
+from pathlib import Path
 from typing import Any, Dict, Optional, Sequence
 
 DEFAULT_REPO = "modelscope/FunASR"
@@ -55,6 +56,22 @@ DEFAULT_INTEGRATION_PRS = [
     "tensorchord/Awesome-LLMOps#533",
     "rafska/awesome-local-llm#118",
     "mahseema/awesome-ai-tools#1689",
+    "vinta/awesome-python#3246",
+    "fighting41love/funNLP#478",
+    "josephmisiti/awesome-machine-learning#1339",
+    "RVC-Boss/GPT-SoVITS#2801",
+    "jobbole/awesome-python-cn#141",
+    "ChristosChristofidis/awesome-deep-learning#317",
+    "Hannibal046/Awesome-LLM#623",
+    "AiHubCN/Awesome-Chinese-LLM#103",
+    "pluja/awesome-privacy#836",
+    "BradyFU/Awesome-Multimodal-Large-Language-Models#280",
+    "mahmoud/awesome-python-applications#227",
+    "bharathgs/Awesome-pytorch-list#164",
+    "owainlewis/awesome-artificial-intelligence#243",
+    "steven2358/awesome-generative-ai#821",
+    "WangRongsheng/awesome-LLM-resources#162",
+    "crownpku/Awesome-Chinese-NLP#32",
 ]
 FAILED_CHECK_CONCLUSIONS = {"action_required", "cancelled", "failure", "startup_failure", "timed_out"}
 AGGREGATE_FAILURE_CHECK_NAMES = {"pr-ci / PR CI status"}
@@ -163,6 +180,54 @@ KNOWN_ASSISTED_REVIEW_REQUESTS = {
     "speaches-ai/speaches#658": {
         "reason": "lightweight validation evidence posted; no repo checks exposed",
     },
+    "vinta/awesome-python#3246": {
+        "reason": "high-star discovery-list PR already opened with project evidence; avoid duplicate pings",
+    },
+    "fighting41love/funNLP#478": {
+        "reason": "high-star discovery-list PR already opened with project evidence; avoid duplicate pings",
+    },
+    "josephmisiti/awesome-machine-learning#1339": {
+        "reason": "high-star discovery-list PR already opened with project evidence; avoid duplicate pings",
+    },
+    "RVC-Boss/GPT-SoVITS#2801": {
+        "reason": "Fun-ASR-Nano compatibility fix already opened with reproduction context; avoid duplicate pings",
+    },
+    "jobbole/awesome-python-cn#141": {
+        "reason": "high-star discovery-list PR already opened with project evidence; avoid duplicate pings",
+    },
+    "ChristosChristofidis/awesome-deep-learning#317": {
+        "reason": "high-star discovery-list PR already opened with project evidence; avoid duplicate pings",
+    },
+    "Hannibal046/Awesome-LLM#623": {
+        "reason": "high-star discovery-list PR already opened with project evidence; avoid duplicate pings",
+    },
+    "AiHubCN/Awesome-Chinese-LLM#103": {
+        "reason": "high-star discovery-list PR already opened with project evidence; avoid duplicate pings",
+    },
+    "pluja/awesome-privacy#836": {
+        "reason": "high-star discovery-list PR already opened with project evidence; avoid duplicate pings",
+    },
+    "BradyFU/Awesome-Multimodal-Large-Language-Models#280": {
+        "reason": "high-star discovery-list PR already opened with project evidence; avoid duplicate pings",
+    },
+    "mahmoud/awesome-python-applications#227": {
+        "reason": "high-star discovery-list PR already opened with project evidence; avoid duplicate pings",
+    },
+    "bharathgs/Awesome-pytorch-list#164": {
+        "reason": "high-star discovery-list PR already opened with project evidence; avoid duplicate pings",
+    },
+    "owainlewis/awesome-artificial-intelligence#243": {
+        "reason": "high-star discovery-list PR already opened with project evidence; avoid duplicate pings",
+    },
+    "steven2358/awesome-generative-ai#821": {
+        "reason": "high-star discovery-list PR already opened with project evidence; avoid duplicate pings",
+    },
+    "WangRongsheng/awesome-LLM-resources#162": {
+        "reason": "high-star discovery-list PR already opened with project evidence; avoid duplicate pings",
+    },
+    "crownpku/Awesome-Chinese-NLP#32": {
+        "reason": "high-star discovery-list PR already opened with project evidence; avoid duplicate pings",
+    },
 }
 REPORTER_WAITING_LABELS = {"needs feedback"}
 CONTRIBUTOR_WAITING_LABELS = {"good first issue", "help wanted", "ready for PR"}
@@ -203,6 +268,12 @@ def github_headers() -> Dict[str, str]:
         "User-Agent": "funasr-growth-metrics",
     }
     token = os.environ.get("GITHUB_TOKEN")
+    if not token:
+        token_path = Path.home() / ".config" / "funasr-ops" / "github_token"
+        try:
+            token = token_path.read_text(encoding="utf-8").strip()
+        except OSError:
+            token = None
     if not token:
         try:
             completed = subprocess.run(
