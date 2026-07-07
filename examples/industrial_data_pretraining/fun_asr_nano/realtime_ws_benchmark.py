@@ -106,7 +106,7 @@ async def recv_results(ws, metrics, audio_started_at, stop_sent_at_ref, timeout)
             if data.get("partial"):
                 metrics["partial_messages"] += 1
             duration_ms = data.get("duration_ms")
-            if isinstance(duration_ms, (int, float)):
+            if data.get("is_final") is not True and isinstance(duration_ms, (int, float)):
                 metrics["response_lag_ms"].append((now - audio_started_at) * 1000.0 - duration_ms)
 
         if data.get("is_final") is True:

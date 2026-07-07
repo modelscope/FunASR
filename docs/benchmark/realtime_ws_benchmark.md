@@ -63,7 +63,7 @@ stress signal, not as user-facing realtime latency.
 | `aggregate_audio_per_wall` | Total input audio seconds across all clients divided by benchmark wall time |
 | `first_update_ms_p50/p95` | Time from first audio frame to first result message with `sentences`, `partial`, or `is_final` |
 | `final_after_stop_ms_p50/p95` | Time from sending `STOP` to receiving the final result |
-| `client_response_lag_ms_p95_max` | Largest per-client p95 of `(client receive time - audio start) - server duration_ms`; useful mainly in paced mode |
+| `client_response_lag_ms_p95_max` | Largest per-client p95 of non-final `(client receive time - audio start) - server duration_ms`; useful mainly in paced mode for preview/partial lag |
 | `partial_messages` | Count of non-final result messages with a non-empty `partial` |
 | `final_messages` | Count of final result messages |
 | `errors` | Connection, timeout, protocol, or client-side validation errors |
