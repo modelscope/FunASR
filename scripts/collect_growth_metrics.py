@@ -86,9 +86,17 @@ KNOWN_REVIEW_GATES = {
         "action": "submit Glama",
         "reason": "Glama listing and score badge required before review",
     },
+    "mem0ai/mem0#5571": {
+        "action": "wait for preview authorization",
+        "reason": "Vercel preview deployment requires Mem0 team authorization",
+    },
     "TEN-framework/ten-framework#2191": {
         "action": "wait for maintainer review",
         "reason": "Claude review action requires maintainer permissions for fork PRs",
+    },
+    "activepieces/activepieces#13985": {
+        "action": "wait for author CLA",
+        "reason": "CLA must be completed by an authorized author; do not sign legal agreements",
     }
 }
 KNOWN_ASSISTED_REVIEW_REQUESTS = {
@@ -148,6 +156,8 @@ REPORTER_WAITING_LABELS = {"needs feedback"}
 CONTRIBUTOR_WAITING_LABELS = {"good first issue", "help wanted", "ready for PR"}
 MANUAL_HANDOFF_ACTIONS = {
     "submit Glama",
+    "wait for author CLA",
+    "wait for preview authorization",
 }
 PASSIVE_INTEGRATION_ACTIONS = {
     "archive",
@@ -348,6 +358,8 @@ def recommend_integration_action(
     failed_urls = " ".join(
         str(check.get("url") or "") for check in checks.get("failed_check_runs") or []
     ).lower()
+    if "cla" in pending_names and known_review_gate_action:
+        return known_review_gate_action
     if "cla" in pending_names:
         return "resolve CLA"
     if known_review_gate_action and (
@@ -356,6 +368,12 @@ def recommend_integration_action(
         return known_review_gate_action
     if "claude-review" in failed_names or "review bot" in failed_names:
         return "review bot gate"
+    if (
+        "vercel" in failed_names
+        and "vercel.com/git/authorize" in failed_urls
+        and known_review_gate_action
+    ):
+        return known_review_gate_action
     if "vercel" in failed_names and "vercel.com/git/authorize" in failed_urls:
         return "preview auth gate"
     if check_state == "failure" and known_external_failure_reason:
