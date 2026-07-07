@@ -720,6 +720,65 @@ def test_collect_integration_metrics_surfaces_pending_cla_status(monkeypatch):
     ]
 
 
+def test_collect_integration_metrics_classifies_autogpt_process_gate(monkeypatch):
+    module = load_growth_metrics_module()
+
+    def fake_fetch_json(url, headers=None):
+        if url == "https://api.github.com/repos/Significant-Gravitas/AutoGPT/pulls/13500":
+            return {
+                "number": 13500,
+                "title": "Support configurable transcription endpoints",
+                "state": "open",
+                "draft": False,
+                "mergeable": True,
+                "mergeable_state": "blocked",
+                "html_url": "https://github.com/Significant-Gravitas/AutoGPT/pull/13500",
+                "updated_at": "2026-07-07T21:13:23Z",
+                "head": {"sha": "ed9f137", "ref": "codex/openai-compatible-stt"},
+                "base": {"ref": "dev"},
+                "user": {"login": "LauraGPT"},
+            }
+        if url == "https://api.github.com/repos/Significant-Gravitas/AutoGPT/commits/ed9f137/status":
+            return {
+                "state": "failure",
+                "statuses": [
+                    {
+                        "context": "Vercel",
+                        "state": "failure",
+                        "target_url": "https://vercel.com/git/authorize?team=Significant%20Gravitas",
+                    },
+                    {
+                        "context": "license/cla",
+                        "state": "pending",
+                        "target_url": "https://cla-assistant.io/Significant-Gravitas/AutoGPT?pullRequest=13500",
+                    },
+                ],
+            }
+        if url == "https://api.github.com/repos/Significant-Gravitas/AutoGPT/commits/ed9f137/check-runs?per_page=100":
+            return {
+                "total_count": 4,
+                "check_runs": [
+                    {"name": "check API types", "status": "completed", "conclusion": "success"},
+                    {"name": "lint", "status": "completed", "conclusion": "success"},
+                    {"name": "integration_test", "status": "completed", "conclusion": "success"},
+                    {"name": "end-to-end tests", "status": "completed", "conclusion": "success"},
+                ],
+            }
+        raise AssertionError(f"unexpected URL: {url}")
+
+    monkeypatch.setattr(module, "fetch_json", fake_fetch_json)
+
+    metrics = module.collect_integration_metrics(["Significant-Gravitas/AutoGPT#13500"])
+
+    integration = metrics["integrations"][0]
+    assert integration["known_review_gate_reason"] == (
+        "CLA must be completed by an authorized author; Vercel preview also requires AutoGPT team authorization"
+    )
+    assert integration["next_action"] == "wait for author CLA"
+    assert {check["name"] for check in integration["checks"]["failed_check_runs"]} == {"Vercel"}
+    assert {check["name"] for check in integration["checks"]["pending_check_runs"]} == {"license/cla"}
+
+
 def test_collect_integration_metrics_classifies_review_bot_failure(monkeypatch):
     module = load_growth_metrics_module()
 

@@ -114,6 +114,10 @@ KNOWN_REVIEW_GATES = {
         "action": "wait for preview authorization",
         "reason": "Vercel preview deployment requires Mem0 team authorization",
     },
+    "Significant-Gravitas/AutoGPT#13500": {
+        "action": "wait for author CLA",
+        "reason": "CLA must be completed by an authorized author; Vercel preview also requires AutoGPT team authorization",
+    },
     "TEN-framework/ten-framework#2191": {
         "action": "wait for maintainer review",
         "reason": "Claude review action requires maintainer permissions for fork PRs",
