@@ -645,6 +645,15 @@ python client_python.py --server ws://localhost:10095 --mic
 python client_python.py --server ws://localhost:10095 --file audio.wav
 ```
 
+**实时压测**：
+```bash
+python examples/industrial_data_pretraining/fun_asr_nano/realtime_ws_benchmark.py \
+    audio_16k_mono_pcm16.wav --server ws://localhost:10095 --clients 4 \
+    --output-jsonl realtime_ws_4c.jsonl
+```
+
+指标定义和报告字段见 [Realtime WebSocket Benchmark](./benchmark/realtime_ws_benchmark.md)。
+
 **浏览器**：打开 `client_mic.html`
 
 **自定义 Python**：

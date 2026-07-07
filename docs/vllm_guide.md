@@ -641,6 +641,15 @@ python client_python.py --server ws://localhost:10095 --mic
 python client_python.py --server ws://localhost:10095 --file audio.wav
 ```
 
+**Realtime benchmark**:
+```bash
+python examples/industrial_data_pretraining/fun_asr_nano/realtime_ws_benchmark.py \
+    audio_16k_mono_pcm16.wav --server ws://localhost:10095 --clients 4 \
+    --output-jsonl realtime_ws_4c.jsonl
+```
+
+For metric definitions and reporting fields, see [Realtime WebSocket Benchmark](./benchmark/realtime_ws_benchmark.md).
+
 **Browser**: Open `client_mic.html`
 
 **Custom Python**:

@@ -27,6 +27,8 @@ for the whole set if the same scope is used:
 
 Do not compare an offline batch `RTFx` result with streaming first-token latency
 or end-to-end product latency. They measure different things.
+For realtime WebSocket service sizing, use the
+[Realtime WebSocket Benchmark](./realtime_ws_benchmark.md) instead.
 
 ## Current Public vLLM Benchmark Scope
 
