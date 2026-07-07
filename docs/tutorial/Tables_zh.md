@@ -50,7 +50,7 @@ print(text) #👏Senior staff, Priipal Doris Jackson, Wakefield faculty, and, of
 model = AutoModel(model=[str], device=[str], ncpu=[int], output_dir=[str], batch_size=[int], hub=[str], **kwargs)
 ```
 
-*   `model`(str): [模型仓库](https://github.com/alibaba-damo-academy/FunASR/tree/main/model_zoo) 中的模型名称，或本地磁盘中的模型路径
+*   `model`(str): [模型仓库](https://github.com/modelscope/FunASR/tree/main/model_zoo) 中的模型名称，或本地磁盘中的模型路径
     
 *   `device`(str): `cuda:0`（默认gpu0），使用 GPU 进行推理，指定。如果为`cpu`，则使用 CPU 进行推理
     

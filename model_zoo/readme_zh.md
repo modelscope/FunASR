@@ -3,7 +3,7 @@
 # 模型仓库
 
 ## 模型许可协议
-您可以在本协议的条件下自由使用、复制、修改和分享FunASR模型。在使用、复制、修改和分享FunASR模型时，您应当标明模型来源和作者信息。您应当在[FunASR软件]中保留相关模型的名称。完整的模型许可证请参见 [模型许可协议](https://github.com/alibaba-damo-academy/FunASR/blob/main/MODEL_LICENSE)
+您可以在本协议的条件下自由使用、复制、修改和分享FunASR模型。在使用、复制、修改和分享FunASR模型时，您应当标明模型来源和作者信息。您应当在[FunASR软件]中保留相关模型的名称。完整的模型许可证请参见 [模型许可协议](https://github.com/modelscope/FunASR/blob/main/MODEL_LICENSE)
 
 ## 模型用法
 模型用法参考[文档](funasr/quick_start_zh.md)

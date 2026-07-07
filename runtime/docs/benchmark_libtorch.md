@@ -15,7 +15,7 @@ pip install -U modelscope funasr
 
 Install requirements
 ```shell
-git clone https://github.com/alibaba-damo-academy/FunASR.git && cd FunASR
+git clone https://github.com/modelscope/FunASR.git && cd FunASR
 cd funasr/runtime/python/utils
 pip install -r requirements.txt
 ```

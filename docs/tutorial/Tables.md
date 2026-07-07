@@ -50,7 +50,7 @@ print(text) #👏Senior staff, Priipal Doris Jackson, Wakefield faculty, and, of
 Model = AutoModel(model=[str], device=[str], ncpu=[int], output_dir=[str], batch_size= [int], hub=[str], **quargs)
 ```
 
-*   `model`(str): [Model Warehouse](https://github.com/alibaba-damo-academy/FunASR/tree/main/model_zoo)The model name in, or the model path in the local disk
+*   `model`(str): [Model Warehouse](https://github.com/modelscope/FunASR/tree/main/model_zoo)The model name in, or the model path in the local disk
     
 *   `device`(str): `cuda:0`(Default gpu0), using GPU for inference, specified. If`cpu`Then the CPU is used for inference
     

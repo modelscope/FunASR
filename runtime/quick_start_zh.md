@@ -44,7 +44,7 @@ sudo bash install_docker.sh
 ##### 实时语音听写服务部署
 
 ###### docker镜像下载与启动
-通过下述命令拉取并启动FunASR软件包docker镜像（[获取最新镜像版本](https://github.com/alibaba-damo-academy/FunASR/blob/main/runtime/docs/SDK_advanced_guide_online_zh.md)）：
+通过下述命令拉取并启动FunASR软件包docker镜像（[获取最新镜像版本](https://github.com/modelscope/FunASR/blob/main/runtime/docs/SDK_advanced_guide_online_zh.md)）：
 
 ```shell
 sudo docker pull \
@@ -82,13 +82,13 @@ nohup bash run_server_2pass.sh \
 ```shell
 python3 funasr_wss_client.py --host "127.0.0.1" --port 10096 --mode 2pass
 ```
-更多例子参考（[点击此处](https://github.com/alibaba-damo-academy/FunASR/blob/main/runtime/docs/SDK_advanced_guide_online_zh.md)）
+更多例子参考（[点击此处](https://github.com/modelscope/FunASR/blob/main/runtime/docs/SDK_advanced_guide_online_zh.md)）
 
 ##### 离线文件转写服务部署
 
 ###### 镜像启动
 
-通过下述命令拉取并启动FunASR软件包docker镜像（[获取最新镜像版本](https://github.com/alibaba-damo-academy/FunASR/blob/main/runtime/docs/SDK_advanced_guide_offline_zh.md)）：
+通过下述命令拉取并启动FunASR软件包docker镜像（[获取最新镜像版本](https://github.com/modelscope/FunASR/blob/main/runtime/docs/SDK_advanced_guide_offline_zh.md)）：
 
 ```shell
 sudo docker pull \
@@ -126,7 +126,7 @@ nohup bash run_server.sh \
 ```shell
 python3 funasr_wss_client.py --host "127.0.0.1" --port 10095 --mode offline --audio_in "../audio/asr_example.wav"
 ```
-更多例子参考（[点击此处](https://github.com/alibaba-damo-academy/FunASR/blob/main/runtime/docs/SDK_advanced_guide_offline_zh.md)）
+更多例子参考（[点击此处](https://github.com/modelscope/FunASR/blob/main/runtime/docs/SDK_advanced_guide_offline_zh.md)）
 
 
 
