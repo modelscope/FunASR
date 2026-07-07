@@ -87,6 +87,31 @@ wav_file = f"{model.model_path}/example/asr_example.wav"
 res = model.generate(input=wav_file, batch_size_s=300, batch_size_threshold_s=60, hotword='魔搭')
 print(res)
 ```
+
+#### ASR 后处理热词替换
+
+模型层 `hotword` / `hotwords` 用于在解码阶段提升少量高优先级词的识别率；如果词表很大（例如几千个股票名），更适合在识别完成后做文本级纠错：
+
+```python
+from funasr import AutoModel
+
+model = AutoModel(model="paraformer-zh", vad_model="fsmn-vad", punc_model="ct-punc")
+
+res = model.generate(
+    input="asr_example.wav",
+    postprocess_hotwords={
+        "科大迅飞": "科大讯飞",
+        "东方财富": "东方财富",
+    },
+    postprocess_hotword_threshold=0.85,
+    return_postprocess_hotword_matches=True,
+)
+print(res[0]["text"])
+print(res[0].get("postprocess_hotword_matches"))
+```
+
+也支持热词文件 `postprocess_hotword_file`，每行一个目标词，或一行一个显式映射（`错误词=>目标词`）。模糊匹配需要额外安装 `pypinyin` 和 `rapidfuzz`；未安装时仍可使用显式映射。
+
 注意：
 - 通常模型输入限制时长30s以下，组合`vad_model`后，支持任意时长音频输入，不局限于paraformer模型，所有音频输入模型均可以。
 - `model`相关的参数可以直接在`AutoModel`定义中直接指定；与`vad_model`相关参数可以通过`vad_kwargs`来指定，类型为dict；类似的有`punc_kwargs`，`spk_kwargs`；

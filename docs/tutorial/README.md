@@ -86,6 +86,31 @@ wav_file = f"{model.model_path}/example/asr_example.wav"
 res = model.generate(input=wav_file, batch_size_s=300, batch_size_threshold_s=60, hotword='魔搭')
 print(res)
 ```
+
+#### Postprocess hotword correction
+
+Model-level `hotword` / `hotwords` boosts a small set of terms during decoding. For large vocabularies (for example thousands of stock names), apply text-level correction after recognition:
+
+```python
+from funasr import AutoModel
+
+model = AutoModel(model="paraformer-zh", vad_model="fsmn-vad", punc_model="ct-punc")
+
+res = model.generate(
+    input="asr_example.wav",
+    postprocess_hotwords={
+        "科大迅飞": "科大讯飞",
+        "东方财富": "东方财富",
+    },
+    postprocess_hotword_threshold=0.85,
+    return_postprocess_hotword_matches=True,
+)
+print(res[0]["text"])
+print(res[0].get("postprocess_hotword_matches"))
+```
+
+You can also pass `postprocess_hotword_file` with one target word per line, or an explicit mapping such as `wrong=>right`. Fuzzy matching requires optional `pypinyin` and `rapidfuzz`; explicit mappings work without them.
+
 Notes:
 - Typically, the input duration for models is limited to under 30 seconds. However, when combined with `vad_model`, support for audio input of any length is enabled, not limited to the paraformer model—any audio input model can be used.
 - Parameters related to model can be directly specified in the definition of AutoModel; parameters related to `vad_model` can be set through `vad_kwargs`, which is a dict; similar parameters include `punc_kwargs` and `spk_kwargs`.

@@ -28,6 +28,7 @@ from funasr.utils.load_utils import load_audio_text_image_video
 from funasr.train_utils.set_all_random_seed import set_all_random_seed
 from funasr.train_utils.load_pretrained_model import load_pretrained_model
 from funasr.utils import export_utils
+from funasr.utils.postprocess_hotwords import apply_postprocess_hotwords_to_results
 from funasr.utils import misc
 
 
@@ -458,6 +459,12 @@ class AutoModel:
             **cfg: Runtime parameters:
                 - cache (dict): State cache for streaming mode. Pass {} for first call.
                 - hotword (str/list): Keywords to boost recognition accuracy.
+                - postprocess_hotwords (str/list/dict): Text-level hotword correction after
+                  decoding. Unlike model-level ``hotword``, this runs on the final text.
+                - postprocess_hotword_file (str): Hotword file path. Each line is a target
+                  word or an explicit mapping like ``错误词=>目标词``.
+                - postprocess_hotword_threshold (float): Fuzzy match threshold in [0, 1].
+                - return_postprocess_hotword_matches (bool): Include replacement details.
                 - language (str): Language hint ("auto", "zh", "en", "Chinese", etc.)
                 - batch_size_s (int): Dynamic batch total duration in seconds.
                 - is_final (bool): Last chunk flag for streaming mode.
@@ -486,12 +493,13 @@ class AutoModel:
                     if cfg.get("return_raw_text", self.kwargs.get("return_raw_text", False)):
                         result["raw_text"] = copy.copy(result["text"])
                     result["text"] = punc_res[0]["text"]
-            return results
+            return apply_postprocess_hotwords_to_results(results, cfg)
 
         else:
-            return self.inference_with_vad(
+            results = self.inference_with_vad(
                 input, input_len=input_len, progress_callback=progress_callback, **cfg
             )
+            return apply_postprocess_hotwords_to_results(results, cfg)
 
     def inference(
         self,
