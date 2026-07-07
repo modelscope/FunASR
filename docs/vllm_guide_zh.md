@@ -4,7 +4,7 @@
 
 ## Benchmark
 
-**测试集**：184 文件，11541 秒，Fun-ASR-Nano / GLM-ASR-Nano。
+**测试集**：184 文件，11541 秒，Fun-ASR-Nano / GLM-ASR-Nano。RTFx 定义、计时口径和可复现字段请见 [Benchmark RTF and Reproducibility Notes](./benchmark/rtf_reproducibility.md)。
 
 | 模型 | 引擎 | VAD | RTFx | CER | 备注 |
 |------|------|-----|------|-----|------|
