@@ -67,6 +67,21 @@ _spk_model = None
 _args = None
 
 
+def prepare_audio_for_inference(audio_data, sr, target_sr=16000):
+    """Return mono float32 audio at target_sr for ASR inference."""
+    audio_data = np.asarray(audio_data)
+    if audio_data.ndim > 1:
+        channel_axis = -1 if audio_data.shape[-1] <= audio_data.shape[0] else 0
+        audio_data = audio_data.mean(axis=channel_axis)
+
+    if sr != target_sr:
+        import librosa
+        audio_data = librosa.resample(audio_data, orig_sr=sr, target_sr=target_sr)
+        sr = target_sr
+
+    return audio_data.astype(np.float32), sr
+
+
 def load_engine(args):
     global _engine, _vad_model, _spk_model, _args
     _args = args
@@ -90,14 +105,7 @@ def load_engine(args):
 def process_audio(audio_data, sr=16000, language=None, hotwords=None, 
                   use_vad=True, use_spk=False, use_timestamp=True):
     """Core processing: VAD segment → vLLM ASR → timestamps → SPK."""
-    if sr != 16000:
-        import librosa
-        audio_data = librosa.resample(audio_data, orig_sr=sr, target_sr=16000)
-        sr = 16000
-
-    if audio_data.ndim > 1:
-        audio_data = audio_data[:, 0]
-    audio_data = audio_data.astype(np.float32)
+    audio_data, sr = prepare_audio_for_inference(audio_data, sr)
 
     # VAD segmentation
     if use_vad and len(audio_data) > sr * 1:
