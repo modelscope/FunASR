@@ -245,6 +245,7 @@ PASSIVE_INTEGRATION_ACTIONS = {
     "preview auth gate",
     "resolve CLA",
     "wait for checks",
+    "wait for maintainer preliminary PR",
     "wait for maintainer rerun",
     "wait for maintainer review",
 }
