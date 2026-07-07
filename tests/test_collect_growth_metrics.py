@@ -74,6 +74,7 @@ def test_default_integration_prs_include_new_growth_lanes():
     module = load_growth_metrics_module()
 
     expected_prs = {
+        "Significant-Gravitas/AutoGPT#13500",
         "huggingface/speech-to-speech#319",
         "run-llama/llama_index#21958",
         "run-llama/llama_index#21996",

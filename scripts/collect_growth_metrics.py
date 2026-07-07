@@ -40,6 +40,7 @@ DEFAULT_INTEGRATION_PRS = [
     "run-llama/llama_index#21958",
     "run-llama/llama_index#21996",
     "mem0ai/mem0#5571",
+    "Significant-Gravitas/AutoGPT#13500",
     "tmoroney/auto-subs#629",
     "infiniflow/ragflow#16473",
     "pipecat-ai/pipecat#4844",
