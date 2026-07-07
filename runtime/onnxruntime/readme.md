@@ -1,4 +1,4 @@
-# Please ref to [websocket service](https://github.com/alibaba-damo-academy/FunASR/tree/main/runtime/websocket)
+# Please ref to [websocket service](https://github.com/modelscope/FunASR/tree/main/runtime/websocket)
 
 # If you want to compile the file yourself, you can follow the steps below.
 ## Building for Linux/Unix
@@ -27,7 +27,7 @@ apt-get install libssl-dev #ubuntu
 
 ### Build runtime
 ```shell
-git clone https://github.com/alibaba-damo-academy/FunASR.git && cd FunASR/runtime/onnxruntime
+git clone https://github.com/modelscope/FunASR.git && cd FunASR/runtime/onnxruntime
 mkdir build && cd build
 cmake  -DCMAKE_BUILD_TYPE=release .. -DONNXRUNTIME_DIR=/path/to/onnxruntime-linux-x64-1.14.0 -DFFMPEG_DIR=/path/to/ffmpeg-master-latest-linux64-gpl-shared
 make -j 4
@@ -47,7 +47,7 @@ Download and unzip to d:/ffmpeg-master-latest-win64-gpl-shared
 
 ### Build runtime
 ```
-git clone https://github.com/alibaba-damo-academy/FunASR.git
+git clone https://github.com/modelscope/FunASR.git
 cd FunASR/runtime/onnxruntime
 mkdir build
 cd build
