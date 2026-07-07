@@ -34,7 +34,14 @@ This plan focuses on useful adoption work rather than vanity marketing: if more 
 
 ## Current campaign snapshot
 
-As of 2026-06-30 11:42 UTC, the ecosystem has 34,660 combined GitHub stars, or 3,436 additional stars since the 31,224 baseline. The remaining gap to the +20,000 target is 16,564 stars by 2026-09-30, which requires roughly 181 stars/day across the remaining 92 days.
+As of 2026-07-07 18:47 UTC, the ecosystem has 35,076 combined GitHub stars, or 3,852 additional stars since the 31,224 baseline. The remaining gap to the +20,000 target is 16,148 stars by 2026-09-30, which requires roughly 190 stars/day across the remaining 85 days.
+
+| Repository | Stars | Forks | Open issues | Open PRs | Last push |
+|---|---:|---:|---:|---:|---|
+| `modelscope/FunASR` | 19,017 | 1,913 | 6 | 0 | 2026-07-07 |
+| `FunAudioLLM/Fun-ASR` | 1,360 | 132 | 0 | 0 | 2026-07-07 |
+| `FunAudioLLM/SenseVoice` | 8,801 | 788 | 0 | 0 | 2026-07-07 |
+| `modelscope/FunClip` | 5,898 | 709 | 0 | 0 | 2026-07-07 |
 
 Keep this snapshot fresh during weekly planning. The ecosystem mode also reports the remaining gap, days left to 2026-09-30, and the required daily average:
 
@@ -42,6 +49,25 @@ Keep this snapshot fresh during weekly planning. The ecosystem mode also reports
 python scripts/collect_growth_metrics.py --ecosystem
 python scripts/collect_growth_metrics.py --ecosystem --format json
 ```
+
+## Traffic funnel snapshot
+
+The highest owned conversion surfaces are the repository overviews and Chinese READMEs. Use these surfaces for model-selection clarity, deployment proof, and official ecosystem routing before adding new long-form pages.
+
+14-day GitHub traffic as of 2026-07-07 18:46 UTC:
+
+| Repository | Views | Unique visitors | Clones | Unique cloners | Highest-traffic owned paths |
+|---|---:|---:|---:|---:|---|
+| `modelscope/FunASR` | 40,588 | 9,650 | 12,635 | 2,144 | overview: 7,243 uniques; `README_zh.md`: 2,521; releases: 469 |
+| `FunAudioLLM/Fun-ASR` | 6,173 | 1,926 | 1,023 | 817 | overview: 1,584 uniques; `README_zh.md`: 581; `docs/vllm_guide.md`: 148 |
+| `FunAudioLLM/SenseVoice` | 8,917 | 3,477 | 1,028 | 620 | overview: 2,802 uniques; `README_zh.md`: 923; releases: 163 |
+| `modelscope/FunClip` | 2,764 | 1,366 | 622 | 455 | overview: 1,187 uniques; `README_zh.md`: 327; UI screenshots: 203 combined |
+
+Top referrer pattern:
+
+- Search and GitHub dominate all four repos, so SEO snippets, GitHub topics, and README first-screen clarity matter more than low-frequency social posts.
+- `funasr.com`, `modelscope.github.io`, Hugging Face, ChatGPT, and `ai-bot.cn` are meaningful secondary referrers; keep model cards and homepage links synchronized with README claims.
+- FunClip has unusually visible image traffic, so screenshot freshness and UI clarity can influence creator conversion.
 
 ## Workstream 1: Convert first-time visitors
 
@@ -143,7 +169,8 @@ Set `GITHUB_TOKEN` when running this from CI or a shared network so GitHub's pub
 | `GetStream/Vision-Agents#606` FunASR STT plugin | Adds SenseVoice/FunASR to multimodal voice and vision agent examples | Keep package include paths and tests aligned with upstream conventions, then watch review threads for optional dependency or documentation requests. |
 | `TEN-framework/ten-framework#2191` FunASR ASR extension | Places SenseVoice/FunASR in a realtime multimodal agent framework with extension discovery | The failing `claude-review` action is a fork-permission gate, not a code failure; wait for maintainer-side review or rerun, and respond only to concrete code/doc feedback. |
 | `activepieces/activepieces#13985` FunASR speech recognition piece | Gives no-code workflow users a direct FunASR speech recognition action | The CLA status is author-controlled; monitor only for maintainer feedback or test failures until the author-side gate clears. |
-| `Uberi/speech_recognition#903` FunASR recognizer | Exposes FunASR through a widely known Python speech-recognition wrapper | Keep the recognizer optional and lightweight, and be ready with a minimal install/import smoke test if maintainers ask for scope reduction. |
+| `speaches-ai/speaches#658` FunASR transcription backend | Adds SenseVoice/Paraformer to an OpenAI-compatible local speech API used by self-hosted voice stacks | Current `unstable` state is a fork-workflow approval gate with no check-runs/logs on the head commit; keep the local validation note current and respond only if real CI logs or maintainer review appear. |
+| `Uberi/speech_recognition#903` FunASR recognizer | Exposes FunASR through a widely known Python speech-recognition wrapper | Current `unstable` state is a fork-workflow approval gate with no check-runs/logs on the head commit; keep the recognizer optional and lightweight, and be ready with a minimal install/import smoke test if maintainers ask for scope reduction. |
 | `ai4s-research/awesome-ai-for-science#69` FunASR science toolkit listing | Creates a discovery path from scientific AI tooling lists to FunASR for transcription and field-recording workflows | Validate the link, keep the description technically accurate, and avoid extra comments unless maintainers ask for category or wording changes. |
 | `lukasmasuch/best-of-ml-python#455` FunASR project listing | Adds FunASR to a high-star ranked Python ML discovery list that is refreshed weekly | The PR is mergeable and already has prior pings; keep monitoring without adding more comments unless new maintainer feedback or validation evidence appears. |
 | `mahseema/awesome-ai-tools#1689` FunClip video-tool listing | Adds FunClip to a high-visibility AI tools list where video creators discover clipping and subtitle workflows | Validate the FunClip link, keep the description aligned with local transcription/SRT/AI clipping capabilities, and avoid status pings after evidence is posted. |
