@@ -36,6 +36,41 @@ def test_cli_defaults_disable_speaker_and_bound_partial_window():
     assert args.partial_window_sec == 15.0
 
 
+def test_websocket_keepalive_kwargs_are_configurable():
+    module = load_service_module()
+
+    args = module.build_arg_parser().parse_args(
+        [
+            "--ws-ping-interval", "35",
+            "--ws-ping-timeout", "70",
+            "--ws-close-timeout", "12",
+            "--ws-max-size", "12345",
+        ]
+    )
+
+    assert module.build_websocket_serve_kwargs(args) == {
+        "max_size": 12345,
+        "ping_interval": 35.0,
+        "ping_timeout": 70.0,
+        "close_timeout": 12.0,
+    }
+
+
+def test_websocket_keepalive_kwargs_can_disable_ping():
+    module = load_service_module()
+
+    args = module.build_arg_parser().parse_args(
+        [
+            "--ws-ping-interval", "0",
+            "--ws-ping-timeout", "0",
+        ]
+    )
+
+    kwargs = module.build_websocket_serve_kwargs(args)
+    assert kwargs["ping_interval"] is None
+    assert kwargs["ping_timeout"] is None
+
+
 def test_create_speaker_tracker_skips_spk_when_disabled():
     module = load_service_module()
     args = types.SimpleNamespace(enable_spk=False, device="cuda:0")
