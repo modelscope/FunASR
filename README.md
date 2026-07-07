@@ -246,7 +246,7 @@ llama-funasr-sensevoice -m ./gguf/SenseVoiceSmall-f16.gguf --vad ./gguf/fsmn-vad
 
 ## Benchmark
 
-> 184 long-form audio files (192 min). [Full report →](https://modelscope.github.io/FunASR/benchmark.html)
+> 184 long-form audio files (192 min). [Full report →](https://modelscope.github.io/FunASR/benchmark.html) · [RTFx and reproducibility notes →](./docs/benchmark/rtf_reproducibility.md)
 
 | Model | Chinese CER ↓ | GPU Speed | CPU Speed | vs Whisper-large-v3 |
 |-------|------|-----------|-----------|-------------------|

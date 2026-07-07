@@ -4,7 +4,7 @@
 
 ## Benchmark
 
-**Test set**: 184 files, 11,541 seconds total. Models: Fun-ASR-Nano / GLM-ASR-Nano.
+**Test set**: 184 files, 11,541 seconds total. Models: Fun-ASR-Nano / GLM-ASR-Nano. See [Benchmark RTF and Reproducibility Notes](./benchmark/rtf_reproducibility.md) for the `RTFx` definition, timing scope checklist, and fields required for comparable reports.
 
 | Model | Engine | VAD | RTFx | CER | Notes |
 |-------|--------|-----|------|-----|-------|

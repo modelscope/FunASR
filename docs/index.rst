@@ -84,6 +84,7 @@ Overview
    :maxdepth: 1
    :caption: Benchmark and Leaderboard
 
+   ./benchmark/rtf_reproducibility.md
    ./benchmark/benchmark_onnx.md
    ./benchmark/benchmark_onnx_cpp.md
    ./benchmark/benchmark_libtorch.md
