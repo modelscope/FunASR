@@ -22,6 +22,7 @@ except ImportError:
     AutoModelForCausalLM = None
 
 from .ctc import CTC
+from .device_utils import resolve_autocast_device_type
 from .tools.utils import forced_align
 
 dtype_map = {"bf16": torch.bfloat16, "fp16": torch.float16, "fp32": torch.float32}
@@ -279,9 +280,9 @@ class FunASRNano(nn.Module):
             stats["batch_size_real_frames"] = speech_lengths.sum().item()
             stats["padding_frames"] = stats["batch_size_x_frames"] - stats["batch_size_real_frames"]
 
-        device_type = next(self.parameters()).device.type
+        autocast_device_type = resolve_autocast_device_type(next(self.parameters()).device)
         with torch.autocast(
-            device_type=device_type if device_type in ["cuda", "xpu", "mps"] else "cpu",
+            device_type=autocast_device_type,
             enabled=True if self.llm_dtype != "fp32" else False,
             dtype=dtype_map[self.llm_dtype],
         ):
@@ -758,9 +759,9 @@ class FunASRNano(nn.Module):
             padded[i, Tmax - Ti :, :] = e[0].to(dt)  # left padding
             attn[i, Tmax - Ti :] = 1
 
-        device_type = torch.device(kwargs.get("device", "cuda")).type
+        autocast_device_type = resolve_autocast_device_type(kwargs.get("device", "cuda"))
         with torch.autocast(
-            device_type=device_type if device_type in ["cuda", "xpu", "mps"] else "cpu",
+            device_type=autocast_device_type,
             enabled=True if llm_dtype != "fp32" else False,
             dtype=dt,
         ):
@@ -852,9 +853,9 @@ class FunASRNano(nn.Module):
             llm_dtype = "fp16" if kwargs.get("fp16", False) else llm_dtype
             llm_dtype = "bf16" if kwargs.get("bf16", False) else llm_dtype
 
-        device_type = torch.device(kwargs.get("device", "cuda")).type
+        autocast_device_type = resolve_autocast_device_type(kwargs.get("device", "cuda"))
         with torch.autocast(
-            device_type=device_type if device_type in ["cuda", "xpu", "mps"] else "cpu",
+            device_type=autocast_device_type,
             enabled=True if llm_dtype != "fp32" else False,
             dtype=dtype_map[llm_dtype],
         ):
