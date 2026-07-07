@@ -82,6 +82,10 @@ KNOWN_EXTERNAL_CHECK_FAILURES = {
     }
 }
 KNOWN_REVIEW_GATES = {
+    "sgl-project/sglang-omni#898": {
+        "action": "wait for contributor conflict resolution",
+        "reason": "Contributor-owned branch is dirty; conflict recipe already posted from the FunASR side",
+    },
     "punkpeye/awesome-mcp-servers#7153": {
         "action": "submit Glama",
         "reason": "Glama listing and score badge required before review",
@@ -157,6 +161,7 @@ CONTRIBUTOR_WAITING_LABELS = {"good first issue", "help wanted", "ready for PR"}
 MANUAL_HANDOFF_ACTIONS = {
     "submit Glama",
     "wait for author CLA",
+    "wait for contributor conflict resolution",
     "wait for preview authorization",
 }
 PASSIVE_INTEGRATION_ACTIONS = {
@@ -345,6 +350,8 @@ def recommend_integration_action(
     if pull_request.get("draft"):
         return "finish draft"
     mergeable_state = pull_request.get("mergeable_state")
+    if mergeable_state == "dirty" and known_review_gate_action:
+        return known_review_gate_action
     if mergeable_state == "dirty":
         return "resolve conflicts"
 
