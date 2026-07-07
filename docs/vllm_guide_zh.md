@@ -598,6 +598,18 @@ CUDA_VISIBLE_DEVICES=0 python examples/industrial_data_pretraining/fun_asr_nano/
 
 说话人分离默认关闭；只有确实需要 `spk` 字段时再加 `--enable-spk`。
 
+如果麦克风长连接经过 Docker、nginx 或云负载均衡，建议保持 WebSocket
+ping/pong 开启，并把 timeout 调到能覆盖短暂网络抖动：
+
+```bash
+CUDA_VISIBLE_DEVICES=0 python examples/industrial_data_pretraining/fun_asr_nano/serve_realtime_ws.py \
+    --port 10095 --language 中文 \
+    --ws-ping-interval 20 --ws-ping-timeout 60
+```
+
+只有在外部网关已经统一负责 keepalive / reconnect 策略时，才考虑设置
+`--ws-ping-interval 0` 关闭服务端 ping。
+
 ### 6.3 WebSocket 协议
 
 **连接**：`ws://host:10095`

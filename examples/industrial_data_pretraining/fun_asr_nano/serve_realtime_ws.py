@@ -536,12 +536,32 @@ async def handle_client(websocket, args):
         logger.error(f"Error: {e}", exc_info=True)
 
 
+def _positive_or_none(value):
+    return None if value <= 0 else value
+
+
+def build_websocket_serve_kwargs(args):
+    return {
+        "max_size": args.ws_max_size,
+        "ping_interval": _positive_or_none(args.ws_ping_interval),
+        "ping_timeout": _positive_or_none(args.ws_ping_timeout),
+        "close_timeout": args.ws_close_timeout,
+    }
+
+
 async def main(args):
     load_models(args)
     logger.info(f"Server on ws://0.0.0.0:{args.port}")
+    serve_kwargs = build_websocket_serve_kwargs(args)
+    logger.info(
+        "WebSocket options: "
+        f"max_size={serve_kwargs['max_size']}, "
+        f"ping_interval={serve_kwargs['ping_interval']}, "
+        f"ping_timeout={serve_kwargs['ping_timeout']}, "
+        f"close_timeout={serve_kwargs['close_timeout']}"
+    )
     async with websockets.serve(
-        lambda ws: handle_client(ws, args), "0.0.0.0", args.port,
-        max_size=10*1024*1024,
+        lambda ws: handle_client(ws, args), "0.0.0.0", args.port, **serve_kwargs,
     ):
         await asyncio.Future()
 
@@ -569,6 +589,14 @@ def build_arg_parser():
     parser.add_argument("--tensor-parallel-size", type=int, default=1)
     parser.add_argument("--gpu-memory-utilization", type=float, default=0.8)
     parser.add_argument("--max-model-len", type=int, default=2048)
+    parser.add_argument("--ws-ping-interval", type=float, default=20.0,
+                        help="WebSocket ping interval in seconds; <=0 disables keepalive pings.")
+    parser.add_argument("--ws-ping-timeout", type=float, default=20.0,
+                        help="WebSocket ping timeout in seconds; <=0 disables ping timeout.")
+    parser.add_argument("--ws-close-timeout", type=float, default=10.0,
+                        help="WebSocket close handshake timeout in seconds.")
+    parser.add_argument("--ws-max-size", type=int, default=10 * 1024 * 1024,
+                        help="Maximum incoming WebSocket message size in bytes.")
     return parser
 
 
