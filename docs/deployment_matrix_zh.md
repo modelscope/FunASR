@@ -13,6 +13,7 @@
 | Docker Compose API | 可复现本地 smoke test 或小型内部服务 | [OpenAI API Docker 文档](../examples/openai_api/README_zh.md) | 默认 CPU；容器里使用 CUDA 前需要先适配 CUDA-capable 镜像。 |
 | Kubernetes API | 集群内私有语音 API | [Kubernetes 模板](../examples/openai_api/kubernetes/README_zh.md) | 默认私有 `ClusterIP`；对外开放前补齐鉴权、TLS、网络策略和 GPU 调度。 |
 | Runtime WebSocket 服务 | 实时字幕、会议、客服流式音频 | [Runtime 服务文档](../runtime/readme_cn.md) | 需要中间结果、断句或长连接音频流时选择。 |
+| ONNX/C++ Runtime | 高并发 CPU 服务或嵌入式实时 ASR | [ONNX Runtime 文档](../runtime/onnxruntime/readme.md) | 如果延迟和并发已经验证，不要轻易替换；固定业务词优先做文本后处理。 |
 | vLLM 加速 | Fun-ASR-Nano 等 LLM-based ASR 高吞吐 | [vLLM 指南](./vllm_guide.md) | 适合 LLM 解码吞吐；不适用于非自回归 Paraformer。 |
 | MCP 服务 | Claude/Cursor/桌面 Agent 语音工具 | [MCP 示例](../examples/mcp_server/) | 适合把 ASR 结果暴露成一个本地工具。 |
 | 字幕生成 | 从长音频或视频生成 SRT/VTT | [字幕示例](../examples/subtitle/) | 需要可读性时使用 verbose segments 和说话人标签。 |
@@ -53,6 +54,16 @@ docker compose up --build
 
 使用 Runtime WebSocket 服务。上线前请用真实音频验证 chunk size、VAD、断句、标点、说话人分离、重连行为和客户端背压。
 
+### 我已有高并发 ONNX，但需要热词
+
+不要只因为当前 CPU ONNX/C++ 实时链路缺少热词，就把整条已经跑稳的链路迁到 GPU 大模型。先确认产品里的“热词”到底是哪一种：
+
+- 如果是公司名、产品名、专有名词或固定误识别纠错，优先保留 ONNX 链路，在最终文本上做确定性后处理。这样能保留已经验证过的 CPU 并发能力，也更容易审计。
+- 如果必须在解码阶段影响识别，或者确实存在多语言/语义理解上的质量缺口，再测试 Fun-ASR-Nano、Qwen3-ASR 等 GPU 路径；但要按首包延迟、尾包延迟、音频切片长度、VAD 策略和同时说话路数重新压测。
+- 如果两类需求都有，只在 GPU 模型质量或语言覆盖明显更好的流量上使用 GPU，其他高吞吐稳定流量继续走 ONNX。
+
+开部署 issue 时，请附上当前 ONNX 并发、CPU 核数、目标热词、可接受端到端延迟、GPU 型号、模型启动命令，以及热词是“识别后纠错”还是“解码阶段偏置”。
+
 ### 我需要更高的 LLM-based ASR 吞吐
 
 Fun-ASR-Nano 走 vLLM 路径。请用自己的音频分布做 benchmark，并关注 GPU 显存、tensor parallel size、首 token 延迟和 warmup 时间。
@@ -68,6 +79,7 @@ Fun-ASR-Nano 的 LLM-based 路径目前主要按 CUDA/vLLM、标准 PyTorch CPU/
 - 跑一个公开短音频 smoke sample，再跑至少一个真实私有样本。
 - 每次请求记录音频时长、模型、设备、延迟、响应格式和错误类型。
 - API 暴露到可信网络外之前，增加上传大小限制、鉴权、TLS 和限流；可用 [安全与网关指南](../examples/openai_api/SECURITY_zh.md) 规划边界。
+- 热词或纠错需求要先记录它是确定性后处理，还是解码阶段偏置；替换已有 runtime 前同时 benchmark 质量和延迟。
 - 流式场景需要测试静音、噪声、多人重叠、长连接、重连和慢客户端。
 - 发布 benchmark 结论时，说明输入时长、硬件、batch size、模型、运行路径，以及是否排除模型下载和 warmup 时间。
 
