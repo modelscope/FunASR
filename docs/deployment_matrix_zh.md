@@ -9,6 +9,7 @@
 | Colab Notebook | 浏览器 smoke test、首次评估、可分享 demo | [Colab 快速体验](../examples/colab/README_zh.md) | 不需要本地环境；首次运行会下载模型，GPU runtime 更快。 |
 | Python API | Notebook、离线任务、首次模型评测 | [README 快速开始](../README_zh.md#快速开始) | 最简单；调用方自己负责批处理、重试和文件管理。 |
 | OpenAI 兼容 API | 私有语音 API、Agent、Dify/LangChain/AutoGen 风格客户端 | [OpenAI API 示例](../examples/openai_api/README_zh.md) | 已支持 OpenAI audio API 的应用最容易接入。 |
+| Xinference | 已经使用 Xinference 统一管理模型服务的团队 | [Xinference 仓库](https://github.com/xorbitsai/inference) | 使用包含 [xorbitsai/inference#5140](https://github.com/xorbitsai/inference/pull/5140) 的版本或 commit，确保 Fun-ASR-Nano 使用打包发布的 `funasr~=1.3.0`，而不是旧的 git commit pin。 |
 | Docker Compose API | 可复现本地 smoke test 或小型内部服务 | [OpenAI API Docker 文档](../examples/openai_api/README_zh.md) | 默认 CPU；容器里使用 CUDA 前需要先适配 CUDA-capable 镜像。 |
 | Kubernetes API | 集群内私有语音 API | [Kubernetes 模板](../examples/openai_api/kubernetes/README_zh.md) | 默认私有 `ClusterIP`；对外开放前补齐鉴权、TLS、网络策略和 GPU 调度。 |
 | Runtime WebSocket 服务 | 实时字幕、会议、客服流式音频 | [Runtime 服务文档](../runtime/readme_cn.md) | 需要中间结果、断句或长连接音频流时选择。 |
@@ -27,6 +28,10 @@
 ### 我想替代云端转写服务
 
 使用 OpenAI 兼容 API。它提供 `/v1/audio/transcriptions`、`/v1/models`、`/health` 和 Swagger docs。先用 `sensevoice` 跑通 `examples/openai_api/smoke_test.sh` 或 `examples/openai_api/smoke_test.py`，再根据 [客户端配方](../examples/openai_api/CLIENTS.md) 和 [JavaScript/TypeScript 配方](../examples/openai_api/JAVASCRIPT_zh.md) 接入 SDK 或 HTTP 客户端。浏览器上传或麦克风 demo 可使用 [Gradio 浏览器 Demo](../examples/openai_api/GRADIO_zh.md)。Dify、n8n、HTTP 节点或 webhook worker 可参考 [工作流配方](../examples/openai_api/WORKFLOWS_zh.md)。API 网关、开发者门户或按 schema 导入时可使用 [OpenAPI 规范](../examples/openai_api/OPENAPI_zh.md)。跨团队共享服务前，请先阅读 [安全与网关指南](../examples/openai_api/SECURITY_zh.md)。
+
+### 我已经在使用 Xinference
+
+如果你的系统已经用 Xinference 管理模型注册、virtualenv 隔离和服务生命周期，可以选择 Xinference 路径。请确认使用的 Xinference 版本或 commit 包含 [xorbitsai/inference#5140](https://github.com/xorbitsai/inference/pull/5140)；该更新把 Fun-ASR-Nano model spec 从旧的 FunASR git SHA 改为打包发布的 `funasr~=1.3.0` 依赖。首次评估 FunASR，或需要面向 Agent 的 OpenAI 兼容转写接口时，仍建议先从上面的 FunASR 原生 OpenAI API 示例开始。
 
 ### 我想要可复现的容器 demo
 
