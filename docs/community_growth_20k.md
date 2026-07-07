@@ -34,11 +34,11 @@ This plan focuses on useful adoption work rather than vanity marketing: if more 
 
 ## Current campaign snapshot
 
-As of 2026-07-07 18:47 UTC, the ecosystem has 35,076 combined GitHub stars, or 3,852 additional stars since the 31,224 baseline. The remaining gap to the +20,000 target is 16,148 stars by 2026-09-30, which requires roughly 190 stars/day across the remaining 85 days.
+As of 2026-07-07 22:57 UTC, the ecosystem has 35,077 combined GitHub stars, or 3,853 additional stars since the 31,224 baseline. The remaining gap to the +20,000 target is 16,147 stars by 2026-09-30, which requires roughly 190 stars/day across the remaining 85 days.
 
 | Repository | Stars | Forks | Open issues | Open PRs | Last push |
 |---|---:|---:|---:|---:|---|
-| `modelscope/FunASR` | 19,017 | 1,913 | 6 | 0 | 2026-07-07 |
+| `modelscope/FunASR` | 19,018 | 1,913 | 6 | 0 | 2026-07-07 |
 | `FunAudioLLM/Fun-ASR` | 1,360 | 132 | 0 | 0 | 2026-07-07 |
 | `FunAudioLLM/SenseVoice` | 8,801 | 788 | 0 | 0 | 2026-07-07 |
 | `modelscope/FunClip` | 5,898 | 709 | 0 | 0 | 2026-07-07 |
@@ -148,6 +148,21 @@ python scripts/collect_growth_metrics.py --integrations --format json
 ```
 
 Set `GITHUB_TOKEN` when running this from CI or a shared network so GitHub's public API rate limit does not hide the real PR state.
+
+### External adoption issue queue
+
+High-star feature requests and roadmap issues are earlier in the funnel than PRs: they shape whether upstream projects expose a clean local STT contract before any code branch exists. Track them separately from merge-ready PRs and comment only when a maintainer asks for implementation detail, test scope, or provider behavior.
+
+| Adoption issue | Growth reason | Current maintainer action |
+|---|---|---|
+| `openclaw/openclaw#45508` self-hosted STT/TTS provider support in WebChat | Routes OpenClaw WebChat users toward private OpenAI-compatible STT providers instead of browser-only speech APIs | A batch push-to-talk path has been scoped: browser records a blob, the Gateway calls the configured `tools.media.audio` / OpenAI-compatible transcription backend, and streaming can remain a follow-up. Watch for product/API decisions before proposing code. |
+| `openclaw/openclaw#87140` pluggable macOS Push-to-Talk STT backend | Opens a native desktop path for FunASR/SenseVoice as local/private ASR behind OpenClaw's existing PTT UX | Keep Apple Speech as the default and watch for a batch-only provider boundary with explicit capability flags (`batch`, `streaming`, `languages`, `local_only`, `requires_network`). |
+| `NousResearch/hermes-agent#56989` local STT docs and hardening | Helps self-hosted messaging gateways document fully local voice-note transcription for private deployments | Track whether docs define a backend-neutral `local_command` and local HTTP contract; FunASR/SenseVoice should fit as wrappers or OpenAI-compatible `/v1/audio/transcriptions` services. |
+| `anomalyco/opencode#33300` desktop voice input | Puts local speech input in a high-visibility coding-agent desktop app where privacy-sensitive users may avoid browser dictation | Watch for an app-side transcription provider abstraction that inserts transcripts into the prompt draft and keeps provider credentials out of the renderer. |
+| `ggml-org/llama.cpp#24375` ASR model routing for WebUI mic input | Lets Qwen3-ASR / Fun-ASR-Nano act as the dedicated transcription model for a separate text-only chat model | Track the proposed `/v1/models` input-modality discovery and explicit transcription-model selector; avoid duplicate comments while a contributor is working on the UI behavior. |
+| `Wei-Shaw/sub2api#3754` OpenAI audio endpoint passthrough | Adds a Chinese gateway path for OpenAI-compatible STT/TTS clients and self-hosted FunASR/SenseVoice endpoints | Watch for standard multipart `POST /v1/audio/transcriptions` passthrough, language/model forwarding, and a CJK regression that preserves `language=zh`. |
+| `elizaOS/eliza#14807` audio PII redaction pipeline | Makes timed ASR spans part of an agent safety workflow where local CJK/private transcription can be useful | Keep FunASR/SenseVoice positioned as optional verifier backends; avoid coupling the primary redaction path to one ASR engine. |
+| `altic-dev/FluidVoice#547` remote transcription backend | Gives lightweight or Intel Macs a path to consume a LAN/GPU STT server instead of running every model locally | Relevant to FunASR/SenseVoice remote endpoints, but GitHub returned `403 Blocked` on the first comment attempt; monitor without retrying until there is new maintainer activity. |
 
 | Integration PR | Growth reason | Current maintainer action |
 |---|---|---|
