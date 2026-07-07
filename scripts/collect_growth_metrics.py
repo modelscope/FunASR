@@ -52,6 +52,8 @@ DEFAULT_INTEGRATION_PRS = [
     "Uberi/speech_recognition#903",
     "ai4s-research/awesome-ai-for-science#69",
     "lukasmasuch/best-of-ml-python#455",
+    "tensorchord/Awesome-LLMOps#533",
+    "rafska/awesome-local-llm#118",
     "mahseema/awesome-ai-tools#1689",
 ]
 FAILED_CHECK_CONCLUSIONS = {"action_required", "cancelled", "failure", "startup_failure", "timed_out"}
@@ -130,6 +132,12 @@ KNOWN_ASSISTED_REVIEW_REQUESTS = {
     },
     "lukasmasuch/best-of-ml-python#455": {
         "reason": "review evidence already posted; avoid duplicate pings",
+    },
+    "tensorchord/Awesome-LLMOps#533": {
+        "reason": "DCO and link validation already posted; avoid duplicate pings",
+    },
+    "rafska/awesome-local-llm#118": {
+        "reason": "local ASR listing validation already posted; avoid duplicate pings",
     },
     "mahseema/awesome-ai-tools#1689": {
         "reason": "review evidence already posted; avoid duplicate pings",
