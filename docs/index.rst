@@ -85,6 +85,7 @@ Overview
    :caption: Benchmark and Leaderboard
 
    ./benchmark/rtf_reproducibility.md
+   ./benchmark/realtime_ws_benchmark.md
    ./benchmark/benchmark_onnx.md
    ./benchmark/benchmark_onnx_cpp.md
    ./benchmark/benchmark_libtorch.md
