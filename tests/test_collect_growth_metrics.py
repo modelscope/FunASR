@@ -1125,6 +1125,18 @@ def test_format_integration_markdown_lists_active_operator_queue():
                 "next_action": "resolve CLA",
                 "checks": {"state": "pending", "failed_check_runs": [], "pending_check_runs": []},
             },
+            {
+                "pr": "huggingface/optimum-intel#1801",
+                "html_url": "https://github.com/huggingface/optimum-intel/pull/1801",
+                "state": "open",
+                "mergeable_state": "unstable",
+                "repo_stars": 18_000,
+                "repo_forks": 2_800,
+                "updated_at": "2026-06-30T04:20:02Z",
+                "updated_age_days": 0,
+                "next_action": "wait for maintainer preliminary PR",
+                "checks": {"state": "failure", "failed_check_runs": [], "pending_check_runs": []},
+            },
         ],
     }
 
@@ -1138,6 +1150,7 @@ def test_format_integration_markdown_lists_active_operator_queue():
     )
     assert "livekit/agents#6176" not in active_queue
     assert "activepieces/activepieces#13985" not in active_queue
+    assert "wait for maintainer preliminary PR" not in active_queue
 
 
 def test_format_integration_markdown_lists_manual_handoff_gates():
