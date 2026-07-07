@@ -779,3 +779,20 @@ RTFx 102 → 46。CER 不变。默认关闭。
 
 **Q: 首次慢？**
 vLLM 初始化 60-90s，之后即时。
+
+**Q: vLLM 输出连续标点（例如 `!!!!!!!!`），但 PyTorch/HF generate 正常，应该先查什么？**
+这通常说明音频 frontend 和 checkpoint 本身能工作，但 vLLM prompt-embedding
+路径或解码参数和 upstream runner 不一致。改模型前先检查这些项：
+
+- 传给 vLLM 的 prompt embeddings 要显式转成 float32：
+  `EmbedsPrompt(prompt_embeds=input_embeds.float())`。
+- 使用 ASR 更合适的确定性解码。Fun-ASR-Nano vLLM 路径默认使用
+  `temperature=0.0`、`top_p=1.0` 和 `skip_special_tokens=True`。在
+  prompt-embeds 模式下，`repetition_penalty` 保持中性的 `1.0`，除非你走的是
+  token prompt 路径；FunASR 的 vLLM helper 会把其他值归一化，避免 vLLM CUDA scatter
+  错误。
+- 确认 `model_dir` 和 `vllm_model_dir` 是匹配的一组 Fun-ASR-Nano 模型。如果清空
+  `vllm_model_dir` 后同一音频走 HF generate 正常，就继续排查 vLLM 路径，而不是音频文件。
+- 对一个失败样本记录 vLLM `finish_reason`、生成 token ids、prompt embedding dtype
+  和 shape。连续标点且 `finish_reason="length"` 时，通常更像解码/prompt 不匹配，而不是
+  VAD 或音频读取问题。

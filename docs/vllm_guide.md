@@ -775,3 +775,23 @@ Streaming: `serve_realtime_ws.RealtimeASRSession`
 
 **Q: Slow first startup?**
 vLLM initialization takes 60–90 s (KV Cache + CUDA Graph warmup). Subsequent inferences are instant.
+
+**Q: vLLM returns repeated punctuation such as `!!!!!!!!` but PyTorch/HF generate is normal. What should I check?**
+This usually means the audio frontend and checkpoint can work, but the vLLM
+prompt-embedding path or decoding parameters differ from the upstream runner.
+Check these items before changing the model:
+
+- Pass prompt embeddings to vLLM as float32:
+  `EmbedsPrompt(prompt_embeds=input_embeds.float())`.
+- Use ASR-style deterministic decoding. The Fun-ASR-Nano vLLM path defaults to
+  `temperature=0.0`, `top_p=1.0`, and `skip_special_tokens=True`. In
+  prompt-embeds mode, keep `repetition_penalty` at the neutral `1.0` unless you
+  are using a token-prompt path; other values are normalized by FunASR's vLLM
+  helpers to avoid vLLM CUDA scatter errors.
+- Verify that `model_dir` and `vllm_model_dir` are the matching Fun-ASR-Nano
+  pair. If clearing `vllm_model_dir` makes the same audio work through HF
+  generate, keep debugging the vLLM path rather than the audio file.
+- Log vLLM `finish_reason`, generated token ids, prompt embedding dtype, and
+  prompt embedding shape for one failing sample. Repeated punctuation with
+  `finish_reason="length"` usually points to decode/prompt mismatch rather than
+  VAD or audio loading.
