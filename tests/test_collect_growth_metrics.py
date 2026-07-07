@@ -25,6 +25,7 @@ def test_default_integration_prs_include_sglang_omni_fun_asr():
 def test_github_headers_falls_back_to_gh_auth_token(monkeypatch):
     module = load_growth_metrics_module()
     monkeypatch.delenv("GITHUB_TOKEN", raising=False)
+    monkeypatch.setenv("HOME", "/tmp/funasr-growth-metrics-no-token-home")
 
     def fake_run(args, **kwargs):
         assert args == ["gh", "auth", "token"]
@@ -35,6 +36,24 @@ def test_github_headers_falls_back_to_gh_auth_token(monkeypatch):
     headers = module.github_headers()
 
     assert headers["Authorization"] == "Bearer cli-token"
+
+
+def test_github_headers_reads_funasr_ops_token_file(monkeypatch, tmp_path):
+    module = load_growth_metrics_module()
+    monkeypatch.delenv("GITHUB_TOKEN", raising=False)
+    monkeypatch.setenv("HOME", str(tmp_path))
+    token_path = tmp_path / ".config" / "funasr-ops" / "github_token"
+    token_path.parent.mkdir(parents=True)
+    token_path.write_text("file-token\n")
+
+    def fake_run(args, **kwargs):
+        raise FileNotFoundError("gh")
+
+    monkeypatch.setattr(module.subprocess, "run", fake_run)
+
+    headers = module.github_headers()
+
+    assert headers["Authorization"] == "Bearer file-token"
 
 
 def test_default_integration_prs_include_high_visibility_external_queue():
@@ -88,6 +107,56 @@ def test_default_integration_prs_include_voice_agent_and_ml_discovery_lanes():
     }
 
     assert expected_prs.issubset(set(module.DEFAULT_INTEGRATION_PRS))
+
+
+def test_default_integration_prs_include_high_star_awesome_discovery_lanes():
+    module = load_growth_metrics_module()
+
+    expected_prs = {
+        "vinta/awesome-python#3246",
+        "fighting41love/funNLP#478",
+        "josephmisiti/awesome-machine-learning#1339",
+        "RVC-Boss/GPT-SoVITS#2801",
+        "jobbole/awesome-python-cn#141",
+        "ChristosChristofidis/awesome-deep-learning#317",
+        "Hannibal046/Awesome-LLM#623",
+        "AiHubCN/Awesome-Chinese-LLM#103",
+        "pluja/awesome-privacy#836",
+        "BradyFU/Awesome-Multimodal-Large-Language-Models#280",
+        "mahmoud/awesome-python-applications#227",
+        "bharathgs/Awesome-pytorch-list#164",
+        "owainlewis/awesome-artificial-intelligence#243",
+        "steven2358/awesome-generative-ai#821",
+        "WangRongsheng/awesome-LLM-resources#162",
+        "crownpku/Awesome-Chinese-NLP#32",
+    }
+
+    assert expected_prs.issubset(set(module.DEFAULT_INTEGRATION_PRS))
+
+
+def test_high_star_awesome_discovery_lanes_wait_for_maintainer_review():
+    module = load_growth_metrics_module()
+
+    expected_prs = {
+        "vinta/awesome-python#3246",
+        "fighting41love/funNLP#478",
+        "josephmisiti/awesome-machine-learning#1339",
+        "RVC-Boss/GPT-SoVITS#2801",
+        "jobbole/awesome-python-cn#141",
+        "ChristosChristofidis/awesome-deep-learning#317",
+        "Hannibal046/Awesome-LLM#623",
+        "AiHubCN/Awesome-Chinese-LLM#103",
+        "pluja/awesome-privacy#836",
+        "BradyFU/Awesome-Multimodal-Large-Language-Models#280",
+        "mahmoud/awesome-python-applications#227",
+        "bharathgs/Awesome-pytorch-list#164",
+        "owainlewis/awesome-artificial-intelligence#243",
+        "steven2358/awesome-generative-ai#821",
+        "WangRongsheng/awesome-LLM-resources#162",
+        "crownpku/Awesome-Chinese-NLP#32",
+    }
+
+    assert expected_prs.issubset(set(module.KNOWN_ASSISTED_REVIEW_REQUESTS))
 
 
 def test_default_integration_prs_include_mcp_discovery_lanes():
@@ -640,7 +709,7 @@ def test_collect_integration_metrics_surfaces_pending_cla_status(monkeypatch):
     metrics = module.collect_integration_metrics(["activepieces/activepieces#13985"])
 
     integration = metrics["integrations"][0]
-    assert integration["next_action"] == "resolve CLA"
+    assert integration["next_action"] == "wait for author CLA"
     assert integration["checks"]["pending_check_runs"] == [
         {
             "name": "license/cla",
@@ -734,7 +803,7 @@ def test_collect_integration_metrics_classifies_vercel_authorization_gate(monkey
     metrics = module.collect_integration_metrics(["mem0ai/mem0#5571"])
 
     integration = metrics["integrations"][0]
-    assert integration["next_action"] == "preview auth gate"
+    assert integration["next_action"] == "wait for preview authorization"
     assert integration["checks"]["failed_check_runs"] == [
         {
             "name": "Vercel",
@@ -850,7 +919,7 @@ def test_collect_integration_metrics_treats_empty_pending_status_as_review_gate(
     integration = metrics["integrations"][0]
     assert integration["checks"]["state"] == "unknown"
     assert integration["checks"]["pending_check_runs"] == []
-    assert integration["next_action"] == "review gate"
+    assert integration["next_action"] == "wait for contributor conflict resolution"
 
 
 def test_format_integration_markdown_includes_update_age_and_next_action():
