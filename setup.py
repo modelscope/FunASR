@@ -35,7 +35,7 @@ requirements = {
         "jaconv",
         # Speaker & evaluation
         "umap_learn",
-        "editdistance>=0.5.2",
+        "rapidfuzz>=3.0.0",
         # Optional (training/enhancement)
         "torch_complex",
         "tensorboardX",
@@ -44,7 +44,7 @@ requirements = {
     ],
     # train: The modules invoked when training only.
     "train": [
-        "editdistance",
+        "rapidfuzz>=3.0.0",
     ],
     # all: The modules should be optionally installled due to some reason.
     #      Please consider moving them to "install" occasionally
