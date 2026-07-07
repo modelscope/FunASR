@@ -113,6 +113,7 @@ Overview
    ./cli.md
    ./use_case_showcase.md
    ./use_case_showcase_zh.md
+   ./community_projects.md
    ./reference/application.md
 
 .. toctree::

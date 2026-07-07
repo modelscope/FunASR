@@ -289,6 +289,7 @@ llama-funasr-sensevoice -m ./gguf/SenseVoiceSmall-f16.gguf --vad ./gguf/fsmn-vad
 | 📖 [Documentation](https://modelscope.github.io/FunASR/) | 🐛 [Issues](https://github.com/modelscope/FunASR/issues) |
 | 💬 [Discussions](https://github.com/modelscope/FunASR/discussions) | 🤗 [HuggingFace](https://huggingface.co/funasr) |
 | 🤝 [Contributing](./CONTRIBUTING.md) | 🌐 [funasr.com](https://www.funasr.com) |
+| 🧩 [Community projects](./docs/community_projects.md) | 💡 [Use-case showcase](./docs/use_case_showcase.md) |
 
 ## Star History
 
