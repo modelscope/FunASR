@@ -9,6 +9,7 @@ Use this page to choose the shortest deployment path for a product, demo, benchm
 | Colab notebook | Browser smoke tests, first evaluation, shareable demos | [Colab quickstart](../examples/colab/) | No local setup; first run downloads model files, GPU runtime is faster. |
 | Python API | Notebooks, offline jobs, first model evaluation | [README quick start](../README.md#quick-start) | Lowest ceremony; caller owns batching, retries, and files. |
 | OpenAI-compatible API | Private speech API, agents, Dify/LangChain/AutoGen-style clients | [OpenAI API example](../examples/openai_api/) | Easiest integration for apps that already support OpenAI audio APIs. |
+| Xinference | Teams that already operate Xinference model serving | [Xinference repository](https://github.com/xorbitsai/inference) | Use a Xinference version containing [xorbitsai/inference#5140](https://github.com/xorbitsai/inference/pull/5140) so Fun-ASR-Nano uses packaged `funasr~=1.3.0` instead of the old pinned git commit. |
 | Docker Compose API | Reproducible local smoke test or small internal service | [OpenAI API Docker docs](../examples/openai_api/#docker-deployment) | CPU by default; adapt the image before using CUDA in containers. |
 | Kubernetes API | Internal speech API for cluster services | [Kubernetes template](../examples/openai_api/kubernetes/) | Starts as private `ClusterIP`; add auth, TLS, network policy, and GPU scheduling before broader exposure. |
 | Runtime WebSocket service | Live captions, meetings, call-center streams | [Runtime service docs](../runtime/readme.md) | Use when partial results, endpointing, or long-lived audio streams matter. |
@@ -27,6 +28,16 @@ Use the [Colab quickstart](../examples/colab/) when you want a browser-only smok
 ### I want a local replacement for cloud transcription
 
 Use the OpenAI-compatible API. It exposes `/v1/audio/transcriptions`, `/v1/models`, `/health`, and Swagger docs. Start with `sensevoice`, run `examples/openai_api/smoke_test.sh` or `examples/openai_api/smoke_test.py`, then connect existing SDK or HTTP clients using [client recipes](../examples/openai_api/CLIENTS.md) and [JavaScript/TypeScript recipes](../examples/openai_api/JAVASCRIPT.md). For browser upload or microphone demos, use the [Gradio browser demo](../examples/openai_api/GRADIO.md). For Dify, n8n, HTTP nodes, or webhook workers, follow the [workflow recipes](../examples/openai_api/WORKFLOWS.md). For API gateways, developer portals, and schema-driven imports, use the [OpenAPI spec](../examples/openai_api/OPENAPI.md). Before sharing the service, review the [security and gateway guide](../examples/openai_api/SECURITY.md).
+
+### I already run Xinference
+
+Use Xinference when your stack already standardizes on its model registry,
+virtualenv isolation, and serving lifecycle. Make sure your Xinference build
+includes [xorbitsai/inference#5140](https://github.com/xorbitsai/inference/pull/5140);
+that update moved the Fun-ASR-Nano model specs from an old FunASR git SHA to the
+packaged `funasr~=1.3.0` dependency line. For first-time FunASR evaluation or
+agent-oriented OpenAI-compatible transcription, start with the native FunASR
+OpenAI API example above instead.
 
 ### I want a repeatable container demo
 
