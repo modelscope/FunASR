@@ -64,6 +64,12 @@ success before adding it to directory PRs:
 If the badge endpoint still returns 404, keep the badge out of external
 directory submissions until the Glama listing is live.
 
+### Directory listings
+
+The FunASR MCP server is listed on mcp.so:
+
+- <https://mcp.so/server/mcp-server-funasr/radial-hks>
+
 ### 3. Configure your AI tool
 
 **Claude Code** (`~/.claude.json`):
