@@ -32,8 +32,10 @@ DEFAULT_TARGET_DATE = "2026-09-30"
 DEFAULT_INTEGRATION_PRS = [
     "huggingface/transformers#46180",
     "sgl-project/sglang-omni#898",
+    "yuekaizhang/Fun-ASR-vllm#21",
     "ray-project/ray#64053",
     "huggingface/optimum-intel#1801",
+    "openvino-agent/optimum-intel#5",
     "huggingface/speech-to-speech#319",
     "livekit/agents#6176",
     "mahimairaja/voiceai#16",
@@ -66,6 +68,11 @@ DEFAULT_INTEGRATION_PRS = [
     "faroit/awesome-python-scientific-audio#85",
     "joewongjc/type4me#207",
     "ga642381/speech-trident#31",
+    "EmulationAI/awesome-large-audio-models#19",
+    "ddlBoJack/Awesome-Speech-Language-Model#6",
+    "LqNoob/Neural-Codec-and-Speech-Language-Models#4",
+    "PyTorchKR/oss-landscape#688",
+    "metame-ai/awesome-audio-plaza#10",
     "vinta/awesome-python#3246",
     "fighting41love/funNLP#478",
     "josephmisiti/awesome-machine-learning#1339",
@@ -200,6 +207,27 @@ KNOWN_ASSISTED_REVIEW_REQUESTS = {
     },
     "ga642381/speech-trident#31": {
         "reason": "SenseVoice model-list evidence already posted; avoid duplicate pings",
+    },
+    "yuekaizhang/Fun-ASR-vllm#21": {
+        "reason": "Fun-ASR-vLLM dtype compatibility validation already posted; wait for maintainer review",
+    },
+    "openvino-agent/optimum-intel#5": {
+        "reason": "OpenVINO review-structure cleanup reference branch already posted; wait for maintainer guidance",
+    },
+    "EmulationAI/awesome-large-audio-models#19": {
+        "reason": "FunAudioLLM paper-list validation already posted; wait for maintainer review",
+    },
+    "ddlBoJack/Awesome-Speech-Language-Model#6": {
+        "reason": "Fun-ASR-Nano speech-language-model validation already posted; wait for maintainer review",
+    },
+    "LqNoob/Neural-Codec-and-Speech-Language-Models#4": {
+        "reason": "Fun-ASR-Nano and SenseVoice model-list validation already posted; wait for maintainer review",
+    },
+    "PyTorchKR/oss-landscape#688": {
+        "reason": "FunASR OSS landscape entry is clean and README-only; avoid status noise unless maintainers ask",
+    },
+    "metame-ai/awesome-audio-plaza#10": {
+        "reason": "FunASR, SenseVoice, and FunClip ASR-section PR already has prior pings; avoid duplicate comments",
     },
     "ai4s-research/awesome-ai-for-science#69": {
         "reason": "review evidence already posted; avoid duplicate pings",
