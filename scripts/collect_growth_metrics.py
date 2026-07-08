@@ -36,6 +36,7 @@ DEFAULT_INTEGRATION_PRS = [
     "huggingface/optimum-intel#1801",
     "huggingface/speech-to-speech#319",
     "livekit/agents#6176",
+    "mahimairaja/voiceai#16",
     "punkpeye/awesome-mcp-servers#7153",
     "run-llama/llama_index#21958",
     "run-llama/llama_index#21996",
@@ -129,6 +130,10 @@ KNOWN_REVIEW_GATES = {
     "TEN-framework/ten-framework#2191": {
         "action": "wait for maintainer review",
         "reason": "Claude review action requires maintainer permissions for fork PRs",
+    },
+    "mahimairaja/voiceai#16": {
+        "action": "wait for maintainer workflow approval",
+        "reason": "Maintainer approved; link-check fix and local lychee validation posted, but the new fork check suite is action_required with no check-runs",
     },
     "activepieces/activepieces#13985": {
         "action": "wait for author CLA",
