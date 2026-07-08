@@ -1,5 +1,6 @@
 {
-  "$schema": "https://glama.ai/api/mcp/v1/schemas/glama.json",
+  "$schema": "https://glama.ai/mcp/schemas/server.json",
+  "maintainers": ["LauraGPT"],
   "name": "funasr",
   "display_name": "FunASR MCP Server",
   "description": "Local speech recognition MCP server powered by FunASR and SenseVoice. It exposes a transcribe_audio tool for privacy-friendly audio transcription from local files.",
