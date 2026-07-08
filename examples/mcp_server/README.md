@@ -28,6 +28,20 @@ the Docker build context so the container entrypoint runs `funasr_mcp.py`.
 The `glama.json` file in this directory declares the MCP server command and
 metadata for directory scanners.
 
+### Official MCP Registry checklist
+
+The Dockerfile includes the OCI ownership label expected by the official MCP
+Registry:
+
+```dockerfile
+LABEL io.modelcontextprotocol.server.name="io.github.modelscope/funasr-mcp"
+```
+
+Before publishing, push a public OCI image (for example to GHCR) and create a
+matching `server.json` whose `name` is `io.github.modelscope/funasr-mcp` and
+whose package identifier points at that image tag. The Registry verifies that
+the Docker/OCI label and `server.json` name match.
+
 ### Glama submission checklist
 
 Use these values when adding the server at <https://glama.ai/mcp/servers>:

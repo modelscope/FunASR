@@ -1,5 +1,7 @@
 FROM python:3.10-slim
 
+LABEL io.modelcontextprotocol.server.name="io.github.modelscope/funasr-mcp"
+
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PIP_NO_CACHE_DIR=1 \
