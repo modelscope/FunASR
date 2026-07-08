@@ -87,7 +87,11 @@ Use the vLLM path for Fun-ASR-Nano. Benchmark with your own audio distribution a
 
 ### I want to run Fun-ASR-Nano on Ascend NPU
 
-Fun-ASR-Nano's LLM-based path is currently documented and validated for CUDA/vLLM, standard PyTorch CPU/GPU runs, and CPU/edge GGUF runtimes. Ascend NPU (`torch_npu`) is not an officially validated runtime for this model yet. Do not assume that a SenseVoice or Paraformer NPU deployment means Fun-ASR-Nano will also work, because Nano also exercises the Qwen decoder, `inputs_embeds`, and autocast path. If you are adapting it, start with `torch.bfloat16`, capture the `torch` / `torch_npu` / CANN versions, and open a focused PR or deployment issue with a minimal command and full stack trace.
+Fun-ASR-Nano's LLM-based path is documented and validated for CUDA/vLLM, standard PyTorch CPU/GPU runs, and CPU/edge GGUF runtimes. Ascend NPU (`torch_npu`) is still not an official production runtime for this model. Do not assume that a SenseVoice or Paraformer NPU deployment means Fun-ASR-Nano will also work, because Nano also exercises the Qwen decoder, `inputs_embeds`, and backend-specific autocast/operator paths.
+
+A community smoke test in [#3034](https://github.com/modelscope/FunASR/issues/3034) confirmed that the PyTorch `AutoModel(..., device="npu:*")` path can now enter the NPU backend after the autocast device fix, and produced the expected transcript on a 310P3 with `torch_npu 2.5.1` / CANN 8.5.1. That run was much slower than CPU (`rtf_avg` about 124 on NPU vs about 1.9 on CPU), so treat it as compatibility evidence, not a performance recommendation. The same report showed `AutoModelVLLM` on `vllm_ascend 0.9.2rc1` failing inside Qwen3 rotary embedding / `TransData` operator support; debug that path as a vLLM-Ascend runtime/operator issue and capture logs with `ASCEND_LAUNCH_BLOCKING=1`.
+
+If you are adapting this backend, keep the first PR narrow: start with `torch.bfloat16`, capture `torch` / `torch_npu` / CANN / driver / NPU model, separate PyTorch `AutoModel` from `AutoModelVLLM`, and attach the minimal command plus full stack trace.
 
 ## Readiness checklist
 

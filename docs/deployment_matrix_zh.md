@@ -70,7 +70,11 @@ Fun-ASR-Nano 走 vLLM 路径。请用自己的音频分布做 benchmark，并关
 
 ### 我想在昇腾 NPU 上跑 Fun-ASR-Nano
 
-Fun-ASR-Nano 的 LLM-based 路径目前主要按 CUDA/vLLM、标准 PyTorch CPU/GPU，以及 CPU/边缘 GGUF runtime 记录和验证；Ascend NPU（`torch_npu`）还不是这个模型的官方验证运行时。不要因为 SenseVoice 或 Paraformer 能在 NPU 上跑，就默认 Fun-ASR-Nano 也能直接跑通，因为 Nano 还会经过 Qwen 解码器、`inputs_embeds` 和 autocast 路径。若要适配，请先从 `torch.bfloat16` 开始，记录 `torch` / `torch_npu` / CANN 版本，并在最小 PR 或 deployment issue 里附上最小命令和完整错误栈。
+Fun-ASR-Nano 的 LLM-based 路径目前主要按 CUDA/vLLM、标准 PyTorch CPU/GPU，以及 CPU/边缘 GGUF runtime 记录和验证；Ascend NPU（`torch_npu`）仍不是这个模型的官方生产运行时。不要因为 SenseVoice 或 Paraformer 能在 NPU 上跑，就默认 Fun-ASR-Nano 也能直接跑通，因为 Nano 还会经过 Qwen 解码器、`inputs_embeds`，以及后端相关的 autocast / 算子路径。
+
+[#3034](https://github.com/modelscope/FunASR/issues/3034) 里的社区复测表明：修复 autocast device 之后，PyTorch `AutoModel(..., device="npu:*")` 路径已经能进入 NPU 后端，并在 310P3、`torch_npu 2.5.1`、CANN 8.5.1 环境里产出正确文本。但该 smoke run 明显慢于 CPU（NPU `rtf_avg` 约 124，CPU 约 1.9），所以这只能作为兼容性证据，不是性能推荐。同一报告里，`AutoModelVLLM` + `vllm_ascend 0.9.2rc1` 仍在 Qwen3 rotary embedding / `TransData` 算子支持处失败；这条路径应按 vLLM-Ascend runtime / 算子兼容问题继续排查，并建议带 `ASCEND_LAUNCH_BLOCKING=1` 复现日志。
+
+如果你正在适配这个后端，请保持第一版范围很小：先从 `torch.bfloat16` 开始，记录 `torch` / `torch_npu` / CANN / 驱动 / NPU 型号，把 PyTorch `AutoModel` 和 `AutoModelVLLM` 分开验证，并在 PR 或 deployment issue 里附上最小命令和完整 stack trace。
 
 ## 上线检查清单
 
