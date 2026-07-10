@@ -25,7 +25,8 @@ docker run --rm -i \
 
 When submitting this server to MCP directories such as Glama, use this folder as
 the Docker build context so the container entrypoint runs `funasr_mcp.py`.
-The `glama.json` file in this directory declares the MCP server command and
+The repository root `glama.json` declares GitHub maintainer ownership for Glama,
+while the `glama.json` file in this directory declares the container command and
 metadata for directory scanners.
 
 ### Official MCP Registry checklist
