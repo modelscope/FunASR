@@ -22,6 +22,7 @@ except ImportError:
     AutoModelForCausalLM = None
 
 from .ctc import CTC
+from .checkpoint_utils import disable_incomplete_ctc
 from .device_utils import resolve_autocast_device_type
 from .tools.utils import forced_align
 
@@ -145,6 +146,7 @@ class FunASRNano(nn.Module):
 
         # ctc decoder
         self.ctc_decoder = None
+        self._externally_loaded_ctc_keys = set()
         # TODO: fix table name
         ctc_decoder_class = tables.adaptor_classes.get(kwargs.get("ctc_decoder", None))
         if ctc_decoder_class is not None:
@@ -173,6 +175,11 @@ class FunASRNano(nn.Module):
             if init_param_path is not None:
                 src_state = torch.load(init_param_path, map_location="cpu")
                 flag = self.ctc_decoder.load_state_dict(src_state, strict=False)
+                self._externally_loaded_ctc_keys.update(
+                    f"ctc_decoder.{key}"
+                    for key in self.ctc_decoder.state_dict()
+                    if key in src_state
+                )
                 logging.info(f"Loading ctc_decoder ckpt: {init_param_path}, status: {flag}")
             freeze = ctc_decoder_conf.get("freeze", False)
             if freeze:
@@ -195,6 +202,11 @@ class FunASRNano(nn.Module):
         self.length_normalized_loss = length_normalized_loss
         rank = int(os.environ.get("RANK", 0))
         logging.info(f"rank: {rank}, model is builded.")
+
+    def on_pretrained_model_loaded(self, loaded_keys):
+        """Fail closed when a checkpoint configures CTC without trained weights."""
+        loaded_keys = set(loaded_keys).union(getattr(self, "_externally_loaded_ctc_keys", ()))
+        disable_incomplete_ctc(self, loaded_keys, log=logging)
 
     def forward(
         self,

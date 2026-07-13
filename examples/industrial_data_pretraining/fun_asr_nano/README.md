@@ -64,6 +64,12 @@ pip install -r requirements.txt
 - [ ] Support speaker diarization
 - [x] Support model training
 
+> [!NOTE]
+> Character-level timestamps require a checkpoint with complete `ctc_decoder.*` and
+> `ctc.*` weights. The current `Fun-ASR-MLT-Nano-2512` checkpoint does not include
+> those weights, so FunASR logs a warning and returns text without `timestamps` or
+> `ctc_timestamps` instead of aligning with uninitialized layers.
+
 # Usage 🛠️
 
 ## Inference

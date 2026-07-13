@@ -45,6 +45,7 @@ def load_pretrained_model(
     src_state = src_state["state_dict"] if "state_dict" in src_state else src_state
     src_state = src_state["model_state_dict"] if "model_state_dict" in src_state else src_state
     src_state = src_state["model"] if "model" in src_state else src_state
+    loaded_keys = set()
 
     if isinstance(scope_map, str):
         scope_map = scope_map.split(",")
@@ -96,8 +97,12 @@ def load_pretrained_model(
                 )
             else:
                 dst_state[k] = src_state[k_src]
+                loaded_keys.add(k)
         else:
             print(f"Warning, miss key in ckpt: {k}, {path}")
 
     flag = obj.load_state_dict(dst_state, strict=True)
+    on_loaded = getattr(obj, "on_pretrained_model_loaded", None)
+    if callable(on_loaded):
+        on_loaded(frozenset(loaded_keys))
     logging.info(f"Loading ckpt: {path}, status: {flag}")

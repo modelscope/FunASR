@@ -64,6 +64,11 @@ pip install -r requirements.txt
 - [ ] 支持区分说话人识别
 - [x] 支持模型训练
 
+> [!NOTE]
+> 字符级时间戳要求 checkpoint 同时包含完整的 `ctc_decoder.*` 和 `ctc.*` 权重。
+> 当前 `Fun-ASR-MLT-Nano-2512` checkpoint 未包含这些权重，因此 FunASR 会记录警告并仅返回文本，
+> 不再使用未初始化的层生成 `timestamps` 或 `ctc_timestamps`。
+
 # 用法 🛠️
 
 ## 推理
