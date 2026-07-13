@@ -2,6 +2,18 @@
 
 This page collects maintained community integrations and experiments around FunASR models. These projects are useful for users exploring deployment paths beyond the official Python runtime, but they are not official FunASR implementations unless explicitly noted.
 
+## Applications and workflows
+
+| Project | What it provides | Notes |
+|---|---|---|
+| [GPT-SoVITS](https://github.com/RVC-Boss/GPT-SoVITS) | Voice-dataset preparation and WebUI transcription with Fun-ASR-Nano, SenseVoice, and classic FunASR models. | The default CLI path uses Fun-ASR-Nano for Chinese, English, Japanese, Korean, and automatic language detection; Cantonese uses classic UniASR. Models download on first use. See the upstream [runtime fallback](https://github.com/RVC-Boss/GPT-SoVITS/pull/2801) and [backend documentation](https://github.com/RVC-Boss/GPT-SoVITS/pull/2803). |
+
+Run dataset transcription from a GPT-SoVITS checkout:
+
+```bash
+python tools/asr/funasr_asr.py -i <input> -o <output> -l zh
+```
+
 ## VAD runtimes
 
 | Project | What it provides | Notes |
