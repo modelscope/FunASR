@@ -103,6 +103,12 @@ def load_pretrained_model(
 
     flag = obj.load_state_dict(dst_state, strict=True)
     on_loaded = getattr(obj, "on_pretrained_model_loaded", None)
+    if not callable(on_loaded) and hasattr(obj, "module"):
+        on_loaded = getattr(obj.module, "on_pretrained_model_loaded", None)
+        if callable(on_loaded):
+            loaded_keys = {
+                key[len("module.") :] if key.startswith("module.") else key for key in loaded_keys
+            }
     if callable(on_loaded):
         on_loaded(frozenset(loaded_keys))
     logging.info(f"Loading ckpt: {path}, status: {flag}")

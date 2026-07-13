@@ -1,3 +1,24 @@
+def normalize_checkpoint_state(state):
+    """Unwrap common checkpoint containers and remove one DDP key prefix."""
+    while isinstance(state, dict):
+        wrapped = next(
+            (
+                state[key]
+                for key in ("state_dict", "model_state_dict", "model")
+                if isinstance(state.get(key), dict)
+            ),
+            None,
+        )
+        if wrapped is None or wrapped is state:
+            break
+        state = wrapped
+
+    return {
+        key[len("module.") :] if key.startswith("module.") else key: value
+        for key, value in state.items()
+    }
+
+
 def disable_incomplete_ctc(model, loaded_keys, *, log):
     """Disable timestamp inference unless every required CTC tensor was loaded."""
     if model.ctc_decoder is None or model.ctc is None:

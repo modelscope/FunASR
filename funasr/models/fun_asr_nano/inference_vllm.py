@@ -33,7 +33,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 
-from .checkpoint_utils import disable_incomplete_ctc
+from .checkpoint_utils import disable_incomplete_ctc, normalize_checkpoint_state
 
 logger = logging.getLogger(__name__)
 
@@ -358,6 +358,8 @@ class FunASRNanoVLLM:
         """Load timestamp modules and disable them when the checkpoint is incomplete."""
         if self.ctc_decoder is None or self.ctc is None:
             return
+
+        state_dict = normalize_checkpoint_state(state_dict)
 
         def compatible_state(module, prefix):
             expected = module.state_dict()

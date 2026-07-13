@@ -22,7 +22,7 @@ except ImportError:
     AutoModelForCausalLM = None
 
 from .ctc import CTC
-from .checkpoint_utils import disable_incomplete_ctc
+from .checkpoint_utils import disable_incomplete_ctc, normalize_checkpoint_state
 from .device_utils import resolve_autocast_device_type
 from .tools.utils import forced_align
 
@@ -173,7 +173,9 @@ class FunASRNano(nn.Module):
             self.ctc_decoder = ctc_decoder_class(**ctc_decoder_conf)
             init_param_path = ctc_decoder_conf.get("init_param_path", None)
             if init_param_path is not None:
-                src_state = torch.load(init_param_path, map_location="cpu")
+                src_state = normalize_checkpoint_state(
+                    torch.load(init_param_path, map_location="cpu")
+                )
                 flag = self.ctc_decoder.load_state_dict(src_state, strict=False)
                 self._externally_loaded_ctc_keys.update(
                     f"ctc_decoder.{key}"
