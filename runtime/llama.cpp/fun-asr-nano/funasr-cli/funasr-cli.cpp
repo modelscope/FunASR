@@ -184,6 +184,7 @@ int main(int argc,char**argv){
 
     std::vector<float> wav;
     if(!funasr_load_audio_16k_mono(wav_path.c_str(),wav)){fprintf(stderr,"failed to read audio\n");return 1;}
+    ggml_time_init(); // Required before ggml_time_us() on Windows.
     int64_t t0=ggml_time_us();
 
     enc_model em; if(!load_enc(enc_path.c_str(),em))return 1;
