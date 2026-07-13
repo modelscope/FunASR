@@ -41,7 +41,7 @@ def test_cli_accepts_float32_dtype_alias():
 
     args = module.build_arg_parser().parse_args(["--dtype", "float32"])
 
-    assert args.dtype == "float32"
+    assert args.dtype == "fp32"
 
 
 def test_websocket_keepalive_kwargs_are_configurable():
