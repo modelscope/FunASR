@@ -359,19 +359,21 @@ class FunASRNanoVLLM:
         if self.ctc_decoder is None or self.ctc is None:
             return
 
-        ctc_dec_state = {
-            key[len("ctc_decoder.") :]: value
-            for key, value in state_dict.items()
-            if key.startswith("ctc_decoder.")
-        }
+        def compatible_state(module, prefix):
+            expected = module.state_dict()
+            return {
+                key[len(prefix) :]: value
+                for key, value in state_dict.items()
+                if key.startswith(prefix)
+                and key[len(prefix) :] in expected
+                and value.size() == expected[key[len(prefix) :]].size()
+            }
+
+        ctc_dec_state = compatible_state(self.ctc_decoder, "ctc_decoder.")
         if ctc_dec_state:
             self.ctc_decoder.load_state_dict(ctc_dec_state, strict=False)
 
-        ctc_state = {
-            key[len("ctc.") :]: value
-            for key, value in state_dict.items()
-            if key.startswith("ctc.") and not key.startswith("ctc_decoder.")
-        }
+        ctc_state = compatible_state(self.ctc, "ctc.")
         if ctc_state:
             self.ctc.load_state_dict(ctc_state, strict=False)
 

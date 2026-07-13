@@ -1,3 +1,4 @@
+import pytest
 import torch
 
 from funasr.models.fun_asr_nano import model as nano_model
@@ -118,6 +119,21 @@ def test_vllm_model_disables_timestamps_when_ctc_weights_are_incomplete():
     _attach_ctc_modules(model)
     state = _complete_ctc_state(model)
     state.pop("ctc_decoder.bias")
+
+    model._load_ctc_weights(state)
+
+    assert model.ctc_decoder is None
+    assert model.ctc is None
+    assert model.ctc_tokenizer is None
+    assert model.blank_id is None
+
+
+@pytest.mark.parametrize("key", ["ctc_decoder.weight", "ctc.bias"])
+def test_vllm_model_disables_timestamps_when_ctc_weight_shape_mismatches(key):
+    model = object.__new__(FunASRNanoVLLM)
+    _attach_ctc_modules(model)
+    state = _complete_ctc_state(model)
+    state[key] = torch.zeros(1)
 
     model._load_ctc_weights(state)
 
