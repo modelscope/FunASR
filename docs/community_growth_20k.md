@@ -34,14 +34,14 @@ This plan focuses on useful adoption work rather than vanity marketing: if more 
 
 ## Current campaign snapshot
 
-As of 2026-07-08 07:32 UTC, the ecosystem has 35,109 combined GitHub stars, or 3,885 additional stars since the 31,224 baseline. The remaining gap to the +20,000 target is 16,115 stars by 2026-09-30, which requires roughly 192 stars/day across the remaining 84 days.
+As of 2026-07-13 07:54 UTC, the ecosystem has 35,328 combined GitHub stars, or 4,104 additional stars since the 31,224 baseline. The remaining gap to the +20,000 target is 15,896 stars by 2026-09-30, which requires roughly 202 stars/day across the remaining 79 days.
 
 | Repository | Stars | Forks | Open issues | Open PRs | Last push |
 |---|---:|---:|---:|---:|---|
-| `modelscope/FunASR` | 19,041 | 1,912 | 2 | 0 | 2026-07-08 |
-| `FunAudioLLM/Fun-ASR` | 1,363 | 134 | 0 | 0 | 2026-07-07 |
-| `FunAudioLLM/SenseVoice` | 8,807 | 789 | 0 | 0 | 2026-07-07 |
-| `modelscope/FunClip` | 5,898 | 709 | 0 | 0 | 2026-07-07 |
+| `modelscope/FunASR` | 19,186 | 1,926 | 3 | 0 | 2026-07-13 |
+| `FunAudioLLM/Fun-ASR` | 1,388 | 137 | 0 | 0 | 2026-07-07 |
+| `FunAudioLLM/SenseVoice` | 8,845 | 793 | 0 | 0 | 2026-07-10 |
+| `modelscope/FunClip` | 5,909 | 710 | 0 | 0 | 2026-07-07 |
 
 Keep this snapshot fresh during weekly planning. The ecosystem mode also reports the remaining gap, days left to 2026-09-30, and the required daily average:
 
