@@ -585,7 +585,12 @@ def build_arg_parser():
     parser.add_argument("--spk-model", type=str, default="iic/speech_eres2netv2_sv_zh-cn_16k-common")
     parser.add_argument("--hotword-file", type=str, default="热词列表")
     parser.add_argument("--language", type=str, default=None, help="Language hint (e.g. 中文, English, 日本語)")
-    parser.add_argument("--dtype", type=str, default="bf16", choices=["bf16", "fp16", "fp32"])
+    parser.add_argument(
+        "--dtype",
+        type=lambda value: "fp32" if value == "float32" else value,
+        default="bf16",
+        choices=["bf16", "fp16", "fp32", "float32"],
+    )
     parser.add_argument("--tensor-parallel-size", type=int, default=1)
     parser.add_argument("--gpu-memory-utilization", type=float, default=0.8)
     parser.add_argument("--max-model-len", type=int, default=2048)

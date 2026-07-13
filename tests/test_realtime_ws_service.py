@@ -36,6 +36,14 @@ def test_cli_defaults_disable_speaker_and_bound_partial_window():
     assert args.partial_window_sec == 15.0
 
 
+def test_cli_accepts_float32_dtype_alias():
+    module = load_service_module()
+
+    args = module.build_arg_parser().parse_args(["--dtype", "float32"])
+
+    assert args.dtype == "fp32"
+
+
 def test_websocket_keepalive_kwargs_are_configurable():
     module = load_service_module()
 
