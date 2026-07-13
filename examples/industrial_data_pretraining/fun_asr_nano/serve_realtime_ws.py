@@ -10,6 +10,7 @@ Features:
 """
 
 import asyncio
+from collections import deque
 import json
 import logging
 import os
@@ -77,21 +78,33 @@ from funasr.models.fsmn_vad_streaming.dynamic_vad import DynamicStreamingVAD
 class HybridSpeakerTracker:
     """Speaker diarization: streaming ClusterBackend + final re-clustering."""
 
-    def __init__(self, spk_model, device, threshold=0.6):
+    def __init__(
+        self,
+        spk_model,
+        device,
+        threshold=0.6,
+        max_history_chunks=128,
+        max_speakers=15,
+    ):
+        if max_history_chunks <= 0:
+            raise ValueError("max_history_chunks must be positive")
+        if max_speakers <= 0:
+            raise ValueError("max_speakers must be positive")
         self.spk_model = spk_model
         self.device = device
         self.threshold = threshold
+        self.max_speakers = max_speakers
         self.speaker_centers = []
+        self.speaker_center_updates = []
         from funasr.models.campplus.utils import sv_chunk, postprocess, distribute_spk
         from funasr.models.campplus.cluster_backend import ClusterBackend
         self.sv_chunk = sv_chunk
         self.postprocess = postprocess
         self.distribute_spk = distribute_spk
         self.cluster_backend = ClusterBackend(merge_thr=0.78).to(device)
-        self.all_chunks = []
-        self.all_embeddings = []
-        self.display_map = {}
-        self.next_display_id = 0
+        self.all_chunks = deque(maxlen=max_history_chunks)
+        self.all_embeddings = deque(maxlen=max_history_chunks)
+        self.last_speaker_id = 0
 
     @torch.no_grad()
     def assign_streaming(self, audio_samples, seg_start_s, seg_end_s, sentence):
@@ -99,31 +112,89 @@ class HybridSpeakerTracker:
         vad_seg = [[seg_start_s, seg_end_s, audio_samples]]
         chunks = self.sv_chunk(vad_seg)
         if not chunks:
-            sentence["spk"] = self.next_display_id
-            self.next_display_id += 1
+            sentence["spk"] = self.last_speaker_id
             return
 
-        self.all_chunks.extend(chunks)
         speech_list = [ch[2] for ch in chunks]
         spk_res = self.spk_model.generate(input=speech_list, cache={}, is_final=True)
-        embs = torch.cat([r["spk_embedding"] for r in spk_res], dim=0)
-        self.all_embeddings.append(embs)
+        embeddings = torch.cat([r["spk_embedding"] for r in spk_res], dim=0).detach().cpu()
+        for chunk, embedding in zip(chunks, embeddings):
+            # Speaker post-processing only needs timestamps after embedding extraction.
+            # Do not retain NumPy views into the session audio buffer.
+            self.all_chunks.append((float(chunk[0]), float(chunk[1])))
+            self.all_embeddings.append(embedding.clone())
 
-        all_embs = torch.cat(self.all_embeddings, dim=0)
-        labels = self.cluster_backend(all_embs.cpu(), oracle_num=None)
-        if not isinstance(labels, np.ndarray):
-            labels = np.array(labels)
-
-        all_sorted = sorted(self.all_chunks, key=lambda x: x[0])
-        sv_output = self.postprocess(all_sorted, None, labels, all_embs.cpu())
+        sv_output = self._cluster_recent(update_centers=True)
         temp = [{"start": int(seg_start_s*1000), "end": int(seg_end_s*1000), "text": sentence["text"]}]
         self.distribute_spk(temp, sv_output)
-        raw_spk = temp[0].get("spk", 0)
+        sentence["spk"] = temp[0].get("spk", self.last_speaker_id)
+        self.last_speaker_id = sentence["spk"]
 
-        if raw_spk not in self.display_map:
-            self.display_map[raw_spk] = self.next_display_id
-            self.next_display_id += 1
-        sentence["spk"] = self.display_map[raw_spk]
+    def _cluster_recent(self, update_centers):
+        all_embeddings = torch.stack(list(self.all_embeddings), dim=0)
+        labels = self.cluster_backend(all_embeddings, oracle_num=None)
+        if not isinstance(labels, np.ndarray):
+            labels = np.asarray(labels)
+
+        chunks = [[start, end, None] for start, end in self.all_chunks]
+        sv_output, cluster_centers = self.postprocess(
+            chunks,
+            None,
+            labels,
+            all_embeddings,
+            return_spk_center=True,
+        )
+        stable_ids = self._map_cluster_centers(cluster_centers, update=update_centers)
+        return [[start, end, stable_ids[int(spk)]] for start, end, spk in sv_output]
+
+    def _map_cluster_centers(self, cluster_centers, update):
+        centers = torch.as_tensor(cluster_centers, dtype=torch.float32).cpu()
+        centers = torch.nn.functional.normalize(centers, dim=1)
+        stable_ids = []
+        used_ids = set()
+
+        for center in centers:
+            best_id = None
+            best_similarity = float("-inf")
+            created = False
+            if self.speaker_centers:
+                similarities = torch.stack(
+                    [torch.dot(center, known_center) for known_center in self.speaker_centers]
+                )
+                for candidate in torch.argsort(similarities, descending=True).tolist():
+                    if candidate not in used_ids:
+                        best_id = candidate
+                        best_similarity = float(similarities[candidate])
+                        break
+
+            matched = best_id is not None and best_similarity >= self.threshold
+            if not matched and update and len(self.speaker_centers) < self.max_speakers:
+                best_id = len(self.speaker_centers)
+                self.speaker_centers.append(center.clone())
+                self.speaker_center_updates.append(1)
+                matched = True
+                created = True
+            elif best_id is None:
+                # There can be more active clusters than the configured identity cap.
+                if not self.speaker_centers:
+                    best_id = 0
+                else:
+                    similarities = torch.stack(
+                        [torch.dot(center, known_center) for known_center in self.speaker_centers]
+                    )
+                    best_id = int(torch.argmax(similarities))
+
+            if update and matched and not created:
+                count = self.speaker_center_updates[best_id]
+                weight = 1.0 / min(count + 1, 20)
+                updated = (1.0 - weight) * self.speaker_centers[best_id] + weight * center
+                self.speaker_centers[best_id] = torch.nn.functional.normalize(updated, dim=0)
+                self.speaker_center_updates[best_id] = count + 1
+
+            stable_ids.append(best_id)
+            used_ids.add(best_id)
+
+        return stable_ids
 
     @torch.no_grad()
     def finalize(self, sentences, min_split_s=3.0):
@@ -131,31 +202,36 @@ class HybridSpeakerTracker:
         if not self.all_embeddings or not sentences:
             return sentences
 
-        all_embs = torch.cat(self.all_embeddings, dim=0)
-        labels = self.cluster_backend(all_embs.cpu(), oracle_num=None)
-        if not isinstance(labels, np.ndarray):
-            labels = np.array(labels)
-
-        all_sorted = sorted(self.all_chunks, key=lambda x: x[0])
-        sv_output = self.postprocess(all_sorted, None, labels, all_embs.cpu())
-
-        for s in sentences:
-            s.pop("spk", None)
-        self.distribute_spk(sentences, sv_output)
-
-        id_map = {}
-        next_id = 0
-        for s in sentences:
-            raw = s.get("spk", 0)
-            if raw not in id_map:
-                id_map[raw] = next_id
-                next_id += 1
-            s["spk"] = id_map[raw]
-
+        sv_output = self._cluster_recent(update_centers=False)
+        history_start_ms = int(min(start for start, _ in self.all_chunks) * 1000)
         final_sentences = []
         for s in sentences:
-            sub = self._try_split(s, sv_output, id_map, min_split_s)
-            final_sentences.extend(sub)
+            if s["end"] <= history_start_ms:
+                final_sentences.append(s)
+                continue
+            current = dict(s)
+            if s["start"] < history_start_ms:
+                duration_ms = s["end"] - s["start"]
+                boundary_ratio = (history_start_ms - s["start"]) / duration_ms
+                split_index = min(
+                    len(s["text"]) - 1,
+                    max(1, round(len(s["text"]) * boundary_ratio)),
+                )
+                prefix_text = s["text"][:split_index].strip()
+                suffix_text = s["text"][split_index:].strip()
+                if not prefix_text or not suffix_text:
+                    final_sentences.append(s)
+                    continue
+
+                prefix = dict(s)
+                prefix.update(text=prefix_text, end=history_start_ms)
+                final_sentences.append(prefix)
+                current.update(
+                    text=suffix_text,
+                    start=history_start_ms,
+                )
+            self.distribute_spk([current], sv_output)
+            final_sentences.extend(self._try_split(current, sv_output, {}, min_split_s))
 
         return final_sentences
 
@@ -217,17 +293,26 @@ class HybridSpeakerTracker:
 
     def reset(self):
         self.speaker_centers = []
-        self.all_chunks = []
-        self.all_embeddings = []
-        self.display_map = {}
-        self.next_display_id = 0
+        self.speaker_center_updates = []
+        self.all_chunks.clear()
+        self.all_embeddings.clear()
+        self.last_speaker_id = 0
 
 
 class RealtimeASRSession:
     """Manages a single streaming ASR session."""
 
-    def __init__(self, vllm_engine, asr_kwargs, vad, spk_tracker=None, sample_rate=16000, chunk_ms=960,
-                 partial_window_sec=15.0):
+    def __init__(
+        self,
+        vllm_engine,
+        asr_kwargs,
+        vad,
+        spk_tracker=None,
+        sample_rate=16000,
+        chunk_ms=960,
+        partial_window_sec=15.0,
+        audio_lookback_sec=5.0,
+    ):
         self.vllm_engine = vllm_engine
         self.asr_kwargs = asr_kwargs
         self.vad = vad
@@ -243,10 +328,12 @@ class RealtimeASRSession:
         # without changing the final result (completed segments are always decoded
         # in full by _decode_segment / the is_final path). Set <=0 to disable.
         self.partial_window_samples = int(sample_rate * partial_window_sec) if partial_window_sec and partial_window_sec > 0 else 0
+        self.audio_lookback_samples = max(0, int(sample_rate * audio_lookback_sec))
         self.first_decode_done = False
 
         self.audio_buffer = np.array([], dtype=np.float32)
-        self.vad_fed_samples = 0
+        self.audio_buffer_start_sample = 0
+        self.total_samples = 0
         self.prev_text = ""
         self.last_partial_text = ""
         self.last_partial_start_ms = 0
@@ -261,11 +348,10 @@ class RealtimeASRSession:
         audio_int16 = np.frombuffer(pcm_bytes, dtype=np.int16)
         audio_float = audio_int16.astype(np.float32) / 32768.0
         self.audio_buffer = np.concatenate([self.audio_buffer, audio_float])
+        self.total_samples += len(audio_float)
 
-        new_audio = self.audio_buffer[self.vad_fed_samples:]
-        if len(new_audio) > 0:
-            new_confirmed = self.vad.feed(torch.from_numpy(new_audio).float(), is_final=False)
-            self.vad_fed_samples = len(self.audio_buffer)
+        if len(audio_float) > 0:
+            new_confirmed = self.vad.feed(torch.from_numpy(audio_float).float(), is_final=False)
 
             for seg in new_confirmed:
                 seg_text = self._decode_segment(seg)
@@ -275,32 +361,51 @@ class RealtimeASRSession:
                 self.locked_sentences.append({"text": seg_text, "start": int(seg[0]), "end": int(seg[1])})
                 if self.spk_tracker:
                     s0 = int(seg[0] * self.sample_rate / 1000)
-                    s1 = min(int(seg[1] * self.sample_rate / 1000), len(self.audio_buffer))
-                    self.spk_tracker.assign_streaming(self.audio_buffer[s0:s1], seg[0]/1000, seg[1]/1000, self.locked_sentences[-1])
+                    s1 = min(int(seg[1] * self.sample_rate / 1000), self.total_samples)
+                    segment_audio = self._slice_audio(s0, s1).copy()
+                    self.spk_tracker.assign_streaming(segment_audio, seg[0]/1000, seg[1]/1000, self.locked_sentences[-1])
                 logger.info(f"Locked: [{seg[0]}-{seg[1]}ms] \"{seg_text[:40]}\"")
+
+        self._compact_audio_buffer()
+
+    def _slice_audio(self, start_sample, end_sample):
+        local_start = max(0, start_sample - self.audio_buffer_start_sample)
+        local_end = min(len(self.audio_buffer), end_sample - self.audio_buffer_start_sample)
+        if local_end <= local_start:
+            return np.array([], dtype=np.float32)
+        return self.audio_buffer[local_start:local_end]
+
+    def _compact_audio_buffer(self):
+        if self.vad.current_speech_start is not None:
+            keep_from = int(self.vad.current_speech_start * self.sample_rate / 1000)
+        else:
+            keep_from = self.total_samples - self.audio_lookback_samples
+        keep_from = min(self.total_samples, max(self.audio_buffer_start_sample, keep_from))
+        drop_samples = keep_from - self.audio_buffer_start_sample
+        if drop_samples > 0:
+            # A copy is required here; a slice would keep the discarded backing
+            # array alive and recreate the long-session memory leak.
+            self.audio_buffer = self.audio_buffer[drop_samples:].copy()
+            self.audio_buffer_start_sample = keep_from
+
+    def _release_audio_buffer(self):
+        self.audio_buffer = np.array([], dtype=np.float32)
+        self.audio_buffer_start_sample = self.total_samples
 
     def should_decode(self):
         threshold = self.first_chunk_samples if not self.first_decode_done else self.chunk_samples
-        return (len(self.audio_buffer) - self.last_decode_samples) >= threshold
+        return (self.total_samples - self.last_decode_samples) >= threshold
 
     @torch.no_grad()
     def decode(self, is_final=False):
-        if len(self.audio_buffer) < self.chunk_samples:
+        if self.total_samples < self.chunk_samples:
+            if is_final:
+                self._release_audio_buffer()
             return self._build_response(is_final)
 
         if is_final:
-            remaining = self.audio_buffer[self.vad_fed_samples:]
-            if len(remaining) > 0:
-                new_confirmed = self.vad.feed(torch.from_numpy(remaining).float(), is_final=True)
-                self.vad_fed_samples = len(self.audio_buffer)
-                for seg in new_confirmed:
-                    seg_text = self._decode_segment(seg)
-                    if not seg_text.strip():
-                        continue
-                    self.locked_sentences.append({"text": seg_text, "start": int(seg[0]), "end": int(seg[1])})
-
             if self.vad.current_speech_start is not None:
-                end_ms = int(len(self.audio_buffer) * 1000 / self.sample_rate)
+                end_ms = int(self.total_samples * 1000 / self.sample_rate)
                 seg = [self.vad.current_speech_start, end_ms]
                 seg_text = self._decode_segment(seg)
                 if seg_text.strip():
@@ -309,12 +414,13 @@ class RealtimeASRSession:
 
             if self.spk_tracker and self.locked_sentences:
                 self.locked_sentences = self.spk_tracker.finalize(self.locked_sentences)
+            self._release_audio_buffer()
             return self._build_response(is_final)
 
         if self.vad.current_speech_start is not None:
             seg_audio, partial_start_ms = self.get_partial_decode_audio()
         else:
-            self.last_decode_samples = len(self.audio_buffer)
+            self.last_decode_samples = self.total_samples
             self.last_partial_text = ""
             return self._build_response(is_final)
 
@@ -339,7 +445,7 @@ class RealtimeASRSession:
         if hallucinated:
             self.prev_text = ""
 
-        self.last_decode_samples = len(self.audio_buffer)
+        self.last_decode_samples = self.total_samples
         self.last_partial_text = text
         self.last_partial_start_ms = partial_start_ms
         if text.strip() and not self.first_decode_done:
@@ -360,20 +466,20 @@ class RealtimeASRSession:
         decode_start_sample = seg_start_sample
 
         if self.partial_window_samples:
-            min_start = len(self.audio_buffer) - self.partial_window_samples
+            min_start = self.total_samples - self.partial_window_samples
             if min_start > decode_start_sample:
                 decode_start_sample = min_start
 
-        decode_start_sample = max(0, decode_start_sample)
+        decode_start_sample = max(self.audio_buffer_start_sample, decode_start_sample)
         start_ms = int(decode_start_sample * 1000 / self.sample_rate)
-        return self.audio_buffer[decode_start_sample:], start_ms
+        return self._slice_audio(decode_start_sample, self.total_samples), start_ms
 
     @torch.no_grad()
     def _decode_segment(self, seg):
         """Decode a completed VAD segment via vLLM."""
         start_sample = int(seg[0] * self.sample_rate / 1000)
-        end_sample = min(int(seg[1] * self.sample_rate / 1000), len(self.audio_buffer))
-        seg_audio = self.audio_buffer[start_sample:end_sample]
+        end_sample = min(int(seg[1] * self.sample_rate / 1000), self.total_samples)
+        seg_audio = self._slice_audio(start_sample, end_sample)
         if len(seg_audio) < 1600:
             return ""
         audio_tensor = torch.from_numpy(seg_audio).float()
@@ -393,7 +499,7 @@ class RealtimeASRSession:
             return ""
 
     def _build_response(self, is_final):
-        duration_ms = int(len(self.audio_buffer) * 1000 / self.sample_rate)
+        duration_ms = int(self.total_samples * 1000 / self.sample_rate)
         sentences = list(self.locked_sentences)
         partial = self.last_partial_text
         if partial:
@@ -412,7 +518,8 @@ class RealtimeASRSession:
 
     def reset(self):
         self.audio_buffer = np.array([], dtype=np.float32)
-        self.vad_fed_samples = 0
+        self.audio_buffer_start_sample = 0
+        self.total_samples = 0
         self.first_decode_done = False
         self.vad.reset()
         self.prev_text = ""
@@ -477,6 +584,17 @@ def create_speaker_tracker(spk_model, args):
     return HybridSpeakerTracker(spk_model, args.device)
 
 
+async def run_session_work(args, operation, *operation_args, **operation_kwargs):
+    """Run blocking session work off-loop without concurrent shared-model access."""
+    lock = getattr(args, "_session_work_lock", None)
+    if lock is None:
+        lock = asyncio.Lock()
+        args._session_work_lock = lock
+
+    async with lock:
+        return await asyncio.to_thread(operation, *operation_args, **operation_kwargs)
+
+
 async def handle_client(websocket, args):
     vllm_engine, asr_kwargs, vad_model, spk_model = load_models(args)
     vad = DynamicStreamingVAD(vad_model)
@@ -516,17 +634,17 @@ async def handle_client(websocket, args):
                     await websocket.send(json.dumps({"event": "language_set", "language": lang}))
                     logger.info(f"Language set: {lang}")
                 elif cmd.upper() == "STOP":
-                    if session.is_active and len(session.audio_buffer) > 0:
-                        result = session.decode(is_final=True)
+                    if session.is_active and session.total_samples > 0:
+                        result = await run_session_work(args, session.decode, is_final=True)
                         await websocket.send(json.dumps(result))
                         logger.info(f"Final: {len(result['sentences'])} sentences")
                         session.is_active = False
                     await websocket.send(json.dumps({"event": "stopped"}))
             elif isinstance(message, bytes) and session.is_active:
-                session.add_audio(message)
+                await run_session_work(args, session.add_audio, message)
                 now = time.time()
                 if now - last_decode_time >= decode_interval and session.should_decode():
-                    result = session.decode(is_final=False)
+                    result = await run_session_work(args, session.decode, is_final=False)
                     await websocket.send(json.dumps(result))
                     last_decode_time = now
 
