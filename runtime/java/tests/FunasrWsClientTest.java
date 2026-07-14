@@ -1,6 +1,5 @@
 package websocket;
 
-import java.lang.reflect.Field;
 import java.net.URI;
 
 public final class FunasrWsClientTest {
@@ -15,17 +14,19 @@ public final class FunasrWsClientTest {
     public void close() {
       closeCalled = true;
     }
+
+    @Override
+    public void send(String text) {}
   }
 
   private static void assertCloseDecision(
-      boolean expected, boolean eof, String mode, String message, String description)
+      boolean expected, boolean eof, String clientMode, String message, String description)
       throws Exception {
     RecordingClient client = new RecordingClient();
-    FunasrWsClient.mode = mode;
-
-    Field eofField = FunasrWsClient.class.getDeclaredField("iseof");
-    eofField.setAccessible(true);
-    eofField.setBoolean(client, eof);
+    FunasrWsClient.mode = clientMode;
+    if (eof) {
+      client.sendEof();
+    }
 
     client.onMessage(message);
     if (client.closeCalled != expected) {
@@ -63,7 +64,7 @@ public final class FunasrWsClientTest {
         true,
         true,
         "offline",
-        "{\"text\":\"done\",\"is_final\":true}",
+        "{\"mode\":\"2pass-offline\",\"text\":\"done\",\"is_final\":true}",
         "final offline response");
   }
 }
