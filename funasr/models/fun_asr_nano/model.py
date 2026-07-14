@@ -34,7 +34,8 @@ class FunASRNano(nn.Module):
     """Fun-ASR-Nano: End-to-End ASR Large Model.
 
     Trained on tens of millions of hours of real speech data.
-    Supports 31 languages including Chinese dialects and regional accents.
+    Language coverage is checkpoint-specific: Nano supports Chinese, English,
+    and Japanese plus Chinese dialects/accents; MLT-Nano supports 31 languages.
 
     Features:
     - Character-level timestamps (via CTC forced alignment)
