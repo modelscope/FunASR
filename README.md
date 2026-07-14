@@ -99,7 +99,7 @@ Whisper is a single model; **FunASR is a toolkit** — you pick the right model 
 | Languages | 50+ (Qwen3-ASR 52, Nano 31) | 57 | Varies |
 | Streaming | ✅ WebSocket (Paraformer) | ❌ | ✅ |
 | CPU viable | ✅ 17x realtime (SenseVoice) | ❌ Too slow | N/A |
-| Self-hosted | ✅ MIT license | ✅ MIT license | ❌ Cloud only |
+| Self-hosted | ✅ Yes (toolkit: MIT; model licenses vary) | ✅ MIT license | ❌ Cloud only |
 | Cost | Free | Free | $0.006/min+ |
 
 Trying FunASR for the first time? Use the [Colab quickstart](./examples/colab/) before setting up a local environment. Choosing a first model? Start with the [model selection guide](./docs/model_selection.md). Planning a switch from Whisper or a cloud ASR provider? Use the [migration guide](./docs/migration_from_whisper.md) and [benchmark example](./examples/migration/) to test representative audio, map features, and roll out safely.
@@ -303,7 +303,8 @@ llama-funasr-sensevoice -m ./gguf/SenseVoiceSmall-f16.gguf --vad ./gguf/fsmn-vad
 
 ## License
 
-[MIT License](./LICENSE)
+- FunASR toolkit source code in this repository: [MIT License](./LICENSE).
+- Pretrained model weights are licensed separately. Check the license shown on each model card; when a model card links to the [FunASR Model Open Source License Agreement](./MODEL_LICENSE), those terms apply.
 
 ## Citations
 
