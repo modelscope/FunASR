@@ -40,7 +40,7 @@ In your Dify app settings:
 
 | Model Name | Best For | Speed |
 |-----------|----------|-------|
-| `fun-asr-nano` | 31 languages + Chinese dialects | 340x realtime (vLLM) |
+| `fun-asr-nano` | zh/en/ja + Chinese dialects/accents | 340x realtime (vLLM) |
 | `sensevoice` | Ultra-fast, 5 languages | 170x realtime |
 | `paraformer` | Chinese (classic, stable) | 120x realtime |
 

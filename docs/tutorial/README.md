@@ -146,7 +146,8 @@ print(res[0]["text"])
 print(res[0]["timestamps"])  # character-level timestamps
 ```
 Notes:
-- Fun-ASR-Nano is trained on tens of millions of hours of data, supporting 31 languages including Chinese dialects.
+- Fun-ASR-Nano is trained on tens of millions of hours of data and supports Chinese, English, and Japanese, plus Chinese dialect groups and regional accents.
+- For the separate 31-language checkpoint, use Fun-ASR-MLT-Nano.
 - Supports hotwords: `hotwords=["keyword1", "keyword2"]`
 - Supports speaker diarization: add `spk_model="cam++"` and `punc_model="ct-punc"` to get `sentence_info` with speaker labels.
 - Requires: `pip install tiktoken huggingface_hub`

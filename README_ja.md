@@ -61,7 +61,7 @@ SenseVoiceSmall自体ではなく、CAM++によって提供されます。
 ### なぜFunASRを選ぶのか？
 
 Whisper は単一モデルですが、**FunASR はツールキット**です——用途に応じて
-**Fun-ASR-Nano**（中・英・日と中国語方言、GPU）、
+**Fun-ASR-Nano**（中・英・日と中国語方言・地域アクセント、GPU）、
 **Fun-ASR-MLT-Nano**（31言語）、**SenseVoiceSmall**（5言語ASRと感情・
 音声イベント）、**Paraformer**（低遅延ストリーミング）を選べます。
 下の表はツールキット全体の機能と、それを提供するモデルまたはパイプラインを示します：

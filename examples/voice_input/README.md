@@ -55,7 +55,7 @@ python funasr_input.py --lang zh                          # 语言
 |------|------|------|
 | sensevoice (默认) | 170x GPU / 17x CPU | 中/英/日/韩/粤 |
 | paraformer | 120x GPU / 15x CPU | 中/英 |
-| fun-asr-nano | 17x GPU | 31种语言 |
+| fun-asr-nano | 17x GPU | 中/英/日 + 中文方言/口音 |
 
 ## 架构
 
