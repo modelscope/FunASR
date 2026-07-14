@@ -225,7 +225,10 @@ public class FunasrWsClient extends WebSocketClient {
       close();
     }
 	 
-    if (iseof && mode.equals("offline") && jsonObject.containsKey("is_final") && jsonObject.get("is_final").equals("false")) {
+    if (iseof
+        && mode.equals("offline")
+        && jsonObject.containsKey("is_final")
+        && Boolean.TRUE.equals(jsonObject.get("is_final"))) {
       close();
     }
   }
