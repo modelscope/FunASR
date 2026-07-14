@@ -15,6 +15,8 @@ SMOKE_TEST = MCP_DIR / "smoke_test.py"
 
 def load_smoke_test_module():
     spec = importlib.util.spec_from_file_location("funasr_mcp_smoke_test", SMOKE_TEST)
+    if spec is None or spec.loader is None:
+        raise ImportError(f"Could not load smoke test module from {SMOKE_TEST}")
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module
@@ -134,6 +136,26 @@ class MCPContainerSmokeContractTest(unittest.TestCase):
 
         with self.assertRaisesRegex(ValueError, "transcribe_audio"):
             self.smoke_test.validate_responses(responses)
+
+    def test_validate_responses_rejects_non_object_payload(self):
+        with self.assertRaisesRegex(ValueError, "JSON object"):
+            self.smoke_test.validate_responses([{"id": 1}, ["unexpected"]])
+
+    def test_validate_responses_reports_unexpected_ids_without_sorting(self):
+        responses = [
+            {"jsonrpc": "2.0", "id": 1, "result": {}},
+            {"jsonrpc": "2.0", "id": 2, "result": {"tools": []}},
+            {"jsonrpc": "2.0", "method": "notifications/progress"},
+        ]
+
+        with self.assertRaisesRegex(ValueError, "expected response IDs 1 and 2"):
+            self.smoke_test.validate_responses(responses)
+
+    def test_parse_responses_rejects_non_json_stdout(self):
+        stdout = 'library log on stdout\n{"jsonrpc":"2.0","id":1,"result":{}}\n'
+
+        with self.assertRaisesRegex(ValueError, "non-JSON stdout"):
+            self.smoke_test.parse_responses(stdout)
 
 
 if __name__ == "__main__":

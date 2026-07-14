@@ -20,9 +20,13 @@ REQUESTS = [
 
 
 def validate_responses(responses):
-    by_id = {response.get("id"): response for response in responses}
-    if set(by_id) != {1, 2}:
-        raise ValueError(f"expected response IDs 1 and 2, got {sorted(by_id)}")
+    if not all(isinstance(response, dict) for response in responses):
+        raise ValueError("expected each stdout payload to be a JSON object")
+
+    response_ids = [response.get("id") for response in responses]
+    if len(responses) != 2 or set(response_ids) != {1, 2}:
+        raise ValueError(f"expected response IDs 1 and 2 only, got {response_ids}")
+    by_id = {response["id"]: response for response in responses}
 
     server_info = by_id[1].get("result", {}).get("serverInfo", {})
     if server_info.get("name") != "funasr":
@@ -32,6 +36,21 @@ def validate_responses(responses):
     tool_names = {tool.get("name") for tool in tools}
     if "transcribe_audio" not in tool_names:
         raise ValueError(f"transcribe_audio missing from tools/list: {tool_names}")
+
+
+def parse_responses(stdout):
+    responses = []
+    for line_number, raw_line in enumerate(stdout.splitlines(), start=1):
+        line = raw_line.strip()
+        if not line:
+            continue
+        try:
+            responses.append(json.loads(line))
+        except json.JSONDecodeError as error:
+            raise ValueError(
+                f"non-JSON stdout on line {line_number}: {line[:120]}"
+            ) from error
+    return responses
 
 
 def run_smoke_test(image, timeout):
@@ -49,9 +68,7 @@ def run_smoke_test(image, timeout):
             f"container exited with {completed.returncode}: {completed.stderr.strip()}"
         )
 
-    responses = [
-        json.loads(line) for line in completed.stdout.splitlines() if line.strip()
-    ]
+    responses = parse_responses(completed.stdout)
     validate_responses(responses)
 
 
