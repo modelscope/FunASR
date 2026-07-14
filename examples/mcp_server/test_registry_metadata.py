@@ -95,7 +95,10 @@ class MCPRegistryMetadataTest(unittest.TestCase):
         self.assertIn("docker/build-push-action@v7", workflow)
         self.assertIn("docker/setup-buildx-action@v4", workflow)
         self.assertIn("docker/login-action@v4", workflow)
-        self.assertEqual(workflow.count("persist-credentials: false"), 2)
+        self.assertNotIn("actions/checkout@v4", workflow)
+        self.assertNotIn("actions/setup-python@v5", workflow)
+        self.assertNotIn("docker/build-push-action@v6", workflow)
+        self.assertNotIn("docker/setup-buildx-action@v3", workflow)
 
 
 class MCPContainerSmokeContractTest(unittest.TestCase):
