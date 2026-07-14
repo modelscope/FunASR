@@ -1,0 +1,181 @@
+name: Validate and publish FunASR MCP server
+
+on:
+  pull_request:
+    paths:
+      - "examples/mcp_server/**"
+      - ".github/workflows/publish-mcp-server.yml"
+  push:
+    branches: ["main"]
+    tags: ["mcp-v*"]
+    paths:
+      - "examples/mcp_server/**"
+      - ".github/workflows/publish-mcp-server.yml"
+  workflow_dispatch:
+
+env:
+  IMAGE_NAME: ghcr.io/modelscope/funasr-mcp
+  MCP_PUBLISHER_VERSION: v1.8.0
+  MCP_PUBLISHER_SHA256: 1370446bbe74d562608e8005a6ccce02d146a661fbd78674e11cc70b9618d6cf
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.10"
+
+      - name: Run MCP unit and metadata tests
+        run: python -m unittest discover -s examples/mcp_server -p "test_*.py" -v
+
+      - name: Validate server.json against the official schema
+        run: |
+          python -m pip install --disable-pip-version-check "jsonschema==4.25.1"
+          schema_url="$(jq -r '."$schema"' examples/mcp_server/server.json)"
+          curl --fail --show-error --silent --location --retry 3 \
+            "$schema_url" -o "$RUNNER_TEMP/server.schema.json"
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          from jsonschema import Draft7Validator
+
+          metadata = json.loads(Path("examples/mcp_server/server.json").read_text())
+          schema = json.loads(
+              (Path(os.environ["RUNNER_TEMP"]) / "server.schema.json").read_text()
+          )
+          Draft7Validator(schema).validate(metadata)
+          PY
+
+      - name: Install verified MCP publisher
+        run: |
+          archive="$RUNNER_TEMP/mcp-publisher.tar.gz"
+          curl --fail --show-error --silent --location --retry 3 \
+            "https://github.com/modelcontextprotocol/registry/releases/download/${MCP_PUBLISHER_VERSION}/mcp-publisher_linux_amd64.tar.gz" \
+            -o "$archive"
+          echo "${MCP_PUBLISHER_SHA256}  $archive" | sha256sum --check
+          tar -xzf "$archive" -C "$RUNNER_TEMP" mcp-publisher
+
+      - name: Validate metadata with the official Registry
+        run: |
+          "$RUNNER_TEMP/mcp-publisher" validate examples/mcp_server/server.json
+
+      - name: Check release tag matches server version
+        id: metadata
+        shell: bash
+        run: |
+          version="$(jq -r '.version' examples/mcp_server/server.json)"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          if [[ "$GITHUB_REF" == refs/tags/mcp-v* ]]; then
+            tag_version="${GITHUB_REF_NAME#mcp-v}"
+            test "$tag_version" = "$version" || {
+              echo "Tag version $tag_version does not match server.json $version" >&2
+              exit 1
+            }
+          fi
+
+      - uses: docker/setup-buildx-action@v4
+
+      - name: Build local MCP image
+        uses: docker/build-push-action@v7
+        with:
+          context: examples/mcp_server
+          load: true
+          push: false
+          tags: funasr-mcp:test
+          build-args: |
+            VERSION=${{ steps.metadata.outputs.version }}
+            VCS_REF=${{ github.sha }}
+          cache-from: type=gha,scope=funasr-mcp
+          cache-to: type=gha,mode=max,scope=funasr-mcp
+
+      - name: Smoke-test MCP protocol inside the image
+        run: python examples/mcp_server/smoke_test.py funasr-mcp:test
+
+  publish:
+    if: startsWith(github.ref, 'refs/tags/mcp-v')
+    needs: validate
+    runs-on: ubuntu-latest
+    environment: mcp-registry-publish
+    permissions:
+      contents: read
+      id-token: write
+      packages: write
+
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Read server version
+        id: metadata
+        run: echo "version=$(jq -r '.version' examples/mcp_server/server.json)" >> "$GITHUB_OUTPUT"
+
+      - uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: docker/setup-buildx-action@v4
+
+      - name: Publish versioned MCP image
+        uses: docker/build-push-action@v7
+        with:
+          context: examples/mcp_server
+          push: true
+          tags: |
+            ${{ env.IMAGE_NAME }}:${{ steps.metadata.outputs.version }}
+            ${{ env.IMAGE_NAME }}:latest
+          build-args: |
+            VERSION=${{ steps.metadata.outputs.version }}
+            VCS_REF=${{ github.sha }}
+          cache-from: type=gha,scope=funasr-mcp
+          cache-to: type=gha,mode=max,scope=funasr-mcp
+
+      - name: Make the GHCR package public
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh api --method PATCH \
+            "/orgs/${GITHUB_REPOSITORY_OWNER}/packages/container/funasr-mcp" \
+            -f visibility=public
+
+      - name: Install verified MCP publisher
+        run: |
+          archive="$RUNNER_TEMP/mcp-publisher.tar.gz"
+          curl --fail --show-error --silent --location --retry 3 \
+            "https://github.com/modelcontextprotocol/registry/releases/download/${MCP_PUBLISHER_VERSION}/mcp-publisher_linux_amd64.tar.gz" \
+            -o "$archive"
+          echo "${MCP_PUBLISHER_SHA256}  $archive" | sha256sum --check
+          tar -xzf "$archive" -C "$RUNNER_TEMP" mcp-publisher
+
+      - name: Publish metadata to the official MCP Registry
+        working-directory: examples/mcp_server
+        run: |
+          "$RUNNER_TEMP/mcp-publisher" login github-oidc
+          "$RUNNER_TEMP/mcp-publisher" publish
+
+      - name: Verify the Registry listing
+        run: |
+          for attempt in {1..6}; do
+            if curl --fail --show-error --silent --get \
+              --data-urlencode "search=io.github.modelscope/funasr-mcp" \
+              https://registry.modelcontextprotocol.io/v0.1/servers \
+              | jq -e '.servers[] | select(.server.name == "io.github.modelscope/funasr-mcp")' \
+              >/dev/null; then
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "Published server did not appear in the Registry within 60 seconds" >&2
+          exit 1

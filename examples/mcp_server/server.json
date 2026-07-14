@@ -1,0 +1,46 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.modelscope/funasr-mcp",
+  "title": "FunASR",
+  "description": "Transcribe local audio with FunASR and SenseVoice using private, on-device inference.",
+  "version": "0.1.0",
+  "websiteUrl": "https://github.com/modelscope/FunASR/tree/main/examples/mcp_server",
+  "repository": {
+    "url": "https://github.com/modelscope/FunASR",
+    "source": "github",
+    "id": "569959091",
+    "subfolder": "examples/mcp_server"
+  },
+  "packages": [
+    {
+      "registryType": "oci",
+      "identifier": "ghcr.io/modelscope/funasr-mcp:0.1.0",
+      "runtimeHint": "docker",
+      "runtimeArguments": [
+        {
+          "type": "named",
+          "name": "--mount",
+          "description": "Mount the host audio directory read-only at /audio in the container.",
+          "value": "type=bind,src={audio_directory},dst=/audio,readonly",
+          "variables": {
+            "audio_directory": {
+              "description": "Host directory containing audio files. Use /audio/<file> when calling the tool.",
+              "format": "filepath",
+              "isRequired": true,
+              "placeholder": "/path/to/audio"
+            }
+          }
+        },
+        {
+          "type": "named",
+          "name": "--mount",
+          "description": "Persist downloaded ModelScope model files between container runs.",
+          "value": "type=volume,src=funasr-mcp-cache,dst=/root/.cache/modelscope"
+        }
+      ],
+      "transport": {
+        "type": "stdio"
+      }
+    }
+  ]
+}
