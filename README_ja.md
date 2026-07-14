@@ -149,5 +149,5 @@ docker pull registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-
 
 ## ライセンス
 
-- このリポジトリの FunASR ツールキットのソースコード: [MIT License](./LICENSE)
+- このリポジトリの FunASR ツールキットのソースコード: [MIT License](./LICENSE)。
 - 事前学習済みモデルの重みは個別にライセンスされます。各モデルカードに記載されたライセンスを確認してください。モデルカードがこのリポジトリの [FunASR Model Open Source License Agreement](./MODEL_LICENSE) を参照している場合、その条件が適用されます。

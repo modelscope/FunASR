@@ -149,5 +149,5 @@ docker pull registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-
 
 ## 라이선스
 
-- 이 저장소의 FunASR 툴킷 소스 코드: [MIT License](./LICENSE)
+- 이 저장소의 FunASR 툴킷 소스 코드: [MIT License](./LICENSE).
 - 사전 학습된 모델 가중치는 별도로 라이선스됩니다. 각 모델 카드에 표시된 라이선스를 확인하세요. 모델 카드가 이 저장소의 [FunASR Model Open Source License Agreement](./MODEL_LICENSE)를 가리키는 경우 해당 조건이 적용됩니다.
