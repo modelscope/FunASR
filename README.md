@@ -5,8 +5,8 @@
 </p>
 
 <p align="center">
-  <strong>Industrial speech recognition. Up to 340x realtime, 26x faster than Whisper. 50+ languages.</strong><br>
-  <em>Speaker diarization · Emotion detection · Streaming · One API call</em>
+  <strong>Industrial speech recognition toolkit for offline, streaming, and edge deployment.</strong><br>
+  <em>ASR · VAD · punctuation · speaker pipelines · emotion and audio-event models · OpenAI-compatible serving</em>
 </p>
 
 <p align="center">
@@ -37,7 +37,7 @@ pip install torch torchaudio
 pip install funasr
 ```
 
-**Flagship model — Fun-ASR-Nano** (LLM-ASR, 31 languages; the default recommendation, needs a GPU):
+**Flagship model — Fun-ASR-Nano** (LLM-ASR for Chinese, English, and Japanese, including Chinese dialects; needs a GPU):
 
 ```python
 from funasr import AutoModel
@@ -48,7 +48,14 @@ print(result[0]["text"])
 # 欢迎大家来体验达摩院推出的语音识别模型。
 ```
 
-On CPU (or for multilingual + emotion in one pass), use **SenseVoice** — which also returns speaker diarization and timestamps:
+For the separate 31-language checkpoint, use
+[Fun-ASR-MLT-Nano-2512](https://huggingface.co/FunAudioLLM/Fun-ASR-MLT-Nano-2512).
+Language coverage is checkpoint-specific.
+
+On CPU (or for five-language ASR plus emotion and audio-event tags), use
+**SenseVoiceSmall**. The pipeline below composes SenseVoiceSmall with FSMN-VAD
+and CAM++; diarization is provided by the separate CAM++ model, not by the
+SenseVoiceSmall checkpoint:
 
 ```python
 from funasr import AutoModel
@@ -60,7 +67,7 @@ result = model.generate(
     batch_size_s=300,
 )
 
-# One call returns VAD segments with speaker id + timestamps — render them however you like:
+# The AutoModel pipeline returns VAD segments with speaker ids and timestamps:
 for seg in result[0]["sentence_info"]:
     print(f"[{seg['start']/1000:.1f}s] Speaker {seg['spk']}: {rich_transcription_postprocess(seg['sentence'])}")
 ```
@@ -70,7 +77,8 @@ for seg in result[0]["sentence_info"]:
 [0.6s] Speaker 0: 欢迎大家来体验达摩院推出的语音识别模型
 ```
 
-That's it. **One model, one call** — VAD segmentation, speech recognition, punctuation, speaker diarization all happen automatically.
+One `AutoModel` pipeline call coordinates the configured ASR, VAD, and speaker
+models and returns the combined result.
 
 ### Scale & deploy the flagship
 
@@ -89,14 +97,19 @@ results = model.generate(["audio1.wav", "audio2.wav"], language="auto")
 
 ### Why FunASR?
 
-Whisper is a single model; **FunASR is a toolkit** — you pick the right model per job: **Fun-ASR-Nano** (flagship LLM-ASR, GPU, 340x realtime with vLLM, 31 languages), **SenseVoice** (CPU-friendly, + emotion & audio events), **Paraformer** (low-latency streaming). The table shows what the toolkit delivers vs one Whisper model — each capability is labelled with the model that provides it:
+Whisper is a single model; **FunASR is a toolkit** — you pick the right model
+per job: **Fun-ASR-Nano** (Chinese, English, Japanese, and Chinese dialects;
+GPU), **Fun-ASR-MLT-Nano** (31 languages), **SenseVoiceSmall** (five-language
+ASR plus emotion and audio events), and **Paraformer** (low-latency streaming).
+The table shows toolkit-level capabilities and names the model or pipeline that
+provides each one:
 
 | | FunASR (toolkit) | Whisper | Cloud APIs |
 |---|---|---|---|
 | Top speed | **340x realtime** (Fun-ASR-Nano + vLLM) | 13x realtime | ~1x realtime |
-| Speaker ID | ✅ Built-in | ❌ Needs pyannote | ✅ Extra cost |
+| Speaker ID | ✅ via VAD + CAM++ pipeline | ❌ Needs pyannote | ✅ Extra cost |
 | Emotion | ✅ via SenseVoice | ❌ | ❌ |
-| Languages | 50+ (Qwen3-ASR 52, Nano 31) | 57 | Varies |
+| Languages | Checkpoint-specific (for example Qwen3-ASR 52, MLT-Nano 31, Nano zh/en/ja) | 57 | Varies |
 | Streaming | ✅ WebSocket (Paraformer) | ❌ | ✅ |
 | CPU viable | ✅ 17x realtime (SenseVoice) | ❌ Too slow | N/A |
 | Self-hosted | ✅ Yes (toolkit: MIT; model licenses vary) | ✅ MIT license | ❌ Cloud only |
@@ -128,7 +141,8 @@ Requirements: Python ≥ 3.8. Install PyTorch + torchaudio first ([pytorch.org](
 
 | Model | Task | Languages | Params | Links |
 |-------|------|-----------|--------|-------|
-| **Fun-ASR-Nano** | ASR + timestamps | 31 languages | 800M | [⭐](https://www.modelscope.cn/models/FunAudioLLM/Fun-ASR-Nano-2512) [🤗](https://huggingface.co/FunAudioLLM/Fun-ASR-Nano-2512) |
+| **Fun-ASR-Nano** | ASR | zh/en/ja + Chinese dialects | 800M | [⭐](https://www.modelscope.cn/models/FunAudioLLM/Fun-ASR-Nano-2512) [🤗](https://huggingface.co/FunAudioLLM/Fun-ASR-Nano-2512) |
+| **Fun-ASR-MLT-Nano** | ASR | 31 languages | 800M | [⭐](https://www.modelscope.cn/models/FunAudioLLM/Fun-ASR-MLT-Nano-2512) [🤗](https://huggingface.co/FunAudioLLM/Fun-ASR-MLT-Nano-2512) |
 | **SenseVoiceSmall** | ASR + emotion + events | zh/en/ja/ko/yue | 234M | [⭐](https://www.modelscope.cn/models/iic/SenseVoiceSmall) [🤗](https://huggingface.co/FunAudioLLM/SenseVoiceSmall) |
 | **Paraformer-zh** | ASR + timestamps | zh/en | 220M | [⭐](https://www.modelscope.cn/models/iic/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary) [🤗](https://huggingface.co/funasr/paraformer-zh) |
 | Paraformer-zh-streaming | Streaming ASR | zh/en | 220M | [⭐](https://modelscope.cn/models/iic/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online/summary) [🤗](https://huggingface.co/funasr/paraformer-zh-streaming) |
@@ -269,8 +283,8 @@ llama-funasr-sensevoice -m ./gguf/SenseVoiceSmall-f16.gguf --vad ./gguf/fsmn-vad
 - 2026/05/24: **v1.3.3** — `funasr-server` CLI, OpenAI-compatible API, MCP Server for AI agents. `pip install --upgrade funasr`
 - 2026/05/20: Added Qwen3-ASR (0.6B/1.7B) — 52 languages, auto detection. [usage](examples/industrial_data_pretraining/qwen3_asr)
 - 2026/05/20: Added GLM-ASR-Nano (1.5B) — 17 languages, dialect support. [usage](examples/industrial_data_pretraining/glm_asr)
-- 2026/05/19: Fun-ASR-Nano and SenseVoice now support speaker diarization.
-- 2025/12/15: [Fun-ASR-Nano-2512](https://github.com/FunAudioLLM/Fun-ASR) — 31 languages, tens of millions of hours training.
+- 2026/05/19: Fun-ASR-Nano and SenseVoice can be combined with VAD and CAM++ for speaker diarization.
+- 2025/12/15: [Fun-ASR-Nano-2512](https://github.com/FunAudioLLM/Fun-ASR) — Chinese, English, Japanese, and Chinese dialect support; trained on tens of millions of hours.
 
 <details><summary>Older</summary>
 
