@@ -287,6 +287,7 @@ docker pull registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-
 | 📖 [文档](https://modelscope.github.io/FunASR/zh/) | 🐛 [问题反馈](https://github.com/modelscope/FunASR/issues) |
 | 💬 [讨论](https://github.com/modelscope/FunASR/discussions) | 🤗 [HuggingFace](https://huggingface.co/funasr) |
 | 🤝 [贡献指南](./CONTRIBUTING.md) | 📈 [20k 增长计划](./docs/community_growth_20k.md) |
+| 🗺️ [仓库职责与路线图](./docs/repository_roles_zh.md) | 🌐 [funasr.com](https://www.funasr.com) |
 | 🧩 [社区项目](./docs/community_projects.md) | 💡 [使用案例](./docs/use_case_showcase.md) |
 
 ## Star 趋势

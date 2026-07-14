@@ -2,6 +2,21 @@
 
 Thanks for helping improve FunASR. We especially welcome contributions that make the first successful transcription faster, improve deployment reliability, or make benchmarks easier to reproduce.
 
+## Repository scope
+
+FunASR spans four repositories. Before opening an issue or PR, check which repo owns the area you are working on:
+
+| Repository | Owns |
+|---|---|
+| `modelscope/FunASR` | Toolkit, inference pipelines, deployment services, `funasr` PyPI package |
+| `FunAudioLLM/Fun-ASR` | Fun-ASR-Nano / MLT model family, checkpoints, model cards, benchmarks, model-level integrations (Transformers, vLLM, GGUF) |
+| `FunAudioLLM/SenseVoice` | SenseVoice model: ASR + emotion + audio events |
+| `modelscope/FunClip` | Video transcription, subtitles, Gradio UI |
+
+**Quick test:** does the problem persist with a different model? If yes, it belongs in `modelscope/FunASR`. If it only affects one model, file it in that model's repo.
+
+Full details: [Repository roles & roadmap](./docs/repository_roles.md) ([中文](./docs/repository_roles_zh.md))
+
 ## High-impact areas
 
 - **Quick start reliability:** installation notes, CPU/GPU/MPS compatibility, dependency fixes, and runnable examples.
