@@ -1,8 +1,8 @@
 # 仓库职责与路线图
 
-本文档说明 FunASR 生态四个仓库的职责边界、用户入口和 issue 路由,并给出一份 directional roadmap。
+本文档说明 FunASR 生态四个仓库的职责边界、用户入口和 issue 路由,并给出一份方向性路线图。
 
-> **Versioned release roadmap: pending maintainer confirmation.**
+> **版本化发布路线图：待维护者确认。**
 > 本文档不承诺版本号和发布日期。当前仓库没有已建立的 milestone;GitHub tag 至 `v1.3.13`,PyPI 已发布 `1.3.14`;`1.4 / 1.5 / 2.0` 的边界尚未经核心 maintainer 确认。
 
 ---
@@ -59,7 +59,7 @@
 
 ## 实时 WebSocket 服务:推荐实现
 
-**`modelscope/FunASR` 中的[Fun-ASR-Nano + vllm 实时 WebSocket 服务](https://github.com/modelscope/FunASR/blob/main/examples/industrial_data_pretraining/fun_asr_nano/serve_realtime_ws.py)是推荐实现。**
+**`modelscope/FunASR` 中的[Fun-ASR-Nano + vLLM 实时 WebSocket 服务](https://github.com/modelscope/FunASR/blob/main/examples/industrial_data_pretraining/fun_asr_nano/serve_realtime_ws.py)是推荐实现。**
 
 - 功能开发、缺陷修复、行为变更,**一律先在 `modelscope/FunASR` 落地**。
 - 模型仓(`FunAudioLLM/Fun-ASR`)**只链接到权威实现**,不再把自带副本描述为权威实现。
@@ -69,14 +69,14 @@
 
 ---
 
-## 路线图(directional)
+## 路线图（方向性）
 
 > 每一项均链接到现有 issue / PR。没有 owner 或验收证据的条目不写完成日期。
 
 ### 当前
 
 - **实时服务长会话有界状态** —— 已由 [#3214](https://github.com/modelscope/FunASR/pull/3214) 合并,[#3101](https://github.com/modelscope/FunASR/issues/3101) 已关闭;模型仓镜像修复 [FunAudioLLM/Fun-ASR#135](https://github.com/FunAudioLLM/Fun-ASR/pull/135) 亦已合并。
-- **Fun-ASR-Nano 的 Transformers 原生集成** —— [huggingface/transformers#46180](https://github.com/huggingface/transformers/pull/46180),CI 全绿(100 success、2 skipped、0 failure),review thread 已全部解决,等待 maintainer approval。
+- **Fun-ASR-Nano 的 Transformers 原生集成** —— [huggingface/transformers#46180](https://github.com/huggingface/transformers/pull/46180),正在审查中;当前 CI 与审查状态请以链接的 PR 为准。
 - **明确四仓职责与 issue 路由** —— [#3203](https://github.com/modelscope/FunASR/issues/3203);即本文档。
 
 ### 下一步

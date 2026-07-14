@@ -59,7 +59,7 @@ The four repositories share models and tooling but their responsibility boundari
 
 ## Realtime WebSocket service: canonical source
 
-**The realtime WebSocket service in [Fun-ASR-Nano + vllm  realtime  WebSocket service](https://github.com/modelscope/FunASR/blob/main/examples/industrial_data_pretraining/fun_asr_nano/serve_realtime_ws.py) is the recommended implementation.**
+**The realtime WebSocket service in [Fun-ASR-Nano + vLLM realtime WebSocket service](https://github.com/modelscope/FunASR/blob/main/examples/industrial_data_pretraining/fun_asr_nano/serve_realtime_ws.py) is the recommended implementation.**
 
 - Feature development, bug fixes, and behavior changes **always land in `modelscope/FunASR` first**.
 - Model repos (`FunAudioLLM/Fun-ASR`) **link to the canonical implementation only** and no longer describe their own copy as the authoritative version.
@@ -76,7 +76,7 @@ The four repositories share models and tooling but their responsibility boundari
 ### Now
 
 - **Bounded realtime long-session state** — merged via [#3214](https://github.com/modelscope/FunASR/pull/3214), [#3101](https://github.com/modelscope/FunASR/issues/3101) closed; model-repo mirror fix [FunAudioLLM/Fun-ASR#135](https://github.com/FunAudioLLM/Fun-ASR/pull/135) also merged.
-- **Fun-ASR-Nano native Transformers integration** — [huggingface/transformers#46180](https://github.com/huggingface/transformers/pull/46180); CI green (100 success, 2 skipped, 0 failure), all review threads resolved, awaiting maintainer approval.
+- **Fun-ASR-Nano native Transformers integration** — [huggingface/transformers#46180](https://github.com/huggingface/transformers/pull/46180); in review. See the linked PR for current CI and review status.
 - **Clarify repository roles and issue routing** — [#3203](https://github.com/modelscope/FunASR/issues/3203); this document.
 
 ### Next
