@@ -37,7 +37,7 @@ pip install torch torchaudio
 pip install funasr
 ```
 
-**Flagship model — Fun-ASR-Nano** (LLM-ASR for Chinese, English, and Japanese, including Chinese dialects; needs a GPU):
+**Flagship model — Fun-ASR-Nano** (LLM-ASR for Chinese, English, and Japanese, plus Chinese dialect groups and regional accents; needs a GPU):
 
 ```python
 from funasr import AutoModel
@@ -50,7 +50,7 @@ print(result[0]["text"])
 
 For the separate 31-language checkpoint, use
 [Fun-ASR-MLT-Nano-2512](https://huggingface.co/FunAudioLLM/Fun-ASR-MLT-Nano-2512).
-Language coverage is checkpoint-specific.
+Language coverage is checkpoint-specific, so Nano and MLT-Nano should be treated as distinct model choices.
 
 On CPU (or for five-language ASR plus emotion and audio-event tags), use
 **SenseVoiceSmall**. The pipeline below composes SenseVoiceSmall with FSMN-VAD
@@ -141,7 +141,7 @@ Requirements: Python ≥ 3.8. Install PyTorch + torchaudio first ([pytorch.org](
 
 | Model | Task | Languages | Params | Links |
 |-------|------|-----------|--------|-------|
-| **Fun-ASR-Nano** | ASR | zh/en/ja + Chinese dialects | 800M | [⭐](https://www.modelscope.cn/models/FunAudioLLM/Fun-ASR-Nano-2512) [🤗](https://huggingface.co/FunAudioLLM/Fun-ASR-Nano-2512) |
+| **Fun-ASR-Nano** | ASR | zh/en/ja + Chinese dialects and accents | 800M | [⭐](https://www.modelscope.cn/models/FunAudioLLM/Fun-ASR-Nano-2512) [🤗](https://huggingface.co/FunAudioLLM/Fun-ASR-Nano-2512) |
 | **Fun-ASR-MLT-Nano** | ASR | 31 languages | 800M | [⭐](https://www.modelscope.cn/models/FunAudioLLM/Fun-ASR-MLT-Nano-2512) [🤗](https://huggingface.co/FunAudioLLM/Fun-ASR-MLT-Nano-2512) |
 | **SenseVoiceSmall** | ASR + emotion + events | zh/en/ja/ko/yue | 234M | [⭐](https://www.modelscope.cn/models/iic/SenseVoiceSmall) [🤗](https://huggingface.co/FunAudioLLM/SenseVoiceSmall) |
 | **Paraformer-zh** | ASR + timestamps | zh/en | 220M | [⭐](https://www.modelscope.cn/models/iic/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary) [🤗](https://huggingface.co/funasr/paraformer-zh) |

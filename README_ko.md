@@ -61,7 +61,7 @@ CAM++에서 제공합니다.
 ### 왜 FunASR인가?
 
 Whisper는 단일 모델이지만, **FunASR는 툴킷**입니다. 용도에 맞게
-**Fun-ASR-Nano**(중국어/영어/일본어 및 중국어 방언, GPU),
+**Fun-ASR-Nano**(중국어/영어/일본어 및 중국어 방언/지역 억양, GPU),
 **Fun-ASR-MLT-Nano**(31개 언어), **SenseVoiceSmall**(5개 언어 ASR와
 감정·오디오 이벤트), **Paraformer**(저지연 스트리밍)를 선택하세요.
 아래 표는 툴킷 전체의 기능과 이를 제공하는 모델 또는 파이프라인을 보여 줍니다:

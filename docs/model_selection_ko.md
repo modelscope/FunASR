@@ -27,7 +27,7 @@ result = model.generate(input="meeting.wav")
 | 빠른 다국어 프라이빗 전사 | SenseVoice-Small | ASR, 감정 태그, 음성 이벤트 태그, CPU/GPU 사용성이 균형 잡힌 기본 경로입니다. | [README quick start](../README_ko.md#빠른-시작) |
 | 중국어 중심 프로덕션 ASR | Paraformer-Large | VAD와 문장부호 복원을 함께 쓰는 성숙한 중국어 ASR 경로입니다. | [Tutorial](./tutorial/README.md) |
 | OpenAI API 예제의 영어 경로 | `paraformer-en` alias | OpenAI-style client에서 호환성을 확인하기 쉬운 가벼운 영어 경로입니다. | [OpenAI API example](../examples/openai_api/README_ko.md) |
-| LLM-based ASR 또는 31개 언어 평가 | Fun-ASR-Nano | LLM-based 모델입니다. decoder throughput이 중요하면 vLLM을 사용합니다. | [vLLM guide](./vllm_guide.md) |
+| LLM-based ASR 또는 중영일 + 중국어 방언/지역 억양 평가 | Fun-ASR-Nano | LLM-based 모델입니다. decoder throughput이 중요하면 vLLM을 사용합니다. | [vLLM guide](./vllm_guide.md) |
 | 라이브 자막 또는 콜센터 스트림 | Runtime WebSocket service | 장시간 연결, 부분 결과, endpointing에 맞춘 런타임입니다. | [Runtime service docs](../runtime/readme.md) |
 | Whisper / cloud ASR에서 전환 | SenseVoice-Small로 baseline을 만들고 필요하면 비교 | 강한 기본 경로로 먼저 평가한 뒤 용도별로 조정하는 편이 안전합니다. | [Migration guide](./migration_from_whisper.md) |
 
@@ -40,7 +40,7 @@ result = model.generate(input="meeting.wav")
 | `sensevoice` | `iic/SenseVoiceSmall` | 다국어 ASR, 이벤트 태그, CPU/GPU 동작이 균형 잡힌 기본 프라이빗 음성 API. |
 | `paraformer` | `paraformer-zh` + VAD + punctuation | 중국어 중심 프로덕션 경로. |
 | `paraformer-en` | `paraformer-en` + VAD | OpenAI-style client의 영어 호환성 확인. |
-| `fun-asr-nano` | `FunAudioLLM/Fun-ASR-Nano-2512` | LLM-based ASR, 31개 언어, vLLM acceleration 평가. |
+| `fun-asr-nano` | `FunAudioLLM/Fun-ASR-Nano-2512` | LLM-based ASR의 중영일·중국어 방언/지역 억양 평가, 또는 vLLM acceleration 확인. |
 
 클라이언트를 연결하기 전에 서비스를 확인하세요.
 

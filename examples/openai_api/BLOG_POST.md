@@ -107,7 +107,7 @@ Now your AI assistant can transcribe local audio files while keeping the audio i
 | `sensevoice` | General purpose, emotion | 170x GPU / 17x CPU |
 | `paraformer` | Chinese production | 120x GPU / 15x CPU |
 | `paraformer-en` | English production | 120x GPU / 15x CPU |
-| `fun-asr-nano` | 31 languages, LLM-based | 17x GPU |
+| `fun-asr-nano` | zh/en/ja + Chinese dialects/accents, LLM-based | 17x GPU |
 
 ## Get Started
 

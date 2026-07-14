@@ -107,7 +107,7 @@ echo "$result" | jq -r '.text'
 | sensevoice | 50+ | ~70ms/10s | General use, multilingual |
 | paraformer | zh + mixed | ~60ms/10s | Chinese production (with punctuation) |
 | paraformer-en | en | ~60ms/10s | English |
-| fun-asr-nano | 31 | varies | Encoder+LLM, complex audio |
+| fun-asr-nano | zh/en/ja + Chinese dialects/accents | varies | Encoder+LLM, complex audio |
 
 ## Legacy CLI
 

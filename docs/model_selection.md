@@ -4,7 +4,7 @@ Use this guide when you are choosing a first model, comparing FunASR with Whispe
 
 ## Fast default path
 
-If you have a GPU, start with the flagship **Fun-ASR-Nano** — an LLM-based ASR model (SenseVoice encoder + a Qwen3 decoder) covering 31 languages, with the strongest accuracy on hard cases, context, and proper nouns:
+If you have a GPU, start with the flagship **Fun-ASR-Nano** — an LLM-based ASR model (SenseVoice encoder + a Qwen3 decoder) for Chinese, English, and Japanese, plus Chinese dialect groups and regional accents, with strong accuracy on hard cases, context, and proper nouns:
 
 ```python
 from funasr import AutoModel
@@ -37,7 +37,7 @@ Switch to Paraformer when your workload is Mandarin-only and you want character-
 | Fast multilingual private transcription | SenseVoice-Small | Strong default with ASR, emotion tags, audio event tags, and CPU viability. | [README quick start](../README.md#quick-start) |
 | Mandarin production ASR | Paraformer-Large | Mature Chinese ASR path with VAD and punctuation. | [Tutorial](./tutorial/README.md) |
 | English-only route in the OpenAI API example | `paraformer-en` alias | Smaller English route for API compatibility checks. | [OpenAI API example](../examples/openai_api/) |
-| LLM-based ASR or 31-language experiments | Fun-ASR-Nano | LLM-based model path; use vLLM when decoder throughput matters. | [vLLM guide](./vllm_guide.md) |
+| LLM-based ASR or Chinese/English/Japanese + dialect experiments | Fun-ASR-Nano | LLM-based model path; use vLLM when decoder throughput matters. | [vLLM guide](./vllm_guide.md) |
 | Live captions or call-center streams | Runtime WebSocket service | Designed for long-lived streaming sessions and partial results. | [Runtime service docs](../runtime/readme.md) |
 | Batch archive processing | SenseVoice-Small or Paraformer-Large | Stable offline transcription path; caller owns manifests, retries, and logs. | [Batch ASR example](../examples/batch_asr_improved.py) |
 | Migration from Whisper/cloud ASR | SenseVoice-Small first, then benchmark alternatives | Gives a strong baseline before deeper model-specific tuning. | [Migration guide](./migration_from_whisper.md) |
@@ -51,7 +51,7 @@ The `examples/openai_api` server exposes short aliases so application teams do n
 | `sensevoice` | `iic/SenseVoiceSmall` | You want the default private speech API with multilingual ASR, event tags, and good CPU/GPU behavior. |
 | `paraformer` | `paraformer-zh` with VAD and punctuation | You want a Mandarin-oriented production route. |
 | `paraformer-en` | `paraformer-en` with VAD | You want a compact English route in OpenAI-style clients. |
-| `fun-asr-nano` | `FunAudioLLM/Fun-ASR-Nano-2512` | You are evaluating LLM-based ASR, 31-language coverage, or vLLM acceleration. |
+| `fun-asr-nano` | `FunAudioLLM/Fun-ASR-Nano-2512` | You are evaluating LLM-based ASR for Chinese, English, Japanese, and Chinese dialect/accent coverage, or want to test vLLM acceleration. |
 
 For Ascend NPU deployments, treat `fun-asr-nano` separately from SenseVoice / Paraformer. The Fun-ASR-Nano PyTorch `AutoModel` path has community compatibility evidence on 310P3 after the NPU autocast fix, but it was much slower than CPU in that smoke test; `AutoModelVLLM` still depends on vLLM-Ascend operator support and has hit Qwen3 rotary / `TransData` failures. Use CUDA/vLLM, standard PyTorch CPU/GPU, or GGUF runtime for production unless you are actively validating an Ascend backend.
 
@@ -91,7 +91,7 @@ For migration work, use the [migration benchmark example](../examples/migration/
 
 ## Practical recommendations
 
-- With a GPU, default to Fun-ASR-Nano — the flagship LLM-based model (31 languages), strongest on hard, contextual, and proper-noun-heavy audio.
+- With a GPU, default to Fun-ASR-Nano — the flagship LLM-based model for Chinese, English, Japanese, and Chinese dialects/accents, strongest on hard, contextual, and proper-noun-heavy audio. For the separate 31-language checkpoint, use Fun-ASR-MLT-Nano.
 - On CPU, or for multilingual + emotion workloads, use SenseVoice-Small (fast non-autoregressive, CPU-viable).
 - Use Paraformer when your production traffic is primarily Mandarin and you want timestamps or hotwords.
 - Use the streaming runtime when partial results and long-lived connections matter more than a single final transcript.

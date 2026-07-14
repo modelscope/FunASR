@@ -71,7 +71,7 @@ result = model.generate(input="https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics
 
 需要 31 语种时，请改用独立的
 [Fun-ASR-MLT-Nano-2512](https://huggingface.co/FunAudioLLM/Fun-ASR-MLT-Nano-2512)
-checkpoint。不同 checkpoint 的语言范围不能混用。
+checkpoint。Nano 与 MLT-Nano 的语言范围不同，使用时请按 checkpoint 选择。
 
 使用 vLLM 做高吞吐批处理：
 

@@ -91,7 +91,7 @@ curl http://localhost:8000/v1/audio/transcriptions \
 | `sensevoice` | 170x realtime | 17x realtime | zh/en/ja/ko/yue | Emotion detection |
 | `paraformer` | 120x realtime | 15x realtime | zh/en | Punctuation |
 | `paraformer-en` | 120x realtime | 15x realtime | en | English only |
-| `fun-asr-nano` | 17x realtime | 3.6x realtime | 31 languages | LLM-based, timestamps |
+| `fun-asr-nano` | 17x realtime | 3.6x realtime | zh/en/ja + Chinese dialects/accents | LLM-based, timestamps |
 
 ## API Endpoints
 

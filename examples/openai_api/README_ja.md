@@ -88,7 +88,7 @@ curl http://localhost:8000/v1/audio/transcriptions \
 | `sensevoice` | 170x realtime | 17x realtime | zh/en/ja/ko/yue | 感情・イベントタグ |
 | `paraformer` | 120x realtime | 15x realtime | zh/en | 句読点復元 |
 | `paraformer-en` | 120x realtime | 15x realtime | en | 英語認識 |
-| `fun-asr-nano` | 17x realtime | 3.6x realtime | 31 languages | LLM-based、タイムスタンプ |
+| `fun-asr-nano` | 17x realtime | 3.6x realtime | 中英日 + 中国語方言・地域アクセント | LLM-based、タイムスタンプ |
 
 ## API エンドポイント
 
