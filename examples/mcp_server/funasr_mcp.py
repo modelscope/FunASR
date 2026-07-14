@@ -28,14 +28,14 @@ import base64
 def send_response(id, result):
     msg = {"jsonrpc": "2.0", "id": id, "result": result}
     out = json.dumps(msg)
-    sys.stdout.write(f"Content-Length: {len(out)}\r\n\r\n{out}")
+    sys.stdout.write(f"{out}\n")
     sys.stdout.flush()
 
 
 def send_notification(method, params=None):
     msg = {"jsonrpc": "2.0", "method": method, "params": params or {}}
     out = json.dumps(msg)
-    sys.stdout.write(f"Content-Length: {len(out)}\r\n\r\n{out}")
+    sys.stdout.write(f"{out}\n")
     sys.stdout.flush()
 
 
@@ -154,25 +154,11 @@ def handle_request(request):
 
 def main():
     """Run MCP server over stdio."""
-    import re
-    buffer = ""
-    while True:
-        line = sys.stdin.readline()
+    for line in sys.stdin:
+        line = line.strip()
         if not line:
-            break
-        buffer += line
-        if "\r\n\r\n" in buffer:
-            header, body_start = buffer.split("\r\n\r\n", 1)
-            match = re.search(r"Content-Length: (\d+)", header)
-            if match:
-                length = int(match.group(1))
-                while len(body_start) < length:
-                    body_start += sys.stdin.read(length - len(body_start))
-                request = json.loads(body_start[:length])
-                buffer = body_start[length:]
-                handle_request(request)
-            else:
-                buffer = ""
+            continue
+        handle_request(json.loads(line))
 
 
 if __name__ == "__main__":
