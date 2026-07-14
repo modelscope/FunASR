@@ -10579,7 +10579,7 @@
             ys_pad_embed = self.decoder.embed(ys_pad_masked)
         with torch.no_grad():
             decoder_outs = self.decoder(
-</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/paraformer_streaming/model.py#L336" target="_blank" class="src-more">View full source →</a></details></div><div class="mblk"><code>.calc_predictor(encoder_out, encoder_out_lens)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/paraformer_streaming/model.py#L392" target="_blank" class="gh-link">L392</a><div class="mdoc"><p>Calc predictor.</p>
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/paraformer_streaming/model.py#L336" target="_blank" class="src-more">View full source →</a></details></div><div class="mblk"><code>.calc_predictor(encoder_out, encoder_out_lens)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/paraformer_streaming/model.py#L395" target="_blank" class="gh-link">L395</a><div class="mdoc"><p>Calc predictor.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>encoder_out</code> — Encoder output tensor.</li>
@@ -10615,7 +10615,7 @@
         )
         predictor_alignments, predictor_alignments_len = self.predictor.gen_frame_alignments(
             pre_alphas,
-</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/paraformer_streaming/model.py#L392" target="_blank" class="src-more">View full source →</a></details></div><div class="mblk"><code>.calc_predictor_chunk(encoder_out, encoder_out_lens, cache, **kwargs)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/paraformer_streaming/model.py#L460" target="_blank" class="gh-link">L460</a><div class="mdoc"><p>Calc predictor chunk.</p>
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/paraformer_streaming/model.py#L395" target="_blank" class="src-more">View full source →</a></details></div><div class="mblk"><code>.calc_predictor_chunk(encoder_out, encoder_out_lens, cache, **kwargs)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/paraformer_streaming/model.py#L463" target="_blank" class="gh-link">L463</a><div class="mdoc"><p>Calc predictor chunk.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>encoder_out</code> — Encoder output tensor.</li>
@@ -10635,7 +10635,7 @@
         is_final = kwargs.get(&quot;is_final&quot;, False)
 
         return self.predictor.forward_chunk(encoder_out, cache[&quot;encoder&quot;], is_final=is_final)
-</code></pre></details></div><div class="mblk"><code>.cal_decoder_with_predictor(encoder_out, encoder_out_lens, sematic_embeds, ys_pad_lens)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/paraformer_streaming/model.py#L473" target="_blank" class="gh-link">L473</a><div class="mdoc"><p>Cal decoder with predictor.</p>
+</code></pre></details></div><div class="mblk"><code>.cal_decoder_with_predictor(encoder_out, encoder_out_lens, sematic_embeds, ys_pad_lens)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/paraformer_streaming/model.py#L476" target="_blank" class="gh-link">L476</a><div class="mdoc"><p>Cal decoder with predictor.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>encoder_out</code> — Encoder output tensor.</li>
@@ -10660,7 +10660,7 @@
         decoder_out = decoder_outs[0]
         decoder_out = torch.log_softmax(decoder_out, dim=-1)
         return decoder_out, ys_pad_lens
-</code></pre></details></div><div class="mblk"><code>.cal_decoder_with_predictor_chunk(encoder_out, encoder_out_lens, sematic_embeds, ys_pad_lens, cache)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/paraformer_streaming/model.py#L491" target="_blank" class="gh-link">L491</a><div class="mdoc"><p>Cal decoder with predictor chunk.</p>
+</code></pre></details></div><div class="mblk"><code>.cal_decoder_with_predictor_chunk(encoder_out, encoder_out_lens, sematic_embeds, ys_pad_lens, cache)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/paraformer_streaming/model.py#L494" target="_blank" class="gh-link">L494</a><div class="mdoc"><p>Cal decoder with predictor chunk.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>encoder_out</code> — Encoder output tensor.</li>
@@ -10685,7 +10685,7 @@
         decoder_out = decoder_outs
         decoder_out = torch.log_softmax(decoder_out, dim=-1)
         return decoder_out, ys_pad_lens
-</code></pre></details></div><div class="mblk"><code>.init_cache(cache, **kwargs)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/paraformer_streaming/model.py#L508" target="_blank" class="gh-link">L508</a><div class="mdoc"><p>Init cache.</p>
+</code></pre></details></div><div class="mblk"><code>.init_cache(cache, **kwargs)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/paraformer_streaming/model.py#L511" target="_blank" class="gh-link">L511</a><div class="mdoc"><p>Init cache.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>cache</code> — State cache dict for streaming inference.</li>
@@ -10721,7 +10721,7 @@
         cache[&quot;encoder&quot;] = cache_encoder
 
         cache_decoder = {
-</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/paraformer_streaming/model.py#L508" target="_blank" class="src-more">View full source →</a></details></div><div class="mblk"><code>.generate_chunk(speech, speech_lengths, key, tokenizer, frontend, **kwargs)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/paraformer_streaming/model.py#L549" target="_blank" class="gh-link">L549</a><div class="mdoc"><p>Generate chunk.</p>
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/paraformer_streaming/model.py#L511" target="_blank" class="src-more">View full source →</a></details></div><div class="mblk"><code>.generate_chunk(speech, speech_lengths, key, tokenizer, frontend, **kwargs)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/paraformer_streaming/model.py#L552" target="_blank" class="gh-link">L552</a><div class="mdoc"><p>Generate chunk.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>speech</code> — Speech audio tensor, shape (batch, time).</li>
@@ -10761,7 +10761,7 @@
         if isinstance(encoder_out, tuple):
             encoder_out = encoder_out[0]
 
-</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/paraformer_streaming/model.py#L549" target="_blank" class="src-more">View full source →</a></details></div><div class="mblk"><code>.inference(data_in, data_lengths, key, tokenizer, frontend, cache, **kwargs)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/paraformer_streaming/model.py#L647" target="_blank" class="gh-link">L647</a><div class="mdoc"><p>Run inference on input data.</p>
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/paraformer_streaming/model.py#L552" target="_blank" class="src-more">View full source →</a></details></div><div class="mblk"><code>.inference(data_in, data_lengths, key, tokenizer, frontend, cache, **kwargs)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/paraformer_streaming/model.py#L650" target="_blank" class="gh-link">L650</a><div class="mdoc"><p>Run inference on input data.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>data_in</code> — Input data (audio samples, file paths, or text).</li>
@@ -10802,7 +10802,7 @@
             kwargs.get(&quot;lm_weight&quot;, 0.0) &gt; 0.00001 and kwargs.get(&quot;lm_file&quot;, None) is not None
         )
         if self.beam_search is None and (is_use_lm or is_use_ctc):
-</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/paraformer_streaming/model.py#L647" target="_blank" class="src-more">View full source →</a></details></div><div class="mblk"><code>.export(**kwargs)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/paraformer_streaming/model.py#L762" target="_blank" class="gh-link">L762</a><div class="mdoc"><p>Export.</p>
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/paraformer_streaming/model.py#L650" target="_blank" class="src-more">View full source →</a></details></div><div class="mblk"><code>.export(**kwargs)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/paraformer_streaming/model.py#L765" target="_blank" class="gh-link">L765</a><div class="mdoc"><p>Export.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>**kwargs</code> — Additional keyword arguments.</li>
@@ -10937,7 +10937,7 @@
         with torch.no_grad():
             decoder_outs = self.decoder(
 </code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/paraformer_streaming/model.py#L336" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
-<div class="api-detail" id="e171"><span class="dtag badge-m">method</span><h2><code>ParaformerStreaming.calc_predictor(encoder_out, encoder_out_lens)</code></h2><div class="dmod">funasr.models.paraformer_streaming.ParaformerStreaming · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/paraformer_streaming/model.py#L392" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Calc predictor.</p>
+<div class="api-detail" id="e171"><span class="dtag badge-m">method</span><h2><code>ParaformerStreaming.calc_predictor(encoder_out, encoder_out_lens)</code></h2><div class="dmod">funasr.models.paraformer_streaming.ParaformerStreaming · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/paraformer_streaming/model.py#L395" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Calc predictor.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>encoder_out</code> — Encoder output tensor.</li>
@@ -10973,8 +10973,8 @@
         )
         predictor_alignments, predictor_alignments_len = self.predictor.gen_frame_alignments(
             pre_alphas,
-</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/paraformer_streaming/model.py#L392" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
-<div class="api-detail" id="e172"><span class="dtag badge-m">method</span><h2><code>ParaformerStreaming.calc_predictor_chunk(encoder_out, encoder_out_lens, cache, **kwargs)</code></h2><div class="dmod">funasr.models.paraformer_streaming.ParaformerStreaming · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/paraformer_streaming/model.py#L460" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Calc predictor chunk.</p>
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/paraformer_streaming/model.py#L395" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
+<div class="api-detail" id="e172"><span class="dtag badge-m">method</span><h2><code>ParaformerStreaming.calc_predictor_chunk(encoder_out, encoder_out_lens, cache, **kwargs)</code></h2><div class="dmod">funasr.models.paraformer_streaming.ParaformerStreaming · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/paraformer_streaming/model.py#L463" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Calc predictor chunk.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>encoder_out</code> — Encoder output tensor.</li>
@@ -10995,7 +10995,7 @@
 
         return self.predictor.forward_chunk(encoder_out, cache[&quot;encoder&quot;], is_final=is_final)
 </code></pre></details></div>
-<div class="api-detail" id="e173"><span class="dtag badge-m">method</span><h2><code>ParaformerStreaming.cal_decoder_with_predictor(encoder_out, encoder_out_lens, sematic_embeds, ys_pad_lens)</code></h2><div class="dmod">funasr.models.paraformer_streaming.ParaformerStreaming · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/paraformer_streaming/model.py#L473" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Cal decoder with predictor.</p>
+<div class="api-detail" id="e173"><span class="dtag badge-m">method</span><h2><code>ParaformerStreaming.cal_decoder_with_predictor(encoder_out, encoder_out_lens, sematic_embeds, ys_pad_lens)</code></h2><div class="dmod">funasr.models.paraformer_streaming.ParaformerStreaming · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/paraformer_streaming/model.py#L476" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Cal decoder with predictor.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>encoder_out</code> — Encoder output tensor.</li>
@@ -11021,7 +11021,7 @@
         decoder_out = torch.log_softmax(decoder_out, dim=-1)
         return decoder_out, ys_pad_lens
 </code></pre></details></div>
-<div class="api-detail" id="e174"><span class="dtag badge-m">method</span><h2><code>ParaformerStreaming.cal_decoder_with_predictor_chunk(encoder_out, encoder_out_lens, sematic_embeds, ys_pad_lens, cache)</code></h2><div class="dmod">funasr.models.paraformer_streaming.ParaformerStreaming · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/paraformer_streaming/model.py#L491" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Cal decoder with predictor chunk.</p>
+<div class="api-detail" id="e174"><span class="dtag badge-m">method</span><h2><code>ParaformerStreaming.cal_decoder_with_predictor_chunk(encoder_out, encoder_out_lens, sematic_embeds, ys_pad_lens, cache)</code></h2><div class="dmod">funasr.models.paraformer_streaming.ParaformerStreaming · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/paraformer_streaming/model.py#L494" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Cal decoder with predictor chunk.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>encoder_out</code> — Encoder output tensor.</li>
@@ -11047,7 +11047,7 @@
         decoder_out = torch.log_softmax(decoder_out, dim=-1)
         return decoder_out, ys_pad_lens
 </code></pre></details></div>
-<div class="api-detail" id="e175"><span class="dtag badge-m">method</span><h2><code>ParaformerStreaming.init_cache(cache, **kwargs)</code></h2><div class="dmod">funasr.models.paraformer_streaming.ParaformerStreaming · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/paraformer_streaming/model.py#L508" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Init cache.</p>
+<div class="api-detail" id="e175"><span class="dtag badge-m">method</span><h2><code>ParaformerStreaming.init_cache(cache, **kwargs)</code></h2><div class="dmod">funasr.models.paraformer_streaming.ParaformerStreaming · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/paraformer_streaming/model.py#L511" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Init cache.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>cache</code> — State cache dict for streaming inference.</li>
@@ -11083,8 +11083,8 @@
         cache[&quot;encoder&quot;] = cache_encoder
 
         cache_decoder = {
-</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/paraformer_streaming/model.py#L508" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
-<div class="api-detail" id="e176"><span class="dtag badge-m">method</span><h2><code>ParaformerStreaming.generate_chunk(speech, speech_lengths, key, tokenizer, frontend, **kwargs)</code></h2><div class="dmod">funasr.models.paraformer_streaming.ParaformerStreaming · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/paraformer_streaming/model.py#L549" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Generate chunk.</p>
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/paraformer_streaming/model.py#L511" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
+<div class="api-detail" id="e176"><span class="dtag badge-m">method</span><h2><code>ParaformerStreaming.generate_chunk(speech, speech_lengths, key, tokenizer, frontend, **kwargs)</code></h2><div class="dmod">funasr.models.paraformer_streaming.ParaformerStreaming · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/paraformer_streaming/model.py#L552" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Generate chunk.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>speech</code> — Speech audio tensor, shape (batch, time).</li>
@@ -11124,8 +11124,8 @@
         if isinstance(encoder_out, tuple):
             encoder_out = encoder_out[0]
 
-</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/paraformer_streaming/model.py#L549" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
-<div class="api-detail" id="e177"><span class="dtag badge-m">method</span><h2><code>ParaformerStreaming.inference(data_in, data_lengths, key, tokenizer, frontend, cache, **kwargs)</code></h2><div class="dmod">funasr.models.paraformer_streaming.ParaformerStreaming · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/paraformer_streaming/model.py#L647" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Run inference on input data.</p>
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/paraformer_streaming/model.py#L552" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
+<div class="api-detail" id="e177"><span class="dtag badge-m">method</span><h2><code>ParaformerStreaming.inference(data_in, data_lengths, key, tokenizer, frontend, cache, **kwargs)</code></h2><div class="dmod">funasr.models.paraformer_streaming.ParaformerStreaming · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/paraformer_streaming/model.py#L650" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Run inference on input data.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>data_in</code> — Input data (audio samples, file paths, or text).</li>
@@ -11166,8 +11166,8 @@
             kwargs.get(&quot;lm_weight&quot;, 0.0) &gt; 0.00001 and kwargs.get(&quot;lm_file&quot;, None) is not None
         )
         if self.beam_search is None and (is_use_lm or is_use_ctc):
-</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/paraformer_streaming/model.py#L647" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
-<div class="api-detail" id="e178"><span class="dtag badge-m">method</span><h2><code>ParaformerStreaming.export(**kwargs)</code></h2><div class="dmod">funasr.models.paraformer_streaming.ParaformerStreaming · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/paraformer_streaming/model.py#L762" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Export.</p>
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/paraformer_streaming/model.py#L650" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
+<div class="api-detail" id="e178"><span class="dtag badge-m">method</span><h2><code>ParaformerStreaming.export(**kwargs)</code></h2><div class="dmod">funasr.models.paraformer_streaming.ParaformerStreaming · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/paraformer_streaming/model.py#L765" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Export.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>**kwargs</code> — Additional keyword arguments.</li>
