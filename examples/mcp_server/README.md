@@ -19,8 +19,15 @@ checks that initialize the server and call `tools/list`.
 docker build -t funasr-mcp examples/mcp_server
 docker run --rm -i \
   -e FUNASR_DEVICE=cpu \
-  -v /path/to/audio:/audio:ro \
+  --mount type=bind,src=/path/to/audio,dst=/audio,readonly \
+  --mount type=volume,src=funasr-mcp-cache,dst=/root/.cache/modelscope \
   funasr-mcp
+```
+
+Verify the image entrypoint and MCP handshake without downloading a model:
+
+```bash
+python examples/mcp_server/smoke_test.py funasr-mcp
 ```
 
 When submitting this server to MCP directories such as Glama, use this folder as
@@ -29,19 +36,45 @@ The repository root `glama.json` declares GitHub maintainer ownership for Glama,
 while the `glama.json` file in this directory declares the container command and
 metadata for directory scanners.
 
-### Official MCP Registry checklist
+### Official MCP Registry
 
-The Dockerfile includes the OCI ownership label expected by the official MCP
-Registry:
+The versioned Registry metadata is in [`server.json`](server.json). It points to
+the public GHCR image and asks clients to mount one host audio directory at
+`/audio` read-only. The Dockerfile carries the matching OCI ownership label:
 
 ```dockerfile
 LABEL io.modelcontextprotocol.server.name="io.github.modelscope/funasr-mcp"
 ```
 
-Before publishing, push a public OCI image (for example to GHCR) and create a
-matching `server.json` whose `name` is `io.github.modelscope/funasr-mcp` and
-whose package identifier points at that image tag. The Registry verifies that
-the Docker/OCI label and `server.json` name match.
+The release workflow validates the metadata against the official schema, builds
+the image, performs an MCP `initialize` and `tools/list` handshake, pushes the
+versioned image to GHCR, and publishes `server.json` through the official
+`mcp-publisher` CLI.
+
+To release a new MCP server version:
+
+1. Update `version` and the OCI image tag in `server.json` together.
+2. Merge the change after the MCP validation workflow passes.
+3. Have a `modelscope` organization Owner push the matching `mcp-v<version>`
+   tag, for example `mcp-v0.1.0`.
+4. Approve the protected `mcp-registry-publish` environment deployment.
+
+The official Registry only grants the `io.github.modelscope/*` namespace to a
+GitHub organization Owner. Keep the publish environment restricted to release
+tags and require a maintainer approval because its OIDC token can publish the
+organization namespace.
+
+After publication, clients can run the pinned image directly:
+
+```bash
+docker run --rm -i \
+  --mount type=bind,src=/path/to/audio,dst=/audio,readonly \
+  --mount type=volume,src=funasr-mcp-cache,dst=/root/.cache/modelscope \
+  ghcr.io/modelscope/funasr-mcp:0.1.0
+```
+
+When using the container, pass tool paths under `/audio`, such as
+`/audio/meeting.wav`.
 
 ### Glama submission checklist
 
