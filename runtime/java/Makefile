@@ -8,6 +8,7 @@ WEBSOCKET_DIR:= ./
 WEBSOCKET_FILES = \
 	$(WEBSOCKET_DIR)/FunasrWsClient.java \
  
+TEST_FILES = $(WEBSOCKET_DIR)/tests/FunasrWsClientTest.java
 
 
 LIB_BUILD_DIR = ./lib
@@ -31,7 +32,7 @@ vpath %.java src
 	
 rebuild: clean all
 	
-.PHONY:  clean run downjar
+.PHONY:  clean run downjar test
 
 downjar:
 	wget https://repo1.maven.org/maven2/org/slf4j/slf4j-api/1.7.25/slf4j-api-1.7.25.jar -P ./lib/
@@ -60,6 +61,11 @@ runclient:
 
 buildwebsocket: $(WEBSOCKET_FILES:.java=.class)
 	
+
+test: buildwebsocket
+				$(JAVAC) -cp $(BUILD_DIR):lib/slf4j-simple-1.7.25.jar:lib/slf4j-api-1.7.25.jar:lib/Java-WebSocket-1.5.3.jar:lib/json-simple-1.1.1.jar:lib/argparse4j-0.9.0.jar -d $(BUILD_DIR) -encoding UTF-8 $(TEST_FILES)
+				java -ea -cp $(BUILD_DIR):lib/slf4j-simple-1.7.25.jar:lib/slf4j-api-1.7.25.jar:lib/Java-WebSocket-1.5.3.jar:lib/json-simple-1.1.1.jar:lib/argparse4j-0.9.0.jar $(RUNJFLAGS) websocket.FunasrWsClientTest
+
 
 %.class: %.java
 
