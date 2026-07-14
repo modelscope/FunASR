@@ -54,20 +54,33 @@ python scripts/collect_growth_metrics.py --ecosystem --format json
 
 The highest owned conversion surfaces are the repository overviews and Chinese READMEs. Use these surfaces for model-selection clarity, deployment proof, and official ecosystem routing before adding new long-form pages.
 
-14-day GitHub traffic as of 2026-07-07 18:46 UTC:
+14-day GitHub traffic for 2026-06-30 through 2026-07-13, collected on 2026-07-14 18:51 UTC:
 
 | Repository | Views | Unique visitors | Clones | Unique cloners | Highest-traffic owned paths |
 |---|---:|---:|---:|---:|---|
-| `modelscope/FunASR` | 40,588 | 9,650 | 12,635 | 2,144 | overview: 7,243 uniques; `README_zh.md`: 2,521; releases: 469 |
-| `FunAudioLLM/Fun-ASR` | 6,173 | 1,926 | 1,023 | 817 | overview: 1,584 uniques; `README_zh.md`: 581; `docs/vllm_guide.md`: 148 |
-| `FunAudioLLM/SenseVoice` | 8,917 | 3,477 | 1,028 | 620 | overview: 2,802 uniques; `README_zh.md`: 923; releases: 163 |
-| `modelscope/FunClip` | 2,764 | 1,366 | 622 | 455 | overview: 1,187 uniques; `README_zh.md`: 327; UI screenshots: 203 combined |
+| `modelscope/FunASR` | 39,873 | 9,823 | 10,805 | 2,293 | overview: 7,120 uniques; `README_zh.md`: 2,679; releases: 520 |
+| `FunAudioLLM/Fun-ASR` | 6,332 | 2,106 | 1,029 | 766 | overview: 1,652 uniques; `README_zh.md`: 668; `docs/vllm_guide.md`: 118 |
+| `FunAudioLLM/SenseVoice` | 8,425 | 3,436 | 1,132 | 660 | overview: 2,682 uniques; `README_zh.md`: 884; releases: 184 |
+| `modelscope/FunClip` | 2,708 | 1,295 | 729 | 518 | overview: 1,064 uniques; `README_zh.md`: 348; UI screenshots: 198 combined |
+
+The same exact 14-day window produced the following public stargazer events. `Viewer-days` is the sum of each day's unique-view count, so the final percentage is a directional funnel ratio rather than a deduplicated user conversion rate.
+
+| Repository | New stars | Stars/day | Viewer-days | Viewer-days/day | Stars / viewer-day |
+|---|---:|---:|---:|---:|---:|
+| `modelscope/FunASR` | 507 | 36.2 | 13,562 | 969 | 3.7% |
+| `FunAudioLLM/Fun-ASR` | 75 | 5.4 | 2,693 | 192 | 2.8% |
+| `FunAudioLLM/SenseVoice` | 147 | 10.5 | 4,119 | 294 | 3.6% |
+| `modelscope/FunClip` | 44 | 3.1 | 1,482 | 106 | 3.0% |
+| **Total** | **773** | **55.2** | **21,856** | **1,561** | **3.5%** |
+
+The current 55.2 stars/day is only 27% of the required 203 stars/day. At the observed 3.5% viewer-day ratio, the ecosystem needs roughly 5,740 qualified viewer-days/day, or 3.68x the current traffic. Holding traffic flat would require an implausible 13.0% ratio, so reach is the primary constraint; README conversion work alone cannot close the target gap.
 
 Top referrer pattern:
 
-- Search and GitHub dominate all four repos, so SEO snippets, GitHub topics, and README first-screen clarity matter more than low-frequency social posts.
-- `funasr.com`, `modelscope.github.io`, Hugging Face, ChatGPT, and `ai-bot.cn` are meaningful secondary referrers; keep model cards and homepage links synchronized with README claims.
+- Search and GitHub dominate all four repos, contributing 9,320 Google visits and 9,605 GitHub visits in the window. Keep repository topics, search snippets, external integration links, and Chinese README entry points synchronized.
+- `funasr.com` contributed 2,343 visits across the four repositories, while Hugging Face contributed 1,071 and ChatGPT 607. These owned/model-discovery surfaces are large enough to justify explicit routing to the most relevant repository and runnable demo.
 - FunClip has unusually visible image traffic, so screenshot freshness and UI clarity can influence creator conversion.
+- Prioritize distribution that can add thousands of qualified visits per day: merged integrations in high-star applications, model/runtime releases with runnable evidence, Hugging Face model-card routing, and official-site launch/use-case pages. Treat small directory listings as secondary unless they already send measurable traffic.
 
 ## Workstream 1: Convert first-time visitors
 
