@@ -1,6 +1,6 @@
 # FunASR MCP Server
 
-[Model Context Protocol](https://modelcontextprotocol.io/) server that gives AI assistants the ability to transcribe audio.
+[Model Context Protocol](https://modelcontextprotocol.io/) server that gives AI assistants local audio transcription with SenseVoiceSmall by default.
 
 ## Setup
 
@@ -113,9 +113,9 @@ Transcribe a speech audio file to text.
 | Name | Type | Required | Description |
 |------|------|----------|-------------|
 | `audio_path` | string | Yes | Path to audio file (wav, mp3, flac, m4a, ogg) |
-| `language` | string | No | Language hint (auto-detected by default) |
+| `language` | string | No | `auto`, `zh`, `yue`, `en`, `ja`, or `ko` (default: `auto`) |
 
-**Returns:** Transcribed text with timestamps and speaker labels (when available).
+**Returns:** Transcribed text with per-segment timestamps when the model returns them.
 
 ## Example Usage
 
@@ -130,14 +130,15 @@ Once configured, ask your AI assistant:
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `FUNASR_DEVICE` | `cpu` | Device: `cuda`, `cpu`, or `mps` |
-| `FUNASR_MODEL` | `iic/SenseVoiceSmall` | ASR model to use |
+| `FUNASR_MODEL` | `iic/SenseVoiceSmall` | Model name or local model path passed to `AutoModel` |
 
 ## Features
 
-- **50+ languages** with automatic detection
-- **Speaker diarization** — identifies who said what
-- **Timestamps** — per-segment timing
-- **170x realtime on GPU**, 17x on CPU
+- **Five-language transcription** — Mandarin, Cantonese, English, Japanese, and Korean
+- **Automatic detection or explicit hints** — `auto`, `zh`, `yue`, `en`, `ja`, and `ko`
+- **VAD segmentation** — splits longer audio before recognition
+- **Optional segment timestamps** — included only when the configured model returns them
+- **Configurable local inference** — choose the model and CPU, CUDA, or MPS with environment variables
 - **No API key needed** — fully local inference
 - MIT licensed, privacy-friendly (audio never leaves your machine)
 
