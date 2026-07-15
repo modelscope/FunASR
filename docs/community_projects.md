@@ -1,45 +1,34 @@
-# FunASR Community Projects
+[English](./community_projects.md) | [简体中文](./community_projects_zh.md)
 
-This page collects maintained community integrations and experiments around FunASR models. These projects are useful for users exploring deployment paths beyond the official Python runtime, but they are not official FunASR implementations unless explicitly noted.
+# FunASR Community Integrations
 
-## Applications and workflows
+This page lists maintained projects where FunASR, Fun-ASR-Nano, SenseVoice, or an official FunASR model is already integrated upstream. Each entry below was checked against the project's default branch and, where available, a linked merged change.
 
-| Project | What it provides | Notes |
+These integrations are community-maintained. Their release cadence, hardware support, and API stability are controlled by the upstream project, not by the FunASR maintainers.
+
+## Voice agents and applications
+
+| Project | What is integrated | Start here |
 |---|---|---|
-| [GPT-SoVITS](https://github.com/RVC-Boss/GPT-SoVITS) | Voice-dataset preparation and WebUI transcription with Fun-ASR-Nano, SenseVoice, and classic FunASR models. | The default CLI path uses Fun-ASR-Nano for Chinese, English, Japanese, Korean, and automatic language detection; Cantonese uses classic UniASR. Models download on first use. See the upstream [runtime fallback](https://github.com/RVC-Boss/GPT-SoVITS/pull/2801) and [backend documentation](https://github.com/RVC-Boss/GPT-SoVITS/pull/2803). |
+| [Pipecat](https://github.com/pipecat-ai/pipecat) | A local `FunASRSTTService` backed by SenseVoice for voice and multimodal agent pipelines, with transcription and voice-agent examples. | [FunASR service docs](https://docs.pipecat.ai/api-reference/server/services/stt/funasr), [transcription example](https://github.com/pipecat-ai/pipecat/blob/main/examples/transcription/transcription-funasr.py), [voice-agent example](https://github.com/pipecat-ai/pipecat/blob/main/examples/voice/voice-funasr.py), and merged [#4844](https://github.com/pipecat-ai/pipecat/pull/4844). |
+| [xiaozhi-esp32-server](https://github.com/xinnan-tech/xiaozhi-esp32-server) | The default local ASR provider uses FunASR with SenseVoiceSmall; recognition language can be set to `auto`, `zh`, `en`, `ja`, `ko`, or `yue`. A separate FunASR runtime-server provider is also available. | [Provider implementation](https://github.com/xinnan-tech/xiaozhi-esp32-server/blob/main/main/xiaozhi-server/core/providers/asr/fun_local.py), [configuration](https://github.com/xinnan-tech/xiaozhi-esp32-server/blob/main/main/xiaozhi-server/config.yaml), and merged [#3255](https://github.com/xinnan-tech/xiaozhi-esp32-server/pull/3255). |
+| [AutoSubs](https://github.com/tmoroney/auto-subs) | An on-device int8 ONNX SenseVoice engine for subtitle generation in DaVinci Resolve, Premiere, and After Effects. | [SenseVoice model notes](https://github.com/tmoroney/auto-subs#sensevoice), [engine source](https://github.com/tmoroney/auto-subs/blob/main/AutoSubs-App/src-tauri/crates/transcription-engine/src/engines/sense_voice.rs), and merged [#629](https://github.com/tmoroney/auto-subs/pull/629). |
+| [OmniVoice Studio](https://github.com/debpalash/OmniVoice-Studio) | Its OpenAI-compatible remote ASR backend can point dictation and dubbing workflows at a self-hosted FunASR or SenseVoice server. | [OpenAI-compatible ASR guide](https://github.com/debpalash/OmniVoice-Studio/blob/main/docs/engines/openai-compatible-asr.md) and merged [#1003](https://github.com/debpalash/OmniVoice-Studio/pull/1003). |
+| [GPT-SoVITS](https://github.com/RVC-Boss/GPT-SoVITS) | Dataset preparation and WebUI transcription with Fun-ASR-Nano, SenseVoice, and classic FunASR models. | [`funasr_asr.py`](https://github.com/RVC-Boss/GPT-SoVITS/blob/main/tools/asr/funasr_asr.py), runtime fallback [#2801](https://github.com/RVC-Boss/GPT-SoVITS/pull/2801), and backend documentation [#2803](https://github.com/RVC-Boss/GPT-SoVITS/pull/2803). |
 
-Run dataset transcription from a GPT-SoVITS checkout:
+## Model serving and runtimes
 
-```bash
-python tools/asr/funasr_asr.py -i <input> -o <output> -l zh
-```
-
-## VAD runtimes
-
-| Project | What it provides | Notes |
+| Project | What is integrated | Start here |
 |---|---|---|
-| [vad-burn](https://github.com/di-osc/vad-burn) | FSMN VAD inference in pure Rust with Python bindings. It supports offline VAD, streaming VAD, CPU-only inference, and automatic download of the default `iic/speech_fsmn_vad_zh-cn-16k-common-pytorch` model from ModelScope. | Community project from [#3106](https://github.com/modelscope/FunASR/issues/3106). Useful for Rust services, CLI tools, desktop apps, or Python pipelines that need FSMN VAD without depending on the original Python runtime. |
+| [Xinference](https://github.com/xorbitsai/inference) | Built-in audio model specifications for SenseVoiceSmall, Fun-ASR-Nano-2512, and Fun-ASR-MLT-Nano-2512 through Xinference's unified inference API. | [Audio model specifications](https://github.com/xorbitsai/inference/blob/main/xinference/model/audio/model_spec.json) and the FunASR 1.3 compatibility update in merged [#5140](https://github.com/xorbitsai/inference/pull/5140). |
+| [Fun-ASR-vLLM](https://github.com/yuekaizhang/Fun-ASR-vllm) | Community vLLM inference for Fun-ASR-Nano and Fun-ASR-MLT-Nano, including batch evaluation and NVIDIA Triton deployment. | [Setup and benchmarks](https://github.com/yuekaizhang/Fun-ASR-vllm#readme) and the deterministic ASR decoding fix in merged [#20](https://github.com/yuekaizhang/Fun-ASR-vllm/pull/20). |
+| [vad-burn](https://github.com/di-osc/vad-burn) | FSMN VAD inference in pure Rust with Python bindings, including offline, streaming, and CPU-only modes. | [Project README](https://github.com/di-osc/vad-burn#readme) and the FunASR showcase in [#3106](https://github.com/modelscope/FunASR/issues/3106). |
 
-`vad-burn` reports the following benchmark on `assets/vad_example.wav` (16 kHz mono PCM, 70.47 seconds) on a MacBook Pro M1 with the Burn Flex CPU backend:
+## Before adopting an integration
 
-| Mode | Avg time | RTF | Speedup |
-|---|---:|---:|---:|
-| FSMN VAD offline | 73.631 ms | 0.001045 | 957.08x |
-| FSMN VAD streaming, 600 ms chunks | 198.425 ms | 0.002816 | 355.15x |
-
-Minimal Python usage from the project:
-
-```python
-from vad_burn import FsmnVadModel, VadOptions
-
-vad = FsmnVadModel.from_modelscope()
-segments = vad.detect(samples, 16000, VadOptions())
-
-stream = vad.new_stream(VadOptions())
-for chunk in chunks:
-    segments = stream.push(chunk, 16000)
-final_segments = stream.finish()
-```
+- Follow the upstream project's installation and release notes; do not assume its dependency versions match FunASR `main`.
+- Validate the exact model, language, audio format, and hardware path you plan to deploy.
+- Report application or adapter bugs to the integration project. Report reproducible core FunASR model or runtime bugs to [FunASR issues](https://github.com/modelscope/FunASR/issues).
 
 ## Add your project
 
@@ -48,5 +37,5 @@ If you maintain a FunASR integration, open a [showcase issue](https://github.com
 - repository link and maintenance status
 - supported FunASR model or runtime path
 - install and minimal usage instructions
-- benchmark or validation details when available
+- a merged change, release, benchmark, or other reproducible validation
 - a note about whether the project is official, community-maintained, or experimental
