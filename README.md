@@ -21,7 +21,7 @@
 </p>
 
 <p align="center">
-  <a href="#quick-start">Quick Start</a> · <a href="./examples/colab/">Colab</a> · <a href="#benchmark">Benchmark</a> · <a href="./docs/model_selection.md">Model selection</a> · <a href="./docs/migration_from_whisper.md">Migration guide</a> · <a href="./docs/use_case_showcase.md">Use cases</a> · <a href="./docs/deployment_matrix.md">Deployment matrix</a> · <a href="#model-zoo">Models</a> · <a href="https://modelscope.github.io/FunASR/agent.html">Agent Integration</a> · <a href="https://modelscope.github.io/FunASR/">Docs</a> · <a href="./CONTRIBUTING.md">Contribute</a>
+  <a href="#quick-start">Quick Start</a> · <a href="./examples/colab/">Colab</a> · <a href="#benchmark">Benchmark</a> · <a href="./docs/model_selection.md">Model selection</a> · <a href="./docs/migration_from_whisper.md">Migration guide</a> · <a href="./docs/use_case_showcase.md">Use cases</a> · <a href="./docs/community_projects.md">Community integrations</a> · <a href="./docs/deployment_matrix.md">Deployment matrix</a> · <a href="#model-zoo">Models</a> · <a href="https://modelscope.github.io/FunASR/agent.html">Agent Integration</a> · <a href="https://modelscope.github.io/FunASR/">Docs</a> · <a href="./CONTRIBUTING.md">Contribute</a>
 </p>
 
 ---
