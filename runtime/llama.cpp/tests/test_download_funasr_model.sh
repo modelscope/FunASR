@@ -2,6 +2,7 @@
 set -euo pipefail
 
 ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
+REPO_ROOT=$(cd "$ROOT/../.." && pwd)
 SCRIPT="$ROOT/download-funasr-model.sh"
 TMP=$(mktemp -d)
 trap 'rm -rf "$TMP"' EXIT
@@ -105,5 +106,24 @@ if HF_SKIP_CREATE=1 bash "$SCRIPT" sensevoice "$TMP/out" >"$TMP/stdout" 2>"$TMP/
   exit 1
 fi
 grep -F "no GGUF files found in $TMP/out" "$TMP/stderr" >/dev/null
+
+assert_readme_quickstart() {
+  local readme=$1
+  if ! grep -F "bash download-funasr-model.sh sensevoice ./gguf" "$readme" >/dev/null; then
+    printf 'missing default SenseVoice download command in %s\n' "$readme" >&2
+    exit 1
+  fi
+  if ! grep -F "llama-funasr-sensevoice -m ./gguf/sensevoice-small-q8.gguf --vad ./gguf/fsmn-vad.gguf -a audio.wav" "$readme" >/dev/null; then
+    printf 'README command does not run the default sensevoice-small-q8.gguf in %s\n' "$readme" >&2
+    exit 1
+  fi
+  if grep -F "SenseVoiceSmall-f16.gguf" "$readme" >/dev/null; then
+    printf 'stale SenseVoice filename in %s\n' "$readme" >&2
+    exit 1
+  fi
+}
+
+assert_readme_quickstart "$REPO_ROOT/README.md"
+assert_readme_quickstart "$REPO_ROOT/README_zh.md"
 
 echo "download-funasr-model contract tests passed"

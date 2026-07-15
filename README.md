@@ -248,7 +248,7 @@ Run **SenseVoice / Paraformer / Fun-ASR-Nano** as a **single self-contained bina
 ```bash
 # 1) Grab a prebuilt binary from Releases (Linux / macOS / Windows), then:
 bash download-funasr-model.sh sensevoice ./gguf        # or: paraformer | nano
-llama-funasr-sensevoice -m ./gguf/SenseVoiceSmall-f16.gguf --vad ./gguf/fsmn-vad.gguf -a audio.wav
+llama-funasr-sensevoice -m ./gguf/sensevoice-small-q8.gguf --vad ./gguf/fsmn-vad.gguf -a audio.wav
 # → 欢迎大家来体验达摩院推出的语音识别模型
 ```
 
