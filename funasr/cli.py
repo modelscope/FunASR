@@ -139,7 +139,13 @@ def main():
         if args.language:
             gen_kw["language"] = args.language
         if args.hotwords:
-            gen_kw["hotwords"] = args.hotwords.split(",")
+            hotwords = [
+                word.strip() for word in args.hotwords.split(",") if word.strip()
+            ]
+            if args.model == "paraformer":
+                gen_kw["hotword"] = " ".join(hotwords)
+            else:
+                gen_kw["hotwords"] = hotwords
 
         result = model.generate(**gen_kw)
         elapsed = time.time() - t0
