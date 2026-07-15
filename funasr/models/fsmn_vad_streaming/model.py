@@ -403,6 +403,35 @@ class FsmnVADStreaming(nn.Module):
         self.encoder = encoder
         self.encoder_conf = encoder_conf
 
+    def DropCachedFrames(self, drop_frames: int, cache: dict = None) -> None:
+        """Release score, decibel, and waveform history before an absolute frame."""
+        if cache is None:
+            cache = {}
+        stats = cache["stats"]
+        if drop_frames > stats.frm_cnt:
+            raise RuntimeError(
+                f"Cannot drop through frame {drop_frames}; only {stats.frm_cnt} frames exist"
+            )
+
+        real_drop_frames = drop_frames - stats.last_drop_frames
+        if real_drop_frames <= 0:
+            return
+
+        frame_shift_length = int(
+            self.vad_opts.frame_in_ms * self.vad_opts.sample_rate / 1000
+        )
+        drop_samples = real_drop_frames * frame_shift_length
+        stats.data_buf_all = stats.data_buf_all[drop_samples:].clone()
+        stats.decibel = stats.decibel[real_drop_frames:]
+        stats.scores = stats.scores[:, real_drop_frames:, :].clone()
+        stats.last_drop_frames = drop_frames
+
+        data_buf_offset = max(
+            stats.data_buf_start_frame - stats.last_drop_frames,
+            0,
+        ) * frame_shift_length
+        stats.data_buf = stats.data_buf_all[data_buf_offset:]
+
     def ResetDetection(self, cache: dict = None):
         """Resetdetection.
         
@@ -424,44 +453,80 @@ class FsmnVADStreaming(nn.Module):
         if cache["stats"].output_data_buf:
             assert cache["stats"].output_data_buf[-1].contain_seg_end_point == True
             drop_frames = int(cache["stats"].output_data_buf[-1].end_ms / self.vad_opts.frame_in_ms)
-            real_drop_frames = drop_frames - cache["stats"].last_drop_frames
-            cache["stats"].last_drop_frames = drop_frames
-            cache["stats"].data_buf_all = cache["stats"].data_buf_all[
-                real_drop_frames
-                * int(self.vad_opts.frame_in_ms * self.vad_opts.sample_rate / 1000) :
-            ]
-            cache["stats"].decibel = cache["stats"].decibel[real_drop_frames:]
-            cache["stats"].scores = cache["stats"].scores[:, real_drop_frames:, :]
+            self.DropCachedFrames(drop_frames, cache=cache)
 
-    def ComputeDecibel(self, cache: dict = None) -> None:
+    def ComputeDecibel(
+        self, cache: dict = None, frame_count: Optional[int] = None
+    ) -> None:
         """Computedecibel.
         
             Args:
+                frame_count: Number of VAD score frames emitted for this waveform.
                 cache: State cache dict for streaming inference.
             """
         if cache is None:
             cache = {}
         frame_sample_length = int(self.vad_opts.frame_length_ms * self.vad_opts.sample_rate / 1000)
         frame_shift_length = int(self.vad_opts.frame_in_ms * self.vad_opts.sample_rate / 1000)
-        if cache["stats"].data_buf_all is None:
-            cache["stats"].data_buf_all = cache["stats"].waveform[
-                0
-            ]  # cache["stats"].data_buf is pointed to cache["stats"].waveform[0]
-            cache["stats"].data_buf = cache["stats"].data_buf_all
+        if frame_count is not None and int(frame_count) <= 0:
+            return
+        stats = cache["stats"]
+        waveform = stats.waveform[0]
+
+        frame_count_was_provided = frame_count is not None
+        available_frames = max(
+            (waveform.numel() - frame_sample_length) // frame_shift_length + 1,
+            0,
+        )
+        frame_count = available_frames if frame_count is None else int(frame_count)
+        if frame_count <= 0:
+            return
+
+        # The frontend provides the exact waveform span for these VAD score frames.
+        aligned_sample_count = (
+            (frame_count - 1) * frame_shift_length + frame_sample_length
+        )
+        if waveform.numel() != aligned_sample_count:
+            if frame_count_was_provided or waveform.numel() < aligned_sample_count:
+                raise RuntimeError(
+                    "VAD score frames and waveform samples are not aligned: "
+                    f"expected {aligned_sample_count}, got {waveform.numel()}"
+                )
+            waveform = waveform[:aligned_sample_count]
+
+        aligned_waveform = waveform
+
+        if stats.data_buf_all is None:
+            stats.data_buf_all = aligned_waveform.clone()
         else:
-            cache["stats"].data_buf_all = torch.cat(
-                (cache["stats"].data_buf_all, cache["stats"].waveform[0])
+            new_sample_count = frame_count * frame_shift_length
+            stats.data_buf_all = torch.cat(
+                (stats.data_buf_all, aligned_waveform[-new_sample_count:])
             )
-            
-        waveform_numpy = cache["stats"].waveform.numpy()
 
-        offsets = np.arange(0, waveform_numpy.shape[1] - frame_sample_length + 1, frame_shift_length)
-        frames = waveform_numpy[0, offsets[:, np.newaxis] + np.arange(frame_sample_length)]
+        data_buf_offset = max(
+            stats.data_buf_start_frame - stats.last_drop_frames,
+            0,
+        ) * frame_shift_length
+        stats.data_buf = stats.data_buf_all[data_buf_offset:]
 
-        decibel_numpy = 10 * np.log10(np.sum(np.square(frames), axis=1) + 0.000001)
+        waveform_numpy = aligned_waveform.detach().cpu().numpy()
+
+        offsets = np.arange(
+            0,
+            waveform_numpy.shape[0] - frame_sample_length + 1,
+            frame_shift_length,
+        )
+        frames = waveform_numpy[
+            offsets[:, np.newaxis] + np.arange(frame_sample_length)
+        ]
+
+        decibel_numpy = 10 * np.log10(
+            np.sum(np.square(frames), axis=1) + 0.000001
+        )
         decibel_numpy = decibel_numpy.tolist()
 
-        cache["stats"].decibel.extend(decibel_numpy)
+        stats.decibel.extend(decibel_numpy)
 
 
     def ComputeScores(self, feats: torch.Tensor, cache: dict = None) -> None:
@@ -710,7 +775,6 @@ class FsmnVADStreaming(nn.Module):
         # for each frame, calc log posterior probability of each state
         if cur_decibel < self.vad_opts.decibel_thres:
             frame_state = FrameState.kFrameStateSil
-            self.DetectOneFrame(frame_state, t, False, cache=cache)
             return frame_state
 
         sum_score = 0.0
@@ -777,17 +841,20 @@ class FsmnVADStreaming(nn.Module):
             """
         if cache is None:
             cache = {}
+        if feats.numel() == 0:
+            return []
         # if len(cache) == 0:
         #     self.AllResetDetection()
         # self.waveform = waveform  # compute decibel for each frame
         cache["stats"].waveform = waveform
         is_streaming_input = kwargs.get("is_streaming_input", True)
-        self.ComputeDecibel(cache=cache)
+        self.ComputeDecibel(frame_count=feats.shape[1], cache=cache)
         self.ComputeScores(feats, cache=cache)
         if not is_final:
             self.DetectCommonFrames(cache=cache)
         else:
             self.DetectLastFrames(cache=cache)
+        self.DropCachedFrames(cache["stats"].data_buf_start_frame, cache=cache)
         segments = []
         for batch_num in range(0, feats.shape[0]):  # only support batch_size = 1 now
             segment_batch = []
@@ -946,6 +1013,9 @@ class FsmnVADStreaming(nn.Module):
         speech_to_sil_ms = self.vad_opts.speech_to_sil_time_thres
         accumulated_ms = cache.get("_dynamic_accumulated_ms", 0)
         in_speech = cache.get("_dynamic_in_speech", False)
+        frontend_inference_kwargs = {}
+        if getattr(frontend, "supports_aligned_waveforms", False):
+            frontend_inference_kwargs["return_waveform"] = True
 
         for i in range(n):
             kwargs["is_final"] = _is_final and i == n - 1
@@ -973,6 +1043,7 @@ class FsmnVADStreaming(nn.Module):
                 frontend=frontend,
                 cache=cache["frontend"],
                 is_final=kwargs["is_final"],
+                **frontend_inference_kwargs,
             )
             time3 = time.perf_counter()
             meta_data["extract_feat"] = f"{time3 - time2:0.3f}"
@@ -982,9 +1053,13 @@ class FsmnVADStreaming(nn.Module):
             speech = speech.to(device=kwargs["device"])
             speech_lengths = speech_lengths.to(device=kwargs["device"])
 
+            waveform = cache["frontend"].get("aligned_waveforms")
+            if waveform is None or waveform.numel() == 0:
+                # Custom frontends may expose an exact span under the legacy key.
+                waveform = cache["frontend"]["waveforms"]
             batch = {
                 "feats": speech,
-                "waveform": cache["frontend"]["waveforms"],
+                "waveform": waveform,
                 "is_final": kwargs["is_final"],
                 "cache": cache,
                 "is_streaming_input": is_streaming_input,
