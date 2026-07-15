@@ -284,7 +284,7 @@ def post_process_punct(input: str, normalized_text: str, add_unicode_punct: bool
     Args:
         input: input text (original input to the NN, before normalization or tokenization)
         normalized_text: output text (output of the TN NN model)
-        add_unicode_punct: set to True to handle unicode punctuation marks as well as default string.punctuation (increases post processing time)
+        add_unicode_punct: set to True to handle unicode punctuation marks as well as default string.punctuation
     """
     # in the post-processing WFST graph "``" are repalced with '"" quotes (otherwise single quotes "`" won't be handled correctly)
     # this function fixes spaces around them based on input sequence, so here we're making the same double quote replacement
@@ -296,12 +296,11 @@ def post_process_punct(input: str, normalized_text: str, add_unicode_punct: bool
     punct_marks = [x for x in string.punctuation if x in input]
 
     if add_unicode_punct:
-        punct_unicode = [
-            chr(i)
-            for i in range(sys.maxunicode)
-            if category(chr(i)).startswith("P") and chr(i) not in punct_default and chr(i) in input
-        ]
-        punct_marks = punct_marks.extend(punct_unicode)
+        punct_marks.extend(
+            char
+            for char in dict.fromkeys(input)
+            if char not in string.punctuation and category(char).startswith("P")
+        )
 
     for punct in punct_marks:
         try:
