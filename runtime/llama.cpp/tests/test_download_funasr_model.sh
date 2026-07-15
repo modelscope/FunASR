@@ -13,6 +13,10 @@ set -euo pipefail
 
 printf '%s\n' "$*" >>"$HF_LOG"
 
+if [[ "${HF_SKIP_CREATE:-0}" == 1 ]]; then
+  exit 0
+fi
+
 out=
 args=("$@")
 for ((i = 0; i < ${#args[@]}; i++)); do
@@ -86,5 +90,20 @@ if bash "$SCRIPT" sensevoice "$TMP/out" q4km >/dev/null 2>&1; then
   exit 1
 fi
 [[ ! -s "$HF_LOG" ]]
+
+mkdir -p "$TMP/empty-bin"
+if PATH="$TMP/empty-bin" /bin/bash "$SCRIPT" sensevoice "$TMP/out" >"$TMP/stdout" 2>"$TMP/stderr"; then
+  echo "download succeeded without a Hugging Face CLI" >&2
+  exit 1
+fi
+[[ ! -s "$TMP/stdout" ]]
+grep -F "need the Hugging Face CLI" "$TMP/stderr" >/dev/null
+
+reset_case
+if HF_SKIP_CREATE=1 bash "$SCRIPT" sensevoice "$TMP/out" >"$TMP/stdout" 2>"$TMP/stderr"; then
+  echo "download succeeded without producing a GGUF file" >&2
+  exit 1
+fi
+grep -F "no GGUF files found in $TMP/out" "$TMP/stderr" >/dev/null
 
 echo "download-funasr-model contract tests passed"

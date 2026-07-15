@@ -57,7 +57,7 @@ esac
 # huggingface_hub ships `hf` (new CLI); older versions only have `huggingface-cli` (deprecated). Use whichever exists.
 if   command -v hf              >/dev/null 2>&1; then HF=hf
 elif command -v huggingface-cli >/dev/null 2>&1; then HF=huggingface-cli
-else echo "need the Hugging Face CLI: pip install -U huggingface_hub"; exit 1; fi
+else echo "error: need the Hugging Face CLI: pip install -U huggingface_hub" >&2; exit 1; fi
 mkdir -p "$OUT"
 echo "downloading $REPO ..."
 if [ ${#FILES[@]} -eq 0 ]; then
@@ -69,4 +69,12 @@ if [ "$MODEL" != "fsmn-vad" ] && [ "$MODEL" != "vad" ]; then
   echo "downloading FSMN-VAD (for --vad) ..."
   "$HF" download FunAudioLLM/fsmn-vad-GGUF fsmn-vad.gguf --local-dir "$OUT"
 fi
-echo "done -> $OUT"; ls -1 "$OUT"/*.gguf
+shopt -s nullglob
+GGUF_FILES=("$OUT"/*.gguf)
+shopt -u nullglob
+if [ ${#GGUF_FILES[@]} -eq 0 ]; then
+  echo "error: no GGUF files found in $OUT" >&2
+  exit 1
+fi
+echo "done -> $OUT"
+printf '%s\n' "${GGUF_FILES[@]}"
