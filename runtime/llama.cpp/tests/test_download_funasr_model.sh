@@ -146,23 +146,23 @@ assert_readme_quickstart() {
     exit 1
   fi
 
-  if ! grep -F "bash download-funasr-model.sh sensevoice ./gguf" <<<"$quickstart" >/dev/null; then
+  if ! grep -Eq '^bash download-funasr-model\.sh sensevoice \./gguf([[:space:]]+#.*)?$' <<<"$quickstart"; then
     printf 'missing default SenseVoice download command in %s\n' "$readme" >&2
     exit 1
   fi
-  if ! grep -F "./llama-funasr-sensevoice -m ./gguf/$DEFAULT_SENSEVOICE_MODEL --vad ./gguf/fsmn-vad.gguf -a audio.wav" <<<"$quickstart" >/dev/null; then
+  if ! grep -Fx "./llama-funasr-sensevoice -m ./gguf/$DEFAULT_SENSEVOICE_MODEL --vad ./gguf/fsmn-vad.gguf -a audio.wav" <<<"$quickstart" >/dev/null; then
     printf 'README command does not run the default sensevoice-small-q8.gguf in %s\n' "$readme" >&2
     exit 1
   fi
-  if ! grep -F "hf download FunAudioLLM/SenseVoiceSmall-GGUF $DEFAULT_SENSEVOICE_MODEL --local-dir .\\gguf" <<<"$powershell" >/dev/null; then
+  if ! grep -Fx "hf download FunAudioLLM/SenseVoiceSmall-GGUF $DEFAULT_SENSEVOICE_MODEL --local-dir .\\gguf" <<<"$powershell" >/dev/null; then
     printf 'missing Windows SenseVoice download command in %s\n' "$readme" >&2
     exit 1
   fi
-  if ! grep -F 'hf download FunAudioLLM/fsmn-vad-GGUF fsmn-vad.gguf --local-dir .\gguf' <<<"$powershell" >/dev/null; then
+  if ! grep -Fx 'hf download FunAudioLLM/fsmn-vad-GGUF fsmn-vad.gguf --local-dir .\gguf' <<<"$powershell" >/dev/null; then
     printf 'missing Windows FSMN-VAD download command in %s\n' "$readme" >&2
     exit 1
   fi
-  if ! grep -F ".\\llama-funasr-sensevoice.exe -m .\\gguf\\$DEFAULT_SENSEVOICE_MODEL --vad .\\gguf\\fsmn-vad.gguf -a audio.wav" <<<"$powershell" >/dev/null; then
+  if ! grep -Fx ".\\llama-funasr-sensevoice.exe -m .\\gguf\\$DEFAULT_SENSEVOICE_MODEL --vad .\\gguf\\fsmn-vad.gguf -a audio.wav" <<<"$powershell" >/dev/null; then
     printf 'missing Windows PowerShell quickstart in %s\n' "$readme" >&2
     exit 1
   fi
