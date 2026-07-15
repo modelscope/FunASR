@@ -430,3 +430,47 @@ def test_inference_negotiates_aligned_waveform_support(supports_alignment):
         )
 
     assert extract_kwargs[0].get("return_waveform", False) is supports_alignment
+
+
+def test_inference_rejects_missing_waveform_before_forward():
+    vad = vad_model.FsmnVADStreaming.__new__(vad_model.FsmnVADStreaming)
+    vad.vad_opts = SimpleNamespace(speech_to_sil_time_thres=100)
+    forward_batches = []
+    vad.forward = lambda **batch: forward_batches.append(batch) or []
+    cache = {
+        "frontend": {},
+        "prev_samples": torch.empty(0),
+        "encoder": {},
+        "stats": SimpleNamespace(),
+    }
+    frontend = SimpleNamespace(fs=16000, frame_shift=10, lfr_n=1)
+
+    with (
+        patch.object(
+            vad_model,
+            "load_audio_text_image_video",
+            return_value=[torch.zeros(960)],
+        ),
+        patch.object(
+            vad_model,
+            "extract_fbank",
+            return_value=(torch.zeros(1, 2, 4), torch.tensor([2])),
+        ),
+        pytest.raises(
+            RuntimeError,
+            match="must provide aligned_waveforms or waveforms",
+        ),
+    ):
+        vad_model.FsmnVADStreaming.inference(
+            vad,
+            torch.zeros(960),
+            frontend=frontend,
+            cache=cache,
+            key=["utt"],
+            chunk_size=60,
+            is_final=False,
+            device="cpu",
+            dynamic_silence=False,
+        )
+
+    assert forward_batches == []

@@ -1056,7 +1056,12 @@ class FsmnVADStreaming(nn.Module):
             waveform = cache["frontend"].get("aligned_waveforms")
             if waveform is None or waveform.numel() == 0:
                 # Custom frontends may expose an exact span under the legacy key.
-                waveform = cache["frontend"]["waveforms"]
+                waveform = cache["frontend"].get("waveforms")
+            if speech.numel() > 0 and (waveform is None or waveform.numel() == 0):
+                raise RuntimeError(
+                    "Streaming VAD frontend must provide aligned_waveforms or waveforms "
+                    "when emitting feature frames"
+                )
             batch = {
                 "feats": speech,
                 "waveform": waveform,
