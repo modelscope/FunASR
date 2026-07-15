@@ -29,9 +29,28 @@ and the audio embeddings are injected into it via `llama_decode`'s embedding inp
 build/convert/run quickstart, validation numbers, and gotchas.
 
 ## Download pre-built GGUF (fastest — no Python ML env)
+
+The helper requires the Hugging Face CLI (`pip install -U huggingface_hub`). By
+default it downloads one practical quantized variant plus FSMN-VAD, rather than
+every GGUF in the repository:
+
 ```bash
-./download-funasr-model.sh sensevoice          # or: paraformer | nano | fsmn-vad
+./download-funasr-model.sh sensevoice          # q8 (default) + FSMN-VAD
+./download-funasr-model.sh paraformer          # q8 (default) + FSMN-VAD
+./download-funasr-model.sh nano                 # encoder-f16 + q8_0 (default) + FSMN-VAD
+./download-funasr-model.sh fsmn-vad             # FSMN-VAD only
 ```
+
+Use the optional third argument to choose another variant. SenseVoice and
+Paraformer support `q8`, `f16`, `f32`, or `all`; Nano supports `q8_0`, `q4km`,
+`q5km`, or `all`. The optional second argument is the output directory:
+
+```bash
+./download-funasr-model.sh sensevoice funasr-gguf f16
+./download-funasr-model.sh nano funasr-gguf q4km
+./download-funasr-model.sh paraformer funasr-gguf all  # explicitly download every GGUF
+```
+
 Pre-converted GGUF on Hugging Face: [SenseVoiceSmall-GGUF](https://huggingface.co/FunAudioLLM/SenseVoiceSmall-GGUF) · [Paraformer-GGUF](https://huggingface.co/FunAudioLLM/Paraformer-GGUF) · [Fun-ASR-Nano-GGUF](https://huggingface.co/FunAudioLLM/Fun-ASR-Nano-GGUF) · [fsmn-vad-GGUF](https://huggingface.co/FunAudioLLM/fsmn-vad-GGUF). Or convert yourself with `convert-funasr-to-gguf.py`.
 
 ## Build (standalone, CI-friendly)

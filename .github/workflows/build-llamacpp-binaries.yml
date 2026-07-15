@@ -129,7 +129,10 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create "${{ github.ref_name }}" dist/* \
+          tag="${{ github.ref_name }}"
+          version="${tag#runtime-llamacpp-}"
+          docs="https://github.com/${{ github.repository }}/blob/$tag/runtime/llama.cpp/README.md"
+          gh release create "$tag" dist/* \
             --repo "${{ github.repository }}" \
-            --title "FunASR llama.cpp runtime ${{ github.ref_name }}" \
-            --notes "Prebuilt self-contained binaries for the FunASR llama.cpp / GGUF runtime — SenseVoice, Paraformer and Fun-ASR-Nano with built-in FSMN-VAD (a whisper.cpp-style on-device ASR, strong on Chinese). Get a model with \`bash download-funasr-model.sh <sensevoice|paraformer|nano>\`, then run \`llama-funasr-cli\` / \`llama-funasr-sensevoice\` / \`llama-funasr-paraformer\`. Use the default x64 asset for maximum CPU compatibility; use the x64-avx2 asset on CPUs with AVX2/FMA/F16C/BMI2 for higher throughput. No Python, no build. Docs: runtime/llama.cpp/README.md"
+            --title "FunASR llama.cpp runtime $version" \
+            --notes "Prebuilt self-contained binaries for the FunASR llama.cpp / GGUF runtime: SenseVoice, Paraformer and Fun-ASR-Nano with built-in FSMN-VAD. Download the default quantized model with \`bash download-funasr-model.sh <sensevoice|paraformer|nano>\` (the helper requires the Hugging Face CLI: \`pip install -U huggingface_hub\`), then run \`llama-funasr-cli\` / \`llama-funasr-sensevoice\` / \`llama-funasr-paraformer\`. Use the default x64 asset for maximum CPU compatibility; use the x64-avx2 asset on CPUs with AVX2/FMA/F16C/BMI2 for higher throughput. No Python ASR runtime or local build is required. Docs: $docs"
