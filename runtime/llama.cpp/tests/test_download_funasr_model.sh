@@ -63,6 +63,8 @@ bash "$SCRIPT" sensevoice "$TMP/out" >/dev/null
 assert_log "download FunAudioLLM/SenseVoiceSmall-GGUF sensevoice-small-q8.gguf --local-dir $TMP/out"
 assert_log "download FunAudioLLM/fsmn-vad-GGUF fsmn-vad.gguf --local-dir $TMP/out"
 assert_no_log "--include *.gguf"
+DEFAULT_SENSEVOICE_MODEL=$(awk '$1 == "download" && $2 == "FunAudioLLM/SenseVoiceSmall-GGUF" { print $3; exit }' "$HF_LOG")
+[[ -n "$DEFAULT_SENSEVOICE_MODEL" ]]
 
 reset_case
 bash "$SCRIPT" paraformer "$TMP/out" f16 >/dev/null
@@ -109,21 +111,49 @@ grep -F "no GGUF files found in $TMP/out" "$TMP/stderr" >/dev/null
 
 assert_readme_quickstart() {
   local readme=$1
-  if ! grep -F "bash download-funasr-model.sh sensevoice ./gguf" "$readme" >/dev/null; then
+  local section_prefix=$2
+  local section
+  local quickstart
+
+  if ! section=$(awk -v prefix="$section_prefix" '
+    !found && index($0, prefix) == 1 { found = 1 }
+    found && /^---$/ { exit }
+    found { print }
+    END { if (!found) exit 1 }
+  ' "$readme"); then
+    printf 'missing CPU/edge section in %s\n' "$readme" >&2
+    exit 1
+  fi
+
+  if ! quickstart=$(printf '%s\n' "$section" | awk '
+    !seen && /^```bash$/ { seen = 1; in_block = 1; next }
+    in_block && /^```$/ { complete = 1; exit }
+    in_block { print }
+    END { if (!seen || !complete) exit 1 }
+  '); then
+    printf 'missing Bash quickstart block in %s\n' "$readme" >&2
+    exit 1
+  fi
+
+  if ! grep -F "bash download-funasr-model.sh sensevoice ./gguf" <<<"$quickstart" >/dev/null; then
     printf 'missing default SenseVoice download command in %s\n' "$readme" >&2
     exit 1
   fi
-  if ! grep -F "llama-funasr-sensevoice -m ./gguf/sensevoice-small-q8.gguf --vad ./gguf/fsmn-vad.gguf -a audio.wav" "$readme" >/dev/null; then
+  if ! grep -F "./llama-funasr-sensevoice -m ./gguf/$DEFAULT_SENSEVOICE_MODEL --vad ./gguf/fsmn-vad.gguf -a audio.wav" <<<"$quickstart" >/dev/null; then
     printf 'README command does not run the default sensevoice-small-q8.gguf in %s\n' "$readme" >&2
     exit 1
   fi
-  if grep -F "SenseVoiceSmall-f16.gguf" "$readme" >/dev/null; then
-    printf 'stale SenseVoice filename in %s\n' "$readme" >&2
+  if ! grep -F ".\\pkg\\llama-funasr-sensevoice.exe -m .\\gguf\\$DEFAULT_SENSEVOICE_MODEL --vad .\\gguf\\fsmn-vad.gguf -a audio.wav" <<<"$section" >/dev/null; then
+    printf 'missing Windows PowerShell quickstart in %s\n' "$readme" >&2
+    exit 1
+  fi
+  if ! grep -F '[Releases](https://github.com/modelscope/FunASR/releases)' <<<"$section" >/dev/null; then
+    printf 'non-portable Releases link in %s\n' "$readme" >&2
     exit 1
   fi
 }
 
-assert_readme_quickstart "$REPO_ROOT/README.md"
-assert_readme_quickstart "$REPO_ROOT/README_zh.md"
+assert_readme_quickstart "$REPO_ROOT/README.md" '### CPU / Edge'
+assert_readme_quickstart "$REPO_ROOT/README_zh.md" '### CPU / 边缘部署'
 
 echo "download-funasr-model contract tests passed"

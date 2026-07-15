@@ -1,0 +1,31 @@
+name: Test llama.cpp downloader
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'README.md'
+      - 'README_zh.md'
+      - 'runtime/llama.cpp/download-funasr-model.sh'
+      - 'runtime/llama.cpp/tests/test_download_funasr_model.sh'
+      - '.github/workflows/test-llamacpp-downloader.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'README.md'
+      - 'README_zh.md'
+      - 'runtime/llama.cpp/download-funasr-model.sh'
+      - 'runtime/llama.cpp/tests/test_download_funasr_model.sh'
+      - '.github/workflows/test-llamacpp-downloader.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run downloader and README contract tests
+        run: bash runtime/llama.cpp/tests/test_download_funasr_model.sh
