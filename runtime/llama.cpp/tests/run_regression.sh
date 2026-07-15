@@ -24,7 +24,12 @@ ensure_models(){ local key="$1"; shift
   local missing=0; for f in "$@"; do [ -f "$MODELS/$f" ] || missing=1; done
   [ "$missing" = 0 ] && return 0
   { [ "$key" = fsmn-vad ] || [ "$RUN_FULL" = 1 ]; } || return 1   # only auto-fetch the tiny VAD unless RUN_FULL
-  "$RT/download-funasr-model.sh" "$key" "$MODELS" >/dev/null 2>&1 || return 1
+  local args=("$key" "$MODELS")
+  case "$key" in
+    sensevoice|paraformer) args+=(f16) ;;
+    nano) args+=(q8_0) ;;
+  esac
+  "$RT/download-funasr-model.sh" "${args[@]}" >/dev/null 2>&1 || return 1
   for f in "$@"; do [ -f "$MODELS/$f" ] || return 1; done; return 0
 }
 check(){ local name="$1" golden="$2" got="$3"
