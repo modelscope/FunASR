@@ -130,10 +130,18 @@ class DynamicStreamingVAD:
         self.accumulated_since_cut_ms += int(chunk_samples * 1000 / self.sample_rate)
 
         self._apply_dynamic_threshold()
+        initial_cache_kwargs = {}
+        if "stats" not in self.cache:
+            initial_cache_kwargs = {
+                "max_end_silence_time": self._get_silence_threshold(),
+                "speech_noise_thres": self.speech_noise_thres,
+            }
 
         res = self.model.generate(
             input=[audio_chunk], cache=self.cache,
             is_final=is_final, chunk_size=self.chunk_size_ms,
+            dynamic_silence=False,
+            **initial_cache_kwargs,
         )
 
         signals = res[0].get("value", [])
