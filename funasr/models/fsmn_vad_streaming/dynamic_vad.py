@@ -134,7 +134,7 @@ class DynamicStreamingVAD:
         res = self.model.generate(
             input=[audio_chunk], cache=self.cache,
             is_final=is_final, chunk_size=self.chunk_size_ms,
-            silence_schedule=self.silence_schedule,
+            silence_schedule=self.silence_schedule, #fix here
         )
 
         signals = res[0].get("value", [])
