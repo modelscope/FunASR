@@ -1,5 +1,6 @@
 import ast
 from pathlib import Path
+import re
 import unittest
 
 
@@ -7,6 +8,7 @@ ROOT = Path(__file__).resolve().parents[1]
 PACKAGE_ROOT = ROOT / "runtime" / "python" / "onnxruntime"
 SETUP_PATH = PACKAGE_ROOT / "setup.py"
 EXPECTED_VERSION = "0.4.2"
+REQUIREMENT_NAME_PATTERN = re.compile(r"^\s*([A-Za-z0-9](?:[A-Za-z0-9._-]*[A-Za-z0-9])?)")
 
 
 def read_setup_tree():
@@ -34,25 +36,33 @@ def setup_keyword_literal(tree, name):
     raise AssertionError(f"setuptools.setup() has no {name!r} keyword")
 
 
+def normalized_requirement_name(requirement):
+    match = REQUIREMENT_NAME_PATTERN.match(requirement)
+    if match is None:
+        raise AssertionError(f"Unable to parse requirement name from {requirement!r}")
+    return re.sub(r"[-_.]+", "-", match.group(1)).lower()
+
+
 class FunASROnnxReleaseContractTest(unittest.TestCase):
     def test_release_version_is_0_4_2(self):
         self.assertEqual(assigned_literal(read_setup_tree(), "VERSION_NUM"), EXPECTED_VERSION)
 
     def test_runtime_dependencies_keep_onnx_install_torch_free(self):
         requirements = setup_keyword_literal(read_setup_tree(), "install_requires")
-        names = {
-            requirement.split(";", 1)[0]
-            .split("[", 1)[0]
-            .split("=", 1)[0]
-            .split("<", 1)[0]
-            .split(">", 1)[0]
-            .strip()
-            .lower()
-            .replace("_", "-")
-            for requirement in requirements
-        }
+        names = {normalized_requirement_name(requirement) for requirement in requirements}
         self.assertIn("jieba", names)
         self.assertNotIn("torch", names)
+
+    def test_requirement_name_parser_handles_pep508_forms(self):
+        cases = {
+            "torch!=2.0": "torch",
+            "Torch_CUDA~=2.0": "torch-cuda",
+            'torch[distributed]>=2.0; python_version >= "3.11"': "torch",
+            "torch @ https://example.invalid/torch.whl": "torch",
+        }
+        for requirement, expected in cases.items():
+            with self.subTest(requirement=requirement):
+                self.assertEqual(normalized_requirement_name(requirement), expected)
 
     def test_package_source_has_no_torch_imports(self):
         offenders = []
