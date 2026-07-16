@@ -871,7 +871,9 @@ class FsmnVADStreaming(nn.Module):
             sil_pdf_ids=self.vad_opts.sil_pdf_ids,
             max_end_sil_frame_cnt_thresh=self.vad_opts.max_end_silence_time
             - self.vad_opts.speech_to_sil_time_thres,
-            speech_noise_thres=self.vad_opts.speech_noise_thres,
+            speech_noise_thres=kwargs.get(
+                "speech_noise_thres", self.vad_opts.speech_noise_thres
+            ),
         )
         cache["windows_detector"] = windows_detector
         cache["stats"] = stats
