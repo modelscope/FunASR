@@ -274,7 +274,25 @@ curl http://localhost:8000/v1/audio/transcriptions \
 docker pull registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-online-cpu-0.1.12
 ```
 
-> **CPU / 边缘部署(无需 GPU、无需 Python):** 用 **llama.cpp / GGUF** 跑 Fun-ASR-Nano / SenseVoice / Paraformer —— 单个自包含二进制,对标 whisper.cpp。详见 [runtime/llama.cpp/](./runtime/llama.cpp/)。
+### CPU / 边缘部署 - llama.cpp / GGUF（无需 GPU、无需 Python）
+
+在 CPU 和边缘设备上用单个自包含二进制运行 **SenseVoice / Paraformer / Fun-ASR-Nano**，无需 Python 运行环境，并内置 FSMN-VAD。
+
+```bash
+# Linux / macOS：在解压后的发布目录中执行
+bash download-funasr-model.sh sensevoice ./gguf        # 也可使用 paraformer 或 nano
+./llama-funasr-sensevoice -m ./gguf/sensevoice-small-q8.gguf --vad ./gguf/fsmn-vad.gguf -a audio.wav
+# -> 欢迎大家来体验达摩院推出的语音识别模型
+```
+
+```powershell
+# Windows PowerShell：在解压根目录执行（需已安装 `hf` CLI）
+hf download FunAudioLLM/SenseVoiceSmall-GGUF sensevoice-small-q8.gguf --local-dir .\gguf
+hf download FunAudioLLM/fsmn-vad-GGUF fsmn-vad.gguf --local-dir .\gguf
+.\llama-funasr-sensevoice.exe -m .\gguf\sensevoice-small-q8.gguf --vad .\gguf\fsmn-vad.gguf -a audio.wav
+```
+
+**预编译二进制：** [Releases](https://github.com/modelscope/FunASR/releases) · **下载与快速开始：** [funasr.com/llama-cpp](https://www.funasr.com/llama-cpp.html) · **GGUF 模型：** [Hugging Face](https://huggingface.co/FunAudioLLM) · **文档与评测：** [runtime/llama.cpp/](./runtime/llama.cpp/)
 
 [OpenAI API 示例 →](./examples/openai_api/README_zh.md) · [Gradio Demo →](./examples/openai_api/GRADIO_zh.md) · [客户端配方 →](./examples/openai_api/CLIENTS.md) · [JavaScript/TypeScript 配方 →](./examples/openai_api/JAVASCRIPT_zh.md) · [Kubernetes 模板 →](./examples/openai_api/kubernetes/README_zh.md) · [工作流配方 →](./examples/openai_api/WORKFLOWS_zh.md) · [Postman 集合 →](./examples/openai_api/POSTMAN_zh.md) · [OpenAPI 规范 →](./examples/openai_api/OPENAPI_zh.md) · [安全指南 →](./examples/openai_api/SECURITY_zh.md) · [部署选型 →](./docs/deployment_matrix_zh.md) · [部署文档 →](./runtime/readme_cn.md) · [Agent 集成 →](https://modelscope.github.io/FunASR/agent.html)
 

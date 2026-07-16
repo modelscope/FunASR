@@ -2,6 +2,7 @@
 set -euo pipefail
 
 ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
+REPO_ROOT=$(cd "$ROOT/../.." && pwd)
 SCRIPT="$ROOT/download-funasr-model.sh"
 TMP=$(mktemp -d)
 trap 'rm -rf "$TMP"' EXIT
@@ -62,6 +63,8 @@ bash "$SCRIPT" sensevoice "$TMP/out" >/dev/null
 assert_log "download FunAudioLLM/SenseVoiceSmall-GGUF sensevoice-small-q8.gguf --local-dir $TMP/out"
 assert_log "download FunAudioLLM/fsmn-vad-GGUF fsmn-vad.gguf --local-dir $TMP/out"
 assert_no_log "--include *.gguf"
+DEFAULT_SENSEVOICE_MODEL=$(awk '$1 == "download" && $2 == "FunAudioLLM/SenseVoiceSmall-GGUF" { print $3; exit }' "$HF_LOG")
+[[ -n "$DEFAULT_SENSEVOICE_MODEL" ]]
 
 reset_case
 bash "$SCRIPT" paraformer "$TMP/out" f16 >/dev/null
@@ -105,5 +108,71 @@ if HF_SKIP_CREATE=1 bash "$SCRIPT" sensevoice "$TMP/out" >"$TMP/stdout" 2>"$TMP/
   exit 1
 fi
 grep -F "no GGUF files found in $TMP/out" "$TMP/stderr" >/dev/null
+
+assert_readme_quickstart() {
+  local readme=$1
+  local section_prefix=$2
+  local section
+  local quickstart
+  local powershell
+
+  if ! section=$(awk -v prefix="$section_prefix" '
+    !found && index($0, prefix) == 1 { found = 1 }
+    found && /^---$/ { exit }
+    found { print }
+    END { if (!found) exit 1 }
+  ' "$readme"); then
+    printf 'missing CPU/edge section in %s\n' "$readme" >&2
+    exit 1
+  fi
+
+  if ! quickstart=$(printf '%s\n' "$section" | awk '
+    !seen && /^```bash$/ { seen = 1; in_block = 1; next }
+    in_block && /^```$/ { complete = 1; exit }
+    in_block { print }
+    END { if (!seen || !complete) exit 1 }
+  '); then
+    printf 'missing Bash quickstart block in %s\n' "$readme" >&2
+    exit 1
+  fi
+
+  if ! powershell=$(printf '%s\n' "$section" | awk '
+    !seen && /^```powershell$/ { seen = 1; in_block = 1; next }
+    in_block && /^```$/ { complete = 1; exit }
+    in_block { print }
+    END { if (!seen || !complete) exit 1 }
+  '); then
+    printf 'missing PowerShell quickstart block in %s\n' "$readme" >&2
+    exit 1
+  fi
+
+  if ! grep -Eq '^bash download-funasr-model\.sh sensevoice \./gguf([[:space:]]+#.*)?$' <<<"$quickstart"; then
+    printf 'missing default SenseVoice download command in %s\n' "$readme" >&2
+    exit 1
+  fi
+  if ! grep -Fx "./llama-funasr-sensevoice -m ./gguf/$DEFAULT_SENSEVOICE_MODEL --vad ./gguf/fsmn-vad.gguf -a audio.wav" <<<"$quickstart" >/dev/null; then
+    printf 'README command does not run the default sensevoice-small-q8.gguf in %s\n' "$readme" >&2
+    exit 1
+  fi
+  if ! grep -Fx "hf download FunAudioLLM/SenseVoiceSmall-GGUF $DEFAULT_SENSEVOICE_MODEL --local-dir .\\gguf" <<<"$powershell" >/dev/null; then
+    printf 'missing Windows SenseVoice download command in %s\n' "$readme" >&2
+    exit 1
+  fi
+  if ! grep -Fx 'hf download FunAudioLLM/fsmn-vad-GGUF fsmn-vad.gguf --local-dir .\gguf' <<<"$powershell" >/dev/null; then
+    printf 'missing Windows FSMN-VAD download command in %s\n' "$readme" >&2
+    exit 1
+  fi
+  if ! grep -Fx ".\\llama-funasr-sensevoice.exe -m .\\gguf\\$DEFAULT_SENSEVOICE_MODEL --vad .\\gguf\\fsmn-vad.gguf -a audio.wav" <<<"$powershell" >/dev/null; then
+    printf 'missing Windows PowerShell quickstart in %s\n' "$readme" >&2
+    exit 1
+  fi
+  if ! grep -F '[Releases](https://github.com/modelscope/FunASR/releases)' <<<"$section" >/dev/null; then
+    printf 'non-portable Releases link in %s\n' "$readme" >&2
+    exit 1
+  fi
+}
+
+assert_readme_quickstart "$REPO_ROOT/README.md" '### CPU / Edge'
+assert_readme_quickstart "$REPO_ROOT/README_zh.md" '### CPU / 边缘部署'
 
 echo "download-funasr-model contract tests passed"
