@@ -1,6 +1,7 @@
 import asyncio
 import importlib.util
 import json
+import subprocess
 import sys
 import threading
 import time
@@ -12,7 +13,27 @@ import torch
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-SERVICE_PATH = REPO_ROOT / "examples" / "industrial_data_pretraining" / "fun_asr_nano" / "serve_realtime_ws.py"
+EXAMPLE_SERVICE_PATH = (
+    REPO_ROOT / "examples" / "industrial_data_pretraining" / "fun_asr_nano" / "serve_realtime_ws.py"
+)
+PACKAGE_SERVICE_PATH = REPO_ROOT / "funasr" / "bin" / "realtime_ws.py"
+SERVICE_PATH = PACKAGE_SERVICE_PATH
+
+
+def test_realtime_ws_service_is_packaged():
+    assert PACKAGE_SERVICE_PATH.is_file()
+
+
+def test_example_realtime_entrypoint_delegates_to_packaged_cli():
+    result = subprocess.run(
+        [sys.executable, str(EXAMPLE_SERVICE_PATH), "--help"],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert "--endpoint-mode" in result.stdout
 
 
 def load_service_module():
