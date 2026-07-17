@@ -18,6 +18,8 @@ requirements = {
         "PyYAML>=5.1.2",
         "tqdm",
         "requests",
+        "regex",
+        "websockets>=10.4",
         # Model loading
         "omegaconf>=2.0",
         "hydra-core>=1.3.2",
@@ -155,6 +157,7 @@ setup(
             "funasr = funasr.cli:main",
             "funasr-hydra = funasr.bin.inference:main_hydra",
             "funasr-server = funasr.bin.server:main",
+            "funasr-realtime-server = funasr.bin.realtime_ws:cli_main",
             "funasr-train = funasr.bin.train:main_hydra",
             "funasr-train-ds = funasr.bin.train_ds:main_hydra",
             "funasr-export = funasr.bin.export:main_hydra",
