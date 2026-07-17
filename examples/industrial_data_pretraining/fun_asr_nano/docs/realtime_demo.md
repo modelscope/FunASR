@@ -15,6 +15,25 @@ pip install -r requirements.txt
 CUDA_VISIBLE_DEVICES=0 python serve_realtime_ws.py --port 10095 --language 中文
 ```
 
+### 客户端 VAD / 低延迟对话模式
+
+客户端已经持续执行 VAD 时，可以关闭服务端 VAD 模型，并由客户端明确提交每句话：
+
+```bash
+CUDA_VISIBLE_DEVICES=0 python serve_realtime_ws.py \
+  --port 10095 --language 中文 --endpoint-mode client
+```
+
+同一条 WebSocket 连接上的协议为：
+
+1. 发送文本 `START`；
+2. 持续发送 16 kHz、16-bit PCM 二进制帧，服务端仍会返回 partial；
+3. 客户端 VAD 检测到句末后发送文本 `COMMIT`；
+4. 服务端立即返回一次 `is_final=true`，清理当前句状态但保持连接；
+5. 重复步骤 2-4，整个会话结束时发送 `STOP`。
+
+`COMMIT` 不受默认 960 ms final 门槛限制，因此短句也会提交。该模式信任客户端 endpoint，不运行 FSMN-VAD；需要服务端自动去噪和分句时继续使用默认的 `--endpoint-mode server`。
+
 ## 客户端
 
 ```bash

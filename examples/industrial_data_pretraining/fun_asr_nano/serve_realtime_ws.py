@@ -3,6 +3,7 @@
 
 Features:
 - Streaming VAD segmentation (fsmn-vad)
+- Client-driven utterance endpoints (COMMIT, without server VAD)
 - Per-segment ASR decoding (Fun-ASR-Nano via vLLM)
 - Speaker diarization (eres2netv2 + ClusterBackend)
 - Hotword customization
@@ -73,6 +74,20 @@ def _clean_asr_text(text):
 
 
 from funasr.models.fsmn_vad_streaming.dynamic_vad import DynamicStreamingVAD
+
+
+class ClientEndpointVAD:
+    """Track an utterance start without loading or running a VAD model."""
+
+    def __init__(self):
+        self.current_speech_start = None
+
+    def start_utterance(self, start_ms):
+        if self.current_speech_start is None:
+            self.current_speech_start = start_ms
+
+    def reset(self):
+        self.current_speech_start = None
 
 
 class HybridSpeakerTracker:
@@ -312,10 +327,14 @@ class RealtimeASRSession:
         chunk_ms=960,
         partial_window_sec=15.0,
         audio_lookback_sec=5.0,
+        endpoint_mode="server",
     ):
+        if endpoint_mode not in {"server", "client"}:
+            raise ValueError(f"Unsupported endpoint mode: {endpoint_mode}")
         self.vllm_engine = vllm_engine
         self.asr_kwargs = asr_kwargs
         self.vad = vad
+        self.endpoint_mode = endpoint_mode
         self.sample_rate = sample_rate
         self.chunk_samples = int(sample_rate * chunk_ms / 1000)
         self.first_chunk_samples = int(sample_rate * 480 / 1000)
@@ -347,11 +366,19 @@ class RealtimeASRSession:
     def add_audio(self, pcm_bytes):
         audio_int16 = np.frombuffer(pcm_bytes, dtype=np.int16)
         audio_float = audio_int16.astype(np.float32) / 32768.0
+        chunk_start_sample = self.total_samples
         self.audio_buffer = np.concatenate([self.audio_buffer, audio_float])
         self.total_samples += len(audio_float)
 
         if len(audio_float) > 0:
-            new_confirmed = self.vad.feed(torch.from_numpy(audio_float).float(), is_final=False)
+            if self.endpoint_mode == "client":
+                start_ms = int(chunk_start_sample * 1000 / self.sample_rate)
+                self.vad.start_utterance(start_ms)
+                new_confirmed = []
+            else:
+                new_confirmed = self.vad.feed(
+                    torch.from_numpy(audio_float).float(), is_final=False
+                )
 
             for seg in new_confirmed:
                 seg_text = self._decode_segment(seg)
@@ -398,10 +425,22 @@ class RealtimeASRSession:
 
     @torch.no_grad()
     def decode(self, is_final=False):
-        if self.total_samples < self.chunk_samples:
+        if is_final and self.endpoint_mode == "client":
+            return self.commit()
+
+        if self.endpoint_mode == "server" and self.total_samples < self.chunk_samples:
             if is_final:
                 self._release_audio_buffer()
             return self._build_response(is_final)
+
+        if self.endpoint_mode == "client":
+            if self.vad.current_speech_start is None:
+                return self._build_response(is_final=False)
+            utterance_start_sample = int(
+                self.vad.current_speech_start * self.sample_rate / 1000
+            )
+            if self.total_samples - utterance_start_sample < self.first_chunk_samples:
+                return self._build_response(is_final=False)
 
         if is_final:
             if self.vad.current_speech_start is not None:
@@ -459,6 +498,52 @@ class RealtimeASRSession:
             self.prev_text = ""
 
         return self._build_response(is_final)
+
+    @torch.no_grad()
+    def commit(self):
+        """Finalize one client-delimited utterance while keeping the session open."""
+        if self.endpoint_mode != "client":
+            raise RuntimeError("COMMIT requires endpoint_mode='client'")
+
+        if self.vad.current_speech_start is not None:
+            end_ms = int(self.total_samples * 1000 / self.sample_rate)
+            seg = [self.vad.current_speech_start, end_ms]
+            seg_text = self._decode_segment(seg)
+            if seg_text.strip():
+                sentence = {
+                    "text": seg_text,
+                    "start": int(seg[0]),
+                    "end": int(seg[1]),
+                }
+                if self.spk_tracker:
+                    s0 = int(seg[0] * self.sample_rate / 1000)
+                    segment_audio = self._slice_audio(s0, self.total_samples).copy()
+                    self.spk_tracker.assign_streaming(
+                        segment_audio,
+                        seg[0] / 1000,
+                        seg[1] / 1000,
+                        sentence,
+                    )
+                self.locked_sentences.append(sentence)
+            self.vad.current_speech_start = None
+
+        if self.spk_tracker and self.locked_sentences:
+            self.locked_sentences = self.spk_tracker.finalize(self.locked_sentences)
+
+        response = self._build_response(is_final=True)
+        self._reset_utterance_state()
+        return response
+
+    def _reset_utterance_state(self):
+        self._release_audio_buffer()
+        self.first_decode_done = False
+        self.vad.reset()
+        self.prev_text = ""
+        self.last_partial_text = ""
+        self.last_partial_start_ms = 0
+        self.last_decode_samples = self.total_samples
+        self.locked_sentences = []
+        self.prev_seg_text = ""
 
     def get_partial_decode_audio(self):
         """Return the bounded audio window used for unstable partial decoding."""
@@ -564,8 +649,14 @@ def load_models(args):
             _asr_kwargs["language"] = args.language
             logger.info(f"Language: {args.language}")
 
-        logger.info("Loading VAD: fsmn-vad (streaming)")
-        _vad_model = AutoModel(model="fsmn-vad", device=args.device, disable_update=True)
+        if getattr(args, "endpoint_mode", "server") == "server":
+            logger.info("Loading VAD: fsmn-vad (streaming)")
+            _vad_model = AutoModel(
+                model="fsmn-vad", device=args.device, disable_update=True
+            )
+        else:
+            _vad_model = None
+            logger.info("Server VAD disabled; client COMMIT controls utterance endpoints")
 
         if getattr(args, "enable_spk", False):
             logger.info(f"Loading SPK: {args.spk_model}")
@@ -597,7 +688,11 @@ async def run_session_work(args, operation, *operation_args, **operation_kwargs)
 
 async def handle_client(websocket, args):
     vllm_engine, asr_kwargs, vad_model, spk_model = load_models(args)
-    vad = DynamicStreamingVAD(vad_model)
+    endpoint_mode = getattr(args, "endpoint_mode", "server")
+    if endpoint_mode == "client":
+        vad = ClientEndpointVAD()
+    else:
+        vad = DynamicStreamingVAD(vad_model)
     spk_tracker = create_speaker_tracker(spk_model, args)
     session = RealtimeASRSession(
         vllm_engine,
@@ -605,6 +700,7 @@ async def handle_client(websocket, args):
         vad,
         spk_tracker=spk_tracker,
         partial_window_sec=getattr(args, 'partial_window_sec', 15.0),
+        endpoint_mode=endpoint_mode,
     )
     logger.info(f"Client connected: {websocket.remote_address}")
 
@@ -633,12 +729,55 @@ async def handle_client(websocket, args):
                     session.asr_kwargs["language"] = lang if lang else None
                     await websocket.send(json.dumps({"event": "language_set", "language": lang}))
                     logger.info(f"Language set: {lang}")
-                elif cmd.upper() == "STOP":
-                    if session.is_active and session.total_samples > 0:
-                        result = await run_session_work(args, session.decode, is_final=True)
+                elif cmd.upper() == "COMMIT":
+                    if endpoint_mode != "client":
+                        await websocket.send(
+                            json.dumps(
+                                {
+                                    "event": "error",
+                                    "error": "COMMIT requires --endpoint-mode client",
+                                }
+                            )
+                        )
+                    elif not session.is_active:
+                        await websocket.send(
+                            json.dumps(
+                                {
+                                    "event": "error",
+                                    "error": "Session is not active; send START first",
+                                }
+                            )
+                        )
+                    else:
+                        commit_started = time.perf_counter()
+                        result = await run_session_work(args, session.commit)
                         await websocket.send(json.dumps(result))
-                        logger.info(f"Final: {len(result['sentences'])} sentences")
-                        session.is_active = False
+                        last_decode_time = time.time()
+                        elapsed_ms = (time.perf_counter() - commit_started) * 1000
+                        logger.info(
+                            "Commit final: %d sentences in %.1fms",
+                            len(result.get("sentences", [])),
+                            elapsed_ms,
+                        )
+                elif cmd.upper() == "STOP":
+                    if endpoint_mode == "client":
+                        has_pending_audio = (
+                            session.total_samples > session.audio_buffer_start_sample
+                        )
+                    else:
+                        has_pending_audio = session.total_samples > 0
+                    if session.is_active and has_pending_audio:
+                        if endpoint_mode == "client":
+                            result = await run_session_work(args, session.commit)
+                        else:
+                            result = await run_session_work(
+                                args, session.decode, is_final=True
+                            )
+                        await websocket.send(json.dumps(result))
+                        logger.info(
+                            "Final: %d sentences", len(result.get("sentences", []))
+                        )
+                    session.is_active = False
                     await websocket.send(json.dumps({"event": "stopped"}))
             elif isinstance(message, bytes) and session.is_active:
                 await run_session_work(args, session.add_audio, message)
@@ -693,6 +832,15 @@ def build_arg_parser():
     parser.add_argument("--use-context", action="store_true", default=True)
     parser.add_argument("--no-context", dest="use_context", action="store_false")
     parser.add_argument("--decode-interval", type=float, default=0.48)
+    parser.add_argument(
+        "--endpoint-mode",
+        choices=["server", "client"],
+        default="server",
+        help=(
+            "Use server VAD endpoints (default), or accept client COMMIT messages "
+            "without loading the VAD model."
+        ),
+    )
     parser.add_argument("--partial-window-sec", type=float, default=15.0,
                         help="Cap the interim partial re-decode window to the most recent N seconds. "
                              "A long ongoing speech segment is otherwise re-encoded from its start on "
