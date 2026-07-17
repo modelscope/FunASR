@@ -1,0 +1,85 @@
+name: Validate funasr-onnx package
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/test-funasr-onnx-package.yml"
+      - "runtime/python/onnxruntime/**"
+      - "tests/test_funasr_onnx_release.py"
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/test-funasr-onnx-package.yml"
+      - "runtime/python/onnxruntime/**"
+      - "tests/test_funasr_onnx_release.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  package-smoke:
+    name: Python ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version:
+          - "3.11"
+          - "3.12"
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - name: Install build tooling
+        run: python -m pip install --upgrade pip build twine
+
+      - name: Check release contract
+        run: python tests/test_funasr_onnx_release.py
+
+      - name: Build wheel and source distribution
+        run: python -m build runtime/python/onnxruntime --outdir dist/funasr-onnx
+
+      - name: Check distribution metadata
+        run: python -m twine check dist/funasr-onnx/*
+
+      - name: Install built wheel
+        run: python -m pip install --force-reinstall dist/funasr-onnx/*.whl
+
+      - name: Verify clean ONNX install
+        run: |
+          python -m pip check
+          python - <<'PY'
+          import importlib.util
+          from importlib.metadata import requires, version
+
+          assert version("funasr-onnx") == "0.4.2"
+          assert importlib.util.find_spec("torch") is None
+
+          requirements = requires("funasr-onnx") or []
+          normalized = {item.lower().replace("_", "-") for item in requirements}
+          assert any(item.startswith("jieba") for item in normalized)
+          assert not any(item.startswith("torch") for item in normalized)
+
+          from funasr_onnx import CT_Transformer, Fsmn_vad, Paraformer, SenseVoiceSmall
+
+          assert all(
+              entrypoint is not None
+              for entrypoint in (Paraformer, Fsmn_vad, CT_Transformer, SenseVoiceSmall)
+          )
+          PY
+
+      - name: Upload release candidate
+        if: matrix.python-version == '3.12'
+        uses: actions/upload-artifact@v7
+        with:
+          name: funasr-onnx-0.4.2
+          path: dist/funasr-onnx/*
+          if-no-files-found: error
