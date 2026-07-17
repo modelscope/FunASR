@@ -1,5 +1,6 @@
 import asyncio
 import importlib.util
+import json
 import sys
 import threading
 import time
@@ -38,6 +39,15 @@ def test_cli_defaults_disable_speaker_and_bound_partial_window():
 
     assert args.enable_spk is False
     assert args.partial_window_sec == 15.0
+    assert args.endpoint_mode == "server"
+
+
+def test_cli_accepts_client_endpoint_mode():
+    module = load_service_module()
+
+    args = module.build_arg_parser().parse_args(["--endpoint-mode", "client"])
+
+    assert args.endpoint_mode == "client"
 
 
 def test_cli_accepts_float32_dtype_alias():
@@ -212,6 +222,197 @@ class DummyEngine:
     def generate(self, inputs, **kwargs):
         self.input_lengths.extend(len(audio) for audio in inputs)
         return [{"text": "hello"}]
+
+
+def test_client_endpoint_mode_skips_fsmn_vad_model(monkeypatch):
+    module = load_service_module()
+    auto_model_calls = []
+
+    import funasr
+
+    monkeypatch.setattr(
+        funasr,
+        "AutoModel",
+        lambda model, **kwargs: auto_model_calls.append(model) or object(),
+    )
+    vllm_stub = types.ModuleType("funasr.auto.auto_model_vllm")
+    vllm_stub.AutoModelVLLM = lambda **kwargs: object()
+    monkeypatch.setitem(sys.modules, "funasr.auto.auto_model_vllm", vllm_stub)
+
+    args = types.SimpleNamespace(
+        model="FunAudioLLM/Fun-ASR-Nano-2512",
+        hub="ms",
+        device="cpu",
+        dtype="fp32",
+        tensor_parallel_size=1,
+        gpu_memory_utilization=0.8,
+        max_model_len=2048,
+        hotword_file="",
+        language=None,
+        enable_spk=False,
+        endpoint_mode="client",
+    )
+
+    _, _, vad_model, _ = module.load_models(args)
+
+    assert vad_model is None
+    assert auto_model_calls == []
+
+
+def make_client_endpoint_session(module):
+    assert hasattr(module, "ClientEndpointVAD")
+    return module.RealtimeASRSession(
+        vllm_engine=DummyEngine(),
+        asr_kwargs={},
+        vad=module.ClientEndpointVAD(),
+        sample_rate=16000,
+        chunk_ms=960,
+        endpoint_mode="client",
+    )
+
+
+def test_client_endpoint_mode_emits_partial_at_first_decode_threshold():
+    module = load_service_module()
+    session = make_client_endpoint_session(module)
+    audio = np.zeros(int(0.48 * session.sample_rate), dtype=np.int16).tobytes()
+
+    session.add_audio(audio)
+    response = session.decode(is_final=False)
+
+    assert session.should_decode() is False
+    assert response["partial"] == "hello"
+    assert response["partial_start_ms"] == 0
+    assert response["is_final"] is False
+    assert session.vllm_engine.input_lengths == [int(0.48 * session.sample_rate)]
+
+
+def test_client_commits_short_utterances_once_with_monotonic_timestamps():
+    module = load_service_module()
+    session = make_client_endpoint_session(module)
+
+    session.add_audio(np.zeros(int(0.4 * session.sample_rate), dtype=np.int16).tobytes())
+    first = session.commit()
+    session.add_audio(np.zeros(int(0.3 * session.sample_rate), dtype=np.int16).tobytes())
+    second = session.commit()
+
+    assert first == {
+        "sentences": [{"text": "hello", "start": 0, "end": 400}],
+        "partial": "",
+        "partial_start_ms": 0,
+        "duration_ms": 400,
+        "is_final": True,
+    }
+    assert second == {
+        "sentences": [{"text": "hello", "start": 400, "end": 700}],
+        "partial": "",
+        "partial_start_ms": 0,
+        "duration_ms": 700,
+        "is_final": True,
+    }
+    assert session.vllm_engine.input_lengths == [6400, 4800]
+    assert len(session.audio_buffer) == 0
+    assert session.audio_buffer_start_sample == session.total_samples
+
+
+def test_handler_commit_returns_one_final_and_reuses_connection(monkeypatch):
+    module = load_service_module()
+    dynamic_vad_calls = []
+    client_vad_calls = []
+    received_audio = []
+
+    class ProtocolSession:
+        def __init__(self, *args, **kwargs):
+            self.is_active = False
+            self.total_samples = 0
+            self.audio_buffer_start_sample = 0
+            self.audio_buffer = np.array([], dtype=np.float32)
+            self.commit_count = 0
+
+        def reset(self):
+            self.total_samples = 0
+            self.audio_buffer_start_sample = 0
+            self.audio_buffer = np.array([], dtype=np.float32)
+
+        def add_audio(self, message):
+            received_audio.append(message)
+            self.total_samples += 1
+            self.audio_buffer = np.ones(1, dtype=np.float32)
+
+        def should_decode(self):
+            return False
+
+        def commit(self):
+            self.commit_count += 1
+            self.audio_buffer = np.array([], dtype=np.float32)
+            self.audio_buffer_start_sample = self.total_samples
+            return {"is_final": True, "sequence": self.commit_count}
+
+        def decode(self, is_final=False):
+            return self.commit()
+
+    class FakeWebSocket:
+        remote_address = ("127.0.0.1", 12345)
+
+        def __init__(self):
+            self.messages = iter(
+                [
+                    "START",
+                    b"first",
+                    "COMMIT",
+                    b"second",
+                    "COMMIT",
+                    "STOP",
+                    b"after-stop",
+                ]
+            )
+            self.sent = []
+
+        def __aiter__(self):
+            return self
+
+        async def __anext__(self):
+            try:
+                return next(self.messages)
+            except StopIteration as error:
+                raise StopAsyncIteration from error
+
+        async def send(self, message):
+            self.sent.append(json.loads(message))
+
+    monkeypatch.setattr(module, "load_models", lambda args: (object(), {}, None, None))
+    monkeypatch.setattr(
+        module,
+        "DynamicStreamingVAD",
+        lambda model: dynamic_vad_calls.append(model) or object(),
+    )
+    monkeypatch.setattr(
+        module,
+        "ClientEndpointVAD",
+        lambda: client_vad_calls.append(True) or object(),
+        raising=False,
+    )
+    monkeypatch.setattr(module, "create_speaker_tracker", lambda model, args: None)
+    monkeypatch.setattr(module, "RealtimeASRSession", ProtocolSession)
+    websocket = FakeWebSocket()
+    args = types.SimpleNamespace(
+        device="cpu",
+        decode_interval=0.48,
+        partial_window_sec=15.0,
+        endpoint_mode="client",
+    )
+
+    asyncio.run(module.handle_client(websocket, args))
+
+    finals = [message for message in websocket.sent if message.get("is_final")]
+    events = [message.get("event") for message in websocket.sent if message.get("event")]
+    assert finals == [
+        {"is_final": True, "sequence": 1},
+        {"is_final": True, "sequence": 2},
+    ]
+    assert events == ["started", "stopped"]
+    assert dynamic_vad_calls == []
+    assert client_vad_calls == [True]
+    assert received_audio == [b"first", b"second"]
 
 
 def test_two_hour_session_keeps_audio_bounded_and_duration_absolute():
