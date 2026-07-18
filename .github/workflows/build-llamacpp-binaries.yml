@@ -88,6 +88,7 @@ jobs:
             cuda_version: '13.2.0'
             cuda_architectures: '86'
             build_target: llama-funasr-sensevoice
+            timeout_minutes: 90
             cmake_flags: >-
               -DGGML_NATIVE=OFF
               -DGGML_CUDA=ON
@@ -106,6 +107,7 @@ jobs:
               -DGGML_F16C=OFF
               -DGGML_BMI2=OFF
     runs-on: ${{ matrix.os }}
+    timeout-minutes: ${{ matrix.timeout_minutes || 30 }}
     defaults:
       run:
         shell: bash

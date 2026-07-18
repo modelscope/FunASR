@@ -38,64 +38,6 @@ FetchContent_Declare(llama
 FetchContent_GetProperties(llama)
 if(NOT llama_POPULATED)
     FetchContent_Populate(llama)
-    if(GGML_CUDA_FORCE_CUBLAS)
-        set(_funasr_ggml_cuda_cmake "${llama_SOURCE_DIR}/ggml/src/ggml-cuda/CMakeLists.txt")
-        file(READ "${_funasr_ggml_cuda_cmake}" _funasr_ggml_cuda_text)
-        string(REPLACE
-"    file(GLOB   SRCS \"template-instances/fattn-tile*.cu\")
-    list(APPEND GGML_SOURCES_CUDA \${SRCS})
-    file(GLOB   SRCS \"template-instances/fattn-mma*.cu\")
-    list(APPEND GGML_SOURCES_CUDA \${SRCS})
-    file(GLOB   SRCS \"template-instances/mmq*.cu\")
-    list(APPEND GGML_SOURCES_CUDA \${SRCS})
-    file(GLOB   SRCS \"template-instances/mmf*.cu\")
-    list(APPEND GGML_SOURCES_CUDA \${SRCS})
-"
-"    if (GGML_CUDA_FA)
-        file(GLOB   SRCS \"template-instances/fattn-tile*.cu\")
-        list(APPEND GGML_SOURCES_CUDA \${SRCS})
-        file(GLOB   SRCS \"template-instances/fattn-mma*.cu\")
-        list(APPEND GGML_SOURCES_CUDA \${SRCS})
-    endif()
-    if (NOT GGML_CUDA_FORCE_CUBLAS)
-        file(GLOB   SRCS \"template-instances/mmq*.cu\")
-        list(APPEND GGML_SOURCES_CUDA \${SRCS})
-        file(GLOB   SRCS \"template-instances/mmf*.cu\")
-        list(APPEND GGML_SOURCES_CUDA \${SRCS})
-    endif()
-"
-            _funasr_ggml_cuda_text "${_funasr_ggml_cuda_text}")
-        string(REPLACE
-"    if (GGML_CUDA_FA_ALL_QUANTS)
-        file(GLOB   SRCS \"template-instances/fattn-vec*.cu\")
-        list(APPEND GGML_SOURCES_CUDA \${SRCS})
-        add_compile_definitions(GGML_CUDA_FA_ALL_QUANTS)
-    else()
-        list(APPEND GGML_SOURCES_CUDA
-            template-instances/fattn-vec-instance-f16-f16.cu
-            template-instances/fattn-vec-instance-q4_0-q4_0.cu
-            template-instances/fattn-vec-instance-q8_0-q8_0.cu
-            template-instances/fattn-vec-instance-bf16-bf16.cu)
-    endif()
-"
-"    if (GGML_CUDA_FA)
-        if (GGML_CUDA_FA_ALL_QUANTS)
-            file(GLOB   SRCS \"template-instances/fattn-vec*.cu\")
-            list(APPEND GGML_SOURCES_CUDA \${SRCS})
-            add_compile_definitions(GGML_CUDA_FA_ALL_QUANTS)
-        else()
-            list(APPEND GGML_SOURCES_CUDA
-                template-instances/fattn-vec-instance-f16-f16.cu
-                template-instances/fattn-vec-instance-q4_0-q4_0.cu
-                template-instances/fattn-vec-instance-q8_0-q8_0.cu
-                template-instances/fattn-vec-instance-bf16-bf16.cu)
-        endif()
-    endif()
-"
-            _funasr_ggml_cuda_text "${_funasr_ggml_cuda_text}")
-        file(WRITE "${_funasr_ggml_cuda_cmake}" "${_funasr_ggml_cuda_text}")
-        message(WARNING "FunASR CUDA release: pruning ggml CUDA template sources for GGML_CUDA_FORCE_CUBLAS/GGML_CUDA_FA")
-    endif()
     add_subdirectory(${llama_SOURCE_DIR} ${llama_BINARY_DIR})
 endif()
 
