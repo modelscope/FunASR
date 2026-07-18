@@ -86,6 +86,7 @@ jobs:
             name: windows-x64-cuda
             cuda: true
             cuda_version: '13.2.0'
+            build_target: llama-funasr-sensevoice
             cmake_flags: >-
               -DGGML_NATIVE=OFF
               -DGGML_CUDA=ON
@@ -126,8 +127,15 @@ jobs:
           # AVX-VNNI instructions and then crash with SIGILL on ordinary CPUs.
           # Keep the default x64 package conservative, and publish explicit
           # x64-avx2 assets for machines that support AVX2/FMA/F16C/BMI2.
+          # The CUDA release asset is SenseVoiceSmall-specific for now; building
+          # only that target keeps the Windows CUDA job bounded and matches the
+          # backend currently exposed by `--backend cuda`.
           cmake -B build -DCMAKE_BUILD_TYPE=Release ${{ matrix.cmake_flags }}
-          cmake --build build --config Release -j 2
+          if [ -n "${{ matrix.build_target }}" ]; then
+            cmake --build build --config Release -j 2 --target "${{ matrix.build_target }}"
+          else
+            cmake --build build --config Release -j 2
+          fi
       - name: Package
         run: |
           mkdir -p pkg
