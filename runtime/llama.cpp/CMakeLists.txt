@@ -24,6 +24,9 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
 endif()
 
 include(FetchContent)
+if(POLICY CMP0169)
+    cmake_policy(SET CMP0169 OLD)
+endif()
 set(LLAMA_BUILD_TESTS    OFF CACHE BOOL "" FORCE)
 set(LLAMA_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 set(LLAMA_BUILD_TOOLS    OFF CACHE BOOL "" FORCE)
@@ -32,7 +35,11 @@ set(LLAMA_CURL           OFF CACHE BOOL "" FORCE)
 FetchContent_Declare(llama
     GIT_REPOSITORY https://github.com/ggml-org/llama.cpp.git
     GIT_TAG        8086439a4cea94c71a5dfb8fe4ad1546aebd640f)
-FetchContent_MakeAvailable(llama)
+FetchContent_GetProperties(llama)
+if(NOT llama_POPULATED)
+    FetchContent_Populate(llama)
+    add_subdirectory(${llama_SOURCE_DIR} ${llama_BINARY_DIR})
+endif()
 
 find_package(Threads REQUIRED)
 set(FUNASR_COMMON ${CMAKE_CURRENT_SOURCE_DIR}/funasr-common)
