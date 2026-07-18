@@ -313,6 +313,16 @@ class HybridSpeakerTracker:
         self.all_embeddings.clear()
         self.last_speaker_id = 0
 
+    def session_stats(self):
+        return {
+            "speaker_history_chunks": len(self.all_chunks),
+            "speaker_history_embeddings": len(self.all_embeddings),
+            "speaker_history_limit": self.all_chunks.maxlen,
+            "speaker_centers": len(self.speaker_centers),
+            "speaker_center_limit": self.max_speakers,
+            "last_speaker_id": self.last_speaker_id,
+        }
+
 
 class RealtimeASRSession:
     """Manages a single streaming ASR session."""
@@ -601,6 +611,22 @@ class RealtimeASRSession:
                 "partial_start_ms": partial_start,
                 "duration_ms": duration_ms, "is_final": False}
 
+    def session_stats(self):
+        stats = {
+            "duration_ms": int(self.total_samples * 1000 / self.sample_rate),
+            "total_samples": self.total_samples,
+            "audio_buffer_samples": len(self.audio_buffer),
+            "audio_buffer_start_ms": int(
+                self.audio_buffer_start_sample * 1000 / self.sample_rate
+            ),
+            "locked_sentences": len(self.locked_sentences),
+            "partial_active": self.vad.current_speech_start is not None,
+            "last_decode_ms": int(self.last_decode_samples * 1000 / self.sample_rate),
+        }
+        if self.spk_tracker:
+            stats.update(self.spk_tracker.session_stats())
+        return stats
+
     def reset(self):
         self.audio_buffer = np.array([], dtype=np.float32)
         self.audio_buffer_start_sample = 0
@@ -686,6 +712,25 @@ async def run_session_work(args, operation, *operation_args, **operation_kwargs)
         return await asyncio.to_thread(operation, *operation_args, **operation_kwargs)
 
 
+def log_session_stats(session):
+    stats = session.session_stats()
+    logger.info(
+        "Session stats: duration_ms=%d audio_buffer_samples=%d "
+        "audio_buffer_start_ms=%d locked_sentences=%d partial_active=%s "
+        "speaker_history_chunks=%s speaker_history_embeddings=%s "
+        "speaker_centers=%s",
+        stats["duration_ms"],
+        stats["audio_buffer_samples"],
+        stats["audio_buffer_start_ms"],
+        stats["locked_sentences"],
+        stats["partial_active"],
+        stats.get("speaker_history_chunks", "-"),
+        stats.get("speaker_history_embeddings", "-"),
+        stats.get("speaker_centers", "-"),
+    )
+    return stats
+
+
 async def handle_client(websocket, args):
     vllm_engine, asr_kwargs, vad_model, spk_model = load_models(args)
     endpoint_mode = getattr(args, "endpoint_mode", "server")
@@ -706,6 +751,8 @@ async def handle_client(websocket, args):
 
     decode_interval = args.decode_interval
     last_decode_time = 0
+    stats_interval = getattr(args, "log_session_stats_interval", 0.0)
+    last_stats_time = time.time()
 
     try:
         async for message in websocket:
@@ -782,6 +829,13 @@ async def handle_client(websocket, args):
             elif isinstance(message, bytes) and session.is_active:
                 await run_session_work(args, session.add_audio, message)
                 now = time.time()
+                if (
+                    stats_interval
+                    and stats_interval > 0
+                    and now - last_stats_time >= stats_interval
+                ):
+                    log_session_stats(session)
+                    last_stats_time = now
                 if now - last_decode_time >= decode_interval and session.should_decode():
                     result = await run_session_work(args, session.decode, is_final=False)
                     await websocket.send(json.dumps(result))
@@ -868,6 +922,8 @@ def build_arg_parser():
                         help="WebSocket close handshake timeout in seconds.")
     parser.add_argument("--ws-max-size", type=int, default=10 * 1024 * 1024,
                         help="Maximum incoming WebSocket message size in bytes.")
+    parser.add_argument("--log-session-stats-interval", type=float, default=0.0,
+                        help="Log bounded long-session state every N seconds; <=0 disables.")
     return parser
 
 
