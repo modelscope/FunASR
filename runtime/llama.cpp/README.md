@@ -58,6 +58,24 @@ Pre-converted GGUF on Hugging Face: [SenseVoiceSmall-GGUF](https://huggingface.c
 cmake -B build -DCMAKE_BUILD_TYPE=Release      # fetches pinned llama.cpp; static, self-contained
 cmake --build build -j                          # -> build/bin/llama-funasr-* (all tools)
 ```
+
+### Optional CUDA backend for SenseVoiceSmall
+
+The prebuilt release ZIPs are CPU-first portable packages. To experiment with
+SenseVoiceSmall graph execution on NVIDIA GPUs, build from source with ggml CUDA
+enabled and select the backend at runtime:
+
+```bash
+cmake -B build-cuda -DCMAKE_BUILD_TYPE=Release -DGGML_CUDA=ON
+cmake --build build-cuda -j --target llama-funasr-sensevoice
+./build-cuda/bin/llama-funasr-sensevoice \
+  -m sensevoice-small-f16.gguf -a sample.wav --backend cuda
+```
+
+`--backend cpu` remains the default and is what the current cross-platform
+prebuilt binaries use. A binary built without `-DGGML_CUDA=ON` exits with a clear
+message if `--backend cuda` is requested.
+
 ## Build (shared)
 ```bash
 git clone https://github.com/ggml-org/llama.cpp && cd llama.cpp
