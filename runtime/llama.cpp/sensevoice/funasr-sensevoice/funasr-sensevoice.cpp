@@ -60,6 +60,39 @@ struct cfg { int d_model=512,n_head=4,num_blocks=50,tp_blocks=20,kernel=11,vocab
 struct model { cfg c; ggml_context*ctx_w=nullptr; std::map<std::string,ggml_tensor*> t;
   ggml_tensor* g(const std::string&n){auto it=t.find(n);if(it==t.end()){fprintf(stderr,"missing %s\n",n.c_str());exit(1);}return it->second;} };
 
+struct graph_backend {
+  ggml_backend_t backend=nullptr;
+  ggml_backend_buffer_type_t buffer_type=nullptr;
+  bool is_cpu=true;
+};
+
+static graph_backend make_graph_backend(const std::string&name){
+  graph_backend out;
+  if(name=="cpu"){
+    out.backend=ggml_backend_cpu_init();
+    out.buffer_type=ggml_backend_get_default_buffer_type(out.backend);
+    out.is_cpu=true;
+  } else if(name=="cuda"){
+    ggml_backend_load_all();
+    ggml_backend_dev_t dev=ggml_backend_dev_by_type(GGML_BACKEND_DEVICE_TYPE_GPU);
+    if(!dev){
+      fprintf(stderr,"CUDA backend requested, but no GPU backend is available; build with -DGGML_CUDA=ON\n");
+      exit(1);
+    }
+    out.backend=ggml_backend_dev_init(dev,nullptr);
+    out.buffer_type=ggml_backend_get_default_buffer_type(out.backend);
+    out.is_cpu=false;
+  } else {
+    fprintf(stderr,"unsupported backend '%s' (expected cpu|cuda)\n",name.c_str());
+    exit(1);
+  }
+  if(!out.backend||!out.buffer_type){
+    fprintf(stderr,"failed to initialize %s backend\n",name.c_str());
+    exit(1);
+  }
+  return out;
+}
+
 static ggml_tensor* lin(ggml_context*c,ggml_tensor*w,ggml_tensor*b,ggml_tensor*x){auto y=ggml_mul_mat(c,w,x);return b?ggml_add(c,y,b):y;}
 static ggml_tensor* lnorm(ggml_context*c,ggml_tensor*x,ggml_tensor*g,ggml_tensor*b){return ggml_add(c,ggml_mul(c,ggml_norm(c,x,LN_EPS),g),b);}
 static ggml_tensor* sanm_attn(ggml_context*c,model&m,const std::string&p,ggml_tensor*x,int T){
@@ -104,15 +137,18 @@ static std::string detok_sv(const std::vector<int>&ids,const std::vector<std::st
 
 int main(int argc,char**argv){
   std::string gguf_path,fbank_path,wav_path,vad_path; int vad_maxseg=30000; bool ids_mode=false,keep_tags=false;
+  std::string backend_name="cpu";
   for(int i=1;i<argc;i++){ if(!strcmp(argv[i],"-m")&&i+1<argc)gguf_path=argv[++i];
     else if(!strcmp(argv[i],"-f")&&i+1<argc)fbank_path=argv[++i];
     else if(!strcmp(argv[i],"-a")&&i+1<argc)wav_path=argv[++i];
     else if(!strcmp(argv[i],"--vad")&&i+1<argc)vad_path=argv[++i];
     else if(!strcmp(argv[i],"--vad-maxseg")&&i+1<argc)vad_maxseg=atoi(argv[++i]);
+    else if(!strcmp(argv[i],"--backend")&&i+1<argc)backend_name=argv[++i];
     else if(!strcmp(argv[i],"--ids"))ids_mode=true;
     else if(!strcmp(argv[i],"--keep-tags"))keep_tags=true;
-    else {fprintf(stderr,"usage: %s -m sensevoice.gguf (-a audio.wav | -f fbank.bin) [--vad fsmn-vad.gguf [--vad-maxseg ms]] [--ids] [--keep-tags]\n",argv[0]);return 1;} }
+    else {fprintf(stderr,"usage: %s -m sensevoice.gguf (-a audio.wav | -f fbank.bin) [--vad fsmn-vad.gguf [--vad-maxseg ms]] [--backend cpu|cuda] [--ids] [--keep-tags]\n",argv[0]);return 1;} }
   if(gguf_path.empty()||(fbank_path.empty()&&wav_path.empty())){fprintf(stderr,"missing args\n");return 1;}
+  graph_backend graph_be=make_graph_backend(backend_name);
 
   // load model
   model m; gguf_init_params gp={false,&m.ctx_w}; gguf_context*gg=gguf_init_from_file(gguf_path.c_str(),gp);
@@ -139,7 +175,6 @@ int main(int argc,char**argv){
     for(int i=0;i<nq;i++) memcpy(&inp[(size_t)i*F], &emb[(size_t)qtok[i]*F], F*sizeof(float));
     memcpy(&inp[(size_t)nq*F], fb.data(), (size_t)T*F*sizeof(float));
     float sc=sqrtf((float)D); for(auto&v:inp)v*=sc; add_posenc(inp,N,F);
-    ggml_backend_t be=ggml_backend_cpu_init();
     ggml_init_params cp={(size_t)1024*1024*1024,nullptr,true}; ggml_context*c=ggml_init(cp);
     ggml_tensor*x=ggml_new_tensor_2d(c,GGML_TYPE_F32,F,N); ggml_set_input(x);
     ggml_tensor*h=sanm_layer(c,m,"encoder.encoders0.0.",x,N,false);
@@ -150,9 +185,9 @@ int main(int argc,char**argv){
     ggml_tensor*logits=lin(c,m.g("ctc.ctc_lo.weight"),m.g("ctc.ctc_lo.bias"),h);  // [V, N]
     ggml_set_output(logits);
     ggml_cgraph*gf=ggml_new_graph_custom(c,32768,false); ggml_build_forward_expand(gf,logits);
-    ggml_gallocr_t ga=ggml_gallocr_new(ggml_backend_cpu_buffer_type()); ggml_gallocr_alloc_graph(ga,gf);
-    ggml_backend_tensor_set(x,inp.data(),0,ggml_nbytes(x)); ggml_backend_cpu_set_n_threads(be,8);
-    if(ggml_backend_graph_compute(be,gf)!=GGML_STATUS_SUCCESS){fprintf(stderr,"compute failed\n");}
+    ggml_gallocr_t ga=ggml_gallocr_new(graph_be.buffer_type); ggml_gallocr_alloc_graph(ga,gf);
+    ggml_backend_tensor_set(x,inp.data(),0,ggml_nbytes(x)); if(graph_be.is_cpu) ggml_backend_cpu_set_n_threads(graph_be.backend,8);
+    if(ggml_backend_graph_compute(graph_be.backend,gf)!=GGML_STATUS_SUCCESS){fprintf(stderr,"compute failed\n");}
     std::vector<float> lg((size_t)V*N); ggml_backend_tensor_get(logits,lg.data(),0,ggml_nbytes(logits));
     std::vector<int> seg_ids; int prev=-1;   // greedy CTC: argmax per frame -> collapse -> drop blank
     for(int n=0;n<N;n++){ const float*col=&lg[(size_t)n*V]; int am=0; float best=col[0];
@@ -160,7 +195,7 @@ int main(int argc,char**argv){
       if(am!=prev && am!=m.c.blank) seg_ids.push_back(am); prev=am; }
     if(emit_ids){ for(int id:seg_ids) printf("%d ",id); }
     else { std::string t=detok_sv(seg_ids,vocab,keep_tags); printf("%s",t.c_str()); }
-    ggml_gallocr_free(ga); ggml_free(c); ggml_backend_free(be);
+    ggml_gallocr_free(ga); ggml_free(c);
   };
 
   int64_t t0=ggml_time_us();
@@ -186,6 +221,7 @@ int main(int argc,char**argv){
   }
   printf("\n");
   fprintf(stderr,"[sensevoice] done %.2fs\n",(ggml_time_us()-t0)/1e6);
+  ggml_backend_free(graph_be.backend);
   if(m.ctx_w) ggml_free(m.ctx_w);
   return 0;
 }
