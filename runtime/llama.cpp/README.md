@@ -76,8 +76,9 @@ cmake --build build-cuda -j --target llama-funasr-sensevoice
 prebuilt binaries use. Tagged runtime releases also publish a
 `funasr-llamacpp-windows-x64-cuda.zip` package when the Windows CUDA release job
 passes; it requires an NVIDIA driver compatible with the CUDA Toolkit version
-configured by that release job. A binary built without `-DGGML_CUDA=ON` exits
-with a clear message if `--backend cuda` is requested.
+configured by that release job and targets CUDA architectures 75/86/89/120. A
+binary built without `-DGGML_CUDA=ON` exits with a clear message if
+`--backend cuda` is requested.
 
 ## Build (shared)
 ```bash

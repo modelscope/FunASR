@@ -86,6 +86,7 @@ jobs:
             name: windows-x64-cuda
             cuda: true
             cuda_version: '13.2.0'
+            cuda_architectures: '75;86;89;120'
             build_target: llama-funasr-sensevoice
             cmake_flags: >-
               -DGGML_NATIVE=OFF
@@ -130,7 +131,15 @@ jobs:
           # The CUDA release asset is SenseVoiceSmall-specific for now; building
           # only that target keeps the Windows CUDA job bounded and matches the
           # backend currently exposed by `--backend cuda`.
-          cmake -B build -DCMAKE_BUILD_TYPE=Release ${{ matrix.cmake_flags }}
+          cmake_args=(
+            -B build
+            -DCMAKE_BUILD_TYPE=Release
+            ${{ matrix.cmake_flags }}
+          )
+          if [ -n "${{ matrix.cuda_architectures }}" ]; then
+            cmake_args+=("-DCMAKE_CUDA_ARCHITECTURES=${{ matrix.cuda_architectures }}")
+          fi
+          cmake "${cmake_args[@]}"
           if [ -n "${{ matrix.build_target }}" ]; then
             cmake --build build --config Release -j 2 --target "${{ matrix.build_target }}"
           else
@@ -173,4 +182,4 @@ jobs:
           gh release create "$tag" dist/* \
             --repo "${{ github.repository }}" \
             --title "FunASR llama.cpp runtime $version" \
-            --notes "Prebuilt self-contained binaries for the FunASR llama.cpp / GGUF runtime: SenseVoice, Paraformer and Fun-ASR-Nano with built-in FSMN-VAD. Download the default quantized model with \`bash download-funasr-model.sh <sensevoice|paraformer|nano>\` (the helper requires the Hugging Face CLI: \`pip install -U huggingface_hub\`), then run \`llama-funasr-cli\` / \`llama-funasr-sensevoice\` / \`llama-funasr-paraformer\`. Use the default x64 asset for maximum CPU compatibility; use the x64-avx2 asset on CPUs with AVX2/FMA/F16C/BMI2 for higher throughput. The Windows CUDA asset is \`windows-x64-cuda\`; it requires an NVIDIA driver compatible with the CUDA Toolkit version configured by the release workflow and enables SenseVoiceSmall graph execution with \`llama-funasr-sensevoice ... --backend cuda\`. No Python ASR runtime or local build is required. Docs: $docs"
+            --notes "Prebuilt self-contained binaries for the FunASR llama.cpp / GGUF runtime: SenseVoice, Paraformer and Fun-ASR-Nano with built-in FSMN-VAD. Download the default quantized model with \`bash download-funasr-model.sh <sensevoice|paraformer|nano>\` (the helper requires the Hugging Face CLI: \`pip install -U huggingface_hub\`), then run \`llama-funasr-cli\` / \`llama-funasr-sensevoice\` / \`llama-funasr-paraformer\`. Use the default x64 asset for maximum CPU compatibility; use the x64-avx2 asset on CPUs with AVX2/FMA/F16C/BMI2 for higher throughput. The Windows CUDA asset is \`windows-x64-cuda\`; it requires an NVIDIA driver compatible with the CUDA Toolkit version configured by the release workflow, targets CUDA architectures 75/86/89/120, and enables SenseVoiceSmall graph execution with \`llama-funasr-sensevoice ... --backend cuda\`. No Python ASR runtime or local build is required. Docs: $docs"
