@@ -257,9 +257,11 @@ bash download-funasr-model.sh sensevoice ./gguf        # or: paraformer | nano
 hf download FunAudioLLM/SenseVoiceSmall-GGUF sensevoice-small-q8.gguf --local-dir .\gguf
 hf download FunAudioLLM/fsmn-vad-GGUF fsmn-vad.gguf --local-dir .\gguf
 .\llama-funasr-sensevoice.exe -m .\gguf\sensevoice-small-q8.gguf --vad .\gguf\fsmn-vad.gguf -a audio.wav
+# Use the windows-x64-cuda package on RTX 30-class GPUs:
+.\llama-funasr-sensevoice.exe -m .\gguf\sensevoice-small-q8.gguf --vad .\gguf\fsmn-vad.gguf -a audio.wav --backend cuda
 ```
 
-**Prebuilt binaries:** [Releases](https://github.com/modelscope/FunASR/releases) · **Download & quickstart:** [funasr.com/llama-cpp](https://www.funasr.com/llama-cpp.html) · **GGUF models:** [Hugging Face](https://huggingface.co/FunAudioLLM) · **Docs & benchmarks:** [runtime/llama.cpp/](./runtime/llama.cpp/)
+**Prebuilt binaries:** [v0.1.7 release](https://github.com/modelscope/FunASR/releases/tag/runtime-llamacpp-v0.1.7) · [Windows CUDA zip](https://github.com/modelscope/FunASR/releases/download/runtime-llamacpp-v0.1.7/funasr-llamacpp-windows-x64-cuda.zip) · **Download & quickstart:** [funasr.com/llama-cpp](https://www.funasr.com/llama-cpp.html) · **GGUF models:** [Hugging Face](https://huggingface.co/FunAudioLLM) · **Docs & benchmarks:** [runtime/llama.cpp/](./runtime/llama.cpp/)
 
 [OpenAI API example →](./examples/openai_api/) · [Gradio demo →](./examples/openai_api/GRADIO.md) · [Client recipes →](./examples/openai_api/CLIENTS.md) · [JavaScript/TypeScript recipes →](./examples/openai_api/JAVASCRIPT.md) · [Kubernetes template →](./examples/openai_api/kubernetes/) · [Workflow recipes →](./examples/openai_api/WORKFLOWS.md) · [Postman collection →](./examples/openai_api/POSTMAN.md) · [OpenAPI spec →](./examples/openai_api/OPENAPI.md) · [Security guide →](./examples/openai_api/SECURITY.md) · [Deployment matrix →](./docs/deployment_matrix.md) · [Deployment docs →](./runtime/readme.md) · [Agent integration →](https://modelscope.github.io/FunASR/agent.html)
 
@@ -284,6 +286,7 @@ hf download FunAudioLLM/fsmn-vad-GGUF fsmn-vad.gguf --local-dir .\gguf
 ## What's new
 
 - 2026/07/18: **v1.3.16 on PyPI** — client-driven realtime endpoints for Fun-ASR-Nano. Start one WebSocket session, stream PCM, and send `COMMIT` for each utterance without loading server-side VAD; short utterances finalize and timestamps remain monotonic across commits. Install with `pip install --upgrade funasr`, then run `funasr-realtime-server --endpoint-mode client`. [Guide →](examples/industrial_data_pretraining/fun_asr_nano/docs/realtime_demo.md)
+- 2026/07/18: **llama.cpp runtime v0.1.7** — prebuilt Windows CUDA package for SenseVoiceSmall (`funasr-llamacpp-windows-x64-cuda.zip`) plus Linux / macOS / Windows CPU packages. Download the GGUF model, then run `llama-funasr-sensevoice ... --backend cuda` on supported NVIDIA GPUs. [Release →](https://github.com/modelscope/FunASR/releases/tag/runtime-llamacpp-v0.1.7)
 - 2026/06/20: **llama.cpp / GGUF runtime** — run SenseVoice / Paraformer / Fun-ASR-Nano on CPU & edge as a single self-contained binary (a whisper.cpp-style alternative), built-in FSMN-VAD, no Python at runtime. Prebuilt binaries for Linux / macOS / Windows + **q8 quantized models (~half the size, same accuracy)**. [runtime/llama.cpp/](./runtime/llama.cpp/) · [Releases](../../releases)
 - 2026/06/21: **v1.3.12** on PyPI — rolling fixes (qwen3-asr language codes, glm_asr, vLLM repetition_penalty). `pip install --upgrade funasr`
 - 2026/05/24: **vLLM Inference Engine** — 2-3x faster LLM decoding for Fun-ASR-Nano. Streaming WebSocket service with VAD + Speaker Diarization. [Guide →](docs/vllm_guide.md) · [Realtime WS tuning →](docs/vllm_guide.md#67-production-concurrency-and-multi-process-deployment) · [API stability checklist →](docs/vllm_guide.md#production-api-stability-checklist)

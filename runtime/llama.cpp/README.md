@@ -61,9 +61,19 @@ cmake --build build -j                          # -> build/bin/llama-funasr-* (a
 
 ### Optional CUDA backend for SenseVoiceSmall
 
-The prebuilt release ZIPs are CPU-first portable packages. To experiment with
-SenseVoiceSmall graph execution on NVIDIA GPUs, build from source with ggml CUDA
-enabled and select the backend at runtime:
+The CPU release ZIPs are portable packages. Tagged releases also publish
+`funasr-llamacpp-windows-x64-cuda.zip` for SenseVoiceSmall graph execution on
+NVIDIA GPUs that match CUDA architecture 86. Download the CUDA ZIP from
+[runtime-llamacpp-v0.1.7](https://github.com/modelscope/FunASR/releases/tag/runtime-llamacpp-v0.1.7),
+then select the backend at runtime:
+
+```bash
+# From the extracted windows-x64-cuda package:
+./llama-funasr-sensevoice \
+  -m sensevoice-small-q8.gguf --vad fsmn-vad.gguf -a sample.wav --backend cuda
+```
+
+Build from source to target a different GPU architecture:
 
 ```bash
 cmake -B build-cuda -DCMAKE_BUILD_TYPE=Release -DGGML_CUDA=ON
@@ -73,12 +83,10 @@ cmake --build build-cuda -j --target llama-funasr-sensevoice
 ```
 
 `--backend cpu` remains the default and is what the portable cross-platform
-prebuilt binaries use. Tagged runtime releases also publish a
-`funasr-llamacpp-windows-x64-cuda.zip` package when the Windows CUDA release job
-passes; it requires an NVIDIA driver compatible with the CUDA Toolkit version
-configured by that release job and targets CUDA architecture 86. Build from source
-for other GPU architectures. A binary built without `-DGGML_CUDA=ON` exits with a
-clear message if `--backend cuda` is requested.
+prebuilt binaries use. The CUDA package requires an NVIDIA driver compatible
+with the CUDA Toolkit version configured by the release workflow. A binary built
+without `-DGGML_CUDA=ON` exits with a clear message if `--backend cuda` is
+requested.
 
 ## Build (shared)
 ```bash
