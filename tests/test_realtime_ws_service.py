@@ -61,6 +61,7 @@ def test_cli_defaults_disable_speaker_and_bound_partial_window():
     assert args.enable_spk is False
     assert args.partial_window_sec == 15.0
     assert args.endpoint_mode == "server"
+    assert args.log_session_stats_interval == 0.0
 
 
 def test_cli_accepts_client_endpoint_mode():
@@ -112,6 +113,16 @@ def test_websocket_keepalive_kwargs_can_disable_ping():
     kwargs = module.build_websocket_serve_kwargs(args)
     assert kwargs["ping_interval"] is None
     assert kwargs["ping_timeout"] is None
+
+
+def test_cli_accepts_session_stats_interval():
+    module = load_service_module()
+
+    args = module.build_arg_parser().parse_args(
+        ["--log-session-stats-interval", "30"]
+    )
+
+    assert args.log_session_stats_interval == 30.0
 
 
 def test_create_speaker_tracker_skips_spk_when_disabled():
@@ -459,6 +470,31 @@ def test_two_hour_session_keeps_audio_bounded_and_duration_absolute():
     assert session._build_response(is_final=False)["duration_ms"] == 2 * 60 * 60 * 1000
 
 
+def test_session_stats_report_bounded_long_session_state():
+    module = load_service_module()
+    sample_rate = 10
+    session = module.RealtimeASRSession(
+        vllm_engine=DummyEngine(),
+        asr_kwargs={},
+        vad=SilentVad(),
+        sample_rate=sample_rate,
+        chunk_ms=1000,
+        audio_lookback_sec=5,
+    )
+    for _ in range(20):
+        session.add_audio(np.zeros(sample_rate, dtype=np.int16).tobytes())
+    session.locked_sentences = [{"text": "done", "start": 0, "end": 1000}]
+
+    stats = session.session_stats()
+
+    assert stats["duration_ms"] == 20000
+    assert stats["total_samples"] == 200
+    assert stats["audio_buffer_samples"] <= 50
+    assert stats["audio_buffer_start_ms"] == 15000
+    assert stats["locked_sentences"] == 1
+    assert stats["partial_active"] is False
+
+
 def test_completed_segment_uses_absolute_offsets_after_audio_compaction():
     module = load_service_module()
     sample_rate = 16000
@@ -647,7 +683,9 @@ def test_handler_keeps_event_loop_responsive_during_session_work(monkeypatch):
         async def send(self, message):
             self.sent.append(message)
 
-    monkeypatch.setattr(module, "load_models", lambda args: (object(), {}, object(), None))
+    monkeypatch.setattr(
+        module, "load_models", lambda args: (object(), {}, object(), None)
+    )
     monkeypatch.setattr(module, "DynamicStreamingVAD", lambda model: object())
     monkeypatch.setattr(module, "create_speaker_tracker", lambda model, args: None)
     monkeypatch.setattr(module, "RealtimeASRSession", BlockingSession)
@@ -680,3 +718,89 @@ def test_handler_keeps_event_loop_responsive_during_session_work(monkeypatch):
     assert gaps
     assert max(gaps) < 0.08
     assert BlockingSession.max_active_workers == 1
+
+
+def test_handler_logs_session_stats_on_configured_interval(monkeypatch):
+    module = load_service_module()
+    logged = []
+
+    class StatsSession:
+        def __init__(self, *args, **kwargs):
+            self.is_active = False
+            self.audio_buffer = np.zeros(1, dtype=np.float32)
+            self.total_samples = 0
+            self.audio_buffer_start_sample = 0
+
+        def reset(self):
+            pass
+
+        def add_audio(self, message):
+            self.total_samples += 1
+
+        def should_decode(self):
+            return False
+
+        def session_stats(self):
+            return {
+                "duration_ms": self.total_samples,
+                "audio_buffer_samples": 1,
+                "audio_buffer_start_ms": 0,
+                "locked_sentences": 0,
+                "partial_active": False,
+                "speaker_history_chunks": 0,
+                "speaker_history_embeddings": 0,
+                "speaker_centers": 0,
+            }
+
+    class FakeWebSocket:
+        remote_address = ("127.0.0.1", 12345)
+
+        def __init__(self):
+            self.messages = iter(["START", b"a", b"b", "STOP"])
+            self.sent = []
+
+        def __aiter__(self):
+            return self
+
+        async def __anext__(self):
+            try:
+                return next(self.messages)
+            except StopIteration as error:
+                raise StopAsyncIteration from error
+
+        async def send(self, message):
+            self.sent.append(json.loads(message))
+
+    clock = iter([0.0, 0.0, 2.0])
+    monkeypatch.setattr(module, "load_models", lambda args: (object(), {}, object(), None))
+    monkeypatch.setattr(module, "DynamicStreamingVAD", lambda model: object())
+    monkeypatch.setattr(module, "create_speaker_tracker", lambda model, args: None)
+    monkeypatch.setattr(module, "RealtimeASRSession", StatsSession)
+    monkeypatch.setattr(
+        module,
+        "log_session_stats",
+        lambda session: logged.append(session.session_stats()),
+    )
+    monkeypatch.setattr(module.time, "time", lambda: next(clock, 2.0))
+    args = types.SimpleNamespace(
+        device="cpu",
+        decode_interval=60.0,
+        partial_window_sec=15.0,
+        endpoint_mode="server",
+        log_session_stats_interval=1.0,
+    )
+
+    asyncio.run(module.handle_client(FakeWebSocket(), args))
+
+    assert logged == [
+        {
+            "duration_ms": 2,
+            "audio_buffer_samples": 1,
+            "audio_buffer_start_ms": 0,
+            "locked_sentences": 0,
+            "partial_active": False,
+            "speaker_history_chunks": 0,
+            "speaker_history_embeddings": 0,
+            "speaker_centers": 0,
+        }
+    ]
