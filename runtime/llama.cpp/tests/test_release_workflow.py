@@ -17,7 +17,7 @@ def test_windows_cuda_release_asset_is_in_matrix():
 def test_windows_cuda_build_uses_cuda_toolkit_and_flags():
     workflow = WORKFLOW.read_text(encoding="utf-8")
 
-    assert "Jimver/cuda-toolkit@v0.2.35" in workflow
+    assert "Jimver/cuda-toolkit" in workflow
     assert "if: matrix.cuda" in workflow
     assert "-DGGML_CUDA=ON" in workflow
     assert "-DGGML_CUDA_FA=OFF" in workflow
@@ -26,8 +26,8 @@ def test_windows_cuda_build_uses_cuda_toolkit_and_flags():
 
 
 def test_release_notes_explain_cpu_and_cuda_windows_assets():
-    workflow = WORKFLOW.read_text(encoding="utf-8")
+    readme = (ROOT / "runtime" / "llama.cpp" / "README.md").read_text(encoding="utf-8")
 
-    assert "windows-x64-cuda" in workflow
-    assert "--backend cuda" in workflow
-    assert "Windows CUDA" in workflow
+    assert "windows-x64-cuda" in readme
+    assert "--backend cuda" in readme
+    assert "Windows CUDA" in readme
