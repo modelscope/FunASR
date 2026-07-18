@@ -72,9 +72,12 @@ cmake --build build-cuda -j --target llama-funasr-sensevoice
   -m sensevoice-small-f16.gguf -a sample.wav --backend cuda
 ```
 
-`--backend cpu` remains the default and is what the current cross-platform
-prebuilt binaries use. A binary built without `-DGGML_CUDA=ON` exits with a clear
-message if `--backend cuda` is requested.
+`--backend cpu` remains the default and is what the portable cross-platform
+prebuilt binaries use. Tagged runtime releases also publish a
+`funasr-llamacpp-windows-x64-cuda.zip` package when the Windows CUDA release job
+passes; it requires an NVIDIA driver compatible with CUDA 13.2. A binary built
+without `-DGGML_CUDA=ON` exits with a clear message if `--backend cuda` is
+requested.
 
 ## Build (shared)
 ```bash
