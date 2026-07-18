@@ -34,10 +34,13 @@ def test_cublas_release_build_skips_long_mmq_template_sources():
     cmake = RUNTIME_CMAKE.read_text(encoding="utf-8")
 
     assert "GGML_CUDA_FORCE_CUBLAS" in cmake
-    assert "skipping ggml CUDA MMQ/fattn-mma template sources" in cmake
+    assert "pruning ggml CUDA template sources" in cmake
+    assert "if (GGML_CUDA_FA)" in cmake
     assert 'if (NOT GGML_CUDA_FORCE_CUBLAS)' in cmake
+    assert 'template-instances/fattn-tile*.cu' in cmake
     assert 'template-instances/fattn-mma*.cu' in cmake
     assert 'template-instances/mmq*.cu' in cmake
+    assert 'template-instances/mmf*.cu' in cmake
 
 
 def test_release_notes_explain_cpu_and_cuda_windows_assets():
