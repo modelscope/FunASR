@@ -56,6 +56,9 @@ for seg in result[0]["sentence_info"]:
 这是一次 `AutoModel` pipeline 调用，实际组合了 SenseVoiceSmall、FSMN-VAD
 和 CAM++ 三个独立模型；说话人分离由 CAM++ 提供，并非 SenseVoiceSmall
 checkpoint 的内置输出。
+SenseVoice 论文见 [arXiv:2407.04051](https://arxiv.org/abs/2407.04051)，
+模型见 [Hugging Face checkpoint](https://huggingface.co/FunAudioLLM/SenseVoiceSmall)，
+边缘部署可用 [GGUF checkpoint](https://huggingface.co/FunAudioLLM/SenseVoiceSmall-GGUF)。
 
 ### LLM 语音识别：Fun-ASR-Nano
 
@@ -175,7 +178,7 @@ pip install -e ./
 |------|------|------|--------|------|
 | **Fun-ASR-Nano** | 识别 | 中/英/日 + 中文方言 | 800M | [⭐](https://www.modelscope.cn/models/FunAudioLLM/Fun-ASR-Nano-2512) [🤗](https://huggingface.co/FunAudioLLM/Fun-ASR-Nano-2512) |
 | **Fun-ASR-MLT-Nano** | 识别 | 31 种语言 | 800M | [⭐](https://www.modelscope.cn/models/FunAudioLLM/Fun-ASR-MLT-Nano-2512) [🤗](https://huggingface.co/FunAudioLLM/Fun-ASR-MLT-Nano-2512) |
-| **SenseVoiceSmall** | 识别 + 情感 + 事件 | 中/英/日/韩/粤 | 234M | [⭐](https://www.modelscope.cn/models/iic/SenseVoiceSmall) [🤗](https://huggingface.co/FunAudioLLM/SenseVoiceSmall) |
+| **SenseVoiceSmall** | 识别 + 情感 + 事件 | 中/英/日/韩/粤 | 234M | [⭐](https://www.modelscope.cn/models/iic/SenseVoiceSmall) [🤗](https://huggingface.co/FunAudioLLM/SenseVoiceSmall) [GGUF](https://huggingface.co/FunAudioLLM/SenseVoiceSmall-GGUF) [论文](https://arxiv.org/abs/2407.04051) |
 | **Paraformer-zh** | 识别 + 时间戳 | 中/英 | 220M | [⭐](https://www.modelscope.cn/models/damo/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary) [🤗](https://huggingface.co/funasr/paraformer-zh) |
 | Paraformer-zh-streaming | 流式识别 | 中/英 | 220M | [⭐](https://modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online/summary) [🤗](https://huggingface.co/funasr/paraformer-zh-streaming) |
 | Qwen3-ASR | 识别，52 种语言 | 多语言 | 1.7B | [使用](examples/industrial_data_pretraining/qwen3_asr) |
