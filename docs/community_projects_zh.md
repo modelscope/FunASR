@@ -28,6 +28,7 @@
 | 项目 | 已集成能力 | 从这里开始 |
 |---|---|---|
 | [Xinference](https://github.com/xorbitsai/inference) | 通过 Xinference 统一推理 API 提供 SenseVoiceSmall、Fun-ASR-Nano-2512 和 Fun-ASR-MLT-Nano-2512 内置音频模型规格。 | [音频模型规格](https://github.com/xorbitsai/inference/blob/main/xinference/model/audio/model_spec.json) 和已合并 [#5140](https://github.com/xorbitsai/inference/pull/5140) 中的 FunASR 1.3 兼容性更新。 |
+| [Optimum Intel](https://github.com/huggingface/optimum-intel) | 通过 Hugging Face Optimum Intel 支持 Fun-ASR 模型的 OpenVINO 导出与推理，包括 FunASR 专用 modeling 代码以及 ASR、export、quantization 覆盖。 | [FunASR OpenVINO modeling](https://github.com/huggingface/optimum-intel/blob/main/optimum/intel/openvino/modeling_funasr.py)、[支持模型文档](https://github.com/huggingface/optimum-intel/blob/main/docs/source/openvino/models.mdx) 和已合并 [#1801](https://github.com/huggingface/optimum-intel/pull/1801)。 |
 | [Fun-ASR-vLLM](https://github.com/yuekaizhang/Fun-ASR-vllm) | 面向 Fun-ASR-Nano 和 Fun-ASR-MLT-Nano 的社区 vLLM 推理实现，包含批量评测和 NVIDIA Triton 部署。 | [安装与 Benchmark](https://github.com/yuekaizhang/Fun-ASR-vllm#readme) 和已合并 [#20](https://github.com/yuekaizhang/Fun-ASR-vllm/pull/20) 中的确定性 ASR 解码修复。 |
 | [vad-burn](https://github.com/di-osc/vad-burn) | 纯 Rust FSMN VAD 推理与 Python binding，支持离线、流式和纯 CPU 模式。 | [项目 README](https://github.com/di-osc/vad-burn#readme) 和 FunASR showcase [#3106](https://github.com/modelscope/FunASR/issues/3106)。 |
 
