@@ -45,6 +45,7 @@
 |---|---|---|
 | [awesome-python](https://github.com/vinta/awesome-python) | SenseVoice 已收录到大型 Python 资源目录的 Speech Recognition 部分，方便 Python 开发者发现本地多语种 ASR。 | [项目 README](https://github.com/vinta/awesome-python#readme) 和已合并 [#3246](https://github.com/vinta/awesome-python/pull/3246)。 |
 | [speech-trident](https://github.com/ga642381/speech-trident) | SenseVoice 已收录到 speech/audio language models 目录，面向语音 LLM、representation learning 和 codec model 读者。 | [项目 README](https://github.com/ga642381/speech-trident#readme) 和已合并 [#31](https://github.com/ga642381/speech-trident/pull/31)。 |
+| [voiceai](https://github.com/mahimairaja/voiceai) | 面向 Voice AI agent builder 的资源地图，在 Speech-to-text (STT / ASR) 部分同时收录 FunASR 和 SenseVoice，帮助开发者发现自托管本地 ASR 与多语种语音理解选项。 | [英文 README](https://github.com/mahimairaja/voiceai#readme)、[中文 README](https://github.com/mahimairaja/voiceai/blob/main/README_zh.md) 和已合并 [#16](https://github.com/mahimairaja/voiceai/pull/16)。 |
 
 ## 采用社区集成前
 

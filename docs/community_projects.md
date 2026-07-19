@@ -45,6 +45,7 @@ These integrations are community-maintained. Their release cadence, hardware sup
 |---|---|---|
 | [awesome-python](https://github.com/vinta/awesome-python) | SenseVoice is listed in the Speech Recognition section of one of the largest Python resource directories, making it easier for Python developers to discover local multilingual ASR. | [Project README](https://github.com/vinta/awesome-python#readme) and merged [#3246](https://github.com/vinta/awesome-python/pull/3246). |
 | [speech-trident](https://github.com/ga642381/speech-trident) | SenseVoice is listed among speech/audio language models in a curated speech LLM, representation learning, and codec model directory. | [Project README](https://github.com/ga642381/speech-trident#readme) and merged [#31](https://github.com/ga642381/speech-trident/pull/31). |
+| [voiceai](https://github.com/mahimairaja/voiceai) | A voice-AI agent resource map that lists FunASR and SenseVoice in its Speech-to-text (STT / ASR) section, pointing agent builders toward self-hosted local ASR and multilingual speech understanding options. | [English README](https://github.com/mahimairaja/voiceai#readme), [Chinese README](https://github.com/mahimairaja/voiceai/blob/main/README_zh.md), and merged [#16](https://github.com/mahimairaja/voiceai/pull/16). |
 
 ## Before adopting an integration
 
