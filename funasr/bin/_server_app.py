@@ -26,6 +26,67 @@ except ImportError:
 logger = logging.getLogger("funasr.server")
 
 
+def _split_text_for_openai_segments(text: str, max_chars: int = 80):
+    """Split unsegmented ASR text into readable OpenAI-compatible cues."""
+    text = text.strip()
+    if not text:
+        return []
+
+    words = text.split()
+    if not words:
+        return [text[i : i + max_chars] for i in range(0, len(text), max_chars)]
+
+    parts = []
+    current = []
+    current_len = 0
+    for word in words:
+        next_len = len(word) if not current else current_len + 1 + len(word)
+        if current and next_len > max_chars:
+            parts.append(" ".join(current))
+            current = []
+            current_len = 0
+
+        current.append(word)
+        current_len = len(word) if current_len == 0 else current_len + 1 + len(word)
+        if word[-1:] in ".!?;:" and current_len >= max_chars // 2:
+            parts.append(" ".join(current))
+            current = []
+            current_len = 0
+
+    if current:
+        parts.append(" ".join(current))
+
+    if any(len(part) > max_chars for part in parts):
+        return [text[i : i + max_chars] for i in range(0, len(text), max_chars)]
+
+    return parts
+
+
+def build_openai_fallback_segments(text: str, duration: float, max_chars: int = 80):
+    """Build coarse timestamped segments when a backend returns text only."""
+    parts = _split_text_for_openai_segments(text, max_chars=max_chars)
+    if not parts:
+        return []
+    if len(parts) == 1 or duration <= 0:
+        return [{"start": 0.0, "end": max(float(duration), 0.0), "text": parts[0]}]
+
+    total_chars = sum(len(part) for part in parts)
+    if total_chars <= 0:
+        return [{"start": 0.0, "end": float(duration), "text": text.strip()}]
+
+    segments = []
+    consumed = 0
+    previous_end = 0.0
+    for i, part in enumerate(parts):
+        consumed += len(part)
+        end = float(duration) if i == len(parts) - 1 else float(duration) * consumed / total_chars
+        end = max(end, previous_end)
+        segments.append({"start": round(previous_end, 3), "end": round(end, 3), "text": part})
+        previous_end = end
+
+    return segments
+
+
 def prepare_audio_for_inference(audio_data, sr, target_sr=16000):
     """Return mono float32 audio at target_sr for ASR inference."""
     audio_data = np.asarray(audio_data)
@@ -174,6 +235,10 @@ def create_app(device: str = "cuda", preload_model: str = "auto") -> FastAPI:
     def _process_fallback(model_name, audio_path, language=None):
         """Process with non-LLM model (SenseVoice/Paraformer)."""
         model = _load_fallback(model_name)
+        try:
+            duration = float(sf.info(audio_path).duration)
+        except Exception:
+            duration = 0.0
         kwargs = {"input": audio_path, "batch_size": 1}
         if language:
             kwargs["language"] = language
@@ -188,7 +253,9 @@ def create_app(device: str = "cuda", preload_model: str = "auto") -> FastAPI:
                     "text": re.sub(r'<\|[^|]*\|>', '', s.get("text", "")).strip(),
                     "speaker": s.get("spk"),
                 })
-        return {"text": text, "segments": segments}
+        if not segments and text:
+            segments = build_openai_fallback_segments(text, duration)
+        return {"text": text, "segments": segments, "duration": duration}
 
     # Pre-load
     if preload_model == "fun-asr-nano":
