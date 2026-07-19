@@ -341,7 +341,7 @@ The script captures GitHub stars, forks, watchers, open issues, open pull reques
 
 - [ ] Create a GitHub release focused on one sharp value proposition.
 - [ ] Update PyPI release description if needed.
-- [ ] Update Hugging Face organization/model cards. Current `FunAudioLLM/Fun-ASR-Nano-2512`, `FunAudioLLM/Fun-ASR-MLT-Nano-2512`, and `FunAudioLLM/SenseVoiceSmall` README patches add `python -m pip install -U "funasr>=1.3.19"` before optional demo-repo setup, but Hugging Face Hub still returns `403` at the model-repo `preupload` step even with the current org-scoped token. Retry after the token grants model-card preupload/write on those repos.
+- [ ] Update Hugging Face organization/model cards. The `FunAudioLLM/Fun-ASR-MLT-Nano-2512` README update is complete: HF PR [#5](https://huggingface.co/FunAudioLLM/Fun-ASR-MLT-Nano-2512/discussions/5) merged commit `3dd802bfb8a05dadc440c9d9fc84ecfc1e15c0ff`, and `main` now includes `python -m pip install -U "funasr>=1.3.19"` before optional demo-repo setup. The same prepared patches for `FunAudioLLM/Fun-ASR-Nano-2512` and `FunAudioLLM/SenseVoiceSmall` still fail at the Hugging Face model-repo `preupload` step with `403`, because the current fine-grained token shows empty permissions on those specific model scopes despite org-level `repo.write`. Retry after model-card preupload/write is granted on those repos.
 - [ ] Update ModelScope model cards and demos.
 - [ ] Update homepage hero and docs entry points.
 
