@@ -39,3 +39,5 @@ def test_release_notes_explain_cpu_and_cuda_windows_assets():
     assert "CUDA architecture 86" in readme
     assert "Build from source" in readme
     assert "other GPU architectures" in readme
+    assert "CMAKE_CUDA_ARCHITECTURES=120" in readme
+    assert "sm_120" in readme

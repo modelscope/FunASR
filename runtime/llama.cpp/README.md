@@ -59,7 +59,7 @@ cmake -B build -DCMAKE_BUILD_TYPE=Release      # fetches pinned llama.cpp; stati
 cmake --build build -j                          # -> build/bin/llama-funasr-* (all tools)
 ```
 
-### Optional CUDA backend for SenseVoiceSmall
+### Optional Windows CUDA backend for SenseVoiceSmall
 
 The CPU release ZIPs are portable packages. Tagged releases also publish
 `funasr-llamacpp-windows-x64-cuda.zip` for SenseVoiceSmall graph execution on
@@ -73,14 +73,20 @@ then select the backend at runtime:
   -m sensevoice-small-q8.gguf --vad fsmn-vad.gguf -a sample.wav --backend cuda
 ```
 
-Build from source to target a different GPU architecture:
+Build from source to target other GPU architectures:
 
 ```bash
-cmake -B build-cuda -DCMAKE_BUILD_TYPE=Release -DGGML_CUDA=ON
+cmake -B build-cuda -DCMAKE_BUILD_TYPE=Release -DGGML_CUDA=ON \
+  -DCMAKE_CUDA_ARCHITECTURES=120
 cmake --build build-cuda -j --target llama-funasr-sensevoice
 ./build-cuda/bin/llama-funasr-sensevoice \
   -m sensevoice-small-f16.gguf -a sample.wav --backend cuda
 ```
+
+Use the matching `CMAKE_CUDA_ARCHITECTURES` value for your GPU. RTX 50 /
+Blackwell cards report compute capability 12.0 (`sm_120`), so the current
+`windows-x64-cuda` prebuilt package for architecture 86 will not cover those
+cards.
 
 `--backend cpu` remains the default and is what the portable cross-platform
 prebuilt binaries use. The CUDA package requires an NVIDIA driver compatible
