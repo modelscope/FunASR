@@ -5,7 +5,7 @@
 ## 安装训练环境
 
 ```
-pip install funasr>=1.3.0
+pip install "funasr>=1.3.19"
 ```
 
 ## 数据准备

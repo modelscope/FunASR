@@ -45,7 +45,7 @@
 pip install "vllm==0.19.1"   # 按你的驱动 CUDA 调整;见下方说明
 
 # 2) 再装 FunASR 与其余依赖。
-pip install funasr>=1.3.0
+pip install "funasr>=1.3.19"
 pip install safetensors tiktoken websockets regex fastapi uvicorn python-multipart
 
 cd /path/to/FunASR && pip install -e .
