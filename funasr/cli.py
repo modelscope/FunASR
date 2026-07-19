@@ -20,9 +20,12 @@ def clean_text(text):
 
 
 def _srt_time(ms):
-    s = ms / 1000.0
-    h, m, sec = int(s // 3600), int((s % 3600) // 60), int(s % 60)
-    return f"{h:02d}:{m:02d}:{sec:02d},{int((s % 1) * 1000):03d}"
+    ms = max(0, int(round(ms)))
+    h = ms // 3600000
+    m = (ms % 3600000) // 60000
+    sec = (ms % 60000) // 1000
+    ms_rem = ms % 1000
+    return f"{h:02d}:{m:02d}:{sec:02d},{ms_rem:03d}"
 
 
 def format_srt(segments):
@@ -37,6 +40,38 @@ def format_tsv(segments):
     for seg in segments:
         lines.append(f"{seg.get('start',0)/1000:.3f}\t{seg.get('end',0)/1000:.3f}\t{seg.get('text','')}")
     return "\n".join(lines)
+
+
+def _parse_ms(value, scale=1):
+    if value is None:
+        return None
+    try:
+        return int(float(value) * scale)
+    except (TypeError, ValueError):
+        return None
+
+
+def _timestamp_bounds_ms(result):
+    bounds = []
+    for key in ("timestamp", "timestamps"):
+        for ts in result.get(key, []) or []:
+            if isinstance(ts, dict):
+                start = ts.get("start_time", ts.get("start"))
+                end = ts.get("end_time", ts.get("end"))
+                start_ms = _parse_ms(start, 1000)
+                end_ms = _parse_ms(end, 1000)
+            elif isinstance(ts, (list, tuple)) and len(ts) >= 2:
+                start_ms = _parse_ms(ts[0])
+                end_ms = _parse_ms(ts[1])
+            else:
+                continue
+            if start_ms is None or end_ms is None:
+                continue
+            if end_ms > start_ms:
+                bounds.append((start_ms, end_ms))
+    if not bounds:
+        return None
+    return min(start for start, _ in bounds), max(end for _, end in bounds)
 
 
 def _format_output(text, segments, timestamps, fmt, audio_path, model_name, language, elapsed):
@@ -58,8 +93,12 @@ def _format_output(text, segments, timestamps, fmt, audio_path, model_name, lang
     elif fmt == "srt":
         if segments:
             return format_srt(segments)
-        # No per-sentence timestamps: emit one valid cue spanning the whole audio
-        # (instead of a bogus 99:59:59 end time).
+        # No per-sentence timestamps: emit one valid cue spanning the known
+        # timestamp/audio bounds instead of a bogus 99:59:59 end time.
+        timestamp_bounds = _timestamp_bounds_ms({"timestamp": timestamps})
+        if timestamp_bounds:
+            start_ms, end_ms = timestamp_bounds
+            return f"1\n{_srt_time(start_ms)} --> {_srt_time(end_ms)}\n{text}\n"
         try:
             import soundfile as sf
             dur_ms = int(sf.info(audio_path).duration * 1000)
@@ -115,8 +154,9 @@ def main():
     config["hub"] = args.hub
     if args.spk and "spk_model" not in config:
         config["spk_model"] = "cam++"
-    if "punc_model" not in config and args.model not in ("fun-asr-nano", "sensevoice"):
-        config["punc_model"] = "ct-punc"
+    if "punc_model" not in config and args.model != "fun-asr-nano":
+        if args.model != "sensevoice" or args.output_format in ("srt", "tsv"):
+            config["punc_model"] = "ct-punc"
 
     t_load = time.time()
     model = AutoModel(device=device, disable_update=True, **config)
@@ -147,6 +187,15 @@ def main():
             else:
                 gen_kw["hotwords"] = hotwords
 
+        if args.output_format in ("srt", "tsv"):
+            gen_kw.update(
+                {
+                    "sentence_timestamp": True,
+                    "output_timestamp": True,
+                    "return_time_stamps": True,
+                }
+            )
+
         result = model.generate(**gen_kw)
         elapsed = time.time() - t0
 
@@ -159,7 +208,9 @@ def main():
                     s["speaker"] = seg["spk"]
                 segments.append(s)
 
-        timestamps = result[0].get("timestamps") if args.timestamps else None
+        timestamps = result[0].get("timestamps") or result[0].get("timestamp")
+        if not args.timestamps and args.output_format not in ("srt", "tsv"):
+            timestamps = None
         output = _format_output(text, segments, timestamps, args.output_format, audio_path, args.model, args.language, elapsed)
 
         if args.output_dir:
