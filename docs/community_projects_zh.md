@@ -35,6 +35,13 @@
 | [Fun-ASR-vLLM](https://github.com/yuekaizhang/Fun-ASR-vllm) | 面向 Fun-ASR-Nano 和 Fun-ASR-MLT-Nano 的社区 vLLM 推理实现，包含批量评测和 NVIDIA Triton 部署。 | [安装与 Benchmark](https://github.com/yuekaizhang/Fun-ASR-vllm#readme) 和已合并 [#20](https://github.com/yuekaizhang/Fun-ASR-vllm/pull/20) 中的确定性 ASR 解码修复。 |
 | [vad-burn](https://github.com/di-osc/vad-burn) | 纯 Rust FSMN VAD 推理与 Python binding，支持离线、流式和纯 CPU 模式。 | [项目 README](https://github.com/di-osc/vad-burn#readme) 和 FunASR showcase [#3106](https://github.com/modelscope/FunASR/issues/3106)。 |
 
+## 发现入口
+
+| 项目 | 已集成能力 | 从这里开始 |
+|---|---|---|
+| [awesome-python](https://github.com/vinta/awesome-python) | SenseVoice 已收录到大型 Python 资源目录的 Speech Recognition 部分，方便 Python 开发者发现本地多语种 ASR。 | [项目 README](https://github.com/vinta/awesome-python#readme) 和已合并 [#3246](https://github.com/vinta/awesome-python/pull/3246)。 |
+| [speech-trident](https://github.com/ga642381/speech-trident) | SenseVoice 已收录到 speech/audio language models 目录，面向语音 LLM、representation learning 和 codec model 读者。 | [项目 README](https://github.com/ga642381/speech-trident#readme) 和已合并 [#31](https://github.com/ga642381/speech-trident/pull/31)。 |
+
 ## 采用社区集成前
 
 - 按上游项目的安装和发布说明操作，不要假设其依赖版本与 FunASR `main` 完全一致。

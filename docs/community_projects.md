@@ -35,6 +35,13 @@ These integrations are community-maintained. Their release cadence, hardware sup
 | [Fun-ASR-vLLM](https://github.com/yuekaizhang/Fun-ASR-vllm) | Community vLLM inference for Fun-ASR-Nano and Fun-ASR-MLT-Nano, including batch evaluation and NVIDIA Triton deployment. | [Setup and benchmarks](https://github.com/yuekaizhang/Fun-ASR-vllm#readme) and the deterministic ASR decoding fix in merged [#20](https://github.com/yuekaizhang/Fun-ASR-vllm/pull/20). |
 | [vad-burn](https://github.com/di-osc/vad-burn) | FSMN VAD inference in pure Rust with Python bindings, including offline, streaming, and CPU-only modes. | [Project README](https://github.com/di-osc/vad-burn#readme) and the FunASR showcase in [#3106](https://github.com/modelscope/FunASR/issues/3106). |
 
+## Discovery lists
+
+| Project | What is integrated | Start here |
+|---|---|---|
+| [awesome-python](https://github.com/vinta/awesome-python) | SenseVoice is listed in the Speech Recognition section of one of the largest Python resource directories, making it easier for Python developers to discover local multilingual ASR. | [Project README](https://github.com/vinta/awesome-python#readme) and merged [#3246](https://github.com/vinta/awesome-python/pull/3246). |
+| [speech-trident](https://github.com/ga642381/speech-trident) | SenseVoice is listed among speech/audio language models in a curated speech LLM, representation learning, and codec model directory. | [Project README](https://github.com/ga642381/speech-trident#readme) and merged [#31](https://github.com/ga642381/speech-trident/pull/31). |
+
 ## Before adopting an integration
 
 - Follow the upstream project's installation and release notes; do not assume its dependency versions match FunASR `main`.
