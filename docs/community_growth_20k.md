@@ -34,14 +34,14 @@ This plan focuses on useful adoption work rather than vanity marketing: if more 
 
 ## Current campaign snapshot
 
-As of 2026-07-14 18:25 UTC, the ecosystem has 35,404 combined GitHub stars, or 4,180 additional stars since the 31,224 baseline. The remaining gap to the +20,000 target is 15,820 stars by 2026-09-30, which requires roughly 203 stars/day across the remaining 78 days.
+As of 2026-07-19 01:37 UTC, the ecosystem has 35,585 combined GitHub stars, or 4,361 additional stars since the 31,224 baseline. The remaining gap to the +20,000 target is 15,639 stars by 2026-09-30, which requires roughly 214 stars/day across the remaining 73 days.
 
 | Repository | Stars | Forks | Open issues | Open PRs | Last push |
 |---|---:|---:|---:|---:|---|
-| `modelscope/FunASR` | 19,236 | 1,930 | 1 | 0 | 2026-07-14 |
-| `FunAudioLLM/Fun-ASR` | 1,395 | 137 | 0 | 0 | 2026-07-14 |
-| `FunAudioLLM/SenseVoice` | 8,857 | 792 | 0 | 0 | 2026-07-14 |
-| `modelscope/FunClip` | 5,916 | 709 | 0 | 0 | 2026-07-14 |
+| `modelscope/FunASR` | 19,326 | 1,942 | 2 | 0 | 2026-07-19 |
+| `FunAudioLLM/Fun-ASR` | 1,409 | 138 | 0 | 0 | 2026-07-18 |
+| `FunAudioLLM/SenseVoice` | 8,886 | 793 | 0 | 0 | 2026-07-18 |
+| `modelscope/FunClip` | 5,964 | 713 | 0 | 0 | 2026-07-18 |
 
 Keep this snapshot fresh during weekly planning. The ecosystem mode also reports the remaining gap, days left to 2026-09-30, and the required daily average:
 
@@ -73,7 +73,7 @@ The same exact 14-day window produced the following public stargazer events. `Vi
 | `modelscope/FunClip` | 44 | 3.1 | 1,482 | 106 | 3.0% |
 | **Total** | **773** | **55.2** | **21,856** | **1,561** | **3.5%** |
 
-The current 55.2 stars/day is only 27% of the required 203 stars/day. At the observed 3.5% viewer-day ratio, the ecosystem needs roughly 5,740 qualified viewer-days/day, or 3.68x the current traffic. Holding traffic flat would require an implausible 13.0% ratio, so reach is the primary constraint; README conversion work alone cannot close the target gap.
+The current 55.2 stars/day is only 26% of the required 214 stars/day. At the observed 3.5% viewer-day ratio, the ecosystem needs roughly 6,120 qualified viewer-days/day, or 3.92x the current traffic. Holding traffic flat would require an implausible 13.7% ratio, so reach is the primary constraint; README conversion work alone cannot close the target gap.
 
 Top referrer pattern:
 
