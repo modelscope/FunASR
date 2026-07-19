@@ -607,6 +607,19 @@ CUDA_VISIBLE_DEVICES=0 python examples/industrial_data_pretraining/fun_asr_nano/
 Set `--ws-ping-interval 0` only when an external gateway already owns
 keepalive/reconnect policy.
 
+For long-session debugging, especially with `--enable-spk`, enable periodic
+session-state logs:
+
+```bash
+CUDA_VISIBLE_DEVICES=0 python examples/industrial_data_pretraining/fun_asr_nano/serve_realtime_ws.py \
+    --port 10095 --language 中文 --enable-spk \
+    --log-session-stats-interval 30
+```
+
+This prints a `Session stats:` line every 30 seconds. Include the last few
+lines in issue reports together with tail RTF, process RSS, GPU memory, and
+the final disconnect log.
+
 ### 6.3 WebSocket Protocol
 
 **Connection**: `ws://host:10095`
@@ -728,6 +741,7 @@ Because each refresh re-encodes from the sentence start, the longer a sentence, 
 - **SPK is of limited effectiveness on Fun-ASR-Nano** (see #2944); most real-time ASR scenarios do not need speaker separation.
 - **Streaming SPK is expensive and grows with the session**: each sentence re-clusters **all historical embeddings** (**O(N²)**, more expensive per sentence as the session grows) and **synchronously blocks the event loop**; the session also **re-clusters everything again** at the end, so the per-sentence clustering during streaming is overwritten by the final result — redundant as far as the final output is concerned. This is especially pronounced under long sessions + high concurrency.
 - **Recommendation**: keep the default off for multi-client live ASR; if diarization is required, add `--enable-spk` and treat the final STOP-time labels as authoritative.
+- **Long-session diagnostics**: when a session still slows down or disconnects, rerun with `--log-session-stats-interval 30` and check whether `audio_buffer_samples`, `locked_sentences`, `speaker_history_chunks`, `speaker_history_embeddings`, and `speaker_centers` stay bounded. If those counters stay near their limits while RTF keeps rising, the remaining bottleneck is more likely model inference, response payload size, or environment scheduling rather than retained session state.
 
 ### 6.7 Production concurrency and multi-process deployment
 
