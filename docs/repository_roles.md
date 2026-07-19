@@ -75,7 +75,7 @@ The four repositories share models and tooling but their responsibility boundari
 
 ### Now
 
-- **Bounded realtime long-session state** — merged via [#3214](https://github.com/modelscope/FunASR/pull/3214), [#3101](https://github.com/modelscope/FunASR/issues/3101) closed; model-repo mirror fix [FunAudioLLM/Fun-ASR#135](https://github.com/FunAudioLLM/Fun-ASR/pull/135) also merged.
+- **Bounded realtime long-session state** — fixes merged via [#3214](https://github.com/modelscope/FunASR/pull/3214), diagnostics shipped in `funasr==1.3.19`, and the model-repo mirror fix [FunAudioLLM/Fun-ASR#135](https://github.com/FunAudioLLM/Fun-ASR/pull/135) also merged. [#3101](https://github.com/modelscope/FunASR/issues/3101) remains open while waiting for reporter retest logs.
 - **Fun-ASR-Nano native Transformers integration** — [huggingface/transformers#46180](https://github.com/huggingface/transformers/pull/46180); in review. See the linked PR for current CI and review status.
 - **Clarify repository roles and issue routing** — [#3203](https://github.com/modelscope/FunASR/issues/3203); this document.
 

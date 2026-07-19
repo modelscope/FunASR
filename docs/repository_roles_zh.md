@@ -75,7 +75,7 @@
 
 ### 当前
 
-- **实时服务长会话有界状态** —— 已由 [#3214](https://github.com/modelscope/FunASR/pull/3214) 合并,[#3101](https://github.com/modelscope/FunASR/issues/3101) 已关闭;模型仓镜像修复 [FunAudioLLM/Fun-ASR#135](https://github.com/FunAudioLLM/Fun-ASR/pull/135) 亦已合并。
+- **实时服务长会话有界状态** —— 修复已由 [#3214](https://github.com/modelscope/FunASR/pull/3214) 合并，诊断能力已随 `funasr==1.3.19` 发布；模型仓镜像修复 [FunAudioLLM/Fun-ASR#135](https://github.com/FunAudioLLM/Fun-ASR/pull/135) 亦已合并。[#3101](https://github.com/modelscope/FunASR/issues/3101) 仍保持 open，等待 reporter 提供复测日志。
 - **Fun-ASR-Nano 的 Transformers 原生集成** —— [huggingface/transformers#46180](https://github.com/huggingface/transformers/pull/46180),正在审查中;当前 CI 与审查状态请以链接的 PR 为准。
 - **明确四仓职责与 issue 路由** —— [#3203](https://github.com/modelscope/FunASR/issues/3203);即本文档。
 
