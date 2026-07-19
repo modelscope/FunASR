@@ -24,6 +24,11 @@ funasr audio.wav --output-format json
 funasr audio.wav --output-format srt --output-dir ./subs
 ```
 
+`srt` and `tsv` outputs request sentence-level timestamps. In FunASR 1.3.18
+and newer, the default `sensevoice` CLI path also loads punctuation for subtitle
+generation, so subtitle files are split into sentence cues instead of one
+full-text block when the model returns `sentence_info`.
+
 ## Options
 
 | Option | Short | Default | Description |
@@ -66,15 +71,23 @@ Structured output for programmatic use:
 SubRip subtitle format:
 ```
 1
-00:00:00,000 --> 00:00:05,540
-欢迎大家来体验达摩院推出的语音识别模型
+00:00:00,000 --> 00:00:01,200
+第一句。
+
+2
+00:00:01,200 --> 00:00:02,600
+第二句。
 ```
+
+If a model does not return sentence-level timestamps, the CLI falls back to one
+valid cue spanning the known timestamp or audio duration.
 
 ### tsv
 Tab-separated values (start/end in seconds):
 ```
 start	end	text
-0.000	5.540	欢迎大家来体验达摩院推出的语音识别模型
+0.000	1.200	第一句。
+1.200	2.600	第二句。
 ```
 
 ## Advanced Examples
@@ -104,10 +117,15 @@ echo "$result" | jq -r '.text'
 
 | Model | Languages | Speed | Best for |
 |-------|-----------|-------|----------|
-| sensevoice | 50+ | ~70ms/10s | General use, multilingual |
+| sensevoice | zh/en/ja/ko/yue | ~70ms/10s | CPU-friendly ASR, emotion/audio events |
 | paraformer | zh + mixed | ~60ms/10s | Chinese production (with punctuation) |
 | paraformer-en | en | ~60ms/10s | English |
 | fun-asr-nano | zh/en/ja + Chinese dialects/accents | varies | Encoder+LLM, complex audio |
+
+Language coverage is checkpoint-specific. For example, the separate
+Fun-ASR-MLT-Nano checkpoint covers 31 languages, while the default CLI
+`fun-asr-nano` choice targets Chinese, English, Japanese, and Chinese dialects
+or accents.
 
 ## Legacy CLI
 
