@@ -16,6 +16,7 @@
 | [TMSpeech](https://github.com/jxlpzqc/TMSpeech) | Windows 会议字幕与翻译工具，可通过外部命令识别器运行 Fun-ASR-Nano INT8。Silero VAD 先完成语音段切分再调用 Nano 解码，同时保留原有低成本 C# 流式识别器。 | [Fun-ASR-Nano 配置](https://github.com/jxlpzqc/TMSpeech/blob/master/README.md#%E4%BD%BF%E7%94%A8-fun-asr-nano)、[识别器源码](https://github.com/jxlpzqc/TMSpeech/blob/master/external_recognizer/simulate-streaming-funasr-nano.py) 和已合并 [#110](https://github.com/jxlpzqc/TMSpeech/pull/110)。 |
 | [OmniVoice Studio](https://github.com/debpalash/OmniVoice-Studio) | 通过 OpenAI 兼容远程 ASR backend，把听写和配音工作流连接到自托管 FunASR 或 SenseVoice 服务。 | [OpenAI 兼容 ASR 指南](https://github.com/debpalash/OmniVoice-Studio/blob/main/docs/engines/openai-compatible-asr.md) 和已合并 [#1003](https://github.com/debpalash/OmniVoice-Studio/pull/1003)。 |
 | [GPT-SoVITS](https://github.com/RVC-Boss/GPT-SoVITS) | 使用 Fun-ASR-Nano、SenseVoice 和经典 FunASR 模型完成数据集预处理与 WebUI 转写。 | [`funasr_asr.py`](https://github.com/RVC-Boss/GPT-SoVITS/blob/main/tools/asr/funasr_asr.py)、runtime fallback [#2801](https://github.com/RVC-Boss/GPT-SoVITS/pull/2801) 和 backend 文档 [#2803](https://github.com/RVC-Boss/GPT-SoVITS/pull/2803)。 |
+| [AudioNotes](https://github.com/harry0703/AudioNotes) | 将音视频内容提取为结构化 Markdown 笔记，并把 Fun-ASR-MLT-Nano 路由到 Fun-ASR Nano 推理配置，保留 cache、batch size 和列表式 hotwords。 | [项目 README](https://github.com/harry0703/AudioNotes#readme)、[FunASR 服务](https://github.com/harry0703/AudioNotes/blob/main/app/services/asr_funasr.py) 和已合并 [#65](https://github.com/harry0703/AudioNotes/pull/65)。 |
 
 ## 模型服务与 Runtime
 
