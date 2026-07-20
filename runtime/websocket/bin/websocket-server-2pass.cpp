@@ -65,7 +65,7 @@ context_ptr WebSocketServer::on_tls_init(tls_mode mode,
   return ctx;
 }
 
-nlohmann::json handle_result(FUNASR_RESULT result, websocketpp::connection_hdl& hdl, std::map<websocketpp::connection_hdl, std::shared_ptr<FUNASR_MESSAGE>,std::owner_less<websocketpp::connection_hdl>>& data_map) {
+nlohmann::json handle_result(FUNASR_RESULT result, websocketpp::connection_hdl& hdl, std::map<websocketpp::connection_hdl, std::shared_ptr<FUNASR_MESSAGE>,std::owner_less<websocketpp::connection_hdl>>& data_map, std::string modetype) {
   std::shared_ptr<FUNASR_MESSAGE> data_msg = nullptr;
   auto it = data_map.find(hdl);
   if (it != data_map.end()) {
@@ -95,20 +95,23 @@ nlohmann::json handle_result(FUNASR_RESULT result, websocketpp::connection_hdl& 
   data_msg->end_time = FunASRGetTpassEnd(result);  // 记录句子的结束时间
   jsonresult["timestamp"] = data_msg->timestamp;
 
-  std::string tmp_tpass_msg = FunASRGetTpassResult(result, 0);
-  if (tmp_tpass_msg != "") {
-    LOG(INFO) << "wav_name: " << data_msg->msg["wav_name"].get<std::string>() << " | offline results : " << tmp_tpass_msg;
-    jsonresult["text"] = tmp_tpass_msg;
-    jsonresult["mode"] = "2pass-offline";
+  // online 模式跳过 offline 结果，避免覆盖 online 结果
+  if (modetype != "online") {
+    std::string tmp_tpass_msg = FunASRGetTpassResult(result, 0);
+    if (tmp_tpass_msg != "") {
+      LOG(INFO) << "wav_name: " << data_msg->msg["wav_name"].get<std::string>() << " | offline results : " << tmp_tpass_msg;
+      jsonresult["text"] = tmp_tpass_msg;
+      jsonresult["mode"] = "2pass-offline";
 
-    // 句子结束，记录结束时间
-    jsonresult["start_time"] = data_msg->start_time;
-    jsonresult["end_time"] = data_msg->end_time;
-    jsonresult["slice_type"] = 2;
-    jsonresult["index"] = data_msg->index;
+      // 句子结束，记录结束时间
+      jsonresult["start_time"] = data_msg->start_time;
+      jsonresult["end_time"] = data_msg->end_time;
+      jsonresult["slice_type"] = 2;
+      jsonresult["index"] = data_msg->index;
 
-    data_msg->index++; //句子序号
-    data_msg->is_sentence_started = false;  // 重置句子状态
+      data_msg->index++; //句子序号
+      data_msg->is_sentence_started = false;  // 重置句子状态
+    }
   }
 
   std::string tmp_stamp_msg = FunASRGetStamp(result);
@@ -195,7 +198,7 @@ void WebSocketServer::do_decoder(
       }
       if (Result) {
         websocketpp::lib::error_code ec;
-        nlohmann::json jsonresult = handle_result(Result, hdl, data_map);
+        nlohmann::json jsonresult = handle_result(Result, hdl, data_map, modetype);
         jsonresult["wav_name"] = wav_name;
         jsonresult["is_final"] = false;
         if (jsonresult["text"] != "") {
@@ -238,7 +241,7 @@ void WebSocketServer::do_decoder(
       }
       if (Result) {
         websocketpp::lib::error_code ec;
-        nlohmann::json jsonresult = handle_result(Result, hdl, data_map);
+        nlohmann::json jsonresult = handle_result(Result, hdl, data_map, modetype);
         jsonresult["wav_name"] = wav_name;
         jsonresult["is_final"] = true;
         //LOG(INFO) << "jsonresult: " << jsonresult.dump(4);
