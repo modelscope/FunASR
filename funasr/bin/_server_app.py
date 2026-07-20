@@ -101,7 +101,7 @@ def prepare_audio_for_inference(audio_data, sr, target_sr=16000):
 
     return audio_data.astype(np.float32), sr
 
-def create_app(device: str = "cuda", preload_model: str = "auto") -> FastAPI:
+def create_app(device: str = "cuda", preload_model: str = "auto", model_path: str = None, hub: str = "ms") -> FastAPI:
     if preload_model == "auto":
         preload_model = "fun-asr-nano" if device.startswith("cuda") else "sensevoice"
 
@@ -110,6 +110,8 @@ def create_app(device: str = "cuda", preload_model: str = "auto") -> FastAPI:
     app.state.engine = None
     app.state.vad_model = None
     app.state.fallback_models = {}
+    app.state.model_path = model_path
+    app.state.hub = hub
 
     # Non-LLM model configs (use AutoModel, no vLLM)
     FALLBACK_CONFIGS = {
@@ -135,9 +137,12 @@ def create_app(device: str = "cuda", preload_model: str = "auto") -> FastAPI:
 
             logger.info("Loading Fun-ASR-Nano vLLM engine...")
             t0 = time.time()
+            # Use custom model_path if provided, otherwise default
+            vllm_model = app.state.model_path if app.state.model_path else "FunAudioLLM/Fun-ASR-Nano-2512"
+            vllm_hub = app.state.hub if app.state.hub else "hf"
             app.state.engine = FunASRNanoVLLM.from_pretrained(
-                model="FunAudioLLM/Fun-ASR-Nano-2512",
-                hub="hf",
+                model=vllm_model,
+                hub=vllm_hub,
                 device=device,
                 dtype="bf16",
                 max_model_len=4096,
@@ -154,8 +159,8 @@ def create_app(device: str = "cuda", preload_model: str = "auto") -> FastAPI:
             app.state.use_vllm = False
             from funasr import AutoModel
             cfg = {
-                "model": "FunAudioLLM/Fun-ASR-Nano-2512",
-                "hub": "hf",
+                "model": app.state.model_path if app.state.model_path else "FunAudioLLM/Fun-ASR-Nano-2512",
+                "hub": app.state.hub if app.state.hub else "hf",
                 "trust_remote_code": True,
                 "vad_model": "fsmn-vad",
                 "vad_kwargs": {"max_single_segment_time": 30000},
@@ -163,7 +168,7 @@ def create_app(device: str = "cuda", preload_model: str = "auto") -> FastAPI:
                 "disable_update": True,
             }
             app.state.fallback_models["fun-asr-nano"] = AutoModel(**cfg)
-            logger.info("Fallback AutoModel loaded for fun-asr-nano.")
+            logger.info(f"Fallback AutoModel loaded for fun-asr-nano with model={cfg['model']}, hub={cfg['hub']}.")
 
     def _load_fallback(name: str):
         """Load non-LLM model via AutoModel."""
@@ -173,9 +178,14 @@ def create_app(device: str = "cuda", preload_model: str = "auto") -> FastAPI:
             return None
         from funasr import AutoModel
         cfg = FALLBACK_CONFIGS[name].copy()
+        # Override with custom model_path and hub if provided
+        if app.state.model_path:
+            cfg["model"] = app.state.model_path
+        if app.state.hub:
+            cfg["hub"] = app.state.hub
         cfg["device"] = device
         cfg["disable_update"] = True
-        logger.info(f"Loading fallback model '{name}'...")
+        logger.info(f"Loading fallback model '{name}' with model={cfg['model']}, hub={cfg['hub']}...")
         model = AutoModel(**cfg)
         app.state.fallback_models[name] = model
         return model
@@ -258,7 +268,11 @@ def create_app(device: str = "cuda", preload_model: str = "auto") -> FastAPI:
         return {"text": text, "segments": segments, "duration": duration}
 
     # Pre-load
-    if preload_model == "fun-asr-nano":
+    if app.state.model_path:
+        # When custom model_path is provided, use it as the model name for loading
+        logger.info(f"Loading custom model: {app.state.model_path} (hub: {app.state.hub})")
+        _load_fallback(preload_model if preload_model != "auto" else "custom")
+    elif preload_model == "fun-asr-nano":
         _load_vllm_engine()
     else:
         _load_fallback(preload_model)
@@ -288,17 +302,18 @@ def create_app(device: str = "cuda", preload_model: str = "auto") -> FastAPI:
                     result = _process_fallback("fun-asr-nano", tmp_path, language=language)
                 finally:
                     os.unlink(tmp_path)
-        elif model in FALLBACK_CONFIGS:
+        elif model in FALLBACK_CONFIGS or model == "custom":
             suffix = os.path.splitext(file.filename)[1] if file.filename else ".wav"
             with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
                 tmp.write(content)
                 tmp_path = tmp.name
             try:
-                result = _process_fallback(model, tmp_path, language=language)
+                result = _process_fallback(model if model != "custom" else preload_model, tmp_path, language=language)
             finally:
                 os.unlink(tmp_path)
         else:
-            raise HTTPException(400, f"Unknown model '{model}'. Available: fun-asr-nano, {', '.join(FALLBACK_CONFIGS.keys())}")
+            available = ["fun-asr-nano", "custom"] + list(FALLBACK_CONFIGS.keys())
+            raise HTTPException(400, f"Unknown model '{model}'. Available: {', '.join(available)}")
 
         t1 = time.perf_counter()
 
@@ -352,6 +367,8 @@ def create_app(device: str = "cuda", preload_model: str = "auto") -> FastAPI:
     @app.get("/v1/models")
     async def list_models():
         all_models = ["fun-asr-nano"] + list(FALLBACK_CONFIGS.keys())
+        if app.state.model_path:
+            all_models.append("custom")
         return JSONResponse({"object": "list", "data": [{"id": n, "object": "model"} for n in all_models]})
 
     @app.get("/health")
