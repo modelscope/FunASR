@@ -53,7 +53,6 @@ DEFAULT_INTEGRATION_PRS = [
     "agno-agi/agno#8501",
     "GetStream/Vision-Agents#606",
     "TEN-framework/ten-framework#2191",
-    "activepieces/activepieces#13985",
     "Uberi/speech_recognition#903",
     "ai4s-research/awesome-ai-for-science#69",
     "lukasmasuch/best-of-ml-python#455",
