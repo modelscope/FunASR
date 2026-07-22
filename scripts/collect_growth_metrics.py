@@ -328,6 +328,37 @@ def fetch_json(url: str, headers: Optional[Dict[str, str]] = None) -> Any:
         raise RuntimeError(f"GET {url} failed: {exc.reason}") from exc
 
 
+def collect_pypi_download_metrics(package: str) -> Dict[str, Any]:
+    url = f"https://pypistats.org/api/packages/{package}/overall?mirrors=false"
+    try:
+        payload = fetch_json(url, {"User-Agent": "funasr-growth-metrics"})
+        rows = [
+            row
+            for row in payload.get("data", [])
+            if row.get("category") == "without_mirrors"
+            and row.get("date")
+            and isinstance(row.get("downloads"), int)
+        ]
+        rows.sort(key=lambda row: row["date"])
+        if not rows:
+            raise RuntimeError("PyPIStats returned no daily download rows")
+        return {
+            "source": "pypistats.org",
+            "source_url": f"https://pypistats.org/packages/{package}",
+            "latest_date": rows[-1]["date"],
+            "downloads_last_7_days": sum(row["downloads"] for row in rows[-7:]),
+            "downloads_last_30_days": sum(row["downloads"] for row in rows[-30:]),
+            "status": "available",
+        }
+    except Exception as exc:
+        return {
+            "source": "pypistats.org",
+            "source_url": f"https://pypistats.org/packages/{package}",
+            "status": "unavailable",
+            "reason": str(exc),
+        }
+
+
 def github_headers() -> Dict[str, str]:
     headers = {
         "Accept": "application/vnd.github+json",
@@ -710,6 +741,7 @@ def collect_metrics(repo: str, package: str) -> Dict[str, Any]:
             "version": pypi.get("info", {}).get("version"),
             "summary": pypi.get("info", {}).get("summary"),
             "project_url": pypi.get("info", {}).get("project_url"),
+            "downloads": collect_pypi_download_metrics(package),
         },
     }
     return metrics
@@ -752,8 +784,22 @@ def collect_ecosystem_metrics(
             "version": pypi.get("info", {}).get("version"),
             "summary": pypi.get("info", {}).get("summary"),
             "project_url": pypi.get("info", {}).get("project_url"),
+            "downloads": collect_pypi_download_metrics(package),
         },
     }
+
+
+def format_pypi_downloads(pypi: Dict[str, Any]) -> str:
+    downloads = pypi.get("downloads") or {}
+    if downloads.get("status") == "available":
+        return (
+            f"- PyPI downloads: **{downloads.get('downloads_last_7_days', 0):,}** last 7 days; "
+            f"**{downloads.get('downloads_last_30_days', 0):,}** last 30 days "
+            f"(through {downloads.get('latest_date')}, {downloads.get('source_url')})"
+        )
+    if downloads.get("status") == "unavailable":
+        return f"- PyPI downloads: unavailable via {downloads.get('source', 'PyPIStats')} ({downloads.get('reason')})"
+    return "- PyPI downloads: n/a"
 
 
 def format_markdown(metrics: Dict[str, Any], star_goal: int) -> str:
@@ -772,6 +818,7 @@ def format_markdown(metrics: Dict[str, Any], star_goal: int) -> str:
         if github.get("open_pull_requests") is not None
         else "- Open pull requests: n/a",
         f"- PyPI package: **{pypi.get('package')} {pypi.get('version')}**",
+        format_pypi_downloads(pypi),
         f"- Last GitHub push: `{github.get('pushed_at')}`",
         "",
         "## Links",
@@ -797,6 +844,7 @@ def format_ecosystem_markdown(metrics: Dict[str, Any]) -> str:
         f"- Target date: **{ecosystem['target_date']}** ({ecosystem['days_remaining']:,} days remaining)",
         f"- Required daily average: **{ecosystem['required_daily_average']:,}** stars/day",
         f"- PyPI package: **{pypi.get('package')} {pypi.get('version')}**",
+        format_pypi_downloads(pypi),
         "",
         "## Repositories",
         "",

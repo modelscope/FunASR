@@ -233,3 +233,19 @@ def test_growth_plan_records_homepage_entrypoint_completion():
         assert marker in text
 
     assert "[ ] Update homepage hero and docs entry points" not in text
+
+
+def test_growth_plan_records_metrics_tracking_progress():
+    text = PLAN.read_text()
+
+    required_markers = [
+        "[ ] Track stars, PyPI downloads, issue volume, and docs traffic.",
+        "PyPIStats",
+        "`downloads_last_7_days`",
+        "`downloads_last_30_days`",
+        "`collect_growth_metrics.py`",
+        "GitHub stars, open issues, and open pull requests",
+        "docs traffic remains unavailable until an analytics credential or export is connected",
+    ]
+    for marker in required_markers:
+        assert marker in text
