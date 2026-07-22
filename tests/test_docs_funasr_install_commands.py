@@ -84,6 +84,28 @@ def test_public_docs_do_not_advertise_stale_release_or_star_copy():
             assert marker not in text
 
 
+def test_chinese_readme_model_table_uses_current_modelscope_entries():
+    text = (ROOT / "README_zh.md").read_text()
+
+    current_entries = [
+        "models/iic/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary",
+        "models/iic/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online/summary",
+        "models/iic/punc_ct-transformer_cn-en-common-vocab471067-large/summary",
+        "models/iic/speech_fsmn_vad_zh-cn-16k-common-pytorch/summary",
+    ]
+    stale_entries = [
+        "models/damo/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary",
+        "models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online/summary",
+        "models/damo/punc_ct-transformer_cn-en-common-vocab471067-large/summary",
+        "models/damo/speech_fsmn_vad_zh-cn-16k-common-pytorch/summary",
+    ]
+
+    for marker in current_entries:
+        assert marker in text
+    for marker in stale_entries:
+        assert marker not in text
+
+
 def test_realtime_demo_documents_partial_and_hotword_boundaries():
     text = (
         ROOT
