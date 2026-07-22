@@ -148,3 +148,26 @@ def test_growth_plan_records_release_note_terminal_outputs():
         assert marker in text
 
     assert "[ ] Record concise terminal outputs for release notes" not in text
+
+
+def test_growth_plan_records_sharp_github_release_focus():
+    text = PLAN.read_text()
+
+    required_markers = [
+        "[x] Create a GitHub release focused on one sharp value proposition",
+        "v1.3.26",
+        "https://github.com/modelscope/FunASR/releases/tag/v1.3.26",
+        "Release focus: OpenAI-compatible ASR deployment",
+        "run the OpenAI-compatible transcription API",
+        "`python -m pip install -U \"funasr==1.3.26\"`",
+        "`/v1/audio/transcriptions`",
+        "`serve_realtime_ws.py`",
+        "`docs/vllm_guide.md`",
+        "`vllm 0.19.1`",
+        "`runtime-llamacpp-v0.1.8`",
+        "self-contained `llama-funasr-*` binary",
+    ]
+    for marker in required_markers:
+        assert marker in text
+
+    assert "[ ] Create a GitHub release focused on one sharp value proposition" not in text
