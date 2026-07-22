@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import sys
+import time
 import urllib.request
 from dataclasses import dataclass
 
@@ -90,21 +91,35 @@ def validate_pages(pages: dict[str, str]) -> list[str]:
     return failures
 
 
-def fetch_pages(timeout: float) -> dict[str, str]:
+def _fetch_url(url: str, timeout: float, retries: int) -> str:
+    last_error: Exception | None = None
+    for attempt in range(retries + 1):
+        try:
+            with urllib.request.urlopen(url, timeout=timeout) as response:
+                body = response.read()
+            return body.decode("utf-8", errors="replace")
+        except Exception as exc:
+            last_error = exc
+            if attempt == retries:
+                break
+            time.sleep(min(0.25 * (attempt + 1), 1.0))
+    raise last_error
+
+
+def fetch_pages(timeout: float, retries: int = 3) -> dict[str, str]:
     pages: dict[str, str] = {}
     for url in PAGE_CONTRACTS:
-        with urllib.request.urlopen(url, timeout=timeout) as response:
-            body = response.read()
-        pages[url] = body.decode("utf-8", errors="replace")
+        pages[url] = _fetch_url(url, timeout=timeout, retries=retries)
     return pages
 
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--timeout", type=float, default=20.0)
+    parser.add_argument("--retries", type=int, default=3)
     args = parser.parse_args(argv)
 
-    failures = validate_pages(fetch_pages(timeout=args.timeout))
+    failures = validate_pages(fetch_pages(timeout=args.timeout, retries=args.retries))
     if failures:
         print("funasr.com static page contract failed:", file=sys.stderr)
         for failure in failures:
