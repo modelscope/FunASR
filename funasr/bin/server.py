@@ -5,6 +5,8 @@ Usage:
     funasr-server                          # default: sensevoice on cuda:0, port 8000
     funasr-server --device cpu --port 9000
     funasr-server --model paraformer
+    funasr-server --model-path /path/to/local/model
+    funasr-server --model-path username/paraformer --hub hf
 """
 
 import argparse
@@ -21,6 +23,8 @@ Examples:
   funasr-server --device cpu             # Start on CPU
   funasr-server --model paraformer       # Use Paraformer model
   funasr-server --port 9000             # Custom port
+  funasr-server --model-path /path/to/local/model  # Use local model
+  funasr-server --model-path username/model --hub hf  # Use HuggingFace model
 
 Then use with OpenAI SDK:
   from openai import OpenAI
@@ -32,6 +36,8 @@ Then use with OpenAI SDK:
     parser.add_argument("--port", type=int, default=8000, help="Port (default: 8000)")
     parser.add_argument("--device", default="cuda", help="Device: cuda, cpu, mps (default: cuda)")
     parser.add_argument("--model", default="auto", help="Pre-load model: auto (GPU=fun-asr-nano, CPU=sensevoice), sensevoice, paraformer, fun-asr-nano")
+    parser.add_argument("--model-path", default=None, help="Local model path or model ID (overrides --model)")
+    parser.add_argument("--hub", default="ms", help="Model hub: ms (ModelScope), hf (HuggingFace) (default: ms)")
     args = parser.parse_args()
 
     try:
@@ -49,12 +55,15 @@ Then use with OpenAI SDK:
     # Use inline app to avoid path issues
     from funasr.bin._server_app import create_app
 
-    app = create_app(device=args.device, preload_model=args.model)
+    app = create_app(device=args.device, preload_model=args.model, model_path=args.model_path, hub=args.hub)
 
     print(f"╔══════════════════════════════════════════════╗")
     print(f"║  FunASR Server v1.3.6                        ║")
     print(f"║  Device: {args.device:<8}                          ║")
     print(f"║  Model:  {args.model:<12}                      ║")
+    if args.model_path:
+        print(f"║  Model Path: {args.model_path:<25} ║")
+        print(f"║  Hub:     {args.hub:<8}                          ║")
     print(f"║  URL:    http://{args.host}:{args.port}/v1          ║")
     print(f"║  Docs:   http://{args.host}:{args.port}/docs        ║")
     print(f"╚══════════════════════════════════════════════╝")
