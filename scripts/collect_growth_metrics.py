@@ -114,6 +114,14 @@ KNOWN_EXTERNAL_CHECK_FAILURES = {
         },
         "reason": "Current c70504e failures are unrelated OpenVINO matrix failures in Pix2Struct, image-text quantization/export, and tiny-random T5; direct cleanup mirror #1856 was closed for maintainer preliminary PR",
         "action": "wait for maintainer preliminary PR",
+    },
+    "ray-project/ray#64053": {
+        "failed_check_names": {
+            "buildkite/microcheck",
+            "docs/readthedocs.com:anyscale-ray",
+        },
+        "reason": "Current Ray failures are Buildkite/ReadTheDocs gates already triaged; the remaining PR-local Black fix is waiting on the contributor branch owner",
+        "action": "wait for contributor branch update",
     }
 }
 KNOWN_REVIEW_GATES = {
@@ -147,6 +155,9 @@ KNOWN_REVIEW_GATES = {
     }
 }
 KNOWN_ASSISTED_REVIEW_REQUESTS = {
+    "huggingface/transformers#46180": {
+        "reason": "checks are green and the remaining blocker is an active maintainer-held review thread",
+    },
     "infiniflow/ragflow#16473": {
         "reason": "review evidence already posted; avoid duplicate pings",
     },
@@ -310,6 +321,7 @@ PASSIVE_INTEGRATION_ACTIONS = {
     "preview auth gate",
     "resolve CLA",
     "wait for checks",
+    "wait for contributor branch update",
     "wait for maintainer preliminary PR",
     "wait for maintainer rerun",
     "wait for maintainer review",
