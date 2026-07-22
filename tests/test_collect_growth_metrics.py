@@ -27,6 +27,11 @@ def test_github_headers_falls_back_to_gh_auth_token(monkeypatch):
     module = load_growth_metrics_module()
     monkeypatch.delenv("GITHUB_TOKEN", raising=False)
     monkeypatch.setenv("HOME", "/tmp/funasr-growth-metrics-no-token-home")
+    monkeypatch.setattr(
+        module,
+        "OPS_GITHUB_TOKEN_PATH",
+        Path("/tmp/funasr-growth-metrics-missing-ops-token"),
+    )
 
     def fake_run(args, **kwargs):
         assert args == ["gh", "auth", "token"]
@@ -55,6 +60,25 @@ def test_github_headers_reads_funasr_ops_token_file(monkeypatch, tmp_path):
     headers = module.github_headers()
 
     assert headers["Authorization"] == "Bearer file-token"
+
+
+def test_github_headers_reads_configured_ops_token_file(monkeypatch, tmp_path):
+    module = load_growth_metrics_module()
+    monkeypatch.delenv("GITHUB_TOKEN", raising=False)
+    monkeypatch.setenv("HOME", str(tmp_path / "empty-home"))
+    ops_token_path = tmp_path / "ops" / "github_token"
+    ops_token_path.parent.mkdir(parents=True)
+    ops_token_path.write_text("ops-file-token\n")
+    monkeypatch.setattr(module, "OPS_GITHUB_TOKEN_PATH", ops_token_path)
+
+    def fake_run(args, **kwargs):
+        raise AssertionError("gh auth token should not be called when ops token exists")
+
+    monkeypatch.setattr(module.subprocess, "run", fake_run)
+
+    headers = module.github_headers()
+
+    assert headers["Authorization"] == "Bearer ops-file-token"
 
 
 def test_default_integration_prs_include_high_visibility_external_queue():
