@@ -13,6 +13,26 @@ DOCS_WITH_CURRENT_FUNASR_INSTALL = [
     "examples/industrial_data_pretraining/fun_asr_nano/docs/finetune_zh.md",
 ]
 
+PUBLIC_DOCS_SHOULD_USE_CURRENT_HOSTS = [
+    "benchmarks/benchmark_pipeline_cer.md",
+    "docs/installation/installation.md",
+    "docs/installation/installation_zh.md",
+    "model_zoo/modelscope_models.md",
+    "model_zoo/readme.md",
+    "runtime/docs/SDK_advanced_guide_offline.md",
+    "runtime/docs/SDK_advanced_guide_offline_en.md",
+    "runtime/docs/SDK_advanced_guide_offline_en_zh.md",
+    "runtime/docs/SDK_advanced_guide_offline_gpu.md",
+    "runtime/docs/SDK_advanced_guide_offline_gpu_zh.md",
+    "runtime/docs/SDK_advanced_guide_offline_zh.md",
+    "runtime/docs/SDK_advanced_guide_online.md",
+    "runtime/docs/SDK_advanced_guide_online_zh.md",
+    "runtime/python/grpc/Readme.md",
+    "runtime/python/libtorch/README.md",
+    "runtime/python/onnxruntime/README.md",
+    "runtime/python/websocket/README.md",
+]
+
 
 def test_current_funasr_install_commands_are_quoted():
     for relpath in DOCS_WITH_CURRENT_FUNASR_INSTALL:
@@ -26,6 +46,13 @@ def test_fun_asr_nano_finetune_zh_uses_canonical_filename():
     docs_dir = ROOT / "examples/industrial_data_pretraining/fun_asr_nano/docs"
     assert (docs_dir / "finetune_zh.md").exists()
     assert "fintune_zh.md" not in (docs_dir / "finetune.md").read_text()
+
+
+def test_public_docs_use_current_repository_and_docs_hosts():
+    for relpath in PUBLIC_DOCS_SHOULD_USE_CURRENT_HOSTS:
+        text = (ROOT / relpath).read_text()
+        assert "github.com/alibaba/FunASR" not in text
+        assert "alibaba-damo-academy.github.io/FunASR" not in text
 
 
 def test_realtime_demo_documents_partial_and_hotword_boundaries():

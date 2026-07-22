@@ -10,7 +10,7 @@ This is a demo using funasr pipeline with websocket python-api. It supports the 
 pip install -U modelscope funasr
 # For the users in China, you could install with the command:
 # pip install -U modelscope funasr -i https://mirror.sjtu.edu.cn/pypi/web/simple
-git clone https://github.com/alibaba/FunASR.git && cd FunASR
+git clone https://github.com/modelscope/FunASR.git && cd FunASR
 ```
 
 ### Install the requirements for server
@@ -43,7 +43,7 @@ python funasr_wss_server.py --port 10095
 
 Install the requirements for client
 ```shell
-git clone https://github.com/alibaba/FunASR.git && cd FunASR
+git clone https://github.com/modelscope/FunASR.git && cd FunASR
 cd funasr/runtime/python/websocket
 pip install -r requirements_client.txt
 ```

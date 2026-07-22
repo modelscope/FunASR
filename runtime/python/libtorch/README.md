@@ -32,7 +32,7 @@ pip install -U funasr_torch
 or install from source code
 
 ```shell
-git clone https://github.com/alibaba/FunASR.git && cd FunASR
+git clone https://github.com/modelscope/FunASR.git && cd FunASR
 cd funasr/runtime/python/libtorch
 pip install -e ./
 # For the users in China, you could install with the command:

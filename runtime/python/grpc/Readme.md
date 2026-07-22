@@ -5,7 +5,7 @@ In the demo client, audio_chunk_duration is set to 1000ms, and send_interval is 
 
 ### 1. Install the requirements
 ```shell
-git clone https://github.com/alibaba/FunASR.git && cd FunASR/funasr/runtime/python/grpc
+git clone https://github.com/modelscope/FunASR.git && cd FunASR/funasr/runtime/python/grpc
 pip install -r requirements.txt
 ```
 

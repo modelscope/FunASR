@@ -27,7 +27,7 @@ If you have already installed Docker, ignore this step!
 curl -O https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/shell/install_docker.sh;
 sudo bash install_docker.sh
 ```
-If you do not have Docker installed, please refer to [Docker Installation](https://alibaba-damo-academy.github.io/FunASR/en/installation/docker.html)
+If you do not have Docker installed, please refer to [Docker Installation](https://modelscope.github.io/FunASR/installation.html#docker)
 
 ### Pull Docker Image
 Use the following command to pull and start the FunASR software package docker image:
