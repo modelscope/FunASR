@@ -349,7 +349,7 @@ Paste the Markdown output into launch notes, weekly community updates, or releas
 
 ### Week 2: Deployment proof
 
-- [ ] Publish API server curl examples.
+- [x] Publish API server curl examples. On 2026-07-23, the OpenAI-compatible API docs already publish copy-paste curl paths in `examples/openai_api/README.md` and `examples/openai_api/README_zh.md`, plus scripted smoke tests in `examples/openai_api/smoke_test.sh` and `examples/openai_api/smoke_test.py`. The manual flow downloads `sample.wav`, checks `/health`, and posts to `/v1/audio/transcriptions` with `-F file=@sample.wav`, `-F model=sensevoice`, and `response_format=verbose_json`; no-code and gateway users can use `examples/openai_api/POSTMAN.md` and `examples/openai_api/OPENAPI.md`.
 - [ ] Publish WebSocket streaming examples.
 - [ ] Validate Docker CPU and GPU images.
 - [ ] Validate vLLM guide on one GPU server.
