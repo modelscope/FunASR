@@ -31,7 +31,7 @@ Support the deployment of Python and C++ versions, where
 pip3 install -U modelscope funasr flask
 # Users in mainland China, if encountering network issues, can install with the following command:
 # pip3 install -U modelscope funasr -i https://mirror.sjtu.edu.cn/pypi/web/simple
-git clone https://github.com/alibaba/FunASR.git && cd FunASR
+git clone https://github.com/modelscope/FunASR.git && cd FunASR
 ```
 
 #### Start ASR Service

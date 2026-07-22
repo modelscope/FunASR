@@ -31,6 +31,13 @@ PUBLIC_DOCS_SHOULD_USE_CURRENT_HOSTS = [
     "runtime/python/libtorch/README.md",
     "runtime/python/onnxruntime/README.md",
     "runtime/python/websocket/README.md",
+    "docs/m2met2/Baseline.md",
+    "examples/industrial_data_pretraining/monotonic_aligner/README_zh.md",
+    "examples/industrial_data_pretraining/sense_voice/README.md",
+    "examples/industrial_data_pretraining/sense_voice/README_zh.md",
+    "examples/industrial_data_pretraining/sense_voice/README_ja.md",
+    "runtime/html5/readme.md",
+    "runtime/html5/readme_zh.md",
 ]
 
 
