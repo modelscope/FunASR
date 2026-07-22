@@ -10,7 +10,7 @@ DOCS_WITH_CURRENT_FUNASR_INSTALL = [
     "docs/vllm_guide_zh.md",
     "docs/vllm_guide_zh_v2.md",
     "examples/industrial_data_pretraining/fun_asr_nano/docs/finetune.md",
-    "examples/industrial_data_pretraining/fun_asr_nano/docs/fintune_zh.md",
+    "examples/industrial_data_pretraining/fun_asr_nano/docs/finetune_zh.md",
 ]
 
 
@@ -20,6 +20,12 @@ def test_current_funasr_install_commands_are_quoted():
         assert '"funasr>=1.3.23"' in text
         assert "funasr>=1.3.0" not in text
         assert not re.search(r"pip install funasr>=", text)
+
+
+def test_fun_asr_nano_finetune_zh_uses_canonical_filename():
+    docs_dir = ROOT / "examples/industrial_data_pretraining/fun_asr_nano/docs"
+    assert (docs_dir / "finetune_zh.md").exists()
+    assert "fintune_zh.md" not in (docs_dir / "finetune.md").read_text()
 
 
 def test_realtime_demo_documents_partial_and_hotword_boundaries():
