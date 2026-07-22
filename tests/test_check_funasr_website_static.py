@@ -1,5 +1,6 @@
 import importlib.util
 import sys
+import urllib.error
 from pathlib import Path
 
 
@@ -83,3 +84,43 @@ def test_website_contract_reports_stale_runtime_and_star_copy():
         and "forbidden `runtime-llamacpp-v0.1.1`" in failure
         for failure in failures
     )
+
+
+def test_fetch_pages_retries_transient_url_errors(monkeypatch):
+    checker = _load_module()
+    calls = []
+
+    class FakeResponse:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+        def read(self):
+            return b"ok"
+
+    def fake_urlopen(url, timeout):
+        calls.append((url, timeout))
+        if len(calls) == 1:
+            raise urllib.error.URLError("temporary SSL handshake timeout")
+        return FakeResponse()
+
+    monkeypatch.setattr(checker.urllib.request, "urlopen", fake_urlopen)
+    monkeypatch.setattr(
+        checker,
+        "PAGE_CONTRACTS",
+        {
+            "https://www.funasr.com/example.html": checker.PageContract(
+                required=("ok",)
+            )
+        },
+    )
+
+    pages = checker.fetch_pages(timeout=3, retries=2)
+
+    assert pages == {"https://www.funasr.com/example.html": "ok"}
+    assert calls == [
+        ("https://www.funasr.com/example.html", 3),
+        ("https://www.funasr.com/example.html", 3),
+    ]
