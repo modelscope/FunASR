@@ -48,6 +48,24 @@ jobs:
               -DGGML_FMA=ON
               -DGGML_F16C=ON
               -DGGML_BMI2=ON
+          - os: ubuntu-latest
+            name: linux-x64-vulkan
+            vulkan: true
+            build_target: llama-funasr-sensevoice
+            timeout_minutes: 90
+            cmake_flags: >-
+              -DGGML_NATIVE=OFF
+              -DGGML_VULKAN=ON
+              -DGGML_AVX=OFF
+              -DGGML_AVX2=OFF
+              -DGGML_AVX_VNNI=OFF
+              -DGGML_AVX512=OFF
+              -DGGML_AVX512_VBMI=OFF
+              -DGGML_AVX512_VNNI=OFF
+              -DGGML_AVX512_BF16=OFF
+              -DGGML_FMA=OFF
+              -DGGML_F16C=OFF
+              -DGGML_BMI2=OFF
           - os: ubuntu-24.04-arm
             name: linux-arm64
             cmake_flags: -DGGML_NATIVE=OFF
@@ -124,6 +142,12 @@ jobs:
       - name: Show CUDA compiler
         if: matrix.cuda
         run: nvcc --version
+      - name: Install Vulkan SDK packages
+        if: matrix.vulkan
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libvulkan-dev glslc spirv-headers vulkan-tools
+          vulkaninfo --summary || true
       - name: Configure and build
         run: |
           # Release binaries must be portable across user machines, not tuned to
@@ -131,9 +155,9 @@ jobs:
           # AVX-VNNI instructions and then crash with SIGILL on ordinary CPUs.
           # Keep the default x64 package conservative, and publish explicit
           # x64-avx2 assets for machines that support AVX2/FMA/F16C/BMI2.
-          # The CUDA release asset is SenseVoiceSmall-specific for now; building
-          # only that target keeps the Windows CUDA job bounded and matches the
-          # backend currently exposed by `--backend cuda`.
+          # The GPU release assets are SenseVoiceSmall-specific for now; building
+          # only that target keeps the bounded jobs aligned with the backend
+          # currently exposed by `--backend cuda` / `--backend vulkan`.
           cmake_args=(
             -B build
             -DCMAKE_BUILD_TYPE=Release
