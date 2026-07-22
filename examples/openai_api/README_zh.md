@@ -148,6 +148,8 @@ BASE_URL=http://localhost:8000 bash smoke_test.sh
 python smoke_test.py --base-url http://localhost:8000
 ```
 
+如果想用一个命令完成 build、run 和 smoke test，可以用 `bash validate_docker.sh` 验证便携 CPU 镜像。具备 NVIDIA Container Toolkit 且镜像已适配 CUDA 时，可以用 `bash validate_docker.sh --gpu` 以 `FUNASR_DEVICE=cuda` 跑同一套 smoke test。
+
 ## Kubernetes 部署
 
 在跨团队共享服务或通过网关暴露服务前，请先阅读 [安全与网关指南](SECURITY_zh.md)，补齐 TLS、鉴权、上传限制、限流和日志策略。
