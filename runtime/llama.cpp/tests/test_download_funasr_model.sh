@@ -170,6 +170,18 @@ assert_readme_quickstart() {
     printf 'non-portable Releases link in %s\n' "$readme" >&2
     exit 1
   fi
+  if ! grep -F 'runtime-llamacpp-v0.1.8' <<<"$section" >/dev/null; then
+    printf 'missing current runtime v0.1.8 link in %s\n' "$readme" >&2
+    exit 1
+  fi
+  if ! grep -F 'funasr-llamacpp-linux-x64-vulkan' <<<"$section" >/dev/null; then
+    printf 'missing Linux Vulkan runtime asset in %s\n' "$readme" >&2
+    exit 1
+  fi
+  if ! grep -F -- '--backend vulkan' <<<"$section" >/dev/null; then
+    printf 'missing Vulkan backend command hint in %s\n' "$readme" >&2
+    exit 1
+  fi
 }
 
 assert_readme_quickstart "$REPO_ROOT/README.md" '### CPU / Edge'
