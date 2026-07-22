@@ -264,12 +264,19 @@ hf download FunAudioLLM/fsmn-vad-GGUF fsmn-vad.gguf --local-dir .\gguf
 .\llama-funasr-sensevoice.exe -m .\gguf\sensevoice-small-q8.gguf --vad .\gguf\fsmn-vad.gguf -a audio.wav --backend cuda
 ```
 
+Use `funasr-llamacpp-linux-x64-vulkan.tar.gz` on Linux GPU systems with a
+working Vulkan driver/ICD:
+
+```bash
+./llama-funasr-sensevoice -m ./gguf/sensevoice-small-q8.gguf --vad ./gguf/fsmn-vad.gguf -a audio.wav --backend vulkan
+```
+
 The current Windows CUDA package targets CUDA architecture 86. RTX 50 / Blackwell
 GPUs report compute capability 12.0 (`sm_120`) and should use the CPU package or
 build from source with `-DCMAKE_CUDA_ARCHITECTURES=120` until a dedicated CUDA
 asset is published.
 
-**Prebuilt binaries:** [Releases](https://github.com/modelscope/FunASR/releases) · [v0.1.7](https://github.com/modelscope/FunASR/releases/tag/runtime-llamacpp-v0.1.7) · [Windows CUDA zip](https://github.com/modelscope/FunASR/releases/download/runtime-llamacpp-v0.1.7/funasr-llamacpp-windows-x64-cuda.zip) · **Download & quickstart:** [funasr.com/llama-cpp](https://www.funasr.com/llama-cpp.html) · **GGUF models:** [Hugging Face](https://huggingface.co/FunAudioLLM) · **Docs & benchmarks:** [runtime/llama.cpp/](./runtime/llama.cpp/)
+**Prebuilt binaries:** [Releases](https://github.com/modelscope/FunASR/releases) · [v0.1.8](https://github.com/modelscope/FunASR/releases/tag/runtime-llamacpp-v0.1.8) · [Linux Vulkan tarball](https://github.com/modelscope/FunASR/releases/download/runtime-llamacpp-v0.1.8/funasr-llamacpp-linux-x64-vulkan.tar.gz) · [Windows CUDA zip](https://github.com/modelscope/FunASR/releases/download/runtime-llamacpp-v0.1.8/funasr-llamacpp-windows-x64-cuda.zip) · **Download & quickstart:** [funasr.com/llama-cpp](https://www.funasr.com/llama-cpp.html) · **GGUF models:** [Hugging Face](https://huggingface.co/FunAudioLLM) · **Docs & benchmarks:** [runtime/llama.cpp/](./runtime/llama.cpp/)
 
 [OpenAI API example →](./examples/openai_api/) · [Gradio demo →](./examples/openai_api/GRADIO.md) · [Client recipes →](./examples/openai_api/CLIENTS.md) · [JavaScript/TypeScript recipes →](./examples/openai_api/JAVASCRIPT.md) · [Kubernetes template →](./examples/openai_api/kubernetes/) · [Workflow recipes →](./examples/openai_api/WORKFLOWS.md) · [Postman collection →](./examples/openai_api/POSTMAN.md) · [OpenAPI spec →](./examples/openai_api/OPENAPI.md) · [Security guide →](./examples/openai_api/SECURITY.md) · [Deployment matrix →](./docs/deployment_matrix.md) · [Deployment docs →](./runtime/readme.md) · [Agent integration →](https://modelscope.github.io/FunASR/agent.html)
 
@@ -294,6 +301,7 @@ asset is published.
 ## What's new
 
 - 2026/07/22: **v1.3.23 on PyPI** — packaging and onboarding refresh for this week's community integrations: the PyPI long description now highlights the current OpenAI-compatible server path, llama.cpp/GGUF runtime notes, Windows CUDA architecture guidance, and browser quickstart links shipped in the repository docs. Runtime code is unchanged from v1.3.22. Install with `python -m pip install -U "funasr==1.3.23"`. [Release ->](https://github.com/modelscope/FunASR/releases/tag/v1.3.23)
+- 2026/07/22: **llama.cpp runtime v0.1.8** — adds `funasr-llamacpp-linux-x64-vulkan.tar.gz` for SenseVoiceSmall on Linux Vulkan GPUs. Run `llama-funasr-sensevoice ... --backend vulkan`; CPU, AVX2, macOS arm64, Windows CPU/AVX2, and Windows CUDA packages remain available. [Release ->](https://github.com/modelscope/FunASR/releases/tag/runtime-llamacpp-v0.1.8)
 - 2026/07/19: **v1.3.22 on PyPI** — `funasr-server` now fills OpenAI-compatible `verbose_json.segments` for text-only SenseVoice/Paraformer fallback responses, so subtitle clients no longer see an empty `segments` array when `text` is populated. Install with `python -m pip install -U "funasr==1.3.22"`. [Release ->](https://github.com/modelscope/FunASR/releases/tag/v1.3.22)
 - 2026/07/19: **v1.3.21 on PyPI** — fixes first-import onboarding in fresh environments where users install `funasr` before choosing a platform-specific PyTorch build. `import funasr` and `funasr.__version__` now work without torch; accessing `AutoModel` still requires PyTorch and raises a clear install hint. Install with `python -m pip install -U "funasr==1.3.21"`. [Release ->](https://github.com/modelscope/FunASR/releases/tag/v1.3.21)
 - 2026/07/19: **v1.3.20 on PyPI** — PyPI metadata and install guidance now point at the current FunASR docs, community integrations, and quoted `python -m pip install -U "funasr>=1.3.19"` commands for Fun-ASR-Nano deployment paths. This is a documentation/packaging sync; runtime code remains unchanged from v1.3.19. Install with `python -m pip install -U "funasr==1.3.20"`. [Release ->](https://github.com/modelscope/FunASR/releases/tag/v1.3.20)
