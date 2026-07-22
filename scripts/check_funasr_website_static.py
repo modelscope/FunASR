@@ -54,10 +54,21 @@ PAGE_CONTRACTS: dict[str, PageContract] = {
         required=("recommended funasr &gt;= 1.3.26", "/en/donors.html"),
         forbidden=("1.3.10",),
     ),
+    f"{BASE_URL}/llama-cpp.html": PageContract(
+        required=(
+            "runtime-llamacpp-v0.1.8",
+            "funasr-llamacpp-linux-x64-vulkan.tar.gz",
+            "funasr-llamacpp-windows-x64-cuda.zip",
+            "Fun-ASR-Nano",
+            "GGUF",
+        ),
+        forbidden=("runtime-llamacpp-v0.1.1",),
+    ),
     f"{BASE_URL}/blog/funasr-llama-cpp-whisper-cpp-alternative.html": PageContract(
         required=(
             "runtime-llamacpp-v0.1.8",
             "funasr-llamacpp-linux-x64-vulkan.tar.gz",
+            "Fun-ASR-Nano-GGUF",
             "Vulkan / CUDA",
             "/donors.html",
         ),
@@ -67,6 +78,7 @@ PAGE_CONTRACTS: dict[str, PageContract] = {
         required=(
             "runtime-llamacpp-v0.1.8",
             "funasr-llamacpp-linux-x64-vulkan.tar.gz",
+            "Fun-ASR-Nano-GGUF",
             "Vulkan / CUDA",
             "/en/donors.html",
         ),
