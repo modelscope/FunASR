@@ -353,6 +353,51 @@ def test_collect_ecosystem_metrics_sums_repositories_and_target_gap(monkeypatch)
     ]
 
 
+def test_collect_pypi_download_metrics_sums_recent_windows(monkeypatch):
+    module = load_growth_metrics_module()
+
+    def fake_fetch_json(url, headers=None):
+        assert url == "https://pypistats.org/api/packages/funasr/overall?mirrors=false"
+        return {
+            "data": [
+                {
+                    "category": "without_mirrors",
+                    "date": f"2026-07-{day:02d}",
+                    "downloads": day,
+                }
+                for day in range(1, 32)
+            ]
+        }
+
+    monkeypatch.setattr(module, "fetch_json", fake_fetch_json)
+
+    metrics = module.collect_pypi_download_metrics("funasr")
+
+    assert metrics == {
+        "source": "pypistats.org",
+        "source_url": "https://pypistats.org/packages/funasr",
+        "latest_date": "2026-07-31",
+        "downloads_last_7_days": sum(range(25, 32)),
+        "downloads_last_30_days": sum(range(2, 32)),
+        "status": "available",
+    }
+
+
+def test_collect_pypi_download_metrics_reports_unavailable_without_failing(monkeypatch):
+    module = load_growth_metrics_module()
+
+    def fake_fetch_json(url, headers=None):
+        raise RuntimeError("HTTP 429")
+
+    monkeypatch.setattr(module, "fetch_json", fake_fetch_json)
+
+    metrics = module.collect_pypi_download_metrics("funasr")
+
+    assert metrics["status"] == "unavailable"
+    assert metrics["source"] == "pypistats.org"
+    assert "HTTP 429" in metrics["reason"]
+
+
 def test_collect_ecosystem_metrics_calculates_daily_target(monkeypatch):
     module = load_growth_metrics_module()
 
@@ -394,6 +439,42 @@ def test_collect_ecosystem_metrics_calculates_daily_target(monkeypatch):
     assert metrics["ecosystem"]["target_date"] == "2026-09-30"
     assert metrics["ecosystem"]["days_remaining"] == 92
     assert metrics["ecosystem"]["required_daily_average"] == 181
+
+
+def test_format_ecosystem_markdown_includes_pypi_download_windows():
+    module = load_growth_metrics_module()
+
+    metrics = {
+        "collected_at_utc": "2026-07-23T00:00:00+00:00",
+        "ecosystem": {
+            "repositories": [],
+            "total_stars": 35787,
+            "baseline_stars": 31224,
+            "target_additional_stars": 20000,
+            "added_stars": 4563,
+            "remaining_to_target": 15437,
+            "target_date": "2026-09-30",
+            "days_remaining": 70,
+            "required_daily_average": 221,
+        },
+        "pypi": {
+            "package": "funasr",
+            "version": "1.3.26",
+            "project_url": "https://pypi.org/project/funasr/",
+            "downloads": {
+                "status": "available",
+                "latest_date": "2026-07-22",
+                "downloads_last_7_days": 70123,
+                "downloads_last_30_days": 301234,
+                "source_url": "https://pypistats.org/packages/funasr",
+            },
+        },
+    }
+
+    output = module.format_ecosystem_markdown(metrics)
+
+    assert "- PyPI downloads: **70,123** last 7 days; **301,234** last 30 days" in output
+    assert "through 2026-07-22" in output
 
 
 def test_collect_integration_metrics_summarizes_pull_request_checks(monkeypatch):

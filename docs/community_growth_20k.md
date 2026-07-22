@@ -370,7 +370,7 @@ Paste the Markdown output into launch notes, weekly community updates, or releas
 - [ ] Pin a GitHub discussion for the release. The release discussion exists at [`modelscope/FunASR#3376`](https://github.com/modelscope/FunASR/discussions/3376), but the GitHub GraphQL API currently exposes `createDiscussion` and `updateDiscussion` but no discussion pin mutation; pin manually in the GitHub Discussions UI or retry if GitHub exposes an API for discussion pinning.
 - [ ] Triage all new issues within 48 hours.
 - [ ] Convert top 3 support questions into docs.
-- [ ] Track stars, PyPI downloads, issue volume, and docs traffic.
+- [ ] Track stars, PyPI downloads, issue volume, and docs traffic. `collect_growth_metrics.py` now tracks GitHub stars, open issues, and open pull requests for the four core repositories and adds PyPIStats download windows for `funasr` as `downloads_last_7_days` and `downloads_last_30_days` when `pypistats.org` is reachable. The script keeps the patrol usable when PyPIStats is rate-limited by reporting downloads as unavailable instead of failing the run. GitHub/PyPI tracking is now covered; docs traffic remains unavailable until an analytics credential or export is connected.
 
 ## Release-note template
 
