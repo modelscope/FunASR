@@ -31,7 +31,7 @@
 pip3 install -U modelscope funasr flask
 # 中国大陆用户，如果遇到网络问题，可以通过下面指令安装：
 # pip3 install -U modelscope funasr -i https://mirror.sjtu.edu.cn/pypi/web/simple
-git clone https://github.com/alibaba/FunASR.git && cd FunASR
+git clone https://github.com/modelscope/FunASR.git && cd FunASR
 ```
 
 #### 启动ASR服务

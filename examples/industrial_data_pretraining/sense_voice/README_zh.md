@@ -260,7 +260,7 @@ fastapi run --port 50000
 ### 安装训练环境
 
 ```shell
-git clone https://github.com/alibaba/FunASR.git && cd FunASR
+git clone https://github.com/modelscope/FunASR.git && cd FunASR
 pip3 install -e ./
 ```
 

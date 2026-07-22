@@ -3,7 +3,7 @@
 # 语音识别
 
 > **注意**:
-> pipeline 支持 [modelscope模型仓库](https://alibaba-damo-academy.github.io/FunASR/en/model_zoo/modelscope_models.html#pretrained-models-on-modelscope) 中的所有模型进行推理和微调。这里我们以典型模型作为示例来演示使用方法。
+> pipeline 支持 [modelscope模型仓库](https://github.com/modelscope/FunASR/tree/main/model_zoo#pretrained-models-on-modelscope) 中的所有模型进行推理和微调。这里我们以典型模型作为示例来演示使用方法。
 
 ## 推理
 
@@ -20,7 +20,7 @@ print(res)
 
 ### API接口说明
 #### AutoModel 定义
-- `model`: [模型仓库](https://alibaba-damo-academy.github.io/FunASR/en/model_zoo/modelscope_models.html#pretrained-models-on-modelscope) 中的模型名称，或本地磁盘中的模型路径
+- `model`: [模型仓库](https://github.com/modelscope/FunASR/tree/main/model_zoo#pretrained-models-on-modelscope) 中的模型名称，或本地磁盘中的模型路径
 - `device`: `cuda`（默认），使用 GPU 进行推理。如果为`cpu`，则使用 CPU 进行推理
 - `ncpu`: `None` （默认），设置用于 CPU 内部操作并行性的线程数
 - `output_dir`: `None` （默认），如果设置，输出结果的输出路径
