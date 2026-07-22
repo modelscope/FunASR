@@ -169,6 +169,32 @@ def test_model_zoo_tables_use_current_paraformer_modelscope_entry():
         assert stale not in text
 
 
+def test_full_modelscope_tables_use_current_core_entries():
+    docs = [
+        (ROOT / "model_zoo/modelscope_models.md").read_text(),
+        (ROOT / "model_zoo/modelscope_models_zh.md").read_text(),
+    ]
+
+    current_entries = [
+        "models/iic/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary",
+        "models/iic/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online/summary",
+        "models/iic/punc_ct-transformer_cn-en-common-vocab471067-large/summary",
+        "models/iic/speech_fsmn_vad_zh-cn-16k-common-pytorch/summary",
+    ]
+    stale_entries = [
+        "models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary",
+        "models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online/summary",
+        "models/damo/punc_ct-transformer_cn-en-common-vocab471067-large/summary",
+        "models/damo/speech_fsmn_vad_zh-cn-16k-common-pytorch/summary",
+    ]
+
+    for text in docs:
+        for marker in current_entries:
+            assert marker in text
+        for marker in stale_entries:
+            assert marker not in text
+
+
 def test_model_zoo_landing_tables_link_huggingface_repos():
     docs = [
         (
