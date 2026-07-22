@@ -87,7 +87,6 @@ DEFAULT_INTEGRATION_PRS = [
     "bharathgs/Awesome-pytorch-list#164",
     "owainlewis/awesome-artificial-intelligence#243",
     "steven2358/awesome-generative-ai#821",
-    "WangRongsheng/awesome-LLM-resources#162",
     "crownpku/Awesome-Chinese-NLP#32",
 ]
 FAILED_CHECK_CONCLUSIONS = {"action_required", "cancelled", "failure", "startup_failure", "timed_out"}
@@ -290,9 +289,6 @@ KNOWN_ASSISTED_REVIEW_REQUESTS = {
         "reason": "high-star discovery-list PR already opened with project evidence; avoid duplicate pings",
     },
     "steven2358/awesome-generative-ai#821": {
-        "reason": "high-star discovery-list PR already opened with project evidence; avoid duplicate pings",
-    },
-    "WangRongsheng/awesome-LLM-resources#162": {
         "reason": "high-star discovery-list PR already opened with project evidence; avoid duplicate pings",
     },
     "crownpku/Awesome-Chinese-NLP#32": {

@@ -53,6 +53,7 @@
 | [voiceai](https://github.com/mahimairaja/voiceai) | 面向 Voice AI agent builder 的资源地图，在 Speech-to-text (STT / ASR) 部分同时收录 FunASR 和 SenseVoice，帮助开发者发现自托管本地 ASR 与多语种语音理解选项。 | [英文 README](https://github.com/mahimairaja/voiceai#readme)、[中文 README](https://github.com/mahimairaja/voiceai/blob/main/README_zh.md) 和已合并 [#16](https://github.com/mahimairaja/voiceai/pull/16)。 |
 | [Large-Audio-Models](https://github.com/liusongxiang/Large-Audio-Models) | 面向音频领域 foundation model 的资源目录，已收录 FunAudioLLM 语音理解与生成论文及 SenseVoice 代码入口，方便语音、歌声和音乐模型读者发现项目。 | [项目 README](https://github.com/liusongxiang/Large-Audio-Models#readme) 和已合并 [#26](https://github.com/liusongxiang/Large-Audio-Models/pull/26)。 |
 | [Neural-Codec-and-Speech-Language-Models](https://github.com/LqNoob/Neural-Codec-and-Speech-Language-Models) | 面向 neural codec、TTS 和 speech language model 的资源目录，已同时收录 Fun-ASR-Nano 与 SenseVoice，方便对比 ASR 和语音理解模型的读者发现项目。 | [项目 README](https://github.com/LqNoob/Neural-Codec-and-Speech-Language-Models#readme) 和已合并 [#4](https://github.com/LqNoob/Neural-Codec-and-Speech-Language-Models/pull/4)。 |
+| [awesome-LLM-resources](https://github.com/WangRongsheng/awesome-LLM-resources) | 中文 LLM 资源目录，已在 STT / ASR 资源中收录 FunASR 和 SenseVoice，为多模态与语音工具读者提供另一个维护中的发现入口。 | [项目 README](https://github.com/WangRongsheng/awesome-LLM-resources#readme) 和已合并 [#162](https://github.com/WangRongsheng/awesome-LLM-resources/pull/162)。 |
 
 ## 采用社区集成前
 

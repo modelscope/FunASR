@@ -128,11 +128,11 @@ def test_default_integration_prs_include_high_star_awesome_discovery_lanes():
         "bharathgs/Awesome-pytorch-list#164",
         "owainlewis/awesome-artificial-intelligence#243",
         "steven2358/awesome-generative-ai#821",
-        "WangRongsheng/awesome-LLM-resources#162",
         "crownpku/Awesome-Chinese-NLP#32",
     }
 
     assert expected_prs.issubset(set(module.DEFAULT_INTEGRATION_PRS))
+    assert "WangRongsheng/awesome-LLM-resources#162" not in module.DEFAULT_INTEGRATION_PRS
 
 
 def test_high_star_awesome_discovery_lanes_wait_for_maintainer_review():
@@ -153,11 +153,11 @@ def test_high_star_awesome_discovery_lanes_wait_for_maintainer_review():
         "bharathgs/Awesome-pytorch-list#164",
         "owainlewis/awesome-artificial-intelligence#243",
         "steven2358/awesome-generative-ai#821",
-        "WangRongsheng/awesome-LLM-resources#162",
         "crownpku/Awesome-Chinese-NLP#32",
     }
 
     assert expected_prs.issubset(set(module.KNOWN_ASSISTED_REVIEW_REQUESTS))
+    assert "WangRongsheng/awesome-LLM-resources#162" not in module.KNOWN_ASSISTED_REVIEW_REQUESTS
 
 
 def test_default_integration_prs_include_missing_validated_discovery_lanes():
