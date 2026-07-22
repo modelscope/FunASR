@@ -696,6 +696,7 @@ def test_known_assisted_review_requests_include_validated_review_gate_prs():
         "livekit/agents#6176",
         "run-llama/llama_index#21958",
         "run-llama/llama_index#21996",
+        "BerriAI/litellm-docs#610",
         "mudler/LocalAI#10090",
         "ray-project/ray#64053",
         "agno-agi/agno#8501",
