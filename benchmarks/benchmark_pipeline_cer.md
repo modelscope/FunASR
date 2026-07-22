@@ -11,7 +11,7 @@
 
 
 ### Tools
-#### [Install Requirements](https://alibaba-damo-academy.github.io/FunASR/en/installation/installation.html#installation)
+#### [Install Requirements](https://modelscope.github.io/FunASR/installation.html#installation)
 
 Install ModelScope and FunASR from pip
 ```shell
@@ -22,7 +22,7 @@ pip install -U modelscope funasr
 
 Or install FunASR from source code
 ```shell
-git clone https://github.com/alibaba/FunASR.git && cd FunASR
+git clone https://github.com/modelscope/FunASR.git && cd FunASR
 pip install -e ./
 # For the users in China, you could install with the command:
 # pip install -e ./ -i https://mirror.sjtu.edu.cn/pypi/web/simple
@@ -32,7 +32,7 @@ pip install -e ./
 #### Recipe
 
 
-##### [Test CER](https://alibaba-damo-academy.github.io/FunASR/en/modelscope_pipeline/asr_pipeline.html#inference-with-multi-thread-cpus-or-multi-gpus)
+##### [Test CER](https://modelscope.github.io/FunASR/tutorial.html)
 set the `model`, `data_dir` and `output_dir` in `infer.sh`.
 ```shell
 cd egs_modelscope/asr/TEMPLATE

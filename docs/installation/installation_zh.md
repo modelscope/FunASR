@@ -50,7 +50,7 @@ pip3 install -U funasr
 #### 或者从源代码安装
 
 ``` sh
-git clone https://github.com/alibaba/FunASR.git && cd FunASR
+git clone https://github.com/modelscope/FunASR.git && cd FunASR
 pip3 install -e ./
 # 对于中国大陆用户，可以使用以下命令进行安装：
 # pip3 install -e ./ -i https://mirror.sjtu.edu.cn/pypi/web/simple
