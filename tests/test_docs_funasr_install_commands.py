@@ -106,6 +106,18 @@ def test_chinese_readme_model_table_uses_current_modelscope_entries():
         assert marker not in text
 
 
+def test_readme_model_tables_surface_public_gguf_entries():
+    readmes = [
+        (ROOT / "README.md").read_text(),
+        (ROOT / "README_zh.md").read_text(),
+    ]
+
+    for text in readmes:
+        assert "https://huggingface.co/FunAudioLLM/Fun-ASR-Nano-GGUF" in text
+        assert "https://huggingface.co/FunAudioLLM/SenseVoiceSmall-GGUF" in text
+        assert "https://huggingface.co/FunAudioLLM/Fun-ASR-MLT-Nano-GGUF" not in text
+
+
 def test_realtime_demo_documents_partial_and_hotword_boundaries():
     text = (
         ROOT
