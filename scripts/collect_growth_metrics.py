@@ -2,7 +2,8 @@
 """Collect lightweight growth metrics for the FunASR repository.
 
 The script uses only Python's standard library and public APIs by default.
-Set GITHUB_TOKEN to raise GitHub API rate limits in CI or release workflows.
+Set GITHUB_TOKEN, or place a token in the FunASR ops token file, to raise
+GitHub API rate limits in CI or release workflows.
 """
 
 from __future__ import annotations
@@ -29,6 +30,7 @@ DEFAULT_PACKAGE = "funasr"
 DEFAULT_BASELINE_STARS = 31224
 DEFAULT_TARGET_ADDITIONAL_STARS = 20000
 DEFAULT_TARGET_DATE = "2026-09-30"
+OPS_GITHUB_TOKEN_PATH = Path("/cpfs_speech/user/zhifu.gzf/.config/funasr-ops/github_token")
 DEFAULT_INTEGRATION_PRS = [
     "huggingface/transformers#46180",
     "yuekaizhang/Fun-ASR-vllm#21",
@@ -334,11 +336,13 @@ def github_headers() -> Dict[str, str]:
     }
     token = os.environ.get("GITHUB_TOKEN")
     if not token:
-        token_path = Path.home() / ".config" / "funasr-ops" / "github_token"
-        try:
-            token = token_path.read_text(encoding="utf-8").strip()
-        except OSError:
-            token = None
+        for token_path in github_token_paths():
+            try:
+                token = token_path.read_text(encoding="utf-8").strip()
+            except OSError:
+                continue
+            if token:
+                break
     if not token:
         try:
             completed = subprocess.run(
@@ -356,6 +360,13 @@ def github_headers() -> Dict[str, str]:
     if token:
         headers["Authorization"] = f"Bearer {token}"
     return headers
+
+
+def github_token_paths() -> Sequence[Path]:
+    return (
+        Path.home() / ".config" / "funasr-ops" / "github_token",
+        OPS_GITHUB_TOKEN_PATH,
+    )
 
 
 def collect_github_repo_metrics(repo: str) -> Dict[str, Any]:
