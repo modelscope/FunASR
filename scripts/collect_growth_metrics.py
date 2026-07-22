@@ -123,8 +123,8 @@ KNOWN_REVIEW_GATES = {
         "reason": "Contributor-owned branch is dirty; conflict recipe already posted from the FunASR side",
     },
     "punkpeye/awesome-mcp-servers#7153": {
-        "action": "submit Glama",
-        "reason": "Glama listing and score badge required before review",
+        "action": "wait for maintainer review",
+        "reason": "Glama listing and score badge are live",
     },
     "mem0ai/mem0#5571": {
         "action": "wait for preview authorization",
