@@ -22860,7 +22860,7 @@
     res = model.generate(input=kwargs[&quot;input&quot;])
     print(res)
 </code></pre></details></div>
-<div class="api-detail" id="e454"><span class="dtag badge-f">function</span><h2><code>detect_and_fix_hallucination(text, max_ngram_length, max_occurrences)</code></h2><div class="dmod">funasr.bin.realtime_ws · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/realtime_ws.py#L31" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Detect repeated patterns (hallucination) and truncate to keep one occurrence.</p>
+<div class="api-detail" id="e454"><span class="dtag badge-f">function</span><h2><code>detect_and_fix_hallucination(text, max_ngram_length, max_occurrences)</code></h2><div class="dmod">funasr.bin.realtime_ws · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/realtime_ws.py#L36" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Detect repeated patterns (hallucination) and truncate to keep one occurrence.</p>
 </div><details class="src-block"><summary>📄 Source code</summary><pre><code>def detect_and_fix_hallucination(text, max_ngram_length=12, max_occurrences=3):
     &quot;&quot;&quot;Detect repeated patterns (hallucination) and truncate to keep one occurrence.&quot;&quot;&quot;
     if not text or len(text) &lt; max_ngram_length * 2:
@@ -22891,8 +22891,8 @@
                 if end_pos &gt;= 0:
                     return text[:end_pos + len(repeated)], True
             return text[:len(text)//2], True
-</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/realtime_ws.py#L31" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
-<div class="api-detail" id="e455"><span class="dtag badge-c">class</span><h2>ClientEndpointVAD</h2><div class="dmod">funasr.bin.realtime_ws · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/realtime_ws.py#L79" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Track an utterance start without loading or running a VAD model.</p>
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/realtime_ws.py#L36" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
+<div class="api-detail" id="e455"><span class="dtag badge-c">class</span><h2>ClientEndpointVAD</h2><div class="dmod">funasr.bin.realtime_ws · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/realtime_ws.py#L114" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Track an utterance start without loading or running a VAD model.</p>
 </div><details class="src-block"><summary>📄 Source code</summary><pre><code>class ClientEndpointVAD:
     &quot;&quot;&quot;Track an utterance start without loading or running a VAD model.&quot;&quot;&quot;
 
@@ -22905,20 +22905,20 @@
 
     def reset(self):
         self.current_speech_start = None
-</code></pre></details><h3 class="mt">Methods</h3><div class="mblk"><code>.start_utterance(start_ms)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/realtime_ws.py#L85" target="_blank" class="gh-link">L85</a><div class="mdoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source</summary><pre><code>    def start_utterance(self, start_ms):
+</code></pre></details><h3 class="mt">Methods</h3><div class="mblk"><code>.start_utterance(start_ms)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/realtime_ws.py#L120" target="_blank" class="gh-link">L120</a><div class="mdoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source</summary><pre><code>    def start_utterance(self, start_ms):
         if self.current_speech_start is None:
             self.current_speech_start = start_ms
-</code></pre></details></div><div class="mblk"><code>.reset()</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/realtime_ws.py#L89" target="_blank" class="gh-link">L89</a><div class="mdoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source</summary><pre><code>    def reset(self):
+</code></pre></details></div><div class="mblk"><code>.reset()</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/realtime_ws.py#L124" target="_blank" class="gh-link">L124</a><div class="mdoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source</summary><pre><code>    def reset(self):
         self.current_speech_start = None
 </code></pre></details></div></div>
-<div class="api-detail" id="e456"><span class="dtag badge-m">method</span><h2><code>ClientEndpointVAD.start_utterance(start_ms)</code></h2><div class="dmod">funasr.bin.realtime_ws.ClientEndpointVAD · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/realtime_ws.py#L85" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source code</summary><pre><code>    def start_utterance(self, start_ms):
+<div class="api-detail" id="e456"><span class="dtag badge-m">method</span><h2><code>ClientEndpointVAD.start_utterance(start_ms)</code></h2><div class="dmod">funasr.bin.realtime_ws.ClientEndpointVAD · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/realtime_ws.py#L120" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source code</summary><pre><code>    def start_utterance(self, start_ms):
         if self.current_speech_start is None:
             self.current_speech_start = start_ms
 </code></pre></details></div>
-<div class="api-detail" id="e457"><span class="dtag badge-m">method</span><h2><code>ClientEndpointVAD.reset()</code></h2><div class="dmod">funasr.bin.realtime_ws.ClientEndpointVAD · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/realtime_ws.py#L89" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source code</summary><pre><code>    def reset(self):
+<div class="api-detail" id="e457"><span class="dtag badge-m">method</span><h2><code>ClientEndpointVAD.reset()</code></h2><div class="dmod">funasr.bin.realtime_ws.ClientEndpointVAD · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/realtime_ws.py#L124" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source code</summary><pre><code>    def reset(self):
         self.current_speech_start = None
 </code></pre></details></div>
-<div class="api-detail" id="e458"><span class="dtag badge-c">class</span><h2>HybridSpeakerTracker</h2><div class="dmod">funasr.bin.realtime_ws · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/realtime_ws.py#L93" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Speaker diarization: streaming ClusterBackend + final re-clustering.</p>
+<div class="api-detail" id="e458"><span class="dtag badge-c">class</span><h2>HybridSpeakerTracker</h2><div class="dmod">funasr.bin.realtime_ws · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/realtime_ws.py#L128" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Speaker diarization: streaming ClusterBackend + final re-clustering.</p>
 </div><details class="src-block"><summary>📄 Source code</summary><pre><code>class HybridSpeakerTracker:
     &quot;&quot;&quot;Speaker diarization: streaming ClusterBackend + final re-clustering.&quot;&quot;&quot;
 
@@ -22949,7 +22949,7 @@
         self.all_chunks = deque(maxlen=max_history_chunks)
         self.all_embeddings = deque(maxlen=max_history_chunks)
         self.last_speaker_id = 0
-</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/realtime_ws.py#L93" target="_blank" class="src-more">View full source on GitHub →</a></details><h3 class="mt">Methods</h3><div class="mblk"><code>.assign_streaming(audio_samples, seg_start_s, seg_end_s, sentence)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/realtime_ws.py#L125" target="_blank" class="gh-link">L125</a><div class="mdoc"><p>Assign speaker ID during streaming using ClusterBackend.</p>
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/realtime_ws.py#L128" target="_blank" class="src-more">View full source on GitHub →</a></details><h3 class="mt">Methods</h3><div class="mblk"><code>.assign_streaming(audio_samples, seg_start_s, seg_end_s, sentence)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/realtime_ws.py#L160" target="_blank" class="gh-link">L160</a><div class="mdoc"><p>Assign speaker ID during streaming using ClusterBackend.</p>
 </div><details class="src-block"><summary>📄 Source</summary><pre><code>    def assign_streaming(self, audio_samples, seg_start_s, seg_end_s, sentence):
         &quot;&quot;&quot;Assign speaker ID during streaming using ClusterBackend.&quot;&quot;&quot;
         vad_seg = [[seg_start_s, seg_end_s, audio_samples]]
@@ -22972,7 +22972,7 @@
         self.distribute_spk(temp, sv_output)
         sentence[&quot;spk&quot;] = temp[0].get(&quot;spk&quot;, self.last_speaker_id)
         self.last_speaker_id = sentence[&quot;spk&quot;]
-</code></pre></details></div><div class="mblk"><code>.finalize(sentences, min_split_s)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/realtime_ws.py#L215" target="_blank" class="gh-link">L215</a><div class="mdoc"><p>Final re-clustering for accurate speaker assignment.</p>
+</code></pre></details></div><div class="mblk"><code>.finalize(sentences, min_split_s)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/realtime_ws.py#L250" target="_blank" class="gh-link">L250</a><div class="mdoc"><p>Final re-clustering for accurate speaker assignment.</p>
 </div><details class="src-block"><summary>📄 Source</summary><pre><code>    def finalize(self, sentences, min_split_s=3.0):
         &quot;&quot;&quot;Final re-clustering for accurate speaker assignment.&quot;&quot;&quot;
         if not self.all_embeddings or not sentences:
@@ -23003,13 +23003,13 @@
                 prefix.update(text=prefix_text, end=history_start_ms)
                 final_sentences.append(prefix)
                 current.update(
-</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/realtime_ws.py#L215" target="_blank" class="src-more">View full source →</a></details></div><div class="mblk"><code>.reset()</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/realtime_ws.py#L309" target="_blank" class="gh-link">L309</a><div class="mdoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source</summary><pre><code>    def reset(self):
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/realtime_ws.py#L250" target="_blank" class="src-more">View full source →</a></details></div><div class="mblk"><code>.reset()</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/realtime_ws.py#L344" target="_blank" class="gh-link">L344</a><div class="mdoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source</summary><pre><code>    def reset(self):
         self.speaker_centers = []
         self.speaker_center_updates = []
         self.all_chunks.clear()
         self.all_embeddings.clear()
         self.last_speaker_id = 0
-</code></pre></details></div><div class="mblk"><code>.session_stats()</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/realtime_ws.py#L316" target="_blank" class="gh-link">L316</a><div class="mdoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source</summary><pre><code>    def session_stats(self):
+</code></pre></details></div><div class="mblk"><code>.session_stats()</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/realtime_ws.py#L351" target="_blank" class="gh-link">L351</a><div class="mdoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source</summary><pre><code>    def session_stats(self):
         return {
             &quot;speaker_history_chunks&quot;: len(self.all_chunks),
             &quot;speaker_history_embeddings&quot;: len(self.all_embeddings),
@@ -23019,7 +23019,7 @@
             &quot;last_speaker_id&quot;: self.last_speaker_id,
         }
 </code></pre></details></div></div>
-<div class="api-detail" id="e459"><span class="dtag badge-m">method</span><h2><code>HybridSpeakerTracker.assign_streaming(audio_samples, seg_start_s, seg_end_s, sentence)</code></h2><div class="dmod">funasr.bin.realtime_ws.HybridSpeakerTracker · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/realtime_ws.py#L125" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Assign speaker ID during streaming using ClusterBackend.</p>
+<div class="api-detail" id="e459"><span class="dtag badge-m">method</span><h2><code>HybridSpeakerTracker.assign_streaming(audio_samples, seg_start_s, seg_end_s, sentence)</code></h2><div class="dmod">funasr.bin.realtime_ws.HybridSpeakerTracker · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/realtime_ws.py#L160" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Assign speaker ID during streaming using ClusterBackend.</p>
 </div><details class="src-block"><summary>📄 Source code</summary><pre><code>    def assign_streaming(self, audio_samples, seg_start_s, seg_end_s, sentence):
         &quot;&quot;&quot;Assign speaker ID during streaming using ClusterBackend.&quot;&quot;&quot;
         vad_seg = [[seg_start_s, seg_end_s, audio_samples]]
@@ -23043,7 +23043,7 @@
         sentence[&quot;spk&quot;] = temp[0].get(&quot;spk&quot;, self.last_speaker_id)
         self.last_speaker_id = sentence[&quot;spk&quot;]
 </code></pre></details></div>
-<div class="api-detail" id="e460"><span class="dtag badge-m">method</span><h2><code>HybridSpeakerTracker.finalize(sentences, min_split_s)</code></h2><div class="dmod">funasr.bin.realtime_ws.HybridSpeakerTracker · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/realtime_ws.py#L215" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Final re-clustering for accurate speaker assignment.</p>
+<div class="api-detail" id="e460"><span class="dtag badge-m">method</span><h2><code>HybridSpeakerTracker.finalize(sentences, min_split_s)</code></h2><div class="dmod">funasr.bin.realtime_ws.HybridSpeakerTracker · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/realtime_ws.py#L250" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Final re-clustering for accurate speaker assignment.</p>
 </div><details class="src-block"><summary>📄 Source code</summary><pre><code>    def finalize(self, sentences, min_split_s=3.0):
         &quot;&quot;&quot;Final re-clustering for accurate speaker assignment.&quot;&quot;&quot;
         if not self.all_embeddings or not sentences:
@@ -23074,15 +23074,15 @@
                 prefix.update(text=prefix_text, end=history_start_ms)
                 final_sentences.append(prefix)
                 current.update(
-</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/realtime_ws.py#L215" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
-<div class="api-detail" id="e461"><span class="dtag badge-m">method</span><h2><code>HybridSpeakerTracker.reset()</code></h2><div class="dmod">funasr.bin.realtime_ws.HybridSpeakerTracker · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/realtime_ws.py#L309" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source code</summary><pre><code>    def reset(self):
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/realtime_ws.py#L250" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
+<div class="api-detail" id="e461"><span class="dtag badge-m">method</span><h2><code>HybridSpeakerTracker.reset()</code></h2><div class="dmod">funasr.bin.realtime_ws.HybridSpeakerTracker · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/realtime_ws.py#L344" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source code</summary><pre><code>    def reset(self):
         self.speaker_centers = []
         self.speaker_center_updates = []
         self.all_chunks.clear()
         self.all_embeddings.clear()
         self.last_speaker_id = 0
 </code></pre></details></div>
-<div class="api-detail" id="e462"><span class="dtag badge-m">method</span><h2><code>HybridSpeakerTracker.session_stats()</code></h2><div class="dmod">funasr.bin.realtime_ws.HybridSpeakerTracker · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/realtime_ws.py#L316" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source code</summary><pre><code>    def session_stats(self):
+<div class="api-detail" id="e462"><span class="dtag badge-m">method</span><h2><code>HybridSpeakerTracker.session_stats()</code></h2><div class="dmod">funasr.bin.realtime_ws.HybridSpeakerTracker · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/realtime_ws.py#L351" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source code</summary><pre><code>    def session_stats(self):
         return {
             &quot;speaker_history_chunks&quot;: len(self.all_chunks),
             &quot;speaker_history_embeddings&quot;: len(self.all_embeddings),
@@ -23092,7 +23092,7 @@
             &quot;last_speaker_id&quot;: self.last_speaker_id,
         }
 </code></pre></details></div>
-<div class="api-detail" id="e463"><span class="dtag badge-c">class</span><h2>RealtimeASRSession</h2><div class="dmod">funasr.bin.realtime_ws · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/realtime_ws.py#L327" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Manages a single streaming ASR session.</p>
+<div class="api-detail" id="e463"><span class="dtag badge-c">class</span><h2>RealtimeASRSession</h2><div class="dmod">funasr.bin.realtime_ws · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/realtime_ws.py#L362" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Manages a single streaming ASR session.</p>
 </div><details class="src-block"><summary>📄 Source code</summary><pre><code>class RealtimeASRSession:
     &quot;&quot;&quot;Manages a single streaming ASR session.&quot;&quot;&quot;
 
@@ -23123,7 +23123,7 @@
         # length-L segment. Under concurrency that saturates the GPU and long-segment
         # requests time out. Capping the partial window to the most recent
         # `partial_window_sec` seconds makes interim re-decoding ~O(L) per segment
-</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/realtime_ws.py#L327" target="_blank" class="src-more">View full source on GitHub →</a></details><h3 class="mt">Methods</h3><div class="mblk"><code>.add_audio(pcm_bytes)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/realtime_ws.py#L376" target="_blank" class="gh-link">L376</a><div class="mdoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source</summary><pre><code>    def add_audio(self, pcm_bytes):
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/realtime_ws.py#L362" target="_blank" class="src-more">View full source on GitHub →</a></details><h3 class="mt">Methods</h3><div class="mblk"><code>.add_audio(pcm_bytes)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/realtime_ws.py#L411" target="_blank" class="gh-link">L411</a><div class="mdoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source</summary><pre><code>    def add_audio(self, pcm_bytes):
         audio_int16 = np.frombuffer(pcm_bytes, dtype=np.int16)
         audio_float = audio_int16.astype(np.float32) / 32768.0
         chunk_start_sample = self.total_samples
@@ -23153,10 +23153,10 @@
                     self.spk_tracker.assign_streaming(segment_audio, seg[0]/1000, seg[1]/1000, self.locked_sentences[-1])
                 logger.info(f&quot;Locked: [{seg[0]}-{seg[1]}ms] \&quot;{seg_text[:40]}\&quot;&quot;)
 
-</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/realtime_ws.py#L376" target="_blank" class="src-more">View full source →</a></details></div><div class="mblk"><code>.should_decode()</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/realtime_ws.py#L432" target="_blank" class="gh-link">L432</a><div class="mdoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source</summary><pre><code>    def should_decode(self):
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/realtime_ws.py#L411" target="_blank" class="src-more">View full source →</a></details></div><div class="mblk"><code>.should_decode()</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/realtime_ws.py#L467" target="_blank" class="gh-link">L467</a><div class="mdoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source</summary><pre><code>    def should_decode(self):
         threshold = self.first_chunk_samples if not self.first_decode_done else self.chunk_samples
         return (self.total_samples - self.last_decode_samples) &gt;= threshold
-</code></pre></details></div><div class="mblk"><code>.decode(is_final)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/realtime_ws.py#L437" target="_blank" class="gh-link">L437</a><div class="mdoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source</summary><pre><code>    def decode(self, is_final=False):
+</code></pre></details></div><div class="mblk"><code>.decode(is_final)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/realtime_ws.py#L472" target="_blank" class="gh-link">L472</a><div class="mdoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source</summary><pre><code>    def decode(self, is_final=False):
         if is_final and self.endpoint_mode == &quot;client&quot;:
             return self.commit()
 
@@ -23186,7 +23186,7 @@
             if self.spk_tracker and self.locked_sentences:
                 self.locked_sentences = self.spk_tracker.finalize(self.locked_sentences)
             self._release_audio_buffer()
-</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/realtime_ws.py#L437" target="_blank" class="src-more">View full source →</a></details></div><div class="mblk"><code>.commit()</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/realtime_ws.py#L513" target="_blank" class="gh-link">L513</a><div class="mdoc"><p>Finalize one client-delimited utterance while keeping the session open.</p>
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/realtime_ws.py#L472" target="_blank" class="src-more">View full source →</a></details></div><div class="mblk"><code>.commit()</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/realtime_ws.py#L548" target="_blank" class="gh-link">L548</a><div class="mdoc"><p>Finalize one client-delimited utterance while keeping the session open.</p>
 </div><details class="src-block"><summary>📄 Source</summary><pre><code>    def commit(self):
         &quot;&quot;&quot;Finalize one client-delimited utterance while keeping the session open.&quot;&quot;&quot;
         if self.endpoint_mode != &quot;client&quot;:
@@ -23217,7 +23217,7 @@
         if self.spk_tracker and self.locked_sentences:
             self.locked_sentences = self.spk_tracker.finalize(self.locked_sentences)
 
-</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/realtime_ws.py#L513" target="_blank" class="src-more">View full source →</a></details></div><div class="mblk"><code>.get_partial_decode_audio()</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/realtime_ws.py#L558" target="_blank" class="gh-link">L558</a><div class="mdoc"><p>Return the bounded audio window used for unstable partial decoding.</p>
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/realtime_ws.py#L548" target="_blank" class="src-more">View full source →</a></details></div><div class="mblk"><code>.get_partial_decode_audio()</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/realtime_ws.py#L593" target="_blank" class="gh-link">L593</a><div class="mdoc"><p>Return the bounded audio window used for unstable partial decoding.</p>
 </div><details class="src-block"><summary>📄 Source</summary><pre><code>    def get_partial_decode_audio(self):
         &quot;&quot;&quot;Return the bounded audio window used for unstable partial decoding.&quot;&quot;&quot;
         seg_start_sample = int(self.vad.current_speech_start * self.sample_rate / 1000)
@@ -23231,7 +23231,7 @@
         decode_start_sample = max(self.audio_buffer_start_sample, decode_start_sample)
         start_ms = int(decode_start_sample * 1000 / self.sample_rate)
         return self._slice_audio(decode_start_sample, self.total_samples), start_ms
-</code></pre></details></div><div class="mblk"><code>.session_stats()</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/realtime_ws.py#L614" target="_blank" class="gh-link">L614</a><div class="mdoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source</summary><pre><code>    def session_stats(self):
+</code></pre></details></div><div class="mblk"><code>.session_stats()</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/realtime_ws.py#L650" target="_blank" class="gh-link">L650</a><div class="mdoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source</summary><pre><code>    def session_stats(self):
         stats = {
             &quot;duration_ms&quot;: int(self.total_samples * 1000 / self.sample_rate),
             &quot;total_samples&quot;: self.total_samples,
@@ -23246,7 +23246,7 @@
         if self.spk_tracker:
             stats.update(self.spk_tracker.session_stats())
         return stats
-</code></pre></details></div><div class="mblk"><code>.reset()</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/realtime_ws.py#L630" target="_blank" class="gh-link">L630</a><div class="mdoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source</summary><pre><code>    def reset(self):
+</code></pre></details></div><div class="mblk"><code>.reset()</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/realtime_ws.py#L666" target="_blank" class="gh-link">L666</a><div class="mdoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source</summary><pre><code>    def reset(self):
         self.audio_buffer = np.array([], dtype=np.float32)
         self.audio_buffer_start_sample = 0
         self.total_samples = 0
@@ -23260,7 +23260,7 @@
         if self.spk_tracker:
             self.spk_tracker.reset()
 </code></pre></details></div></div>
-<div class="api-detail" id="e464"><span class="dtag badge-m">method</span><h2><code>RealtimeASRSession.add_audio(pcm_bytes)</code></h2><div class="dmod">funasr.bin.realtime_ws.RealtimeASRSession · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/realtime_ws.py#L376" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source code</summary><pre><code>    def add_audio(self, pcm_bytes):
+<div class="api-detail" id="e464"><span class="dtag badge-m">method</span><h2><code>RealtimeASRSession.add_audio(pcm_bytes)</code></h2><div class="dmod">funasr.bin.realtime_ws.RealtimeASRSession · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/realtime_ws.py#L411" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source code</summary><pre><code>    def add_audio(self, pcm_bytes):
         audio_int16 = np.frombuffer(pcm_bytes, dtype=np.int16)
         audio_float = audio_int16.astype(np.float32) / 32768.0
         chunk_start_sample = self.total_samples
@@ -23290,12 +23290,12 @@
                     self.spk_tracker.assign_streaming(segment_audio, seg[0]/1000, seg[1]/1000, self.locked_sentences[-1])
                 logger.info(f&quot;Locked: [{seg[0]}-{seg[1]}ms] \&quot;{seg_text[:40]}\&quot;&quot;)
 
-</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/realtime_ws.py#L376" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
-<div class="api-detail" id="e465"><span class="dtag badge-m">method</span><h2><code>RealtimeASRSession.should_decode()</code></h2><div class="dmod">funasr.bin.realtime_ws.RealtimeASRSession · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/realtime_ws.py#L432" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source code</summary><pre><code>    def should_decode(self):
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/realtime_ws.py#L411" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
+<div class="api-detail" id="e465"><span class="dtag badge-m">method</span><h2><code>RealtimeASRSession.should_decode()</code></h2><div class="dmod">funasr.bin.realtime_ws.RealtimeASRSession · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/realtime_ws.py#L467" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source code</summary><pre><code>    def should_decode(self):
         threshold = self.first_chunk_samples if not self.first_decode_done else self.chunk_samples
         return (self.total_samples - self.last_decode_samples) &gt;= threshold
 </code></pre></details></div>
-<div class="api-detail" id="e466"><span class="dtag badge-m">method</span><h2><code>RealtimeASRSession.decode(is_final)</code></h2><div class="dmod">funasr.bin.realtime_ws.RealtimeASRSession · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/realtime_ws.py#L437" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source code</summary><pre><code>    def decode(self, is_final=False):
+<div class="api-detail" id="e466"><span class="dtag badge-m">method</span><h2><code>RealtimeASRSession.decode(is_final)</code></h2><div class="dmod">funasr.bin.realtime_ws.RealtimeASRSession · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/realtime_ws.py#L472" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source code</summary><pre><code>    def decode(self, is_final=False):
         if is_final and self.endpoint_mode == &quot;client&quot;:
             return self.commit()
 
@@ -23325,8 +23325,8 @@
             if self.spk_tracker and self.locked_sentences:
                 self.locked_sentences = self.spk_tracker.finalize(self.locked_sentences)
             self._release_audio_buffer()
-</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/realtime_ws.py#L437" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
-<div class="api-detail" id="e467"><span class="dtag badge-m">method</span><h2><code>RealtimeASRSession.commit()</code></h2><div class="dmod">funasr.bin.realtime_ws.RealtimeASRSession · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/realtime_ws.py#L513" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Finalize one client-delimited utterance while keeping the session open.</p>
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/realtime_ws.py#L472" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
+<div class="api-detail" id="e467"><span class="dtag badge-m">method</span><h2><code>RealtimeASRSession.commit()</code></h2><div class="dmod">funasr.bin.realtime_ws.RealtimeASRSession · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/realtime_ws.py#L548" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Finalize one client-delimited utterance while keeping the session open.</p>
 </div><details class="src-block"><summary>📄 Source code</summary><pre><code>    def commit(self):
         &quot;&quot;&quot;Finalize one client-delimited utterance while keeping the session open.&quot;&quot;&quot;
         if self.endpoint_mode != &quot;client&quot;:
@@ -23357,8 +23357,8 @@
         if self.spk_tracker and self.locked_sentences:
             self.locked_sentences = self.spk_tracker.finalize(self.locked_sentences)
 
-</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/realtime_ws.py#L513" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
-<div class="api-detail" id="e468"><span class="dtag badge-m">method</span><h2><code>RealtimeASRSession.get_partial_decode_audio()</code></h2><div class="dmod">funasr.bin.realtime_ws.RealtimeASRSession · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/realtime_ws.py#L558" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Return the bounded audio window used for unstable partial decoding.</p>
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/realtime_ws.py#L548" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
+<div class="api-detail" id="e468"><span class="dtag badge-m">method</span><h2><code>RealtimeASRSession.get_partial_decode_audio()</code></h2><div class="dmod">funasr.bin.realtime_ws.RealtimeASRSession · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/realtime_ws.py#L593" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Return the bounded audio window used for unstable partial decoding.</p>
 </div><details class="src-block"><summary>📄 Source code</summary><pre><code>    def get_partial_decode_audio(self):
         &quot;&quot;&quot;Return the bounded audio window used for unstable partial decoding.&quot;&quot;&quot;
         seg_start_sample = int(self.vad.current_speech_start * self.sample_rate / 1000)
@@ -23373,7 +23373,7 @@
         start_ms = int(decode_start_sample * 1000 / self.sample_rate)
         return self._slice_audio(decode_start_sample, self.total_samples), start_ms
 </code></pre></details></div>
-<div class="api-detail" id="e469"><span class="dtag badge-m">method</span><h2><code>RealtimeASRSession.session_stats()</code></h2><div class="dmod">funasr.bin.realtime_ws.RealtimeASRSession · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/realtime_ws.py#L614" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source code</summary><pre><code>    def session_stats(self):
+<div class="api-detail" id="e469"><span class="dtag badge-m">method</span><h2><code>RealtimeASRSession.session_stats()</code></h2><div class="dmod">funasr.bin.realtime_ws.RealtimeASRSession · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/realtime_ws.py#L650" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source code</summary><pre><code>    def session_stats(self):
         stats = {
             &quot;duration_ms&quot;: int(self.total_samples * 1000 / self.sample_rate),
             &quot;total_samples&quot;: self.total_samples,
@@ -23389,7 +23389,7 @@
             stats.update(self.spk_tracker.session_stats())
         return stats
 </code></pre></details></div>
-<div class="api-detail" id="e470"><span class="dtag badge-m">method</span><h2><code>RealtimeASRSession.reset()</code></h2><div class="dmod">funasr.bin.realtime_ws.RealtimeASRSession · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/realtime_ws.py#L630" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source code</summary><pre><code>    def reset(self):
+<div class="api-detail" id="e470"><span class="dtag badge-m">method</span><h2><code>RealtimeASRSession.reset()</code></h2><div class="dmod">funasr.bin.realtime_ws.RealtimeASRSession · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/realtime_ws.py#L666" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source code</summary><pre><code>    def reset(self):
         self.audio_buffer = np.array([], dtype=np.float32)
         self.audio_buffer_start_sample = 0
         self.total_samples = 0
@@ -23403,7 +23403,7 @@
         if self.spk_tracker:
             self.spk_tracker.reset()
 </code></pre></details></div>
-<div class="api-detail" id="e471"><span class="dtag badge-f">function</span><h2><code>load_models(args)</code></h2><div class="dmod">funasr.bin.realtime_ws · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/realtime_ws.py#L651" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source code</summary><pre><code>def load_models(args):
+<div class="api-detail" id="e471"><span class="dtag badge-f">function</span><h2><code>load_models(args)</code></h2><div class="dmod">funasr.bin.realtime_ws · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/realtime_ws.py#L687" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source code</summary><pre><code>def load_models(args):
     global _vllm_engine, _asr_kwargs, _vad_model, _spk_model
     if _vllm_engine is None:
         from funasr import AutoModel
@@ -23430,16 +23430,16 @@
             _asr_kwargs[&quot;language&quot;] = args.language
             logger.info(f&quot;Language: {args.language}&quot;)
 
-        if getattr(args, &quot;endpoint_mode&quot;, &quot;server&quot;) == &quot;server&quot;:
-            logger.info(&quot;Loading VAD: fsmn-vad (streaming)&quot;)
-            _vad_model = AutoModel(
-</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/realtime_ws.py#L651" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
-<div class="api-detail" id="e472"><span class="dtag badge-f">function</span><h2><code>create_speaker_tracker(spk_model, args)</code></h2><div class="dmod">funasr.bin.realtime_ws · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/realtime_ws.py#L698" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source code</summary><pre><code>def create_speaker_tracker(spk_model, args):
+        postprocess_file = getattr(args, &quot;postprocess_hotword_file&quot;, &quot;&quot;)
+        if postprocess_file:
+            _asr_kwargs[&quot;postprocess_hotword_file&quot;] = postprocess_file
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/realtime_ws.py#L687" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
+<div class="api-detail" id="e472"><span class="dtag badge-f">function</span><h2><code>create_speaker_tracker(spk_model, args)</code></h2><div class="dmod">funasr.bin.realtime_ws · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/realtime_ws.py#L741" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source code</summary><pre><code>def create_speaker_tracker(spk_model, args):
     if not getattr(args, &quot;enable_spk&quot;, False) or spk_model is None:
         return None
     return HybridSpeakerTracker(spk_model, args.device)
 </code></pre></details></div>
-<div class="api-detail" id="e473"><span class="dtag badge-f">function</span><h2><code>log_session_stats(session)</code></h2><div class="dmod">funasr.bin.realtime_ws · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/realtime_ws.py#L715" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source code</summary><pre><code>def log_session_stats(session):
+<div class="api-detail" id="e473"><span class="dtag badge-f">function</span><h2><code>log_session_stats(session)</code></h2><div class="dmod">funasr.bin.realtime_ws · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/realtime_ws.py#L758" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source code</summary><pre><code>def log_session_stats(session):
     stats = session.session_stats()
     logger.info(
         &quot;Session stats: duration_ms=%d audio_buffer_samples=%d &quot;
@@ -23457,7 +23457,7 @@
     )
     return stats
 </code></pre></details></div>
-<div class="api-detail" id="e474"><span class="dtag badge-f">function</span><h2><code>build_websocket_serve_kwargs(args)</code></h2><div class="dmod">funasr.bin.realtime_ws · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/realtime_ws.py#L854" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source code</summary><pre><code>def build_websocket_serve_kwargs(args):
+<div class="api-detail" id="e474"><span class="dtag badge-f">function</span><h2><code>build_websocket_serve_kwargs(args)</code></h2><div class="dmod">funasr.bin.realtime_ws · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/realtime_ws.py#L909" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source code</summary><pre><code>def build_websocket_serve_kwargs(args):
     return {
         &quot;max_size&quot;: args.ws_max_size,
         &quot;ping_interval&quot;: _positive_or_none(args.ws_ping_interval),
@@ -23465,7 +23465,7 @@
         &quot;close_timeout&quot;: args.ws_close_timeout,
     }
 </code></pre></details></div>
-<div class="api-detail" id="e475"><span class="dtag badge-f">function</span><h2><code>build_arg_parser()</code></h2><div class="dmod">funasr.bin.realtime_ws · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/realtime_ws.py#L880" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source code</summary><pre><code>def build_arg_parser():
+<div class="api-detail" id="e475"><span class="dtag badge-f">function</span><h2><code>build_arg_parser()</code></h2><div class="dmod">funasr.bin.realtime_ws · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/realtime_ws.py#L935" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source code</summary><pre><code>def build_arg_parser():
     parser = argparse.ArgumentParser(description=&quot;Fun-ASR-Nano Streaming WebSocket Server&quot;)
     parser.add_argument(&quot;--port&quot;, type=int, default=10095)
     parser.add_argument(&quot;--model&quot;, type=str, default=&quot;FunAudioLLM/Fun-ASR-Nano-2512&quot;)
@@ -23492,11 +23492,11 @@
     parser.add_argument(&quot;--enable-spk&quot;, action=&quot;store_true&quot;, help=&quot;Enable streaming speaker diarization.&quot;)
     parser.add_argument(&quot;--spk-model&quot;, type=str, default=&quot;iic/speech_eres2netv2_sv_zh-cn_16k-common&quot;)
     parser.add_argument(&quot;--hotword-file&quot;, type=str, default=&quot;热词列表&quot;)
-    parser.add_argument(&quot;--language&quot;, type=str, default=None, help=&quot;Language hint (e.g. 中文, English, 日本語)&quot;)
     parser.add_argument(
-        &quot;--dtype&quot;,
-</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/realtime_ws.py#L880" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
-<div class="api-detail" id="e476"><span class="dtag badge-f">function</span><h2><code>cli_main()</code></h2><div class="dmod">funasr.bin.realtime_ws · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/realtime_ws.py#L930" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source code</summary><pre><code>def cli_main():
+        &quot;--postprocess-hotword-file&quot;,
+        type=str,
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/realtime_ws.py#L935" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
+<div class="api-detail" id="e476"><span class="dtag badge-f">function</span><h2><code>cli_main()</code></h2><div class="dmod">funasr.bin.realtime_ws · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/realtime_ws.py#L996" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source code</summary><pre><code>def cli_main():
     args = build_arg_parser().parse_args()
     asyncio.run(main(args))
 </code></pre></details></div>
