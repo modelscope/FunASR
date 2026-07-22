@@ -107,6 +107,43 @@ The shared **FSMN-VAD** front end builds the same way (`funasr-vad/` + `funasr-c
 target `llama-funasr-vad`); export weights with `export_vad_gguf.py`. Pass
 `--vad fsmn-vad.gguf` to any of the three tools for built-in long-audio segmentation.
 
+## Lightweight HTTP server
+
+The GGUF binaries are command-line tools first. For local apps that expect an
+HTTP transcription endpoint, `server/funasr_gguf_server.py` wraps an existing
+binary and exposes an OpenAI-compatible `POST /v1/audio/transcriptions` route.
+It uses only the Python standard library and still runs inference in the C++
+binary:
+
+```bash
+python server/funasr_gguf_server.py \
+  --host 127.0.0.1 --port 8000 \
+  --binary ./build/bin/llama-funasr-sensevoice \
+  --model ./gguf/sensevoice-small-q8.gguf \
+  --vad ./gguf/fsmn-vad.gguf
+```
+
+Then send audio with the same shape used by OpenAI-compatible clients:
+
+```bash
+curl http://127.0.0.1:8000/v1/audio/transcriptions \
+  -F file=@sample.wav \
+  -F model=funasr-gguf
+```
+
+Response:
+
+```json
+{"text": "transcribed text"}
+```
+
+CUDA-enabled SenseVoice builds can be selected with `--backend cuda`. Extra
+binary flags can be forwarded with repeated `--extra-arg`, for example
+`--extra-arg --keep-tags`. This wrapper starts one subprocess per request, so it
+is best for local tools, demos, and integration tests. For sustained production
+traffic, use the Python `funasr-server` OpenAI-compatible service or build a
+dedicated native server around the C++ runtime.
+
 ## Validation
 
 Each model was validated against the FunASR PyTorch reference (encoder cosine ≈ 1.0;

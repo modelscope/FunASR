@@ -41,3 +41,12 @@ def test_release_notes_explain_cpu_and_cuda_windows_assets():
     assert "other GPU architectures" in readme
     assert "CMAKE_CUDA_ARCHITECTURES=120" in readme
     assert "sm_120" in readme
+
+
+def test_readme_documents_lightweight_http_server():
+    readme = (ROOT / "runtime" / "llama.cpp" / "README.md").read_text(encoding="utf-8")
+
+    assert "server/funasr_gguf_server.py" in readme
+    assert "/v1/audio/transcriptions" in readme
+    assert "--binary ./build/bin/llama-funasr-sensevoice" in readme
+    assert "one subprocess per request" in readme
