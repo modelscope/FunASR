@@ -135,7 +135,7 @@ export default {
                 {
                     icon: require('./assets/images/lxwj-az.png'),
                     title: '安  装',
-                    link: 'https://github.com/alibaba-damo-academy/FunASR/blob/main/runtime/docs/SDK_advanced_guide_offline_zh.md'
+                    link: 'https://github.com/modelscope/FunASR/blob/main/runtime/docs/SDK_advanced_guide_offline_zh.md'
                 },
                 {
                     icon: require('./assets/images/lxwj-sy.png'),

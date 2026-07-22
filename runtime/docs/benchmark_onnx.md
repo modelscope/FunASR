@@ -35,9 +35,9 @@ set the model, data path and output_dir
 nohup bash test_cer.sh &> log.txt &
 ```
 
-## [Paraformer-large](https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary) 
+## [Paraformer-large](https://www.modelscope.cn/models/iic/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary)
 
-Number of Parameter: 220M 
+Number of Parameter: 220M
 
 Storage size: 880MB
 
@@ -95,7 +95,7 @@ CER after int8-quant: 1.95%
 
 ## [Paraformer](https://modelscope.cn/models/damo/speech_paraformer_asr_nat-zh-cn-16k-common-vocab8358-tensorflow1/summary)
 
-Number of Parameter: 68M 
+Number of Parameter: 68M
 
 Storage size: 275MB
 
