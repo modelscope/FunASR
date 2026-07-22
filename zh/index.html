@@ -93,6 +93,7 @@ print(res[0]["sentence_info"])</pre>
             <h2 class="section-title">最新动态</h2>
             <p class="section-subtitle">网站文档已对齐 README 和 main 分支最新能力。</p>
             <div class="grid-3">
+                <div class="card"><h3>llama.cpp / GGUF 运行时</h3><p>runtime-llamacpp-v0.1.8 新增 SenseVoiceSmall GGUF 的 Linux Vulkan 包。支持 Vulkan 的 GPU 可用自包含二进制和 <code>--backend vulkan</code> 运行。</p><p><a href="deployment-matrix.html#runtime-llamacpp-v0.1.8">选择 GGUF 运行时</a></p></div>
                 <div class="card"><h3>vLLM 推理引擎</h3><p>Fun-ASR-Nano LLM 解码加速 2-3 倍，支持 tensor parallel 批量推理和实时 WebSocket 服务。</p><p><a href="vllm.html">阅读 vLLM 文档</a></p></div>
                 <div class="card"><h3>Agent 基础设施</h3><p><code>funasr-server</code> 提供 OpenAI 兼容转写 API；MCP 和语音输入示例可把本地 ASR 接入 AI 工具。</p><p><a href="agent.html">配置 Agent 集成</a></p></div>
                 <div class="card"><h3>性能评测</h3><p>长音频评测覆盖 SenseVoice、Paraformer、Fun-ASR-Nano、GLM-ASR 和 Whisper 变体，包含 GPU/CPU 结果。</p><p><a href="benchmark.html">查看评测</a></p></div>
