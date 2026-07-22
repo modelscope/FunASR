@@ -65,7 +65,7 @@ context_ptr WebSocketServer::on_tls_init(tls_mode mode,
   return ctx;
 }
 
-nlohmann::json handle_result(FUNASR_RESULT result, websocketpp::connection_hdl& hdl, std::map<websocketpp::connection_hdl, std::shared_ptr<FUNASR_MESSAGE>,std::owner_less<websocketpp::connection_hdl>>& data_map, std::string modetype) {
+nlohmann::json handle_result(FUNASR_RESULT result, websocketpp::connection_hdl& hdl, std::map<websocketpp::connection_hdl, std::shared_ptr<FUNASR_MESSAGE>,std::owner_less<websocketpp::connection_hdl>>& data_map, const std::string& modetype, bool is_final) {
   std::shared_ptr<FUNASR_MESSAGE> data_msg = nullptr;
   auto it = data_map.find(hdl);
   if (it != data_map.end()) {
@@ -76,8 +76,9 @@ nlohmann::json handle_result(FUNASR_RESULT result, websocketpp::connection_hdl& 
   nlohmann::json jsonresult;
   jsonresult["text"] = "";
 
-  std::string tmp_online_msg = FunASRGetResult(result, 0);
-  if (tmp_online_msg != "") {
+  const char* online_result = FunASRGetResult(result, 0);
+  if (online_result != nullptr && online_result[0] != '\0') {
+    std::string tmp_online_msg = online_result;
     LOG(INFO) << "wav_name: " << data_msg->msg["wav_name"].get<std::string>() << " | online_res :" << tmp_online_msg;
     jsonresult["text"] = tmp_online_msg;
     jsonresult["mode"] = "2pass-online";
@@ -95,10 +96,10 @@ nlohmann::json handle_result(FUNASR_RESULT result, websocketpp::connection_hdl& 
   data_msg->end_time = FunASRGetTpassEnd(result);  // 记录句子的结束时间
   jsonresult["timestamp"] = data_msg->timestamp;
 
-  // online 模式跳过 offline 结果，避免覆盖 online 结果
   if (modetype != "online") {
-    std::string tmp_tpass_msg = FunASRGetTpassResult(result, 0);
-    if (tmp_tpass_msg != "") {
+    const char* tpass_result = FunASRGetTpassResult(result, 0);
+    if (tpass_result != nullptr && tpass_result[0] != '\0') {
+      std::string tmp_tpass_msg = tpass_result;
       LOG(INFO) << "wav_name: " << data_msg->msg["wav_name"].get<std::string>() << " | offline results : " << tmp_tpass_msg;
       jsonresult["text"] = tmp_tpass_msg;
       jsonresult["mode"] = "2pass-offline";
@@ -112,6 +113,11 @@ nlohmann::json handle_result(FUNASR_RESULT result, websocketpp::connection_hdl& 
       data_msg->index++; //句子序号
       data_msg->is_sentence_started = false;  // 重置句子状态
     }
+  } else if (is_final && data_msg->is_sentence_started) {
+    // online mode must not send 2pass-offline text, but final chunks still close
+    // the sentence state so the next utterance starts with slice_type=0.
+    data_msg->index++; //句子序号
+    data_msg->is_sentence_started = false;  // 重置句子状态
   }
 
   std::string tmp_stamp_msg = FunASRGetStamp(result);
@@ -198,7 +204,7 @@ void WebSocketServer::do_decoder(
       }
       if (Result) {
         websocketpp::lib::error_code ec;
-        nlohmann::json jsonresult = handle_result(Result, hdl, data_map, modetype);
+        nlohmann::json jsonresult = handle_result(Result, hdl, data_map, modetype, false);
         jsonresult["wav_name"] = wav_name;
         jsonresult["is_final"] = false;
         if (jsonresult["text"] != "") {
@@ -241,7 +247,7 @@ void WebSocketServer::do_decoder(
       }
       if (Result) {
         websocketpp::lib::error_code ec;
-        nlohmann::json jsonresult = handle_result(Result, hdl, data_map, modetype);
+        nlohmann::json jsonresult = handle_result(Result, hdl, data_map, modetype, true);
         jsonresult["wav_name"] = wav_name;
         jsonresult["is_final"] = true;
         //LOG(INFO) << "jsonresult: " << jsonresult.dump(4);
