@@ -55,13 +55,15 @@ def install_dummy_funasr(monkeypatch):
     return DummyAutoModel
 
 
-def install_dummy_vllm(monkeypatch):
+def install_dummy_vllm(monkeypatch, raise_on_load=False):
     class DummyVLLM:
         calls = []
 
         @classmethod
         def from_pretrained(cls, **kwargs):
             cls.calls.append(kwargs)
+            if raise_on_load:
+                raise RuntimeError("vllm unavailable")
             return object()
 
     monkeypatch.setitem(sys.modules, "funasr.models", types.ModuleType("funasr.models"))
@@ -101,7 +103,7 @@ def test_fallback_segments_keep_short_text_single_cue(monkeypatch):
     ]
 
 
-def test_default_fun_asr_nano_uses_huggingface_hub(monkeypatch):
+def test_default_fun_asr_nano_uses_requested_modelscope_hub(monkeypatch):
     module = load_server_app(monkeypatch)
     DummyAutoModel = install_dummy_funasr(monkeypatch)
     DummyVLLM = install_dummy_vllm(monkeypatch)
@@ -109,8 +111,20 @@ def test_default_fun_asr_nano_uses_huggingface_hub(monkeypatch):
     module.create_app(device="cuda", preload_model="fun-asr-nano", hub="ms")
 
     assert DummyVLLM.calls[0]["model"] == "FunAudioLLM/Fun-ASR-Nano-2512"
-    assert DummyVLLM.calls[0]["hub"] == "hf"
+    assert DummyVLLM.calls[0]["hub"] == "ms"
     assert DummyAutoModel.instances[0]["model"] == "fsmn-vad"
+
+
+def test_default_fun_asr_nano_fallback_uses_requested_modelscope_hub(monkeypatch):
+    module = load_server_app(monkeypatch)
+    DummyAutoModel = install_dummy_funasr(monkeypatch)
+    install_dummy_vllm(monkeypatch, raise_on_load=True)
+
+    module.create_app(device="cuda", preload_model="fun-asr-nano", hub="ms")
+
+    fallback = DummyAutoModel.instances[-1]
+    assert fallback["model"] == "FunAudioLLM/Fun-ASR-Nano-2512"
+    assert fallback["hub"] == "ms"
 
 
 def test_custom_model_path_fallback_uses_empty_config_and_requested_hub(monkeypatch):
