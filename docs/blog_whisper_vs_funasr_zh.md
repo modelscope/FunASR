@@ -104,7 +104,7 @@ print(result[0]["text"])
 ```
 
 更多信息：
-- GitHub：https://github.com/modelscope/FunASR（16K+ stars）
+- GitHub：https://github.com/modelscope/FunASR（19K+ stars）
 - 官网：https://www.funasr.com
 - 完整评测：https://modelscope.github.io/FunASR/benchmark.html
 - 从 Whisper 迁移指南：https://github.com/modelscope/FunASR/blob/main/docs/migration_from_whisper.md

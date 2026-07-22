@@ -3,7 +3,7 @@
 This document explains the responsibility boundaries, user entry points, and issue routing across the four FunASR ecosystem repositories, along with a directional roadmap.
 
 > **Versioned release roadmap: pending maintainer confirmation.**
-> This document does not commit to version numbers or release dates. The repository has no established milestones; GitHub tags go up to `v1.3.13`, and PyPI has published `1.3.14`; the boundaries for `1.4 / 1.5 / 2.0` have not been confirmed by core maintainers.
+> This document does not commit to future version numbers or release dates. The repository has no established milestones; as of the 2026-07-22 maintainer patrol, GitHub and PyPI both have the `v1.3.26` / `1.3.26` release line published. The boundaries for `1.4 / 1.5 / 2.0` have not been confirmed by core maintainers.
 
 ---
 
