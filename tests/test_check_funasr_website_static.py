@@ -20,6 +20,18 @@ def test_website_contract_accepts_current_public_copy():
     checker = _load_module()
 
     pages = {
+        "https://www.funasr.com/": """
+            工业级 语音识别服务
+            /v1/audio/transcriptions
+            vLLM 加速
+            <a href="/donors.html">功德榜</a>
+        """,
+        "https://www.funasr.com/en/": """
+            Industrial Speech Recognition
+            OpenAI-compatible
+            /v1/audio/transcriptions
+            vLLM Acceleration
+        """,
         "https://www.funasr.com/ecosystem.html": """
             <div class="stat-num">35K+</div>
             <a href="/donors.html">功德榜</a>
@@ -72,6 +84,13 @@ def test_website_contract_accepts_current_public_copy():
     }
 
     assert checker.validate_pages(pages) == []
+
+
+def test_website_contract_includes_homepage_entrypoints():
+    checker = _load_module()
+
+    assert "https://www.funasr.com/" in checker.PAGE_CONTRACTS
+    assert "https://www.funasr.com/en/" in checker.PAGE_CONTRACTS
 
 
 def test_website_contract_reports_stale_runtime_and_star_copy():
