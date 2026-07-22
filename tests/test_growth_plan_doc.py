@@ -171,3 +171,25 @@ def test_growth_plan_records_sharp_github_release_focus():
         assert marker in text
 
     assert "[ ] Create a GitHub release focused on one sharp value proposition" not in text
+
+
+def test_growth_plan_records_pypi_description_audit():
+    text = PLAN.read_text()
+
+    required_markers = [
+        "[x] Update PyPI release description if needed",
+        "PyPI `funasr 1.3.26`",
+        "long description already comes from `README.md`",
+        "`OpenAI-compatible`",
+        "`/v1/audio/transcriptions`",
+        "`vllm`",
+        "`runtime-llamacpp-v0.1.8`",
+        "`GGUF`",
+        "`funasr==1.3.26`",
+        "package summary was prepared for the next PyPI publish",
+        "OpenAI-compatible speech recognition toolkit with WebSocket streaming, vLLM acceleration, and llama.cpp/GGUF edge runtime",
+    ]
+    for marker in required_markers:
+        assert marker in text
+
+    assert "[ ] Update PyPI release description if needed" not in text
