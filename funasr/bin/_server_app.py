@@ -137,9 +137,10 @@ def create_app(device: str = "cuda", preload_model: str = "auto", model_path: st
 
             logger.info("Loading Fun-ASR-Nano vLLM engine...")
             t0 = time.time()
-            # Use custom model_path if provided, otherwise default
+            # Use custom model_path if provided, otherwise default. In both
+            # cases, honor the server-level hub selection.
             vllm_model = app.state.model_path if app.state.model_path else "FunAudioLLM/Fun-ASR-Nano-2512"
-            vllm_hub = app.state.hub if app.state.model_path else "hf"
+            vllm_hub = app.state.hub
             app.state.engine = FunASRNanoVLLM.from_pretrained(
                 model=vllm_model,
                 hub=vllm_hub,
@@ -160,7 +161,7 @@ def create_app(device: str = "cuda", preload_model: str = "auto", model_path: st
             from funasr import AutoModel
             cfg = {
                 "model": app.state.model_path if app.state.model_path else "FunAudioLLM/Fun-ASR-Nano-2512",
-                "hub": app.state.hub if app.state.model_path else "hf",
+                "hub": app.state.hub,
                 "trust_remote_code": True,
                 "vad_model": "fsmn-vad",
                 "vad_kwargs": {"max_single_segment_time": 30000},
