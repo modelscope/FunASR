@@ -250,9 +250,11 @@ class DummyEngine:
     def __init__(self):
         self._engine = types.SimpleNamespace(tokenizer=DummyTokenizer())
         self.input_lengths = []
+        self.generate_kwargs = []
 
     def generate(self, inputs, **kwargs):
         self.input_lengths.extend(len(audio) for audio in inputs)
+        self.generate_kwargs.append(kwargs)
         return [{"text": "hello"}]
 
 
@@ -316,6 +318,21 @@ def test_client_endpoint_mode_emits_partial_at_first_decode_threshold():
     assert response["partial_start_ms"] == 0
     assert response["is_final"] is False
     assert session.vllm_engine.input_lengths == [int(0.48 * session.sample_rate)]
+
+
+def test_postprocess_hotwords_correct_final_text_without_model_hotword_bias():
+    module = load_service_module()
+    session = make_client_endpoint_session(module)
+    session.asr_kwargs = {
+        "postprocess_hotwords": {"hello": "Tool"},
+        "return_postprocess_hotword_matches": True,
+    }
+
+    session.add_audio(np.zeros(int(0.4 * session.sample_rate), dtype=np.int16).tobytes())
+    result = session.commit()
+
+    assert result["sentences"] == [{"text": "Tool", "start": 0, "end": 400}]
+    assert session.vllm_engine.generate_kwargs[-1].get("hotwords") is None
 
 
 def test_client_commits_short_utterances_once_with_monotonic_timestamps():
@@ -445,6 +462,121 @@ def test_handler_commit_returns_one_final_and_reuses_connection(monkeypatch):
     assert dynamic_vad_calls == []
     assert client_vad_calls == [True]
     assert received_audio == [b"first", b"second"]
+
+
+def test_handler_accepts_postprocess_hotwords_without_model_hotword_bias(monkeypatch):
+    module = load_service_module()
+    session_kwargs = []
+
+    class ProtocolSession:
+        def __init__(self, vllm_engine, asr_kwargs, *args, **kwargs):
+            self.is_active = False
+            self.asr_kwargs = asr_kwargs
+            session_kwargs.append(dict(asr_kwargs))
+
+        def reset(self):
+            pass
+
+        def commit(self):
+            return {"is_final": True, "asr_kwargs": dict(self.asr_kwargs)}
+
+    class FakeWebSocket:
+        remote_address = ("127.0.0.1", 12345)
+
+        def __init__(self):
+            self.messages = iter(
+                [
+                    "START",
+                    "POSTPROCESS_HOTWORDS:hello=>Tool,哈囉=>客製化",
+                    "COMMIT",
+                ]
+            )
+            self.sent = []
+
+        def __aiter__(self):
+            return self
+
+        async def __anext__(self):
+            try:
+                return next(self.messages)
+            except StopIteration as error:
+                raise StopAsyncIteration from error
+
+        async def send(self, message):
+            self.sent.append(json.loads(message))
+
+    monkeypatch.setattr(module, "load_models", lambda args: (object(), {}, None, None))
+    monkeypatch.setattr(module, "ClientEndpointVAD", lambda: object(), raising=False)
+    monkeypatch.setattr(module, "create_speaker_tracker", lambda model, args: None)
+    monkeypatch.setattr(module, "RealtimeASRSession", ProtocolSession)
+    websocket = FakeWebSocket()
+    args = types.SimpleNamespace(
+        decode_interval=0.48,
+        partial_window_sec=15.0,
+        endpoint_mode="client",
+        log_session_stats_interval=0.0,
+    )
+
+    asyncio.run(module.handle_client(websocket, args))
+
+    assert session_kwargs == [{}]
+    assert websocket.sent[1] == {
+        "event": "postprocess_hotwords_set",
+        "postprocess_hotwords": {"hello": "Tool", "哈囉": "客製化"},
+    }
+    final = [message for message in websocket.sent if message.get("is_final")][0]
+    assert final["asr_kwargs"] == {
+        "postprocess_hotwords": {"hello": "Tool", "哈囉": "客製化"},
+        "postprocess_hotword_fuzzy": False,
+        "return_postprocess_hotword_matches": True,
+    }
+    assert "hotwords" not in final["asr_kwargs"]
+
+
+def test_load_models_reads_postprocess_hotword_file(monkeypatch, tmp_path):
+    module = load_service_module()
+    module._vllm_engine = None
+    module._asr_kwargs = None
+    module._vad_model = None
+    module._spk_model = None
+    hotword_file = tmp_path / "postprocess_hotwords.txt"
+    hotword_file.write_text("hello=>Tool\n哈囉=>客製化\n", encoding="utf-8")
+    auto_model_calls = []
+
+    import funasr
+
+    monkeypatch.setattr(
+        funasr,
+        "AutoModel",
+        lambda model, **kwargs: auto_model_calls.append(model) or object(),
+    )
+    vllm_stub = types.ModuleType("funasr.auto.auto_model_vllm")
+    vllm_stub.AutoModelVLLM = lambda **kwargs: object()
+    monkeypatch.setitem(sys.modules, "funasr.auto.auto_model_vllm", vllm_stub)
+
+    args = types.SimpleNamespace(
+        model="FunAudioLLM/Fun-ASR-Nano-2512",
+        hub="ms",
+        device="cpu",
+        dtype="fp32",
+        tensor_parallel_size=1,
+        gpu_memory_utilization=0.8,
+        max_model_len=2048,
+        hotword_file="",
+        postprocess_hotword_file=str(hotword_file),
+        language=None,
+        enable_spk=False,
+        endpoint_mode="client",
+    )
+
+    _, asr_kwargs, _, _ = module.load_models(args)
+
+    assert asr_kwargs == {
+        "postprocess_hotword_file": str(hotword_file),
+        "postprocess_hotword_fuzzy": False,
+        "return_postprocess_hotword_matches": True,
+    }
+    assert auto_model_calls == []
 
 
 def test_two_hour_session_keeps_audio_bounded_and_duration_absolute():

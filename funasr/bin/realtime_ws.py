@@ -23,6 +23,11 @@ import warnings
 import regex
 import websockets
 
+from funasr.utils.postprocess_hotwords import (
+    apply_postprocess_hotwords_to_results,
+    parse_postprocess_hotwords,
+)
+
 warnings.filterwarnings('ignore')
 logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)s] %(message)s')
 logger = logging.getLogger(__name__)
@@ -71,6 +76,36 @@ def _clean_asr_text(text):
     text = re.sub(r'/sil|endofbreak|FFFF', '', text)
     text = re.sub(r'\s+', ' ', text)
     return text.strip()
+
+
+def _postprocess_result_text(text, asr_kwargs):
+    if not text:
+        return text
+    cfg = {
+        key: asr_kwargs[key]
+        for key in (
+            "postprocess_hotwords",
+            "postprocess_hotword_file",
+            "postprocess_hotword_threshold",
+            "postprocess_hotword_fuzzy",
+            "return_postprocess_hotword_matches",
+        )
+        if key in asr_kwargs
+    }
+    if not cfg:
+        return text
+    results = apply_postprocess_hotwords_to_results([{"text": text}], cfg)
+    return results[0].get("text", text)
+
+
+def _parse_postprocess_hotwords_command(payload):
+    explicit, fuzzy_targets = parse_postprocess_hotwords(
+        payload.replace(",", "\n")
+    )
+    if fuzzy_targets:
+        for target in fuzzy_targets:
+            explicit[target] = target
+    return explicit
 
 
 from funasr.models.fsmn_vad_streaming.dynamic_vad import DynamicStreamingVAD
@@ -587,6 +622,7 @@ class RealtimeASRSession:
             )
             text = results[0]["text"] if results else ""
             text = _clean_asr_text(text)
+            text = _postprocess_result_text(text, self.asr_kwargs)
             self.prev_seg_text = text
             return text
         except Exception as e:
@@ -674,6 +710,13 @@ def load_models(args):
         if getattr(args, 'language', None):
             _asr_kwargs["language"] = args.language
             logger.info(f"Language: {args.language}")
+
+        postprocess_file = getattr(args, "postprocess_hotword_file", "")
+        if postprocess_file:
+            _asr_kwargs["postprocess_hotword_file"] = postprocess_file
+            _asr_kwargs["postprocess_hotword_fuzzy"] = False
+            _asr_kwargs["return_postprocess_hotword_matches"] = True
+            logger.info(f"Loaded postprocess hotwords from '{postprocess_file}'")
 
         if getattr(args, "endpoint_mode", "server") == "server":
             logger.info("Loading VAD: fsmn-vad (streaming)")
@@ -770,6 +813,18 @@ async def handle_client(websocket, args):
                     session.asr_kwargs["hotwords"] = hotwords
                     await websocket.send(json.dumps({"event": "hotwords_set", "hotwords": hotwords}))
                     logger.info(f"Hotwords set: {len(hotwords)} words")
+                elif cmd.upper().startswith("POSTPROCESS_HOTWORDS:"):
+                    payload = cmd.split(":", 1)[1]
+                    hotwords = _parse_postprocess_hotwords_command(payload)
+                    session.asr_kwargs = dict(session.asr_kwargs)
+                    session.asr_kwargs["postprocess_hotwords"] = hotwords
+                    session.asr_kwargs["postprocess_hotword_fuzzy"] = False
+                    session.asr_kwargs["return_postprocess_hotword_matches"] = True
+                    await websocket.send(json.dumps({
+                        "event": "postprocess_hotwords_set",
+                        "postprocess_hotwords": hotwords,
+                    }))
+                    logger.info(f"Postprocess hotwords set: {len(hotwords)} pairs")
                 elif cmd.upper().startswith("LANGUAGE:"):
                     lang = cmd[9:].strip()
                     session.asr_kwargs = dict(session.asr_kwargs)
@@ -904,6 +959,17 @@ def build_arg_parser():
     parser.add_argument("--enable-spk", action="store_true", help="Enable streaming speaker diarization.")
     parser.add_argument("--spk-model", type=str, default="iic/speech_eres2netv2_sv_zh-cn_16k-common")
     parser.add_argument("--hotword-file", type=str, default="热词列表")
+    parser.add_argument(
+        "--postprocess-hotword-file",
+        type=str,
+        default="",
+        help=(
+            "Deterministic text-level hotword corrections applied to final "
+            "sentences after decoding. Lines should be 'wrong=>right' pairs. "
+            "Unlike --hotword-file, this does not bias "
+            "model decoding or hallucinate words during silence."
+        ),
+    )
     parser.add_argument("--language", type=str, default=None, help="Language hint (e.g. 中文, English, 日本語)")
     parser.add_argument(
         "--dtype",
