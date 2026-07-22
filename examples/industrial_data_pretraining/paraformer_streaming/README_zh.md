@@ -1,4 +1,4 @@
-(简体中文|[English](./README.md))
+(简体中文|[示例目录](../))
 
 FunASR开源了大量在工业数据上预训练模型，您可以在 [模型许可协议](https://github.com/modelscope/FunASR/blob/main/MODEL_LICENSE)下自由使用、复制、修改和分享FunASR模型，下面列举代表性的模型，更多模型请参考 [模型仓库](https://github.com/modelscope/FunASR/tree/main/model_zoo)。
 

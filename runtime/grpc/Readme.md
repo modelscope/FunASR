@@ -38,7 +38,7 @@ cd /cfs/user/burkliu/work2023/FunASR/funasr/runtime/grpc
 ```
 
 ### 4. Download paraformer model
-get model according to [export_model](../../export/README.md)
+get model according to [export_model](../docs/benchmark_onnx_cpp.md)
 
 or run code below as default
 ```shell

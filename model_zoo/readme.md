@@ -15,7 +15,7 @@ Here we provided several pretrained models on different datasets. The details of
 #### Paraformer
 
 
-FunASR has open-sourced a large number of pre-trained models on industrial data. You are free to use, copy, modify, and share FunASR models under the [Model License Agreement](./MODEL_LICENSE). Below are some representative models, for more models please refer to the [Model Zoo]().
+FunASR has open-sourced a large number of pre-trained models on industrial data. You are free to use, copy, modify, and share FunASR models under the [Model License Agreement](../MODEL_LICENSE). Below are some representative models, for more models please refer to the [Model Zoo](https://github.com/modelscope/FunASR/tree/main/model_zoo).
 
 (Note: 🤗 represents the Huggingface model zoo link, ⭐ represents the ModelScope model zoo link)
 

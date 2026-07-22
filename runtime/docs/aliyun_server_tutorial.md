@@ -59,6 +59,5 @@
 
 <img src="images/aliyun12.png"  width="900"/>
 
-上图表示已经成功申请了云服务器，后续可以根据FunASR runtime-SDK部署文档进行一键部署（[点击此处](./SDK_tutorial_cn.md)）
-
+上图表示已经成功申请了云服务器，后续可以根据FunASR runtime-SDK部署文档进行一键部署（[点击此处](./SDK_tutorial_zh.md)）
 
