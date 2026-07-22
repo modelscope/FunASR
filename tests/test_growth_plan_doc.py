@@ -56,3 +56,25 @@ def test_growth_plan_records_github_metadata_completion():
         assert marker in text
 
     assert "[ ] Confirm GitHub repo description and topics mention ASR" not in text
+
+
+def test_growth_plan_records_api_curl_examples_completion():
+    text = PLAN.read_text()
+
+    required_markers = [
+        "[x] Publish API server curl examples",
+        "`examples/openai_api/README.md`",
+        "`examples/openai_api/README_zh.md`",
+        "`examples/openai_api/smoke_test.sh`",
+        "`examples/openai_api/smoke_test.py`",
+        "`/v1/audio/transcriptions`",
+        "`-F file=@sample.wav`",
+        "`-F model=sensevoice`",
+        "`response_format=verbose_json`",
+        "`examples/openai_api/POSTMAN.md`",
+        "`examples/openai_api/OPENAPI.md`",
+    ]
+    for marker in required_markers:
+        assert marker in text
+
+    assert "[ ] Publish API server curl examples" not in text
