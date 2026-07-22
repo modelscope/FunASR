@@ -127,3 +127,24 @@ def test_growth_plan_records_vllm_guide_gpu_validation():
         assert marker in text
 
     assert "[ ] Validate vLLM guide on one GPU server" not in text
+
+
+def test_growth_plan_records_release_note_terminal_outputs():
+    text = PLAN.read_text()
+
+    required_markers = [
+        "[x] Record concise terminal outputs for release notes",
+        "Combined GitHub stars: **35,787**",
+        "Added since baseline: **4,563** / 20,000",
+        "PyPI package: **funasr 1.3.26**",
+        "funasr.com static page contract passed for 9 pages",
+        "validate_docker.sh syntax ok",
+        "Model loaded in 82.6s",
+        "Results: 1 samples, total inference time: 1.95s",
+        "Text: 开饭时间早上九点至下午五点。",
+        "Release notes can now cite the growth snapshot, website patrol, Docker helper guard, and H100 vLLM smoke",
+    ]
+    for marker in required_markers:
+        assert marker in text
+
+    assert "[ ] Record concise terminal outputs for release notes" not in text
