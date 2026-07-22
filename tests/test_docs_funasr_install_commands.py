@@ -169,6 +169,68 @@ def test_model_zoo_tables_use_current_paraformer_modelscope_entry():
         assert stale not in text
 
 
+def test_model_zoo_landing_tables_link_huggingface_repos():
+    docs = [
+        (
+            (ROOT / "model_zoo/readme.md").read_text(),
+            [
+                "https://huggingface.co/funasr/paraformer-zh",
+                "https://huggingface.co/funasr/paraformer-zh-streaming",
+                "https://huggingface.co/funasr/ct-punc",
+                "https://huggingface.co/funasr/fsmn-vad",
+            ],
+        ),
+        (
+            (ROOT / "model_zoo/readme_zh.md").read_text(),
+            [
+                "https://huggingface.co/funasr/paraformer-zh",
+                "https://huggingface.co/funasr/paraformer-zh-streaming",
+            ],
+        ),
+    ]
+
+    for text, required_hf_links in docs:
+        for link in required_hf_links:
+            assert link in text
+
+
+def test_model_zoo_landing_tables_use_current_core_modelscope_entries():
+    docs = [
+        (
+            (ROOT / "model_zoo/readme.md").read_text(),
+            [
+                "models/iic/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary",
+                "models/iic/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online/summary",
+                "models/iic/punc_ct-transformer_cn-en-common-vocab471067-large/summary",
+                "models/iic/speech_fsmn_vad_zh-cn-16k-common-pytorch/summary",
+            ],
+            [
+                "models/damo/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary",
+                "models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online/summary",
+                "models/damo/punc_ct-transformer_cn-en-common-vocab471067-large/summary",
+                "models/damo/speech_fsmn_vad_zh-cn-16k-common-pytorch/summary",
+            ],
+        ),
+        (
+            (ROOT / "model_zoo/readme_zh.md").read_text(),
+            [
+                "models/iic/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary",
+                "models/iic/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online/summary",
+            ],
+            [
+                "models/damo/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary",
+                "models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online/summary",
+            ],
+        ),
+    ]
+
+    for text, current_entries, stale_entries in docs:
+        for marker in current_entries:
+            assert marker in text
+        for marker in stale_entries:
+            assert marker not in text
+
+
 def test_readme_model_tables_surface_public_gguf_entries():
     readmes = [
         (ROOT / "README.md").read_text(),
