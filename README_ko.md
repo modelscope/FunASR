@@ -128,7 +128,7 @@ pip install funasr
 | **Fun-ASR-Nano** | 인식 | 중/영/일 + 중국어 방언 | 800M | [⭐](https://www.modelscope.cn/models/FunAudioLLM/Fun-ASR-Nano-2512) [🤗](https://huggingface.co/FunAudioLLM/Fun-ASR-Nano-2512) [GGUF](https://huggingface.co/FunAudioLLM/Fun-ASR-Nano-GGUF) |
 | **Fun-ASR-MLT-Nano** | 인식 | 31개 언어 | 800M | [⭐](https://www.modelscope.cn/models/FunAudioLLM/Fun-ASR-MLT-Nano-2512) [🤗](https://huggingface.co/FunAudioLLM/Fun-ASR-MLT-Nano-2512) |
 | **SenseVoiceSmall** | 인식 + 감정 + 이벤트 | 중/영/일/한/광둥어 | 234M | [⭐](https://www.modelscope.cn/models/iic/SenseVoiceSmall) [🤗](https://huggingface.co/FunAudioLLM/SenseVoiceSmall) [GGUF](https://huggingface.co/FunAudioLLM/SenseVoiceSmall-GGUF) |
-| **Paraformer-zh** | 인식 + 타임스탬프 | 중/영 | 220M | [⭐](https://www.modelscope.cn/models/damo/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary) [🤗](https://huggingface.co/funasr/paraformer-zh) |
+| **Paraformer-zh** | 인식 + 타임스탬프 | 중/영 | 220M | [⭐](https://www.modelscope.cn/models/iic/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary) [🤗](https://huggingface.co/funasr/paraformer-zh) |
 | Qwen3-ASR | 인식, 52개 언어 | 다국어 | 1.7B | [사용법](examples/industrial_data_pretraining/qwen3_asr) |
 | GLM-ASR-Nano | 인식, 17개 언어 | 다국어 | 1.5B | [사용법](examples/industrial_data_pretraining/glm_asr) |
 | Whisper-large-v3-turbo | 인식 + 번역 | 다국어 | 809M | [사용법](examples/industrial_data_pretraining/whisper) |
