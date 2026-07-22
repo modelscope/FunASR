@@ -41,10 +41,10 @@ PAGE_CONTRACTS: dict[str, PageContract] = {
         forbidden=("16K+",),
     ),
     f"{BASE_URL}/donors.html": PageContract(
-        required=("服务器", "www.funasr.com", "域名"),
+        required=("捐赠金额用于购买服务器与", "www.funasr.com", "域名"),
     ),
     f"{BASE_URL}/en/donors.html": PageContract(
-        required=("servers", "www.funasr.com", "domain"),
+        required=("Donations helped purchase servers", "www.funasr.com", "domain"),
     ),
     f"{BASE_URL}/blog/funasr-cli-transcribe-command-line.html": PageContract(
         required=("推荐 funasr ≥ 1.3.26", "/donors.html"),
