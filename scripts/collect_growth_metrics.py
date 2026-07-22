@@ -564,15 +564,7 @@ def recommend_integration_action(
 
 def display_mergeable_state(integration: Dict[str, Any]) -> str:
     mergeable_state = integration.get("mergeable_state")
-    if mergeable_state and mergeable_state != "unknown":
-        return str(mergeable_state)
-
     mergeable = integration.get("mergeable")
-    if isinstance(mergeable, bool):
-        return "mergeable" if mergeable else "not mergeable"
-    if mergeable and str(mergeable).lower() not in {"unknown", "none"}:
-        return str(mergeable).lower()
-
     checks = integration.get("checks") or {}
     next_action = integration.get("next_action") or "inspect"
     has_check_blocker = bool(checks.get("failed_check_runs") or checks.get("pending_check_runs"))
@@ -584,8 +576,17 @@ def display_mergeable_state(integration: Dict[str, Any]) -> str:
             integration.get("known_review_gate_reason")
             or integration.get("known_assisted_review_reason")
         )
+        and (mergeable is True or mergeable_state in {"blocked", "unknown", "unstable", None})
     ):
         return "review-gated"
+
+    if mergeable_state and mergeable_state != "unknown":
+        return str(mergeable_state)
+
+    if isinstance(mergeable, bool):
+        return "mergeable" if mergeable else "not mergeable"
+    if mergeable and str(mergeable).lower() not in {"unknown", "none"}:
+        return str(mergeable).lower()
 
     return str(mergeable_state or mergeable or "unknown")
 
