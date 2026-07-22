@@ -110,12 +110,27 @@ def test_readme_model_tables_surface_public_gguf_entries():
     readmes = [
         (ROOT / "README.md").read_text(),
         (ROOT / "README_zh.md").read_text(),
+        (ROOT / "README_ja.md").read_text(),
+        (ROOT / "README_ko.md").read_text(),
     ]
 
     for text in readmes:
         assert "https://huggingface.co/FunAudioLLM/Fun-ASR-Nano-GGUF" in text
         assert "https://huggingface.co/FunAudioLLM/SenseVoiceSmall-GGUF" in text
         assert "https://huggingface.co/FunAudioLLM/Fun-ASR-MLT-Nano-GGUF" not in text
+
+
+def test_localized_readmes_surface_current_release_and_edge_runtime():
+    readmes = [
+        (ROOT / "README_ja.md").read_text(),
+        (ROOT / "README_ko.md").read_text(),
+    ]
+
+    for text in readmes:
+        assert 'python -m pip install -U "funasr==1.3.26"' in text
+        assert "https://github.com/modelscope/FunASR/releases/tag/v1.3.26" in text
+        assert "https://www.funasr.com/llama-cpp.html" in text
+        assert "runtime-llamacpp-v0.1.8" in text
 
 
 def test_realtime_demo_documents_partial_and_hotword_boundaries():
