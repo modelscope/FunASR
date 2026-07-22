@@ -1216,6 +1216,36 @@ def test_format_integration_markdown_marks_missing_exposure_metrics_as_unavailab
     ) in output
 
 
+def test_format_integration_markdown_marks_unknown_review_gate_as_review_gated():
+    module = load_growth_metrics_module()
+    metrics = {
+        "collected_at_utc": "2026-07-02T00:00:00+00:00",
+        "integrations": [
+            {
+                "pr": "punkpeye/awesome-mcp-servers#7153",
+                "html_url": "https://github.com/punkpeye/awesome-mcp-servers/pull/7153",
+                "state": "open",
+                "mergeable": None,
+                "mergeable_state": "unknown",
+                "repo_stars": 91_000,
+                "repo_forks": 13_000,
+                "updated_at": "2026-07-22T17:46:15Z",
+                "updated_age_days": 0,
+                "next_action": "wait for maintainer review",
+                "known_review_gate_reason": "Glama listing and score badge are live",
+                "checks": {"state": "success", "failed_check_runs": [], "pending_check_runs": []},
+            }
+        ],
+    }
+
+    output = module.format_integration_markdown(metrics)
+
+    assert (
+        "| [punkpeye/awesome-mcp-servers#7153](https://github.com/punkpeye/awesome-mcp-servers/pull/7153) | "
+        "91,000 | 13,000 | open | review-gated | success | 0 | 0 | 0d | wait for maintainer review | `2026-07-22T17:46:15Z` |"
+    ) in output
+
+
 def test_format_integration_markdown_lists_high_exposure_priorities_by_stars():
     module = load_growth_metrics_module()
     metrics = {

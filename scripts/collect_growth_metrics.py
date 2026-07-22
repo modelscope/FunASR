@@ -551,6 +551,34 @@ def recommend_integration_action(
     return "inspect"
 
 
+def display_mergeable_state(integration: Dict[str, Any]) -> str:
+    mergeable_state = integration.get("mergeable_state")
+    if mergeable_state and mergeable_state != "unknown":
+        return str(mergeable_state)
+
+    mergeable = integration.get("mergeable")
+    if isinstance(mergeable, bool):
+        return "mergeable" if mergeable else "not mergeable"
+    if mergeable and str(mergeable).lower() not in {"unknown", "none"}:
+        return str(mergeable).lower()
+
+    checks = integration.get("checks") or {}
+    next_action = integration.get("next_action") or "inspect"
+    has_check_blocker = bool(checks.get("failed_check_runs") or checks.get("pending_check_runs"))
+    if (
+        checks.get("state") in {"success", "unknown"}
+        and not has_check_blocker
+        and next_action == "wait for maintainer review"
+        and (
+            integration.get("known_review_gate_reason")
+            or integration.get("known_assisted_review_reason")
+        )
+    ):
+        return "review-gated"
+
+    return str(mergeable_state or mergeable or "unknown")
+
+
 def collect_pull_request_metrics(spec: str, now: Optional[dt.datetime] = None) -> Dict[str, Any]:
     repo, pr_number = parse_pull_request_spec(spec)
     now = now or dt.datetime.now(dt.timezone.utc)
@@ -807,7 +835,7 @@ def format_integration_markdown(metrics: Dict[str, Any]) -> str:
             f"{repo_stars} | "
             f"{repo_forks} | "
             f"{integration.get('state')} | "
-            f"{integration.get('mergeable_state') or integration.get('mergeable')} | "
+            f"{display_mergeable_state(integration)} | "
             f"{checks.get('state')} | "
             f"{failed_count:,} | "
             f"{pending_count:,} | "
