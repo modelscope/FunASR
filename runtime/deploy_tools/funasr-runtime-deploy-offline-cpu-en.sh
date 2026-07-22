@@ -27,7 +27,7 @@ SUDO_CMD="sudo"
 
 
 DEFAULT_DOCKER_OFFLINE_CPU_EN_LISTS_OSS="https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/docker_lists/docker_offline_cpu_en_lists"
-DEFAULT_DOCKER_OFFLINE_CPU_EN_LISTS_GIT="https://raw.githubusercontent.com/alibaba-damo-academy/FunASR/main/runtime/docs/docker_offline_cpu_en_lists"
+DEFAULT_DOCKER_OFFLINE_CPU_EN_LISTS_GIT="https://raw.githubusercontent.com/modelscope/FunASR/main/runtime/docs/docker_offline_cpu_en_lists"
 DEFAULT_DOCKER_IMAGE_LISTS=$DEFAULT_DOCKER_OFFLINE_CPU_EN_LISTS_OSS
 DEFAULT_FUNASR_DOCKER_URL="registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr"
 DEFAULT_FUNASR_RUNTIME_RESOURCES="funasr-runtime-resources"

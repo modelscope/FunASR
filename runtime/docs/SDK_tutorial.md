@@ -27,7 +27,7 @@ Cloud service providers offer a 3-month free trial for new users. Application tu
 Download the deployment tool `funasr-runtime-deploy-offline-cpu-zh.sh`
 
 ```shell
-curl -O https://raw.githubusercontent.com/alibaba-damo-academy/FunASR/main/runtime/deploy_tools/funasr-runtime-deploy-offline-cpu-zh.sh;
+curl -O https://raw.githubusercontent.com/modelscope/FunASR/main/runtime/deploy_tools/funasr-runtime-deploy-offline-cpu-zh.sh;
 # If there is a network problem, users in mainland China can use the following command:
 # curl -O https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/shell/funasr-runtime-deploy-offline-cpu-zh.sh;
 ```

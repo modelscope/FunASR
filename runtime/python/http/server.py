@@ -23,21 +23,21 @@ parser.add_argument(
     "--asr_model",
     type=str,
     default="paraformer-zh",
-    help="asr model from https://github.com/alibaba-damo-academy/FunASR?tab=readme-ov-file#model-zoo",
+    help="asr model from https://github.com/modelscope/FunASR?tab=readme-ov-file#model-zoo",
 )
 parser.add_argument("--asr_model_revision", type=str, default="v2.0.4", help="")
 parser.add_argument(
     "--vad_model",
     type=str,
     default="fsmn-vad",
-    help="vad model from https://github.com/alibaba-damo-academy/FunASR?tab=readme-ov-file#model-zoo",
+    help="vad model from https://github.com/modelscope/FunASR?tab=readme-ov-file#model-zoo",
 )
 parser.add_argument("--vad_model_revision", type=str, default="v2.0.4", help="")
 parser.add_argument(
     "--punc_model",
     type=str,
     default="ct-punc-c",
-    help="model from https://github.com/alibaba-damo-academy/FunASR?tab=readme-ov-file#model-zoo",
+    help="model from https://github.com/modelscope/FunASR?tab=readme-ov-file#model-zoo",
 )
 parser.add_argument("--punc_model_revision", type=str, default="v2.0.4", help="")
 parser.add_argument("--ngpu", type=int, default=1, help="0 for cpu, 1 for gpu")

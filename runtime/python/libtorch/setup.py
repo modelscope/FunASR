@@ -17,7 +17,7 @@ setuptools.setup(
     name="funasr_torch",
     version="0.1.3",
     platforms="Any",
-    url="https://github.com/alibaba-damo-academy/FunASR.git",
+    url="https://github.com/modelscope/FunASR.git",
     author="Speech Lab of DAMO Academy, Alibaba Group",
     author_email="funasr@list.alibaba-inc.com",
     description="FunASR: A Fundamental End-to-End Speech Recognition Toolkit",
