@@ -40,3 +40,19 @@ def test_growth_plan_records_install_deployment_faq_completion():
         assert marker in text
 
     assert "[ ] Add a short FAQ for install/deployment failures" not in text
+
+
+def test_growth_plan_records_github_metadata_completion():
+    text = PLAN.read_text()
+
+    required_markers = [
+        "[x] Confirm GitHub repo description and topics mention ASR",
+        "`modelscope/FunASR` topics include `mcp-server`, `openai-compatible-api`, `streaming-asr`, and `vllm`",
+        "`FunAudioLLM/Fun-ASR` topics include `fun-asr-nano`, `llama-cpp`, `gguf`, and `multilingual-asr`",
+        "`FunAudioLLM/SenseVoice` topics include `sensevoice`, `language-identification`, `audio-event-detection`, and `speech-understanding`",
+        "`modelscope/FunClip` topics include `video-transcription`, `auto-subtitles`, `ai-video-editing`, and `funclip`",
+    ]
+    for marker in required_markers:
+        assert marker in text
+
+    assert "[ ] Confirm GitHub repo description and topics mention ASR" not in text
