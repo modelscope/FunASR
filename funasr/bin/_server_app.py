@@ -139,7 +139,7 @@ def create_app(device: str = "cuda", preload_model: str = "auto", model_path: st
             t0 = time.time()
             # Use custom model_path if provided, otherwise default
             vllm_model = app.state.model_path if app.state.model_path else "FunAudioLLM/Fun-ASR-Nano-2512"
-            vllm_hub = app.state.hub if app.state.hub else "hf"
+            vllm_hub = app.state.hub if app.state.model_path else "hf"
             app.state.engine = FunASRNanoVLLM.from_pretrained(
                 model=vllm_model,
                 hub=vllm_hub,
@@ -160,7 +160,7 @@ def create_app(device: str = "cuda", preload_model: str = "auto", model_path: st
             from funasr import AutoModel
             cfg = {
                 "model": app.state.model_path if app.state.model_path else "FunAudioLLM/Fun-ASR-Nano-2512",
-                "hub": app.state.hub if app.state.hub else "hf",
+                "hub": app.state.hub if app.state.model_path else "hf",
                 "trust_remote_code": True,
                 "vad_model": "fsmn-vad",
                 "vad_kwargs": {"max_single_segment_time": 30000},
@@ -174,14 +174,15 @@ def create_app(device: str = "cuda", preload_model: str = "auto", model_path: st
         """Load non-LLM model via AutoModel."""
         if name in app.state.fallback_models:
             return app.state.fallback_models[name]
-        if name not in FALLBACK_CONFIGS:
+        if name not in FALLBACK_CONFIGS and not app.state.model_path:
             return None
         from funasr import AutoModel
-        cfg = FALLBACK_CONFIGS[name].copy()
+        cfg = FALLBACK_CONFIGS.get(name, {}).copy()
         # Override with custom model_path and hub if provided
         if app.state.model_path:
             cfg["model"] = app.state.model_path
-        if app.state.hub:
+            cfg["hub"] = app.state.hub
+        elif app.state.hub:
             cfg["hub"] = app.state.hub
         cfg["device"] = device
         cfg["disable_update"] = True
@@ -271,7 +272,7 @@ def create_app(device: str = "cuda", preload_model: str = "auto", model_path: st
     if app.state.model_path:
         # When custom model_path is provided, use it as the model name for loading
         logger.info(f"Loading custom model: {app.state.model_path} (hub: {app.state.hub})")
-        _load_fallback(preload_model if preload_model != "auto" else "custom")
+        _load_fallback("custom")
     elif preload_model == "fun-asr-nano":
         _load_vllm_engine()
     else:
@@ -308,7 +309,7 @@ def create_app(device: str = "cuda", preload_model: str = "auto", model_path: st
                 tmp.write(content)
                 tmp_path = tmp.name
             try:
-                result = _process_fallback(model if model != "custom" else preload_model, tmp_path, language=language)
+                result = _process_fallback(model, tmp_path, language=language)
             finally:
                 os.unlink(tmp_path)
         else:
