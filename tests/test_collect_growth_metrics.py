@@ -1642,6 +1642,64 @@ def test_main_outputs_ecosystem_json(monkeypatch):
     assert payload["ecosystem"]["remaining_to_target"] == 16602
 
 
+def test_main_treats_explicit_multi_repos_as_ecosystem_json(monkeypatch):
+    module = load_growth_metrics_module()
+
+    repo_stars = {
+        "modelscope/FunASR": 18714,
+        "FunAudioLLM/Fun-ASR": 1318,
+        "FunAudioLLM/SenseVoice": 8718,
+        "modelscope/FunClip": 5872,
+    }
+
+    def fake_fetch_json(url, headers=None):
+        if url.endswith("/pulls?state=open&per_page=100"):
+            return []
+        if url.startswith("https://api.github.com/repos/"):
+            repo = url.removeprefix("https://api.github.com/repos/")
+            return {
+                "stargazers_count": repo_stars[repo],
+                "forks_count": 0,
+                "subscribers_count": 0,
+                "open_issues_count": 0,
+                "default_branch": "main",
+                "pushed_at": "2026-06-30T00:00:00Z",
+                "html_url": f"https://github.com/{repo}",
+            }
+        if url == "https://pypi.org/pypi/funasr/json":
+            return {"info": {"version": "1.3.14", "summary": "FunASR", "project_url": "https://pypi.org/project/funasr/"}}
+        raise AssertionError(f"unexpected URL: {url}")
+
+    monkeypatch.setattr(module, "fetch_json", fake_fetch_json)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "collect_growth_metrics.py",
+            "--format",
+            "json",
+            "--repos",
+            "modelscope/FunASR",
+            "FunAudioLLM/Fun-ASR",
+            "FunAudioLLM/SenseVoice",
+            "modelscope/FunClip",
+        ],
+    )
+
+    with redirect_stdout(io.StringIO()) as stdout:
+        assert module.main() == 0
+
+    payload = json.loads(stdout.getvalue())
+    assert "github" not in payload
+    assert payload["ecosystem"]["total_stars"] == 34622
+    assert [repo["repo"] for repo in payload["ecosystem"]["repositories"]] == [
+        "modelscope/FunASR",
+        "FunAudioLLM/Fun-ASR",
+        "FunAudioLLM/SenseVoice",
+        "modelscope/FunClip",
+    ]
+
+
 def test_main_outputs_integrations_json(monkeypatch):
     module = load_growth_metrics_module()
 
