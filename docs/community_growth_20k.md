@@ -350,7 +350,7 @@ Paste the Markdown output into launch notes, weekly community updates, or releas
 ### Week 2: Deployment proof
 
 - [x] Publish API server curl examples. On 2026-07-23, the OpenAI-compatible API docs already publish copy-paste curl paths in `examples/openai_api/README.md` and `examples/openai_api/README_zh.md`, plus scripted smoke tests in `examples/openai_api/smoke_test.sh` and `examples/openai_api/smoke_test.py`. The manual flow downloads `sample.wav`, checks `/health`, and posts to `/v1/audio/transcriptions` with `-F file=@sample.wav`, `-F model=sensevoice`, and `response_format=verbose_json`; no-code and gateway users can use `examples/openai_api/POSTMAN.md` and `examples/openai_api/OPENAPI.md`.
-- [ ] Publish WebSocket streaming examples.
+- [x] Publish WebSocket streaming examples. On 2026-07-23, realtime WebSocket examples are published in `docs/vllm_guide.md`, `docs/vllm_guide_zh.md`, and `examples/industrial_data_pretraining/fun_asr_nano/docs/realtime_demo.md`. They show how to start `serve_realtime_ws.py`, connect to `ws://localhost:10095`, run `client_python.py --server ws://localhost:10095 --mic` or `client_python.py --server ws://localhost:10095 --file audio.wav`, interpret `partial`, `partial_start_ms`, and `is_final`, and run `realtime_ws_benchmark.py` for multi-client load checks.
 - [ ] Validate Docker CPU and GPU images.
 - [ ] Validate vLLM guide on one GPU server.
 - [ ] Record concise terminal outputs for release notes.

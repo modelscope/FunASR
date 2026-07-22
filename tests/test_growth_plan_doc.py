@@ -78,3 +78,26 @@ def test_growth_plan_records_api_curl_examples_completion():
         assert marker in text
 
     assert "[ ] Publish API server curl examples" not in text
+
+
+def test_growth_plan_records_websocket_streaming_examples_completion():
+    text = PLAN.read_text()
+
+    required_markers = [
+        "[x] Publish WebSocket streaming examples",
+        "`docs/vllm_guide.md`",
+        "`docs/vllm_guide_zh.md`",
+        "`examples/industrial_data_pretraining/fun_asr_nano/docs/realtime_demo.md`",
+        "`serve_realtime_ws.py`",
+        "`ws://localhost:10095`",
+        "`client_python.py --server ws://localhost:10095 --mic`",
+        "`client_python.py --server ws://localhost:10095 --file audio.wav`",
+        "`partial`",
+        "`partial_start_ms`",
+        "`is_final`",
+        "`realtime_ws_benchmark.py`",
+    ]
+    for marker in required_markers:
+        assert marker in text
+
+    assert "[ ] Publish WebSocket streaming examples" not in text
