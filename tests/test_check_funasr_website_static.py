@@ -35,7 +35,7 @@ def test_website_contract_accepts_current_public_copy():
             <div>54.3K stars</div>
         """,
         "https://www.funasr.com/donors.html": """
-            捐赠金额用于购买服务器与 <a href="https://www.funasr.com/">www.funasr.com</a> 域名
+            捐赠金额用于购买服务器与 <a href="https://www.funasr.com/">www.funasr.com</a> 域名，帮助官网和社区资料持续在线。
         """,
         "https://www.funasr.com/en/donors.html": """
             Donations helped purchase servers and the <a href="https://www.funasr.com/">www.funasr.com</a> domain.
