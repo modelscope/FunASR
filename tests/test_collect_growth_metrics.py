@@ -1270,6 +1270,38 @@ def test_format_integration_markdown_marks_unknown_review_gate_as_review_gated()
     ) in output
 
 
+def test_format_integration_markdown_marks_mergeable_blocked_review_wait_as_review_gated():
+    module = load_growth_metrics_module()
+    metrics = {
+        "collected_at_utc": "2026-07-02T00:00:00+00:00",
+        "integrations": [
+            {
+                "pr": "huggingface/transformers#46180",
+                "html_url": "https://github.com/huggingface/transformers/pull/46180",
+                "state": "open",
+                "mergeable": True,
+                "mergeable_state": "blocked",
+                "repo_stars": 162_000,
+                "repo_forks": 33_000,
+                "updated_at": "2026-07-22T08:50:59Z",
+                "updated_age_days": 0,
+                "next_action": "wait for maintainer review",
+                "known_assisted_review_reason": (
+                    "checks are green and the remaining blocker is an active maintainer-held review thread"
+                ),
+                "checks": {"state": "success", "failed_check_runs": [], "pending_check_runs": []},
+            }
+        ],
+    }
+
+    output = module.format_integration_markdown(metrics)
+
+    assert (
+        "| [huggingface/transformers#46180](https://github.com/huggingface/transformers/pull/46180) | "
+        "162,000 | 33,000 | open | review-gated | success | 0 | 0 | 0d | wait for maintainer review | `2026-07-22T08:50:59Z` |"
+    ) in output
+
+
 def test_format_integration_markdown_lists_high_exposure_priorities_by_stars():
     module = load_growth_metrics_module()
     metrics = {
