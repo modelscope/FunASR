@@ -84,8 +84,13 @@ def test_public_docs_do_not_advertise_stale_release_or_star_copy():
             assert marker not in text
 
 
-def test_chinese_readme_model_table_uses_current_modelscope_entries():
-    text = (ROOT / "README_zh.md").read_text()
+def test_readme_model_tables_use_current_modelscope_entries():
+    readmes = [
+        (ROOT / "README.md").read_text(),
+        (ROOT / "README_zh.md").read_text(),
+        (ROOT / "README_ja.md").read_text(),
+        (ROOT / "README_ko.md").read_text(),
+    ]
 
     current_entries = [
         "models/iic/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary",
@@ -100,10 +105,15 @@ def test_chinese_readme_model_table_uses_current_modelscope_entries():
         "models/damo/speech_fsmn_vad_zh-cn-16k-common-pytorch/summary",
     ]
 
-    for marker in current_entries:
-        assert marker in text
-    for marker in stale_entries:
-        assert marker not in text
+    for text in readmes:
+        assert current_entries[0] in text
+        assert stale_entries[0] not in text
+
+    for text in readmes[:2]:
+        for marker in current_entries:
+            assert marker in text
+        for marker in stale_entries:
+            assert marker not in text
 
 
 def test_readme_model_tables_surface_public_gguf_entries():
