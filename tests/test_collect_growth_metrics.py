@@ -195,6 +195,16 @@ def test_missing_validated_discovery_lanes_wait_for_maintainer_review():
     assert expected_prs.issubset(set(module.KNOWN_ASSISTED_REVIEW_REQUESTS))
 
 
+def test_type4me_review_wait_reflects_completed_qwen3_smoke():
+    module = load_growth_metrics_module()
+
+    reason = module.KNOWN_ASSISTED_REVIEW_REQUESTS["joewongjc/type4me#207"]["reason"]
+
+    assert "Qwen3-only ASR smoke evidence posted" in reason
+    assert "keep draft" not in reason
+    assert "until Qwen3-only ASR smoke test" not in reason
+
+
 def test_default_integration_prs_include_mcp_discovery_lanes():
     module = load_growth_metrics_module()
 

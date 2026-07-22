@@ -199,7 +199,7 @@ KNOWN_ASSISTED_REVIEW_REQUESTS = {
         "reason": "FunASR scientific-audio listing evidence already posted; avoid duplicate pings",
     },
     "joewongjc/type4me#207": {
-        "reason": "draft validation status already posted; keep draft until Qwen3-only ASR smoke test",
+        "reason": "Qwen3-only ASR smoke evidence posted and PR is ready for maintainer review",
     },
     "ga642381/speech-trident#31": {
         "reason": "SenseVoice model-list evidence already posted; avoid duplicate pings",
