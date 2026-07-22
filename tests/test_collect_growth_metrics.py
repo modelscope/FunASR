@@ -19,7 +19,7 @@ def load_growth_metrics_module():
 def test_default_integration_prs_include_sglang_omni_fun_asr():
     module = load_growth_metrics_module()
 
-    assert "sgl-project/sglang-omni#1078" in module.DEFAULT_INTEGRATION_PRS
+    assert "sgl-project/sglang-omni#1078" not in module.DEFAULT_INTEGRATION_PRS
     assert "sgl-project/sglang-omni#898" not in module.DEFAULT_INTEGRATION_PRS
 
 
@@ -61,21 +61,20 @@ def test_default_integration_prs_include_high_visibility_external_queue():
     module = load_growth_metrics_module()
 
     expected_prs = {
-        "infiniflow/ragflow#16473",
-        "pipecat-ai/pipecat#4844",
         "TEN-framework/ten-framework#2191",
         "Uberi/speech_recognition#903",
     }
 
     assert expected_prs.issubset(set(module.DEFAULT_INTEGRATION_PRS))
     assert "activepieces/activepieces#13985" not in module.DEFAULT_INTEGRATION_PRS
+    assert "infiniflow/ragflow#16473" not in module.DEFAULT_INTEGRATION_PRS
+    assert "pipecat-ai/pipecat#4844" not in module.DEFAULT_INTEGRATION_PRS
 
 
 def test_default_integration_prs_include_new_growth_lanes():
     module = load_growth_metrics_module()
 
     expected_prs = {
-        "Significant-Gravitas/AutoGPT#13500",
         "huggingface/speech-to-speech#319",
         "run-llama/llama_index#21958",
         "run-llama/llama_index#21996",
@@ -83,21 +82,22 @@ def test_default_integration_prs_include_new_growth_lanes():
         "mudler/LocalAI#10090",
         "agno-agi/agno#8501",
         "GetStream/Vision-Agents#606",
-        "ai4s-research/awesome-ai-for-science#69",
     }
 
     assert expected_prs.issubset(set(module.DEFAULT_INTEGRATION_PRS))
+    assert "Significant-Gravitas/AutoGPT#13500" not in module.DEFAULT_INTEGRATION_PRS
+    assert "ai4s-research/awesome-ai-for-science#69" not in module.DEFAULT_INTEGRATION_PRS
 
 
 def test_default_integration_prs_include_video_discovery_lanes():
     module = load_growth_metrics_module()
 
     expected_prs = {
-        "tmoroney/auto-subs#629",
         "mahseema/awesome-ai-tools#1689",
     }
 
     assert expected_prs.issubset(set(module.DEFAULT_INTEGRATION_PRS))
+    assert "tmoroney/auto-subs#629" not in module.DEFAULT_INTEGRATION_PRS
 
 
 def test_default_integration_prs_include_voice_agent_and_ml_discovery_lanes():
@@ -115,10 +115,8 @@ def test_default_integration_prs_include_high_star_awesome_discovery_lanes():
     module = load_growth_metrics_module()
 
     expected_prs = {
-        "vinta/awesome-python#3246",
         "fighting41love/funNLP#478",
         "josephmisiti/awesome-machine-learning#1339",
-        "RVC-Boss/GPT-SoVITS#2801",
         "jobbole/awesome-python-cn#141",
         "ChristosChristofidis/awesome-deep-learning#317",
         "Hannibal046/Awesome-LLM#623",
@@ -134,6 +132,8 @@ def test_default_integration_prs_include_high_star_awesome_discovery_lanes():
 
     assert expected_prs.issubset(set(module.DEFAULT_INTEGRATION_PRS))
     assert "WangRongsheng/awesome-LLM-resources#162" not in module.DEFAULT_INTEGRATION_PRS
+    assert "vinta/awesome-python#3246" not in module.DEFAULT_INTEGRATION_PRS
+    assert "RVC-Boss/GPT-SoVITS#2801" not in module.DEFAULT_INTEGRATION_PRS
 
 
 def test_high_star_awesome_discovery_lanes_wait_for_maintainer_review():
@@ -172,10 +172,10 @@ def test_default_integration_prs_include_missing_validated_discovery_lanes():
         "Osmantic/ODS#1639",
         "faroit/awesome-python-scientific-audio#85",
         "joewongjc/type4me#207",
-        "ga642381/speech-trident#31",
     }
 
     assert expected_prs.issubset(set(module.DEFAULT_INTEGRATION_PRS))
+    assert "ga642381/speech-trident#31" not in module.DEFAULT_INTEGRATION_PRS
 
 
 def test_missing_validated_discovery_lanes_wait_for_maintainer_review():
