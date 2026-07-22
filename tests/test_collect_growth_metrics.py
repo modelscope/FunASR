@@ -64,11 +64,11 @@ def test_default_integration_prs_include_high_visibility_external_queue():
         "infiniflow/ragflow#16473",
         "pipecat-ai/pipecat#4844",
         "TEN-framework/ten-framework#2191",
-        "activepieces/activepieces#13985",
         "Uberi/speech_recognition#903",
     }
 
     assert expected_prs.issubset(set(module.DEFAULT_INTEGRATION_PRS))
+    assert "activepieces/activepieces#13985" not in module.DEFAULT_INTEGRATION_PRS
 
 
 def test_default_integration_prs_include_new_growth_lanes():
