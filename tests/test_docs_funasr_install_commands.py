@@ -20,3 +20,22 @@ def test_current_funasr_install_commands_are_quoted():
         assert '"funasr>=1.3.19"' in text
         assert "funasr>=1.3.0" not in text
         assert not re.search(r"pip install funasr>=", text)
+
+
+def test_realtime_demo_documents_partial_and_hotword_boundaries():
+    text = (
+        ROOT
+        / "examples/industrial_data_pretraining/fun_asr_nano/docs/realtime_demo.md"
+    ).read_text()
+
+    required = [
+        "data.sentences.map",
+        "data.partial || \"\"",
+        "partial_start_ms",
+        "--partial-window-sec",
+        "不是确定性文本替换",
+        "HOTWORDS:Tool,客製化,季會",
+        "后处理",
+    ]
+    for marker in required:
+        assert marker in text

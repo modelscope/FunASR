@@ -43,6 +43,22 @@ PyPI 安装对应的命令为 `funasr-realtime-server --endpoint-mode client`。
 
 `COMMIT` 不受默认 960 ms final 门槛限制，因此短句也会提交。该模式信任客户端 endpoint，不运行 FSMN-VAD；需要服务端自动去噪和分句时继续使用默认的 `--endpoint-mode server`。
 
+### 渲染 `sentences` 与 `partial`
+
+服务端返回的 `sentences` 是已经由 VAD 或 `COMMIT` 锁定的文本；`partial` 是当前还在说的临时预览，后续消息可能会覆盖它。前端不要只在页面上追加 `sentences`，否则连续讲话时会误以为预览里的尾部文字在最终结果中丢失。推荐每条消息都用“已锁定文本 + 当前预览”重绘显示：
+
+```js
+const committed = data.sentences.map((s) => s.text).join("");
+const preview = data.partial || "";
+render(committed + preview);
+```
+
+`partial_start_ms` 表示当前 `partial` 对应的音频起点。启用默认的 `--partial-window-sec 15` 时，长时间不停顿讲话会让预览窗口向前滑动；这只影响临时预览，VAD 锁定句、`COMMIT` 和 `STOP` 的最终结果仍会用完整句段重新解码。
+
+### 热词排查
+
+`HOTWORDS:Tool,客製化,季會` 或 `--hotword-file` 是模型解码阶段的热词偏置，不是确定性文本替换。热词过多、太短、中英文混杂，或音频静音/低音量/长句不停顿时，模型可能把相近声音偏向热词。排查时建议先完全关闭热词跑同一段音频；如果需求是把固定误识别改成正确专名，优先在识别完成后做后处理，而不是把大量词放进模型 hotwords。
+
 ## 客户端
 
 ```bash
