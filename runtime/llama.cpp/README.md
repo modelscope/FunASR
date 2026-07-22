@@ -94,6 +94,38 @@ with the CUDA Toolkit version configured by the release workflow. A binary built
 without `-DGGML_CUDA=ON` exits with a clear message if `--backend cuda` is
 requested.
 
+### Optional Linux Vulkan backend for SenseVoiceSmall
+
+Tagged releases also publish `funasr-llamacpp-linux-x64-vulkan.tar.gz` for
+SenseVoiceSmall graph execution through ggml's Vulkan backend. This is useful on
+Linux systems with AMD, Intel, NVIDIA, or integrated GPUs that expose a working
+Vulkan driver/ICD. Download the `linux-x64-vulkan` asset, install your vendor GPU
+driver, then select the backend at runtime:
+
+```bash
+# From the extracted linux-x64-vulkan package:
+./llama-funasr-sensevoice \
+  -m sensevoice-small-q8.gguf --vad fsmn-vad.gguf -a sample.wav --backend vulkan
+```
+
+Build from source when you need a local Vulkan SDK, distro-specific driver
+stack, or to validate a device before release packaging:
+
+```bash
+sudo apt-get install libvulkan-dev glslc spirv-headers vulkan-tools
+vulkaninfo --summary
+cmake -B build-vulkan -DCMAKE_BUILD_TYPE=Release -DGGML_VULKAN=ON
+cmake --build build-vulkan -j --target llama-funasr-sensevoice
+./build-vulkan/bin/llama-funasr-sensevoice \
+  -m sensevoice-small-f16.gguf -a sample.wav --backend vulkan
+```
+
+`--backend cpu` remains the default and is what the portable cross-platform
+prebuilt binaries use. A binary built without `-DGGML_VULKAN=ON` exits with a
+clear message if `--backend vulkan` is requested. Vulkan performance and device
+availability depend on the installed GPU driver/ICD rather than on CUDA compute
+capability.
+
 ## Build (shared)
 ```bash
 git clone https://github.com/ggml-org/llama.cpp && cd llama.cpp
@@ -137,12 +169,13 @@ Response:
 {"text": "transcribed text"}
 ```
 
-CUDA-enabled SenseVoice builds can be selected with `--backend cuda`. Extra
-binary flags can be forwarded with repeated `--extra-arg`, for example
-`--extra-arg --keep-tags`. This wrapper starts one subprocess per request, so it
-is best for local tools, demos, and integration tests. For sustained production
-traffic, use the Python `funasr-server` OpenAI-compatible service or build a
-dedicated native server around the C++ runtime.
+CUDA- and Vulkan-enabled SenseVoice builds can be selected with `--backend cuda`
+or `--backend vulkan`. Extra binary flags can be forwarded with repeated
+`--extra-arg`, for example `--extra-arg --keep-tags`. This wrapper starts one subprocess per request,
+so it is best for local tools, demos, and integration
+tests. For sustained production traffic, use the Python `funasr-server`
+OpenAI-compatible service or build a dedicated native server around the C++
+runtime.
 
 ## Validation
 

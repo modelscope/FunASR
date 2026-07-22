@@ -16,6 +16,15 @@ def test_windows_cuda_release_asset_is_in_matrix():
     assert "timeout_minutes: 90" in workflow
 
 
+def test_linux_vulkan_release_asset_is_in_matrix():
+    workflow = WORKFLOW.read_text(encoding="utf-8")
+
+    assert "name: linux-x64-vulkan" in workflow
+    assert "vulkan: true" in workflow
+    assert "build_target: llama-funasr-sensevoice" in workflow
+    assert "timeout_minutes: 90" in workflow
+
+
 def test_windows_cuda_build_uses_cuda_toolkit_and_flags():
     workflow = WORKFLOW.read_text(encoding="utf-8")
 
@@ -30,6 +39,15 @@ def test_windows_cuda_build_uses_cuda_toolkit_and_flags():
     assert "--target \"${{ matrix.build_target }}\"" in workflow
 
 
+def test_linux_vulkan_build_uses_vulkan_sdk_and_flags():
+    workflow = WORKFLOW.read_text(encoding="utf-8")
+
+    assert "libvulkan-dev" in workflow
+    assert "vulkan-tools" in workflow
+    assert "if: matrix.vulkan" in workflow
+    assert "-DGGML_VULKAN=ON" in workflow
+
+
 def test_release_notes_explain_cpu_and_cuda_windows_assets():
     readme = (ROOT / "runtime" / "llama.cpp" / "README.md").read_text(encoding="utf-8")
 
@@ -41,6 +59,15 @@ def test_release_notes_explain_cpu_and_cuda_windows_assets():
     assert "other GPU architectures" in readme
     assert "CMAKE_CUDA_ARCHITECTURES=120" in readme
     assert "sm_120" in readme
+
+
+def test_release_notes_explain_vulkan_linux_asset():
+    readme = (ROOT / "runtime" / "llama.cpp" / "README.md").read_text(encoding="utf-8")
+
+    assert "linux-x64-vulkan" in readme
+    assert "--backend vulkan" in readme
+    assert "Linux Vulkan" in readme
+    assert "GGML_VULKAN=ON" in readme
 
 
 def test_readme_documents_lightweight_http_server():

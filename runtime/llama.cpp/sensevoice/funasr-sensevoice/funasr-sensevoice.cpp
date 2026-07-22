@@ -10,6 +10,7 @@
 #include "ggml-backend.h"
 #include "gguf.h"
 
+#include <cctype>
 #include <cmath>
 #include <cstdint>
 #include <cstdio>
@@ -66,6 +67,29 @@ struct graph_backend {
   bool is_cpu=true;
 };
 
+static std::string lower_copy(const char*s){
+  std::string out=s?s:"";
+  for(char&c:out)c=(char)std::tolower((unsigned char)c);
+  return out;
+}
+
+static ggml_backend_dev_t find_gpu_backend_device(const std::string&backend_name){
+  ggml_backend_load_all();
+  for(size_t i=0;i<ggml_backend_dev_count();i++){
+    ggml_backend_dev_t dev=ggml_backend_dev_get(i);
+    if(ggml_backend_dev_type(dev)!=GGML_BACKEND_DEVICE_TYPE_GPU) continue;
+    std::string reg=lower_copy(ggml_backend_reg_name(ggml_backend_dev_backend_reg(dev)));
+    std::string dev_name=lower_copy(ggml_backend_dev_name(dev));
+    std::string dev_desc=lower_copy(ggml_backend_dev_description(dev));
+    if(reg.find(backend_name)!=std::string::npos||
+       dev_name.find(backend_name)!=std::string::npos||
+       dev_desc.find(backend_name)!=std::string::npos){
+      return dev;
+    }
+  }
+  return nullptr;
+}
+
 static graph_backend make_graph_backend(const std::string&name){
   graph_backend out;
   if(name=="cpu"){
@@ -73,8 +97,7 @@ static graph_backend make_graph_backend(const std::string&name){
     out.buffer_type=ggml_backend_get_default_buffer_type(out.backend);
     out.is_cpu=true;
   } else if(name=="cuda"){
-    ggml_backend_load_all();
-    ggml_backend_dev_t dev=ggml_backend_dev_by_type(GGML_BACKEND_DEVICE_TYPE_GPU);
+    ggml_backend_dev_t dev=find_gpu_backend_device("cuda");
     if(!dev){
       fprintf(stderr,"CUDA backend requested, but no GPU backend is available; build with -DGGML_CUDA=ON\n");
       exit(1);
@@ -82,8 +105,17 @@ static graph_backend make_graph_backend(const std::string&name){
     out.backend=ggml_backend_dev_init(dev,nullptr);
     out.buffer_type=ggml_backend_get_default_buffer_type(out.backend);
     out.is_cpu=false;
+  } else if(name=="vulkan"){
+    ggml_backend_dev_t dev=find_gpu_backend_device("vulkan");
+    if(!dev){
+      fprintf(stderr,"Vulkan backend requested, but no Vulkan GPU backend is available; build with -DGGML_VULKAN=ON and install a Vulkan driver/ICD\n");
+      exit(1);
+    }
+    out.backend=ggml_backend_dev_init(dev,nullptr);
+    out.buffer_type=ggml_backend_get_default_buffer_type(out.backend);
+    out.is_cpu=false;
   } else {
-    fprintf(stderr,"unsupported backend '%s' (expected cpu|cuda)\n",name.c_str());
+    fprintf(stderr,"unsupported backend '%s' (expected cpu|cuda|vulkan)\n",name.c_str());
     exit(1);
   }
   if(!out.backend||!out.buffer_type){
@@ -146,7 +178,7 @@ int main(int argc,char**argv){
     else if(!strcmp(argv[i],"--backend")&&i+1<argc)backend_name=argv[++i];
     else if(!strcmp(argv[i],"--ids"))ids_mode=true;
     else if(!strcmp(argv[i],"--keep-tags"))keep_tags=true;
-    else {fprintf(stderr,"usage: %s -m sensevoice.gguf (-a audio.wav | -f fbank.bin) [--vad fsmn-vad.gguf [--vad-maxseg ms]] [--backend cpu|cuda] [--ids] [--keep-tags]\n",argv[0]);return 1;} }
+    else {fprintf(stderr,"usage: %s -m sensevoice.gguf (-a audio.wav | -f fbank.bin) [--vad fsmn-vad.gguf [--vad-maxseg ms]] [--backend cpu|cuda|vulkan] [--ids] [--keep-tags]\n",argv[0]);return 1;} }
   if(gguf_path.empty()||(fbank_path.empty()&&wav_path.empty())){fprintf(stderr,"missing args\n");return 1;}
   graph_backend graph_be=make_graph_backend(backend_name);
 
