@@ -59,6 +59,25 @@ render(committed + preview);
 
 `HOTWORDS:Tool,客製化,季會` 或 `--hotword-file` 是模型解码阶段的热词偏置，不是确定性文本替换。热词过多、太短、中英文混杂，或音频静音/低音量/长句不停顿时，模型可能把相近声音偏向热词。排查时建议先完全关闭热词跑同一段音频；如果需求是把固定误识别改成正确专名，优先在识别完成后做后处理，而不是把大量词放进模型 hotwords。
 
+实时服务也支持最终文本级后处理，适合“固定错词 -> 正确专名”的确定性纠正，不会参与模型解码，也不会在静音时把声音偏成热词。启动时可以传文件：
+
+```bash
+cat > postprocess_hotwords.txt <<'EOF'
+哈囉=>客製化
+哈罗=>客製化
+EOF
+
+funasr-realtime-server --postprocess-hotword-file postprocess_hotwords.txt
+```
+
+也可以在同一条 WebSocket 连接中发送：
+
+```text
+POSTPROCESS_HOTWORDS:哈囉=>客製化,哈罗=>客製化
+```
+
+如果你确实希望模型在解码阶段更偏向某些专名，再使用 `HOTWORDS:` / `--hotword-file`；否则优先使用 `POSTPROCESS_HOTWORDS:` / `--postprocess-hotword-file`。
+
 ## 客户端
 
 ```bash
