@@ -70,6 +70,15 @@ def test_release_notes_explain_vulkan_linux_asset():
     assert "GGML_VULKAN=ON" in readme
 
 
+
+def test_github_release_notes_mention_vulkan_asset():
+    workflow = WORKFLOW.read_text(encoding="utf-8")
+    release_notes = workflow.split('--notes "', maxsplit=1)[1]
+
+    assert "linux-x64-vulkan" in release_notes
+    assert "--backend vulkan" in release_notes
+    assert "GGML_VULKAN=ON" in release_notes
+
 def test_readme_documents_lightweight_http_server():
     readme = (ROOT / "runtime" / "llama.cpp" / "README.md").read_text(encoding="utf-8")
 
