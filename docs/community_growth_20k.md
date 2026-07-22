@@ -366,8 +366,8 @@ Paste the Markdown output into launch notes, weekly community updates, or releas
 
 ### Week 4: Distribution and feedback
 
-- [ ] Share the release in relevant developer communities.
-- [ ] Pin a GitHub discussion for the release.
+- [x] Share the release in relevant developer communities. On 2026-07-23, GitHub Discussion [`modelscope/FunASR#3376`](https://github.com/modelscope/FunASR/discussions/3376) was published in the `Announcements` category with the title `FunASR v1.3.26: OpenAI-compatible ASR deployment, vLLM, and llama.cpp runtime`. It routes readers to `funasr==1.3.26`, `/v1/audio/transcriptions`, WebSocket realtime examples, `docs/vllm_guide.md`, the H100 vLLM smoke evidence, `runtime-llamacpp-v0.1.8`, troubleshooting docs, and asks real app users to share hardware, model path, latency, and deployment friction.
+- [ ] Pin a GitHub discussion for the release. The release discussion exists at [`modelscope/FunASR#3376`](https://github.com/modelscope/FunASR/discussions/3376), but the GitHub GraphQL API currently exposes `createDiscussion` and `updateDiscussion` but no discussion pin mutation; pin manually in the GitHub Discussions UI or retry if GitHub exposes an API for discussion pinning.
 - [ ] Triage all new issues within 48 hours.
 - [ ] Convert top 3 support questions into docs.
 - [ ] Track stars, PyPI downloads, issue volume, and docs traffic.

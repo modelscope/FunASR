@@ -193,3 +193,23 @@ def test_growth_plan_records_pypi_description_audit():
         assert marker in text
 
     assert "[ ] Update PyPI release description if needed" not in text
+
+
+def test_growth_plan_records_release_discussion_distribution():
+    text = PLAN.read_text()
+
+    required_markers = [
+        "[x] Share the release in relevant developer communities",
+        "modelscope/FunASR#3376",
+        "https://github.com/modelscope/FunASR/discussions/3376",
+        "FunASR v1.3.26: OpenAI-compatible ASR deployment, vLLM, and llama.cpp runtime",
+        "Announcements",
+        "`/v1/audio/transcriptions`",
+        "`runtime-llamacpp-v0.1.8`",
+        "GitHub GraphQL API currently exposes `createDiscussion` and `updateDiscussion` but no discussion pin mutation",
+        "[ ] Pin a GitHub discussion for the release",
+    ]
+    for marker in required_markers:
+        assert marker in text
+
+    assert "[ ] Share the release in relevant developer communities" not in text
