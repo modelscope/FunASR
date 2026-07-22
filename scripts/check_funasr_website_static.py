@@ -22,6 +22,22 @@ class PageContract:
 
 
 PAGE_CONTRACTS: dict[str, PageContract] = {
+    f"{BASE_URL}/": PageContract(
+        required=(
+            "工业级",
+            "/v1/audio/transcriptions",
+            "vLLM",
+            "/donors.html",
+        ),
+    ),
+    f"{BASE_URL}/en/": PageContract(
+        required=(
+            "Industrial Speech Recognition",
+            "OpenAI-compatible",
+            "/v1/audio/transcriptions",
+            "vLLM",
+        ),
+    ),
     f"{BASE_URL}/ecosystem.html": PageContract(
         required=(
             "35K+",

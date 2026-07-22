@@ -213,3 +213,23 @@ def test_growth_plan_records_release_discussion_distribution():
         assert marker in text
 
     assert "[ ] Share the release in relevant developer communities" not in text
+
+
+def test_growth_plan_records_homepage_entrypoint_completion():
+    text = PLAN.read_text()
+
+    required_markers = [
+        "[x] Update homepage hero and docs entry points",
+        "https://www.funasr.com/",
+        "https://www.funasr.com/en/",
+        "Industrial Speech Recognition",
+        "`OpenAI-compatible`",
+        "`/v1/audio/transcriptions`",
+        "`vLLM`",
+        "`/donors.html`",
+        "funasr.com static page contract passed for 11 pages",
+    ]
+    for marker in required_markers:
+        assert marker in text
+
+    assert "[ ] Update homepage hero and docs entry points" not in text
