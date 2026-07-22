@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import re
 import sys
 import time
 import urllib.request
@@ -17,6 +18,7 @@ BASE_URL = "https://www.funasr.com"
 class PageContract:
     required: tuple[str, ...]
     forbidden: tuple[str, ...] = ()
+    visible_required: tuple[str, ...] = ()
 
 
 PAGE_CONTRACTS: dict[str, PageContract] = {
@@ -42,9 +44,11 @@ PAGE_CONTRACTS: dict[str, PageContract] = {
     ),
     f"{BASE_URL}/donors.html": PageContract(
         required=("捐赠金额用于购买服务器与", "www.funasr.com", "域名"),
+        visible_required=("捐赠金额用于购买服务器与", "www.funasr.com", "域名"),
     ),
     f"{BASE_URL}/en/donors.html": PageContract(
         required=("Donations helped purchase servers", "www.funasr.com", "domain"),
+        visible_required=("Donations helped purchase servers", "www.funasr.com", "domain"),
     ),
     f"{BASE_URL}/blog/funasr-cli-transcribe-command-line.html": PageContract(
         required=("推荐 funasr ≥ 1.3.26", "/donors.html"),
@@ -87,6 +91,18 @@ PAGE_CONTRACTS: dict[str, PageContract] = {
 }
 
 
+def extract_visible_text(html: str) -> str:
+    body = html.split("<body", 1)[-1]
+    body = re.sub(
+        r"<script[\s\S]*?</script>|<style[\s\S]*?</style>",
+        " ",
+        body,
+        flags=re.IGNORECASE,
+    )
+    body = re.sub(r"<[^>]+>", " ", body)
+    return re.sub(r"\s+", " ", body).strip()
+
+
 def validate_pages(pages: dict[str, str]) -> list[str]:
     failures: list[str] = []
     for url, contract in PAGE_CONTRACTS.items():
@@ -97,6 +113,11 @@ def validate_pages(pages: dict[str, str]) -> list[str]:
         for needle in contract.required:
             if needle not in text:
                 failures.append(f"{url}: missing `{needle}`")
+        if contract.visible_required:
+            visible_text = extract_visible_text(text)
+            for needle in contract.visible_required:
+                if needle not in visible_text:
+                    failures.append(f"{url}: visible text missing `{needle}`")
         for needle in contract.forbidden:
             if needle in text:
                 failures.append(f"{url}: forbidden `{needle}`")

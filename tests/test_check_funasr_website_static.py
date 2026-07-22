@@ -100,6 +100,39 @@ def test_website_contract_reports_stale_runtime_and_star_copy():
     )
 
 
+def test_website_contract_requires_visible_donor_usage_copy():
+    checker = _load_module()
+
+    pages = {
+        url: "ok" for url in checker.PAGE_CONTRACTS
+    }
+    pages["https://www.funasr.com/donors.html"] = """
+        <head>
+            <meta name="description" content="捐赠金额用于购买服务器与 www.funasr.com 域名。">
+        </head>
+        <body>FunASR 社区功德榜</body>
+    """
+    pages["https://www.funasr.com/en/donors.html"] = """
+        <head>
+            <meta name="description" content="Donations helped purchase servers and the www.funasr.com domain.">
+        </head>
+        <body>FunASR Community Thanks</body>
+    """
+
+    failures = checker.validate_pages(pages)
+
+    assert any(
+        "donors.html" in failure
+        and "visible text missing `捐赠金额用于购买服务器与`" in failure
+        for failure in failures
+    )
+    assert any(
+        "en/donors.html" in failure
+        and "visible text missing `Donations helped purchase servers`" in failure
+        for failure in failures
+    )
+
+
 def test_fetch_pages_retries_transient_url_errors(monkeypatch):
     checker = _load_module()
     calls = []
