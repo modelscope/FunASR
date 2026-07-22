@@ -31,7 +31,7 @@ DEFAULT_TARGET_ADDITIONAL_STARS = 20000
 DEFAULT_TARGET_DATE = "2026-09-30"
 DEFAULT_INTEGRATION_PRS = [
     "huggingface/transformers#46180",
-    "sgl-project/sglang-omni#898",
+    "sgl-project/sglang-omni#1078",
     "yuekaizhang/Fun-ASR-vllm#21",
     "ray-project/ray#64053",
     "huggingface/optimum-intel#1801",
@@ -125,10 +125,6 @@ KNOWN_EXTERNAL_CHECK_FAILURES = {
     }
 }
 KNOWN_REVIEW_GATES = {
-    "sgl-project/sglang-omni#898": {
-        "action": "wait for contributor conflict resolution",
-        "reason": "Contributor-owned branch is dirty; conflict recipe already posted from the FunASR side",
-    },
     "punkpeye/awesome-mcp-servers#7153": {
         "action": "wait for maintainer review",
         "reason": "Glama listing and score badge are live",
@@ -504,6 +500,8 @@ def recommend_integration_action(
     known_assisted_review_reason: Optional[str] = None,
 ) -> str:
     if pull_request.get("state") != "open":
+        if pull_request.get("merged_at"):
+            return "merged / done"
         return "archive"
     if pull_request.get("draft"):
         return "finish draft"

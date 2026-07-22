@@ -19,7 +19,8 @@ def load_growth_metrics_module():
 def test_default_integration_prs_include_sglang_omni_fun_asr():
     module = load_growth_metrics_module()
 
-    assert "sgl-project/sglang-omni#898" in module.DEFAULT_INTEGRATION_PRS
+    assert "sgl-project/sglang-omni#1078" in module.DEFAULT_INTEGRATION_PRS
+    assert "sgl-project/sglang-omni#898" not in module.DEFAULT_INTEGRATION_PRS
 
 
 def test_github_headers_falls_back_to_gh_auth_token(monkeypatch):
@@ -1066,38 +1067,45 @@ def test_recommend_integration_action_prioritizes_dirty_merge_state_over_pending
     assert action == "resolve conflicts"
 
 
-def test_collect_integration_metrics_treats_empty_pending_status_as_review_gate(monkeypatch):
+def test_collect_integration_metrics_treats_merged_sglang_omni_as_completed(monkeypatch):
     module = load_growth_metrics_module()
 
     def fake_fetch_json(url, headers=None):
-        if url == "https://api.github.com/repos/sgl-project/sglang-omni/pulls/898":
+        if url == "https://api.github.com/repos/sgl-project/sglang-omni/pulls/1078":
             return {
-                "number": 898,
+                "number": 1078,
                 "title": "Add Fun-ASR serving support",
-                "state": "open",
+                "state": "closed",
                 "draft": False,
                 "mergeable": True,
-                "mergeable_state": "blocked",
-                "html_url": "https://github.com/sgl-project/sglang-omni/pull/898",
-                "updated_at": "2026-06-30T04:48:08Z",
-                "head": {"sha": "c081a79", "ref": "funasr-serving"},
+                "mergeable_state": "unknown",
+                "merged_at": "2026-07-18T15:11:15Z",
+                "html_url": "https://github.com/sgl-project/sglang-omni/pull/1078",
+                "updated_at": "2026-07-18T15:11:15Z",
+                "head": {"sha": "b6ea7ab1", "ref": "add-fun-asr"},
                 "base": {"ref": "main"},
                 "user": {"login": "PoTaTo-Mika"},
             }
-        if url == "https://api.github.com/repos/sgl-project/sglang-omni/commits/c081a79/status":
-            return {"state": "pending", "statuses": []}
-        if url == "https://api.github.com/repos/sgl-project/sglang-omni/commits/c081a79/check-runs?per_page=100":
-            return {"total_count": 0, "check_runs": []}
+        if url == "https://api.github.com/repos/sgl-project/sglang-omni/commits/b6ea7ab1/status":
+            return {"state": "success", "statuses": []}
+        if url == "https://api.github.com/repos/sgl-project/sglang-omni/commits/b6ea7ab1/check-runs?per_page=100":
+            return {
+                "total_count": 2,
+                "check_runs": [
+                    {"name": "unit", "status": "completed", "conclusion": "success"},
+                    {"name": "cleanup - PR CI home on close", "status": "completed", "conclusion": "cancelled"},
+                ],
+            }
         raise AssertionError(f"unexpected URL: {url}")
 
     monkeypatch.setattr(module, "fetch_json", fake_fetch_json)
 
-    metrics = module.collect_integration_metrics(["sgl-project/sglang-omni#898"])
+    metrics = module.collect_integration_metrics(["sgl-project/sglang-omni#1078"])
 
     integration = metrics["integrations"][0]
-    assert integration["checks"]["state"] == "unknown"
-    assert integration["checks"]["pending_check_runs"] == []
-    assert integration["next_action"] == "wait for contributor conflict resolution"
+    assert integration["state"] == "closed"
+    assert integration["checks"]["state"] == "failure"
+    assert integration["next_action"] == "merged / done"
 
 
 def test_format_integration_markdown_includes_update_age_and_next_action():
