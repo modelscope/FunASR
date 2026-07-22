@@ -153,6 +153,9 @@ KNOWN_ASSISTED_REVIEW_REQUESTS = {
     "run-llama/llama_index#21996": {
         "reason": "FunASR dependency gate addressed; avoid duplicate pings",
     },
+    "BerriAI/litellm-docs#610": {
+        "reason": "conflict resolved and Docusaurus build/check evidence posted; avoid duplicate pings",
+    },
     "mudler/LocalAI#10090": {
         "reason": "review evidence already posted; avoid duplicate pings",
     },
