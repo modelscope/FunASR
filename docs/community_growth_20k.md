@@ -34,14 +34,14 @@ This plan focuses on useful adoption work rather than vanity marketing: if more 
 
 ## Current campaign snapshot
 
-As of 2026-07-19 01:37 UTC, the ecosystem has 35,585 combined GitHub stars, or 4,361 additional stars since the 31,224 baseline. The remaining gap to the +20,000 target is 15,639 stars by 2026-09-30, which requires roughly 214 stars/day across the remaining 73 days.
+As of 2026-07-22 18:45 UTC, the ecosystem has 35,786 combined GitHub stars, or 4,562 additional stars since the 31,224 baseline. The remaining gap to the +20,000 target is 15,438 stars by 2026-09-30, which requires roughly 221 stars/day across the remaining 70 days.
 
 | Repository | Stars | Forks | Open issues | Open PRs | Last push |
 |---|---:|---:|---:|---:|---|
-| `modelscope/FunASR` | 19,326 | 1,942 | 2 | 0 | 2026-07-19 |
-| `FunAudioLLM/Fun-ASR` | 1,409 | 138 | 0 | 0 | 2026-07-18 |
-| `FunAudioLLM/SenseVoice` | 8,886 | 793 | 0 | 0 | 2026-07-18 |
-| `modelscope/FunClip` | 5,964 | 713 | 0 | 0 | 2026-07-18 |
+| `modelscope/FunASR` | 19,407 | 1,952 | 2 | 0 | 2026-07-22 |
+| `FunAudioLLM/Fun-ASR` | 1,416 | 139 | 0 | 0 | 2026-07-22 |
+| `FunAudioLLM/SenseVoice` | 8,916 | 795 | 0 | 0 | 2026-07-22 |
+| `modelscope/FunClip` | 6,047 | 721 | 0 | 0 | 2026-07-22 |
 
 Keep this snapshot fresh during weekly planning. The ecosystem mode also reports the remaining gap, days left to 2026-09-30, and the required daily average:
 
@@ -141,6 +141,12 @@ python scripts/collect_growth_metrics.py --issues
 python scripts/collect_growth_metrics.py --issues --format json
 ```
 
+Keep the official website's conversion-critical pages from regressing after static-site edits or deploys:
+
+```bash
+python scripts/check_funasr_website_static.py
+```
+
 ## Workstream 5: External proof
 
 - Publish reproducible benchmark scripts and raw configuration for the 184-file benchmark.
@@ -188,6 +194,7 @@ High-star feature requests and roadmap issues are earlier in the funnel than PRs
 | `deepset-ai/haystack-core-integrations#3572` FunASR-Haystack Python 3.14 installation | Removes an installation scare in Haystack's integration catalog that can prevent new users from trying FunASR | A current Windows CPython 3.14 resolver check succeeds with `funasr 1.3.14`, `umap-learn 0.5.12`, `pynndescent 0.6.0`, `numba 0.66.0`, and `llvmlite 0.48.0`; the reported `llvmlite 0.36.0` path is therefore more consistent with a stale lock or lagging package index than the current dependency graph. Diagnostic commands and requested lock/index evidence are at https://github.com/deepset-ai/haystack-core-integrations/issues/3572#issuecomment-4965365012. Do not change core packaging until the reporter provides a current failing resolution. |
 | `crewAIInc/crewAI#5983` FunASR for voice-enabled agents | Routes a 55k-star multi-agent framework toward a provider-neutral voice command path where FunASR/SenseVoice can be a local OpenAI-compatible transcription backend | LauraGPT revived the stale broad request with a concrete `voice.stt.*` config, multipart `/v1/audio/transcriptions` contract, mock endpoint test shape, and agent-command handoff at https://github.com/crewAIInc/crewAI/issues/5983#issuecomment-4901293351. Watch for maintainer direction before opening a code PR. |
 | `Significant-Gravitas/AutoGPT#13347` FunASR as an open-source STT backend | Keeps the 185k-star AutoGPT voice-input discussion anchored on a generic OpenAI-compatible transcription contract rather than a heavyweight FunASR-only dependency | LauraGPT mapped the existing hard-coded Copilot Whisper route, then opened PR `Significant-Gravitas/AutoGPT#13500` and linked it back at https://github.com/Significant-Gravitas/AutoGPT/issues/13347#issuecomment-4908286807. The PR later merged, so keep this as a completed high-visibility OpenAI-compatible STT contract win rather than an active operator item. |
+| `modelscope/FunASR#3334` funasr.com static page contract | Protects owned website conversion surfaces that already send qualified traffic to the four repositories | Merged on 2026-07-23. The new `scripts/check_funasr_website_static.py` patrols 8 public pages across ecosystem, donor, CLI tutorial, and llama.cpp blog surfaces. It requires the current `35K+` ecosystem proof, donor server/domain copy, LiteLLM `custom_openai` card, `funasr >= 1.3.26` CLI guidance, and `runtime-llamacpp-v0.1.8` download path while forbidding stale `16K+`, `1.3.10`, and `runtime-llamacpp-v0.1.1` regressions. Post-merge validation passed the 7-test lightweight suite plus a real public website contract run. |
 | `chatchat-space/Langchain-Chatchat#5479` FunASR/SenseVoice voice input | Puts FunASR in a 38k-star Chinese RAG/Agent app where local audio upload can feed existing Chat and knowledge-base flows | LauraGPT proposed an OpenAI-compatible ASR endpoint slice, including `asr.base_url`, multipart request shape, minimal `{ "text": "..." }` response, and mocked CI endpoint at https://github.com/chatchat-space/Langchain-Chatchat/issues/5479#issuecomment-4901293565. Monitor stale handling and maintainer appetite for a first audio-upload transcription path. |
 | `royshil/obs-localvocal#314` SenseVoice/Paraformer engine option | Opens an OBS live-captioning path where SenseVoice/Paraformer can be evaluated through a cleaner ASR-engine boundary instead of a Whisper-only runtime | Maintainer is interested but capacity-limited until mid/late August. LauraGPT mapped current Whisper coupling points and suggested a facade-only first refactor at https://github.com/royshil/obs-localvocal/issues/314#issuecomment-4909662013; wait for a refactor branch or review request before proposing Sherpa-ONNX/FunASR runtime code. |
 | `SevaSk/ecoute#203` FunASR alternative ASR backend | Places FunASR/SenseVoice in a local realtime transcription app where users already compare Whisper-compatible and local ASR backends | LauraGPT recommended a two-step path at https://github.com/SevaSk/ecoute/issues/203#issuecomment-4906862462: first expose an OpenAI-compatible local STT endpoint with `stt_base_url`, optional key, model, and language; later add a native backend only with explicit streaming, language, timestamp, and batch-window capabilities. Monitor for maintainer appetite or an implementation PR before posting again. |
