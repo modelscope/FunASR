@@ -5,7 +5,7 @@
 ## 安装训练环境
 
 ```
-pip install "funasr>=1.3.23"
+pip install "funasr>=1.3.25"
 ```
 
 ## 数据准备

@@ -44,7 +44,7 @@ PUBLIC_DOCS_SHOULD_USE_CURRENT_HOSTS = [
 def test_current_funasr_install_commands_are_quoted():
     for relpath in DOCS_WITH_CURRENT_FUNASR_INSTALL:
         text = (ROOT / relpath).read_text()
-        assert '"funasr>=1.3.23"' in text
+        assert '"funasr>=1.3.25"' in text
         assert "funasr>=1.3.0" not in text
         assert not re.search(r"pip install funasr>=", text)
 
