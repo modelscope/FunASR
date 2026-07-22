@@ -22700,7 +22700,7 @@
 
     return audio_data.astype(np.float32), sr
 </code></pre></details></div>
-<div class="api-detail" id="e449"><span class="dtag badge-f">function</span><h2><code>create_app(device, preload_model)</code></h2><div class="dmod">funasr.bin._server_app · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/_server_app.py#L104" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source code</summary><pre><code>def create_app(device: str = &quot;cuda&quot;, preload_model: str = &quot;auto&quot;) -&gt; FastAPI:
+<div class="api-detail" id="e449"><span class="dtag badge-f">function</span><h2><code>create_app(device, preload_model, model_path, hub)</code></h2><div class="dmod">funasr.bin._server_app · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/_server_app.py#L104" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source code</summary><pre><code>def create_app(device: str = &quot;cuda&quot;, preload_model: str = &quot;auto&quot;, model_path: str = None, hub: str = &quot;ms&quot;) -&gt; FastAPI:
     if preload_model == &quot;auto&quot;:
         preload_model = &quot;fun-asr-nano&quot; if device.startswith(&quot;cuda&quot;) else &quot;sensevoice&quot;
 
@@ -22709,6 +22709,8 @@
     app.state.engine = None
     app.state.vad_model = None
     app.state.fallback_models = {}
+    app.state.model_path = model_path
+    app.state.hub = hub
 
     # Non-LLM model configs (use AutoModel, no vLLM)
     FALLBACK_CONFIGS = {
@@ -22728,8 +22730,6 @@
         &quot;&quot;&quot;Load Fun-ASR-Nano vLLM engine. Falls back to AutoModel if vLLM unavailable.&quot;&quot;&quot;
         if app.state.engine is not None:
             return
-        try:
-            from funasr.models.fun_asr_nano.inference_vllm import FunASRNanoVLLM
 </code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/_server_app.py#L104" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
 <div class="api-detail" id="e450"><span class="dtag badge-f">function</span><h2><code>main_hydra(kwargs)</code></h2><div class="dmod">funasr.bin.compute_audio_cmvn · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/compute_audio_cmvn.py#L15" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Main hydra.</p>
 <h4>Args:</h4>
@@ -23500,7 +23500,7 @@
     args = build_arg_parser().parse_args()
     asyncio.run(main(args))
 </code></pre></details></div>
-<div class="api-detail" id="e477"><span class="dtag badge-f">function</span><h2><code>main()</code></h2><div class="dmod">funasr.bin.server · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/server.py#L14" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source code</summary><pre><code>def main():
+<div class="api-detail" id="e477"><span class="dtag badge-f">function</span><h2><code>main()</code></h2><div class="dmod">funasr.bin.server · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/server.py#L16" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source code</summary><pre><code>def main():
     parser = argparse.ArgumentParser(
         description=&quot;FunASR OpenAI-Compatible API Server&quot;,
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -23510,6 +23510,8 @@ Examples:
   funasr-server --device cpu             # Start on CPU
   funasr-server --model paraformer       # Use Paraformer model
   funasr-server --port 9000             # Custom port
+  funasr-server --model-path /path/to/local/model  # Use local model
+  funasr-server --model-path username/model --hub hf  # Use HuggingFace model
 
 Then use with OpenAI SDK:
   from openai import OpenAI
@@ -23521,16 +23523,14 @@ Then use with OpenAI SDK:
     parser.add_argument(&quot;--port&quot;, type=int, default=8000, help=&quot;Port (default: 8000)&quot;)
     parser.add_argument(&quot;--device&quot;, default=&quot;cuda&quot;, help=&quot;Device: cuda, cpu, mps (default: cuda)&quot;)
     parser.add_argument(&quot;--model&quot;, default=&quot;auto&quot;, help=&quot;Pre-load model: auto (GPU=fun-asr-nano, CPU=sensevoice), sensevoice, paraformer, fun-asr-nano&quot;)
+    parser.add_argument(&quot;--model-path&quot;, default=None, help=&quot;Local model path or model ID (overrides --model)&quot;)
+    parser.add_argument(&quot;--hub&quot;, default=&quot;ms&quot;, help=&quot;Model hub: ms (ModelScope), hf (HuggingFace) (default: ms)&quot;)
     args = parser.parse_args()
 
     try:
         import uvicorn
         import fastapi
-    except ImportError:
-        print(&quot;Error: funasr-server requires additional packages.&quot;)
-        print(&quot;Install with: pip install vllm fastapi uvicorn python-multipart&quot;)
-        sys.exit(1)
-</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/server.py#L14" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/server.py#L16" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
 <div class="api-detail" id="e478"><span class="dtag badge-f">function</span><h2><code>field2slice(field)</code></h2><div class="dmod">funasr.bin.tokenize_text · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/tokenize_text.py#L23" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Convert field string to slice</p>
 <p>Note that field string accepts 1-based integer.</p>
 <h4>Examples:</h4>
