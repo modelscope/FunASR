@@ -5,7 +5,7 @@
 ## Requirements
 
 ```
-pip install "funasr>=1.3.25"
+pip install "funasr>=1.3.26"
 ```
 
 ## Data Prepare
