@@ -40,6 +40,24 @@ PUBLIC_DOCS_SHOULD_USE_CURRENT_HOSTS = [
     "runtime/html5/readme_zh.md",
 ]
 
+PUBLIC_ENTRYPOINTS_SHOULD_USE_CURRENT_REPO_URLS = [
+    "model_zoo/modelscope_models.md",
+    "model_zoo/modelscope_models_zh.md",
+    "model_zoo/readme.md",
+    "runtime/deploy_tools/funasr-runtime-deploy-offline-cpu-en.sh",
+    "runtime/deploy_tools/funasr-runtime-deploy-offline-cpu-zh.sh",
+    "runtime/deploy_tools/funasr-runtime-deploy-online-cpu-zh.sh",
+    "runtime/docs/SDK_tutorial.md",
+    "runtime/docs/SDK_tutorial_en.md",
+    "runtime/docs/SDK_tutorial_en_zh.md",
+    "runtime/docs/SDK_tutorial_online.md",
+    "runtime/docs/SDK_tutorial_online_zh.md",
+    "runtime/docs/SDK_tutorial_zh.md",
+    "runtime/python/http/server.py",
+    "runtime/python/libtorch/setup.py",
+    "runtime/python/onnxruntime/setup.py",
+]
+
 
 def test_current_funasr_install_commands_are_quoted():
     for relpath in DOCS_WITH_CURRENT_FUNASR_INSTALL:
@@ -60,6 +78,18 @@ def test_public_docs_use_current_repository_and_docs_hosts():
         text = (ROOT / relpath).read_text()
         assert "github.com/alibaba/FunASR" not in text
         assert "alibaba-damo-academy.github.io/FunASR" not in text
+
+
+def test_public_entrypoints_use_current_repository_urls():
+    forbidden = [
+        "github.com/alibaba-damo-academy/FunASR",
+        "raw.githubusercontent.com/alibaba-damo-academy/FunASR",
+    ]
+
+    for relpath in PUBLIC_ENTRYPOINTS_SHOULD_USE_CURRENT_REPO_URLS:
+        text = (ROOT / relpath).read_text()
+        for marker in forbidden:
+            assert marker not in text
 
 
 def test_public_docs_do_not_advertise_stale_release_or_star_copy():
@@ -114,6 +144,29 @@ def test_readme_model_tables_use_current_modelscope_entries():
             assert marker in text
         for marker in stale_entries:
             assert marker not in text
+
+
+def test_model_zoo_tables_use_current_paraformer_modelscope_entry():
+    docs = [
+        (ROOT / "model_zoo/modelscope_models.md").read_text(),
+        (ROOT / "model_zoo/modelscope_models_zh.md").read_text(),
+        (ROOT / "model_zoo/readme.md").read_text(),
+    ]
+
+    current = (
+        "models/iic/"
+        "speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-pytorch"
+        "/summary"
+    )
+    stale = (
+        "models/damo/"
+        "speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-pytorch"
+        "/summary"
+    )
+
+    for text in docs:
+        assert current in text
+        assert stale not in text
 
 
 def test_readme_model_tables_surface_public_gguf_entries():
