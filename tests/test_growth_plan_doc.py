@@ -101,3 +101,29 @@ def test_growth_plan_records_websocket_streaming_examples_completion():
         assert marker in text
 
     assert "[ ] Publish WebSocket streaming examples" not in text
+
+
+def test_growth_plan_records_vllm_guide_gpu_validation():
+    text = PLAN.read_text()
+
+    required_markers = [
+        "[x] Validate vLLM guide on one GPU server",
+        "funasr-3239-vllm0191-py312-20260717",
+        "`torch 2.10.0+cu128`",
+        "`vllm 0.19.1`",
+        "`funasr 1.3.26`",
+        "ModelScope snapshot",
+        "`Qwen3-0.6B`",
+        "`model.pt`",
+        "`CUDA_VISIBLE_DEVICES=0`",
+        "`examples/industrial_data_pretraining/fun_asr_nano/demo_vllm.py`",
+        "`gpu_memory_utilization=0.35`",
+        "Model loaded in 82.6s",
+        "1 files in 1.95s",
+        "开饭时间早上九点至下午五点。",
+        "HF `Fun-ASR-Nano-2512-hf` snapshot",
+    ]
+    for marker in required_markers:
+        assert marker in text
+
+    assert "[ ] Validate vLLM guide on one GPU server" not in text
