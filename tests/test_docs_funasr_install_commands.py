@@ -62,6 +62,28 @@ def test_public_docs_use_current_repository_and_docs_hosts():
         assert "alibaba-damo-academy.github.io/FunASR" not in text
 
 
+def test_public_docs_do_not_advertise_stale_release_or_star_copy():
+    checked_docs = [
+        "docs/repository_roles.md",
+        "docs/repository_roles_zh.md",
+        "docs/blog_whisper_vs_funasr_zh.md",
+        "runtime/llama.cpp/README.md",
+    ]
+    forbidden = [
+        "GitHub tags go up to `v1.3.13`",
+        "PyPI has published `1.3.14`",
+        "GitHub tag 至 `v1.3.13`",
+        "PyPI 已发布 `1.3.14`",
+        "（16K+ stars）",
+        "runtime-llamacpp-v0.1.7",
+    ]
+
+    for relpath in checked_docs:
+        text = (ROOT / relpath).read_text()
+        for marker in forbidden:
+            assert marker not in text
+
+
 def test_realtime_demo_documents_partial_and_hotword_boundaries():
     text = (
         ROOT
