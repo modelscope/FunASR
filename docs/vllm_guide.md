@@ -44,7 +44,7 @@ Install vLLM first, choosing a version compatible with your NVIDIA driver's CUDA
 pip install "vllm==0.19.1"   # adjust to your driver CUDA; see note below
 
 # 2) Then FunASR and the rest.
-pip install "funasr>=1.3.23"
+pip install "funasr>=1.3.25"
 
 cd /path/to/FunASR && pip install -e .
 ```
