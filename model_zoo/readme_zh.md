@@ -18,9 +18,9 @@
 
 |                                                                              模型名字                                                                              |         任务详情          |     训练数据     | 参数量  |
 |:--------------------------------------------------------------------------------------------------------------------------------------------------------------:|:---------------------:|:------------:|:----:|
-|      paraformer-zh <br> ([⭐](https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary)  [🤗]() )       |    语音识别，带时间戳输出，非实时    |  60000小时，中文  | 220M |
+|      paraformer-zh <br> ([⭐](https://www.modelscope.cn/models/iic/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary)  [🤗](https://huggingface.co/funasr/paraformer-zh) )       |    语音识别，带时间戳输出，非实时    |  60000小时，中文  | 220M |
 | SeACoParaformer-zh <br> ( [⭐](https://www.modelscope.cn/models/iic/speech_seaco_paraformer_large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary)  [🤗]() ) | 带热词功能的语音识别，带时间戳输出，非实时 |  60000小时，中文  | 220M |
 |              paraformer-zh-spk <br> ( [⭐](https://modelscope.cn/models/damo/speech_paraformer-large-vad-punc-spk_asr_nat-zh-cn/summary)  [🤗]() )              |  分角色语音识别，带时间戳输出，非实时   |  60000小时，中文  | 220M |
-|    paraformer-zh-streaming <br> ( [⭐](https://modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online/summary) [🤗]() )    |        语音识别，实时        |  60000小时，中文  | 220M |
+|    paraformer-zh-streaming <br> ( [⭐](https://modelscope.cn/models/iic/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online/summary) [🤗](https://huggingface.co/funasr/paraformer-zh-streaming) )    |        语音识别，实时        |  60000小时，中文  | 220M |
 | paraformer-zh-streaming-small <br> ( [⭐](https://www.modelscope.cn/models/iic/speech_paraformer_asr_nat-zh-cn-16k-common-vocab8404-online/summary) [🤗]() ) |        语音识别，实时        |  60000小时，中文  | 220M |
 | paraformer-en <br> ( [⭐](https://www.modelscope.cn/models/damo/speech_paraformer-large-vad-punc_asr_nat-en-16k-common-vocab10020/summary) [🤗]() )       |       语音识别，非实时        |  50000小时，英文  | 220M |
