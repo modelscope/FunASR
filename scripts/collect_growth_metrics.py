@@ -982,8 +982,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--repos",
         nargs="+",
-        default=DEFAULT_ECOSYSTEM_REPOS,
-        help="GitHub repositories for --ecosystem mode",
+        default=None,
+        help="GitHub repositories for --ecosystem or --issues mode; multiple explicit repos imply --ecosystem",
     )
     parser.add_argument("--ecosystem", action="store_true", help="Collect the four-repository FunASR ecosystem")
     parser.add_argument("--integrations", action="store_true", help="Collect tracked external integration PRs")
@@ -1010,14 +1010,16 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> int:
     args = parse_args()
+    repos = args.repos or DEFAULT_ECOSYSTEM_REPOS
+    ecosystem_mode = args.ecosystem or bool(args.repos and len(args.repos) > 1)
     try:
         if args.integrations:
             metrics = collect_integration_metrics(args.integration_prs)
         elif args.issues:
-            metrics = collect_issue_metrics(args.repos)
-        elif args.ecosystem:
+            metrics = collect_issue_metrics(repos)
+        elif ecosystem_mode:
             metrics = collect_ecosystem_metrics(
-                args.repos,
+                repos,
                 args.pypi_package,
                 args.baseline_stars,
                 args.target_additional_stars,
@@ -1035,7 +1037,7 @@ def main() -> int:
         print(format_integration_markdown(metrics), end="")
     elif args.issues:
         print(format_issue_markdown(metrics), end="")
-    elif args.ecosystem:
+    elif ecosystem_mode:
         print(format_ecosystem_markdown(metrics), end="")
     else:
         print(format_markdown(metrics, args.star_goal), end="")
