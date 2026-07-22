@@ -205,6 +205,7 @@ def test_default_integration_prs_include_speech_server_lanes():
     module = load_growth_metrics_module()
 
     expected_prs = {
+        "BerriAI/litellm-docs#610",
         "speaches-ai/speaches#658",
         "getpaseo/paseo#1634",
     }

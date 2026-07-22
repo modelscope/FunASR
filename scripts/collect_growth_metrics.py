@@ -38,6 +38,7 @@ DEFAULT_INTEGRATION_PRS = [
     "punkpeye/awesome-mcp-servers#7153",
     "run-llama/llama_index#21958",
     "run-llama/llama_index#21996",
+    "BerriAI/litellm-docs#610",
     "mem0ai/mem0#5571",
     "speaches-ai/speaches#658",
     "mudler/LocalAI#10090",
