@@ -92,6 +92,40 @@ def test_public_entrypoints_use_current_repository_urls():
             assert marker not in text
 
 
+def test_troubleshooting_faq_is_linked_from_readmes():
+    readme_links = [
+        ("README.md", "./docs/troubleshooting.md"),
+        ("README_zh.md", "./docs/troubleshooting_zh.md"),
+    ]
+
+    for readme, link in readme_links:
+        text = (ROOT / readme).read_text()
+        assert link in text
+
+
+def test_troubleshooting_faq_covers_common_install_and_deploy_failures():
+    docs = [
+        (ROOT / "docs/troubleshooting.md").read_text(),
+        (ROOT / "docs/troubleshooting_zh.md").read_text(),
+    ]
+    required_markers = [
+        "torch",
+        "torchaudio",
+        "ModelScope",
+        "Hugging Face",
+        "funasr-server",
+        "/v1/audio/transcriptions",
+        "WebSocket",
+        "llama.cpp",
+        "GGUF",
+        "Deployment Help",
+    ]
+
+    for text in docs:
+        for marker in required_markers:
+            assert marker in text
+
+
 def test_public_docs_do_not_advertise_stale_release_or_star_copy():
     checked_docs = [
         "docs/repository_roles.md",
