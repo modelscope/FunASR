@@ -48,15 +48,24 @@ def test_website_contract_accepts_current_public_copy():
             pip install -U funasr   # recommended funasr &gt;= 1.3.26
             <a href="/en/donors.html">Thanks</a>
         """,
+        "https://www.funasr.com/llama-cpp.html": """
+            runtime-llamacpp-v0.1.8
+            funasr-llamacpp-linux-x64-vulkan.tar.gz
+            funasr-llamacpp-windows-x64-cuda.zip
+            Fun-ASR-Nano
+            GGUF
+        """,
         "https://www.funasr.com/blog/funasr-llama-cpp-whisper-cpp-alternative.html": """
             runtime-llamacpp-v0.1.8
             funasr-llamacpp-linux-x64-vulkan.tar.gz
+            Fun-ASR-Nano-GGUF
             Vulkan / CUDA
             <a href="/donors.html">功德榜</a>
         """,
         "https://www.funasr.com/en/blog/funasr-llama-cpp-whisper-cpp-alternative.html": """
             runtime-llamacpp-v0.1.8
             funasr-llamacpp-linux-x64-vulkan.tar.gz
+            Fun-ASR-Nano-GGUF
             Vulkan / CUDA
             <a href="/en/donors.html">Thanks</a>
         """,
@@ -75,6 +84,7 @@ def test_website_contract_reports_stale_runtime_and_star_copy():
     pages[
         "https://www.funasr.com/blog/funasr-llama-cpp-whisper-cpp-alternative.html"
     ] = "runtime-llamacpp-v0.1.1"
+    pages["https://www.funasr.com/llama-cpp.html"] = "runtime-llamacpp-v0.1.1"
 
     failures = checker.validate_pages(pages)
 
@@ -82,6 +92,10 @@ def test_website_contract_reports_stale_runtime_and_star_copy():
     assert any(
         "funasr-llama-cpp-whisper-cpp-alternative.html" in failure
         and "forbidden `runtime-llamacpp-v0.1.1`" in failure
+        for failure in failures
+    )
+    assert any(
+        "llama-cpp.html" in failure and "forbidden `runtime-llamacpp-v0.1.1`" in failure
         for failure in failures
     )
 
