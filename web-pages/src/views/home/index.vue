@@ -6,7 +6,7 @@
                 <li :ref="item.ref" v-for="(item, index) in headerList" :key="index" @click="anchorTo(item)">
                     <p>{{item.name}}</p>
                 </li>
-                <li @click="toPage({link: 'https://github.com/alibaba-damo-academy/FunASR'})">
+                <li @click="toPage({link: 'https://github.com/modelscope/FunASR'})">
                     Github
                 </li>
                 <li>

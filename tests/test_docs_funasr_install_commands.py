@@ -44,6 +44,9 @@ PUBLIC_ENTRYPOINTS_SHOULD_USE_CURRENT_REPO_URLS = [
     "model_zoo/modelscope_models.md",
     "model_zoo/modelscope_models_zh.md",
     "model_zoo/readme.md",
+    "web-pages/src/views/home/index.vue",
+    "web-pages/src/views/home/lxwjzxfw.vue",
+    "web-pages/src/views/home/sstx.vue",
     "runtime/deploy_tools/funasr-runtime-deploy-offline-cpu-en.sh",
     "runtime/deploy_tools/funasr-runtime-deploy-offline-cpu-zh.sh",
     "runtime/deploy_tools/funasr-runtime-deploy-online-cpu-zh.sh",
@@ -227,6 +230,32 @@ def test_full_modelscope_tables_use_current_core_entries():
             assert marker in text
         for marker in stale_entries:
             assert marker not in text
+
+
+def test_runtime_benchmark_docs_use_current_core_modelscope_entries():
+    docs = [
+        (ROOT / "benchmarks/benchmark_pipeline_cer.md").read_text(),
+        (ROOT / "runtime/docs/benchmark_libtorch.md").read_text(),
+        (ROOT / "runtime/docs/benchmark_onnx.md").read_text(),
+        (ROOT / "runtime/docs/benchmark_onnx_cpp.md").read_text(),
+    ]
+
+    current_entries = [
+        "models/iic/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary",
+        "models/iic/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary",
+        "models/iic/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online/summary",
+        "models/iic/speech_fsmn_vad_zh-cn-16k-common-onnx/summary",
+        "models/iic/punc_ct-transformer_zh-cn-common-vocab272727-onnx/summary",
+    ]
+    stale_entries = [
+        entry.replace("models/iic/", "models/damo/") for entry in current_entries
+    ]
+
+    combined = "\n".join(docs)
+    for marker in current_entries:
+        assert marker in combined
+    for marker in stale_entries:
+        assert marker not in combined
 
 
 def test_model_zoo_landing_tables_link_huggingface_repos():
