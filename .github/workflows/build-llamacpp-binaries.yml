@@ -176,6 +176,24 @@ jobs:
       - name: Show Vulkan shader compiler
         if: matrix.windows_vulkan
         run: glslc --version
+      - name: Install SPIR-V Headers CMake package
+        if: matrix.windows_vulkan
+        run: |
+          runner_temp="$(cygpath -u "$RUNNER_TEMP")"
+          headers_src="$runner_temp/SPIRV-Headers"
+          headers_build="$runner_temp/SPIRV-Headers-build"
+          headers_prefix="$runner_temp/SPIRV-Headers-install"
+          git init -q "$headers_src"
+          git -C "$headers_src" remote add origin https://github.com/KhronosGroup/SPIRV-Headers.git
+          git -C "$headers_src" fetch --depth 1 origin 09913f088a1197aba4aefd300a876b2ebbaa3391
+          git -C "$headers_src" checkout --detach FETCH_HEAD
+          cmake -S "$headers_src" -B "$headers_build" \
+            -DSPIRV_HEADERS_ENABLE_INSTALL=ON \
+            -DSPIRV_HEADERS_ENABLE_TESTS=OFF \
+            -DCMAKE_INSTALL_PREFIX="$headers_prefix"
+          cmake --install "$headers_build" --config Release
+          cmake_prefix_path="$(cygpath -m "$headers_prefix")"
+          echo "CMAKE_PREFIX_PATH=$cmake_prefix_path" >> "$GITHUB_ENV"
       - name: Configure and build
         run: |
           # Release binaries must be portable across user machines, not tuned to

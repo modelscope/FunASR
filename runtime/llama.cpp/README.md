@@ -146,10 +146,19 @@ installed by that driver instead of shipping an SDK copy.
 
 To build on Windows, install the
 [LunarG Vulkan SDK](https://vulkan.lunarg.com/sdk/home#windows) with `glslc`,
-open a Developer PowerShell where `VULKAN_SDK` is set, and run:
+open a Developer PowerShell where `VULKAN_SDK` is set, and install the
+`SPIRV-Headers` CMake package expected by the pinned llama.cpp revision:
 
 ```powershell
 glslc --version
+git clone https://github.com/KhronosGroup/SPIRV-Headers.git
+git -C SPIRV-Headers checkout 09913f088a1197aba4aefd300a876b2ebbaa3391
+cmake -S SPIRV-Headers -B SPIRV-Headers-build `
+  -DSPIRV_HEADERS_ENABLE_INSTALL=ON -DSPIRV_HEADERS_ENABLE_TESTS=OFF `
+  -DCMAKE_INSTALL_PREFIX="$PWD/SPIRV-Headers-install"
+cmake --install SPIRV-Headers-build --config Release
+$env:CMAKE_PREFIX_PATH = "$PWD/SPIRV-Headers-install"
+
 cmake -B build-vulkan -A x64 -DCMAKE_BUILD_TYPE=Release -DGGML_VULKAN=ON
 cmake --build build-vulkan --config Release --target llama-funasr-sensevoice
 .\build-vulkan\bin\Release\llama-funasr-sensevoice.exe `

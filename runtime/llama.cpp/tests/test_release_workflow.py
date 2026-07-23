@@ -72,6 +72,11 @@ def test_windows_vulkan_build_uses_pinned_full_sdk():
     assert "if: matrix.windows_vulkan" in workflow
     assert "version: '1.4.309.0'" in workflow
     assert "glslc --version" in workflow
+    assert "KhronosGroup/SPIRV-Headers.git" in workflow
+    assert "09913f088a1197aba4aefd300a876b2ebbaa3391" in workflow
+    assert "-DSPIRV_HEADERS_ENABLE_INSTALL=ON" in workflow
+    assert "-DSPIRV_HEADERS_ENABLE_TESTS=OFF" in workflow
+    assert "CMAKE_PREFIX_PATH=" in workflow
 
 
 def test_release_notes_explain_cpu_and_cuda_windows_assets():
@@ -103,6 +108,7 @@ def test_release_notes_explain_vulkan_windows_asset():
     assert "windows-x64-vulkan" in readme
     assert "Windows Vulkan" in readme
     assert "Vulkan SDK" in readme
+    assert "SPIRV-Headers" in readme
     assert "--backend vulkan" in readme
     assert "windows-x64-vulkan" in root_readme
 
