@@ -64,7 +64,7 @@ cmake --build build -j                          # -> build/bin/llama-funasr-* (a
 The CPU release ZIPs are portable packages. Tagged releases also publish
 `funasr-llamacpp-windows-x64-cuda.zip` for SenseVoiceSmall graph execution on
 NVIDIA GPUs that match CUDA architecture 86. Download the CUDA ZIP from
-[runtime-llamacpp-v0.1.8](https://github.com/modelscope/FunASR/releases/tag/runtime-llamacpp-v0.1.8),
+[runtime-llamacpp-v0.1.9](https://github.com/modelscope/FunASR/releases/tag/runtime-llamacpp-v0.1.9),
 then select the backend at runtime:
 
 ```bash

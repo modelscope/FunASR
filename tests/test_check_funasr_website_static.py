@@ -64,31 +64,43 @@ def test_website_contract_accepts_current_public_copy():
             <a href="/en/donors.html">Thanks</a>
         """,
         "https://www.funasr.com/llama-cpp.html": """
-            runtime-llamacpp-v0.1.8
+            runtime-llamacpp-v0.1.9
             funasr-llamacpp-linux-x64-vulkan.tar.gz
+            funasr-llamacpp-windows-x64-vulkan.zip
+            funasr-llamacpp-windows-x64-cuda.zip
+            Fun-ASR-Nano
+            GGUF
+        """,
+        "https://www.funasr.com/en/llama-cpp.html": """
+            runtime-llamacpp-v0.1.9
+            funasr-llamacpp-linux-x64-vulkan.tar.gz
+            funasr-llamacpp-windows-x64-vulkan.zip
             funasr-llamacpp-windows-x64-cuda.zip
             Fun-ASR-Nano
             GGUF
         """,
         "https://www.funasr.com/blog/funasr-llama-cpp-whisper-cpp-alternative.html": """
-            runtime-llamacpp-v0.1.8
+            runtime-llamacpp-v0.1.9
             funasr-llamacpp-linux-x64-vulkan.tar.gz
+            funasr-llamacpp-windows-x64-vulkan.zip
             Fun-ASR-Nano-GGUF
-            Vulkan / CUDA
+            Linux/Windows Vulkan 与 Windows CUDA
             <a href="/donors.html">功德榜</a>
         """,
         "https://www.funasr.com/en/blog/funasr-llama-cpp-whisper-cpp-alternative.html": """
-            runtime-llamacpp-v0.1.8
+            runtime-llamacpp-v0.1.9
             funasr-llamacpp-linux-x64-vulkan.tar.gz
+            funasr-llamacpp-windows-x64-vulkan.zip
             Fun-ASR-Nano-GGUF
-            Vulkan / CUDA
+            Linux/Windows Vulkan and Windows CUDA
             <a href="/en/donors.html">Thanks</a>
         """,
         "https://www.funasr.com/blog/funasr-v1-3-26-openai-vllm-llama-cpp.html": """
             funasr==1.3.26
             /v1/audio/transcriptions
             RTFx 340
-            runtime-llamacpp-v0.1.8
+            runtime-llamacpp-v0.1.9
+            funasr-llamacpp-windows-x64-vulkan.zip
             https://github.com/modelscope/FunASR
             https://github.com/FunAudioLLM/Fun-ASR
             https://github.com/FunAudioLLM/SenseVoice
@@ -99,7 +111,8 @@ def test_website_contract_accepts_current_public_copy():
             funasr==1.3.26
             /v1/audio/transcriptions
             RTFx 340
-            runtime-llamacpp-v0.1.8
+            runtime-llamacpp-v0.1.9
+            funasr-llamacpp-windows-x64-vulkan.zip
             https://github.com/modelscope/FunASR
             https://github.com/FunAudioLLM/Fun-ASR
             https://github.com/FunAudioLLM/SenseVoice
@@ -116,6 +129,8 @@ def test_website_contract_includes_homepage_entrypoints():
 
     assert "https://www.funasr.com/" in checker.PAGE_CONTRACTS
     assert "https://www.funasr.com/en/" in checker.PAGE_CONTRACTS
+    assert "https://www.funasr.com/llama-cpp.html" in checker.PAGE_CONTRACTS
+    assert "https://www.funasr.com/en/llama-cpp.html" in checker.PAGE_CONTRACTS
 
 
 def test_website_contract_includes_v1326_launch_articles():

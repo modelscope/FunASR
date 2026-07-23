@@ -172,7 +172,7 @@ def test_growth_plan_records_release_note_terminal_outputs():
         "Combined GitHub stars: **35,787**",
         "Added since baseline: **4,563** / 20,000",
         "PyPI package: **funasr 1.3.26**",
-        "funasr.com static page contract passed for 9 pages",
+        "funasr.com static page contract passed for 14 pages",
         "validate_docker.sh syntax ok",
         "Model loaded in 82.6s",
         "Results: 1 samples, total inference time: 1.95s",
@@ -199,8 +199,11 @@ def test_growth_plan_records_sharp_github_release_focus():
         "`serve_realtime_ws.py`",
         "`docs/vllm_guide.md`",
         "`vllm 0.19.1`",
-        "`runtime-llamacpp-v0.1.8`",
-        "self-contained `llama-funasr-*` binary",
+        "`runtime-llamacpp-v0.1.9`",
+        "nine self-contained `llama-funasr-*` assets",
+        "Windows Vulkan",
+        "all nine prebuilt llama.cpp / GGUF assets",
+        "30000804161",
     ]
     for marker in required_markers:
         assert marker in text
@@ -332,8 +335,9 @@ def test_growth_plan_records_release_discussion_distribution():
         "https://github.com/modelscope/FunASR/discussions/3376",
         "FunASR v1.3.26: OpenAI-compatible ASR deployment, vLLM, and llama.cpp runtime",
         "Announcements",
+        "Windows Vulkan",
         "`/v1/audio/transcriptions`",
-        "`runtime-llamacpp-v0.1.8`",
+        "`runtime-llamacpp-v0.1.9`",
         "[x] Pin a GitHub discussion for the release",
         "`Discussion has successfully been pinned`",
     ]
@@ -355,7 +359,7 @@ def test_growth_plan_records_homepage_entrypoint_completion():
         "`/v1/audio/transcriptions`",
         "`vLLM`",
         "`/donors.html`",
-        "funasr.com static page contract passed for 13 pages",
+        "funasr.com static page contract passed for 14 pages",
         "funasr-v1-3-26-openai-vllm-llama-cpp.html",
     ]
     for marker in required_markers:

@@ -49,7 +49,7 @@ curl -X POST "http://127.0.0.1:8000/v1/audio/transcriptions" \
 
 ## llama.cpp 或 GGUF runtime 无法启动
 
-- 从 README 或 [funasr.com/llama-cpp](https://www.funasr.com/llama-cpp.html) 下载当前 `runtime-llamacpp-v0.1.8` release 包。
+- 从 README 或 [funasr.com/llama-cpp](https://www.funasr.com/llama-cpp.html) 下载当前 `runtime-llamacpp-v0.1.9` release 包。
 - 按机器环境选择包：CPU 包兼容性最好，Vulkan 包需要可用 Vulkan runtime，CUDA 包需要兼容的 NVIDIA driver。
 - GGUF 模型请使用 Hugging Face 上当前的公开仓库，例如 `FunAudioLLM/Fun-ASR-Nano-GGUF` 或 `FunAudioLLM/SenseVoiceSmall-GGUF`。
 - GPU 问题请在 **Deployment Help** issue 里附 `nvidia-smi`、操作系统、driver 版本、runtime 包名、模型文件名和完整 llama.cpp 命令。

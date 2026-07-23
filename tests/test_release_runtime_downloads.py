@@ -17,8 +17,8 @@ def load_release_script():
 
 def runtime_release_payload():
     return {
-        "tagName": "runtime-llamacpp-v0.1.8",
-        "url": "https://github.com/modelscope/FunASR/releases/tag/runtime-llamacpp-v0.1.8",
+        "tagName": "runtime-llamacpp-v0.1.9",
+        "url": "https://github.com/modelscope/FunASR/releases/tag/runtime-llamacpp-v0.1.9",
         "assets": [
             {
                 "name": "funasr-llamacpp-linux-arm64.tar.gz",
@@ -56,6 +56,11 @@ def runtime_release_payload():
                 "digest": "sha256:windowscuda",
             },
             {
+                "name": "funasr-llamacpp-windows-x64-vulkan.zip",
+                "url": "https://example.test/windows-vulkan.zip",
+                "digest": "sha256:windowsvulkan",
+            },
+            {
                 "name": "funasr-llamacpp-windows-x64.zip",
                 "url": "https://example.test/windows-x64.zip",
                 "digest": "sha256:windowsx64",
@@ -82,12 +87,14 @@ def test_runtime_download_section_lists_all_prebuilt_assets():
     )
 
     assert "## Runtime downloads" in section
-    assert "runtime-llamacpp-v0.1.8" in section
+    assert "runtime-llamacpp-v0.1.9" in section
     assert 'python -m pip install -U "funasr==1.3.26"' in section
-    assert section.count("| [funasr-llamacpp-") == 8
+    assert section.count("| [funasr-llamacpp-") == 9
     assert "Windows x64 CUDA" in section
+    assert "Windows x64 Vulkan" in section
     assert "Linux x64 Vulkan" in section
     assert "`windowscuda`" in section
+    assert "`windowsvulkan`" in section
 
 
 def test_merge_release_body_replaces_stale_runtime_download_section():
@@ -110,3 +117,4 @@ old runtime table
     assert "old runtime table" not in merged
     assert merged.count("## Runtime downloads") == 1
     assert "funasr-llamacpp-windows-x64-cuda.zip" in merged
+    assert "funasr-llamacpp-windows-x64-vulkan.zip" in merged

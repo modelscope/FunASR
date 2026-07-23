@@ -344,7 +344,7 @@ def test_localized_readmes_surface_current_release_and_edge_runtime():
         assert 'python -m pip install -U "funasr==1.3.26"' in text
         assert "https://github.com/modelscope/FunASR/releases/tag/v1.3.26" in text
         assert "https://www.funasr.com/llama-cpp.html" in text
-        assert "runtime-llamacpp-v0.1.8" in text
+        assert "runtime-llamacpp-v0.1.9" in text
 
 
 def test_realtime_demo_documents_partial_and_hotword_boundaries():
