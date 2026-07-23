@@ -355,7 +355,8 @@ def test_growth_plan_records_homepage_entrypoint_completion():
         "`/v1/audio/transcriptions`",
         "`vLLM`",
         "`/donors.html`",
-        "funasr.com static page contract passed for 11 pages",
+        "funasr.com static page contract passed for 13 pages",
+        "funasr-v1-3-26-openai-vllm-llama-cpp.html",
     ]
     for marker in required_markers:
         assert marker in text
