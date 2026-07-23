@@ -208,25 +208,22 @@ def test_growth_plan_records_sharp_github_release_focus():
     assert "[ ] Create a GitHub release focused on one sharp value proposition" not in text
 
 
-def test_growth_plan_records_discussion_pin_api_blocker():
+def test_growth_plan_records_discussion_pin_completion():
     text = PLAN.read_text()
 
     required_markers = [
-        "[ ] Pin a GitHub discussion for the release",
+        "[x] Pin a GitHub discussion for the release",
         "`modelscope/FunASR#3376`",
-        "`D_kwDOIfjis84An-Vp`",
-        "`Announcements` category",
-        "`createDiscussion`",
-        "`updateDiscussion`",
-        "`closeDiscussion`",
-        "`reopenDiscussion`",
-        "no `pinDiscussion` / `unpinDiscussion`",
-        "`pinIssue`",
-        "`pinIssueComment`",
-        "`pinEnvironment`",
+        "authenticated Discussions admin UI",
+        "`Discussion has successfully been pinned`",
+        "`Edit pinned discussion`",
+        "`Unpin discussion`",
+        "top of the public Discussions page",
     ]
     for marker in required_markers:
         assert marker in text
+
+    assert "[ ] Pin a GitHub discussion for the release" not in text
 
 
 def test_growth_plan_records_issue_triage_completion():
@@ -337,9 +334,8 @@ def test_growth_plan_records_release_discussion_distribution():
         "Announcements",
         "`/v1/audio/transcriptions`",
         "`runtime-llamacpp-v0.1.8`",
-        "no `pinDiscussion` / `unpinDiscussion`",
-        "`pinIssue`, `pinIssueComment`, and `pinEnvironment`",
-        "[ ] Pin a GitHub discussion for the release",
+        "[x] Pin a GitHub discussion for the release",
+        "`Discussion has successfully been pinned`",
     ]
     for marker in required_markers:
         assert marker in text
