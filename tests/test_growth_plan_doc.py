@@ -208,6 +208,27 @@ def test_growth_plan_records_sharp_github_release_focus():
     assert "[ ] Create a GitHub release focused on one sharp value proposition" not in text
 
 
+def test_growth_plan_records_discussion_pin_api_blocker():
+    text = PLAN.read_text()
+
+    required_markers = [
+        "[ ] Pin a GitHub discussion for the release",
+        "`modelscope/FunASR#3376`",
+        "`D_kwDOIfjis84An-Vp`",
+        "`Announcements` category",
+        "`createDiscussion`",
+        "`updateDiscussion`",
+        "`closeDiscussion`",
+        "`reopenDiscussion`",
+        "no `pinDiscussion` / `unpinDiscussion`",
+        "`pinIssue`",
+        "`pinIssueComment`",
+        "`pinEnvironment`",
+    ]
+    for marker in required_markers:
+        assert marker in text
+
+
 def test_growth_plan_records_issue_triage_completion():
     text = PLAN.read_text()
 
@@ -316,7 +337,8 @@ def test_growth_plan_records_release_discussion_distribution():
         "Announcements",
         "`/v1/audio/transcriptions`",
         "`runtime-llamacpp-v0.1.8`",
-        "GitHub GraphQL API currently exposes `createDiscussion` and `updateDiscussion` but no discussion pin mutation",
+        "no `pinDiscussion` / `unpinDiscussion`",
+        "`pinIssue`, `pinIssueComment`, and `pinEnvironment`",
         "[ ] Pin a GitHub discussion for the release",
     ]
     for marker in required_markers:
