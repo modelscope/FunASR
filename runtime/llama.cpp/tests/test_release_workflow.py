@@ -116,6 +116,15 @@ def test_release_notes_explain_vulkan_windows_asset():
 
 
 
+def test_readmes_surface_current_windows_vulkan_release():
+    for name in ("README.md", "README_zh.md", "README_ja.md", "README_ko.md"):
+        readme = (ROOT / name).read_text(encoding="utf-8")
+
+        assert "runtime-llamacpp-v0.1.9" in readme
+        assert "windows-x64-vulkan" in readme
+
+
+
 def test_github_release_notes_mention_vulkan_asset():
     workflow = WORKFLOW.read_text(encoding="utf-8")
     release_notes = workflow.split('--notes "', maxsplit=1)[1]

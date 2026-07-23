@@ -40,6 +40,8 @@ def platform_label(asset_name: str) -> str:
         return "Linux x64 portable"
     if "macos-arm64" in asset_name:
         return "macOS arm64"
+    if "windows-x64-vulkan" in asset_name:
+        return "Windows x64 Vulkan"
     if "windows-x64-cuda" in asset_name:
         return "Windows x64 CUDA"
     if "windows-x64-avx2" in asset_name:
