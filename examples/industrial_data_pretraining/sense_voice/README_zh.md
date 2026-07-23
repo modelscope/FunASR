@@ -380,6 +380,8 @@ sensevoice2jsonl \
 bash finetune.sh
 ```
 
+需要增加新口音、语种或业务域并保持已有能力时，请参考[持续微调指南](CONTINUAL_FINETUNING_zh.md)。
+
 ## WebUI
 
 ```shell
