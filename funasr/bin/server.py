@@ -11,6 +11,14 @@ Usage:
 
 import argparse
 import sys
+from pathlib import Path
+
+
+PACKAGE_VERSION = (Path(__file__).resolve().parents[1] / "version.txt").read_text().strip()
+
+
+def server_version_label():
+    return f"FunASR Server v{PACKAGE_VERSION}"
 
 
 def main():
@@ -58,7 +66,7 @@ Then use with OpenAI SDK:
     app = create_app(device=args.device, preload_model=args.model, model_path=args.model_path, hub=args.hub)
 
     print(f"╔══════════════════════════════════════════════╗")
-    print(f"║  FunASR Server v1.3.6                        ║")
+    print(f"║  {server_version_label():<44}║")
     print(f"║  Device: {args.device:<8}                          ║")
     print(f"║  Model:  {args.model:<12}                      ║")
     if args.model_path:
