@@ -9,6 +9,7 @@ MCP_DIR = Path(__file__).resolve().parent
 REPO_ROOT = MCP_DIR.parents[1]
 SERVER_JSON = MCP_DIR / "server.json"
 DOCKERFILE = MCP_DIR / "Dockerfile"
+README = MCP_DIR / "README.md"
 WORKFLOW = REPO_ROOT / ".github" / "workflows" / "publish-mcp-server.yml"
 SMOKE_TEST = MCP_DIR / "smoke_test.py"
 
@@ -55,6 +56,16 @@ class MCPRegistryMetadataTest(unittest.TestCase):
             package["identifier"],
             f"ghcr.io/modelscope/funasr-mcp:{self.metadata['version']}",
         )
+
+    def test_readme_uses_current_published_image(self):
+        readme = README.read_text()
+        version = self.metadata["version"]
+
+        self.assertIn(f"ghcr.io/modelscope/funasr-mcp:{version}", readme)
+        self.assertIn(f"releases/tag/mcp-v{version}", readme)
+        self.assertIn("registry.modelcontextprotocol.io", readme)
+        if version != "0.1.0":
+            self.assertNotIn("ghcr.io/modelscope/funasr-mcp:0.1.0", readme)
 
     def test_oci_package_mounts_audio_read_only(self):
         package = self.metadata["packages"][0]
