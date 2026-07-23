@@ -353,8 +353,9 @@ def test_collect_ecosystem_metrics_sums_repositories_and_target_gap(monkeypatch)
     ]
 
 
-def test_collect_pypi_download_metrics_sums_recent_windows(monkeypatch):
+def test_collect_pypi_download_metrics_sums_recent_windows(monkeypatch, tmp_path):
     module = load_growth_metrics_module()
+    monkeypatch.setattr(module, "DEFAULT_PYPI_DOWNLOAD_CACHE", tmp_path / "pypi-downloads-funasr.json")
 
     def fake_fetch_json(url, headers=None):
         assert url == "https://pypistats.org/api/packages/funasr/overall?mirrors=false"
@@ -381,10 +382,44 @@ def test_collect_pypi_download_metrics_sums_recent_windows(monkeypatch):
         "downloads_last_30_days": sum(range(2, 32)),
         "status": "available",
     }
+    cached = json.loads((tmp_path / "pypi-downloads-funasr.json").read_text())
+    assert cached["package"] == "funasr"
+    assert cached["metrics"] == metrics
 
 
-def test_collect_pypi_download_metrics_reports_unavailable_without_failing(monkeypatch):
+def test_collect_pypi_download_metrics_uses_cache_after_live_failure(monkeypatch, tmp_path):
     module = load_growth_metrics_module()
+    cache_path = tmp_path / "pypi-downloads-funasr.json"
+    monkeypatch.setattr(module, "DEFAULT_PYPI_DOWNLOAD_CACHE", cache_path)
+    cache_path.write_text(json.dumps({
+        "package": "funasr",
+        "metrics": {
+            "source": "pypistats.org",
+            "source_url": "https://pypistats.org/packages/funasr",
+            "latest_date": "2026-07-21",
+            "downloads_last_7_days": 116407,
+            "downloads_last_30_days": 442556,
+            "status": "available",
+        },
+    }))
+
+    def fake_fetch_json(url, headers=None):
+        raise RuntimeError("HTTP 429")
+
+    monkeypatch.setattr(module, "fetch_json", fake_fetch_json)
+
+    metrics = module.collect_pypi_download_metrics("funasr")
+
+    assert metrics["status"] == "stale_available"
+    assert metrics["downloads_last_7_days"] == 116407
+    assert metrics["downloads_last_30_days"] == 442556
+    assert metrics["cache_path"] == str(cache_path)
+    assert "HTTP 429" in metrics["reason"]
+
+
+def test_collect_pypi_download_metrics_reports_unavailable_without_cache(monkeypatch, tmp_path):
+    module = load_growth_metrics_module()
+    monkeypatch.setattr(module, "DEFAULT_PYPI_DOWNLOAD_CACHE", tmp_path / "missing-cache.json")
 
     def fake_fetch_json(url, headers=None):
         raise RuntimeError("HTTP 429")
@@ -439,6 +474,42 @@ def test_collect_ecosystem_metrics_calculates_daily_target(monkeypatch):
     assert metrics["ecosystem"]["target_date"] == "2026-09-30"
     assert metrics["ecosystem"]["days_remaining"] == 92
     assert metrics["ecosystem"]["required_daily_average"] == 181
+
+
+def test_format_ecosystem_markdown_marks_cached_pypi_download_windows():
+    module = load_growth_metrics_module()
+
+    metrics = {
+        "collected_at_utc": "2026-07-23T00:00:00+00:00",
+        "ecosystem": {
+            "repositories": [],
+            "total_stars": 35787,
+            "baseline_stars": 31224,
+            "target_additional_stars": 20000,
+            "added_stars": 4563,
+            "remaining_to_target": 15437,
+            "target_date": "2026-09-30",
+            "days_remaining": 70,
+            "required_daily_average": 221,
+        },
+        "pypi": {
+            "package": "funasr",
+            "version": "1.3.26",
+            "downloads": {
+                "status": "stale_available",
+                "latest_date": "2026-07-21",
+                "downloads_last_7_days": 116407,
+                "downloads_last_30_days": 442556,
+                "source_url": "https://pypistats.org/packages/funasr",
+                "reason": "HTTP 429",
+            },
+        },
+    }
+
+    output = module.format_ecosystem_markdown(metrics)
+
+    assert "- PyPI downloads: **116,407** last 7 days; **442,556** last 30 days" in output
+    assert "cached after live API failure: HTTP 429" in output
 
 
 def test_format_ecosystem_markdown_includes_pypi_download_windows():
