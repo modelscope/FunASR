@@ -352,6 +352,8 @@ Ensure to modify the train_tool in finetune.sh to the absolute path of `funasr/b
 bash finetune.sh
 ```
 
+For adding a new accent, language, or domain while retaining existing capabilities, see [Continual fine-tuning](CONTINUAL_FINETUNING.md).
+
 ## WebUI
 
 ```shell
