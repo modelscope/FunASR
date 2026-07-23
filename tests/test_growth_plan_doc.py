@@ -208,6 +208,28 @@ def test_growth_plan_records_sharp_github_release_focus():
     assert "[ ] Create a GitHub release focused on one sharp value proposition" not in text
 
 
+def test_growth_plan_records_modelscope_card_sync_blocker():
+    text = PLAN.read_text()
+
+    required_markers = [
+        "[ ] Update ModelScope model cards and demos",
+        "`scripts/sync_modelscope_model_cards.py`",
+        "`FunAudioLLM/Fun-ASR-Nano-2512`",
+        "`README.md`, `README_zh.md`",
+        "`iic/SenseVoiceSmall`",
+        "`python -m pip install -U \"funasr>=1.3.26\" modelscope`",
+        "`torch.cuda.is_available()`",
+        "modelscope-card-sync-20260723",
+        "HTTP 400 from the ModelScope LFS batch API",
+        "`No credentials found`",
+        "https://modelscope.cn/my/myaccesstoken",
+    ]
+    for marker in required_markers:
+        assert marker in text
+
+    assert (ROOT / "scripts" / "sync_modelscope_model_cards.py").exists()
+
+
 def test_growth_plan_records_pypi_description_audit():
     text = PLAN.read_text()
 
