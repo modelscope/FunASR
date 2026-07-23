@@ -2,6 +2,14 @@
 
 This short FAQ covers the install and deployment failures that most often block a first FunASR trial. For model choice, see the [model selection guide](./model_selection.md); for serving options, see the [deployment matrix](./deployment_matrix.md).
 
+## Top support questions from recent issues
+
+Recent issue triage shows three repeat blockers that stop first-time users most often:
+
+- **Which install or hub path should I use?** See [Install or import fails](#install-or-import-fails) and [Model download is slow or fails](#model-download-is-slow-or-fails). This covers reports like #3321, #3045, #3042, #2973, and #2976.
+- **Which runtime package should I run on CPU, CUDA, Vulkan, or GGUF?** See [llama.cpp or GGUF runtime does not start](#llamacpp-or-gguf-runtime-does-not-start). This covers reports like #3298, #3297, #3296, #3289, and #3243.
+- **Why is realtime, VAD, vLLM, or server output delayed, empty, or different from local Python?** See [`funasr-server` starts but OpenAI-compatible requests fail](#funasr-server-starts-but-openai-compatible-requests-fail) and [WebSocket realtime output is empty or delayed](#websocket-realtime-output-is-empty-or-delayed). This covers reports like #3101, #3109, #3038, #3031, #2968, and #2965.
+
 ## Install or import fails
 
 - Install `torch` and `torchaudio` first, then install FunASR:

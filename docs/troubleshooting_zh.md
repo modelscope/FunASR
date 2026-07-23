@@ -2,6 +2,14 @@
 
 这份简短 FAQ 汇总首次安装和部署 FunASR 时最常见的阻塞问题。模型选择请看[模型选择指南](./model_selection_zh.md)，服务化选型请看[部署选型](./deployment_matrix_zh.md)。
 
+## 最近 issue 里的 Top 支持问题
+
+最近 issue 巡检显示，最容易阻塞首次试用的三类问题是：
+
+- **应该用哪个安装命令、模型 id 或 hub？** 看[安装或 import 失败](#安装或-import-失败)和[模型下载慢或失败](#模型下载慢或失败)。对应 #3321、#3045、#3042、#2973、#2976 等问题。
+- **CPU、CUDA、Vulkan、GGUF 应该下载哪个 runtime 包？** 看[llama.cpp 或 GGUF runtime 无法启动](#llamacpp-或-gguf-runtime-无法启动)。对应 #3298、#3297、#3296、#3289、#3243 等问题。
+- **实时服务、VAD、vLLM 或 server 输出为什么延迟、为空，或和本地 Python 不一致？** 看[`funasr-server` 启动后 OpenAI 兼容接口请求失败](#funasr-server-启动后-openai-兼容接口请求失败)和[WebSocket 实时输出为空或延迟很大](#websocket-实时输出为空或延迟很大)。对应 #3101、#3109、#3038、#3031、#2968、#2965 等问题。
+
 ## 安装或 import 失败
 
 - 先安装 `torch` 和 `torchaudio`，再安装 FunASR：
