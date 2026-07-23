@@ -33,8 +33,23 @@
 不想先配置本地环境？可以打开 [Colab 快速体验](./examples/colab/README_zh.md) 在浏览器里转写公开样例或上传自己的音频。
 
 ```bash
+pip install torch torchaudio
 pip install funasr
 ```
+
+如果要运行 GPU quickstart，请先按 [pytorch.org](https://pytorch.org/get-started/locally/)
+选择与你的 NVIDIA driver 匹配的 PyTorch / torchaudio CUDA wheel，再安装 FunASR。
+安装后先确认 GPU 可见：
+
+```bash
+python - <<'PY'
+import torch
+print(torch.cuda.is_available())
+PY
+```
+
+只有这里输出 `True` 时才使用 `device="cuda"`；否则请先使用
+`device="cpu"`，或重新安装匹配 CUDA 的 PyTorch wheel。
 
 ```python
 from funasr import AutoModel

@@ -33,9 +33,24 @@
 No local setup? Open the [Colab quickstart](./examples/colab/) to transcribe a public sample or upload your own audio in a browser.
 
 ```bash
+# CPU-only installs can use the default PyPI wheels.
 pip install torch torchaudio
 pip install funasr
 ```
+
+For GPU quickstarts, install the PyTorch and torchaudio wheels that match your
+NVIDIA driver from [pytorch.org](https://pytorch.org/get-started/locally/)
+before installing FunASR. After installation, confirm the GPU is visible:
+
+```bash
+python - <<'PY'
+import torch
+print(torch.cuda.is_available())
+PY
+```
+
+Only use `device="cuda"` when this prints `True`; otherwise use `device="cpu"`
+or reinstall PyTorch with the correct CUDA wheel.
 
 **Flagship model — Fun-ASR-Nano** (LLM-ASR for Chinese, English, and Japanese, plus Chinese dialect groups and regional accents; needs a GPU):
 
