@@ -208,6 +208,29 @@ def test_growth_plan_records_sharp_github_release_focus():
     assert "[ ] Create a GitHub release focused on one sharp value proposition" not in text
 
 
+def test_growth_plan_records_issue_triage_completion():
+    text = PLAN.read_text()
+
+    required_markers = [
+        "[x] Triage all new issues within 48 hours",
+        "`modelscope/FunASR`",
+        "`FunAudioLLM/Fun-ASR`",
+        "`FunAudioLLM/SenseVoice`",
+        "`modelscope/FunClip`",
+        "`0` open pull requests",
+        "Fun-ASR, SenseVoice, and FunClip had `0` open issues",
+        "#3302",
+        "`question` + `needs feedback`",
+        "#3104",
+        "`enhancement` + `needs maintainer decision`",
+        "No unlabelled or unowned open issue remained",
+    ]
+    for marker in required_markers:
+        assert marker in text
+
+    assert "[ ] Triage all new issues within 48 hours" not in text
+
+
 def test_growth_plan_records_top_support_questions_completion():
     text = PLAN.read_text()
     troubleshooting = (ROOT / "docs" / "troubleshooting.md").read_text()
