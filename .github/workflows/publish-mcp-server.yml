@@ -139,12 +139,28 @@ jobs:
           cache-to: type=gha,mode=max,scope=funasr-mcp
 
       - name: Make the GHCR package public
+        continue-on-error: true
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh api --method PATCH \
             "/orgs/${GITHUB_REPOSITORY_OWNER}/packages/container/funasr-mcp" \
             -f visibility=public
+
+      - name: Verify the versioned image is publicly pullable
+        env:
+          IMAGE_VERSION: ${{ steps.metadata.outputs.version }}
+        run: |
+          token="$(curl --fail --show-error --silent --get \
+            --data-urlencode "service=ghcr.io" \
+            --data-urlencode "scope=repository:modelscope/funasr-mcp:pull" \
+            https://ghcr.io/token | jq -r '.token')"
+          test -n "$token"
+          curl --fail --show-error --silent \
+            -H "Authorization: Bearer $token" \
+            -H "Accept: application/vnd.oci.image.index.v1+json, application/vnd.docker.distribution.manifest.list.v2+json" \
+            "https://ghcr.io/v2/modelscope/funasr-mcp/manifests/${IMAGE_VERSION}" \
+            >/dev/null
 
       - name: Install verified MCP publisher
         run: |

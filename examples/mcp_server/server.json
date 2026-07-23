@@ -3,7 +3,7 @@
   "name": "io.github.modelscope/funasr-mcp",
   "title": "FunASR",
   "description": "Transcribe local audio with FunASR and SenseVoice using private, on-device inference.",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "websiteUrl": "https://github.com/modelscope/FunASR/tree/main/examples/mcp_server",
   "repository": {
     "url": "https://github.com/modelscope/FunASR",
@@ -14,7 +14,7 @@
   "packages": [
     {
       "registryType": "oci",
-      "identifier": "ghcr.io/modelscope/funasr-mcp:0.1.0",
+      "identifier": "ghcr.io/modelscope/funasr-mcp:0.1.1",
       "runtimeHint": "docker",
       "runtimeArguments": [
         {
