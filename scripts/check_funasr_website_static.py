@@ -21,6 +21,12 @@ class PageContract:
     visible_required: tuple[str, ...] = ()
 
 
+@dataclass(frozen=True)
+class StaticAssetContract:
+    signature: bytes
+    min_bytes: int = 128
+
+
 PAGE_CONTRACTS: dict[str, PageContract] = {
     f"{BASE_URL}/": PageContract(
         required=(
@@ -172,6 +178,48 @@ PAGE_CONTRACTS: dict[str, PageContract] = {
         ),
         forbidden=("funasr==1.3.10", "runtime-llamacpp-v0.1.1"),
     ),
+    f"{BASE_URL}/blog/funasr-v1-3-27-language-metadata-vllm-fallback.html": PageContract(
+        required=(
+            "funasr==1.3.27",
+            "/v1/audio/transcriptions",
+            "verbose_json.language",
+            'language":"en',
+            "AutoModel",
+            "runtime-llamacpp-v0.1.9",
+            "https://github.com/modelscope/FunASR/releases/tag/v1.3.27",
+            "https://github.com/modelscope/FunASR",
+            "https://github.com/FunAudioLLM/Fun-ASR",
+            "https://github.com/FunAudioLLM/SenseVoice",
+            "https://github.com/modelscope/FunClip",
+            "/donors.html",
+        ),
+        forbidden=("funasr==1.3.26", "runtime-llamacpp-v0.1.1"),
+    ),
+    f"{BASE_URL}/en/blog/funasr-v1-3-27-language-metadata-vllm-fallback.html": PageContract(
+        required=(
+            "funasr==1.3.27",
+            "/v1/audio/transcriptions",
+            "verbose_json.language",
+            'language":"en',
+            "AutoModel",
+            "runtime-llamacpp-v0.1.9",
+            "https://github.com/modelscope/FunASR/releases/tag/v1.3.27",
+            "https://github.com/modelscope/FunASR",
+            "https://github.com/FunAudioLLM/Fun-ASR",
+            "https://github.com/FunAudioLLM/SenseVoice",
+            "https://github.com/modelscope/FunClip",
+            "/en/donors.html",
+        ),
+        forbidden=("funasr==1.3.26", "runtime-llamacpp-v0.1.1"),
+    ),
+}
+
+
+PNG_SIGNATURE = b"\x89PNG\r\n\x1a\n"
+
+STATIC_ASSET_CONTRACTS: dict[str, StaticAssetContract] = {
+    f"{BASE_URL}/img/banner.4f436d19.png": StaticAssetContract(PNG_SIGNATURE),
+    f"{BASE_URL}/logo.png": StaticAssetContract(PNG_SIGNATURE),
 }
 
 
@@ -208,19 +256,35 @@ def validate_pages(pages: dict[str, str]) -> list[str]:
     return failures
 
 
-def _fetch_url(url: str, timeout: float, retries: int) -> str:
+def validate_assets(assets: dict[str, bytes]) -> list[str]:
+    failures: list[str] = []
+    for url, contract in STATIC_ASSET_CONTRACTS.items():
+        body = assets.get(url)
+        if body is None:
+            failures.append(f"{url}: asset was not fetched")
+        elif not body.startswith(contract.signature) or len(body) < contract.min_bytes:
+            failures.append(f"{url}: response is not a valid PNG")
+    return failures
+
+
+def _fetch_bytes(url: str, timeout: float, retries: int) -> bytes:
     last_error: Exception | None = None
     for attempt in range(retries + 1):
         try:
             with urllib.request.urlopen(url, timeout=timeout) as response:
-                body = response.read()
-            return body.decode("utf-8", errors="replace")
+                return response.read()
         except Exception as exc:
             last_error = exc
             if attempt == retries:
                 break
             time.sleep(min(0.25 * (attempt + 1), 1.0))
     raise last_error
+
+
+def _fetch_url(url: str, timeout: float, retries: int) -> str:
+    return _fetch_bytes(url, timeout=timeout, retries=retries).decode(
+        "utf-8", errors="replace"
+    )
 
 
 def fetch_pages(timeout: float, retries: int = 3) -> dict[str, str]:
@@ -230,6 +294,13 @@ def fetch_pages(timeout: float, retries: int = 3) -> dict[str, str]:
     return pages
 
 
+def fetch_assets(timeout: float, retries: int = 3) -> dict[str, bytes]:
+    assets: dict[str, bytes] = {}
+    for url in STATIC_ASSET_CONTRACTS:
+        assets[url] = _fetch_bytes(url, timeout=timeout, retries=retries)
+    return assets
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--timeout", type=float, default=20.0)
@@ -237,13 +308,19 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     failures = validate_pages(fetch_pages(timeout=args.timeout, retries=args.retries))
+    failures.extend(
+        validate_assets(fetch_assets(timeout=args.timeout, retries=args.retries))
+    )
     if failures:
         print("funasr.com static page contract failed:", file=sys.stderr)
         for failure in failures:
             print(f"- {failure}", file=sys.stderr)
         return 1
 
-    print(f"funasr.com static page contract passed for {len(PAGE_CONTRACTS)} pages")
+    print(
+        "funasr.com static contract passed for "
+        f"{len(PAGE_CONTRACTS)} pages and {len(STATIC_ASSET_CONTRACTS)} assets"
+    )
     return 0
 
 

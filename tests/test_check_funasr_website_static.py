@@ -119,6 +119,34 @@ def test_website_contract_accepts_current_public_copy():
             https://github.com/modelscope/FunClip
             <a href="/en/donors.html">Thanks</a>
         """,
+        "https://www.funasr.com/blog/funasr-v1-3-27-language-metadata-vllm-fallback.html": """
+            funasr==1.3.27
+            /v1/audio/transcriptions
+            verbose_json.language
+            language":"en
+            AutoModel
+            runtime-llamacpp-v0.1.9
+            https://github.com/modelscope/FunASR/releases/tag/v1.3.27
+            https://github.com/modelscope/FunASR
+            https://github.com/FunAudioLLM/Fun-ASR
+            https://github.com/FunAudioLLM/SenseVoice
+            https://github.com/modelscope/FunClip
+            <a href="/donors.html">功德榜</a>
+        """,
+        "https://www.funasr.com/en/blog/funasr-v1-3-27-language-metadata-vllm-fallback.html": """
+            funasr==1.3.27
+            /v1/audio/transcriptions
+            verbose_json.language
+            language":"en
+            AutoModel
+            runtime-llamacpp-v0.1.9
+            https://github.com/modelscope/FunASR/releases/tag/v1.3.27
+            https://github.com/modelscope/FunASR
+            https://github.com/FunAudioLLM/Fun-ASR
+            https://github.com/FunAudioLLM/SenseVoice
+            https://github.com/modelscope/FunClip
+            <a href="/en/donors.html">Thanks</a>
+        """,
     }
 
     assert checker.validate_pages(pages) == []
@@ -144,6 +172,37 @@ def test_website_contract_includes_v1326_launch_articles():
         "https://www.funasr.com/en/blog/funasr-v1-3-26-openai-vllm-llama-cpp.html"
         in checker.PAGE_CONTRACTS
     )
+
+
+def test_website_contract_includes_v1327_launch_articles():
+    checker = _load_module()
+
+    assert (
+        "https://www.funasr.com/blog/funasr-v1-3-27-language-metadata-vllm-fallback.html"
+        in checker.PAGE_CONTRACTS
+    )
+    assert (
+        "https://www.funasr.com/en/blog/funasr-v1-3-27-language-metadata-vllm-fallback.html"
+        in checker.PAGE_CONTRACTS
+    )
+
+
+def test_static_asset_contract_rejects_non_png_payloads():
+    checker = _load_module()
+    banner_url = "https://www.funasr.com/img/banner.4f436d19.png"
+    logo_url = "https://www.funasr.com/logo.png"
+
+    assert banner_url in checker.STATIC_ASSET_CONTRACTS
+    assert logo_url in checker.STATIC_ASSET_CONTRACTS
+
+    failures = checker.validate_assets(
+        {
+            banner_url: b"<html>not an image</html>",
+            logo_url: b"\x89PNG\r\n\x1a\n" + b"x" * 200,
+        }
+    )
+
+    assert failures == [f"{banner_url}: response is not a valid PNG"]
 
 
 def test_website_contract_reports_stale_runtime_and_star_copy():
