@@ -103,6 +103,29 @@ def test_fallback_segments_keep_short_text_single_cue(monkeypatch):
     ]
 
 
+def test_extract_language_from_sensevoice_text(monkeypatch):
+    module = load_server_app(monkeypatch)
+
+    assert module.extract_language_from_asr_text("<|en|><|NEUTRAL|><|Speech|>hello") == "en"
+    assert module.extract_language_from_asr_text("<|yue|> nei hou") == "yue"
+    assert module.extract_language_from_asr_text("plain transcript") is None
+
+
+def test_resolve_transcription_language_prefers_request_then_detection(monkeypatch):
+    module = load_server_app(monkeypatch)
+
+    assert module.resolve_transcription_language("ja", {"language": "en"}) == "ja"
+    assert module.resolve_transcription_language("auto", {"language": "en"}) == "en"
+    assert module.resolve_transcription_language(None, {"language": "ko"}) == "ko"
+    assert module.resolve_transcription_language(None, {}) == "unknown"
+
+
+def test_resolve_transcription_language_does_not_default_to_chinese(monkeypatch):
+    module = load_server_app(monkeypatch)
+
+    assert module.resolve_transcription_language(None, {}) != "zh"
+
+
 def test_default_fun_asr_nano_uses_requested_modelscope_hub(monkeypatch):
     module = load_server_app(monkeypatch)
     DummyAutoModel = install_dummy_funasr(monkeypatch)
