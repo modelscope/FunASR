@@ -1,18 +1,23 @@
 #!/usr/bin/env python3
-"""Add prebuilt runtime download links to a Python package GitHub release."""
+"""Attach prebuilt runtimes and their download links to a Python GitHub release."""
 
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
+import re
 import subprocess
 import tempfile
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 
 
 RUNTIME_SECTION_HEADING = "## Runtime downloads"
+RUNTIME_SECTION_START = "<!-- funasr-runtime-downloads:start -->"
+RUNTIME_SECTION_END = "<!-- funasr-runtime-downloads:end -->"
 
 
 def run_gh_json(args: list[str]) -> Any:
@@ -51,7 +56,18 @@ def platform_label(asset_name: str) -> str:
     return asset_name
 
 
-def latest_runtime_tag(repository: str) -> str:
+def parse_published_at(value: str, *, label: str) -> datetime:
+    if not value:
+        raise RuntimeError(f"{label} has no publication timestamp")
+    try:
+        return datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError as error:
+        raise RuntimeError(
+            f"{label} has invalid publication timestamp: {value}"
+        ) from error
+
+
+def latest_runtime_tag(repository: str, *, published_before: str) -> str:
     releases = run_gh_json(
         [
             "release",
@@ -59,17 +75,29 @@ def latest_runtime_tag(repository: str) -> str:
             "--repo",
             repository,
             "--limit",
-            "50",
+            "1000",
             "--json",
             "tagName,publishedAt,isDraft,isPrerelease",
         ]
     )
+    cutoff = parse_published_at(published_before, label="Python release")
+    eligible = []
     for release in releases:
-        if release["tagName"].startswith("runtime-llamacpp-v") and not release.get(
-            "isDraft"
+        if (
+            release["tagName"].startswith("runtime-llamacpp-v")
+            and not release.get("isDraft")
+            and not release.get("isPrerelease")
         ):
-            return release["tagName"]
-    raise RuntimeError("No published runtime-llamacpp release found")
+            published_at = parse_published_at(
+                release.get("publishedAt") or "", label=release["tagName"]
+            )
+            if published_at <= cutoff:
+                eligible.append((published_at, release["tagName"]))
+    if eligible:
+        return max(eligible)[1]
+    raise RuntimeError(
+        f"No stable runtime-llamacpp release published by {published_before} found"
+    )
 
 
 def load_release(repository: str, tag: str) -> dict[str, Any]:
@@ -81,22 +109,137 @@ def load_release(repository: str, tag: str) -> dict[str, Any]:
             "--repo",
             repository,
             "--json",
-            "tagName,name,body,url,assets",
+            "tagName,name,body,url,assets,publishedAt,isDraft,isPrerelease",
         ]
     )
+
+
+def runtime_assets(release: dict[str, Any]) -> list[dict[str, Any]]:
+    assets = release.get("assets") or []
+    selected = [
+        asset for asset in assets if asset["name"].startswith("funasr-llamacpp-")
+    ]
+    if not selected:
+        raise RuntimeError(f"{release['tagName']} has no llama.cpp assets")
+    return selected
+
+
+def validate_runtime_release(
+    *, runtime_release: dict[str, Any], python_release: dict[str, Any]
+) -> None:
+    runtime_tag = runtime_release["tagName"]
+    if runtime_release.get("isDraft"):
+        raise RuntimeError(f"{runtime_tag} is a draft")
+    if runtime_release.get("isPrerelease"):
+        raise RuntimeError(f"{runtime_tag} is a prerelease")
+    runtime_published_at = parse_published_at(
+        runtime_release.get("publishedAt") or "", label=runtime_tag
+    )
+    python_published_at = parse_published_at(
+        python_release.get("publishedAt") or "", label=python_release["tagName"]
+    )
+    if runtime_published_at > python_published_at:
+        raise RuntimeError(
+            f"{runtime_tag} was published after {python_release['tagName']}"
+        )
+
+
+def asset_sha256(asset: dict[str, Any]) -> str:
+    digest = asset.get("digest")
+    if not isinstance(digest, str) or not digest.startswith("sha256:"):
+        raise RuntimeError(f"{asset['name']} has no SHA-256 digest")
+    sha256 = digest.removeprefix("sha256:")
+    if not re.fullmatch(r"[0-9a-fA-F]{64}", sha256):
+        raise RuntimeError(f"{asset['name']} has an invalid SHA-256 digest")
+    return sha256.lower()
+
+
+def runtime_assets_to_upload(
+    *, python_release: dict[str, Any], runtime_release: dict[str, Any]
+) -> list[dict[str, Any]]:
+    existing = {asset["name"]: asset for asset in (python_release.get("assets") or [])}
+    missing = []
+    for source_asset in runtime_assets(runtime_release):
+        source_digest = asset_sha256(source_asset)
+        target_asset = existing.get(source_asset["name"])
+        if target_asset is None:
+            missing.append(source_asset)
+            continue
+        target_digest = asset_sha256(target_asset)
+        if target_digest != source_digest:
+            raise RuntimeError(
+                f"{python_release['tagName']} already has {source_asset['name']} "
+                "with a different digest"
+            )
+    return missing
+
+
+def verify_asset_digest(asset_path: Path, asset: dict[str, Any]) -> None:
+    expected = asset_sha256(asset)
+    with asset_path.open("rb") as handle:
+        actual = hashlib.file_digest(handle, "sha256").hexdigest()
+    if actual != expected:
+        raise RuntimeError(
+            f"SHA-256 mismatch for {asset['name']}: expected {expected}, got {actual}"
+        )
+
+
+def sync_runtime_assets(
+    *,
+    repository: str,
+    python_tag: str,
+    runtime_release: dict[str, Any],
+    python_release: dict[str, Any],
+) -> None:
+    missing = runtime_assets_to_upload(
+        python_release=python_release,
+        runtime_release=runtime_release,
+    )
+    if not missing:
+        return
+
+    with tempfile.TemporaryDirectory() as temp_dir:
+        download_dir = Path(temp_dir)
+        paths = []
+        for asset in missing:
+            run_gh(
+                [
+                    "release",
+                    "download",
+                    runtime_release["tagName"],
+                    "--repo",
+                    repository,
+                    "--pattern",
+                    asset["name"],
+                    "--dir",
+                    str(download_dir),
+                ]
+            )
+            asset_path = download_dir / asset["name"]
+            verify_asset_digest(asset_path, asset)
+            paths.append(str(asset_path))
+
+        run_gh(
+            [
+                "release",
+                "upload",
+                python_tag,
+                *paths,
+                "--repo",
+                repository,
+            ]
+        )
 
 
 def build_runtime_downloads_section(
     *, python_tag: str, runtime_release: dict[str, Any]
 ) -> str:
-    assets = sorted(runtime_release.get("assets") or [], key=lambda asset: asset["name"])
-    runtime_assets = [
-        asset for asset in assets if asset["name"].startswith("funasr-llamacpp-")
-    ]
-    if not runtime_assets:
-        raise RuntimeError(f"{runtime_release['tagName']} has no llama.cpp assets")
+    selected_assets = sorted(
+        runtime_assets(runtime_release), key=lambda asset: asset["name"]
+    )
 
     python_version = python_tag.removeprefix("v")
+    repository_url = runtime_release["url"].split("/releases/tag/", maxsplit=1)[0]
     lines = [
         RUNTIME_SECTION_HEADING,
         "",
@@ -106,19 +249,20 @@ def build_runtime_downloads_section(
         ),
         "",
         (
-            "Use these assets when you want the self-contained `llama-funasr-*` "
-            "binaries instead of the Python package. The runtime release is shared "
-            f"by the current Python releases; `{python_tag}` itself is the PyPI package release."
+            "The same verified runtime assets are attached directly to this Python "
+            "release so users can find the package and self-contained "
+            "`llama-funasr-*` binaries in one place."
         ),
         "",
         "| Platform | Asset | SHA-256 |",
         "|---|---|---|",
     ]
-    for asset in runtime_assets:
-        digest = (asset.get("digest") or "").removeprefix("sha256:")
+    for asset in selected_assets:
+        digest = asset_sha256(asset)
+        asset_url = f"{repository_url}/releases/download/{python_tag}/{asset['name']}"
         lines.append(
             f"| {platform_label(asset['name'])} | "
-            f"[{asset['name']}]({asset['url']}) | "
+            f"[{asset['name']}]({asset_url}) | "
             f"`{digest}` |"
         )
 
@@ -145,19 +289,68 @@ def build_runtime_downloads_section(
 def merge_release_body(
     *, current_body: str, python_tag: str, runtime_release: dict[str, Any]
 ) -> str:
-    body_without_runtime = current_body.split(RUNTIME_SECTION_HEADING, maxsplit=1)[
-        0
-    ].rstrip()
     runtime_section = build_runtime_downloads_section(
         python_tag=python_tag, runtime_release=runtime_release
     )
-    return f"{body_without_runtime}\n\n{runtime_section}\n"
+    managed_section = (
+        f"{RUNTIME_SECTION_START}\n{runtime_section}\n{RUNTIME_SECTION_END}"
+    )
+
+    marker_start = current_body.find(RUNTIME_SECTION_START)
+    marker_end = current_body.find(RUNTIME_SECTION_END)
+    if (marker_start == -1) != (marker_end == -1):
+        raise RuntimeError("Release body has incomplete runtime download markers")
+    if marker_start != -1:
+        if marker_end < marker_start:
+            raise RuntimeError("Release body has invalid runtime download markers")
+        prefix = current_body[:marker_start]
+        suffix = current_body[marker_end + len(RUNTIME_SECTION_END) :]
+    else:
+        legacy_start = current_body.find(RUNTIME_SECTION_HEADING)
+        if legacy_start == -1:
+            prefix = current_body
+            suffix = ""
+        else:
+            next_heading = current_body.find(
+                "\n## ", legacy_start + len(RUNTIME_SECTION_HEADING)
+            )
+            legacy_end = len(current_body) if next_heading == -1 else next_heading + 1
+            prefix = current_body[:legacy_start]
+            suffix = current_body[legacy_end:]
+
+    parts = [
+        part for part in (prefix.rstrip(), managed_section, suffix.strip()) if part
+    ]
+    return "\n\n".join(parts) + "\n"
 
 
-def update_release_body(repository: str, python_tag: str, runtime_tag: str | None) -> None:
-    runtime_tag = runtime_tag or latest_runtime_tag(repository)
+def update_release(repository: str, python_tag: str, runtime_tag: str | None) -> None:
     python_release = load_release(repository, python_tag)
+    published_at = python_release.get("publishedAt")
+    if not published_at:
+        raise RuntimeError(f"{python_tag} has no publication timestamp")
+    runtime_tag = runtime_tag or latest_runtime_tag(
+        repository, published_before=published_at
+    )
     runtime_release = load_release(repository, runtime_tag)
+    validate_runtime_release(
+        runtime_release=runtime_release,
+        python_release=python_release,
+    )
+    sync_runtime_assets(
+        repository=repository,
+        python_tag=python_tag,
+        runtime_release=runtime_release,
+        python_release=python_release,
+    )
+    python_release = load_release(repository, python_tag)
+    remaining = runtime_assets_to_upload(
+        python_release=python_release,
+        runtime_release=runtime_release,
+    )
+    if remaining:
+        names = ", ".join(asset["name"] for asset in remaining)
+        raise RuntimeError(f"{python_tag} is still missing runtime assets: {names}")
     merged = merge_release_body(
         current_body=python_release.get("body") or "",
         python_tag=python_tag,
@@ -185,7 +378,9 @@ def update_release_body(repository: str, python_tag: str, runtime_tag: str | Non
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("python_tag", help="Python package release tag, for example v1.3.26")
+    parser.add_argument(
+        "python_tag", help="Python package release tag, for example v1.3.26"
+    )
     parser.add_argument(
         "--repo",
         default=os.environ.get("GITHUB_REPOSITORY", "modelscope/FunASR"),
@@ -201,7 +396,7 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> None:
     args = parse_args()
-    update_release_body(args.repo, args.python_tag, args.runtime_tag)
+    update_release(args.repo, args.python_tag, args.runtime_tag)
 
 
 if __name__ == "__main__":

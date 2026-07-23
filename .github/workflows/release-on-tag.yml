@@ -18,8 +18,11 @@ jobs:
       - name: Create GitHub Release with auto-generated notes
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "${{ github.ref_name }}" --generate-notes --verify-tag --title "${{ github.ref_name }}"
-      - name: Add Runtime downloads to GitHub Release
+        run: |
+          if ! gh release view "${{ github.ref_name }}" >/dev/null 2>&1; then
+            gh release create "${{ github.ref_name }}" --generate-notes --verify-tag --title "${{ github.ref_name }}"
+          fi
+      - name: Add Runtime assets and downloads to GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
         run: python scripts/update_release_runtime_downloads.py "${{ github.ref_name }}"
