@@ -126,6 +126,39 @@ clear message if `--backend vulkan` is requested. Vulkan performance and device
 availability depend on the installed GPU driver/ICD rather than on CUDA compute
 capability.
 
+### Optional Windows Vulkan backend for SenseVoiceSmall
+
+Tagged releases publish `funasr-llamacpp-windows-x64-vulkan.zip` for the same
+SenseVoiceSmall Vulkan graph execution on Windows. The prebuilt package does not
+require the Vulkan SDK. It does require a current AMD, Intel, or NVIDIA graphics
+driver that provides a working Vulkan loader and device:
+
+```powershell
+# From the extracted windows-x64-vulkan package:
+vulkaninfo --summary  # Optional driver check when vulkaninfo is installed.
+.\llama-funasr-sensevoice.exe `
+  -m sensevoice-small-q8.gguf --vad fsmn-vad.gguf -a sample.wav --backend vulkan
+```
+
+If the command reports that no Vulkan device is available, update the vendor GPU
+driver first. The package intentionally relies on the system `vulkan-1.dll`
+installed by that driver instead of shipping an SDK copy.
+
+To build on Windows, install the
+[LunarG Vulkan SDK](https://vulkan.lunarg.com/sdk/home#windows) with `glslc`,
+open a Developer PowerShell where `VULKAN_SDK` is set, and run:
+
+```powershell
+glslc --version
+cmake -B build-vulkan -A x64 -DCMAKE_BUILD_TYPE=Release -DGGML_VULKAN=ON
+cmake --build build-vulkan --config Release --target llama-funasr-sensevoice
+.\build-vulkan\bin\Release\llama-funasr-sensevoice.exe `
+  -m sensevoice-small-f16.gguf -a sample.wav --backend vulkan
+```
+
+`--backend cpu` remains the default. The Windows Vulkan package currently
+accelerates SenseVoiceSmall only, matching the Linux Vulkan package.
+
 ## Build (shared)
 ```bash
 git clone https://github.com/ggml-org/llama.cpp && cd llama.cpp

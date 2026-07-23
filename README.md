@@ -275,6 +275,8 @@ bash download-funasr-model.sh sensevoice ./gguf        # or: paraformer | nano
 hf download FunAudioLLM/SenseVoiceSmall-GGUF sensevoice-small-q8.gguf --local-dir .\gguf
 hf download FunAudioLLM/fsmn-vad-GGUF fsmn-vad.gguf --local-dir .\gguf
 .\llama-funasr-sensevoice.exe -m .\gguf\sensevoice-small-q8.gguf --vad .\gguf\fsmn-vad.gguf -a audio.wav
+# Use the windows-x64-vulkan package with a current AMD, Intel, or NVIDIA Vulkan driver:
+.\llama-funasr-sensevoice.exe -m .\gguf\sensevoice-small-q8.gguf --vad .\gguf\fsmn-vad.gguf -a audio.wav --backend vulkan
 # Use the windows-x64-cuda package on RTX 30-class GPUs:
 .\llama-funasr-sensevoice.exe -m .\gguf\sensevoice-small-q8.gguf --vad .\gguf\fsmn-vad.gguf -a audio.wav --backend cuda
 ```
@@ -285,6 +287,10 @@ working Vulkan driver/ICD:
 ```bash
 ./llama-funasr-sensevoice -m ./gguf/sensevoice-small-q8.gguf --vad ./gguf/fsmn-vad.gguf -a audio.wav --backend vulkan
 ```
+
+The Windows Vulkan ZIP uses the system Vulkan loader supplied by the GPU driver;
+installing the Vulkan SDK is only necessary when building from source. Both
+Vulkan packages currently accelerate SenseVoiceSmall.
 
 The current Windows CUDA package targets CUDA architecture 86. RTX 50 / Blackwell
 GPUs report compute capability 12.0 (`sm_120`) and should use the CPU package or
