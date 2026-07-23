@@ -59,12 +59,36 @@ PAGE_CONTRACTS: dict[str, PageContract] = {
         forbidden=("16K+",),
     ),
     f"{BASE_URL}/donors.html": PageContract(
-        required=("捐赠金额用于购买服务器与", "www.funasr.com", "域名"),
-        visible_required=("捐赠金额用于购买服务器与", "www.funasr.com", "域名"),
+        required=(
+            "捐赠资金用于社区基础设施建设",
+            "购买和维护服务器",
+            "购买、续费和维护",
+            "www.funasr.com",
+            "域名",
+        ),
+        visible_required=(
+            "捐赠资金用于社区基础设施建设",
+            "购买和维护服务器",
+            "购买、续费和维护",
+            "www.funasr.com",
+            "域名",
+        ),
     ),
     f"{BASE_URL}/en/donors.html": PageContract(
-        required=("Donations helped purchase servers", "www.funasr.com", "domain"),
-        visible_required=("Donations helped purchase servers", "www.funasr.com", "domain"),
+        required=(
+            "Donations fund community infrastructure",
+            "server purchase and maintenance",
+            "purchase, renewal, and maintenance",
+            "www.funasr.com",
+            "domain",
+        ),
+        visible_required=(
+            "Donations fund community infrastructure",
+            "server purchase and maintenance",
+            "purchase, renewal, and maintenance",
+            "www.funasr.com",
+            "domain",
+        ),
     ),
     f"{BASE_URL}/blog/funasr-cli-transcribe-command-line.html": PageContract(
         required=("推荐 funasr ≥ 1.3.26", "/donors.html"),
@@ -103,6 +127,34 @@ PAGE_CONTRACTS: dict[str, PageContract] = {
             "/en/donors.html",
         ),
         forbidden=("runtime-llamacpp-v0.1.1",),
+    ),
+    f"{BASE_URL}/blog/funasr-v1-3-26-openai-vllm-llama-cpp.html": PageContract(
+        required=(
+            "funasr==1.3.26",
+            "/v1/audio/transcriptions",
+            "RTFx 340",
+            "runtime-llamacpp-v0.1.8",
+            "https://github.com/modelscope/FunASR",
+            "https://github.com/FunAudioLLM/Fun-ASR",
+            "https://github.com/FunAudioLLM/SenseVoice",
+            "https://github.com/modelscope/FunClip",
+            "/donors.html",
+        ),
+        forbidden=("funasr==1.3.10", "runtime-llamacpp-v0.1.1"),
+    ),
+    f"{BASE_URL}/en/blog/funasr-v1-3-26-openai-vllm-llama-cpp.html": PageContract(
+        required=(
+            "funasr==1.3.26",
+            "/v1/audio/transcriptions",
+            "RTFx 340",
+            "runtime-llamacpp-v0.1.8",
+            "https://github.com/modelscope/FunASR",
+            "https://github.com/FunAudioLLM/Fun-ASR",
+            "https://github.com/FunAudioLLM/SenseVoice",
+            "https://github.com/modelscope/FunClip",
+            "/en/donors.html",
+        ),
+        forbidden=("funasr==1.3.10", "runtime-llamacpp-v0.1.1"),
     ),
 }
 

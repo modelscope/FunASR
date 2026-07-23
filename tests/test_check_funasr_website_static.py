@@ -47,10 +47,13 @@ def test_website_contract_accepts_current_public_copy():
             <div>54.3K stars</div>
         """,
         "https://www.funasr.com/donors.html": """
-            捐赠金额用于购买服务器与 <a href="https://www.funasr.com/">www.funasr.com</a> 域名，帮助官网和社区资料持续在线。
+            捐赠资金用于社区基础设施建设，包括购买和维护服务器，以及购买、续费和维护
+            <a href="https://www.funasr.com/">www.funasr.com</a> 域名。
         """,
         "https://www.funasr.com/en/donors.html": """
-            Donations helped purchase servers and the <a href="https://www.funasr.com/">www.funasr.com</a> domain.
+            Donations fund community infrastructure, including server purchase and maintenance,
+            as well as the purchase, renewal, and maintenance of the
+            <a href="https://www.funasr.com/">www.funasr.com</a> domain.
         """,
         "https://www.funasr.com/blog/funasr-cli-transcribe-command-line.html": """
             pip install -U funasr   # 推荐 funasr ≥ 1.3.26
@@ -81,6 +84,28 @@ def test_website_contract_accepts_current_public_copy():
             Vulkan / CUDA
             <a href="/en/donors.html">Thanks</a>
         """,
+        "https://www.funasr.com/blog/funasr-v1-3-26-openai-vllm-llama-cpp.html": """
+            funasr==1.3.26
+            /v1/audio/transcriptions
+            RTFx 340
+            runtime-llamacpp-v0.1.8
+            https://github.com/modelscope/FunASR
+            https://github.com/FunAudioLLM/Fun-ASR
+            https://github.com/FunAudioLLM/SenseVoice
+            https://github.com/modelscope/FunClip
+            <a href="/donors.html">功德榜</a>
+        """,
+        "https://www.funasr.com/en/blog/funasr-v1-3-26-openai-vllm-llama-cpp.html": """
+            funasr==1.3.26
+            /v1/audio/transcriptions
+            RTFx 340
+            runtime-llamacpp-v0.1.8
+            https://github.com/modelscope/FunASR
+            https://github.com/FunAudioLLM/Fun-ASR
+            https://github.com/FunAudioLLM/SenseVoice
+            https://github.com/modelscope/FunClip
+            <a href="/en/donors.html">Thanks</a>
+        """,
     }
 
     assert checker.validate_pages(pages) == []
@@ -91,6 +116,19 @@ def test_website_contract_includes_homepage_entrypoints():
 
     assert "https://www.funasr.com/" in checker.PAGE_CONTRACTS
     assert "https://www.funasr.com/en/" in checker.PAGE_CONTRACTS
+
+
+def test_website_contract_includes_v1326_launch_articles():
+    checker = _load_module()
+
+    assert (
+        "https://www.funasr.com/blog/funasr-v1-3-26-openai-vllm-llama-cpp.html"
+        in checker.PAGE_CONTRACTS
+    )
+    assert (
+        "https://www.funasr.com/en/blog/funasr-v1-3-26-openai-vllm-llama-cpp.html"
+        in checker.PAGE_CONTRACTS
+    )
 
 
 def test_website_contract_reports_stale_runtime_and_star_copy():
@@ -127,13 +165,13 @@ def test_website_contract_requires_visible_donor_usage_copy():
     }
     pages["https://www.funasr.com/donors.html"] = """
         <head>
-            <meta name="description" content="捐赠金额用于购买服务器与 www.funasr.com 域名。">
+            <meta name="description" content="捐赠资金用于社区基础设施建设，包括购买和维护服务器，以及购买、续费和维护 www.funasr.com 域名。">
         </head>
         <body>FunASR 社区功德榜</body>
     """
     pages["https://www.funasr.com/en/donors.html"] = """
         <head>
-            <meta name="description" content="Donations helped purchase servers and the www.funasr.com domain.">
+            <meta name="description" content="Donations fund community infrastructure, including server purchase and maintenance, plus the purchase, renewal, and maintenance of the www.funasr.com domain.">
         </head>
         <body>FunASR Community Thanks</body>
     """
@@ -142,12 +180,12 @@ def test_website_contract_requires_visible_donor_usage_copy():
 
     assert any(
         "donors.html" in failure
-        and "visible text missing `捐赠金额用于购买服务器与`" in failure
+        and "visible text missing `购买和维护服务器`" in failure
         for failure in failures
     )
     assert any(
         "en/donors.html" in failure
-        and "visible text missing `Donations helped purchase servers`" in failure
+        and "visible text missing `server purchase and maintenance`" in failure
         for failure in failures
     )
 
