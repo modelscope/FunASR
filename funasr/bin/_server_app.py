@@ -150,7 +150,7 @@ def create_app(device: str = "cuda", preload_model: str = "auto", model_path: st
 
     def _load_vllm_engine():
         """Load Fun-ASR-Nano vLLM engine. Falls back to AutoModel if vLLM unavailable."""
-        if app.state.engine is not None:
+        if app.state.engine is not None or "fun-asr-nano" in app.state.fallback_models:
             return
         try:
             from funasr.models.fun_asr_nano.inference_vllm import FunASRNanoVLLM
@@ -162,7 +162,7 @@ def create_app(device: str = "cuda", preload_model: str = "auto", model_path: st
             # cases, honor the server-level hub selection.
             vllm_model = app.state.model_path if app.state.model_path else "FunAudioLLM/Fun-ASR-Nano-2512"
             vllm_hub = app.state.hub
-            app.state.engine = FunASRNanoVLLM.from_pretrained(
+            engine = FunASRNanoVLLM.from_pretrained(
                 model=vllm_model,
                 hub=vllm_hub,
                 device=device,
@@ -171,10 +171,12 @@ def create_app(device: str = "cuda", preload_model: str = "auto", model_path: st
                 gpu_memory_utilization=0.5,
             )
             logger.info(f"vLLM engine ready in {time.time()-t0:.1f}s")
-            app.state.use_vllm = True
 
             logger.info("Loading VAD model...")
-            app.state.vad_model = _AutoModel(model="fsmn-vad", device=device, disable_update=True)
+            vad_model = _AutoModel(model="fsmn-vad", device=device, disable_update=True)
+            app.state.engine = engine
+            app.state.vad_model = vad_model
+            app.state.use_vllm = True
             logger.info("VAD ready.")
         except Exception as e:
             logger.warning(f"vLLM failed ({e}), falling back to AutoModel for fun-asr-nano")
