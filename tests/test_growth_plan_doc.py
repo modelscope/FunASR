@@ -363,23 +363,36 @@ def test_growth_plan_records_homepage_entrypoint_completion():
     assert "[ ] Update homepage hero and docs entry points" not in text
 
 
-def test_growth_plan_records_metrics_tracking_progress():
+def test_growth_plan_records_metrics_tracking_completion():
     text = PLAN.read_text()
 
     required_markers = [
-        "[ ] Track stars, PyPI downloads, issue volume, and docs traffic.",
+        "[x] Track stars, PyPI downloads, issue volume, and docs traffic.",
         "PyPIStats",
         "`downloads_last_7_days`",
         "`downloads_last_30_days`",
         "`collect_growth_metrics.py`",
         "GitHub stars, open issues, and open pull requests",
-        "`116,407` downloads in 7 days",
-        "`442,556` downloads in 30 days",
-        "`2026-07-21`",
+        "`117,850` downloads in 7 days",
+        "`445,755` downloads in 30 days",
+        "`2026-07-22`",
         "pypi-downloads-funasr.json",
         "`stale_available`",
         "SSL/429 outages",
-        "docs traffic remains unavailable until an analytics credential or export is connected",
+        "`scripts/collect_website_traffic.py`",
+        "`python scripts/collect_website_traffic.py --log '/var/log/nginx/access.log*' --days 30 --format json`",
+        "plain or gzip Nginx logs",
+        "raw client IPs and user agents are never emitted",
+        "over 15 rotated logs",
+        "`88,239` page views / `47,084` approximate unique visitors",
+        "docs at `15,501` / `11,843`",
+        "blog at `27,901` / `22,716`",
+        "`21,915` / `12,668`",
+        "docs at `4,638` / `3,612`",
+        "blog at `6,901` / `5,590`",
     ]
     for marker in required_markers:
         assert marker in text
+
+    assert "[ ] Track stars, PyPI downloads, issue volume, and docs traffic." not in text
+    assert "docs traffic remains unavailable" not in text
