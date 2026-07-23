@@ -31,6 +31,7 @@ DEFAULT_BASELINE_STARS = 31224
 DEFAULT_TARGET_ADDITIONAL_STARS = 20000
 DEFAULT_TARGET_DATE = "2026-09-30"
 OPS_GITHUB_TOKEN_PATH = Path("/cpfs_speech/user/zhifu.gzf/.config/funasr-ops/github_token")
+DEFAULT_PYPI_DOWNLOAD_CACHE = Path("/cpfs_speech/user/zhifu.gzf/.cache/funasr-ops/pypi-downloads-funasr.json")
 DEFAULT_INTEGRATION_PRS = [
     "huggingface/transformers#46180",
     "yuekaizhang/Fun-ASR-vllm#21",
@@ -328,6 +329,45 @@ def fetch_json(url: str, headers: Optional[Dict[str, str]] = None) -> Any:
         raise RuntimeError(f"GET {url} failed: {exc.reason}") from exc
 
 
+def pypi_download_cache_path(package: str) -> Path:
+    if package == DEFAULT_PACKAGE:
+        return DEFAULT_PYPI_DOWNLOAD_CACHE
+    return DEFAULT_PYPI_DOWNLOAD_CACHE.with_name(f"pypi-downloads-{package}.json")
+
+
+def write_pypi_download_cache(package: str, metrics: Dict[str, Any]) -> None:
+    cache_path = pypi_download_cache_path(package)
+    try:
+        cache_path.parent.mkdir(parents=True, exist_ok=True)
+        cache_path.write_text(
+            json.dumps({"package": package, "metrics": metrics}, ensure_ascii=False, indent=2) + "\n",
+            encoding="utf-8",
+        )
+    except OSError:
+        pass
+
+
+def read_pypi_download_cache(package: str, reason: str) -> Optional[Dict[str, Any]]:
+    cache_path = pypi_download_cache_path(package)
+    try:
+        cached = json.loads(cache_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return None
+    if cached.get("package") != package:
+        return None
+    metrics = cached.get("metrics")
+    if not isinstance(metrics, dict):
+        return None
+    required = {"latest_date", "downloads_last_7_days", "downloads_last_30_days", "source_url"}
+    if not required.issubset(metrics):
+        return None
+    stale = dict(metrics)
+    stale["status"] = "stale_available"
+    stale["cache_path"] = str(cache_path)
+    stale["reason"] = reason
+    return stale
+
+
 def collect_pypi_download_metrics(package: str) -> Dict[str, Any]:
     url = f"https://pypistats.org/api/packages/{package}/overall?mirrors=false"
     try:
@@ -342,7 +382,7 @@ def collect_pypi_download_metrics(package: str) -> Dict[str, Any]:
         rows.sort(key=lambda row: row["date"])
         if not rows:
             raise RuntimeError("PyPIStats returned no daily download rows")
-        return {
+        metrics = {
             "source": "pypistats.org",
             "source_url": f"https://pypistats.org/packages/{package}",
             "latest_date": rows[-1]["date"],
@@ -350,12 +390,18 @@ def collect_pypi_download_metrics(package: str) -> Dict[str, Any]:
             "downloads_last_30_days": sum(row["downloads"] for row in rows[-30:]),
             "status": "available",
         }
+        write_pypi_download_cache(package, metrics)
+        return metrics
     except Exception as exc:
+        reason = str(exc)
+        cached = read_pypi_download_cache(package, reason)
+        if cached:
+            return cached
         return {
             "source": "pypistats.org",
             "source_url": f"https://pypistats.org/packages/{package}",
             "status": "unavailable",
-            "reason": str(exc),
+            "reason": reason,
         }
 
 
@@ -791,11 +837,14 @@ def collect_ecosystem_metrics(
 
 def format_pypi_downloads(pypi: Dict[str, Any]) -> str:
     downloads = pypi.get("downloads") or {}
-    if downloads.get("status") == "available":
+    if downloads.get("status") in {"available", "stale_available"}:
+        cache_note = ""
+        if downloads.get("status") == "stale_available":
+            cache_note = f"; cached after live API failure: {downloads.get('reason')}"
         return (
             f"- PyPI downloads: **{downloads.get('downloads_last_7_days', 0):,}** last 7 days; "
             f"**{downloads.get('downloads_last_30_days', 0):,}** last 30 days "
-            f"(through {downloads.get('latest_date')}, {downloads.get('source_url')})"
+            f"(through {downloads.get('latest_date')}, {downloads.get('source_url')}{cache_note})"
         )
     if downloads.get("status") == "unavailable":
         return f"- PyPI downloads: unavailable via {downloads.get('source', 'PyPIStats')} ({downloads.get('reason')})"

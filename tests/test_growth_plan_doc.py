@@ -377,6 +377,12 @@ def test_growth_plan_records_metrics_tracking_progress():
         "`downloads_last_30_days`",
         "`collect_growth_metrics.py`",
         "GitHub stars, open issues, and open pull requests",
+        "`116,407` downloads in 7 days",
+        "`442,556` downloads in 30 days",
+        "`2026-07-21`",
+        "pypi-downloads-funasr.json",
+        "`stale_available`",
+        "SSL/429 outages",
         "docs traffic remains unavailable until an analytics credential or export is connected",
     ]
     for marker in required_markers:
