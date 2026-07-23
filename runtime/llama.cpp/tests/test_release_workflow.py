@@ -36,6 +36,8 @@ def test_windows_vulkan_release_asset_is_in_matrix():
     assert "build_target: llama-funasr-sensevoice" in entry
     assert "timeout_minutes: 90" in entry
     assert "-DGGML_VULKAN=ON" in entry
+    assert "-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded" in entry
+    assert "-DGGML_OPENMP=OFF" in entry
 
 
 def test_windows_cuda_build_uses_cuda_toolkit_and_flags():

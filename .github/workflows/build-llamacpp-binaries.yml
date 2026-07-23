@@ -108,7 +108,9 @@ jobs:
             timeout_minutes: 90
             cmake_flags: >-
               -DGGML_NATIVE=OFF
+              -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded
               -DGGML_VULKAN=ON
+              -DGGML_OPENMP=OFF
               -DGGML_AVX=OFF
               -DGGML_AVX2=OFF
               -DGGML_AVX_VNNI=OFF
