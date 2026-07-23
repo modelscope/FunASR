@@ -9,6 +9,7 @@ import pytest
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SERVICE_PATH = REPO_ROOT / "funasr" / "bin" / "_server_app.py"
+SERVER_CLI_PATH = REPO_ROOT / "funasr" / "bin" / "server.py"
 
 
 def load_server_app(monkeypatch):
@@ -16,6 +17,7 @@ def load_server_app(monkeypatch):
         def __init__(self, *args, **kwargs):
             self.state = types.SimpleNamespace()
             self.routes = {}
+            self.metadata = kwargs
 
         def post(self, path, *args, **kwargs):
             def decorator(func):
@@ -53,7 +55,17 @@ def load_server_app(monkeypatch):
     return module
 
 
-def install_dummy_funasr(monkeypatch, fail_once_for_models=()):
+def load_server_cli():
+    module_name = "funasr_server_cli_under_test"
+    sys.modules.pop(module_name, None)
+    spec = importlib.util.spec_from_file_location(module_name, SERVER_CLI_PATH)
+    module = importlib.util.module_from_spec(spec)
+    assert spec.loader is not None
+    spec.loader.exec_module(module)
+    return module
+
+
+def install_dummy_funasr(monkeypatch, fail_once_for_models=(), generated_text="transcript"):
     remaining_failures = {model: 1 for model in fail_once_for_models}
 
     class DummyAutoModel:
@@ -72,7 +84,7 @@ def install_dummy_funasr(monkeypatch, fail_once_for_models=()):
         def generate(self, **kwargs):
             if self.kwargs.get("model") == "fsmn-vad":
                 return [{"value": [[0, 1000]]}]
-            return [{"text": "transcript"}]
+            return [{"text": generated_text}]
 
     funasr_stub = types.ModuleType("funasr")
     funasr_stub.AutoModel = DummyAutoModel
@@ -172,6 +184,46 @@ def test_resolve_transcription_language_does_not_default_to_chinese(monkeypatch)
     module = load_server_app(monkeypatch)
 
     assert module.resolve_transcription_language(None, {}) != "zh"
+
+
+def test_verbose_json_reports_sensevoice_detected_language(monkeypatch):
+    module = load_server_app(monkeypatch)
+    install_dummy_funasr(
+        monkeypatch,
+        generated_text="<|en|><|NEUTRAL|><|Speech|>hello",
+    )
+    monkeypatch.setattr(module.sf, "info", lambda path: types.SimpleNamespace(duration=1.25))
+    app = module.create_app(device="cpu", preload_model="sensevoice")
+    transcribe = app.routes[("POST", "/v1/audio/transcriptions")]
+
+    response = asyncio.run(
+        transcribe(
+            file=DummyUpload(),
+            model="sensevoice",
+            language=None,
+            response_format="verbose_json",
+            spk=False,
+        )
+    )
+
+    assert response["language"] == "en"
+    assert response["text"] == "hello"
+    assert response["segments"] == [
+        {"id": 0, "start": 0.0, "end": 1.25, "text": "hello", "words": []}
+    ]
+
+
+def test_server_versions_follow_package_version(monkeypatch):
+    expected = (REPO_ROOT / "funasr" / "version.txt").read_text().strip()
+    module = load_server_app(monkeypatch)
+    server_module = load_server_cli()
+    install_dummy_funasr(monkeypatch)
+
+    app = module.create_app(device="cpu", preload_model="sensevoice")
+
+    assert app.metadata["version"] == expected
+    assert hasattr(server_module, "server_version_label")
+    assert server_module.server_version_label() == f"FunASR Server v{expected}"
 
 
 def test_default_fun_asr_nano_uses_requested_modelscope_hub(monkeypatch):

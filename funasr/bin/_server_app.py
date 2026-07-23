@@ -10,6 +10,7 @@ import re
 import time
 import logging
 import tempfile
+from pathlib import Path
 from typing import Optional
 
 import numpy as np
@@ -24,6 +25,9 @@ except ImportError:
     )
 
 logger = logging.getLogger("funasr.server")
+
+
+PACKAGE_VERSION = (Path(__file__).resolve().parents[1] / "version.txt").read_text().strip()
 
 
 _LANGUAGE_TAG_RE = re.compile(r"<\|(zh|en|yue|ja|ko)\|>")
@@ -126,7 +130,7 @@ def create_app(device: str = "cuda", preload_model: str = "auto", model_path: st
     if preload_model == "auto":
         preload_model = "fun-asr-nano" if device.startswith("cuda") else "sensevoice"
 
-    app = FastAPI(title="FunASR Server", version="1.3.6")
+    app = FastAPI(title="FunASR Server", version=PACKAGE_VERSION)
     app.state.device = device
     app.state.engine = None
     app.state.vad_model = None
