@@ -208,6 +208,36 @@ def test_growth_plan_records_sharp_github_release_focus():
     assert "[ ] Create a GitHub release focused on one sharp value proposition" not in text
 
 
+def test_growth_plan_records_top_support_questions_completion():
+    text = PLAN.read_text()
+    troubleshooting = (ROOT / "docs" / "troubleshooting.md").read_text()
+    troubleshooting_zh = (ROOT / "docs" / "troubleshooting_zh.md").read_text()
+
+    required_markers = [
+        "[x] Convert top 3 support questions into docs",
+        "latest 80 FunASR issues",
+        "install / hub / model-id selection",
+        "llama.cpp / GGUF / CUDA-Vulkan runtime packages",
+        "realtime / VAD / vLLM / server output behavior",
+        "#3321",
+        "#3298",
+        "#3101",
+        "Top support questions",
+        "`docs/troubleshooting.md`",
+        "`docs/troubleshooting_zh.md`",
+    ]
+    for marker in required_markers:
+        assert marker in text
+
+    assert "[ ] Convert top 3 support questions into docs" not in text
+    assert "## Top support questions from recent issues" in troubleshooting
+    assert "Which install or hub path should I use?" in troubleshooting
+    assert "Which runtime package should I run on CPU, CUDA, Vulkan, or GGUF?" in troubleshooting
+    assert "Why is realtime, VAD, vLLM, or server output delayed" in troubleshooting
+    assert "## 最近 issue 里的 Top 支持问题" in troubleshooting_zh
+    assert "应该用哪个安装命令、模型 id 或 hub？" in troubleshooting_zh
+
+
 def test_growth_plan_records_modelscope_card_sync_blocker():
     text = PLAN.read_text()
 
