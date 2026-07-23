@@ -34,6 +34,7 @@ OPS_GITHUB_TOKEN_PATH = Path("/cpfs_speech/user/zhifu.gzf/.config/funasr-ops/git
 DEFAULT_PYPI_DOWNLOAD_CACHE = Path("/cpfs_speech/user/zhifu.gzf/.cache/funasr-ops/pypi-downloads-funasr.json")
 DEFAULT_INTEGRATION_PRS = [
     "huggingface/transformers#46180",
+    "huggingface/optimum-intel#1874",
     "yuekaizhang/Fun-ASR-vllm#21",
     "ray-project/ray#64053",
     "huggingface/speech-to-speech#319",
@@ -312,6 +313,7 @@ PASSIVE_INTEGRATION_ACTIONS = {
     "wait for checks",
     "wait for contributor branch update",
     "wait for maintainer preliminary PR",
+    "wait for maintainer merge",
     "wait for maintainer rerun",
     "wait for maintainer review",
 }
@@ -569,6 +571,48 @@ def classify_known_external_failure(spec: str, checks: Dict[str, Any]) -> Option
     return None
 
 
+def summarize_pull_request_reviews(repo: str, pr_number: int) -> Dict[str, Any]:
+    base_url = f"https://api.github.com/repos/{repo}/pulls/{pr_number}/reviews?per_page=100"
+    reviews = []
+    page = 1
+    while True:
+        url = base_url if page == 1 else f"{base_url}&page={page}"
+        page_reviews = fetch_json(url, github_headers())
+        if not isinstance(page_reviews, list):
+            break
+        reviews.extend(page_reviews)
+        if len(page_reviews) < 100:
+            break
+        page += 1
+
+    latest_by_reviewer: Dict[str, str] = {}
+    for review in reviews:
+        reviewer = (review.get("user") or {}).get("login")
+        state = str(review.get("state") or "").upper()
+        if reviewer and state in {"APPROVED", "CHANGES_REQUESTED", "DISMISSED"}:
+            latest_by_reviewer[str(reviewer)] = state
+
+    approvals = sorted(
+        reviewer for reviewer, state in latest_by_reviewer.items() if state == "APPROVED"
+    )
+    changes_requested_by = sorted(
+        reviewer
+        for reviewer, state in latest_by_reviewer.items()
+        if state == "CHANGES_REQUESTED"
+    )
+    if changes_requested_by:
+        state = "changes_requested"
+    elif approvals:
+        state = "approved"
+    else:
+        state = "none"
+    return {
+        "state": state,
+        "approvals": approvals,
+        "changes_requested_by": changes_requested_by,
+    }
+
+
 def recommend_integration_action(
     pull_request: Dict[str, Any],
     checks: Dict[str, Any],
@@ -576,6 +620,7 @@ def recommend_integration_action(
     known_external_failure_action: Optional[str] = None,
     known_review_gate_action: Optional[str] = None,
     known_assisted_review_reason: Optional[str] = None,
+    review_state: Optional[str] = None,
 ) -> str:
     if pull_request.get("state") != "open":
         if pull_request.get("merged_at"):
@@ -631,6 +676,10 @@ def recommend_integration_action(
         and mergeable_state in {"blocked", "clean", "unknown", "unstable", None}
     ):
         return "wait for maintainer review"
+    if review_state == "changes_requested":
+        return "address review feedback"
+    if review_state == "approved":
+        return "wait for maintainer merge"
 
     if check_state in {"success", "unknown"} and mergeable_state == "clean":
         return "request review"
@@ -687,6 +736,22 @@ def collect_pull_request_metrics(spec: str, now: Optional[dt.datetime] = None) -
     )
     known_review_gate = KNOWN_REVIEW_GATES.get(spec) or {}
     known_assisted_review = KNOWN_ASSISTED_REVIEW_REQUESTS.get(spec) or {}
+    recommendation_args = (
+        pull_request,
+        checks,
+        known_external_failure_reason,
+        known_external_failure_action,
+        known_review_gate.get("action"),
+        known_assisted_review.get("reason"),
+    )
+    review_summary = {"state": "not_checked", "approvals": [], "changes_requested_by": []}
+    next_action = recommend_integration_action(*recommendation_args)
+    if next_action in {"request review", "review gate"}:
+        review_summary = summarize_pull_request_reviews(repo, pr_number)
+        next_action = recommend_integration_action(
+            *recommendation_args,
+            review_state=review_summary["state"],
+        )
     updated_at = pull_request.get("updated_at")
     return {
         "pr": f"{repo}#{pr_number}",
@@ -711,14 +776,10 @@ def collect_pull_request_metrics(spec: str, now: Optional[dt.datetime] = None) -
         "known_external_failure_action": known_external_failure_action,
         "known_review_gate_reason": known_review_gate.get("reason"),
         "known_assisted_review_reason": known_assisted_review.get("reason"),
-        "next_action": recommend_integration_action(
-            pull_request,
-            checks,
-            known_external_failure_reason,
-            known_external_failure_action,
-            known_review_gate.get("action"),
-            known_assisted_review.get("reason"),
-        ),
+        "review_state": review_summary["state"],
+        "approvals": review_summary["approvals"],
+        "changes_requested_by": review_summary["changes_requested_by"],
+        "next_action": next_action,
     }
 
 

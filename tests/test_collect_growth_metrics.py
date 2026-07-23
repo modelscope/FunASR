@@ -85,6 +85,7 @@ def test_default_integration_prs_include_high_visibility_external_queue():
     module = load_growth_metrics_module()
 
     expected_prs = {
+        "huggingface/optimum-intel#1874",
         "TEN-framework/ten-framework#2191",
         "Uberi/speech_recognition#903",
     }
@@ -855,6 +856,8 @@ def test_collect_integration_metrics_recommends_review_for_clean_success_pr(monk
                     {"name": "validate", "status": "completed", "conclusion": "success"},
                 ],
             }
+        if url == "https://api.github.com/repos/example/clean-pr/pulls/42/reviews?per_page=100":
+            return []
         raise AssertionError(f"unexpected URL: {url}")
 
     monkeypatch.setattr(module, "fetch_json", fake_fetch_json)
@@ -862,6 +865,233 @@ def test_collect_integration_metrics_recommends_review_for_clean_success_pr(monk
     metrics = module.collect_integration_metrics(["example/clean-pr#42"])
 
     assert metrics["integrations"][0]["next_action"] == "request review"
+
+
+def test_collect_integration_metrics_waits_for_merge_after_maintainer_approval(monkeypatch):
+    module = load_growth_metrics_module()
+
+    def fake_fetch_json(url, headers=None):
+        if url == "https://api.github.com/repos/example/approved-pr/pulls/42":
+            return {
+                "number": 42,
+                "title": "Add FunASR",
+                "state": "open",
+                "draft": False,
+                "mergeable": True,
+                "mergeable_state": "clean",
+                "html_url": "https://github.com/example/approved-pr/pull/42",
+                "updated_at": "2026-07-23T04:16:43Z",
+                "head": {"sha": "1dafe5e", "ref": "add-funasr"},
+                "base": {"ref": "main"},
+                "user": {"login": "LauraGPT"},
+            }
+        if url == "https://api.github.com/repos/example/approved-pr/commits/1dafe5e/status":
+            return {"state": "success", "statuses": []}
+        if url == "https://api.github.com/repos/example/approved-pr/commits/1dafe5e/check-runs?per_page=100":
+            return {
+                "total_count": 1,
+                "check_runs": [
+                    {"name": "validate", "status": "completed", "conclusion": "success"},
+                ],
+            }
+        if url == "https://api.github.com/repos/example/approved-pr/pulls/42/reviews?per_page=100":
+            return [
+                {
+                    "id": 123,
+                    "state": "APPROVED",
+                    "submitted_at": "2026-07-23T04:00:00Z",
+                    "user": {"login": "maintainer"},
+                }
+            ]
+        raise AssertionError(f"unexpected URL: {url}")
+
+    monkeypatch.setattr(module, "fetch_json", fake_fetch_json)
+
+    metrics = module.collect_integration_metrics(["example/approved-pr#42"])
+
+    integration = metrics["integrations"][0]
+    assert integration["review_state"] == "approved"
+    assert integration["approvals"] == ["maintainer"]
+    assert integration["next_action"] == "wait for maintainer merge"
+
+
+def test_collect_integration_metrics_surfaces_requested_review_changes(monkeypatch):
+    module = load_growth_metrics_module()
+
+    def fake_fetch_json(url, headers=None):
+        if url == "https://api.github.com/repos/example/reviewed-pr/pulls/42":
+            return {
+                "number": 42,
+                "title": "Add FunASR",
+                "state": "open",
+                "draft": False,
+                "mergeable": True,
+                "mergeable_state": "clean",
+                "html_url": "https://github.com/example/reviewed-pr/pull/42",
+                "updated_at": "2026-07-23T04:16:43Z",
+                "head": {"sha": "824c3c5", "ref": "add-funasr"},
+                "base": {"ref": "main"},
+                "user": {"login": "LauraGPT"},
+            }
+        if url == "https://api.github.com/repos/example/reviewed-pr/commits/824c3c5/status":
+            return {"state": "success", "statuses": []}
+        if url == "https://api.github.com/repos/example/reviewed-pr/commits/824c3c5/check-runs?per_page=100":
+            return {
+                "total_count": 1,
+                "check_runs": [
+                    {"name": "validate", "status": "completed", "conclusion": "success"},
+                ],
+            }
+        if url == "https://api.github.com/repos/example/reviewed-pr/pulls/42/reviews?per_page=100":
+            return [
+                {
+                    "id": 124,
+                    "state": "CHANGES_REQUESTED",
+                    "submitted_at": "2026-07-23T04:00:00Z",
+                    "user": {"login": "maintainer"},
+                }
+            ]
+        raise AssertionError(f"unexpected URL: {url}")
+
+    monkeypatch.setattr(module, "fetch_json", fake_fetch_json)
+
+    metrics = module.collect_integration_metrics(["example/reviewed-pr#42"])
+
+    integration = metrics["integrations"][0]
+    assert integration["review_state"] == "changes_requested"
+    assert integration["changes_requested_by"] == ["maintainer"]
+    assert integration["next_action"] == "address review feedback"
+
+
+def test_review_summary_reads_later_pages_before_deciding(monkeypatch):
+    module = load_growth_metrics_module()
+    first_page = [
+        {
+            "id": 1,
+            "state": "CHANGES_REQUESTED",
+            "user": {"login": "maintainer"},
+        }
+    ] + [
+        {
+            "id": review_id,
+            "state": "COMMENTED",
+            "user": {"login": f"reviewer-{review_id}"},
+        }
+        for review_id in range(2, 101)
+    ]
+
+    def fake_fetch_json(url, headers=None):
+        if url == "https://api.github.com/repos/example/long-pr/pulls/42/reviews?per_page=100":
+            return first_page
+        if url == "https://api.github.com/repos/example/long-pr/pulls/42/reviews?per_page=100&page=2":
+            return [
+                {
+                    "id": 101,
+                    "state": "APPROVED",
+                    "user": {"login": "maintainer"},
+                }
+            ]
+        raise AssertionError(f"unexpected URL: {url}")
+
+    monkeypatch.setattr(module, "fetch_json", fake_fetch_json)
+
+    summary = module.summarize_pull_request_reviews("example/long-pr", 42)
+
+    assert summary["state"] == "approved"
+    assert summary["approvals"] == ["maintainer"]
+    assert summary["changes_requested_by"] == []
+
+
+def test_review_summary_keeps_latest_decisive_state_per_reviewer(monkeypatch):
+    module = load_growth_metrics_module()
+
+    def fake_fetch_json(url, headers=None):
+        assert url == "https://api.github.com/repos/example/review-history/pulls/42/reviews?per_page=100"
+        return [
+            {"state": "CHANGES_REQUESTED", "user": {"login": "alice"}},
+            {"state": "COMMENTED", "user": {"login": "alice"}},
+            {"state": "APPROVED", "user": {"login": "alice"}},
+            {"state": "APPROVED", "user": {"login": "bob"}},
+            {"state": "COMMENTED", "user": {"login": "bob"}},
+            {"state": "APPROVED", "user": {"login": "carol"}},
+            {"state": "DISMISSED", "user": {"login": "carol"}},
+        ]
+
+    monkeypatch.setattr(module, "fetch_json", fake_fetch_json)
+
+    summary = module.summarize_pull_request_reviews("example/review-history", 42)
+
+    assert summary["state"] == "approved"
+    assert summary["approvals"] == ["alice", "bob"]
+    assert summary["changes_requested_by"] == []
+
+
+def test_blocked_approved_pr_waits_for_maintainer_merge(monkeypatch):
+    module = load_growth_metrics_module()
+
+    def fake_fetch_json(url, headers=None):
+        if url == "https://api.github.com/repos/example/blocked-pr/pulls/42":
+            return {
+                "number": 42,
+                "title": "Add FunASR",
+                "state": "open",
+                "draft": False,
+                "mergeable": True,
+                "mergeable_state": "blocked",
+                "html_url": "https://github.com/example/blocked-pr/pull/42",
+                "updated_at": "2026-07-23T04:16:43Z",
+                "head": {"sha": "abc1234", "ref": "add-funasr"},
+                "base": {"ref": "main"},
+                "user": {"login": "LauraGPT"},
+            }
+        if url == "https://api.github.com/repos/example/blocked-pr/commits/abc1234/status":
+            return {"state": "success", "statuses": []}
+        if url == "https://api.github.com/repos/example/blocked-pr/commits/abc1234/check-runs?per_page=100":
+            return {
+                "total_count": 1,
+                "check_runs": [
+                    {"name": "test", "status": "completed", "conclusion": "success"}
+                ],
+            }
+        if url == "https://api.github.com/repos/example/blocked-pr/pulls/42/reviews?per_page=100":
+            return [{"state": "APPROVED", "user": {"login": "maintainer"}}]
+        raise AssertionError(f"unexpected URL: {url}")
+
+    monkeypatch.setattr(module, "fetch_json", fake_fetch_json)
+
+    metrics = module.collect_integration_metrics(["example/blocked-pr#42"])
+
+    assert metrics["integrations"][0]["next_action"] == "wait for maintainer merge"
+
+
+def test_wait_for_maintainer_merge_is_not_active_operator_work():
+    module = load_growth_metrics_module()
+    metrics = {
+        "collected_at_utc": "2026-07-23T06:00:00+00:00",
+        "integrations": [
+            {
+                "pr": "huggingface/optimum-intel#1874",
+                "html_url": "https://github.com/huggingface/optimum-intel/pull/1874",
+                "state": "open",
+                "mergeable": True,
+                "mergeable_state": "clean",
+                "repo_stars": 608,
+                "repo_forks": 147,
+                "updated_at": "2026-07-23T04:16:43Z",
+                "updated_age_days": 0,
+                "checks": {
+                    "state": "success",
+                    "failed_check_runs": [],
+                    "pending_check_runs": [],
+                },
+                "next_action": "wait for maintainer merge",
+            }
+        ],
+    }
+
+    output = module.format_integration_markdown(metrics)
+
+    assert "## Active operator queue" not in output
 
 
 def test_known_assisted_review_requests_include_validated_discovery_prs():
