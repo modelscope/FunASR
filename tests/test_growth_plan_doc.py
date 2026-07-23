@@ -46,26 +46,35 @@ def test_growth_plan_records_readme_quick_start_cpu_gpu_validation():
     text = PLAN.read_text()
 
     required_markers = [
-        "[ ] Verify README quick start on clean CPU and GPU environments",
+        "[x] Verify README quick start on clean CPU and GPU environments",
         "clean CPU venv",
         "clean GPU venv",
         "README Quick Start SenseVoiceSmall CPU",
         "README Quick Start Fun-ASR-Nano GPU",
         "`torch 2.13.0+cu130`",
         "`torchaudio 2.11.0+cu130`",
+        "`torch 2.11.0+cu128`",
+        "`torch.version.cuda 12.8`",
+        "`torchaudio 2.11.0+cu128`",
         "`funasr 1.3.26`",
         "`AutoModel(model=\"iic/SenseVoiceSmall\"",
         "`AutoModel(model=\"FunAudioLLM/Fun-ASR-Nano-2512\"",
         "`torch.cuda.is_available()` was `False`",
-        "install the PyTorch / torchaudio CUDA wheels from pytorch.org",
+        "install matching PyTorch / torchaudio CUDA wheels from pytorch.org",
         "verify `torch.cuda.is_available()` before using `device=\"cuda\"`",
-        "Do not mark this complete until a clean GPU venv reports CUDA visible",
+        "`cuda_available True`",
+        "`NVIDIA H100 80GB HBM3`",
+        "`rtf_avg: 0.237`",
         "欢迎大家来体验达摩院推出的语音识别模型",
         "readme-quickstart-cpu-20260723.log",
         "readme-quickstart-gpu-20260723.log",
+        "readme-quickstart-gpu-cu128-20260723.log",
     ]
     for marker in required_markers:
         assert marker in text
+
+    assert "[ ] Verify README quick start on clean CPU and GPU environments" not in text
+    assert "Do not mark this complete until a clean GPU venv reports CUDA visible" not in text
 
 
 def test_growth_plan_records_github_metadata_completion():
