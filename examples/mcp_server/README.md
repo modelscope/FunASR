@@ -42,6 +42,12 @@ The versioned Registry metadata is in [`server.json`](server.json). It points to
 the public GHCR image and asks clients to mount one host audio directory at
 `/audio` read-only. The Dockerfile carries the matching OCI ownership label:
 
+Current published release:
+
+- [GitHub release mcp-v0.1.1](https://github.com/modelscope/FunASR/releases/tag/mcp-v0.1.1)
+- [Official MCP Registry entry](https://registry.modelcontextprotocol.io/v0.1/servers?search=io.github.modelscope/funasr-mcp)
+- [Public GHCR package](https://github.com/orgs/modelscope/packages/container/package/funasr-mcp)
+
 ```dockerfile
 LABEL io.modelcontextprotocol.server.name="io.github.modelscope/funasr-mcp"
 ```
@@ -56,7 +62,7 @@ To release a new MCP server version:
 1. Update `version` and the OCI image tag in `server.json` together.
 2. Merge the change after the MCP validation workflow passes.
 3. Have a `modelscope` organization Owner push the matching `mcp-v<version>`
-   tag, for example `mcp-v0.1.0`.
+   tag, for example `mcp-v0.1.1`.
 4. Approve the protected `mcp-registry-publish` environment deployment.
 
 The official Registry only grants the `io.github.modelscope/*` namespace to a
@@ -70,7 +76,7 @@ After publication, clients can run the pinned image directly:
 docker run --rm -i \
   --mount type=bind,src=/path/to/audio,dst=/audio,readonly \
   --mount type=volume,src=funasr-mcp-cache,dst=/root/.cache/modelscope \
-  ghcr.io/modelscope/funasr-mcp:0.1.0
+  ghcr.io/modelscope/funasr-mcp:0.1.1
 ```
 
 When using the container, pass tool paths under `/audio`, such as
@@ -88,8 +94,9 @@ Use these values when adding the server at <https://glama.ai/mcp/servers>:
 | Server command | `python /app/funasr_mcp.py` |
 | Expected MCP tool | `transcribe_audio` |
 
-After Glama finishes evaluation, verify that the score badge endpoint returns
-success before adding it to directory PRs:
+After Glama finishes evaluation, verify that the listing or API shows an
+evaluated quality score before adding it to directory PRs. An HTTP 200 from the
+listing or badge endpoint alone does not prove that a score has been assigned:
 
 ```markdown
 [![modelscope/FunASR MCP server](https://glama.ai/mcp/servers/modelscope/FunASR/badges/score.svg)](https://glama.ai/mcp/servers/modelscope/FunASR)
@@ -100,8 +107,9 @@ directory submissions until the Glama listing is live.
 
 ### Directory listings
 
-The FunASR MCP server is listed on mcp.so:
+The FunASR MCP server is published in the official Registry and listed on mcp.so:
 
+- <https://registry.modelcontextprotocol.io/v0.1/servers?search=io.github.modelscope/funasr-mcp>
 - <https://mcp.so/server/mcp-server-funasr/radial-hks>
 
 ### 3. Configure your AI tool
