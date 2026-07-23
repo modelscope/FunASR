@@ -41,5 +41,6 @@ python benchmark/fix_sensevoice_cer.py</code></pre>
 <table><tr><th>用途</th><th>推奨モデル</th></tr><tr><td>最速の本番書き起こし</td><td>SenseVoice-Small または Paraformer-Large。</td></tr><tr><td>CPU バッチ書き起こし</td><td>まず SenseVoice-Small。中国語の本番 pipeline では Paraformer-Large。</td></tr><tr><td>中国語・英語・日本語、および中国語の方言/アクセントを扱う LLM-style 認識</td><td>Fun-ASR-Nano。31言語が必要な場合は別 checkpoint の <a href="https://huggingface.co/FunAudioLLM/Fun-ASR-MLT-Nano-2512">Fun-ASR-MLT-Nano</a> を使用し、LLM decode throughput を高める場合は <a href="vllm.html">vLLM</a> を使用。</td></tr><tr><td>OpenAI 互換ローカル endpoint</td><td><a href="agent.html">funasr-server</a> を使い、model alias は <code>sensevoice</code>、<code>paraformer</code>、または <code>fun-asr-nano</code>。</td></tr></table>
 </section>
 </div></div>
-<footer><p>FunASR &middot; Tongyi Lab, Alibaba Group</p><p><a href="index.html">ホーム</a> &middot; <a href="tutorial.html">チュートリアル</a> &middot; <a href="agent.html">Agent</a> &middot; <a href="benchmark.html">Benchmark</a> &middot; <a href="vllm.html">vLLM</a> &middot; <a href="https://github.com/modelscope/FunASR">GitHub</a></p></footer>
+<footer><p>FunASR &middot; Tongyi Lab, Alibaba Group</p><p><a href="index.html">ホーム</a> &middot; <a href="tutorial.html">チュートリアル</a> &middot; <a href="agent.html">Agent</a> &middot; <a href="benchmark.html">Benchmark</a>
+                <a href="../donors.html">Donors</a> &middot; <a href="vllm.html">vLLM</a> &middot; <a href="https://github.com/modelscope/FunASR">GitHub</a></p></footer>
 </body></html>

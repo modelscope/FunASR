@@ -41,5 +41,6 @@ python benchmark/fix_sensevoice_cer.py</code></pre>
 <table><tr><th>需求</th><th>推荐模型</th></tr><tr><td>最快生产转写</td><td>SenseVoice-Small 或 Paraformer-Large。</td></tr><tr><td>CPU 批量转写</td><td>优先 SenseVoice-Small；中文生产流水线可选 Paraformer-Large。</td></tr><tr><td>中/英/日及中文方言、口音的 LLM-style 识别</td><td>Fun-ASR-Nano；需要 31 语种时使用独立的 <a href="https://huggingface.co/FunAudioLLM/Fun-ASR-MLT-Nano-2512">Fun-ASR-MLT-Nano</a> checkpoint，并使用 <a href="vllm.html">vLLM</a> 提升 LLM 解码吞吐。</td></tr><tr><td>OpenAI 兼容本地服务</td><td>使用 <a href="agent.html">funasr-server</a>，模型别名为 <code>sensevoice</code>、<code>paraformer</code> 或 <code>fun-asr-nano</code>。</td></tr></table>
 </section>
 </div></div>
-<footer><p>FunASR &middot; 通义实验室，阿里巴巴集团</p><p><a href="index.html">首页</a> &middot; <a href="tutorial.html">教程</a> &middot; <a href="agent.html">Agent</a> &middot; <a href="benchmark.html">Benchmark</a> &middot; <a href="vllm.html">vLLM</a> &middot; <a href="https://github.com/modelscope/FunASR">GitHub</a></p></footer>
+<footer><p>FunASR &middot; 通义实验室，阿里巴巴集团</p><p><a href="index.html">首页</a> &middot; <a href="tutorial.html">教程</a> &middot; <a href="agent.html">Agent</a> &middot; <a href="benchmark.html">Benchmark</a>
+                <a href="../donors.html">功德榜</a> &middot; <a href="vllm.html">vLLM</a> &middot; <a href="https://github.com/modelscope/FunASR">GitHub</a></p></footer>
 </body></html>
