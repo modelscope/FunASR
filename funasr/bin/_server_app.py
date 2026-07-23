@@ -26,6 +26,27 @@ except ImportError:
 logger = logging.getLogger("funasr.server")
 
 
+_LANGUAGE_TAG_RE = re.compile(r"<\|(zh|en|yue|ja|ko)\|>")
+
+
+def extract_language_from_asr_text(text):
+    """Extract a SenseVoice language code before special tokens are removed."""
+    if not isinstance(text, str):
+        return None
+    match = _LANGUAGE_TAG_RE.search(text)
+    return match.group(1) if match else None
+
+
+def resolve_transcription_language(requested_language, result):
+    """Prefer the caller's language hint, then backend detection, else unknown."""
+    if requested_language and requested_language.strip().lower() != "auto":
+        return requested_language
+    detected_language = result.get("language")
+    if isinstance(detected_language, str) and detected_language:
+        return detected_language
+    return "unknown"
+
+
 def _split_text_for_openai_segments(text: str, max_chars: int = 80):
     """Split unsegmented ASR text into readable OpenAI-compatible cues."""
     text = text.strip()
@@ -255,7 +276,9 @@ def create_app(device: str = "cuda", preload_model: str = "auto", model_path: st
         if language:
             kwargs["language"] = language
         result = model.generate(**kwargs)
-        text = re.sub(r'<\|[^|]*\|>', '', result[0]["text"]).strip()
+        raw_text = result[0]["text"]
+        detected_language = extract_language_from_asr_text(raw_text)
+        text = re.sub(r'<\|[^|]*\|>', '', raw_text).strip()
         segments = []
         if "sentence_info" in result[0]:
             for s in result[0]["sentence_info"]:
@@ -267,7 +290,12 @@ def create_app(device: str = "cuda", preload_model: str = "auto", model_path: st
                 })
         if not segments and text:
             segments = build_openai_fallback_segments(text, duration)
-        return {"text": text, "segments": segments, "duration": duration}
+        return {
+            "text": text,
+            "segments": segments,
+            "duration": duration,
+            "language": detected_language,
+        }
 
     # Pre-load
     if app.state.model_path:
@@ -322,7 +350,7 @@ def create_app(device: str = "cuda", preload_model: str = "auto", model_path: st
         if response_format == "verbose_json":
             return JSONResponse({
                 "task": "transcribe",
-                "language": language or "zh",
+                "language": resolve_transcription_language(language, result),
                 "duration": result.get("duration", 0),
                 "text": result["text"],
                 "segments": [
