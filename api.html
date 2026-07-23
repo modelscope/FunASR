@@ -22748,7 +22748,7 @@
 
     def _load_vllm_engine():
         &quot;&quot;&quot;Load Fun-ASR-Nano vLLM engine. Falls back to AutoModel if vLLM unavailable.&quot;&quot;&quot;
-        if app.state.engine is not None:
+        if app.state.engine is not None or &quot;fun-asr-nano&quot; in app.state.fallback_models:
             return
 </code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/_server_app.py#L125" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
 <div class="api-detail" id="e452"><span class="dtag badge-f">function</span><h2><code>main_hydra(kwargs)</code></h2><div class="dmod">funasr.bin.compute_audio_cmvn · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/compute_audio_cmvn.py#L15" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Main hydra.</p>
