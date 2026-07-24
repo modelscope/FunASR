@@ -235,6 +235,46 @@ def test_ecosystem_contract_requires_live_dify_marketplace():
     )
 
 
+def _valid_english_ecosystem_html():
+    return """
+        <body>
+        <div class="stat-num">35K+</div>
+        <a href="/en/donors.html">Thanks</a>
+        <a href="https://github.com/BerriAI/litellm">LiteLLM</a>
+        <div>custom_openai</div>
+        <div>54.3K stars</div>
+        <a href="https://marketplace.dify.ai/plugin/langgenius/funasr">
+            FunASR plugin 0.1.1
+        </a>
+        <div>supports 25 MB uploads</div>
+        </body>
+    """
+
+
+def test_ecosystem_contract_rejects_longer_dify_version():
+    checker = _load_module()
+    url = "https://www.funasr.com/en/ecosystem.html"
+    pages = {url: _valid_english_ecosystem_html()}
+    pages[url] = pages[url].replace(
+        "FunASR plugin 0.1.1", "FunASR plugin 0.1.10"
+    )
+
+    failures = checker.validate_pages(pages)
+
+    assert any(url in failure and "FunASR plugin 0.1.1" in failure for failure in failures)
+
+
+def test_ecosystem_contract_rejects_larger_dify_upload_limit():
+    checker = _load_module()
+    url = "https://www.funasr.com/en/ecosystem.html"
+    pages = {url: _valid_english_ecosystem_html()}
+    pages[url] = pages[url].replace("25 MB uploads", "125 MB uploads")
+
+    failures = checker.validate_pages(pages)
+
+    assert any(url in failure and "25 MB uploads" in failure for failure in failures)
+
+
 def test_website_contract_includes_v1326_launch_articles():
     checker = _load_module()
 
