@@ -54,6 +54,13 @@ PAGE_CONTRACTS: dict[str, PageContract] = {
             "custom_openai",
             "54.3K stars",
         ),
+        visible_required=(
+            "FunASR 官方插件 0.1.1",
+            "最大 25 MB 音频上传",
+        ),
+        required_links=(
+            "https://marketplace.dify.ai/plugin/langgenius/funasr",
+        ),
         forbidden=("16K+",),
     ),
     f"{BASE_URL}/en/ecosystem.html": PageContract(
@@ -63,6 +70,13 @@ PAGE_CONTRACTS: dict[str, PageContract] = {
             "LiteLLM",
             "custom_openai",
             "54.3K stars",
+        ),
+        visible_required=(
+            "FunASR plugin 0.1.1",
+            "25 MB uploads",
+        ),
+        required_links=(
+            "https://marketplace.dify.ai/plugin/langgenius/funasr",
         ),
         forbidden=("16K+",),
     ),

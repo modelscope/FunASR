@@ -38,6 +38,10 @@ def test_website_contract_accepts_current_public_copy():
             <a href="https://github.com/BerriAI/litellm">LiteLLM</a>
             <div>custom_openai</div>
             <div>54.3K stars</div>
+            <a href="https://marketplace.dify.ai/plugin/langgenius/funasr">
+                FunASR 官方插件 0.1.1
+            </a>
+            <div>支持最大 25 MB 音频上传</div>
         """,
         "https://www.funasr.com/en/ecosystem.html": """
             <div class="stat-num">35K+</div>
@@ -45,6 +49,10 @@ def test_website_contract_accepts_current_public_copy():
             <a href="https://github.com/BerriAI/litellm">LiteLLM</a>
             <div>custom_openai</div>
             <div>54.3K stars</div>
+            <a href="https://marketplace.dify.ai/plugin/langgenius/funasr">
+                FunASR plugin 0.1.1
+            </a>
+            <div>supports 25 MB uploads</div>
         """,
         "https://www.funasr.com/donors.html": """
             捐赠资金用于社区基础设施建设，包括购买和维护服务器，以及购买、续费和维护
@@ -191,6 +199,40 @@ def test_website_contract_includes_homepage_entrypoints():
     assert "https://www.funasr.com/en/" in checker.PAGE_CONTRACTS
     assert "https://www.funasr.com/llama-cpp.html" in checker.PAGE_CONTRACTS
     assert "https://www.funasr.com/en/llama-cpp.html" in checker.PAGE_CONTRACTS
+
+
+def test_ecosystem_contract_requires_live_dify_marketplace():
+    checker = _load_module()
+    url = "https://www.funasr.com/en/ecosystem.html"
+    pages = {
+        url: """
+            <body>
+            <div class="stat-num">35K+</div>
+            <a href="/en/donors.html">Thanks</a>
+            <a href="https://github.com/BerriAI/litellm">LiteLLM</a>
+            <div>custom_openai</div>
+            <div>54.3K stars</div>
+            <a href="https://github.com/langgenius/dify">Dify</a>
+            </body>
+        """
+    }
+
+    failures = checker.validate_pages(pages)
+
+    assert any(
+        url in failure
+        and "missing link `https://marketplace.dify.ai/plugin/langgenius/funasr`"
+        in failure
+        for failure in failures
+    )
+    assert any(
+        url in failure and "visible text missing `FunASR plugin 0.1.1`" in failure
+        for failure in failures
+    )
+    assert any(
+        url in failure and "visible text missing `25 MB uploads`" in failure
+        for failure in failures
+    )
 
 
 def test_website_contract_includes_v1326_launch_articles():
