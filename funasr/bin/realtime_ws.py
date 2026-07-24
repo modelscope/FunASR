@@ -33,36 +33,110 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)s] %(me
 logger = logging.getLogger(__name__)
 
 
+def _normalize_transcript_with_positions(text):
+    normalized = []
+    source_positions = []
+    for index, char in enumerate(text):
+        if regex.fullmatch(r"[\p{P}\p{S}\s]", char):
+            continue
+        folded = char.casefold()
+        normalized.extend(folded)
+        source_positions.extend([index] * len(folded))
+    return "".join(normalized), source_positions
+
+
+def _normalize_transcript(text):
+    return _normalize_transcript_with_positions(text)[0]
+
+
+def _merge_overlapping_transcripts(existing, incoming):
+    """Join adjacent rolling-window transcripts when their text overlap is clear."""
+    existing_norm, existing_positions = _normalize_transcript_with_positions(existing)
+    incoming_norm, incoming_positions = _normalize_transcript_with_positions(incoming)
+    if not existing_norm or not incoming_norm:
+        return None
+
+    minimum_overlap = max(4, min(len(existing_norm), len(incoming_norm)) // 4)
+    for overlap in range(min(len(existing_norm), len(incoming_norm)), minimum_overlap - 1, -1):
+        if existing_norm[-overlap:] != incoming_norm[:overlap]:
+            continue
+        existing_start = len(existing_norm) - overlap
+        if (
+            existing_start > 0
+            and existing_positions[existing_start - 1] == existing_positions[existing_start]
+        ):
+            continue
+        if (
+            overlap < len(incoming_positions)
+            and incoming_positions[overlap - 1] == incoming_positions[overlap]
+        ):
+            continue
+        suffix_start = incoming_positions[overlap - 1] + 1
+        while (
+            suffix_start < len(incoming)
+            and regex.fullmatch(r"[\p{P}\p{S}]", incoming[suffix_start])
+            and existing.endswith(incoming[suffix_start])
+        ):
+            suffix_start += 1
+        return existing + incoming[suffix_start:]
+    return None
+
+
 def detect_and_fix_hallucination(text, max_ngram_length=12, max_occurrences=3):
     """Detect repeated patterns (hallucination) and truncate to keep one occurrence."""
     if not text or len(text) < max_ngram_length * 2:
         return text, False
 
-    cleaned = regex.sub(r'\p{P}+', '', text)
+    source_positions = []
+    cleaned_chars = []
+    for index, char in enumerate(text):
+        if regex.fullmatch(r'\p{P}', char):
+            continue
+        cleaned_chars.append(char)
+        source_positions.append(index)
+    cleaned = ''.join(cleaned_chars)
+
+    def truncate_after_first(match):
+        def ascii_quote_count(quote, end):
+            count = 0
+            for index in range(end):
+                if text[index] != quote:
+                    continue
+                if (
+                    quote == "'"
+                    and index > 0
+                    and index + 1 < len(text)
+                    and text[index - 1].isalnum()
+                    and text[index + 1].isalnum()
+                ):
+                    continue
+                count += 1
+            return count
+
+        cleaned_end = match.start(1) + len(match.group(1))
+        source_end = source_positions[cleaned_end - 1] + 1
+        while source_end < len(text) and regex.fullmatch(
+            r'[\p{Pe}\p{Pf}\p{Po}\p{Pd}\p{Pc}]', text[source_end]
+        ):
+            if (
+                text[source_end] in {'"', "'"}
+                and ascii_quote_count(text[source_end], source_end) % 2 == 0
+            ):
+                break
+            source_end += 1
+        return text[:source_end].rstrip(), True
 
     word_pattern = rf'(?<!\S)(?!\d+$)(\w+)(?:\s+\1){{{max_occurrences - 1},}}(?!\S)'
-    if regex.search(word_pattern, cleaned, regex.IGNORECASE):
-        match = regex.search(word_pattern, cleaned, regex.IGNORECASE)
-        repeated = match.group(1)
-        pos = text.find(repeated)
-        if pos >= 0:
-            end_pos = text.find(repeated, pos + len(repeated))
-            if end_pos >= 0:
-                return text[:end_pos + len(repeated)], True
-        return text[:len(text)//2], True
+    match = regex.search(word_pattern, cleaned, regex.IGNORECASE)
+    if match:
+        return truncate_after_first(match)
 
     for length in range(1, max_ngram_length):
         pattern = rf'(?<!\d)(\S{{{length}}})\1{{{max_occurrences - 1},}}(?!\d)'
         combined = rf'(?=.*\D){pattern}'
         match = regex.search(combined, cleaned)
         if match:
-            repeated = match.group(1)
-            pos = text.find(repeated)
-            if pos >= 0:
-                end_pos = text.find(repeated, pos + len(repeated))
-                if end_pos >= 0:
-                    return text[:end_pos + len(repeated)], True
-            return text[:len(text)//2], True
+            return truncate_after_first(match)
 
     return text, False
 
@@ -401,6 +475,12 @@ class RealtimeASRSession:
         self.prev_text = ""
         self.last_partial_text = ""
         self.last_partial_start_ms = 0
+        self.last_partial_end_ms = 0
+        self.last_partial_eligible = False
+        self.segment_partial_text = ""
+        self.segment_partial_start_ms = 0
+        self.segment_partial_end_ms = 0
+        self.segment_partial_stable_count = 0
         self.last_decode_samples = 0
         self.locked_sentences = []
         self.prev_seg_text = ""
@@ -428,15 +508,9 @@ class RealtimeASRSession:
             for seg in new_confirmed:
                 seg_text = self._decode_segment(seg)
                 self.prev_text = ""
-                if not seg_text.strip():
-                    continue
-                self.locked_sentences.append({"text": seg_text, "start": int(seg[0]), "end": int(seg[1])})
-                if self.spk_tracker:
-                    s0 = int(seg[0] * self.sample_rate / 1000)
-                    s1 = min(int(seg[1] * self.sample_rate / 1000), self.total_samples)
-                    segment_audio = self._slice_audio(s0, s1).copy()
-                    self.spk_tracker.assign_streaming(segment_audio, seg[0]/1000, seg[1]/1000, self.locked_sentences[-1])
-                logger.info(f"Locked: [{seg[0]}-{seg[1]}ms] \"{seg_text[:40]}\"")
+                self._append_completed_segment(seg, seg_text)
+                if seg_text.strip():
+                    logger.info(f"Locked: [{seg[0]}-{seg[1]}ms] \"{seg_text[:40]}\"")
 
         self._compact_audio_buffer()
 
@@ -464,6 +538,67 @@ class RealtimeASRSession:
         self.audio_buffer = np.array([], dtype=np.float32)
         self.audio_buffer_start_sample = self.total_samples
 
+    def _reset_partial_history(self):
+        self.segment_partial_text = ""
+        self.segment_partial_start_ms = 0
+        self.segment_partial_end_ms = 0
+        self.segment_partial_stable_count = 0
+
+    def _record_partial_text(self, text, start_ms, hallucinated=False):
+        """Build a confidence-bearing transcript across overlapping partial windows."""
+        end_ms = int(self.total_samples * 1000 / self.sample_rate)
+        self.last_partial_end_ms = end_ms
+        self.last_partial_eligible = bool(text.strip()) and not hallucinated
+        if not text.strip() or hallucinated:
+            self._reset_partial_history()
+            return
+
+        start_ms = int(start_ms)
+        incoming_norm = _normalize_transcript(text)
+        if not self.segment_partial_text:
+            self.segment_partial_text = text
+            self.segment_partial_start_ms = start_ms
+            self.segment_partial_end_ms = end_ms
+            self.segment_partial_stable_count = 1
+            return
+
+        history_norm = _normalize_transcript(self.segment_partial_text)
+        if start_ms == self.segment_partial_start_ms:
+            if incoming_norm == history_norm:
+                self.segment_partial_text = text
+                self.segment_partial_end_ms = end_ms
+                self.segment_partial_stable_count += 1
+            else:
+                self.segment_partial_text = text
+                self.segment_partial_end_ms = end_ms
+                self.segment_partial_stable_count = 1
+            return
+
+        if start_ms < self.segment_partial_start_ms:
+            self.segment_partial_text = text
+            self.segment_partial_start_ms = start_ms
+            self.segment_partial_end_ms = end_ms
+            self.segment_partial_stable_count = 1
+            return
+
+        if start_ms > self.segment_partial_end_ms:
+            self.segment_partial_text = text
+            self.segment_partial_start_ms = start_ms
+            self.segment_partial_end_ms = end_ms
+            self.segment_partial_stable_count = 1
+            return
+
+        merged = _merge_overlapping_transcripts(self.segment_partial_text, text)
+        if merged is not None:
+            self.segment_partial_text = merged
+            self.segment_partial_end_ms = end_ms
+            self.segment_partial_stable_count = 1
+        else:
+            self.segment_partial_text = text
+            self.segment_partial_start_ms = start_ms
+            self.segment_partial_end_ms = end_ms
+            self.segment_partial_stable_count = 1
+
     def should_decode(self):
         threshold = self.first_chunk_samples if not self.first_decode_done else self.chunk_samples
         return (self.total_samples - self.last_decode_samples) >= threshold
@@ -473,10 +608,11 @@ class RealtimeASRSession:
         if is_final and self.endpoint_mode == "client":
             return self.commit()
 
-        if self.endpoint_mode == "server" and self.total_samples < self.chunk_samples:
+        if self.endpoint_mode == "server":
             if is_final:
-                self._release_audio_buffer()
-            return self._build_response(is_final)
+                return self._finalize_server_session()
+            if self.total_samples < self.first_chunk_samples:
+                return self._build_response(is_final)
 
         if self.endpoint_mode == "client":
             if self.vad.current_speech_start is None:
@@ -487,25 +623,13 @@ class RealtimeASRSession:
             if self.total_samples - utterance_start_sample < self.first_chunk_samples:
                 return self._build_response(is_final=False)
 
-        if is_final:
-            if self.vad.current_speech_start is not None:
-                end_ms = int(self.total_samples * 1000 / self.sample_rate)
-                seg = [self.vad.current_speech_start, end_ms]
-                seg_text = self._decode_segment(seg)
-                if seg_text.strip():
-                    self.locked_sentences.append({"text": seg_text, "start": int(seg[0]), "end": int(seg[1])})
-                self.vad.current_speech_start = None
-
-            if self.spk_tracker and self.locked_sentences:
-                self.locked_sentences = self.spk_tracker.finalize(self.locked_sentences)
-            self._release_audio_buffer()
-            return self._build_response(is_final)
-
         if self.vad.current_speech_start is not None:
             seg_audio, partial_start_ms = self.get_partial_decode_audio()
         else:
             self.last_decode_samples = self.total_samples
             self.last_partial_text = ""
+            self.last_partial_eligible = False
+            self._reset_partial_history()
             return self._build_response(is_final)
 
         if len(seg_audio) < self.chunk_samples // 2:
@@ -523,6 +647,8 @@ class RealtimeASRSession:
             text = _clean_asr_text(text)
         except Exception as e:
             logger.error(f"ASR error: {e}")
+            self.last_partial_eligible = False
+            self._reset_partial_history()
             return self._build_response(is_final)
 
         text, hallucinated = detect_and_fix_hallucination(text)
@@ -532,6 +658,7 @@ class RealtimeASRSession:
         self.last_decode_samples = self.total_samples
         self.last_partial_text = text
         self.last_partial_start_ms = partial_start_ms
+        self._record_partial_text(text, partial_start_ms, hallucinated=hallucinated)
         if text.strip() and not self.first_decode_done:
             self.first_decode_done = True
 
@@ -554,30 +681,45 @@ class RealtimeASRSession:
             end_ms = int(self.total_samples * 1000 / self.sample_rate)
             seg = [self.vad.current_speech_start, end_ms]
             seg_text = self._decode_segment(seg)
-            if seg_text.strip():
-                sentence = {
-                    "text": seg_text,
-                    "start": int(seg[0]),
-                    "end": int(seg[1]),
-                }
-                if self.spk_tracker:
-                    s0 = int(seg[0] * self.sample_rate / 1000)
-                    segment_audio = self._slice_audio(s0, self.total_samples).copy()
-                    self.spk_tracker.assign_streaming(
-                        segment_audio,
-                        seg[0] / 1000,
-                        seg[1] / 1000,
-                        sentence,
-                    )
-                self.locked_sentences.append(sentence)
+            self._append_completed_segment(seg, seg_text)
             self.vad.current_speech_start = None
 
-        if self.spk_tracker and self.locked_sentences:
-            self.locked_sentences = self.spk_tracker.finalize(self.locked_sentences)
+        self._finalize_speakers()
 
         response = self._build_response(is_final=True)
         self._reset_utterance_state()
         return response
+
+    def _finalize_server_session(self):
+        duration_ms = int(self.total_samples * 1000 / self.sample_rate)
+        final_segments = []
+        finalize_vad = getattr(self.vad, "finalize", None)
+        if callable(finalize_vad):
+            try:
+                final_segments = finalize_vad() or []
+            except Exception as error:
+                logger.error(f"VAD finalization error: {error}")
+
+        had_valid_final_segment = False
+        for raw_seg in final_segments:
+            start_ms = max(0, int(raw_seg[0]))
+            end_ms = min(duration_ms, int(raw_seg[1]))
+            if end_ms <= start_ms:
+                continue
+            had_valid_final_segment = True
+            seg = [start_ms, end_ms]
+            seg_text = self._decode_segment(seg)
+            self._append_completed_segment(seg, seg_text)
+
+        if not had_valid_final_segment and self.vad.current_speech_start is not None:
+            seg = [int(self.vad.current_speech_start), duration_ms]
+            seg_text = self._decode_segment(seg)
+            self._append_completed_segment(seg, seg_text)
+
+        self.vad.current_speech_start = None
+        self._finalize_speakers()
+        self._release_audio_buffer()
+        return self._build_response(is_final=True)
 
     def _reset_utterance_state(self):
         self._release_audio_buffer()
@@ -586,6 +728,9 @@ class RealtimeASRSession:
         self.prev_text = ""
         self.last_partial_text = ""
         self.last_partial_start_ms = 0
+        self.last_partial_end_ms = 0
+        self.last_partial_eligible = False
+        self._reset_partial_history()
         self.last_decode_samples = self.total_samples
         self.locked_sentences = []
         self.prev_seg_text = ""
@@ -604,30 +749,140 @@ class RealtimeASRSession:
         start_ms = int(decode_start_sample * 1000 / self.sample_rate)
         return self._slice_audio(decode_start_sample, self.total_samples), start_ms
 
+    def _partial_fallback_candidate(self, seg, require_stable, latest_only=False):
+        if latest_only:
+            if not self.last_partial_eligible:
+                return ""
+            text = self.last_partial_text.strip()
+            start_ms = self.last_partial_start_ms
+            end_ms = self.last_partial_end_ms
+        else:
+            if require_stable and self.segment_partial_stable_count < 2:
+                return ""
+            text = self.segment_partial_text
+            start_ms = self.segment_partial_start_ms
+            end_ms = self.segment_partial_end_ms
+
+        end_tolerance_ms = 100
+        if (
+            not text
+            or int(start_ms) != int(seg[0])
+            or abs(int(end_ms) - int(seg[1])) > end_tolerance_ms
+        ):
+            return ""
+        return text
+
+    def _reconcile_completed_segment_text(self, decoded_text, seg, decode_succeeded):
+        """Keep a proven segment partial only when the completed decode regresses."""
+        final_text, final_hallucinated = detect_and_fix_hallucination(decoded_text)
+        if not decode_succeeded:
+            partial_text = self._partial_fallback_candidate(
+                seg, require_stable=False, latest_only=True
+            )
+            partial_text, _ = detect_and_fix_hallucination(partial_text)
+            if partial_text:
+                logger.warning(
+                    "Completed segment [%d-%dms] decode failed; keeping the latest "
+                    "full-coverage partial (%d chars)",
+                    int(seg[0]), int(seg[1]), len(partial_text),
+                )
+                return partial_text
+            return final_text
+
+        if not final_text.strip():
+            return final_text
+
+        partial_text = self._partial_fallback_candidate(
+            seg, require_stable=not final_hallucinated
+        )
+        if not partial_text:
+            return final_text
+        partial_text, partial_hallucinated = detect_and_fix_hallucination(partial_text)
+        final_cmp = _normalize_transcript(final_text)
+        partial_cmp = _normalize_transcript(partial_text)
+        segment_duration_ms = max(0, int(seg[1]) - int(seg[0]))
+        truncated_prefix = (
+            segment_duration_ms >= 2000
+            and len(final_cmp) >= 4
+            and partial_cmp.startswith(final_cmp)
+            and len(partial_cmp) >= len(final_cmp) * 2
+            and len(partial_cmp) - len(final_cmp) >= 8
+        )
+        use_partial = (
+            (final_hallucinated and not partial_hallucinated)
+            or truncated_prefix
+        )
+        if use_partial and partial_cmp:
+            reason = "hallucinated" if final_hallucinated else "truncated"
+            logger.warning(
+                "Completed segment [%d-%dms] decode was %s; "
+                "keeping the latest aligned partial (%d -> %d chars)",
+                int(seg[0]), int(seg[1]), reason, len(final_text), len(partial_text),
+            )
+            return partial_text
+        return final_text
+
+    def _clear_completed_partial(self, seg):
+        self.last_partial_text = ""
+        self.last_partial_start_ms = int(seg[1])
+        self.last_partial_end_ms = int(seg[1])
+        self.last_partial_eligible = False
+        self._reset_partial_history()
+
+    def _append_completed_segment(self, seg, text):
+        if not text.strip():
+            return
+        sentence = {
+            "text": text,
+            "start": int(seg[0]),
+            "end": int(seg[1]),
+        }
+        if self.spk_tracker:
+            s0 = int(seg[0] * self.sample_rate / 1000)
+            s1 = min(int(seg[1] * self.sample_rate / 1000), self.total_samples)
+            segment_audio = self._slice_audio(s0, s1).copy()
+            self.spk_tracker.assign_streaming(
+                segment_audio,
+                seg[0] / 1000,
+                seg[1] / 1000,
+                sentence,
+            )
+        self.locked_sentences.append(sentence)
+
+    def _finalize_speakers(self):
+        if self.spk_tracker and self.locked_sentences:
+            self.locked_sentences = self.spk_tracker.finalize(self.locked_sentences)
+
     @torch.no_grad()
     def _decode_segment(self, seg):
         """Decode a completed VAD segment via vLLM."""
         start_sample = int(seg[0] * self.sample_rate / 1000)
         end_sample = min(int(seg[1] * self.sample_rate / 1000), self.total_samples)
         seg_audio = self._slice_audio(start_sample, end_sample)
-        if len(seg_audio) < 1600:
-            return ""
-        audio_tensor = torch.from_numpy(seg_audio).float()
-        try:
-            results = self.vllm_engine.generate(
-                inputs=[audio_tensor],
-                hotwords=self.asr_kwargs.get("hotwords"),
-                language=self.asr_kwargs.get("language"),
-                max_new_tokens=512,
-            )
-            text = results[0]["text"] if results else ""
-            text = _clean_asr_text(text)
-            text = _postprocess_result_text(text, self.asr_kwargs)
-            self.prev_seg_text = text
-            return text
-        except Exception as e:
-            logger.error(f"Segment decode error: {e}")
-            return ""
+        text = ""
+        decode_succeeded = False
+        if len(seg_audio) >= 1600:
+            audio_tensor = torch.from_numpy(seg_audio).float()
+            try:
+                results = self.vllm_engine.generate(
+                    inputs=[audio_tensor],
+                    hotwords=self.asr_kwargs.get("hotwords"),
+                    language=self.asr_kwargs.get("language"),
+                    max_new_tokens=512,
+                )
+                text = results[0]["text"] if results else ""
+                text = _clean_asr_text(text)
+                decode_succeeded = True
+            except Exception as e:
+                logger.error(f"Segment decode error: {e}")
+
+        text = self._reconcile_completed_segment_text(
+            text, seg, decode_succeeded=decode_succeeded
+        )
+        text = _postprocess_result_text(text, self.asr_kwargs)
+        self.prev_seg_text = text
+        self._clear_completed_partial(seg)
+        return text
 
     def _build_response(self, is_final):
         duration_ms = int(self.total_samples * 1000 / self.sample_rate)
@@ -672,6 +927,9 @@ class RealtimeASRSession:
         self.prev_text = ""
         self.last_partial_text = ""
         self.last_partial_start_ms = 0
+        self.last_partial_end_ms = 0
+        self.last_partial_eligible = False
+        self._reset_partial_history()
         self.last_decode_samples = 0
         self.locked_sentences = []
         if self.spk_tracker:
