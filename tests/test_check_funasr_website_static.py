@@ -264,6 +264,22 @@ def test_ecosystem_contract_rejects_longer_dify_version():
     assert any(url in failure and "FunASR plugin 0.1.1" in failure for failure in failures)
 
 
+def test_ecosystem_contract_rejects_dify_version_suffixes():
+    checker = _load_module()
+    url = "https://www.funasr.com/en/ecosystem.html"
+
+    for version in ("0.1.1-beta", "0.1.1+build"):
+        pages = {url: _valid_english_ecosystem_html()}
+        pages[url] = pages[url].replace("0.1.1", version)
+
+        failures = checker.validate_pages(pages)
+
+        assert any(
+            url in failure and "FunASR plugin 0.1.1" in failure
+            for failure in failures
+        )
+
+
 def test_ecosystem_contract_rejects_larger_dify_upload_limit():
     checker = _load_module()
     url = "https://www.funasr.com/en/ecosystem.html"

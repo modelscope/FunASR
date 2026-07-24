@@ -56,7 +56,7 @@ PAGE_CONTRACTS: dict[str, PageContract] = {
             "54.3K stars",
         ),
         visible_patterns=(
-            ("FunASR 官方插件 0.1.1", r"FunASR 官方插件 0\.1\.1(?![\w.])"),
+            ("FunASR 官方插件 0.1.1", r"FunASR 官方插件 0\.1\.1(?![\w.+-])"),
             ("最大 25 MB 音频上传", r"最大 (?<!\d)25 MB 音频上传"),
         ),
         required_links=(
@@ -73,7 +73,7 @@ PAGE_CONTRACTS: dict[str, PageContract] = {
             "54.3K stars",
         ),
         visible_patterns=(
-            ("FunASR plugin 0.1.1", r"FunASR plugin 0\.1\.1(?![\w.])"),
+            ("FunASR plugin 0.1.1", r"FunASR plugin 0\.1\.1(?![\w.+-])"),
             ("25 MB uploads", r"(?<!\d)25 MB uploads"),
         ),
         required_links=(
