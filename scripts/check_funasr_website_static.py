@@ -20,6 +20,7 @@ class PageContract:
     required: tuple[str, ...]
     forbidden: tuple[str, ...] = ()
     visible_required: tuple[str, ...] = ()
+    visible_patterns: tuple[tuple[str, str], ...] = ()
     required_links: tuple[str, ...] = ()
 
 
@@ -54,6 +55,13 @@ PAGE_CONTRACTS: dict[str, PageContract] = {
             "custom_openai",
             "54.3K stars",
         ),
+        visible_patterns=(
+            ("FunASR 官方插件 0.1.1", r"FunASR 官方插件 0\.1\.1(?![\w.+-])"),
+            ("最大 25 MB 音频上传", r"最大 (?<!\d)25 MB 音频上传"),
+        ),
+        required_links=(
+            "https://marketplace.dify.ai/plugin/langgenius/funasr",
+        ),
         forbidden=("16K+",),
     ),
     f"{BASE_URL}/en/ecosystem.html": PageContract(
@@ -63,6 +71,13 @@ PAGE_CONTRACTS: dict[str, PageContract] = {
             "LiteLLM",
             "custom_openai",
             "54.3K stars",
+        ),
+        visible_patterns=(
+            ("FunASR plugin 0.1.1", r"FunASR plugin 0\.1\.1(?![\w.+-])"),
+            ("25 MB uploads", r"(?<!\d)25 MB uploads"),
+        ),
+        required_links=(
+            "https://marketplace.dify.ai/plugin/langgenius/funasr",
         ),
         forbidden=("16K+",),
     ),
@@ -314,11 +329,17 @@ def validate_pages(pages: dict[str, str]) -> list[str]:
         for needle in contract.required:
             if needle not in text:
                 failures.append(f"{url}: missing `{needle}`")
-        if contract.visible_required:
+        visible_text = ""
+        if contract.visible_required or contract.visible_patterns:
             visible_text = extract_visible_text(text)
+        if contract.visible_required:
             for needle in contract.visible_required:
                 if needle not in visible_text:
                     failures.append(f"{url}: visible text missing `{needle}`")
+        if contract.visible_patterns:
+            for label, pattern in contract.visible_patterns:
+                if re.search(pattern, visible_text) is None:
+                    failures.append(f"{url}: visible text missing `{label}`")
         if contract.required_links:
             links = extract_links(text)
             for target in contract.required_links:
