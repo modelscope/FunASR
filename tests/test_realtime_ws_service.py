@@ -258,6 +258,818 @@ class DummyEngine:
         return [{"text": "hello"}]
 
 
+class FixedTextEngine(DummyEngine):
+    def __init__(self, text):
+        super().__init__()
+        self.text = text
+
+    def generate(self, inputs, **kwargs):
+        self.input_lengths.extend(len(audio) for audio in inputs)
+        self.generate_kwargs.append(kwargs)
+        return [{"text": self.text}]
+
+
+class FailingTextEngine(DummyEngine):
+    def generate(self, inputs, **kwargs):
+        raise RuntimeError("synthetic final decode failure")
+
+
+class ScriptedTextEngine(DummyEngine):
+    def __init__(self, outputs):
+        super().__init__()
+        self.outputs = list(outputs)
+
+    def generate(self, inputs, **kwargs):
+        self.input_lengths.extend(len(audio) for audio in inputs)
+        self.generate_kwargs.append(kwargs)
+        output = self.outputs.pop(0)
+        if isinstance(output, Exception):
+            raise output
+        return [{"text": output}]
+
+
+class ControllableVad:
+    def __init__(self, sample_rate=16000):
+        self.sample_rate = sample_rate
+        self.current_speech_start = 0
+        self.total_samples = 0
+        self.lock_next = False
+
+    def feed(self, audio, is_final=False):
+        self.total_samples += len(audio)
+        if not self.lock_next:
+            return []
+        self.lock_next = False
+        self.current_speech_start = None
+        return [[0, int(self.total_samples * 1000 / self.sample_rate)]]
+
+    def start_utterance(self, start_ms):
+        if self.current_speech_start is None:
+            self.current_speech_start = start_ms
+
+    def reset(self):
+        self.current_speech_start = None
+
+
+class PreviousBoundaryVad(ControllableVad):
+    def feed(self, audio, is_final=False):
+        self.total_samples += len(audio)
+        if not self.lock_next:
+            return []
+        self.lock_next = False
+        self.current_speech_start = None
+        end_samples = self.total_samples - len(audio)
+        return [[0, int(end_samples * 1000 / self.sample_rate)]]
+
+
+class FinalFlushVad:
+    def __init__(self, sample_rate=16000):
+        self.sample_rate = sample_rate
+        self.current_speech_start = None
+        self.total_samples = 0
+        self.finalize_calls = 0
+
+    def feed(self, audio, is_final=False):
+        assert is_final is False
+        self.total_samples += len(audio)
+        return []
+
+    def finalize(self):
+        self.finalize_calls += 1
+        return [[0, int(self.total_samples * 1000 / self.sample_rate)]]
+
+    def reset(self):
+        self.current_speech_start = None
+
+
+class RecordingSpeakerTracker:
+    def __init__(self):
+        self.assigned = []
+        self.finalize_calls = 0
+
+    def assign_streaming(self, audio, start_sec, end_sec, sentence):
+        sentence["spk"] = 7
+        self.assigned.append((len(audio), start_sec, end_sec))
+
+    def finalize(self, sentences):
+        self.finalize_calls += 1
+        return sentences
+
+    def reset(self):
+        pass
+
+
+class OneShotSegmentVad:
+    def __init__(self, sample_rate=16000):
+        self.sample_rate = sample_rate
+        self.current_speech_start = 0
+        self.emitted = False
+
+    def feed(self, audio, is_final=False):
+        if self.emitted:
+            return []
+        self.emitted = True
+        self.current_speech_start = None
+        return [[0, int(len(audio) * 1000 / self.sample_rate)]]
+
+    def reset(self):
+        self.current_speech_start = None
+
+
+def make_one_shot_segment_session(
+    module, final_text, partial_text, partial_start_ms=0, engine=None
+):
+    sample_rate = 16000
+    session = module.RealtimeASRSession(
+        vllm_engine=engine or FixedTextEngine(final_text),
+        asr_kwargs={},
+        vad=OneShotSegmentVad(sample_rate),
+        sample_rate=sample_rate,
+        chunk_ms=960,
+    )
+    session.last_partial_text = partial_text
+    session.last_partial_start_ms = partial_start_ms
+    session.last_partial_end_ms = 2000
+    session.segment_partial_text = partial_text
+    session.segment_partial_start_ms = partial_start_ms
+    session.segment_partial_end_ms = 2000
+    session.segment_partial_stable_count = 2
+    session.last_partial_eligible = True
+    session.add_audio(np.zeros(2 * sample_rate, dtype=np.int16).tobytes())
+    return session
+
+
+def add_pcm(session, duration_ms, sample_rate=16000):
+    samples = int(duration_ms * sample_rate / 1000)
+    session.add_audio(np.zeros(samples, dtype=np.int16).tobytes())
+
+
+def decode_partial(session, duration_ms):
+    add_pcm(session, duration_ms, session.sample_rate)
+    assert session.should_decode()
+    return session.decode(is_final=False)
+
+
+def test_completed_segment_keeps_aligned_partial_when_final_is_truncated_prefix():
+    module = load_service_module()
+    partial = (
+        "当然可以。目前我们已经完成了第一阶段的调查研究工作，并收集了所有必要的数据。"
+        "接下来我们将进入分析阶段，预计在下周完成。"
+    )
+
+    session = make_one_shot_segment_session(module, "当然可以。", partial)
+
+    assert session.locked_sentences == [
+        {"text": partial, "start": 0, "end": 2000}
+    ]
+    assert session.last_partial_text == ""
+
+
+def test_completed_segment_keeps_clean_aligned_partial_when_final_hallucinates():
+    module = load_service_module()
+    partial = "不好意思，上午杭高架交通比较混乱一点，我们不晓得我们有点耽误。"
+    repeated = "好，拜拜。" * 80
+
+    session = make_one_shot_segment_session(module, repeated, partial)
+
+    assert session.locked_sentences == [
+        {"text": partial, "start": 0, "end": 2000}
+    ]
+    assert session.last_partial_text == ""
+
+
+def test_completed_segment_keeps_aligned_partial_when_final_decode_fails():
+    module = load_service_module()
+    partial = "最终解码异常时，已经稳定显示的内容不应整句丢失。"
+
+    session = make_one_shot_segment_session(
+        module,
+        "",
+        partial,
+        engine=FailingTextEngine(),
+    )
+
+    assert session.locked_sentences == [
+        {"text": partial, "start": 0, "end": 2000}
+    ]
+    assert session.last_partial_text == ""
+
+
+def test_completed_segment_keeps_distinct_final_correction_and_clears_partial():
+    module = load_service_module()
+
+    session = make_one_shot_segment_session(
+        module,
+        "感谢各位今天参加会议。",
+        "感谢各位今天参加会以。",
+    )
+
+    assert session.locked_sentences == [
+        {"text": "感谢各位今天参加会议。", "start": 0, "end": 2000}
+    ]
+    assert session.last_partial_text == ""
+
+
+def test_completed_segment_does_not_reuse_partial_from_another_window():
+    module = load_service_module()
+    stale_partial = "当然可以。目前我们已经完成了第一阶段的调查研究工作。"
+
+    session = make_one_shot_segment_session(
+        module,
+        "当然可以。",
+        stale_partial,
+        partial_start_ms=5000,
+    )
+
+    assert session.locked_sentences == [
+        {"text": "当然可以。", "start": 0, "end": 2000}
+    ]
+    assert session.last_partial_text == ""
+
+
+def test_hallucination_repair_handles_repeated_phrases_with_punctuation():
+    module = load_service_module()
+    prefix = "不好意思，上午杭高架交通比较混乱一点。"
+    text = prefix + "好，拜拜。" * 80
+
+    repaired, hallucinated = module.detect_and_fix_hallucination(text)
+
+    assert hallucinated is True
+    assert repaired == prefix + "好，拜拜。"
+
+
+def test_server_stop_under_one_chunk_keeps_partial_when_final_decode_fails():
+    module = load_service_module()
+    engine = ScriptedTextEngine(
+        ["已经稳定显示的短句。", RuntimeError("synthetic final decode failure")]
+    )
+    session = module.RealtimeASRSession(
+        engine,
+        {},
+        ControllableVad(),
+        sample_rate=16000,
+        chunk_ms=960,
+    )
+
+    partial = decode_partial(session, 600)
+    assert partial["partial"] == "已经稳定显示的短句。"
+    assert len(engine.generate_kwargs) == 1
+    result = session.decode(is_final=True)
+
+    assert len(engine.generate_kwargs) == 2
+    assert engine.outputs == []
+    assert result["sentences"] == [
+        {"text": "已经稳定显示的短句。", "start": 0, "end": 600}
+    ]
+    assert session.last_partial_text == ""
+
+
+def test_successful_empty_final_does_not_restore_old_partial():
+    module = load_service_module()
+    partial = "会议取消。稍后另行通知。"
+    session = module.RealtimeASRSession(
+        ScriptedTextEngine([partial, partial, ""]),
+        {},
+        ControllableVad(),
+        sample_rate=16000,
+        chunk_ms=500,
+    )
+
+    decode_partial(session, 500)
+    decode_partial(session, 500)
+    result = session.decode(is_final=True)
+
+    assert result["sentences"] == []
+    assert session.last_partial_text == ""
+
+
+def test_short_dense_final_can_remove_a_speculative_partial_suffix():
+    module = load_service_module()
+    partial = "会议取消。稍后另行通知。"
+    session = module.RealtimeASRSession(
+        ScriptedTextEngine([partial, partial, "会议取消。"]),
+        {},
+        ControllableVad(),
+        sample_rate=16000,
+        chunk_ms=500,
+    )
+
+    decode_partial(session, 500)
+    decode_partial(session, 500)
+    result = session.decode(is_final=True)
+
+    assert result["sentences"] == [
+        {"text": "会议取消。", "start": 0, "end": 1000}
+    ]
+
+
+def test_successful_final_can_remove_suffix_after_two_growing_partials():
+    module = load_service_module()
+    session = module.RealtimeASRSession(
+        ScriptedTextEngine(
+            [
+                "会议取消。稍后另行通知。",
+                "会议取消。稍后另行通知，请等待后续安排。",
+                "会议取消。",
+            ]
+        ),
+        {},
+        ControllableVad(),
+        sample_rate=16000,
+        chunk_ms=1000,
+        endpoint_mode="client",
+    )
+
+    decode_partial(session, 1000)
+    decode_partial(session, 1000)
+    result = session.decode(is_final=True)
+
+    assert result["sentences"] == [
+        {"text": "会议取消。", "start": 0, "end": 2000}
+    ]
+
+
+def test_regressed_partial_resets_confidence_before_final_correction():
+    module = load_service_module()
+    partial = "会议取消。稍后另行通知，请等待后续安排。"
+    session = module.RealtimeASRSession(
+        ScriptedTextEngine([partial, partial, "会议取消。", "会议取消。"]),
+        {},
+        ControllableVad(),
+        sample_rate=16000,
+        chunk_ms=1000,
+    )
+
+    decode_partial(session, 1000)
+    decode_partial(session, 1000)
+    decode_partial(session, 1000)
+    result = session.decode(is_final=True)
+
+    assert result["sentences"] == [
+        {"text": "会议取消。", "start": 0, "end": 3000}
+    ]
+
+
+def test_vad_lock_keeps_stable_full_partial_and_assigns_speaker():
+    module = load_service_module()
+    partial = (
+        "当然可以。目前我们已经完成了第一阶段的调查研究工作，并收集了所有必要的数据。"
+        "接下来我们将进入分析阶段。"
+    )
+    vad = PreviousBoundaryVad()
+    speaker = RecordingSpeakerTracker()
+    session = module.RealtimeASRSession(
+        ScriptedTextEngine([partial, partial, "当然可以。"]),
+        {},
+        vad,
+        spk_tracker=speaker,
+        sample_rate=16000,
+        chunk_ms=1000,
+    )
+
+    decode_partial(session, 1000)
+    decode_partial(session, 1000)
+    vad.lock_next = True
+    add_pcm(session, 1000)
+
+    assert session.locked_sentences == [
+        {"text": partial, "start": 0, "end": 2000, "spk": 7}
+    ]
+    assert speaker.assigned == [(32000, 0.0, 2.0)]
+    assert speaker.finalize_calls == 0
+    assert session.last_partial_text == ""
+
+
+def test_client_commit_uses_the_same_stable_partial_reconciliation():
+    module = load_service_module()
+    partial = (
+        "当然可以。目前我们已经完成了第一阶段的调查研究工作，并收集了所有必要的数据。"
+        "接下来我们将进入分析阶段。"
+    )
+    speaker = RecordingSpeakerTracker()
+    session = module.RealtimeASRSession(
+        ScriptedTextEngine([partial, partial, "当然可以。"]),
+        {},
+        ControllableVad(),
+        spk_tracker=speaker,
+        sample_rate=16000,
+        chunk_ms=1000,
+        endpoint_mode="client",
+    )
+
+    decode_partial(session, 1000)
+    decode_partial(session, 1000)
+    result = session.decode(is_final=True)
+
+    assert result["sentences"] == [
+        {"text": partial, "start": 0, "end": 2000, "spk": 7}
+    ]
+    assert speaker.finalize_calls == 1
+    assert session.last_partial_text == ""
+
+
+def test_shifted_partial_without_full_segment_history_is_not_reused():
+    module = load_service_module()
+    partial = "当然可以。目前我们已经完成了全部调查研究工作。"
+    session = module.RealtimeASRSession(
+        ScriptedTextEngine([partial, "当然可以。"]),
+        {},
+        ControllableVad(),
+        sample_rate=16000,
+        chunk_ms=960,
+        partial_window_sec=1.5,
+    )
+
+    decode_partial(session, 2000)
+    result = session.decode(is_final=True)
+
+    assert result["sentences"] == [
+        {"text": "当然可以。", "start": 0, "end": 2000}
+    ]
+
+
+def test_partial_missing_the_segment_tail_is_not_reused():
+    module = load_service_module()
+    partial = "当然可以。目前我们已经完成了全部调查研究工作，并进入分析阶段。"
+    session = module.RealtimeASRSession(
+        ScriptedTextEngine([partial, partial, "当然可以。"]),
+        {},
+        ControllableVad(),
+        sample_rate=16000,
+        chunk_ms=1000,
+        endpoint_mode="client",
+    )
+
+    decode_partial(session, 1000)
+    decode_partial(session, 1000)
+    add_pcm(session, 1000)
+    result = session.decode(is_final=True)
+
+    assert result["sentences"] == [
+        {"text": "当然可以。", "start": 0, "end": 3000}
+    ]
+
+
+def test_nonoverlapping_partial_invalidates_old_full_segment_history():
+    module = load_service_module()
+    partial = "当然可以。目前我们已经完成了全部调查研究工作，并进入分析阶段。"
+    session = module.RealtimeASRSession(
+        ScriptedTextEngine(
+            [
+                partial,
+                partial,
+                "完全无关的新窗口内容",
+                "仍然无关的后续窗口内容",
+                "当然可以。",
+            ]
+        ),
+        {},
+        ControllableVad(),
+        sample_rate=16000,
+        chunk_ms=500,
+        partial_window_sec=1.0,
+        endpoint_mode="client",
+    )
+
+    decode_partial(session, 500)
+    decode_partial(session, 500)
+    decode_partial(session, 500)
+    decode_partial(session, 500)
+    result = session.decode(is_final=True)
+
+    assert result["sentences"] == [
+        {"text": "当然可以。", "start": 0, "end": 2000}
+    ]
+
+
+def test_hallucinated_partial_is_not_locked_when_final_decode_fails():
+    module = load_service_module()
+    session = module.RealtimeASRSession(
+        ScriptedTextEngine(
+            ["好，拜拜。" * 80, RuntimeError("synthetic final decode failure")]
+        ),
+        {},
+        ControllableVad(),
+        sample_rate=16000,
+        chunk_ms=500,
+        endpoint_mode="client",
+    )
+
+    partial = decode_partial(session, 500)
+    assert partial["partial"] == "好，拜拜。"
+    result = session.decode(is_final=True)
+
+    assert result["sentences"] == []
+
+
+def test_hallucinated_partial_breaks_stable_partial_continuity():
+    module = load_service_module()
+    partial = "会议取消。稍后另行通知，请等待后续安排。"
+    session = module.RealtimeASRSession(
+        ScriptedTextEngine(
+            [partial, "好，拜拜。" * 80, partial, "会议取消。"]
+        ),
+        {},
+        ControllableVad(),
+        sample_rate=16000,
+        chunk_ms=1000,
+        endpoint_mode="client",
+    )
+
+    decode_partial(session, 1000)
+    decode_partial(session, 1000)
+    decode_partial(session, 1000)
+    result = session.decode(is_final=True)
+
+    assert result["sentences"] == [
+        {"text": "会议取消。", "start": 0, "end": 3000}
+    ]
+
+
+def test_partial_decode_error_breaks_stable_partial_continuity():
+    module = load_service_module()
+    partial = "会议取消。稍后另行通知，请等待后续安排。"
+    session = module.RealtimeASRSession(
+        ScriptedTextEngine(
+            [partial, RuntimeError("synthetic partial failure"), partial, "会议取消。"]
+        ),
+        {},
+        ControllableVad(),
+        sample_rate=16000,
+        chunk_ms=1000,
+        endpoint_mode="client",
+    )
+
+    decode_partial(session, 1000)
+    decode_partial(session, 1000)
+    decode_partial(session, 1000)
+    result = session.decode(is_final=True)
+
+    assert result["sentences"] == [
+        {"text": "会议取消。", "start": 0, "end": 3000}
+    ]
+
+
+def test_empty_partial_breaks_stable_partial_continuity():
+    module = load_service_module()
+    partial = "会议取消。稍后另行通知，请等待后续安排。"
+    session = module.RealtimeASRSession(
+        ScriptedTextEngine([partial, "", partial, "会议取消。"]),
+        {},
+        ControllableVad(),
+        sample_rate=16000,
+        chunk_ms=1000,
+        endpoint_mode="client",
+    )
+
+    decode_partial(session, 1000)
+    decode_partial(session, 1000)
+    decode_partial(session, 1000)
+    result = session.decode(is_final=True)
+
+    assert result["sentences"] == [
+        {"text": "会议取消。", "start": 0, "end": 3000}
+    ]
+
+
+def test_partial_overlap_cannot_bridge_an_audio_coverage_gap():
+    module = load_service_module()
+    session = module.RealtimeASRSession(
+        ScriptedTextEngine(
+            ["ABCDEFGH", "EFGHIJKLMNOP", "好，拜拜。" * 80]
+        ),
+        {},
+        ControllableVad(),
+        sample_rate=16000,
+        chunk_ms=500,
+        partial_window_sec=1.0,
+        endpoint_mode="client",
+    )
+
+    decode_partial(session, 500)
+    decode_partial(session, 2000)
+    result = session.decode(is_final=True)
+
+    assert result["sentences"] == [
+        {"text": "好，拜拜。", "start": 0, "end": 2500}
+    ]
+
+
+def test_partial_overlap_cannot_bridge_a_100ms_audio_gap():
+    module = load_service_module()
+    session = module.RealtimeASRSession(
+        ScriptedTextEngine(
+            ["ABCDEFGH", "EFGHIJKLMNOP", "好，拜拜。" * 80]
+        ),
+        {},
+        ControllableVad(),
+        sample_rate=16000,
+        chunk_ms=500,
+        partial_window_sec=0.5,
+        endpoint_mode="client",
+    )
+
+    decode_partial(session, 500)
+    decode_partial(session, 600)
+    result = session.decode(is_final=True)
+
+    assert result["sentences"] == [
+        {"text": "好，拜拜。", "start": 0, "end": 1100}
+    ]
+
+
+def test_partial_must_start_exactly_at_segment_start_for_fallback():
+    module = load_service_module()
+    session = module.RealtimeASRSession(
+        ScriptedTextEngine(
+            ["ABCDEFGHIJKLMNOP", "ABCDEFGHIJKLMNOP", "ABCD"]
+        ),
+        {},
+        ControllableVad(),
+        sample_rate=16000,
+        chunk_ms=500,
+        partial_window_sec=1.9,
+        endpoint_mode="client",
+    )
+
+    decode_partial(session, 2000)
+    session.decode(is_final=False)
+    result = session.decode(is_final=True)
+
+    assert result["sentences"] == [
+        {"text": "ABCD", "start": 0, "end": 2000}
+    ]
+
+
+def test_server_stop_assigns_speaker_to_active_segment():
+    module = load_service_module()
+    speaker = RecordingSpeakerTracker()
+    session = module.RealtimeASRSession(
+        FixedTextEngine("已经完成的短句。"),
+        {},
+        ControllableVad(),
+        spk_tracker=speaker,
+        sample_rate=16000,
+        chunk_ms=960,
+    )
+
+    add_pcm(session, 600)
+    result = session.decode(is_final=True)
+
+    assert result["sentences"] == [
+        {"text": "已经完成的短句。", "start": 0, "end": 600, "spk": 7}
+    ]
+    assert speaker.assigned == [(9600, 0.0, 0.6)]
+    assert speaker.finalize_calls == 1
+
+
+def test_server_stop_flushes_vad_before_decoding_final_segment():
+    module = load_service_module()
+    vad = FinalFlushVad()
+    speaker = RecordingSpeakerTracker()
+    engine = FixedTextEngine("由 VAD final flush 确认的短句。")
+    session = module.RealtimeASRSession(
+        engine,
+        {},
+        vad,
+        spk_tracker=speaker,
+        sample_rate=16000,
+        chunk_ms=960,
+    )
+
+    add_pcm(session, 600)
+    result = session.decode(is_final=True)
+
+    assert vad.finalize_calls == 1
+    assert len(engine.generate_kwargs) == 1
+    assert result["sentences"] == [
+        {
+            "text": "由 VAD final flush 确认的短句。",
+            "start": 0,
+            "end": 600,
+            "spk": 7,
+        }
+    ]
+    assert speaker.finalize_calls == 1
+
+
+def test_server_stop_finalizes_speakers_after_vad_already_locked():
+    module = load_service_module()
+    vad = ControllableVad()
+    speaker = RecordingSpeakerTracker()
+    session = module.RealtimeASRSession(
+        FixedTextEngine("已经由 VAD 锁定的句子。"),
+        {},
+        vad,
+        spk_tracker=speaker,
+        sample_rate=16000,
+        chunk_ms=960,
+    )
+
+    vad.lock_next = True
+    add_pcm(session, 600)
+    assert speaker.finalize_calls == 0
+    result = session.decode(is_final=True)
+
+    assert result["sentences"] == [
+        {
+            "text": "已经由 VAD 锁定的句子。",
+            "start": 0,
+            "end": 600,
+            "spk": 7,
+        }
+    ]
+    assert speaker.finalize_calls == 1
+
+
+def test_overlapping_partial_windows_preserve_long_segment_on_final_regression():
+    module = load_service_module()
+    vad = PreviousBoundaryVad()
+    session = module.RealtimeASRSession(
+        ScriptedTextEngine(
+            [
+                "ABCD",
+                "ABCDEFG",
+                "ABCDEFGHI",
+                "ABCDEFGHIJ",
+                "DEFGHIJKLMNO",
+                "好，拜拜。" * 80,
+            ]
+        ),
+        {},
+        vad,
+        sample_rate=16000,
+        chunk_ms=500,
+        partial_window_sec=2.0,
+    )
+
+    for _ in range(5):
+        decode_partial(session, 500)
+    vad.lock_next = True
+    add_pcm(session, 500)
+
+    assert session.locked_sentences == [
+        {"text": "ABCDEFGHIJKLMNO", "start": 0, "end": 2500}
+    ]
+    assert session.last_partial_text == ""
+
+
+def test_hallucination_repair_stops_before_the_next_opening_quote():
+    module = load_service_module()
+    prefix = "前缀："
+
+    repaired, hallucinated = module.detect_and_fix_hallucination(
+        prefix + "“好”" * 80
+    )
+
+    assert hallucinated is True
+    assert repaired == prefix + "“好”"
+
+
+def test_overlap_merge_preserves_casefold_expansion_source_positions():
+    module = load_service_module()
+
+    assert module._merge_overlapping_transcripts(
+        "Die Straße", "Straße ist frei"
+    ) == "Die Straße ist frei"
+
+
+def test_overlap_merge_preserves_new_punctuation_after_overlap():
+    module = load_service_module()
+
+    assert module._merge_overlapping_transcripts(
+        "今天天气", "今天天气，真好"
+    ) == "今天天气，真好"
+
+
+def test_hallucination_repair_keeps_one_ascii_quoted_phrase():
+    module = load_service_module()
+
+    repaired, hallucinated = module.detect_and_fix_hallucination(
+        "前缀：" + '"good"' * 80
+    )
+
+    assert hallucinated is True
+    assert repaired == '前缀："good"'
+
+
+def test_hallucination_repair_distinguishes_apostrophe_from_ascii_quote():
+    module = load_service_module()
+
+    repaired, hallucinated = module.detect_and_fix_hallucination(
+        "don't " + "'good'" * 80
+    )
+
+    assert hallucinated is True
+    assert repaired == "don't 'good'"
+
+
+def test_overlap_merge_rejects_casefold_split_inside_source_character():
+    module = load_service_module()
+
+    assert module._merge_overlapping_transcripts("abcs", "abcßXYZ") is None
+
+
 def test_client_endpoint_mode_skips_fsmn_vad_model(monkeypatch):
     module = load_service_module()
     auto_model_calls = []
