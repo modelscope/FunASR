@@ -1130,6 +1130,21 @@ class AutoModel:
             elif kwargs.get("sentence_timestamp", False):
                 if not len(result["text"].strip()):
                     sentence_list = []
+                elif self.punc_model is None and punc_res is None and not sentence_timestamps:
+                    sentence_list = []
+                    for rest, vadsegment in zip(restored_data, vadsegments):
+                        text = str(rest.get("text", "")).strip()
+                        if not text:
+                            continue
+                        sentence_list.append(
+                            {
+                                "start": vadsegment[0],
+                                "end": vadsegment[1],
+                                "text": text,
+                                "sentence": text,
+                                "timestamp": [],
+                            }
+                        )
                 elif punc_res is None:
                     logging.warning(
                         "punc_model is required for sentence_timestamp, skipping sentence segmentation."

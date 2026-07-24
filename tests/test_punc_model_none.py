@@ -90,6 +90,66 @@ class TestPuncModelNone(unittest.TestCase):
     @patch("funasr.auto.auto_model.slice_padding_audio_samples")
     @patch("funasr.auto.auto_model.load_audio_text_image_video")
     @patch("funasr.auto.auto_model.prepare_data_iterator")
+    def test_sentence_timestamp_uses_vad_segments_when_asr_has_no_timestamps(
+        self, mock_prep, mock_load, mock_slice
+    ):
+        """SenseVoice should expose its per-VAD text as timestamped sentences."""
+        am = self._make_auto_model(punc_model=None)
+        results_seq = [
+            [{"key": "test_utt", "value": [[120, 800], [1050, 1900]]}],
+            [{"text": "first phrase"}],
+            [{"text": "second phrase"}],
+        ]
+        am.inference = MagicMock(side_effect=lambda *args, **kwargs: results_seq.pop(0))
+        mock_prep.return_value = (["test_utt"], [np.zeros(32000, dtype=np.float32)])
+        mock_load.return_value = np.zeros(32000, dtype=np.float32)
+        mock_slice.return_value = ([np.zeros(16000, dtype=np.float32)], [16000])
+
+        results = am.inference_with_vad("dummy_input", sentence_timestamp=True)
+
+        self.assertEqual(
+            results[0]["sentence_info"],
+            [
+                {
+                    "start": 120,
+                    "end": 800,
+                    "text": "first phrase",
+                    "sentence": "first phrase",
+                    "timestamp": [],
+                },
+                {
+                    "start": 1050,
+                    "end": 1900,
+                    "text": "second phrase",
+                    "sentence": "second phrase",
+                    "timestamp": [],
+                },
+            ],
+        )
+
+    @patch("funasr.auto.auto_model.slice_padding_audio_samples")
+    @patch("funasr.auto.auto_model.load_audio_text_image_video")
+    @patch("funasr.auto.auto_model.prepare_data_iterator")
+    def test_vad_fallback_requires_punc_model_to_be_absent(
+        self, mock_prep, mock_load, mock_slice
+    ):
+        am = self._make_auto_model(punc_model=MagicMock())
+        results_seq = [
+            [{"key": "test_utt", "value": [[120, 800]]}],
+            [{"text": "phrase", "timestamps": []}],
+        ]
+        am.inference = MagicMock(side_effect=lambda *args, **kwargs: results_seq.pop(0))
+        mock_prep.return_value = (["test_utt"], [np.zeros(16000, dtype=np.float32)])
+        mock_load.return_value = np.zeros(16000, dtype=np.float32)
+        mock_slice.return_value = ([np.zeros(16000, dtype=np.float32)], [16000])
+
+        results = am.inference_with_vad("dummy_input", sentence_timestamp=True)
+
+        self.assertEqual(results[0]["sentence_info"], [])
+
+    @patch("funasr.auto.auto_model.slice_padding_audio_samples")
+    @patch("funasr.auto.auto_model.load_audio_text_image_video")
+    @patch("funasr.auto.auto_model.prepare_data_iterator")
     def test_punc_model_with_value_still_works(self, mock_prep, mock_load, mock_slice):
         """When punc_model is provided, punc_res should still be used normally."""
         punc_mock = MagicMock()
