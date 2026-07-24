@@ -187,6 +187,46 @@ def test_website_contract_accepts_current_public_copy():
             <a href="https://github.com/modelscope/FunClip">FunClip</a>
             <a href="/en/donors.html">Thanks</a>
         """,
+        "https://www.funasr.com/blog/funclip-v2-1-0-video-clipping-release.html": """
+            <body>
+            FunClip v2.1.0
+            FunClip-2.1.0.tar.gz FunClip-2.1.0.zip SHA256SUMS
+            funasr>=1.3.29 TwelveLabs Pegasus
+            <img src="/img/funclip-v2-1-0-interface.jpg">
+            为什么发布的是源码归档，而不是 wheel
+            v2.1.0 的精确合并源码通过 50 项测试，另有 1 项跳过
+            干净 Python 3.12 环境中的 6 项发布契约测试
+            GitHub Actions 首次发布和主动重跑均成功
+            Star <a href="https://github.com/modelscope/FunClip">FunClip 仓库</a>
+            <a href="https://github.com/modelscope/FunClip/releases/tag/v2.1.0">Release</a>
+            <a href="https://github.com/modelscope/FunClip/releases/download/v2.1.0/FunClip-2.1.0.tar.gz">tar.gz</a>
+            <a href="https://github.com/modelscope/FunClip/releases/download/v2.1.0/FunClip-2.1.0.zip">zip</a>
+            <a href="https://github.com/modelscope/FunClip/releases/download/v2.1.0/SHA256SUMS">SHA256SUMS</a>
+            <a href="https://huggingface.co/spaces/FunAudioLLM/FunClip">Space</a>
+            <a href="https://github.com/modelscope/FunASR/releases/tag/v1.3.29">FunASR v1.3.29</a>
+            <a href="/donors.html">功德榜</a>
+            </body>
+        """,
+        "https://www.funasr.com/en/blog/funclip-v2-1-0-video-clipping-release.html": """
+            <body>
+            FunClip v2.1.0
+            FunClip-2.1.0.tar.gz FunClip-2.1.0.zip SHA256SUMS
+            funasr>=1.3.29 TwelveLabs Pegasus
+            <img src="/img/funclip-v2-1-0-interface.jpg">
+            Why these are source archives, not a wheel
+            The exact v2.1.0 merge passed 50 tests with 1 skipped
+            Six release-contract tests also passed in a clean Python 3.12 environment
+            Both the initial GitHub Actions release and a deliberate rerun succeeded
+            star the <a href="https://github.com/modelscope/FunClip">FunClip repository</a>
+            <a href="https://github.com/modelscope/FunClip/releases/tag/v2.1.0">Release</a>
+            <a href="https://github.com/modelscope/FunClip/releases/download/v2.1.0/FunClip-2.1.0.tar.gz">tar.gz</a>
+            <a href="https://github.com/modelscope/FunClip/releases/download/v2.1.0/FunClip-2.1.0.zip">zip</a>
+            <a href="https://github.com/modelscope/FunClip/releases/download/v2.1.0/SHA256SUMS">SHA256SUMS</a>
+            <a href="https://huggingface.co/spaces/FunAudioLLM/FunClip">Space</a>
+            <a href="https://github.com/modelscope/FunASR/releases/tag/v1.3.29">FunASR v1.3.29</a>
+            <a href="/en/donors.html">Thanks</a>
+            </body>
+        """,
     }
 
     assert checker.validate_pages(pages) == []
@@ -255,13 +295,13 @@ def test_ecosystem_contract_rejects_longer_dify_version():
     checker = _load_module()
     url = "https://www.funasr.com/en/ecosystem.html"
     pages = {url: _valid_english_ecosystem_html()}
-    pages[url] = pages[url].replace(
-        "FunASR plugin 0.1.1", "FunASR plugin 0.1.10"
-    )
+    pages[url] = pages[url].replace("FunASR plugin 0.1.1", "FunASR plugin 0.1.10")
 
     failures = checker.validate_pages(pages)
 
-    assert any(url in failure and "FunASR plugin 0.1.1" in failure for failure in failures)
+    assert any(
+        url in failure and "FunASR plugin 0.1.1" in failure for failure in failures
+    )
 
 
 def test_ecosystem_contract_rejects_dify_version_suffixes():
@@ -275,8 +315,7 @@ def test_ecosystem_contract_rejects_dify_version_suffixes():
         failures = checker.validate_pages(pages)
 
         assert any(
-            url in failure and "FunASR plugin 0.1.1" in failure
-            for failure in failures
+            url in failure and "FunASR plugin 0.1.1" in failure for failure in failures
         )
 
 
@@ -327,6 +366,126 @@ def test_website_contract_includes_v1328_launch_articles():
     assert (
         "https://www.funasr.com/en/blog/funasr-v1-3-28-realtime-websocket-subtitles.html"
         in checker.PAGE_CONTRACTS
+    )
+
+
+def test_website_contract_includes_funclip_v210_launch():
+    checker = _load_module()
+
+    assert (
+        "https://www.funasr.com/blog/funclip-v2-1-0-video-clipping-release.html"
+        in checker.PAGE_CONTRACTS
+    )
+    assert (
+        "https://www.funasr.com/en/blog/funclip-v2-1-0-video-clipping-release.html"
+        in checker.PAGE_CONTRACTS
+    )
+    assert (
+        "https://www.funasr.com/img/funclip-v2-1-0-interface.jpg"
+        in checker.STATIC_ASSET_CONTRACTS
+    )
+
+
+def test_funclip_v210_contract_rejects_hidden_evidence_and_wrong_routes():
+    checker = _load_module()
+    url = "https://www.funasr.com/en/blog/funclip-v2-1-0-video-clipping-release.html"
+    pages = {
+        url: """
+            <body>
+            <meta name="release-copy" content="FunClip v2.1.0 FunClip-2.1.0.tar.gz
+                FunClip-2.1.0.zip SHA256SUMS funasr>=1.3.29 TwelveLabs Pegasus
+                /img/funclip-v2-1-0-interface.jpg /en/donors.html">
+            <div style="display: none">
+                Why these are source archives, not a wheel
+                The exact v2.1.0 merge passed 50 tests with 1 skipped
+                Six release-contract tests also passed in a clean Python 3.12 environment
+                Both the initial GitHub Actions release and a deliberate rerun succeeded
+                star the FunClip repository
+            </div>
+            <div hidden>
+                <a href="https://github.com/modelscope/FunClip"></a>
+                <a href="https://github.com/modelscope/FunClip/releases/tag/v2.1.0"></a>
+                <a href="https://github.com/modelscope/FunClip/releases/download/v2.1.0/FunClip-2.1.0.tar.gz"></a>
+                <a href="https://github.com/modelscope/FunClip/releases/download/v2.1.0/FunClip-2.1.0.zip"></a>
+                <a href="https://github.com/modelscope/FunClip/releases/download/v2.1.0/SHA256SUMS"></a>
+                <a href="https://huggingface.co/spaces/FunAudioLLM/FunClip"></a>
+                <a href="https://github.com/modelscope/FunASR/releases/tag/v1.3.29"></a>
+                <a href="/en/donors.html"></a>
+                <img src="/img/funclip-v2-1-0-interface.jpg">
+            </div>
+            <p>Unrelated visible article copy.</p>
+            <a href="/wrong-donor.html">Thanks</a>
+            <img src="/img/wrong-interface.jpg">
+            </body>
+        """
+    }
+
+    failures = checker.validate_pages(pages)
+
+    assert any(
+        url in failure
+        and "visible text missing `The exact v2.1.0 merge passed 50 tests with 1 skipped`"
+        in failure
+        for failure in failures
+    )
+    assert any(
+        url in failure
+        and "missing link `https://github.com/modelscope/FunClip`" in failure
+        for failure in failures
+    )
+    assert any(
+        url in failure and "missing link `/en/donors.html`" in failure
+        for failure in failures
+    )
+    assert any(
+        url in failure
+        and "missing image `/img/funclip-v2-1-0-interface.jpg`" in failure
+        for failure in failures
+    )
+
+
+def test_funclip_v210_contract_rejects_zero_area_links():
+    checker = _load_module()
+    url = "https://www.funasr.com/en/blog/funclip-v2-1-0-video-clipping-release.html"
+    hidden_content_link = '<a href="{href}"><span hidden>placeholder</span></a>'
+    required_links = (
+        "https://github.com/modelscope/FunClip",
+        "https://github.com/modelscope/FunClip/releases/tag/v2.1.0",
+        "https://github.com/modelscope/FunClip/releases/download/v2.1.0/FunClip-2.1.0.tar.gz",
+        "https://github.com/modelscope/FunClip/releases/download/v2.1.0/FunClip-2.1.0.zip",
+        "https://github.com/modelscope/FunClip/releases/download/v2.1.0/SHA256SUMS",
+        "https://huggingface.co/spaces/FunAudioLLM/FunClip",
+        "https://github.com/modelscope/FunASR/releases/tag/v1.3.29",
+        "/en/donors.html",
+    )
+    links = "".join(hidden_content_link.format(href=href) for href in required_links)
+    pages = {
+        url: f"""
+            <body>
+            FunClip v2.1.0
+            FunClip-2.1.0.tar.gz FunClip-2.1.0.zip SHA256SUMS
+            funasr>=1.3.29 TwelveLabs Pegasus
+            Why these are source archives, not a wheel
+            The exact v2.1.0 merge passed 50 tests with 1 skipped
+            Six release-contract tests also passed in a clean Python 3.12 environment
+            Both the initial GitHub Actions release and a deliberate rerun succeeded
+            star the FunClip repository
+            <img src="/img/funclip-v2-1-0-interface.jpg">
+            {links}
+            </body>
+        """
+    }
+
+    failures = checker.validate_pages(pages)
+
+    assert any(
+        url in failure
+        and "missing link `https://github.com/modelscope/FunClip`" in failure
+        for failure in failures
+    )
+    assert any(
+        url in failure and "missing link `/en/donors.html`" in failure
+        for failure in failures
     )
 
 
@@ -417,7 +576,8 @@ def test_v1328_contract_requires_visible_stop_and_sensevoice_copy():
     failures = checker.validate_pages(pages)
 
     assert any(
-        url in failure and "visible text missing `including STOP final decode`" in failure
+        url in failure
+        and "visible text missing `including STOP final decode`" in failure
         for failure in failures
     )
     assert any(
@@ -432,26 +592,44 @@ def test_static_asset_contract_rejects_non_png_payloads():
     checker = _load_module()
     banner_url = "https://www.funasr.com/img/banner.4f436d19.png"
     logo_url = "https://www.funasr.com/logo.png"
+    funclip_url = "https://www.funasr.com/img/funclip-v2-1-0-interface.jpg"
 
     assert banner_url in checker.STATIC_ASSET_CONTRACTS
     assert logo_url in checker.STATIC_ASSET_CONTRACTS
+    assert funclip_url in checker.STATIC_ASSET_CONTRACTS
 
     failures = checker.validate_assets(
         {
             banner_url: b"<html>not an image</html>",
             logo_url: b"\x89PNG\r\n\x1a\n" + b"x" * 200,
+            funclip_url: b"\xff\xd8\xff" + b"x" * 100_000,
         }
     )
 
     assert failures == [f"{banner_url}: response is not a valid PNG"]
 
 
+def test_static_asset_contract_rejects_invalid_funclip_jpeg():
+    checker = _load_module()
+    banner_url = "https://www.funasr.com/img/banner.4f436d19.png"
+    logo_url = "https://www.funasr.com/logo.png"
+    funclip_url = "https://www.funasr.com/img/funclip-v2-1-0-interface.jpg"
+
+    failures = checker.validate_assets(
+        {
+            banner_url: b"\x89PNG\r\n\x1a\n" + b"x" * 200,
+            logo_url: b"\x89PNG\r\n\x1a\n" + b"x" * 200,
+            funclip_url: b"<html>not an image</html>",
+        }
+    )
+
+    assert failures == [f"{funclip_url}: response is not a valid JPEG"]
+
+
 def test_website_contract_reports_stale_runtime_and_star_copy():
     checker = _load_module()
 
-    pages = {
-        url: "" for url in checker.PAGE_CONTRACTS
-    }
+    pages = {url: "" for url in checker.PAGE_CONTRACTS}
     pages["https://www.funasr.com/ecosystem.html"] = "16K+"
     pages[
         "https://www.funasr.com/blog/funasr-llama-cpp-whisper-cpp-alternative.html"
@@ -460,7 +638,10 @@ def test_website_contract_reports_stale_runtime_and_star_copy():
 
     failures = checker.validate_pages(pages)
 
-    assert any("ecosystem.html" in failure and "forbidden `16K+`" in failure for failure in failures)
+    assert any(
+        "ecosystem.html" in failure and "forbidden `16K+`" in failure
+        for failure in failures
+    )
     assert any(
         "funasr-llama-cpp-whisper-cpp-alternative.html" in failure
         and "forbidden `runtime-llamacpp-v0.1.1`" in failure
@@ -475,9 +656,7 @@ def test_website_contract_reports_stale_runtime_and_star_copy():
 def test_website_contract_requires_visible_donor_usage_copy():
     checker = _load_module()
 
-    pages = {
-        url: "ok" for url in checker.PAGE_CONTRACTS
-    }
+    pages = {url: "ok" for url in checker.PAGE_CONTRACTS}
     pages["https://www.funasr.com/donors.html"] = """
         <head>
             <meta name="description" content="捐赠资金用于社区基础设施建设，包括购买和维护服务器，以及购买、续费和维护 www.funasr.com 域名。">
@@ -529,11 +708,7 @@ def test_fetch_pages_retries_transient_url_errors(monkeypatch):
     monkeypatch.setattr(
         checker,
         "PAGE_CONTRACTS",
-        {
-            "https://www.funasr.com/example.html": checker.PageContract(
-                required=("ok",)
-            )
-        },
+        {"https://www.funasr.com/example.html": checker.PageContract(required=("ok",))},
     )
 
     pages = checker.fetch_pages(timeout=3, retries=2)
