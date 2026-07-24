@@ -147,6 +147,38 @@ def test_website_contract_accepts_current_public_copy():
             https://github.com/modelscope/FunClip
             <a href="/en/donors.html">Thanks</a>
         """,
+        "https://www.funasr.com/blog/funasr-v1-3-28-realtime-websocket-subtitles.html": """
+            funasr==1.3.28
+            funasr-realtime-server
+            VAD STOP SenseVoice
+            精确合并源码通过 118 项聚焦回归测试
+            实时 WebSocket 文件还独立通过 60 项测试
+            覆盖 STOP 最终解码
+            SenseVoice 用户通过同一次包升级获得字幕对齐修复
+            runtime-llamacpp-v0.1.9
+            https://github.com/modelscope/FunASR/releases/tag/v1.3.28
+            <a href="https://github.com/modelscope/FunASR">FunASR</a>
+            <a href="https://github.com/FunAudioLLM/Fun-ASR">Fun-ASR</a>
+            <a href="https://github.com/FunAudioLLM/SenseVoice">SenseVoice</a>
+            <a href="https://github.com/modelscope/FunClip">FunClip</a>
+            <a href="/donors.html">功德榜</a>
+        """,
+        "https://www.funasr.com/en/blog/funasr-v1-3-28-realtime-websocket-subtitles.html": """
+            funasr==1.3.28
+            funasr-realtime-server
+            VAD STOP SenseVoice
+            The exact merged source passed 118 focused regression tests.
+            The realtime WebSocket file also passed all 60 tests independently
+            including STOP final decode
+            SenseVoice users receive the subtitle alignment fix
+            runtime-llamacpp-v0.1.9
+            https://github.com/modelscope/FunASR/releases/tag/v1.3.28
+            <a href="https://github.com/modelscope/FunASR">FunASR</a>
+            <a href="https://github.com/FunAudioLLM/Fun-ASR">Fun-ASR</a>
+            <a href="https://github.com/FunAudioLLM/SenseVoice">SenseVoice</a>
+            <a href="https://github.com/modelscope/FunClip">FunClip</a>
+            <a href="/en/donors.html">Thanks</a>
+        """,
     }
 
     assert checker.validate_pages(pages) == []
@@ -184,6 +216,117 @@ def test_website_contract_includes_v1327_launch_articles():
     assert (
         "https://www.funasr.com/en/blog/funasr-v1-3-27-language-metadata-vllm-fallback.html"
         in checker.PAGE_CONTRACTS
+    )
+
+
+def test_website_contract_includes_v1328_launch_articles():
+    checker = _load_module()
+
+    assert (
+        "https://www.funasr.com/blog/funasr-v1-3-28-realtime-websocket-subtitles.html"
+        in checker.PAGE_CONTRACTS
+    )
+    assert (
+        "https://www.funasr.com/en/blog/funasr-v1-3-28-realtime-websocket-subtitles.html"
+        in checker.PAGE_CONTRACTS
+    )
+
+
+def test_v1328_contract_rejects_language_swapped_body():
+    checker = _load_module()
+    url = "https://www.funasr.com/blog/funasr-v1-3-28-realtime-websocket-subtitles.html"
+    pages = {
+        url: """
+            <body>
+            funasr==1.3.28 funasr-realtime-server VAD STOP SenseVoice
+            The exact merged source passed 118 focused regression tests.
+            The realtime WebSocket file also passed all 60 tests independently.
+            runtime-llamacpp-v0.1.9
+            https://github.com/modelscope/FunASR/releases/tag/v1.3.28
+            <a href="https://github.com/modelscope/FunASR">FunASR</a>
+            <a href="https://github.com/FunAudioLLM/Fun-ASR">Fun-ASR</a>
+            <a href="https://github.com/FunAudioLLM/SenseVoice">SenseVoice</a>
+            <a href="https://github.com/modelscope/FunClip">FunClip</a>
+            <a href="/donors.html">Thanks</a>
+            </body>
+        """
+    }
+
+    failures = checker.validate_pages(pages)
+
+    assert any(
+        url in failure
+        and "visible text missing `精确合并源码通过 118 项聚焦回归测试`" in failure
+        for failure in failures
+    )
+
+
+def test_v1328_contract_rejects_css_test_count_and_indirect_repo_link():
+    checker = _load_module()
+    url = "https://www.funasr.com/en/blog/funasr-v1-3-28-realtime-websocket-subtitles.html"
+    pages = {
+        url: """
+            <style>.proof { font-weight: 600; }</style>
+            <body>
+            funasr==1.3.28 funasr-realtime-server VAD STOP SenseVoice
+            The exact merged source passed 118 focused regression tests.
+            runtime-llamacpp-v0.1.9
+            <a href="https://github.com/modelscope/FunASR/releases/tag/v1.3.28">Release</a>
+            <a href="https://github.com/FunAudioLLM/Fun-ASR">Fun-ASR</a>
+            <a href="https://github.com/FunAudioLLM/SenseVoice">SenseVoice</a>
+            <a href="https://github.com/modelscope/FunClip">FunClip</a>
+            <a href="/en/donors.html">Thanks</a>
+            </body>
+        """
+    }
+
+    failures = checker.validate_pages(pages)
+
+    assert any(
+        url in failure
+        and "visible text missing `The realtime WebSocket file also passed all 60 tests independently`"
+        in failure
+        for failure in failures
+    )
+    assert any(
+        url in failure
+        and "missing link `https://github.com/modelscope/FunASR`" in failure
+        for failure in failures
+    )
+
+
+def test_v1328_contract_requires_visible_stop_and_sensevoice_copy():
+    checker = _load_module()
+    url = "https://www.funasr.com/en/blog/funasr-v1-3-28-realtime-websocket-subtitles.html"
+    pages = {
+        url: """
+            <head><meta name="keywords" content="STOP"></head>
+            <body>
+            funasr==1.3.28 funasr-realtime-server VAD
+            The exact merged source passed 118 focused regression tests.
+            The realtime WebSocket file also passed all 60 tests independently.
+            runtime-llamacpp-v0.1.9
+            https://github.com/modelscope/FunASR/releases/tag/v1.3.28
+            <a href="https://github.com/modelscope/FunASR">FunASR</a>
+            <a href="https://github.com/FunAudioLLM/Fun-ASR">Fun-ASR</a>
+            <a href="https://github.com/FunAudioLLM/SenseVoice">Repository</a>
+            <a href="https://github.com/modelscope/FunClip">FunClip</a>
+            <a href="/en/donors.html">Thanks</a>
+            </body>
+        """
+    }
+
+    failures = checker.validate_pages(pages)
+
+    assert any(
+        url in failure and "visible text missing `including STOP final decode`" in failure
+        for failure in failures
+    )
+    assert any(
+        url in failure
+        and "visible text missing `SenseVoice users receive the subtitle alignment fix`"
+        in failure
+        for failure in failures
     )
 
 

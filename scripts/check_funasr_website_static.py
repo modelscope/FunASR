@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+from html.parser import HTMLParser
 import re
 import sys
 import time
@@ -19,6 +20,7 @@ class PageContract:
     required: tuple[str, ...]
     forbidden: tuple[str, ...] = ()
     visible_required: tuple[str, ...] = ()
+    required_links: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -212,6 +214,52 @@ PAGE_CONTRACTS: dict[str, PageContract] = {
         ),
         forbidden=("funasr==1.3.26", "runtime-llamacpp-v0.1.1"),
     ),
+    f"{BASE_URL}/blog/funasr-v1-3-28-realtime-websocket-subtitles.html": PageContract(
+        required=(
+            "funasr==1.3.28",
+            "funasr-realtime-server",
+            "VAD",
+            "runtime-llamacpp-v0.1.9",
+            "https://github.com/modelscope/FunASR/releases/tag/v1.3.28",
+            "/donors.html",
+        ),
+        visible_required=(
+            "精确合并源码通过 118 项聚焦回归测试",
+            "实时 WebSocket 文件还独立通过 60 项测试",
+            "覆盖 STOP 最终解码",
+            "SenseVoice 用户通过同一次包升级获得字幕对齐修复",
+        ),
+        required_links=(
+            "https://github.com/modelscope/FunASR",
+            "https://github.com/FunAudioLLM/Fun-ASR",
+            "https://github.com/FunAudioLLM/SenseVoice",
+            "https://github.com/modelscope/FunClip",
+        ),
+        forbidden=("funasr==1.3.27", "runtime-llamacpp-v0.1.1"),
+    ),
+    f"{BASE_URL}/en/blog/funasr-v1-3-28-realtime-websocket-subtitles.html": PageContract(
+        required=(
+            "funasr==1.3.28",
+            "funasr-realtime-server",
+            "VAD",
+            "runtime-llamacpp-v0.1.9",
+            "https://github.com/modelscope/FunASR/releases/tag/v1.3.28",
+            "/en/donors.html",
+        ),
+        visible_required=(
+            "The exact merged source passed 118 focused regression tests",
+            "The realtime WebSocket file also passed all 60 tests independently",
+            "including STOP final decode",
+            "SenseVoice users receive the subtitle alignment fix",
+        ),
+        required_links=(
+            "https://github.com/modelscope/FunASR",
+            "https://github.com/FunAudioLLM/Fun-ASR",
+            "https://github.com/FunAudioLLM/SenseVoice",
+            "https://github.com/modelscope/FunClip",
+        ),
+        forbidden=("funasr==1.3.27", "runtime-llamacpp-v0.1.1"),
+    ),
 }
 
 
@@ -235,6 +283,27 @@ def extract_visible_text(html: str) -> str:
     return re.sub(r"\s+", " ", body).strip()
 
 
+class _LinkCollector(HTMLParser):
+    def __init__(self) -> None:
+        super().__init__()
+        self.links: set[str] = set()
+
+    def handle_starttag(
+        self, tag: str, attrs: list[tuple[str, str | None]]
+    ) -> None:
+        if tag.lower() != "a":
+            return
+        for name, value in attrs:
+            if name.lower() == "href" and value is not None:
+                self.links.add(value)
+
+
+def extract_links(html: str) -> set[str]:
+    parser = _LinkCollector()
+    parser.feed(html)
+    return parser.links
+
+
 def validate_pages(pages: dict[str, str]) -> list[str]:
     failures: list[str] = []
     for url, contract in PAGE_CONTRACTS.items():
@@ -250,6 +319,11 @@ def validate_pages(pages: dict[str, str]) -> list[str]:
             for needle in contract.visible_required:
                 if needle not in visible_text:
                     failures.append(f"{url}: visible text missing `{needle}`")
+        if contract.required_links:
+            links = extract_links(text)
+            for target in contract.required_links:
+                if target not in links:
+                    failures.append(f"{url}: missing link `{target}`")
         for needle in contract.forbidden:
             if needle in text:
                 failures.append(f"{url}: forbidden `{needle}`")
