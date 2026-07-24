@@ -22,6 +22,7 @@ import torch
 import warnings
 import regex
 import websockets
+from websockets.exceptions import ConnectionClosed
 
 from funasr.utils.postprocess_hotwords import (
     apply_postprocess_hotwords_to_results,
@@ -1154,7 +1155,7 @@ async def handle_client(websocket, args):
                     await websocket.send(json.dumps(result))
                     last_decode_time = now
 
-    except websockets.exceptions.ConnectionClosed:
+    except ConnectionClosed:
         logger.info("Client disconnected")
     except Exception as e:
         logger.error(f"Error: {e}", exc_info=True)

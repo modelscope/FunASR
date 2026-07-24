@@ -37,19 +37,70 @@ def test_example_realtime_entrypoint_delegates_to_packaged_cli():
 
 
 def load_service_module():
-    websockets_stub = types.SimpleNamespace(
-        exceptions=types.SimpleNamespace(ConnectionClosed=Exception),
-        serve=lambda *args, **kwargs: None,
-    )
-    sys.modules.setdefault("websockets", websockets_stub)
+    websockets_stub = types.ModuleType("websockets")
+    websockets_stub.serve = lambda *args, **kwargs: None
+    exceptions_stub = types.ModuleType("websockets.exceptions")
+    exceptions_stub.ConnectionClosed = type("ConnectionClosed", (Exception,), {})
+
+    previous_websockets = sys.modules.get("websockets")
+    previous_exceptions = sys.modules.get("websockets.exceptions")
+    sys.modules["websockets"] = websockets_stub
+    sys.modules["websockets.exceptions"] = exceptions_stub
 
     module_name = "serve_realtime_ws_under_test"
     sys.modules.pop(module_name, None)
     spec = importlib.util.spec_from_file_location(module_name, SERVICE_PATH)
     module = importlib.util.module_from_spec(spec)
     assert spec.loader is not None
-    spec.loader.exec_module(module)
+    try:
+        spec.loader.exec_module(module)
+    finally:
+        if previous_websockets is None:
+            sys.modules.pop("websockets", None)
+        else:
+            sys.modules["websockets"] = previous_websockets
+        if previous_exceptions is None:
+            sys.modules.pop("websockets.exceptions", None)
+        else:
+            sys.modules["websockets.exceptions"] = previous_exceptions
     return module
+
+
+def test_handler_catches_unexpected_errors_without_top_level_exceptions(
+    monkeypatch, caplog
+):
+    module = load_service_module()
+
+    class FailingWebSocket:
+        remote_address = ("127.0.0.1", 12345)
+
+        def __aiter__(self):
+            return self
+
+        async def __anext__(self):
+            raise RuntimeError("boom")
+
+    class Session:
+        def __init__(self, *args, **kwargs):
+            pass
+
+    monkeypatch.setattr(
+        module, "load_models", lambda args: (object(), {}, object(), None)
+    )
+    monkeypatch.setattr(module, "DynamicStreamingVAD", lambda model: object())
+    monkeypatch.setattr(
+        module, "create_speaker_tracker", lambda model, args: None
+    )
+    monkeypatch.setattr(module, "RealtimeASRSession", Session)
+    args = types.SimpleNamespace(
+        device="cpu",
+        decode_interval=0.48,
+        partial_window_sec=15.0,
+    )
+
+    asyncio.run(module.handle_client(FailingWebSocket(), args))
+
+    assert "boom" in caplog.text
 
 
 def test_cli_defaults_disable_speaker_and_bound_partial_window():
@@ -1684,6 +1735,10 @@ def test_handler_logs_session_stats_on_configured_interval(monkeypatch):
         def should_decode(self):
             return False
 
+        def decode(self, is_final=False):
+            assert is_final is True
+            return {"text": "", "sentences": []}
+
         def session_stats(self):
             return {
                 "duration_ms": self.total_samples,
@@ -1734,7 +1789,8 @@ def test_handler_logs_session_stats_on_configured_interval(monkeypatch):
         log_session_stats_interval=1.0,
     )
 
-    asyncio.run(module.handle_client(FakeWebSocket(), args))
+    websocket = FakeWebSocket()
+    asyncio.run(module.handle_client(websocket, args))
 
     assert logged == [
         {
@@ -1748,3 +1804,4 @@ def test_handler_logs_session_stats_on_configured_interval(monkeypatch):
             "speaker_centers": 0,
         }
     ]
+    assert websocket.sent[-1] == {"event": "stopped"}
