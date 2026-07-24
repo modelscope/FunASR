@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
-# Copyright FunASR (https://github.com/FunAudioLLM/SenseVoice). All Rights Reserved.
+# Copyright FunASR (https://github.com/QwenAudio/SenseVoice). All Rights Reserved.
 #  MIT License  (https://opensource.org/licenses/MIT)
 
 from funasr import AutoModel

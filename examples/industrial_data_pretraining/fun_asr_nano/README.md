@@ -51,7 +51,7 @@ Online Experience:
 # Environment Setup 🐍
 
 ```shell
-git clone https://github.com/FunAudioLLM/Fun-ASR.git
+git clone https://github.com/QwenAudio/Fun-ASR.git
 cd Fun-ASR
 pip install -r requirements.txt
 ```

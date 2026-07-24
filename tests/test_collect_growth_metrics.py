@@ -294,23 +294,23 @@ def test_collect_ecosystem_metrics_sums_repositories_and_target_gap(monkeypatch)
             "pushed_at": "2026-06-30T01:48:35Z",
             "html_url": "https://github.com/modelscope/FunASR",
         },
-        "FunAudioLLM/Fun-ASR": {
+        "QwenAudio/Fun-ASR": {
             "stargazers_count": 1318,
             "forks_count": 120,
             "subscribers_count": 20,
             "open_issues_count": 0,
             "default_branch": "main",
             "pushed_at": "2026-06-29T13:24:05Z",
-            "html_url": "https://github.com/FunAudioLLM/Fun-ASR",
+            "html_url": "https://github.com/QwenAudio/Fun-ASR",
         },
-        "FunAudioLLM/SenseVoice": {
+        "QwenAudio/SenseVoice": {
             "stargazers_count": 8718,
             "forks_count": 800,
             "subscribers_count": 90,
             "open_issues_count": 0,
             "default_branch": "main",
             "pushed_at": "2026-06-29T13:24:06Z",
-            "html_url": "https://github.com/FunAudioLLM/SenseVoice",
+            "html_url": "https://github.com/QwenAudio/SenseVoice",
         },
         "modelscope/FunClip": {
             "stargazers_count": 5872,
@@ -336,7 +336,7 @@ def test_collect_ecosystem_metrics_sums_repositories_and_target_gap(monkeypatch)
     monkeypatch.setattr(module, "fetch_json", fake_fetch_json)
 
     metrics = module.collect_ecosystem_metrics(
-        ["modelscope/FunASR", "FunAudioLLM/Fun-ASR", "FunAudioLLM/SenseVoice", "modelscope/FunClip"],
+        ["modelscope/FunASR", "QwenAudio/Fun-ASR", "QwenAudio/SenseVoice", "modelscope/FunClip"],
         package="funasr",
         baseline_stars=31224,
         target_additional_stars=20000,
@@ -348,8 +348,8 @@ def test_collect_ecosystem_metrics_sums_repositories_and_target_gap(monkeypatch)
     assert metrics["ecosystem"]["remaining_to_target"] == 16602
     assert [repo["repo"] for repo in metrics["ecosystem"]["repositories"]] == [
         "modelscope/FunASR",
-        "FunAudioLLM/Fun-ASR",
-        "FunAudioLLM/SenseVoice",
+        "QwenAudio/Fun-ASR",
+        "QwenAudio/SenseVoice",
         "modelscope/FunClip",
     ]
 
@@ -444,8 +444,8 @@ def test_collect_ecosystem_metrics_calculates_daily_target(monkeypatch):
             repo = url.removeprefix("https://api.github.com/repos/")
             stars = {
                 "modelscope/FunASR": 18715,
-                "FunAudioLLM/Fun-ASR": 1318,
-                "FunAudioLLM/SenseVoice": 8718,
+                "QwenAudio/Fun-ASR": 1318,
+                "QwenAudio/SenseVoice": 8718,
                 "modelscope/FunClip": 5872,
             }[repo]
             return {
@@ -464,7 +464,7 @@ def test_collect_ecosystem_metrics_calculates_daily_target(monkeypatch):
     monkeypatch.setattr(module, "fetch_json", fake_fetch_json)
 
     metrics = module.collect_ecosystem_metrics(
-        ["modelscope/FunASR", "FunAudioLLM/Fun-ASR", "FunAudioLLM/SenseVoice", "modelscope/FunClip"],
+        ["modelscope/FunASR", "QwenAudio/Fun-ASR", "QwenAudio/SenseVoice", "modelscope/FunClip"],
         package="funasr",
         baseline_stars=31224,
         target_additional_stars=20000,
@@ -2009,8 +2009,8 @@ def test_main_outputs_ecosystem_json(monkeypatch):
 
     repo_stars = {
         "modelscope/FunASR": 18714,
-        "FunAudioLLM/Fun-ASR": 1318,
-        "FunAudioLLM/SenseVoice": 8718,
+        "QwenAudio/Fun-ASR": 1318,
+        "QwenAudio/SenseVoice": 8718,
         "modelscope/FunClip": 5872,
     }
 
@@ -2061,8 +2061,8 @@ def test_main_treats_explicit_multi_repos_as_ecosystem_json(monkeypatch):
 
     repo_stars = {
         "modelscope/FunASR": 18714,
-        "FunAudioLLM/Fun-ASR": 1318,
-        "FunAudioLLM/SenseVoice": 8718,
+        "QwenAudio/Fun-ASR": 1318,
+        "QwenAudio/SenseVoice": 8718,
         "modelscope/FunClip": 5872,
     }
 
@@ -2094,8 +2094,8 @@ def test_main_treats_explicit_multi_repos_as_ecosystem_json(monkeypatch):
             "json",
             "--repos",
             "modelscope/FunASR",
-            "FunAudioLLM/Fun-ASR",
-            "FunAudioLLM/SenseVoice",
+            "QwenAudio/Fun-ASR",
+            "QwenAudio/SenseVoice",
             "modelscope/FunClip",
         ],
     )
@@ -2108,8 +2108,8 @@ def test_main_treats_explicit_multi_repos_as_ecosystem_json(monkeypatch):
     assert payload["ecosystem"]["total_stars"] == 34622
     assert [repo["repo"] for repo in payload["ecosystem"]["repositories"]] == [
         "modelscope/FunASR",
-        "FunAudioLLM/Fun-ASR",
-        "FunAudioLLM/SenseVoice",
+        "QwenAudio/Fun-ASR",
+        "QwenAudio/SenseVoice",
         "modelscope/FunClip",
     ]
 

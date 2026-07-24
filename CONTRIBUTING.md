@@ -9,8 +9,8 @@ FunASR spans four repositories. Before opening an issue or PR, check which repo 
 | Repository | Owns |
 |---|---|
 | `modelscope/FunASR` | Toolkit, inference pipelines, deployment services, `funasr` PyPI package |
-| `FunAudioLLM/Fun-ASR` | Fun-ASR-Nano / MLT model family, checkpoints, model cards, benchmarks, model-level integrations (Transformers, vLLM, GGUF) |
-| `FunAudioLLM/SenseVoice` | SenseVoice model: ASR + emotion + audio events |
+| `QwenAudio/Fun-ASR` | Fun-ASR-Nano / MLT model family, checkpoints, model cards, benchmarks, model-level integrations (Transformers, vLLM, GGUF) |
+| `QwenAudio/SenseVoice` | SenseVoice model: ASR + emotion + audio events |
 | `modelscope/FunClip` | Video transcription, subtitles, Gradio UI |
 
 **Quick test:** does the problem persist with a different model? If yes, it belongs in `modelscope/FunASR`. If it only affects one model, file it in that model's repo.

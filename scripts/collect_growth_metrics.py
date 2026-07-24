@@ -22,8 +22,8 @@ from typing import Any, Dict, Optional, Sequence
 DEFAULT_REPO = "modelscope/FunASR"
 DEFAULT_ECOSYSTEM_REPOS = [
     "modelscope/FunASR",
-    "FunAudioLLM/Fun-ASR",
-    "FunAudioLLM/SenseVoice",
+    "QwenAudio/Fun-ASR",
+    "QwenAudio/SenseVoice",
     "modelscope/FunClip",
 ]
 DEFAULT_PACKAGE = "funasr"
