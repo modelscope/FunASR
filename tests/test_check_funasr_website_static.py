@@ -110,8 +110,8 @@ def test_website_contract_accepts_current_public_copy():
             runtime-llamacpp-v0.1.9
             funasr-llamacpp-windows-x64-vulkan.zip
             https://github.com/modelscope/FunASR
-            https://github.com/FunAudioLLM/Fun-ASR
-            https://github.com/FunAudioLLM/SenseVoice
+            https://github.com/QwenAudio/Fun-ASR
+            https://github.com/QwenAudio/SenseVoice
             https://github.com/modelscope/FunClip
             <a href="/donors.html">功德榜</a>
         """,
@@ -122,8 +122,8 @@ def test_website_contract_accepts_current_public_copy():
             runtime-llamacpp-v0.1.9
             funasr-llamacpp-windows-x64-vulkan.zip
             https://github.com/modelscope/FunASR
-            https://github.com/FunAudioLLM/Fun-ASR
-            https://github.com/FunAudioLLM/SenseVoice
+            https://github.com/QwenAudio/Fun-ASR
+            https://github.com/QwenAudio/SenseVoice
             https://github.com/modelscope/FunClip
             <a href="/en/donors.html">Thanks</a>
         """,
@@ -136,8 +136,8 @@ def test_website_contract_accepts_current_public_copy():
             runtime-llamacpp-v0.1.9
             https://github.com/modelscope/FunASR/releases/tag/v1.3.27
             https://github.com/modelscope/FunASR
-            https://github.com/FunAudioLLM/Fun-ASR
-            https://github.com/FunAudioLLM/SenseVoice
+            https://github.com/QwenAudio/Fun-ASR
+            https://github.com/QwenAudio/SenseVoice
             https://github.com/modelscope/FunClip
             <a href="/donors.html">功德榜</a>
         """,
@@ -150,8 +150,8 @@ def test_website_contract_accepts_current_public_copy():
             runtime-llamacpp-v0.1.9
             https://github.com/modelscope/FunASR/releases/tag/v1.3.27
             https://github.com/modelscope/FunASR
-            https://github.com/FunAudioLLM/Fun-ASR
-            https://github.com/FunAudioLLM/SenseVoice
+            https://github.com/QwenAudio/Fun-ASR
+            https://github.com/QwenAudio/SenseVoice
             https://github.com/modelscope/FunClip
             <a href="/en/donors.html">Thanks</a>
         """,
@@ -166,8 +166,8 @@ def test_website_contract_accepts_current_public_copy():
             runtime-llamacpp-v0.1.9
             https://github.com/modelscope/FunASR/releases/tag/v1.3.28
             <a href="https://github.com/modelscope/FunASR">FunASR</a>
-            <a href="https://github.com/FunAudioLLM/Fun-ASR">Fun-ASR</a>
-            <a href="https://github.com/FunAudioLLM/SenseVoice">SenseVoice</a>
+            <a href="https://github.com/QwenAudio/Fun-ASR">Fun-ASR</a>
+            <a href="https://github.com/QwenAudio/SenseVoice">SenseVoice</a>
             <a href="https://github.com/modelscope/FunClip">FunClip</a>
             <a href="/donors.html">功德榜</a>
         """,
@@ -182,8 +182,8 @@ def test_website_contract_accepts_current_public_copy():
             runtime-llamacpp-v0.1.9
             https://github.com/modelscope/FunASR/releases/tag/v1.3.28
             <a href="https://github.com/modelscope/FunASR">FunASR</a>
-            <a href="https://github.com/FunAudioLLM/Fun-ASR">Fun-ASR</a>
-            <a href="https://github.com/FunAudioLLM/SenseVoice">SenseVoice</a>
+            <a href="https://github.com/QwenAudio/Fun-ASR">Fun-ASR</a>
+            <a href="https://github.com/QwenAudio/SenseVoice">SenseVoice</a>
             <a href="https://github.com/modelscope/FunClip">FunClip</a>
             <a href="/en/donors.html">Thanks</a>
         """,
@@ -342,8 +342,8 @@ def test_v1328_contract_rejects_language_swapped_body():
             runtime-llamacpp-v0.1.9
             https://github.com/modelscope/FunASR/releases/tag/v1.3.28
             <a href="https://github.com/modelscope/FunASR">FunASR</a>
-            <a href="https://github.com/FunAudioLLM/Fun-ASR">Fun-ASR</a>
-            <a href="https://github.com/FunAudioLLM/SenseVoice">SenseVoice</a>
+            <a href="https://github.com/QwenAudio/Fun-ASR">Fun-ASR</a>
+            <a href="https://github.com/QwenAudio/SenseVoice">SenseVoice</a>
             <a href="https://github.com/modelscope/FunClip">FunClip</a>
             <a href="/donors.html">Thanks</a>
             </body>
@@ -370,8 +370,8 @@ def test_v1328_contract_rejects_css_test_count_and_indirect_repo_link():
             The exact merged source passed 118 focused regression tests.
             runtime-llamacpp-v0.1.9
             <a href="https://github.com/modelscope/FunASR/releases/tag/v1.3.28">Release</a>
-            <a href="https://github.com/FunAudioLLM/Fun-ASR">Fun-ASR</a>
-            <a href="https://github.com/FunAudioLLM/SenseVoice">SenseVoice</a>
+            <a href="https://github.com/QwenAudio/Fun-ASR">Fun-ASR</a>
+            <a href="https://github.com/QwenAudio/SenseVoice">SenseVoice</a>
             <a href="https://github.com/modelscope/FunClip">FunClip</a>
             <a href="/en/donors.html">Thanks</a>
             </body>
@@ -406,8 +406,8 @@ def test_v1328_contract_requires_visible_stop_and_sensevoice_copy():
             runtime-llamacpp-v0.1.9
             https://github.com/modelscope/FunASR/releases/tag/v1.3.28
             <a href="https://github.com/modelscope/FunASR">FunASR</a>
-            <a href="https://github.com/FunAudioLLM/Fun-ASR">Fun-ASR</a>
-            <a href="https://github.com/FunAudioLLM/SenseVoice">Repository</a>
+            <a href="https://github.com/QwenAudio/Fun-ASR">Fun-ASR</a>
+            <a href="https://github.com/QwenAudio/SenseVoice">Repository</a>
             <a href="https://github.com/modelscope/FunClip">FunClip</a>
             <a href="/en/donors.html">Thanks</a>
             </body>

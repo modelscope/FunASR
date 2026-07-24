@@ -39,7 +39,7 @@ def _patches(source_root: Path) -> tuple[CardPatch, ...]:
     nano_en_env_old = """# Environment Setup 🐍
 
 ```shell
-git clone https://github.com/FunAudioLLM/Fun-ASR.git
+git clone https://github.com/QwenAudio/Fun-ASR.git
 cd Fun-ASR
 pip install -r requirements.txt
 ```"""
@@ -61,14 +61,14 @@ print(torch.__version__, torch.version.cuda, torch.cuda.is_available())
 Optional demo repository setup:
 
 ```shell
-git clone https://github.com/FunAudioLLM/Fun-ASR.git
+git clone https://github.com/QwenAudio/Fun-ASR.git
 cd Fun-ASR
 pip install -r requirements.txt
 ```"""
     nano_zh_env_old = """# 环境安装 🐍
 
 ```shell
-git clone https://github.com/FunAudioLLM/Fun-ASR.git
+git clone https://github.com/QwenAudio/Fun-ASR.git
 cd Fun-ASR
 pip install -r requirements.txt
 ```"""
@@ -90,7 +90,7 @@ print(torch.__version__, torch.version.cuda, torch.cuda.is_available())
 如需运行 demo 仓库，可再执行：
 
 ```shell
-git clone https://github.com/FunAudioLLM/Fun-ASR.git
+git clone https://github.com/QwenAudio/Fun-ASR.git
 cd Fun-ASR
 pip install -r requirements.txt
 ```"""

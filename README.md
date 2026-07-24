@@ -344,12 +344,12 @@ asset is published.
 - 2026/05/20: Added Qwen3-ASR (0.6B/1.7B) — 52 languages, auto detection. [usage](examples/industrial_data_pretraining/qwen3_asr)
 - 2026/05/20: Added GLM-ASR-Nano (1.5B) — 17 languages, dialect support. [usage](examples/industrial_data_pretraining/glm_asr)
 - 2026/05/19: Fun-ASR-Nano and SenseVoice can be combined with VAD and CAM++ for speaker diarization.
-- 2025/12/15: [Fun-ASR-Nano-2512](https://github.com/FunAudioLLM/Fun-ASR) — Chinese, English, Japanese, and Chinese dialect support; trained on tens of millions of hours.
+- 2025/12/15: [Fun-ASR-Nano-2512](https://github.com/QwenAudio/Fun-ASR) — Chinese, English, Japanese, and Chinese dialect support; trained on tens of millions of hours.
 
 <details><summary>Older</summary>
 
 - 2024/10/10: Whisper-large-v3-turbo support added.
-- 2024/07/04: [SenseVoice](https://github.com/FunAudioLLM/SenseVoice) — ASR + emotion + audio events.
+- 2024/07/04: [SenseVoice](https://github.com/QwenAudio/SenseVoice) — ASR + emotion + audio events.
 - 2024/01/30: FunASR 1.0 released.
 
 </details>

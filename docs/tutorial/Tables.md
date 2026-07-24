@@ -360,4 +360,4 @@ res = m.inference(
 print(text)
 ```
 
-Trim reference:[https://github.com/FunAudioLLM/SenseVoice/blob/main/finetune.sh](https://github.com/FunAudioLLM/SenseVoice/blob/main/finetune.sh)
+Trim reference:[https://github.com/QwenAudio/SenseVoice/blob/main/finetune.sh](https://github.com/QwenAudio/SenseVoice/blob/main/finetune.sh)

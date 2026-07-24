@@ -12,8 +12,8 @@ def test_growth_plan_records_four_repo_community_template_completion():
         "[x] Add or refresh CONTRIBUTING, PR template, and issue templates",
         "modelscope/FunClip#188",
         "modelscope/FunClip#189",
-        "FunAudioLLM/Fun-ASR#151",
-        "FunAudioLLM/SenseVoice#327",
+        "QwenAudio/Fun-ASR#151",
+        "QwenAudio/SenseVoice#327",
         "four core repositories now have `CONTRIBUTING.md`, issue templates, and PR templates",
     ]
     for marker in required_markers:
@@ -83,8 +83,8 @@ def test_growth_plan_records_github_metadata_completion():
     required_markers = [
         "[x] Confirm GitHub repo description and topics mention ASR",
         "`modelscope/FunASR` topics include `mcp-server`, `openai-compatible-api`, `streaming-asr`, and `vllm`",
-        "`FunAudioLLM/Fun-ASR` topics include `fun-asr-nano`, `llama-cpp`, `gguf`, and `multilingual-asr`",
-        "`FunAudioLLM/SenseVoice` topics include `sensevoice`, `language-identification`, `audio-event-detection`, and `speech-understanding`",
+        "`QwenAudio/Fun-ASR` topics include `fun-asr-nano`, `llama-cpp`, `gguf`, and `multilingual-asr`",
+        "`QwenAudio/SenseVoice` topics include `sensevoice`, `language-identification`, `audio-event-detection`, and `speech-understanding`",
         "`modelscope/FunClip` topics include `video-transcription`, `auto-subtitles`, `ai-video-editing`, and `funclip`",
     ]
     for marker in required_markers:
@@ -235,8 +235,8 @@ def test_growth_plan_records_issue_triage_completion():
     required_markers = [
         "[x] Triage all new issues within 48 hours",
         "`modelscope/FunASR`",
-        "`FunAudioLLM/Fun-ASR`",
-        "`FunAudioLLM/SenseVoice`",
+        "`QwenAudio/Fun-ASR`",
+        "`QwenAudio/SenseVoice`",
         "`modelscope/FunClip`",
         "`0` open pull requests",
         "Fun-ASR, SenseVoice, and FunClip had `0` open issues",
