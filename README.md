@@ -1,3 +1,5 @@
+[![MCP Toplist](https://mcptoplist.com/badge/io.github.modelscope%2Ffunasr-mcp.svg)](https://mcptoplist.com/server/io.github.modelscope%2Ffunasr-mcp)
+
 ([简体中文](./README_zh.md)|English|[日本語](./README_ja.md)|[한국어](./README_ko.md))
 
 <p align="center">
