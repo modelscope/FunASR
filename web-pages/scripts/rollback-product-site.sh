@@ -19,12 +19,21 @@ target=$site_base/releases/$release_id
 validator=${VALIDATOR:-$script_dir/../product-site/validate.py}
 python_bin=${PYTHON_BIN:-python3}
 nginx_bin=${NGINX_BIN:-nginx}
+nginx_master_pid=${NGINX_MASTER_PID:-}
 curl_bin=${CURL_BIN:-curl}
 smoke_base_url=${SMOKE_BASE_URL:-https://www.funasr.com}
 temporary_link=$site_base/.current.rollback.$$
 lock_dir=$site_base/.product-site-release.lock
 previous_target=
 switched=0
+
+reload_nginx() {
+  if [[ -n $nginx_master_pid ]]; then
+    kill -HUP "$nginx_master_pid"
+  else
+    "$nginx_bin" -s reload
+  fi
+}
 
 cleanup() {
   rm -f -- "$temporary_link"
@@ -37,7 +46,7 @@ on_error() {
   if [[ $switched -eq 1 && -n $previous_target ]]; then
     ln -s -- "$previous_target" "$temporary_link"
     mv -Tf -- "$temporary_link" "$current_link"
-    "$nginx_bin" -s reload >/dev/null 2>&1 || true
+    reload_nginx >/dev/null 2>&1 || true
   fi
   cleanup
   echo "rollback failed; previous site restored" >&2
@@ -64,7 +73,7 @@ fi
 ln -s -- "$target" "$temporary_link"
 mv -Tf -- "$temporary_link" "$current_link"
 switched=1
-"$nginx_bin" -s reload
+reload_nginx
 
 for route in / /deploy/ /blog/ /donors.html; do
   "$curl_bin" --fail --silent --show-error --max-time 15 "$smoke_base_url$route" >/dev/null

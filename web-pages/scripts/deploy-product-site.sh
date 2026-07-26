@@ -25,6 +25,7 @@ validator=${VALIDATOR:-$script_dir/../product-site/validate.py}
 python_bin=${PYTHON_BIN:-python3}
 nginx_config=${NGINX_CONFIG:-/etc/nginx/nginx.conf}
 nginx_bin=${NGINX_BIN:-nginx}
+nginx_master_pid=${NGINX_MASTER_PID:-}
 curl_bin=${CURL_BIN:-curl}
 smoke_base_url=${SMOKE_BASE_URL:-https://www.funasr.com}
 destination=$releases_dir/$release_id
@@ -33,6 +34,14 @@ temporary_link=$site_base/.current.$release_id.$$
 lock_dir=$site_base/.product-site-release.lock
 previous_target=
 switched=0
+
+reload_nginx() {
+  if [[ -n $nginx_master_pid ]]; then
+    kill -HUP "$nginx_master_pid"
+  else
+    "$nginx_bin" -s reload
+  fi
+}
 
 cleanup() {
   rm -rf -- "$staging"
@@ -50,7 +59,7 @@ restore_previous() {
   else
     rm -f -- "$current_link"
   fi
-  "$nginx_bin" -s reload >/dev/null 2>&1 || true
+  reload_nginx >/dev/null 2>&1 || true
 }
 
 on_error() {
@@ -90,7 +99,7 @@ fi
 ln -s -- "$destination" "$temporary_link"
 mv -Tf -- "$temporary_link" "$current_link"
 switched=1
-"$nginx_bin" -s reload
+reload_nginx
 
 for route in / /deploy/ /blog/ /donors.html; do
   "$curl_bin" --fail --silent --show-error --max-time 15 "$smoke_base_url$route" >/dev/null
