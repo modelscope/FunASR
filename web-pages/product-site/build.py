@@ -10,8 +10,10 @@ import tempfile
 from pathlib import Path
 from typing import Any
 
+from bs4 import BeautifulSoup
 from jinja2 import Environment, FileSystemLoader, StrictUndefined, select_autoescape
 
+from legacy import normalize_document
 from registry import load_registry, validate_registry
 from selector import MATCH_WEIGHTS
 
@@ -38,6 +40,14 @@ def route_path(output_dir: Path, route: str) -> Path:
 
 def canonical_url(route: str) -> str:
     return f'{BASE_URL}{route}'
+
+
+def legacy_route(relative: Path) -> str:
+    """Convert a legacy HTML path to its public route."""
+    route = f'/{relative.as_posix()}'
+    if relative.name == 'index.html':
+        route = route[:-len('index.html')]
+    return route
 
 
 def _copy_hashed_assets(stage: Path) -> tuple[dict[str, str], dict[str, str]]:
@@ -146,6 +156,17 @@ def build(output_dir: Path) -> dict[str, Any]:
         legacy = SITE_ROOT / 'legacy'
         if legacy.is_dir():
             shutil.copytree(legacy, stage, dirs_exist_ok=True)
+            for source in sorted(legacy.rglob('*.html')):
+                html = source.read_text(encoding='utf-8')
+                if not BeautifulSoup(html, 'html.parser').select_one('nav.nav'):
+                    continue
+                relative = source.relative_to(legacy)
+                language = 'en' if relative.parts[0] == 'en' else 'zh'
+                destination = stage / relative
+                destination.write_text(
+                    normalize_document(html, legacy_route(relative), language),
+                    encoding='utf-8',
+                )
 
         registry = load_registry(SITE_ROOT / 'data' / 'deployments.json')
         errors = validate_registry(registry)

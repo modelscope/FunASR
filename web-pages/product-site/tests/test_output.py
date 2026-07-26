@@ -97,3 +97,15 @@ def test_manifest_contains_all_detail_and_benchmark_routes(built_site):
     expected.update({'/benchmarks.html', '/en/benchmarks.html'})
 
     assert expected <= routes
+
+
+def test_old_llama_routes_point_to_product_pages(built_site):
+    for relative, expected in (
+        ('llama-cpp.html', '/deploy/llama-cpp.html'),
+        ('en/llama-cpp.html', '/en/deploy/llama-cpp.html'),
+    ):
+        soup = read_soup(built_site / relative)
+        assert soup.select_one('link[rel="canonical"]')['href'].endswith(expected)
+        assert soup.select_one('.nav-links a[href$="/deploy/"]') or soup.select_one(
+            '.nav-links a[href$="/en/deploy/"]'
+        )
