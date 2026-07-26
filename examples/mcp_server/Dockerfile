@@ -1,7 +1,7 @@
 FROM python:3.10-slim
 
-ARG FUNASR_VERSION=1.3.14
-ARG VERSION=0.1.0
+ARG FUNASR_VERSION=1.3.29
+ARG VERSION=0.1.2
 ARG VCS_REF=unknown
 
 LABEL io.modelcontextprotocol.server.name="io.github.modelscope/funasr-mcp" \

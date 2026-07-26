@@ -128,6 +128,27 @@ class FunASRMCPToolContractTest(unittest.TestCase):
             language_schema["enum"], ["auto", "zh", "yue", "en", "ja", "ko"]
         )
 
+    def test_tool_contract_explains_usage_side_effects_and_path_scope(self):
+        with patch.object(self.server, "send_response") as send_response:
+            self.server.handle_request({"id": 1, "method": "tools/list"})
+
+        tool = send_response.call_args[0][1]["tools"][0]
+        description = tool["description"].lower()
+        properties = tool["inputSchema"]["properties"]
+        audio_path_description = properties["audio_path"]["description"].lower()
+        language_description = properties["language"]["description"].lower()
+
+        self.assertIn("use this tool", description)
+        self.assertIn("do not use", description)
+        self.assertIn("first call", description)
+        self.assertIn("model cache", description)
+        self.assertIn("segments", description)
+        self.assertIn("local", audio_path_description)
+        self.assertIn("container", audio_path_description)
+        self.assertIn("url", audio_path_description)
+        self.assertIn("auto", language_description)
+        self.assertIn("explicit", language_description)
+
     def test_empty_audio_path_returns_a_parameter_error(self):
         with patch.object(self.server, "send_response") as send_response:
             self.server.handle_request(

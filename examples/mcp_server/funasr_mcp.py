@@ -123,17 +123,37 @@ def handle_request(request):
             "tools": [
                 {
                     "name": "transcribe_audio",
-                    "description": "Transcribe local speech audio with SenseVoiceSmall. Supports automatic or explicit Mandarin, Cantonese, English, Japanese, and Korean recognition with VAD segmentation.",
+                    "description": (
+                        "Transcribe one existing local audio file with FunASR and "
+                        "SenseVoiceSmall. Use this tool when the user provides a file "
+                        "path accessible to the MCP server and wants speech converted "
+                        "to text. Do not use it for URLs, live microphone streams, or "
+                        "files that are not mounted into the container. The first call "
+                        "may download and load model weights into the model cache, so "
+                        "it can take longer than later calls. Returns transcript text "
+                        "and, when available, time-aligned segments. Supports automatic "
+                        "or explicit Mandarin, Cantonese, English, Japanese, and Korean "
+                        "recognition with VAD segmentation."
+                    ),
                     "inputSchema": {
                         "type": "object",
                         "properties": {
                             "audio_path": {
                                 "type": "string",
-                                "description": "Path to audio file (wav, mp3, flac, etc)"
+                                "description": (
+                                    "Existing local audio file path visible to the MCP "
+                                    "server, such as /audio/meeting.wav for the container. "
+                                    "URLs and live streams are not accepted. Common WAV, "
+                                    "MP3, and FLAC files are supported."
+                                ),
                             },
                             "language": {
                                 "type": "string",
-                                "description": "Language hint: auto, zh, yue, en, ja, or ko",
+                                "description": (
+                                    "Optional language hint. Use auto to detect Mandarin, "
+                                    "Cantonese, English, Japanese, or Korean, or provide an "
+                                    "explicit code: zh, yue, en, ja, or ko."
+                                ),
                                 "enum": list(SUPPORTED_LANGUAGES),
                                 "default": "auto",
                             }
