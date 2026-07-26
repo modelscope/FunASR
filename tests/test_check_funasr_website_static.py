@@ -3,6 +3,8 @@ import sys
 import urllib.error
 from pathlib import Path
 
+import pytest
+
 
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / "scripts" / "check_funasr_website_static.py"
@@ -778,6 +780,84 @@ def test_navigation_contract_requires_donors_as_last_directory_link():
         for failure in failures
     )
     assert not any("plain.html" in failure for failure in failures)
+
+
+def test_navigation_contract_requires_visible_correctly_labeled_donor_link():
+    checker = _load_module()
+    pages = {
+        "https://www.funasr.com/blog/hidden.html": """
+            <nav><div class="nav-links">
+                <a href="/blog/">技术博客</a>
+                <a hidden href="/donors.html">功德榜</a>
+            </div></nav>
+        """,
+        "https://www.funasr.com/blog/wrong-label.html": """
+            <nav><div class="nav-links">
+                <a href="/blog/">技术博客</a>
+                <a href="/donors.html">社区</a>
+            </div></nav>
+        """,
+        "https://www.funasr.com/blog/hidden-label.html": """
+            <nav><div class="nav-links">
+                <a href="/blog/">技术博客</a>
+                <a href="/donors.html"><template>功德榜</template></a>
+            </div></nav>
+        """,
+        "https://www.funasr.com/en/blog/empty.html": """
+            <nav><div class="nav-links"></div></nav>
+        """,
+    }
+
+    failures = checker.validate_navigation(pages)
+
+    assert any(
+        "hidden.html" in failure
+        and "missing `/donors.html`; link must be visible" in failure
+        for failure in failures
+    )
+    assert any(
+        "wrong-label.html" in failure
+        and "must use visible label `功德榜`" in failure
+        for failure in failures
+    )
+    assert any(
+        "hidden-label.html" in failure
+        and "missing `/donors.html`; link must be visible" in failure
+        for failure in failures
+    )
+    assert any(
+        "empty.html" in failure
+        and "missing `/en/donors.html`; link must be visible" in failure
+        for failure in failures
+    )
+
+
+def test_fetch_pages_rejects_redirected_donor_page(monkeypatch):
+    checker = _load_module()
+    donor_url = "https://www.funasr.com/donors.html"
+
+    class FakeResponse:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+        def read(self):
+            return b"redirected donor copy"
+
+        def geturl(self):
+            return "https://www.funasr.com/community.html"
+
+    monkeypatch.setattr(checker.urllib.request, "urlopen", lambda url, timeout: FakeResponse())
+    monkeypatch.setattr(
+        checker,
+        "PAGE_CONTRACTS",
+        {donor_url: checker.PageContract(required=("donor copy",))},
+    )
+
+    with pytest.raises(RuntimeError, match="redirected"):
+        checker.fetch_pages(timeout=3, retries=0)
 
 
 def test_extract_sitemap_page_urls_keeps_unique_same_origin_html_pages():
