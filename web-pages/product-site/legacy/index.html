@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>FunASR - 工业级语音识别服务 | 语音理解一站式解决方案</title>
+<meta name="description" content="FunASR 是工业级语音识别服务，提供语音识别、语音检测、标点恢复、说话人分离、情感检测、音频事件识别，统一 Python 接口，支持 50+ 语言，私有化部署。">
+<link rel="icon" href="logo.png">
+<meta property="og:title" content="FunASR - 工业级语音理解一站式解决方案">
+<meta property="og:description" content="语音识别、语音检测、标点恢复、说话人分离、情感检测、音频事件识别——统一 Python 接口，一行命令部署。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://www.funasr.com">
+<meta property="og:image" content="https://www.funasr.com/logo.png">
+<link rel="canonical" href="https://www.funasr.com">
+<link rel="alternate" hreflang="zh" href="https://www.funasr.com">
+<link rel="alternate" hreflang="en" href="https://www.funasr.com/en/">
+<link rel="alternate" hreflang="x-default" href="https://www.funasr.com/en/">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"SoftwareApplication","name":"FunASR","applicationCategory":"DeveloperApplication","operatingSystem":"Linux, Windows, macOS","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"description":"Industrial-grade speech recognition toolkit supporting 50+ languages","url":"https://www.funasr.com","downloadUrl":"https://pypi.org/project/funasr/","author":{"@type":"Organization","name":"FunAudioLLM, Tongyi Lab"}}
+</script>
+<script src="/lang-redirect.js"></script>
+<style>
+:root{--primary:#2563eb;--primary-dark:#1d4ed8;--bg:#fff;--surface:#f8fafc;--border:#e2e8f0;--text:#0f172a;--text-soft:#475569;--text-muted:#94a3b8;--radius:12px}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;color:var(--text);line-height:1.6;-webkit-font-smoothing:antialiased}
+a{color:var(--primary);text-decoration:none}
+a:hover{text-decoration:underline}
+.container{max-width:1120px;margin:0 auto;padding:0 24px}
+
+.nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(255,255,255,0.85);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:14px 0}
+.nav .container{display:flex;align-items:center;gap:32px}
+.nav-logo{font-size:1.3rem;font-weight:800;color:var(--text);text-decoration:none}
+.nav-logo span{color:var(--primary)}
+.nav-links{display:flex;gap:24px;margin-left:auto}
+.nav-links a{font-size:0.88rem;font-weight:500;color:var(--text-soft);text-decoration:none;transition:color 0.15s}
+.nav-links a:hover{color:var(--primary)}
+.nav-btn{padding:8px 18px;background:var(--primary);color:white;border-radius:8px;font-size:0.85rem;font-weight:600;text-decoration:none}
+.nav-btn:hover{background:var(--primary-dark);text-decoration:none}
+
+.hero{padding:140px 0 80px;background:linear-gradient(180deg,#0f172a 0%,#1e293b 100%);color:white}
+.hero-grid{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center}
+.hero h1{font-size:3rem;font-weight:800;line-height:1.15}
+.hero h1 span{background:linear-gradient(135deg,#60a5fa,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero-sub{margin-top:16px;font-size:1.05rem;color:#94a3b8;max-width:500px}
+.hero-actions{display:flex;gap:12px;margin-top:28px}
+.btn-primary{padding:12px 28px;background:var(--primary);color:white;border-radius:10px;font-weight:600;text-decoration:none;box-shadow:0 4px 14px rgba(37,99,235,0.3)}
+.btn-primary:hover{background:var(--primary-dark);text-decoration:none}
+.btn-outline{padding:12px 28px;background:transparent;color:white;border:1px solid rgba(255,255,255,0.25);border-radius:10px;font-weight:600;text-decoration:none}
+.btn-outline:hover{border-color:rgba(255,255,255,0.5);text-decoration:none}
+.hero-stats{display:flex;gap:40px;margin-top:36px}
+.hero-stat strong{font-size:2rem;font-weight:800;display:block}
+.hero-stat span{font-size:0.78rem;color:#64748b;display:block}
+.hero-code{background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:24px;color:#e2e8f0;font-family:monospace;font-size:0.8rem;line-height:1.8;overflow-x:auto}
+.hero-code .c{color:#64748b}
+.hero-code .k{color:#7dd3fc}
+.hero-code .s{color:#86efac}
+
+section{padding:80px 0}
+section.alt{background:var(--surface)}
+section.dark{background:#0f172a;color:white}
+.section-header{text-align:center;margin-bottom:48px}
+.section-header h2{font-size:2rem;font-weight:800}
+.section-header p{margin-top:8px;font-size:1.05rem;color:var(--text-soft);max-width:600px;margin-left:auto;margin-right:auto}
+
+.capabilities-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+.cap-card{padding:32px;border-radius:var(--radius);border:1px solid var(--border);background:white;text-align:center;transition:all 0.2s}
+.cap-card:hover{border-color:var(--primary);box-shadow:0 8px 20px rgba(37,99,235,0.06);transform:translateY(-3px)}
+.cap-icon{width:56px;height:56px;border-radius:14px;background:linear-gradient(135deg,#eff6ff,#e0e7ff);display:flex;align-items:center;justify-content:center;font-size:1.5rem;margin:0 auto 16px}
+.cap-card h3{font-size:1.05rem;font-weight:700;margin-bottom:8px}
+.cap-card p{font-size:0.85rem;color:var(--text-soft);line-height:1.6}
+
+/* How to use - Tabs */
+.tabs{display:flex;gap:4px;background:var(--surface);border-radius:10px;padding:4px;border:1px solid var(--border);width:fit-content;margin:0 auto 32px}
+.tab{padding:10px 24px;border-radius:8px;font-size:0.88rem;font-weight:600;color:var(--text-soft);cursor:pointer;transition:all 0.15s;border:none;background:none}
+.tab:hover{color:var(--text)}
+.tab.active{background:white;color:var(--primary);box-shadow:0 2px 8px rgba(0,0,0,0.06)}
+.tab-content{display:none}
+.tab-content.active{display:block}
+.usage-panel{max-width:760px;margin:0 auto}
+.usage-panel h3{font-size:1.1rem;font-weight:700;margin-bottom:6px}
+.usage-panel .desc{color:var(--text-soft);font-size:0.92rem;margin-bottom:20px}
+.code-block{background:#1e293b;border-radius:12px;padding:24px;color:#e2e8f0;font-family:monospace;font-size:0.82rem;line-height:1.9;overflow-x:auto;margin-bottom:16px}
+.code-block .c{color:#64748b}
+.code-block .p{color:#22c55e}
+.code-block .s{color:#86efac}
+.code-block .n{color:#fbbf24}
+.output-block{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:20px;font-size:0.85rem;color:#166534;line-height:1.7;margin-bottom:20px}
+.output-block strong{display:block;font-size:0.75rem;color:#15803d;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+
+.more-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;max-width:600px;margin:0 auto}
+.more-item{display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:8px;border:1px solid var(--border);font-size:0.88rem;font-weight:500;color:var(--text);transition:all 0.15s;text-decoration:none}
+.more-item:hover{border-color:var(--primary);background:#f8faff;text-decoration:none}
+.more-item span{color:var(--text-muted);font-size:0.8rem;margin-left:auto}
+
+.bench-table{width:100%;border-collapse:collapse;margin:20px 0;font-size:0.85rem;color:#e2e8f0}
+.bench-table th,.bench-table td{padding:12px 16px;text-align:left;border-bottom:1px solid rgba(255,255,255,0.1)}
+.bench-table th{color:#94a3b8;font-size:0.75rem;text-transform:uppercase}
+.bench-table .win{color:#22c55e;font-weight:700}
+
+.video-section{background:linear-gradient(180deg,#1e293b 0%,#0f172a 100%);color:white;padding:80px 0}
+.video-wrapper{max-width:800px;margin:0 auto;border-radius:16px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.4);aspect-ratio:16/9;position:relative;background:#000}
+.video-wrapper iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:none}
+
+footer{background:#0f172a;color:#94a3b8;padding:48px 0 32px}
+.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;margin-bottom:32px}
+.footer-brand h3{color:white;font-size:1.2rem;margin-bottom:8px}
+.footer-brand p{font-size:0.85rem;line-height:1.7}
+.footer-col h4{color:white;font-size:0.85rem;margin-bottom:12px;font-weight:600}
+.footer-col a{display:block;font-size:0.83rem;color:#94a3b8;margin-bottom:8px;text-decoration:none}
+.footer-col a:hover{color:white}
+.footer-bottom{border-top:1px solid #1e293b;padding-top:24px;font-size:0.8rem;text-align:center}
+
+@media(max-width:900px){.hero-grid{grid-template-columns:1fr}.capabilities-grid{grid-template-columns:1fr 1fr}.footer-grid{grid-template-columns:1fr 1fr}.nav-links{display:none}.more-grid{grid-template-columns:1fr}}
+@media(max-width:600px){.hero{padding:112px 0 36px}.hero h1{font-size:2rem}.hero-code{display:none}.hero-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:28px}.hero-stat strong{font-size:1.6rem}.capabilities-grid{grid-template-columns:1fr}.tabs{flex-wrap:wrap;width:100%}.tab{flex:1;text-align:center;padding:8px 12px;font-size:0.82rem}.bench-table{table-layout:fixed;font-size:0.72rem}.bench-table th,.bench-table td{padding:8px 4px;overflow-wrap:anywhere}}
+
+.hero-models{display:flex;flex-direction:column;align-items:flex-start;gap:8px;margin:0 0 18px}
+.hero-flagship{display:inline-flex;align-items:center;gap:6px;max-width:100%;padding:7px 16px;background:rgba(37,99,235,0.08);border:1px solid rgba(37,99,235,0.25);border-radius:999px;font-size:0.85rem;font-weight:500;line-height:1.4;color:#1d4ed8;text-decoration:none}
+.hero-flagship.mlt{background:rgba(22,163,74,0.08);border-color:rgba(22,163,74,0.3);color:#15803d}
+.hero-flagship strong{font-weight:700}
+.hero-flagship:hover{background:rgba(37,99,235,0.14)}
+.hero-flagship.mlt:hover{background:rgba(22,163,74,0.14)}
+@media(max-width:600px){.hero-flagship{display:block;width:100%;padding:7px 12px;font-size:0.78rem;border-radius:10px}}
+</style>
+</head>
+<body>
+<nav class="nav"><div class="container">
+<a href="#" class="nav-logo">Fun<span>ASR</span></a>
+<div class="nav-links">
+<a href="#capabilities">核心能力</a>
+<a href="#usage">如何使用</a>
+<a href="#benchmark">性能</a>
+<a href="#demo">演示</a>
+<a href="https://modelscope.github.io/FunASR/zh/" target="_blank">文档</a>
+<a href="quickstart.html">快速上手</a>
+<a href="models.html">模型</a>
+<a href="ecosystem.html">生态</a><a href="/blog/">技术博客</a>
+<a href="vs-whisper.html">对比 Whisper</a>
+<a href="/donors.html">功德榜</a>
+
+</div>
+<a href="/en/" style="font-size:0.85rem;font-weight:500;color:var(--text-soft);text-decoration:none">EN</a>
+<a href="https://github.com/modelscope/FunASR" target="_blank" class="nav-btn">GitHub ★</a>
+</div></nav>
+
+<!-- Hero -->
+<section class="hero"><div class="container">
+<div class="hero-grid">
+<div>
+<h1>工业级<br><span>语音识别服务</span></h1>
+<div class="hero-models">
+<a href="https://huggingface.co/FunAudioLLM/Fun-ASR-Nano-2512" target="_blank" rel="noopener" class="hero-flagship">🚀 旗舰 <strong>Fun-ASR-Nano</strong> · 中/英/日 + 中文方言/口音</a>
+<a href="https://huggingface.co/FunAudioLLM/Fun-ASR-MLT-Nano-2512" target="_blank" rel="noopener" class="hero-flagship mlt">🌍 31 语种 <strong>Fun-ASR-MLT-Nano</strong> · 独立 checkpoint</a>
+</div>
+<p class="hero-sub">语音识别、语音检测、标点恢复、说话人分离、情感检测、音频事件识别——统一的 Python 接口，一次调用完成全部处理。50+ 语言覆盖，私有化部署，生产就绪。</p>
+<div class="hero-actions">
+<a href="#usage" class="btn-primary">如何使用</a>
+<a href="#demo" class="btn-outline">观看演示</a>
+</div>
+<div class="hero-stats">
+<div class="hero-stat"><strong>50+</strong><span>支持语言</span></div>
+<div class="hero-stat"><strong>170x</strong><span>实时处理速度</span></div>
+<div class="hero-stat"><strong>1 API</strong><span>统一调用接口</span></div>
+</div>
+</div>
+<div class="hero-code">
+<span class="c"># 一行启动语音识别服务</span><br>
+<span class="k">$</span> pip install torch torchaudio
+pip install funasr vllm fastapi uvicorn python-multipart<br>
+<span class="k">$</span> funasr-server --device cuda<br>
+<br>
+<span class="c"># OpenAI SDK 直接调用</span><br>
+<span class="k">from</span> openai <span class="k">import</span> OpenAI<br>
+client = OpenAI(base_url=<span class="s">"http://localhost:8899/v1"</span>, api_key=<span class="s">"x"</span>)<br>
+result = client.audio.transcriptions.create(<br>
+&nbsp;&nbsp;&nbsp;&nbsp;model=<span class="s">"fun-asr-nano"</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;file=open(<span class="s">"meeting.wav"</span>, <span class="s">"rb"</span>)<br>
+)<br>
+print(result.text)
+</div>
+</div>
+</div></section>
+
+<!-- 核心能力 -->
+<section id="capabilities"><div class="container">
+<div class="section-header">
+<h2>核心能力</h2>
+<p>从原始音频到结构化输出的完整语音理解流水线，一次调用全部搞定</p>
+</div>
+<div class="capabilities-grid">
+<div class="cap-card"><div class="cap-icon">🎙️</div><h3>语音识别</h3><p>端到端 ASR，支持 50+ 语言，中文含 7 大方言及 26 种地域口音，自动语种检测</p></div>
+<div class="cap-card"><div class="cap-icon">📍</div><h3>语音检测 (VAD)</h3><p>毫秒级语音活动检测，自适应静音阈值，精确切分语音段与静音段</p></div>
+<div class="cap-card"><div class="cap-icon">✍️</div><h3>标点恢复</h3><p>自动添加标点符号和逆文本正则化，输出可直接阅读的规范文本</p></div>
+<div class="cap-card"><div class="cap-icon">👥</div><h3>说话人分离</h3><p>自动识别"谁说了什么"，为每句话标注说话人 ID，支持多人会议</p></div>
+<div class="cap-card"><div class="cap-icon">😊</div><h3>情感检测</h3><p>识别开心、悲伤、愤怒、中性情感状态，适用于客服质检和舆情分析</p></div>
+<div class="cap-card"><div class="cap-icon">🔔</div><h3>音频事件识别</h3><p>检测背景音乐、掌声、笑声、哭声等声学事件，完整音频场景理解</p></div>
+</div>
+</div></section>
+
+<!-- 如何使用 -->
+<section class="alt" id="usage"><div class="container">
+<div class="section-header">
+<h2>如何使用</h2>
+<p>三步开始：安装 → 选择场景 → 调用</p>
+</div>
+
+<!-- Step 1: 安装 -->
+<div style="text-align:center;margin-bottom:48px">
+<div style="display:inline-block;background:#1e293b;border-radius:10px;padding:14px 32px;font-family:monospace;font-size:0.95rem;color:#e2e8f0">
+<span style="color:#22c55e">$</span> pip install torch torchaudio
+pip install funasr vllm fastapi uvicorn python-multipart
+</div>
+<p style="margin-top:10px;font-size:0.82rem;color:var(--text-muted)">Python 3.8+ · GPU 8GB+ · 支持 Linux / macOS</p>
+</div>
+
+<!-- Step 2: 选择场景 (Tabs) -->
+<div class="tabs">
+<button class="tab active" onclick="switchTab('offline')">文件转写</button>
+<button class="tab" onclick="switchTab('stream')">实时识别</button>
+<button class="tab" onclick="switchTab('api')">API 接入</button>
+</div>
+
+<div class="tab-content active" id="tab-offline">
+<div class="usage-panel">
+<h3>文件转写 — 上传音频，获得完整转录结果</h3>
+<p class="desc">适合会议录音、视频字幕、批量音频处理。自动包含 VAD 分段、标点、时间戳和说话人标注。</p>
+<div class="code-block">
+<span class="c"># 启动离线转写服务（pip 安装后直接可用）</span><br>
+<span class="p">$</span> funasr-server --device cuda --port <span class="n">8899</span><br>
+<br>
+<span class="c"># 调用（curl）</span><br>
+<span class="p">$</span> curl -X POST http://localhost:<span class="n">8899</span>/v1/audio/transcriptions \<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-F "file=@meeting.wav" -F "model=fun-asr-nano" -F "response_format=verbose_json"
+</div>
+<div class="output-block">
+<strong>输出结果</strong>
+[00:01.7 → 00:05.5] 说话人 0: 今天我们讨论三个议题。<br>
+[00:05.8 → 00:08.2] 说话人 1: 好的，第一个是关于 Q3 计划。<br>
+[00:08.5 → 00:12.1] 说话人 0: 请开始吧，我们有半小时。
+</div>
+</div>
+</div>
+
+<div class="tab-content" id="tab-stream">
+<div class="usage-panel">
+<h3>实时识别 — 麦克风输入，边说边出结果</h3>
+<p class="desc">适合实时字幕、直播转写、语音助手。基于 WebSocket 协议，确认文字锁定不变，新文字持续更新。</p>
+<div class="code-block">
+<span class="c"># 流式服务需要源码（pip 暂不包含）</span><br>
+<span class="p">$</span> git clone https://github.com/modelscope/FunASR.git && cd FunASR<br>
+<span class="p">$</span> python examples/industrial_data_pretraining/fun_asr_nano/serve_realtime_ws.py --port <span class="n">10095</span> --language 中文<br>
+<br>
+<span class="c"># 浏览器打开自带的客户端页面</span><br>
+<span class="p">$</span> open client_mic.html<br>
+<br>
+<span class="c"># 或用 Python 连接</span><br>
+<span class="p">$</span> python client_python.py --server ws://localhost:<span class="n">10095</span> --mic
+</div>
+<div class="output-block">
+<strong>实时输出（逐步更新）</strong>
+[实时] 今天我们讨论...<br>
+[确认] 今天我们讨论三个议题。<br>
+[实时] 好的第一个是...<br>
+[确认] 好的，第一个是关于 Q3 计划。
+</div>
+</div>
+</div>
+
+<div class="tab-content" id="tab-api">
+<div class="usage-panel">
+<h3>API 接入 — OpenAI 兼容，AI 框架零改动对接</h3>
+<p class="desc">标准 /v1/audio/transcriptions 接口，LangChain、AutoGen、Dify、Coze 等框架可直接调用，无需修改代码。</p>
+<div class="code-block">
+<span class="c"># 启动 OpenAI 兼容 API</span><br>
+<span class="p">$</span> funasr-server --device cuda<br>
+<br>
+<span class="c"># Python 调用（与 OpenAI Whisper API 完全相同）</span><br>
+from openai import OpenAI<br>
+client = OpenAI(base_url=<span class="s">"http://localhost:8899/v1"</span>, api_key=<span class="s">"x"</span>)<br>
+<br>
+result = client.audio.transcriptions.create(<br>
+&nbsp;&nbsp;&nbsp;&nbsp;model=<span class="s">"fun-asr-nano"</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;file=open(<span class="s">"audio.wav"</span>, <span class="s">"rb"</span>),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;response_format=<span class="s">"verbose_json"</span><br>
+)<br>
+print(result.text)
+</div>
+<div class="output-block">
+<strong>返回 JSON</strong>
+{"text": "今天我们讨论三个议题。", "segments": [{"start": 1.7, "end": 5.5, "text": "..."}], "duration": 12.1}
+</div>
+</div>
+</div>
+
+<!-- Step 3: 更多用法 -->
+<div style="margin-top:48px">
+<h3 style="text-align:center;font-size:1.1rem;margin-bottom:20px;color:var(--text)">更多用法</h3>
+<div class="more-grid">
+<a class="more-item" href="https://github.com/modelscope/FunASR/blob/main/docs/vllm_guide_zh_v2.md" target="_blank">🔥 热词增强 <span>→</span></a>
+<a class="more-item" href="https://modelscope.github.io/FunASR/zh/tutorial.html" target="_blank">👥 说话人分离 <span>→</span></a>
+<a class="more-item" href="https://github.com/QwenAudio/SenseVoice" target="_blank">😊 情感检测 <span>→</span></a>
+<a class="more-item" href="https://modelscope.github.io/FunASR/zh/tutorial.html" target="_blank">🌍 多语言识别 <span>→</span></a>
+<a class="more-item" href="https://modelscope.github.io/FunASR/zh/training.html" target="_blank">🎯 模型微调 <span>→</span></a>
+<a class="more-item" href="https://github.com/modelscope/FunASR/blob/main/docs/vllm_guide_zh_v2.md" target="_blank">⚡ vLLM 加速 <span>→</span></a>
+</div>
+</div>
+</div></section>
+
+<!-- 性能对比 -->
+<section class="dark" id="benchmark"><div class="container">
+<div class="section-header">
+<h2 style="color:white">性能对比</h2>
+<p style="color:#94a3b8">184 文件 / 11,541 秒 / Fun-ASR-Nano</p>
+</div>
+<table class="bench-table">
+<thead><tr><th>模型</th><th>引擎</th><th>RTFx</th><th>CER</th><th>备注</th></tr></thead>
+<tbody>
+<tr><td>Fun-ASR-Nano</td><td>PyTorch</td><td>21</td><td>8.06%</td><td>基准</td></tr>
+<tr><td>Fun-ASR-Nano</td><td class="win">vLLM batch</td><td class="win">340</td><td>8.20%</td><td class="win">16x 加速</td></tr>
+<tr><td>Fun-ASR-Nano</td><td class="win">离线服务</td><td class="win">102</td><td>8.14%</td><td>含 VAD 片段起止时间</td></tr>
+<tr><td>GLM-ASR-Nano</td><td class="win">vLLM batch</td><td class="win">265</td><td>12.93%</td><td>社区模型</td></tr>
+</tbody>
+</table>
+<p style="text-align:center;color:#64748b;font-size:0.82rem;margin-top:16px">准确率与 PyTorch 完全一致（CER 差 &lt; 0.2%），速度提升 16–340 倍。<a href="https://modelscope.github.io/FunASR/zh/benchmark.html" style="color:#60a5fa" target="_blank">完整报告 →</a></p>
+</div></section>
+
+<!-- 产品演示 -->
+<section class="video-section" id="demo"><div class="container">
+<div class="section-header">
+<h2 style="color:white">产品演示</h2>
+<p style="color:#94a3b8">观看 FunASR 实时语音识别效果</p>
+</div>
+<div class="video-wrapper">
+<iframe src="//player.bilibili.com/player.html?isOutside=true&aid=116639869699659&bvid=BV1QwVP6eEfp&cid=38624300030&p=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"></iframe>
+</div>
+</div></section>
+
+<!-- Footer -->
+<footer><div class="container">
+<div class="footer-grid">
+<div class="footer-brand">
+<h3>FunASR</h3>
+<p>通义实验室出品的工业级语音识别服务。语音理解一站式解决方案，为生产环境而生。</p>
+</div>
+<div class="footer-col"><h4>文档</h4>
+<a href="https://modelscope.github.io/FunASR/zh/tutorial.html">快速上手</a>
+<a href="https://modelscope.github.io/FunASR/zh/training.html">训练微调</a>
+<a href="https://github.com/modelscope/FunASR/blob/main/docs/vllm_guide_zh_v2.md">vLLM 指南</a>
+<a href="https://modelscope.github.io/FunASR/api.html">API 参考</a>
+</div>
+<div class="footer-col"><h4>生态</h4>
+<a href="https://github.com/QwenAudio/Fun-ASR">Fun-ASR-Nano</a>
+<a href="https://github.com/QwenAudio/SenseVoice">SenseVoice</a>
+<a href="https://github.com/modelscope/FunClip">FunClip</a>
+<a href="https://github.com/QwenAudio/CosyVoice">CosyVoice</a>
+</div>
+<div class="footer-col"><h4>社区</h4>
+<a href="https://github.com/modelscope/FunASR">GitHub</a>
+<a href="https://github.com/modelscope/FunASR/discussions">Discussions</a>
+<a href="https://github.com/modelscope/FunASR/issues">问题反馈</a>
+</div>
+</div>
+<div class="footer-bottom">© 2024-2026 Tongyi Lab, Alibaba Group · <a href="https://github.com/modelscope/FunASR/blob/main/LICENSE" style="color:#94a3b8">MIT License</a></div>
+</div></footer>
+
+<script>
+function switchTab(id){
+document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+event.target.classList.add('active');
+document.getElementById('tab-'+id).classList.add('active');
+}
+</script>
+<script src="/stats/tracker.js" async></script>
+</body>
+</html>

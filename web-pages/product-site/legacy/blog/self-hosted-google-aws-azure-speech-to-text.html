@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>自托管语音转文字:Google / AWS / Azure 云语音 API 的免费开源替代(FunASR)| FunASR 博客</title>
+<meta name="description" content="想替代 Google Cloud Speech-to-Text / AWS Transcribe / Azure Speech?FunASR 是开源免费(MIT)的自托管语音转文字方案:本地推理、不按分钟计费、数据不出内网、中文强,且 OpenAI 兼容、改 base_url 即可迁移。附实测代码与成本对比。">
+<meta name="keywords" content="自托管语音识别, Google Speech-to-Text 替代, AWS Transcribe 替代, Azure Speech 替代, 云语音API替代, 开源语音转文字, 离线语音识别, FunASR, 语音转文字 自托管, speech to text self hosted">
+<link rel="icon" href="/logo.png">
+<meta property="og:title" content="自托管语音转文字:Google / AWS / Azure 云语音 API 的免费开源替代(FunASR)| FunASR 博客">
+<meta property="og:description" content="想替代 Google Cloud Speech-to-Text / AWS Transcribe / Azure Speech?FunASR 是开源免费(MIT)的自托管语音转文字方案:本地推理、不按分钟计费、数据不出内网、中文强,且 OpenAI 兼容、改 base_url 即可迁移。附实测代码与成本对比。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://www.funasr.com/blog/self-hosted-google-aws-azure-speech-to-text.html">
+<meta property="og:image" content="https://www.funasr.com/logo.png">
+<link rel="canonical" href="https://www.funasr.com/blog/self-hosted-google-aws-azure-speech-to-text.html">
+<link rel="alternate" hreflang="en" href="https://www.funasr.com/en/blog/self-hosted-google-aws-azure-speech-to-text.html">
+<link rel="alternate" hreflang="zh" href="https://www.funasr.com/blog/self-hosted-google-aws-azure-speech-to-text.html">
+<link rel="alternate" hreflang="x-default" href="https://www.funasr.com/en/blog/self-hosted-google-aws-azure-speech-to-text.html">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","headline":"自托管语音转文字:Google / AWS / Azure 云语音 API 的免费开源替代(FunASR)| FunASR 博客","description":"想替代 Google Cloud Speech-to-Text / AWS Transcribe / Azure Speech?FunASR 是开源免费(MIT)的自托管语音转文字方案:本地推理、不按分钟计费、数据不出内网、中文强,且 OpenAI 兼容、改 base_url 即可迁移。附实测代码与成本对比。","datePublished":"2026-06-22","dateModified":"2026-06-22","author":{"@type":"Organization","name":"FunASR / Tongyi Lab"},"publisher":{"@type":"Organization","name":"FunASR","logo":{"@type":"ImageObject","url":"https://www.funasr.com/logo.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://www.funasr.com/blog/self-hosted-google-aws-azure-speech-to-text.html"},"image":"https://www.funasr.com/logo.png"}
+</script>
+<style>:root{--primary:#2563eb;--primary-dark:#1d4ed8;--bg:#fff;--surface:#f8fafc;--border:#e2e8f0;--text:#0f172a;--text-soft:#475569;--text-muted:#94a3b8;--radius:12px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',-apple-system,sans-serif;color:var(--text);line-height:1.7}
+a{color:var(--primary);text-decoration:none}a:hover{text-decoration:underline}
+.container{max-width:800px;margin:0 auto;padding:0 24px}
+.nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(255,255,255,0.9);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:14px 0}
+.nav .container{max-width:1120px;display:flex;align-items:center;gap:24px}
+.nav-logo{font-size:1.2rem;font-weight:800;color:var(--text)}.nav-logo span{color:var(--primary)}
+.nav-links{display:flex;gap:20px;margin-left:auto;flex-wrap:wrap}
+.nav-links a{font-size:0.85rem;font-weight:500;color:var(--text-soft)}
+.nav-btn{padding:7px 16px;background:var(--primary);color:#fff;border-radius:7px;font-size:0.83rem;font-weight:600}
+article{padding:120px 0 80px}
+h1{font-size:2rem;font-weight:800;line-height:1.3;margin-bottom:14px}
+h2{font-size:1.3rem;font-weight:700;margin:36px 0 14px;padding-top:16px;border-top:1px solid var(--border)}
+h3{font-size:1.05rem;font-weight:700;margin:22px 0 10px}
+p{margin-bottom:14px;color:var(--text-soft)}
+ul,ol{margin:0 0 14px 22px;color:var(--text-soft)}li{margin-bottom:6px}
+table{width:100%;border-collapse:collapse;margin:16px 0;font-size:0.86rem}
+th,td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--border)}
+th{font-weight:600;background:var(--surface);font-size:0.78rem;color:var(--text-muted)}
+pre{background:#1e293b;color:#e2e8f0;padding:18px;border-radius:10px;overflow-x:auto;font-size:0.82rem;line-height:1.7;margin:14px 0}
+code{font-family:ui-monospace,Menlo,monospace}
+p code,li code{background:var(--surface);padding:2px 6px;border-radius:5px;font-size:0.85em;color:var(--primary-dark)}
+.post-meta{color:var(--text-muted);font-size:0.85rem;margin-bottom:24px}
+.cta{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin:28px 0;text-align:center}
+.cta a.btn{display:inline-block;padding:10px 24px;background:var(--primary);color:#fff;border-radius:8px;font-weight:600}
+.post-list{list-style:none;margin:0;padding:0}
+.post-list li{margin:0 0 8px}
+.post-card{display:block;border:1px solid var(--border);border-radius:var(--radius);padding:20px 22px;margin-bottom:14px}
+.post-card:hover{border-color:var(--primary);text-decoration:none}
+.post-card h2{border:none;padding:0;margin:0 0 6px;font-size:1.15rem;color:var(--text)}
+.post-card p{margin:0;color:var(--text-soft);font-size:0.9rem}
+.post-card .date{color:var(--text-muted);font-size:0.8rem}
+footer{background:#0f172a;color:#94a3b8;padding:28px 0;text-align:center;font-size:0.8rem}
+footer a{color:#94a3b8}</style>
+</head>
+<body>
+<nav class="nav"><div class="container"><a href="/" class="nav-logo">Fun<span>ASR</span></a><div class="nav-links"><a href="/#capabilities">核心能力</a><a href="/#usage">如何使用</a><a href="/#benchmark">性能</a><a href="/#demo">演示</a><a href="https://modelscope.github.io/FunASR/zh/" target="_blank">文档</a><a href="/quickstart.html">快速上手</a><a href="/models.html">模型</a><a href="/ecosystem.html">生态</a><a href="/blog/">技术博客</a><a href="/vs-whisper.html">对比 Whisper</a><a href="/donors.html">功德榜</a></div><a href="https://www.funasr.com/en/blog/self-hosted-google-aws-azure-speech-to-text.html" style="font-size:0.83rem;font-weight:500;color:var(--text-soft)">EN</a><a href="https://github.com/modelscope/FunASR" target="_blank" class="nav-btn">GitHub ★</a></div></nav>
+<article><div class="container">
+<h1>自托管语音转文字:Google / AWS / Azure 云语音 API 的免费开源替代</h1>
+<p class="post-meta">2026-06-22 · FunASR 团队</p>
+
+<p>Google Cloud Speech-to-Text、AWS Transcribe、Azure Speech 这些云语音 API 很好用——全托管、自动扩容、免运维。但当用量上去、或对数据合规有要求时,它们的短板也很明显:<strong>按分钟计费(规模化后很贵)、音频要上传到厂商云(隐私/合规/数据驻留问题)、有速率限制、离不开网络、难以定制</strong>。</p>
+<p><strong>FunASR</strong>(通义实验室开源)是一个成熟的自托管替代:<strong>开源免费(MIT,可商用)、跑在你自己的机器上(可完全离线)、不按分钟计费、数据不出内网</strong>,中文与亚洲语种尤其强,并提供 <strong>OpenAI 兼容接口</strong>,迁移成本极低。下面是真实可跑的上手代码。</p>
+
+<h2>4 行代码,本地转写(实测输出)</h2>
+<pre>pip install funasr
+
+from funasr import AutoModel
+from funasr.utils.postprocess_utils import rich_transcription_postprocess
+
+model = AutoModel(model="iic/SenseVoiceSmall", disable_update=True)  # 没 GPU 自动用 CPU
+res = model.generate(input="audio.wav", language="auto", use_itn=True)
+
+print(rich_transcription_postprocess(res[0]["text"]))
+# 欢迎大家来体验达摩院推出的语音识别模型。</pre>
+<p>模型首次运行自动下载,之后全程在本地推理——<strong>没有 API key、没有按分钟账单、音频不上传任何云</strong>。</p>
+
+<h2>已经在用云 API?换 base_url 即可迁移</h2>
+<p>FunASR 自带 <strong>OpenAI 兼容的转写服务</strong>,如果你的应用已经在调云厂商 SDK,通常只需把 <code>base_url</code> 指向自己的服务:</p>
+<pre># 起一个本地服务(OpenAI 兼容 /v1/audio/transcriptions)
+funasr-server --model sensevoice --device cuda
+
+# 客户端:OpenAI SDK 直接连本地,改一行 base_url
+from openai import OpenAI
+client = OpenAI(base_url="http://localhost:8000/v1", api_key="not-needed")
+text = client.audio.transcriptions.create(model="sensevoice", file=open("audio.wav","rb")).text</pre>
+
+<h2>FunASR vs 云语音 API</h2>
+<table>
+<tr><th></th><th>FunASR(自托管)</th><th>云 STT(Google/AWS/Azure)</th></tr>
+<tr><td>计费</td><td>开源免费,只有固定机器成本</td><td>按分钟计费,随用量线性增长</td></tr>
+<tr><td>数据</td><td>留在你自己服务器(可离线)</td><td>音频上传到厂商云</td></tr>
+<tr><td>部署</td><td>自己跑(pip / Docker)</td><td>全托管,零运维</td></tr>
+<tr><td>语种</td><td>50+,中文/亚洲语种很强</td><td>多语种(各厂不同)</td></tr>
+<tr><td>说话人分离</td><td>✅ 内置(cam++)</td><td>✅(额外计费/配置)</td></tr>
+<tr><td>情感 / 音频事件</td><td>✅(SenseVoice)</td><td>多数 ❌</td></tr>
+<tr><td>定制 / 微调</td><td>✅ 完整模型权限</td><td>有限</td></tr>
+<tr><td>离线 / 内网隔离</td><td>✅</td><td>❌</td></tr>
+<tr><td>许可证</td><td>开源,可商用</td><td>闭源</td></tr>
+</table>
+<p>需要说句公道话:如果你要的是<strong>零运维、按需弹性、不想管机器</strong>,托管云 API 仍然是省心之选。FunASR 的取舍是——你用一台自己的机器,换来<strong>可控成本、数据私有、可离线、可定制</strong>。</p>
+
+<h2>什么时候自托管更划算</h2>
+<p>云 STT 一般按音频分钟计费(各厂/各档大致 <strong>每音频小时 $0.6 ~ $1.5</strong>)。也就是说处理 <strong>1000 小时/月</strong>大约 $600 ~ $1500/月,且随用量线性上涨;而一台自托管 FunASR 实例是<strong>固定的机器成本,与转写量基本无关</strong>。当你满足以下任一条,自托管通常更优:</p>
+<ul>
+<li><strong>用量大</strong>:每月音频时长高,按分钟计费的账单远超一台机器的成本;</li>
+<li><strong>数据敏感</strong>:医疗/金融/政企,音频不能离开内网;</li>
+<li><strong>需离线 / 内网隔离</strong>的部署环境;</li>
+<li><strong>中文/方言/亚洲语种</strong>为主,想要更强的本土效果与可定制性。</li>
+</ul>
+
+<p>想进一步看:与 OpenAI Whisper API 的对比见 <a href="/blog/self-hosted-openai-whisper-api-alternative.html">自托管 Whisper API 替代</a>;与 Deepgram/AssemblyAI 的对比见 <a href="/blog/self-hosted-deepgram-assemblyai-alternative.html">Deepgram/AssemblyAI 替代</a>;中文准确率见 <a href="/blog/funasr-vs-whisper-benchmark.html">FunASR vs Whisper benchmark</a>;不确定选哪个模型看 <a href="/blog/which-funasr-model.html">模型选型指南</a>。</p>
+
+<div class="cta"><p><strong>FunASR 全家桶都是开源的(MIT)</strong>——工业级 ASR / VAD / 标点 / 说话人 / 情感事件 / LLM-ASR,自托管、可商用。觉得有用就点个 Star 支持一下 👇</p><p><a class="btn" href="https://github.com/modelscope/FunASR" target="_blank">⭐ Star FunASR</a></p><p style="margin-top:10px;font-size:0.85rem">也欢迎 Star:<a href="https://github.com/QwenAudio/SenseVoice" target="_blank">SenseVoice</a> · <a href="https://github.com/QwenAudio/Fun-ASR" target="_blank">Fun-ASR</a> · <a href="https://github.com/modelscope/FunClip" target="_blank">FunClip</a></p></div>
+<!--related-posts-->
+<h2>相关文章</h2>
+<ul class="post-list">
+<li><a href="/blog/funasr-vs-whisper-benchmark.html">FunASR vs Whisper 实测对比</a></li>
+<li><a href="/blog/sensevoice-deployment-guide.html">SenseVoice 部署指南</a></li>
+<li><a href="/blog/fun-asr-nano-guide.html">Fun-ASR-Nano 使用指南</a></li>
+<li><a href="/blog/funasr-speaker-diarization.html">说话人分离:谁在何时说话</a></li>
+<li><a href="/blog/sensevoice-emotion-language-detection.html">情感与语种检测</a></li>
+<li><a href="/blog/funasr-realtime-streaming-asr.html">实时流式语音识别</a></li>
+<li><a href="/blog/funasr-transcribe-long-audio.html">转写超长音频(1小时一次搞定)</a></li>
+<li><a href="/blog/funasr-cli-transcribe-command-line.html">命令行转写(文本/JSON/SRT)</a></li>
+<li><a href="/blog/self-hosted-openai-whisper-api-alternative.html">自托管 OpenAI Whisper API 替代</a></li>
+<li><a href="/blog/generate-subtitles-srt-vtt-from-audio-video.html">自动生成字幕(SRT / VTT)</a></li>
+<li><a href="/blog/speech-to-text-python-transcribe-audio.html">Python 语音转文字教程</a></li>
+<li><a href="/blog/funasr-llama-cpp-whisper-cpp-alternative.html">FunASR 跑进 llama.cpp(whisper.cpp 替代)</a></li>
+<li><a href="/blog/funasr-vs-faster-whisper-chinese.html">FunASR vs faster-whisper(中文/粤语)</a></li>
+<li><a href="/blog/lightweight-speech-recognition-cpu.html">轻量语音识别(CPU 250MB)</a></li>
+<li><a href="/blog/self-hosted-deepgram-assemblyai-alternative.html">自托管替代 Deepgram/AssemblyAI</a></li>
+<li><a href="/blog/which-funasr-model.html">选哪个 FunASR 模型</a></li>
+<li><a href="/blog/cantonese-speech-recognition.html">粤语语音识别(SenseVoice 原生粤语)</a></li>
+<li><a href="/blog/japanese-speech-recognition.html">日语语音识别(SenseVoice 转写+标点+情感)</a></li>
+<li><a href="/blog/voice-activity-detection-python.html">Python 语音活动检测(VAD)</a></li>
+<li><a href="/blog/chinese-speech-recognition.html">中文语音识别(普通话)实战</a></li>
+<li><a href="/blog/punctuation-restoration-python.html">标点恢复 Python 实战</a></li>
+<li><a href="/blog/speech-to-text-timestamps-python.html">语音识别带时间戳(字级)</a></li>
+</ul>
+</div></article>
+<footer><div class="container">© 2024-2026 Tongyi Lab, Alibaba Group · <a href="https://github.com/modelscope/FunASR/blob/main/LICENSE">MIT License</a></div></footer>
+</body>
+</html>

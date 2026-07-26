@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>FunASR Quickstart Guide | Speech Recognition in Python — Get Started in 3 Minutes</title>
+<meta name="description" content="Get started with FunASR in 3 minutes. File transcription, real-time streaming ASR, and OpenAI-compatible API server deployment with copy-paste Python code. Free, open-source speech recognition.">
+<meta name="keywords" content="speech recognition python, ASR API, automatic speech recognition, speech to text, FunASR tutorial, real-time ASR, OpenAI Whisper alternative, voice recognition API">
+<link rel="icon" href="../logo.png">
+<meta property="og:title" content="FunASR Quickstart Guide — Speech Recognition in 3 Minutes">
+<meta property="og:description" content="File transcription, real-time streaming, OpenAI-compatible API — complete runnable code, ready to copy and use.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://www.funasr.com/en/quickstart.html">
+<meta property="og:image" content="https://www.funasr.com/logo.png">
+<link rel="canonical" href="https://www.funasr.com/en/quickstart.html">
+<link rel="alternate" hreflang="en" href="https://www.funasr.com/en/quickstart.html">
+<link rel="alternate" hreflang="zh" href="https://www.funasr.com/quickstart.html">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  "name": "FunASR Quickstart Guide",
+  "description": "Learn how to use FunASR for speech recognition in 3 minutes: file transcription, real-time streaming ASR, and OpenAI-compatible API server deployment.",
+  "image": "https://www.funasr.com/logo.png",
+  "totalTime": "PT3M",
+  "tool": [
+    {"@type": "HowToTool", "name": "Python 3.8+"},
+    {"@type": "HowToTool", "name": "pip"},
+    {"@type": "HowToTool", "name": "GPU (8GB+ VRAM, optional)"}
+  ],
+  "step": [
+    {
+      "@type": "HowToStep",
+      "position": 1,
+      "name": "Install FunASR",
+      "text": "Install FunASR and its dependencies using pip: pip install funasr",
+      "url": "https://www.funasr.com/en/quickstart.html#install"
+    },
+    {
+      "@type": "HowToStep",
+      "position": 2,
+      "name": "Transcribe Audio Files",
+      "text": "Use AutoModel to load the SenseVoice model and call the generate method to transcribe audio files. Supports 50+ languages with emotion detection.",
+      "url": "https://www.funasr.com/en/quickstart.html#file-transcription"
+    },
+    {
+      "@type": "HowToStep",
+      "position": 3,
+      "name": "Real-time Streaming ASR",
+      "text": "Use the Paraformer streaming model for real-time speech recognition with microphone input and WebSocket support.",
+      "url": "https://www.funasr.com/en/quickstart.html#streaming"
+    },
+    {
+      "@type": "HowToStep",
+      "position": 4,
+      "name": "Deploy OpenAI-compatible API",
+      "text": "Start an OpenAI-compatible speech recognition API server with a single command. Works with curl, Python SDK, and AI frameworks out of the box.",
+      "url": "https://www.funasr.com/en/quickstart.html#api-server"
+    }
+  ]
+}
+</script>
+<style>
+:root{--primary:#2563eb;--primary-dark:#1d4ed8;--bg:#fff;--surface:#f8fafc;--border:#e2e8f0;--text:#0f172a;--text-soft:#475569;--text-muted:#94a3b8;--radius:12px}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;color:var(--text);line-height:1.6;-webkit-font-smoothing:antialiased}
+a{color:var(--primary);text-decoration:none}
+a:hover{text-decoration:underline}
+.container{max-width:1120px;margin:0 auto;padding:0 24px}
+
+.nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(255,255,255,0.85);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:14px 0}
+.nav .container{display:flex;align-items:center;gap:32px}
+.nav-logo{font-size:1.3rem;font-weight:800;color:var(--text);text-decoration:none}
+.nav-logo span{color:var(--primary)}
+.nav-links{display:flex;gap:24px;margin-left:auto}
+.nav-links a{font-size:0.88rem;font-weight:500;color:var(--text-soft);text-decoration:none;transition:color 0.15s}
+.nav-links a:hover{color:var(--primary)}
+.nav-links a.active{color:var(--primary)}
+.nav-btn{padding:8px 18px;background:var(--primary);color:white;border-radius:8px;font-size:0.85rem;font-weight:600;text-decoration:none}
+.nav-btn:hover{background:var(--primary-dark);text-decoration:none}
+
+.page-hero{padding:120px 0 60px;background:linear-gradient(180deg,#0f172a 0%,#1e293b 100%);color:white;text-align:center}
+.page-hero h1{font-size:2.6rem;font-weight:800;line-height:1.2}
+.page-hero h1 span{background:linear-gradient(135deg,#60a5fa,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.page-hero p{margin-top:16px;font-size:1.1rem;color:#94a3b8;max-width:640px;margin-left:auto;margin-right:auto}
+.page-hero .prereq{margin-top:24px;display:flex;gap:16px;justify-content:center;flex-wrap:wrap}
+.page-hero .prereq span{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:6px 16px;font-size:0.82rem;color:#cbd5e1}
+
+section{padding:80px 0}
+section.alt{background:var(--surface)}
+section.dark{background:#0f172a;color:white}
+.section-header{text-align:center;margin-bottom:48px}
+.section-header h2{font-size:2rem;font-weight:800}
+.section-header p{margin-top:8px;font-size:1.05rem;color:var(--text-soft);max-width:600px;margin-left:auto;margin-right:auto}
+
+.step-number{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;background:var(--primary);color:white;font-weight:700;font-size:0.95rem;margin-right:12px;flex-shrink:0}
+
+.guide-section{max-width:820px;margin:0 auto 64px}
+.guide-section h2{display:flex;align-items:center;font-size:1.5rem;font-weight:800;margin-bottom:8px}
+.guide-section .subtitle{color:var(--text-soft);font-size:0.95rem;margin-bottom:24px;padding-left:48px}
+
+.code-block{background:#1e293b;border-radius:12px;padding:24px;color:#e2e8f0;font-family:'SF Mono',Monaco,Consolas,monospace;font-size:0.82rem;line-height:1.9;overflow-x:auto;margin-bottom:16px;position:relative}
+.code-block .c{color:#64748b}
+.code-block .p{color:#22c55e}
+.code-block .s{color:#86efac}
+.code-block .n{color:#fbbf24}
+.code-block .k{color:#7dd3fc}
+
+.output-block{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:20px;font-size:0.85rem;color:#166534;line-height:1.7;margin-bottom:20px}
+.output-block strong{display:block;font-size:0.75rem;color:#15803d;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+
+.tip-block{background:#eff6ff;border:1px solid #bfdbfe;border-radius:12px;padding:20px;font-size:0.85rem;color:#1e40af;line-height:1.7;margin-bottom:20px}
+.tip-block strong{display:block;font-size:0.75rem;color:#1d4ed8;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+
+.next-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;max-width:720px;margin:0 auto}
+.next-card{display:flex;align-items:center;gap:14px;padding:20px 24px;border-radius:var(--radius);border:1px solid var(--border);background:white;text-decoration:none;color:var(--text);transition:all 0.2s}
+.next-card:hover{border-color:var(--primary);box-shadow:0 8px 20px rgba(37,99,235,0.06);transform:translateY(-2px);text-decoration:none}
+.next-icon{font-size:1.5rem;flex-shrink:0}
+.next-card h3{font-size:0.95rem;font-weight:700;margin-bottom:2px}
+.next-card p{font-size:0.8rem;color:var(--text-soft)}
+
+footer{background:#0f172a;color:#94a3b8;padding:48px 0 32px}
+.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;margin-bottom:32px}
+.footer-brand h3{color:white;font-size:1.2rem;margin-bottom:8px}
+.footer-brand p{font-size:0.85rem;line-height:1.7}
+.footer-col h4{color:white;font-size:0.85rem;margin-bottom:12px;font-weight:600}
+.footer-col a{display:block;font-size:0.83rem;color:#94a3b8;margin-bottom:8px;text-decoration:none}
+.footer-col a:hover{color:white}
+.footer-bottom{border-top:1px solid #1e293b;padding-top:24px;font-size:0.8rem;text-align:center}
+
+@media(max-width:900px){.footer-grid{grid-template-columns:1fr 1fr}.nav-links{display:none}.next-grid{grid-template-columns:1fr}}
+@media(max-width:600px){.page-hero h1{font-size:1.8rem}.guide-section h2{font-size:1.2rem}.next-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<!-- Nav -->
+<nav class="nav"><div class="container">
+<a href="/en/" class="nav-logo">Fun<span>ASR</span></a>
+<div class="nav-links"><a href="/en/#capabilities">Capabilities</a><a href="/en/#usage">How to Use</a><a href="/en/#benchmark">Benchmark</a><a href="/en/#demo">Demo</a><a href="https://modelscope.github.io/FunASR/" target="_blank">Docs</a><a href="quickstart.html">Quickstart</a><a href="models.html">Models</a><a href="ecosystem.html">Ecosystem</a><a href="/en/blog/">Blog</a><a href="vs-whisper.html">vs Whisper</a><a href="/en/donors.html">Thanks</a></div>
+<a href="/quickstart.html" style="font-size:0.85rem;font-weight:500;color:var(--text-soft);text-decoration:none">中文</a>
+<a href="https://github.com/modelscope/FunASR" target="_blank" class="nav-btn">GitHub ★</a>
+</div></nav>
+
+<!-- Hero -->
+<section class="page-hero">
+<h1><span>Quickstart</span> Guide</h1>
+<p>Master the three core workflows of FunASR in under 3 minutes: file transcription, real-time streaming, and API server deployment. Every code snippet is ready to copy and run.</p>
+<div class="prereq">
+<span>Python 3.8+</span>
+<span>GPU 8GB+ (optional, CPU works too)</span>
+<span>Linux / macOS / Windows</span>
+</div>
+</section>
+
+<!-- Install -->
+<section id="install"><div class="container">
+<div class="guide-section">
+<h2><div class="step-number">0</div>Installation</h2>
+<p class="subtitle">One command to install everything. GPU users should add vllm for a 16x speed boost.</p>
+<div class="code-block">
+<span class="c"># Basic install (works on both CPU and GPU)</span><br>
+<span class="p">$</span> pip install funasr<br>
+<br>
+<span class="c"># Full install (API server + vLLM acceleration, recommended for GPU)</span><br>
+<span class="p">$</span> pip install funasr vllm fastapi uvicorn python-multipart
+</div>
+<div class="tip-block">
+<strong>Tip</strong>
+If you just need a one-off transcription, <code>pip install funasr</code> is enough. For deploying an API server or maximum throughput, go with the full install.
+</div>
+</div>
+</div></section>
+
+<!-- Section 1: File Transcription -->
+<section class="alt" id="file-transcription"><div class="container">
+<div class="guide-section">
+<h2><div class="step-number">1</div>File Transcription</h2>
+<p class="subtitle">Pass in an audio file, get back the full transcript. Supports 50+ languages with built-in emotion and audio event detection.</p>
+
+<div class="code-block">
+<span class="k">from</span> funasr <span class="k">import</span> AutoModel<br>
+<br>
+<span class="c"># Fun-ASR-Nano: flagship LLM-ASR for zh/en/ja + Chinese dialects/accents (GPU)</span><br>
+model = AutoModel(model=<span class="s">"FunAudioLLM/Fun-ASR-Nano-2512"</span>, device=<span class="s">"cuda"</span>)<br>
+result = model.generate(input=<span class="s">"meeting.wav"</span>)<br>
+print(result[<span class="n">0</span>][<span class="s">"text"</span>])<br>
+<br>
+<span class="c"># For 31 languages use the separate checkpoint: FunAudioLLM/Fun-ASR-MLT-Nano-2512</span><br>
+<span class="c"># On CPU, use SenseVoice: AutoModel(model="iic/SenseVoiceSmall", vad_model="fsmn-vad")</span>
+</div>
+
+<div class="output-block">
+<strong>Output</strong>
+Let's discuss the three topics today. Sounds good. First one is the Q3 plan. Go ahead, we have 30 minutes.
+</div>
+
+<div class="code-block">
+<span class="c"># Batch-process multiple files at once</span><br>
+results = model.generate(input=[<span class="s">"file1.wav"</span>, <span class="s">"file2.mp3"</span>, <span class="s">"file3.flac"</span>])<br>
+<span class="k">for</span> r <span class="k">in</span> results:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;print(r[<span class="s">"text"</span>])
+</div>
+
+<div class="tip-block">
+<strong>Supported Formats</strong>
+WAV, MP3, FLAC, AAC, OGG, MP4 video -- virtually every common audio and video format works out of the box, no manual conversion needed.
+</div>
+</div>
+</div></section>
+
+<!-- Section 2: Real-time Streaming -->
+<section id="streaming"><div class="container">
+<div class="guide-section">
+<h2><div class="step-number">2</div>Real-time Streaming ASR</h2>
+<p class="subtitle">Feed audio from a microphone or stream and get results as you speak. Perfect for live captions, broadcast transcription, and voice assistants.</p>
+
+<div class="tip-block">
+<strong>Which model</strong>
+The flagship <strong>Fun-ASR-Nano</strong> (LLM-ASR) is an <strong>offline</strong> model and the default for file transcription and the OpenAI-compatible API (sections 1 &amp; 3). For true <strong>low-latency, speak-as-you-go streaming</strong>, FunASR ships a dedicated streaming model, <code>paraformer-zh-streaming</code> — shown below. One industrial-grade FunASR stack; pick the model per use case.
+</div>
+
+<div class="code-block">
+<span class="k">from</span> funasr <span class="k">import</span> AutoModel<br>
+<br>
+<span class="c"># Paraformer streaming model</span><br>
+model = AutoModel(model=<span class="s">"paraformer-zh-streaming"</span>, vad_model=<span class="s">"fsmn-vad"</span>)<br>
+<br>
+<span class="c"># Streaming inference: chunk_size = [5, 10, 5] means 600ms lookahead</span><br>
+chunk_size = [<span class="n">5</span>, <span class="n">10</span>, <span class="n">5</span>]<br>
+cache = {}<br>
+<br>
+<span class="c"># Simulate streaming input (replace with mic capture in production)</span><br>
+<span class="k">import</span> soundfile <span class="k">as</span> sf<br>
+speech, sr = sf.read(<span class="s">"meeting.wav"</span>)<br>
+chunk_stride = chunk_size[<span class="n">1</span>] * <span class="n">960</span>  <span class="c"># samples per chunk</span><br>
+<br>
+<span class="k">for</span> i <span class="k">in</span> range(<span class="n">0</span>, len(speech), chunk_stride):<br>
+&nbsp;&nbsp;&nbsp;&nbsp;chunk = speech[i:i+chunk_stride]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;is_final = (i + chunk_stride >= len(speech))<br>
+&nbsp;&nbsp;&nbsp;&nbsp;result = model.generate(<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;input=chunk, cache=cache,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;is_final=is_final, chunk_size=chunk_size<br>
+&nbsp;&nbsp;&nbsp;&nbsp;)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;print(result[<span class="n">0</span>][<span class="s">"text"</span>], end=<span class="s">""</span>, flush=<span class="k">True</span>)
+</div>
+
+<div class="output-block">
+<strong>Live output (updates progressively)</strong>
+Let's discuss the...three topics today. Sounds good. First one is...the Q3 plan.
+</div>
+
+<div class="tip-block">
+<strong>WebSocket Real-time Service</strong>
+Need browser-based live transcription? FunASR ships with a complete WebSocket server solution. Check the <a href="https://github.com/modelscope/FunASR" target="_blank">GitHub repository</a> under <code>examples/</code> for the WebSocket server and browser client code.
+</div>
+</div>
+</div></section>
+
+<!-- Section 3: API Server -->
+<section class="alt" id="api-server"><div class="container">
+<div class="guide-section">
+<h2><div class="step-number">3</div>OpenAI-compatible API Server</h2>
+<p class="subtitle">Deploy an OpenAI-compatible speech recognition API with a single command. Drop-in replacement for any app already using the Whisper API.</p>
+
+<div class="code-block">
+<span class="c"># Install and start the server</span><br>
+<span class="p">$</span> pip install funasr vllm fastapi uvicorn python-multipart<br>
+<span class="p">$</span> funasr-server --device cuda<br>
+<br>
+<span class="c"># Server starts on port 8899 by default</span>
+</div>
+
+<div class="code-block">
+<span class="c"># Option 1: curl</span><br>
+<span class="p">$</span> curl -X POST http://localhost:<span class="n">8899</span>/v1/audio/transcriptions \<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-F <span class="s">"file=@audio.wav"</span> \<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-F <span class="s">"model=iic/SenseVoiceSmall"</span>
+</div>
+
+<div class="code-block">
+<span class="c"># Option 2: OpenAI Python SDK (identical to Whisper API)</span><br>
+<span class="k">from</span> openai <span class="k">import</span> OpenAI<br>
+<br>
+client = OpenAI(base_url=<span class="s">"http://localhost:8899/v1"</span>, api_key=<span class="s">"x"</span>)<br>
+result = client.audio.transcriptions.create(<br>
+&nbsp;&nbsp;&nbsp;&nbsp;model=<span class="s">"fun-asr-nano"</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;file=open(<span class="s">"audio.wav"</span>, <span class="s">"rb"</span>),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;response_format=<span class="s">"verbose_json"</span><br>
+)<br>
+print(result.text)
+</div>
+
+<div class="output-block">
+<strong>JSON Response</strong>
+{"text": "Let's discuss the three topics today.", "segments": [{"start": 1.7, "end": 5.5, "text": "Let's discuss the three topics today."}], "duration": 12.1}
+</div>
+</div>
+</div></section>
+
+<!-- MCP Server -->
+<section id="mcp"><div class="container">
+<div class="guide-section">
+<h2><div class="step-number">+</div>MCP Server: AI Assistant Integration</h2>
+<p class="subtitle">With MCP enabled, AI assistants like Claude, Cursor, and Windsurf can call FunASR directly for speech recognition.</p>
+
+<div class="code-block">
+<span class="c"># Start the server with MCP support</span><br>
+<span class="p">$</span> funasr-server --device cuda --enable-mcp<br>
+<br>
+<span class="c"># AI assistants can now invoke speech recognition via MCP protocol</span><br>
+<span class="c"># Works with Claude Desktop, Cursor, Windsurf, and more</span>
+</div>
+
+<div class="tip-block">
+<strong>What is MCP?</strong>
+MCP (Model Context Protocol) is a standard protocol for AI assistants to invoke external tools. Once enabled, your AI coding assistant can directly "listen to" audio files, unlocking voice-driven development workflows.
+</div>
+</div>
+</div></section>
+
+<!-- Next Steps -->
+<section class="alt" id="next"><div class="container">
+<div class="section-header">
+<h2>Next Steps</h2>
+<p>Explore more of what FunASR can do</p>
+</div>
+<div class="next-grid">
+<a class="next-card" href="https://github.com/modelscope/FunASR" target="_blank">
+<div class="next-icon">⭐</div>
+<div><h3>GitHub Repository</h3><p>Source code, examples, and issue tracker</p></div>
+</a>
+<a class="next-card" href="models.html">
+<div class="next-icon">🧠</div>
+<div><h3>Model Gallery</h3><p>Browse all available models and their capabilities</p></div>
+</a>
+<a class="next-card" href="ecosystem.html">
+<div class="next-icon">🔗</div>
+<div><h3>Ecosystem</h3><p>FunClip, CosyVoice, and companion tools</p></div>
+</a>
+<a class="next-card" href="vs-whisper.html">
+<div class="next-icon">⚡</div>
+<div><h3>vs Whisper</h3><p>Performance, accuracy, and feature comparison</p></div>
+</a>
+</div>
+</div></section>
+
+<!-- Footer -->
+<footer><div class="container">
+<div class="footer-grid">
+<div class="footer-brand">
+<h3>FunASR</h3>
+<p>Industrial-grade speech recognition from Tongyi Lab. All-in-one speech understanding, built for production.</p>
+</div>
+<div class="footer-col"><h4>Documentation</h4>
+<a href="quickstart.html">Quickstart</a>
+<a href="https://modelscope.github.io/FunASR/training.html">Training Guide</a>
+<a href="https://github.com/modelscope/FunASR/blob/main/docs/vllm_guide.md">vLLM Guide</a>
+<a href="https://modelscope.github.io/FunASR/api.html">API Reference</a>
+</div>
+<div class="footer-col"><h4>Ecosystem</h4>
+<a href="https://github.com/QwenAudio/Fun-ASR">Fun-ASR-Nano</a>
+<a href="https://github.com/QwenAudio/SenseVoice">SenseVoice</a>
+<a href="https://github.com/modelscope/FunClip">FunClip</a>
+<a href="https://github.com/QwenAudio/CosyVoice">CosyVoice</a>
+</div>
+<div class="footer-col"><h4>Community</h4>
+<a href="https://github.com/modelscope/FunASR">GitHub</a>
+<a href="https://github.com/modelscope/FunASR/discussions">Discussions</a>
+<a href="https://github.com/modelscope/FunASR/issues">Issues</a>
+</div>
+</div>
+<div class="footer-bottom">&copy; 2024-2026 Tongyi Lab, Alibaba Group &middot; <a href="https://github.com/modelscope/FunASR/blob/main/LICENSE" style="color:#94a3b8">MIT License</a></div>
+</div></footer>
+
+<script src="/stats/tracker.js" async></script>
+</body>
+</html>

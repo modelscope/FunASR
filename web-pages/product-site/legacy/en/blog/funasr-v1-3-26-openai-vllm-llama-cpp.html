@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>FunASR v1.3.26:OpenAI-Compatible API, vLLM, and llama.cpp | FunASR</title>
+  <meta name="description" content="Deploy FunASR v1.3.26 through the OpenAI-compatible /v1/audio/transcriptions API, high-throughput vLLM inference, or self-contained llama.cpp/GGUF runtimes.">
+  <meta name="keywords" content="FunASR v1.3.26,OpenAI compatible ASR,vLLM speech recognition,llama.cpp ASR,GGUF,self-hosted speech to text">
+  <link rel="icon" href="/logo.png">
+  <meta property="og:title" content="FunASR v1.3.26:OpenAI-Compatible API, vLLM, and llama.cpp">
+  <meta property="og:description" content="Three runnable paths for OpenAI-compatible serving, GPU throughput, and Python-free edge deployment.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://www.funasr.com/en/blog/funasr-v1-3-26-openai-vllm-llama-cpp.html">
+  <meta property="og:image" content="https://www.funasr.com/img/banner.4f436d19.png">
+  <link rel="canonical" href="https://www.funasr.com/en/blog/funasr-v1-3-26-openai-vllm-llama-cpp.html">
+  <link rel="alternate" hreflang="en" href="https://www.funasr.com/en/blog/funasr-v1-3-26-openai-vllm-llama-cpp.html">
+  <link rel="alternate" hreflang="zh" href="https://www.funasr.com/blog/funasr-v1-3-26-openai-vllm-llama-cpp.html">
+  <link rel="alternate" hreflang="x-default" href="https://www.funasr.com/en/blog/funasr-v1-3-26-openai-vllm-llama-cpp.html">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"BlogPosting","headline":"FunASR v1.3.26:OpenAI-Compatible API, vLLM, and llama.cpp","description":"Three runnable paths for OpenAI-compatible serving, GPU throughput, and Python-free edge deployment.","datePublished":"2026-07-23","dateModified":"2026-07-23","author":{"@type":"Organization","name":"FunASR / Tongyi Lab"},"publisher":{"@type":"Organization","name":"FunASR","logo":{"@type":"ImageObject","url":"https://www.funasr.com/logo.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://www.funasr.com/en/blog/funasr-v1-3-26-openai-vllm-llama-cpp.html"},"image":"https://www.funasr.com/img/banner.4f436d19.png"}
+  </script>
+  <style>
+  :root{--primary:#2563eb;--primary-dark:#1d4ed8;--accent:#047857;--bg:#fff;--surface:#f8fafc;--border:#e2e8f0;--text:#0f172a;--text-soft:#475569;--text-muted:#94a3b8}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Inter',-apple-system,sans-serif;color:var(--text);line-height:1.7;background:var(--bg)}
+  a{color:var(--primary);text-decoration:none}a:hover{text-decoration:underline}
+  .container{max-width:800px;margin:0 auto;padding:0 24px}
+  .nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(255,255,255,0.94);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:14px 0}
+  .nav .container{max-width:1120px;display:flex;align-items:center;gap:24px}
+  .nav-logo{font-size:1.2rem;font-weight:800;color:var(--text)}.nav-logo span{color:var(--primary)}
+  .nav-links{display:flex;gap:20px;margin-left:auto;flex-wrap:wrap}.nav-links a{font-size:.85rem;font-weight:500;color:var(--text-soft)}
+  .nav-btn{padding:7px 16px;background:var(--primary);color:#fff;border-radius:7px;font-size:.83rem;font-weight:600}
+  article{padding:116px 0 80px}
+  h1{font-size:2rem;font-weight:800;line-height:1.3;margin-bottom:14px}
+  h2{font-size:1.3rem;font-weight:700;margin:38px 0 14px;padding-top:18px;border-top:1px solid var(--border)}
+  h3{font-size:1.05rem;font-weight:700;margin:24px 0 10px}
+  p{margin-bottom:14px;color:var(--text-soft)}
+  ul{margin:0 0 16px 22px;color:var(--text-soft)}li{margin-bottom:7px}
+  table{width:100%;border-collapse:collapse;margin:18px 0;font-size:.88rem}
+  th,td{padding:11px 12px;text-align:left;vertical-align:top;border-bottom:1px solid var(--border)}th{font-weight:600;background:var(--surface);color:var(--text)}
+  pre{background:#172033;color:#e2e8f0;padding:18px;border-radius:8px;overflow-x:auto;font-size:.82rem;line-height:1.7;margin:14px 0}
+  code{font-family:ui-monospace,Menlo,monospace}p code,li code,td code{background:var(--surface);padding:2px 6px;border-radius:5px;font-size:.85em;color:var(--primary-dark)}
+  .post-meta{color:var(--text-muted);font-size:.85rem;margin-bottom:22px}
+  .lead{font-size:1.05rem;color:var(--text);margin:22px 0}
+  .hero-media{display:block;width:100%;aspect-ratio:2.04/1;object-fit:cover;border-radius:8px;border:1px solid var(--border);margin:0 0 24px}
+  .proof{border-left:4px solid var(--accent);background:#f0fdf4;padding:14px 16px;margin:18px 0;color:#14532d}
+  .cta{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:24px;margin:30px 0;text-align:center}.cta p{margin-bottom:16px}.cta a.btn{display:inline-block;padding:10px 22px;background:var(--primary);color:#fff;border-radius:7px;font-weight:600}
+  footer{background:#0f172a;color:#94a3b8;padding:28px 0;text-align:center;font-size:.8rem}footer a{color:#94a3b8}
+  @media(max-width:900px){.nav-links{display:none}.nav .container{gap:16px}.nav-logo{margin-right:auto}h1{font-size:1.65rem}table{font-size:.8rem}th,td{padding:9px 8px}}
+  </style>
+</head>
+<body>
+<nav class="nav"><div class="container"><a href="/en/" class="nav-logo">Fun<span>ASR</span></a><div class="nav-links"><a href="/en/#capabilities">Capabilities</a><a href="/en/#usage">How to Use</a><a href="/en/#benchmark">Benchmark</a><a href="/en/#demo">Demo</a><a href="https://modelscope.github.io/FunASR/" target="_blank">Docs</a><a href="/en/quickstart.html">Quickstart</a><a href="/en/models.html">Models</a><a href="/en/ecosystem.html">Ecosystem</a><a href="/en/blog/">Blog</a><a href="/en/vs-whisper.html">vs Whisper</a><a href="/en/donors.html">Thanks</a></div><a href="/blog/funasr-v1-3-26-openai-vllm-llama-cpp.html" style="font-size:.83rem;font-weight:500;color:var(--text-soft)">中文</a><a href="https://github.com/modelscope/FunASR" target="_blank" rel="noopener" class="nav-btn">GitHub ★</a></div></nav>
+<article><div class="container">
+  <h1>FunASR v1.3.26:OpenAI-Compatible API, vLLM, and llama.cpp</h1>
+  <p class="post-meta">July 23, 2026 · FunASR release guide</p>
+  <img class="hero-media" src="/img/banner.4f436d19.png" alt="FunASR industrial speech recognition visual">
+  <p class="lead">FunASR v1.3.26 organizes the same open-source speech stack into three clear entry points:Python and an OpenAI-compatible API, vLLM for high-throughput GPU inference, and Python-free llama.cpp / GGUF runtimes.</p>
+  <p>This is more than a wheel-only release. The Python package, serving examples, GPU inference guide, and eight platform runtime assets target different deployment needs while remaining part of one FunASR ecosystem.</p>
+
+  <h2>Choose the path that matches your workload</h2>
+  <table>
+    <thead><tr><th>Goal</th><th>Recommended path</th><th>Start here</th></tr></thead>
+    <tbody>
+      <tr><td>Connect an OpenAI SDK, agent, or workflow</td><td><code>/v1/audio/transcriptions</code></td><td><a href="https://github.com/modelscope/FunASR/tree/main/examples/openai_api" target="_blank" rel="noopener">OpenAI-compatible API example</a></td></tr>
+      <tr><td>Batch transcription and high-throughput GPU serving</td><td>Fun-ASR-Nano + vLLM</td><td><a href="https://github.com/modelscope/FunASR/blob/main/docs/vllm_guide.md" target="_blank" rel="noopener">vLLM guide</a></td></tr>
+      <tr><td>CPU, edge, or zero-Python deployment</td><td>llama.cpp / GGUF</td><td><a href="https://github.com/modelscope/FunASR/releases/tag/runtime-llamacpp-v0.1.9" target="_blank" rel="noopener">v0.1.9 runtime assets</a></td></tr>
+    </tbody>
+  </table>
+
+  <h2>1. Start the OpenAI-compatible transcription service</h2>
+  <p>This path uses the same server implementation as the repository smoke tests. Pin the current PyPI release, then start the service:</p>
+  <pre><code>git clone https://github.com/modelscope/FunASR.git
+cd FunASR/examples/openai_api
+python -m pip install "funasr==1.3.26" fastapi uvicorn python-multipart
+python server.py --model sensevoice --device cuda --port 8000</code></pre>
+  <p>In another terminal, verify health and transcription with the public sample:</p>
+  <pre><code>curl -L https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/BAC009S0764W0121.wav -o sample.wav
+curl http://localhost:8000/health
+curl http://localhost:8000/v1/audio/transcriptions \
+  -F file=@sample.wav \
+  -F model=sensevoice \
+  -F response_format=verbose_json</code></pre>
+  <p>If you already use the OpenAI Python client, point <code>base_url</code> to <code>http://localhost:8000/v1</code>. The examples also include model listing, Swagger, Postman, OpenAPI, Gradio, and Kubernetes paths.</p>
+
+  <h2>2. Scale Fun-ASR-Nano throughput with vLLM</h2>
+  <p>Fun-ASR-Nano runs its audio encoder and adaptor in PyTorch, then sends continuous audio embeddings into the Qwen3 decoder managed by vLLM. The repository benchmark records <strong>RTFx 340</strong> for vLLM batch inference while keeping CER close to the PyTorch baseline.</p>
+  <div class="proof">The maintainer environment also completed a real-checkpoint smoke on one H100:vLLM 0.19.1 loaded successfully, transcribed the bundled sample, and returned token timestamps. The vLLM guide documents installation, memory, batching, WebSocket, and serving options.</div>
+  <pre><code>python -m pip install "vllm==0.19.1"
+python -m pip install "funasr&gt;=1.3.26" safetensors tiktoken websockets
+# Follow docs/vllm_guide.md for offline, streaming, or server mode</code></pre>
+
+  <h2>3. Download the self-contained llama.cpp / GGUF runtime</h2>
+  <p><a href="https://github.com/modelscope/FunASR/releases/tag/runtime-llamacpp-v0.1.9" target="_blank" rel="noopener">runtime-llamacpp-v0.1.9</a> ships Linux x64/ARM64, macOS ARM64, and Windows x64 packages. Linux includes AVX2 and Vulkan options; Windows includes AVX2, Vulkan, and CUDA, including <code>funasr-llamacpp-windows-x64-vulkan.zip</code>. Each archive provides a self-contained <code>llama-funasr-*</code> binary entry point.</p>
+  <ul>
+    <li>Choose the standard CPU build when you do not want to maintain Python.</li>
+    <li>Choose Vulkan or CUDA for desktop GPU acceleration.</li>
+    <li>Choose ARM64 for edge devices and Apple Silicon.</li>
+  </ul>
+  <p>See the <a href="/en/llama-cpp.html">llama.cpp / GGUF page</a> for models, commands, and hardware selection. Runtime assets and model versions are linked together so users do not have to hunt across releases.</p>
+
+  <h2>What each repository owns</h2>
+  <table>
+    <thead><tr><th>Repository</th><th>What to follow</th></tr></thead>
+    <tbody>
+      <tr><td><a href="https://github.com/modelscope/FunASR" target="_blank" rel="noopener">FunASR</a></td><td>Toolkit, serving, OpenAI API, vLLM, llama.cpp, and deployment docs</td></tr>
+      <tr><td><a href="https://github.com/QwenAudio/Fun-ASR" target="_blank" rel="noopener">Fun-ASR</a></td><td>Fun-ASR-Nano / MLT models, capabilities, benchmarks, and model integrations</td></tr>
+      <tr><td><a href="https://github.com/QwenAudio/SenseVoice" target="_blank" rel="noopener">SenseVoice</a></td><td>Multilingual ASR plus emotion, language, and audio-event recognition</td></tr>
+      <tr><td><a href="https://github.com/modelscope/FunClip" target="_blank" rel="noopener">FunClip</a></td><td>Speech-driven video understanding, retrieval, and editing</td></tr>
+    </tbody>
+  </table>
+
+  <div class="cta">
+    <p>Run one real audio file through the path that fits your deployment. File a reproducible GitHub issue when something blocks you, and star the repository you actually use.</p>
+    <a class="btn" href="https://github.com/modelscope/FunASR/releases/tag/v1.3.26" target="_blank" rel="noopener">Read the v1.3.26 release notes</a>
+  </div>
+</div></article>
+<footer><div class="container">© 2024-2026 Tongyi Lab, Alibaba Group · <a href="https://github.com/modelscope/FunASR/blob/main/LICENSE">MIT License</a></div></footer>
+</body>
+</html>

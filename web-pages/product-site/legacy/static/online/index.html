@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <title>FunASR 在线语音识别</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f8fafc; color: #1e293b; min-height: 100vh; }
+        .header { background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%); color: white; padding: 24px 0; text-align: center; }
+        .header h1 { font-size: 1.8rem; font-weight: 700; margin-bottom: 6px; }
+        .header p { font-size: 0.9rem; opacity: 0.85; max-width: 600px; margin: 0 auto; }
+        .container { max-width: 800px; margin: 0 auto; padding: 24px 16px; }
+        .card { background: white; border-radius: 12px; padding: 24px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); border: 1px solid #e2e8f0; }
+        .card h3 { font-size: 0.85rem; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; }
+        label { font-size: 0.9rem; color: #475569; cursor: pointer; }
+        input[type="text"], textarea { width: 100%; padding: 10px 14px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.9rem; transition: border-color 0.2s; }
+        input[type="text"]:focus, textarea:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
+        textarea { resize: vertical; min-height: 80px; }
+        .radio-group { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 6px; }
+        .radio-group label { display: flex; align-items: center; gap: 6px; padding: 8px 14px; border: 1px solid #e2e8f0; border-radius: 8px; transition: all 0.15s; }
+        .radio-group label:hover { border-color: #3b82f6; background: #eff6ff; }
+        .radio-group input[type="radio"]:checked + span { color: #2563eb; font-weight: 600; }
+        .btn-group { display: flex; gap: 10px; margin-top: 16px; }
+        button { padding: 10px 20px; border: none; border-radius: 8px; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: all 0.15s; }
+        #btnConnect { background: #f1f5f9; color: #475569; border: 1px solid #d1d5db; }
+        #btnConnect:hover { background: #e2e8f0; }
+        #btnStart { background: #2563eb; color: white; }
+        #btnStart:hover { background: #1d4ed8; }
+        #btnStop { background: #ef4444; color: white; }
+        #btnStop:hover { background: #dc2626; }
+        .result-area { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; min-height: 120px; font-size: 0.95rem; line-height: 1.7; white-space: pre-wrap; color: #334155; }
+        .status { font-size: 0.8rem; color: #64748b; margin-top: 8px; padding: 6px 12px; background: #f1f5f9; border-radius: 6px; display: inline-block; }
+        audio { width: 100%; margin-top: 12px; border-radius: 8px; }
+        .link-bar { text-align: center; margin-top: 20px; font-size: 0.85rem; color: #64748b; }
+        .link-bar a { color: #2563eb; text-decoration: none; }
+        .link-bar a:hover { text-decoration: underline; }
+        @media (max-width: 600px) { .container { padding: 12px; } .card { padding: 16px; } .radio-group { gap: 8px; } }
+    </style>
+</head>
+<body>
+    <script src="recorder-core.js" charset="UTF-8"></script>
+    <script src="wav.js" charset="UTF-8"></script>
+    <script src="pcm.js" charset="UTF-8"></script>
+
+    <div class="header">
+        <h1>FunASR 在线语音识别</h1>
+        <p>工业级语音识别体验 — 支持实时转写、离线文件转写、热词定制</p>
+    </div>
+
+    <div class="container">
+        <div class="card">
+            <h3>服务器配置</h3>
+            <input id="wssip" type="text" onchange="addresschange()" value="wss://www.funasr.com:10095/" placeholder="WebSocket 服务地址"/>
+            <a id="wsslink" href="#" onclick="window.open('https://www.funasr.com:10095/', '_blank')" style="display:inline-block;margin-top:8px;font-size:0.8rem;color:#2563eb;text-decoration:none;">
+                <span id="info_wslink">点击授权 WSS 连接</span>
+            </a>
+        </div>
+
+        <div class="card">
+            <h3>录音模式</h3>
+            <div class="radio-group">
+                <label><input name="recoder_mode" onclick="on_recoder_mode_change()" type="radio" value="mic" checked="true"/><span>🎤 麦克风</span></label>
+                <label><input name="recoder_mode" onclick="on_recoder_mode_change()" type="radio" value="file"/><span>📁 文件上传</span></label>
+            </div>
+        </div>
+
+        <div class="card" id="mic_mode_div">
+            <h3>识别模式</h3>
+            <div class="radio-group">
+                <label><input name="asr_mode" type="radio" value="2pass" checked="true"/><span>2Pass（推荐）</span></label>
+                <label><input name="asr_mode" type="radio" value="online"/><span>实时</span></label>
+                <label><input name="asr_mode" type="radio" value="offline"/><span>离线</span></label>
+            </div>
+        </div>
+
+        <div class="card" id="rec_mode_div" style="display:none;">
+            <h3>选择音频文件</h3>
+            <input type="file" id="upfile" accept="audio/*" style="font-size:0.9rem;"/>
+        </div>
+
+        <div class="card" id="use_itn_div">
+            <h3>逆文本标准化 (ITN)</h3>
+            <div class="radio-group">
+                <label><input name="use_itn" type="radio" value="false" checked="true"/><span>关闭</span></label>
+                <label><input name="use_itn" type="radio" value="true"/><span>开启</span></label>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>热词设置</h3>
+            <textarea id="varHot" placeholder="一行一个关键字，空格隔开权重">阿里巴巴 20
+hello world 40</textarea>
+        </div>
+
+        <div class="card">
+            <h3>识别结果</h3>
+            <div class="result-area" id="varArea"></div>
+            <div class="status" id="info_div">就绪 — 点击「连接」开始</div>
+            <div class="btn-group">
+                <button id="btnConnect">连接</button>
+                <button id="btnStart">开始</button>
+                <button id="btnStop">停止</button>
+            </div>
+            <audio id="audio_record" type="audio/wav" controls></audio>
+        </div>
+
+        <div class="link-bar">
+            <a href="https://github.com/modelscope/FunASR" target="_blank">GitHub</a> · 
+            <a href="https://modelscope.github.io/FunASR" target="_blank">文档</a> · 
+            FunASR © Tongyi Lab, Alibaba Group
+        </div>
+    </div>
+
+    <script src="wsconnecter.js" charset="utf-8"></script>
+    <script>
+        // Patch: make varArea work as div instead of textarea
+        var origVarArea = document.getElementById('varArea');
+        Object.defineProperty(origVarArea, 'value', {
+            get: function() { return this.textContent; },
+            set: function(v) { this.textContent = v; }
+        });
+    </script>
+    <script src="main.js" charset="utf-8"></script>
+</body>
+</html>

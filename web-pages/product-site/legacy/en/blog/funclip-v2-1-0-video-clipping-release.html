@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>FunClip v2.1.0: Local AI Video Clipping with FunASR | FunASR</title>
+  <meta name="description" content="FunClip v2.1.0 is the first versioned GitHub release for local AI video clipping with Paraformer, Fun-ASR-Nano, SenseVoice, LLM selection, tar.gz, zip, and SHA256SUMS.">
+  <meta name="keywords" content="FunClip v2.1.0,AI video clipping,local video editor,automatic subtitles,FunASR,Fun-ASR-Nano,SenseVoice,LLM video clipping,Gradio">
+  <link rel="icon" href="/logo.png">
+  <meta property="og:title" content="FunClip v2.1.0: The First Versioned Local AI Video-Clipping Release">
+  <meta property="og:description" content="Paraformer, Fun-ASR-Nano, SenseVoice, and LLM clipping in checksum-protected, rollback-ready source archives.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://www.funasr.com/en/blog/funclip-v2-1-0-video-clipping-release.html">
+  <meta property="og:image" content="https://www.funasr.com/img/funclip-v2-1-0-interface.jpg">
+  <link rel="canonical" href="https://www.funasr.com/en/blog/funclip-v2-1-0-video-clipping-release.html">
+  <link rel="alternate" hreflang="en" href="https://www.funasr.com/en/blog/funclip-v2-1-0-video-clipping-release.html">
+  <link rel="alternate" hreflang="zh" href="https://www.funasr.com/blog/funclip-v2-1-0-video-clipping-release.html">
+  <link rel="alternate" hreflang="x-default" href="https://www.funasr.com/en/blog/funclip-v2-1-0-video-clipping-release.html">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"BlogPosting","headline":"FunClip v2.1.0: The First Versioned Local AI Video-Clipping Release","description":"Paraformer, Fun-ASR-Nano, SenseVoice, and LLM clipping in checksum-protected, rollback-ready source archives.","datePublished":"2026-07-24","dateModified":"2026-07-24","author":{"@type":"Organization","name":"FunASR / Tongyi Lab"},"publisher":{"@type":"Organization","name":"FunASR","logo":{"@type":"ImageObject","url":"https://www.funasr.com/logo.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://www.funasr.com/en/blog/funclip-v2-1-0-video-clipping-release.html"},"image":"https://www.funasr.com/img/funclip-v2-1-0-interface.jpg"}
+  </script>
+  <style>
+  :root{--primary:#2563eb;--primary-dark:#1d4ed8;--accent:#047857;--bg:#fff;--surface:#f8fafc;--border:#e2e8f0;--text:#0f172a;--text-soft:#475569;--text-muted:#94a3b8}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Inter',-apple-system,sans-serif;color:var(--text);line-height:1.7;background:var(--bg)}
+  a{color:var(--primary);text-decoration:none}a:hover{text-decoration:underline}
+  .container{max-width:800px;margin:0 auto;padding:0 24px}
+  .nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(255,255,255,0.94);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:14px 0}
+  .nav .container{max-width:1120px;display:flex;align-items:center;gap:24px}
+  .nav-logo{font-size:1.2rem;font-weight:800;color:var(--text)}.nav-logo span{color:var(--primary)}
+  .nav-links{display:flex;gap:20px;margin-left:auto;flex-wrap:wrap}.nav-links a{font-size:.85rem;font-weight:500;color:var(--text-soft)}
+  .nav-btn{padding:7px 16px;background:var(--primary);color:#fff;border-radius:7px;font-size:.83rem;font-weight:600}
+  article{padding:116px 0 80px}
+  h1{font-size:2rem;font-weight:800;line-height:1.3;margin-bottom:14px}
+  h2{font-size:1.3rem;font-weight:700;margin:38px 0 14px;padding-top:18px;border-top:1px solid var(--border)}
+  h3{font-size:1.05rem;font-weight:700;margin:24px 0 10px}
+  p{margin-bottom:14px;color:var(--text-soft)}
+  ul{margin:0 0 16px 22px;color:var(--text-soft)}li{margin-bottom:7px}
+  table{width:100%;border-collapse:collapse;margin:18px 0;font-size:.88rem}
+  th,td{padding:11px 12px;text-align:left;vertical-align:top;border-bottom:1px solid var(--border)}th{font-weight:600;background:var(--surface);color:var(--text)}
+  pre{background:#172033;color:#e2e8f0;padding:18px;border-radius:8px;overflow-x:auto;font-size:.82rem;line-height:1.7;margin:14px 0}
+  code{font-family:ui-monospace,Menlo,monospace}p code,li code,td code{background:var(--surface);padding:2px 6px;border-radius:5px;font-size:.85em;color:var(--primary-dark)}
+  .post-meta{color:var(--text-muted);font-size:.85rem;margin-bottom:22px}
+  .lead{font-size:1.05rem;color:var(--text);margin:22px 0}
+  .hero-media{display:block;width:100%;aspect-ratio:2.04/1;object-fit:cover;border-radius:8px;border:1px solid var(--border);margin:0 0 24px}
+  .proof{border-left:4px solid var(--accent);background:#f0fdf4;padding:14px 16px;margin:18px 0;color:#14532d}
+  .cta{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:24px;margin:30px 0;text-align:center}.cta p{margin-bottom:16px}.cta a.btn{display:inline-block;padding:10px 22px;background:var(--primary);color:#fff;border-radius:7px;font-weight:600}
+  footer{background:#0f172a;color:#94a3b8;padding:28px 0;text-align:center;font-size:.8rem}footer a{color:#94a3b8}
+  @media(max-width:900px){.nav-links{display:none}.nav .container{gap:16px}.nav-logo{margin-right:auto}h1{font-size:1.65rem}table{font-size:.8rem}th,td{padding:9px 8px}}
+  </style>
+</head>
+<body>
+<nav class="nav"><div class="container"><a href="/en/" class="nav-logo">Fun<span>ASR</span></a><div class="nav-links"><a href="/en/#capabilities">Capabilities</a><a href="/en/#usage">How to Use</a><a href="/en/#benchmark">Benchmark</a><a href="/en/#demo">Demo</a><a href="https://modelscope.github.io/FunASR/" target="_blank" rel="noopener">Docs</a><a href="/en/quickstart.html">Quickstart</a><a href="/en/models.html">Models</a><a href="/en/ecosystem.html">Ecosystem</a><a href="/en/blog/">Blog</a><a href="/en/vs-whisper.html">vs Whisper</a><a href="/en/donors.html">Thanks</a></div><a href="/blog/funclip-v2-1-0-video-clipping-release.html" style="font-size:.83rem;font-weight:500;color:var(--text-soft)">中文</a><a href="https://github.com/modelscope/FunASR" target="_blank" rel="noopener" class="nav-btn">GitHub ★</a></div></nav>
+<article><div class="container">
+  <h1>FunClip v2.1.0: The First Versioned Local AI Video-Clipping Release</h1>
+  <p class="post-meta">July 24, 2026 · FunClip Release</p>
+  <img class="hero-media" src="/img/funclip-v2-1-0-interface.jpg" alt="FunClip local video input, subtitle recognition, and LLM-assisted clipping interface">
+  <p class="lead">FunClip v2.1.0 is the project's first versioned GitHub release. It turns the current local video-clipping application into a downloadable, verifiable, rollback-ready snapshot: transcribe video with the FunASR model family, then cut by transcript, speaker, or LLM-selected segments.</p>
+  <p>You can run the public Space first or download the source for private local deployment. Videos, audio, and model weights stay outside the release archives.</p>
+
+  <h2>Choose the ASR path that fits the edit</h2>
+  <table>
+    <thead><tr><th>Path</th><th>Best for</th><th>Launch command</th></tr></thead>
+    <tbody>
+      <tr><td>Paraformer</td><td>Precise timestamps, transcript or speaker clipping, and Chinese hotwords</td><td><code>python funclip/launch.py</code></td></tr>
+      <tr><td>Fun-ASR-Nano</td><td>High-accuracy Mandarin, English, Japanese, Chinese dialect, and accent transcription; use Paraformer for precise character-level clipping</td><td><code>python funclip/launch.py -m fun-asr-nano</code></td></tr>
+      <tr><td>SenseVoice</td><td>Multilingual ASR with emotion and audio-event tags</td><td><code>python funclip/launch.py -m sensevoice</code></td></tr>
+      <tr><td>English Paraformer</td><td>English recognition with timestamp-based clipping</td><td><code>python funclip/launch.py -l en</code></td></tr>
+    </tbody>
+  </table>
+
+  <h2>1. Try the public application first</h2>
+  <p>The <a href="https://huggingface.co/spaces/FunAudioLLM/FunClip" target="_blank" rel="noopener">FunClip Hugging Face Space</a> runs the same public application. Use it to validate video upload, ASR, subtitle selection, and AI clipping before moving private media or pinned dependencies to a local deployment.</p>
+
+  <h2>2. Download and verify v2.1.0</h2>
+  <p>Use the <code>tar.gz</code> archive on Linux and macOS, or the <code>zip</code> archive on Windows and general-purpose extraction workflows. The checksum command below verifies only archives present in the current directory:</p>
+  <pre><code>curl -LO https://github.com/modelscope/FunClip/releases/download/v2.1.0/FunClip-2.1.0.tar.gz
+curl -LO https://github.com/modelscope/FunClip/releases/download/v2.1.0/SHA256SUMS
+sha256sum -c SHA256SUMS --ignore-missing
+
+tar -xzf FunClip-2.1.0.tar.gz
+cd FunClip-2.1.0
+python -m pip install -r requirements.txt
+python -m pip install -U "funasr>=1.3.29"
+python funclip/launch.py</code></pre>
+  <p>On Windows, run <code>Get-FileHash -Algorithm SHA256 FunClip-2.1.0.zip</code> and compare the result with <a href="https://github.com/modelscope/FunClip/releases/download/v2.1.0/SHA256SUMS" target="_blank" rel="noopener">SHA256SUMS</a>.</p>
+
+  <h2>3. From transcript clipping to content-aware selection</h2>
+  <p>The default workflow turns a video into timestamped subtitles and lets you cut by transcript or speaker. LLM-assisted clipping sends subtitles plus your prompt to a configured provider and returns segments that the existing clip action can consume directly.</p>
+  <ul>
+    <li>Use a supported transcript-driven LLM provider when subtitles contain the signal you need.</li>
+    <li>Use optional TwelveLabs Pegasus when action, scene changes, or on-screen events matter more than the transcript; Pegasus reasons over video and audio together.</li>
+    <li>Use direct transcript or speaker selection when a human needs exact control over the output video and SRT cues.</li>
+  </ul>
+
+  <h2>Why these are source archives, not a wheel</h2>
+  <p>FunClip is a runnable application, not a declared Python library package; the repository has no wheel-producing <code>setup.py</code> or <code>pyproject.toml</code>. v2.1.0 therefore ships two honest application snapshots and one checksum manifest:</p>
+  <ul>
+    <li><a href="https://github.com/modelscope/FunClip/releases/download/v2.1.0/FunClip-2.1.0.tar.gz" target="_blank" rel="noopener"><code>FunClip-2.1.0.tar.gz</code></a></li>
+    <li><a href="https://github.com/modelscope/FunClip/releases/download/v2.1.0/FunClip-2.1.0.zip" target="_blank" rel="noopener"><code>FunClip-2.1.0.zip</code></a></li>
+    <li><a href="https://github.com/modelscope/FunClip/releases/download/v2.1.0/SHA256SUMS" target="_blank" rel="noopener"><code>SHA256SUMS</code></a></li>
+  </ul>
+  <p>The archives contain tracked application source, documentation, and the dependency manifest. They do not bundle runtime dependencies or model weights, so every model keeps its own license and distribution boundary.</p>
+
+  <div class="proof">The exact v2.1.0 merge passed 50 tests with 1 skipped. Six release-contract tests also passed in a clean Python 3.12 environment, covering reproducible archives, cross-filesystem output, invalid-ref rejection, and idempotent publication. Both the initial GitHub Actions release and a deliberate rerun succeeded; the rerun verified the published assets and made no destructive changes.</div>
+
+  <h2>Version relationship with FunASR 1.3.29</h2>
+  <p>FunClip v2.1.0 requires <code>funasr>=1.3.29</code>. When SenseVoice has no token timestamps, that release exposes every VAD speech region through <code>sentence_info</code>, giving subtitle and clipping clients real segment boundaries. It also includes the realtime final-text and short-tail fixes from 1.3.28. See the <a href="https://github.com/modelscope/FunASR/releases/tag/v1.3.29" target="_blank" rel="noopener">FunASR v1.3.29 release</a> for details.</p>
+
+  <div class="cta">
+    <p>Run one video in the Space or deploy the pinned version on your own machine. File a reproducible issue when something blocks you, and star the <a href="https://github.com/modelscope/FunClip" target="_blank" rel="noopener">FunClip repository</a> if it becomes part of your workflow.</p>
+    <a class="btn" href="https://github.com/modelscope/FunClip/releases/tag/v2.1.0" target="_blank" rel="noopener">Open the FunClip v2.1.0 release and downloads</a>
+  </div>
+</div></article>
+<footer><div class="container">© 2024-2026 Tongyi Lab, Alibaba Group · <a href="https://github.com/modelscope/FunASR/blob/main/LICENSE">MIT License</a></div></footer>
+</body>
+</html>

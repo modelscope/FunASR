@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>FunASR v1.3.26:OpenAI 兼容 API、vLLM 与 llama.cpp 部署 | FunASR</title>
+  <meta name="description" content="FunASR v1.3.26 发布指南:用 OpenAI 兼容 /v1/audio/transcriptions 接口、vLLM 高吞吐推理或 llama.cpp/GGUF 自包含运行时部署本地语音识别。">
+  <meta name="keywords" content="FunASR v1.3.26,OpenAI compatible ASR,vLLM speech recognition,llama.cpp ASR,GGUF,自托管语音识别">
+  <link rel="icon" href="/logo.png">
+  <meta property="og:title" content="FunASR v1.3.26:OpenAI 兼容 API、vLLM 与 llama.cpp 部署">
+  <meta property="og:description" content="三个可运行入口覆盖 OpenAI 兼容服务、GPU 高吞吐和无 Python 边缘部署。">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://www.funasr.com/blog/funasr-v1-3-26-openai-vllm-llama-cpp.html">
+  <meta property="og:image" content="https://www.funasr.com/img/banner.4f436d19.png">
+  <link rel="canonical" href="https://www.funasr.com/blog/funasr-v1-3-26-openai-vllm-llama-cpp.html">
+  <link rel="alternate" hreflang="en" href="https://www.funasr.com/en/blog/funasr-v1-3-26-openai-vllm-llama-cpp.html">
+  <link rel="alternate" hreflang="zh" href="https://www.funasr.com/blog/funasr-v1-3-26-openai-vllm-llama-cpp.html">
+  <link rel="alternate" hreflang="x-default" href="https://www.funasr.com/en/blog/funasr-v1-3-26-openai-vllm-llama-cpp.html">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"BlogPosting","headline":"FunASR v1.3.26:OpenAI 兼容 API、vLLM 与 llama.cpp 部署","description":"三个可运行入口覆盖 OpenAI 兼容服务、GPU 高吞吐和无 Python 边缘部署。","datePublished":"2026-07-23","dateModified":"2026-07-23","author":{"@type":"Organization","name":"FunASR / Tongyi Lab"},"publisher":{"@type":"Organization","name":"FunASR","logo":{"@type":"ImageObject","url":"https://www.funasr.com/logo.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://www.funasr.com/blog/funasr-v1-3-26-openai-vllm-llama-cpp.html"},"image":"https://www.funasr.com/img/banner.4f436d19.png"}
+  </script>
+  <style>
+  :root{--primary:#2563eb;--primary-dark:#1d4ed8;--accent:#047857;--bg:#fff;--surface:#f8fafc;--border:#e2e8f0;--text:#0f172a;--text-soft:#475569;--text-muted:#94a3b8}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Inter',-apple-system,sans-serif;color:var(--text);line-height:1.7;background:var(--bg)}
+  a{color:var(--primary);text-decoration:none}a:hover{text-decoration:underline}
+  .container{max-width:800px;margin:0 auto;padding:0 24px}
+  .nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(255,255,255,0.94);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:14px 0}
+  .nav .container{max-width:1120px;display:flex;align-items:center;gap:24px}
+  .nav-logo{font-size:1.2rem;font-weight:800;color:var(--text)}.nav-logo span{color:var(--primary)}
+  .nav-links{display:flex;gap:20px;margin-left:auto;flex-wrap:wrap}.nav-links a{font-size:.85rem;font-weight:500;color:var(--text-soft)}
+  .nav-btn{padding:7px 16px;background:var(--primary);color:#fff;border-radius:7px;font-size:.83rem;font-weight:600}
+  article{padding:116px 0 80px}
+  h1{font-size:2rem;font-weight:800;line-height:1.3;margin-bottom:14px}
+  h2{font-size:1.3rem;font-weight:700;margin:38px 0 14px;padding-top:18px;border-top:1px solid var(--border)}
+  h3{font-size:1.05rem;font-weight:700;margin:24px 0 10px}
+  p{margin-bottom:14px;color:var(--text-soft)}
+  ul{margin:0 0 16px 22px;color:var(--text-soft)}li{margin-bottom:7px}
+  table{width:100%;border-collapse:collapse;margin:18px 0;font-size:.88rem}
+  th,td{padding:11px 12px;text-align:left;vertical-align:top;border-bottom:1px solid var(--border)}th{font-weight:600;background:var(--surface);color:var(--text)}
+  pre{background:#172033;color:#e2e8f0;padding:18px;border-radius:8px;overflow-x:auto;font-size:.82rem;line-height:1.7;margin:14px 0}
+  code{font-family:ui-monospace,Menlo,monospace}p code,li code,td code{background:var(--surface);padding:2px 6px;border-radius:5px;font-size:.85em;color:var(--primary-dark)}
+  .post-meta{color:var(--text-muted);font-size:.85rem;margin-bottom:22px}
+  .lead{font-size:1.05rem;color:var(--text);margin:22px 0}
+  .hero-media{display:block;width:100%;aspect-ratio:2.04/1;object-fit:cover;border-radius:8px;border:1px solid var(--border);margin:0 0 24px}
+  .proof{border-left:4px solid var(--accent);background:#f0fdf4;padding:14px 16px;margin:18px 0;color:#14532d}
+  .cta{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:24px;margin:30px 0;text-align:center}.cta p{margin-bottom:16px}.cta a.btn{display:inline-block;padding:10px 22px;background:var(--primary);color:#fff;border-radius:7px;font-weight:600}
+  footer{background:#0f172a;color:#94a3b8;padding:28px 0;text-align:center;font-size:.8rem}footer a{color:#94a3b8}
+  @media(max-width:900px){.nav-links{display:none}.nav .container{gap:16px}.nav-logo{margin-right:auto}h1{font-size:1.65rem}table{font-size:.8rem}th,td{padding:9px 8px}}
+  </style>
+</head>
+<body>
+<nav class="nav"><div class="container"><a href="/" class="nav-logo">Fun<span>ASR</span></a><div class="nav-links"><a href="/#capabilities">核心能力</a><a href="/#usage">如何使用</a><a href="/#benchmark">性能</a><a href="/#demo">演示</a><a href="https://modelscope.github.io/FunASR/zh/" target="_blank">文档</a><a href="/quickstart.html">快速上手</a><a href="/models.html">模型</a><a href="/ecosystem.html">生态</a><a href="/blog/">技术博客</a><a href="/vs-whisper.html">对比 Whisper</a><a href="/donors.html">功德榜</a></div><a href="/en/blog/funasr-v1-3-26-openai-vllm-llama-cpp.html" style="font-size:.83rem;font-weight:500;color:var(--text-soft)">EN</a><a href="https://github.com/modelscope/FunASR" target="_blank" rel="noopener" class="nav-btn">GitHub ★</a></div></nav>
+<article><div class="container">
+  <h1>FunASR v1.3.26:OpenAI 兼容 API、vLLM 与 llama.cpp 部署</h1>
+  <p class="post-meta">2026-07-23 · FunASR 发布指南</p>
+  <img class="hero-media" src="/img/banner.4f436d19.png" alt="FunASR 工业级语音识别视觉图">
+  <p class="lead">FunASR v1.3.26 把同一套开源语音识别能力整理成三个清晰入口:Python 与 OpenAI 兼容 API、面向 GPU 批量吞吐的 vLLM，以及无需 Python 的 llama.cpp / GGUF 运行时。</p>
+  <p>这不是只有一个 wheel 的发布。Python 包、服务示例、GPU 推理指南和八个平台运行时资产分别面向不同部署场景，并通过同一个 FunASR 生态互相衔接。</p>
+
+  <h2>先选最适合你的入口</h2>
+  <table>
+    <thead><tr><th>目标</th><th>推荐入口</th><th>开始位置</th></tr></thead>
+    <tbody>
+      <tr><td>接入现有 OpenAI SDK、Agent 或工作流</td><td><code>/v1/audio/transcriptions</code></td><td><a href="https://github.com/modelscope/FunASR/tree/main/examples/openai_api" target="_blank" rel="noopener">OpenAI 兼容 API 示例</a></td></tr>
+      <tr><td>GPU 批量转写与高吞吐服务</td><td>Fun-ASR-Nano + vLLM</td><td><a href="https://github.com/modelscope/FunASR/blob/main/docs/vllm_guide_zh.md" target="_blank" rel="noopener">vLLM 中文指南</a></td></tr>
+      <tr><td>CPU、边缘设备或零 Python 部署</td><td>llama.cpp / GGUF</td><td><a href="https://github.com/modelscope/FunASR/releases/tag/runtime-llamacpp-v0.1.9" target="_blank" rel="noopener">v0.1.9 运行时资产</a></td></tr>
+    </tbody>
+  </table>
+
+  <h2>1. 启动 OpenAI 兼容转写服务</h2>
+  <p>下面的路径与仓库 smoke test 使用同一套服务实现。先固定当前 PyPI 版本，再启动服务:</p>
+  <pre><code>git clone https://github.com/modelscope/FunASR.git
+cd FunASR/examples/openai_api
+python -m pip install "funasr==1.3.26" fastapi uvicorn python-multipart
+python server.py --model sensevoice --device cuda --port 8000</code></pre>
+  <p>另开一个终端，用公开样例验证健康检查和转写:</p>
+  <pre><code>curl -L https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/BAC009S0764W0121.wav -o sample.wav
+curl http://localhost:8000/health
+curl http://localhost:8000/v1/audio/transcriptions \
+  -F file=@sample.wav \
+  -F model=sensevoice \
+  -F response_format=verbose_json</code></pre>
+  <p>已有 OpenAI Python 客户端时，只需把 <code>base_url</code> 指向 <code>http://localhost:8000/v1</code>。接口还提供模型列表、Swagger 文档、Postman、OpenAPI、Gradio 和 Kubernetes 示例。</p>
+
+  <h2>2. 用 vLLM 放大 Fun-ASR-Nano 吞吐</h2>
+  <p>Fun-ASR-Nano 的音频编码器与 adaptor 在 PyTorch 中生成连续音频 embedding，再交给 vLLM 的 Qwen3 解码部分。仓库基准记录 vLLM batch 达到 <strong>RTFx 340</strong>，并保留与 PyTorch 基线接近的 CER。</p>
+  <div class="proof">维护环境已在单张 H100 上完成真实 checkpoint 验证:vLLM 0.19.1 成功加载，样例音频完成转写并输出 token 时间戳。完整安装、显存、批处理、WebSocket 与服务参数都在 vLLM 指南中。</div>
+  <pre><code>python -m pip install "vllm==0.19.1"
+python -m pip install "funasr&gt;=1.3.26" safetensors tiktoken websockets
+# 按 docs/vllm_guide_zh.md 选择离线、流式或服务入口</code></pre>
+
+  <h2>3. 下载 llama.cpp / GGUF 自包含运行时</h2>
+  <p><a href="https://github.com/modelscope/FunASR/releases/tag/runtime-llamacpp-v0.1.9" target="_blank" rel="noopener">runtime-llamacpp-v0.1.9</a> 同时提供 Linux x64/ARM64、macOS ARM64 和 Windows x64 包，其中 Linux 支持 AVX2/Vulkan，Windows 支持 AVX2/Vulkan/CUDA，并提供 <code>funasr-llamacpp-windows-x64-vulkan.zip</code>。每个压缩包都带自包含的 <code>llama-funasr-*</code> 二进制入口。</p>
+  <ul>
+    <li>不想维护 Python 环境:选标准 CPU 包。</li>
+    <li>桌面 GPU:按平台选择 Vulkan 或 CUDA 包。</li>
+    <li>边缘设备与 Apple Silicon:选择 ARM64 包。</li>
+  </ul>
+  <p>模型、命令与硬件选择见<a href="/llama-cpp.html"> llama.cpp / GGUF 专页</a>，发布资产和模型版本保持对应，避免用户在多个 release 中寻找文件。</p>
+
+  <h2>四个仓库分别解决什么</h2>
+  <table>
+    <thead><tr><th>仓库</th><th>适合关注的内容</th></tr></thead>
+    <tbody>
+      <tr><td><a href="https://github.com/modelscope/FunASR" target="_blank" rel="noopener">FunASR</a></td><td>工具包、服务、OpenAI API、vLLM、llama.cpp 与部署文档</td></tr>
+      <tr><td><a href="https://github.com/QwenAudio/Fun-ASR" target="_blank" rel="noopener">Fun-ASR</a></td><td>Fun-ASR-Nano / MLT 模型、能力、评测和模型级集成</td></tr>
+      <tr><td><a href="https://github.com/QwenAudio/SenseVoice" target="_blank" rel="noopener">SenseVoice</a></td><td>多语言 ASR、情感、语言和音频事件识别</td></tr>
+      <tr><td><a href="https://github.com/modelscope/FunClip" target="_blank" rel="noopener">FunClip</a></td><td>由语音识别驱动的视频理解、检索与剪辑</td></tr>
+    </tbody>
+  </table>
+
+  <div class="cta">
+    <p>从最适合你的入口跑通一个真实音频。遇到问题可在 GitHub 提交可复现 issue；如果项目对你有用，也欢迎 Star 你实际使用的仓库。</p>
+    <a class="btn" href="https://github.com/modelscope/FunASR/releases/tag/v1.3.26" target="_blank" rel="noopener">查看 v1.3.26 发布说明</a>
+  </div>
+</div></article>
+<footer><div class="container">© 2024-2026 Tongyi Lab, Alibaba Group · <a href="https://github.com/modelscope/FunASR/blob/main/LICENSE">MIT License</a></div></footer>
+</body>
+</html>

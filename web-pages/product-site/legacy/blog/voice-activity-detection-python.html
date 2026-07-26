@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Python 语音活动检测(VAD):检测语音、去静音、按停顿切分音频 | FunASR 博客</title>
+<meta name="description" content="怎么用 Python 做语音活动检测(VAD)?FunASR fsmn-vad 3 行代码返回每段语音的起止毫秒,可去静音、按停顿切分长录音、给任意 ASR(含 Whisper)做预处理防幻觉。附真实实测输出。">
+<meta name="keywords" content="语音活动检测, VAD, voice activity detection python, vad python, 去静音, 音频切分, 静音检测, 按停顿切分音频, silero vad 替代, fsmn-vad, FunASR, 语音预处理">
+<link rel="icon" href="/logo.png">
+<meta property="og:title" content="Python 语音活动检测(VAD):检测语音、去静音、按停顿切分音频 | FunASR 博客">
+<meta property="og:description" content="怎么用 Python 做语音活动检测(VAD)?FunASR fsmn-vad 3 行代码返回每段语音的起止毫秒,可去静音、按停顿切分长录音、给任意 ASR(含 Whisper)做预处理防幻觉。附真实实测输出。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://www.funasr.com/blog/voice-activity-detection-python.html">
+<meta property="og:image" content="https://www.funasr.com/logo.png">
+<link rel="canonical" href="https://www.funasr.com/blog/voice-activity-detection-python.html">
+<link rel="alternate" hreflang="en" href="https://www.funasr.com/en/blog/voice-activity-detection-python.html">
+<link rel="alternate" hreflang="zh" href="https://www.funasr.com/blog/voice-activity-detection-python.html">
+<link rel="alternate" hreflang="x-default" href="https://www.funasr.com/en/blog/voice-activity-detection-python.html">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","headline":"Python 语音活动检测(VAD):检测语音、去静音、按停顿切分音频 | FunASR 博客","description":"怎么用 Python 做语音活动检测(VAD)?FunASR fsmn-vad 3 行代码返回每段语音的起止毫秒,可去静音、按停顿切分长录音、给任意 ASR(含 Whisper)做预处理防幻觉。附真实实测输出。","datePublished":"2026-06-22","dateModified":"2026-06-22","author":{"@type":"Organization","name":"FunASR / Tongyi Lab"},"publisher":{"@type":"Organization","name":"FunASR","logo":{"@type":"ImageObject","url":"https://www.funasr.com/logo.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://www.funasr.com/blog/voice-activity-detection-python.html"},"image":"https://www.funasr.com/logo.png"}
+</script>
+<style>:root{--primary:#2563eb;--primary-dark:#1d4ed8;--bg:#fff;--surface:#f8fafc;--border:#e2e8f0;--text:#0f172a;--text-soft:#475569;--text-muted:#94a3b8;--radius:12px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',-apple-system,sans-serif;color:var(--text);line-height:1.7}
+a{color:var(--primary);text-decoration:none}a:hover{text-decoration:underline}
+.container{max-width:800px;margin:0 auto;padding:0 24px}
+.nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(255,255,255,0.9);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:14px 0}
+.nav .container{max-width:1120px;display:flex;align-items:center;gap:24px}
+.nav-logo{font-size:1.2rem;font-weight:800;color:var(--text)}.nav-logo span{color:var(--primary)}
+.nav-links{display:flex;gap:20px;margin-left:auto;flex-wrap:wrap}
+.nav-links a{font-size:0.85rem;font-weight:500;color:var(--text-soft)}
+.nav-btn{padding:7px 16px;background:var(--primary);color:#fff;border-radius:7px;font-size:0.83rem;font-weight:600}
+article{padding:120px 0 80px}
+h1{font-size:2rem;font-weight:800;line-height:1.3;margin-bottom:14px}
+h2{font-size:1.3rem;font-weight:700;margin:36px 0 14px;padding-top:16px;border-top:1px solid var(--border)}
+h3{font-size:1.05rem;font-weight:700;margin:22px 0 10px}
+p{margin-bottom:14px;color:var(--text-soft)}
+ul,ol{margin:0 0 14px 22px;color:var(--text-soft)}li{margin-bottom:6px}
+table{width:100%;border-collapse:collapse;margin:16px 0;font-size:0.86rem}
+th,td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--border)}
+th{font-weight:600;background:var(--surface);font-size:0.78rem;color:var(--text-muted)}
+pre{background:#1e293b;color:#e2e8f0;padding:18px;border-radius:10px;overflow-x:auto;font-size:0.82rem;line-height:1.7;margin:14px 0}
+code{font-family:ui-monospace,Menlo,monospace}
+p code,li code{background:var(--surface);padding:2px 6px;border-radius:5px;font-size:0.85em;color:var(--primary-dark)}
+.post-meta{color:var(--text-muted);font-size:0.85rem;margin-bottom:24px}
+.cta{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin:28px 0;text-align:center}
+.cta a.btn{display:inline-block;padding:10px 24px;background:var(--primary);color:#fff;border-radius:8px;font-weight:600}
+.post-list{list-style:none;margin:0;padding:0}
+.post-list li{margin:0 0 8px}
+.post-card{display:block;border:1px solid var(--border);border-radius:var(--radius);padding:20px 22px;margin-bottom:14px}
+.post-card:hover{border-color:var(--primary);text-decoration:none}
+.post-card h2{border:none;padding:0;margin:0 0 6px;font-size:1.15rem;color:var(--text)}
+.post-card p{margin:0;color:var(--text-soft);font-size:0.9rem}
+.post-card .date{color:var(--text-muted);font-size:0.8rem}
+footer{background:#0f172a;color:#94a3b8;padding:28px 0;text-align:center;font-size:0.8rem}
+footer a{color:#94a3b8}</style>
+</head>
+<body>
+<nav class="nav"><div class="container"><a href="/" class="nav-logo">Fun<span>ASR</span></a><div class="nav-links"><a href="/#capabilities">核心能力</a><a href="/#usage">如何使用</a><a href="/#benchmark">性能</a><a href="/#demo">演示</a><a href="https://modelscope.github.io/FunASR/zh/" target="_blank">文档</a><a href="/quickstart.html">快速上手</a><a href="/models.html">模型</a><a href="/ecosystem.html">生态</a><a href="/blog/">技术博客</a><a href="/vs-whisper.html">对比 Whisper</a><a href="/donors.html">功德榜</a></div><a href="https://www.funasr.com/en/blog/voice-activity-detection-python.html" style="font-size:0.83rem;font-weight:500;color:var(--text-soft)">EN</a><a href="https://github.com/modelscope/FunASR" target="_blank" class="nav-btn">GitHub ★</a></div></nav>
+<article><div class="container">
+<h1>Python 语音活动检测(VAD):检测语音、去静音、按停顿切分音频</h1>
+<p class="post-meta">2026-06-22 · FunASR 团队</p>
+
+<p><strong>语音活动检测(VAD,Voice Activity Detection)</strong>是音频处理的基础一环:从一段录音里找出"哪里有人在说话、哪里是静音/噪声"。它是几乎所有语音流程的第一步——去掉静音省算力、把长录音按停顿切成小段、给下游 ASR 做预处理(<strong>包括给 Whisper 喂干净音频以省钱、防它在静音处胡乱"幻觉"出文字</strong>)。</p>
+<p><strong>FunASR 的 <code>fsmn-vad</code></strong> 是一个工业级、轻量、极快的开源 VAD 模型,3 行 Python 就能用,返回每段语音的<strong>起止毫秒</strong>。下面全部是真实实测输出。</p>
+
+<h2>3 行代码做 VAD</h2>
+<pre>pip install funasr
+
+from funasr import AutoModel
+
+model = AutoModel(model="fsmn-vad", disable_update=True)
+segments = model.generate(input="audio.wav")[0]["value"]
+
+print(segments)
+# [[610, 5530]]   # 单位:毫秒 —— 语音从 0.61s 到 5.53s,开头 610ms 静音被自动剔除</pre>
+<p>返回值是 <code>[[start_ms, end_ms], ...]</code> 的列表,每个区间是一段连续语音。上例里一段 5.55s 的录音,开头的 0.61s 静音被自动去掉了。</p>
+
+<h2>真实示例:13 秒录音切成 2 段</h2>
+<p>把两段话中间插 1.5s 停顿拼成一段 13.31s 的录音(模拟真实带停顿的录音),VAD 的真实输出:</p>
+<table>
+<tr><th>语音段</th><th>起止</th><th>时长</th></tr>
+<tr><td>seg0</td><td>0.61s → 5.45s</td><td>4.84s</td></tr>
+<tr><td>seg1</td><td>7.28s → 13.29s</td><td>6.01s</td></tr>
+</table>
+<p>VAD 准确切出两段语音、把中间 1.5s 的停顿(5.45s~7.28s)和开头静音都识别为非语音。整段 13.31s 里语音占 82%,<strong>剔除了 18% 的静音</strong>。这一步在 GPU 上只花了 <strong>0.12 秒(约 110× 实时)</strong>——VAD 本身极轻,几乎不增加流程开销。</p>
+
+<h2>三个实用场景</h2>
+<h3>1. 去静音 / 只保留语音</h3>
+<pre>import soundfile as sf
+import numpy as np
+
+audio, sr = sf.read("audio.wav")
+segments = model.generate(input="audio.wav")[0]["value"]
+
+# 拼接所有语音段,丢弃静音
+speech = np.concatenate([audio[int(s/1000*sr):int(e/1000*sr)] for s, e in segments])
+sf.write("speech_only.wav", speech, sr)</pre>
+
+<h3>2. 按停顿把长录音切成多个文件(便于批量识别)</h3>
+<pre>for i, (s, e) in enumerate(segments):
+    chunk = audio[int(s/1000*sr):int(e/1000*sr)]
+    sf.write(f"chunk_{i}.wav", chunk, sr)
+# chunk_0.wav, chunk_1.wav, ...  每个文件是一段独立语音</pre>
+
+<h3>3. 给任何 ASR(含 Whisper)做预处理</h3>
+<p>在跑识别<strong>之前</strong>先做 VAD,有两个实打实的好处:① 不把静音/噪声送进模型 = <strong>省算力、降成本</strong>;② Whisper 在长静音处容易"幻觉"出重复文字,<strong>先用 VAD 切掉静音能显著减少幻觉</strong>。FunASR 的 ASR 模型(SenseVoice / Paraformer)更是可以直接 <code>vad_model="fsmn-vad"</code> 一行接上,内部自动分段。</p>
+<pre>from funasr import AutoModel
+# ASR 直接挂载 VAD,长音频自动分段识别
+asr = AutoModel(model="iic/SenseVoiceSmall", vad_model="fsmn-vad")
+result = asr.generate(input="long_audio.wav")</pre>
+
+<h2>为什么用 fsmn-vad</h2>
+<table>
+<tr><th></th><th>fsmn-vad(FunASR)</th></tr>
+<tr><td>用法</td><td>3 行 Python,返回毫秒级语音区间</td></tr>
+<tr><td>速度</td><td>实测 13s 音频 0.12s(约 110× 实时)</td></tr>
+<tr><td>体量</td><td>轻量 FSMN 结构,CPU 也能实时跑</td></tr>
+<tr><td>生态</td><td>可独立用,也能一行挂到 FunASR 的 ASR 上自动分段</td></tr>
+<tr><td>许可证</td><td>开源,可商用</td></tr>
+</table>
+<p>如果你已经在用 FunASR 做识别,VAD 是同一套工具、零额外依赖;如果你在用 Whisper 或别的 ASR,也可以把 fsmn-vad 当成独立的预处理器。想看完整的语音流程,可参考 <a href="/blog/funasr-transcribe-long-audio.html">转写超长音频</a> 和 <a href="/blog/funasr-speaker-diarization.html">说话人分离</a>。</p>
+
+<div class="cta"><p><strong>FunASR 全家桶都是开源的</strong>——fsmn-vad、工业级 ASR、标点、说话人、情感事件、LLM-ASR,拿来即用。觉得有用就点个 Star 支持一下 👇</p><p><a class="btn" href="https://github.com/modelscope/FunASR" target="_blank">⭐ Star FunASR</a></p><p style="margin-top:10px;font-size:0.85rem">也欢迎 Star:<a href="https://github.com/QwenAudio/SenseVoice" target="_blank">SenseVoice</a> · <a href="https://github.com/QwenAudio/Fun-ASR" target="_blank">Fun-ASR</a> · <a href="https://github.com/modelscope/FunClip" target="_blank">FunClip</a></p></div>
+<!--related-posts-->
+<h2>相关文章</h2>
+<ul class="post-list">
+<li><a href="/blog/funasr-vs-whisper-benchmark.html">FunASR vs Whisper 实测对比</a></li>
+<li><a href="/blog/sensevoice-deployment-guide.html">SenseVoice 部署指南</a></li>
+<li><a href="/blog/fun-asr-nano-guide.html">Fun-ASR-Nano 使用指南</a></li>
+<li><a href="/blog/funasr-speaker-diarization.html">说话人分离:谁在何时说话</a></li>
+<li><a href="/blog/sensevoice-emotion-language-detection.html">情感与语种检测</a></li>
+<li><a href="/blog/funasr-realtime-streaming-asr.html">实时流式语音识别</a></li>
+<li><a href="/blog/funasr-transcribe-long-audio.html">转写超长音频(1小时一次搞定)</a></li>
+<li><a href="/blog/funasr-cli-transcribe-command-line.html">命令行转写(文本/JSON/SRT)</a></li>
+<li><a href="/blog/self-hosted-openai-whisper-api-alternative.html">自托管 OpenAI Whisper API 替代</a></li>
+<li><a href="/blog/generate-subtitles-srt-vtt-from-audio-video.html">自动生成字幕(SRT / VTT)</a></li>
+<li><a href="/blog/speech-to-text-python-transcribe-audio.html">Python 语音转文字教程</a></li>
+<li><a href="/blog/funasr-llama-cpp-whisper-cpp-alternative.html">FunASR 跑进 llama.cpp(whisper.cpp 替代)</a></li>
+<li><a href="/blog/funasr-vs-faster-whisper-chinese.html">FunASR vs faster-whisper(中文/粤语)</a></li>
+<li><a href="/blog/lightweight-speech-recognition-cpu.html">轻量语音识别(CPU 250MB)</a></li>
+<li><a href="/blog/self-hosted-deepgram-assemblyai-alternative.html">自托管替代 Deepgram/AssemblyAI</a></li>
+<li><a href="/blog/which-funasr-model.html">选哪个 FunASR 模型</a></li>
+<li><a href="/blog/cantonese-speech-recognition.html">粤语语音识别(SenseVoice 原生粤语)</a></li>
+<li><a href="/blog/japanese-speech-recognition.html">日语语音识别(SenseVoice 转写+标点+情感)</a></li>
+<li><a href="/blog/self-hosted-google-aws-azure-speech-to-text.html">自托管替代 Google/AWS/Azure 云语音 API</a></li>
+<li><a href="/blog/chinese-speech-recognition.html">中文语音识别(普通话)实战</a></li>
+<li><a href="/blog/punctuation-restoration-python.html">标点恢复 Python 实战</a></li>
+<li><a href="/blog/speech-to-text-timestamps-python.html">语音识别带时间戳(字级)</a></li>
+</ul>
+</div></article>
+<footer><div class="container">© 2024-2026 Tongyi Lab, Alibaba Group · <a href="https://github.com/modelscope/FunASR/blob/main/LICENSE">MIT License</a></div></footer>
+</body>
+</html>
