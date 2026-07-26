@@ -39,6 +39,14 @@ curl -X POST "http://127.0.0.1:8000/v1/audio/transcriptions" \
   -F "model=FunAudioLLM/SenseVoiceSmall"
 ```
 
+- If the curl request works but a browser reports a CORS or network error, restart the server with the browser page's exact origin (scheme, host, and port):
+
+```bash
+funasr-server --device cpu --model sensevoice \
+  --cors-origin http://localhost:3000
+```
+
+- Repeat `--cors-origin` for each trusted browser origin, for example when both `localhost` and `127.0.0.1` are used. Browser CORS access is disabled by default; avoid a wildcard on machines reachable by other users.
 - If `/v1/audio/transcriptions` returns 4xx or 5xx, attach the startup command, full server log, request command, model id, hub, and audio duration.
 
 ## WebSocket realtime output is empty or delayed
