@@ -1,0 +1,12 @@
+{
+  "items": [
+    {"id": "product", "zh": "产品", "en": "Product", "href_zh": "/", "href_en": "/en/"},
+    {"id": "deploy", "zh": "部署", "en": "Deploy", "href_zh": "/deploy/", "href_en": "/en/deploy/"},
+    {"id": "models", "zh": "模型", "en": "Models", "href_zh": "/models.html", "href_en": "/en/models.html"},
+    {"id": "benchmarks", "zh": "性能", "en": "Benchmarks", "href_zh": "/benchmarks.html", "href_en": "/en/benchmarks.html"},
+    {"id": "ecosystem", "zh": "生态", "en": "Ecosystem", "href_zh": "/ecosystem.html", "href_en": "/en/ecosystem.html"},
+    {"id": "blog", "zh": "博客", "en": "Blog", "href_zh": "/blog/", "href_en": "/en/blog/"},
+    {"id": "docs", "zh": "文档", "en": "Docs", "href_zh": "https://github.com/modelscope/FunASR/tree/main/docs", "href_en": "https://github.com/modelscope/FunASR/tree/main/docs"},
+    {"id": "donors", "zh": "功德榜", "en": "Donors", "href_zh": "/donors.html", "href_en": "/en/donors.html"}
+  ]
+}
