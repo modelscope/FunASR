@@ -93,7 +93,12 @@ def load_engine(args):
             gpu_memory_utilization=args.gpu_memory_utilization,
         )
         logger.info(f"Loading VAD: {args.vad_model}")
-        _vad_model = AutoModel(model=args.vad_model, device=args.device, disable_update=True)
+        _vad_model = AutoModel(
+            model=args.vad_model,
+            device=args.device,
+            disable_update=True,
+            max_single_segment_time=30000,
+        )
         if args.spk_model:
             logger.info(f"Loading SPK: {args.spk_model}")
             _spk_model = AutoModel(model=args.spk_model, device=args.device, disable_update=True)

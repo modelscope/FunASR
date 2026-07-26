@@ -151,3 +151,35 @@ def test_process_audio_downmixes_stereo_before_resampling(monkeypatch):
     assert np.allclose(captured["engine_input"], 0.5)
     assert result["duration"] == 1.0
     assert result["text"] == "ok"
+
+
+def test_load_engine_limits_vad_segments_to_30_seconds(monkeypatch):
+    module = load_service_module(monkeypatch)
+    captured = {}
+
+    class EngineFactoryStub:
+        @classmethod
+        def from_pretrained(cls, **kwargs):
+            return object()
+
+    def auto_model_stub(**kwargs):
+        captured.update(kwargs)
+        return object()
+
+    module.FunASRNanoVLLM = EngineFactoryStub
+    module.AutoModel = auto_model_stub
+    module._engine = None
+    module.load_engine(
+        types.SimpleNamespace(
+            model="fun-asr-nano",
+            hub="ms",
+            device="cpu",
+            dtype="bf16",
+            max_model_len=4096,
+            gpu_memory_utilization=0.5,
+            vad_model="fsmn-vad",
+            spk_model="",
+        )
+    )
+
+    assert captured["max_single_segment_time"] == 30000
