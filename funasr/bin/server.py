@@ -7,6 +7,7 @@ Usage:
     funasr-server --model paraformer
     funasr-server --model-path /path/to/local/model
     funasr-server --model-path username/paraformer --hub hf
+    funasr-server --cors-origin http://localhost:3000
 """
 
 import argparse
@@ -21,7 +22,7 @@ def server_version_label():
     return f"FunASR Server v{PACKAGE_VERSION}"
 
 
-def main():
+def build_parser():
     parser = argparse.ArgumentParser(
         description="FunASR OpenAI-Compatible API Server",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -33,6 +34,7 @@ Examples:
   funasr-server --port 9000             # Custom port
   funasr-server --model-path /path/to/local/model  # Use local model
   funasr-server --model-path username/model --hub hf  # Use HuggingFace model
+  funasr-server --cors-origin http://localhost:3000  # Allow one browser origin
 
 Then use with OpenAI SDK:
   from openai import OpenAI
@@ -46,7 +48,18 @@ Then use with OpenAI SDK:
     parser.add_argument("--model", default="auto", help="Pre-load model: auto (GPU=fun-asr-nano, CPU=sensevoice), sensevoice, paraformer, fun-asr-nano")
     parser.add_argument("--model-path", default=None, help="Local model path or model ID (overrides --model)")
     parser.add_argument("--hub", default="ms", help="Model hub: ms (ModelScope), hf (HuggingFace) (default: ms)")
-    args = parser.parse_args()
+    parser.add_argument(
+        "--cors-origin",
+        action="append",
+        default=None,
+        metavar="ORIGIN",
+        help="Trusted browser origin for CORS; repeat for multiple origins (disabled by default)",
+    )
+    return parser
+
+
+def main():
+    args = build_parser().parse_args()
 
     try:
         import uvicorn
@@ -63,7 +76,13 @@ Then use with OpenAI SDK:
     # Use inline app to avoid path issues
     from funasr.bin._server_app import create_app
 
-    app = create_app(device=args.device, preload_model=args.model, model_path=args.model_path, hub=args.hub)
+    app = create_app(
+        device=args.device,
+        preload_model=args.model,
+        model_path=args.model_path,
+        hub=args.hub,
+        cors_origins=args.cors_origin,
+    )
 
     print(f"╔══════════════════════════════════════════════╗")
     print(f"║  {server_version_label():<44}║")

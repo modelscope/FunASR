@@ -39,6 +39,14 @@ curl -X POST "http://127.0.0.1:8000/v1/audio/transcriptions" \
   -F "model=FunAudioLLM/SenseVoiceSmall"
 ```
 
+- 如果 curl 成功，但浏览器报 CORS 或 network error，请按浏览器页面的精确 origin（scheme、host、port）重启服务：
+
+```bash
+funasr-server --device cpu --model sensevoice \
+  --cors-origin http://localhost:3000
+```
+
+- 每个可信浏览器 origin 都要重复传入一次 `--cors-origin`，例如同时使用 `localhost` 和 `127.0.0.1` 时。浏览器 CORS 默认关闭；机器可被其他用户访问时不要使用通配符。
 - 如果 `/v1/audio/transcriptions` 返回 4xx 或 5xx，请附启动命令、完整 server log、请求命令、model id、hub 和音频时长。
 
 ## WebSocket 实时输出为空或延迟很大

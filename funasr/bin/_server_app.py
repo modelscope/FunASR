@@ -11,13 +11,14 @@ import time
 import logging
 import tempfile
 from pathlib import Path
-from typing import Optional
+from typing import Iterable, Optional
 
 import numpy as np
 import soundfile as sf
 
 try:
     from fastapi import FastAPI, UploadFile, File, Form, HTTPException
+    from fastapi.middleware.cors import CORSMiddleware
     from fastapi.responses import JSONResponse
 except ImportError:
     raise ImportError(
@@ -126,7 +127,13 @@ def prepare_audio_for_inference(audio_data, sr, target_sr=16000):
 
     return audio_data.astype(np.float32), sr
 
-def create_app(device: str = "cuda", preload_model: str = "auto", model_path: str = None, hub: str = "ms") -> FastAPI:
+def create_app(
+    device: str = "cuda",
+    preload_model: str = "auto",
+    model_path: str = None,
+    hub: str = "ms",
+    cors_origins: Optional[Iterable[str]] = None,
+) -> FastAPI:
     if preload_model == "auto":
         preload_model = "fun-asr-nano" if device.startswith("cuda") else "sensevoice"
 
@@ -137,6 +144,20 @@ def create_app(device: str = "cuda", preload_model: str = "auto", model_path: st
     app.state.fallback_models = {}
     app.state.model_path = model_path
     app.state.hub = hub
+
+    normalized_origins = []
+    for origin in cors_origins or []:
+        origin = origin.strip()
+        if origin and origin not in normalized_origins:
+            normalized_origins.append(origin)
+    if normalized_origins:
+        app.add_middleware(
+            CORSMiddleware,
+            allow_origins=normalized_origins,
+            allow_credentials=False,
+            allow_methods=["GET", "POST", "OPTIONS"],
+            allow_headers=["Authorization", "Content-Type"],
+        )
 
     # Non-LLM model configs (use AutoModel, no vLLM)
     FALLBACK_CONFIGS = {
