@@ -243,6 +243,24 @@ def test_server_versions_follow_package_version(monkeypatch):
     assert server_module.server_version_label() == f"FunASR Server v{expected}"
 
 
+def test_server_cli_collects_repeated_cors_origins():
+    module = load_server_cli()
+
+    args = module.build_parser().parse_args(
+        [
+            "--cors-origin",
+            "http://localhost:3000",
+            "--cors-origin",
+            "http://127.0.0.1:3000",
+        ]
+    )
+
+    assert args.cors_origin == [
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+    ]
+
+
 def test_server_cors_is_disabled_by_default(monkeypatch):
     module = load_server_app(monkeypatch)
     install_dummy_funasr(monkeypatch)
