@@ -1,5 +1,3 @@
-[![MCP Toplist](https://mcptoplist.com/badge/io.github.modelscope%2Ffunasr-mcp.svg)](https://mcptoplist.com/server/io.github.modelscope%2Ffunasr-mcp)
-
 ([简体中文](./README_zh.md)|English|[日本語](./README_ja.md)|[한국어](./README_ko.md))
 
 <p align="center">
@@ -16,6 +14,7 @@
   <a href="https://github.com/modelscope/FunASR"><img src="https://img.shields.io/github/stars/modelscope/FunASR?style=social" alt="Stars"></a>
   <a href="https://pypi.org/project/funasr/"><img src="https://img.shields.io/pypi/dm/funasr" alt="Downloads"></a>
   <a href="https://modelscope.github.io/FunASR/"><img src="https://img.shields.io/badge/docs-online-blue" alt="Docs"></a>
+  <a href="https://mcptoplist.com/server/io.github.modelscope%2Ffunasr-mcp"><img src="https://mcptoplist.com/badge/io.github.modelscope%2Ffunasr-mcp.svg" alt="MCP Toplist"></a>
 </p>
 
 <p align="center">
