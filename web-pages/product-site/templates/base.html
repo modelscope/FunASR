@@ -37,7 +37,7 @@
     </button>
     <nav id="primary-navigation" class="primary-navigation" data-primary-nav aria-label="{{ '主目录' if language == 'zh' else 'Primary navigation' }}">
       {% for item in navigation %}
-      <a href="{{ item.href }}"{% if route == item.href or (item.id == 'deploy' and '/deploy/' in route) %} aria-current="page"{% endif %}>{{ item.label }}</a>
+      <a href="{{ item.href }}"{% if route == item.href or (item.id == 'deploy' and '/deploy/' in route) or (item.id == 'benchmarks' and 'benchmarks.html' in route) %} aria-current="page"{% endif %}>{{ item.label }}</a>
       {% endfor %}
     </nav>
     <div class="header-actions">

@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+{% block content %}
+{% set copy = entry.translations[language] %}
+<section class="detail-hero">
+  <div class="detail-heading">
+    <p class="eyebrow">{{ '部署合同' if language == 'zh' else 'Deployment contract' }}</p>
+    <h1>{{ copy.name }}</h1>
+    <p>{{ copy.summary }}</p>
+    <div class="detail-actions">
+      <a class="button button-primary" href="#commands">{{ '开始部署' if language == 'zh' else 'Start deployment' }}</a>
+      <a class="button button-secondary" href="{{ '/benchmarks.html' if language == 'zh' else '/en/benchmarks.html' }}">{{ '查看基准口径' if language == 'zh' else 'Review benchmark method' }}</a>
+    </div>
+  </div>
+  <dl class="detail-meta">
+    <div><dt>{{ '成熟度' if language == 'zh' else 'Maturity' }}</dt><dd><span class="status status-{{ entry.maturity }}">{{ copy.status_label }}</span></dd></div>
+    <div><dt>FunASR</dt><dd>{{ entry.tested.funasr }}</dd></div>
+    <div><dt>{{ '运行时' if language == 'zh' else 'Runtime' }}</dt><dd>{{ entry.tested.runtime }}</dd></div>
+    <div><dt>{{ '验证日期' if language == 'zh' else 'Verified' }}</dt><dd data-field="verified-date">{{ entry.tested.verified }}</dd></div>
+  </dl>
+</section>
+
+<section class="section content-section" data-section="fit">
+  <div class="section-heading compact-heading">
+    <p class="eyebrow">{{ '适用边界' if language == 'zh' else 'Workload boundary' }}</p>
+    <h2>{{ '先判断它是否适合你的生产约束' if language == 'zh' else 'Decide whether it fits your production constraints' }}</h2>
+  </div>
+  <div class="fit-grid">
+    <div>
+      <h3>{{ '适合' if language == 'zh' else 'Good fit' }}</h3>
+      <ul class="check-list">{% for item in copy.fit %}<li>{{ item }}</li>{% endfor %}</ul>
+    </div>
+    <div>
+      <h3>{{ '不适合' if language == 'zh' else 'Not a fit' }}</h3>
+      <ul class="plain-list">{% for item in copy.not_fit %}<li>{{ item }}</li>{% endfor %}</ul>
+    </div>
+  </div>
+  <div class="table-wrap support-table">
+    <table>
+      <tbody>
+        <tr><th>{{ '模型' if language == 'zh' else 'Models' }}</th><td>{{ entry.models | join(' / ') }}</td></tr>
+        <tr><th>{{ '硬件' if language == 'zh' else 'Hardware' }}</th><td>{{ entry.hardware | join(' / ') }}</td></tr>
+        <tr><th>{{ '操作系统' if language == 'zh' else 'Operating systems' }}</th><td>{{ entry.operating_systems | join(' / ') }}</td></tr>
+        <tr><th>{{ '接口' if language == 'zh' else 'Interfaces' }}</th><td>{{ entry.interfaces | join(' / ') }}</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="commands" class="section content-section command-section" data-section="commands">
+  <div class="section-heading compact-heading">
+    <p class="eyebrow">{{ '运行路径' if language == 'zh' else 'Run path' }}</p>
+    <h2>{{ '从安装到已知音频验证' if language == 'zh' else 'From installation to known-audio verification' }}</h2>
+    <p>{{ '以下命令来自当前验证清单；上线前固定依赖、模型和硬件。' if language == 'zh' else 'These commands come from the current verification registry. Pin dependencies, model, and hardware before rollout.' }}</p>
+  </div>
+  {% for group, commands in [('install', entry.commands.install), ('launch', entry.commands.launch), ('health', entry.commands.health)] %}
+  <div class="command-group">
+    <h3>{{ {'install': ('安装' if language == 'zh' else 'Install'), 'launch': ('启动' if language == 'zh' else 'Launch'), 'health': ('健康检查' if language == 'zh' else 'Health check')}[group] }}</h3>
+    {% for command in commands %}
+    <div class="command-block">
+      <button class="icon-button command-copy" type="button" data-copy-target="#{{ entry.id }}-{{ group }}-{{ loop.index }}" title="{{ '复制命令' if language == 'zh' else 'Copy command' }}"><img src="{{ assets['lucide/copy.svg'] }}" alt=""></button>
+      <pre><code id="{{ entry.id }}-{{ group }}-{{ loop.index }}">{{ command }}</code></pre>
+    </div>
+    {% endfor %}
+  </div>
+  {% endfor %}
+</section>
+
+<section class="section content-section smoke-section" data-section="smoke-test">
+  <div class="section-heading compact-heading">
+    <p class="eyebrow">Smoke test</p>
+    <h2>{{ '发布前必须通过的最小验证' if language == 'zh' else 'Minimum verification before promotion' }}</h2>
+  </div>
+  {% for command in entry.commands.smoke %}
+  <div class="command-block">
+    <button class="icon-button command-copy" type="button" data-copy-target="#{{ entry.id }}-smoke-{{ loop.index }}" title="{{ '复制命令' if language == 'zh' else 'Copy command' }}"><img src="{{ assets['lucide/copy.svg'] }}" alt=""></button>
+    <pre><code id="{{ entry.id }}-smoke-{{ loop.index }}">{{ command }}</code></pre>
+  </div>
+  {% endfor %}
+</section>
+
+<section class="section content-section" data-section="operations">
+  <div class="section-heading compact-heading">
+    <p class="eyebrow">{{ '运行与容量' if language == 'zh' else 'Operations and capacity' }}</p>
+    <h2>{{ '把可运行推进到可运营' if language == 'zh' else 'Move from runnable to operable' }}</h2>
+  </div>
+  <div class="operations-grid">
+    <div>
+      <h3>{{ '运行检查' if language == 'zh' else 'Operational checks' }}</h3>
+      <ul class="plain-list">{% for item in copy.operations %}<li>{{ item }}</li>{% endfor %}</ul>
+    </div>
+    <div>
+      <h3>{{ '容量变量' if language == 'zh' else 'Capacity variables' }}</h3>
+      <ul class="plain-list">
+        <li>{{ '音频时长、语言、声道和 VAD 分段分布' if language == 'zh' else 'Audio duration, language, channels, and VAD segment distribution' }}</li>
+        <li>{{ '并发、队列等待、预热与模型缓存状态' if language == 'zh' else 'Concurrency, queue time, warmup, and model-cache state' }}</li>
+        <li>{{ '精确硬件、驱动、运行时和线程配置' if language == 'zh' else 'Exact hardware, driver, runtime, and thread configuration' }}</li>
+      </ul>
+    </div>
+    <div>
+      <h3>{{ '故障排查' if language == 'zh' else 'Troubleshooting' }}</h3>
+      <ul class="plain-list">{% for item in copy.troubleshooting %}<li>{{ item }}</li>{% endfor %}</ul>
+    </div>
+  </div>
+</section>
+
+<section class="section content-section" data-section="security">
+  <div class="section-heading compact-heading">
+    <p class="eyebrow">{{ '安全边界' if language == 'zh' else 'Security boundary' }}</p>
+    <h2>{{ '生产入口默认不信任' if language == 'zh' else 'Treat production ingress as untrusted' }}</h2>
+  </div>
+  <ul class="security-list">{% for item in copy.security %}<li>{{ item }}</li>{% endfor %}</ul>
+</section>
+
+<section class="section content-section" data-section="limitations">
+  <div class="limitation-callout">
+    <p class="eyebrow">{{ '已知限制' if language == 'zh' else 'Known limitation' }}</p>
+    <h2>{{ copy.primary_limitation }}</h2>
+    <p>{{ '公开基准仅用于复现起点，不替代目标业务负载测试。' if language == 'zh' else 'Public benchmarks are reproduction starting points, not substitutes for target-workload testing.' }}</p>
+  </div>
+</section>
+
+<section class="section content-section" data-section="evidence">
+  <div class="section-heading compact-heading">
+    <p class="eyebrow">{{ '证据与反馈' if language == 'zh' else 'Evidence and feedback' }}</p>
+    <h2>{{ '从原始资料核对部署合同' if language == 'zh' else 'Verify this contract against primary material' }}</h2>
+  </div>
+  <ul class="evidence-list">
+    {% for item in entry.evidence %}<li><a href="{{ item.url }}">{{ item.label }}</a></li>{% endfor %}
+  </ul>
+  <div class="detail-actions">
+    <a class="button button-secondary" href="https://github.com/modelscope/FunASR/issues/new">{{ '报告部署问题' if language == 'zh' else 'Report a deployment issue' }}</a>
+    {% if entry.benchmarks %}<a class="text-link" href="{{ '/benchmarks.html' if language == 'zh' else '/en/benchmarks.html' }}">{{ '查看相关基准记录' if language == 'zh' else 'View related benchmark records' }} <img src="{{ assets['lucide/arrow-right.svg'] }}" alt=""></a>{% endif %}
+  </div>
+</section>
+{% endblock %}

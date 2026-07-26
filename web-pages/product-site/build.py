@@ -169,6 +169,9 @@ def build(output_dir: Path) -> dict[str, Any]:
                 'home_description': '选择适合 GPU 高吞吐、实时流式、OpenAI 兼容 API、CPU 与边缘设备的 FunASR 部署方案。',
                 'deploy_title': '部署中心 - FunASR',
                 'deploy_description': '按工作负载、硬件和优先级选择可验证的 FunASR 工业部署路径。',
+                'detail_suffix': '工业部署 - FunASR',
+                'benchmarks_title': '可复现实测 - FunASR',
+                'benchmarks_description': '核对 FunASR 公开性能记录的硬件、音频、设置、计时口径、来源与适用限制。',
                 'not_found_title': '页面未找到 - FunASR',
                 'not_found_description': '返回 FunASR 部署中心、文档或首页。',
             },
@@ -177,6 +180,9 @@ def build(output_dir: Path) -> dict[str, Any]:
                 'home_description': 'Choose a verified FunASR path for GPU throughput, realtime streaming, OpenAI-compatible APIs, CPUs, and edge devices.',
                 'deploy_title': 'Deployment center - FunASR',
                 'deploy_description': 'Choose an evidence-backed FunASR production path by workload, hardware, and priority.',
+                'detail_suffix': 'industrial deployment - FunASR',
+                'benchmarks_title': 'Reproducible measurements - FunASR',
+                'benchmarks_description': 'Review hardware, audio, settings, timing scope, source, and qualifications for public FunASR performance records.',
                 'not_found_title': 'Page not found - FunASR',
                 'not_found_description': 'Return to the FunASR deployment center, documentation, or home page.',
             },
@@ -224,6 +230,65 @@ def build(output_dir: Path) -> dict[str, Any]:
             )
             context.update({'deployments': registry['deployments'], 'verified': registry['verified']})
             _render_page(environment, 'deploy-index.html', route_path(stage, route), context)
+            pages.append({
+                'route': route,
+                'language': language,
+                'canonical': context['canonical'],
+                'hreflang': context['peer_canonical'],
+            })
+
+        for entry in registry['deployments']:
+            for language in ('zh', 'en'):
+                route = entry['routes'][language]
+                peer_language = 'en' if language == 'zh' else 'zh'
+                peer_route = entry['routes'][peer_language]
+                translation = entry['translations'][language]
+                context = _page_context(
+                    language=language,
+                    route=route,
+                    peer_route=peer_route,
+                    title=f"{translation['name']} - {language_copy[language]['detail_suffix']}",
+                    description=translation['summary'],
+                    navigation=navigation,
+                    assets=assets,
+                )
+                context.update({'entry': entry, 'verified': registry['verified']})
+                _render_page(
+                    environment,
+                    'deploy-detail.html',
+                    route_path(stage, route),
+                    context,
+                )
+                pages.append({
+                    'route': route,
+                    'language': language,
+                    'canonical': context['canonical'],
+                    'hreflang': context['peer_canonical'],
+                })
+
+        for language, route, peer_route in (
+            ('zh', '/benchmarks.html', '/en/benchmarks.html'),
+            ('en', '/en/benchmarks.html', '/benchmarks.html'),
+        ):
+            benchmarks = []
+            for entry in registry['deployments']:
+                for record in entry['benchmarks']:
+                    localized_record = dict(record)
+                    localized_record['deployment_id'] = entry['id']
+                    localized_record['deployment_name'] = entry['translations'][language]['name']
+                    localized_record['deployment_route'] = entry['routes'][language]
+                    benchmarks.append(localized_record)
+            context = _page_context(
+                language=language,
+                route=route,
+                peer_route=peer_route,
+                title=language_copy[language]['benchmarks_title'],
+                description=language_copy[language]['benchmarks_description'],
+                navigation=navigation,
+                assets=assets,
+            )
+            context.update({'benchmarks': benchmarks, 'verified': registry['verified']})
+            _render_page(environment, 'benchmarks.html', route_path(stage, route), context)
             pages.append({
                 'route': route,
                 'language': language,

@@ -37,7 +37,11 @@ BENCHMARK_FIELDS = (
     'runtime',
     'hardware',
     'workload',
+    'audio',
     'settings',
+    'timing_scope',
+    'result',
+    'qualification',
     'source',
     'verified',
 )

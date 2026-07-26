@@ -24,7 +24,21 @@
         {"label": "vLLM guide", "url": "https://github.com/modelscope/FunASR/blob/main/docs/vllm_guide.md"},
         {"label": "deployment matrix", "url": "https://github.com/modelscope/FunASR/blob/main/docs/deployment_matrix.md"}
       ],
-      "benchmarks": [],
+      "benchmarks": [
+        {
+          "model": "Fun-ASR-Nano-2512",
+          "runtime": "vLLM batch",
+          "hardware": "GPU model not recorded in the cited public table",
+          "workload": "Offline batch",
+          "audio": "184 long-form files; 11,541 seconds",
+          "settings": "Dynamic VAD; the public table does not record batch size or the full software and hardware stack",
+          "timing_scope": "Offline throughput; the cited table does not state whether warmup, file I/O, and decoding are excluded",
+          "result": "RTFx 340; CER 8.20%",
+          "qualification": "Incomplete hardware and timing record. Use only as public reference evidence, not a capacity promise.",
+          "source": "https://github.com/modelscope/FunASR/blob/main/docs/vllm_guide.md",
+          "verified": "2026-07-26"
+        }
+      ],
       "translations": {
         "zh": {
           "name": "vLLM GPU 高吞吐",
@@ -75,7 +89,34 @@
         {"label": "runtime release", "url": "https://github.com/modelscope/FunASR/releases/tag/runtime-llamacpp-v0.1.9"},
         {"label": "regression tests", "url": "https://github.com/modelscope/FunASR/tree/main/runtime/llama.cpp/tests"}
       ],
-      "benchmarks": [],
+      "benchmarks": [
+        {
+          "model": "SenseVoiceSmall Q8 GGUF",
+          "runtime": "llama.cpp/GGUF with built-in FSMN-VAD",
+          "hardware": "CPU, 8 threads; CPU model not recorded in the cited report",
+          "workload": "Offline Mandarin CPU",
+          "audio": "184 Mandarin clips, about 44-60 seconds each; total duration not recorded in the cited report",
+          "settings": "Q8 runtime; built-in FSMN-VAD; micro-CER normalize_zh; model load excluded",
+          "timing_scope": "Sum of compute time divided by sum of audio duration; model load excluded",
+          "result": "Approximately 20x realtime; Q8 CER 8.17%",
+          "qualification": "CPU model and full software stack are not recorded. Reproduce on target hardware before comparison.",
+          "source": "https://github.com/modelscope/FunASR/blob/main/runtime/llama.cpp/BENCHMARKS.md",
+          "verified": "2026-07-26"
+        },
+        {
+          "model": "Paraformer Q8 GGUF",
+          "runtime": "llama.cpp/GGUF with built-in FSMN-VAD",
+          "hardware": "CPU, 8 threads; CPU model not recorded in the cited report",
+          "workload": "Offline Mandarin CPU",
+          "audio": "184 Mandarin clips, about 44-60 seconds each; total duration not recorded in the cited report",
+          "settings": "Q8 runtime; built-in FSMN-VAD; micro-CER normalize_zh; model load excluded",
+          "timing_scope": "Sum of compute time divided by sum of audio duration; model load excluded",
+          "result": "Approximately 21x realtime; Q8 CER 9.89%",
+          "qualification": "CPU model and full software stack are not recorded. Reproduce on target hardware before comparison.",
+          "source": "https://github.com/modelscope/FunASR/blob/main/runtime/llama.cpp/BENCHMARKS.md",
+          "verified": "2026-07-26"
+        }
+      ],
       "translations": {
         "zh": {
           "name": "llama.cpp / GGUF 独立运行",
