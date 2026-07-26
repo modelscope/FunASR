@@ -18,6 +18,10 @@ def load_server_app(monkeypatch):
             self.state = types.SimpleNamespace()
             self.routes = {}
             self.metadata = kwargs
+            self.middleware = []
+
+        def add_middleware(self, middleware_class, **kwargs):
+            self.middleware.append((middleware_class, kwargs))
 
         def post(self, path, *args, **kwargs):
             def decorator(func):
@@ -39,11 +43,24 @@ def load_server_app(monkeypatch):
     fastapi_stub.File = lambda *args, **kwargs: None
     fastapi_stub.Form = lambda *args, **kwargs: None
     fastapi_stub.HTTPException = Exception
+    fastapi_stub.__path__ = []
+
+    middleware_stub = types.ModuleType("fastapi.middleware")
+    middleware_stub.__path__ = []
+
+    cors_stub = types.ModuleType("fastapi.middleware.cors")
+
+    class DummyCORSMiddleware:
+        pass
+
+    cors_stub.CORSMiddleware = DummyCORSMiddleware
 
     responses_stub = types.ModuleType("fastapi.responses")
     responses_stub.JSONResponse = lambda content=None: content
 
     monkeypatch.setitem(sys.modules, "fastapi", fastapi_stub)
+    monkeypatch.setitem(sys.modules, "fastapi.middleware", middleware_stub)
+    monkeypatch.setitem(sys.modules, "fastapi.middleware.cors", cors_stub)
     monkeypatch.setitem(sys.modules, "fastapi.responses", responses_stub)
 
     module_name = "funasr_server_app_under_test"
@@ -224,6 +241,46 @@ def test_server_versions_follow_package_version(monkeypatch):
     assert app.metadata["version"] == expected
     assert hasattr(server_module, "server_version_label")
     assert server_module.server_version_label() == f"FunASR Server v{expected}"
+
+
+def test_server_cors_is_disabled_by_default(monkeypatch):
+    module = load_server_app(monkeypatch)
+    install_dummy_funasr(monkeypatch)
+
+    app = module.create_app(device="cpu", preload_model="sensevoice")
+
+    assert app.middleware == []
+
+
+def test_server_configures_normalized_trusted_origins(monkeypatch):
+    module = load_server_app(monkeypatch)
+    install_dummy_funasr(monkeypatch)
+
+    app = module.create_app(
+        device="cpu",
+        preload_model="sensevoice",
+        cors_origins=[
+            " http://localhost:3000 ",
+            "http://localhost:3000",
+            "http://127.0.0.1:3000",
+            " ",
+        ],
+    )
+
+    assert app.middleware == [
+        (
+            module.CORSMiddleware,
+            {
+                "allow_origins": [
+                    "http://localhost:3000",
+                    "http://127.0.0.1:3000",
+                ],
+                "allow_credentials": False,
+                "allow_methods": ["GET", "POST", "OPTIONS"],
+                "allow_headers": ["Authorization", "Content-Type"],
+            },
+        )
+    ]
 
 
 def test_default_fun_asr_nano_uses_requested_modelscope_hub(monkeypatch):
