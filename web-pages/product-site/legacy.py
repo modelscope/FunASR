@@ -89,6 +89,16 @@ def _remove_metadata_links(html: str) -> str:
     return re.sub(r'<link\b[^>]*>', replacement, html, flags=re.IGNORECASE)
 
 
+def _remove_excluded_runtime_dependencies(html: str) -> str:
+    return re.sub(
+        r'<script\b(?=[^>]*\bsrc\s*=\s*["\']/stats/tracker\.js(?:\?[^"\']*)?["\'])'
+        r'[^>]*>\s*</script>',
+        '',
+        html,
+        flags=re.IGNORECASE,
+    )
+
+
 def _metadata_markup(route: str, language: str) -> str:
     canonical_route, peer_route = _canonical_routes(route, language)
     peer_language = 'en' if language == 'zh' else 'zh-CN'
@@ -122,6 +132,7 @@ def normalize_document(html: str, route: str, language: str) -> str:
         html,
         _navigation_markup(language, peer_route),
     )
+    normalized = _remove_excluded_runtime_dependencies(normalized)
 
     marker_pattern = re.compile(
         re.escape(METADATA_START) + r'.*?' + re.escape(METADATA_END),

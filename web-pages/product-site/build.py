@@ -7,6 +7,7 @@ import hashlib
 import json
 import shutil
 import tempfile
+import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import Any
 
@@ -48,6 +49,32 @@ def legacy_route(relative: Path) -> str:
     if relative.name == 'index.html':
         route = route[:-len('index.html')]
     return route
+
+
+def _write_sitemap(stage: Path) -> None:
+    routes: set[str] = set()
+    for page in sorted(stage.rglob('*.html')):
+        if page.name == '404.html':
+            continue
+        soup = BeautifulSoup(page.read_text(encoding='utf-8'), 'html.parser')
+        canonical = soup.select_one('link[rel="canonical"][href]')
+        if canonical is None:
+            continue
+        href = str(canonical['href'])
+        if not href.startswith(BASE_URL):
+            continue
+        route = href[len(BASE_URL):] or '/'
+        routes.add(route)
+
+    ET.register_namespace('', 'http://www.sitemaps.org/schemas/sitemap/0.9')
+    urlset = ET.Element('{http://www.sitemaps.org/schemas/sitemap/0.9}urlset')
+    for route in sorted(routes):
+        url = ET.SubElement(urlset, '{http://www.sitemaps.org/schemas/sitemap/0.9}url')
+        location = ET.SubElement(url, '{http://www.sitemaps.org/schemas/sitemap/0.9}loc')
+        location.text = canonical_url(route)
+    ET.indent(urlset, space='  ')
+    tree = ET.ElementTree(urlset)
+    tree.write(stage / 'sitemap.xml', encoding='utf-8', xml_declaration=True)
 
 
 def _copy_hashed_assets(stage: Path) -> tuple[dict[str, str], dict[str, str]]:
@@ -333,6 +360,8 @@ def build(output_dir: Path) -> dict[str, Any]:
             'canonical': context['canonical'],
             'hreflang': context['peer_canonical'],
         })
+
+        _write_sitemap(stage)
 
         manifest = {
             'schema_version': 1,

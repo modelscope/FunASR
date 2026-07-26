@@ -1,0 +1,40 @@
+name: Product site
+
+on:
+  pull_request:
+    paths:
+      - 'web-pages/product-site/**'
+      - 'web-pages/scripts/**'
+      - 'web-pages/nginx/**'
+      - '.github/workflows/product-site.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'web-pages/product-site/**'
+      - 'web-pages/scripts/**'
+      - 'web-pages/nginx/**'
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+          cache-dependency-path: web-pages/product-site/requirements-site.txt
+      - name: Install site dependencies
+        run: python -m pip install -r web-pages/product-site/requirements-site.txt
+      - name: Run product-site tests
+        run: python -m pytest web-pages/product-site/tests -q
+      - name: Build and validate twice
+        run: |
+          python web-pages/product-site/build.py --output /tmp/funasr-site-a
+          python web-pages/product-site/validate.py /tmp/funasr-site-a
+          python web-pages/product-site/build.py --output /tmp/funasr-site-b
+          python web-pages/product-site/validate.py /tmp/funasr-site-b
+          diff -qr /tmp/funasr-site-a /tmp/funasr-site-b

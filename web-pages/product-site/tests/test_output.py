@@ -12,6 +12,7 @@ sys.path.insert(0, str(SITE_ROOT))
 
 from build import build  # noqa: E402
 from registry import BENCHMARK_FIELDS, load_registry  # noqa: E402
+from validate import validate_output  # noqa: E402
 
 
 @pytest.fixture
@@ -109,3 +110,44 @@ def test_old_llama_routes_point_to_product_pages(built_site):
         assert soup.select_one('.nav-links a[href$="/deploy/"]') or soup.select_one(
             '.nav-links a[href$="/en/deploy/"]'
         )
+
+
+def test_complete_build_passes_output_validation(built_site):
+    assert validate_output(built_site) == []
+
+
+def test_broken_internal_link_fails_validation(built_site):
+    page = built_site / 'index.html'
+    html = page.read_text(encoding='utf-8')
+    page.write_text(html.replace('/deploy/', '/missing/', 1), encoding='utf-8')
+
+    assert '/index.html: broken internal link /missing/' in validate_output(built_site)
+
+
+def test_missing_language_peer_fails_validation(built_site):
+    (built_site / 'en/deploy/vllm.html').unlink()
+
+    assert any('missing hreflang peer' in error for error in validate_output(built_site))
+
+
+def test_duplicate_id_and_invalid_json_ld_fail_validation(built_site):
+    page = built_site / 'deploy/vllm.html'
+    html = page.read_text(encoding='utf-8')
+    html = html.replace('id="commands"', 'id="main"', 1)
+    html = html.replace('"@context": "https://schema.org"', 'not-json', 1)
+    page.write_text(html, encoding='utf-8')
+    errors = validate_output(built_site)
+
+    assert '/deploy/vllm.html: duplicate id main' in errors
+    assert '/deploy/vllm.html: invalid JSON-LD' in errors
+
+
+def test_hashed_asset_tampering_fails_validation(built_site):
+    manifest = __import__('json').loads(
+        (built_site / 'deployment-manifest.json').read_text(encoding='utf-8')
+    )
+    asset = next(iter(manifest['assets']))
+    with (built_site / asset.lstrip('/')).open('ab') as stream:
+        stream.write(b'changed')
+
+    assert any(f'asset hash mismatch {asset}' in error for error in validate_output(built_site))

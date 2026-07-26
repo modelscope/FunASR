@@ -85,6 +85,7 @@ def test_navigation_normalization_is_idempotent_and_preserves_article():
 </head><body>
 <nav class="nav"><div>Old navigation</div></nav>
 {article}
+<script src="/stats/tracker.js"></script>
 </body></html>'''
 
     once = normalize_document(sample, '/blog/example.html', 'zh')
@@ -96,6 +97,7 @@ def test_navigation_normalization_is_idempotent_and_preserves_article():
     assert [link.get_text(strip=True) for link in soup.select('.nav-links a')][-1] == '功德榜'
     assert soup.select_one('link[rel="canonical"]')['href'].endswith('/blog/example.html')
     assert not soup.select_one('link[href*="fonts.googleapis.com"]')
+    assert not soup.select_one('script[src="/stats/tracker.js"]')
 
 
 def test_english_navigation_uses_language_peer():
