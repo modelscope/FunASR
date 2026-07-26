@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="not-found">
+  <p class="error-code">404</p>
+  <h1>页面未找到 / Page not found</h1>
+  <p>这个地址不存在。你可以返回部署中心、文档或首页。<br>This address does not exist. Continue to deployment, documentation, or home.</p>
+  <div class="hero-actions">
+    <a class="button button-primary" href="/deploy/">部署中心 / Deploy</a>
+    <a class="button button-secondary" href="https://github.com/modelscope/FunASR/tree/main/docs">文档 / Docs</a>
+    <a class="button button-secondary" href="/">首页 / Home</a>
+  </div>
+</section>
+{% endblock %}

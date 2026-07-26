@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="{{ html_language }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ title }}</title>
+  <meta name="description" content="{{ description }}">
+  <meta name="theme-color" content="#ffffff">
+  <link rel="canonical" href="{{ canonical }}">
+  <link rel="alternate" hreflang="{{ 'en' if language == 'zh' else 'zh-CN' }}" href="{{ peer_canonical }}">
+  <link rel="alternate" hreflang="{{ 'zh-CN' if language == 'zh' else 'en' }}" href="{{ canonical }}">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="{{ title }}">
+  <meta property="og:description" content="{{ description }}">
+  <meta property="og:url" content="{{ canonical }}">
+  <link rel="stylesheet" href="{{ assets['css/site.css'] }}">
+  <script type="application/ld+json">{{ {
+    '@context': 'https://schema.org',
+    '@type': 'SoftwareApplication',
+    'name': 'FunASR',
+    'applicationCategory': 'DeveloperApplication',
+    'operatingSystem': 'Linux, macOS, Windows',
+    'url': canonical,
+    'codeRepository': github_url,
+    'license': 'https://www.apache.org/licenses/LICENSE-2.0'
+  } | tojson }}</script>
+</head>
+<body data-language="{{ language }}" data-route="{{ route }}">
+  <a class="skip-link" href="#main">{{ '跳到主要内容' if language == 'zh' else 'Skip to main content' }}</a>
+  <header class="site-header">
+    <a class="brand" href="{{ '/' if language == 'zh' else '/en/' }}" aria-label="FunASR {{ '首页' if language == 'zh' else 'home' }}">
+      <span class="brand-mark" aria-hidden="true">F</span>
+      <span>FunASR</span>
+    </a>
+    <button class="icon-button menu-button" type="button" data-menu-toggle aria-expanded="false" aria-controls="primary-navigation" title="{{ '打开目录' if language == 'zh' else 'Open navigation' }}">
+      <img src="{{ assets['lucide/menu.svg'] }}" alt="">
+    </button>
+    <nav id="primary-navigation" class="primary-navigation" data-primary-nav aria-label="{{ '主目录' if language == 'zh' else 'Primary navigation' }}">
+      {% for item in navigation %}
+      <a href="{{ item.href }}"{% if route == item.href or (item.id == 'deploy' and '/deploy/' in route) %} aria-current="page"{% endif %}>{{ item.label }}</a>
+      {% endfor %}
+    </nav>
+    <div class="header-actions">
+      <a class="icon-link" href="{{ peer_route }}" title="{{ 'English' if language == 'zh' else '简体中文' }}">
+        <img src="{{ assets['lucide/languages.svg'] }}" alt="">
+        <span>{{ 'EN' if language == 'zh' else '中文' }}</span>
+      </a>
+      <a class="icon-button" href="{{ github_url }}" title="GitHub" aria-label="GitHub">
+        <img src="{{ assets['lucide/github.svg'] }}" alt="">
+      </a>
+    </div>
+  </header>
+  <main id="main">
+    {% block content %}{% endblock %}
+  </main>
+  <footer class="site-footer">
+    <div>
+      <strong>FunASR</strong>
+      <p>{{ '面向生产部署的开源语音基础设施。' if language == 'zh' else 'Open speech infrastructure for production deployment.' }}</p>
+    </div>
+    <div class="footer-links">
+      <a href="{{ '/deploy/' if language == 'zh' else '/en/deploy/' }}">{{ '部署' if language == 'zh' else 'Deploy' }}</a>
+      <a href="https://github.com/modelscope/FunASR/tree/main/docs">{{ '文档' if language == 'zh' else 'Docs' }}</a>
+      <a href="{{ '/donors.html' if language == 'zh' else '/en/donors.html' }}">{{ '功德榜' if language == 'zh' else 'Donors' }}</a>
+    </div>
+  </footer>
+  <script src="{{ assets['js/site.js'] }}" defer></script>
+</body>
+</html>
