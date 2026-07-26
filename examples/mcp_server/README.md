@@ -44,7 +44,7 @@ the public GHCR image and asks clients to mount one host audio directory at
 
 Current published release:
 
-- [GitHub release mcp-v0.1.1](https://github.com/modelscope/FunASR/releases/tag/mcp-v0.1.1)
+- [GitHub release mcp-v0.1.2](https://github.com/modelscope/FunASR/releases/tag/mcp-v0.1.2)
 - [Official MCP Registry entry](https://registry.modelcontextprotocol.io/v0.1/servers?search=io.github.modelscope/funasr-mcp)
 - [Public GHCR package](https://github.com/orgs/modelscope/packages/container/package/funasr-mcp)
 
@@ -62,7 +62,7 @@ To release a new MCP server version:
 1. Update `version` and the OCI image tag in `server.json` together.
 2. Merge the change after the MCP validation workflow passes.
 3. Have a `modelscope` organization Owner push the matching `mcp-v<version>`
-   tag, for example `mcp-v0.1.1`.
+   tag, for example `mcp-v0.1.2`.
 4. Approve the protected `mcp-registry-publish` environment deployment.
 
 The official Registry only grants the `io.github.modelscope/*` namespace to a
@@ -76,7 +76,7 @@ After publication, clients can run the pinned image directly:
 docker run --rm -i \
   --mount type=bind,src=/path/to/audio,dst=/audio,readonly \
   --mount type=volume,src=funasr-mcp-cache,dst=/root/.cache/modelscope \
-  ghcr.io/modelscope/funasr-mcp:0.1.1
+  ghcr.io/modelscope/funasr-mcp:0.1.2
 ```
 
 When using the container, pass tool paths under `/audio`, such as

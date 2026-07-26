@@ -34,6 +34,7 @@ class MCPRegistryMetadataTest(unittest.TestCase):
             "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
         )
         self.assertEqual(self.metadata["name"], "io.github.modelscope/funasr-mcp")
+        self.assertEqual(self.metadata["version"], "0.1.2")
         self.assertLessEqual(len(self.metadata["description"]), 100)
         self.assertEqual(
             self.metadata["repository"],
@@ -89,7 +90,7 @@ class MCPRegistryMetadataTest(unittest.TestCase):
         )
         self.assertIsNotNone(match)
         self.assertEqual(match.group(1), self.metadata["name"])
-        self.assertIn("ARG FUNASR_VERSION=1.3.14", dockerfile)
+        self.assertIn("ARG FUNASR_VERSION=1.3.29", dockerfile)
         self.assertIn("funasr==${FUNASR_VERSION}", dockerfile)
 
     def test_release_workflow_is_versioned_and_oidc_authenticated(self):
