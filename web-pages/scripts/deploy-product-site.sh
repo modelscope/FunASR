@@ -28,6 +28,7 @@ nginx_bin=${NGINX_BIN:-nginx}
 nginx_master_pid=${NGINX_MASTER_PID:-}
 curl_bin=${CURL_BIN:-curl}
 smoke_base_url=${SMOKE_BASE_URL:-https://www.funasr.com}
+smoke_routes=${SMOKE_ROUTES:-/ /deploy/ /blog/ /donors.html}
 destination=$releases_dir/$release_id
 staging=$releases_dir/.$release_id.staging.$$
 temporary_link=$site_base/.current.$release_id.$$
@@ -101,7 +102,7 @@ mv -Tf -- "$temporary_link" "$current_link"
 switched=1
 reload_nginx
 
-for route in / /deploy/ /blog/ /donors.html; do
+for route in $smoke_routes; do
   "$curl_bin" --fail --silent --show-error --max-time 15 "$smoke_base_url$route" >/dev/null
 done
 
