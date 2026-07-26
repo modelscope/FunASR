@@ -25,3 +25,4 @@ modelscope_models
 examples/aishell/llm_asr_nar/*
 *egg-info
 env/
+web-pages/product-site/tests/browser/node_modules/
