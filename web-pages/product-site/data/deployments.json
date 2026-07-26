@@ -209,7 +209,7 @@
       "id": "containers",
       "routes": {"zh": "/deploy/containers.html", "en": "/en/deploy/containers.html"},
       "maturity": "community-verified",
-      "selector_rank": 50,
+      "selector_rank": 25,
       "workloads": ["private-api", "batch", "realtime"],
       "hardware": ["kubernetes", "cpu", "nvidia-gpu"],
       "priorities": ["portability", "compatibility"],
