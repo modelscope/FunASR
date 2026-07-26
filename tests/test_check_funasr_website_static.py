@@ -657,13 +657,17 @@ def test_website_contract_requires_visible_donor_usage_copy():
     checker = _load_module()
 
     pages = {url: "ok" for url in checker.PAGE_CONTRACTS}
-    pages["https://www.funasr.com/donors.html"] = """
+    pages[
+        "https://www.funasr.com/donors.html"
+    ] = """
         <head>
             <meta name="description" content="捐赠资金用于社区基础设施建设，包括购买和维护服务器，以及购买、续费和维护 www.funasr.com 域名。">
         </head>
         <body>FunASR 社区功德榜</body>
     """
-    pages["https://www.funasr.com/en/donors.html"] = """
+    pages[
+        "https://www.funasr.com/en/donors.html"
+    ] = """
         <head>
             <meta name="description" content="Donations fund community infrastructure, including server purchase and maintenance, plus the purchase, renewal, and maintenance of the www.funasr.com domain.">
         </head>
@@ -717,4 +721,80 @@ def test_fetch_pages_retries_transient_url_errors(monkeypatch):
     assert calls == [
         ("https://www.funasr.com/example.html", 3),
         ("https://www.funasr.com/example.html", 3),
+    ]
+
+
+def test_navigation_contract_requires_donors_as_last_directory_link():
+    checker = _load_module()
+    pages = {
+        "https://www.funasr.com/blog/ok.html": """
+            <nav><div class="nav-links">
+                <a href="/blog/">技术博客</a>
+                <a href="/vs-whisper.html">对比 Whisper</a>
+                <a href="/donors.html">功德榜</a>
+                <a href="/en/blog/ok.html">EN</a>
+                <a class="nav-btn" href="https://github.com/modelscope/FunASR">GitHub</a>
+            </div></nav>
+        """,
+        "https://www.funasr.com/en/blog/missing.html": """
+            <nav><div class="nav-links">
+                <a href="/en/blog/">Blog</a>
+                <a href="/en/vs-whisper.html">vs Whisper</a>
+            </div></nav>
+        """,
+        "https://www.funasr.com/blog/not-last.html": """
+            <nav><div class="nav-links">
+                <a href="/donors.html">功德榜</a>
+                <a href="/blog/">技术博客</a>
+            </div></nav>
+        """,
+        "https://www.funasr.com/en/blog/wrong-language.html": """
+            <nav><div class="nav-links">
+                <a href="/en/blog/">Blog</a>
+                <a href="/donors.html">功德榜</a>
+            </div></nav>
+        """,
+        "https://www.funasr.com/plain.html": "<main>No directory navigation</main>",
+    }
+
+    failures = checker.validate_navigation(pages)
+
+    assert not any("ok.html" in failure for failure in failures)
+    assert any(
+        "missing.html" in failure and "missing `/en/donors.html`" in failure
+        for failure in failures
+    )
+    assert any(
+        "not-last.html" in failure and "must be the last directory link" in failure
+        for failure in failures
+    )
+    assert any(
+        "wrong-language.html" in failure and "missing `/en/donors.html`" in failure
+        for failure in failures
+    )
+    assert any(
+        "wrong-language.html" in failure
+        and "contains wrong-language `/donors.html`" in failure
+        for failure in failures
+    )
+    assert not any("plain.html" in failure for failure in failures)
+
+
+def test_extract_sitemap_page_urls_keeps_unique_same_origin_html_pages():
+    checker = _load_module()
+    sitemap = """<?xml version="1.0" encoding="UTF-8"?>
+        <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+            <url><loc>https://www.funasr.com/</loc></url>
+            <url><loc>https://www.funasr.com/blog/</loc></url>
+            <url><loc>https://www.funasr.com/blog/guide.html</loc></url>
+            <url><loc>https://www.funasr.com/blog/guide.html</loc></url>
+            <url><loc>https://www.funasr.com/logo.png</loc></url>
+            <url><loc>https://example.com/foreign.html</loc></url>
+        </urlset>
+    """
+
+    assert checker.extract_sitemap_page_urls(sitemap) == [
+        "https://www.funasr.com/",
+        "https://www.funasr.com/blog/",
+        "https://www.funasr.com/blog/guide.html",
     ]

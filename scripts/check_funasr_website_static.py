@@ -4,12 +4,15 @@
 from __future__ import annotations
 
 import argparse
+from concurrent.futures import ThreadPoolExecutor
 from html.parser import HTMLParser
 import re
 import sys
 import time
 import urllib.request
 from dataclasses import dataclass
+from urllib.parse import urljoin, urlparse
+import xml.etree.ElementTree as ET
 
 
 BASE_URL = "https://www.funasr.com"
@@ -485,6 +488,104 @@ def extract_images(html: str) -> set[str]:
     return _collect_visible_content(html).images
 
 
+class _DirectoryNavigationCollector(HTMLParser):
+    def __init__(self) -> None:
+        super().__init__()
+        self.links: list[str] = []
+        self._depth = 0
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        tag = tag.lower()
+        attributes = {name.lower(): value for name, value in attrs}
+        if self._depth:
+            if tag == "a" and attributes.get("href"):
+                self.links.append(attributes["href"])
+            if tag not in _VOID_TAGS:
+                self._depth += 1
+        elif tag == "div" and "nav-links" in (attributes.get("class") or "").split():
+            self._depth = 1
+
+    def handle_startendtag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        if not self._depth or tag.lower() != "a":
+            return
+        attributes = {name.lower(): value for name, value in attrs}
+        if attributes.get("href"):
+            self.links.append(attributes["href"])
+
+    def handle_endtag(self, tag: str) -> None:
+        if self._depth:
+            self._depth -= 1
+
+
+def extract_directory_links(html: str) -> list[str]:
+    parser = _DirectoryNavigationCollector()
+    parser.feed(html)
+    parser.close()
+    return parser.links
+
+
+def validate_navigation(pages: dict[str, str]) -> list[str]:
+    failures: list[str] = []
+    for url, html in pages.items():
+        links = extract_directory_links(html)
+        if not links:
+            continue
+        path = urlparse(url).path
+        is_english = path == "/en" or path.startswith("/en/")
+        expected = "/en/donors.html" if is_english else "/donors.html"
+        wrong_language = "/donors.html" if is_english else "/en/donors.html"
+        if is_english:
+            alternate_path = path.removeprefix("/en") or "/"
+        else:
+            alternate_path = f"/en{path}" if path != "/" else "/en/"
+        directory_links = []
+        for link in links:
+            target = urlparse(urljoin(url, link))
+            is_language_toggle = (
+                target.netloc == "www.funasr.com" and target.path == alternate_path
+            )
+            is_github_action = target.netloc == "github.com"
+            if not is_language_toggle and not is_github_action:
+                directory_links.append(link)
+        if expected not in links:
+            failures.append(f"{url}: directory navigation missing `{expected}`")
+        elif not directory_links or directory_links[-1] != expected:
+            failures.append(f"{url}: `{expected}` must be the last directory link")
+        if links.count(expected) > 1:
+            failures.append(
+                f"{url}: directory navigation contains duplicate `{expected}`"
+            )
+        if wrong_language in links:
+            failures.append(
+                f"{url}: directory navigation contains wrong-language "
+                f"`{wrong_language}`"
+            )
+    return failures
+
+
+def extract_sitemap_page_urls(sitemap: str) -> list[str]:
+    root = ET.fromstring(sitemap)
+    urls: list[str] = []
+    seen: set[str] = set()
+    for element in root.iter():
+        if element.tag.rsplit("}", 1)[-1] != "loc" or not element.text:
+            continue
+        url = element.text.strip()
+        parsed = urlparse(url)
+        is_page = parsed.path.endswith("/") or parsed.path.endswith(".html")
+        if (
+            parsed.scheme == "https"
+            and parsed.netloc == "www.funasr.com"
+            and not parsed.query
+            and not parsed.fragment
+            and is_page
+            and url not in seen
+        ):
+            seen.add(url)
+            urls.append(url)
+    return urls
+
+
 def validate_pages(pages: dict[str, str]) -> list[str]:
     failures: list[str] = []
     for url, contract in PAGE_CONTRACTS.items():
@@ -560,6 +661,17 @@ def fetch_pages(timeout: float, retries: int = 3) -> dict[str, str]:
     return pages
 
 
+def fetch_navigation_pages(timeout: float, retries: int = 3) -> dict[str, str]:
+    sitemap = _fetch_url(f"{BASE_URL}/sitemap.xml", timeout=timeout, retries=retries)
+    urls = extract_sitemap_page_urls(sitemap)
+
+    def fetch(url: str) -> tuple[str, str]:
+        return url, _fetch_url(url, timeout=timeout, retries=retries)
+
+    with ThreadPoolExecutor(max_workers=min(8, max(1, len(urls)))) as executor:
+        return dict(executor.map(fetch, urls))
+
+
 def fetch_assets(timeout: float, retries: int = 3) -> dict[str, bytes]:
     assets: dict[str, bytes] = {}
     for url in STATIC_ASSET_CONTRACTS:
@@ -573,7 +685,17 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--retries", type=int, default=3)
     args = parser.parse_args(argv)
 
-    failures = validate_pages(fetch_pages(timeout=args.timeout, retries=args.retries))
+    navigation_pages = fetch_navigation_pages(
+        timeout=args.timeout, retries=args.retries
+    )
+    pages = {
+        url: navigation_pages.get(url)
+        or _fetch_url(url, timeout=args.timeout, retries=args.retries)
+        for url in PAGE_CONTRACTS
+    }
+    all_navigation_pages = navigation_pages | pages
+    failures = validate_pages(pages)
+    failures.extend(validate_navigation(all_navigation_pages))
     failures.extend(
         validate_assets(fetch_assets(timeout=args.timeout, retries=args.retries))
     )
@@ -585,7 +707,9 @@ def main(argv: list[str] | None = None) -> int:
 
     print(
         "funasr.com static contract passed for "
-        f"{len(PAGE_CONTRACTS)} pages and {len(STATIC_ASSET_CONTRACTS)} assets"
+        f"{len(PAGE_CONTRACTS)} page contracts, "
+        f"{len(all_navigation_pages)} navigation pages, and "
+        f"{len(STATIC_ASSET_CONTRACTS)} assets"
     )
     return 0
 
