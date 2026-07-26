@@ -16,6 +16,9 @@ import xml.etree.ElementTree as ET
 
 
 BASE_URL = "https://www.funasr.com"
+DONOR_PAGE_URLS = frozenset(
+    (f"{BASE_URL}/donors.html", f"{BASE_URL}/en/donors.html")
+)
 
 
 @dataclass(frozen=True)
@@ -488,59 +491,120 @@ def extract_images(html: str) -> set[str]:
     return _collect_visible_content(html).images
 
 
+@dataclass(frozen=True)
+class DirectoryLink:
+    href: str
+    label: str
+
+
+@dataclass
+class _NavigationElementState:
+    tag: str
+    hidden: bool
+    link: str | None = None
+    text: list[str] | None = None
+
+
 class _DirectoryNavigationCollector(HTMLParser):
     def __init__(self) -> None:
         super().__init__()
-        self.links: list[str] = []
-        self._depth = 0
+        self.found_navigation = False
+        self.links: list[DirectoryLink] = []
+        self._stack: list[_NavigationElementState] = []
+
+    @property
+    def _parent_hidden(self) -> bool:
+        return bool(self._stack and self._stack[-1].hidden)
+
+    def _finish_link(self, state: _NavigationElementState) -> None:
+        if state.link is None or state.text is None:
+            return
+        label = re.sub(r"\s+", " ", " ".join(state.text)).strip()
+        if label:
+            self.links.append(DirectoryLink(state.link, label))
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
         tag = tag.lower()
         attributes = {name.lower(): value for name, value in attrs}
-        if self._depth:
-            if tag == "a" and attributes.get("href"):
-                self.links.append(attributes["href"])
-            if tag not in _VOID_TAGS:
-                self._depth += 1
-        elif tag == "div" and "nav-links" in (attributes.get("class") or "").split():
-            self._depth = 1
+        if not self._stack:
+            is_navigation = (
+                tag == "div"
+                and "nav-links" in (attributes.get("class") or "").split()
+            )
+            if not is_navigation:
+                return
+            self.found_navigation = True
+            self._stack.append(
+                _NavigationElementState(
+                    tag,
+                    _VisibleContentCollector._has_hidden_attribute(attributes),
+                )
+            )
+            return
+
+        hidden = (
+            self._parent_hidden
+            or tag in _HIDDEN_TAGS
+            or _VisibleContentCollector._has_hidden_attribute(attributes)
+        )
+        if tag not in _VOID_TAGS:
+            link = attributes.get("href") if tag == "a" and not hidden else None
+            self._stack.append(
+                _NavigationElementState(
+                    tag,
+                    hidden,
+                    link=link,
+                    text=[] if link is not None else None,
+                )
+            )
 
     def handle_startendtag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
-        if not self._depth or tag.lower() != "a":
-            return
-        attributes = {name.lower(): value for name, value in attrs}
-        if attributes.get("href"):
-            self.links.append(attributes["href"])
+        return
 
     def handle_endtag(self, tag: str) -> None:
-        if self._depth:
-            self._depth -= 1
+        tag = tag.lower()
+        for index in range(len(self._stack) - 1, -1, -1):
+            if self._stack[index].tag == tag:
+                for state in reversed(self._stack[index:]):
+                    self._finish_link(state)
+                del self._stack[index:]
+                return
+
+    def handle_data(self, data: str) -> None:
+        if self._parent_hidden or not data.strip():
+            return
+        for state in reversed(self._stack):
+            if state.link is not None and state.text is not None:
+                state.text.append(data)
+                return
 
 
-def extract_directory_links(html: str) -> list[str]:
+def extract_directory_links(html: str) -> tuple[bool, list[DirectoryLink]]:
     parser = _DirectoryNavigationCollector()
     parser.feed(html)
     parser.close()
-    return parser.links
+    return parser.found_navigation, parser.links
 
 
 def validate_navigation(pages: dict[str, str]) -> list[str]:
     failures: list[str] = []
     for url, html in pages.items():
-        links = extract_directory_links(html)
-        if not links:
+        found_navigation, navigation_links = extract_directory_links(html)
+        if not found_navigation:
             continue
+        links = [link.href for link in navigation_links]
         path = urlparse(url).path
         is_english = path == "/en" or path.startswith("/en/")
         expected = "/en/donors.html" if is_english else "/donors.html"
+        expected_labels = ("Thanks", "Donors") if is_english else ("功德榜",)
         wrong_language = "/donors.html" if is_english else "/en/donors.html"
         if is_english:
-            alternate_path = path.removeprefix("/en") or "/"
+            alternate_path = path[len("/en") :] or "/"
         else:
             alternate_path = f"/en{path}" if path != "/" else "/en/"
-        directory_links = []
-        for link in links:
-            target = urlparse(urljoin(url, link))
+        directory_links: list[DirectoryLink] = []
+        for link in navigation_links:
+            target = urlparse(urljoin(url, link.href))
             is_language_toggle = (
                 target.netloc == "www.funasr.com" and target.path == alternate_path
             )
@@ -548,8 +612,19 @@ def validate_navigation(pages: dict[str, str]) -> list[str]:
             if not is_language_toggle and not is_github_action:
                 directory_links.append(link)
         if expected not in links:
-            failures.append(f"{url}: directory navigation missing `{expected}`")
-        elif not directory_links or directory_links[-1] != expected:
+            failures.append(
+                f"{url}: directory navigation missing `{expected}`; link must be visible"
+            )
+        else:
+            expected_links = [link for link in navigation_links if link.href == expected]
+            if not any(link.label in expected_labels for link in expected_links):
+                label_description = "` or `".join(expected_labels)
+                failures.append(
+                    f"{url}: `{expected}` must use visible label `{label_description}`"
+                )
+        if expected in links and (
+            not directory_links or directory_links[-1].href != expected
+        ):
             failures.append(f"{url}: `{expected}` must be the last directory link")
         if links.count(expected) > 1:
             failures.append(
@@ -634,11 +709,15 @@ def validate_assets(assets: dict[str, bytes]) -> list[str]:
     return failures
 
 
-def _fetch_bytes(url: str, timeout: float, retries: int) -> bytes:
+def _fetch_bytes(
+    url: str, timeout: float, retries: int, require_exact_url: bool = False
+) -> bytes:
     last_error: Exception | None = None
     for attempt in range(retries + 1):
         try:
             with urllib.request.urlopen(url, timeout=timeout) as response:
+                if require_exact_url and response.geturl() != url:
+                    raise RuntimeError(f"{url} redirected to {response.geturl()}")
                 return response.read()
         except Exception as exc:
             last_error = exc
@@ -648,8 +727,15 @@ def _fetch_bytes(url: str, timeout: float, retries: int) -> bytes:
     raise last_error
 
 
-def _fetch_url(url: str, timeout: float, retries: int) -> str:
-    return _fetch_bytes(url, timeout=timeout, retries=retries).decode(
+def _fetch_url(
+    url: str, timeout: float, retries: int, require_exact_url: bool = False
+) -> str:
+    return _fetch_bytes(
+        url,
+        timeout=timeout,
+        retries=retries,
+        require_exact_url=require_exact_url,
+    ).decode(
         "utf-8", errors="replace"
     )
 
@@ -657,7 +743,12 @@ def _fetch_url(url: str, timeout: float, retries: int) -> str:
 def fetch_pages(timeout: float, retries: int = 3) -> dict[str, str]:
     pages: dict[str, str] = {}
     for url in PAGE_CONTRACTS:
-        pages[url] = _fetch_url(url, timeout=timeout, retries=retries)
+        pages[url] = _fetch_url(
+            url,
+            timeout=timeout,
+            retries=retries,
+            require_exact_url=url in DONOR_PAGE_URLS,
+        )
     return pages
 
 
@@ -688,12 +779,21 @@ def main(argv: list[str] | None = None) -> int:
     navigation_pages = fetch_navigation_pages(
         timeout=args.timeout, retries=args.retries
     )
-    pages = {
-        url: navigation_pages.get(url)
-        or _fetch_url(url, timeout=args.timeout, retries=args.retries)
-        for url in PAGE_CONTRACTS
-    }
-    all_navigation_pages = navigation_pages | pages
+    pages = {}
+    for url in PAGE_CONTRACTS:
+        if url in DONOR_PAGE_URLS:
+            pages[url] = _fetch_url(
+                url,
+                timeout=args.timeout,
+                retries=args.retries,
+                require_exact_url=True,
+            )
+        else:
+            pages[url] = navigation_pages.get(url) or _fetch_url(
+                url, timeout=args.timeout, retries=args.retries
+            )
+    all_navigation_pages = navigation_pages.copy()
+    all_navigation_pages.update(pages)
     failures = validate_pages(pages)
     failures.extend(validate_navigation(all_navigation_pages))
     failures.extend(
