@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://www.funasr.com/</loc><priority>1.0</priority><changefreq>weekly</changefreq></url>
+  <url><loc>https://www.funasr.com/en/</loc><priority>0.9</priority><changefreq>weekly</changefreq></url>
+  <url><loc>https://www.funasr.com/quickstart.html</loc><priority>0.9</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://www.funasr.com/en/quickstart.html</loc><priority>0.9</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://www.funasr.com/models.html</loc><priority>0.9</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://www.funasr.com/en/models.html</loc><priority>0.9</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://www.funasr.com/vs-whisper.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://www.funasr.com/en/vs-whisper.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://www.funasr.com/ecosystem.html</loc><priority>0.8</priority><changefreq>weekly</changefreq></url>
+  <url><loc>https://www.funasr.com/en/ecosystem.html</loc><priority>0.8</priority><changefreq>weekly</changefreq></url>
+  <url><loc>https://www.funasr.com/blog/</loc><priority>0.9</priority><changefreq>weekly</changefreq></url>
+  <url><loc>https://www.funasr.com/en/blog/</loc><priority>0.9</priority><changefreq>weekly</changefreq></url>
+  <url><loc>https://www.funasr.com/blog/funclip-v2-1-0-video-clipping-release.html</loc><lastmod>2026-07-24</lastmod><priority>0.9</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://www.funasr.com/en/blog/funclip-v2-1-0-video-clipping-release.html</loc><lastmod>2026-07-24</lastmod><priority>0.9</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://www.funasr.com/blog/funasr-v1-3-28-realtime-websocket-subtitles.html</loc><lastmod>2026-07-24</lastmod><priority>0.9</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://www.funasr.com/en/blog/funasr-v1-3-28-realtime-websocket-subtitles.html</loc><lastmod>2026-07-24</lastmod><priority>0.9</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://www.funasr.com/donors.html</loc><lastmod>2026-07-23</lastmod><priority>0.5</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://www.funasr.com/en/donors.html</loc><lastmod>2026-07-23</lastmod><priority>0.5</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://www.funasr.com/blog/sensevoice-deployment-guide.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://www.funasr.com/en/blog/sensevoice-deployment-guide.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://www.funasr.com/blog/fun-asr-nano-guide.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://www.funasr.com/en/blog/fun-asr-nano-guide.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://www.funasr.com/blog/funasr-vs-whisper-benchmark.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://www.funasr.com/en/blog/funasr-vs-whisper-benchmark.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+<url><loc>https://www.funasr.com/blog/funasr-speaker-diarization.html</loc><lastmod>2026-06-17</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.funasr.com/en/blog/funasr-speaker-diarization.html</loc><lastmod>2026-06-17</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.funasr.com/blog/sensevoice-emotion-language-detection.html</loc><lastmod>2026-06-17</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.funasr.com/en/blog/sensevoice-emotion-language-detection.html</loc><lastmod>2026-06-17</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.funasr.com/blog/funasr-realtime-streaming-asr.html</loc><lastmod>2026-06-17</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.funasr.com/en/blog/funasr-realtime-streaming-asr.html</loc><lastmod>2026-06-17</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.funasr.com/blog/funasr-transcribe-long-audio.html</loc><lastmod>2026-06-17</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.funasr.com/en/blog/funasr-transcribe-long-audio.html</loc><lastmod>2026-06-17</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.funasr.com/blog/funasr-cli-transcribe-command-line.html</loc><lastmod>2026-06-18</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.funasr.com/en/blog/funasr-cli-transcribe-command-line.html</loc><lastmod>2026-06-18</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.funasr.com/blog/self-hosted-openai-whisper-api-alternative.html</loc><lastmod>2026-06-18</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.funasr.com/en/blog/self-hosted-openai-whisper-api-alternative.html</loc><lastmod>2026-06-18</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.funasr.com/blog/generate-subtitles-srt-vtt-from-audio-video.html</loc><lastmod>2026-06-18</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.funasr.com/en/blog/generate-subtitles-srt-vtt-from-audio-video.html</loc><lastmod>2026-06-18</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.funasr.com/blog/speech-to-text-python-transcribe-audio.html</loc><lastmod>2026-06-18</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.funasr.com/en/blog/speech-to-text-python-transcribe-audio.html</loc><lastmod>2026-06-18</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://www.funasr.com/blog/funasr-llama-cpp-whisper-cpp-alternative.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://www.funasr.com/en/blog/funasr-llama-cpp-whisper-cpp-alternative.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://www.funasr.com/blog/funasr-vs-faster-whisper-chinese.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://www.funasr.com/en/blog/funasr-vs-faster-whisper-chinese.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://www.funasr.com/blog/cantonese-speech-recognition.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://www.funasr.com/en/blog/cantonese-speech-recognition.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://www.funasr.com/llama-cpp.html</loc><priority>0.9</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://www.funasr.com/en/llama-cpp.html</loc><priority>0.9</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://www.funasr.com/blog/lightweight-speech-recognition-cpu.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://www.funasr.com/en/blog/lightweight-speech-recognition-cpu.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://www.funasr.com/blog/which-funasr-model.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://www.funasr.com/en/blog/which-funasr-model.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://www.funasr.com/blog/self-hosted-deepgram-assemblyai-alternative.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://www.funasr.com/en/blog/self-hosted-deepgram-assemblyai-alternative.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://www.funasr.com/blog/japanese-speech-recognition.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://www.funasr.com/en/blog/japanese-speech-recognition.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://www.funasr.com/blog/voice-activity-detection-python.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://www.funasr.com/en/blog/voice-activity-detection-python.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://www.funasr.com/blog/self-hosted-google-aws-azure-speech-to-text.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://www.funasr.com/en/blog/self-hosted-google-aws-azure-speech-to-text.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://www.funasr.com/blog/chinese-speech-recognition.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://www.funasr.com/en/blog/chinese-speech-recognition.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://www.funasr.com/blog/punctuation-restoration-python.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://www.funasr.com/en/blog/punctuation-restoration-python.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://www.funasr.com/blog/speech-to-text-timestamps-python.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://www.funasr.com/en/blog/speech-to-text-timestamps-python.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+</urlset>

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>FunASR 离线文件转写</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f8fafc;color:#1e293b;min-height:100vh}
+.header{background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);color:white;padding:24px 0;text-align:center}
+.header h1{font-size:1.6rem;font-weight:700;margin-bottom:4px}
+.header p{font-size:0.88rem;opacity:0.75}
+.container{max-width:720px;margin:0 auto;padding:24px 16px}
+.card{background:white;border-radius:12px;padding:24px;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,0.06);border:1px solid #e2e8f0}
+.card h3{font-size:0.8rem;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px}
+input[type="text"],textarea{width:100%;padding:10px 14px;border:1px solid #d1d5db;border-radius:8px;font-size:0.9rem}
+input[type="text"]:focus,textarea:focus{outline:none;border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,0.1)}
+textarea{resize:vertical;min-height:70px}
+.radio-group{display:flex;gap:12px;flex-wrap:wrap;margin-top:6px}
+.radio-group label{display:flex;align-items:center;gap:6px;padding:8px 14px;border:1px solid #e2e8f0;border-radius:8px;font-size:0.88rem;cursor:pointer;transition:all 0.15s}
+.radio-group label:hover{border-color:#2563eb;background:#eff6ff}
+.btn-group{display:flex;gap:10px;margin-top:16px}
+button{padding:10px 20px;border:none;border-radius:8px;font-size:0.88rem;font-weight:600;cursor:pointer;transition:all 0.15s}
+#btnConnect{background:#f1f5f9;color:#475569;border:1px solid #d1d5db}
+#btnConnect:hover{background:#e2e8f0}
+#btnStart{background:#2563eb;color:white}
+#btnStart:hover{background:#1d4ed8}
+#btnStop{background:#ef4444;color:white}
+#btnStop:hover{background:#dc2626}
+.result-area{background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:16px;min-height:120px;font-size:0.92rem;line-height:1.7;white-space:pre-wrap;color:#334155}
+.status{font-size:0.8rem;color:#64748b;margin-top:8px}
+audio{width:100%;margin-top:12px;border-radius:8px}
+.footer{text-align:center;padding:20px;font-size:0.82rem;color:#94a3b8}
+.footer a{color:#2563eb;text-decoration:none}
+</style>
+</head>
+<body>
+<script src="recorder-core.js" charset="UTF-8"></script>
+<script src="wav.js" charset="UTF-8"></script>
+<script src="pcm.js" charset="UTF-8"></script>
+
+<div class="header">
+<h1>FunASR 离线文件转写</h1>
+<p>上传音频文件，获取完整转写结果</p>
+</div>
+
+<div class="container">
+<div class="card">
+<h3>服务器地址</h3>
+<input id="wssip" type="text" onchange="addresschange()" value="wss://www.funasr.com:10095/" placeholder="WebSocket 地址"/>
+<a id="wsslink" href="#" onclick="window.open('https://www.funasr.com:10095/','_blank')" style="display:inline-block;margin-top:6px;font-size:0.78rem;color:#2563eb"><span id="info_wslink">点击授权 WSS 连接</span></a>
+</div>
+
+<div class="card">
+<h3>输入方式</h3>
+<div class="radio-group">
+<label><input name="recoder_mode" onclick="on_recoder_mode_change()" type="radio" value="mic" checked/>🎤 麦克风</label>
+<label><input name="recoder_mode" onclick="on_recoder_mode_change()" type="radio" value="file"/>📁 文件</label>
+</div>
+</div>
+
+<div class="card" id="mic_mode_div">
+<h3>识别模式</h3>
+<div class="radio-group">
+<label><input name="asr_mode" type="radio" value="2pass" checked/>2Pass</label>
+<label><input name="asr_mode" type="radio" value="online"/>实时</label>
+<label><input name="asr_mode" type="radio" value="offline"/>离线</label>
+</div>
+</div>
+
+<div class="card" id="rec_mode_div" style="display:none">
+<h3>选择音频文件</h3>
+<input type="file" id="upfile" accept="audio/*"/>
+</div>
+
+<div class="card" id="use_itn_div">
+<h3>ITN (逆文本标准化)</h3>
+<div class="radio-group">
+<label><input name="use_itn" type="radio" value="false" checked/>关闭</label>
+<label><input name="use_itn" type="radio" value="true"/>开启</label>
+</div>
+</div>
+
+<div class="card">
+<h3>热词设置</h3>
+<textarea id="varHot" rows="2" placeholder="一行一个，空格隔开权重">阿里巴巴 20
+hello world 40</textarea>
+</div>
+
+<div class="card">
+<h3>识别结果</h3>
+<textarea id="varArea" rows="8" readonly placeholder="识别结果将显示在此处..." style="background:#f8fafc"></textarea>
+<div class="status" id="info_div">就绪 — 点击「连接」开始</div>
+<div class="btn-group">
+<button id="btnConnect">连接</button>
+<button id="btnStart">开始</button>
+<button id="btnStop">停止</button>
+</div>
+<audio id="audio_record" type="audio/wav" controls></audio>
+</div>
+
+<div class="footer">
+<a href="/">← 返回首页</a> · <a href="https://github.com/modelscope/FunASR" target="_blank">GitHub</a> · FunASR © Tongyi Lab
+</div>
+</div>
+
+<script src="wsconnecter.js" charset="utf-8"></script>
+<script src="main.js" charset="utf-8"></script>
+</body>
+</html>

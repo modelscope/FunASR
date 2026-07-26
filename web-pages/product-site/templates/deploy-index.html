@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="page-intro">
+  <div>
+    <p class="eyebrow">{{ '部署中心' if language == 'zh' else 'Deployment center' }}</p>
+    <h1>{{ '按业务约束选择运行时' if language == 'zh' else 'Choose a runtime from product constraints' }}</h1>
+    <p>{{ '每条路径都列出适用场景、验证版本、启动命令、生产责任和已知限制。' if language == 'zh' else 'Every path records fit, verified versions, startup commands, production responsibilities, and known limitations.' }}</p>
+  </div>
+  <dl class="intro-metrics">
+    <div><dt>{{ '部署路径' if language == 'zh' else 'Paths' }}</dt><dd>{{ deployments | length }}</dd></div>
+    <div><dt>{{ '语言' if language == 'zh' else 'Languages' }}</dt><dd>2</dd></div>
+    <div><dt>{{ '验证日期' if language == 'zh' else 'Verified' }}</dt><dd>{{ verified }}</dd></div>
+  </dl>
+</section>
+<section class="section deploy-grid" aria-label="{{ '部署路径' if language == 'zh' else 'Deployment paths' }}">
+  {% for item in deployments %}
+  <article class="deployment-card">
+    <div class="card-topline">
+      <span class="status status-{{ item.maturity }}">{{ item.translations[language].status_label }}</span>
+      <span>{{ item.tested.verified }}</span>
+    </div>
+    <h2><a href="{{ item.routes[language] }}">{{ item.translations[language].name }}</a></h2>
+    <p>{{ item.translations[language].summary }}</p>
+    <dl>
+      <div><dt>{{ '硬件' if language == 'zh' else 'Hardware' }}</dt><dd>{{ item.hardware | join(' / ') }}</dd></div>
+      <div><dt>{{ '模型' if language == 'zh' else 'Models' }}</dt><dd>{{ item.models[:2] | join(' / ') }}</dd></div>
+    </dl>
+    <div class="card-limitation">
+      <strong>{{ '限制' if language == 'zh' else 'Limitation' }}</strong>
+      <p>{{ item.translations[language].primary_limitation }}</p>
+    </div>
+    <a class="text-link" href="{{ item.routes[language] }}">{{ '查看部署合同' if language == 'zh' else 'View deployment contract' }} <img src="{{ assets['lucide/arrow-right.svg'] }}" alt=""></a>
+  </article>
+  {% endfor %}
+</section>
+{% endblock %}

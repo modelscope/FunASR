@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="page-intro benchmark-intro">
+  <div>
+    <p class="eyebrow">{{ '可复现实测' if language == 'zh' else 'Reproducible measurements' }}</p>
+    <h1>{{ '先比较实验条件，再比较结果' if language == 'zh' else 'Compare test conditions before results' }}</h1>
+    <p>{{ '这里保留公开结果的上下文和缺失项，帮助团队建立自己的容量基线。' if language == 'zh' else 'This page preserves the context and missing fields of public results so teams can establish their own capacity baseline.' }}</p>
+  </div>
+  <dl class="intro-metrics">
+    <div><dt>{{ '记录' if language == 'zh' else 'Records' }}</dt><dd>{{ benchmarks | length }}</dd></div>
+    <div><dt>{{ '验证日期' if language == 'zh' else 'Verified' }}</dt><dd>{{ verified }}</dd></div>
+  </dl>
+</section>
+
+<section class="section benchmark-method">
+  <div class="benchmark-warning" data-benchmark-warning>
+    <strong>{{ '不可直接横向比较' if language == 'zh' else 'Not directly comparable' }}</strong>
+    <p>{{ 'RTFx 会随硬件、音频分布、VAD、并发、预热和计时边界变化。缺少任一条件的结果不能作为采购或容量承诺。' if language == 'zh' else 'RTFx changes with hardware, audio distribution, VAD, concurrency, warmup, and timing boundaries. A result missing any condition is not a procurement or capacity promise.' }}</p>
+  </div>
+  <div class="method-grid">
+    <div><span>1</span><h2>{{ '固定输入' if language == 'zh' else 'Fix inputs' }}</h2><p>{{ '记录音频总时长、文件分布、语言、声道和采样率。' if language == 'zh' else 'Record total duration, file distribution, language, channels, and sample rate.' }}</p></div>
+    <div><span>2</span><h2>{{ '固定系统' if language == 'zh' else 'Fix system' }}</h2><p>{{ '记录 CPU/GPU、驱动、模型、提交、运行时和所有参数。' if language == 'zh' else 'Record CPU/GPU, driver, model, commit, runtime, and every parameter.' }}</p></div>
+    <div><span>3</span><h2>{{ '定义计时' if language == 'zh' else 'Define timing' }}</h2><p>{{ '说明是否包含加载、预热、I/O、排队和后处理。' if language == 'zh' else 'State whether loading, warmup, I/O, queueing, and post-processing are included.' }}</p></div>
+  </div>
+</section>
+
+<section class="section benchmark-results" aria-label="{{ '公开基准记录' if language == 'zh' else 'Public benchmark records' }}">
+  <div class="section-heading compact-heading">
+    <p class="eyebrow">{{ '公开记录' if language == 'zh' else 'Public records' }}</p>
+    <h2>{{ '带完整限定条件阅读每一个数字' if language == 'zh' else 'Read every number with its qualifications' }}</h2>
+  </div>
+  <div class="benchmark-list">
+    {% for record in benchmarks %}
+    <article class="benchmark-record" data-benchmark-record>
+      <div class="benchmark-record-heading">
+        <div><p>{{ record.deployment_name }}</p><h3>{{ record.model }}</h3></div>
+        <strong class="benchmark-result">{{ record.result }}</strong>
+      </div>
+      <dl class="benchmark-fields">
+        <div><dt>{{ '运行时' if language == 'zh' else 'Runtime' }}</dt><dd>{{ record.runtime }}</dd></div>
+        <div data-field="benchmark-hardware"><dt>{{ '硬件' if language == 'zh' else 'Hardware' }}</dt><dd>{{ record.hardware }}</dd></div>
+        <div><dt>{{ '负载' if language == 'zh' else 'Workload' }}</dt><dd>{{ record.workload }}</dd></div>
+        <div><dt>{{ '音频' if language == 'zh' else 'Audio' }}</dt><dd>{{ record.audio }}</dd></div>
+        <div data-field="benchmark-settings"><dt>{{ '设置' if language == 'zh' else 'Settings' }}</dt><dd>{{ record.settings }}</dd></div>
+        <div data-field="benchmark-timing"><dt>{{ '计时口径' if language == 'zh' else 'Timing scope' }}</dt><dd>{{ record.timing_scope }}</dd></div>
+        <div><dt>{{ '核对日期' if language == 'zh' else 'Verified' }}</dt><dd>{{ record.verified }}</dd></div>
+      </dl>
+      <p class="benchmark-qualification" data-field="benchmark-qualification"><strong>{{ '限定：' if language == 'zh' else 'Qualification: ' }}</strong>{{ record.qualification }}</p>
+      <a class="text-link" data-field="benchmark-source" href="{{ record.source }}">{{ '查看原始来源' if language == 'zh' else 'Open primary source' }} <img src="{{ assets['lucide/arrow-right.svg'] }}" alt=""></a>
+    </article>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="section realtime-method">
+  <div class="section-heading compact-heading">
+    <p class="eyebrow">{{ '实时服务' if language == 'zh' else 'Realtime services' }}</p>
+    <h2>{{ '流式容量需要单独测量' if language == 'zh' else 'Streaming capacity needs a separate test' }}</h2>
+    <p>{{ '文件吞吐不能说明首稿延迟、最终结果延迟、长连接并发和背压。使用实时 WebSocket 方法记录这些指标。' if language == 'zh' else 'File throughput does not describe draft latency, final latency, long-lived connection concurrency, or backpressure. Use the realtime WebSocket method to record them.' }}</p>
+  </div>
+  <a class="button button-secondary" href="https://github.com/modelscope/FunASR/blob/main/docs/benchmark/realtime_ws_benchmark.md">{{ '实时测试方法' if language == 'zh' else 'Realtime test method' }}</a>
+  <a class="button button-secondary" href="https://github.com/modelscope/FunASR/blob/main/docs/benchmark/rtf_reproducibility.md">{{ '离线 RTFx 方法' if language == 'zh' else 'Offline RTFx method' }}</a>
+</section>
+{% endblock %}

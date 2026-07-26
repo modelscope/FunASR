@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Transcribe Long Audio with FunASR: Hours in a Single Call | FunASR</title><meta name="description" content="Whisper processes only 30s at a time, so a 1-hour file means manual chunking and stitching. FunASR has built-in VAD: a single generate() call ingests audio of any length - tested 13.2 min transcribed in 4.3s (186x realtime). Runnable code + long-audio best practices."><meta name="keywords" content="transcribe long audio, long audio transcription, whisper 30 second limit, transcribe 1 hour audio, podcast transcription, meeting transcription, FunASR, audio to text python">
+<link rel="icon" href="/logo.png"><meta property="og:title" content="Transcribe Long Audio with FunASR: Hours in a Single Call"><meta property="og:description" content="Whisper processes only 30s at a time, so a 1-hour file means manual chunking and stitching. FunASR has built-in VAD: a single generate() call ingests audio of any length - tested 13.2 min transcribed in 4.3s (186x realtime). Runnable code + long-audio best practices.">
+<meta property="og:type" content="article"><meta property="og:url" content="https://www.funasr.com/en/blog/funasr-transcribe-long-audio.html"><meta property="og:image" content="https://www.funasr.com/logo.png">
+<link rel="canonical" href="https://www.funasr.com/en/blog/funasr-transcribe-long-audio.html"><link rel="alternate" hreflang="en" href="https://www.funasr.com/en/blog/funasr-transcribe-long-audio.html"><link rel="alternate" hreflang="zh" href="https://www.funasr.com/blog/funasr-transcribe-long-audio.html"><link rel="alternate" hreflang="x-default" href="https://www.funasr.com/en/blog/funasr-transcribe-long-audio.html">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","headline":"Transcribe Long Audio with FunASR: Hours in a Single Call","description":"Whisper processes only 30s at a time, so a 1-hour file means manual chunking and stitching. FunASR has built-in VAD: a single generate() call ingests audio of any length - tested 13.2 min transcribed in 4.3s (186x realtime). Runnable code + long-audio best practices.","datePublished":"2026-06-17","dateModified":"2026-06-17","author":{"@type":"Organization","name":"FunASR / Tongyi Lab"},"publisher":{"@type":"Organization","name":"FunASR","logo":{"@type":"ImageObject","url":"https://www.funasr.com/logo.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://www.funasr.com/en/blog/funasr-transcribe-long-audio.html"},"image":"https://www.funasr.com/logo.png"}
+</script>
+<style>:root{--primary:#2563eb;--primary-dark:#1d4ed8;--bg:#fff;--surface:#f8fafc;--border:#e2e8f0;--text:#0f172a;--text-soft:#475569;--text-muted:#94a3b8;--radius:12px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',-apple-system,sans-serif;color:var(--text);line-height:1.7}
+a{color:var(--primary);text-decoration:none}a:hover{text-decoration:underline}
+.container{max-width:800px;margin:0 auto;padding:0 24px}
+.nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(255,255,255,0.9);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:14px 0}
+.nav .container{max-width:1120px;display:flex;align-items:center;gap:24px}
+.nav-logo{font-size:1.2rem;font-weight:800;color:var(--text)}.nav-logo span{color:var(--primary)}
+.nav-links{display:flex;gap:20px;margin-left:auto;flex-wrap:wrap}
+.nav-links a{font-size:0.85rem;font-weight:500;color:var(--text-soft)}
+.nav-btn{padding:7px 16px;background:var(--primary);color:#fff;border-radius:7px;font-size:0.83rem;font-weight:600}
+article{padding:120px 0 80px}
+h1{font-size:2rem;font-weight:800;line-height:1.3;margin-bottom:14px}
+h2{font-size:1.3rem;font-weight:700;margin:36px 0 14px;padding-top:16px;border-top:1px solid var(--border)}
+h3{font-size:1.05rem;font-weight:700;margin:22px 0 10px}
+p{margin-bottom:14px;color:var(--text-soft)}
+ul,ol{margin:0 0 14px 22px;color:var(--text-soft)}li{margin-bottom:6px}
+table{width:100%;border-collapse:collapse;margin:16px 0;font-size:0.86rem}
+th,td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--border)}
+th{font-weight:600;background:var(--surface);font-size:0.78rem;color:var(--text-muted)}
+pre{background:#1e293b;color:#e2e8f0;padding:18px;border-radius:10px;overflow-x:auto;font-size:0.82rem;line-height:1.7;margin:14px 0}
+code{font-family:ui-monospace,Menlo,monospace}
+p code,li code{background:var(--surface);padding:2px 6px;border-radius:5px;font-size:0.85em;color:var(--primary-dark)}
+.post-meta{color:var(--text-muted);font-size:0.85rem;margin-bottom:24px}
+.cta{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin:28px 0;text-align:center}
+.cta a.btn{display:inline-block;padding:10px 24px;background:var(--primary);color:#fff;border-radius:8px;font-weight:600}
+.post-list{list-style:none;margin:0;padding:0}
+.post-list li{margin:0 0 8px}
+.post-card{display:block;border:1px solid var(--border);border-radius:var(--radius);padding:20px 22px;margin-bottom:14px}
+.post-card:hover{border-color:var(--primary);text-decoration:none}
+.post-card h2{border:none;padding:0;margin:0 0 6px;font-size:1.15rem;color:var(--text)}
+.post-card p{margin:0;color:var(--text-soft);font-size:0.9rem}
+.post-card .date{color:var(--text-muted);font-size:0.8rem}
+footer{background:#0f172a;color:#94a3b8;padding:28px 0;text-align:center;font-size:0.8rem}
+footer a{color:#94a3b8}</style></head><body>
+<nav class="nav"><div class="container"><a href="/" class="nav-logo">Fun<span>ASR</span></a><div class="nav-links"><a href="/en/#capabilities">Capabilities</a><a href="/en/#usage">How to Use</a><a href="/en/#benchmark">Benchmark</a><a href="/en/#demo">Demo</a><a href="https://modelscope.github.io/FunASR/" target="_blank">Docs</a><a href="/en/quickstart.html">Quickstart</a><a href="/en/models.html">Models</a><a href="/en/ecosystem.html">Ecosystem</a><a href="/en/blog/">Blog</a><a href="/en/vs-whisper.html">vs Whisper</a><a href="/en/donors.html">Donors</a></div><a href="https://www.funasr.com/blog/funasr-transcribe-long-audio.html" style="font-size:0.83rem;font-weight:600;color:var(--text-soft)">中文</a><a href="https://github.com/modelscope/FunASR" target="_blank" class="nav-btn">GitHub ★</a></div></nav>
+<article><div class="container">
+<h1>Transcribe Long Audio with FunASR: Hours in a Single Call</h1>
+<p class="post-meta">FunASR Blog · 2026-06-17 · Tutorial</p>
+<p>Transcribing a 1-hour podcast, lecture or meeting with Whisper is painful: it processes only <strong>30 seconds</strong> at a time, so you have to chunk the audio, transcribe each piece, and stitch the results back together - while handling words cut off at chunk boundaries.</p>
+<p><strong>FunASR makes this trivial.</strong> With built-in VAD (voice activity detection), a single <code>generate()</code> call ingests audio of <strong>any length</strong> - it segments, batch-decodes and reassembles the full text for you, with zero chunking code.</p>
+<h2>Install</h2>
+<pre><code>pip install -U funasr modelscope</code></pre>
+<h2>Full, runnable code</h2>
+<pre><code>from funasr import AutoModel
+
+model = AutoModel(
+    model="iic/SenseVoiceSmall",   # or "paraformer-zh"
+    vad_model="fsmn-vad",          # built-in voice activity detection
+    vad_kwargs={"max_single_segment_time": 30000},
+)
+
+# One call on a full 1-hour file - VAD segments and batches it internally.
+res = model.generate(
+    input="podcast_1hour.wav",
+    batch_size_s=300,   # dynamic batching of VAD segments (throughput)
+)
+print(res[0]["text"])</code></pre>
+<h2>Tested: 13 minutes transcribed in 4.3s</h2>
+<pre><code>long clip: 791s = 13.2 min
+transcribed 791s in 4.3s -> RTFx=186
+output chars: 2104   # full transcript, head to tail</code></pre>
+<p>We fed a <strong>13.2-minute (791s)</strong> recording into a single <code>generate()</code> call - done in <strong>4.3s (186x realtime)</strong>, with output covering the full file head to tail. A 1-hour file works exactly the same way, no code changes.</p>
+<h2>Why it handles any length</h2>
+<ul>
+<li><strong>VAD auto-segmentation</strong>: <code>fsmn-vad</code> splits the long audio into speech segments at pauses; <code>max_single_segment_time</code> caps the longest segment.</li>
+<li><strong>Dynamic batching</strong>: <code>batch_size_s=300</code> packs segments by total duration for high-throughput decoding.</li>
+<li><strong>Bounded memory</strong>: because it processes segments, GPU memory is <strong>independent of total file length</strong> - 1 hour uses about as much as 1 minute.</li>
+</ul>
+<h2>Going further</h2>
+<ul>
+<li>Add <code>punc_model="ct-punc"</code> for automatic punctuation;</li>
+<li>Add <code>spk_model="cam++"</code> for <a href="/en/blog/funasr-speaker-diarization.html">speaker diarization</a> (who spoke when);</li>
+<li>Use <code>SenseVoiceSmall</code> for <a href="/en/blog/sensevoice-emotion-language-detection.html">language & emotion</a>; for max speed see the <a href="/en/blog/funasr-vs-whisper-benchmark.html">benchmark</a>.</li>
+</ul>
+<h2>Typical use cases</h2>
+<ul>
+<li><strong>Podcasts / audiobooks</strong>: transcribe a whole episode at once.</li>
+<li><strong>Meetings / lectures</strong>: batch long recordings to text + archive/search.</li>
+<li><strong>Call recordings</strong>: full-call transcription for QA and mining.</li>
+</ul>
+<div class="cta"><p>FunASR is Tongyi Lab's open-source, industrial-grade speech recognition toolkit - long audio, streaming and multilingual all covered.</p><a class="btn" href="https://github.com/modelscope/FunASR" target="_blank">Star FunASR on GitHub ★</a></div>
+<!--related-posts-->
+<h2>Related posts</h2>
+<ul class="post-list">
+<li><a href="/en/blog/funasr-vs-whisper-benchmark.html">FunASR vs Whisper Benchmark</a></li>
+<li><a href="/en/blog/sensevoice-deployment-guide.html">SenseVoice Deployment Guide</a></li>
+<li><a href="/en/blog/fun-asr-nano-guide.html">Fun-ASR-Nano Guide</a></li>
+<li><a href="/en/blog/funasr-speaker-diarization.html">Speaker Diarization: Who Spoke When</a></li>
+<li><a href="/en/blog/sensevoice-emotion-language-detection.html">Emotion & Language Detection</a></li>
+<li><a href="/en/blog/funasr-realtime-streaming-asr.html">Real-Time Streaming Speech-to-Text</a></li>
+<li><a href="/en/blog/funasr-cli-transcribe-command-line.html">Transcribe from the Command Line</a></li>
+<li><a href="/en/blog/self-hosted-openai-whisper-api-alternative.html">Self-Hosted OpenAI Whisper API Alternative</a></li>
+<li><a href="/en/blog/generate-subtitles-srt-vtt-from-audio-video.html">Auto-Generate Subtitles (SRT / VTT)</a></li>
+<li><a href="/en/blog/speech-to-text-python-transcribe-audio.html">Speech to Text in Python</a></li>
+<li><a href="/en/blog/funasr-llama-cpp-whisper-cpp-alternative.html">FunASR on llama.cpp (whisper.cpp Alternative)</a></li>
+<li><a href="/en/blog/funasr-vs-faster-whisper-chinese.html">FunASR vs faster-whisper (Chinese/Cantonese)</a></li>
+<li><a href="/en/blog/lightweight-speech-recognition-cpu.html">Lightweight Speech Recognition on CPU</a></li>
+<li><a href="/en/blog/self-hosted-deepgram-assemblyai-alternative.html">Self-Hosted Deepgram/AssemblyAI Alternative</a></li>
+<li><a href="/en/blog/which-funasr-model.html">Which FunASR Model?</a></li>
+<li><a href="/en/blog/cantonese-speech-recognition.html">Cantonese Speech Recognition (SenseVoice)</a></li>
+<li><a href="/en/blog/japanese-speech-recognition.html">Japanese Speech Recognition (SenseVoice)</a></li>
+<li><a href="/en/blog/voice-activity-detection-python.html">Voice Activity Detection in Python</a></li>
+<li><a href="/en/blog/self-hosted-google-aws-azure-speech-to-text.html">Self-Hosted Google/AWS/Azure STT Alternative</a></li>
+<li><a href="/en/blog/chinese-speech-recognition.html">Chinese Speech Recognition in Python</a></li>
+<li><a href="/en/blog/punctuation-restoration-python.html">Punctuation Restoration in Python</a></li>
+<li><a href="/en/blog/speech-to-text-timestamps-python.html">Speech-to-Text with Timestamps in Python</a></li>
+</ul>
+</div></article>
+<footer><div class="container">FunASR · Open-source speech recognition by Tongyi Lab · <a href="https://github.com/modelscope/FunASR">GitHub</a></div></footer>
+</body></html>

@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="hero" data-section="hero">
+  <img class="hero-image" src="{{ assets['images/deployment-topology.png'] }}" alt="{{ '连接 GPU、CPU、边缘设备和 API 客户端的私有部署拓扑' if language == 'zh' else 'Private deployment topology connecting GPU, CPU, edge devices, and API clients' }}">
+  <div class="hero-shade" aria-hidden="true"></div>
+  <div class="hero-content">
+    <p class="eyebrow">{{ '开源语音基础设施' if language == 'zh' else 'Open speech infrastructure' }}</p>
+    <h1>FunASR</h1>
+    <p class="hero-copy">
+      {{ '可私有化部署的语音智能基础设施。覆盖 GPU 高吞吐、实时流式服务、OpenAI 兼容 API，以及 CPU 与边缘独立运行。' if language == 'zh' else 'Private-deployment speech infrastructure for high-throughput GPU inference, realtime streaming, OpenAI-compatible APIs, and standalone CPU or edge use.' }}
+    </p>
+    <div class="hero-actions">
+      <a class="button button-primary" href="#deployment-selector">
+        {{ '选择部署方案' if language == 'zh' else 'Choose a deployment' }}
+        <img src="{{ assets['lucide/arrow-right.svg'] }}" alt="">
+      </a>
+      <a class="button button-secondary" href="{{ '/quickstart.html' if language == 'zh' else '/en/quickstart.html' }}">
+        <img src="{{ assets['lucide/terminal.svg'] }}" alt="">
+        {{ '5 分钟验证' if language == 'zh' else 'Verify in five minutes' }}
+      </a>
+    </div>
+    <dl class="hero-proof">
+      <div><dt>{{ '许可' if language == 'zh' else 'License' }}</dt><dd>Apache-2.0</dd></div>
+      <div><dt>{{ '接口' if language == 'zh' else 'API' }}</dt><dd>OpenAI compatible</dd></div>
+      <div><dt>{{ '验证日期' if language == 'zh' else 'Verified' }}</dt><dd>{{ verified }}</dd></div>
+    </dl>
+  </div>
+</section>
+
+<section id="deployment-selector" class="section selector-section" data-section="deployment-selector">
+  <div class="section-heading">
+    <p class="eyebrow">{{ '部署选择器' if language == 'zh' else 'Deployment selector' }}</p>
+    <h2>{{ '从工作负载开始，不从框架名开始' if language == 'zh' else 'Start with the workload, not a framework name' }}</h2>
+    <p>{{ '选择业务形态、硬件和首要目标，得到一条有明确限制的推荐路径。' if language == 'zh' else 'Choose the workload, hardware, and primary goal to get one recommendation with an explicit limitation.' }}</p>
+  </div>
+  <form class="selector" data-deployment-selector>
+    <fieldset>
+      <legend>{{ '工作负载' if language == 'zh' else 'Workload' }}</legend>
+      <div class="segments" data-selector-group="workload">
+        <button type="button" data-value="batch" aria-pressed="true">{{ '文件批量' if language == 'zh' else 'File batch' }}</button>
+        <button type="button" data-value="realtime" aria-pressed="false">{{ '实时流' if language == 'zh' else 'Realtime' }}</button>
+        <button type="button" data-value="private-api" aria-pressed="false">{{ '私有 API' if language == 'zh' else 'Private API' }}</button>
+        <button type="button" data-value="edge" aria-pressed="false">{{ '边缘应用' if language == 'zh' else 'Edge app' }}</button>
+      </div>
+    </fieldset>
+    <fieldset>
+      <legend>{{ '硬件' if language == 'zh' else 'Hardware' }}</legend>
+      <div class="segments" data-selector-group="hardware">
+        <button type="button" data-value="nvidia-gpu" aria-pressed="true">NVIDIA GPU</button>
+        <button type="button" data-value="cpu" aria-pressed="false">CPU</button>
+        <button type="button" data-value="desktop-edge-gpu" aria-pressed="false">{{ '桌面 / 边缘 GPU' if language == 'zh' else 'Desktop / edge GPU' }}</button>
+        <button type="button" data-value="kubernetes" aria-pressed="false">Kubernetes</button>
+      </div>
+    </fieldset>
+    <fieldset>
+      <legend>{{ '优先目标' if language == 'zh' else 'Priority' }}</legend>
+      <div class="segments" data-selector-group="priority">
+        <button type="button" data-value="throughput" aria-pressed="true">{{ '吞吐' if language == 'zh' else 'Throughput' }}</button>
+        <button type="button" data-value="latency" aria-pressed="false">{{ '延迟' if language == 'zh' else 'Latency' }}</button>
+        <button type="button" data-value="portability" aria-pressed="false">{{ '可移植' if language == 'zh' else 'Portability' }}</button>
+        <button type="button" data-value="compatibility" aria-pressed="false">{{ '兼容性' if language == 'zh' else 'Compatibility' }}</button>
+      </div>
+    </fieldset>
+  </form>
+  <article class="selector-result" data-selector-result aria-live="polite">
+    <div>
+      <p class="status status-community" data-result-status>{{ '推荐路径' if language == 'zh' else 'Recommended path' }}</p>
+      <h3 data-result-name></h3>
+      <p data-result-reason></p>
+    </div>
+    <div class="limitation">
+      <strong>{{ '首要限制' if language == 'zh' else 'Primary limitation' }}</strong>
+      <p data-result-limitation></p>
+    </div>
+    <a class="button button-primary" data-result-link href="{{ '/deploy/vllm.html' if language == 'zh' else '/en/deploy/vllm.html' }}">
+      {{ '查看部署步骤' if language == 'zh' else 'Open deployment guide' }}
+      <img src="{{ assets['lucide/arrow-right.svg'] }}" alt="">
+    </a>
+  </article>
+  <script type="application/json" id="deployment-selector-data">{{ selector_payload | tojson }}</script>
+</section>
+
+<section class="section matrix-section" data-section="deployment-matrix">
+  <div class="section-heading compact-heading">
+    <p class="eyebrow">{{ '完整矩阵' if language == 'zh' else 'Full matrix' }}</p>
+    <h2>{{ '无 JavaScript 也能完成选择' if language == 'zh' else 'The full decision path works without JavaScript' }}</h2>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr>
+        <th>{{ '方案' if language == 'zh' else 'Path' }}</th>
+        <th>{{ '工作负载' if language == 'zh' else 'Workload' }}</th>
+        <th>{{ '硬件' if language == 'zh' else 'Hardware' }}</th>
+        <th>{{ '接口' if language == 'zh' else 'Interface' }}</th>
+        <th>{{ '状态' if language == 'zh' else 'Status' }}</th>
+      </tr></thead>
+      <tbody>
+      {% for item in deployments %}
+        <tr>
+          <td><a href="{{ item.routes[language] }}">{{ item.translations[language].name }}</a></td>
+          <td>{{ item.workloads | join(' / ') }}</td>
+          <td>{{ item.hardware | join(' / ') }}</td>
+          <td>{{ item.interfaces[:2] | join(' / ') }}</td>
+          <td><span class="status status-{{ item.maturity }}">{{ item.translations[language].status_label }}</span></td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="section api-section" data-section="api-contract">
+  <div class="section-heading">
+    <p class="eyebrow">{{ '可验证接口' if language == 'zh' else 'Inspectable API contract' }}</p>
+    <h2>{{ '先验证服务，再接入客户端' if language == 'zh' else 'Verify the service before integrating a client' }}</h2>
+    <p>{{ '健康、模型身份和真实转写是三个独立检查。' if language == 'zh' else 'Health, model identity, and real transcription are three separate checks.' }}</p>
+  </div>
+  <div class="terminal" aria-label="{{ 'OpenAI 兼容 API 验证命令' if language == 'zh' else 'OpenAI-compatible API verification commands' }}">
+    <div class="terminal-bar"><span></span><span></span><span></span><strong>localhost:8000</strong></div>
+    <pre><code><span class="prompt">$</span> curl -fsS http://localhost:8000/health
+{"status":"ok"}
+
+<span class="prompt">$</span> curl -fsS http://localhost:8000/v1/models
+{"data":[{"id":"sensevoice"}]}
+
+<span class="prompt">$</span> curl http://localhost:8000/v1/audio/transcriptions \
+  -F file=@meeting.wav -F model=sensevoice</code></pre>
+    <button class="icon-button copy-button" type="button" data-copy-target=".terminal pre" title="{{ '复制命令' if language == 'zh' else 'Copy commands' }}">
+      <img src="{{ assets['lucide/copy.svg'] }}" alt="">
+    </button>
+  </div>
+</section>
+
+<section class="section readiness-section">
+  <div class="section-heading compact-heading">
+    <p class="eyebrow">{{ '生产边界' if language == 'zh' else 'Production boundary' }}</p>
+    <h2>{{ '运行时负责推理，平台负责暴露方式' if language == 'zh' else 'The runtime serves inference; the platform controls exposure' }}</h2>
+  </div>
+  <div class="responsibility-grid">
+    <div>
+      <img src="{{ assets['lucide/activity.svg'] }}" alt="">
+      <h3>{{ 'FunASR 原生' if language == 'zh' else 'Native FunASR' }}</h3>
+      <p>{{ '模型加载、转写接口、时间戳、VAD、流式协议和运行时日志。' if language == 'zh' else 'Model loading, transcription, timestamps, VAD, streaming protocols, and runtime logs.' }}</p>
+    </div>
+    <div>
+      <img src="{{ assets['lucide/shield-check.svg'] }}" alt="">
+      <h3>{{ '网关与平台' if language == 'zh' else 'Gateway and platform' }}</h3>
+      <p>{{ 'TLS、认证、租户配额、限流、审计、上传策略、监控和滚动发布。' if language == 'zh' else 'TLS, authentication, tenant quotas, rate limits, audit, upload policy, monitoring, and rollout.' }}</p>
+    </div>
+    <div>
+      <img src="{{ assets['lucide/gauge.svg'] }}" alt="">
+      <h3>{{ '上线证据' if language == 'zh' else 'Release evidence' }}</h3>
+      <p>{{ '目标硬件的容量测试、已知音频 smoke test、版本清单和可执行回滚。' if language == 'zh' else 'Target-hardware capacity tests, known-audio smoke tests, version manifests, and executable rollback.' }}</p>
+    </div>
+  </div>
+</section>
+
+<section class="section final-cta">
+  <div>
+    <p class="eyebrow">{{ '下一步' if language == 'zh' else 'Next step' }}</p>
+    <h2>{{ '选择一条路径，完成第一次可复现验证' if language == 'zh' else 'Choose one path and complete the first reproducible verification' }}</h2>
+  </div>
+  <div class="hero-actions">
+    <a class="button button-primary" href="{{ '/deploy/' if language == 'zh' else '/en/deploy/' }}">{{ '进入部署中心' if language == 'zh' else 'Open deployment center' }}</a>
+    <a class="button button-secondary" href="{{ github_url }}">GitHub</a>
+  </div>
+</section>
+{% endblock %}

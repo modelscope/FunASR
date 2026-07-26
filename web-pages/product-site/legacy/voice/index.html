@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>FunASR 语音输入 - 免费在线语音转文字</title>
+<meta name="description" content="免费在线语音输入工具，基于 FunASR 开源语音识别。支持中英日韩粤语，一键录音转文字，无需安装。">
+<link rel="icon" href="../logo.png">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f8fafc;color:#0f172a;min-height:100vh;display:flex;flex-direction:column;align-items:center}
+.header{width:100%;background:#fff;border-bottom:1px solid #e2e8f0;padding:16px 24px;display:flex;align-items:center;gap:16px}
+.header a.logo{font-size:1.2rem;font-weight:800;color:#0f172a;text-decoration:none}
+.header a.logo span{color:#2563eb}
+.header-links{margin-left:auto;display:flex;gap:16px;font-size:0.85rem}
+.header-links a{color:#64748b;text-decoration:none}
+.header-links a:hover{color:#2563eb}
+.main{flex:1;width:100%;max-width:700px;padding:40px 24px}
+h1{font-size:1.8rem;font-weight:800;text-align:center;margin-bottom:8px}
+.subtitle{text-align:center;color:#64748b;font-size:0.95rem;margin-bottom:32px}
+.recorder{display:flex;flex-direction:column;align-items:center;gap:20px}
+.btn-record{width:80px;height:80px;border-radius:50%;border:none;background:#2563eb;color:white;font-size:1.5rem;cursor:pointer;transition:all 0.2s;box-shadow:0 4px 14px rgba(37,99,235,0.3)}
+.btn-record:hover{transform:scale(1.05);background:#1d4ed8}
+.btn-record.recording{background:#ef4444;animation:pulse 1.5s infinite;box-shadow:0 4px 14px rgba(239,68,68,0.4)}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+.status{font-size:0.88rem;color:#64748b;min-height:24px}
+.result-container{width:100%;margin-top:24px;position:relative}
+.result-box{width:100%;background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:20px;min-height:120px;font-size:1rem;line-height:1.8;white-space:pre-wrap}
+.result-box:empty::before{content:'录音结果将显示在这里...';color:#94a3b8}
+.actions{display:flex;gap:8px;margin-top:12px;justify-content:flex-end}
+.actions button{padding:8px 16px;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:6px;font-size:0.82rem;cursor:pointer;color:#475569}
+.actions button:hover{background:#e2e8f0}
+.tips{margin-top:24px;padding:16px;background:#eff6ff;border-radius:8px;font-size:0.85rem;color:#1e40af}
+.tips strong{display:block;margin-bottom:4px}
+.footer{width:100%;padding:24px;text-align:center;font-size:0.8rem;color:#94a3b8;border-top:1px solid #e2e8f0;margin-top:40px}
+.footer a{color:#64748b}
+.lang-select{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.lang-select button{padding:6px 14px;border:1px solid #e2e8f0;border-radius:6px;background:#fff;font-size:0.82rem;cursor:pointer;color:#475569}
+.lang-select button.active{background:#2563eb;color:#fff;border-color:#2563eb}
+</style>
+</head>
+<body>
+<div class="header">
+<a href="../" class="logo">Fun<span>ASR</span></a>
+<div class="header-links">
+<a href="../">首页</a>
+<a href="https://github.com/modelscope/FunASR" target="_blank">GitHub ★</a>
+</div>
+</div>
+
+<div class="main">
+<h1>语音输入</h1>
+<p class="subtitle">点击录音，自动转为文字。基于 FunASR 开源引擎，完全免费。</p>
+
+<div class="recorder">
+<div class="lang-select">
+<button class="active" data-lang="auto">自动检测</button>
+<button data-lang="zh">中文</button>
+<button data-lang="en">English</button>
+<button data-lang="ja">日本語</button>
+<button data-lang="ko">한국어</button>
+</div>
+<button class="btn-record" id="btnRecord">🎤</button>
+<div class="status" id="status">点击麦克风开始录音</div>
+</div>
+
+<div class="result-container">
+<div class="result-box" id="result"></div>
+<div class="actions">
+<button onclick="copyResult()">📋 复制</button>
+<button onclick="clearResult()">🗑️ 清空</button>
+</div>
+</div>
+
+<div class="tips">
+<strong>使用提示</strong>
+• 首次使用需授权麦克风权限<br>
+• 支持中文、英文、日语、韩语、粤语<br>
+• 录音结束后自动识别，通常 2-3 秒出结果<br>
+• 基于 FunASR SenseVoice 模型，GPU 加速<br>
+• 开源免费，可本地部署：<code>pip install funasr && funasr-server</code>
+</div>
+</div>
+
+<div class="footer">
+<p>Powered by <a href="https://github.com/modelscope/FunASR">FunASR</a> (16K+ ⭐) · 开源免费 MIT · <a href="https://github.com/modelscope/FunASR">Star on GitHub</a></p>
+</div>
+
+<script>
+const btnRecord = document.getElementById('btnRecord');
+const statusEl = document.getElementById('status');
+const resultEl = document.getElementById('result');
+let mediaRecorder = null;
+let audioChunks = [];
+let isRecording = false;
+
+document.querySelectorAll('.lang-select button').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.lang-select button').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+    });
+});
+
+btnRecord.addEventListener('click', async () => {
+    if (!isRecording) {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            mediaRecorder = new MediaRecorder(stream);
+            audioChunks = [];
+            mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) audioChunks.push(e.data); };
+            mediaRecorder.onstop = async () => {
+                stream.getTracks().forEach(t => t.stop());
+                const blob = new Blob(audioChunks, { type: mediaRecorder.mimeType });
+                await transcribe(blob);
+            };
+            mediaRecorder.start();
+            isRecording = true;
+            btnRecord.classList.add('recording');
+            btnRecord.textContent = '⏹';
+            statusEl.textContent = '录音中... 再次点击停止';
+        } catch (err) {
+            statusEl.textContent = '无法访问麦克风，请授权后重试';
+        }
+    } else {
+        mediaRecorder.stop();
+        isRecording = false;
+        btnRecord.classList.remove('recording');
+        btnRecord.textContent = '🎤';
+        statusEl.textContent = '识别中...';
+    }
+});
+
+async function transcribe(blob) {
+    try {
+        // Upload audio to HF Space
+        const formData = new FormData();
+        formData.append('files', blob, 'recording.webm');
+        const uploadResp = await fetch('https://FunAudioLLM-Fun-ASR-Nano-GPU-Debug.hf.space/gradio_api/upload', {
+            method: 'POST', body: formData
+        });
+        const uploadData = await uploadResp.json();
+        const filePath = uploadData[0];
+
+        // Call transcription
+        const callResp = await fetch('https://FunAudioLLM-Fun-ASR-Nano-GPU-Debug.hf.space/gradio_api/call/transcribe_audio', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ data: [{ path: filePath, meta: { _type: 'gradio.FileData' } }, '', 'sensevoice', 0, 0] })
+        });
+        const callData = await callResp.json();
+
+        // Get result via SSE
+        const resultResp = await fetch('https://FunAudioLLM-Fun-ASR-Nano-GPU-Debug.hf.space/gradio_api/call/transcribe_audio/' + callData.event_id);
+        const text = await resultResp.text();
+        const lines = text.split('\n');
+        for (const line of lines) {
+            if (line.startsWith('data: ')) {
+                try {
+                    const data = JSON.parse(line.slice(6));
+                    if (data && data[1]) {
+                        resultEl.textContent += (resultEl.textContent ? '\n' : '') + data[1];
+                        statusEl.textContent = '识别完成 ✓ 点击麦克风继续';
+                        return;
+                    }
+                } catch(e) {}
+            }
+        }
+        statusEl.textContent = '未识别到语音，请重试';
+    } catch (err) {
+        statusEl.textContent = '网络错误: ' + err.message;
+    }
+}
+
+function copyResult() {
+    if (resultEl.textContent) {
+        navigator.clipboard.writeText(resultEl.textContent);
+        statusEl.textContent = '已复制到剪贴板 ✓';
+    }
+}
+function clearResult() {
+    resultEl.textContent = '';
+    statusEl.textContent = '已清空';
+}
+</script>
+</body>
+</html>

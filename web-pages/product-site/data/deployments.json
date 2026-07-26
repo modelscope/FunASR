@@ -1,0 +1,403 @@
+{
+  "schema_version": 1,
+  "verified": "2026-07-26",
+  "deployments": [
+    {
+      "id": "vllm",
+      "routes": {"zh": "/deploy/vllm.html", "en": "/en/deploy/vllm.html"},
+      "maturity": "community-verified",
+      "selector_rank": 10,
+      "workloads": ["batch", "private-api"],
+      "hardware": ["nvidia-gpu", "kubernetes"],
+      "priorities": ["throughput", "latency"],
+      "models": ["Fun-ASR-Nano-2512"],
+      "operating_systems": ["Linux"],
+      "interfaces": ["Python", "HTTP REST", "OpenAI-compatible HTTP", "WebSocket"],
+      "tested": {"funasr": "1.3.29", "runtime": "vLLM 0.19.1 guide", "verified": "2026-07-26"},
+      "commands": {
+        "install": ["pip install funasr", "pip install \"vllm==0.19.1\""],
+        "launch": ["CUDA_VISIBLE_DEVICES=0 python examples/industrial_data_pretraining/fun_asr_nano/serve_vllm.py --port 8899 --model FunAudioLLM/Fun-ASR-Nano-2512 --gpu-memory-utilization 0.5"],
+        "health": ["curl -fsS http://localhost:8899/health"],
+        "smoke": ["curl -X POST http://localhost:8899/v1/audio/transcriptions -F file=@audio.wav -F model=fun-asr-nano -F response_format=verbose_json"]
+      },
+      "evidence": [
+        {"label": "vLLM guide", "url": "https://github.com/modelscope/FunASR/blob/main/docs/vllm_guide.md"},
+        {"label": "deployment matrix", "url": "https://github.com/modelscope/FunASR/blob/main/docs/deployment_matrix.md"}
+      ],
+      "benchmarks": [
+        {
+          "model": "Fun-ASR-Nano-2512",
+          "runtime": "vLLM batch",
+          "hardware": "GPU model not recorded in the cited public table",
+          "workload": "Offline batch",
+          "audio": "184 long-form files; 11,541 seconds",
+          "settings": "Dynamic VAD; the public table does not record batch size or the full software and hardware stack",
+          "timing_scope": "Offline throughput; the cited table does not state whether warmup, file I/O, and decoding are excluded",
+          "result": "RTFx 340; CER 8.20%",
+          "qualification": "Incomplete hardware and timing record. Use only as public reference evidence, not a capacity promise.",
+          "source": "https://github.com/modelscope/FunASR/blob/main/docs/vllm_guide.md",
+          "verified": "2026-07-26"
+        }
+      ],
+      "translations": {
+        "zh": {
+          "name": "vLLM GPU 高吞吐",
+          "summary": "用 Fun-ASR-Nano 在 NVIDIA GPU 上处理批量文件或提供兼容 OpenAI 的转写接口。",
+          "fit": ["批量录音转写", "需要提高 LLM 解码吞吐", "已有 NVIDIA GPU 服务环境"],
+          "not_fit": ["纯 CPU 或边缘设备", "Paraformer 等非自回归模型", "尚未完成显存与并发压测的公网服务"],
+          "selection_reason": "GPU 批处理和 vLLM 调度适合以吞吐为首要目标的 Fun-ASR-Nano 工作负载。",
+          "primary_limitation": "吞吐和显存占用取决于音频切分、批量、并发、GPU 型号与 vLLM 版本，必须按目标流量复测。",
+          "status_label": "社区验证",
+          "operations": ["固定 FunASR、vLLM、Torch 与 CUDA 组合", "预热模型后再采集容量数据", "记录队列等待、首结果和最终结果延迟"],
+          "security": ["在 API 网关实现认证、限流和请求大小限制", "服务端不直接暴露到公网", "隔离模型缓存和上传临时目录"],
+          "troubleshooting": ["先核对 NVIDIA 驱动与 vLLM 所带 CUDA", "重复输出时记录两次完整结果和精确版本", "长音频遗漏时检查 VAD 最大分段时长"]
+        },
+        "en": {
+          "name": "vLLM GPU throughput",
+          "summary": "Run Fun-ASR-Nano on NVIDIA GPUs for file batches or an OpenAI-compatible transcription endpoint.",
+          "fit": ["Batch recording transcription", "LLM decoder throughput is the priority", "An NVIDIA GPU serving environment already exists"],
+          "not_fit": ["CPU-only or edge devices", "Non-autoregressive models such as Paraformer", "Internet-facing service before memory and load tests"],
+          "selection_reason": "GPU batching and vLLM scheduling fit Fun-ASR-Nano workloads that prioritize throughput.",
+          "primary_limitation": "Throughput and memory depend on segmentation, batch size, concurrency, GPU, and vLLM version; retest with target traffic.",
+          "status_label": "Community verified",
+          "operations": ["Pin the FunASR, vLLM, Torch, and CUDA combination", "Warm the model before capacity measurement", "Measure queue, first-result, and final-result latency"],
+          "security": ["Put authentication, rate limits, and upload limits at an API gateway", "Do not expose the worker directly to the internet", "Isolate model cache and temporary upload storage"],
+          "troubleshooting": ["Match the NVIDIA driver to vLLM's CUDA build", "Capture two complete outputs and exact versions for repetition", "Check the VAD maximum segment length when long audio loses content"]
+        }
+      }
+    },
+    {
+      "id": "llama-cpp",
+      "routes": {"zh": "/deploy/llama-cpp.html", "en": "/en/deploy/llama-cpp.html"},
+      "maturity": "production-verified",
+      "selector_rank": 20,
+      "workloads": ["edge", "batch"],
+      "hardware": ["cpu", "desktop-edge-gpu"],
+      "priorities": ["portability", "compatibility"],
+      "models": ["SenseVoiceSmall-GGUF", "Paraformer-GGUF", "Fun-ASR-Nano-GGUF", "FSMN-VAD-GGUF"],
+      "operating_systems": ["Linux", "macOS", "Windows"],
+      "interfaces": ["CLI", "local HTTP server"],
+      "tested": {"funasr": "runtime-llamacpp-v0.1.9", "runtime": "pinned llama.cpp backend", "verified": "2026-07-26"},
+      "commands": {
+        "install": ["cmake -B build -DCMAKE_BUILD_TYPE=Release", "cmake --build build -j"],
+        "launch": ["./build/bin/llama-funasr-sensevoice -m funasr-gguf/sensevoice-small-q8.gguf --vad funasr-gguf/fsmn-vad.gguf -a sample.wav"],
+        "health": ["./build/bin/llama-funasr-sensevoice --help"],
+        "smoke": ["./runtime/llama.cpp/tests/run_regression.sh"]
+      },
+      "evidence": [
+        {"label": "llama.cpp runtime", "url": "https://github.com/modelscope/FunASR/blob/main/runtime/llama.cpp/README.md"},
+        {"label": "runtime release", "url": "https://github.com/modelscope/FunASR/releases/tag/runtime-llamacpp-v0.1.9"},
+        {"label": "regression tests", "url": "https://github.com/modelscope/FunASR/tree/main/runtime/llama.cpp/tests"}
+      ],
+      "benchmarks": [
+        {
+          "model": "SenseVoiceSmall Q8 GGUF",
+          "runtime": "llama.cpp/GGUF with built-in FSMN-VAD",
+          "hardware": "CPU, 8 threads; CPU model not recorded in the cited report",
+          "workload": "Offline Mandarin CPU",
+          "audio": "184 Mandarin clips, about 44-60 seconds each; total duration not recorded in the cited report",
+          "settings": "Q8 runtime; built-in FSMN-VAD; micro-CER normalize_zh; model load excluded",
+          "timing_scope": "Sum of compute time divided by sum of audio duration; model load excluded",
+          "result": "Approximately 20x realtime; Q8 CER 8.17%",
+          "qualification": "CPU model and full software stack are not recorded. Reproduce on target hardware before comparison.",
+          "source": "https://github.com/modelscope/FunASR/blob/main/runtime/llama.cpp/BENCHMARKS.md",
+          "verified": "2026-07-26"
+        },
+        {
+          "model": "Paraformer Q8 GGUF",
+          "runtime": "llama.cpp/GGUF with built-in FSMN-VAD",
+          "hardware": "CPU, 8 threads; CPU model not recorded in the cited report",
+          "workload": "Offline Mandarin CPU",
+          "audio": "184 Mandarin clips, about 44-60 seconds each; total duration not recorded in the cited report",
+          "settings": "Q8 runtime; built-in FSMN-VAD; micro-CER normalize_zh; model load excluded",
+          "timing_scope": "Sum of compute time divided by sum of audio duration; model load excluded",
+          "result": "Approximately 21x realtime; Q8 CER 9.89%",
+          "qualification": "CPU model and full software stack are not recorded. Reproduce on target hardware before comparison.",
+          "source": "https://github.com/modelscope/FunASR/blob/main/runtime/llama.cpp/BENCHMARKS.md",
+          "verified": "2026-07-26"
+        }
+      ],
+      "translations": {
+        "zh": {
+          "name": "llama.cpp / GGUF 独立运行",
+          "summary": "使用跨平台预编译包或源码构建，在 CPU、桌面 GPU 和边缘设备上运行 FunASR GGUF 模型。",
+          "fit": ["不依赖 Python ML 环境", "桌面应用和离线边缘部署", "需要 Linux、macOS、Windows 发布包"],
+          "not_fit": ["需要 vLLM 式大批量 GPU 调度", "未验证目标 GPU 架构的通用预编译 CUDA 包", "必须使用完整 Python 模型生态的流程"],
+          "selection_reason": "GGUF 运行时和独立二进制优先满足可移植、离线和低依赖部署。",
+          "primary_limitation": "预编译 GPU 包只覆盖标注的后端和架构；其他设备需要从源码构建并实机验证。",
+          "status_label": "生产验证",
+          "operations": ["按发布资产 SHA-256 校验下载", "模型和二进制使用同一发布清单", "保留旧二进制和模型目录用于回滚"],
+          "security": ["默认只读取本地音频和模型", "HTTP 服务绑定内网地址并限制上传大小", "不要从不可信地址加载 GGUF"],
+          "troubleshooting": ["CPU 路径先用 q8 模型验证", "CUDA 和 Vulkan 必须匹配本机驱动", "用仓库回归脚本区分模型问题与构建问题"]
+        },
+        "en": {
+          "name": "llama.cpp / GGUF standalone",
+          "summary": "Use cross-platform release packages or source builds to run FunASR GGUF models on CPUs, desktop GPUs, and edge devices.",
+          "fit": ["No Python ML environment", "Desktop applications and offline edge deployment", "Linux, macOS, and Windows release packages"],
+          "not_fit": ["vLLM-style large GPU batch scheduling", "A universal prebuilt CUDA package for an unverified GPU architecture", "Workflows that require the full Python model ecosystem"],
+          "selection_reason": "GGUF runtimes and standalone binaries prioritize portability, offline use, and low dependency count.",
+          "primary_limitation": "Prebuilt GPU packages cover only the documented backend and architecture; other devices require a source build and hardware validation.",
+          "status_label": "Production verified",
+          "operations": ["Verify release assets with SHA-256", "Keep models and binaries on the same release manifest", "Retain the previous binary and model directory for rollback"],
+          "security": ["Read local audio and models by default", "Bind the HTTP server to a private address and limit uploads", "Do not load GGUF files from untrusted sources"],
+          "troubleshooting": ["Validate the q8 CPU path first", "Match CUDA or Vulkan to the local driver", "Use repository regression scripts to separate model and build failures"]
+        }
+      }
+    },
+    {
+      "id": "openai-api",
+      "routes": {"zh": "/deploy/openai-api.html", "en": "/en/deploy/openai-api.html"},
+      "maturity": "production-verified",
+      "selector_rank": 30,
+      "workloads": ["private-api", "batch"],
+      "hardware": ["cpu", "nvidia-gpu", "kubernetes"],
+      "priorities": ["compatibility", "portability"],
+      "models": ["sensevoice", "paraformer", "paraformer-en", "fun-asr-nano"],
+      "operating_systems": ["Linux", "macOS", "Windows"],
+      "interfaces": ["OpenAI-compatible HTTP", "OpenAPI", "Python SDK", "JavaScript"],
+      "tested": {"funasr": "1.3.29", "runtime": "FastAPI and Uvicorn example", "verified": "2026-07-26"},
+      "commands": {
+        "install": ["pip install funasr fastapi uvicorn python-multipart"],
+        "launch": ["cd examples/openai_api && python server.py --model sensevoice --device cpu --port 8000"],
+        "health": ["curl -fsS http://localhost:8000/health", "curl -fsS http://localhost:8000/v1/models"],
+        "smoke": ["cd examples/openai_api && python smoke_test.py --base-url http://localhost:8000"]
+      },
+      "evidence": [
+        {"label": "OpenAI API server", "url": "https://github.com/modelscope/FunASR/blob/main/examples/openai_api/README.md"},
+        {"label": "OpenAPI contract", "url": "https://github.com/modelscope/FunASR/blob/main/examples/openai_api/OPENAPI.md"},
+        {"label": "security guide", "url": "https://github.com/modelscope/FunASR/blob/main/examples/openai_api/SECURITY.md"}
+      ],
+      "benchmarks": [],
+      "translations": {
+        "zh": {
+          "name": "OpenAI 兼容私有 API",
+          "summary": "把 FunASR 模型作为 `/v1/audio/transcriptions` 私有服务接入现有 SDK、代理和工作流。",
+          "fit": ["替换云端转写 API", "复用 OpenAI SDK 或 HTTP 客户端", "需要健康检查和模型枚举"],
+          "not_fit": ["需要浏览器直接匿名访问生产服务", "没有网关但准备暴露公网", "严格实时逐块字幕"],
+          "selection_reason": "稳定的 OpenAI 音频接口能以最少客户端改动接入现有应用。",
+          "primary_limitation": "示例服务不内置生产认证、租户配额和全套可观测性，这些必须由网关和基础设施补齐。",
+          "status_label": "生产验证",
+          "operations": ["用 `/health` 做就绪探针", "用 `/v1/models` 验证加载模型", "模型缓存使用持久卷并在发布前预热"],
+          "security": ["认证、配额、审计和 TLS 在网关实现", "限制 MIME、文件大小和请求时长", "服务仅接受可信反向代理流量"],
+          "troubleshooting": ["先运行仓库 smoke_test.py", "核对客户端 base_url 必须包含 `/v1`", "将模型加载错误与请求格式错误分开排查"]
+        },
+        "en": {
+          "name": "OpenAI-compatible private API",
+          "summary": "Serve FunASR models through `/v1/audio/transcriptions` for existing SDKs, agents, and workflows.",
+          "fit": ["Replacing a cloud transcription API", "Reusing OpenAI SDK or HTTP clients", "Health checks and model discovery are required"],
+          "not_fit": ["Anonymous browser access to a production worker", "Public exposure without a gateway", "Strict chunk-by-chunk live captions"],
+          "selection_reason": "A stable OpenAI audio contract integrates with existing applications with minimal client changes.",
+          "primary_limitation": "The example server does not include production authentication, tenant quotas, or full observability; provide them at the gateway and infrastructure layers.",
+          "status_label": "Production verified",
+          "operations": ["Use `/health` for readiness", "Use `/v1/models` to verify loaded models", "Persist and warm the model cache before rollout"],
+          "security": ["Implement authentication, quotas, audit, and TLS at the gateway", "Limit MIME types, file sizes, and request duration", "Accept traffic only from trusted reverse proxies"],
+          "troubleshooting": ["Run the repository smoke_test.py first", "Ensure the client base_url includes `/v1`", "Separate model-loading failures from request-format failures"]
+        }
+      }
+    },
+    {
+      "id": "realtime",
+      "routes": {"zh": "/deploy/realtime.html", "en": "/en/deploy/realtime.html"},
+      "maturity": "community-verified",
+      "selector_rank": 40,
+      "workloads": ["realtime"],
+      "hardware": ["cpu", "nvidia-gpu", "kubernetes"],
+      "priorities": ["latency", "compatibility"],
+      "models": ["Paraformer-online", "FSMN-VAD", "CT-Transformer punctuation", "Fun-ASR-Nano realtime"],
+      "operating_systems": ["Linux"],
+      "interfaces": ["WebSocket", "Python client", "C++ client", "Go client"],
+      "tested": {"funasr": "1.3.29", "runtime": "Python and C++ WebSocket runtimes", "verified": "2026-07-26"},
+      "commands": {
+        "install": ["pip install funasr websockets ffmpeg-python"],
+        "launch": ["cd runtime/python/websocket && python funasr_wss_server.py --port 10095"],
+        "health": ["ss -ltn | grep 10095"],
+        "smoke": ["cd runtime/python/websocket && python funasr_wss_client.py --host 127.0.0.1 --port 10095 --mode 2pass --chunk_size \"8,8,4\" --audio_in ../../tests/test_audio/zh.wav"]
+      },
+      "evidence": [
+        {"label": "Python WebSocket runtime", "url": "https://github.com/modelscope/FunASR/blob/main/runtime/python/websocket/README.md"},
+        {"label": "WebSocket protocol", "url": "https://github.com/modelscope/FunASR/blob/main/runtime/docs/websocket_protocol.md"},
+        {"label": "realtime benchmark method", "url": "https://github.com/modelscope/FunASR/blob/main/docs/benchmark/realtime_ws_benchmark.md"}
+      ],
+      "benchmarks": [],
+      "translations": {
+        "zh": {
+          "name": "实时流式与字幕",
+          "summary": "通过 WebSocket 在线或 2-pass 协议处理麦克风、会议字幕和实时语音流。",
+          "fit": ["实时字幕", "客户端持续推送 PCM 音频", "需要在线初稿与离线修订"],
+          "not_fit": ["只转写完整文件", "客户端不能处理断线重连和背压", "未定义端点与最终结果语义"],
+          "selection_reason": "WebSocket 和 2-pass 协议为持续音频流提供低延迟初稿与最终结果。",
+          "primary_limitation": "真实容量由音频实时比、分块、VAD、连接数和客户端背压共同决定，文件 RTFx 不能替代并发测试。",
+          "status_label": "社区验证",
+          "operations": ["监控活动连接、积压音频秒数和最终结果延迟", "验证优雅断开与重连", "固定 chunk_size、VAD 和标点配置"],
+          "security": ["在反向代理限制来源、连接数和消息大小", "使用 TLS WebSocket", "不在 URL 查询参数传递长期凭证"],
+          "troubleshooting": ["先用仓库客户端和固定 WAV 验证", "确认 PCM16、16 kHz、单声道", "分别记录首稿和最终结果时刻"]
+        },
+        "en": {
+          "name": "Realtime streaming and captions",
+          "summary": "Use online or two-pass WebSocket protocols for microphones, meeting captions, and continuous speech streams.",
+          "fit": ["Live captions", "Clients continuously send PCM audio", "Online drafts plus offline correction"],
+          "not_fit": ["Complete-file transcription only", "Clients cannot handle reconnects and backpressure", "Endpoint and final-result semantics are undefined"],
+          "selection_reason": "WebSocket and two-pass protocols provide low-latency drafts and final results for continuous audio.",
+          "primary_limitation": "Capacity depends on realtime ratio, chunks, VAD, connection count, and client backpressure; file RTFx does not replace concurrency tests.",
+          "status_label": "Community verified",
+          "operations": ["Monitor active connections, queued audio seconds, and final latency", "Validate graceful disconnect and reconnect", "Pin chunk_size, VAD, and punctuation configuration"],
+          "security": ["Limit origins, connections, and message size at the proxy", "Use TLS WebSocket", "Do not put long-lived credentials in URL query strings"],
+          "troubleshooting": ["Start with the repository client and a fixed WAV", "Confirm PCM16, 16 kHz, mono audio", "Record draft and final-result timestamps separately"]
+        }
+      }
+    },
+    {
+      "id": "containers",
+      "routes": {"zh": "/deploy/containers.html", "en": "/en/deploy/containers.html"},
+      "maturity": "community-verified",
+      "selector_rank": 25,
+      "workloads": ["private-api", "batch", "realtime"],
+      "hardware": ["kubernetes", "cpu", "nvidia-gpu"],
+      "priorities": ["portability", "compatibility"],
+      "models": ["sensevoice", "paraformer", "fun-asr-nano"],
+      "operating_systems": ["Linux containers", "Kubernetes"],
+      "interfaces": ["Docker Compose", "Kubernetes ClusterIP", "OpenAI-compatible HTTP"],
+      "tested": {"funasr": "1.3.29", "runtime": "Docker Compose and Kubernetes templates", "verified": "2026-07-26"},
+      "commands": {
+        "install": ["cd examples/openai_api && cp .env.example .env"],
+        "launch": ["docker compose up --build"],
+        "health": ["curl -fsS http://localhost:8000/health"],
+        "smoke": ["python examples/openai_api/smoke_test.py --base-url http://localhost:8000"]
+      },
+      "evidence": [
+        {"label": "deployment matrix", "url": "https://github.com/modelscope/FunASR/blob/main/docs/deployment_matrix.md"},
+        {"label": "Kubernetes template", "url": "https://github.com/modelscope/FunASR/tree/main/examples/openai_api/kubernetes"},
+        {"label": "Docker installation", "url": "https://github.com/modelscope/FunASR/blob/main/docs/installation/docker.md"}
+      ],
+      "benchmarks": [],
+      "translations": {
+        "zh": {
+          "name": "容器与 Kubernetes",
+          "summary": "用 Docker Compose 验证，再用带持久模型缓存、探针和 ClusterIP 的 Kubernetes 模板部署。",
+          "fit": ["需要可重复环境", "已有容器平台", "需要滚动发布和持久模型缓存"],
+          "not_fit": ["尚未验证本地模型和接口", "GPU 镜像与集群调度未准备", "把示例 Compose 直接当作公网生产架构"],
+          "selection_reason": "容器模板适合把已验证的 FunASR API 纳入现有发布和编排体系。",
+          "primary_limitation": "CPU 示例不是 CUDA 生产镜像；GPU 驱动、镜像、调度和容量仍需平台团队验证。",
+          "status_label": "社区验证",
+          "operations": ["模型缓存使用持久卷", "就绪探针检查 `/health`", "部署前完成镜像和模型预热"],
+          "security": ["默认使用私有 ClusterIP", "Secret 不写入镜像和仓库", "入口网关承担 TLS、认证和限流"],
+          "troubleshooting": ["先让 CPU Compose smoke test 通过", "区分镜像拉取、模型下载和推理错误", "GPU Pod 核对设备插件、驱动和运行时"]
+        },
+        "en": {
+          "name": "Containers and Kubernetes",
+          "summary": "Validate with Docker Compose, then deploy with the Kubernetes template, persistent model cache, probes, and private ClusterIP.",
+          "fit": ["Reproducible environments", "An existing container platform", "Rolling releases and persistent model cache"],
+          "not_fit": ["The local model and API are not yet validated", "GPU images and cluster scheduling are not ready", "Using the example Compose file as a public production architecture"],
+          "selection_reason": "Container templates bring an already validated FunASR API into an existing release and orchestration system.",
+          "primary_limitation": "The CPU example is not a CUDA production image; GPU drivers, image, scheduling, and capacity still require platform validation.",
+          "status_label": "Community verified",
+          "operations": ["Persist the model cache", "Use `/health` for readiness", "Warm images and models before rollout"],
+          "security": ["Use a private ClusterIP by default", "Keep secrets out of images and source control", "Put TLS, authentication, and rate limits at ingress"],
+          "troubleshooting": ["Pass the CPU Compose smoke test first", "Separate image pull, model download, and inference failures", "Check device plugin, driver, and runtime for GPU pods"]
+        }
+      }
+    },
+    {
+      "id": "cpu-runtime",
+      "routes": {"zh": "/deploy/cpu-runtime.html", "en": "/en/deploy/cpu-runtime.html"},
+      "maturity": "community-verified",
+      "selector_rank": 60,
+      "workloads": ["batch", "realtime", "edge"],
+      "hardware": ["cpu"],
+      "priorities": ["latency", "portability", "compatibility"],
+      "models": ["Paraformer", "Paraformer-online", "SenseVoiceSmall", "FSMN-VAD", "CT-Transformer punctuation"],
+      "operating_systems": ["Linux", "macOS", "Windows"],
+      "interfaces": ["C++", "ONNX Runtime", "Python ONNX", "HTTP", "WebSocket"],
+      "tested": {"funasr": "1.3.29", "runtime": "ONNX Runtime C++ and Python", "verified": "2026-07-26"},
+      "commands": {
+        "install": ["cd runtime/onnxruntime && cmake -B build -DCMAKE_BUILD_TYPE=Release", "cmake --build build -j"],
+        "launch": ["python runtime/python/onnxruntime/demo_sencevoice_small.py"],
+        "health": ["test -x runtime/onnxruntime/build/bin/funasr-onnx-offline"],
+        "smoke": ["python runtime/python/onnxruntime/demo_paraformer_offline.py"]
+      },
+      "evidence": [
+        {"label": "ONNX C++ runtime", "url": "https://github.com/modelscope/FunASR/blob/main/runtime/onnxruntime/readme.md"},
+        {"label": "Python ONNX runtime", "url": "https://github.com/modelscope/FunASR/blob/main/runtime/python/onnxruntime/README.md"},
+        {"label": "CPU benchmark guide", "url": "https://github.com/modelscope/FunASR/blob/main/runtime/docs/benchmark_onnx_cpp.md"}
+      ],
+      "benchmarks": [],
+      "translations": {
+        "zh": {
+          "name": "ONNX / C++ CPU 运行时",
+          "summary": "在通用 CPU 上用 ONNX Runtime 和 C++ 路径部署离线、在线与 2-pass ASR。",
+          "fit": ["CPU 高并发服务", "嵌入式或本地应用", "现有 Paraformer 在线链路已经满足质量"],
+          "not_fit": ["需要 LLM 解码和开放式指令", "未经测试就迁移成熟 CPU 流量到 GPU", "依赖特定 Python 业务插件"],
+          "selection_reason": "ONNX/C++ 路径适合低依赖、可控延迟和已证明的 CPU 并发。",
+          "primary_limitation": "模型转换、算子支持和线程参数受平台影响；必须使用目标 CPU 与真实音频测容量。",
+          "status_label": "社区验证",
+          "operations": ["固定 ONNX Runtime 与模型版本", "分别设置模型、解码和 I/O 线程", "监控实时比、CPU 饱和度与队列"],
+          "security": ["限制本地文件和网络输入边界", "服务模式限制请求大小和并发", "模型目录只读并校验来源"],
+          "troubleshooting": ["先运行单文件离线示例", "线程增加不等于吞吐线性增加", "热词不足先评估确定性文本后处理"]
+        },
+        "en": {
+          "name": "ONNX / C++ CPU runtime",
+          "summary": "Deploy offline, online, and two-pass ASR on general CPUs with ONNX Runtime and C++ paths.",
+          "fit": ["High-concurrency CPU services", "Embedded or local applications", "An existing Paraformer online path already meets quality goals"],
+          "not_fit": ["LLM decoding and open-ended instructions", "Moving proven CPU traffic to GPU without tests", "Workflows that depend on Python-only business plugins"],
+          "selection_reason": "ONNX/C++ fits low-dependency, controlled-latency, proven CPU concurrency.",
+          "primary_limitation": "Model conversion, operator support, and thread settings vary by platform; measure capacity on the target CPU with real audio.",
+          "status_label": "Community verified",
+          "operations": ["Pin ONNX Runtime and model versions", "Tune model, decoder, and I/O threads separately", "Monitor realtime ratio, CPU saturation, and queue depth"],
+          "security": ["Bound local file and network inputs", "Limit request size and concurrency in service mode", "Keep model directories read-only and verify their source"],
+          "troubleshooting": ["Start with a single-file offline example", "More threads do not guarantee linear throughput", "Evaluate deterministic text post-processing before changing models for fixed terms"]
+        }
+      }
+    },
+    {
+      "id": "production",
+      "routes": {"zh": "/deploy/production.html", "en": "/en/deploy/production.html"},
+      "maturity": "production-verified",
+      "selector_rank": 70,
+      "workloads": ["private-api", "batch", "realtime", "edge"],
+      "hardware": ["cpu", "nvidia-gpu", "desktop-edge-gpu", "kubernetes"],
+      "priorities": ["compatibility", "latency", "throughput", "portability"],
+      "models": ["All supported deployment models"],
+      "operating_systems": ["Linux", "macOS", "Windows", "Kubernetes"],
+      "interfaces": ["HTTP", "WebSocket", "CLI", "C++"],
+      "tested": {"funasr": "1.3.29", "runtime": "cross-runtime production checklist", "verified": "2026-07-26"},
+      "commands": {
+        "install": ["git clone https://github.com/modelscope/FunASR.git"],
+        "launch": ["Run the selected runtime with pinned versions and an immutable model cache"],
+        "health": ["Verify readiness, model identity, and one known-audio transcript"],
+        "smoke": ["Record version, model digest, hardware, warmup, audio duration, concurrency, latency, and output before promotion"]
+      },
+      "evidence": [
+        {"label": "deployment matrix", "url": "https://github.com/modelscope/FunASR/blob/main/docs/deployment_matrix.md"},
+        {"label": "reproducible benchmark method", "url": "https://github.com/modelscope/FunASR/blob/main/docs/benchmark/rtf_reproducibility.md"},
+        {"label": "API security guide", "url": "https://github.com/modelscope/FunASR/blob/main/examples/openai_api/SECURITY.md"}
+      ],
+      "benchmarks": [],
+      "translations": {
+        "zh": {
+          "name": "生产上线检查",
+          "summary": "把模型能运行推进到可观测、可扩缩、可回滚且边界清晰的生产服务。",
+          "fit": ["准备上线或扩容", "需要容量、就绪和安全边界", "需要可审计的发布与回滚"],
+          "not_fit": ["用单次演示结果代替容量测试", "省略网关和访问控制", "没有版本、模型和硬件记录的性能比较"],
+          "selection_reason": "无论选择哪种运行时，生产检查都是发布前的共同必经路径。",
+          "primary_limitation": "清单不能替代目标业务的负载、准确率、故障和安全演练。",
+          "status_label": "生产验证",
+          "operations": ["区分存活、就绪和业务 smoke test", "容量测试包含预热、队列和音频分布", "发布保留模型、配置和上一版本回滚点"],
+          "security": ["网络入口默认拒绝并最小授权", "上传、日志、缓存和临时文件有保留策略", "凭证、音频和预签名 URL 不写入普通日志"],
+          "troubleshooting": ["先确认模型和运行时精确版本", "使用已知音频区分基础设施与质量回归", "故障时先回滚再做在线试错"]
+        },
+        "en": {
+          "name": "Production rollout checklist",
+          "summary": "Move from a runnable model to an observable, scalable, reversible production service with explicit boundaries.",
+          "fit": ["Preparing a launch or scale-up", "Capacity, readiness, and security boundaries are required", "Auditable release and rollback are required"],
+          "not_fit": ["Using one demo result as a capacity test", "Omitting gateway and access control", "Comparing performance without version, model, and hardware records"],
+          "selection_reason": "Production readiness is a required path before release regardless of the selected runtime.",
+          "primary_limitation": "A checklist does not replace workload, accuracy, failure, and security exercises for the target product.",
+          "status_label": "Production verified",
+          "operations": ["Separate liveness, readiness, and business smoke tests", "Include warmup, queueing, and audio distribution in capacity tests", "Keep model, configuration, and previous-version rollback points"],
+          "security": ["Default-deny network access and grant minimum privileges", "Define retention for uploads, logs, caches, and temporary files", "Keep credentials, audio, and presigned URLs out of normal logs"],
+          "troubleshooting": ["Confirm exact model and runtime versions first", "Use known audio to separate infrastructure and quality regressions", "Roll back before experimenting during an incident"]
+        }
+      }
+    }
+  ]
+}
