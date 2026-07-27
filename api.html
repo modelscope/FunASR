@@ -20827,33 +20827,38 @@
                 ):
                     data_or_path_or_list_j = load_audio_text_image_video(
 </code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/load_utils.py#L48" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
-<div class="api-detail" id="e383"><span class="dtag badge-f">function</span><h2><code>load_bytes(input)</code></h2><div class="dmod">funasr.utils.load_utils · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/load_utils.py#L207" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Convert audio bytes to numpy array.</p>
+<div class="api-detail" id="e383"><span class="dtag badge-f">function</span><h2><code>load_bytes(input)</code></h2><div class="dmod">funasr.utils.load_utils · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/load_utils.py#L306" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Convert raw PCM or container-formatted audio bytes to a waveform.</p>
 <h4>Args:</h4>
 <ul>
-<li><code>input (bytes)</code> — Raw audio bytes.</li>
+<li><code>input (bytes)</code> — Raw int16 PCM or encoded audio-file bytes.</li>
 </ul>
 <h4>Returns:</h4>
 <ul>
-<li><code>numpy.ndarray</code> — Decoded audio samples.</li>
+<li><code>numpy.ndarray</code> — Mono float32 samples at 16 kHz.</li>
 </ul>
 </div><details class="src-block"><summary>📄 Source code</summary><pre><code>def load_bytes(input):
-    &quot;&quot;&quot;Convert audio bytes to numpy array.
+    &quot;&quot;&quot;Convert raw PCM or container-formatted audio bytes to a waveform.
 
     Args:
-        input (bytes): Raw audio bytes.
+        input (bytes): Raw int16 PCM or encoded audio-file bytes.
 
     Returns:
-        numpy.ndarray: Decoded audio samples.
+        numpy.ndarray: Mono float32 samples at 16 kHz.
     &quot;&quot;&quot;
-    # Only run the (expensive) frame-rate validation when the payload is an
-    # actual audio container (WAV, MP3, OGG, …).  Raw PCM buffers have no
-    # recognisable header and would cause pydub to spend ~200 ms before
-    # raising an exception that is then silently swallowed anyway.
     if _is_audio_container(input):
         try:
-            input = validate_frame_rate(input)
-        except Exception:
-            pass
+            waveform = load_audio_text_image_video(BytesIO(input), fs=16000)
+        except Exception as exc:
+            raise RuntimeError(
+                &quot;Failed to decode container-formatted audio bytes. Verify that the input is &quot;
+                &quot;a complete supported audio file and that torchaudio, soundfile, or ffmpeg &quot;
+                &quot;is available.&quot;
+            ) from exc
+        else:
+            if isinstance(waveform, torch.Tensor):
+                waveform = waveform.detach().cpu().numpy()
+            return np.asarray(waveform, dtype=np.float32)
+
     middle_data = np.frombuffer(input, dtype=np.int16)
     middle_data = np.asarray(middle_data)
     if middle_data.dtype.kind not in &quot;iu&quot;:
@@ -20861,13 +20866,8 @@
     dtype = np.dtype(&quot;float32&quot;)
     if dtype.kind != &quot;f&quot;:
         raise TypeError(&quot;&#x27;dtype&#x27; must be a floating point type&quot;)
-
-    i = np.iinfo(middle_data.dtype)
-    abs_max = 2 ** (i.bits - 1)
-    offset = i.min + abs_max
-    array = np.frombuffer((middle_data.astype(dtype) - offset) / abs_max, dtype=np.float32)
-</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/load_utils.py#L207" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
-<div class="api-detail" id="e384"><span class="dtag badge-f">function</span><h2><code>validate_frame_rate(input, fs)</code></h2><div class="dmod">funasr.utils.load_utils · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/load_utils.py#L240" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Validate frame rate.</p>
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/load_utils.py#L306" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
+<div class="api-detail" id="e384"><span class="dtag badge-f">function</span><h2><code>validate_frame_rate(input, fs)</code></h2><div class="dmod">funasr.utils.load_utils · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/load_utils.py#L344" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Validate frame rate.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>input</code> — Input audio/text data.</li>
@@ -20903,8 +20903,8 @@
         output = BytesIO()
         audio.export(output, format=&quot;wav&quot;)
         output.seek(0)
-</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/load_utils.py#L240" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
-<div class="api-detail" id="e385"><span class="dtag badge-f">function</span><h2><code>extract_fbank(data, data_len, data_type, frontend, **kwargs)</code></h2><div class="dmod">funasr.utils.load_utils · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/load_utils.py#L277" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Extract filter-bank features from audio data.</p>
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/load_utils.py#L344" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
+<div class="api-detail" id="e385"><span class="dtag badge-f">function</span><h2><code>extract_fbank(data, data_len, data_type, frontend, **kwargs)</code></h2><div class="dmod">funasr.utils.load_utils · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/load_utils.py#L381" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Extract filter-bank features from audio data.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>data</code> — Audio samples (list of numpy arrays or tensors).</li>
@@ -20946,7 +20946,7 @@
         for data_i in data:
             if isinstance(data_i, np.ndarray):
                 data_i = torch.from_numpy(data_i)
-</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/load_utils.py#L277" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/load_utils.py#L381" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
 <div class="api-detail" id="e386"><span class="dtag badge-f">function</span><h2><code>statistic_model_parameters(model, prefix)</code></h2><div class="dmod">funasr.utils.misc · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/misc.py#L10" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Statistic model parameters.</p>
 <h4>Args:</h4>
 <ul>
