@@ -99,6 +99,7 @@ Whisper は単一モデルですが、**FunASR はツールキット**です—�
 
 ## 最新情報
 
+- 2026/07/27：**v1.3.30 を PyPI に公開** — WAV、MP3、FLAC、OGG、MP4/M4A、WebM などのコンテナ形式の音声バイト列を raw PCM と誤認せず、対応するコーデックでデコードするようになりました。OpenAI 互換レスポンスは話者ラベルを保持し、句読点が一致しない場合も VAD 区間時刻を保持します。信頼済みブラウザクライアント向け CORS と、vLLM の 30 秒 VAD 上限にも対応しました。GitHub Release には、デスクトップ／サーバー向け 9 ターゲットの最新 llama.cpp ビルドも同梱しています。インストール：`python -m pip install -U "funasr==1.3.30"`。[Release →](https://github.com/modelscope/FunASR/releases/tag/v1.3.30)
 - 2026/07/24：**v1.3.29 hotfix が PyPI に公開** — SenseVoice の長時間音声推論で word timestamp と句読点モデルがない場合でも、各 VAD 音声区間を `sentence_info` で返すようになりました。字幕クライアントは、ゼロ長またはメディア全体を覆う一つの cue ではなく、認識テキストと実際のミリ秒単位の開始・終了時刻を取得できます。インストール：`python -m pip install -U "funasr==1.3.29"`。[Release →](https://github.com/modelscope/FunASR/releases/tag/v1.3.29)
 - 2026/07/24：**v1.3.28 hotfix が PyPI に公開** — VAD で確定した realtime WebSocket の最終結果が短い接頭辞、反復 hallucination、または decode 例外へ退化した場合、現在の音声区間を連続して完全に覆う clean partial を保持します。短い STOP tail、VAD finalize、話者処理も同じ信頼できる完了経路に統一しました。SenseVoice 字幕は rich tag、句読点、word/BPE timestamp を正しく整列し、中国語を一つの cue に潰さず、英語表記も保持します。インストール：`python -m pip install -U "funasr==1.3.28"`。[Release →](https://github.com/modelscope/FunASR/releases/tag/v1.3.28)
 - 2026/07/24：**v1.3.27 が PyPI に公開** — OpenAI 互換サーバーが `verbose_json` で SenseVoice の検出言語を返し、vLLM fallback 後はキャッシュ済み Fun-ASR-Nano `AutoModel` を再利用します。vLLM/VAD 初期化と fallback の両方が失敗した場合は、半初期化状態を残さず、後続リクエストで再試行できます。インストール：`python -m pip install -U "funasr==1.3.27"`。[Release →](https://github.com/modelscope/FunASR/releases/tag/v1.3.27)
