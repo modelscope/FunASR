@@ -274,6 +274,60 @@ class TestPuncModelNone(unittest.TestCase):
             ],
         )
 
+    @patch("funasr.auto.auto_model.slice_padding_audio_samples")
+    @patch("funasr.auto.auto_model.load_audio_text_image_video")
+    @patch("funasr.auto.auto_model.prepare_data_iterator")
+    def test_sentence_timestamp_falls_back_to_vad_when_punctuation_alignment_fails(
+        self, mock_prep, mock_load, mock_slice
+    ):
+        """A malformed long-audio punctuation array must not collapse all VAD segments."""
+        am = self._make_auto_model(punc_model=MagicMock())
+        tag = "<|zh|><|NEUTRAL|><|Speech|><|woitn|>"
+        results_seq = [
+            [{"key": "test_utt", "value": [[100, 1100], [1300, 2300]]}],
+            [
+                {
+                    "text": f"{tag}第一句",
+                    "timestamp": [[0, 300], [300, 600], [600, 900]],
+                    "words": ["第", "一", "句"],
+                }
+            ],
+            [
+                {
+                    "text": f"{tag}第二句",
+                    "timestamp": [[0, 300], [300, 600], [600, 900]],
+                    "words": ["第", "二", "句"],
+                }
+            ],
+            [{"text": "第一句。第二句。", "punc_array": [3]}],
+        ]
+        am.inference = MagicMock(side_effect=lambda *args, **kwargs: results_seq.pop(0))
+        mock_prep.return_value = (["test_utt"], [np.zeros(40000, dtype=np.float32)])
+        mock_load.return_value = np.zeros(40000, dtype=np.float32)
+        mock_slice.return_value = ([np.zeros(16000, dtype=np.float32)], [16000])
+
+        results = am.inference_with_vad("dummy_input", sentence_timestamp=True)
+
+        self.assertEqual(
+            results[0]["sentence_info"],
+            [
+                {
+                    "start": 100,
+                    "end": 1000,
+                    "text": "第一句",
+                    "sentence": "第一句",
+                    "timestamp": [[100, 400], [400, 700], [700, 1000]],
+                },
+                {
+                    "start": 1300,
+                    "end": 2200,
+                    "text": "第二句",
+                    "sentence": "第二句",
+                    "timestamp": [[1300, 1600], [1600, 1900], [1900, 2200]],
+                },
+            ],
+        )
+
     @patch("funasr.auto.auto_model.distribute_spk")
     @patch("funasr.auto.auto_model.postprocess")
     @patch("funasr.auto.auto_model.sv_chunk")

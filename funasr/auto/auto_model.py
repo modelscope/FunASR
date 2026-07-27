@@ -68,6 +68,42 @@ def _join_vad_texts(texts):
     return joined
 
 
+def _vad_segment_sentences(restored_data, vadsegments):
+    """Build readable sentence records directly from VAD-aligned ASR chunks."""
+    sentences = []
+    for result, vadsegment in zip(restored_data, vadsegments):
+        text = re.sub(r"<\|[^|]*\|>", "", str(result.get("text", ""))).strip()
+        if not text:
+            continue
+
+        timestamps = []
+        raw_timestamps = result.get("timestamp")
+        if raw_timestamps is None:
+            raw_timestamps = result.get("timestamps", [])
+        for item in raw_timestamps or []:
+            if isinstance(item, dict):
+                start = item.get("start_time")
+                end = item.get("end_time")
+                if start is None or end is None:
+                    continue
+                timestamps.append([int(float(start) * 1000), int(float(end) * 1000)])
+            elif isinstance(item, (list, tuple)) and len(item) >= 2:
+                timestamps.append([int(item[0]), int(item[1])])
+
+        start = timestamps[0][0] if timestamps else vadsegment[0]
+        end = timestamps[-1][1] if timestamps else vadsegment[1]
+        sentences.append(
+            {
+                "start": start,
+                "end": end,
+                "text": text,
+                "sentence": text,
+                "timestamp": timestamps,
+            }
+        )
+    return sentences
+
+
 def _get_punc_tokens(text, punc_array, punc_model):
     """Return the surface tokens represented by a CT-Transformer punctuation array."""
     try:
@@ -1018,6 +1054,7 @@ class AutoModel:
 
             timestamp_text = punc_input_text
             sentence_timestamps = result.get("timestamp", [])
+            punc_alignment_failed = False
             if punc_res is not None:
                 try:
                     punc_length = len(punc_array)
@@ -1038,6 +1075,7 @@ class AutoModel:
                         timestamp_text, sentence_timestamps = merged_units
                 if punc_array is not None and punc_length != len(sentence_timestamps):
                     punc_array = None
+                    punc_alignment_failed = True
             surface_sentence_list = None
             if aligned_word_text is not None and punc_array is not None:
                 surface_sentence_list = _timestamp_sentences_from_surface(
@@ -1131,25 +1169,17 @@ class AutoModel:
                 if not len(result["text"].strip()):
                     sentence_list = []
                 elif self.punc_model is None and punc_res is None and not sentence_timestamps:
-                    sentence_list = []
-                    for rest, vadsegment in zip(restored_data, vadsegments):
-                        text = str(rest.get("text", "")).strip()
-                        if not text:
-                            continue
-                        sentence_list.append(
-                            {
-                                "start": vadsegment[0],
-                                "end": vadsegment[1],
-                                "text": text,
-                                "sentence": text,
-                                "timestamp": [],
-                            }
-                        )
+                    sentence_list = _vad_segment_sentences(restored_data, vadsegments)
                 elif punc_res is None:
                     logging.warning(
                         "punc_model is required for sentence_timestamp, skipping sentence segmentation."
                     )
                     sentence_list = []
+                elif punc_alignment_failed:
+                    logging.warning(
+                        "punctuation timestamps could not be aligned, falling back to VAD segments."
+                    )
+                    sentence_list = _vad_segment_sentences(restored_data, vadsegments)
                 elif surface_sentence_list is not None:
                     sentence_list = surface_sentence_list
                 else:
