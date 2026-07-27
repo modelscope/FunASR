@@ -84,6 +84,33 @@ def test_benchmark_page_warns_against_cross_profile_claims(built_site):
         assert 'RTFx' in warning.get_text()
 
 
+@pytest.mark.parametrize(
+    ('relative', 'release_caveat'),
+    (
+        ('benchmarks.html', '不代表 SGLang-Omni 已发布该集成'),
+        ('en/benchmarks.html', 'not a released SGLang-Omni integration'),
+    ),
+)
+def test_rtx4090_community_benchmark_is_bilingual_and_qualified(
+    built_site, relative, release_caveat
+):
+    soup = read_soup(built_site / relative)
+    section = soup.select_one('[data-community-benchmark="rtx4090"]')
+
+    assert section
+    text = section.get_text(' ', strip=True)
+    for marker in ('105,067', '16.11 GiB', '0.0175', '0.0164', release_caveat):
+        assert marker in text
+
+    links = {link.get('href') for link in section.select('a[href]')}
+    assert {
+        'https://github.com/sgl-project/sglang-omni/issues/1170',
+        'https://github.com/sgl-project/sglang-omni/issues/1120',
+        'https://github.com/sgl-project/sglang-omni/pull/1171',
+        'https://gist.github.com/wirybeaver/ffa8a07f89066654a271a45b21592d25',
+    } <= links
+
+
 def test_manifest_contains_all_detail_and_benchmark_routes(built_site):
     manifest = __import__('json').loads(
         (built_site / 'deployment-manifest.json').read_text(encoding='utf-8')
