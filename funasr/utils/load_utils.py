@@ -127,12 +127,16 @@ def load_audio_text_image_video(
                     data_or_path_or_list = data_or_path_or_list.mean(0)
             except:
                 try:
+                    if hasattr(data_or_path_or_list, "seek"):
+                        data_or_path_or_list.seek(0)
                     import soundfile as sf
                     data_np, audio_fs = sf.read(data_or_path_or_list, dtype="float32")
                     data_or_path_or_list = torch.from_numpy(data_np).squeeze()
                     if data_or_path_or_list.ndim > 1 and kwargs.get("reduce_channels", True):
                         data_or_path_or_list = data_or_path_or_list.mean(-1)
                 except:
+                    if hasattr(data_or_path_or_list, "seek"):
+                        data_or_path_or_list.seek(0)
                     data_or_path_or_list = _load_audio_ffmpeg(data_or_path_or_list, sr=fs)
                     data_or_path_or_list = torch.from_numpy(
                         data_or_path_or_list
@@ -175,6 +179,96 @@ def load_audio_text_image_video(
     return data_or_path_or_list
 
 
+def _mp3_header_fields(data: bytes, offset: int):
+    """Return MPEG audio header fields, including free-format bitrate index zero."""
+    if offset + 4 > len(data):
+        return None
+
+    header = int.from_bytes(data[offset : offset + 4], "big")
+    if header & 0xFFE00000 != 0xFFE00000:
+        return None
+
+    version_id = (header >> 19) & 0x3
+    layer_id = (header >> 17) & 0x3
+    bitrate_index = (header >> 12) & 0xF
+    sample_rate_index = (header >> 10) & 0x3
+    padding = (header >> 9) & 0x1
+    if (
+        version_id == 1
+        or layer_id == 0
+        or bitrate_index == 15
+        or sample_rate_index == 3
+    ):
+        return None
+    return version_id, layer_id, bitrate_index, sample_rate_index, padding
+
+
+def _mp3_frame_length(data: bytes, offset: int) -> int:
+    """Return a fixed-bitrate MPEG audio frame length, or zero if unavailable."""
+    fields = _mp3_header_fields(data, offset)
+    if fields is None:
+        return 0
+    version_id, layer_id, bitrate_index, sample_rate_index, padding = fields
+    if bitrate_index == 0:
+        return 0
+
+    mpeg1_bitrates = {
+        3: (32, 64, 96, 128, 160, 192, 224, 256, 288, 320, 352, 384, 416, 448),
+        2: (32, 48, 56, 64, 80, 96, 112, 128, 160, 192, 224, 256, 320, 384),
+        1: (32, 40, 48, 56, 64, 80, 96, 112, 128, 160, 192, 224, 256, 320),
+    }
+    mpeg2_bitrates = {
+        3: (32, 48, 56, 64, 80, 96, 112, 128, 144, 160, 176, 192, 224, 256),
+        2: (8, 16, 24, 32, 40, 48, 56, 64, 80, 96, 112, 128, 144, 160),
+        1: (8, 16, 24, 32, 40, 48, 56, 64, 80, 96, 112, 128, 144, 160),
+    }
+    sample_rates = {
+        3: (44100, 48000, 32000),
+        2: (22050, 24000, 16000),
+        0: (11025, 12000, 8000),
+    }
+    bitrate_table = mpeg1_bitrates if version_id == 3 else mpeg2_bitrates
+    bitrate = bitrate_table[layer_id][bitrate_index - 1] * 1000
+    sample_rate = sample_rates[version_id][sample_rate_index]
+
+    if layer_id == 3:
+        return (12 * bitrate // sample_rate + padding) * 4
+    coefficient = 144 if version_id == 3 or layer_id == 2 else 72
+    return coefficient * bitrate // sample_rate + padding
+
+
+def _has_consecutive_mp3_frames(data: bytes) -> bool:
+    """Avoid mistaking raw PCM that starts with one sync-like sample for MP3."""
+    fields = _mp3_header_fields(data, 0)
+    if fields is None:
+        return False
+    version_id, layer_id, bitrate_index, sample_rate_index, _ = fields
+    if bitrate_index == 0:
+        signature = version_id, layer_id, sample_rate_index
+        padding_slot = 4 if layer_id == 3 else 1
+        first_padding = fields[4] * padding_slot
+        for second_offset in range(24, min(len(data) - 3, 8192)):
+            next_fields = _mp3_header_fields(data, second_offset)
+            if next_fields is not None and (
+                next_fields[0], next_fields[1], next_fields[3]
+            ) == signature and next_fields[2] == 0:
+                base_frame_length = second_offset - first_padding
+                third_offset = (
+                    second_offset
+                    + base_frame_length
+                    + next_fields[4] * padding_slot
+                )
+                third_fields = _mp3_header_fields(data, third_offset)
+                if third_fields is not None and (
+                    third_fields[0], third_fields[1], third_fields[3]
+                ) == signature and third_fields[2] == 0:
+                    return True
+        return False
+
+    first_frame_length = _mp3_frame_length(data, 0)
+    return first_frame_length > 0 and _mp3_frame_length(data, first_frame_length) > 0
+
+
 def _is_audio_container(data: bytes) -> bool:
     """Return True if *data* starts with a recognised container-format magic header.
 
@@ -184,10 +278,15 @@ def _is_audio_container(data: bytes) -> bool:
     if len(data) < 4:
         return False
     # WAV  – RIFF....WAVE
-    if data[:4] == b"RIFF":
+    if (
+        len(data) >= 12
+        and data[:4] in (b"RIFF", b"RIFX", b"RF64", b"BW64")
+        and data[8:12] == b"WAVE"
+    ):
         return True
-    # MP3  – ID3 tag or sync word (0xFF 0xEx)
-    if data[:3] == b"ID3" or (data[0] == 0xFF and (data[1] & 0xE0) == 0xE0):
+    # MP3  – ID3 tag or at least two structurally valid MPEG audio frames
+    has_mpeg_sync = data[0] == 0xFF and (data[1] & 0xE0) == 0xE0
+    if data[:3] == b"ID3" or (has_mpeg_sync and _has_consecutive_mp3_frames(data)):
         return True
     # OGG
     if data[:4] == b"OggS":
@@ -205,23 +304,28 @@ def _is_audio_container(data: bytes) -> bool:
 
 
 def load_bytes(input):
-    """Convert audio bytes to numpy array.
+    """Convert raw PCM or container-formatted audio bytes to a waveform.
 
     Args:
-        input (bytes): Raw audio bytes.
+        input (bytes): Raw int16 PCM or encoded audio-file bytes.
 
     Returns:
-        numpy.ndarray: Decoded audio samples.
+        numpy.ndarray: Mono float32 samples at 16 kHz.
     """
-    # Only run the (expensive) frame-rate validation when the payload is an
-    # actual audio container (WAV, MP3, OGG, …).  Raw PCM buffers have no
-    # recognisable header and would cause pydub to spend ~200 ms before
-    # raising an exception that is then silently swallowed anyway.
     if _is_audio_container(input):
         try:
-            input = validate_frame_rate(input)
-        except Exception:
-            pass
+            waveform = load_audio_text_image_video(BytesIO(input), fs=16000)
+        except Exception as exc:
+            raise RuntimeError(
+                "Failed to decode container-formatted audio bytes. Verify that the input is "
+                "a complete supported audio file and that torchaudio, soundfile, or ffmpeg "
+                "is available."
+            ) from exc
+        else:
+            if isinstance(waveform, torch.Tensor):
+                waveform = waveform.detach().cpu().numpy()
+            return np.asarray(waveform, dtype=np.float32)
+
     middle_data = np.frombuffer(input, dtype=np.int16)
     middle_data = np.asarray(middle_data)
     if middle_data.dtype.kind not in "iu":
@@ -315,14 +419,14 @@ def extract_fbank(data, data_len=None, data_type: str = "sound", frontend=None, 
     return data.to(torch.float32), data_len.to(torch.int32)
 
 
-def _load_audio_ffmpeg(file: str, sr: int = 16000):
+def _load_audio_ffmpeg(file, sr: int = 16000):
     """
     Open an audio file and read as mono waveform, resampling as necessary
 
     Parameters
     ----------
-    file: str
-        The audio file to open
+    file: str or file-like object
+        The audio file or byte stream to open
 
     sr: int
         The sample rate to resample the audio if necessary
@@ -336,7 +440,15 @@ def _load_audio_ffmpeg(file: str, sr: int = 16000):
     # and resampling as necessary.  Requires the ffmpeg CLI in PATH.
     # fmt: off
     pcm_params = []
-    if file.lower().endswith('.pcm'):
+    stdin_data = None
+    if hasattr(file, "read"):
+        if hasattr(file, "seek"):
+            file.seek(0)
+        stdin_data = file.read()
+        input_source = "pipe:0"
+    else:
+        input_source = os.fspath(file)
+    if isinstance(input_source, str) and input_source.lower().endswith('.pcm'):
         pcm_params = [
             "-f", "s16le",
             "-ar", str(sr),
@@ -348,7 +460,7 @@ def _load_audio_ffmpeg(file: str, sr: int = 16000):
         "-nostdin",
         "-threads", "0",
         *pcm_params,  # PCM files need input format specified before -i since PCM is raw data without headers
-        "-i", file,
+        "-i", input_source,
         "-f", "s16le",
         "-ac", "1",
         "-acodec", "pcm_s16le",
@@ -357,7 +469,7 @@ def _load_audio_ffmpeg(file: str, sr: int = 16000):
     ]
     # fmt: on
     try:
-        out = run(cmd, capture_output=True, check=True).stdout
+        out = run(cmd, input=stdin_data, capture_output=True, check=True).stdout
     except CalledProcessError as e:
         raise RuntimeError(f"Failed to load audio: {e.stderr.decode()}") from e
 
