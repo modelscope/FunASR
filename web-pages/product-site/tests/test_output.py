@@ -112,6 +112,24 @@ def test_old_llama_routes_point_to_product_pages(built_site):
         )
 
 
+@pytest.mark.parametrize('relative', ('ecosystem.html', 'en/ecosystem.html'))
+def test_ecosystem_surfaces_orca_sensevoice_desktop_integration(built_site, relative):
+    soup = read_soup(built_site / relative)
+    anchor = soup.select_one(
+        '.card-title a[href="https://github.com/stablyai/orca"]'
+    )
+
+    assert anchor
+    card = anchor.find_parent(class_='card')
+    assert card
+    links = {link.get('href') for link in card.select('a[href]')}
+    assert 'https://github.com/stablyai/orca/pull/7436' in links
+    assert 'https://github.com/stablyai/orca/releases/tag/v1.4.159-rc.1' in links
+    text = card.get_text(' ', strip=True)
+    for marker in ('SenseVoice', 'macOS', 'Linux', 'Windows', 'v1.4.158'):
+        assert marker in text
+
+
 def test_complete_build_passes_output_validation(built_site):
     assert validate_output(built_site) == []
 
