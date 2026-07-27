@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import re
 import sys
 from pathlib import Path
@@ -73,6 +74,25 @@ def test_language_metadata_is_symmetric(tmp_path):
     assert en.select_one('link[rel="canonical"]')['href'] == 'https://www.funasr.com/en/'
     assert zh.select_one('link[hreflang="en"]')['href'] == 'https://www.funasr.com/en/'
     assert en.select_one('link[hreflang="zh-CN"]')['href'] == 'https://www.funasr.com/'
+
+
+def test_visible_repository_links_use_fixed_conversion_routes(tmp_path):
+    build(tmp_path)
+
+    for relative in ('index.html', 'en/index.html'):
+        soup = read_soup(tmp_path / relative)
+        github_links = soup.select('a[aria-label="GitHub"], .final-cta a')
+        github_hrefs = {
+            link.get('href')
+            for link in github_links
+            if link.get_text(strip=True) == 'GitHub' or link.get('aria-label') == 'GitHub'
+        }
+        json_ld = json.loads(soup.select_one('script[type="application/ld+json"]').string)
+
+        assert github_hrefs == {'/go/github'}
+        assert soup.select_one('.site-footer a[href="/go/docs"]')
+        assert soup.select_one('.site-footer a[href="/go/releases"]')
+        assert json_ld['codeRepository'] == 'https://github.com/modelscope/FunASR'
 
 
 def test_build_manifest_records_asset_hashes(tmp_path):
