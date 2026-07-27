@@ -52,6 +52,39 @@
   </div>
 </section>
 
+<section class="section benchmark-results" data-community-benchmark="rtx4090" aria-label="{{ 'RTX 4090 社区验证' if language == 'zh' else 'RTX 4090 community validation' }}">
+  <div class="section-heading compact-heading">
+    <p class="eyebrow">{{ '消费级 GPU 社区验证' if language == 'zh' else 'Consumer GPU community validation' }}</p>
+    <h2>{{ '单张 RTX 4090 上的 Fun-ASR Nano' if language == 'zh' else 'Fun-ASR Nano on one RTX 4090' }}</h2>
+    <p>{{ 'SGLang-Omni 社区完成了 SeedTTS 英文、中文全量测试和 30 分钟稳定性测试。以下结果对应被测 feature branch，不代表 SGLang-Omni 已发布该集成。' if language == 'zh' else 'The SGLang-Omni community completed full SeedTTS English and Chinese sweeps plus a 30-minute stability run. These results describe the tested feature branch, not a released SGLang-Omni integration.' }}</p>
+  </div>
+  <div class="benchmark-list">
+    <article class="benchmark-record">
+      <div class="benchmark-record-heading">
+        <div><p>SGLang-Omni 0.1.0</p><h3>Fun-ASR Nano</h3></div>
+        <strong class="benchmark-result">c=16: 114.26 EN / 127.25 ZH samples/s</strong>
+      </div>
+      <dl class="benchmark-fields">
+        <div><dt>{{ '硬件' if language == 'zh' else 'Hardware' }}</dt><dd>RTX 4090 24,564 MiB; Ryzen 9 7950X; 125 GiB RAM</dd></div>
+        <div><dt>{{ '软件' if language == 'zh' else 'Software' }}</dt><dd>CUDA 13.0; PyTorch 2.11.0; Transformers 5.6.0; Fun-ASR <code>854d88f</code></dd></div>
+        <div><dt>SeedTTS EN</dt><dd>1,088/1,088; c=1: 20.16 samples/s, 0.050 s; c=16: 114.26 samples/s, 0.139 s; WER 0.0175</dd></div>
+        <div><dt>SeedTTS ZH</dt><dd>2,020/2,020; c=1: 14.36 samples/s, 0.071 s; c=16: 127.25 samples/s, 0.125 s; CER 0.0164</dd></div>
+        <div><dt>{{ '稳定性' if language == 'zh' else 'Stability' }}</dt><dd>{{ '30 分钟混合 c=1/4/8/16；105,067 次成功请求；0 个意外错误' if language == 'zh' else '30-minute mixed c=1/4/8/16 soak; 105,067 successful requests; 0 unexpected errors' }}</dd></div>
+        <div><dt>{{ '显存' if language == 'zh' else 'Memory' }}</dt><dd>{{ '静态分配后 15.98 GiB；CUDA Graph 捕获后 16.11 GiB；退出后显存释放' if language == 'zh' else '15.98 GiB after static allocation; 16.11 GiB after graph capture; GPU memory released on exit' }}</dd></div>
+        <div><dt>{{ '测量口径' if language == 'zh' else 'Timing scope' }}</dt><dd>{{ '预热后三次测量；完整 SeedTTS sweep；无跳过样本' if language == 'zh' else 'Three measured repeats after warmup; complete SeedTTS sweeps; zero skipped clips' }}</dd></div>
+        <div><dt>{{ '请求边界' if language == 'zh' else 'Request boundary' }}</dt><dd>{{ '每次请求最长 30 秒；只观察到最终转写事件' if language == 'zh' else 'Maximum 30 seconds per request; only terminal transcript events were observed' }}</dd></div>
+      </dl>
+      <p class="benchmark-qualification"><strong>{{ '限定：' if language == 'zh' else 'Qualification: ' }}</strong>{{ '结果来自有未提交改动的 feature worktree，上游集成仍在推进；不能据此声称已发布支持或具备低延迟增量输出。' if language == 'zh' else 'Results came from a dirty feature worktree while upstream integration remained in progress; they do not establish released support or low-latency streaming deltas.' }}</p>
+      <ul class="evidence-list">
+        <li><a href="https://github.com/sgl-project/sglang-omni/issues/1170">{{ '完整评测与环境' if language == 'zh' else 'Full benchmark and environment' }}</a></li>
+        <li><a href="https://github.com/sgl-project/sglang-omni/issues/1120">{{ '消费级 GPU 路线图' if language == 'zh' else 'Consumer GPU roadmap' }}</a></li>
+        <li><a href="https://github.com/sgl-project/sglang-omni/pull/1171">{{ '集成草稿 PR' if language == 'zh' else 'Draft integration PR' }}</a></li>
+        <li><a href="https://gist.github.com/wirybeaver/ffa8a07f89066654a271a45b21592d25">{{ '原始 JSON 数据' if language == 'zh' else 'Raw JSON artifacts' }}</a></li>
+      </ul>
+    </article>
+  </div>
+</section>
+
 <section class="section realtime-method">
   <div class="section-heading compact-heading">
     <p class="eyebrow">{{ '实时服务' if language == 'zh' else 'Realtime services' }}</p>
