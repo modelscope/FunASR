@@ -82,7 +82,12 @@ def load_server_cli():
     return module
 
 
-def install_dummy_funasr(monkeypatch, fail_once_for_models=(), generated_text="transcript"):
+def install_dummy_funasr(
+    monkeypatch,
+    fail_once_for_models=(),
+    generated_text="transcript",
+    generated_result=None,
+):
     remaining_failures = {model: 1 for model in fail_once_for_models}
 
     class DummyAutoModel:
@@ -101,6 +106,8 @@ def install_dummy_funasr(monkeypatch, fail_once_for_models=(), generated_text="t
         def generate(self, **kwargs):
             if self.kwargs.get("model") == "fsmn-vad":
                 return [{"value": [[0, 1000]]}]
+            if generated_result is not None:
+                return [generated_result.copy()]
             return [{"text": generated_text}]
 
     funasr_stub = types.ModuleType("funasr")
@@ -230,6 +237,211 @@ def test_verbose_json_reports_sensevoice_detected_language(monkeypatch):
     ]
 
 
+def test_openai_verbose_json_preserves_speaker_labels(monkeypatch):
+    module = load_server_app(monkeypatch)
+
+    response = module.build_openai_verbose_json(
+        {
+            "language": "zh",
+            "duration": 1.25,
+            "text": "hello",
+            "segments": [
+                {
+                    "start": 0.0,
+                    "end": 1.25,
+                    "text": "hello",
+                    "speaker": "SPK0",
+                }
+            ],
+        },
+        requested_language=None,
+    )
+
+    assert response["segments"] == [
+        {
+            "id": 0,
+            "start": 0.0,
+            "end": 1.25,
+            "text": "hello",
+            "words": [],
+            "speaker": "SPK0",
+        }
+    ]
+
+
+def test_attach_speaker_labels_runs_diarization_pipeline(monkeypatch):
+    import torch
+
+    module = load_server_app(monkeypatch)
+    calls = []
+
+    class DummyClusterBackend:
+        def __init__(self, merge_thr):
+            assert merge_thr == 0.78
+
+        def to(self, device):
+            assert device == "cpu"
+            return self
+
+        def __call__(self, embeddings, oracle_num=None):
+            assert embeddings.shape[1] == 2
+            assert oracle_num is None
+            calls.append("cluster")
+            return module.np.zeros(embeddings.shape[0], dtype=int)
+
+    class DummySpeakerModel:
+        def generate(self, input, cache, is_final):
+            assert input
+            assert cache == {}
+            assert is_final is True
+            return [
+                {"spk_embedding": torch.tensor([[1.0, 0.0]])}
+                for _ in input
+            ]
+
+    def fake_sv_chunk(diarization_inputs, fs):
+        assert fs == 16000
+        assert diarization_inputs[0][:2] == [0.0, 2.0]
+        calls.append("chunk")
+        return [[0.0, 2.0, diarization_inputs[0][2]]]
+
+    def fake_postprocess(chunks, vad_segments, labels, embeddings):
+        assert vad_segments is None
+        assert labels.tolist() == [0]
+        assert embeddings.shape == (1, 2)
+        calls.append("postprocess")
+        return [[chunks[0][0], chunks[0][1], 0]]
+
+    def fake_distribute_spk(sentences, speaker_timeline):
+        assert speaker_timeline == [[0.0, 2.0, 0]]
+        sentences[0]["spk"] = 0
+        calls.append("distribute")
+
+    funasr_stub = types.ModuleType("funasr")
+    funasr_stub.__path__ = []
+    models_stub = types.ModuleType("funasr.models")
+    models_stub.__path__ = []
+    campplus_stub = types.ModuleType("funasr.models.campplus")
+    campplus_stub.__path__ = []
+    cluster_stub = types.ModuleType("funasr.models.campplus.cluster_backend")
+    cluster_stub.ClusterBackend = DummyClusterBackend
+    utils_stub = types.ModuleType("funasr.models.campplus.utils")
+    utils_stub.sv_chunk = fake_sv_chunk
+    utils_stub.postprocess = fake_postprocess
+    utils_stub.distribute_spk = fake_distribute_spk
+    monkeypatch.setitem(sys.modules, "funasr", funasr_stub)
+    monkeypatch.setitem(sys.modules, "funasr.models", models_stub)
+    monkeypatch.setitem(sys.modules, "funasr.models.campplus", campplus_stub)
+    monkeypatch.setitem(
+        sys.modules, "funasr.models.campplus.cluster_backend", cluster_stub
+    )
+    monkeypatch.setitem(sys.modules, "funasr.models.campplus.utils", utils_stub)
+    segments = [{"start": 0.0, "end": 2.0, "text": "hello"}]
+
+    result = module.attach_speaker_labels(
+        module.np.ones(32000, dtype=module.np.float32),
+        16000,
+        segments,
+        DummySpeakerModel(),
+        "cpu",
+    )
+
+    assert result == [
+        {"start": 0.0, "end": 2.0, "text": "hello", "speaker": "SPK0"}
+    ]
+    assert calls == ["chunk", "cluster", "postprocess", "distribute"]
+
+
+def test_fallback_reads_sentence_info_sentence_field(monkeypatch):
+    module = load_server_app(monkeypatch)
+    install_dummy_funasr(
+        monkeypatch,
+        generated_result={
+            "text": "hello",
+            "sentence_info": [
+                {"start": 0, "end": 1250, "sentence": "hello", "spk": 1}
+            ],
+        },
+    )
+    monkeypatch.setattr(module.sf, "info", lambda path: types.SimpleNamespace(duration=1.25))
+    app = module.create_app(device="cpu", preload_model="sensevoice")
+    transcribe = app.routes[("POST", "/v1/audio/transcriptions")]
+
+    response = asyncio.run(
+        transcribe(
+            file=DummyUpload(),
+            model="sensevoice",
+            language=None,
+            response_format="verbose_json",
+            spk=False,
+        )
+    )
+
+    assert response["segments"] == [
+        {
+            "id": 0,
+            "start": 0.0,
+            "end": 1.25,
+            "text": "hello",
+            "words": [],
+            "speaker": 1,
+        }
+    ]
+
+
+def test_spk_request_lazily_loads_and_reuses_speaker_model(monkeypatch):
+    module = load_server_app(monkeypatch)
+    DummyAutoModel = install_dummy_funasr(monkeypatch)
+    monkeypatch.setattr(module.sf, "info", lambda path: types.SimpleNamespace(duration=1.25))
+    monkeypatch.setattr(
+        module.sf,
+        "read",
+        lambda path: (module.np.ones(20000, dtype=module.np.float32), 16000),
+    )
+    attach_calls = []
+
+    def fake_attach(audio_data, sample_rate, segments, speaker_model, device):
+        attach_calls.append((sample_rate, speaker_model.kwargs["model"], device))
+        segments[0]["speaker"] = "SPK0"
+        return segments
+
+    monkeypatch.setattr(module, "attach_speaker_labels", fake_attach, raising=False)
+    app = module.create_app(
+        device="cpu",
+        preload_model="sensevoice",
+        spk_model="iic/speech_eres2netv2_sv_zh-cn_16k-common",
+    )
+    transcribe = app.routes[("POST", "/v1/audio/transcriptions")]
+
+    assert not any(
+        instance.get("model") == "iic/speech_eres2netv2_sv_zh-cn_16k-common"
+        for instance in DummyAutoModel.instances
+    )
+
+    for _ in range(2):
+        response = asyncio.run(
+            transcribe(
+                file=DummyUpload(),
+                model="sensevoice",
+                language=None,
+                response_format="verbose_json",
+                spk=True,
+            )
+        )
+        assert response["segments"][0]["speaker"] == "SPK0"
+
+    speaker_models = [
+        instance
+        for instance in DummyAutoModel.instances
+        if instance.get("model") == "iic/speech_eres2netv2_sv_zh-cn_16k-common"
+    ]
+    assert len(speaker_models) == 1
+    assert attach_calls == [
+        (16000, "iic/speech_eres2netv2_sv_zh-cn_16k-common", "cpu"),
+        (16000, "iic/speech_eres2netv2_sv_zh-cn_16k-common", "cpu"),
+    ]
+
+
 def test_server_versions_follow_package_version(monkeypatch):
     expected = (REPO_ROOT / "funasr" / "version.txt").read_text().strip()
     module = load_server_app(monkeypatch)
@@ -259,6 +471,16 @@ def test_server_cli_collects_repeated_cors_origins():
         "http://localhost:3000",
         "http://127.0.0.1:3000",
     ]
+
+
+def test_server_cli_accepts_speaker_model():
+    module = load_server_cli()
+
+    args = module.build_parser().parse_args(
+        ["--spk-model", "iic/speech_eres2netv2_sv_zh-cn-16k-common"]
+    )
+
+    assert args.spk_model == "iic/speech_eres2netv2_sv_zh-cn-16k-common"
 
 
 def test_server_cors_is_disabled_by_default(monkeypatch):

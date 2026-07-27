@@ -49,6 +49,11 @@ Then use with OpenAI SDK:
     parser.add_argument("--model-path", default=None, help="Local model path or model ID (overrides --model)")
     parser.add_argument("--hub", default="ms", help="Model hub: ms (ModelScope), hf (HuggingFace) (default: ms)")
     parser.add_argument(
+        "--spk-model",
+        default="cam++",
+        help="Speaker model loaded on the first spk=true request (default: cam++)",
+    )
+    parser.add_argument(
         "--cors-origin",
         action="append",
         default=None,
@@ -81,6 +86,7 @@ def main():
         preload_model=args.model,
         model_path=args.model_path,
         hub=args.hub,
+        spk_model=args.spk_model,
         cors_origins=args.cors_origin,
     )
 

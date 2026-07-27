@@ -127,11 +127,95 @@ def prepare_audio_for_inference(audio_data, sr, target_sr=16000):
 
     return audio_data.astype(np.float32), sr
 
+
+def attach_speaker_labels(audio_data, sr, segments, speaker_model, device):
+    """Run speaker diarization once and attach labels to timestamped segments."""
+    if not segments:
+        return segments
+
+    import torch
+    from funasr.models.campplus.cluster_backend import ClusterBackend
+    from funasr.models.campplus.utils import distribute_spk, postprocess, sv_chunk
+
+    audio_data, sr = prepare_audio_for_inference(audio_data, sr)
+    duration = len(audio_data) / sr
+    diarization_inputs = []
+    segment_indexes = []
+    for index, segment in enumerate(segments):
+        start = max(float(segment.get("start", 0.0)), 0.0)
+        end = min(max(float(segment.get("end", start)), start), duration)
+        start_sample = int(start * sr)
+        end_sample = int(end * sr)
+        if end_sample <= start_sample:
+            continue
+        diarization_inputs.append([start, end, audio_data[start_sample:end_sample]])
+        segment_indexes.append(index)
+
+    chunks = sv_chunk(diarization_inputs, fs=sr)
+    if not chunks:
+        return segments
+
+    speaker_results = speaker_model.generate(
+        input=[chunk[2] for chunk in chunks], cache={}, is_final=True
+    )
+    embeddings = torch.cat(
+        [speaker_result["spk_embedding"] for speaker_result in speaker_results], dim=0
+    )
+    labels = ClusterBackend(merge_thr=0.78).to(device)(embeddings.cpu(), oracle_num=None)
+    if not isinstance(labels, np.ndarray):
+        labels = np.asarray(labels)
+    speaker_timeline = postprocess(
+        sorted(chunks, key=lambda chunk: chunk[0]),
+        None,
+        labels,
+        embeddings.detach().cpu().numpy(),
+    )
+    sentences = [
+        {
+            "text": segments[index]["text"],
+            "start": int(float(segments[index]["start"]) * 1000),
+            "end": int(float(segments[index]["end"]) * 1000),
+        }
+        for index in segment_indexes
+    ]
+    distribute_spk(sentences, speaker_timeline)
+    for index, sentence in zip(segment_indexes, sentences):
+        speaker = sentence.get("spk")
+        if speaker is not None:
+            segments[index]["speaker"] = f"SPK{speaker}"
+    return segments
+
+
+def build_openai_verbose_json(result, requested_language=None):
+    """Build OpenAI-compatible verbose JSON while preserving FunASR extensions."""
+    segments = []
+    for index, segment in enumerate(result.get("segments", [])):
+        item = {
+            "id": index,
+            "start": segment["start"],
+            "end": segment["end"],
+            "text": segment["text"],
+            "words": segment.get("words", []),
+        }
+        if segment.get("speaker") is not None:
+            item["speaker"] = segment["speaker"]
+        segments.append(item)
+
+    return {
+        "task": "transcribe",
+        "language": resolve_transcription_language(requested_language, result),
+        "duration": result.get("duration", 0),
+        "text": result["text"],
+        "segments": segments,
+    }
+
+
 def create_app(
     device: str = "cuda",
     preload_model: str = "auto",
     model_path: str = None,
     hub: str = "ms",
+    spk_model: str = "cam++",
     cors_origins: Optional[Iterable[str]] = None,
 ) -> FastAPI:
     if preload_model == "auto":
@@ -141,6 +225,8 @@ def create_app(
     app.state.device = device
     app.state.engine = None
     app.state.vad_model = None
+    app.state.spk_model = None
+    app.state.spk_model_name = spk_model
     app.state.fallback_models = {}
     app.state.model_path = model_path
     app.state.hub = hub
@@ -172,6 +258,24 @@ def create_app(
             "punc_model": "ct-punc",
         },
     }
+
+    def _load_spk_model():
+        """Lazily load diarization only when a request opts in with spk=true."""
+        if app.state.spk_model is not None:
+            return app.state.spk_model
+        if not app.state.spk_model_name:
+            raise HTTPException(400, "Speaker diarization is disabled; configure --spk-model")
+
+        from funasr import AutoModel
+
+        logger.info(f"Loading speaker model: {app.state.spk_model_name}")
+        app.state.spk_model = AutoModel(
+            model=app.state.spk_model_name,
+            device=device,
+            disable_update=True,
+        )
+        logger.info("Speaker model ready.")
+        return app.state.spk_model
 
     def _load_vllm_engine():
         """Load Fun-ASR-Nano vLLM engine. Falls back to AutoModel if vLLM unavailable."""
@@ -286,13 +390,22 @@ def create_app(
             output_segments.append(seg_info)
             full_text_parts.append(text)
 
+        if use_spk:
+            attach_speaker_labels(
+                audio_data,
+                sr,
+                output_segments,
+                _load_spk_model(),
+                device,
+            )
+
         return {
             "text": "".join(full_text_parts),
             "segments": output_segments,
             "duration": len(audio_data) / sr,
         }
 
-    def _process_fallback(model_name, audio_path, language=None):
+    def _process_fallback(model_name, audio_path, language=None, use_spk=False):
         """Process with non-LLM model (SenseVoice/Paraformer)."""
         model = _load_fallback(model_name)
         try:
@@ -309,14 +422,27 @@ def create_app(
         segments = []
         if "sentence_info" in result[0]:
             for s in result[0]["sentence_info"]:
-                segments.append({
+                segment = {
                     "start": s.get("start", 0)/1000,
                     "end": s.get("end", 0)/1000,
-                    "text": re.sub(r'<\|[^|]*\|>', '', s.get("text", "")).strip(),
-                    "speaker": s.get("spk"),
-                })
+                    "text": re.sub(
+                        r'<\|[^|]*\|>', '', s.get("text") or s.get("sentence", "")
+                    ).strip(),
+                }
+                if s.get("spk") is not None:
+                    segment["speaker"] = s["spk"]
+                segments.append(segment)
         if not segments and text:
             segments = build_openai_fallback_segments(text, duration)
+        if use_spk and segments:
+            audio_data, sr = sf.read(audio_path)
+            attach_speaker_labels(
+                audio_data,
+                sr,
+                segments,
+                _load_spk_model(),
+                device,
+            )
         return {
             "text": text,
             "segments": segments,
@@ -356,7 +482,9 @@ def create_app(
                     tmp.write(content)
                     tmp_path = tmp.name
                 try:
-                    result = _process_fallback("fun-asr-nano", tmp_path, language=language)
+                    result = _process_fallback(
+                        "fun-asr-nano", tmp_path, language=language, use_spk=spk
+                    )
                 finally:
                     os.unlink(tmp_path)
         elif model in FALLBACK_CONFIGS or model == "custom":
@@ -365,7 +493,9 @@ def create_app(
                 tmp.write(content)
                 tmp_path = tmp.name
             try:
-                result = _process_fallback(model, tmp_path, language=language)
+                result = _process_fallback(
+                    model, tmp_path, language=language, use_spk=spk
+                )
             finally:
                 os.unlink(tmp_path)
         else:
@@ -375,16 +505,7 @@ def create_app(
         t1 = time.perf_counter()
 
         if response_format == "verbose_json":
-            return JSONResponse({
-                "task": "transcribe",
-                "language": resolve_transcription_language(language, result),
-                "duration": result.get("duration", 0),
-                "text": result["text"],
-                "segments": [
-                    {"id": i, "start": s["start"], "end": s["end"], "text": s["text"], "words": s.get("words", [])}
-                    for i, s in enumerate(result["segments"])
-                ],
-            })
+            return JSONResponse(build_openai_verbose_json(result, requested_language=language))
         elif response_format == "text":
             return JSONResponse(result["text"])
         else:
@@ -412,7 +533,9 @@ def create_app(
                 tmp.write(content)
                 tmp_path = tmp.name
             try:
-                result = _process_fallback("fun-asr-nano", tmp_path, language=language)
+                result = _process_fallback(
+                    "fun-asr-nano", tmp_path, language=language, use_spk=spk
+                )
             finally:
                 os.unlink(tmp_path)
         t1 = time.perf_counter()
