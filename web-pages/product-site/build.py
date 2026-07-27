@@ -21,6 +21,7 @@ from selector import MATCH_WEIGHTS
 
 SITE_ROOT = Path(__file__).resolve().parent
 BASE_URL = 'https://www.funasr.com'
+GITHUB_REPOSITORY_URL = 'https://github.com/modelscope/FunASR'
 
 
 def sha256(path: Path) -> str:
@@ -129,7 +130,10 @@ def _page_context(
         'description': description,
         'navigation': _navigation(navigation, language),
         'assets': assets,
-        'github_url': 'https://github.com/modelscope/FunASR',
+        'github_repository_url': GITHUB_REPOSITORY_URL,
+        'github_url': '/go/github',
+        'docs_url': '/go/docs',
+        'releases_url': '/go/releases',
     }
 
 

@@ -21,7 +21,7 @@
     'applicationCategory': 'DeveloperApplication',
     'operatingSystem': 'Linux, macOS, Windows',
     'url': canonical,
-    'codeRepository': github_url,
+    'codeRepository': github_repository_url,
     'license': 'https://www.apache.org/licenses/LICENSE-2.0'
   } | tojson }}</script>
 </head>
@@ -60,7 +60,8 @@
     </div>
     <div class="footer-links">
       <a href="{{ '/deploy/' if language == 'zh' else '/en/deploy/' }}">{{ '部署' if language == 'zh' else 'Deploy' }}</a>
-      <a href="https://github.com/modelscope/FunASR/tree/main/docs">{{ '文档' if language == 'zh' else 'Docs' }}</a>
+      <a href="{{ docs_url }}">{{ '文档' if language == 'zh' else 'Docs' }}</a>
+      <a href="{{ releases_url }}">{{ '发布' if language == 'zh' else 'Releases' }}</a>
       <a href="{{ '/donors.html' if language == 'zh' else '/en/donors.html' }}">{{ '功德榜' if language == 'zh' else 'Donors' }}</a>
     </div>
   </footer>

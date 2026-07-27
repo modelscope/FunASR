@@ -75,6 +75,12 @@ kill -HUP <master-pid>
 
 ## Monitoring
 
+Visible repository, documentation, and release links use the fixed `/go/github`,
+`/go/docs`, and `/go/releases` routes. The JSON-LD `codeRepository` value remains
+the direct GitHub URL so attribution does not change search metadata. Redirect
+targets are defined only in `web-pages/nginx/conversion-map.conf`; never accept a
+target from a query parameter.
+
 Check after one hour and again after 24 hours:
 
 ```bash
@@ -83,6 +89,13 @@ tail -200 /var/log/nginx/funasr-conversions.log
 curl -fsSI https://www.funasr.com/
 curl -fsSI https://www.funasr.com/deploy/vllm.html
 curl -fsSI https://www.funasr.com/blog/
+```
+
+Count non-smoke conversion requests by route:
+
+```bash
+grep -vE '"(FunASR release smoke|curl/)' /var/log/nginx/funasr-conversions.log \
+  | awk '{print $7}' | sort | uniq -c | sort -nr
 ```
 
 Roll back on elevated 5xx responses, missing indexed routes, mobile overflow, missing assets, invalid conversion redirects, or a failed static validation.
