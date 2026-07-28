@@ -129,6 +129,8 @@ jobs:
         with:
           context: examples/mcp_server
           push: true
+          provenance: mode=max
+          sbom: true
           tags: |
             ${{ env.IMAGE_NAME }}:${{ steps.metadata.outputs.version }}
             ${{ env.IMAGE_NAME }}:latest
