@@ -41,7 +41,7 @@ class StaticAssetContract:
 PAGE_CONTRACTS: dict[str, PageContract] = {
     f"{BASE_URL}/": PageContract(
         required=(
-            "工业级",
+            "可私有化部署的语音智能基础设施",
             "/v1/audio/transcriptions",
             "vLLM",
             "/donors.html",
@@ -49,7 +49,7 @@ PAGE_CONTRACTS: dict[str, PageContract] = {
     ),
     f"{BASE_URL}/en/": PageContract(
         required=(
-            "Industrial Speech Recognition",
+            "Private-deployment speech infrastructure",
             "OpenAI-compatible",
             "/v1/audio/transcriptions",
             "vLLM",

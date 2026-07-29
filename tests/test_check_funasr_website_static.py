@@ -18,18 +18,33 @@ def _load_module():
     return module
 
 
+def _load_product_site_builder():
+    site_root = ROOT / "web-pages" / "product-site"
+    spec = importlib.util.spec_from_file_location(
+        "funasr_product_site_build", site_root / "build.py"
+    )
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    sys.path.insert(0, str(site_root))
+    try:
+        spec.loader.exec_module(module)
+    finally:
+        sys.path.remove(str(site_root))
+    return module
+
+
 def test_website_contract_accepts_current_public_copy():
     checker = _load_module()
 
     pages = {
         "https://www.funasr.com/": """
-            工业级 语音识别服务
+            可私有化部署的语音智能基础设施
             /v1/audio/transcriptions
             vLLM 加速
             <a href="/donors.html">功德榜</a>
         """,
         "https://www.funasr.com/en/": """
-            Industrial Speech Recognition
+            Private-deployment speech infrastructure
             OpenAI-compatible
             /v1/audio/transcriptions
             vLLM Acceleration
@@ -230,6 +245,24 @@ def test_website_contract_accepts_current_public_copy():
             </body>
         """,
     }
+
+    assert checker.validate_pages(pages) == []
+
+
+def test_homepage_contract_accepts_current_product_site_build(tmp_path, monkeypatch):
+    checker = _load_module()
+    builder = _load_product_site_builder()
+    builder.build(tmp_path)
+    urls = ("https://www.funasr.com/", "https://www.funasr.com/en/")
+    pages = {
+        urls[0]: (tmp_path / "index.html").read_text(encoding="utf-8"),
+        urls[1]: (tmp_path / "en" / "index.html").read_text(encoding="utf-8"),
+    }
+    monkeypatch.setattr(
+        checker,
+        "PAGE_CONTRACTS",
+        {url: checker.PAGE_CONTRACTS[url] for url in urls},
+    )
 
     assert checker.validate_pages(pages) == []
 
