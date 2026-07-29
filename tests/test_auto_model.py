@@ -23,6 +23,13 @@ class TestAutoModel(unittest.TestCase):
             "disable_update": True,
         }
 
+    def test_vda_model_typo_reports_vad_model_parameter(self):
+        with self.assertRaisesRegex(
+            TypeError,
+            r"`vda_model`.*`vad_model`",
+        ):
+            AutoModel(vda_model="fsmn-vad", disable_update=True)
+
     def test_merge_thr_in_cb_model(self):
         kwargs = self.base_kwargs.copy()
         kwargs["spk_model"] = "cam++"

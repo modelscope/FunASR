@@ -421,6 +421,11 @@ class AutoModel:
             >>> model = AutoModel(model="FunAudioLLM/Fun-ASR-Nano-2512", trust_remote_code=True,
             ...                   remote_code="./model.py", vad_model="fsmn-vad", spk_model="cam++", hub="hf")
         """
+        if "vda_model" in kwargs:
+            raise TypeError(
+                "`vda_model` is not a valid AutoModel argument; use `vad_model` to enable voice activity detection."
+            )
+
         try:
             from funasr.utils.version_checker import check_for_update
 
