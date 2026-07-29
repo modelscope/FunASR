@@ -68,8 +68,11 @@ python funasr_wss_client.py \
 --audio_in [if set, loadding from wav.scp, else recording from mircrophone] \
 --output_dir [if set, write the results to output_dir] \
 --mode [`online` for streaming asr, `offline` for non-streaming, `2pass` for unifying streaming and non-streaming asr] \
---thread_num [thread_num for send data]
+--thread_num [thread_num for send data] \
+--result_timeout [seconds to wait for the final server acknowledgement]
 ```
+
+When `--audio_in` is set, the client sends `{"is_speaking": false, "is_end": true}` after the last audio frame. The server flushes pending online and offline inference before replying with `{"is_end": true, "is_final": true}`. If inference fails, the acknowledgement contains `{"is_end": true, "is_final": false, "error": "..."}`. The client waits up to `--result_timeout` seconds for this acknowledgement; the default is 300 seconds.
 
 #### Usage examples
 ##### ASR offline client

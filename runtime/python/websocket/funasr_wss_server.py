@@ -346,6 +346,7 @@ async def ws_serve(websocket, path=None):
     frames = []
     frames_asr = []
     frames_asr_online = []
+    pending_offline_audio = []
     global websocket_users
     websocket_users.add(websocket)
 
@@ -358,6 +359,8 @@ async def ws_serve(websocket, path=None):
     websocket.vad_pre_idx = 0
     speech_start = False
     speech_end_i = -1
+    online_needs_finalization = False
+    session_errors = []
 
     websocket.wav_name = "microphone"
     websocket.mode = "2pass"
@@ -374,6 +377,88 @@ async def ws_serve(websocket, path=None):
 
     print("new user connected", flush=True)
 
+    def record_error(message):
+        if message not in session_errors:
+            session_errors.append(message)
+
+    async def finalize_online_segment():
+        nonlocal frames_asr_online, online_needs_finalization
+
+        if websocket.mode not in ("2pass", "online") or not online_needs_finalization:
+            return
+
+        websocket.status_dict_asr_online["is_final"] = True
+        try:
+            await async_asr_online(websocket, b"".join(frames_asr_online))
+        except Exception as e:
+            print("error in final asr streaming:", e)
+            record_error(f"online inference failed: {e}")
+
+        frames_asr_online = []
+        websocket.status_dict_asr_online["cache"] = {}
+        websocket.status_dict_asr_online["is_final"] = False
+        online_needs_finalization = False
+
+    async def finish_input(send_end_ack):
+        nonlocal frames, frames_asr, frames_asr_online, pending_offline_audio
+        nonlocal speech_start, speech_end_i, online_needs_finalization
+
+        await finalize_online_segment()
+
+        if websocket.mode in ("2pass", "offline"):
+            audio_in = b"".join(frames_asr)
+            if not audio_in:
+                audio_in = b"".join(pending_offline_audio)
+
+            if audio_in:
+                if websocket.save_offline_segments and audio_in:
+                    try:
+                        await run_blocking(
+                            save_offline_wav_segment_sync,
+                            websocket,
+                            audio_in,
+                            "not_speaking",
+                            sem=SEM_WAV,
+                        )
+                    except Exception as e:
+                        print("[SAVE_OFFLINE_SEG] async failed:", e)
+
+                try:
+                    await async_asr(websocket, audio_in)
+                    pending_offline_audio = []
+                except Exception as e:
+                    print("error in final asr offline:", e)
+                    record_error(f"offline inference failed: {e}")
+
+        errors = list(session_errors)
+
+        frames = []
+        frames_asr = []
+        frames_asr_online = []
+        pending_offline_audio = []
+        speech_start = False
+        speech_end_i = -1
+        online_needs_finalization = False
+        websocket.vad_pre_idx = 0
+        websocket.status_dict_asr_online["cache"] = {}
+        websocket.status_dict_vad["cache"] = {}
+
+        if send_end_ack:
+            acknowledgement = {
+                "mode": websocket.mode,
+                "wav_name": websocket.wav_name,
+                "is_final": not errors,
+                "is_end": True,
+            }
+            if errors:
+                acknowledgement["error"] = "; ".join(errors)
+            await websocket.send(
+                json.dumps(acknowledgement, ensure_ascii=False)
+            )
+            session_errors.clear()
+        elif errors:
+            raise RuntimeError("; ".join(errors))
+
     try:
         async for message in websocket:
             # ========== 1) 先处理“文本配置消息” ==========
@@ -386,9 +471,11 @@ async def ws_serve(websocket, path=None):
 
                 print("=============messagejson============", messagejson)
 
+                end_of_input = False
                 if "is_speaking" in messagejson:
                     websocket.is_speaking = bool(messagejson["is_speaking"])
                     websocket.status_dict_asr_online["is_final"] = (not websocket.is_speaking)
+                    end_of_input = not websocket.is_speaking
 
                 if "chunk_interval" in messagejson:
                     websocket.chunk_interval = _safe_int(
@@ -421,16 +508,28 @@ async def ws_serve(websocket, path=None):
                     print(f"热词已更新: {hotword_data}")
 
                 if "mode" in messagejson:
-                    websocket.mode = messagejson["mode"] or websocket.mode
+                    requested_mode = messagejson["mode"]
+                    if requested_mode and requested_mode not in ("online", "offline", "2pass"):
+                        websocket.mode = requested_mode
+                        record_error(f"unsupported mode: {requested_mode!r}")
+                    else:
+                        websocket.mode = requested_mode or websocket.mode
 
                 if "audio_fs" in messagejson:
                     websocket.audio_fs = _safe_int(messagejson["audio_fs"], 16000)
 
+                if end_of_input:
+                    await finish_input(send_end_ack=bool(messagejson.get("is_end")))
+
                 continue
 
             # ========== 2) 处理“二进制音频消息” ==========
+            if websocket.mode not in ("online", "offline", "2pass"):
+                continue
+
             if "chunk_size" not in websocket.status_dict_asr_online:
                 print("[WARN] chunk_size not set yet, skip audio frame (send config first).")
+                record_error("audio frame discarded: chunk_size is not configured")
                 continue
 
             try:
@@ -439,16 +538,21 @@ async def ws_serve(websocket, path=None):
                 )
             except Exception as e:
                 print("[WARN] set vad chunk_size failed:", e)
+                record_error(f"audio frame discarded: invalid VAD chunk_size: {e}")
                 continue
 
             pcm = message
             frames.append(pcm)
+            if websocket.mode in ("2pass", "offline"):
+                pending_offline_audio.append(pcm)
 
             duration_ms = _pcm_duration_ms(pcm, fs=websocket.audio_fs, ch=1, sampwidth=2)
             websocket.vad_pre_idx += duration_ms
 
             # online asr
             frames_asr_online.append(pcm)
+            if websocket.mode in ("2pass", "online"):
+                online_needs_finalization = True
             websocket.status_dict_asr_online["is_final"] = (speech_end_i != -1)
 
             if (len(frames_asr_online) % websocket.chunk_interval == 0) or websocket.status_dict_asr_online["is_final"]:
@@ -456,8 +560,9 @@ async def ws_serve(websocket, path=None):
                     audio_in = b"".join(frames_asr_online)
                     try:
                         await async_asr_online(websocket, audio_in)
-                    except Exception:
+                    except Exception as e:
                         print(f"error in asr streaming, {websocket.status_dict_asr_online}")
+                        record_error(f"online inference failed: {e}")
                 frames_asr_online = []
 
             if speech_start:
@@ -468,6 +573,7 @@ async def ws_serve(websocket, path=None):
                 speech_start_i, speech_end_i = await async_vad(websocket, pcm)
             except Exception as e:
                 print("error in vad:", e)
+                record_error(f"vad inference failed: {e}")
                 speech_start_i, speech_end_i = -1, -1
 
             if speech_start_i != -1:
@@ -482,8 +588,12 @@ async def ws_serve(websocket, path=None):
 
             # ========== 3) 2pass：离线阶段触发点 ==========
             if (speech_end_i != -1) or (not websocket.is_speaking):
+                await finalize_online_segment()
+
                 if websocket.mode in ("2pass", "offline"):
                     audio_in = b"".join(frames_asr)
+                    if not audio_in and speech_end_i != -1:
+                        audio_in = b"".join(pending_offline_audio)
                     reason = "vad_end" if speech_end_i != -1 else "not_speaking"
 
                     # 保存 wav：放线程池，避免磁盘 IO 卡 loop
@@ -499,21 +609,26 @@ async def ws_serve(websocket, path=None):
                         except Exception as e:
                             print("[SAVE_OFFLINE_SEG] async failed:", e)
 
-                    try:
-                        await async_asr(websocket, audio_in)
-                    except Exception as e:
-                        print("error in asr offline:", e)
+                    if audio_in:
+                        try:
+                            await async_asr(websocket, audio_in)
+                            pending_offline_audio = []
+                        except Exception as e:
+                            print("error in asr offline:", e)
+                            record_error(f"offline inference failed: {e}")
 
                 frames_asr = []
                 speech_start = False
                 frames_asr_online = []
                 websocket.status_dict_asr_online["cache"] = {}
+                websocket.status_dict_asr_online["is_final"] = False
+                online_needs_finalization = False
+                speech_end_i = -1
 
                 if not websocket.is_speaking:
                     websocket.vad_pre_idx = 0
                     frames = []
                     websocket.status_dict_vad["cache"] = {}
-                    speech_end_i = -1
                 else:
                     frames = frames[-20:]
 
@@ -524,6 +639,11 @@ async def ws_serve(websocket, path=None):
             websocket_users.remove(websocket)
     except websockets.InvalidState:
         print("InvalidState...")
+        try:
+            await ws_reset(websocket)
+        except Exception:
+            pass
+        websocket_users.discard(websocket)
     except Exception as e:
         print("Exception:", e)
         try:
@@ -663,11 +783,7 @@ async def async_asr(websocket, audio_in: bytes):
         if punc_array is not None:
             message["punc_array"] = to_python(punc_array)
 
-        try:
-            await websocket.send(json.dumps(message, ensure_ascii=False))
-        except Exception as e:
-            print("send json failed:", e)
-            print("message types:", {k: type(v) for k, v in message.items()})
+        await websocket.send(json.dumps(message, ensure_ascii=False))
     else:
         message = {
             "mode": mode,
@@ -681,7 +797,7 @@ async def async_asr(websocket, audio_in: bytes):
 
 
 async def async_asr_online(websocket, audio_in: bytes):
-    if len(audio_in) <= 0:
+    if len(audio_in) <= 0 and not websocket.status_dict_asr_online.get("is_final", False):
         return
 
     # streaming generate 也是阻塞：线程池执行
