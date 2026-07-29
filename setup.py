@@ -140,7 +140,16 @@ setup(
     long_description_content_type="text/markdown",
     license="The MIT License",
     packages=find_packages(include=["funasr*"]),
-    package_data={"funasr": ["version.txt"]},
+    package_data={
+        "funasr": [
+            "version.txt",
+            "models/sense_voice/whisper_lib/normalizers/english.json",
+            "models/rwkv_bat/cuda_encoder/*.cpp",
+            "models/rwkv_bat/cuda_encoder/*.cu",
+            "models/rwkv_bat/cuda_decoder/*.cpp",
+            "models/rwkv_bat/cuda_decoder/*.cu",
+        ]
+    },
     install_requires=install_requires,
     setup_requires=setup_requires,
     tests_require=tests_require,
