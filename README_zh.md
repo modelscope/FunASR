@@ -147,6 +147,7 @@ Whisper 是单个模型，**FunASR 是一个工具箱**——按场景挑模型�
 
 ## 最新动态
 
+- 2026/07/31：**v1.4.0 已发布到 PyPI** — `AutoModel` 现在会在下载模型前拒绝常见的 `vda_model` 误拼写并明确提示使用 `vad_model`，避免依赖 VAD 的分段、说话人处理和 `sentence_info` 被静默关闭。GitHub 源码发布同时更新 legacy WebSocket 文件运行时：客户端会等待明确的输入结束确认，服务端先刷新待处理的 offline、online 与 2pass 音频，并把收尾失败返回给客户端。Python 包安装命令：`python -m pip install -U "funasr==1.4.0"`。[发布页 →](https://github.com/modelscope/FunASR/releases/tag/v1.4.0)
 - 2026/07/27：**v1.3.30 已发布到 PyPI** — WAV、MP3、FLAC、OGG、MP4/M4A 和 WebM 等容器格式的音频字节现在会通过对应编解码器解码，不再被误当作原始 PCM。OpenAI 兼容响应会保留说话人标签，标点不匹配时仍保留 VAD 分句时间，受信任的浏览器客户端可按需启用 CORS，vLLM 的 VAD 分段上限为 30 秒。GitHub 发布页还同时提供覆盖九种桌面和服务器目标的当前 llama.cpp 预编译运行包。安装命令：`python -m pip install -U "funasr==1.3.30"`。[发布页 →](https://github.com/modelscope/FunASR/releases/tag/v1.3.30)
 - 2026/07/24：**v1.3.29 热修复已发布到 PyPI** — SenseVoice 长音频在没有词级时间戳和标点模型时，现在会通过 `sentence_info` 返回每个 VAD 语音片段。字幕客户端可直接获得识别文本及真实的毫秒级起止时间，不再退化为零时长或覆盖整段媒体的单条字幕。安装命令：`python -m pip install -U "funasr==1.3.29"`。[发布页 →](https://github.com/modelscope/FunASR/releases/tag/v1.3.29)
 - 2026/07/24：**v1.3.28 热修复已发布到 PyPI** — 实时 WebSocket 在 VAD 锁句结果退化为短前缀、重复幻觉或解码异常时，会保留连续且完整覆盖当前语音段的干净 partial；短音频 STOP、VAD 收尾和说话人结束现在统一走可靠的完成路径。SenseVoice 字幕分句也会正确对齐富标签、标点与词/BPE 时间戳，不再把中文压成一个字幕块，也不会破坏英文原文。安装命令：`python -m pip install -U "funasr==1.3.28"`。[发布页 →](https://github.com/modelscope/FunASR/releases/tag/v1.3.28)
