@@ -95,6 +95,27 @@ def test_visible_repository_links_use_fixed_conversion_routes(tmp_path):
         assert json_ld['codeRepository'] == 'https://github.com/modelscope/FunASR'
 
 
+def test_home_surfaces_attributed_ecosystem_repositories(tmp_path):
+    build(tmp_path)
+
+    for relative, expected_heading in (
+        ('index.html', '从模型到视频工作流'),
+        ('en/index.html', 'From models to video workflows'),
+    ):
+        soup = read_soup(tmp_path / relative)
+        section = soup.select_one('[data-section="ecosystem-adoption"]')
+
+        assert section
+        assert section.h2.get_text(strip=True) == expected_heading
+        assert {link.get('href') for link in section.select('a[href]')} == {
+            '/go/fun-asr',
+            '/go/sensevoice',
+            '/go/funclip',
+        }
+        text = section.get_text(' ', strip=True)
+        assert all(name in text for name in ('Fun-ASR', 'SenseVoice', 'FunClip'))
+
+
 def test_build_manifest_records_asset_hashes(tmp_path):
     manifest = build(tmp_path)
 
