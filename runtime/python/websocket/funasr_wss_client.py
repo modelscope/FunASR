@@ -50,6 +50,12 @@ parser.add_argument("--output_dir", type=str, default=None, help="output_dir")
 parser.add_argument("--ssl", type=int, default=1, help="1 for ssl connect, 0 for no ssl")
 parser.add_argument("--use_itn", type=int, default=1, help="1 for using itn, 0 for not itn")
 parser.add_argument("--mode", type=str, default="2pass", help="offline, online, 2pass")
+parser.add_argument(
+    "--result_timeout",
+    type=float,
+    default=300.0,
+    help="seconds to wait for the server's end-of-input acknowledgement",
+)
 
 # ✅ 验收日志输出目录（每个 meeting 单独写，避免多进程抢文件）
 parser.add_argument("--log_dir", type=str, default="./asr_logs", help="验收日志输出目录")
@@ -185,7 +191,7 @@ async def record_microphone():
         await asyncio.sleep(0.01)
 
 
-async def record_from_scp(chunk_begin, chunk_size):
+async def record_from_scp(chunk_begin, chunk_size, completion_queue):
     """从 wav/scp 文件读取音频分片发送，用于压测和延迟测试"""
     global voices, latency_first_audio_time, latency_last_audio_time
     if args.audio_in.endswith(".scp"):
@@ -268,7 +274,6 @@ async def record_from_scp(chunk_begin, chunk_size):
         )
 
         await websocket.send(message)
-        is_speaking = True
 
         # 初始化该 wav 的统计状态
         latency_first_audio_time[wav_name] = None
@@ -286,10 +291,6 @@ async def record_from_scp(chunk_begin, chunk_size):
 
             await websocket.send(data)
 
-            if i == chunk_num - 1:
-                is_speaking = False
-                await websocket.send(json.dumps({"is_speaking": is_speaking}, ensure_ascii=False))
-
             # ✅ sleep策略：默认按实时节奏；若开启 send_without_sleep 则几乎不 sleep（压测）
             if args.send_without_sleep:
                 sleep_duration = 0.001
@@ -301,20 +302,30 @@ async def record_from_scp(chunk_begin, chunk_size):
                 )
             await asyncio.sleep(sleep_duration)
 
-    if not args.mode == "offline":
-        await asyncio.sleep(2)
-
-    if args.mode == "offline":
-        global offline_msg_done
-        while not offline_msg_done:
-            await asyncio.sleep(1)
-
-    await asyncio.sleep(10)
+        await websocket.send(
+            json.dumps({"is_speaking": False, "is_end": True}, ensure_ascii=False)
+        )
+        try:
+            acknowledgement = await asyncio.wait_for(
+                completion_queue.get(), timeout=args.result_timeout
+            )
+        except asyncio.TimeoutError as e:
+            await websocket.close()
+            raise TimeoutError(
+                f"server did not acknowledge end of input for {wav_name!r} "
+                f"within {args.result_timeout:g} seconds"
+            ) from e
+        if not acknowledgement.get("is_final", False):
+            await websocket.close()
+            error = acknowledgement.get("error") or "server did not finalize input"
+            raise RuntimeError(
+                f"server failed to finalize {wav_name!r}: {error}"
+            )
 
     await websocket.close()
 
 
-async def message(id, writer: MeetingWriter):
+async def message(id, writer: MeetingWriter, completion_queue):
     """接收服务端识别结果 + 打印实时文本 + 打印延迟 + 写验收日志(events.jsonl)"""
     import websockets
     global websocket, voices, offline_msg_done
@@ -324,6 +335,13 @@ async def message(id, writer: MeetingWriter):
     text_print = ""
     text_print_2pass_online = ""
     text_print_2pass_offline = ""
+    end_ack_received = False
+
+    def release_sender_with_error(error):
+        if completion_queue is not None and not end_ack_received:
+            completion_queue.put_nowait(
+                {"is_end": True, "is_final": False, "error": error}
+            )
 
     if args.output_dir is not None:
         ibest_writer = open(
@@ -372,6 +390,10 @@ async def message(id, writer: MeetingWriter):
 
             timestamp = meg.get("timestamp", "")
             offline_msg_done = meg.get("is_final", False)
+            if meg.get("is_end"):
+                end_ack_received = True
+                if completion_queue is not None:
+                    completion_queue.put_nowait(meg)
 
             # ✅ 验收友好：每条消息落 events.jsonl（便于后处理）
             event = {
@@ -460,8 +482,10 @@ async def message(id, writer: MeetingWriter):
 
     except websockets.exceptions.ConnectionClosedOK:
         print(f"[MEETING {id}] connection closed normally")
+        release_sender_with_error("connection closed before end-of-input acknowledgement")
     except Exception as e:
         print(f"[MEETING {id}] Exception:", e)
+        release_sender_with_error(f"receiver failed before end-of-input acknowledgement: {e}")
     finally:
         try:
             if ibest_writer is not None:
@@ -497,12 +521,15 @@ async def ws_client(id, chunk_begin, chunk_size):
         ) as websocket:
             meeting_tag = f"{id}_{i}"
             writer = MeetingWriter(args.log_dir, meeting_id=meeting_tag, flush_every=args.log_flush_every)
+            completion_queue = asyncio.Queue() if args.audio_in is not None else None
             try:
                 if args.audio_in is not None:
-                    task = asyncio.create_task(record_from_scp(i, 1))
+                    task = asyncio.create_task(record_from_scp(i, 1, completion_queue))
                 else:
                     task = asyncio.create_task(record_microphone())
-                task3 = asyncio.create_task(message(str(id) + "_" + str(i), writer))  # processid+fileid
+                task3 = asyncio.create_task(
+                    message(str(id) + "_" + str(i), writer, completion_queue)
+                )  # processid+fileid
                 await asyncio.gather(task, task3)
             finally:
                 writer.close()
