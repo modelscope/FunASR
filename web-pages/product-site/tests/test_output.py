@@ -139,6 +139,26 @@ def test_old_llama_routes_point_to_product_pages(built_site):
         )
 
 
+@pytest.mark.parametrize('relative', ('models.html', 'en/models.html'))
+def test_model_pages_use_attributed_repository_routes(built_site, relative):
+    soup = read_soup(built_site / relative)
+    hrefs = {link.get('href') for link in soup.select('a[href]')}
+
+    assert '/go/fun-asr' in hrefs
+    assert '/go/sensevoice' in hrefs
+    assert 'https://github.com/QwenAudio/Fun-ASR' not in hrefs
+    assert 'https://github.com/QwenAudio/SenseVoice' not in hrefs
+
+
+@pytest.mark.parametrize('relative', ('ecosystem.html', 'en/ecosystem.html'))
+def test_ecosystem_pages_use_attributed_funclip_route(built_site, relative):
+    soup = read_soup(built_site / relative)
+    hrefs = {link.get('href') for link in soup.select('a[href]')}
+
+    assert '/go/funclip' in hrefs
+    assert 'https://github.com/modelscope/FunClip' not in hrefs
+
+
 @pytest.mark.parametrize('relative', ('ecosystem.html', 'en/ecosystem.html'))
 def test_ecosystem_surfaces_orca_sensevoice_desktop_integration(built_site, relative):
     soup = read_soup(built_site / relative)

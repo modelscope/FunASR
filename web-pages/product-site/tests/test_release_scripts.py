@@ -13,10 +13,18 @@ CONVERSION_MAP = REPO_ROOT / 'web-pages' / 'nginx' / 'conversion-map.conf'
 NGINX_CONFIG = REPO_ROOT / 'web-pages' / 'nginx' / 'funasr.com.conf'
 EXPECTED_FIXED_ROUTES = {
     '/go/github',
+    '/go/fun-asr',
+    '/go/sensevoice',
+    '/go/funclip',
     '/go/docs',
     '/go/releases',
     '/go/deploy-vllm',
     '/go/deploy-llama-cpp',
+}
+EXPECTED_REPOSITORY_ROUTES = {
+    '/go/fun-asr': 'https://github.com/QwenAudio/Fun-ASR',
+    '/go/sensevoice': 'https://github.com/QwenAudio/SenseVoice',
+    '/go/funclip': 'https://github.com/modelscope/FunClip',
 }
 
 
@@ -120,6 +128,7 @@ def test_conversion_map_contains_only_fixed_redirects():
         routes[route] = target
 
     assert set(routes) == EXPECTED_FIXED_ROUTES
+    assert EXPECTED_REPOSITORY_ROUTES.items() <= routes.items()
     assert all(
         target.startswith('https://github.com/') or target.startswith('https://www.funasr.com/')
         for target in routes.values()
