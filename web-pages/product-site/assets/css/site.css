@@ -610,6 +610,49 @@ td a {
   color: var(--muted);
 }
 
+.ecosystem-repositories {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 44px;
+}
+
+.ecosystem-repositories article {
+  display: flex;
+  min-height: 250px;
+  flex-direction: column;
+  padding-top: 20px;
+  border-top: 3px solid var(--blue);
+}
+
+.ecosystem-repositories article:nth-child(2) {
+  border-color: var(--green);
+}
+
+.ecosystem-repositories article:nth-child(3) {
+  border-color: #d08a21;
+}
+
+.repository-role {
+  margin: 0 0 8px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 750;
+}
+
+.ecosystem-repositories h3 {
+  margin: 0 0 8px;
+  font-size: 24px;
+}
+
+.ecosystem-repositories article > p:not(.repository-role) {
+  margin: 0 0 24px;
+  color: var(--muted);
+}
+
+.ecosystem-repositories .text-link {
+  margin-top: auto;
+}
+
 .final-cta {
   display: flex;
   align-items: end;
@@ -1192,7 +1235,8 @@ td a {
     grid-template-columns: 1fr;
   }
 
-  .responsibility-grid {
+  .responsibility-grid,
+  .ecosystem-repositories {
     gap: 24px;
   }
 
@@ -1394,8 +1438,13 @@ td a {
   }
 
   .responsibility-grid,
+  .ecosystem-repositories,
   .deploy-grid {
     grid-template-columns: 1fr;
+  }
+
+  .ecosystem-repositories article {
+    min-height: 0;
   }
 
   .final-cta,

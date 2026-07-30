@@ -155,6 +155,34 @@
   </div>
 </section>
 
+<section class="section ecosystem-section" data-section="ecosystem-adoption">
+  <div class="section-heading">
+    <p class="eyebrow">{{ '生态仓库' if language == 'zh' else 'Ecosystem repositories' }}</p>
+    <h2>{{ '从模型到视频工作流' if language == 'zh' else 'From models to video workflows' }}</h2>
+    <p>{{ '按目标进入专用仓库，核对模型、部署边界与可复现示例。' if language == 'zh' else 'Open the focused repository for its models, deployment boundaries, and reproducible examples.' }}</p>
+  </div>
+  <div class="ecosystem-repositories">
+    <article>
+      <p class="repository-role">{{ '端到端语音识别' if language == 'zh' else 'End-to-end speech recognition' }}</p>
+      <h3>Fun-ASR</h3>
+      <p>{{ '端到端语音识别模型家族，覆盖旗舰与 31 语言 MLT 检查点。' if language == 'zh' else 'A family of end-to-end speech recognition models spanning flagship and 31-language MLT checkpoints.' }}</p>
+      <a class="text-link" href="/go/fun-asr">{{ '查看 Fun-ASR' if language == 'zh' else 'Open Fun-ASR on GitHub' }} <img src="{{ assets['lucide/arrow-right.svg'] }}" alt=""></a>
+    </article>
+    <article>
+      <p class="repository-role">{{ '多语言语音理解' if language == 'zh' else 'Multilingual speech understanding' }}</p>
+      <h3>SenseVoice</h3>
+      <p>{{ '覆盖语音识别、语言、情感与音频事件的多语言理解模型。' if language == 'zh' else 'Multilingual understanding across speech recognition, language, emotion, and audio events.' }}</p>
+      <a class="text-link" href="/go/sensevoice">{{ '查看 SenseVoice' if language == 'zh' else 'Open SenseVoice on GitHub' }} <img src="{{ assets['lucide/arrow-right.svg'] }}" alt=""></a>
+    </article>
+    <article>
+      <p class="repository-role">{{ '视频理解与剪辑' if language == 'zh' else 'Video understanding and clipping' }}</p>
+      <h3>FunClip</h3>
+      <p>{{ '以语音与文本定位为核心的视频理解与智能剪辑工作流。' if language == 'zh' else 'Video understanding and intelligent clipping workflows driven by speech and text localization.' }}</p>
+      <a class="text-link" href="/go/funclip">{{ '查看 FunClip' if language == 'zh' else 'Open FunClip on GitHub' }} <img src="{{ assets['lucide/arrow-right.svg'] }}" alt=""></a>
+    </article>
+  </div>
+</section>
+
 <section class="section final-cta">
   <div>
     <p class="eyebrow">{{ '下一步' if language == 'zh' else 'Next step' }}</p>
