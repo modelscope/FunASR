@@ -33,6 +33,18 @@ extern "C" {
 using namespace std;
 
 namespace funasr {
+#if !defined(__APPLE__) && defined(ENABLE_FFMPEG)
+namespace {
+void FreeAvioContext(AVIOContext** avio_ctx) {
+    if (avio_ctx == nullptr || *avio_ctx == nullptr) {
+        return;
+    }
+    av_freep(&(*avio_ctx)->buffer);
+    avio_context_free(avio_ctx);
+}
+}  // namespace
+#endif
+
 // see http://soundfile.sapp.org/doc/WaveFormat/
 // Note: We assume little endian here
 struct WaveHeader {
@@ -472,17 +484,17 @@ bool Audio::FfmpegLoad(const char* buf, int n_file_len){
     formatContext->pb = avio_ctx;
     if (avformat_open_input(&formatContext, "", nullptr, nullptr) != 0) {
         LOG(ERROR) << "Error: Could not open input file.";
-        avio_context_free(&avio_ctx);
         avformat_close_input(&formatContext);
         avformat_free_context(formatContext);
+        FreeAvioContext(&avio_ctx);
         return false;
     }
 
     if (avformat_find_stream_info(formatContext, nullptr) < 0) {
         LOG(ERROR) << "Error: Could not find stream information.";
-        avio_context_free(&avio_ctx);
         avformat_close_input(&formatContext);
         avformat_free_context(formatContext);
+        FreeAvioContext(&avio_ctx);
         return false;
     }
     const AVCodec* codec = nullptr;
@@ -494,24 +506,24 @@ bool Audio::FfmpegLoad(const char* buf, int n_file_len){
     AVCodecContext* codecContext = avcodec_alloc_context3(codec);
     if (!codecContext) {
         LOG(ERROR) << "Failed to allocate codec context";
-        avio_context_free(&avio_ctx);
         avformat_close_input(&formatContext);
         avformat_free_context(formatContext);
+        FreeAvioContext(&avio_ctx);
         return false;
     }
     if (avcodec_parameters_to_context(codecContext, codecParameters) != 0) {
         LOG(ERROR) << "Error: Could not copy codec parameters to codec context.";
-        avio_context_free(&avio_ctx);
         avformat_close_input(&formatContext);
         avformat_free_context(formatContext);
+        FreeAvioContext(&avio_ctx);
         avcodec_free_context(&codecContext);
         return false;
     }
     if (avcodec_open2(codecContext, codec, nullptr) < 0) {
         LOG(ERROR) << "Error: Could not open audio decoder.";
-        avio_context_free(&avio_ctx);
         avformat_close_input(&formatContext);
         avformat_free_context(formatContext);
+        FreeAvioContext(&avio_ctx);
         avcodec_free_context(&codecContext);
         return false;
     }
@@ -528,17 +540,17 @@ bool Audio::FfmpegLoad(const char* buf, int n_file_len){
     );
     if (swr_ctx == nullptr) {
         LOG(ERROR) << "Could not initialize resampler";
-        avio_context_free(&avio_ctx);
         avformat_close_input(&formatContext);
         avformat_free_context(formatContext);
+        FreeAvioContext(&avio_ctx);
         avcodec_free_context(&codecContext);
         return false;
     }
     if (swr_init(swr_ctx) != 0) {
         LOG(ERROR) << "Could not initialize resampler";
-        avio_context_free(&avio_ctx);
         avformat_close_input(&formatContext);
         avformat_free_context(formatContext);
+        FreeAvioContext(&avio_ctx);
         avcodec_free_context(&codecContext);
         swr_free(&swr_ctx);
         return false;
@@ -582,11 +594,9 @@ bool Audio::FfmpegLoad(const char* buf, int n_file_len){
         av_packet_unref(packet);
     }
 
-    //avio_context_free(&avio_ctx);
-    av_freep(&avio_ctx ->buffer);
-    av_freep(&avio_ctx);
     avformat_close_input(&formatContext);
     avformat_free_context(formatContext);
+    FreeAvioContext(&avio_ctx);
     avcodec_free_context(&codecContext);
     swr_free(&swr_ctx);
     av_packet_free(&packet);
