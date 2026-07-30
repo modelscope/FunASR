@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "verified": "2026-07-26",
+  "verified": "2026-07-30",
   "deployments": [
     {
       "id": "vllm",
@@ -141,6 +141,84 @@
           "operations": ["Verify release assets with SHA-256", "Keep models and binaries on the same release manifest", "Retain the previous binary and model directory for rollback"],
           "security": ["Read local audio and models by default", "Bind the HTTP server to a private address and limit uploads", "Do not load GGUF files from untrusted sources"],
           "troubleshooting": ["Validate the q8 CPU path first", "Match CUDA or Vulkan to the local driver", "Use repository regression scripts to separate model and build failures"]
+        }
+      }
+    },
+    {
+      "id": "audio-cpp",
+      "routes": {"zh": "/deploy/audio-cpp.html", "en": "/en/deploy/audio-cpp.html"},
+      "maturity": "community-verified",
+      "selector_rank": 21,
+      "workloads": ["edge", "batch", "private-api"],
+      "hardware": ["cpu", "nvidia-gpu", "desktop-edge-gpu"],
+      "priorities": ["portability", "compatibility"],
+      "models": ["Fun-ASR-Nano-2512"],
+      "operating_systems": ["Linux", "macOS", "Windows"],
+      "interfaces": ["CLI", "OpenAI-compatible HTTP"],
+      "tested": {"funasr": "Fun-ASR-Nano-2512", "runtime": "audio.cpp@1778b23a", "verified": "2026-07-30"},
+      "commands": {
+        "install": [
+          "git clone https://github.com/0xShug0/audio.cpp.git && cd audio.cpp",
+          "bash scripts/build_linux.sh --backend cpu --model-set custom --models fun_asr_nano --target audiocpp_cli --target audiocpp_server",
+          "python3 tools/model_manager_v2.py install fun_asr_nano"
+        ],
+        "launch": [
+          "build/linux-cpu-release/bin/audiocpp_cli --task asr --family fun_asr_nano --model models/Fun-ASR-Nano-2512-GGUF/fun-asr-nano-2512-q8_0.gguf --backend cpu --audio speech.wav --text-out transcript.txt",
+          "printf '%s\\n' '{\"host\":\"127.0.0.1\",\"port\":8080,\"backend\":\"cpu\",\"threads\":4,\"lazy_load\":true,\"models\":[{\"id\":\"fun-asr-nano\",\"family\":\"fun_asr_nano\",\"path\":\"models/Fun-ASR-Nano-2512-GGUF/fun-asr-nano-2512-q8_0.gguf\",\"task\":\"asr\",\"mode\":\"offline\"}]}' > server.json",
+          "build/linux-cpu-release/bin/audiocpp_server --config server.json"
+        ],
+        "health": [
+          "curl -fsS http://127.0.0.1:8080/health",
+          "curl -fsS http://127.0.0.1:8080/v1/models"
+        ],
+        "smoke": [
+          "curl -fsS http://127.0.0.1:8080/v1/audio/transcriptions -F model=fun-asr-nano -F language=auto -F file=@speech.wav"
+        ]
+      },
+      "evidence": [
+        {"label": "audio.cpp Fun-ASR-Nano guide", "url": "https://github.com/0xShug0/audio.cpp/blob/1778b23a5f6a4951c788e4bb0e7baa04f20012a2/docs/models/fun_asr_nano.md"},
+        {"label": "merged implementation", "url": "https://github.com/0xShug0/audio.cpp/pull/155"},
+        {"label": "pinned GGUF package", "url": "https://huggingface.co/FunAudioLLM/Fun-ASR-Nano-2512-GGUF/tree/ce72677f84900f0dc57f498ace253bfb3c9155b6"}
+      ],
+      "benchmarks": [
+        {
+          "model": "Fun-ASR-Nano-2512 Q8_0 GGUF",
+          "runtime": "audio.cpp native Fun-ASR-Nano runtime",
+          "hardware": "NVIDIA H100 CUDA; exact driver and toolchain versions are not recorded in the cited guide",
+          "workload": "Single offline transcription through the OpenAI-compatible server",
+          "audio": "One 14.07-second reference WAV",
+          "settings": "Standalone Q8_0 GGUF; CUDA backend; concurrency one; other runtime settings are not recorded",
+          "timing_scope": "End-to-end server validation; the cited guide does not state warmup, file I/O, or process-start boundaries",
+          "result": "Approximately 0.0725 RTF; transcript matched the official safetensors path",
+          "qualification": "Single-sample parity smoke, not a capacity benchmark. Reproduce on target hardware with production audio and concurrency.",
+          "source": "https://github.com/0xShug0/audio.cpp/blob/1778b23a5f6a4951c788e4bb0e7baa04f20012a2/docs/models/fun_asr_nano.md",
+          "verified": "2026-07-29"
+        }
+      ],
+      "translations": {
+        "zh": {
+          "name": "audio.cpp 原生 Fun-ASR-Nano",
+          "summary": "用原生 C++ / GGML 在 CPU 或 CUDA 上运行 Fun-ASR-Nano Q8_0，并提供 CLI 与兼容 OpenAI 的本地转写服务。",
+          "fit": ["不希望安装 Python 推理环境", "桌面、边缘与离线批量转写", "需要兼容 OpenAI 的本地音频接口"],
+          "not_fit": ["需要实时流式结果或时间戳", "需要 Fun-ASR-Nano 之外的 FunASR 模型", "尚未在目标硬件完成容量与准确率复测的公网服务"],
+          "selection_reason": "原生 GGML、Q8_0 模型和统一 CLI/HTTP 接口适合低依赖的离线 Fun-ASR-Nano 部署。",
+          "primary_limitation": "当前只输出离线转写文本，不暴露 streaming 或 timestamps；其他模型家族仍应选择对应 FunASR 运行时。",
+          "status_label": "社区验证",
+          "operations": ["固定 audio.cpp 提交与 GGUF revision", "先用已知 WAV 核对 transcript 再接业务流量", "分别记录冷启动、预热 RTF、内存与并发队列"],
+          "security": ["服务默认绑定 127.0.0.1 或可信内网", "在反向代理限制上传大小、MIME、认证与并发", "只加载经过 SHA-256 校验的 GGUF 和配置"],
+          "troubleshooting": ["先用 CPU + Q8_0 路径排除 CUDA 环境问题", "构建 backend 必须与运行参数一致", "输入异常时先核对 WAV、单声道和 16 kHz 转换路径"]
+        },
+        "en": {
+          "name": "audio.cpp native Fun-ASR-Nano",
+          "summary": "Run Fun-ASR-Nano Q8_0 with native C++ and GGML on CPU or CUDA, using a CLI or local OpenAI-compatible transcription service.",
+          "fit": ["No Python inference environment", "Desktop, edge, and offline batch transcription", "A local OpenAI-compatible audio endpoint is required"],
+          "not_fit": ["Realtime streaming results or timestamps", "FunASR model families other than Fun-ASR-Nano", "Internet-facing service before capacity and accuracy tests on target hardware"],
+          "selection_reason": "Native GGML, Q8_0 weights, and shared CLI/HTTP surfaces fit low-dependency offline Fun-ASR-Nano deployment.",
+          "primary_limitation": "The current path returns offline transcript text only and exposes neither streaming nor timestamps; use the corresponding FunASR runtime for other model families.",
+          "status_label": "Community verified",
+          "operations": ["Pin the audio.cpp commit and GGUF revision", "Verify a known WAV transcript before business traffic", "Measure cold start, warm RTF, memory, and concurrent queueing separately"],
+          "security": ["Bind the service to 127.0.0.1 or a trusted private network", "Enforce upload size, MIME, authentication, and concurrency at the proxy", "Load only GGUF and configuration files verified with SHA-256"],
+          "troubleshooting": ["Start with CPU and Q8_0 to isolate CUDA setup", "Match the compiled backend to the runtime argument", "For input failures, verify WAV decoding, mono conversion, and 16 kHz resampling"]
         }
       }
     },
