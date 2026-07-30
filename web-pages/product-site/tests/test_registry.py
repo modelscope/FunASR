@@ -17,6 +17,7 @@ REGISTRY = SITE_ROOT / 'data' / 'deployments.json'
 EXPECTED_IDS = {
     'vllm',
     'llama-cpp',
+    'audio-cpp',
     'openai-api',
     'realtime',
     'containers',
@@ -40,6 +41,29 @@ def test_registry_has_all_product_routes(valid_registry):
 
 def test_language_pairs_have_identical_fields(valid_registry):
     assert all(set(zh) == set(en) for zh, en in deployment_pairs(valid_registry))
+
+
+def test_audio_cpp_contract_tracks_merged_offline_runtime(valid_registry):
+    entry = next(item for item in valid_registry['deployments'] if item['id'] == 'audio-cpp')
+    llama_cpp = next(item for item in valid_registry['deployments'] if item['id'] == 'llama-cpp')
+
+    assert entry['maturity'] == 'community-verified'
+    assert entry['selector_rank'] > llama_cpp['selector_rank']
+    assert entry['tested'] == {
+        'funasr': 'Fun-ASR-Nano-2512',
+        'runtime': 'audio.cpp@1778b23a',
+        'verified': '2026-07-30',
+    }
+    assert entry['models'] == ['Fun-ASR-Nano-2512']
+    assert any('model_manager_v2.py install fun_asr_nano' in command for command in entry['commands']['install'])
+    build_command = next(command for command in entry['commands']['install'] if '--model-set custom' in command)
+    assert build_command.startswith('bash scripts/build_linux.sh ')
+    assert any('/v1/audio/transcriptions' in command for command in entry['commands']['smoke'])
+    assert any('/health' in command for command in entry['commands']['health'])
+    assert any('1778b23a5f6a4951c788e4bb0e7baa04f20012a2' in item['url'] for item in entry['evidence'])
+    assert any('ce72677f84900f0dc57f498ace253bfb3c9155b6' in item['url'] for item in entry['evidence'])
+    assert 'streaming' in entry['translations']['en']['primary_limitation'].lower()
+    assert 'timestamp' in entry['translations']['en']['primary_limitation'].lower()
 
 
 def test_production_entry_requires_evidence(valid_registry):
