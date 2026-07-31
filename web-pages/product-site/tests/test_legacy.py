@@ -109,3 +109,50 @@ def test_english_navigation_uses_language_peer():
 
     assert [link.get_text(strip=True) for link in soup.select('.nav-links a')][-1] == 'Donors'
     assert soup.select_one('[data-language-peer]')['href'] == '/blog/example.html'
+
+
+def test_v140_release_pages_are_bilingual_indexed_and_precise():
+    slug = 'funasr-v1-4-0-pypi-release.html'
+    pages = {
+        'zh': LEGACY / 'blog' / slug,
+        'en': LEGACY / 'en' / 'blog' / slug,
+    }
+    runtime_assets = (
+        'linux-arm64',
+        'linux-x64',
+        'linux-x64-avx2',
+        'linux-x64-vulkan',
+        'macos-arm64',
+        'windows-x64',
+        'windows-x64-avx2',
+        'windows-x64-cuda',
+        'windows-x64-vulkan',
+    )
+
+    for language, path in pages.items():
+        text = path.read_text(encoding='utf-8')
+        soup = BeautifulSoup(text, 'html.parser')
+
+        assert 'funasr==1.4.0' in text
+        assert 'https://github.com/modelscope/FunASR/releases/tag/v1.4.0' in text
+        assert 'SHA256SUMS-v1.4.0' in text
+        assert '`vda_model`' not in text
+        assert 'vda_model' in text
+        assert 'vad_model' in text
+        assert 'SenseVoice' in text
+        assert 'RWKV-BAT' in text
+        assert 'PyPI wheel' in text
+        assert 'tagged source' in text
+        assert all(asset in text for asset in runtime_assets)
+
+        expected_route = f'/{"" if language == "zh" else "en/"}blog/{slug}'
+        assert soup.select_one('link[rel="canonical"]')['href'].endswith(expected_route)
+
+    zh_index = (LEGACY / 'blog' / 'index.html').read_text(encoding='utf-8')
+    en_index = (LEGACY / 'en' / 'blog' / 'index.html').read_text(encoding='utf-8')
+    sitemap = (LEGACY / 'sitemap.xml').read_text(encoding='utf-8')
+
+    assert f'/blog/{slug}' in zh_index
+    assert f'/en/blog/{slug}' in en_index
+    assert f'https://www.funasr.com/blog/{slug}' in sitemap
+    assert f'https://www.funasr.com/en/blog/{slug}' in sitemap
