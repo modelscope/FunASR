@@ -238,10 +238,9 @@ class Trainer:
                 self.best_step_or_epoch = ckpt_name
 
             if self.avg_keep_nbest_models_type == "acc":
-                if (
-                    self.val_acc_step_or_epoch[ckpt_name]
-                    >= self.val_acc_step_or_epoch[self.best_step_or_epoch]
-                ):
+                cur_acc = self.val_acc_step_or_epoch.get(ckpt_name)
+                best_acc = self.val_acc_step_or_epoch.get(self.best_step_or_epoch)
+                if cur_acc is not None and (best_acc is None or cur_acc >= best_acc):
                     self.best_step_or_epoch = ckpt_name
                     best_ckpt = Path(os.path.join(self.output_dir, f"model.pt.best"))
                     # torch.save(state, best_ckpt)
@@ -250,17 +249,20 @@ class Trainer:
                             save_dir=self.output_dir, tag=f"model.pt.best", client_state=state
                         )
                     logging.info(
-                        f"Update best acc: {self.val_acc_step_or_epoch[self.best_step_or_epoch]:.4f}, {best_ckpt}"
+                        f"Update best acc: {cur_acc:.4f}, {best_ckpt}"
+                    )
+                elif cur_acc is None:
+                    logging.info(
+                        f"Checkpoint {ckpt_name} saved at a step with no validation acc yet; not considered for best."
                     )
                 else:
                     logging.info(
-                        f"No improvement in acc: {self.val_acc_step_or_epoch[ckpt_name]:.4f} < {self.val_acc_step_or_epoch[self.best_step_or_epoch]:.4f}, {os.path.join(self.output_dir, self.best_step_or_epoch)}"
+                        f"No improvement in acc: {cur_acc:.4f} < {best_acc:.4f}, {os.path.join(self.output_dir, self.best_step_or_epoch)}"
                     )
             elif self.avg_keep_nbest_models_type == "loss":
-                if (
-                    self.val_loss_step_or_epoch[ckpt_name]
-                    <= self.val_loss_step_or_epoch[self.best_step_or_epoch]
-                ):
+                cur_loss = self.val_loss_step_or_epoch.get(ckpt_name)
+                best_loss = self.val_loss_step_or_epoch.get(self.best_step_or_epoch)
+                if cur_loss is not None and (best_loss is None or cur_loss <= best_loss):
                     self.best_step_or_epoch = ckpt_name
                     best_ckpt = Path(os.path.join(self.output_dir, f"model.pt.best"))
                     # torch.save(state, best_ckpt)
@@ -269,18 +271,22 @@ class Trainer:
                             save_dir=self.output_dir, tag=f"model.pt.best", client_state=state
                         )
                     logging.info(
-                        f"Update best loss: {self.val_loss_step_or_epoch[self.best_step_or_epoch]:.4f}, {best_ckpt}"
+                        f"Update best loss: {cur_loss:.4f}, {best_ckpt}"
+                    )
+                elif cur_loss is None:
+                    logging.info(
+                        f"Checkpoint {ckpt_name} saved at a step with no validation loss yet; not considered for best."
                     )
                 else:
                     logging.info(
-                        f"No improvement in loss: {self.val_loss_step_or_epoch[ckpt_name]:.4f} > {self.val_loss_step_or_epoch[self.best_step_or_epoch]:.4f}, {os.path.join(self.output_dir, self.best_step_or_epoch)}"
+                        f"No improvement in loss: {cur_loss:.4f} > {best_loss:.4f}, {os.path.join(self.output_dir, self.best_step_or_epoch)}"
                     )
             else:
                 print("Undo")
             if self.rank == 0:
                 self.saved_ckpts[ckpt_name] = getattr(
                     self, f"val_{self.avg_keep_nbest_models_type}_step_or_epoch"
-                )[ckpt_name]
+                ).get(ckpt_name, 0.0)
                 if self.keep_nbest_models > 0:
                     if len(self.saved_ckpts) > self.keep_nbest_models:
                         if self.avg_keep_nbest_models_type == "acc":
@@ -360,40 +366,46 @@ class Trainer:
                 self.best_step_or_epoch = ckpt_name
 
             if self.avg_keep_nbest_models_type == "acc":
-                if (
-                    self.val_acc_step_or_epoch[ckpt_name]
-                    >= self.val_acc_step_or_epoch[self.best_step_or_epoch]
-                ):
+                cur_acc = self.val_acc_step_or_epoch.get(ckpt_name)
+                best_acc = self.val_acc_step_or_epoch.get(self.best_step_or_epoch)
+                if cur_acc is not None and (best_acc is None or cur_acc >= best_acc):
                     self.best_step_or_epoch = ckpt_name
                     best_ckpt = Path(os.path.join(self.output_dir, f"model.pt.best"))
                     torch.save(state, best_ckpt)
                     logging.info(
-                        f"Update best acc: {self.val_acc_step_or_epoch[self.best_step_or_epoch]:.4f}, {best_ckpt}"
+                        f"Update best acc: {cur_acc:.4f}, {best_ckpt}"
+                    )
+                elif cur_acc is None:
+                    logging.info(
+                        f"Checkpoint {ckpt_name} saved at a step with no validation acc yet; not considered for best."
                     )
                 else:
                     logging.info(
-                        f"No improvement in acc: {self.val_acc_step_or_epoch[ckpt_name]:.4f} < {self.val_acc_step_or_epoch[self.best_step_or_epoch]:.4f}, {os.path.join(self.output_dir, self.best_step_or_epoch)}"
+                        f"No improvement in acc: {cur_acc:.4f} < {best_acc:.4f}, {os.path.join(self.output_dir, self.best_step_or_epoch)}"
                     )
             elif self.avg_keep_nbest_models_type == "loss":
-                if (
-                    self.val_loss_step_or_epoch[ckpt_name]
-                    <= self.val_loss_step_or_epoch[self.best_step_or_epoch]
-                ):
+                cur_loss = self.val_loss_step_or_epoch.get(ckpt_name)
+                best_loss = self.val_loss_step_or_epoch.get(self.best_step_or_epoch)
+                if cur_loss is not None and (best_loss is None or cur_loss <= best_loss):
                     self.best_step_or_epoch = ckpt_name
                     best_ckpt = Path(os.path.join(self.output_dir, f"model.pt.best"))
                     torch.save(state, best_ckpt)
                     logging.info(
-                        f"Update best loss: {self.val_loss_step_or_epoch[self.best_step_or_epoch]:.4f}, {best_ckpt}"
+                        f"Update best loss: {cur_loss:.4f}, {best_ckpt}"
+                    )
+                elif cur_loss is None:
+                    logging.info(
+                        f"Checkpoint {ckpt_name} saved at a step with no validation loss yet; not considered for best."
                     )
                 else:
                     logging.info(
-                        f"No improvement in loss: {self.val_loss_step_or_epoch[ckpt_name]:.4f} > {self.val_loss_step_or_epoch[self.best_step_or_epoch]:.4f}, {os.path.join(self.output_dir, self.best_step_or_epoch)}"
+                        f"No improvement in loss: {cur_loss:.4f} > {best_loss:.4f}, {os.path.join(self.output_dir, self.best_step_or_epoch)}"
                     )
             else:
                 print("Undo")
             self.saved_ckpts[ckpt_name] = getattr(
                 self, f"val_{self.avg_keep_nbest_models_type}_step_or_epoch"
-            )[ckpt_name]
+            ).get(ckpt_name, 0.0)
             if self.keep_nbest_models > 0:
                 if len(self.saved_ckpts) > self.keep_nbest_models:
                     if self.avg_keep_nbest_models_type == "acc":
