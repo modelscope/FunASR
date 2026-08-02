@@ -129,6 +129,10 @@ class FunASRNano(nn.Module):
         self.llm = model.to(dtype_map[self.llm_dtype])
         llm_dim = model.get_input_embeddings().weight.shape[-1]
 
+        # lora: inject LoRA adapters into the LLM target Linear layers
+        if self.llm is not None and llm_conf.get("use_lora", False):
+            self._apply_lora_to_llm(llm_conf)
+
         # adaptor
         adaptor_class = tables.adaptor_classes.get(audio_adaptor)
         if audio_encoder_output_size > 0:
@@ -205,6 +209,75 @@ class FunASRNano(nn.Module):
         self.length_normalized_loss = length_normalized_loss
         rank = int(os.environ.get("RANK", 0))
         logging.info(f"rank: {rank}, model is builded.")
+
+    def _apply_lora_to_llm(self, llm_conf: dict):
+        """Replace the LLM target Linear layers with LoRA adapters.
+
+        When ``llm_conf.use_lora`` is true, every ``nn.Linear`` in the LLM whose
+        module name contains one of ``lora_conf.target_modules`` is swapped for a
+        ``lora.Linear`` (base weight shared and frozen, trainable ``lora_A`` /
+        ``lora_B`` added). The base weights stay untouched in the state dict, so a
+        LoRA checkpoint can be loaded back into a model built with the same
+        ``lora_conf``, or folded for deployment (W' = W + alpha/r * B @ A).
+
+        Frozen-base behaviour: the LLM is frozen by ``llm_conf.freeze``; the
+        ``lora_A``/``lora_B`` parameters created here are trainable regardless.
+        With ``lora_only: true`` in the training config, ``mark_only_lora_as_trainable``
+        additionally freezes every non-LoRA parameter (encoder/adaptor/CTC), giving
+        pure-LoRA training. To keep the encoder/adaptor trainable while LoRA-tweaking
+        only the LLM, set ``lora_only: false`` and unfreeze them via their conf.
+        """
+        lora_conf = llm_conf.get("lora_conf", {})
+        lora_r = lora_conf.get("r", 16)
+        lora_alpha = lora_conf.get("lora_alpha", 32)
+        lora_dropout = lora_conf.get("lora_dropout", 0.05)
+        target_modules = lora_conf.get("target_modules", ["q_proj", "v_proj"])
+
+        from funasr.models.lora.layers import Linear as LoRALinear
+
+        lora_applied = 0
+        for name, module in list(self.llm.named_modules()):
+            if not isinstance(module, nn.Linear):
+                continue
+            if not any(target in name.split(".") for target in target_modules):
+                continue
+            parts = name.split(".")
+            parent = self.llm
+            for p in parts[:-1]:
+                parent = getattr(parent, p)
+            new_linear = LoRALinear(
+                in_features=module.in_features,
+                out_features=module.out_features,
+                r=lora_r,
+                lora_alpha=lora_alpha,
+                lora_dropout=lora_dropout,
+                bias=module.bias is not None,
+                # keep the adapter params in the base weight's dtype (e.g. bf16),
+                # so the LoRA path does not depend on autocast to reconcile dtypes
+                dtype=module.weight.dtype,
+            )
+            # share (and keep frozen) the pretrained base weight
+            new_linear.weight = module.weight
+            new_linear.bias = module.bias
+            setattr(parent, parts[-1], new_linear)
+            lora_applied += 1
+
+        if lora_applied > 0:
+            logging.info(
+                "LoRA applied to %d Linear layers in the LLM "
+                "(r=%d, alpha=%d, dropout=%s, targets=%s)",
+                lora_applied,
+                lora_r,
+                lora_alpha,
+                lora_dropout,
+                target_modules,
+            )
+        else:
+            logging.warning(
+                "use_lora=true but no target modules found in the LLM "
+                "(target_modules=%s)",
+                target_modules,
+            )
 
     def on_pretrained_model_loaded(self, loaded_keys):
         """Fail closed when a checkpoint configures CTC without trained weights."""
