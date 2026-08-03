@@ -15,7 +15,12 @@ class _DummyModule(torch.nn.Module):
 
 
 class _FakeDeepSpeedEngine:
-    """Minimal stand-in for a DeepSpeed engine (only save_checkpoint is used)."""
+    """Minimal stand-in for a DeepSpeed engine (only save_checkpoint is used).
+
+    DeepSpeed writes one checkpoint directory per tag; this fake writes a
+    placeholder *file* per tag so that keep_nbest_models pruning's
+    smart_remove() actually deletes something observable on disk.
+    """
 
     def __init__(self):
         self.tags = []
@@ -24,6 +29,8 @@ class _FakeDeepSpeedEngine:
     def save_checkpoint(self, save_dir=None, tag=None, client_state=None):
         self.tags.append(tag)
         self.client_states.append(client_state)
+        with open(os.path.join(save_dir, tag), "w") as f:
+            f.write("placeholder")
         return True
 
 
@@ -93,11 +100,11 @@ def test_unvalidated_checkpoint_cannot_evict_validated_best(tmp_path, ranking, u
 
     # The unvalidated checkpoint is kept on disk but excluded from ranking:
     # no synthetic score, no best change, and the validated best is never pruned.
+    # Both the validated best and the unvalidated checkpoint files survive.
     assert trainer.saved_ckpts == {"model.pt.ep1.1": _bad_metric(ranking)}
     assert trainer.best_step_or_epoch == "model.pt.ep1.1"
-    if not use_deepspeed:
-        assert os.path.exists(os.path.join(tmp_path, "model.pt.ep1.2"))
-        assert os.path.exists(os.path.join(tmp_path, "model.pt.ep1.1"))
+    assert os.path.exists(os.path.join(tmp_path, "model.pt.ep1.1"))
+    assert os.path.exists(os.path.join(tmp_path, "model.pt.ep1.2"))
 
 
 @pytest.mark.parametrize("ranking", ["loss", "acc"])
@@ -122,7 +129,6 @@ def test_validated_checkpoints_still_rank_and_prune(tmp_path, ranking, use_deeps
 
     assert trainer.saved_ckpts == {"model.pt.ep1.2": _good_metric(ranking)}
     assert trainer.best_step_or_epoch == "model.pt.ep1.2"
-    if not use_deepspeed:
-        # the worse validated checkpoint was pruned, the better one remains
-        assert not os.path.exists(os.path.join(tmp_path, "model.pt.ep1.1"))
-        assert os.path.exists(os.path.join(tmp_path, "model.pt.ep1.2"))
+    # the worse validated checkpoint was pruned, the better one remains
+    assert not os.path.exists(os.path.join(tmp_path, "model.pt.ep1.1"))
+    assert os.path.exists(os.path.join(tmp_path, "model.pt.ep1.2"))
