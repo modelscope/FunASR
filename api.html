@@ -25845,7 +25845,7 @@ Then use with OpenAI SDK:
                 &quot;total_step&quot;: self.batch_total,
                 &quot;state_dict&quot;: model.state_dict(),
                 &quot;optimizer&quot;: optim.state_dict(),
-</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer.py#L148" target="_blank" class="src-more">View full source →</a></details></div><div class="mblk"><code>.resume_checkpoint(model, optim, scheduler, scaler)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer.py#L265" target="_blank" class="gh-link">L265</a><div class="mdoc"><p>Resumes training from a checkpoint at the given file path.</p>
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer.py#L148" target="_blank" class="src-more">View full source →</a></details></div><div class="mblk"><code>.resume_checkpoint(model, optim, scheduler, scaler)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer.py#L287" target="_blank" class="gh-link">L287</a><div class="mdoc"><p>Resumes training from a checkpoint at the given file path.</p>
 <p>Loads the model&#x27;s state, the optimizer&#x27;s state, and the scheduler&#x27;s state.</p>
 <h4>Args:</h4>
 <ul>
@@ -25881,7 +25881,7 @@ Then use with OpenAI SDK:
                     else:
                         k_ddp = k
 
-</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer.py#L265" target="_blank" class="src-more">View full source →</a></details></div><div class="mblk"><code>.train_epoch(model, optim, scheduler, scaler, dataloader_train, dataloader_val, epoch, writer, **kwargs)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer.py#L345" target="_blank" class="gh-link">L345</a><div class="mdoc"><p>Defines the training process for a single epoch with gradient accumulation.</p>
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer.py#L287" target="_blank" class="src-more">View full source →</a></details></div><div class="mblk"><code>.train_epoch(model, optim, scheduler, scaler, dataloader_train, dataloader_val, epoch, writer, **kwargs)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer.py#L367" target="_blank" class="gh-link">L367</a><div class="mdoc"><p>Defines the training process for a single epoch with gradient accumulation.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>epoch (int)</code> — The current epoch number.</li>
@@ -25916,7 +25916,7 @@ Then use with OpenAI SDK:
 
         iterator_stop = torch.tensor(0).to(self.device)
 
-</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer.py#L345" target="_blank" class="src-more">View full source →</a></details></div><div class="mblk"><code>.validate_epoch(model, dataloader_val, epoch, writer, **kwargs)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer.py#L542" target="_blank" class="gh-link">L542</a><div class="mdoc"><p>Defines the validation process for a single epoch.</p>
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer.py#L367" target="_blank" class="src-more">View full source →</a></details></div><div class="mblk"><code>.validate_epoch(model, dataloader_val, epoch, writer, **kwargs)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer.py#L564" target="_blank" class="gh-link">L564</a><div class="mdoc"><p>Defines the validation process for a single epoch.</p>
 <p>Should be implemented with the actual model validation steps.</p>
 <h4>Args:</h4>
 <ul>
@@ -25952,7 +25952,7 @@ Then use with OpenAI SDK:
                 if self.use_ddp or self.use_fsdp:
                     dist.all_reduce(iterator_stop, dist.ReduceOp.SUM)
                     if iterator_stop &gt; 0:
-</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer.py#L542" target="_blank" class="src-more">View full source →</a></details></div><div class="mblk"><code>.log(epoch, batch_idx, step_in_epoch, batch_num_epoch, lr, loss, speed_stats, stats, writer, tag, data_split_i, data_split_num, log_step, **kwargs)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer.py#L656" target="_blank" class="gh-link">L656</a><div class="mdoc"><p>Log.</p>
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer.py#L564" target="_blank" class="src-more">View full source →</a></details></div><div class="mblk"><code>.log(epoch, batch_idx, step_in_epoch, batch_num_epoch, lr, loss, speed_stats, stats, writer, tag, data_split_i, data_split_num, log_step, **kwargs)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer.py#L678" target="_blank" class="gh-link">L678</a><div class="mdoc"><p>Log.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>epoch</code> — TODO.</li>
@@ -26000,7 +26000,7 @@ Then use with OpenAI SDK:
                 speed_stats: TODO.
                 stats: TODO.
                 writer: TODO.
-</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer.py#L656" target="_blank" class="src-more">View full source →</a></details></div><div class="mblk"><code>.close(writer)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer.py#L749" target="_blank" class="gh-link">L749</a><div class="mdoc"><p>Close.</p>
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer.py#L678" target="_blank" class="src-more">View full source →</a></details></div><div class="mblk"><code>.close(writer)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer.py#L771" target="_blank" class="gh-link">L771</a><div class="mdoc"><p>Close.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>writer</code> — TODO.</li>
@@ -26059,7 +26059,7 @@ Then use with OpenAI SDK:
                 &quot;state_dict&quot;: model.state_dict(),
                 &quot;optimizer&quot;: optim.state_dict(),
 </code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer.py#L148" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
-<div class="api-detail" id="e549"><span class="dtag badge-m">method</span><h2><code>Trainer.resume_checkpoint(model, optim, scheduler, scaler)</code></h2><div class="dmod">funasr.train_utils.trainer.Trainer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer.py#L265" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Resumes training from a checkpoint at the given file path.</p>
+<div class="api-detail" id="e549"><span class="dtag badge-m">method</span><h2><code>Trainer.resume_checkpoint(model, optim, scheduler, scaler)</code></h2><div class="dmod">funasr.train_utils.trainer.Trainer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer.py#L287" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Resumes training from a checkpoint at the given file path.</p>
 <p>Loads the model&#x27;s state, the optimizer&#x27;s state, and the scheduler&#x27;s state.</p>
 <h4>Args:</h4>
 <ul>
@@ -26095,8 +26095,8 @@ Then use with OpenAI SDK:
                     else:
                         k_ddp = k
 
-</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer.py#L265" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
-<div class="api-detail" id="e550"><span class="dtag badge-m">method</span><h2><code>Trainer.train_epoch(model, optim, scheduler, scaler, dataloader_train, dataloader_val, epoch, writer, **kwargs)</code></h2><div class="dmod">funasr.train_utils.trainer.Trainer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer.py#L345" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Defines the training process for a single epoch with gradient accumulation.</p>
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer.py#L287" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
+<div class="api-detail" id="e550"><span class="dtag badge-m">method</span><h2><code>Trainer.train_epoch(model, optim, scheduler, scaler, dataloader_train, dataloader_val, epoch, writer, **kwargs)</code></h2><div class="dmod">funasr.train_utils.trainer.Trainer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer.py#L367" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Defines the training process for a single epoch with gradient accumulation.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>epoch (int)</code> — The current epoch number.</li>
@@ -26131,8 +26131,8 @@ Then use with OpenAI SDK:
 
         iterator_stop = torch.tensor(0).to(self.device)
 
-</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer.py#L345" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
-<div class="api-detail" id="e551"><span class="dtag badge-m">method</span><h2><code>Trainer.validate_epoch(model, dataloader_val, epoch, writer, **kwargs)</code></h2><div class="dmod">funasr.train_utils.trainer.Trainer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer.py#L542" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Defines the validation process for a single epoch.</p>
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer.py#L367" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
+<div class="api-detail" id="e551"><span class="dtag badge-m">method</span><h2><code>Trainer.validate_epoch(model, dataloader_val, epoch, writer, **kwargs)</code></h2><div class="dmod">funasr.train_utils.trainer.Trainer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer.py#L564" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Defines the validation process for a single epoch.</p>
 <p>Should be implemented with the actual model validation steps.</p>
 <h4>Args:</h4>
 <ul>
@@ -26168,8 +26168,8 @@ Then use with OpenAI SDK:
                 if self.use_ddp or self.use_fsdp:
                     dist.all_reduce(iterator_stop, dist.ReduceOp.SUM)
                     if iterator_stop &gt; 0:
-</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer.py#L542" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
-<div class="api-detail" id="e552"><span class="dtag badge-m">method</span><h2><code>Trainer.log(epoch, batch_idx, step_in_epoch, batch_num_epoch, lr, loss, speed_stats, stats, writer, tag, data_split_i, data_split_num, log_step, **kwargs)</code></h2><div class="dmod">funasr.train_utils.trainer.Trainer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer.py#L656" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Log.</p>
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer.py#L564" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
+<div class="api-detail" id="e552"><span class="dtag badge-m">method</span><h2><code>Trainer.log(epoch, batch_idx, step_in_epoch, batch_num_epoch, lr, loss, speed_stats, stats, writer, tag, data_split_i, data_split_num, log_step, **kwargs)</code></h2><div class="dmod">funasr.train_utils.trainer.Trainer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer.py#L678" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Log.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>epoch</code> — TODO.</li>
@@ -26217,8 +26217,8 @@ Then use with OpenAI SDK:
                 speed_stats: TODO.
                 stats: TODO.
                 writer: TODO.
-</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer.py#L656" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
-<div class="api-detail" id="e553"><span class="dtag badge-m">method</span><h2><code>Trainer.close(writer)</code></h2><div class="dmod">funasr.train_utils.trainer.Trainer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer.py#L749" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Close.</p>
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer.py#L678" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
+<div class="api-detail" id="e553"><span class="dtag badge-m">method</span><h2><code>Trainer.close(writer)</code></h2><div class="dmod">funasr.train_utils.trainer.Trainer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer.py#L771" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Close.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>writer</code> — TODO.</li>
@@ -26342,7 +26342,7 @@ Then use with OpenAI SDK:
                 &quot;epoch&quot;: epoch,
                 # &quot;state_dict&quot;: model.state_dict(),
                 # &quot;optimizer&quot;: optim.state_dict(),
-</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer_ds.py#L171" target="_blank" class="src-more">View full source →</a></details></div><div class="mblk"><code>.resume_checkpoint(model, optim, scheduler, scaler)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer_ds.py#L414" target="_blank" class="gh-link">L414</a><div class="mdoc"><p>Resumes training from a checkpoint at the given file path.</p>
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer_ds.py#L171" target="_blank" class="src-more">View full source →</a></details></div><div class="mblk"><code>.resume_checkpoint(model, optim, scheduler, scaler)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer_ds.py#L458" target="_blank" class="gh-link">L458</a><div class="mdoc"><p>Resumes training from a checkpoint at the given file path.</p>
 <p>Loads the model&#x27;s state, the optimizer&#x27;s state, and the scheduler&#x27;s state.</p>
 <h4>Args:</h4>
 <ul>
@@ -26378,7 +26378,7 @@ Then use with OpenAI SDK:
                     self.val_loss_step_or_epoch = (
                         checkpoint[&quot;val_loss_step_or_epoch&quot;]
                         if &quot;val_loss_step_or_epoch&quot; in checkpoint
-</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer_ds.py#L414" target="_blank" class="src-more">View full source →</a></details></div><div class="mblk"><code>.train_epoch(model, optim, scheduler, scaler, dataloader_train, dataloader_val, epoch, **kwargs)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer_ds.py#L554" target="_blank" class="gh-link">L554</a><div class="mdoc"><p>Defines the training process for a single epoch with gradient accumulation.</p>
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer_ds.py#L458" target="_blank" class="src-more">View full source →</a></details></div><div class="mblk"><code>.train_epoch(model, optim, scheduler, scaler, dataloader_train, dataloader_val, epoch, **kwargs)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer_ds.py#L598" target="_blank" class="gh-link">L598</a><div class="mdoc"><p>Defines the training process for a single epoch with gradient accumulation.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>epoch (int)</code> — The current epoch number.</li>
@@ -26413,7 +26413,7 @@ Then use with OpenAI SDK:
         iterator_stop = torch.tensor(0).to(self.device)
 
         dataloader_train.batch_sampler.set_epoch(epoch)
-</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer_ds.py#L554" target="_blank" class="src-more">View full source →</a></details></div><div class="mblk"><code>.forward_step(model, batch, loss_dict)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer_ds.py#L676" target="_blank" class="gh-link">L676</a><div class="mdoc"><p>Forward step.</p>
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer_ds.py#L598" target="_blank" class="src-more">View full source →</a></details></div><div class="mblk"><code>.forward_step(model, batch, loss_dict)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer_ds.py#L720" target="_blank" class="gh-link">L720</a><div class="mdoc"><p>Forward step.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>model</code> — Model instance or model name.</li>
@@ -26437,7 +26437,7 @@ Then use with OpenAI SDK:
         loss_dict[&quot;loss&quot;] = loss
         loss_dict[&quot;stats&quot;] = stats
         loss_dict[&quot;weight&quot;] = weight
-</code></pre></details></div><div class="mblk"><code>.backward_step(model, scaler, loss_dict)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer_ds.py#L694" target="_blank" class="gh-link">L694</a><div class="mdoc"><p>Backward step.</p>
+</code></pre></details></div><div class="mblk"><code>.backward_step(model, scaler, loss_dict)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer_ds.py#L738" target="_blank" class="gh-link">L738</a><div class="mdoc"><p>Backward step.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>model</code> — Model instance or model name.</li>
@@ -26462,7 +26462,7 @@ Then use with OpenAI SDK:
                 scaler.scale(loss).backward()
             else:
                 loss.backward()
-</code></pre></details></div><div class="mblk"><code>.update_step(model, optim, scheduler, scaler, loss_dict)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer_ds.py#L713" target="_blank" class="gh-link">L713</a><div class="mdoc"><p>Update step.</p>
+</code></pre></details></div><div class="mblk"><code>.update_step(model, optim, scheduler, scaler, loss_dict)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer_ds.py#L757" target="_blank" class="gh-link">L757</a><div class="mdoc"><p>Update step.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>model</code> — Model instance or model name.</li>
@@ -26501,7 +26501,7 @@ Then use with OpenAI SDK:
                         return
 
                 # Execute an optimization step (update model parameters)
-</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer_ds.py#L713" target="_blank" class="src-more">View full source →</a></details></div><div class="mblk"><code>.validate_epoch(model, dataloader_val, epoch, writer, **kwargs)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer_ds.py#L754" target="_blank" class="gh-link">L754</a><div class="mdoc"><p>Defines the validation process for a single epoch.</p>
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer_ds.py#L757" target="_blank" class="src-more">View full source →</a></details></div><div class="mblk"><code>.validate_epoch(model, dataloader_val, epoch, writer, **kwargs)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer_ds.py#L798" target="_blank" class="gh-link">L798</a><div class="mdoc"><p>Defines the validation process for a single epoch.</p>
 <p>Should be implemented with the actual model validation steps.</p>
 <h4>Args:</h4>
 <ul>
@@ -26537,7 +26537,7 @@ Then use with OpenAI SDK:
             time5 = time_beg
 
             dataloader_val.batch_sampler.set_epoch(epoch)
-</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer_ds.py#L754" target="_blank" class="src-more">View full source →</a></details></div><div class="mblk"><code>.log(loss_dict, tag, **kwargs)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer_ds.py#L848" target="_blank" class="gh-link">L848</a><div class="mdoc"><p>Log.</p>
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer_ds.py#L798" target="_blank" class="src-more">View full source →</a></details></div><div class="mblk"><code>.log(loss_dict, tag, **kwargs)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer_ds.py#L892" target="_blank" class="gh-link">L892</a><div class="mdoc"><p>Log.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>loss_dict</code> — TODO.</li>
@@ -26574,7 +26574,7 @@ Then use with OpenAI SDK:
         if (batch_idx + 1) % self.log_interval == 0:
             batch_idx = log_step if log_step is not None else batch_idx
             gpu_info = (
-</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer_ds.py#L848" target="_blank" class="src-more">View full source →</a></details></div><div class="mblk"><code>.close(writer)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer_ds.py#L929" target="_blank" class="gh-link">L929</a><div class="mdoc"><p>Close.</p>
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer_ds.py#L892" target="_blank" class="src-more">View full source →</a></details></div><div class="mblk"><code>.close(writer)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer_ds.py#L973" target="_blank" class="gh-link">L973</a><div class="mdoc"><p>Close.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>writer</code> — TODO.</li>
@@ -26594,7 +26594,7 @@ Then use with OpenAI SDK:
 
         if self.use_ddp or self.use_fsdp:
             torch.distributed.destroy_process_group()
-</code></pre></details></div><div class="mblk"><code>.warp_model(model, **kwargs)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer_ds.py#L945" target="_blank" class="gh-link">L945</a><div class="mdoc"><p>Warp model.</p>
+</code></pre></details></div><div class="mblk"><code>.warp_model(model, **kwargs)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer_ds.py#L989" target="_blank" class="gh-link">L989</a><div class="mdoc"><p>Warp model.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>model</code> — Model instance or model name.</li>
@@ -26630,7 +26630,7 @@ Then use with OpenAI SDK:
                 logging.info(&quot;Estimating model states memory needs (zero3)...&quot;)
                 estimate_zero3_model_states_mem_needs_all_live(
                     model,
-</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer_ds.py#L945" target="_blank" class="src-more">View full source →</a></details></div><div class="mblk"><code>.warp_optim_scheduler(model, **kwargs)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer_ds.py#L997" target="_blank" class="gh-link">L997</a><div class="mdoc"><p>Warp optim scheduler.</p>
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer_ds.py#L989" target="_blank" class="src-more">View full source →</a></details></div><div class="mblk"><code>.warp_optim_scheduler(model, **kwargs)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer_ds.py#L1041" target="_blank" class="gh-link">L1041</a><div class="mdoc"><p>Warp optim scheduler.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>model</code> — Model instance or model name.</li>
@@ -26666,7 +26666,7 @@ Then use with OpenAI SDK:
             import deepspeed
 
             args = OmegaConf.create({&quot;deepspeed_config&quot;: self.deepspeed_config})
-</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer_ds.py#L997" target="_blank" class="src-more">View full source →</a></details></div></div>
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer_ds.py#L1041" target="_blank" class="src-more">View full source →</a></details></div></div>
 <div class="api-detail" id="e556"><span class="dtag badge-m">method</span><h2><code>Trainer.save_checkpoint(epoch, step, model, optim, scheduler, scaler, step_in_epoch, **kwargs)</code></h2><div class="dmod">funasr.train_utils.trainer_ds.Trainer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer_ds.py#L171" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Saves a checkpoint containing the model&#x27;s state, the optimizer&#x27;s state,</p>
 <p>and the scheduler&#x27;s state at the end of the given epoch. This method is</p>
 <p>intended to be called at the end of each epoch to save the training progress.</p>
@@ -26705,7 +26705,7 @@ Then use with OpenAI SDK:
                 # &quot;state_dict&quot;: model.state_dict(),
                 # &quot;optimizer&quot;: optim.state_dict(),
 </code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer_ds.py#L171" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
-<div class="api-detail" id="e557"><span class="dtag badge-m">method</span><h2><code>Trainer.resume_checkpoint(model, optim, scheduler, scaler)</code></h2><div class="dmod">funasr.train_utils.trainer_ds.Trainer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer_ds.py#L414" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Resumes training from a checkpoint at the given file path.</p>
+<div class="api-detail" id="e557"><span class="dtag badge-m">method</span><h2><code>Trainer.resume_checkpoint(model, optim, scheduler, scaler)</code></h2><div class="dmod">funasr.train_utils.trainer_ds.Trainer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer_ds.py#L458" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Resumes training from a checkpoint at the given file path.</p>
 <p>Loads the model&#x27;s state, the optimizer&#x27;s state, and the scheduler&#x27;s state.</p>
 <h4>Args:</h4>
 <ul>
@@ -26741,8 +26741,8 @@ Then use with OpenAI SDK:
                     self.val_loss_step_or_epoch = (
                         checkpoint[&quot;val_loss_step_or_epoch&quot;]
                         if &quot;val_loss_step_or_epoch&quot; in checkpoint
-</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer_ds.py#L414" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
-<div class="api-detail" id="e558"><span class="dtag badge-m">method</span><h2><code>Trainer.train_epoch(model, optim, scheduler, scaler, dataloader_train, dataloader_val, epoch, **kwargs)</code></h2><div class="dmod">funasr.train_utils.trainer_ds.Trainer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer_ds.py#L554" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Defines the training process for a single epoch with gradient accumulation.</p>
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer_ds.py#L458" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
+<div class="api-detail" id="e558"><span class="dtag badge-m">method</span><h2><code>Trainer.train_epoch(model, optim, scheduler, scaler, dataloader_train, dataloader_val, epoch, **kwargs)</code></h2><div class="dmod">funasr.train_utils.trainer_ds.Trainer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer_ds.py#L598" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Defines the training process for a single epoch with gradient accumulation.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>epoch (int)</code> — The current epoch number.</li>
@@ -26777,8 +26777,8 @@ Then use with OpenAI SDK:
         iterator_stop = torch.tensor(0).to(self.device)
 
         dataloader_train.batch_sampler.set_epoch(epoch)
-</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer_ds.py#L554" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
-<div class="api-detail" id="e559"><span class="dtag badge-m">method</span><h2><code>Trainer.forward_step(model, batch, loss_dict)</code></h2><div class="dmod">funasr.train_utils.trainer_ds.Trainer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer_ds.py#L676" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Forward step.</p>
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer_ds.py#L598" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
+<div class="api-detail" id="e559"><span class="dtag badge-m">method</span><h2><code>Trainer.forward_step(model, batch, loss_dict)</code></h2><div class="dmod">funasr.train_utils.trainer_ds.Trainer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer_ds.py#L720" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Forward step.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>model</code> — Model instance or model name.</li>
@@ -26803,7 +26803,7 @@ Then use with OpenAI SDK:
         loss_dict[&quot;stats&quot;] = stats
         loss_dict[&quot;weight&quot;] = weight
 </code></pre></details></div>
-<div class="api-detail" id="e560"><span class="dtag badge-m">method</span><h2><code>Trainer.backward_step(model, scaler, loss_dict)</code></h2><div class="dmod">funasr.train_utils.trainer_ds.Trainer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer_ds.py#L694" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Backward step.</p>
+<div class="api-detail" id="e560"><span class="dtag badge-m">method</span><h2><code>Trainer.backward_step(model, scaler, loss_dict)</code></h2><div class="dmod">funasr.train_utils.trainer_ds.Trainer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer_ds.py#L738" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Backward step.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>model</code> — Model instance or model name.</li>
@@ -26829,7 +26829,7 @@ Then use with OpenAI SDK:
             else:
                 loss.backward()
 </code></pre></details></div>
-<div class="api-detail" id="e561"><span class="dtag badge-m">method</span><h2><code>Trainer.update_step(model, optim, scheduler, scaler, loss_dict)</code></h2><div class="dmod">funasr.train_utils.trainer_ds.Trainer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer_ds.py#L713" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Update step.</p>
+<div class="api-detail" id="e561"><span class="dtag badge-m">method</span><h2><code>Trainer.update_step(model, optim, scheduler, scaler, loss_dict)</code></h2><div class="dmod">funasr.train_utils.trainer_ds.Trainer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer_ds.py#L757" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Update step.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>model</code> — Model instance or model name.</li>
@@ -26868,8 +26868,8 @@ Then use with OpenAI SDK:
                         return
 
                 # Execute an optimization step (update model parameters)
-</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer_ds.py#L713" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
-<div class="api-detail" id="e562"><span class="dtag badge-m">method</span><h2><code>Trainer.validate_epoch(model, dataloader_val, epoch, writer, **kwargs)</code></h2><div class="dmod">funasr.train_utils.trainer_ds.Trainer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer_ds.py#L754" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Defines the validation process for a single epoch.</p>
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer_ds.py#L757" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
+<div class="api-detail" id="e562"><span class="dtag badge-m">method</span><h2><code>Trainer.validate_epoch(model, dataloader_val, epoch, writer, **kwargs)</code></h2><div class="dmod">funasr.train_utils.trainer_ds.Trainer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer_ds.py#L798" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Defines the validation process for a single epoch.</p>
 <p>Should be implemented with the actual model validation steps.</p>
 <h4>Args:</h4>
 <ul>
@@ -26905,8 +26905,8 @@ Then use with OpenAI SDK:
             time5 = time_beg
 
             dataloader_val.batch_sampler.set_epoch(epoch)
-</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer_ds.py#L754" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
-<div class="api-detail" id="e563"><span class="dtag badge-m">method</span><h2><code>Trainer.log(loss_dict, tag, **kwargs)</code></h2><div class="dmod">funasr.train_utils.trainer_ds.Trainer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer_ds.py#L848" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Log.</p>
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer_ds.py#L798" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
+<div class="api-detail" id="e563"><span class="dtag badge-m">method</span><h2><code>Trainer.log(loss_dict, tag, **kwargs)</code></h2><div class="dmod">funasr.train_utils.trainer_ds.Trainer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer_ds.py#L892" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Log.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>loss_dict</code> — TODO.</li>
@@ -26943,8 +26943,8 @@ Then use with OpenAI SDK:
         if (batch_idx + 1) % self.log_interval == 0:
             batch_idx = log_step if log_step is not None else batch_idx
             gpu_info = (
-</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer_ds.py#L848" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
-<div class="api-detail" id="e564"><span class="dtag badge-m">method</span><h2><code>Trainer.close(writer)</code></h2><div class="dmod">funasr.train_utils.trainer_ds.Trainer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer_ds.py#L929" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Close.</p>
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer_ds.py#L892" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
+<div class="api-detail" id="e564"><span class="dtag badge-m">method</span><h2><code>Trainer.close(writer)</code></h2><div class="dmod">funasr.train_utils.trainer_ds.Trainer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer_ds.py#L973" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Close.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>writer</code> — TODO.</li>
@@ -26965,7 +26965,7 @@ Then use with OpenAI SDK:
         if self.use_ddp or self.use_fsdp:
             torch.distributed.destroy_process_group()
 </code></pre></details></div>
-<div class="api-detail" id="e565"><span class="dtag badge-m">method</span><h2><code>Trainer.warp_model(model, **kwargs)</code></h2><div class="dmod">funasr.train_utils.trainer_ds.Trainer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer_ds.py#L945" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Warp model.</p>
+<div class="api-detail" id="e565"><span class="dtag badge-m">method</span><h2><code>Trainer.warp_model(model, **kwargs)</code></h2><div class="dmod">funasr.train_utils.trainer_ds.Trainer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer_ds.py#L989" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Warp model.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>model</code> — Model instance or model name.</li>
@@ -27001,8 +27001,8 @@ Then use with OpenAI SDK:
                 logging.info(&quot;Estimating model states memory needs (zero3)...&quot;)
                 estimate_zero3_model_states_mem_needs_all_live(
                     model,
-</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer_ds.py#L945" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
-<div class="api-detail" id="e566"><span class="dtag badge-m">method</span><h2><code>Trainer.warp_optim_scheduler(model, **kwargs)</code></h2><div class="dmod">funasr.train_utils.trainer_ds.Trainer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer_ds.py#L997" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Warp optim scheduler.</p>
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer_ds.py#L989" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
+<div class="api-detail" id="e566"><span class="dtag badge-m">method</span><h2><code>Trainer.warp_optim_scheduler(model, **kwargs)</code></h2><div class="dmod">funasr.train_utils.trainer_ds.Trainer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer_ds.py#L1041" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Warp optim scheduler.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>model</code> — Model instance or model name.</li>
@@ -27038,7 +27038,7 @@ Then use with OpenAI SDK:
             import deepspeed
 
             args = OmegaConf.create({&quot;deepspeed_config&quot;: self.deepspeed_config})
-</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer_ds.py#L997" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer_ds.py#L1041" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
 <div class="api-detail" id="e567"><span class="dtag badge-c">class</span><h2>AudioDataset</h2><div class="dmod">funasr.datasets.datasets · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/datasets/audio_datasets/datasets.py#L10" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>AudioDataset</p>
 </div><details class="src-block"><summary>📄 Source code</summary><pre><code>class AudioDataset(torch.utils.data.Dataset):
     &quot;&quot;&quot;
