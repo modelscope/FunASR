@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "verified": "2026-07-30",
+  "verified": "2026-08-04",
   "deployments": [
     {
       "id": "vllm",
@@ -63,6 +63,86 @@
           "operations": ["Pin the FunASR, vLLM, Torch, and CUDA combination", "Warm the model before capacity measurement", "Measure queue, first-result, and final-result latency"],
           "security": ["Put authentication, rate limits, and upload limits at an API gateway", "Do not expose the worker directly to the internet", "Isolate model cache and temporary upload storage"],
           "troubleshooting": ["Match the NVIDIA driver to vLLM's CUDA build", "Capture two complete outputs and exact versions for repetition", "Check the VAD maximum segment length when long audio loses content"]
+        }
+      }
+    },
+    {
+      "id": "sensevoice-tensorrt",
+      "routes": {"zh": "/deploy/sensevoice-tensorrt.html", "en": "/en/deploy/sensevoice-tensorrt.html"},
+      "maturity": "production-verified",
+      "selector_rank": 15,
+      "workloads": ["batch", "private-api"],
+      "hardware": ["nvidia-gpu", "kubernetes"],
+      "priorities": ["throughput", "latency"],
+      "models": ["SenseVoiceSmall"],
+      "operating_systems": ["Linux"],
+      "interfaces": ["Triton gRPC/HTTP", "TensorRT plan", "Docker"],
+      "tested": {"funasr": "main@6408aaa9", "runtime": "TensorRT 10.0.1 / Triton 24.05", "verified": "2026-08-04"},
+      "commands": {
+        "install": [
+          "git clone https://github.com/modelscope/FunASR.git && cd FunASR && git checkout 6408aaa96d54f89db467346010eff3c7d1fc485a",
+          "pip install -e . \"onnx>=1.16\" soundfile \"tritonclient[grpc]\"",
+          "python - <<'PY'\nfrom funasr import AutoModel\n\nmodel = AutoModel(model=\"iic/SenseVoiceSmall\", device=\"cuda:0\")\nmodel.export(\n    type=\"onnx\",\n    quantize=False,\n    device=\"cuda:0\",\n    output_dir=\"./sensevoice_onnx\",\n    max_seq_len=4096,\n)\nPY",
+          "curl -fL https://huggingface.co/FunAudioLLM/SenseVoiceSmall/resolve/main/chn_jpn_yue_eng_ko_spectok.bpe.model \\\n  -o runtime/triton_gpu/model_repo_sense_voice_small/scoring/chn_jpn_yue_eng_ko_spectok.bpe.model \\\n&& echo \"aa87f86064c3730d799ddf7af3c04659151102cba548bce325cf06ba4da4e6a8  runtime/triton_gpu/model_repo_sense_voice_small/scoring/chn_jpn_yue_eng_ko_spectok.bpe.model\" | sha256sum -c -"
+        ],
+        "launch": [
+          "python runtime/triton_gpu/scripts/build_sensevoice_tensorrt.py \\\n    ./sensevoice_onnx/model.onnx \\\n    runtime/triton_gpu/model_repo_sense_voice_small/encoder/1/model.plan \\\n    --precision fp16 \\\n    --min-batch 1 --opt-batch 8 --max-batch 16 \\\n    --min-frames 1 --opt-frames 512 --max-frames 4096 \\\n    --workspace-gb 8",
+          "cp runtime/triton_gpu/model_repo_sense_voice_small/encoder/config.pbtxt.tensorrt \\\n   runtime/triton_gpu/model_repo_sense_voice_small/encoder/config.pbtxt",
+          "cd runtime/triton_gpu && tritonserver --model-repository ./model_repo_sense_voice_small \\\n  --pinned-memory-pool-byte-size=512000000 \\\n  --cuda-memory-pool-byte-size=0:1024000000"
+        ],
+        "health": [
+          "curl -fsS http://localhost:8000/v2/health/ready",
+          "curl -fsS http://localhost:8000/v2/models/sensevoice/ready"
+        ],
+        "smoke": [
+          "python - <<'PY'\nimport numpy as np\nimport soundfile as sf\nimport tritonclient.grpc as grpc\n\naudio, sample_rate = sf.read(\n    \"runtime/triton_gpu/client/test_wavs/mid.wav\", dtype=\"float32\"\n)\nassert sample_rate == 16000\nvalues = {\n    \"WAV\": audio[None, :],\n    \"WAV_LENS\": np.array([[audio.size]], dtype=np.int32),\n    \"LANGUAGE\": np.array([[0]], dtype=np.int32),\n    \"TEXT_NORM\": np.array([[1]], dtype=np.int32),\n}\ninputs = []\nfor name, value in values.items():\n    tensor = grpc.InferInput(name, value.shape, grpc.np_to_triton_dtype(value.dtype))\n    tensor.set_data_from_numpy(value)\n    inputs.append(tensor)\nresult = grpc.InferenceServerClient(\"localhost:8001\").infer(\"sensevoice\", inputs)\ntranscript = result.as_numpy(\"TRANSCRIPTS\")[0][0].decode()\nassert transcript.strip(), \"SenseVoice returned an empty transcript\"\nprint(transcript)\nPY"
+        ]
+      },
+      "evidence": [
+        {"label": "TensorRT deployment guide", "url": "https://github.com/modelscope/FunASR/blob/main/runtime/triton_gpu/README.md"},
+        {"label": "validated TensorRT builder", "url": "https://github.com/modelscope/FunASR/blob/main/runtime/triton_gpu/scripts/build_sensevoice_tensorrt.py"},
+        {"label": "native TensorRT integration PR", "url": "https://github.com/modelscope/FunASR/pull/3463"},
+        {"label": "deployment request and validation record", "url": "https://github.com/modelscope/FunASR/issues/3453"}
+      ],
+      "benchmarks": [
+        {
+          "model": "SenseVoiceSmall",
+          "runtime": "TensorRT 10.0.1 with Triton 24.05 model contract",
+          "hardware": "NVIDIA H100; device memory capacity and host CPU are not part of the recorded result",
+          "workload": "Native FP16 engine build, profile-bound execution, and PyTorch parity validation",
+          "audio": "Bundled Chinese example plus synthetic feature tensors at 30 and 64 frames",
+          "settings": "FP16; batch profile 1/8/16; post-LFR frame profile 1/512/4096; 8 GiB builder workspace",
+          "timing_scope": "Engine build wall time only; inference timings are correctness probes and not a throughput benchmark",
+          "result": "527,504,916 bytes; 113.9 s engine build; 100% CTC top-1 agreement; exact bundled-audio transcript",
+          "qualification": "Single-H100 compatibility and parity evidence. Build on the target GPU and TensorRT version, then load-test with production audio before capacity planning.",
+          "source": "https://github.com/modelscope/FunASR/blob/main/runtime/triton_gpu/README.md",
+          "verified": "2026-08-04"
+        }
+      ],
+      "translations": {
+        "zh": {
+          "name": "SenseVoice TensorRT / Triton",
+          "summary": "把 SenseVoiceSmall 构建为原生 FP16 TensorRT engine，并通过 Triton 提供可批处理的 GPU 推理服务。",
+          "fit": ["固定 NVIDIA GPU 环境中的 SenseVoice 批量转写", "需要 Triton 动态批处理、健康检查和模型仓库", "愿意按生产音频分布定制 batch 与帧长 profile"],
+          "not_fit": ["CPU、macOS、Windows 或通用边缘设备", "需要跨 GPU 型号直接复制同一个 engine", "只有动态量化 model_quant.onnx 的部署"],
+          "selection_reason": "原生 TensorRT engine 和 Triton 调度适合固定 NVIDIA GPU 上以 SenseVoice 延迟与吞吐为核心的服务。",
+          "primary_limitation": "TensorRT plan 不保证跨 GPU 架构或 TensorRT 版本可移植，必须在目标环境重新构建并复测精度、显存和容量。",
+          "status_label": "生产验证",
+          "operations": ["在与生产相同的 GPU 架构和 TensorRT 版本上构建 engine", "按真实 batch、并发和音频时长重设优化 profile", "保存 ONNX、engine、构建日志、SHA-256 与 Triton 配置用于回滚"],
+          "security": ["Triton worker 仅绑定内网，由网关完成认证、TLS、限流和审计", "限制音频大小、时长、声道、采样率和并发", "只加载经过校验的 ONNX、TensorRT plan、分词器和模型仓库"],
+          "troubleshooting": ["构建前确认导出使用 quantize=False，不能使用 model_quant.onnx", "parser 报错时先运行 ONNX checker 并核对 SenseVoice tensor 名称和 dtype", "Triton 加载失败时确认 model.plan 与 config.pbtxt.tensorrt 位于同一 encoder 版本目录"]
+        },
+        "en": {
+          "name": "SenseVoice TensorRT / Triton",
+          "summary": "Build SenseVoiceSmall as a native FP16 TensorRT engine and serve batched GPU inference through Triton.",
+          "fit": ["SenseVoice batch transcription on a fixed NVIDIA GPU fleet", "Triton dynamic batching, health checks, and model repositories", "Optimization profiles tuned to production batch and audio distributions"],
+          "not_fit": ["CPU, macOS, Windows, or general edge targets", "Copying one engine across different GPU models", "Deployments that only have dynamically quantized model_quant.onnx"],
+          "selection_reason": "A native TensorRT engine and Triton scheduling fit SenseVoice services that prioritize latency and throughput on fixed NVIDIA GPUs.",
+          "primary_limitation": "A TensorRT plan is not portable across arbitrary GPU architectures or TensorRT versions; rebuild and revalidate accuracy, memory, and capacity on the target stack.",
+          "status_label": "Production verified",
+          "operations": ["Build on the same GPU architecture and TensorRT version used in production", "Retune optimization profiles for real batch, concurrency, and audio duration", "Retain ONNX, engine, build log, SHA-256, and Triton configuration for rollback"],
+          "security": ["Bind Triton workers to private networks and provide authentication, TLS, rate limits, and audit at the gateway", "Limit audio size, duration, channels, sample rate, and concurrency", "Load only verified ONNX, TensorRT plans, tokenizers, and model repositories"],
+          "troubleshooting": ["Confirm the export used quantize=False; model_quant.onnx is unsupported", "Run the ONNX checker and verify SenseVoice tensor names and dtypes before investigating parser errors", "When Triton cannot load the model, keep model.plan and config.pbtxt.tensorrt in the same encoder version directory"]
         }
       }
     },
