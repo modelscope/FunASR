@@ -18,6 +18,7 @@
 #include "funasrruntime.h"
 #include "tclap/CmdLine.h"
 #include "com-define.h"
+#include "result-json.h"
 #include "audio.h"
 
 using namespace std;
@@ -62,6 +63,7 @@ int main(int argc, char** argv)
     TCLAP::ValueArg<std::string> wav_path("", WAV_PATH, "the input could be: wav_path, e.g.: asr_example.wav; pcm_path, e.g.: asr_example.pcm; wav.scp, kaldi style wav list (wav_id \t wav_path)", true, "", "string");
     TCLAP::ValueArg<std::int32_t>   audio_fs("", AUDIO_FS, "the sample rate of audio", false, 16000, "int32_t");
     TCLAP::ValueArg<std::string>    hotword("", HOTWORD, "the hotword file, one hotword perline, Format: Hotword Weight (could be: 阿里巴巴 20)", false, "", "string");
+    TCLAP::ValueArg<std::string>    output_format("", "output-format", "result output: log (Default) or jsonl", false, "log", "string");
 
     cmd.add(offline_model_dir);
     cmd.add(online_model_dir);
@@ -81,7 +83,16 @@ int main(int argc, char** argv)
     cmd.add(asr_mode);
     cmd.add(onnx_thread);
     cmd.add(hotword);
+    cmd.add(output_format);
     cmd.parse(argc, argv);
+
+    funasr::OutputFormat output_format_;
+    try {
+        output_format_ = funasr::ParseOutputFormat(output_format.getValue());
+    } catch (const std::invalid_argument& error) {
+        LOG(ERROR) << error.what();
+        return 2;
+    }
 
     std::map<std::string, std::string> model_path;
     GetValue(offline_model_dir, OFFLINE_MODEL_DIR, model_path);
@@ -206,6 +217,7 @@ int main(int argc, char** argv)
         string online_res="";
         string tpass_res="";
         string time_stamp_res="";
+        bool has_result = false;
         std::vector<std::vector<string>> punc_cache(2);
         for (int sample_offset = 0; sample_offset < buff_len; sample_offset += std::min(step, buff_len - sample_offset)) {
             if (sample_offset + step >= buff_len - 1) {
@@ -224,6 +236,7 @@ int main(int argc, char** argv)
 
             if (result)
             {
+                has_result = true;
                 string online_msg = FunASRGetResult(result, 0);
                 online_res += online_msg;
                 if(online_msg != ""){
@@ -248,16 +261,21 @@ int main(int argc, char** argv)
                 FunASRFreeResult(result);
             }
         }
-        if(asr_mode_==2){
-            LOG(INFO) << wav_id << " Final online  results "<<" : "<<online_res;
-        }
-        if(asr_mode_==1){
-            LOG(INFO) << wav_id << " Final online  results "<<" : "<<tpass_res;
-        }
-        if(asr_mode_==0 || asr_mode_==2){
-            LOG(INFO) << wav_id << " Final offline results " <<" : "<<tpass_res;
-            if(time_stamp_res!=""){
-                LOG(INFO) << wav_id << " Final timestamp results " <<" : "<<time_stamp_res;
+        if (output_format_ == funasr::OutputFormat::kJsonl && has_result) {
+            cout << funasr::FormatResultJson(
+                wav_id, asr_mode.getValue(), tpass_res, time_stamp_res, "") << endl;
+        } else {
+            if(asr_mode_==2){
+                LOG(INFO) << wav_id << " Final online  results "<<" : "<<online_res;
+            }
+            if(asr_mode_==1){
+                LOG(INFO) << wav_id << " Final online  results "<<" : "<<tpass_res;
+            }
+            if(asr_mode_==0 || asr_mode_==2){
+                LOG(INFO) << wav_id << " Final offline results " <<" : "<<tpass_res;
+                if(time_stamp_res!=""){
+                    LOG(INFO) << wav_id << " Final timestamp results " <<" : "<<time_stamp_res;
+                }
             }
         }
     }
@@ -271,4 +289,3 @@ int main(int argc, char** argv)
     FunTpassUninit(tpass_handle);
     return 0;
 }
-

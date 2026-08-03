@@ -6,6 +6,11 @@ option(ENABLE_GLOG "Whether to build glog" ON)
 option(ENABLE_FST "Whether to build openfst" ON) # ITN need openfst compiled
 option(ENABLE_FFMPEG "Whether to enable ffmpeg audio decoding" OFF)
 option(GPU "Whether to build with GPU" OFF)
+option(FUNASR_BUILD_TESTS "Build FunASR ONNX Runtime unit tests" OFF)
+
+if(FUNASR_BUILD_TESTS)
+    enable_testing()
+endif()
 
 # set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD 14 CACHE STRING "The C++ version to be used.")

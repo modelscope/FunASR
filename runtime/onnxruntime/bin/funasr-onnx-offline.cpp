@@ -17,6 +17,7 @@
 #include "funasrruntime.h"
 #include "tclap/CmdLine.h"
 #include "com-define.h"
+#include "result-json.h"
 #include <unordered_map>
 #include "util.h"
 #include "audio.h"
@@ -59,6 +60,7 @@ int main(int argc, char** argv)
     TCLAP::ValueArg<std::string>    wav_path("", WAV_PATH, "the input could be: wav_path, e.g.: asr_example.wav; pcm_path, e.g.: asr_example.pcm; wav.scp, kaldi style wav list (wav_id \t wav_path)", true, "", "string");
     TCLAP::ValueArg<std::int32_t>   audio_fs("", AUDIO_FS, "the sample rate of audio", false, 16000, "int32_t");
     TCLAP::ValueArg<std::string>    hotword("", HOTWORD, "the hotword file, one hotword perline, Format: Hotword Weight (could be: 阿里巴巴 20)", false, "", "string");
+    TCLAP::ValueArg<std::string>    output_format("", "output-format", "result output: log (Default) or jsonl", false, "log", "string");
     TCLAP::SwitchArg use_gpu("", INFER_GPU, "Whether to use GPU for inference, default is false", false);
     TCLAP::ValueArg<std::int32_t> batch_size("", BATCHSIZE, "batch_size for ASR model when using GPU", false, 4, "int32_t");
 
@@ -78,9 +80,18 @@ int main(int argc, char** argv)
     cmd.add(wav_path);
     cmd.add(audio_fs);
     cmd.add(hotword);
+    cmd.add(output_format);
     cmd.add(use_gpu);
     cmd.add(batch_size);
     cmd.parse(argc, argv);
+
+    funasr::OutputFormat output_format_;
+    try {
+        output_format_ = funasr::ParseOutputFormat(output_format.getValue());
+    } catch (const std::invalid_argument& error) {
+        LOG(ERROR) << error.what();
+        return 2;
+    }
 
     std::map<std::string, std::string> model_path;
     GetValue(model_dir, MODEL_DIR, model_path);
@@ -201,14 +212,18 @@ int main(int argc, char** argv)
         if (result)
         {
             string msg = FunASRGetResult(result, 0);
-            LOG(INFO)<< wav_id <<" : "<<msg;
             string stamp = FunASRGetStamp(result);
-            if(stamp !=""){
-                LOG(INFO)<< wav_id <<" : "<<stamp;
-            }
             string stamp_sents = FunASRGetStampSents(result);
-            if(stamp_sents !=""){
-                LOG(INFO)<< wav_id <<" : "<<stamp_sents;
+            if (output_format_ == funasr::OutputFormat::kJsonl) {
+                cout << funasr::FormatResultJson(wav_id, "offline", msg, stamp, stamp_sents) << endl;
+            } else {
+                LOG(INFO)<< wav_id <<" : "<<msg;
+                if(stamp !=""){
+                    LOG(INFO)<< wav_id <<" : "<<stamp;
+                }
+                if(stamp_sents !=""){
+                    LOG(INFO)<< wav_id <<" : "<<stamp_sents;
+                }
             }
             snippet_time += FunASRGetRetSnippetTime(result);
             FunASRFreeResult(result);
@@ -227,4 +242,3 @@ int main(int argc, char** argv)
     FunOfflineUninit(asr_hanlde);
     return 0;
 }
-
