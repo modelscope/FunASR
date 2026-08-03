@@ -11,9 +11,12 @@ include_directories(${PROJECT_SOURCE_DIR}/third_party)
 SET(RELATION_SOURCE "../src/resample.cpp" "../src/util.cpp" "../src/alignedmem.cpp" "../src/encode_converter.cpp")
 endif()
 
+add_library(funasr-result-json STATIC "result-json.cpp")
+target_include_directories(funasr-result-json PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+
 add_executable(funasr-onnx-offline "funasr-onnx-offline.cpp" ${RELATION_SOURCE})
 target_link_options(funasr-onnx-offline PRIVATE "-Wl,--no-as-needed")
-target_link_libraries(funasr-onnx-offline PUBLIC funasr)
+target_link_libraries(funasr-onnx-offline PUBLIC funasr funasr-result-json)
 
 add_executable(funasr-onnx-offline-vad "funasr-onnx-offline-vad.cpp" ${RELATION_SOURCE})
 target_link_options(funasr-onnx-offline-vad PRIVATE "-Wl,--no-as-needed")
@@ -37,19 +40,31 @@ target_link_libraries(funasr-onnx-online-punc PUBLIC funasr)
 
 add_executable(funasr-onnx-offline-rtf "funasr-onnx-offline-rtf.cpp" ${RELATION_SOURCE})
 target_link_options(funasr-onnx-offline-rtf PRIVATE "-Wl,--no-as-needed")
-target_link_libraries(funasr-onnx-offline-rtf PUBLIC funasr)
+target_link_libraries(funasr-onnx-offline-rtf PUBLIC funasr funasr-result-json)
 
 add_executable(funasr-onnx-2pass "funasr-onnx-2pass.cpp" ${RELATION_SOURCE})
 target_link_options(funasr-onnx-2pass PRIVATE "-Wl,--no-as-needed")
-target_link_libraries(funasr-onnx-2pass PUBLIC funasr)
+target_link_libraries(funasr-onnx-2pass PUBLIC funasr funasr-result-json)
 
 add_executable(funasr-onnx-2pass-rtf "funasr-onnx-2pass-rtf.cpp" ${RELATION_SOURCE})
 target_link_options(funasr-onnx-2pass-rtf PRIVATE "-Wl,--no-as-needed")
-target_link_libraries(funasr-onnx-2pass-rtf PUBLIC funasr)
+target_link_libraries(funasr-onnx-2pass-rtf PUBLIC funasr funasr-result-json)
 
 add_executable(funasr-onnx-online-rtf "funasr-onnx-online-rtf.cpp" ${RELATION_SOURCE})
 target_link_options(funasr-onnx-online-rtf PRIVATE "-Wl,--no-as-needed")
 target_link_libraries(funasr-onnx-online-rtf PUBLIC funasr)
+
+if(FUNASR_BUILD_TESTS)
+    find_package(Python3 REQUIRED COMPONENTS Interpreter)
+    add_executable(funasr-result-json-test "tests/result-json-test.cpp")
+    target_link_libraries(funasr-result-json-test PRIVATE funasr-result-json)
+    add_test(NAME funasr-result-json-test COMMAND funasr-result-json-test)
+    add_test(
+        NAME funasr-cli-output-format-test
+        COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/cli-output-format-test.py
+                --bin-dir ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+    )
+endif()
 
 # include_directories(${FFMPEG_DIR}/include)
 # add_executable(ff "ffmpeg.cpp")

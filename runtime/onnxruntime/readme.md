@@ -1,5 +1,7 @@
 # Please ref to [websocket service](https://github.com/modelscope/FunASR/tree/main/runtime/websocket)
 
+Machine-readable transcript and timestamp output: [JSONL output guide](../docs/onnxruntime_binary_output.md) | [中文](../docs/onnxruntime_binary_output_zh.md)
+
 # If you want to compile the file yourself, you can follow the steps below.
 ## Building for Linux/Unix
 ### Download onnxruntime

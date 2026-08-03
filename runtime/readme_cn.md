@@ -2,6 +2,8 @@
 
 English Version（[docs](./readme.md)）
 
+原生 ONNX Runtime JSONL 转写与时间戳输出：[使用文档](./docs/onnxruntime_binary_output_zh.md)
+
 FunASR是由阿里巴巴通义实验室语音团队开源的一款语音识别基础框架，集成了语音端点检测、语音识别、标点断句等领域的工业级别模型，吸引了众多开发者参与体验和开发。为了解决工业落地的最后一公里，将模型集成到业务中去，我们开发了社区软件包。
 支持以下几种服务部署：
 

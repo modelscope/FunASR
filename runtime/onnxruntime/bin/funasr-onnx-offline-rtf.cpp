@@ -13,6 +13,7 @@
 #include "funasrruntime.h"
 #include "tclap/CmdLine.h"
 #include "com-define.h"
+#include "result-json.h"
 
 #include <iostream>
 #include <fstream>
@@ -31,7 +32,8 @@ std::mutex mtx;
 
 void runReg(FUNASR_HANDLE asr_handle, vector<string> wav_list, vector<string> wav_ids, int audio_fs,
             float* total_length, long* total_time, int core_id, float glob_beam = 3.0f, float lat_beam = 3.0f, float am_sc = 10.0f, 
-            int fst_inc_wts = 20, string hotword_path = "") {
+            int fst_inc_wts = 20, string hotword_path = "",
+            funasr::OutputFormat output_format = funasr::OutputFormat::kLog) {
     
     struct timeval start, end;
     long seconds = 0;
@@ -77,14 +79,21 @@ void runReg(FUNASR_HANDLE asr_handle, vector<string> wav_list, vector<string> wa
 
         if(result){
             string msg = FunASRGetResult(result, 0);
-            LOG(INFO) << "Thread: " << this_thread::get_id() << "," << wav_ids[i] << " : " << msg;
             string stamp = FunASRGetStamp(result);
-            if(stamp !=""){
-                LOG(INFO) << "Thread: " << this_thread::get_id() << "," << wav_ids[i] << " : " << stamp;
-            }
             string stamp_sents = FunASRGetStampSents(result);
-            if(stamp_sents !=""){
-                LOG(INFO)<< wav_ids[i] <<" : "<<stamp_sents;
+            if (output_format == funasr::OutputFormat::kJsonl) {
+                const string line = funasr::FormatResultJson(
+                    wav_ids[i], "offline", msg, stamp, stamp_sents);
+                lock_guard<mutex> guard(mtx);
+                cout << line << endl;
+            } else {
+                LOG(INFO) << "Thread: " << this_thread::get_id() << "," << wav_ids[i] << " : " << msg;
+                if(stamp !=""){
+                    LOG(INFO) << "Thread: " << this_thread::get_id() << "," << wav_ids[i] << " : " << stamp;
+                }
+                if(stamp_sents !=""){
+                    LOG(INFO)<< wav_ids[i] <<" : "<<stamp_sents;
+                }
             }
             float snippet_time = FunASRGetRetSnippetTime(result);
             n_total_length += snippet_time;
@@ -143,6 +152,7 @@ int main(int argc, char *argv[])
     TCLAP::ValueArg<std::int32_t>   audio_fs("", AUDIO_FS, "the sample rate of audio", false, 16000, "int32_t");
     TCLAP::ValueArg<std::int32_t> thread_num("", THREAD_NUM, "multi-thread num for rtf", false, 1, "int32_t");
     TCLAP::ValueArg<std::string>    hotword("", HOTWORD, "the hotword file, one hotword perline, Format: Hotword Weight (could be: 阿里巴巴 20)", false, "", "string");
+    TCLAP::ValueArg<std::string>    output_format("", "output-format", "result output: log (Default) or jsonl", false, "log", "string");
     TCLAP::SwitchArg use_gpu("", INFER_GPU, "Whether to use GPU for inference, default is false", false);
     TCLAP::ValueArg<std::int32_t> batch_size("", BATCHSIZE, "batch_size for ASR model when using GPU", false, 4, "int32_t");
 
@@ -159,6 +169,7 @@ int main(int argc, char *argv[])
     cmd.add(lattice_beam);
     cmd.add(am_scale);
     cmd.add(hotword);
+    cmd.add(output_format);
     cmd.add(fst_inc_wts);
     cmd.add(wav_path);
     cmd.add(audio_fs);
@@ -166,6 +177,14 @@ int main(int argc, char *argv[])
     cmd.add(use_gpu);
     cmd.add(batch_size);
     cmd.parse(argc, argv);
+
+    funasr::OutputFormat output_format_;
+    try {
+        output_format_ = funasr::ParseOutputFormat(output_format.getValue());
+    } catch (const std::invalid_argument& error) {
+        LOG(ERROR) << error.what();
+        return 2;
+    }
 
     std::map<std::string, std::string> model_path;
     GetValue(model_dir, MODEL_DIR, model_path);
@@ -246,7 +265,7 @@ int main(int argc, char *argv[])
     }
     for (int i = 0; i < rtf_threds; i++)
     {
-        threads.emplace_back(thread(runReg, asr_handle, wav_list, wav_ids, audio_fs.getValue(), &total_length, &total_time, i, glob_beam, lat_beam, am_sc, value_bias, hotword_path));
+        threads.emplace_back(thread(runReg, asr_handle, wav_list, wav_ids, audio_fs.getValue(), &total_length, &total_time, i, glob_beam, lat_beam, am_sc, value_bias, hotword_path, output_format_));
     }
 
     for (auto& thread : threads)
