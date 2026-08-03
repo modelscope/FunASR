@@ -93,6 +93,46 @@ bash finetune.sh
 - For training data less than 5000 hours, it is recommended to fine-tune the audio_encoder and audio_adaptor.
 - For training data greater than 10000 hours, it is recommended to perform full-parameter fine-tuning.
 
+## LoRA Finetune
+
+As an alternative to full-parameter / partial fine-tuning, you can LoRA-tune the
+Qwen3-0.6B LLM (attaching adapters to its `q_proj` / `v_proj` linear layers):
+
+```
+bash lora_finetune.sh
+```
+
+What it sets:
+
+- `llm_conf.use_lora=true` — injects `LoRALinear` adapters into the target layers
+  of the LLM (base weights shared and frozen, trainable `lora_A` / `lora_B` added).
+- `lora_only=true` — freezes every non-LoRA parameter (audio encoder, adaptor and
+  CTC decoder), so only the adapters train. Checkpoints still save the full state
+  dict (base weights unchanged + adapter params), so you can resume or decode with
+  the same `use_lora=true` config.
+- `llm_conf.freeze=true` — keeps the LLM base weights frozen (redundant with
+  `lora_only`, but explicit).
+
+LoRA hyper-parameters live under `llm_conf.lora_conf` (defaults ship with the
+model config): `r`, `lora_alpha`, `lora_dropout`, `target_modules`. Override them
+on the command line, e.g.:
+
+```
+++llm_conf.lora_conf.r=32
+```
+
+To keep the audio encoder / adaptor **trainable** while LoRA-tweaking only the LLM
+(a good middle ground for a few hundred hours of domain data), set
+`lora_only=false`, `audio_encoder_conf.freeze=false` and
+`audio_adaptor_conf.freeze=false`; the LLM base weights stay frozen via
+`llm_conf.freeze=true`.
+
+**Decoding / deployment:** the fine-tuned checkpoint works with `decode.py` below
+without any merge step — the forward pass adds the adapter output on top of the
+base weights. To fold the adapters into the base weights for a standalone
+deployment checkpoint, compute `W' = W + (lora_alpha / r) * lora_B @ lora_A` for
+each target module and drop the `lora_A` / `lora_B` keys.
+
 ## Model Evaluation
 
 After model fine-tuning is completed, you can decode the model using the decode.py script:

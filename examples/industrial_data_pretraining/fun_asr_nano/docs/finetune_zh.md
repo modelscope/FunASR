@@ -93,6 +93,36 @@ bash finetune.sh
 - 训练数据少于 5000 小时，建议微调 audio_encoder 和 audio_adaptor
 - 训练数据大于 10000 小时，建议全量参数微调
 
+## LoRA 微调
+
+作为全量/部分微调的替代方案，可以对 Qwen3-0.6B LLM 做 LoRA 微调（在其
+`q_proj` / `v_proj` 线性层上挂适配器）：
+
+```
+bash lora_finetune.sh
+```
+
+关键参数说明：
+
+- `llm_conf.use_lora=true` — 在 LLM 目标层注入 `LoRALinear` 适配器（基座权重共享并冻结，新增可训练的 `lora_A` / `lora_B`）。
+- `lora_only=true` — 冻结所有非 LoRA 参数（音频编码器、适配器、CTC 解码器），只训练适配器。checkpoint 仍保存完整 state dict（基座权重不变 + 适配器参数），因此用相同的 `use_lora=true` 配置即可续训或解码。
+- `llm_conf.freeze=true` — 保持 LLM 基座权重冻结（与 `lora_only` 重复，但更显式）。
+
+LoRA 超参数位于 `llm_conf.lora_conf` 下（模型配置已自带默认值）：
+`r`、`lora_alpha`、`lora_dropout`、`target_modules`。可在命令行覆盖，例如：
+
+```
+++llm_conf.lora_conf.r=32
+```
+
+如果希望在只对 LLM 做 LoRA 的同时**保持音频编码器/适配器可训练**（对数百小时领域数据是个不错的折中），
+可设置 `lora_only=false`、`audio_encoder_conf.freeze=false`、`audio_adaptor_conf.freeze=false`；
+LLM 基座权重仍通过 `llm_conf.freeze=true` 保持冻结。
+
+**解码 / 部署：** 微调后的 checkpoint 可直接用下文的 `decode.py` 解码，无需合并步骤——
+前向时在基座输出上叠加适配器输出。若要把适配器折叠进基座权重以得到独立部署的 checkpoint，
+对每个目标模块计算 `W' = W + (lora_alpha / r) * lora_B @ lora_A`，并删除 `lora_A` / `lora_B` 键即可。
+
 ## 模型评测
 
 当模型微调结束后，可以使用 decode.py 脚本对模型进行解码：
