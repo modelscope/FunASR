@@ -234,7 +234,9 @@ class Trainer:
             # torch.save(state, latest)
             with torch.no_grad():
                 model.save_checkpoint(save_dir=self.output_dir, tag=f"model.pt", client_state=state)
-            if self.best_step_or_epoch == "":
+            if self.best_step_or_epoch == "" and ckpt_name in getattr(
+                self, f"val_{self.avg_keep_nbest_models_type}_step_or_epoch"
+            ):
                 self.best_step_or_epoch = ckpt_name
 
             if self.avg_keep_nbest_models_type == "acc":
@@ -284,22 +286,36 @@ class Trainer:
             else:
                 print("Undo")
             if self.rank == 0:
-                self.saved_ckpts[ckpt_name] = getattr(
+                # Only checkpoints carrying the configured validation metric
+                # (acc or loss) are ranked. A checkpoint saved at an unvalidated
+                # step (e.g. save_checkpoint_interval is not a multiple of
+                # validate_interval) is kept on disk but excluded from
+                # saved_ckpts, so it never competes in best-model ranking or
+                # keep_nbest_models pruning with a fabricated score and cannot
+                # evict a validated best checkpoint.
+                metric_value = getattr(
                     self, f"val_{self.avg_keep_nbest_models_type}_step_or_epoch"
-                ).get(ckpt_name, 0.0)
-                if self.keep_nbest_models > 0:
-                    if len(self.saved_ckpts) > self.keep_nbest_models:
-                        if self.avg_keep_nbest_models_type == "acc":
-                            key = min(self.saved_ckpts, key=self.saved_ckpts.get)
-                        else:
-                            key = max(self.saved_ckpts, key=self.saved_ckpts.get)
-                        if key in self.saved_ckpts:
-                            del self.saved_ckpts[key]
-                        filename = os.path.join(self.output_dir, key)
-                        logging.info(f"Delete: {filename}")
-                        if os.path.exists(filename):
-                            # os.remove(filename)
-                            misc_utils.smart_remove(filename)
+                ).get(ckpt_name)
+                if metric_value is None:
+                    logging.info(
+                        f"Checkpoint {ckpt_name} has no {self.avg_keep_nbest_models_type} metric; "
+                        "kept on disk but excluded from keep_nbest_models ranking."
+                    )
+                else:
+                    self.saved_ckpts[ckpt_name] = metric_value
+                    if self.keep_nbest_models > 0:
+                        if len(self.saved_ckpts) > self.keep_nbest_models:
+                            if self.avg_keep_nbest_models_type == "acc":
+                                key = min(self.saved_ckpts, key=self.saved_ckpts.get)
+                            else:
+                                key = max(self.saved_ckpts, key=self.saved_ckpts.get)
+                            if key in self.saved_ckpts:
+                                del self.saved_ckpts[key]
+                            filename = os.path.join(self.output_dir, key)
+                            logging.info(f"Delete: {filename}")
+                            if os.path.exists(filename):
+                                # os.remove(filename)
+                                misc_utils.smart_remove(filename)
 
         elif self.use_fsdp:
             raise NotImplementedError(
@@ -362,7 +378,9 @@ class Trainer:
             logging.info(f"\nCheckpoint saved to {filename}\n")
             latest = Path(os.path.join(self.output_dir, f"model.pt"))
             torch.save(state, latest)
-            if self.best_step_or_epoch == "":
+            if self.best_step_or_epoch == "" and ckpt_name in getattr(
+                self, f"val_{self.avg_keep_nbest_models_type}_step_or_epoch"
+            ):
                 self.best_step_or_epoch = ckpt_name
 
             if self.avg_keep_nbest_models_type == "acc":
@@ -403,22 +421,36 @@ class Trainer:
                     )
             else:
                 print("Undo")
-            self.saved_ckpts[ckpt_name] = getattr(
+            # Only checkpoints carrying the configured validation metric
+            # (acc or loss) are ranked. A checkpoint saved at an unvalidated
+            # step (e.g. save_checkpoint_interval is not a multiple of
+            # validate_interval) is kept on disk but excluded from saved_ckpts,
+            # so it never competes in best-model ranking or keep_nbest_models
+            # pruning with a fabricated score and cannot evict a validated
+            # best checkpoint.
+            metric_value = getattr(
                 self, f"val_{self.avg_keep_nbest_models_type}_step_or_epoch"
-            ).get(ckpt_name, 0.0)
-            if self.keep_nbest_models > 0:
-                if len(self.saved_ckpts) > self.keep_nbest_models:
-                    if self.avg_keep_nbest_models_type == "acc":
-                        key = min(self.saved_ckpts, key=self.saved_ckpts.get)
-                    else:
-                        key = max(self.saved_ckpts, key=self.saved_ckpts.get)
-                    if key in self.saved_ckpts:
-                        del self.saved_ckpts[key]
-                    filename = os.path.join(self.output_dir, key)
-                    logging.info(f"Delete: {filename}")
-                    if os.path.exists(filename):
-                        # os.remove(filename)
-                        misc_utils.smart_remove(filename)
+            ).get(ckpt_name)
+            if metric_value is None:
+                logging.info(
+                    f"Checkpoint {ckpt_name} has no {self.avg_keep_nbest_models_type} metric; "
+                    "kept on disk but excluded from keep_nbest_models ranking."
+                )
+            else:
+                self.saved_ckpts[ckpt_name] = metric_value
+                if self.keep_nbest_models > 0:
+                    if len(self.saved_ckpts) > self.keep_nbest_models:
+                        if self.avg_keep_nbest_models_type == "acc":
+                            key = min(self.saved_ckpts, key=self.saved_ckpts.get)
+                        else:
+                            key = max(self.saved_ckpts, key=self.saved_ckpts.get)
+                        if key in self.saved_ckpts:
+                            del self.saved_ckpts[key]
+                        filename = os.path.join(self.output_dir, key)
+                        logging.info(f"Delete: {filename}")
+                        if os.path.exists(filename):
+                            # os.remove(filename)
+                            misc_utils.smart_remove(filename)
 
         if self.use_ddp or self.use_fsdp:
             dist.barrier()
