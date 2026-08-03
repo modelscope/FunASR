@@ -196,6 +196,110 @@ def test_ecosystem_surfaces_merged_whisperlivekit_sensevoice_backend(
         assert marker in text
 
 
+@pytest.mark.parametrize('relative', ('ecosystem.html', 'en/ecosystem.html'))
+def test_ecosystem_surfaces_released_subtitle_edit_funasr_backends(
+    built_site, relative
+):
+    soup = read_soup(built_site / relative)
+    anchor = soup.select_one(
+        '.card-title a[href="https://github.com/SubtitleEdit/subtitleedit"]'
+    )
+
+    assert anchor
+    card = anchor.find_parent(class_='card')
+    assert card
+    links = {link.get('href') for link in card.select('a[href]')}
+    assert {
+        'https://github.com/SubtitleEdit/subtitleedit/pull/13063',
+        'https://github.com/SubtitleEdit/subtitleedit/releases/tag/v5.2.0-beta2',
+    } <= links
+    text = card.get_text(' ', strip=True)
+    for marker in (
+        '13.7K',
+        'Fun-ASR Nano',
+        'SenseVoice',
+        'Q4',
+        'Q8',
+        'F16',
+        'Windows',
+        'macOS',
+        'Linux',
+        'v5.2.0-beta2',
+    ):
+        assert marker in text
+
+
+@pytest.mark.parametrize(
+    ('relative', 'peer', 'markers'),
+    (
+        (
+            'blog/subtitle-edit-fun-asr-sensevoice-local-subtitles.html',
+            '/en/blog/subtitle-edit-fun-asr-sensevoice-local-subtitles.html',
+            ('视频', '字幕', '当前是 beta 版本'),
+        ),
+        (
+            'en/blog/subtitle-edit-fun-asr-sensevoice-local-subtitles.html',
+            '/blog/subtitle-edit-fun-asr-sensevoice-local-subtitles.html',
+            ('video', 'subtitles', 'currently a beta release'),
+        ),
+    ),
+)
+def test_subtitle_edit_blog_is_bilingual_and_evidence_backed(
+    built_site, relative, peer, markers
+):
+    page = built_site / relative
+    soup = read_soup(page)
+    text = soup.get_text(' ', strip=True)
+
+    assert soup.select_one('link[rel="canonical"]')['href'].endswith('/' + relative)
+    assert soup.select_one(f'link[rel="alternate"][href$="{peer}"]')
+    image = soup.select_one('article img[src]')
+    assert image
+    assert (built_site / image['src'].lstrip('/')).is_file()
+    links = {link.get('href') for link in soup.select('a[href]')}
+    assert {
+        'https://github.com/SubtitleEdit/subtitleedit',
+        'https://github.com/SubtitleEdit/subtitleedit/pull/13063',
+        'https://github.com/SubtitleEdit/subtitleedit/releases/tag/v5.2.0-beta2',
+        '/go/fun-asr',
+        '/go/sensevoice',
+    } <= links
+    for marker in (
+        'Video',
+        'Audio to text',
+        'Crisp ASR Fun-ASR Nano',
+        'Crisp ASR SenseVoice',
+        'Q4',
+        'Q8',
+        'F16',
+        'Windows',
+        'macOS',
+        'Linux',
+        'v5.2.0-beta2',
+        *markers,
+    ):
+        assert marker in text
+
+
+@pytest.mark.parametrize(
+    ('relative', 'href'),
+    (
+        (
+            'blog/index.html',
+            '/blog/subtitle-edit-fun-asr-sensevoice-local-subtitles.html',
+        ),
+        (
+            'en/blog/index.html',
+            '/en/blog/subtitle-edit-fun-asr-sensevoice-local-subtitles.html',
+        ),
+    ),
+)
+def test_blog_indexes_surface_subtitle_edit_release(built_site, relative, href):
+    soup = read_soup(built_site / relative)
+
+    assert soup.select_one(f'a[href="{href}"]')
+
+
 def test_complete_build_passes_output_validation(built_site):
     assert validate_output(built_site) == []
 
