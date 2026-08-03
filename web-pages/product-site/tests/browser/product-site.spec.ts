@@ -90,6 +90,37 @@ test('selector, language peers, copy, and compatibility routes work', async ({ b
   await context.close();
 });
 
+for (const viewport of [
+  { name: 'mobile', width: 390, height: 844 },
+  { name: 'desktop', width: 1440, height: 900 },
+]) {
+  test(`SenseVoice TensorRT deployment is stable at ${viewport.name}`, async ({ page }, testInfo) => {
+    await page.setViewportSize(viewport);
+    await page.goto('/deploy/sensevoice-tensorrt.html');
+
+    await expect(page.locator('h1')).toHaveText('SenseVoice TensorRT / Triton');
+    await expect(page.locator('[data-section="commands"] .command-block')).toHaveCount(9);
+    await expect(page.locator('[data-section="smoke-test"] .command-block')).toHaveCount(1);
+    await expect(page.locator('a[href="https://github.com/modelscope/FunASR/pull/3463"]')).toBeVisible();
+    await expect(page.locator('a[href="/en/deploy/sensevoice-tensorrt.html"]')).toBeVisible();
+
+    const layout = await page.evaluate(() => ({
+      overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+      commandWidths: [...document.querySelectorAll<HTMLElement>('.command-block')].map((node) => ({
+        parent: node.parentElement?.getBoundingClientRect().width ?? 0,
+        width: node.getBoundingClientRect().width,
+      })),
+    }));
+    expect(layout.overflow).toBeLessThanOrEqual(1);
+    expect(layout.commandWidths.every(({ parent, width }) => width <= parent + 1)).toBe(true);
+
+    await page.screenshot({
+      path: testInfo.outputPath(`sensevoice-tensorrt-${viewport.name}.png`),
+      fullPage: true,
+    });
+  });
+}
+
 test('reduced motion disables smooth scrolling', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/en/');

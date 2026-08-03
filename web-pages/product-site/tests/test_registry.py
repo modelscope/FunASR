@@ -16,6 +16,7 @@ from registry import deployment_pairs, load_registry, validate_registry  # noqa:
 REGISTRY = SITE_ROOT / 'data' / 'deployments.json'
 EXPECTED_IDS = {
     'vllm',
+    'sensevoice-tensorrt',
     'llama-cpp',
     'audio-cpp',
     'openai-api',
@@ -64,6 +65,57 @@ def test_audio_cpp_contract_tracks_merged_offline_runtime(valid_registry):
     assert any('ce72677f84900f0dc57f498ace253bfb3c9155b6' in item['url'] for item in entry['evidence'])
     assert 'streaming' in entry['translations']['en']['primary_limitation'].lower()
     assert 'timestamp' in entry['translations']['en']['primary_limitation'].lower()
+
+
+def test_sensevoice_tensorrt_contract_tracks_merged_native_runtime(valid_registry):
+    entry = next(
+        item for item in valid_registry['deployments']
+        if item['id'] == 'sensevoice-tensorrt'
+    )
+    vllm = next(item for item in valid_registry['deployments'] if item['id'] == 'vllm')
+    llama_cpp = next(item for item in valid_registry['deployments'] if item['id'] == 'llama-cpp')
+
+    assert entry['maturity'] == 'production-verified'
+    assert vllm['selector_rank'] < entry['selector_rank'] < llama_cpp['selector_rank']
+    assert entry['tested'] == {
+        'funasr': 'main@6408aaa9',
+        'runtime': 'TensorRT 10.0.1 / Triton 24.05',
+        'verified': '2026-08-04',
+    }
+    assert entry['models'] == ['SenseVoiceSmall']
+    assert entry['hardware'] == ['nvidia-gpu', 'kubernetes']
+    assert 'Triton gRPC/HTTP' in entry['interfaces']
+    assert any('git checkout 6408aaa9' in command for command in entry['commands']['install'])
+    assert any('quantize=False' in command for command in entry['commands']['install'])
+    assert any(
+        'chn_jpn_yue_eng_ko_spectok.bpe.model' in command
+        and 'aa87f86064c3730d799ddf7af3c04659151102cba548bce325cf06ba4da4e6a8' in command
+        for command in entry['commands']['install']
+    )
+    assert any(
+        'build_sensevoice_tensorrt.py' in command
+        and '--max-batch 16' in command
+        and '--max-frames 4096' in command
+        for command in entry['commands']['launch']
+    )
+    assert any(
+        command.startswith('cd runtime/triton_gpu && tritonserver')
+        for command in entry['commands']['launch']
+    )
+    assert any('/v2/health/ready' in command for command in entry['commands']['health'])
+    assert any('TRANSCRIPTS' in command for command in entry['commands']['smoke'])
+    assert any('/pull/3463' in item['url'] for item in entry['evidence'])
+    assert any(
+        'build_sensevoice_tensorrt.py' in item['url'] for item in entry['evidence']
+    )
+    assert any(
+        '527,504,916 bytes' in benchmark['result']
+        and '100% CTC top-1 agreement' in benchmark['result']
+        for benchmark in entry['benchmarks']
+    )
+    limitation = entry['translations']['en']['primary_limitation'].lower()
+    assert 'gpu architecture' in limitation
+    assert 'tensorrt version' in limitation
 
 
 def test_production_entry_requires_evidence(valid_registry):
