@@ -3,7 +3,8 @@ import os
 import pytest
 import torch
 
-from funasr.train_utils.trainer_ds import Trainer
+from funasr.train_utils.trainer import Trainer as TrainerTorch
+from funasr.train_utils.trainer_ds import Trainer as TrainerDs
 
 
 class _DummyModule(torch.nn.Module):
@@ -34,8 +35,23 @@ class _FakeDeepSpeedEngine:
         return True
 
 
-def _make_trainer(tmp_path, ranking, use_deepspeed, keep_nbest_models=1):
-    return Trainer(
+# The same ranking logic exists in three checkpointing paths:
+#   trainer_ds_torch     -- TrainerDs, use_deepspeed=False (torch.save path)
+#   trainer_ds_deepspeed -- TrainerDs, use_deepspeed=True  (DeepSpeed save path)
+#   trainer_torch        -- non-DeepSpeed Trainer (funasr-train), torch.save path
+SAVE_PATHS = ["trainer_ds_torch", "trainer_ds_deepspeed", "trainer_torch"]
+
+
+def _make_trainer(tmp_path, ranking, save_path, keep_nbest_models=1):
+    kwargs = dict(
+        output_dir=str(tmp_path),
+        device="cpu",
+        keep_nbest_models=keep_nbest_models,
+        avg_keep_nbest_models_type=ranking,
+    )
+    if save_path == "trainer_torch":
+        return TrainerTorch(local_rank=0, **kwargs)
+    return TrainerDs(
         rank=0,
         local_rank=0,
         world_size=1,
@@ -43,16 +59,13 @@ def _make_trainer(tmp_path, ranking, use_deepspeed, keep_nbest_models=1):
         use_fsdp=False,
         use_fp16=False,
         use_bf16=False,
-        use_deepspeed=use_deepspeed,
-        output_dir=str(tmp_path),
-        device="cpu",
-        keep_nbest_models=keep_nbest_models,
-        avg_keep_nbest_models_type=ranking,
+        use_deepspeed=(save_path == "trainer_ds_deepspeed"),
+        **kwargs,
     )
 
 
-def _make_fixtures(use_deepspeed):
-    if use_deepspeed:
+def _make_fixtures(save_path):
+    if save_path == "trainer_ds_deepspeed":
         return _FakeDeepSpeedEngine(), None, None, None
     model = _DummyModule()
     optim = torch.optim.SGD(model.parameters(), lr=0.01)
@@ -69,18 +82,18 @@ def _bad_metric(ranking):
     return 1.0 if ranking == "loss" else 0.5
 
 
+@pytest.mark.parametrize("save_path", SAVE_PATHS)
 @pytest.mark.parametrize("ranking", ["loss", "acc"])
-@pytest.mark.parametrize("use_deepspeed", [False, True])
-def test_unvalidated_checkpoint_cannot_evict_validated_best(tmp_path, ranking, use_deepspeed):
+def test_unvalidated_checkpoint_cannot_evict_validated_best(tmp_path, ranking, save_path):
     """A checkpoint saved at an unvalidated step must not enter ranking.
 
     Regression for the KeyError fix: it used to fall back to a fabricated
     score of 0.0, which under loss-based ranking pruned the validated best
     checkpoint and left only the unvalidated one.
     """
-    trainer = _make_trainer(tmp_path, ranking, use_deepspeed, keep_nbest_models=1)
+    trainer = _make_trainer(tmp_path, ranking, save_path, keep_nbest_models=1)
     metric_dict = getattr(trainer, f"val_{ranking}_step_or_epoch")
-    model, optim, scheduler, scaler = _make_fixtures(use_deepspeed)
+    model, optim, scheduler, scaler = _make_fixtures(save_path)
 
     # step 1 was validated; register its metric so it is a ranked best.
     metric_dict["model.pt.ep1.1"] = _bad_metric(ranking)
@@ -107,13 +120,13 @@ def test_unvalidated_checkpoint_cannot_evict_validated_best(tmp_path, ranking, u
     assert os.path.exists(os.path.join(tmp_path, "model.pt.ep1.2"))
 
 
+@pytest.mark.parametrize("save_path", SAVE_PATHS)
 @pytest.mark.parametrize("ranking", ["loss", "acc"])
-@pytest.mark.parametrize("use_deepspeed", [False, True])
-def test_validated_checkpoints_still_rank_and_prune(tmp_path, ranking, use_deepspeed):
+def test_validated_checkpoints_still_rank_and_prune(tmp_path, ranking, save_path):
     """Validated checkpoints must keep ranking and keep_nbest_models pruning."""
-    trainer = _make_trainer(tmp_path, ranking, use_deepspeed, keep_nbest_models=1)
+    trainer = _make_trainer(tmp_path, ranking, save_path, keep_nbest_models=1)
     metric_dict = getattr(trainer, f"val_{ranking}_step_or_epoch")
-    model, optim, scheduler, scaler = _make_fixtures(use_deepspeed)
+    model, optim, scheduler, scaler = _make_fixtures(save_path)
 
     metric_dict["model.pt.ep1.1"] = _bad_metric(ranking)
     metric_dict["model.pt.ep1.2"] = _good_metric(ranking)
