@@ -1,0 +1,19 @@
+{
+  "id": "funasr",
+  "name": "FunASR Realtime Transcription",
+  "description": "Self-hosted realtime speech recognition through FunASR",
+  "activation": {
+    "onStartup": false
+  },
+  "enabledByDefault": true,
+  "contracts": {
+    "realtimeTranscriptionProviders": [
+      "funasr"
+    ]
+  },
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {}
+  }
+}

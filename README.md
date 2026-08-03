@@ -22,7 +22,7 @@
 </p>
 
 <p align="center">
-  <a href="#quick-start">Quick Start</a> · <a href="./examples/colab/">Colab</a> · <a href="#benchmark">Benchmark</a> · <a href="./docs/model_selection.md">Model selection</a> · <a href="./docs/migration_from_whisper.md">Migration guide</a> · <a href="./docs/use_case_showcase.md">Use cases</a> · <a href="./docs/community_projects.md">Community integrations</a> · <a href="./docs/deployment_matrix.md">Deployment matrix</a> · <a href="https://www.funasr.com/">Deployment hub</a> · <a href="./docs/troubleshooting.md">Troubleshooting</a> · <a href="#model-zoo">Models</a> · <a href="https://modelscope.github.io/FunASR/agent.html">Agent Integration</a> · <a href="https://modelscope.github.io/FunASR/">Docs</a> · <a href="./CONTRIBUTING.md">Contribute</a>
+  <a href="#quick-start">Quick Start</a> · <a href="./examples/colab/">Colab</a> · <a href="#benchmark">Benchmark</a> · <a href="./docs/model_selection.md">Model selection</a> · <a href="./docs/migration_from_whisper.md">Migration guide</a> · <a href="./docs/use_case_showcase.md">Use cases</a> · <a href="./docs/community_projects.md">Community integrations</a> · <a href="./docs/deployment_matrix.md">Deployment matrix</a> · <a href="https://www.funasr.com/">Deployment hub</a> · <a href="./docs/troubleshooting.md">Troubleshooting</a> · <a href="#model-zoo">Models</a> · <a href="https://modelscope.github.io/FunASR/agent.html">Agent Integration</a> · <a href="./integrations/openclaw/">OpenClaw</a> · <a href="https://modelscope.github.io/FunASR/">Docs</a> · <a href="./CONTRIBUTING.md">Contribute</a>
 </p>
 
 ---
@@ -113,6 +113,8 @@ results = model.generate(["audio1.wav", "audio2.wav"], language="auto")
 > **Deploy as API server:** `funasr-server --device cuda` → OpenAI-compatible endpoint at localhost:8000
 >
 > **Use with AI agents:** [MCP Server](examples/mcp_server/) for Claude/Cursor · [OpenAI API](examples/openai_api/) for LangChain/Dify/AutoGen
+>
+> **Use with voice agents:** [OpenClaw realtime plugin](integrations/openclaw/) for self-hosted Talk and Voice Call transcription
 
 ### Why FunASR?
 
@@ -322,6 +324,7 @@ asset is published.
 
 ## What's new
 
+- 2026/08/04: **OpenClaw realtime transcription integration** — the new [`openclaw-funasr`](integrations/openclaw/) source package connects self-hosted FunASR `online`, `offline`, and `2pass` WebSocket recognition to OpenClaw Talk and Voice Call. Its 8 kHz G.711 mu-law conversion, 60 ms framing, partial/final transcripts, reconnect limits, package installation, and runtime registration have been verified against OpenClaw `2026.7.2`; npm and ClawHub publication will follow the required [upstream SDK change](https://github.com/openclaw/openclaw/pull/118977).
 - 2026/07/31: **v1.4.0 on PyPI** — `AutoModel` now rejects the common `vda_model` misspelling before model download and points to `vad_model`, so VAD-dependent segmentation, speaker processing, and `sentence_info` are not silently disabled. The GitHub source release also updates the legacy WebSocket file runtime: clients wait for an explicit end-of-input acknowledgement while the server flushes pending offline, online, and 2pass audio and reports finalization failures. Install the Python package with `python -m pip install -U "funasr==1.4.0"`. [Release ->](https://github.com/modelscope/FunASR/releases/tag/v1.4.0)
 - 2026/07/27: **v1.3.30 on PyPI** — container-formatted WAV, MP3, FLAC, OGG, MP4/M4A, and WebM audio bytes are now decoded through their codecs instead of being misread as raw PCM. OpenAI-compatible responses preserve speaker labels, VAD sentence timing survives punctuation mismatch, trusted browser clients can opt in to CORS, and vLLM VAD chunks are capped at 30 seconds. The GitHub release also includes the current prebuilt llama.cpp runtime for nine desktop and server targets. Install with `python -m pip install -U "funasr==1.3.30"`. [Release ->](https://github.com/modelscope/FunASR/releases/tag/v1.3.30)
 - 2026/07/24: **v1.3.29 hotfix on PyPI** — SenseVoice long-audio inference now returns each VAD speech region through `sentence_info` when token timestamps and a punctuation model are unavailable. Subtitle clients receive the recognized text with real millisecond start/end bounds instead of one zero-length or full-media cue. Install with `python -m pip install -U "funasr==1.3.29"`. [Release ->](https://github.com/modelscope/FunASR/releases/tag/v1.3.29)
