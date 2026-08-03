@@ -177,6 +177,25 @@ def test_ecosystem_surfaces_orca_sensevoice_desktop_integration(built_site, rela
         assert marker in text
 
 
+@pytest.mark.parametrize('relative', ('ecosystem.html', 'en/ecosystem.html'))
+def test_ecosystem_surfaces_merged_whisperlivekit_sensevoice_backend(
+    built_site, relative
+):
+    soup = read_soup(built_site / relative)
+    anchor = soup.select_one(
+        '.card-title a[href="https://github.com/QuentinFuxa/WhisperLiveKit"]'
+    )
+
+    assert anchor
+    card = anchor.find_parent(class_='card')
+    assert card
+    links = {link.get('href') for link in card.select('a[href]')}
+    assert 'https://github.com/QuentinFuxa/WhisperLiveKit/pull/385' in links
+    text = card.get_text(' ', strip=True)
+    for marker in ('SenseVoiceSmall', 'LocalAgreement', 'VAC/VAD', 'timestamp'):
+        assert marker in text
+
+
 def test_complete_build_passes_output_validation(built_site):
     assert validate_output(built_site) == []
 
