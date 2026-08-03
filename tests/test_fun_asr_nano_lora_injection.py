@@ -22,6 +22,7 @@ Coverage requested in review (modelscope/FunASR#3456):
 
 import os
 
+import pytest
 import torch
 import torch.nn as nn
 
@@ -33,6 +34,21 @@ N_LAYERS = 2
 
 DEFAULT_CONF = {"r": 4, "lora_alpha": 8, "lora_dropout": 0.05,
                 "target_modules": ["q_proj", "v_proj"]}
+
+# fp32 non-associativity: a merged forward is one matmul `x @ (W + d).T`, the
+# unmerged forward is `x @ W'.T + (x @ A.T @ B.T) * scaling` — different op
+# ordering gives ~1e-5 relative differences, well above torch.allclose's default
+# 1e-5 rtol. 1e-3 is the fp32-appropriate tolerance and still detects a genuinely
+# broken merge (which would differ by the full adapter magnitude, ~O(1-10)).
+MERGE_RTOL = 1e-3
+MERGE_ATOL = 1e-5
+
+
+@pytest.fixture(autouse=True)
+def _seed_rng():
+    # every test must be reproducible: nn.Linear / LoRALinear init and the
+    # explicit normal_() / randn() draws all consume the global RNG
+    torch.manual_seed(0)
 
 
 class _FakeQwen3(nn.Module):
@@ -149,6 +165,28 @@ def test_base_frozen_adapters_trainable():
         assert q.lora_B.requires_grad is True
 
 
+def test_mark_only_lora_as_trainable_keeps_adapters_trainable():
+    from funasr.models.lora.utils import mark_only_lora_as_trainable
+
+    fake = _FakeQwen3()
+    _apply(fake, DEFAULT_CONF)
+
+    # simulate the documented lora_only=true flow in train.py / train_ds.py:
+    # unfreeze the base model first, then mark_only_lora_as_trainable must
+    # re-freeze every non-LoRA parameter while lora_A/lora_B stay trainable.
+    for p in fake.parameters():
+        p.requires_grad = True
+    mark_only_lora_as_trainable(fake, bias="none")
+
+    for layer in fake.layers:
+        q = layer.self_attn.q_proj
+        assert q.weight.requires_grad is False
+        assert q.lora_A.requires_grad is True
+        assert q.lora_B.requires_grad is True
+    # a non-LoRA parameter outside the adapters is frozen by lora_only
+    assert fake.embed_tokens.weight.requires_grad is False
+
+
 def test_adapter_dtype_matches_base_weight_dtype():
     fake = _FakeQwen3().to(torch.bfloat16)  # llm_dtype=bf16 on a real run
     _apply(fake, DEFAULT_CONF)
@@ -208,10 +246,13 @@ def test_state_dict_round_trip_and_train_eval_transitions(tmp_path):
         q.train()
         assert q.merged is False
         unmerged_out = q(x)
-    assert torch.allclose(merged_out, unmerged_out)
-    # the merge/unmerge round trip restores the unmerged behavior (weight is
-    # restored to ~1 ulp, not bit-exact: (w + delta) - delta rounds in IEEE)
-    assert torch.allclose(train_out[0], unmerged_out)
+    # merged and unmerged forwards agree within fp32 tolerance (different op
+    # ordering; see MERGE_RTOL). A genuinely broken merge would differ by the
+    # full adapter term, not ~1e-5, so the tolerance is still discriminating.
+    assert torch.allclose(merged_out, unmerged_out, rtol=MERGE_RTOL, atol=MERGE_ATOL)
+    # the merge/unmerge round trip restores the unmerged behavior: the base
+    # weight is (w + delta) - delta, which fp32 does not restore bit-exactly
+    assert torch.allclose(train_out[0], unmerged_out, rtol=MERGE_RTOL, atol=MERGE_ATOL)
 
     # a fresh model built with the same lora_conf loads the checkpoint; the
     # non-zero adapter (and its forward behavior) survives the round trip.
