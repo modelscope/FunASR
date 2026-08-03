@@ -20,7 +20,72 @@ docker run -it --name "sensevoice-server" --gpus all --net host -v $your_mount_d
 ```
 
 ### Export SenseVoice Model to Onnx
-Please follow the official guide of FunASR to export the sensevoice onnx file. Also, you need to download the tokenizer file by yourself. 
+Please follow the official FunASR guide to export the SenseVoice ONNX file. Also,
+download the tokenizer file used by the scoring model.
+
+The default deployment uses Triton's ONNX Runtime backend. Export an unquantized
+graph when you plan to build a native TensorRT engine:
+
+```python
+from funasr import AutoModel
+
+model = AutoModel(model="iic/SenseVoiceSmall", device="cuda:0")
+model.export(
+    type="onnx",
+    quantize=False,
+    device="cuda:0",
+    output_dir="./sensevoice_onnx",
+    max_seq_len=4096,
+)
+```
+
+Do not use `model_quant.onnx` for native TensorRT. Dynamic ONNX quantization adds
+`DynamicQuantizeLinear` and `MatMulInteger`, which are not supported by this
+TensorRT path. The builder detects these operators and exits with an actionable
+error before starting an expensive engine build.
+
+### Build a Native TensorRT Engine
+
+Build the plan on the same GPU architecture and TensorRT version used by the
+target Triton server. TensorRT plans are not portable across GPU compute
+capabilities or arbitrary TensorRT versions.
+
+Inside the target Triton environment, install ONNX if needed and run:
+
+```sh
+pip install "onnx>=1.16"
+
+python runtime/triton_gpu/scripts/build_sensevoice_tensorrt.py \
+    ./sensevoice_onnx/model.onnx \
+    runtime/triton_gpu/model_repo_sense_voice_small/encoder/1/model.plan \
+    --precision fp16 \
+    --min-batch 1 --opt-batch 8 --max-batch 16 \
+    --min-frames 1 --opt-frames 512 --max-frames 4096 \
+    --workspace-gb 8
+
+cp runtime/triton_gpu/model_repo_sense_voice_small/encoder/config.pbtxt.tensorrt \
+   runtime/triton_gpu/model_repo_sense_voice_small/encoder/config.pbtxt
+```
+
+The frame bounds apply after the SenseVoice LFR frontend. With the default
+frontend, one feature frame represents approximately 60 ms of audio. Tune the
+optimization profile to production traffic; larger maximum batch and frame
+bounds increase build time and may require more GPU memory. The script validates
+the ONNX checker result, exact SenseVoice tensor contract, profile ordering, GPU
+FP16 capability, TensorRT parser result, and atomic plan output.
+
+The maintained baseline was verified with TensorRT 10.0.1 on an NVIDIA H100:
+
+| Check | Result |
+|---|---|
+| FP32 ONNX parser | 0 TensorRT errors |
+| FP16 plan, batch 1-16, frames 1-4096 | 527,504,916 bytes; 113.9 s build |
+| Random features, 30 and 64 frames | 100% CTC top-1 agreement with PyTorch |
+| Bundled Chinese example | Exact transcript: `开饭时间早上九点至下午五点` |
+
+Keep `config.pbtxt` unchanged to continue using ONNX Runtime, or replace it with
+the provided `config.pbtxt.tensorrt` after placing `model.plan` in `encoder/1`.
+
 ### Launch Server
 Log of directory tree:
 ```sh
