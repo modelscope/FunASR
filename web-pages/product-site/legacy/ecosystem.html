@@ -60,11 +60,11 @@ pre{background:#1e293b;color:#e2e8f0;padding:18px;border-radius:10px;overflow-x:
 .cta a.btn.outline{background:transparent;color:var(--primary);border:1px solid var(--primary)}
 footer{background:#0f172a;color:#94a3b8;padding:32px 0;font-size:0.82rem;text-align:center;margin-top:60px}
 footer a{color:#60a5fa}
-@media(max-width:640px){h1{font-size:1.5rem}.stat-bar{gap:20px}.stat-num{font-size:1.5rem}.card-grid{grid-template-columns:1fr}}
+@media(max-width:640px){.nav-links{display:none}.nav-logo{margin-right:auto}h1{font-size:1.5rem}.stat-bar{gap:20px}.stat-num{font-size:1.5rem}.card-grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
-<nav class="nav"><div class="container"><a class="nav-logo" href="./">Fun<span>ASR</span></a><div class="nav-links"><a href="/#capabilities">核心能力</a><a href="/#usage">如何使用</a><a href="/#benchmark">性能</a><a href="/#demo">演示</a><a href="https://modelscope.github.io/FunASR/zh/" target="_blank">文档</a><a href="quickstart.html">快速上手</a><a href="models.html">模型</a><a href="ecosystem.html">生态</a><a href="/blog/">技术博客</a><a href="vs-whisper.html">对比 Whisper</a><a href="/donors.html">功德榜</a><a href="en/ecosystem.html" style="font-size:0.85rem;font-weight:500;color:var(--text-soft);text-decoration:none">EN</a><a href="https://github.com/modelscope/FunASR" target="_blank" class="nav-btn">GitHub ★</a></div></div></nav>
+<nav class="nav"><div class="container"><a class="nav-logo" href="./">Fun<span>ASR</span></a><div class="nav-links"><a href="/#capabilities">核心能力</a><a href="/#usage">如何使用</a><a href="/#benchmark">性能</a><a href="/#demo">演示</a><a href="https://modelscope.github.io/FunASR/zh/" target="_blank">文档</a><a href="quickstart.html">快速上手</a><a href="models.html">模型</a><a href="ecosystem.html">生态</a><a href="/blog/">技术博客</a><a href="vs-whisper.html">对比 Whisper</a><a href="/donors.html">功德榜</a></div><a href="en/ecosystem.html" style="font-size:0.85rem;font-weight:500;color:var(--text-soft);text-decoration:none">EN</a><a href="https://github.com/modelscope/FunASR" target="_blank" class="nav-btn">GitHub ★</a></div></nav>
 
 <article>
 <div class="container">
@@ -92,6 +92,12 @@ footer a{color:#60a5fa}
 <div class="card-stars">10.5K+ stars</div>
 <div class="card-desc">实时流式转写服务。已合并的 <a href="https://github.com/QuentinFuxa/WhisperLiveKit/pull/385">SenseVoiceSmall backend</a> 接入 LocalAgreement 与 VAC/VAD 流水线，保留 word timestamp，支持自动检测及普通话、粤语、英语、日语和韩语。</div>
 <div><span class="card-tag">实时转写</span><span class="card-tag">SenseVoiceSmall</span></div>
+</div>
+<div class="card">
+<div class="card-title"><a href="https://github.com/SubtitleEdit/subtitleedit">Subtitle Edit</a></div>
+<div class="card-stars">13.7K+ stars</div>
+<div class="card-desc"><a href="https://github.com/SubtitleEdit/subtitleedit/releases/tag/v5.2.0-beta2">v5.2.0-beta2</a> 已提供 Fun-ASR Nano 与 SenseVoice 本地视频字幕引擎，覆盖 Windows、macOS、Linux，并提供 Q4、Q8、F16 模型。<a href="https://github.com/SubtitleEdit/subtitleedit/pull/13063">PR #13063</a> 更新 CrispASR 运行时并核验 SenseVoice Metal 路径；<a href="/blog/subtitle-edit-fun-asr-sensevoice-local-subtitles.html">查看使用与选型</a>。</div>
+<div><span class="card-tag">视频字幕</span><span class="card-tag">Fun-ASR Nano</span><span class="card-tag">SenseVoice</span></div>
 </div>
 <div class="card">
 <div class="card-title"><a href="https://github.com/jianchang512/pyvideotrans">pyVideoTrans</a></div>

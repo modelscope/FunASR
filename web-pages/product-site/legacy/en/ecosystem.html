@@ -61,11 +61,11 @@ pre{background:#1e293b;color:#e2e8f0;padding:18px;border-radius:10px;overflow-x:
 .cta a.btn.outline{background:transparent;color:var(--primary);border:1px solid var(--primary)}
 footer{background:#0f172a;color:#94a3b8;padding:32px 0;font-size:0.82rem;text-align:center;margin-top:60px}
 footer a{color:#60a5fa}
-@media(max-width:640px){h1{font-size:1.5rem}.stat-bar{gap:20px}.stat-num{font-size:1.5rem}.card-grid{grid-template-columns:1fr}}
+@media(max-width:640px){.nav-links{display:none}.nav-logo{margin-right:auto}h1{font-size:1.5rem}.stat-bar{gap:20px}.stat-num{font-size:1.5rem}.card-grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
-<nav class="nav"><div class="container"><a class="nav-logo" href="../en/">Fun<span>ASR</span></a><div class="nav-links"><a href="/en/#capabilities">Capabilities</a><a href="/en/#usage">How to Use</a><a href="/en/#benchmark">Benchmark</a><a href="/en/#demo">Demo</a><a href="https://modelscope.github.io/FunASR/" target="_blank">Docs</a><a href="quickstart.html">Quickstart</a><a href="models.html">Models</a><a href="ecosystem.html">Ecosystem</a><a href="/en/blog/">Blog</a><a href="vs-whisper.html">vs Whisper</a><a href="/en/donors.html">Thanks</a><a href="/ecosystem.html" style="font-size:0.85rem;font-weight:500;color:var(--text-soft);text-decoration:none">中文</a><a href="https://github.com/modelscope/FunASR" target="_blank" class="nav-btn">GitHub ★</a></div></div></nav>
+<nav class="nav"><div class="container"><a class="nav-logo" href="../en/">Fun<span>ASR</span></a><div class="nav-links"><a href="/en/#capabilities">Capabilities</a><a href="/en/#usage">How to Use</a><a href="/en/#benchmark">Benchmark</a><a href="/en/#demo">Demo</a><a href="https://modelscope.github.io/FunASR/" target="_blank">Docs</a><a href="quickstart.html">Quickstart</a><a href="models.html">Models</a><a href="ecosystem.html">Ecosystem</a><a href="/en/blog/">Blog</a><a href="vs-whisper.html">vs Whisper</a><a href="/en/donors.html">Thanks</a></div><a href="/ecosystem.html" style="font-size:0.85rem;font-weight:500;color:var(--text-soft);text-decoration:none">中文</a><a href="https://github.com/modelscope/FunASR" target="_blank" class="nav-btn">GitHub ★</a></div></nav>
 
 <article>
 <div class="container">
@@ -93,6 +93,12 @@ footer a{color:#60a5fa}
 <div class="card-stars">10.5K+ stars</div>
 <div class="card-desc">Real-time streaming transcription. The merged <a href="https://github.com/QuentinFuxa/WhisperLiveKit/pull/385">SenseVoiceSmall backend</a> runs through LocalAgreement and the VAC/VAD pipeline, preserves word timestamps, and supports auto detection plus Mandarin, Cantonese, English, Japanese, and Korean.</div>
 <div><span class="card-tag">Live Transcription</span><span class="card-tag">SenseVoiceSmall</span></div>
+</div>
+<div class="card">
+<div class="card-title"><a href="https://github.com/SubtitleEdit/subtitleedit">Subtitle Edit</a></div>
+<div class="card-stars">13.7K+ stars</div>
+<div class="card-desc"><a href="https://github.com/SubtitleEdit/subtitleedit/releases/tag/v5.2.0-beta2">v5.2.0-beta2</a> ships local Fun-ASR Nano and SenseVoice video subtitle engines for Windows, macOS, and Linux, with Q4, Q8, and F16 models. <a href="https://github.com/SubtitleEdit/subtitleedit/pull/13063">PR #13063</a> updates the CrispASR runtime and verifies the SenseVoice Metal path; <a href="/en/blog/subtitle-edit-fun-asr-sensevoice-local-subtitles.html">read the setup and model guide</a>.</div>
+<div><span class="card-tag">Video Subtitles</span><span class="card-tag">Fun-ASR Nano</span><span class="card-tag">SenseVoice</span></div>
 </div>
 <div class="card">
 <div class="card-title"><a href="https://github.com/jianchang512/pyvideotrans">pyVideoTrans</a></div>
