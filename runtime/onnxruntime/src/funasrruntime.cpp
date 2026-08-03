@@ -564,12 +564,8 @@
 			if (wfst_decoder){
 				wfst_decoder->StartUtterance();
 			}
-			float** buff;
-			int* len;
-			buff = new float*[1];
-        	len = new int[1];
-			buff[0] = frame->data;
-			len[0] = frame->len;
+			float* buff[] = {frame->data};
+			int len[] = {frame->len};
 			vector<string> msgs;
 			if(tpass_stream->GetModelType() == MODEL_SVS){
 				msgs = (tpass_stream->asr_handle)->Forward(buff, len, true, svs_lang, svs_itn, 1);
@@ -579,6 +575,8 @@
 			string msg = msgs.size()>0?msgs[0]:"";
 			std::vector<std::string> msg_vec = funasr::SplitStr(msg, " | ");  // split with timestamp
 			if(msg_vec.size()==0){
+				delete frame;
+				frame = nullptr;
 				continue;
 			}
 			msg = msg_vec[0];
