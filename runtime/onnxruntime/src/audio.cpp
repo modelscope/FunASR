@@ -163,11 +163,40 @@ AudioFrame::AudioFrame(int len) : len(len)
     start = 0;
 }
 AudioFrame::AudioFrame(const AudioFrame &other)
+    : start(other.start), end(other.end), is_final(other.is_final), len(other.len),
+      global_start(other.global_start), global_end(other.global_end)
 {
+    if (other.data != nullptr && len > 0) {
+        data = static_cast<float*>(malloc(sizeof(float) * len));
+        if (data != nullptr) {
+            memcpy(data, other.data, sizeof(float) * len);
+        }
+    }
+}
+AudioFrame& AudioFrame::operator=(const AudioFrame &other)
+{
+    if (this == &other) {
+        return *this;
+    }
+
+    float* copied_data = nullptr;
+    if (other.data != nullptr && other.len > 0) {
+        copied_data = static_cast<float*>(malloc(sizeof(float) * other.len));
+        if (copied_data == nullptr) {
+            return *this;
+        }
+        memcpy(copied_data, other.data, sizeof(float) * other.len);
+    }
+
+    free(data);
     start = other.start;
     end = other.end;
-    len = other.len;
     is_final = other.is_final;
+    data = copied_data;
+    len = other.len;
+    global_start = other.global_start;
+    global_end = other.global_end;
+    return *this;
 }
 AudioFrame::AudioFrame(int start, int end, bool is_final):start(start),end(end),is_final(is_final){
     len = end - start;

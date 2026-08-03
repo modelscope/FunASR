@@ -24,6 +24,7 @@ class AudioFrame {
     AudioFrame();
     AudioFrame(int len);
     AudioFrame(const AudioFrame &other);
+    AudioFrame& operator=(const AudioFrame &other);
     AudioFrame(int start, int end, bool is_final);
 
     ~AudioFrame();
