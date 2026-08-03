@@ -1,0 +1,79 @@
+{
+  "name": "openclaw-funasr",
+  "version": "0.1.0",
+  "description": "Self-hosted FunASR realtime transcription for OpenClaw",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.js",
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md",
+    "openclaw.plugin.json"
+  ],
+  "scripts": {
+    "build": "node ./scripts/build.mjs",
+    "test": "npm run build && vitest run --config ./vitest.config.ts",
+    "check": "npm test",
+    "prepack": "npm run build"
+  },
+  "engines": {
+    "node": "^22.22.3 || >=24.15.0"
+  },
+  "peerDependencies": {
+    "openclaw": ">=2026.7.2"
+  },
+  "peerDependenciesMeta": {
+    "openclaw": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@types/node": "26.1.2",
+    "@types/ws": "8.18.1",
+    "esbuild": "0.28.1",
+    "vitest": "4.1.10",
+    "ws": "8.21.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/modelscope/FunASR.git",
+    "directory": "integrations/openclaw"
+  },
+  "homepage": "https://github.com/modelscope/FunASR/tree/main/integrations/openclaw",
+  "bugs": {
+    "url": "https://github.com/modelscope/FunASR/issues"
+  },
+  "keywords": [
+    "asr",
+    "funasr",
+    "openclaw",
+    "speech-to-text",
+    "transcription",
+    "websocket"
+  ],
+  "openclaw": {
+    "extensions": [
+      "./dist/index.js"
+    ],
+    "install": {
+      "clawhubSpec": "clawhub:openclaw-funasr",
+      "npmSpec": "openclaw-funasr",
+      "defaultChoice": "clawhub",
+      "minHostVersion": ">=2026.7.2"
+    },
+    "compat": {
+      "pluginApi": ">=2026.7.2"
+    },
+    "build": {
+      "openclawVersion": "2026.7.2"
+    },
+    "release": {
+      "publishToClawHub": true,
+      "publishToNpm": true
+    }
+  }
+}

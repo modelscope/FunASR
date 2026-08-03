@@ -21,7 +21,7 @@
 </p>
 
 <p align="center">
-  <a href="#快速开始">快速开始</a> · <a href="./examples/colab/README_zh.md">Colab</a> · <a href="#性能评测">性能评测</a> · <a href="./docs/model_selection_zh.md">模型选择</a> · <a href="./docs/migration_from_whisper_zh.md">迁移指南</a> · <a href="./docs/use_case_showcase_zh.md">场景速览</a> · <a href="./docs/community_projects_zh.md">社区集成</a> · <a href="./docs/deployment_matrix_zh.md">部署选型</a> · <a href="https://www.funasr.com/">部署中心</a> · <a href="./docs/troubleshooting_zh.md">排障 FAQ</a> · <a href="#模型列表">模型列表</a> · <a href="https://modelscope.github.io/FunASR/agent.html">Agent 集成</a> · <a href="https://modelscope.github.io/FunASR/zh/">文档</a> · <a href="./CONTRIBUTING.md">贡献</a>
+  <a href="#快速开始">快速开始</a> · <a href="./examples/colab/README_zh.md">Colab</a> · <a href="#性能评测">性能评测</a> · <a href="./docs/model_selection_zh.md">模型选择</a> · <a href="./docs/migration_from_whisper_zh.md">迁移指南</a> · <a href="./docs/use_case_showcase_zh.md">场景速览</a> · <a href="./docs/community_projects_zh.md">社区集成</a> · <a href="./docs/deployment_matrix_zh.md">部署选型</a> · <a href="https://www.funasr.com/">部署中心</a> · <a href="./docs/troubleshooting_zh.md">排障 FAQ</a> · <a href="#模型列表">模型列表</a> · <a href="https://modelscope.github.io/FunASR/agent.html">Agent 集成</a> · <a href="./integrations/openclaw/">OpenClaw</a> · <a href="https://modelscope.github.io/FunASR/zh/">文档</a> · <a href="./CONTRIBUTING.md">贡献</a>
 </p>
 
 ---
@@ -103,6 +103,8 @@ results = model.generate(["audio1.wav", "audio2.wav"], language="auto")
 > **部署为 API 服务：** `funasr-server --device cuda` → 本地 OpenAI 兼容接口 localhost:8000
 >
 > **接入 AI Agent：** [MCP 服务](examples/mcp_server/) 支持 Claude/Cursor · [OpenAI API](examples/openai_api/README_zh.md) 支持 LangChain/Dify/AutoGen
+>
+> **接入语音 Agent：** [OpenClaw 实时转写插件](integrations/openclaw/) 支持私有部署的 Talk 与 Voice Call 转写
 
 ### 为什么选 FunASR？
 
@@ -147,6 +149,7 @@ Whisper 是单个模型，**FunASR 是一个工具箱**——按场景挑模型�
 
 ## 最新动态
 
+- 2026/08/04：**OpenClaw 实时转写集成** — 新增 [`openclaw-funasr`](integrations/openclaw/) 源码包，把私有部署的 FunASR `online`、`offline` 与 `2pass` WebSocket 识别接入 OpenClaw Talk 和 Voice Call。8 kHz G.711 mu-law 转换、60 ms 分帧、partial/final 文本、重连上限、安装包与运行时注册均已基于 OpenClaw `2026.7.2` 验证；npm 与 ClawHub 发布将在所需的[上游 SDK 改动](https://github.com/openclaw/openclaw/pull/118977)合入后进行。
 - 2026/07/31：**v1.4.0 已发布到 PyPI** — `AutoModel` 现在会在下载模型前拒绝常见的 `vda_model` 误拼写并明确提示使用 `vad_model`，避免依赖 VAD 的分段、说话人处理和 `sentence_info` 被静默关闭。GitHub 源码发布同时更新 legacy WebSocket 文件运行时：客户端会等待明确的输入结束确认，服务端先刷新待处理的 offline、online 与 2pass 音频，并把收尾失败返回给客户端。Python 包安装命令：`python -m pip install -U "funasr==1.4.0"`。[发布页 →](https://github.com/modelscope/FunASR/releases/tag/v1.4.0)
 - 2026/07/27：**v1.3.30 已发布到 PyPI** — WAV、MP3、FLAC、OGG、MP4/M4A 和 WebM 等容器格式的音频字节现在会通过对应编解码器解码，不再被误当作原始 PCM。OpenAI 兼容响应会保留说话人标签，标点不匹配时仍保留 VAD 分句时间，受信任的浏览器客户端可按需启用 CORS，vLLM 的 VAD 分段上限为 30 秒。GitHub 发布页还同时提供覆盖九种桌面和服务器目标的当前 llama.cpp 预编译运行包。安装命令：`python -m pip install -U "funasr==1.3.30"`。[发布页 →](https://github.com/modelscope/FunASR/releases/tag/v1.3.30)
 - 2026/07/24：**v1.3.29 热修复已发布到 PyPI** — SenseVoice 长音频在没有词级时间戳和标点模型时，现在会通过 `sentence_info` 返回每个 VAD 语音片段。字幕客户端可直接获得识别文本及真实的毫秒级起止时间，不再退化为零时长或覆盖整段媒体的单条字幕。安装命令：`python -m pip install -U "funasr==1.3.29"`。[发布页 →](https://github.com/modelscope/FunASR/releases/tag/v1.3.29)
