@@ -195,29 +195,51 @@ def _merge_timestamp_units(text, words, timestamps, punc_array, punc_model):
     def normalize(value):
         return "".join(value.split()).casefold()
 
+    if len(words) != len(timestamps):
+        return None
+
+    aligned_text = ""
+    character_timestamps = []
+    for word, timestamp in zip(words, timestamps):
+        word_text = normalize(word)
+        if (
+            not word_text
+            or not isinstance(timestamp, (list, tuple))
+            or len(timestamp) < 2
+            or timestamp[1] < timestamp[0]
+        ):
+            return None
+        start, end = timestamp[:2]
+        duration = end - start
+        aligned_text += word_text
+        for index in range(len(word_text)):
+            character_timestamps.append(
+                [
+                    start + duration * index // len(word_text),
+                    start + duration * (index + 1) // len(word_text),
+                ]
+            )
+
     merged_timestamps = []
-    word_index = 0
+    character_index = 0
     for token in expanded_tokens:
         token_text = normalize(token)
-        if not token_text:
-            return None
-        start_index = word_index
-        word_text = ""
-        while word_index < len(words) and len(word_text) < len(token_text):
-            word_text += normalize(words[word_index])
-            word_index += 1
-        if word_text != token_text or start_index == word_index:
-            return None
-        if not all(
-            isinstance(item, (list, tuple)) and len(item) >= 2
-            for item in timestamps[start_index:word_index]
+        token_end = character_index + len(token_text)
+        if (
+            not token_text
+            or aligned_text[character_index:token_end] != token_text
+            or token_end > len(character_timestamps)
         ):
             return None
         merged_timestamps.append(
-            [timestamps[start_index][0], timestamps[word_index - 1][1]]
+            [
+                character_timestamps[character_index][0],
+                character_timestamps[token_end - 1][1],
+            ]
         )
+        character_index = token_end
 
-    if word_index != len(words):
+    if character_index != len(character_timestamps):
         return None
     return " ".join(expanded_tokens), merged_timestamps
 

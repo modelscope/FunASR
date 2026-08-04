@@ -328,6 +328,68 @@ class TestPuncModelNone(unittest.TestCase):
             ],
         )
 
+    @patch(
+        "funasr.auto.auto_model._get_punc_tokens",
+        return_value=["aon", "storyi", "ca", "说", "差", "距"],
+    )
+    @patch("funasr.auto.auto_model.slice_padding_audio_samples")
+    @patch("funasr.auto.auto_model.load_audio_text_image_video")
+    @patch("funasr.auto.auto_model.prepare_data_iterator")
+    def test_sentence_timestamp_splits_one_asr_word_across_punctuation_tokens(
+        self, mock_prep, mock_load, mock_slice, _mock_get_punc_tokens
+    ):
+        """Punctuation token boundaries may occur inside one timestamped ASR word."""
+        punc_model = MagicMock()
+        punc_model.punc_list = None
+        am = self._make_auto_model(punc_model=punc_model)
+        tag = "<|zh|><|NEUTRAL|><|Speech|><|woitn|>"
+        results_seq = [
+            [{"key": "test_utt", "value": [[0, 1200]]}],
+            [
+                {
+                    "text": f"{tag}aon storyica说差距",
+                    "timestamp": [
+                        [0, 100],
+                        [100, 900],
+                        [900, 1000],
+                        [1000, 1100],
+                        [1100, 1200],
+                    ],
+                    "words": ["aon", "storyica", "说", "差", "距"],
+                }
+            ],
+            [
+                {
+                    "text": "aon storyica.说差距。",
+                    "punc_array": [1, 1, 3, 1, 1, 3],
+                }
+            ],
+        ]
+        am.inference = MagicMock(side_effect=lambda *args, **kwargs: results_seq.pop(0))
+        mock_prep.return_value = (["test_utt"], [np.zeros(19200, dtype=np.float32)])
+        mock_load.return_value = np.zeros(19200, dtype=np.float32)
+        mock_slice.return_value = ([np.zeros(19200, dtype=np.float32)], [19200])
+
+        results = am.inference_with_vad("dummy_input", sentence_timestamp=True)
+
+        self.assertEqual(
+            results[0]["sentence_info"],
+            [
+                {
+                    "text": "aon storyica.",
+                    "start": 0,
+                    "end": 900,
+                    "timestamp": [[0, 100], [100, 700], [700, 900]],
+                },
+                {
+                    "text": "说差距。",
+                    "start": 900,
+                    "end": 1200,
+                    "timestamp": [[900, 1000], [1000, 1100], [1100, 1200]],
+                },
+            ],
+        )
+
     @patch("funasr.auto.auto_model.distribute_spk")
     @patch("funasr.auto.auto_model.postprocess")
     @patch("funasr.auto.auto_model.sv_chunk")
