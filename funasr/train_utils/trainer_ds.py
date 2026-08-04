@@ -193,12 +193,8 @@ class Trainer:
         if self.use_deepspeed:
 
             logging.info(f"Save checkpoint: {epoch}, rank: {self.local_rank}\n")
-            # self.step_or_epoch += 1
             state = {
                 "epoch": epoch,
-                # "state_dict": model.state_dict(),
-                # "optimizer": optim.state_dict(),
-                # "scheduler": scheduler.state_dict(),
                 "saved_ckpts": self.saved_ckpts,
                 "val_acc_step_or_epoch": self.val_acc_step_or_epoch,
                 "val_loss_step_or_epoch": self.val_loss_step_or_epoch,
@@ -218,7 +214,6 @@ class Trainer:
 
             if scaler:
                 state["scaler_state"] = scaler.state_dict()
-            # Create output directory if it does not exist
             os.makedirs(self.output_dir, exist_ok=True)
             if step is None:
                 ckpt_name = f"model.pt.ep{epoch}"
@@ -226,12 +221,10 @@ class Trainer:
                 ckpt_name = f"model.pt.ep{epoch}.{step}"
             filename = os.path.join(self.output_dir, ckpt_name)
 
-            # torch.save(state, filename)
             with torch.no_grad():
                 model.save_checkpoint(save_dir=self.output_dir, tag=ckpt_name, client_state=state)
             logging.info(f"\nCheckpoint saved to {filename}\n")
             latest = Path(os.path.join(self.output_dir, f"model.pt"))
-            # torch.save(state, latest)
             with torch.no_grad():
                 model.save_checkpoint(save_dir=self.output_dir, tag=f"model.pt", client_state=state)
             if self.best_step_or_epoch == "":
@@ -244,7 +237,6 @@ class Trainer:
                 ):
                     self.best_step_or_epoch = ckpt_name
                     best_ckpt = Path(os.path.join(self.output_dir, f"model.pt.best"))
-                    # torch.save(state, best_ckpt)
                     with torch.no_grad():
                         model.save_checkpoint(
                             save_dir=self.output_dir, tag=f"model.pt.best", client_state=state
@@ -263,7 +255,6 @@ class Trainer:
                 ):
                     self.best_step_or_epoch = ckpt_name
                     best_ckpt = Path(os.path.join(self.output_dir, f"model.pt.best"))
-                    # torch.save(state, best_ckpt)
                     with torch.no_grad():
                         model.save_checkpoint(
                             save_dir=self.output_dir, tag=f"model.pt.best", client_state=state
@@ -292,7 +283,6 @@ class Trainer:
                         filename = os.path.join(self.output_dir, key)
                         logging.info(f"Delete: {filename}")
                         if os.path.exists(filename):
-                            # os.remove(filename)
                             misc_utils.smart_remove(filename)
 
         elif self.use_fsdp:
@@ -303,7 +293,6 @@ class Trainer:
             logging.info(
                 f"Save checkpoint: {epoch}, rank: {self.rank}, local_rank: {self.local_rank}\n"
             )
-            # self.step_or_epoch += 1
             state = {
                 "epoch": epoch,
                 "optimizer": optim.state_dict(),
@@ -344,7 +333,6 @@ class Trainer:
 
             if scaler:
                 state["scaler_state"] = scaler.state_dict()
-            # Create output directory if it does not exist
             os.makedirs(self.output_dir, exist_ok=True)
             if step is None:
                 ckpt_name = f"model.pt.ep{epoch}"
@@ -405,7 +393,6 @@ class Trainer:
                     filename = os.path.join(self.output_dir, key)
                     logging.info(f"Delete: {filename}")
                     if os.path.exists(filename):
-                        # os.remove(filename)
                         misc_utils.smart_remove(filename)
 
         if self.use_ddp or self.use_fsdp:
@@ -433,51 +420,27 @@ class Trainer:
                     _, checkpoint = model.load_checkpoint(self.output_dir, "model.pt")
                     self.start_epoch = checkpoint["epoch"]
                     self.saved_ckpts = checkpoint["saved_ckpts"]
-                    self.val_acc_step_or_epoch = (
-                        checkpoint["val_acc_step_or_epoch"]
-                        if "val_acc_step_or_epoch" in checkpoint
-                        else {}
-                    )
-                    self.val_loss_step_or_epoch = (
-                        checkpoint["val_loss_step_or_epoch"]
-                        if "val_loss_step_or_epoch" in checkpoint
-                        else {}
-                    )
-                    self.best_step_or_epoch = (
-                        checkpoint["best_step_or_epoch"]
-                        if "best_step_or_epoch" in checkpoint
-                        else ""
-                    )
-                    self.start_data_split_i = (
-                        checkpoint["data_split_i"] if "data_split_i" in checkpoint else 0
-                    )
-                    self.batch_total = (
-                        checkpoint["batch_total"] if "batch_total" in checkpoint else 0
-                    )
-                    self.start_step = checkpoint["step"] if "step" in checkpoint else 0
+                    self.val_acc_step_or_epoch = checkpoint.get("val_acc_step_or_epoch", {})
+                    self.val_loss_step_or_epoch = checkpoint.get("val_loss_step_or_epoch", {})
+                    self.best_step_or_epoch = checkpoint.get("best_step_or_epoch", "")
+                    self.start_data_split_i = checkpoint.get("data_split_i", 0)
+                    self.batch_total = checkpoint.get("batch_total", 0)
+                    self.start_step = checkpoint.get("step", 0)
                     self.start_step = 0 if self.start_step is None else self.start_step
-                    self.step_in_epoch = (
-                        checkpoint["step_in_epoch"] if "step_in_epoch" in checkpoint else 0
-                    )
+                    self.step_in_epoch = checkpoint.get("step_in_epoch", 0)
                     self.step_in_epoch = 0 if self.step_in_epoch is None else self.step_in_epoch
                     print(checkpoint["train_acc_avg"])
-                    self.train_acc_avg = (
-                        checkpoint["train_acc_avg"] if "train_acc_avg" in checkpoint else 0
-                    )
-                    self.train_loss_avg = (
-                        checkpoint["train_loss_avg"] if "train_loss_avg" in checkpoint else 0
-                    )
+                    self.train_acc_avg = checkpoint.get("train_acc_avg", 0)
+                    self.train_loss_avg = checkpoint.get("train_loss_avg", 0)
                     model.to(self.device)
                     print(f"Checkpoint loaded successfully from '{ckpt}'")
                 else:
                     print(f"No checkpoint found at '{ckpt}', does not resume status!")
             else:
-
                 ckpt = os.path.join(self.output_dir, "model.pt")
                 if os.path.isfile(ckpt):
                     checkpoint = torch.load(ckpt, map_location="cpu")
                     self.start_epoch = checkpoint["epoch"]
-                    # self.model.load_state_dict(checkpoint['state_dict'])
                     src_state = checkpoint["state_dict"]
                     dst_state = model.state_dict()
                     for k in dst_state.keys():
@@ -509,40 +472,18 @@ class Trainer:
                         scaler.load_state_dict(checkpoint["scaler_state"])
 
                     self.saved_ckpts = checkpoint["saved_ckpts"]
-                    self.val_acc_step_or_epoch = (
-                        checkpoint["val_acc_step_or_epoch"]
-                        if "val_acc_step_or_epoch" in checkpoint
-                        else {}
-                    )
-                    self.val_loss_step_or_epoch = (
-                        checkpoint["val_loss_step_or_epoch"]
-                        if "val_loss_step_or_epoch" in checkpoint
-                        else {}
-                    )
-                    self.best_step_or_epoch = (
-                        checkpoint["best_step_or_epoch"]
-                        if "best_step_or_epoch" in checkpoint
-                        else ""
-                    )
-                    self.start_data_split_i = (
-                        checkpoint["data_split_i"] if "data_split_i" in checkpoint else 0
-                    )
-                    self.batch_total = (
-                        checkpoint["batch_total"] if "batch_total" in checkpoint else 0
-                    )
-                    self.start_step = checkpoint["step"] if "step" in checkpoint else 0
+                    self.val_acc_step_or_epoch = checkpoint.get("val_acc_step_or_epoch", {})
+                    self.val_loss_step_or_epoch = checkpoint.get("val_loss_step_or_epoch", {})
+                    self.best_step_or_epoch = checkpoint.get("best_step_or_epoch", "")
+                    self.start_data_split_i = checkpoint.get("data_split_i", 0)
+                    self.batch_total = checkpoint.get("batch_total", 0)
+                    self.start_step = checkpoint.get("step", 0)
                     self.start_step = 0 if self.start_step is None else self.start_step
-                    self.step_in_epoch = (
-                        checkpoint["step_in_epoch"] if "step_in_epoch" in checkpoint else 0
-                    )
+                    self.step_in_epoch = checkpoint.get("step_in_epoch", 0)
                     self.step_in_epoch = 0 if self.step_in_epoch is None else self.step_in_epoch
                     print(checkpoint["train_acc_avg"])
-                    self.train_acc_avg = (
-                        checkpoint["train_acc_avg"] if "train_acc_avg" in checkpoint else 0
-                    )
-                    self.train_loss_avg = (
-                        checkpoint["train_loss_avg"] if "train_loss_avg" in checkpoint else 0
-                    )
+                    self.train_acc_avg = checkpoint.get("train_acc_avg", 0)
+                    self.train_loss_avg = checkpoint.get("train_loss_avg", 0)
                     model.to(self.device)
                     print(f"Checkpoint loaded successfully from '{ckpt}'")
                 else:
@@ -572,9 +513,7 @@ class Trainer:
         logging.info(f"Train epoch: {epoch}, rank: {self.rank}\n")
         model.train()
 
-        # Set the number of steps for gradient accumulation
         accum_grad = self.accum_grad
-        # Initialize the gradient accumulation
         optim.zero_grad()
         speed_stats = {}
 
@@ -604,16 +543,17 @@ class Trainer:
 
             my_context = nullcontext
             if self.use_ddp or self.use_fsdp:
-                my_context = model.no_sync if batch_idx % accum_grad != 0 else my_context
+                my_context = (
+                    model.no_sync
+                    if (batch_idx + 1) % accum_grad != 0
+                    else my_context
+                )
             with my_context():
                 time2 = time.perf_counter()
-
                 self.forward_step(model, batch, loss_dict=loss_dict)
-
                 time3 = time.perf_counter()
                 loss_dict["speed_stats"]["forward_time"] = f"{time3 - time2:0.3f}"
                 self.backward_step(model, scaler, loss_dict=loss_dict)
-
                 time4 = time.perf_counter()
                 loss_dict["speed_stats"]["backward_time"] = f"{time4 - time3:0.3f}"
 
@@ -622,9 +562,7 @@ class Trainer:
             time5 = time.perf_counter()
 
             loss_dict["speed_stats"]["optim_time"] = f"{time5 - time4:0.3f}"
-
             loss_dict["speed_stats"]["total_time"] = total_time
-
             loss_dict["lr"] = scheduler.get_last_lr()[0]
             loss_dict["batch_num_epoch"] = len(dataloader_train)
 
@@ -674,13 +612,7 @@ class Trainer:
             self.train_acc_avg = train_acc_avg.detach().cpu().item() / self.world_size
 
     def forward_step(self, model, batch, loss_dict={}):
-        """Forward step.
-        
-            Args:
-                model: Model instance or model name.
-                batch: TODO.
-                loss_dict: TODO.
-            """
+        """Forward step."""
         with maybe_autocast(dtype=self.dtype, use_deepspeed=self.use_deepspeed):
             retval = model(**batch)
 
@@ -692,13 +624,7 @@ class Trainer:
         loss_dict["weight"] = weight
 
     def backward_step(self, model, scaler, loss_dict={}):
-        """Backward step.
-        
-            Args:
-                model: Model instance or model name.
-                scaler: TODO.
-                loss_dict: TODO.
-            """
+        """Backward step."""
         loss = loss_dict["loss"]
 
         if self.use_deepspeed:
@@ -711,21 +637,12 @@ class Trainer:
                 loss.backward()
 
     def update_step(self, model, optim, scheduler, scaler, loss_dict=None):
-        """Update step.
-        
-            Args:
-                model: Model instance or model name.
-                optim: TODO.
-                scheduler: TODO.
-                scaler: TODO.
-                loss_dict: TODO.
-            """
+        """Update step."""
         batch_idx = loss_dict["batch_idx"]
         if self.use_deepspeed:
             model.step()
         else:
             if (batch_idx + 1) % self.accum_grad == 0:
-                # Perform gradient clipping if it is set
                 if self.grad_clip > 0:
                     grad_norm = torch.nn.utils.clip_grad_norm_(
                         model.parameters(),
@@ -736,10 +653,9 @@ class Trainer:
                         logging.warning(
                             f"The grad norm is {grad_norm}. Skipping updating the model."
                         )
-                        optim.zero_grad()  # Reset gradients
+                        optim.zero_grad()
                         return
 
-                # Execute an optimization step (update model parameters)
                 if self.use_ddp or self.use_fsdp:
                     dist.barrier()
                 if scaler:
@@ -748,7 +664,6 @@ class Trainer:
                 else:
                     optim.step()
                 scheduler.step()
-                # Clear gradients for the next accumulation stage
                 optim.zero_grad(set_to_none=True)
 
     def validate_epoch(
@@ -759,15 +674,9 @@ class Trainer:
         writer=None,
         **kwargs,
     ):
-        """
-        Defines the validation process for a single epoch.
-        Should be implemented with the actual model validation steps.
-
-        Args:
-            epoch (int): The current epoch number.
-        """
+        """Defines the validation process for a single epoch."""
         self.val_loss_avg = 0.0
-        self.val_acc_avg  = 0.0
+        self.val_acc_avg = 0.0
 
         if self.use_ddp or self.use_fsdp or self.use_deepspeed:
             dist.barrier()
@@ -775,14 +684,12 @@ class Trainer:
         model.eval()
 
         with torch.no_grad():
-
             speed_stats = {}
             time_beg = time.perf_counter()
             time5 = time_beg
 
             dataloader_val.batch_sampler.set_epoch(epoch)
             for batch_idx, batch in enumerate(dataloader_val):
-
                 loss_dict = {
                     "speed_stats": {},
                     "epoch": epoch,
@@ -801,9 +708,7 @@ class Trainer:
                 batch = to_device(batch, self.device, non_blocking=True)
 
                 time2 = time.perf_counter()
-
                 self.forward_step(model, batch, loss_dict=loss_dict)
-
                 time3 = time.perf_counter()
                 loss_dict["speed_stats"]["forward_time"] = f"{time3 - time2:0.3f}"
 
@@ -811,7 +716,6 @@ class Trainer:
                 time5 = time.perf_counter()
 
                 loss_dict["speed_stats"]["total_time"] = total_time
-
                 loss_dict["batch_num_epoch"] = len(dataloader_val)
 
                 self.log(loss_dict, tag="val")
@@ -845,19 +749,8 @@ class Trainer:
 
         model.train()
 
-    def log(
-        self,
-        loss_dict: dict = None,
-        tag="train",
-        **kwargs,
-    ):
-        """Log.
-        
-            Args:
-                loss_dict: TODO.
-                tag: TODO.
-                **kwargs: Additional keyword arguments.
-            """
+    def log(self, loss_dict: dict = None, tag="train", **kwargs):
+        """Log."""
         loss = loss_dict["loss"].detach().cpu().item()
         epoch = loss_dict["epoch"]
         batch_idx = loss_dict["batch_idx"]
@@ -921,18 +814,10 @@ class Trainer:
                     writer.add_scalar(f"stats_rank{self.rank}_{key}/{tag}", float(var), batch_total)
                     description_dict[f"stats_rank{self.rank}_{key}/{tag}"] = float(var)
             if self.use_wandb and wandb is not None:
-                wandb.log(
-                    description_dict,
-                    step=batch_total,
-                )
+                wandb.log(description_dict, step=batch_total)
 
     def close(self, writer=None):
-
-        """Close.
-        
-            Args:
-                writer: TODO.
-            """
+        """Close."""
         if self.use_ddp or self.use_fsdp:
             dist.barrier()
 
@@ -943,13 +828,7 @@ class Trainer:
             torch.distributed.destroy_process_group()
 
     def warp_model(self, model, **kwargs):
-
-        """Warp model.
-        
-            Args:
-                model: Model instance or model name.
-                **kwargs: Additional keyword arguments.
-            """
+        """Warp model."""
         if self.use_deepspeed:
             from deepspeed.runtime.zero.stage_1_and_2 import (
                 estimate_zero2_model_states_mem_needs_all_live,
@@ -960,8 +839,6 @@ class Trainer:
             local_world_size = int(os.environ.get("LOCAL_WORLD_SIZE", 1))
             world_size = int(os.environ.get("WORLD_SIZE", 1))
 
-            # NOTE(xcsong): look in detail how the memory estimator API works:
-            #   https://deepspeed.readthedocs.io/en/latest/memory.html#discussion
             if int(os.environ.get("RANK", 0)) == 0:
                 logging.info("Estimating model states memory needs (zero2)...")
                 estimate_zero2_model_states_mem_needs_all_live(
@@ -975,8 +852,8 @@ class Trainer:
                     num_gpus_per_node=local_world_size,
                     num_nodes=world_size // local_world_size,
                 )
-            device = None  # Init device later
-            pass  # Init DeepSpeed later
+            device = None
+            pass
 
         elif self.use_ddp:
             local_rank = int(os.environ.get("LOCAL_RANK", 0))
@@ -995,25 +872,18 @@ class Trainer:
         return model
 
     def warp_optim_scheduler(self, model, **kwargs):
-        """Warp optim scheduler.
-        
-            Args:
-                model: Model instance or model name.
-                **kwargs: Additional keyword arguments.
-            """
+        """Warp optim scheduler."""
         from funasr.optimizers import optim_classes
         from funasr.schedulers import scheduler_classes
         from omegaconf import OmegaConf, DictConfig
         import json
 
-        # optim
         logging.info("Build optim")
         optim = kwargs.get("optim", "adam")
         assert optim in optim_classes
         optim_class = optim_classes.get(optim)
         optim = optim_class(model.parameters(), **kwargs.get("optim_conf"))
 
-        # scheduler
         logging.info("Build scheduler")
         scheduler = kwargs.get("scheduler", "warmuplr")
         assert scheduler in scheduler_classes
@@ -1033,20 +903,12 @@ class Trainer:
             if "fp16" in ds_configs and ds_configs["fp16"]["enabled"]:
                 self.dtype = torch.float16
             if "optimizer" in ds_configs:
-                # NOTE(xcsong): Disable custom optimizer if it is set in ds_config,
-                # extremely useful when enable cpu_offload, DeepspeedCpuAdam
-                # could be 4~5x faster than torch native adam
                 optim = None
                 if "scheduler" in ds_configs:
                     scheduler = None
                 else:
 
                     def scheduler(opt):
-                        """Scheduler.
-                        
-                            Args:
-                                opt: TODO.
-                            """
                         return scheduler_class(opt, **(kwargs.get("scheduler_conf") or {}))
 
             model, optimizer, _, scheduler = deepspeed.initialize(
