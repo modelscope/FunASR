@@ -21,7 +21,7 @@ name_maps_ms = {
 name_maps_hf = {
     "paraformer": "funasr/paraformer-zh",
     "paraformer-zh": "funasr/paraformer-zh",
-    "paraformer-en": "funasr/paraformer-zh",
+    "paraformer-en": "funasr/paraformer-en",
     "paraformer-zh-streaming": "funasr/paraformer-zh-streaming",
     "fsmn-vad": "funasr/fsmn-vad",
     "ct-punc": "funasr/ct-punc",
