@@ -44,10 +44,10 @@ except:
 @hydra.main(config_name=None, version_base=None)
 def main_hydra(kwargs: DictConfig):
     """Main hydra.
-    
-        Args:
-            kwargs: Additional keyword arguments.
-        """
+
+    Args:
+        kwargs: Additional keyword arguments.
+    """
     if kwargs.get("debug", False):
         import pdb
 
@@ -65,10 +65,10 @@ def main(**kwargs):
 
     # set random seed
     """Main.
-    
-        Args:
-            **kwargs: Additional keyword arguments.
-        """
+
+    Args:
+        **kwargs: Additional keyword arguments.
+    """
     set_all_random_seed(kwargs.get("seed", 0))
     torch.backends.cudnn.enabled = kwargs.get("cudnn_enabled", torch.backends.cudnn.enabled)
     torch.backends.cudnn.benchmark = kwargs.get("cudnn_benchmark", torch.backends.cudnn.benchmark)
@@ -83,12 +83,18 @@ def main(**kwargs):
     if local_rank == 0:
         tables.print()
 
-    use_ddp = world_size > 1
     use_fsdp = kwargs.get("use_fsdp", False)
     use_deepspeed = kwargs.get("use_deepspeed", False)
+    if use_deepspeed and use_fsdp:
+        raise ValueError("use_deepspeed and use_fsdp cannot be enabled at the same time")
+    use_ddp = world_size > 1 and not use_deepspeed and not use_fsdp
+
     if use_deepspeed:
         logging.info(f"use_deepspeed: {use_deepspeed}")
+        if deepspeed is None:
+            raise ImportError("DeepSpeed is enabled but the deepspeed package is not installed")
         deepspeed.init_distributed(dist_backend=kwargs.get("backend", "nccl"))
+        torch.cuda.set_device(local_rank)
     elif use_ddp or use_fsdp:
         logging.info(f"use_ddp: {use_ddp}, use_fsdp: {use_fsdp}")
         dist.init_process_group(
@@ -143,6 +149,7 @@ def main(**kwargs):
         world_size=world_size,
         use_ddp=use_ddp,
         use_fsdp=use_fsdp,
+        use_deepspeed=use_deepspeed,
         device=kwargs["device"],
         excludes=kwargs.get("excludes", None),
         output_dir=kwargs.get("output_dir", "./exp"),
