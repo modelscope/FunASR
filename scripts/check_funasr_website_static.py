@@ -57,7 +57,7 @@ PAGE_CONTRACTS: dict[str, PageContract] = {
     ),
     f"{BASE_URL}/ecosystem.html": PageContract(
         required=(
-            "35K+",
+            "36K+",
             "/donors.html",
             "LiteLLM",
             "custom_openai",
@@ -67,12 +67,18 @@ PAGE_CONTRACTS: dict[str, PageContract] = {
             ("FunASR 官方插件 0.1.1", r"FunASR 官方插件 0\.1\.1(?![\w.+-])"),
             ("最大 25 MB 音频上传", r"最大 (?<!\d)25 MB 音频上传"),
         ),
-        required_links=("https://marketplace.dify.ai/plugin/langgenius/funasr",),
+        required_links=(
+            "https://marketplace.dify.ai/plugin/langgenius/funasr",
+            "https://github.com/modelscope/FunClip/releases/tag/v2.1.1",
+            "https://github.com/0xShug0/audio.cpp",
+            "https://github.com/0xShug0/audio.cpp/pull/155",
+            "https://github.com/0xShug0/audio.cpp/blob/1778b23a5f6a4951c788e4bb0e7baa04f20012a2/docs/models/fun_asr_nano.md",
+        ),
         forbidden=("16K+",),
     ),
     f"{BASE_URL}/en/ecosystem.html": PageContract(
         required=(
-            "35K+",
+            "36K+",
             "/en/donors.html",
             "LiteLLM",
             "custom_openai",
@@ -82,7 +88,13 @@ PAGE_CONTRACTS: dict[str, PageContract] = {
             ("FunASR plugin 0.1.1", r"FunASR plugin 0\.1\.1(?![\w.+-])"),
             ("25 MB uploads", r"(?<!\d)25 MB uploads"),
         ),
-        required_links=("https://marketplace.dify.ai/plugin/langgenius/funasr",),
+        required_links=(
+            "https://marketplace.dify.ai/plugin/langgenius/funasr",
+            "https://github.com/modelscope/FunClip/releases/tag/v2.1.1",
+            "https://github.com/0xShug0/audio.cpp",
+            "https://github.com/0xShug0/audio.cpp/pull/155",
+            "https://github.com/0xShug0/audio.cpp/blob/1778b23a5f6a4951c788e4bb0e7baa04f20012a2/docs/models/fun_asr_nano.md",
+        ),
         forbidden=("16K+",),
     ),
     f"{BASE_URL}/donors.html": PageContract(

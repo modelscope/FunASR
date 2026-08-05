@@ -50,9 +50,13 @@ def test_website_contract_accepts_current_public_copy():
             vLLM Acceleration
         """,
         "https://www.funasr.com/ecosystem.html": """
-            <div class="stat-num">35K+</div>
+            <div class="stat-num">36K+</div>
             <a href="/donors.html">功德榜</a>
             <a href="https://github.com/BerriAI/litellm">LiteLLM</a>
+            <a href="https://github.com/modelscope/FunClip/releases/tag/v2.1.1">FunClip v2.1.1</a>
+            <a href="https://github.com/0xShug0/audio.cpp">audio.cpp</a>
+            <a href="https://github.com/0xShug0/audio.cpp/pull/155">merged PR</a>
+            <a href="https://github.com/0xShug0/audio.cpp/blob/1778b23a5f6a4951c788e4bb0e7baa04f20012a2/docs/models/fun_asr_nano.md">pinned guide</a>
             <div>custom_openai</div>
             <div>54.3K stars</div>
             <a href="https://marketplace.dify.ai/plugin/langgenius/funasr">
@@ -61,9 +65,13 @@ def test_website_contract_accepts_current_public_copy():
             <div>支持最大 25 MB 音频上传</div>
         """,
         "https://www.funasr.com/en/ecosystem.html": """
-            <div class="stat-num">35K+</div>
+            <div class="stat-num">36K+</div>
             <a href="/en/donors.html">Thanks</a>
             <a href="https://github.com/BerriAI/litellm">LiteLLM</a>
+            <a href="https://github.com/modelscope/FunClip/releases/tag/v2.1.1">FunClip v2.1.1</a>
+            <a href="https://github.com/0xShug0/audio.cpp">audio.cpp</a>
+            <a href="https://github.com/0xShug0/audio.cpp/pull/155">merged PR</a>
+            <a href="https://github.com/0xShug0/audio.cpp/blob/1778b23a5f6a4951c788e4bb0e7baa04f20012a2/docs/models/fun_asr_nano.md">pinned guide</a>
             <div>custom_openai</div>
             <div>54.3K stars</div>
             <a href="https://marketplace.dify.ai/plugin/langgenius/funasr">
@@ -276,13 +284,31 @@ def test_website_contract_includes_homepage_entrypoints():
     assert "https://www.funasr.com/en/llama-cpp.html" in checker.PAGE_CONTRACTS
 
 
+def test_ecosystem_contract_requires_current_release_and_native_runtime():
+    checker = _load_module()
+    evidence_links = {
+        "https://github.com/modelscope/FunClip/releases/tag/v2.1.1",
+        "https://github.com/0xShug0/audio.cpp",
+        "https://github.com/0xShug0/audio.cpp/pull/155",
+        "https://github.com/0xShug0/audio.cpp/blob/1778b23a5f6a4951c788e4bb0e7baa04f20012a2/docs/models/fun_asr_nano.md",
+    }
+
+    for url in (
+        "https://www.funasr.com/ecosystem.html",
+        "https://www.funasr.com/en/ecosystem.html",
+    ):
+        contract = checker.PAGE_CONTRACTS[url]
+        assert "36K+" in contract.required
+        assert evidence_links <= set(contract.required_links)
+
+
 def test_ecosystem_contract_requires_live_dify_marketplace():
     checker = _load_module()
     url = "https://www.funasr.com/en/ecosystem.html"
     pages = {
         url: """
             <body>
-            <div class="stat-num">35K+</div>
+            <div class="stat-num">36K+</div>
             <a href="/en/donors.html">Thanks</a>
             <a href="https://github.com/BerriAI/litellm">LiteLLM</a>
             <div>custom_openai</div>
@@ -313,9 +339,13 @@ def test_ecosystem_contract_requires_live_dify_marketplace():
 def _valid_english_ecosystem_html():
     return """
         <body>
-        <div class="stat-num">35K+</div>
+        <div class="stat-num">36K+</div>
         <a href="/en/donors.html">Thanks</a>
         <a href="https://github.com/BerriAI/litellm">LiteLLM</a>
+        <a href="https://github.com/modelscope/FunClip/releases/tag/v2.1.1">FunClip v2.1.1</a>
+        <a href="https://github.com/0xShug0/audio.cpp">audio.cpp</a>
+        <a href="https://github.com/0xShug0/audio.cpp/pull/155">merged PR</a>
+        <a href="https://github.com/0xShug0/audio.cpp/blob/1778b23a5f6a4951c788e4bb0e7baa04f20012a2/docs/models/fun_asr_nano.md">pinned guide</a>
         <div>custom_openai</div>
         <div>54.3K stars</div>
         <a href="https://marketplace.dify.ai/plugin/langgenius/funasr">
