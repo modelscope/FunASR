@@ -23814,7 +23814,7 @@ Then use with OpenAI SDK:
     kwargs[&quot;device&quot;] = &quot;cpu&quot;
     model = AutoModel(**kwargs)
 </code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/train.py#L61" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
-<div class="api-detail" id="e490"><span class="dtag badge-f">function</span><h2><code>main_hydra(kwargs)</code></h2><div class="dmod">funasr.bin.train_ds · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/train_ds.py#L45" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Main hydra.</p>
+<div class="api-detail" id="e490"><span class="dtag badge-f">function</span><h2><code>main_hydra(kwargs)</code></h2><div class="dmod">funasr.bin.train_ds · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/train_ds.py#L76" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Main hydra.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>kwargs</code> — Additional keyword arguments.</li>
@@ -23837,7 +23837,7 @@ Then use with OpenAI SDK:
 
     main(**kwargs)
 </code></pre></details></div>
-<div class="api-detail" id="e491"><span class="dtag badge-f">function</span><h2><code>main(**kwargs)</code></h2><div class="dmod">funasr.bin.train_ds · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/train_ds.py#L64" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Main.</p>
+<div class="api-detail" id="e491"><span class="dtag badge-f">function</span><h2><code>main(**kwargs)</code></h2><div class="dmod">funasr.bin.train_ds · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/train_ds.py#L95" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Main.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>**kwargs</code> — Additional keyword arguments.</li>
@@ -23864,15 +23864,15 @@ Then use with OpenAI SDK:
     if local_rank == 0:
         tables.print()
 
-    use_ddp = world_size &gt; 1
-    use_fsdp = kwargs.get(&quot;use_fsdp&quot;, False)
-    use_deepspeed = kwargs.get(&quot;use_deepspeed&quot;, False)
+    (
+        use_ddp,
+        use_fsdp,
+        use_deepspeed,
+        deepspeed_config,
+        trainer_conf,
+    ) = _resolve_distributed_config(kwargs, world_size)
     if use_deepspeed:
-        logging.info(f&quot;use_deepspeed: {use_deepspeed}&quot;)
-        deepspeed.init_distributed(dist_backend=kwargs.get(&quot;backend&quot;, &quot;nccl&quot;))
-    elif use_ddp or use_fsdp:
-        logging.info(f&quot;use_ddp: {use_ddp}, use_fsdp: {use_fsdp}&quot;)
-</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/train_ds.py#L64" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/train_ds.py#L95" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
 <div class="api-detail" id="e492"><span class="dtag badge-f">function</span><h2><code>download_dataset()</code></h2><div class="dmod">funasr.download.download_dataset_from_hub · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/download/download_dataset_from_hub.py#L1" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Download dataset.</p>
 </div><details class="src-block"><summary>📄 Source code</summary><pre><code>def download_dataset():
     &quot;&quot;&quot;Download dataset.&quot;&quot;&quot;
