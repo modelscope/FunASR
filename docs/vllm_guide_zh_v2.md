@@ -51,6 +51,46 @@ pip install safetensors tiktoken websockets regex fastapi uvicorn python-multipa
 cd /path/to/FunASR && pip install -e .
 ```
 
+### 开始前先选定模型路径
+
+目前有两条不同的 Fun-ASR-Nano vLLM 集成路径，checkpoint 与调用接口不能混用：
+
+#### A. FunASR 拆分引擎路径（本指南）
+
+请从 [ModelScope](https://modelscope.cn/models/FunAudioLLM/Fun-ASR-Nano-2512)
+或 [Hugging Face](https://huggingface.co/FunAudioLLM/Fun-ASR-Nano-2512)
+下载官方 `FunAudioLLM/Fun-ASR-Nano-2512`。官方 Hugging Face 仓库的根目录
+实际包含完整的 `model.pt`；`Qwen3-0.6B/` 子目录按设计只保存 LLM 配置与
+tokenizer，不是可以单独加载的权重目录。
+
+```python
+from funasr.auto.auto_model_vllm import AutoModelVLLM
+
+# 二选一；默认使用 ModelScope。
+model = AutoModelVLLM(
+    model="FunAudioLLM/Fun-ASR-Nano-2512",
+    hub="ms",
+)
+# model = AutoModelVLLM(
+#     model="FunAudioLLM/Fun-ASR-Nano-2512",
+#     hub="hf",
+# )
+```
+
+首次加载时，FunASR 会自动调用 `prepare_vllm_model_dir()`：从
+`Qwen3-0.6B/` 复制配置与 tokenizer，从根目录 `model.pt` 提取 `llm.*`
+权重，并生成 `Qwen3-0.6B-vllm/model.safetensors`。不要把 `model` 指向
+`Qwen3-0.6B/`，也不要直接让 vLLM 加载这个只有配置的子目录。
+
+#### B. vLLM 原生转写路径
+
+vLLM 的支持模型表把
+[`allendou/Fun-ASR-Nano-2512-vllm`](https://huggingface.co/allendou/Fun-ASR-Nano-2512-vllm)
+列为原生 `FunASRForConditionalGeneration` 架构的示例。这是托管在官方
+FunAudioLLM 组织之外的社区转换完整 checkpoint。只有明确选择 vLLM 原生转写
+接口时，才应按该模型卡与 vLLM 文档使用它；不要用它替换下文 FunASR
+`AutoModelVLLM` 示例中的官方 checkpoint。
+
 **硬件**：GPU ≥ 8GB VRAM，CUDA ≥ 11.8。推荐 16GB+。
 
 为什么不要单独执行 `pip install torch torchaudio` ? torch/torchaudio/torchvision 的版本由 vLLM 版本决定—— 每个大版本会一起升级(见 vLLM 的 [requirements/cuda.txt](https://github.com/vllm-project/vllm/blob/main/requirements/cuda.txt))。手动安装会拉到最新 wheel,可能是为比你驱动更新的 CUDA runtime 编译的;PyTorch 会在 CUDA 初始化阶段、FunASR 启动前就报 The NVIDIA driver on your system is too old。让 vLLM 统一钉定这三件套即可避免。若仍遇到该错误,请安装其 CUDA 构建与 nvidia-smi 显示的 CUDA 匹配的 vLLM 版本(如 CUDA 12.x 用 vllm==0.19.1),或先升级 NVIDIA 驱动。

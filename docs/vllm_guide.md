@@ -49,6 +49,50 @@ pip install "funasr>=1.3.26"
 cd /path/to/FunASR && pip install -e .
 ```
 
+### Choose the model path before you start
+
+There are two different Fun-ASR-Nano vLLM integrations. Their checkpoints and
+APIs are not interchangeable:
+
+#### A. FunASR split-engine integration (this guide)
+
+Use the official `FunAudioLLM/Fun-ASR-Nano-2512` checkpoint from
+[ModelScope](https://modelscope.cn/models/FunAudioLLM/Fun-ASR-Nano-2512) or
+[Hugging Face](https://huggingface.co/FunAudioLLM/Fun-ASR-Nano-2512). The
+official Hugging Face repository does contain the complete `model.pt` at its
+root. The `Qwen3-0.6B/` subdirectory intentionally contains only the LLM config
+and tokenizer; it is not a standalone model download.
+
+```python
+from funasr.auto.auto_model_vllm import AutoModelVLLM
+
+# Choose one official hub. ModelScope is the default.
+model = AutoModelVLLM(
+    model="FunAudioLLM/Fun-ASR-Nano-2512",
+    hub="ms",
+)
+# model = AutoModelVLLM(
+#     model="FunAudioLLM/Fun-ASR-Nano-2512",
+#     hub="hf",
+# )
+```
+
+On first load, FunASR calls `prepare_vllm_model_dir()` automatically. It copies
+the config/tokenizer from `Qwen3-0.6B/`, extracts the `llm.*` tensors from the
+root `model.pt`, and writes
+`Qwen3-0.6B-vllm/model.safetensors`. Do not point `model` at `Qwen3-0.6B/` and
+do not try to serve that config-only directory directly with vLLM.
+
+#### B. Native vLLM transcription integration
+
+The vLLM supported-model table lists
+[`allendou/Fun-ASR-Nano-2512-vllm`](https://huggingface.co/allendou/Fun-ASR-Nano-2512-vllm)
+for its native `FunASRForConditionalGeneration` architecture. That is a
+community-converted full checkpoint hosted outside the official FunAudioLLM
+organization. Use its model card and vLLM's native transcription API only when
+you intentionally choose that separate path. Do not substitute it for the
+official checkpoint in the FunASR `AutoModelVLLM` examples below.
+
 **Hardware**: GPU ≥ 8 GB VRAM, CUDA ≥ 11.8. 16 GB+ recommended.
 
 Why not pip install torch torchaudio? The torch/torchaudio/torchvision versions are determined by the vLLM release — each major vLLM version bumps them together (see vLLM's requirements/cuda.txt). Installing them by hand pulls the newest wheel, which may be built for a newer CUDA runtime than your driver supports; PyTorch then fails during CUDA initialization with The NVIDIA driver on your system is too old before FunASR even starts. Letting vLLM own the trio avoids this. If you still hit a driver-too-old error, install a vLLM version whose CUDA build matches the CUDA reported by nvidia-smi (e.g. vllm==0.19.1 for CUDA 12.x), or update the NVIDIA driver first.
