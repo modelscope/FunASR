@@ -83,9 +83,12 @@ def main(**kwargs):
     if local_rank == 0:
         tables.print()
 
-    use_ddp = world_size > 1
     use_fsdp = kwargs.get("use_fsdp", False)
     use_deepspeed = kwargs.get("use_deepspeed", False)
+    deepspeed_config = kwargs.get("deepspeed_config", "")
+    if use_deepspeed and use_fsdp:
+        raise ValueError("use_deepspeed and use_fsdp cannot be enabled at the same time")
+    use_ddp = world_size > 1 and not use_deepspeed and not use_fsdp
     if use_deepspeed:
         logging.info(f"use_deepspeed: {use_deepspeed}")
         deepspeed.init_distributed(dist_backend=kwargs.get("backend", "nccl"))
@@ -143,6 +146,8 @@ def main(**kwargs):
         world_size=world_size,
         use_ddp=use_ddp,
         use_fsdp=use_fsdp,
+        use_deepspeed=use_deepspeed,
+        deepspeed_config=deepspeed_config,
         device=kwargs["device"],
         excludes=kwargs.get("excludes", None),
         output_dir=kwargs.get("output_dir", "./exp"),
