@@ -648,7 +648,9 @@ class Trainer:
 
             my_context = nullcontext
             if self.use_ddp or self.use_fsdp:
-                my_context = model.no_sync if batch_idx % accum_grad != 0 else my_context
+                my_context = (
+                    model.no_sync if (batch_idx + 1) % accum_grad != 0 else my_context
+                )
             with my_context():
                 time2 = time.perf_counter()
 
