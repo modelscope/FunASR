@@ -229,6 +229,34 @@ def test_ecosystem_surfaces_released_subtitle_edit_funasr_backends(
         assert marker in text
 
 
+@pytest.mark.parametrize('relative', ('ecosystem.html', 'en/ecosystem.html'))
+def test_ecosystem_refresh_tracks_current_release_and_merged_native_runtime(
+    built_site, relative
+):
+    soup = read_soup(built_site / relative)
+    text = soup.get_text(' ', strip=True)
+
+    assert '36K+' in text
+    assert soup.select_one(
+        'a[href="https://github.com/modelscope/FunClip/releases/tag/v2.1.1"]'
+    )
+
+    anchor = soup.select_one(
+        '.card-title a[href="https://github.com/0xShug0/audio.cpp"]'
+    )
+    assert anchor
+    card = anchor.find_parent(class_='card')
+    assert card
+    links = {link.get('href') for link in card.select('a[href]')}
+    assert {
+        'https://github.com/0xShug0/audio.cpp/pull/155',
+        'https://github.com/0xShug0/audio.cpp/blob/1778b23a5f6a4951c788e4bb0e7baa04f20012a2/docs/models/fun_asr_nano.md',
+    } <= links
+    card_text = card.get_text(' ', strip=True)
+    for marker in ('Fun-ASR-Nano', 'CPU', 'CUDA', 'CLI', 'OpenAI'):
+        assert marker in card_text
+
+
 @pytest.mark.parametrize(
     ('relative', 'peer', 'markers'),
     (
