@@ -23,6 +23,7 @@ static const float LN_EPS = 1e-5f;
 #define FUNASR_AUDIO_IMPLEMENTATION
 #include "funasr_audio.h"
 #include "funasr_vad.h"     // built-in FSMN-VAD front end (--vad segmentation)
+#include "funasr_srt.h"
 #include <utility>
 static const int FS=16000,WINLEN=400,SHIFT=160,NFFT=512,NMEL=80,LFR_M=7,LFR_N=6;
 static const float PREEMPH=0.97f,LOWF=20.0f,HIGHF=8000.0f;
@@ -129,12 +130,13 @@ static std::string detok_pf(const std::vector<int>&ids,const std::vector<std::st
 }
 
 int main(int argc,char**argv){
-  std::string gguf_path,wav_path,vad_path; int vad_maxseg=30000; bool ids_mode=false;
+  std::string gguf_path,wav_path,vad_path; int vad_maxseg=30000; bool ids_mode=false,srt_mode=false;
   for(int i=1;i<argc;i++){if(!strcmp(argv[i],"-m")&&i+1<argc)gguf_path=argv[++i];else if(!strcmp(argv[i],"-a")&&i+1<argc)wav_path=argv[++i];
     else if(!strcmp(argv[i],"--vad")&&i+1<argc)vad_path=argv[++i];
     else if(!strcmp(argv[i],"--vad-maxseg")&&i+1<argc)vad_maxseg=atoi(argv[++i]);
     else if(!strcmp(argv[i],"--ids"))ids_mode=true;
-    else{fprintf(stderr,"usage: %s -m paraformer.gguf -a audio.wav [--vad fsmn-vad.gguf [--vad-maxseg ms]] [--ids]\n",argv[0]);return 1;}}
+    else if(!strcmp(argv[i],"--srt"))srt_mode=true;
+    else{fprintf(stderr,"usage: %s -m paraformer.gguf -a audio.wav [--vad fsmn-vad.gguf [--vad-maxseg ms]] [--srt] [--ids]\n",argv[0]);return 1;}}
   if(gguf_path.empty()||wav_path.empty()){fprintf(stderr,"missing args\n");return 1;}
   model m;gguf_init_params gp={false,&m.ctx_w};gguf_context*gg=gguf_init_from_file(gguf_path.c_str(),gp);if(!gg){fprintf(stderr,"gguf load failed\n");return 1;}
   auto rdi=[&](const char*k,int d){int i=gguf_find_key(gg,k);return i<0?d:(int)gguf_get_val_u32(gg,i);};
@@ -152,9 +154,9 @@ int main(int argc,char**argv){
   float*ow=(float*)m.g("predictor.cif_output.weight")->data; // [1,512]
   float ob=((float*)m.g("predictor.cif_output.bias")->data)[0];
 
-  // Full pipeline (fbank -> CMVN -> encoder -> CIF -> decoder) on one wav window; prints token IDs.
-  auto run_seg=[&](const std::vector<float>& wav){
-    int T=0;auto fb=compute_fbank(wav,T); if(T<1)return;
+  // Full pipeline (fbank -> CMVN -> encoder -> CIF -> decoder) on one wav window; returns text.
+  auto run_seg=[&](const std::vector<float>& wav) -> std::string {
+    int T=0;auto fb=compute_fbank(wav,T); if(T<1)return "";
     for(int t=0;t<T;t++)for(int d=0;d<F;d++)fb[(size_t)t*F+d]=(fb[(size_t)t*F+d]+shift[d])*scale[d];  // CMVN
     {float sc=sqrtf((float)D);for(auto&v:fb)v*=sc;}add_posenc(fb,T,F);
     std::vector<float>enc;
@@ -183,7 +185,7 @@ int main(int argc,char**argv){
       for(int d=0;d<D;d++) frame[d]+=cur*hid[(size_t)t*D+d];
       if(fire){ acoustic.insert(acoustic.end(),frame.begin(),frame.end()); integrate-=1.0f;
         for(int d=0;d<D;d++) frame[d]=rem*hid[(size_t)t*D+d]; } }
-    int N=acoustic.size()/D; if(N<1)return;
+    int N=acoustic.size()/D; if(N<1)return "";
     std::vector<float> logits;
     {ggml_init_params cp={(size_t)2048*1024*1024,nullptr,true};ggml_context*c=ggml_init(cp);
      ggml_tensor*tgt=ggml_new_tensor_2d(c,GGML_TYPE_F32,D,N);ggml_set_input(tgt);
@@ -197,21 +199,34 @@ int main(int argc,char**argv){
      logits=run_graph(c,x,tgt,acoustic.data(),mem,enc.data());ggml_free(c);}
     std::vector<int> seg_ids; seg_ids.reserve(N);
     for(int n=0;n<N;n++){const float*col=&logits[(size_t)n*V];int am=0;float best=col[0];for(int v=1;v<V;v++)if(col[v]>best){best=col[v];am=v;}seg_ids.push_back(am);}
-    if(emit_ids){ for(int id:seg_ids) printf("%d ",id); }
-    else { std::string t=detok_pf(seg_ids,vocab); printf("%s",t.c_str()); }
+    if(emit_ids){ std::string s; for(int id:seg_ids){ s+=std::to_string(id); s+=" "; } return s; }
+    else { return detok_pf(seg_ids,vocab); }
   };
 
   int64_t t0=ggml_time_us();
   std::vector<float>wav;if(!funasr_load_audio_16k_mono(wav_path.c_str(),wav)){fprintf(stderr,"read audio failed\n");return 1;}
+  int srt_idx=0;
   if(!vad_path.empty()){
     std::vector<std::pair<int,int>> segs;
     if(!funasr_vad_segments(vad_path,wav,vad_maxseg,segs)){fprintf(stderr,"vad failed\n");return 1;}
     for(auto&s:segs){ int off=(int)((int64_t)s.first*16000/1000), end=(int)((int64_t)s.second*16000/1000);
       if(end>(int)wav.size())end=wav.size(); if(end-off<WINLEN)continue;
-      std::vector<float> seg(wav.begin()+off,wav.begin()+end); run_seg(seg); }
+      std::vector<float> seg(wav.begin()+off,wav.begin()+end);
+      std::string text=run_seg(seg);
+      if(text.empty())continue;
+      if(srt_mode){ srt_idx++; format_srt_line(srt_idx,s.first,s.second,text); }
+      else { printf("%s",text.c_str()); }
+      fflush(stdout);
+    }
     fprintf(stderr,"[paraformer] %zu vad segments\n",segs.size());
-  } else { run_seg(wav); }
-  printf("\n");
+  } else {
+    int end_ms=(int)((int64_t)wav.size()*1000/16000);
+    std::string text=run_seg(wav);
+    if(srt_mode){ if(!text.empty()) format_srt_line(1,0,end_ms,text); }
+    else { printf("%s",text.c_str()); }
+    fflush(stdout);
+  }
+  if(!srt_mode) printf("\n");
   fprintf(stderr,"[paraformer] done %.2fs\n",(ggml_time_us()-t0)/1e6);
   if(m.ctx_w) ggml_free(m.ctx_w);
   return 0;
