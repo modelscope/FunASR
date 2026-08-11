@@ -59,6 +59,25 @@ cmake -B build -DCMAKE_BUILD_TYPE=Release      # fetches pinned llama.cpp; stati
 cmake --build build -j                          # -> build/bin/llama-funasr-* (all tools)
 ```
 
+## SRT subtitle output
+
+Fun-ASR-Nano, SenseVoiceSmall, and Paraformer accept `--srt` and write standard
+SRT entries to stdout. Use FSMN-VAD segmentation for speech-aligned timestamps;
+Fun-ASR-Nano can also timestamp fixed windows selected with `--chunk`. Without
+segmentation, SenseVoiceSmall and Paraformer emit one entry spanning the input.
+
+```bash
+./build/bin/llama-funasr-cli --enc encoder.gguf -m llm.gguf \
+  --vad fsmn-vad.gguf -a audio.wav --srt > audio.srt
+./build/bin/llama-funasr-sensevoice -m sensevoice-small.gguf \
+  --vad fsmn-vad.gguf -a audio.wav --srt > audio.srt
+./build/bin/llama-funasr-paraformer -m paraformer.gguf \
+  --vad fsmn-vad.gguf -a audio.wav --srt > audio.srt
+```
+
+Progress and timing diagnostics remain on stderr, so redirecting stdout produces
+a clean subtitle file. Normal text output is unchanged when `--srt` is omitted.
+
 ### Optional Windows CUDA backend for SenseVoiceSmall
 
 The CPU release ZIPs are portable packages. Tagged releases also publish

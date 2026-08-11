@@ -25,6 +25,7 @@ static const float LN_EPS = 1e-5f;
 #define FUNASR_AUDIO_IMPLEMENTATION
 #include "funasr_audio.h"
 #include "funasr_vad.h"     // built-in FSMN-VAD front end (--vad segmentation)
+#include "funasr_srt.h"
 #include <utility>
 static const int FS=16000,WINLEN=400,SHIFT=160,NFFT=512,NMEL=80,LFR_M=7,LFR_N=6;
 static const float PREEMPH=0.97f,LOWF=20.0f,HIGHF=8000.0f;
@@ -168,7 +169,7 @@ static std::string detok_sv(const std::vector<int>&ids,const std::vector<std::st
 }
 
 int main(int argc,char**argv){
-  std::string gguf_path,fbank_path,wav_path,vad_path; int vad_maxseg=30000; bool ids_mode=false,keep_tags=false;
+  std::string gguf_path,fbank_path,wav_path,vad_path; int vad_maxseg=30000; bool ids_mode=false,keep_tags=false,srt_mode=false;
   std::string backend_name="cpu";
   for(int i=1;i<argc;i++){ if(!strcmp(argv[i],"-m")&&i+1<argc)gguf_path=argv[++i];
     else if(!strcmp(argv[i],"-f")&&i+1<argc)fbank_path=argv[++i];
@@ -178,7 +179,8 @@ int main(int argc,char**argv){
     else if(!strcmp(argv[i],"--backend")&&i+1<argc)backend_name=argv[++i];
     else if(!strcmp(argv[i],"--ids"))ids_mode=true;
     else if(!strcmp(argv[i],"--keep-tags"))keep_tags=true;
-    else {fprintf(stderr,"usage: %s -m sensevoice.gguf (-a audio.wav | -f fbank.bin) [--vad fsmn-vad.gguf [--vad-maxseg ms]] [--backend cpu|cuda|vulkan] [--ids] [--keep-tags]\n",argv[0]);return 1;} }
+    else if(!strcmp(argv[i],"--srt"))srt_mode=true;
+    else {fprintf(stderr,"usage: %s -m sensevoice.gguf (-a audio.wav | -f fbank.bin) [--vad fsmn-vad.gguf [--vad-maxseg ms]] [--backend cpu|cuda|vulkan] [--srt] [--ids] [--keep-tags]\n",argv[0]);return 1;} }
   if(gguf_path.empty()||(fbank_path.empty()&&wav_path.empty())){fprintf(stderr,"missing args\n");return 1;}
   graph_backend graph_be=make_graph_backend(backend_name);
 
@@ -201,8 +203,8 @@ int main(int argc,char**argv){
   // it does NOT apply am.mvn CMVN (that path is unused at inference). Applying it
   // makes the encoder predict <|nospeech|>. So no CMVN here.
   float*emb=(float*)m.g("embed.weight")->data;   // [16, 560] row-major
-  // Run encoder+CTC on one fbank window [T,F]; prints greedy-CTC token IDs (no newline).
-  auto run_seg=[&](const std::vector<float>& fb,int T){
+  // Run encoder+CTC on one fbank window [T,F]; returns decoded text string.
+  auto run_seg=[&](const std::vector<float>& fb,int T) -> std::string {
     int N=nq+T; std::vector<float> inp((size_t)N*F);
     for(int i=0;i<nq;i++) memcpy(&inp[(size_t)i*F], &emb[(size_t)qtok[i]*F], F*sizeof(float));
     memcpy(&inp[(size_t)nq*F], fb.data(), (size_t)T*F*sizeof(float));
@@ -225,33 +227,47 @@ int main(int argc,char**argv){
     for(int n=0;n<N;n++){ const float*col=&lg[(size_t)n*V]; int am=0; float best=col[0];
       for(int v=1;v<V;v++) if(col[v]>best){best=col[v];am=v;}
       if(am!=prev && am!=m.c.blank) seg_ids.push_back(am); prev=am; }
-    if(emit_ids){ for(int id:seg_ids) printf("%d ",id); }
-    else { std::string t=detok_sv(seg_ids,vocab,keep_tags); printf("%s",t.c_str()); }
+    std::string result;
+    if(emit_ids){ for(int id:seg_ids){ result+=std::to_string(id); result+=" "; } }
+    else { result=detok_sv(seg_ids,vocab,keep_tags); }
     ggml_gallocr_free(ga); ggml_free(c);
+    return result;
   };
 
   int64_t t0=ggml_time_us();
+  int srt_idx=0;
   if(!vad_path.empty()){
     std::vector<float> wav; if(!funasr_load_audio_16k_mono(wav_path.c_str(),wav)){fprintf(stderr,"read audio failed\n");return 1;}
     std::vector<std::pair<int,int>> segs;
     if(!funasr_vad_segments(vad_path,wav,vad_maxseg,segs)){fprintf(stderr,"vad failed\n");return 1;}
     for(auto&s:segs){ int off=(int)((int64_t)s.first*16000/1000), end=(int)((int64_t)s.second*16000/1000);
       if(end>(int)wav.size())end=wav.size(); if(end-off<WINLEN)continue;
-      std::vector<float> seg(wav.begin()+off,wav.begin()+end); int t=0; auto fb=compute_fbank(seg,t); run_seg(fb,t); }
+      std::vector<float> seg(wav.begin()+off,wav.begin()+end); int t=0; auto fb=compute_fbank(seg,t);
+      std::string text=run_seg(fb,t);
+      if(text.empty())continue;
+      if(srt_mode){ srt_idx++; format_srt_line(srt_idx,s.first,s.second,text); }
+      else { printf("%s",text.c_str()); }
+      fflush(stdout);
+    }
     fprintf(stderr,"[sensevoice] %zu vad segments\n",segs.size());
   } else {
-    int32_t T=0,Fc=F; std::vector<float> fb;
+    int32_t T=0,Fc=F; std::vector<float> fb; int end_ms=0;
     if(!wav_path.empty()){
       std::vector<float> wav; if(!funasr_load_audio_16k_mono(wav_path.c_str(),wav)){fprintf(stderr,"read audio failed\n");return 1;}
+      end_ms=(int)((int64_t)wav.size()*1000/16000);
       int t=0; fb=compute_fbank(wav,t); T=t;
     } else {
       FILE*f=fopen(fbank_path.c_str(),"rb"); if(!f){fprintf(stderr,"open fbank\n");return 1;}
       if(fread(&T,4,1,f)!=1||fread(&Fc,4,1,f)!=1){fclose(f);return 1;}
       fb.resize((size_t)T*Fc); if((int)fread(fb.data(),4,fb.size(),f)!=(int)fb.size()){fclose(f);return 1;} fclose(f);
+      end_ms=(int)((int64_t)T*LFR_N*SHIFT*1000/FS);
     }
-    run_seg(fb,T);
+    std::string text=run_seg(fb,T);
+    if(srt_mode){ if(!text.empty()) format_srt_line(1,0,end_ms,text); }
+    else { printf("%s",text.c_str()); }
+    fflush(stdout);
   }
-  printf("\n");
+  if(!srt_mode) printf("\n");
   fprintf(stderr,"[sensevoice] done %.2fs\n",(ggml_time_us()-t0)/1e6);
   ggml_backend_free(graph_be.backend);
   if(m.ctx_w) ggml_free(m.ctx_w);
