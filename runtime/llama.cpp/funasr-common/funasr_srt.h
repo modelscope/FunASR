@@ -1,4 +1,4 @@
-// funasr_srt.h — shared SRT subtitle formatting for funasr ggml runtimes.
+// Shared SRT subtitle formatting for FunASR ggml runtimes.
 #pragma once
 #include <cstdio>
 #include <string>

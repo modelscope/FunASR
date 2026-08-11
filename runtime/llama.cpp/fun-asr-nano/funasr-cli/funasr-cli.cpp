@@ -171,7 +171,7 @@ static void print_usage(const char*argv0){
     fprintf(stderr,
         "usage: %s --enc enc.gguf -m llm.gguf -a audio.wav"
         " [-n npred] [--chunk sec]"
-        " [--vad fsmn-vad.gguf [--vad-maxseg ms]"
+        " [--vad fsmn-vad.gguf [--vad-maxseg ms]]"
         " [--srt] [--rep R]\n", argv0);
 }
 
@@ -263,16 +263,17 @@ int main(int argc,char**argv){
             tk=llama_sampler_sample(smpl,ctx,-1);
         }
 
-        if (seg_text == "/sil") {
-            // skip
-        } else if(srt_mode){
-            srt_idx++;
-            format_srt_line(srt_idx, start_ms, end_ms, seg_text);
+        if(srt_mode){
+            if (seg_text != "/sil") {
+                srt_idx++;
+                format_srt_line(srt_idx, start_ms, end_ms, seg_text);
+            }
         } else {
             printf("%s", seg_text.c_str());
         }
         fflush(stdout);
     }
+    if(!srt_mode) printf("\n");
     int64_t t2=ggml_time_us();
     fprintf(stderr,"[done] %.2fs ; chunk=%.0fs\n",(t2-t0)/1e6, chunk_sec);
     llama_sampler_free(smpl); llama_free(ctx); llama_model_free(model);
