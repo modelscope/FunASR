@@ -58,6 +58,25 @@ def test_detail_commands_come_from_registry(built_site):
             assert command in rendered
 
 
+@pytest.mark.parametrize(
+    ('relative', 'boundary'),
+    (
+        ('deploy/llama-cpp.html', 'Windows AMD'),
+        ('en/deploy/llama-cpp.html', 'Windows AMD'),
+    ),
+)
+def test_llama_cpp_pages_render_v020_download_matrix(built_site, relative, boundary):
+    soup = read_soup(built_site / relative)
+    section = soup.select_one('[data-section="downloads"]')
+
+    assert section
+    rows = section.select('[data-download-asset]')
+    assert len(rows) == 9
+    assert all(row.select_one('a[href*="runtime-llamacpp-v0.2.0"]') for row in rows)
+    assert all(len(row.select_one('[data-field="sha256"]').get_text(strip=True)) == 64 for row in rows)
+    assert boundary in soup.get_text(' ', strip=True)
+
+
 def test_benchmark_rows_have_complete_conditions(built_site):
     registry = load_registry(SITE_ROOT / 'data' / 'deployments.json')
     records = [record for entry in registry['deployments'] for record in entry['benchmarks']]

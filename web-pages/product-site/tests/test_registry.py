@@ -118,6 +118,51 @@ def test_sensevoice_tensorrt_contract_tracks_merged_native_runtime(valid_registr
     assert 'tensorrt version' in limitation
 
 
+def test_llama_cpp_contract_tracks_v020_release_assets(valid_registry):
+    entry = next(item for item in valid_registry['deployments'] if item['id'] == 'llama-cpp')
+
+    assert entry['tested'] == {
+        'funasr': 'runtime-llamacpp-v0.2.0',
+        'runtime': 'llama.cpp@803b7fca',
+        'verified': '2026-08-11',
+    }
+    assert len(entry['downloads']) == 9
+    assert {item['archive'] for item in entry['downloads']} == {
+        'funasr-llamacpp-linux-arm64.tar.gz',
+        'funasr-llamacpp-linux-x64.tar.gz',
+        'funasr-llamacpp-linux-x64-avx2.tar.gz',
+        'funasr-llamacpp-linux-x64-vulkan.tar.gz',
+        'funasr-llamacpp-macos-arm64.tar.gz',
+        'funasr-llamacpp-windows-x64.zip',
+        'funasr-llamacpp-windows-x64-avx2.zip',
+        'funasr-llamacpp-windows-x64-vulkan.zip',
+        'funasr-llamacpp-windows-x64-cuda.zip',
+    }
+    assert all(item['url'].startswith(
+        'https://github.com/modelscope/FunASR/releases/download/runtime-llamacpp-v0.2.0/'
+    ) for item in entry['downloads'])
+    assert all(len(item['sha256']) == 64 for item in entry['downloads'])
+    assert any('actions/runs/31458121788' in item['url'] for item in entry['evidence'])
+    assert any(
+        'download-funasr-model.sh sensevoice ./funasr-gguf f16' in command
+        for command in entry['commands']['install']
+    )
+    assert 'sensevoice-small-f16.gguf' in entry['commands']['launch'][0]
+    assert 'AMD' in entry['translations']['en']['primary_limitation']
+
+
+def test_download_assets_require_https_and_sha256(valid_registry):
+    data = copy.deepcopy(valid_registry)
+    entry = next(item for item in data['deployments'] if item['id'] == 'llama-cpp')
+    entry['downloads'][0]['url'] = 'http://example.com/runtime.tar.gz'
+    entry['downloads'][1]['sha256'] = 'not-a-sha256'
+
+    errors = validate_registry(data)
+
+    assert 'llama-cpp: download URL must use https (item 0)' in errors
+    assert 'llama-cpp: download SHA-256 must be 64 lowercase hex characters (item 1)' in errors
+
+
 def test_production_entry_requires_evidence(valid_registry):
     data = copy.deepcopy(valid_registry)
     entry = next(item for item in data['deployments'] if item['maturity'] == 'production-verified')

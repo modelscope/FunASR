@@ -46,6 +46,39 @@
   </div>
 </section>
 
+{% set downloads = entry.get('downloads', []) %}
+{% if downloads %}
+<section class="section content-section" data-section="downloads">
+  <div class="section-heading compact-heading">
+    <p class="eyebrow">{{ '发布资产' if language == 'zh' else 'Release assets' }}</p>
+    <h2>{{ '按操作系统和后端下载已校验的预编译包' if language == 'zh' else 'Download a verified package for your operating system and backend' }}</h2>
+    <p>{{ 'SHA-256 来自公开 GitHub Release；下载后先核对摘要，再在目标硬件完成 smoke test。' if language == 'zh' else 'SHA-256 values come from the public GitHub Release. Verify the digest, then run a smoke test on the target hardware.' }}</p>
+  </div>
+  <div class="table-wrap download-table">
+    <table>
+      <thead><tr>
+        <th>{{ '系统' if language == 'zh' else 'OS' }}</th>
+        <th>{{ '架构' if language == 'zh' else 'Architecture' }}</th>
+        <th>{{ '后端' if language == 'zh' else 'Backend' }}</th>
+        <th>{{ '下载' if language == 'zh' else 'Download' }}</th>
+        <th>SHA-256</th>
+      </tr></thead>
+      <tbody>
+      {% for item in downloads %}
+        <tr data-download-asset>
+          <td>{{ item.operating_system }}</td>
+          <td>{{ item.architecture }}</td>
+          <td>{{ item.backend }}</td>
+          <td><a href="{{ item.url }}">{{ item.archive }}</a></td>
+          <td><code data-field="sha256">{{ item.sha256 }}</code></td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endif %}
+
 <section id="commands" class="section content-section command-section" data-section="commands">
   <div class="section-heading compact-heading">
     <p class="eyebrow">{{ '运行路径' if language == 'zh' else 'Run path' }}</p>

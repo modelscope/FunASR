@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
@@ -45,6 +46,7 @@ BENCHMARK_FIELDS = (
     'source',
     'verified',
 )
+DOWNLOAD_FIELDS = ('operating_system', 'architecture', 'backend', 'archive', 'url', 'sha256')
 
 
 def load_registry(path: Path) -> dict[str, Any]:
@@ -159,6 +161,30 @@ def validate_registry(data: dict[str, Any]) -> list[str]:
                 if not _nested_value(entry, field_path):
                     errors.append(
                         f'{label}: production-verified entry requires {field_name}'
+                    )
+
+        downloads = entry.get('downloads', [])
+        if not isinstance(downloads, list):
+            errors.append(f'{label}: downloads must be a list')
+        else:
+            for download_index, download in enumerate(downloads):
+                if not isinstance(download, dict):
+                    errors.append(f'{label}: download {download_index} must be an object')
+                    continue
+                for field in DOWNLOAD_FIELDS:
+                    if not download.get(field):
+                        errors.append(
+                            f'{label}: download {download_index} requires {field}'
+                        )
+                if not _is_https_url(download.get('url')):
+                    errors.append(
+                        f'{label}: download URL must use https (item {download_index})'
+                    )
+                digest = download.get('sha256')
+                if not isinstance(digest, str) or not re.fullmatch(r'[0-9a-f]{64}', digest):
+                    errors.append(
+                        f'{label}: download SHA-256 must be 64 lowercase hex characters '
+                        f'(item {download_index})'
                     )
 
         benchmarks = entry.get('benchmarks', [])

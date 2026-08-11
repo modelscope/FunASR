@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "verified": "2026-08-04",
+  "verified": "2026-08-11",
   "deployments": [
     {
       "id": "vllm",
@@ -157,16 +157,28 @@
       "models": ["SenseVoiceSmall-GGUF", "Paraformer-GGUF", "Fun-ASR-Nano-GGUF", "FSMN-VAD-GGUF"],
       "operating_systems": ["Linux", "macOS", "Windows"],
       "interfaces": ["CLI", "local HTTP server"],
-      "tested": {"funasr": "runtime-llamacpp-v0.1.9", "runtime": "pinned llama.cpp backend", "verified": "2026-07-26"},
+      "tested": {"funasr": "runtime-llamacpp-v0.2.0", "runtime": "llama.cpp@803b7fca", "verified": "2026-08-11"},
       "commands": {
-        "install": ["cmake -B build -DCMAKE_BUILD_TYPE=Release", "cmake --build build -j"],
-        "launch": ["./build/bin/llama-funasr-sensevoice -m funasr-gguf/sensevoice-small-q8.gguf --vad funasr-gguf/fsmn-vad.gguf -a sample.wav"],
-        "health": ["./build/bin/llama-funasr-sensevoice --help"],
-        "smoke": ["./runtime/llama.cpp/tests/run_regression.sh"]
+        "install": ["curl -fLO https://github.com/modelscope/FunASR/releases/download/runtime-llamacpp-v0.2.0/funasr-llamacpp-linux-x64.tar.gz", "echo \"15e6407143b4fb91d90bb37f2a41c64c4d48ea0fbe6404b88a9b70269c84f240  funasr-llamacpp-linux-x64.tar.gz\" | sha256sum -c -", "mkdir funasr-llamacpp && tar -xzf funasr-llamacpp-linux-x64.tar.gz -C funasr-llamacpp && cd funasr-llamacpp && bash download-funasr-model.sh sensevoice ./funasr-gguf f16"],
+        "launch": ["cd funasr-llamacpp && ./llama-funasr-sensevoice -m funasr-gguf/sensevoice-small-f16.gguf --vad funasr-gguf/fsmn-vad.gguf -a sample.wav"],
+        "health": ["cd funasr-llamacpp && ./llama-funasr-sensevoice --help"],
+        "smoke": ["cd funasr-llamacpp && ./llama-funasr-sensevoice -m funasr-gguf/sensevoice-small-f16.gguf --vad funasr-gguf/fsmn-vad.gguf -a sample.wav | tee transcript.txt && test -s transcript.txt"]
       },
+      "downloads": [
+        {"operating_system": "Linux", "architecture": "arm64", "backend": "CPU", "archive": "funasr-llamacpp-linux-arm64.tar.gz", "url": "https://github.com/modelscope/FunASR/releases/download/runtime-llamacpp-v0.2.0/funasr-llamacpp-linux-arm64.tar.gz", "sha256": "c78987b2384c6aef339aea1bcd0e130070455d6394fa7ab7ca26840ead10d5da"},
+        {"operating_system": "Linux", "architecture": "x64", "backend": "CPU", "archive": "funasr-llamacpp-linux-x64.tar.gz", "url": "https://github.com/modelscope/FunASR/releases/download/runtime-llamacpp-v0.2.0/funasr-llamacpp-linux-x64.tar.gz", "sha256": "15e6407143b4fb91d90bb37f2a41c64c4d48ea0fbe6404b88a9b70269c84f240"},
+        {"operating_system": "Linux", "architecture": "x64 AVX2", "backend": "CPU", "archive": "funasr-llamacpp-linux-x64-avx2.tar.gz", "url": "https://github.com/modelscope/FunASR/releases/download/runtime-llamacpp-v0.2.0/funasr-llamacpp-linux-x64-avx2.tar.gz", "sha256": "02e10e9a46ea76a040c45d431efe51a3324e64f08c24d38e18c8a4d2781490cd"},
+        {"operating_system": "Linux", "architecture": "x64", "backend": "Vulkan", "archive": "funasr-llamacpp-linux-x64-vulkan.tar.gz", "url": "https://github.com/modelscope/FunASR/releases/download/runtime-llamacpp-v0.2.0/funasr-llamacpp-linux-x64-vulkan.tar.gz", "sha256": "caf71b8c0b4c3249cebc4175e5406d3c588eb9e8966a00d571d4cc5070405385"},
+        {"operating_system": "macOS", "architecture": "arm64", "backend": "CPU", "archive": "funasr-llamacpp-macos-arm64.tar.gz", "url": "https://github.com/modelscope/FunASR/releases/download/runtime-llamacpp-v0.2.0/funasr-llamacpp-macos-arm64.tar.gz", "sha256": "416cbb289e31cb7575365d382155074e922fd061807a37b9ca0247dabd9bc6f9"},
+        {"operating_system": "Windows", "architecture": "x64", "backend": "CPU", "archive": "funasr-llamacpp-windows-x64.zip", "url": "https://github.com/modelscope/FunASR/releases/download/runtime-llamacpp-v0.2.0/funasr-llamacpp-windows-x64.zip", "sha256": "297c962346d7e30d7a7c2c860dfaab3ff07d01fddf15e6fc5212ca9545441a51"},
+        {"operating_system": "Windows", "architecture": "x64 AVX2", "backend": "CPU", "archive": "funasr-llamacpp-windows-x64-avx2.zip", "url": "https://github.com/modelscope/FunASR/releases/download/runtime-llamacpp-v0.2.0/funasr-llamacpp-windows-x64-avx2.zip", "sha256": "4db0f11f603c324a63545cd7009cdd45bb45576efe282cec22796b5fd42d8ea1"},
+        {"operating_system": "Windows", "architecture": "x64", "backend": "Vulkan", "archive": "funasr-llamacpp-windows-x64-vulkan.zip", "url": "https://github.com/modelscope/FunASR/releases/download/runtime-llamacpp-v0.2.0/funasr-llamacpp-windows-x64-vulkan.zip", "sha256": "90b45240c6ccc9177c25490a11848de60a406e129391c8736b14521c0c28cdcb"},
+        {"operating_system": "Windows", "architecture": "x64", "backend": "CUDA", "archive": "funasr-llamacpp-windows-x64-cuda.zip", "url": "https://github.com/modelscope/FunASR/releases/download/runtime-llamacpp-v0.2.0/funasr-llamacpp-windows-x64-cuda.zip", "sha256": "7f2f9ef4d7e0291b284a295ec74bbeca9ea635a7f5f42d0ad06eb780c0d6efc1"}
+      ],
       "evidence": [
         {"label": "llama.cpp runtime", "url": "https://github.com/modelscope/FunASR/blob/main/runtime/llama.cpp/README.md"},
-        {"label": "runtime release", "url": "https://github.com/modelscope/FunASR/releases/tag/runtime-llamacpp-v0.1.9"},
+        {"label": "runtime v0.2.0 release", "url": "https://github.com/modelscope/FunASR/releases/tag/runtime-llamacpp-v0.2.0"},
+        {"label": "nine-platform release workflow", "url": "https://github.com/modelscope/FunASR/actions/runs/31458121788"},
         {"label": "regression tests", "url": "https://github.com/modelscope/FunASR/tree/main/runtime/llama.cpp/tests"}
       ],
       "benchmarks": [
@@ -200,27 +212,27 @@
       "translations": {
         "zh": {
           "name": "llama.cpp / GGUF 独立运行",
-          "summary": "使用跨平台预编译包或源码构建，在 CPU、桌面 GPU 和边缘设备上运行 FunASR GGUF 模型。",
-          "fit": ["不依赖 Python ML 环境", "桌面应用和离线边缘部署", "需要 Linux、macOS、Windows 发布包"],
+          "summary": "使用 v0.2.0 的九个预编译包或源码构建，在 CPU、Vulkan、CUDA 和边缘设备上运行 FunASR GGUF 模型。",
+          "fit": ["不依赖 Python ML 环境", "桌面应用和离线边缘部署", "需要 Linux、macOS、Windows 的 CPU、Vulkan 或 CUDA 发布包"],
           "not_fit": ["需要 vLLM 式大批量 GPU 调度", "未验证目标 GPU 架构的通用预编译 CUDA 包", "必须使用完整 Python 模型生态的流程"],
           "selection_reason": "GGUF 运行时和独立二进制优先满足可移植、离线和低依赖部署。",
-          "primary_limitation": "预编译 GPU 包只覆盖标注的后端和架构；其他设备需要从源码构建并实机验证。",
+          "primary_limitation": "预编译 GPU 包只覆盖标注的后端和架构；Windows AMD Vulkan 的崩溃修复仍需问题报告者实机复测，其他设备也必须在目标硬件验证。",
           "status_label": "生产验证",
-          "operations": ["按发布资产 SHA-256 校验下载", "模型和二进制使用同一发布清单", "保留旧二进制和模型目录用于回滚"],
+          "operations": ["按页面列出的 SHA-256 校验九个发布资产", "模型和二进制使用同一发布清单", "保留旧二进制和模型目录用于回滚"],
           "security": ["默认只读取本地音频和模型", "HTTP 服务绑定内网地址并限制上传大小", "不要从不可信地址加载 GGUF"],
-          "troubleshooting": ["CPU 路径先用 q8 模型验证", "CUDA 和 Vulkan 必须匹配本机驱动", "用仓库回归脚本区分模型问题与构建问题"]
+          "troubleshooting": ["CPU 路径先用 q8 模型验证", "CUDA 和 Vulkan 必须匹配本机驱动", "Windows AMD Vulkan 异常时记录 GPU、驱动、GGML_VK_MAX_NODES_PER_SUBMIT 和 GGML_VK_SERIALIZE_SUBMISSIONS 后回报"]
         },
         "en": {
           "name": "llama.cpp / GGUF standalone",
-          "summary": "Use cross-platform release packages or source builds to run FunASR GGUF models on CPUs, desktop GPUs, and edge devices.",
-          "fit": ["No Python ML environment", "Desktop applications and offline edge deployment", "Linux, macOS, and Windows release packages"],
+          "summary": "Use the nine v0.2.0 release packages or source builds to run FunASR GGUF models on CPU, Vulkan, CUDA, and edge devices.",
+          "fit": ["No Python ML environment", "Desktop applications and offline edge deployment", "CPU, Vulkan, or CUDA packages for Linux, macOS, and Windows"],
           "not_fit": ["vLLM-style large GPU batch scheduling", "A universal prebuilt CUDA package for an unverified GPU architecture", "Workflows that require the full Python model ecosystem"],
           "selection_reason": "GGUF runtimes and standalone binaries prioritize portability, offline use, and low dependency count.",
-          "primary_limitation": "Prebuilt GPU packages cover only the documented backend and architecture; other devices require a source build and hardware validation.",
+          "primary_limitation": "Prebuilt GPU packages cover only the documented backend and architecture; the Windows AMD Vulkan crash fix still awaits reporter hardware confirmation, and every other target also requires hardware validation.",
           "status_label": "Production verified",
-          "operations": ["Verify release assets with SHA-256", "Keep models and binaries on the same release manifest", "Retain the previous binary and model directory for rollback"],
+          "operations": ["Verify all nine release assets against the listed SHA-256 values", "Keep models and binaries on the same release manifest", "Retain the previous binary and model directory for rollback"],
           "security": ["Read local audio and models by default", "Bind the HTTP server to a private address and limit uploads", "Do not load GGUF files from untrusted sources"],
-          "troubleshooting": ["Validate the q8 CPU path first", "Match CUDA or Vulkan to the local driver", "Use repository regression scripts to separate model and build failures"]
+          "troubleshooting": ["Validate the q8 CPU path first", "Match CUDA or Vulkan to the local driver", "For Windows AMD Vulkan failures, record the GPU, driver, GGML_VK_MAX_NODES_PER_SUBMIT, and GGML_VK_SERIALIZE_SUBMISSIONS before reporting"]
         }
       }
     },
