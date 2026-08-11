@@ -149,6 +149,7 @@ Whisper 是单个模型，**FunASR 是一个工具箱**——按场景挑模型�
 
 ## 最新动态
 
+- 2026/08/14：**v1.4.2 已发布到 PyPI** — 标点模型的 token 边界落在带时间戳的 ASR 词内部时，句子对齐现在仍能保留正确的字幕分段。分布式训练会在每个梯度累积窗口的最后一个 microbatch 同步 DDP/FSDP 梯度，并从解析后的配置正确初始化 DeepSpeed/FSDP 模式。对应 GitHub 源码 tag 同时包含 llama.cpp SRT 输出和 v0.2.0 AMD Vulkan submission 更新。安装命令：`python -m pip install -U "funasr==1.4.2"`。[发布页 →](https://github.com/modelscope/FunASR/releases/tag/v1.4.2)
 - 2026/08/11：**llama.cpp runtime v0.2.0** — 统一固定上游 llama.cpp 到 `803b7fca`，通过同一套测试工作流发布 9 个带 SHA-256 校验值的 Linux、macOS 与 Windows 压缩包。Fun-ASR-Nano、SenseVoice 和 Paraformer CLI 现在可直接输出 SRT 字幕；Vulkan 启动会给出可操作的 AMD 诊断信息和 CPU fallback。AMD Windows Vulkan 崩溃修复仍等待 issue 报告者在原硬件上确认。[下载矩阵与快速开始 →](https://www.funasr.com/deploy/llama-cpp.html) · [发布页 →](https://github.com/modelscope/FunASR/releases/tag/runtime-llamacpp-v0.2.0)
 - 2026/08/04：**v1.4.1 已发布到 PyPI** — Hugging Face 的 `paraformer-en` 别名现在会解析到官方英文 checkpoint，不再静默下载中文模型。本补丁还包含 Fun-ASR-Nano LoRA 微调与更安全的 checkpoint 处理；对应 GitHub 源码 tag 同时提供 JSONL 时间戳输出、SenseVoice TensorRT 部署和 OpenClaw 实时转写集成。安装命令：`python -m pip install -U "funasr==1.4.1"`。[发布页 →](https://github.com/modelscope/FunASR/releases/tag/v1.4.1)
 - 2026/08/04：**OpenClaw 实时转写集成** — 新增 [`openclaw-funasr`](integrations/openclaw/) 源码包，把私有部署的 FunASR `online`、`offline` 与 `2pass` WebSocket 识别接入 OpenClaw Talk 和 Voice Call。8 kHz G.711 mu-law 转换、60 ms 分帧、partial/final 文本、重连上限、安装包与运行时注册均已基于 OpenClaw `2026.7.2` 验证；npm 与 ClawHub 发布将在所需的[上游 SDK 改动](https://github.com/openclaw/openclaw/pull/118977)合入后进行。
