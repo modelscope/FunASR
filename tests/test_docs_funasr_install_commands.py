@@ -334,17 +334,33 @@ def test_readme_model_tables_surface_public_gguf_entries():
         assert "https://huggingface.co/FunAudioLLM/Fun-ASR-MLT-Nano-GGUF" not in text
 
 
-def test_localized_readmes_surface_current_release_and_edge_runtime():
-    readmes = [
-        (ROOT / "README_ja.md").read_text(),
-        (ROOT / "README_ko.md").read_text(),
-    ]
+def test_top_level_readmes_surface_current_release_and_edge_runtime():
+    readmes = {
+        name: (ROOT / name).read_text()
+        for name in ("README.md", "README_zh.md", "README_ja.md", "README_ko.md")
+    }
 
-    for text in readmes:
-        assert 'python -m pip install -U "funasr==1.3.26"' in text
-        assert "https://github.com/modelscope/FunASR/releases/tag/v1.3.26" in text
-        assert "https://www.funasr.com/llama-cpp.html" in text
-        assert "runtime-llamacpp-v0.1.9" in text
+    for name, text in readmes.items():
+        assert 'python -m pip install -U "funasr==1.4.1"' in text, name
+        assert "https://github.com/modelscope/FunASR/releases/tag/v1.4.1" in text, name
+        assert "runtime-llamacpp-v0.2.0" in text, name
+
+    assert "https://www.funasr.com/en/deploy/llama-cpp.html" in readmes["README.md"]
+    assert "https://www.funasr.com/deploy/llama-cpp.html" in readmes["README_zh.md"]
+    for name in ("README_ja.md", "README_ko.md"):
+        assert "https://www.funasr.com/en/deploy/llama-cpp.html" in readmes[name]
+
+    for name in ("README.md", "README_zh.md"):
+        text = readmes[name]
+        for asset in (
+            "funasr-llamacpp-linux-x64-vulkan.tar.gz",
+            "funasr-llamacpp-windows-x64-vulkan.zip",
+            "funasr-llamacpp-windows-x64-cuda.zip",
+        ):
+            assert (
+                f"releases/download/runtime-llamacpp-v0.2.0/{asset}" in text
+            ), name
+        assert "releases/download/runtime-llamacpp-v0.1.9/" not in text, name
 
 
 def test_realtime_demo_documents_partial_and_hotword_boundaries():

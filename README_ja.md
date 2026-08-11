@@ -99,6 +99,7 @@ Whisper は単一モデルですが、**FunASR はツールキット**です—�
 
 ## 最新情報
 
+- 2026/08/11：**llama.cpp runtime v0.2.0** — upstream llama.cpp を `803b7fca` に固定し、同一のテスト済み workflow から SHA-256 付きの Linux、macOS、Windows 向け 9 archive を公開しました。Fun-ASR-Nano、SenseVoice、Paraformer CLI は SRT 字幕を出力でき、Vulkan 起動時には AMD 向け診断と CPU fallback を案内します。AMD Windows Vulkan crash の修正は、報告者の実機確認待ちです。[ダウンロード一覧と quickstart →](https://www.funasr.com/en/deploy/llama-cpp.html) · [Release →](https://github.com/modelscope/FunASR/releases/tag/runtime-llamacpp-v0.2.0)
 - 2026/08/04：**v1.4.1 を PyPI に公開** — Hugging Face の `paraformer-en` エイリアスが、誤って中国語モデルをダウンロードせず、公式の英語 checkpoint を解決するようになりました。このパッチには Fun-ASR-Nano の LoRA 微調整と、より安全な checkpoint 処理も含まれます。対応する GitHub ソース tag には JSONL タイムスタンプ出力、SenseVoice TensorRT デプロイ、OpenClaw リアルタイム文字起こし連携も含まれます。インストール：`python -m pip install -U "funasr==1.4.1"`。[Release →](https://github.com/modelscope/FunASR/releases/tag/v1.4.1)
 - 2026/07/31：**v1.4.0 を PyPI に公開** — `AutoModel` はモデルのダウンロード前に、よくある `vda_model` のスペルミスを拒否し、正しい `vad_model` を案内します。これにより、VAD に依存する分割、話者処理、`sentence_info` が気付かないまま無効になることを防ぎます。GitHub のソースリリースでは legacy WebSocket ファイルランタイムも更新され、クライアントは明示的な入力終了応答を待ち、サーバーは保留中の offline、online、2pass 音声を処理してから完了またはエラーを返します。Python パッケージのインストール：`python -m pip install -U "funasr==1.4.0"`。[Release →](https://github.com/modelscope/FunASR/releases/tag/v1.4.0)
 - 2026/07/27：**v1.3.30 を PyPI に公開** — WAV、MP3、FLAC、OGG、MP4/M4A、WebM などのコンテナ形式の音声バイト列を raw PCM と誤認せず、対応するコーデックでデコードするようになりました。OpenAI 互換レスポンスは話者ラベルを保持し、句読点が一致しない場合も VAD 区間時刻を保持します。信頼済みブラウザクライアント向け CORS と、vLLM の 30 秒 VAD 上限にも対応しました。GitHub Release には、デスクトップ／サーバー向け 9 ターゲットの最新 llama.cpp ビルドも同梱しています。インストール：`python -m pip install -U "funasr==1.3.30"`。[Release →](https://github.com/modelscope/FunASR/releases/tag/v1.3.30)
@@ -107,7 +108,7 @@ Whisper は単一モデルですが、**FunASR はツールキット**です—�
 - 2026/07/24：**v1.3.27 が PyPI に公開** — OpenAI 互換サーバーが `verbose_json` で SenseVoice の検出言語を返し、vLLM fallback 後はキャッシュ済み Fun-ASR-Nano `AutoModel` を再利用します。vLLM/VAD 初期化と fallback の両方が失敗した場合は、半初期化状態を残さず、後続リクエストで再試行できます。インストール：`python -m pip install -U "funasr==1.3.27"`。[Release →](https://github.com/modelscope/FunASR/releases/tag/v1.3.27)
 - 2026/07/23：**v1.3.26 が PyPI に公開** — `funasr-server --model fun-asr-nano --hub ms` は ModelScope hub 指定を vLLM 経路と AutoModel fallback の両方で尊重します。インストール：`python -m pip install -U "funasr==1.3.26"`。[Release →](https://github.com/modelscope/FunASR/releases/tag/v1.3.26)
 - 2026/07/23：**llama.cpp runtime v0.1.9** — Windows Vulkan 向け `funasr-llamacpp-windows-x64-vulkan.zip` を追加。現在の AMD、Intel、NVIDIA Vulkan ドライバーで SenseVoiceSmall を単独実行できます。Linux Vulkan、Windows CUDA、CPU/AVX2、Linux arm64、macOS arm64 も引き続き提供します。[Release →](https://github.com/modelscope/FunASR/releases/tag/runtime-llamacpp-v0.1.9)
-- 2026/07/22：**llama.cpp runtime v0.1.8** — Linux Vulkan tarball と Windows CUDA zip を含む CPU/エッジ向け GGUF ランタイム。ダウンロードと手順：[funasr.com/llama-cpp](https://www.funasr.com/llama-cpp.html) · [Release →](https://github.com/modelscope/FunASR/releases/tag/runtime-llamacpp-v0.1.8)
+- 2026/07/22：**llama.cpp runtime v0.1.8** — Linux Vulkan tarball と Windows CUDA zip を含む CPU/エッジ向け GGUF ランタイム。現在のダウンロードと手順：[funasr.com/deploy/llama-cpp](https://www.funasr.com/en/deploy/llama-cpp.html) · [Release →](https://github.com/modelscope/FunASR/releases/tag/runtime-llamacpp-v0.1.8)
 - 2026/05/24：**v1.3.3** — `funasr-server` CLI、OpenAI互換API、MCPサーバー。`pip install --upgrade funasr`
 - 2026/05/20：Qwen3-ASR (0.6B/1.7B) 追加 — 52言語対応。
 - 2026/05/20：GLM-ASR-Nano (1.5B) 追加 — 17言語、方言対応。
@@ -153,7 +154,7 @@ funasr-server --device cuda
 docker pull registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-online-cpu-0.1.12
 ```
 
-CPU/エッジで Python なしのオフライン ASR が必要な場合は、llama.cpp / GGUF ランタイムを使えます：[funasr.com/llama-cpp](https://www.funasr.com/llama-cpp.html) · [Fun-ASR-Nano-GGUF](https://huggingface.co/FunAudioLLM/Fun-ASR-Nano-GGUF) · [SenseVoiceSmall-GGUF](https://huggingface.co/FunAudioLLM/SenseVoiceSmall-GGUF)。
+CPU/エッジで Python なしのオフライン ASR が必要な場合は、llama.cpp / GGUF ランタイムを使えます：[funasr.com/deploy/llama-cpp](https://www.funasr.com/en/deploy/llama-cpp.html) · [Fun-ASR-Nano-GGUF](https://huggingface.co/FunAudioLLM/Fun-ASR-Nano-GGUF) · [SenseVoiceSmall-GGUF](https://huggingface.co/FunAudioLLM/SenseVoiceSmall-GGUF)。
 
 [Colab quickstart →](./examples/colab/README_ja.md) · [OpenAI API example →](./examples/openai_api/README_ja.md) · [Client recipes →](./examples/openai_api/CLIENTS.md) · [Workflow recipes →](./examples/openai_api/WORKFLOWS.md) · [Postman collection →](./examples/openai_api/POSTMAN.md) · [OpenAPI spec →](./examples/openai_api/OPENAPI.md) · [Security guide →](./examples/openai_api/SECURITY.md) · [Deployment matrix →](./docs/deployment_matrix_ja.md) · [デプロイドキュメント →](./runtime/readme.md) · [Agent連携 →](https://modelscope.github.io/FunASR/agent.html)
 
