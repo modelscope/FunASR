@@ -208,7 +208,7 @@ int main(int argc,char**argv){
     llama_context*ctx=llama_init_from_model(model,cp);
     if(!ctx){fprintf(stderr,"failed to create llama context\n");llama_model_free(model);return 1;}
     auto sp=llama_sampler_chain_default_params(); llama_sampler*smpl=llama_sampler_chain_init(sp);
-    if(rep!=1.0f) llama_sampler_chain_add(smpl,llama_sampler_init_penalties(256,rep,0.0f,0.0f));
+    if(rep!=1.0f) llama_sampler_chain_add(smpl,llama_sampler_init_penalties(llama_vocab_n_tokens(vocab),256,rep,0.0f,0.0f));
     llama_sampler_chain_add(smpl,llama_sampler_init_greedy());
 
     const char*prefix="<|im_start|>system\nYou are a helpful assistant.<|im_end|>\n<|im_start|>user\n语音转写：";
