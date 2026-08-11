@@ -187,6 +187,28 @@ cmake --build build-vulkan --config Release --target llama-funasr-sensevoice
 `--backend cpu` remains the default. The Windows Vulkan package currently
 accelerates SenseVoiceSmall only, matching the Linux Vulkan package.
 
+#### AMD Windows troubleshooting
+
+Recent AMD drivers can report `VK_ERROR_DEVICE_LOST` or terminate the process
+when a graph submission exceeds the driver's timeout. The pinned ggml revision
+reduces submission sizes on smaller AMD GPUs and fixes the batching threshold.
+To force smaller submissions or collect the last submitted tensors for a bug
+report, run from PowerShell with:
+
+```powershell
+$env:GGML_VK_MAX_NODES_PER_SUBMIT = "16"
+$env:GGML_VK_SERIALIZE_SUBMISSIONS = "1"
+.\llama-funasr-sensevoice.exe `
+  -m sensevoice-small-f16.gguf --vad fsmn-vad.gguf -a sample.wav --backend vulkan
+```
+
+Try `8` or `1` if `16` still triggers a driver timeout. Include the complete
+stderr output, GPU model, and driver version when reporting a failure. Remove
+the variables after diagnosis because serial submissions can reduce throughput.
+Use `--backend cpu` as the reliable fallback on affected driver/device pairs.
+The current SenseVoiceSmall graph does not create a flash-attention operation,
+so a `--no-flash-attn` switch would not change this execution path.
+
 ## Build (shared)
 ```bash
 git clone https://github.com/ggml-org/llama.cpp && cd llama.cpp
