@@ -99,6 +99,7 @@ Whisper는 단일 모델이지만, **FunASR는 툴킷**입니다. 용도에 맞�
 
 ## 최신 소식
 
+- 2026/08/11: **llama.cpp runtime v0.2.0** — upstream llama.cpp를 `803b7fca`로 고정하고, 하나의 검증된 workflow에서 SHA-256 값이 제공되는 Linux, macOS, Windows용 archive 9개를 공개했습니다. Fun-ASR-Nano, SenseVoice 및 Paraformer CLI는 SRT 자막을 출력할 수 있으며, Vulkan 시작 시 AMD 진단 정보와 CPU fallback을 안내합니다. AMD Windows Vulkan crash 수정은 제보자의 실제 하드웨어 확인을 기다리고 있습니다. [다운로드 목록 및 quickstart →](https://www.funasr.com/en/deploy/llama-cpp.html) · [Release →](https://github.com/modelscope/FunASR/releases/tag/runtime-llamacpp-v0.2.0)
 - 2026/08/04: **v1.4.1 PyPI 공개** — Hugging Face의 `paraformer-en` 별칭이 중국어 모델을 잘못 내려받지 않고 공식 영어 checkpoint를 가리키도록 수정했습니다. 이 패치에는 Fun-ASR-Nano LoRA 미세 조정과 더 안전한 checkpoint 처리도 포함됩니다. 해당 GitHub 소스 tag에는 JSONL 타임스탬프 출력, SenseVoice TensorRT 배포, OpenClaw 실시간 전사 연동도 포함됩니다. 설치: `python -m pip install -U "funasr==1.4.1"`. [Release →](https://github.com/modelscope/FunASR/releases/tag/v1.4.1)
 - 2026/07/31: **v1.4.0 PyPI 공개** — `AutoModel`은 모델 다운로드 전에 흔한 `vda_model` 오타를 거부하고 올바른 `vad_model` 인수를 안내합니다. 따라서 VAD 기반 분할, 화자 처리 및 `sentence_info`가 조용히 비활성화되지 않습니다. GitHub 소스 릴리스에서는 legacy WebSocket 파일 런타임도 개선되어, 클라이언트가 명시적인 입력 종료 응답을 기다리고 서버가 대기 중인 offline, online 및 2pass 오디오를 처리한 뒤 완료 또는 오류를 반환합니다. Python 패키지 설치: `python -m pip install -U "funasr==1.4.0"`. [Release →](https://github.com/modelscope/FunASR/releases/tag/v1.4.0)
 - 2026/07/27: **v1.3.30 PyPI 공개** — WAV, MP3, FLAC, OGG, MP4/M4A, WebM 컨테이너 형식의 오디오 바이트를 raw PCM으로 잘못 해석하지 않고 해당 코덱으로 디코딩합니다. OpenAI 호환 응답은 화자 라벨을 보존하고, 구두점이 일치하지 않아도 VAD 문장 시간을 유지합니다. 신뢰할 수 있는 브라우저 클라이언트용 CORS와 vLLM의 30초 VAD 구간 제한도 지원합니다. GitHub Release에는 데스크톱 및 서버용 9개 대상의 최신 llama.cpp 빌드도 함께 제공합니다. 설치: `python -m pip install -U "funasr==1.3.30"`. [Release →](https://github.com/modelscope/FunASR/releases/tag/v1.3.30)
@@ -107,7 +108,7 @@ Whisper는 단일 모델이지만, **FunASR는 툴킷**입니다. 용도에 맞�
 - 2026/07/24: **v1.3.27 PyPI 공개** — OpenAI 호환 서버가 `verbose_json`에 SenseVoice 감지 언어를 반환하고, vLLM fallback 후에는 캐시된 Fun-ASR-Nano `AutoModel`을 재사용합니다. vLLM/VAD 초기화와 fallback이 모두 실패하면 반쯤 초기화된 상태를 남기지 않아 이후 요청에서 다시 시도할 수 있습니다. 설치: `python -m pip install -U "funasr==1.3.27"`. [Release →](https://github.com/modelscope/FunASR/releases/tag/v1.3.27)
 - 2026/07/23: **v1.3.26 PyPI 공개** — `funasr-server --model fun-asr-nano --hub ms`가 vLLM 경로와 AutoModel fallback 모두에서 ModelScope hub 선택을 존중합니다. 설치: `python -m pip install -U "funasr==1.3.26"`. [Release →](https://github.com/modelscope/FunASR/releases/tag/v1.3.26)
 - 2026/07/23: **llama.cpp runtime v0.1.9** — Windows Vulkan용 `funasr-llamacpp-windows-x64-vulkan.zip`을 추가했습니다. 최신 AMD, Intel 또는 NVIDIA Vulkan 드라이버에서 SenseVoiceSmall을 독립 실행할 수 있습니다. Linux Vulkan, Windows CUDA, CPU/AVX2, Linux arm64, macOS arm64 패키지도 계속 제공합니다. [Release →](https://github.com/modelscope/FunASR/releases/tag/runtime-llamacpp-v0.1.9)
-- 2026/07/22: **llama.cpp runtime v0.1.8** — Linux Vulkan tarball과 Windows CUDA zip을 포함한 CPU/엣지용 GGUF 런타임입니다. 다운로드와 빠른 시작: [funasr.com/llama-cpp](https://www.funasr.com/llama-cpp.html) · [Release →](https://github.com/modelscope/FunASR/releases/tag/runtime-llamacpp-v0.1.8)
+- 2026/07/22: **llama.cpp runtime v0.1.8** — Linux Vulkan tarball과 Windows CUDA zip을 포함한 CPU/엣지용 GGUF 런타임입니다. 현재 다운로드와 빠른 시작: [funasr.com/deploy/llama-cpp](https://www.funasr.com/en/deploy/llama-cpp.html) · [Release →](https://github.com/modelscope/FunASR/releases/tag/runtime-llamacpp-v0.1.8)
 - 2026/05/24: **v1.3.3** — `funasr-server` CLI, OpenAI 호환 API, MCP 서버. `pip install --upgrade funasr`
 - 2026/05/20: Qwen3-ASR (0.6B/1.7B) 추가 — 52개 언어 지원.
 - 2026/05/20: GLM-ASR-Nano (1.5B) 추가 — 17개 언어, 방언 지원.
@@ -153,7 +154,7 @@ funasr-server --device cuda
 docker pull registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-online-cpu-0.1.12
 ```
 
-CPU/엣지에서 Python 없이 오프라인 ASR만 필요하다면 llama.cpp / GGUF 런타임을 사용할 수 있습니다: [funasr.com/llama-cpp](https://www.funasr.com/llama-cpp.html) · [Fun-ASR-Nano-GGUF](https://huggingface.co/FunAudioLLM/Fun-ASR-Nano-GGUF) · [SenseVoiceSmall-GGUF](https://huggingface.co/FunAudioLLM/SenseVoiceSmall-GGUF).
+CPU/엣지에서 Python 없이 오프라인 ASR만 필요하다면 llama.cpp / GGUF 런타임을 사용할 수 있습니다: [funasr.com/deploy/llama-cpp](https://www.funasr.com/en/deploy/llama-cpp.html) · [Fun-ASR-Nano-GGUF](https://huggingface.co/FunAudioLLM/Fun-ASR-Nano-GGUF) · [SenseVoiceSmall-GGUF](https://huggingface.co/FunAudioLLM/SenseVoiceSmall-GGUF).
 
 [Colab quickstart →](./examples/colab/README_ko.md) · [OpenAI API example →](./examples/openai_api/README_ko.md) · [Client recipes →](./examples/openai_api/CLIENTS.md) · [Workflow recipes →](./examples/openai_api/WORKFLOWS.md) · [Postman collection →](./examples/openai_api/POSTMAN.md) · [OpenAPI spec →](./examples/openai_api/OPENAPI.md) · [Security guide →](./examples/openai_api/SECURITY.md) · [Deployment matrix →](./docs/deployment_matrix_ko.md) · [배포 문서 →](./runtime/readme.md) · [Agent 연동 →](https://modelscope.github.io/FunASR/agent.html)
 
