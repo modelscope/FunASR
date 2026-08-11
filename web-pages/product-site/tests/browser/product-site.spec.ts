@@ -94,6 +94,45 @@ for (const viewport of [
   { name: 'mobile', width: 390, height: 844 },
   { name: 'desktop', width: 1440, height: 900 },
 ]) {
+  test(`llama.cpp v0.2.0 download matrix is stable at ${viewport.name}`, async ({ page }, testInfo) => {
+    await page.setViewportSize(viewport);
+    await page.goto('/deploy/llama-cpp.html');
+
+    const section = page.locator('[data-section="downloads"]');
+    await expect(section.locator('[data-download-asset]')).toHaveCount(9);
+    await expect(section.locator('a[href*="runtime-llamacpp-v0.2.0"]')).toHaveCount(9);
+    await expect(page.getByText('Windows AMD Vulkan', { exact: false }).first()).toBeVisible();
+
+    await section.evaluate((node) => node.scrollIntoView({ block: 'start' }));
+
+    const layout = await page.evaluate(() => {
+      const tableWrap = document.querySelector<HTMLElement>('.download-table');
+      const header = document.querySelector<HTMLElement>('.site-header');
+      const heading = document.querySelector<HTMLElement>('[data-section="downloads"] .section-heading');
+      return {
+        overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+        tableClientWidth: tableWrap?.clientWidth ?? 0,
+        tableScrollWidth: tableWrap?.scrollWidth ?? 0,
+        headerBottom: header?.getBoundingClientRect().bottom ?? 0,
+        headingTop: heading?.getBoundingClientRect().top ?? 0,
+      };
+    });
+    expect(layout.overflow).toBeLessThanOrEqual(1);
+    expect(layout.tableClientWidth).toBeGreaterThan(0);
+    expect(layout.tableScrollWidth).toBeGreaterThanOrEqual(layout.tableClientWidth);
+    expect(layout.headingTop).toBeGreaterThanOrEqual(layout.headerBottom + 8);
+
+    await page.screenshot({
+      path: testInfo.outputPath(`llama-cpp-downloads-${viewport.name}.png`),
+      fullPage: true,
+    });
+  });
+}
+
+for (const viewport of [
+  { name: 'mobile', width: 390, height: 844 },
+  { name: 'desktop', width: 1440, height: 900 },
+]) {
   test(`SenseVoice TensorRT deployment is stable at ${viewport.name}`, async ({ page }, testInfo) => {
     await page.setViewportSize(viewport);
     await page.goto('/deploy/sensevoice-tensorrt.html');
