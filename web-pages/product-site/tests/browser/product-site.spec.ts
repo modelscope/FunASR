@@ -160,6 +160,40 @@ for (const viewport of [
   });
 }
 
+for (const viewport of [
+  { name: 'mobile', width: 390, height: 844 },
+  { name: 'desktop', width: 1440, height: 900 },
+]) {
+  test(`audio.cpp deployment is stable at ${viewport.name}`, async ({ page }, testInfo) => {
+    await page.setViewportSize(viewport);
+    await page.goto('/deploy/audio-cpp.html');
+
+    await expect(page.locator('h1')).toHaveText('audio.cpp 原生 Fun-ASR-Nano 与 SenseVoice');
+    await expect(page.getByText('pinned SenseVoice GGUF package', { exact: false })).toBeVisible();
+    await expect(page.locator('a[href="https://github.com/0xShug0/audio.cpp/pull/219"]')).toBeVisible();
+
+    const layout = await page.evaluate(() => ({
+      overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+      evidenceWidths: [...document.querySelectorAll<HTMLElement>('.evidence-list li')].map((node) => ({
+        client: node.clientWidth,
+        scroll: node.scrollWidth,
+      })),
+      commandWidths: [...document.querySelectorAll<HTMLElement>('.command-block')].map((node) => ({
+        parent: node.parentElement?.getBoundingClientRect().width ?? 0,
+        width: node.getBoundingClientRect().width,
+      })),
+    }));
+    expect(layout.overflow).toBeLessThanOrEqual(1);
+    expect(layout.evidenceWidths.every(({ client, scroll }) => scroll <= client + 1)).toBe(true);
+    expect(layout.commandWidths.every(({ parent, width }) => width <= parent + 1)).toBe(true);
+
+    await page.screenshot({
+      path: testInfo.outputPath(`audio-cpp-${viewport.name}.png`),
+      fullPage: true,
+    });
+  });
+}
+
 test('reduced motion disables smooth scrolling', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/en/');

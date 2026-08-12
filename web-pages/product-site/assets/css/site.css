@@ -989,6 +989,11 @@ td a {
 .evidence-list a {
   color: var(--blue-dark);
   font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.evidence-list li {
+  min-width: 0;
 }
 
 .benchmark-intro > div {
