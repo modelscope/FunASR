@@ -23,6 +23,7 @@ def entries():
     [
         ('batch', 'nvidia-gpu', 'throughput', 'vllm'),
         ('edge', 'cpu', 'portability', 'llama-cpp'),
+        ('realtime', 'cpu', 'compatibility', 'sensevoice-native-server'),
         ('private-api', 'kubernetes', 'compatibility', 'containers'),
         ('realtime', 'nvidia-gpu', 'latency', 'realtime'),
     ],

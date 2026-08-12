@@ -237,6 +237,95 @@
       }
     },
     {
+      "id": "sensevoice-native-server",
+      "routes": {"zh": "/deploy/sensevoice-native-server.html", "en": "/en/deploy/sensevoice-native-server.html"},
+      "maturity": "production-verified",
+      "selector_rank": 20.5,
+      "workloads": ["private-api", "realtime", "edge"],
+      "hardware": ["cpu", "nvidia-gpu"],
+      "priorities": ["compatibility", "portability"],
+      "models": ["SenseVoiceSmall-GGUF", "FSMN-VAD-GGUF"],
+      "operating_systems": ["Linux"],
+      "interfaces": ["OpenAI-compatible HTTP", "OpenAI realtime WebSocket", "WS /v1/realtime?intent=transcription", "SSE", "SRT/VTT"],
+      "tested": {
+        "funasr": "SenseVoice main@b054623c",
+        "runtime": "sensevoice-server@558bd67c",
+        "verified": "2026-08-13"
+      },
+      "commands": {
+        "install": [
+          "git clone https://github.com/QwenAudio/SenseVoice.git && cd SenseVoice",
+          "git checkout b054623cca8f015b73ec471dce4f473ac47413da",
+          "python3 -m pip install -U huggingface_hub",
+          "bash runtime/llama.cpp/download-funasr-model.sh sensevoice model",
+          "cmake -S runtime/llama.cpp -B runtime/llama.cpp/build -DCMAKE_BUILD_TYPE=Release",
+          "cmake --build runtime/llama.cpp/build --target sensevoice-server -j"
+        ],
+        "launch": [
+          "runtime/llama.cpp/build/bin/sensevoice-server -m model/sensevoice-small-q8.gguf -vad model/fsmn-vad.gguf --threads 8 --max-connections 4 --max-audio-seconds 300 127.0.0.1 8040"
+        ],
+        "health": [
+          "curl -fsS http://127.0.0.1:8040/health",
+          "curl -fsS http://127.0.0.1:8040/v1/models"
+        ],
+        "smoke": [
+          "curl -fsS http://127.0.0.1:8040/v1/audio/transcriptions -F file=@speech.wav",
+          "curl -fsS http://127.0.0.1:8040/v1/audio/transcriptions -F file=@speech.wav -F response_format=vtt | tee transcript.vtt && grep -q WEBVTT transcript.vtt",
+          "curl -fsSN http://127.0.0.1:8040/v1/audio/transcriptions -F file=@speech.wav -F stream=true | grep -q transcript.text.done",
+          "python3 runtime/llama.cpp/tests/stream_client.py 127.0.0.1 8040 speech_16k.wav 200"
+        ]
+      },
+      "evidence": [
+        {
+          "label": "merged SenseVoice server contribution",
+          "url": "https://github.com/QwenAudio/SenseVoice/pull/341"
+        },
+        {
+          "label": "source and operating guide at the verified merge",
+          "url": "https://github.com/QwenAudio/SenseVoice/blob/b054623cca8f015b73ec471dce4f473ac47413da/runtime/llama.cpp/sensevoice-server/README.md"
+        },
+        {
+          "label": "pull-request build, unit, and contract workflow",
+          "url": "https://github.com/QwenAudio/SenseVoice/actions/runs/31633373807"
+        },
+        {
+          "label": "main-branch build, unit, and contract workflow",
+          "url": "https://github.com/QwenAudio/SenseVoice/actions/runs/31633730096"
+        },
+        {
+          "label": "server regression and contract tests",
+          "url": "https://github.com/QwenAudio/SenseVoice/tree/b054623cca8f015b73ec471dce4f473ac47413da/runtime/llama.cpp/tests"
+        }
+      ],
+      "benchmarks": [],
+      "translations": {
+        "zh": {
+          "name": "SenseVoice 原生 OpenAI 实时服务",
+          "summary": "用一个无 Python 运行时的 C++ 二进制提供 SenseVoice REST、SSE、SRT/VTT 与 OpenAI Realtime WebSocket 转写。",
+          "fit": ["本地或内网 OpenAI 兼容语音接口", "CPU 优先、可选 CUDA 的低依赖部署", "需要文件转写、流式 partial/final 与服务端 VAD"],
+          "not_fit": ["需要预编译跨平台发布包", "需要多租户认证、计费或持久任务队列", "没有在目标硬件完成容量测试就直接暴露公网"],
+          "selection_reason": "原生 GGUF 服务把 REST 文件转写和实时 WebSocket 放进同一个受资源上限保护的二进制，适合私有兼容接口和边缘流式场景。",
+          "primary_limitation": "当前官方验证覆盖 Linux 源码构建；服务不内置生产认证、TLS、多租户配额或持久队列，必须由网关和基础设施补齐。",
+          "status_label": "生产验证",
+          "operations": ["固定 merge commit、SenseVoice GGUF 与 FSMN-VAD GGUF", "显式设置连接上限、单请求音频上限和读取超时", "发布前分别压测 REST、SSE 和 WebSocket，并保留旧二进制回滚"],
+          "security": ["默认绑定 127.0.0.1 或可信内网", "在反向代理实施 TLS、认证、MIME、请求体大小、速率和并发限制", "只加载经过来源与摘要校验的 GGUF"],
+          "troubleshooting": ["先用 CPU、已知 16 kHz WAV 和 REST JSON 路径验证", "确认模型文件名为 sensevoice-small-q8.gguf 与 fsmn-vad.gguf", "WebSocket 客户端发送 16 kHz 单声道 PCM16 的 base64 chunk"]
+        },
+        "en": {
+          "name": "SenseVoice native OpenAI realtime server",
+          "summary": "Use one C++ binary with no Python runtime to serve SenseVoice over REST, SSE, SRT/VTT, and OpenAI realtime WebSocket transcription.",
+          "fit": ["A local or private OpenAI-compatible speech endpoint", "CPU-first deployment with optional CUDA and few runtime dependencies", "File transcription, streaming partial/final results, and server-side VAD"],
+          "not_fit": ["Prebuilt cross-platform release packages are required", "Built-in multi-tenant authentication, billing, or durable job queues are required", "Public exposure before capacity testing on the target hardware"],
+          "selection_reason": "The native GGUF server combines REST file transcription and realtime WebSocket in one resource-bounded binary for private compatible APIs and edge streaming.",
+          "primary_limitation": "Official verification currently covers Linux source builds; the server does not include production authentication, TLS, tenant quotas, or durable queues, so provide them at the gateway and infrastructure layers.",
+          "status_label": "Production verified",
+          "operations": ["Pin the merge commit plus the SenseVoice and FSMN-VAD GGUF files", "Set the connection limit, per-request audio limit, and read timeout explicitly", "Load-test REST, SSE, and WebSocket separately before rollout, and retain the previous binary for rollback"],
+          "security": ["Bind to 127.0.0.1 or a trusted private network by default", "Enforce TLS, authentication, MIME, request-body size, rate, and concurrency at the reverse proxy", "Load only GGUF files with verified provenance and digests"],
+          "troubleshooting": ["Validate CPU, a known 16 kHz WAV, and the REST JSON path first", "Confirm the model files are named sensevoice-small-q8.gguf and fsmn-vad.gguf", "Send base64 chunks of 16 kHz mono PCM16 from WebSocket clients"]
+        }
+      }
+    },
+    {
       "id": "audio-cpp",
       "routes": {"zh": "/deploy/audio-cpp.html", "en": "/en/deploy/audio-cpp.html"},
       "maturity": "community-verified",

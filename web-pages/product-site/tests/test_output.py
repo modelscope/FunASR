@@ -77,6 +77,30 @@ def test_llama_cpp_pages_render_v020_download_matrix(built_site, relative, bound
     assert boundary in soup.get_text(' ', strip=True)
 
 
+@pytest.mark.parametrize(
+    ('relative', 'language_marker'),
+    (
+        ('deploy/sensevoice-native-server.html', '连接上限'),
+        ('en/deploy/sensevoice-native-server.html', 'connection limit'),
+    ),
+)
+def test_sensevoice_native_server_pages_render_operational_contract(
+    built_site, relative, language_marker
+):
+    soup = read_soup(built_site / relative)
+    text = soup.get_text(' ', strip=True)
+
+    for marker in (
+        'sensevoice-server',
+        '/v1/audio/transcriptions',
+        '/v1/realtime?intent=transcription',
+        '--max-connections',
+        '--max-audio-seconds',
+        language_marker,
+    ):
+        assert marker in text
+
+
 def test_benchmark_rows_have_complete_conditions(built_site):
     registry = load_registry(SITE_ROOT / 'data' / 'deployments.json')
     records = [record for entry in registry['deployments'] for record in entry['benchmarks']]

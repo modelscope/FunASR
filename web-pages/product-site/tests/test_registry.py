@@ -18,6 +18,7 @@ EXPECTED_IDS = {
     'vllm',
     'sensevoice-tensorrt',
     'llama-cpp',
+    'sensevoice-native-server',
     'audio-cpp',
     'openai-api',
     'realtime',
@@ -183,6 +184,54 @@ def test_llama_cpp_contract_tracks_v020_release_assets(valid_registry):
     )
     assert 'sensevoice-small-f16.gguf' in entry['commands']['launch'][0]
     assert 'AMD' in entry['translations']['en']['primary_limitation']
+
+
+def test_sensevoice_native_server_contract_tracks_merged_runtime(valid_registry):
+    entry = next(
+        item for item in valid_registry['deployments']
+        if item['id'] == 'sensevoice-native-server'
+    )
+    llama_cpp = next(item for item in valid_registry['deployments'] if item['id'] == 'llama-cpp')
+    audio_cpp = next(item for item in valid_registry['deployments'] if item['id'] == 'audio-cpp')
+
+    assert valid_registry['verified'] == '2026-08-13'
+    assert entry['maturity'] == 'production-verified'
+    assert llama_cpp['selector_rank'] < entry['selector_rank'] < audio_cpp['selector_rank']
+    assert entry['tested'] == {
+        'funasr': 'SenseVoice main@b054623c',
+        'runtime': 'sensevoice-server@558bd67c',
+        'verified': '2026-08-13',
+    }
+    assert entry['models'] == ['SenseVoiceSmall-GGUF', 'FSMN-VAD-GGUF']
+    assert entry['operating_systems'] == ['Linux']
+    assert {
+        'OpenAI-compatible HTTP',
+        'OpenAI realtime WebSocket',
+        'SSE',
+        'SRT/VTT',
+    } <= set(entry['interfaces'])
+    assert any(
+        'git checkout b054623cca8f015b73ec471dce4f473ac47413da' in command
+        for command in entry['commands']['install']
+    )
+    assert any(
+        'download-funasr-model.sh sensevoice' in command
+        for command in entry['commands']['install']
+    )
+    launch = '\n'.join(entry['commands']['launch'])
+    for marker in ('sensevoice-server', '--max-connections', '--max-audio-seconds'):
+        assert marker in launch
+    smoke = '\n'.join(entry['commands']['smoke'])
+    for marker in ('/v1/audio/transcriptions', 'response_format=vtt', 'stream_client.py'):
+        assert marker in smoke
+    assert any('/health' in command for command in entry['commands']['health'])
+    assert any('/v1/models' in command for command in entry['commands']['health'])
+    evidence_urls = {item['url'] for item in entry['evidence']}
+    assert 'https://github.com/QwenAudio/SenseVoice/pull/341' in evidence_urls
+    assert 'https://github.com/QwenAudio/SenseVoice/actions/runs/31633730096' in evidence_urls
+    limitation = entry['translations']['en']['primary_limitation'].lower()
+    assert 'linux' in limitation
+    assert 'authentication' in limitation
 
 
 def test_download_assets_require_https_and_sha256(valid_registry):
