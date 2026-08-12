@@ -45,7 +45,7 @@ def test_language_pairs_have_identical_fields(valid_registry):
     assert all(set(zh) == set(en) for zh, en in deployment_pairs(valid_registry))
 
 
-def test_audio_cpp_contract_tracks_stable_nano_and_candidate_sensevoice(valid_registry):
+def test_audio_cpp_contract_tracks_mainline_nano_and_sensevoice(valid_registry):
     entry = next(item for item in valid_registry['deployments'] if item['id'] == 'audio-cpp')
     llama_cpp = next(item for item in valid_registry['deployments'] if item['id'] == 'llama-cpp')
 
@@ -54,13 +54,13 @@ def test_audio_cpp_contract_tracks_stable_nano_and_candidate_sensevoice(valid_re
     assert entry['selector_rank'] > llama_cpp['selector_rank']
     assert entry['tested'] == {
         'funasr': 'Fun-ASR-Nano-2512 + SenseVoice-Small',
-        'runtime': 'audio.cpp@1778b23a + SenseVoice candidate@b748ca5',
+        'runtime': 'audio.cpp main@979e070f',
         'verified': '2026-08-13',
     }
     assert entry['models'] == ['Fun-ASR-Nano-2512', 'SenseVoice-Small']
     assert 'Buffered streaming CLI/SSE' in entry['interfaces']
     assert any(
-        'git checkout b748ca509adc16c15aff44f76456fd47b257c933' in command
+        'git checkout 979e070fc130bd499ad3fabeefc42b3884fff23a' in command
         for command in entry['commands']['install']
     )
     assert any(
@@ -84,6 +84,11 @@ def test_audio_cpp_contract_tracks_stable_nano_and_candidate_sensevoice(valid_re
     assert any('1778b23a5f6a4951c788e4bb0e7baa04f20012a2' in item['url'] for item in entry['evidence'])
     assert any('ce72677f84900f0dc57f498ace253bfb3c9155b6' in item['url'] for item in entry['evidence'])
     assert any('/pull/219' in item['url'] for item in entry['evidence'])
+    assert any('/pull/221' in item['url'] for item in entry['evidence'])
+    assert any(
+        '/commit/979e070fc130bd499ad3fabeefc42b3884fff23a' in item['url']
+        for item in entry['evidence']
+    )
     assert any(
         '5c3fcfe748a8714216bc135476d5863084fddb72' in item['url']
         for item in entry['evidence']
@@ -98,8 +103,11 @@ def test_audio_cpp_contract_tracks_stable_nano_and_candidate_sensevoice(valid_re
         in benchmark['result']
         for benchmark in entry['benchmarks']
     )
-    assert 'candidate' in entry['translations']['en']['primary_limitation'].lower()
-    assert 'timestamp' in entry['translations']['en']['primary_limitation'].lower()
+    limitation = entry['translations']['en']['primary_limitation'].lower()
+    assert 'main' in limitation
+    assert 'tagged release' in limitation
+    assert 'candidate' not in limitation
+    assert 'timestamp' in limitation
 
 
 def test_sensevoice_tensorrt_contract_tracks_merged_native_runtime(valid_registry):
