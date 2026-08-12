@@ -336,11 +336,11 @@
       "models": ["Fun-ASR-Nano-2512", "SenseVoice-Small"],
       "operating_systems": ["Linux", "macOS", "Windows"],
       "interfaces": ["CLI", "OpenAI-compatible HTTP", "Buffered streaming CLI/SSE"],
-      "tested": {"funasr": "Fun-ASR-Nano-2512 + SenseVoice-Small", "runtime": "audio.cpp@1778b23a + SenseVoice candidate@b748ca5", "verified": "2026-08-13"},
+      "tested": {"funasr": "Fun-ASR-Nano-2512 + SenseVoice-Small", "runtime": "audio.cpp main@979e070f", "verified": "2026-08-13"},
       "commands": {
         "install": [
           "git clone https://github.com/0xShug0/audio.cpp.git && cd audio.cpp",
-          "git checkout b748ca509adc16c15aff44f76456fd47b257c933",
+          "git checkout 979e070fc130bd499ad3fabeefc42b3884fff23a",
           "bash scripts/build_linux.sh --backend cpu --model-set custom --models fun_asr_nano,sense_asr --target audiocpp_cli --target audiocpp_server",
           "python3 tools/model_manager_v2.py install fun_asr_nano",
           "python3 tools/model_manager_v2.py install sensevoice_small_q8"
@@ -365,7 +365,9 @@
         {"label": "audio.cpp Fun-ASR-Nano guide", "url": "https://github.com/0xShug0/audio.cpp/blob/1778b23a5f6a4951c788e4bb0e7baa04f20012a2/docs/models/fun_asr_nano.md"},
         {"label": "merged implementation", "url": "https://github.com/0xShug0/audio.cpp/pull/155"},
         {"label": "pinned Fun-ASR-Nano GGUF package", "url": "https://huggingface.co/FunAudioLLM/Fun-ASR-Nano-2512-GGUF/tree/ce72677f84900f0dc57f498ace253bfb3c9155b6"},
-        {"label": "SenseVoice candidate implementation (6/6 CI)", "url": "https://github.com/0xShug0/audio.cpp/pull/219"},
+        {"label": "merged SenseVoice implementation (6/6 CI)", "url": "https://github.com/0xShug0/audio.cpp/pull/219"},
+        {"label": "SenseVoice promotion to main", "url": "https://github.com/0xShug0/audio.cpp/pull/221"},
+        {"label": "pinned mainline integration commit", "url": "https://github.com/0xShug0/audio.cpp/commit/979e070fc130bd499ad3fabeefc42b3884fff23a"},
         {"label": "pinned SenseVoice GGUF package (SHA-256 4dedf169f625437fb336f2959674f399819729a765e184128c0e25a6e16ff0ec)", "url": "https://huggingface.co/FunAudioLLM/SenseVoiceSmall-GGUF-audiocpp/tree/5c3fcfe748a8714216bc135476d5863084fddb72"}
       ],
       "benchmarks": [
@@ -383,16 +385,16 @@
           "verified": "2026-07-29"
         },
         {
-          "model": "SenseVoice-Small Q8_0 GGUF candidate",
-          "runtime": "audio.cpp native sense_asr candidate b748ca5",
+          "model": "SenseVoice-Small Q8_0 GGUF",
+          "runtime": "audio.cpp native sense_asr main@979e070f",
           "hardware": "CPU; validation host details are not a cross-hardware benchmark contract",
           "workload": "Offline Chinese transcription plus buffered streaming partials",
           "audio": "Known 16 kHz reference WAV and PCM stream",
           "settings": "Standalone schema-v1 Q8_0 GGUF; CPU backend; two-second streaming windows during validation",
           "timing_scope": "Functional parity and loader validation; no capacity claim",
           "result": "919 tensors loaded without sidecar overrides; transcript 开饭时间早上9点至下午5点。; GGUF SHA-256 4dedf169f625437fb336f2959674f399819729a765e184128c0e25a6e16ff0ec",
-          "qualification": "Candidate PR with all six official CI jobs passing; pin the exact commit until upstream merges it.",
-          "source": "https://github.com/0xShug0/audio.cpp/pull/219",
+          "qualification": "Merged into audio.cpp main with all six contribution CI jobs passing, but not yet included in a tagged release; pin the exact main commit.",
+          "source": "https://github.com/0xShug0/audio.cpp/commit/979e070fc130bd499ad3fabeefc42b3884fff23a",
           "verified": "2026-08-13"
         }
       ],
@@ -401,11 +403,11 @@
           "name": "audio.cpp 原生 Fun-ASR-Nano 与 SenseVoice",
           "summary": "用原生 C++ / GGML 在 CPU 或 GPU 上运行 Fun-ASR-Nano 与 SenseVoice Q8，并提供离线 CLI、兼容 OpenAI 的本地接口和 SenseVoice 缓冲流式结果。",
           "fit": ["不希望安装 Python 推理环境", "桌面、边缘、离线批量与低依赖私有部署", "需要兼容 OpenAI 的本地音频接口或 SenseVoice 多语言流式 partial"],
-          "not_fit": ["需要词级时间戳或严格低延迟在线流式", "不接受固定候选提交的生产环境", "尚未在目标硬件完成容量与准确率复测的公网服务"],
-          "selection_reason": "稳定的 Fun-ASR-Nano 路径与候选 SenseVoice 路径共用原生 GGML、Q8 模型及 CLI/HTTP 接口，适合低依赖部署。",
-          "primary_limitation": "Fun-ASR-Nano 已合并稳定；SenseVoice 仍是固定到 b748ca5 的候选 PR，虽已通过 6/6 CI，但合并前不应跟随浮动分支；当前两条路径都不提供词级 timestamps。",
+          "not_fit": ["需要词级时间戳或严格低延迟在线流式", "只允许使用正式 tagged release 的生产环境", "尚未在目标硬件完成容量与准确率复测的公网服务"],
+          "selection_reason": "Fun-ASR-Nano 与 SenseVoice 已进入 audio.cpp 主线，共用原生 GGML、Q8 模型及 CLI/HTTP 接口，适合低依赖部署。",
+          "primary_limitation": "SenseVoice 已合并到 audio.cpp main@979e070f，但尚未进入 tagged release；正式包发布前应固定该主线提交，且当前两条路径都不提供词级 timestamps。",
           "status_label": "社区验证",
-          "operations": ["分别固定稳定 Nano 提交、SenseVoice 候选提交与 GGUF revision", "先用已知 WAV 核对两种模型的 transcript 再接业务流量", "分别记录冷启动、预热 RTF、内存、流式窗口与并发队列"],
+          "operations": ["固定 audio.cpp 主线提交与两份 GGUF revision", "先用已知 WAV 核对两种模型的 transcript 再接业务流量", "分别记录冷启动、预热 RTF、内存、流式窗口与并发队列"],
           "security": ["服务默认绑定 127.0.0.1 或可信内网", "在反向代理限制上传大小、MIME、认证与并发", "只加载经过 SHA-256 校验的 GGUF 和配置"],
           "troubleshooting": ["先用 CPU + Q8_0 路径排除 GPU 环境问题", "构建 backend 必须与运行参数一致", "SenseVoice 输入异常时先核对 schema-v1 GGUF revision、WAV 或 16 kHz 单声道 PCM"]
         },
@@ -413,11 +415,11 @@
           "name": "audio.cpp native Fun-ASR-Nano and SenseVoice",
           "summary": "Run Fun-ASR-Nano and SenseVoice Q8 with native C++ and GGML on CPU or GPU, using offline CLI, a local OpenAI-compatible API, and buffered SenseVoice streaming results.",
           "fit": ["No Python inference environment", "Desktop, edge, offline batch, and low-dependency private deployment", "A local OpenAI-compatible endpoint or multilingual SenseVoice streaming partials are required"],
-          "not_fit": ["Word-level timestamps or strict low-latency online streaming", "Production environments that cannot pin a candidate commit", "Internet-facing service before capacity and accuracy tests on target hardware"],
-          "selection_reason": "The stable Fun-ASR-Nano path and candidate SenseVoice path share native GGML, Q8 weights, and CLI/HTTP surfaces for low-dependency deployment.",
-          "primary_limitation": "Fun-ASR-Nano is merged and stable; SenseVoice remains a candidate pinned to b748ca5. Its 6/6 CI is green, but do not track a floating branch before merge. Neither path currently provides word-level timestamps.",
+          "not_fit": ["Word-level timestamps or strict low-latency online streaming", "Production environments restricted to tagged releases", "Internet-facing service before capacity and accuracy tests on target hardware"],
+          "selection_reason": "Fun-ASR-Nano and SenseVoice are both on the audio.cpp main branch and share native GGML, Q8 weights, and CLI/HTTP surfaces for low-dependency deployment.",
+          "primary_limitation": "SenseVoice is merged into audio.cpp main@979e070f but is not yet in a tagged release. Pin that main commit until a release is published. Neither path currently provides word-level timestamps.",
           "status_label": "Community verified",
-          "operations": ["Pin the stable Nano commit, SenseVoice candidate commit, and both GGUF revisions", "Verify known WAV transcripts with both models before business traffic", "Measure cold start, warm RTF, memory, streaming windows, and concurrent queueing separately"],
+          "operations": ["Pin the audio.cpp main commit and both GGUF revisions", "Verify known WAV transcripts with both models before business traffic", "Measure cold start, warm RTF, memory, streaming windows, and concurrent queueing separately"],
           "security": ["Bind the service to 127.0.0.1 or a trusted private network", "Enforce upload size, MIME, authentication, and concurrency at the proxy", "Load only GGUF and configuration files verified with SHA-256"],
           "troubleshooting": ["Start with CPU and Q8_0 to isolate GPU setup", "Match the compiled backend to the runtime argument", "For SenseVoice input failures, verify the schema-v1 GGUF revision plus WAV or 16 kHz mono PCM"]
         }
