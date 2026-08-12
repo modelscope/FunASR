@@ -44,26 +44,60 @@ def test_language_pairs_have_identical_fields(valid_registry):
     assert all(set(zh) == set(en) for zh, en in deployment_pairs(valid_registry))
 
 
-def test_audio_cpp_contract_tracks_merged_offline_runtime(valid_registry):
+def test_audio_cpp_contract_tracks_stable_nano_and_candidate_sensevoice(valid_registry):
     entry = next(item for item in valid_registry['deployments'] if item['id'] == 'audio-cpp')
     llama_cpp = next(item for item in valid_registry['deployments'] if item['id'] == 'llama-cpp')
 
+    assert valid_registry['verified'] == '2026-08-13'
     assert entry['maturity'] == 'community-verified'
     assert entry['selector_rank'] > llama_cpp['selector_rank']
     assert entry['tested'] == {
-        'funasr': 'Fun-ASR-Nano-2512',
-        'runtime': 'audio.cpp@1778b23a',
-        'verified': '2026-07-30',
+        'funasr': 'Fun-ASR-Nano-2512 + SenseVoice-Small',
+        'runtime': 'audio.cpp@1778b23a + SenseVoice candidate@b748ca5',
+        'verified': '2026-08-13',
     }
-    assert entry['models'] == ['Fun-ASR-Nano-2512']
-    assert any('model_manager_v2.py install fun_asr_nano' in command for command in entry['commands']['install'])
+    assert entry['models'] == ['Fun-ASR-Nano-2512', 'SenseVoice-Small']
+    assert 'Buffered streaming CLI/SSE' in entry['interfaces']
+    assert any(
+        'git checkout b748ca509adc16c15aff44f76456fd47b257c933' in command
+        for command in entry['commands']['install']
+    )
+    assert any(
+        'model_manager_v2.py install fun_asr_nano' in command
+        for command in entry['commands']['install']
+    )
+    assert any(
+        'model_manager_v2.py install sensevoice_small_q8' in command
+        for command in entry['commands']['install']
+    )
     build_command = next(command for command in entry['commands']['install'] if '--model-set custom' in command)
     assert build_command.startswith('bash scripts/build_linux.sh ')
+    assert '--models fun_asr_nano,sense_asr' in build_command
+    assert any('--family sense_asr' in command for command in entry['commands']['launch'])
+    assert any(
+        '--mode streaming' in command and 'audio_chunk_duration_sec=5' in command
+        for command in entry['commands']['launch']
+    )
     assert any('/v1/audio/transcriptions' in command for command in entry['commands']['smoke'])
     assert any('/health' in command for command in entry['commands']['health'])
     assert any('1778b23a5f6a4951c788e4bb0e7baa04f20012a2' in item['url'] for item in entry['evidence'])
     assert any('ce72677f84900f0dc57f498ace253bfb3c9155b6' in item['url'] for item in entry['evidence'])
-    assert 'streaming' in entry['translations']['en']['primary_limitation'].lower()
+    assert any('/pull/219' in item['url'] for item in entry['evidence'])
+    assert any(
+        '5c3fcfe748a8714216bc135476d5863084fddb72' in item['url']
+        for item in entry['evidence']
+    )
+    assert any(
+        '4dedf169f625437fb336f2959674f399819729a765e184128c0e25a6e16ff0ec'
+        in item['label']
+        for item in entry['evidence']
+    )
+    assert any(
+        '4dedf169f625437fb336f2959674f399819729a765e184128c0e25a6e16ff0ec'
+        in benchmark['result']
+        for benchmark in entry['benchmarks']
+    )
+    assert 'candidate' in entry['translations']['en']['primary_limitation'].lower()
     assert 'timestamp' in entry['translations']['en']['primary_limitation'].lower()
 
 
