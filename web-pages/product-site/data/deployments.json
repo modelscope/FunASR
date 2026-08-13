@@ -10,59 +10,78 @@
       "workloads": ["batch", "private-api"],
       "hardware": ["nvidia-gpu", "kubernetes"],
       "priorities": ["throughput", "latency"],
-      "models": ["Fun-ASR-Nano-2512"],
+      "models": ["Fun-ASR-Nano-2512 (community vLLM conversion)"],
       "operating_systems": ["Linux"],
-      "interfaces": ["Python", "HTTP REST", "OpenAI-compatible HTTP", "WebSocket"],
-      "tested": {"funasr": "1.3.29", "runtime": "vLLM 0.19.1 guide", "verified": "2026-07-26"},
+      "interfaces": ["OpenAI-compatible HTTP"],
+      "tested": {"funasr": "Fun-ASR-Nano-2512 conversion@e718b36e", "runtime": "vLLM 0.27.1+cu129 / Torch 2.13.0+cu129", "verified": "2026-08-13"},
       "commands": {
-        "install": ["pip install funasr", "pip install \"vllm==0.19.1\""],
-        "launch": ["CUDA_VISIBLE_DEVICES=0 python examples/industrial_data_pretraining/fun_asr_nano/serve_vllm.py --port 8899 --model FunAudioLLM/Fun-ASR-Nano-2512 --gpu-memory-utilization 0.5"],
-        "health": ["curl -fsS http://localhost:8899/health"],
-        "smoke": ["curl -X POST http://localhost:8899/v1/audio/transcriptions -F file=@audio.wav -F model=fun-asr-nano -F response_format=verbose_json"]
+        "install": [
+          "curl -fL https://github.com/vllm-project/vllm/releases/download/v0.27.1/vllm-0.27.1%2Bcu129-cp38-abi3-manylinux_2_28_x86_64.whl -o vllm-0.27.1+cu129-cp38-abi3-manylinux_2_28_x86_64.whl",
+          "echo \"bf0d52faa2a51e7a01c6856a7a8a2d1307fd0ff711415d34168a67ffac0fa47b  vllm-0.27.1+cu129-cp38-abi3-manylinux_2_28_x86_64.whl\" | sha256sum -c -",
+          "uv venv --python 3.12 .venv && uv pip install --python .venv/bin/python --torch-backend=auto \"vllm[audio] @ file://$PWD/vllm-0.27.1+cu129-cp38-abi3-manylinux_2_28_x86_64.whl\""
+        ],
+        "launch": [
+          "CUDA_VISIBLE_DEVICES=0 .venv/bin/vllm serve allendou/Fun-ASR-Nano-2512-vllm --revision e718b36e2578203ec893e9b488239225f8d668e2 --served-model-name fun-asr-nano --host 127.0.0.1 --port 8899 --dtype float32 --gpu-memory-utilization 0.40 --enforce-eager"
+        ],
+        "health": [
+          "curl -fsS http://127.0.0.1:8899/health",
+          "curl -fsS http://127.0.0.1:8899/v1/models"
+        ],
+        "smoke": [
+          "curl -fL https://huggingface.co/allendou/Fun-ASR-Nano-2512-vllm/resolve/e718b36e2578203ec893e9b488239225f8d668e2/example/zh.mp3 -o zh.mp3 && echo \"0e64de19e4ff9a02e682955c9112f32d2317cfdbb5bc2f3504664044c993f195  zh.mp3\" | sha256sum -c -",
+          "curl -fsS http://127.0.0.1:8899/v1/audio/transcriptions -F file=@zh.mp3 -F model=fun-asr-nano -F language=zh -F response_format=json",
+          "curl -fsS http://127.0.0.1:8899/v1/audio/transcriptions -F file=@zh.mp3 -F model=fun-asr-nano -F language=zh -F 'hotwords=开放时间,开放时间,开放时间' -F response_format=json"
+        ]
       },
       "evidence": [
-        {"label": "vLLM guide", "url": "https://github.com/modelscope/FunASR/blob/main/docs/vllm_guide.md"},
-        {"label": "deployment matrix", "url": "https://github.com/modelscope/FunASR/blob/main/docs/deployment_matrix.md"}
+        {"label": "H100 native FunASR validation record", "url": "https://github.com/modelscope/FunASR/blob/main/docs/vllm_native_funasr_validation.md"},
+        {"label": "vLLM 0.27.1 release and CUDA 12.9 wheel", "url": "https://github.com/vllm-project/vllm/releases/tag/v0.27.1"},
+        {"label": "native FunASR model integration", "url": "https://github.com/vllm-project/vllm/pull/33247"},
+        {"label": "native FunASR hotword support", "url": "https://github.com/vllm-project/vllm/pull/39674"},
+        {"label": "FunASR initialization fix", "url": "https://github.com/vllm-project/vllm/pull/44215"},
+        {"label": "validated community conversion at e718b36e", "url": "https://huggingface.co/allendou/Fun-ASR-Nano-2512-vllm/tree/e718b36e2578203ec893e9b488239225f8d668e2"},
+        {"label": "official FunASR split-engine guide", "url": "https://github.com/modelscope/FunASR/blob/main/docs/vllm_guide.md"},
+        {"label": "FunASR deployment matrix", "url": "https://github.com/modelscope/FunASR/blob/main/docs/deployment_matrix.md"}
       ],
       "benchmarks": [
         {
-          "model": "Fun-ASR-Nano-2512",
-          "runtime": "vLLM batch",
-          "hardware": "GPU model not recorded in the cited public table",
-          "workload": "Offline batch",
-          "audio": "184 long-form files; 11,541 seconds",
-          "settings": "Dynamic VAD; the public table does not record batch size or the full software and hardware stack",
-          "timing_scope": "Offline throughput; the cited table does not state whether warmup, file I/O, and decoding are excluded",
-          "result": "RTFx 340; CER 8.20%",
-          "qualification": "Incomplete hardware and timing record. Use only as public reference evidence, not a capacity promise.",
-          "source": "https://github.com/modelscope/FunASR/blob/main/docs/vllm_guide.md",
-          "verified": "2026-07-26"
+          "model": "allendou/Fun-ASR-Nano-2512-vllm@e718b36e",
+          "runtime": "vLLM 0.27.1+cu129 / Torch 2.13.0+cu129",
+          "hardware": "NVIDIA H100 80GB",
+          "workload": "OpenAI-compatible transcription; Chinese baseline and hotword probes plus two concurrent requests (English and Japanese)",
+          "audio": "Pinned model-repository examples: 6 s Chinese, 8 s English, and 8 s Japanese",
+          "settings": "FP32; eager mode; gpu-memory-utilization 0.40; max model length 40,960; explicit language; warmed server",
+          "timing_scope": "Client wall time after /health became ready; local HTTP and decoding included; cold model download and 20.3 s engine warmup excluded",
+          "result": "Chinese 200 in 0.968 s; repeated hotword corrected 开饭时间 to 开放时间 in 0.214 s; English and Japanese two-request batch completed in 1.123 s wall time",
+          "qualification": "Single-H100 correctness and concurrency probe with a community-converted checkpoint, not an accuracy study or production capacity promise. Revalidate the checkpoint, target GPU, languages, traffic, and hotword policy before rollout.",
+          "source": "https://github.com/modelscope/FunASR/blob/main/docs/vllm_native_funasr_validation.md",
+          "verified": "2026-08-13"
         }
       ],
       "translations": {
         "zh": {
-          "name": "vLLM GPU 高吞吐",
-          "summary": "用 Fun-ASR-Nano 在 NVIDIA GPU 上处理批量文件或提供兼容 OpenAI 的转写接口。",
-          "fit": ["批量录音转写", "需要提高 LLM 解码吞吐", "已有 NVIDIA GPU 服务环境"],
-          "not_fit": ["纯 CPU 或边缘设备", "Paraformer 等非自回归模型", "尚未完成显存与并发压测的公网服务"],
-          "selection_reason": "GPU 批处理和 vLLM 调度适合以吞吐为首要目标的 Fun-ASR-Nano 工作负载。",
-          "primary_limitation": "吞吐和显存占用取决于音频切分、批量、并发、GPU 型号与 vLLM 版本，必须按目标流量复测。",
+          "name": "vLLM 原生 FunASR 服务",
+          "summary": "通过 vLLM 内置的 FunASR 架构，在 NVIDIA GPU 上提供兼容 OpenAI 的多语言转写与热词接口。",
+          "fit": ["需要标准 /v1/audio/transcriptions 接口", "Fun-ASR-Nano 批量或并发转写", "已有 NVIDIA GPU 和 Linux 服务环境"],
+          "not_fit": ["只接受官方发布权重、不能使用社区转换 checkpoint", "纯 CPU 或边缘设备", "尚未完成显存、并发与业务音频压测的公网服务"],
+          "selection_reason": "vLLM 已原生注册 FunASR 架构，并提供 OpenAI 兼容转写、显存调度、并发和热词参数。",
+          "primary_limitation": "当前原生 vLLM 路径依赖社区转换 checkpoint；要求官方权重链路时使用官方 FunASR split-engine。实测仅覆盖单张 H100，必须按目标 GPU、音频、语言、热词与流量复测。",
           "status_label": "社区验证",
-          "operations": ["固定 FunASR、vLLM、Torch 与 CUDA 组合", "预热模型后再采集容量数据", "记录队列等待、首结果和最终结果延迟"],
-          "security": ["在 API 网关实现认证、限流和请求大小限制", "服务端不直接暴露到公网", "隔离模型缓存和上传临时目录"],
-          "troubleshooting": ["先核对 NVIDIA 驱动与 vLLM 所带 CUDA", "重复输出时记录两次完整结果和精确版本", "长音频遗漏时检查 VAD 最大分段时长"]
+          "operations": ["固定 vLLM wheel、Torch、CUDA、模型 revision 与音频依赖", "等待 /health 就绪并完成预热后再采集容量数据", "记录队列等待、最终结果延迟、显存和热词命中率"],
+          "security": ["在 API 网关实现认证、TLS、限流和音频大小/时长限制", "worker 仅绑定内网地址，不直接暴露公网", "校验 wheel、模型 revision 和示例音频摘要，隔离模型缓存与上传临时目录"],
+          "troubleshooting": ["音频返回 400 时确认安装了 vllm[audio]", "启动时 KV cache 不足则提高显存利用率或在业务允许时降低 max-model-len", "非英文请求必须显式传 language；热词用逗号分隔并以真实业务样本验证偏置强度"]
         },
         "en": {
-          "name": "vLLM GPU throughput",
-          "summary": "Run Fun-ASR-Nano on NVIDIA GPUs for file batches or an OpenAI-compatible transcription endpoint.",
-          "fit": ["Batch recording transcription", "LLM decoder throughput is the priority", "An NVIDIA GPU serving environment already exists"],
-          "not_fit": ["CPU-only or edge devices", "Non-autoregressive models such as Paraformer", "Internet-facing service before memory and load tests"],
-          "selection_reason": "GPU batching and vLLM scheduling fit Fun-ASR-Nano workloads that prioritize throughput.",
-          "primary_limitation": "Throughput and memory depend on segmentation, batch size, concurrency, GPU, and vLLM version; retest with target traffic.",
+          "name": "Native FunASR on vLLM",
+          "summary": "Use vLLM's built-in FunASR architecture for multilingual and hotword-aware transcription through an OpenAI-compatible API on NVIDIA GPUs.",
+          "fit": ["A standard /v1/audio/transcriptions endpoint", "Concurrent or batch Fun-ASR-Nano transcription", "An NVIDIA GPU Linux serving environment"],
+          "not_fit": ["Deployments that accept only officially published weights and cannot use a community conversion", "CPU-only or edge devices", "Internet-facing service before memory, concurrency, and workload tests"],
+          "selection_reason": "vLLM natively registers the FunASR architecture and provides OpenAI-compatible transcription, memory scheduling, concurrency, and hotword parameters.",
+          "primary_limitation": "The native vLLM path currently depends on a community-converted checkpoint; use the official FunASR split-engine when an official-weight chain is required. Evidence covers one H100 only, so retest the target GPU, audio, languages, hotwords, and traffic.",
           "status_label": "Community verified",
-          "operations": ["Pin the FunASR, vLLM, Torch, and CUDA combination", "Warm the model before capacity measurement", "Measure queue, first-result, and final-result latency"],
-          "security": ["Put authentication, rate limits, and upload limits at an API gateway", "Do not expose the worker directly to the internet", "Isolate model cache and temporary upload storage"],
-          "troubleshooting": ["Match the NVIDIA driver to vLLM's CUDA build", "Capture two complete outputs and exact versions for repetition", "Check the VAD maximum segment length when long audio loses content"]
+          "operations": ["Pin the vLLM wheel, Torch, CUDA, model revision, and audio dependencies", "Wait for /health and warm the model before measuring capacity", "Measure queue time, final-result latency, memory, and hotword hit rate"],
+          "security": ["Put authentication, TLS, rate limits, and audio size/duration limits at the gateway", "Bind workers to a private address instead of exposing them directly", "Verify wheel, model revision, and sample digests; isolate model cache and temporary uploads"],
+          "troubleshooting": ["For audio HTTP 400 responses, confirm vllm[audio] is installed", "If startup reports insufficient KV cache, raise GPU utilization or lower max-model-len only when the workload permits", "Pass language explicitly for non-English audio; comma-separate hotwords and validate bias strength on production samples"]
         }
       }
     },
