@@ -78,6 +78,19 @@ segmentation, SenseVoiceSmall and Paraformer emit one entry spanning the input.
 Progress and timing diagnostics remain on stderr, so redirecting stdout produces
 a clean subtitle file. Normal text output is unchanged when `--srt` is omitted.
 
+## Speaker diarization
+
+The standalone llama.cpp / GGUF binaries do **not** currently implement CAM++
+speaker embeddings or speaker clustering. `--vad` segments speech for long-audio
+transcription, but it does not assign speaker labels.
+
+For speaker-aware transcripts, use the Python `AutoModel` pipeline with
+`spk_model="cam++"` (see the [FunASR quick start](../../README.md#quick-start)) or
+the [Fun-ASR-Nano vLLM service](../../examples/industrial_data_pretraining/fun_asr_nano/serve_vllm.py),
+which accepts `spk=true` and runs a separate speaker model. Keep using the
+llama.cpp binaries when the requirement is self-contained ASR plus optional
+FSMN-VAD without Python.
+
 ### Optional Windows CUDA backend for SenseVoiceSmall
 
 The CPU release ZIPs are portable packages. Tagged releases also publish
