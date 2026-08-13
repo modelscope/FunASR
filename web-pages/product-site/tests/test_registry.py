@@ -45,6 +45,56 @@ def test_language_pairs_have_identical_fields(valid_registry):
     assert all(set(zh) == set(en) for zh, en in deployment_pairs(valid_registry))
 
 
+def test_vllm_contract_tracks_native_funasr_release_and_h100_validation(valid_registry):
+    entry = next(item for item in valid_registry['deployments'] if item['id'] == 'vllm')
+
+    assert entry['maturity'] == 'community-verified'
+    assert entry['tested'] == {
+        'funasr': 'Fun-ASR-Nano-2512 conversion@e718b36e',
+        'runtime': 'vLLM 0.27.1+cu129 / Torch 2.13.0+cu129',
+        'verified': '2026-08-13',
+    }
+    assert entry['models'] == ['Fun-ASR-Nano-2512 (community vLLM conversion)']
+    install = '\n'.join(entry['commands']['install'])
+    assert 'vllm[audio]' in install
+    assert 'vllm-0.27.1%2Bcu129-cp38-abi3-manylinux_2_28_x86_64.whl' in install
+    assert 'bf0d52faa2a51e7a01c6856a7a8a2d1307fd0ff711415d34168a67ffac0fa47b' in install
+    launch = '\n'.join(entry['commands']['launch'])
+    for marker in (
+        'vllm serve allendou/Fun-ASR-Nano-2512-vllm',
+        '--revision e718b36e2578203ec893e9b488239225f8d668e2',
+        '--served-model-name fun-asr-nano',
+        '--dtype float32',
+        '--gpu-memory-utilization 0.40',
+    ):
+        assert marker in launch
+    smoke = '\n'.join(entry['commands']['smoke'])
+    assert '/v1/audio/transcriptions' in smoke
+    assert 'language=zh' in smoke
+    assert 'hotwords=开放时间,开放时间,开放时间' in smoke
+    evidence_urls = {item['url'] for item in entry['evidence']}
+    for url in (
+        'https://github.com/modelscope/FunASR/blob/main/docs/vllm_native_funasr_validation.md',
+        'https://github.com/vllm-project/vllm/releases/tag/v0.27.1',
+        'https://github.com/vllm-project/vllm/pull/33247',
+        'https://github.com/vllm-project/vllm/pull/39674',
+        'https://github.com/vllm-project/vllm/pull/44215',
+        'https://huggingface.co/allendou/Fun-ASR-Nano-2512-vllm/tree/e718b36e2578203ec893e9b488239225f8d668e2',
+    ):
+        assert url in evidence_urls
+    assert any(
+        benchmark['hardware'] == 'NVIDIA H100 80GB'
+        and 'two concurrent requests' in benchmark['workload']
+        and '1.123 s wall time' in benchmark['result']
+        and 'community-converted checkpoint' in benchmark['qualification']
+        and benchmark['source'] == 'https://github.com/modelscope/FunASR/blob/main/docs/vllm_native_funasr_validation.md'
+        for benchmark in entry['benchmarks']
+    )
+    limitation = entry['translations']['en']['primary_limitation'].lower()
+    assert 'community-converted checkpoint' in limitation
+    assert 'official funasr split-engine' in limitation
+
+
 def test_audio_cpp_contract_tracks_mainline_nano_and_sensevoice(valid_registry):
     entry = next(item for item in valid_registry['deployments'] if item['id'] == 'audio-cpp')
     llama_cpp = next(item for item in valid_registry['deployments'] if item['id'] == 'llama-cpp')
