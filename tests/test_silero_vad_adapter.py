@@ -21,7 +21,9 @@ class TestSileroVadAdapter(unittest.TestCase):
 
     @patch("silero_vad.get_speech_timestamps")
     @patch("silero_vad.load_silero_vad")
-    def test_returns_funasr_millisecond_segments_and_honors_max_length(self, load_model, timestamps):
+    def test_returns_funasr_millisecond_segments_and_honors_max_length(
+        self, load_model, timestamps
+    ):
         load_model.side_effect = self._load_stub
         timestamps.side_effect = self._timestamps_stub
         model = SileroVad()
@@ -32,7 +34,9 @@ class TestSileroVadAdapter(unittest.TestCase):
             max_single_segment_time=500,
         )
 
-        self.assertEqual(results, [{"key": "sample", "value": [[100, 600], [600, 1100]]}])
+        self.assertEqual(
+            results, [{"key": "sample", "value": [[100, 600], [600, 1100]]}]
+        )
         self.assertEqual(metadata["batch_data_time"], 2.0)
         load_model.assert_called_once_with(onnx=False)
 
@@ -46,11 +50,31 @@ class TestSileroVadAdapter(unittest.TestCase):
 
     @patch("silero_vad.get_speech_timestamps")
     @patch("silero_vad.load_silero_vad")
-    def test_auto_model_alias_uses_the_existing_vad_build_path(self, load_model, timestamps):
+    def test_auto_model_alias_uses_the_existing_vad_build_path(
+        self, load_model, timestamps
+    ):
         load_model.side_effect = self._load_stub
         model, resolved = AutoModel.build_model(model="silero-vad", device="cpu")
         self.assertIsInstance(model, SileroVad)
         self.assertEqual(resolved["model"], "SileroVad")
+
+    @patch("silero_vad.get_speech_timestamps")
+    @patch("silero_vad.load_silero_vad")
+    def test_waveform_follows_the_adapter_device(self, load_model, timestamps):
+        load_model.side_effect = self._load_stub
+
+        def timestamps_stub(waveform, model, sampling_rate, **options):
+            self.assertEqual(waveform.device.type, "meta")
+            return []
+
+        timestamps.side_effect = timestamps_stub
+        model = SileroVad().to("meta")
+        results, _ = model.inference(data_in=[torch.zeros(16000)], key=["sample"])
+        self.assertEqual(results, [{"key": "sample", "value": []}])
+
+    def test_rejects_negative_max_segment_length(self):
+        with self.assertRaisesRegex(ValueError, "non-negative"):
+            SileroVad._split_long_segments([[100, 1100]], -500)
 
 
 if __name__ == "__main__":

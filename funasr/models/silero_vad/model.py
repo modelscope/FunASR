@@ -34,6 +34,8 @@ class SileroVad(torch.nn.Module):
         if not max_single_segment_time:
             return segments
         limit_ms = int(max_single_segment_time)
+        if limit_ms < 0:
+            raise ValueError("max_single_segment_time must be non-negative")
         split = []
         for start, end in segments:
             while end - start > limit_ms:
@@ -58,24 +60,38 @@ class SileroVad(torch.nn.Module):
         started = time.perf_counter()
         results = []
         for index, audio in enumerate(audio_list):
-            waveform = torch.as_tensor(audio, dtype=torch.float32).flatten().cpu()
+            waveform = (
+                torch.as_tensor(audio, dtype=torch.float32)
+                .flatten()
+                .to(self.anchor.device)
+            )
             timestamps = self.get_speech_timestamps(
                 waveform,
                 self.model,
                 sampling_rate=sample_rate,
                 threshold=kwargs.get("silero_threshold", 0.5),
                 min_speech_duration_ms=kwargs.get("silero_min_speech_duration_ms", 250),
-                min_silence_duration_ms=kwargs.get("silero_min_silence_duration_ms", 100),
+                min_silence_duration_ms=kwargs.get(
+                    "silero_min_silence_duration_ms", 100
+                ),
                 speech_pad_ms=kwargs.get("silero_speech_pad_ms", 30),
             )
             segments = [
-                [int(item["start"] * 1000 / sample_rate), int(item["end"] * 1000 / sample_rate)]
+                [
+                    int(item["start"] * 1000 / sample_rate),
+                    int(item["end"] * 1000 / sample_rate),
+                ]
                 for item in timestamps
             ]
             segments = self._split_long_segments(
                 segments, kwargs.get("max_single_segment_time")
             )
-            results.append({"key": key[index] if key else str(index), "value": segments})
+            results.append(
+                {"key": key[index] if key else str(index), "value": segments}
+            )
         elapsed = time.perf_counter() - started
         total_samples = sum(len(torch.as_tensor(audio)) for audio in audio_list)
-        return results, {"batch_data_time": total_samples / sample_rate, "forward": elapsed}
+        return results, {
+            "batch_data_time": total_samples / sample_rate,
+            "forward": elapsed,
+        }
