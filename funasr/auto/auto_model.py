@@ -536,6 +536,12 @@ class AutoModel:
                 kwargs contains the resolved configuration.
         """
         assert "model" in kwargs
+        # Silero VAD is loaded by its optional Python package rather than a
+        # FunASR model repository. Supplying model_conf keeps it on the normal
+        # AutoModel construction path while bypassing hub config resolution.
+        if kwargs["model"] in {"silero-vad", "silero_vad"}:
+            kwargs.setdefault("model_conf", {})
+            kwargs["model"] = "SileroVad"
         if "model_conf" not in kwargs:
             logging.info("download models from model hub: {}".format(kwargs.get("hub", "ms")))
             kwargs = download_model(**kwargs)

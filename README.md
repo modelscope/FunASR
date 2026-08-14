@@ -189,6 +189,12 @@ from funasr import AutoModel
 model = AutoModel(model="paraformer-zh", vad_model="fsmn-vad", punc_model="ct-punc", spk_model="cam++", device="cuda")
 result = model.generate(input="https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav", hotword="关键词 20")
 
+# Optional Silero VAD (install first: python -m pip install "funasr[silero]")
+model = AutoModel(
+    model="paraformer-zh", vad_model="silero-vad", device="cuda",
+    vad_kwargs={"silero_threshold": 0.5, "silero_min_silence_duration_ms": 100},
+)
+result = model.generate(input="audio.wav")
 
 # Streaming real-time (feed audio chunk by chunk)
 import soundfile as sf

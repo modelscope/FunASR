@@ -48,6 +48,9 @@ requirements = {
     "train": [
         "rapidfuzz>=3.0.0",
     ],
+    "silero": [
+        "silero-vad>=6.0.0",
+    ],
     # all: The modules should be optionally installled due to some reason.
     #      Please consider moving them to "install" occasionally
     "all": [
