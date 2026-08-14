@@ -18,7 +18,7 @@
 <link rel="alternate" hreflang="x-default" href="https://www.funasr.com/en/blog/funasr-llama-cpp-whisper-cpp-alternative.html">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"BlogPosting","headline":"FunASR 跑进 llama.cpp:中文 ASR 的 whisper.cpp 替代品(CPU/零 Python/下载即用)| FunASR 博客","description":"FunASR 的 llama.cpp/GGUF 端侧运行时:单个自包含二进制、零 Python、内置 VAD、吃任意音频,下载即用转写中文。中文 CPU 上比 whisper.cpp 准约 2.7 倍。3 步实测跑通。","datePublished":"2026-06-20","dateModified":"2026-06-20","author":{"@type":"Organization","name":"FunASR / Tongyi Lab"},"publisher":{"@type":"Organization","name":"FunASR","logo":{"@type":"ImageObject","url":"https://www.funasr.com/logo.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://www.funasr.com/blog/funasr-llama-cpp-whisper-cpp-alternative.html"},"image":"https://www.funasr.com/logo.png"}
+{"@context":"https://schema.org","@type":"BlogPosting","headline":"FunASR 跑进 llama.cpp:中文 ASR 的 whisper.cpp 替代品(CPU/零 Python/下载即用)| FunASR 博客","description":"FunASR 的 llama.cpp/GGUF 端侧运行时:单个自包含二进制、零 Python、内置 VAD、吃任意音频,下载即用转写中文。中文 CPU 上比 whisper.cpp 准约 2.7 倍。3 步实测跑通。","datePublished":"2026-06-20","dateModified":"2026-08-15","author":{"@type":"Organization","name":"FunASR / Tongyi Lab"},"publisher":{"@type":"Organization","name":"FunASR","logo":{"@type":"ImageObject","url":"https://www.funasr.com/logo.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://www.funasr.com/blog/funasr-llama-cpp-whisper-cpp-alternative.html"},"image":"https://www.funasr.com/logo.png"}
 </script>
 <style>:root{--primary:#2563eb;--primary-dark:#1d4ed8;--bg:#fff;--surface:#f8fafc;--border:#e2e8f0;--text:#0f172a;--text-soft:#475569;--text-muted:#94a3b8;--radius:12px}
 *{margin:0;padding:0;box-sizing:border-box}
@@ -54,20 +54,28 @@ p code,li code{background:var(--surface);padding:2px 6px;border-radius:5px;font-
 .post-card p{margin:0;color:var(--text-soft);font-size:0.9rem}
 .post-card .date{color:var(--text-muted);font-size:0.8rem}
 footer{background:#0f172a;color:#94a3b8;padding:28px 0;text-align:center;font-size:0.8rem}
-footer a{color:#94a3b8}</style>
+footer a{color:#94a3b8}
+@media(max-width:760px){
+.nav{padding:12px 0}
+.nav .container{gap:12px;flex-wrap:nowrap}
+.nav-links{display:none}
+.nav-logo{margin-right:auto}
+.nav-btn{padding:7px 12px}
+article{padding-top:96px}
+}</style>
 </head>
 <body>
 <nav class="nav"><div class="container"><a href="/" class="nav-logo">Fun<span>ASR</span></a><div class="nav-links"><a href="/#capabilities">核心能力</a><a href="/#usage">如何使用</a><a href="/#benchmark">性能</a><a href="/#demo">演示</a><a href="https://modelscope.github.io/FunASR/zh/" target="_blank">文档</a><a href="/quickstart.html">快速上手</a><a href="/models.html">模型</a><a href="/ecosystem.html">生态</a><a href="/blog/">技术博客</a><a href="/vs-whisper.html">对比 Whisper</a><a href="/donors.html">功德榜</a></div><a href="https://www.funasr.com/en/blog/funasr-llama-cpp-whisper-cpp-alternative.html" style="font-size:0.83rem;font-weight:500;color:var(--text-soft)">EN</a><a href="https://github.com/modelscope/FunASR" target="_blank" class="nav-btn">GitHub ★</a></div></nav>
 <article><div class="container">
 <h1>FunASR 跑进 llama.cpp:中文语音识别的 whisper.cpp 替代品(CPU、零 Python、下载即用)</h1>
-<p class="post-meta">2026-06-20 · FunASR 团队</p>
+<p class="post-meta">2026-06-20 · 2026-08-15 更新 · FunASR 团队</p>
 
-<p><a href="https://github.com/ggml-org/whisper.cpp" target="_blank">whisper.cpp</a> 是端侧语音识别的事实标准——单个自包含二进制、CPU 就能跑、零依赖。但 Whisper 在<strong>中文</strong>上偏弱。现在 <strong>FunASR 有了 llama.cpp / GGUF 运行时</strong>:一样的"下载即用"体验,**单个静态二进制、零 Python、内置 VAD、吃任意音频**,而且在中文 CPU 上比 whisper.cpp <strong>准约 2.7 倍</strong>。</p>
+<p><a href="https://github.com/ggml-org/whisper.cpp" target="_blank">whisper.cpp</a> 是端侧语音识别的事实标准——单个自包含二进制、CPU 就能跑、零依赖。但 Whisper 在<strong>中文</strong>上偏弱。现在 <strong>FunASR 有了 llama.cpp / GGUF 运行时</strong>:一样的"下载即用"体验,<strong>单个静态二进制、零 Python、内置 VAD、吃任意音频</strong>,而且在中文 CPU 上比 whisper.cpp <strong>准约 2.7 倍</strong>。</p>
 
-<p style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 16px"><strong>👉 想直接下载?</strong> 各平台预编译二进制(Linux/macOS/Windows)+ 一站式 quickstart 与 benchmark 见 <a href="/llama-cpp.html">在 CPU 上运行 FunASR(llama.cpp 下载页)</a>。</p>
+<p style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 16px"><strong>👉 想直接下载?</strong> v0.2.0 提供 9 个 Linux、macOS、Windows 预编译包及 SHA-256；下载矩阵、quickstart 与已知限制见 <a href="/deploy/llama-cpp.html">llama.cpp / GGUF 部署页</a>。</p>
 <h2>3 步跑通(全部实测)</h2>
 <pre># 1. 下预编译二进制(linux-x64 / linux-arm64 / macos-arm64 / windows-x64)
-wget https://github.com/modelscope/FunASR/releases/download/runtime-llamacpp-v0.1.9/funasr-llamacpp-linux-x64-vulkan.tar.gz
+wget https://github.com/modelscope/FunASR/releases/download/runtime-llamacpp-v0.2.0/funasr-llamacpp-linux-x64-vulkan.tar.gz
 tar xzf funasr-llamacpp-linux-x64-vulkan.tar.gz
 # Windows Vulkan 包: funasr-llamacpp-windows-x64-vulkan.zip（运行时加 --backend vulkan）
 
@@ -90,7 +98,8 @@ bash download-funasr-model.sh sensevoice
 <ul>
 <li><strong>内置 FSMN-VAD</strong>:长音频自动分段(`--vad fsmn-vad.gguf`),裸二进制即达参考精度,无需 Python 前端</li>
 <li><strong>任意音频</strong>:wav / mp3 / flac、任意采样率/声道,二进制内部重采样</li>
-<li><strong>多平台预编译</strong>:Linux x64/arm64、macOS arm64、Windows x64,含 Linux/Windows Vulkan 与 Windows CUDA 加速包(<a href="https://github.com/modelscope/FunASR/releases/tag/runtime-llamacpp-v0.1.9" target="_blank">Release</a>);其它平台一条 CMake 命令自构建</li>
+<li><strong>多平台预编译</strong>:v0.2.0 提供 9 个 Linux x64/arm64、macOS arm64、Windows x64 包,含 Linux/Windows Vulkan 与 Windows CUDA 加速包(<a href="https://github.com/modelscope/FunASR/releases/tag/runtime-llamacpp-v0.2.0" target="_blank">Release</a>);其它平台一条 CMake 命令自构建</li>
+<li><strong>直接输出字幕</strong>:Fun-ASR-Nano、SenseVoiceSmall 和 Paraformer CLI 均可通过 <code>--srt</code> 输出带时间戳的 SRT 字幕</li>
 </ul>
 
 <h2>中文 CPU 上 vs whisper.cpp</h2>
