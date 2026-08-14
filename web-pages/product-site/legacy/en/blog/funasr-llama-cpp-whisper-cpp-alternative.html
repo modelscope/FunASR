@@ -18,7 +18,7 @@
 <link rel="alternate" hreflang="x-default" href="https://www.funasr.com/en/blog/funasr-llama-cpp-whisper-cpp-alternative.html">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"BlogPosting","headline":"FunASR on llama.cpp — a whisper.cpp Alternative for Chinese ASR (CPU, no Python) | FunASR Blog","description":"FunASR's llama.cpp/GGUF on-device runtime: a single self-contained binary, no Python, built-in VAD, any audio format — download and transcribe Chinese. ~2.7x more accurate than whisper.cpp on CPU. Verified 3-step quickstart.","datePublished":"2026-06-20","dateModified":"2026-06-20","author":{"@type":"Organization","name":"FunASR / Tongyi Lab"},"publisher":{"@type":"Organization","name":"FunASR","logo":{"@type":"ImageObject","url":"https://www.funasr.com/logo.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://www.funasr.com/en/blog/funasr-llama-cpp-whisper-cpp-alternative.html"},"image":"https://www.funasr.com/logo.png"}
+{"@context":"https://schema.org","@type":"BlogPosting","headline":"FunASR on llama.cpp — a whisper.cpp Alternative for Chinese ASR (CPU, no Python) | FunASR Blog","description":"FunASR's llama.cpp/GGUF on-device runtime: a single self-contained binary, no Python, built-in VAD, any audio format — download and transcribe Chinese. ~2.7x more accurate than whisper.cpp on CPU. Verified 3-step quickstart.","datePublished":"2026-06-20","dateModified":"2026-08-15","author":{"@type":"Organization","name":"FunASR / Tongyi Lab"},"publisher":{"@type":"Organization","name":"FunASR","logo":{"@type":"ImageObject","url":"https://www.funasr.com/logo.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://www.funasr.com/en/blog/funasr-llama-cpp-whisper-cpp-alternative.html"},"image":"https://www.funasr.com/logo.png"}
 </script>
 <style>:root{--primary:#2563eb;--primary-dark:#1d4ed8;--bg:#fff;--surface:#f8fafc;--border:#e2e8f0;--text:#0f172a;--text-soft:#475569;--text-muted:#94a3b8;--radius:12px}
 *{margin:0;padding:0;box-sizing:border-box}
@@ -54,20 +54,28 @@ p code,li code{background:var(--surface);padding:2px 6px;border-radius:5px;font-
 .post-card p{margin:0;color:var(--text-soft);font-size:0.9rem}
 .post-card .date{color:var(--text-muted);font-size:0.8rem}
 footer{background:#0f172a;color:#94a3b8;padding:28px 0;text-align:center;font-size:0.8rem}
-footer a{color:#94a3b8}</style>
+footer a{color:#94a3b8}
+@media(max-width:760px){
+.nav{padding:12px 0}
+.nav .container{gap:12px;flex-wrap:nowrap}
+.nav-links{display:none}
+.nav-logo{margin-right:auto}
+.nav-btn{padding:7px 12px}
+article{padding-top:96px}
+}</style>
 </head>
 <body>
 <nav class="nav"><div class="container"><a href="/en/" class="nav-logo">Fun<span>ASR</span></a><div class="nav-links"><a href="/en/#capabilities">Capabilities</a><a href="/en/#usage">How to Use</a><a href="/en/#benchmark">Benchmark</a><a href="/en/#demo">Demo</a><a href="https://modelscope.github.io/FunASR/" target="_blank">Docs</a><a href="/en/quickstart.html">Quickstart</a><a href="/en/models.html">Models</a><a href="/en/ecosystem.html">Ecosystem</a><a href="/en/blog/">Blog</a><a href="/en/vs-whisper.html">vs Whisper</a><a href="/en/donors.html">Thanks</a></div><a href="https://www.funasr.com/blog/funasr-llama-cpp-whisper-cpp-alternative.html" style="font-size:0.83rem;font-weight:500;color:var(--text-soft)">中文</a><a href="https://github.com/modelscope/FunASR" target="_blank" class="nav-btn">GitHub ★</a></div></nav>
 <article><div class="container">
 <h1>FunASR on llama.cpp — a whisper.cpp Alternative for Chinese ASR (CPU, no Python)</h1>
-<p class="post-meta">2026-06-20 · FunASR Team</p>
+<p class="post-meta">2026-06-20 · Updated 2026-08-15 · FunASR Team</p>
 
 <p><a href="https://github.com/ggml-org/whisper.cpp" target="_blank">whisper.cpp</a> is the de-facto on-device ASR runtime — a single self-contained binary, runs on CPU, zero dependencies. But Whisper is comparatively weak on <strong>Chinese</strong>. Now <strong>FunASR has a llama.cpp / GGUF runtime</strong>: the same download-and-run experience — <strong>one static binary, no Python, built-in VAD, any audio format</strong> — and it is about <strong>2.7× more accurate than whisper.cpp on Chinese CPU</strong>.</p>
 
-<p style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 16px"><strong>👉 Just want the download?</strong> Prebuilt binaries for Linux/macOS/Windows plus a one-page quickstart and benchmarks are on the <a href="/en/llama-cpp.html">Run FunASR on CPU (llama.cpp) page</a>.</p>
+<p style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 16px"><strong>👉 Just want the download?</strong> v0.2.0 ships nine Linux, macOS, and Windows archives with SHA-256 values. Use the <a href="/en/deploy/llama-cpp.html">llama.cpp / GGUF deployment page</a> for the download matrix, quickstart, and known limitations.</p>
 <h2>Run it in 3 steps (all verified)</h2>
 <pre># 1. Download a prebuilt binary (linux-x64 / linux-arm64 / macos-arm64 / windows-x64)
-wget https://github.com/modelscope/FunASR/releases/download/runtime-llamacpp-v0.1.9/funasr-llamacpp-linux-x64-vulkan.tar.gz
+wget https://github.com/modelscope/FunASR/releases/download/runtime-llamacpp-v0.2.0/funasr-llamacpp-linux-x64-vulkan.tar.gz
 tar xzf funasr-llamacpp-linux-x64-vulkan.tar.gz
 # Windows Vulkan asset: funasr-llamacpp-windows-x64-vulkan.zip (run with --backend vulkan)
 
@@ -90,7 +98,8 @@ bash download-funasr-model.sh sensevoice
 <ul>
 <li><strong>Built-in FSMN-VAD</strong>: automatic long-audio segmentation (`--vad fsmn-vad.gguf`); the bare binary reaches reference accuracy with no Python front end.</li>
 <li><strong>Any audio</strong>: wav / mp3 / flac, any sample rate / channels — resampled inside the binary.</li>
-<li><strong>Multi-platform prebuilts</strong>: Linux x64/arm64, macOS arm64, Windows x64, including Linux/Windows Vulkan and Windows CUDA acceleration packages (<a href="https://github.com/modelscope/FunASR/releases/tag/runtime-llamacpp-v0.1.9" target="_blank">Release</a>); one CMake command to build for others.</li>
+<li><strong>Multi-platform prebuilts</strong>: v0.2.0 ships nine Linux x64/arm64, macOS arm64, and Windows x64 archives, including Linux/Windows Vulkan and Windows CUDA packages (<a href="https://github.com/modelscope/FunASR/releases/tag/runtime-llamacpp-v0.2.0" target="_blank">Release</a>); use one CMake command to build for other targets.</li>
+<li><strong>Direct subtitle output</strong>: the Fun-ASR-Nano, SenseVoiceSmall, and Paraformer CLIs can emit timestamped SRT subtitles with <code>--srt</code>.</li>
 </ul>
 
 <h2>vs whisper.cpp on Chinese CPU</h2>

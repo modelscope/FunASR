@@ -200,3 +200,25 @@ test('reduced motion disables smooth scrolling', async ({ page }) => {
   const behavior = await page.locator('html').evaluate((node) => getComputedStyle(node).scrollBehavior);
   expect(behavior).toBe('auto');
 });
+
+test('llama.cpp blog heading clears fixed navigation on mobile', async ({ page }, testInfo) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/blog/funasr-llama-cpp-whisper-cpp-alternative.html');
+
+  const layout = await page.evaluate(() => {
+    const navigation = document.querySelector<HTMLElement>('nav.nav');
+    const heading = document.querySelector<HTMLElement>('h1');
+    return {
+      overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+      navigationBottom: navigation?.getBoundingClientRect().bottom ?? 0,
+      headingTop: heading?.getBoundingClientRect().top ?? 0,
+    };
+  });
+
+  expect(layout.overflow).toBeLessThanOrEqual(1);
+  expect(layout.headingTop).toBeGreaterThanOrEqual(layout.navigationBottom + 16);
+  await page.screenshot({
+    path: testInfo.outputPath('llama-cpp-blog-mobile.png'),
+    fullPage: true,
+  });
+});

@@ -156,3 +156,25 @@ def test_v140_release_pages_are_bilingual_indexed_and_precise():
     assert f'/en/blog/{slug}' in en_index
     assert f'https://www.funasr.com/blog/{slug}' in sitemap
     assert f'https://www.funasr.com/en/blog/{slug}' in sitemap
+
+
+def test_llama_cpp_blog_points_directly_to_current_runtime_release():
+    pages = {
+        'zh': LEGACY / 'blog' / 'funasr-llama-cpp-whisper-cpp-alternative.html',
+        'en': LEGACY / 'en' / 'blog' / 'funasr-llama-cpp-whisper-cpp-alternative.html',
+    }
+    expected_routes = {
+        'zh': '/deploy/llama-cpp.html',
+        'en': '/en/deploy/llama-cpp.html',
+    }
+
+    for language, path in pages.items():
+        text = path.read_text(encoding='utf-8')
+        soup = BeautifulSoup(text, 'html.parser')
+        hrefs = {link.get('href') for link in soup.select('a[href]')}
+
+        assert 'runtime-llamacpp-v0.2.0' in text
+        assert 'runtime-llamacpp-v0.1.9' not in text
+        assert expected_routes[language] in hrefs
+        assert '2026-08-15' in soup.select_one('script[type="application/ld+json"]').string
+        assert '**' not in soup.select_one('article').get_text()
