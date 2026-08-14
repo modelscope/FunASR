@@ -26,7 +26,8 @@ class SileroVad(torch.nn.Module):
                 '`python -m pip install "funasr[silero]"` or '
                 "`python -m pip install silero-vad`."
             ) from error
-        self.model = load_silero_vad(onnx=kwargs.get("silero_onnx", False))
+        self.onnx = bool(kwargs.get("silero_onnx", False))
+        self.model = load_silero_vad(onnx=self.onnx)
         self.get_speech_timestamps = get_speech_timestamps
 
     @staticmethod
@@ -34,8 +35,10 @@ class SileroVad(torch.nn.Module):
         if not max_single_segment_time:
             return segments
         limit_ms = int(max_single_segment_time)
-        if limit_ms < 0:
-            raise ValueError("max_single_segment_time must be non-negative")
+        if limit_ms <= 0:
+            raise ValueError(
+                "max_single_segment_time must resolve to a positive millisecond value"
+            )
         split = []
         for start, end in segments:
             while end - start > limit_ms:
@@ -60,11 +63,8 @@ class SileroVad(torch.nn.Module):
         started = time.perf_counter()
         results = []
         for index, audio in enumerate(audio_list):
-            waveform = (
-                torch.as_tensor(audio, dtype=torch.float32)
-                .flatten()
-                .to(self.anchor.device)
-            )
+            device = torch.device("cpu") if self.onnx else self.anchor.device
+            waveform = torch.as_tensor(audio, dtype=torch.float32).flatten().to(device)
             timestamps = self.get_speech_timestamps(
                 waveform,
                 self.model,

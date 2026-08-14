@@ -72,9 +72,28 @@ class TestSileroVadAdapter(unittest.TestCase):
         results, _ = model.inference(data_in=[torch.zeros(16000)], key=["sample"])
         self.assertEqual(results, [{"key": "sample", "value": []}])
 
+    @patch("silero_vad.get_speech_timestamps")
+    @patch("silero_vad.load_silero_vad")
+    def test_onnx_waveform_stays_on_cpu(self, load_model, timestamps):
+        load_model.return_value = object()
+
+        def timestamps_stub(waveform, model, sampling_rate, **options):
+            self.assertEqual(waveform.device.type, "cpu")
+            return []
+
+        timestamps.side_effect = timestamps_stub
+        model = SileroVad(silero_onnx=True).to("meta")
+        results, _ = model.inference(data_in=[torch.zeros(16000)], key=["sample"])
+        self.assertEqual(results, [{"key": "sample", "value": []}])
+        load_model.assert_called_once_with(onnx=True)
+
     def test_rejects_negative_max_segment_length(self):
-        with self.assertRaisesRegex(ValueError, "non-negative"):
+        with self.assertRaisesRegex(ValueError, "positive"):
             SileroVad._split_long_segments([[100, 1100]], -500)
+
+    def test_rejects_sub_millisecond_max_segment_length(self):
+        with self.assertRaisesRegex(ValueError, "positive"):
+            SileroVad._split_long_segments([[100, 1100]], 0.5)
 
 
 if __name__ == "__main__":
