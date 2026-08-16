@@ -113,6 +113,46 @@ def test_english_navigation_uses_language_peer():
     assert soup.select_one('[data-language-peer]')['href'] == '/blog/example.html'
 
 
+def test_mlx_audio_ecosystem_entry_is_merged_attributed_and_bounded():
+    pages = {
+        'zh': LEGACY / 'ecosystem.html',
+        'en': LEGACY / 'en' / 'ecosystem.html',
+    }
+    required_links = {
+        'https://github.com/Blaizzy/mlx-audio',
+        'https://github.com/Blaizzy/mlx-audio/blob/main/docs/models/stt/fun-asr-nano.md',
+        'https://github.com/Blaizzy/mlx-audio/pull/885',
+        '/go/fun-asr',
+    }
+
+    for language, path in pages.items():
+        soup = BeautifulSoup(path.read_text(encoding='utf-8'), 'html.parser')
+        card = next(
+            item
+            for item in soup.select('.card')
+            if item.select_one('.card-title').get_text(' ', strip=True) == 'MLX Audio'
+        )
+        text = card.get_text(' ', strip=True)
+        hrefs = {link.get('href') for link in card.select('a[href]')}
+
+        assert required_links <= hrefs
+        assert 'Apple Silicon' in text
+        assert 'Fun-ASR-Nano' in text
+        assert 'OpenAI' in text
+        assert ('仅转写' in text) if language == 'zh' else ('transcription-only' in text)
+        assert ('无时间戳' in text) if language == 'zh' else ('no timestamps' in text)
+
+    community_docs = {
+        'en': Path(__file__).resolve().parents[3] / 'docs' / 'community_projects.md',
+        'zh': Path(__file__).resolve().parents[3] / 'docs' / 'community_projects_zh.md',
+    }
+    for text_path in community_docs.values():
+        text = text_path.read_text(encoding='utf-8')
+        assert '[MLX Audio](https://github.com/Blaizzy/mlx-audio)' in text
+        assert 'docs/models/stt/fun-asr-nano.md' in text
+        assert 'https://github.com/Blaizzy/mlx-audio/pull/885' in text
+
+
 def test_v140_release_pages_are_bilingual_indexed_and_precise():
     slug = 'funasr-v1-4-0-pypi-release.html'
     pages = {
