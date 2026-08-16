@@ -59,6 +59,14 @@
       <strong>FunASR</strong>
       <p>{{ '面向生产部署的开源语音基础设施。' if language == 'zh' else 'Open speech infrastructure for production deployment.' }}</p>
     </div>
+    <nav class="footer-repositories" data-footer-repositories aria-label="{{ '官方仓库' if language == 'zh' else 'Official repositories' }}">
+      <strong>{{ '官方仓库' if language == 'zh' else 'Official repositories' }}</strong>
+      <div class="footer-links">
+        <a href="/go/fun-asr">Fun-ASR</a>
+        <a href="/go/sensevoice">SenseVoice</a>
+        <a href="/go/funclip">FunClip</a>
+      </div>
+    </nav>
     <div class="footer-links">
       <a href="{{ '/deploy/' if language == 'zh' else '/en/deploy/' }}">{{ '部署' if language == 'zh' else 'Deploy' }}</a>
       <a href="{{ docs_url }}">{{ '文档' if language == 'zh' else 'Docs' }}</a>

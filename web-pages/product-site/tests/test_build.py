@@ -11,7 +11,7 @@ from bs4 import BeautifulSoup
 SITE_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(SITE_ROOT))
 
-from build import build  # noqa: E402
+from build import build, route_path  # noqa: E402
 
 
 def read_soup(path: Path) -> BeautifulSoup:
@@ -93,6 +93,26 @@ def test_visible_repository_links_use_fixed_conversion_routes(tmp_path):
         assert soup.select_one('.site-footer a[href="/go/docs"]')
         assert soup.select_one('.site-footer a[href="/go/releases"]')
         assert json_ld['codeRepository'] == 'https://github.com/modelscope/FunASR'
+
+
+def test_every_product_page_footer_surfaces_official_repositories(tmp_path):
+    manifest = build(tmp_path)
+
+    for page in manifest['pages']:
+        soup = read_soup(route_path(tmp_path, page['route']))
+        repositories = soup.select_one('[data-footer-repositories]')
+        expected_heading = '官方仓库' if page['language'] == 'zh' else 'Official repositories'
+
+        assert repositories
+        assert repositories.strong.get_text(strip=True) == expected_heading
+        assert {
+            link.get('href'): link.get_text(strip=True)
+            for link in repositories.select('a[href]')
+        } == {
+            '/go/fun-asr': 'Fun-ASR',
+            '/go/sensevoice': 'SenseVoice',
+            '/go/funclip': 'FunClip',
+        }
 
 
 def test_home_surfaces_attributed_ecosystem_repositories(tmp_path):
