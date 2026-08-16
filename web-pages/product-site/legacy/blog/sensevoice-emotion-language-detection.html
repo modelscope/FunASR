@@ -4,11 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Python 语音情感识别:一个模型搞定语种 + 情感 + 音频事件(SenseVoice)| FunASR 博客</title>
-<meta name="description" content="用 SenseVoice 一次推理同时输出语种识别、情感识别(高兴/愤怒/中性)、音频事件(背景音乐/掌声/笑声)与 ITN。3 行 Python 代码,附 5 语言真实输出,比 Whisper 快 15 倍。">
+<meta name="description" content="用 SenseVoice 一次推理同时输出语种识别、情感识别(高兴/愤怒/中性)、音频事件(背景音乐/掌声/笑声)与 ITN。3 行 Python 代码,附 5 语言真实输出,实际吞吐取决于硬件、音频和 batch。">
 <meta name="keywords" content="语音情感识别, SenseVoice, 语种识别, 音频事件检测, 多语言语音识别, Whisper 替代, FunASR, 情感识别 python, 语音识别, 开源语音识别">
 <link rel="icon" href="/logo.png">
 <meta property="og:title" content="Python 语音情感识别:一个模型搞定语种 + 情感 + 音频事件(SenseVoice)| FunASR 博客">
-<meta property="og:description" content="用 SenseVoice 一次推理同时输出语种识别、情感识别(高兴/愤怒/中性)、音频事件(背景音乐/掌声/笑声)与 ITN。3 行 Python 代码,附 5 语言真实输出,比 Whisper 快 15 倍。">
+<meta property="og:description" content="用 SenseVoice 一次推理同时输出语种识别、情感识别(高兴/愤怒/中性)、音频事件(背景音乐/掌声/笑声)与 ITN。3 行 Python 代码,附 5 语言真实输出,实际吞吐取决于硬件、音频和 batch。">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://www.funasr.com/blog/sensevoice-emotion-language-detection.html">
 <meta property="og:image" content="https://www.funasr.com/logo.png">
@@ -18,7 +18,7 @@
 <link rel="alternate" hreflang="x-default" href="https://www.funasr.com/en/blog/sensevoice-emotion-language-detection.html">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"BlogPosting","headline":"Python 语音情感识别:一个模型搞定语种 + 情感 + 音频事件(SenseVoice)| FunASR 博客","description":"用 SenseVoice 一次推理同时输出语种识别、情感识别(高兴/愤怒/中性)、音频事件(背景音乐/掌声/笑声)与 ITN。3 行 Python 代码,附 5 语言真实输出,比 Whisper 快 15 倍。","datePublished":"2026-06-19","dateModified":"2026-06-19","author":{"@type":"Organization","name":"FunASR / Tongyi Lab"},"publisher":{"@type":"Organization","name":"FunASR","logo":{"@type":"ImageObject","url":"https://www.funasr.com/logo.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://www.funasr.com/blog/sensevoice-emotion-language-detection.html"},"image":"https://www.funasr.com/logo.png"}
+{"@context":"https://schema.org","@type":"BlogPosting","headline":"Python 语音情感识别:一个模型搞定语种 + 情感 + 音频事件(SenseVoice)| FunASR 博客","description":"用 SenseVoice 一次推理同时输出语种识别、情感识别(高兴/愤怒/中性)、音频事件(背景音乐/掌声/笑声)与 ITN。3 行 Python 代码,附 5 语言真实输出,实际吞吐取决于硬件、音频和 batch。","datePublished":"2026-06-19","dateModified":"2026-06-19","author":{"@type":"Organization","name":"FunASR / Tongyi Lab"},"publisher":{"@type":"Organization","name":"FunASR","logo":{"@type":"ImageObject","url":"https://www.funasr.com/logo.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://www.funasr.com/blog/sensevoice-emotion-language-detection.html"},"image":"https://www.funasr.com/logo.png"}
 </script>
 <style>:root{--primary:#2563eb;--primary-dark:#1d4ed8;--bg:#fff;--surface:#f8fafc;--border:#e2e8f0;--text:#0f172a;--text-soft:#475569;--text-muted:#94a3b8;--radius:12px}
 *{margin:0;padding:0;box-sizing:border-box}
@@ -57,18 +57,18 @@ footer{background:#0f172a;color:#94a3b8;padding:28px 0;text-align:center;font-si
 footer a{color:#94a3b8}</style>
 </head>
 <body>
-<nav class="nav"><div class="container"><a href="/" class="nav-logo">Fun<span>ASR</span></a><div class="nav-links"><a href="/#capabilities">核心能力</a><a href="/#usage">如何使用</a><a href="/#benchmark">性能</a><a href="/#demo">演示</a><a href="https://modelscope.github.io/FunASR/zh/" target="_blank">文档</a><a href="/quickstart.html">快速上手</a><a href="/models.html">模型</a><a href="/ecosystem.html">生态</a><a href="/blog/">技术博客</a><a href="/vs-whisper.html">对比 Whisper</a><a href="/donors.html">功德榜</a></div><a href="https://www.funasr.com/en/blog/sensevoice-emotion-language-detection.html" style="font-size:0.83rem;font-weight:500;color:var(--text-soft)">EN</a><a href="https://github.com/modelscope/FunASR" target="_blank" class="nav-btn">GitHub ★</a></div></nav>
+<nav class="nav"><div class="container"><a href="/" class="nav-logo">Fun<span>ASR</span></a><div class="nav-links"><a href="/#capabilities">核心能力</a><a href="/#usage">如何使用</a><a href="/#benchmark">性能</a><a href="/#demo">演示</a><a href="https://modelscope.github.io/FunASR/zh/" target="_blank">文档</a><a href="/quickstart.html">快速上手</a><a href="/models.html">模型</a><a href="/ecosystem.html">生态</a><a href="/blog/">技术博客</a><a href="/vs-whisper.html">对比 Whisper</a><a href="/donors.html">功德榜</a></div><a href="https://www.funasr.com/en/blog/sensevoice-emotion-language-detection.html" style="font-size:0.83rem;font-weight:500;color:var(--text-soft)">EN</a><a href="/go/github" target="_blank" class="nav-btn">GitHub ★</a></div></nav>
 <article><div class="container">
 <h1>Python 语音情感识别:一个模型同时输出语种、情感与音频事件(SenseVoice)</h1>
 <p class="post-meta">2026-06-19 · FunASR 团队</p>
 
 <p>大多数语音识别(ASR)模型只给你<strong>文字</strong>。但真实场景里,你往往还想知道:说话人是<strong>什么情绪</strong>?这段是<strong>哪种语言</strong>?背景是<strong>纯人声还是带音乐</strong>?用 Whisper 你得叠一堆东西——语种检测 + 单独的情感模型 + 音频事件分类器,既慢又难维护。</p>
-<p><strong>SenseVoice</strong> 是 FunAudioLLM 团队开源的多语种语音理解模型。它在<strong>一次非自回归前向</strong>里就同时返回:转写文本、<strong>语种识别</strong>、<strong>情感识别</strong>、<strong>音频事件检测</strong>,外加逆文本归一化(ITN)。架构非自回归,<strong>比 Whisper-Large 快约 15 倍</strong>,适合实时也适合大批量。</p>
+<p><strong>SenseVoice</strong> 是 FunAudioLLM 团队开源的多语种语音理解模型。它在<strong>一次非自回归前向</strong>里就同时返回:转写文本、<strong>语种识别</strong>、<strong>情感识别</strong>、<strong>音频事件检测</strong>,外加逆文本归一化(ITN)。架构非自回归，适合低延迟和批量推理；实际吞吐取决于硬件、音频长度和 batch。</p>
 
 <h2>一次推理能拿到什么</h2>
 <table>
 <tr><th>能力</th><th>说明</th></tr>
-<tr><td>语音识别(ASR)</td><td>50+ 语种,中文准确率领先</td></tr>
+<tr><td>语音识别(ASR)</td><td>中、粤、英、日、韩五种语言,中文准确率领先</td></tr>
 <tr><td>语种识别(LID)</td><td>自动判别 <code>zh / en / ja / ko / yue …</code></td></tr>
 <tr><td>情感识别</td><td>HAPPY 😊 / SAD 😔 / ANGRY 😡 / NEUTRAL / FEARFUL / DISGUSTED / SURPRISED</td></tr>
 <tr><td>音频事件</td><td>Speech / BGM 🎵 / Applause 👏 / Laughter / Cry</td></tr>
@@ -125,7 +125,7 @@ print(language, emotion, event, text)</pre>
 </table>
 <p>要的不只是文字,而是对音频的<strong>理解</strong>时,SenseVoice 一个模型就够了——无需再拼语种检测 + 情感模型 + 事件分类器。</p>
 
-<div class="cta"><p><strong>FunASR 全家桶都是开源的</strong>——工业级 ASR / VAD / 标点 / 说话人 / 情感事件 / LLM-ASR。觉得有用就点个 Star 支持一下 👇</p><p><a class="btn" href="https://github.com/modelscope/FunASR" target="_blank">⭐ Star FunASR</a></p><p style="margin-top:10px;font-size:0.85rem">也欢迎 Star:<a href="https://github.com/QwenAudio/SenseVoice" target="_blank">SenseVoice</a> · <a href="https://github.com/QwenAudio/Fun-ASR" target="_blank">Fun-ASR</a> · <a href="https://github.com/modelscope/FunClip" target="_blank">FunClip</a></p></div>
+<div class="cta"><p><strong>FunASR 全家桶都是开源的</strong>——工业级 ASR / VAD / 标点 / 说话人 / 情感事件 / LLM-ASR。觉得有用就点个 Star 支持一下 👇</p><p><a class="btn" href="/go/github" target="_blank">⭐ Star FunASR</a></p><p style="margin-top:10px;font-size:0.85rem">也欢迎 Star:<a href="/go/sensevoice" target="_blank">SenseVoice</a> · <a href="/go/fun-asr" target="_blank">Fun-ASR</a> · <a href="/go/funclip" target="_blank">FunClip</a></p></div>
 <!--related-posts-->
 <h2>相关文章</h2>
 <ul class="post-list">

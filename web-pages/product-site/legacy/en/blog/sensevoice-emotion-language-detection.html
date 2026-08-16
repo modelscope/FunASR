@@ -4,11 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Speech Emotion Recognition in Python — Language ID & Audio Events in One Model (SenseVoice) | FunASR Blog</title>
-<meta name="description" content="Use SenseVoice to get language ID, emotion (happy/angry/neutral), audio events (music/applause/laughter) and ITN in one inference. 3 lines of Python, real 5-language output, 15x faster than Whisper.">
+<meta name="description" content="Use SenseVoice to get language ID, emotion (happy/angry/neutral), audio events (music/applause/laughter) and ITN in one inference. 3 lines of Python, real 5-language output, with throughput that depends on hardware, audio, and batch size.">
 <meta name="keywords" content="speech emotion recognition, speech emotion recognition python, SenseVoice, language identification, audio event detection, multilingual speech recognition, Whisper alternative, FunASR, open source speech to text">
 <link rel="icon" href="/logo.png">
 <meta property="og:title" content="Speech Emotion Recognition in Python — Language ID & Audio Events in One Model (SenseVoice) | FunASR Blog">
-<meta property="og:description" content="Use SenseVoice to get language ID, emotion (happy/angry/neutral), audio events (music/applause/laughter) and ITN in one inference. 3 lines of Python, real 5-language output, 15x faster than Whisper.">
+<meta property="og:description" content="Use SenseVoice to get language ID, emotion (happy/angry/neutral), audio events (music/applause/laughter) and ITN in one inference. 3 lines of Python, real 5-language output, with throughput that depends on hardware, audio, and batch size.">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://www.funasr.com/en/blog/sensevoice-emotion-language-detection.html">
 <meta property="og:image" content="https://www.funasr.com/logo.png">
@@ -18,7 +18,7 @@
 <link rel="alternate" hreflang="x-default" href="https://www.funasr.com/en/blog/sensevoice-emotion-language-detection.html">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"BlogPosting","headline":"Speech Emotion Recognition in Python — Language ID & Audio Events in One Model (SenseVoice) | FunASR Blog","description":"Use SenseVoice to get language ID, emotion (happy/angry/neutral), audio events (music/applause/laughter) and ITN in one inference. 3 lines of Python, real 5-language output, 15x faster than Whisper.","datePublished":"2026-06-19","dateModified":"2026-06-19","author":{"@type":"Organization","name":"FunASR / Tongyi Lab"},"publisher":{"@type":"Organization","name":"FunASR","logo":{"@type":"ImageObject","url":"https://www.funasr.com/logo.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://www.funasr.com/en/blog/sensevoice-emotion-language-detection.html"},"image":"https://www.funasr.com/logo.png"}
+{"@context":"https://schema.org","@type":"BlogPosting","headline":"Speech Emotion Recognition in Python — Language ID & Audio Events in One Model (SenseVoice) | FunASR Blog","description":"Use SenseVoice to get language ID, emotion (happy/angry/neutral), audio events (music/applause/laughter) and ITN in one inference. 3 lines of Python, real 5-language output, with throughput that depends on hardware, audio, and batch size.","datePublished":"2026-06-19","dateModified":"2026-06-19","author":{"@type":"Organization","name":"FunASR / Tongyi Lab"},"publisher":{"@type":"Organization","name":"FunASR","logo":{"@type":"ImageObject","url":"https://www.funasr.com/logo.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://www.funasr.com/en/blog/sensevoice-emotion-language-detection.html"},"image":"https://www.funasr.com/logo.png"}
 </script>
 <style>:root{--primary:#2563eb;--primary-dark:#1d4ed8;--bg:#fff;--surface:#f8fafc;--border:#e2e8f0;--text:#0f172a;--text-soft:#475569;--text-muted:#94a3b8;--radius:12px}
 *{margin:0;padding:0;box-sizing:border-box}
@@ -57,18 +57,18 @@ footer{background:#0f172a;color:#94a3b8;padding:28px 0;text-align:center;font-si
 footer a{color:#94a3b8}</style>
 </head>
 <body>
-<nav class="nav"><div class="container"><a href="/en/" class="nav-logo">Fun<span>ASR</span></a><div class="nav-links"><a href="/en/#capabilities">Capabilities</a><a href="/en/#usage">How to Use</a><a href="/en/#benchmark">Benchmark</a><a href="/en/#demo">Demo</a><a href="https://modelscope.github.io/FunASR/" target="_blank">Docs</a><a href="/en/quickstart.html">Quickstart</a><a href="/en/models.html">Models</a><a href="/en/ecosystem.html">Ecosystem</a><a href="/en/blog/">Blog</a><a href="/en/vs-whisper.html">vs Whisper</a><a href="/en/donors.html">Donors</a></div><a href="https://www.funasr.com/blog/sensevoice-emotion-language-detection.html" style="font-size:0.83rem;font-weight:500;color:var(--text-soft)">中文</a><a href="https://github.com/modelscope/FunASR" target="_blank" class="nav-btn">GitHub ★</a></div></nav>
+<nav class="nav"><div class="container"><a href="/en/" class="nav-logo">Fun<span>ASR</span></a><div class="nav-links"><a href="/en/#capabilities">Capabilities</a><a href="/en/#usage">How to Use</a><a href="/en/#benchmark">Benchmark</a><a href="/en/#demo">Demo</a><a href="https://modelscope.github.io/FunASR/" target="_blank">Docs</a><a href="/en/quickstart.html">Quickstart</a><a href="/en/models.html">Models</a><a href="/en/ecosystem.html">Ecosystem</a><a href="/en/blog/">Blog</a><a href="/en/vs-whisper.html">vs Whisper</a><a href="/en/donors.html">Donors</a></div><a href="https://www.funasr.com/blog/sensevoice-emotion-language-detection.html" style="font-size:0.83rem;font-weight:500;color:var(--text-soft)">中文</a><a href="/go/github" target="_blank" class="nav-btn">GitHub ★</a></div></nav>
 <article><div class="container">
 <h1>Speech Emotion Recognition in Python — Language ID &amp; Audio Events in One Model (SenseVoice)</h1>
 <p class="post-meta">2026-06-19 · FunASR Team</p>
 
 <p>Most speech-recognition (ASR) models give you only <strong>text</strong>. But real applications often need more: what <strong>emotion</strong> is the speaker in? what <strong>language</strong> is this? is the background <strong>clean speech or music</strong>? With Whisper you have to stack several models — language detection + a separate emotion model + an audio-event classifier. Slow and hard to maintain.</p>
-<p><strong>SenseVoice</strong> (an open-source multilingual speech-understanding model from the FunAudioLLM team) returns all of it in <strong>one non-autoregressive forward pass</strong>: the transcript plus <strong>spoken-language ID</strong>, <strong>emotion</strong>, <strong>audio-event detection</strong>, and inverse text normalization (ITN). It is roughly <strong>15× faster than Whisper-Large</strong>.</p>
+<p><strong>SenseVoice</strong> (an open-source multilingual speech-understanding model from the FunAudioLLM team) returns all of it in <strong>one non-autoregressive forward pass</strong>: the transcript plus <strong>spoken-language ID</strong>, <strong>emotion</strong>, <strong>audio-event detection</strong>, and inverse text normalization (ITN). Its non-autoregressive architecture suits low-latency and batch inference; benchmark throughput on the target hardware and audio distribution.</p>
 
 <h2>What one inference gives you</h2>
 <table>
 <tr><th>Capability</th><th>Detail</th></tr>
-<tr><td>ASR</td><td>50+ languages, leading Chinese accuracy</td></tr>
+<tr><td>ASR</td><td>Mandarin, Cantonese, English, Japanese, and Korean, leading Chinese accuracy</td></tr>
 <tr><td>Language ID</td><td>auto-detects <code>zh / en / ja / ko / yue …</code></td></tr>
 <tr><td>Emotion</td><td>HAPPY 😊 / SAD 😔 / ANGRY 😡 / NEUTRAL / FEARFUL / DISGUSTED / SURPRISED</td></tr>
 <tr><td>Audio events</td><td>Speech / BGM 🎵 / Applause 👏 / Laughter / Cry</td></tr>
@@ -125,7 +125,7 @@ print(language, emotion, event, text)</pre>
 </table>
 <p>When you need <strong>understanding</strong> of audio and not just text, one SenseVoice model replaces a language-detector + emotion-model + event-classifier stack.</p>
 
-<div class="cta"><p><strong>The whole FunASR stack is open-source</strong> — industrial-grade ASR / VAD / punctuation / speaker / emotion &amp; events / LLM-ASR. If it helps, a GitHub Star really supports the project 👇</p><p><a class="btn" href="https://github.com/modelscope/FunASR" target="_blank">⭐ Star FunASR</a></p><p style="margin-top:10px;font-size:0.85rem">Also star:<a href="https://github.com/QwenAudio/SenseVoice" target="_blank">SenseVoice</a> · <a href="https://github.com/QwenAudio/Fun-ASR" target="_blank">Fun-ASR</a> · <a href="https://github.com/modelscope/FunClip" target="_blank">FunClip</a></p></div>
+<div class="cta"><p><strong>The whole FunASR stack is open-source</strong> — industrial-grade ASR / VAD / punctuation / speaker / emotion &amp; events / LLM-ASR. If it helps, a GitHub Star really supports the project 👇</p><p><a class="btn" href="/go/github" target="_blank">⭐ Star FunASR</a></p><p style="margin-top:10px;font-size:0.85rem">Also star:<a href="/go/sensevoice" target="_blank">SenseVoice</a> · <a href="/go/fun-asr" target="_blank">Fun-ASR</a> · <a href="/go/funclip" target="_blank">FunClip</a></p></div>
 <!--related-posts-->
 <h2>Related posts</h2>
 <ul class="post-list">

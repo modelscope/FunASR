@@ -43,7 +43,7 @@ p code,li code{background:var(--surface);padding:2px 6px;border-radius:5px;font-
 .post-card .date{color:var(--text-muted);font-size:0.8rem}
 footer{background:#0f172a;color:#94a3b8;padding:28px 0;text-align:center;font-size:0.8rem}
 footer a{color:#94a3b8}</style></head><body>
-<nav class="nav"><div class="container"><a href="/" class="nav-logo">Fun<span>ASR</span></a><div class="nav-links"><a href="/en/#capabilities">Capabilities</a><a href="/en/#usage">How to Use</a><a href="/en/#benchmark">Benchmark</a><a href="/en/#demo">Demo</a><a href="https://modelscope.github.io/FunASR/" target="_blank">Docs</a><a href="/en/quickstart.html">Quickstart</a><a href="/en/models.html">Models</a><a href="/en/ecosystem.html">Ecosystem</a><a href="/en/blog/">Blog</a><a href="/en/vs-whisper.html">vs Whisper</a><a href="/en/donors.html">Thanks</a></div><a href="https://www.funasr.com/blog/funasr-cli-transcribe-command-line.html" style="font-size:0.83rem;font-weight:600;color:var(--text-soft)">中文</a><a href="https://github.com/modelscope/FunASR" target="_blank" class="nav-btn">GitHub ★</a></div></nav>
+<nav class="nav"><div class="container"><a href="/" class="nav-logo">Fun<span>ASR</span></a><div class="nav-links"><a href="/en/#capabilities">Capabilities</a><a href="/en/#usage">How to Use</a><a href="/en/#benchmark">Benchmark</a><a href="/en/#demo">Demo</a><a href="https://modelscope.github.io/FunASR/" target="_blank">Docs</a><a href="/en/quickstart.html">Quickstart</a><a href="/en/models.html">Models</a><a href="/en/ecosystem.html">Ecosystem</a><a href="/en/blog/">Blog</a><a href="/en/vs-whisper.html">vs Whisper</a><a href="/en/donors.html">Thanks</a></div><a href="https://www.funasr.com/blog/funasr-cli-transcribe-command-line.html" style="font-size:0.83rem;font-weight:600;color:var(--text-soft)">中文</a><a href="/go/github" target="_blank" class="nav-btn">GitHub ★</a></div></nav>
 <article><div class="container">
 <h1>Transcribe Audio from the Command Line with FunASR (text / JSON / SRT)</h1>
 <p class="post-meta">FunASR Blog · 2026-06-18 · Tutorial</p>
@@ -53,7 +53,7 @@ footer a{color:#94a3b8}</style></head><body>
 pip install -U funasr   # recommended funasr &gt;= 1.3.26</code></pre>
 <h2>Simplest: print text</h2>
 <pre><code>funasr audio.wav</code></pre>
-<p>Prints the transcript to the terminal. Defaults to SenseVoice (non-autoregressive, very fast, 50+ languages).</p>
+<p>Prints the transcript to the terminal. Defaults to SenseVoice (non-autoregressive, very fast, five SenseVoiceSmall languages and 31 Fun-ASR-MLT-Nano languages).</p>
 <h2>Generate SRT subtitles</h2>
 <pre><code>funasr audio.wav -f srt -o ./subs</code></pre>
 <p>Writes <code>./subs/audio.srt</code>. Add <code>--spk</code> for speaker-split cues with real timestamps:</p>
@@ -95,9 +95,9 @@ print(r.text)</code></pre>
 <ul>
 <li><strong>Local, free, private</strong> - no internet, no API key.</li>
 <li><strong>Fast</strong>: SenseVoice is non-autoregressive, far faster than Whisper (<a href="/en/blog/funasr-vs-whisper-benchmark.html">benchmark</a>) - real-time even on CPU.</li>
-<li><strong>Stronger on Chinese</strong> + 50+ languages; subtitles, speakers, hotwords, JSON out of the box.</li>
+<li><strong>Stronger on Chinese</strong> + five SenseVoiceSmall languages and 31 Fun-ASR-MLT-Nano languages; subtitles, speakers, hotwords, JSON out of the box.</li>
 </ul>
-<div class="cta"><p>FunASR is Tongyi Lab's open-source, industrial-grade speech recognition toolkit.</p><a class="btn" href="https://github.com/modelscope/FunASR" target="_blank">Star FunASR on GitHub ★</a></div>
+<div class="cta"><p>FunASR is Tongyi Lab's open-source, industrial-grade speech recognition toolkit.</p><a class="btn" href="/go/github" target="_blank">Star FunASR on GitHub ★</a></div>
 <!--related-posts-->
 <h2>Related posts</h2>
 <ul class="post-list">
@@ -125,5 +125,5 @@ print(r.text)</code></pre>
 <li><a href="/en/blog/speech-to-text-timestamps-python.html">Speech-to-Text with Timestamps in Python</a></li>
 </ul>
 </div></article>
-<footer><div class="container">FunASR · Open-source speech recognition by Tongyi Lab · <a href="https://github.com/modelscope/FunASR">GitHub</a></div></footer>
+<footer><div class="container">FunASR · Open-source speech recognition by Tongyi Lab · <a href="/go/github">GitHub</a></div></footer>
 </body></html>

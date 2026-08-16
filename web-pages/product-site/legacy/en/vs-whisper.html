@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>FunASR vs Whisper — Open Source Speech Recognition Comparison 2026</title>
-<meta name="description" content="Compare FunASR and Whisper: speed, accuracy, features, languages. FunASR is 170x realtime vs Whisper's 13x. Built-in speaker diarization, emotion detection, streaming.">
+<meta name="description" content="Compare FunASR and Whisper by model coverage, diarization, emotion detection, streaming, CPU/GPU deployment, and reproducible benchmarking.">
 <link rel="icon" href="../logo.png">
 <meta property="og:title" content="FunASR vs Whisper — Which Open Source ASR Should You Use?">
-<meta property="og:description" content="Side-by-side comparison: FunASR runs 13x faster than Whisper on GPU, works on CPU, includes speaker ID and emotion detection out of the box.">
+<meta property="og:description" content="Compare FunASR and Whisper by model coverage, speech features, runtime options, and target-hardware benchmarks.">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://www.funasr.com/en/vs-whisper.html">
 <meta property="og:image" content="https://www.funasr.com/logo.png">
@@ -55,7 +55,7 @@ code{font-family:'JetBrains Mono',monospace}
 .badge{display:inline-block;padding:2px 8px;background:#dcfce7;color:#166534;border-radius:4px;font-size:0.75rem;font-weight:600}
 footer{background:#0f172a;color:#94a3b8;padding:32px 0;text-align:center;font-size:0.82rem}
 footer a{color:#94a3b8}
-@media(max-width:600px){.nav-links{display:none}.nav .container{gap:16px}.nav-logo{margin-right:auto}h1{font-size:1.7rem}table{font-size:0.8rem}th,td{padding:8px}}
+@media(max-width:600px){.nav-links{display:none}.nav .container{gap:16px}.nav-logo{margin-right:auto}h1{font-size:1.7rem}table{font-size:0.8rem;table-layout:fixed}th,td{padding:8px;overflow-wrap:anywhere}}
 </style>
 </head>
 <body>
@@ -63,7 +63,7 @@ footer a{color:#94a3b8}
 <a href="/en/" class="nav-logo">Fun<span>ASR</span></a>
 <div class="nav-links"><a href="/en/#capabilities">Capabilities</a><a href="/en/#usage">How to Use</a><a href="/en/#benchmark">Benchmark</a><a href="/en/#demo">Demo</a><a href="https://modelscope.github.io/FunASR/" target="_blank">Docs</a><a href="/en/quickstart.html">Quickstart</a><a href="/en/models.html">Models</a><a href="/en/ecosystem.html">Ecosystem</a><a href="/en/blog/">Blog</a><a href="/en/vs-whisper.html">vs Whisper</a><a href="/en/donors.html">Thanks</a></div>
 <a href="/" style="font-size:0.83rem;font-weight:500;color:var(--text-soft)">中文</a>
-<a href="https://github.com/modelscope/FunASR" target="_blank" class="nav-btn">GitHub ★</a>
+<a href="/go/github" target="_blank" class="nav-btn">GitHub ★</a>
 </div></nav>
 
 <article><div class="container">
@@ -71,28 +71,24 @@ footer a{color:#94a3b8}
 <h1>FunASR vs Whisper: Which Open Source ASR Should You Use?</h1>
 <p>Both FunASR and OpenAI Whisper are open-source speech recognition tools. Here's a detailed comparison to help you choose the right one for your use case.</p>
 
-<h2>Speed Comparison</h2>
-<p>Tested on 184 long-form audio files (192 minutes total). Higher RTF = faster.</p>
+<h2>How to Compare Performance</h2>
+<p>Throughput and latency depend on the GPU or CPU, precision, audio duration, batch size, concurrency, and runtime. Treat single-machine multipliers as workload-specific; benchmark RTF, p50/p95 latency, peak memory, and recognition quality on the target deployment.</p>
 
 <table>
-<thead><tr><th>Model</th><th>GPU Speed</th><th>CPU Speed</th><th>vs Whisper-large-v3</th></tr></thead>
+<thead><tr><th>Deployment Goal</th><th>FunASR Path</th><th>Whisper Path</th><th>Measure</th></tr></thead>
 <tbody>
-<tr><td>FunASR Fun-ASR-Nano (vLLM)</td><td class="win">340x realtime</td><td>—</td><td><span class="badge">26x faster</span></td></tr>
-<tr><td>FunASR SenseVoice-Small</td><td class="win">170x realtime</td><td class="win">17x realtime</td><td><span class="badge">13x faster</span></td></tr>
-<tr><td>FunASR Paraformer-Large</td><td class="win">120x realtime</td><td class="win">15x realtime</td><td><span class="badge">9x faster</span></td></tr>
-<tr><td>Whisper-large-v3-turbo</td><td>46x realtime</td><td class="lose">❌ Too slow</td><td>3.4x faster</td></tr>
-<tr><td>Whisper-large-v3</td><td class="lose">13x realtime</td><td class="lose">❌</td><td>baseline</td></tr>
+<tr><td>High-throughput GPU</td><td>Fun-ASR-Nano + vLLM</td><td>Whisper + batched runtime</td><td>Concurrency, batch, memory, and long-audio RTF</td></tr>
+<tr><td>Low-latency CPU/GPU</td><td>SenseVoiceSmall or Paraformer</td><td>Quantized Whisper runtime</td><td>Single-request p50/p95, threads, and peak memory</td></tr>
+<tr><td>Edge device</td><td>llama.cpp/GGUF or native runtime</td><td>whisper.cpp</td><td>Realtime behavior, power, and model size on-device</td></tr>
 </tbody>
 </table>
-
-<p><strong>Key takeaway:</strong> FunASR models run on CPU faster than Whisper runs on GPU.</p>
 
 <h2>Feature Comparison</h2>
 
 <table>
 <thead><tr><th>Feature</th><th>FunASR</th><th>Whisper</th></tr></thead>
 <tbody>
-<tr><td>Languages</td><td class="win">50+ (SenseVoice) / 31 (MLT-Nano) / zh-en-ja + Chinese dialects/accents (Nano)</td><td>57</td></tr>
+<tr><td>Languages</td><td class="win">SenseVoiceSmall: zh/yue/en/ja/ko; MLT-Nano: 31 languages; Nano: zh/en/ja plus Chinese dialects and accents</td><td>57</td></tr>
 <tr><td>Speaker Diarization</td><td class="win">✅ Built-in (cam++)</td><td>❌ Needs pyannote</td></tr>
 <tr><td>Emotion Detection</td><td class="win">✅ Happy/Sad/Angry/Neutral</td><td>❌</td></tr>
 <tr><td>Audio Event Detection</td><td class="win">✅ Music, applause, laughter</td><td>❌</td></tr>
@@ -102,7 +98,7 @@ footer a{color:#94a3b8}
 <tr><td>OpenAI-compatible API</td><td class="win">✅ funasr-server</td><td>Separate wrapper needed</td></tr>
 <tr><td>VAD (Voice Activity)</td><td class="win">✅ Built-in</td><td>❌ External</td></tr>
 <tr><td>Punctuation</td><td class="win">✅ Built-in</td><td>Partial</td></tr>
-<tr><td>CPU Inference</td><td class="win">✅ 17x realtime</td><td>❌ Impractical</td></tr>
+<tr><td>CPU Inference</td><td class="win">✅ SenseVoice / Paraformer / native runtimes</td><td>✅ Quantized runtimes available</td></tr>
 <tr><td>Fine-tuning</td><td class="win">✅ DeepSpeed scripts</td><td>Community scripts</td></tr>
 <tr><td>License</td><td>MIT</td><td>MIT</td></tr>
 <tr><td>Cost</td><td>Free (self-hosted)</td><td>Free (self-hosted)</td></tr>
@@ -145,7 +141,7 @@ result = model.generate(input="meeting.wav")
 <div class="cta">
 <h3>Ready to try FunASR?</h3>
 <p>The FunASR open-source community keeps growing. Try it and join the project.</p>
-<a href="https://github.com/modelscope/FunASR" class="btn">View on GitHub ★</a>
+<a href="/go/github" class="btn">View on GitHub ★</a>
 </div>
 
 <h2>Migration Guide</h2>
@@ -155,11 +151,11 @@ result = model.generate(input="meeting.wav")
 <table>
 <thead><tr><th>Project</th><th>Best For</th><th>Link</th></tr></thead>
 <tbody>
-<tr><td>FunASR</td><td>Full-featured toolkit (all models)</td><td><a href="https://github.com/modelscope/FunASR">GitHub</a></td></tr>
-<tr><td>Fun-ASR-Nano</td><td>Flagship LLM-ASR for zh/en/ja + Chinese dialects/accents</td><td><a href="https://github.com/QwenAudio/Fun-ASR">GitHub</a></td></tr>
-<tr><td>Fun-ASR-MLT-Nano</td><td>Separate multilingual checkpoint for 31 languages</td><td><a href="https://github.com/QwenAudio/Fun-ASR">GitHub</a></td></tr>
-<tr><td>SenseVoice</td><td>Ultra-fast ASR + emotion + events</td><td><a href="https://github.com/QwenAudio/SenseVoice">GitHub</a></td></tr>
-<tr><td>FunClip</td><td>AI video clipping with ASR</td><td><a href="https://github.com/modelscope/FunClip">GitHub</a></td></tr>
+<tr><td>FunASR</td><td>Full-featured toolkit (all models)</td><td><a href="/go/github">GitHub</a></td></tr>
+<tr><td>Fun-ASR-Nano</td><td>Flagship LLM-ASR for zh/en/ja + Chinese dialects/accents</td><td><a href="/go/fun-asr">GitHub</a></td></tr>
+<tr><td>Fun-ASR-MLT-Nano</td><td>Separate multilingual checkpoint for 31 languages</td><td><a href="/go/fun-asr">GitHub</a></td></tr>
+<tr><td>SenseVoice</td><td>Ultra-fast ASR + emotion + events</td><td><a href="/go/sensevoice">GitHub</a></td></tr>
+<tr><td>FunClip</td><td>AI video clipping with ASR</td><td><a href="/go/funclip">GitHub</a></td></tr>
 </tbody>
 </table>
 

@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>SenseVoice Deployment Guide: Multilingual ASR 15x Faster Than Whisper | FunASR Blog</title>
-<meta name="description" content="Complete SenseVoice deployment tutorial: transcribe multilingual speech in 3 lines of Python, with language ID, emotion and audio-event detection, VAD for long audio, GPU/CPU tips. Open-source ASR 15x faster than Whisper.">
+<title>SenseVoice Deployment Guide: Five-Language ASR, Emotion and Audio Events | FunASR Blog</title>
+<meta name="description" content="Deploy SenseVoice for Mandarin, Cantonese, English, Japanese, and Korean ASR with language ID, emotion and audio-event detection, long-audio VAD, and GPU/CPU guidance.">
 <meta name="keywords" content="SenseVoice, SenseVoice deployment, speech recognition, multilingual ASR, Whisper alternative, FunASR, emotion recognition, language identification, ASR tutorial, open source speech to text">
 <link rel="icon" href="/logo.png">
-<meta property="og:title" content="SenseVoice Deployment Guide: Multilingual ASR 15x Faster Than Whisper | FunASR Blog">
-<meta property="og:description" content="Complete SenseVoice deployment tutorial: transcribe multilingual speech in 3 lines of Python, with language ID, emotion and audio-event detection, VAD for long audio, GPU/CPU tips. Open-source ASR 15x faster than Whisper.">
+<meta property="og:title" content="SenseVoice Deployment Guide: Five-Language ASR, Emotion and Audio Events | FunASR Blog">
+<meta property="og:description" content="Deploy SenseVoice for Mandarin, Cantonese, English, Japanese, and Korean ASR with language ID, emotion and audio-event detection, long-audio VAD, and GPU/CPU guidance.">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://www.funasr.com/en/blog/sensevoice-deployment-guide.html">
 <meta property="og:image" content="https://www.funasr.com/logo.png">
@@ -18,7 +18,7 @@
 <link rel="alternate" hreflang="x-default" href="https://www.funasr.com/en/blog/sensevoice-deployment-guide.html">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"BlogPosting","headline":"SenseVoice Deployment Guide: Multilingual ASR 15x Faster Than Whisper | FunASR Blog","description":"Complete SenseVoice deployment tutorial: transcribe multilingual speech in 3 lines of Python, with language ID, emotion and audio-event detection, VAD for long audio, GPU/CPU tips. Open-source ASR 15x faster than Whisper.","datePublished":"2026-06-16","dateModified":"2026-06-16","author":{"@type":"Organization","name":"FunASR / Tongyi Lab"},"publisher":{"@type":"Organization","name":"FunASR","logo":{"@type":"ImageObject","url":"https://www.funasr.com/logo.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://www.funasr.com/en/blog/sensevoice-deployment-guide.html"},"image":"https://www.funasr.com/logo.png"}
+{"@context":"https://schema.org","@type":"BlogPosting","headline":"SenseVoice Deployment Guide: Five-Language ASR, Emotion and Audio Events | FunASR Blog","description":"Deploy SenseVoice for Mandarin, Cantonese, English, Japanese, and Korean ASR with language ID, emotion and audio-event detection, long-audio VAD, and GPU/CPU guidance.","datePublished":"2026-06-16","dateModified":"2026-08-17","author":{"@type":"Organization","name":"FunASR / Tongyi Lab"},"publisher":{"@type":"Organization","name":"FunASR","logo":{"@type":"ImageObject","url":"https://www.funasr.com/logo.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://www.funasr.com/en/blog/sensevoice-deployment-guide.html"},"image":"https://www.funasr.com/logo.png"}
 </script>
 <style>:root{--primary:#2563eb;--primary-dark:#1d4ed8;--bg:#fff;--surface:#f8fafc;--border:#e2e8f0;--text:#0f172a;--text-soft:#475569;--text-muted:#94a3b8;--radius:12px}
 *{margin:0;padding:0;box-sizing:border-box}
@@ -54,14 +54,18 @@ p code,li code{background:var(--surface);padding:2px 6px;border-radius:5px;font-
 .post-card p{margin:0;color:var(--text-soft);font-size:0.9rem}
 .post-card .date{color:var(--text-muted);font-size:0.8rem}
 footer{background:#0f172a;color:#94a3b8;padding:28px 0;text-align:center;font-size:0.8rem}
-footer a{color:#94a3b8}</style>
+footer a{color:#94a3b8}
+@media(max-width:700px){
+.nav{padding:12px 0}.nav .container{gap:16px}.nav-links{display:none}.nav-btn{white-space:nowrap}
+article{padding-top:96px}
+}</style>
 </head>
 <body>
-<nav class="nav"><div class="container"><a href="/en/" class="nav-logo">Fun<span>ASR</span></a><div class="nav-links"><a href="/en/#capabilities">Capabilities</a><a href="/en/#usage">How to Use</a><a href="/en/#benchmark">Benchmark</a><a href="/en/#demo">Demo</a><a href="https://modelscope.github.io/FunASR/" target="_blank">Docs</a><a href="/en/quickstart.html">Quickstart</a><a href="/en/models.html">Models</a><a href="/en/ecosystem.html">Ecosystem</a><a href="/en/blog/">Blog</a><a href="/en/vs-whisper.html">vs Whisper</a><a href="/en/donors.html">Donors</a></div><a href="https://www.funasr.com/blog/sensevoice-deployment-guide.html" style="font-size:0.83rem;font-weight:500;color:var(--text-soft)">中文</a><a href="https://github.com/modelscope/FunASR" target="_blank" class="nav-btn">GitHub ★</a></div></nav>
+<nav class="nav"><div class="container"><a href="/en/" class="nav-logo">Fun<span>ASR</span></a><div class="nav-links"><a href="/en/#capabilities">Capabilities</a><a href="/en/#usage">How to Use</a><a href="/en/#benchmark">Benchmark</a><a href="/en/#demo">Demo</a><a href="https://modelscope.github.io/FunASR/" target="_blank">Docs</a><a href="/en/quickstart.html">Quickstart</a><a href="/en/models.html">Models</a><a href="/en/ecosystem.html">Ecosystem</a><a href="/en/blog/">Blog</a><a href="/en/vs-whisper.html">vs Whisper</a><a href="/en/donors.html">Donors</a></div><a href="https://www.funasr.com/blog/sensevoice-deployment-guide.html" style="font-size:0.83rem;font-weight:500;color:var(--text-soft)">中文</a><a href="/go/github" target="_blank" class="nav-btn">GitHub ★</a></div></nav>
 <article><div class="container">
-<h1>SenseVoice Deployment Guide: Multilingual Speech Recognition 15× Faster Than Whisper</h1>
+<h1>SenseVoice Deployment Guide: Five-Language ASR, Emotion and Audio Events</h1>
 <p class="post-meta">FunASR Blog · 2026-06-16 · Tutorial</p>
-<p><strong>SenseVoice</strong> is an open-source multilingual speech understanding model from the FunAudioLLM team. Beyond automatic speech recognition (ASR), a single forward pass also returns <strong>spoken-language identification, emotion recognition, and audio-event detection</strong>. Its non-autoregressive architecture makes it roughly <strong>15× faster than Whisper-Large</strong>, with latency low enough for both real-time and high-throughput batch workloads.</p>
+<p><strong>SenseVoice</strong> is an open-source speech-understanding model from the FunAudioLLM team for Mandarin, Cantonese, English, Japanese, and Korean. Beyond automatic speech recognition (ASR), a single forward pass also returns <strong>spoken-language identification, emotion recognition, and audio-event detection</strong>. Its non-autoregressive architecture suits low-latency and batch workloads; benchmark throughput and latency on the target hardware, audio distribution, and batch configuration.</p>
 <p>Here is a copy-paste guide to get SenseVoice running in three steps.</p>
 
 <h2>1. Install</h2>
@@ -110,8 +114,8 @@ res = model.generate(input="long_audio.wav", language="auto", use_itn=True, batc
 <table>
 <thead><tr><th>Dimension</th><th>SenseVoice-Small</th></tr></thead>
 <tbody>
-<tr><td>Speed vs Whisper-Large</td><td>~15×</td></tr>
-<tr><td>Languages</td><td>Chinese / Cantonese / English / Japanese / Korean ...</td></tr>
+<tr><td>Performance validation</td><td>Benchmark RTF and p50/p95 on the target hardware, audio distribution, and batch</td></tr>
+<tr><td>Languages</td><td>Mandarin / Cantonese / English / Japanese / Korean</td></tr>
 <tr><td>Extra capabilities</td><td>Language ID · Emotion · Audio events</td></tr>
 <tr><td>Architecture</td><td>Non-autoregressive (low latency)</td></tr>
 <tr><td>License</td><td>Open source (commercial use allowed)</td></tr>
@@ -121,7 +125,7 @@ res = model.generate(input="long_audio.wav", language="auto", use_itn=True, batc
 <div class="cta">
 <h3>Get started with SenseVoice</h3>
 <p>If this guide helped, please star the project on GitHub ⭐ to support open source.</p>
-<a href="https://github.com/QwenAudio/SenseVoice" class="btn">SenseVoice GitHub ★</a>
+<a href="/go/sensevoice" class="btn">SenseVoice GitHub ★</a>
 </div>
 
 <p>Read more: <a href="/en/quickstart.html">FunASR Quickstart</a> · <a href="/en/models.html">All models</a> · <a href="/en/ecosystem.html">Ecosystem</a></p>

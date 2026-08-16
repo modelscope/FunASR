@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>FunASR vs Whisper 对比 — 开源语音识别哪个好？</title>
-<meta name="description" content="FunASR 与 Whisper 详细对比：FunASR 速度快 13 倍，内置说话人分离、情感检测、流式识别，支持 CPU 部署。">
+<meta name="description" content="FunASR 与 Whisper 详细对比：模型覆盖、说话人分离、情感检测、流式识别、CPU/GPU 部署与可复现实测方法。">
 <link rel="icon" href="logo.png">
 <meta property="og:title" content="FunASR vs Whisper — 开源语音识别对比">
-<meta property="og:description" content="FunASR 比 Whisper 快 13 倍，内置说话人分离和情感检测，支持 CPU 推理和实时流式。">
+<meta property="og:description" content="按模型覆盖、说话人能力、情感检测、流式识别和部署条件对比 FunASR 与 Whisper。">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://www.funasr.com/vs-whisper.html">
 <meta property="og:image" content="https://www.funasr.com/logo.png">
@@ -43,7 +43,7 @@ pre{background:#1e293b;color:#e2e8f0;padding:18px;border-radius:10px;overflow-x:
 .cta a.btn{display:inline-block;padding:10px 24px;background:var(--primary);color:white;border-radius:8px;font-weight:600;text-decoration:none}
 footer{background:#0f172a;color:#94a3b8;padding:28px 0;text-align:center;font-size:0.8rem}
 footer a{color:#94a3b8}
-@media(max-width:600px){.nav-links{display:none}.nav .container{gap:16px}.nav-logo{margin-right:auto}h1{font-size:1.7rem}table{font-size:0.8rem}th,td{padding:8px}}
+@media(max-width:600px){.nav-links{display:none}.nav .container{gap:16px}.nav-logo{margin-right:auto}h1{font-size:1.7rem}table{font-size:0.8rem;table-layout:fixed}th,td{padding:8px;overflow-wrap:anywhere}}
 </style>
 </head>
 <body>
@@ -51,7 +51,7 @@ footer a{color:#94a3b8}
 <a href="/" class="nav-logo">Fun<span>ASR</span></a>
 <div class="nav-links"><a href="/#capabilities">核心能力</a><a href="/#usage">如何使用</a><a href="/#benchmark">性能</a><a href="/#demo">演示</a><a href="https://modelscope.github.io/FunASR/zh/" target="_blank">文档</a><a href="quickstart.html">快速上手</a><a href="models.html">模型</a><a href="ecosystem.html">生态</a><a href="/blog/">技术博客</a><a href="vs-whisper.html">对比 Whisper</a><a href="/donors.html">功德榜</a></div>
 <a href="/en/vs-whisper.html" style="font-size:0.83rem;font-weight:500;color:var(--text-soft)">EN</a>
-<a href="https://github.com/modelscope/FunASR" target="_blank" class="nav-btn">GitHub ★</a>
+<a href="/go/github" target="_blank" class="nav-btn">GitHub ★</a>
 </div></nav>
 
 <article><div class="container">
@@ -59,21 +59,17 @@ footer a{color:#94a3b8}
 <h1>FunASR vs Whisper：开源语音识别详细对比</h1>
 <p>FunASR 和 OpenAI Whisper 都是开源语音识别工具。本文从速度、功能、部署等维度进行全面对比。</p>
 
-<h2>速度对比</h2>
-<p>测试条件：184 条长音频（共 192 分钟）。RTF 越高越快。</p>
+<h2>性能比较方法</h2>
+<p>吞吐和延迟会随 GPU/CPU 型号、精度、音频长度、batch、并发及运行时变化。不要把单一硬件上的倍速当成通用结论；请在目标环境中分别记录 RTF、p50/p95 延迟、峰值显存或内存，以及识别质量。</p>
 
 <table>
-<thead><tr><th>模型</th><th>GPU 速度</th><th>CPU 速度</th><th>vs Whisper-large-v3</th></tr></thead>
+<thead><tr><th>部署目标</th><th>FunASR 路径</th><th>Whisper 路径</th><th>建议实测</th></tr></thead>
 <tbody>
-<tr><td>FunASR Fun-ASR-Nano (vLLM)</td><td class="win">340x 实时</td><td>—</td><td class="win">快 26 倍</td></tr>
-<tr><td>FunASR SenseVoice-Small</td><td class="win">170x 实时</td><td class="win">17x 实时</td><td class="win">快 13 倍</td></tr>
-<tr><td>FunASR Paraformer-Large</td><td class="win">120x 实时</td><td class="win">15x 实时</td><td class="win">快 9 倍</td></tr>
-<tr><td>Whisper-large-v3-turbo</td><td>46x 实时</td><td>❌ 太慢</td><td>快 3.4 倍</td></tr>
-<tr><td>Whisper-large-v3</td><td>13x 实时</td><td>❌</td><td>基准</td></tr>
+<tr><td>高吞吐 GPU</td><td>Fun-ASR-Nano + vLLM</td><td>Whisper + 批处理运行时</td><td>并发、batch、显存和长音频 RTF</td></tr>
+<tr><td>低延迟 CPU/GPU</td><td>SenseVoiceSmall 或 Paraformer</td><td>Whisper 量化实现</td><td>单请求 p50/p95、线程数和峰值内存</td></tr>
+<tr><td>边缘设备</td><td>llama.cpp/GGUF 或原生 runtime</td><td>whisper.cpp</td><td>目标设备实时性、功耗和模型体积</td></tr>
 </tbody>
 </table>
-
-<p><strong>结论：FunASR 在 CPU 上比 Whisper 在 GPU 上还快。</strong></p>
 
 <h2>功能对比</h2>
 <table>
@@ -85,11 +81,11 @@ footer a{color:#94a3b8}
 <tr><td>热词</td><td class="win">✅ 自定义词表增强</td><td>❌</td></tr>
 <tr><td>中文方言</td><td class="win">7 大方言 + 26 地方口音</td><td>有限</td></tr>
 <tr><td>OpenAI 兼容 API</td><td class="win">✅ funasr-server</td><td>需额外封装</td></tr>
-<tr><td>CPU 推理</td><td class="win">✅ 17x 实时</td><td>❌ 不可用</td></tr>
+<tr><td>CPU 推理</td><td class="win">✅ SenseVoice / Paraformer / 原生 runtime</td><td>✅ 量化实现可用</td></tr>
 <tr><td>VAD</td><td class="win">✅ 内置</td><td>❌ 外部</td></tr>
 <tr><td>标点恢复</td><td class="win">✅ 内置</td><td>部分</td></tr>
 <tr><td>微调训练</td><td class="win">✅ DeepSpeed</td><td>社区脚本</td></tr>
-<tr><td>语言数量</td><td>50+（SenseVoice）/ 31（MLT-Nano）/ 中英日 + 中文方言/口音（Nano）</td><td>57</td></tr>
+<tr><td>语言数量</td><td>SenseVoiceSmall：中/粤/英/日/韩；MLT-Nano：31 语种；Nano：中/英/日及中文方言/口音</td><td>57</td></tr>
 <tr><td>开源协议</td><td>MIT</td><td>MIT</td></tr>
 </tbody>
 </table>
@@ -111,18 +107,18 @@ result = model.generate(input="meeting.wav")
 <div class="cta">
 <h3>开始使用 FunASR</h3>
 <p>FunASR 开源社区持续增长，欢迎体验并参与共建。</p>
-<a href="https://github.com/modelscope/FunASR" class="btn">GitHub ★ 立即体验</a>
+<a href="/go/github" class="btn">GitHub ★ 立即体验</a>
 </div>
 
 <h2>生态项目</h2>
 <table>
 <thead><tr><th>项目</th><th>适用场景</th><th>链接</th></tr></thead>
 <tbody>
-<tr><td>FunASR</td><td>全功能工具包（所有模型）</td><td><a href="https://github.com/modelscope/FunASR">GitHub</a></td></tr>
-<tr><td>Fun-ASR-Nano</td><td>旗舰 LLM-ASR，中英日 + 中文方言/口音</td><td><a href="https://github.com/QwenAudio/Fun-ASR">GitHub</a></td></tr>
-<tr><td>Fun-ASR-MLT-Nano</td><td>独立多语 checkpoint，31 语言</td><td><a href="https://github.com/QwenAudio/Fun-ASR">GitHub</a></td></tr>
-<tr><td>SenseVoice</td><td>超快 ASR + 情感 + 音频事件</td><td><a href="https://github.com/QwenAudio/SenseVoice">GitHub</a></td></tr>
-<tr><td>FunClip</td><td>AI 智能视频剪辑</td><td><a href="https://github.com/modelscope/FunClip">GitHub</a></td></tr>
+<tr><td>FunASR</td><td>全功能工具包（所有模型）</td><td><a href="/go/github">GitHub</a></td></tr>
+<tr><td>Fun-ASR-Nano</td><td>旗舰 LLM-ASR，中英日 + 中文方言/口音</td><td><a href="/go/fun-asr">GitHub</a></td></tr>
+<tr><td>Fun-ASR-MLT-Nano</td><td>独立多语 checkpoint，31 语言</td><td><a href="/go/fun-asr">GitHub</a></td></tr>
+<tr><td>SenseVoice</td><td>超快 ASR + 情感 + 音频事件</td><td><a href="/go/sensevoice">GitHub</a></td></tr>
+<tr><td>FunClip</td><td>AI 智能视频剪辑</td><td><a href="/go/funclip">GitHub</a></td></tr>
 </tbody>
 </table>
 

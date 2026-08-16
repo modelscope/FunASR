@@ -54,7 +54,7 @@ def _navigation_markup(language: str, peer_route: str) -> str:
         f'<div class="nav-links">{links}</div>'
         f'<a href="{escape(peer_route, quote=True)}" data-language-peer '
         f'style="font-size:0.83rem;font-weight:500;color:var(--text-soft)">{peer_label}</a>'
-        '<a href="https://github.com/modelscope/FunASR" target="_blank" '
+        '<a href="/go/github" target="_blank" '
         'rel="noopener" class="nav-btn">GitHub</a></div></nav>'
     )
 
