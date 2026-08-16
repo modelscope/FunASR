@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import json
 import sys
+import xml.etree.ElementTree as ET
 from pathlib import Path
 
 import pytest
@@ -46,6 +48,38 @@ def test_every_deployment_page_has_operational_contract(built_site):
             assert soup.select_one('[data-section="limitations"]')
             assert soup.select_one('[data-section="operations"]')
             assert soup.select_one('[data-section="evidence"]')
+
+
+def test_deployment_pages_publish_accurate_discovery_metadata(built_site):
+    registry = load_registry(SITE_ROOT / 'data' / 'deployments.json')
+
+    for entry in registry['deployments']:
+        for language in ('zh', 'en'):
+            page = route_path(built_site, entry['routes'][language])
+            soup = read_soup(page)
+            metadata = json.loads(soup.select_one('script[type="application/ld+json"]').string)
+
+            assert metadata['license'] == (
+                'https://github.com/modelscope/FunASR/blob/main/LICENSE'
+            )
+            assert metadata['dateModified'] == entry['tested']['verified']
+
+
+def test_deployment_sitemap_entries_use_registry_verification_dates(built_site):
+    registry = load_registry(SITE_ROOT / 'data' / 'deployments.json')
+    root = ET.parse(built_site / 'sitemap.xml').getroot()
+    namespace = {'sitemap': 'http://www.sitemaps.org/schemas/sitemap/0.9'}
+    entries = {
+        item.findtext('sitemap:loc', namespaces=namespace): item.findtext(
+            'sitemap:lastmod', namespaces=namespace
+        )
+        for item in root.findall('sitemap:url', namespace)
+    }
+
+    for entry in registry['deployments']:
+        for language in ('zh', 'en'):
+            url = f"https://www.funasr.com{entry['routes'][language]}"
+            assert entries[url] == entry['tested']['verified']
 
 
 def test_detail_commands_come_from_registry(built_site):

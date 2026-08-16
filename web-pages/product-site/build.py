@@ -52,7 +52,7 @@ def legacy_route(relative: Path) -> str:
     return route
 
 
-def _write_sitemap(stage: Path) -> None:
+def _write_sitemap(stage: Path, last_modified_by_route: dict[str, str]) -> None:
     routes: set[str] = set()
     for page in sorted(stage.rglob('*.html')):
         if page.name == '404.html':
@@ -73,6 +73,11 @@ def _write_sitemap(stage: Path) -> None:
         url = ET.SubElement(urlset, '{http://www.sitemaps.org/schemas/sitemap/0.9}url')
         location = ET.SubElement(url, '{http://www.sitemaps.org/schemas/sitemap/0.9}loc')
         location.text = canonical_url(route)
+        if last_modified := last_modified_by_route.get(route):
+            modified = ET.SubElement(
+                url, '{http://www.sitemaps.org/schemas/sitemap/0.9}lastmod'
+            )
+            modified.text = last_modified
     ET.indent(urlset, space='  ')
     tree = ET.ElementTree(urlset)
     tree.write(stage / 'sitemap.xml', encoding='utf-8', xml_declaration=True)
@@ -116,6 +121,7 @@ def _page_context(
     peer_route: str,
     title: str,
     description: str,
+    date_modified: str,
     navigation: dict[str, Any],
     assets: dict[str, str],
 ) -> dict[str, Any]:
@@ -128,6 +134,7 @@ def _page_context(
         'peer_canonical': canonical_url(peer_route),
         'title': title,
         'description': description,
+        'date_modified': date_modified,
         'navigation': _navigation(navigation, language),
         'assets': assets,
         'github_repository_url': GITHUB_REPOSITORY_URL,
@@ -251,6 +258,7 @@ def build(output_dir: Path) -> dict[str, Any]:
                 peer_route=peer_route,
                 title=language_copy[language]['home_title'],
                 description=language_copy[language]['home_description'],
+                date_modified=registry['verified'],
                 navigation=navigation,
                 assets=assets,
             )
@@ -277,6 +285,7 @@ def build(output_dir: Path) -> dict[str, Any]:
                 peer_route=peer_route,
                 title=language_copy[language]['deploy_title'],
                 description=language_copy[language]['deploy_description'],
+                date_modified=registry['verified'],
                 navigation=navigation,
                 assets=assets,
             )
@@ -301,6 +310,7 @@ def build(output_dir: Path) -> dict[str, Any]:
                     peer_route=peer_route,
                     title=f"{translation['name']} - {language_copy[language]['detail_suffix']}",
                     description=translation['summary'],
+                    date_modified=entry['tested']['verified'],
                     navigation=navigation,
                     assets=assets,
                 )
@@ -336,6 +346,7 @@ def build(output_dir: Path) -> dict[str, Any]:
                 peer_route=peer_route,
                 title=language_copy[language]['benchmarks_title'],
                 description=language_copy[language]['benchmarks_description'],
+                date_modified=registry['verified'],
                 navigation=navigation,
                 assets=assets,
             )
@@ -354,6 +365,7 @@ def build(output_dir: Path) -> dict[str, Any]:
             peer_route='/en/deploy/',
             title=language_copy['zh']['not_found_title'],
             description=language_copy['zh']['not_found_description'],
+            date_modified=registry['verified'],
             navigation=navigation,
             assets=assets,
         )
@@ -365,7 +377,12 @@ def build(output_dir: Path) -> dict[str, Any]:
             'hreflang': context['peer_canonical'],
         })
 
-        _write_sitemap(stage)
+        last_modified_by_route = {
+            entry['routes'][language]: entry['tested']['verified']
+            for entry in registry['deployments']
+            for language in ('zh', 'en')
+        }
+        _write_sitemap(stage, last_modified_by_route)
 
         manifest = {
             'schema_version': 1,
