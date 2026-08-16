@@ -1163,6 +1163,12 @@ td a {
   color: #aeb9c8;
 }
 
+.footer-repositories {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
 .footer-links {
   display: flex;
   align-items: center;
