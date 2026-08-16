@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -95,6 +96,7 @@ def test_navigation_normalization_is_idempotent_and_preserves_article():
     assert once == twice
     assert article in once
     assert [link.get_text(strip=True) for link in soup.select('.nav-links a')][-1] == '功德榜'
+    assert soup.select_one('.nav-btn')['href'] == '/go/github'
     assert soup.select_one('link[rel="canonical"]')['href'].endswith('/blog/example.html')
     assert not soup.select_one('link[href*="fonts.googleapis.com"]')
     assert not soup.select_one('script[src="/stats/tracker.js"]')
@@ -178,3 +180,26 @@ def test_llama_cpp_blog_points_directly_to_current_runtime_release():
         assert expected_routes[language] in hrefs
         assert '2026-08-15' in soup.select_one('script[type="application/ld+json"]').string
         assert '**' not in soup.select_one('article').get_text()
+
+
+def test_public_pages_do_not_overstate_sensevoice_language_or_speed_claims():
+    language_claim = re.compile(
+        r'50\+\s*(?:supported\s+|支持\s*)?(?:languages?|语言|语种)',
+        re.IGNORECASE,
+    )
+    fixed_speed_claim = re.compile(
+        r'\b(?:13|15|17|170)[x×]\b|(?:13|15|17|170)\s*倍'
+    )
+
+    violations = []
+    for path in sorted(LEGACY.rglob('*.html')):
+        source = path.read_text(encoding='utf-8')
+        text = BeautifulSoup(source, 'html.parser').get_text(
+            ' ',
+            strip=True,
+        )
+        searchable = f'{source}\n{text}'
+        if language_claim.search(searchable) or fixed_speed_claim.search(searchable):
+            violations.append(path.relative_to(LEGACY).as_posix())
+
+    assert violations == []

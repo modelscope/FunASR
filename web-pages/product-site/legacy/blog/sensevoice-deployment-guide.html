@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>SenseVoice 部署指南：比 Whisper 快 15 倍的多语言语音识别 | FunASR 博客</title>
-<meta name="description" content="SenseVoice 部署完整教程：3 行 Python 代码跑通多语言语音识别，含语种/情感/音频事件检测、VAD 长音频分段、GPU/CPU 选择。比 Whisper 快 15 倍的开源 ASR。">
+<title>SenseVoice 部署指南：五语种识别、情感与音频事件 | FunASR 博客</title>
+<meta name="description" content="SenseVoice 部署完整教程：3 行 Python 代码跑通中、粤、英、日、韩语音识别，含语种、情感、音频事件检测、VAD 长音频分段及 GPU/CPU 选择。">
 <meta name="keywords" content="SenseVoice, SenseVoice 部署, 语音识别, 多语言语音识别, Whisper 替代, FunASR, 情感识别, 语种识别, ASR 教程, 开源语音识别">
 <link rel="icon" href="/logo.png">
-<meta property="og:title" content="SenseVoice 部署指南：比 Whisper 快 15 倍的多语言语音识别 | FunASR 博客">
-<meta property="og:description" content="SenseVoice 部署完整教程：3 行 Python 代码跑通多语言语音识别，含语种/情感/音频事件检测、VAD 长音频分段、GPU/CPU 选择。比 Whisper 快 15 倍的开源 ASR。">
+<meta property="og:title" content="SenseVoice 部署指南：五语种识别、情感与音频事件 | FunASR 博客">
+<meta property="og:description" content="SenseVoice 部署完整教程：3 行 Python 代码跑通中、粤、英、日、韩语音识别，含语种、情感、音频事件检测、VAD 长音频分段及 GPU/CPU 选择。">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://www.funasr.com/blog/sensevoice-deployment-guide.html">
 <meta property="og:image" content="https://www.funasr.com/logo.png">
@@ -18,7 +18,7 @@
 <link rel="alternate" hreflang="x-default" href="https://www.funasr.com/en/blog/sensevoice-deployment-guide.html">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"BlogPosting","headline":"SenseVoice 部署指南：比 Whisper 快 15 倍的多语言语音识别 | FunASR 博客","description":"SenseVoice 部署完整教程：3 行 Python 代码跑通多语言语音识别，含语种/情感/音频事件检测、VAD 长音频分段、GPU/CPU 选择。比 Whisper 快 15 倍的开源 ASR。","datePublished":"2026-06-16","dateModified":"2026-06-16","author":{"@type":"Organization","name":"FunASR / Tongyi Lab"},"publisher":{"@type":"Organization","name":"FunASR","logo":{"@type":"ImageObject","url":"https://www.funasr.com/logo.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://www.funasr.com/blog/sensevoice-deployment-guide.html"},"image":"https://www.funasr.com/logo.png"}
+{"@context":"https://schema.org","@type":"BlogPosting","headline":"SenseVoice 部署指南：五语种识别、情感与音频事件 | FunASR 博客","description":"SenseVoice 部署完整教程：3 行 Python 代码跑通中、粤、英、日、韩语音识别，含语种、情感、音频事件检测、VAD 长音频分段及 GPU/CPU 选择。","datePublished":"2026-06-16","dateModified":"2026-08-17","author":{"@type":"Organization","name":"FunASR / Tongyi Lab"},"publisher":{"@type":"Organization","name":"FunASR","logo":{"@type":"ImageObject","url":"https://www.funasr.com/logo.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://www.funasr.com/blog/sensevoice-deployment-guide.html"},"image":"https://www.funasr.com/logo.png"}
 </script>
 <style>:root{--primary:#2563eb;--primary-dark:#1d4ed8;--bg:#fff;--surface:#f8fafc;--border:#e2e8f0;--text:#0f172a;--text-soft:#475569;--text-muted:#94a3b8;--radius:12px}
 *{margin:0;padding:0;box-sizing:border-box}
@@ -54,14 +54,18 @@ p code,li code{background:var(--surface);padding:2px 6px;border-radius:5px;font-
 .post-card p{margin:0;color:var(--text-soft);font-size:0.9rem}
 .post-card .date{color:var(--text-muted);font-size:0.8rem}
 footer{background:#0f172a;color:#94a3b8;padding:28px 0;text-align:center;font-size:0.8rem}
-footer a{color:#94a3b8}</style>
+footer a{color:#94a3b8}
+@media(max-width:700px){
+.nav{padding:12px 0}.nav .container{gap:16px}.nav-links{display:none}.nav-btn{white-space:nowrap}
+article{padding-top:96px}
+}</style>
 </head>
 <body>
-<nav class="nav"><div class="container"><a href="/" class="nav-logo">Fun<span>ASR</span></a><div class="nav-links"><a href="/#capabilities">核心能力</a><a href="/#usage">如何使用</a><a href="/#benchmark">性能</a><a href="/#demo">演示</a><a href="https://modelscope.github.io/FunASR/zh/" target="_blank">文档</a><a href="/quickstart.html">快速上手</a><a href="/models.html">模型</a><a href="/ecosystem.html">生态</a><a href="/blog/">技术博客</a><a href="/vs-whisper.html">对比 Whisper</a><a href="/donors.html">功德榜</a></div><a href="https://www.funasr.com/en/blog/sensevoice-deployment-guide.html" style="font-size:0.83rem;font-weight:500;color:var(--text-soft)">EN</a><a href="https://github.com/modelscope/FunASR" target="_blank" class="nav-btn">GitHub ★</a></div></nav>
+<nav class="nav"><div class="container"><a href="/" class="nav-logo">Fun<span>ASR</span></a><div class="nav-links"><a href="/#capabilities">核心能力</a><a href="/#usage">如何使用</a><a href="/#benchmark">性能</a><a href="/#demo">演示</a><a href="https://modelscope.github.io/FunASR/zh/" target="_blank">文档</a><a href="/quickstart.html">快速上手</a><a href="/models.html">模型</a><a href="/ecosystem.html">生态</a><a href="/blog/">技术博客</a><a href="/vs-whisper.html">对比 Whisper</a><a href="/donors.html">功德榜</a></div><a href="https://www.funasr.com/en/blog/sensevoice-deployment-guide.html" style="font-size:0.83rem;font-weight:500;color:var(--text-soft)">EN</a><a href="/go/github" target="_blank" class="nav-btn">GitHub ★</a></div></nav>
 <article><div class="container">
-<h1>SenseVoice 部署指南：比 Whisper 快 15 倍的多语言语音识别</h1>
+<h1>SenseVoice 部署指南：五语种识别、情感与音频事件</h1>
 <p class="post-meta">FunASR 技术博客 · 2026-06-16 · 部署教程</p>
-<p><strong>SenseVoice</strong> 是 FunAudioLLM 团队开源的多语言语音理解大模型。它不仅做语音识别（ASR），还能在一次前向推理中同时输出<strong>语种识别、情感识别、音频事件检测</strong>。模型采用非自回归结构，推理速度比 Whisper-Large 快约 <strong>15 倍</strong>，单条 10 秒音频的识别延迟可低至几十毫秒，非常适合工业级实时与批量场景。</p>
+<p><strong>SenseVoice</strong> 是 FunAudioLLM 团队开源的语音理解模型，支持普通话、粤语、英语、日语和韩语。它不仅做语音识别（ASR），还能在一次前向推理中同时输出<strong>语种识别、情感识别、音频事件检测</strong>。模型采用非自回归结构，适合低延迟和批量场景；实际吞吐和延迟取决于硬件、音频长度及 batch，需要在目标环境实测。</p>
 <p>本文用可直接复制运行的代码，带你 3 步把 SenseVoice 跑起来。</p>
 
 <h2>1. 安装</h2>
@@ -112,8 +116,8 @@ res = model.generate(input="long_audio.wav", language="auto", use_itn=True, batc
 <table>
 <thead><tr><th>维度</th><th>SenseVoice-Small</th></tr></thead>
 <tbody>
-<tr><td>相对 Whisper-Large 速度</td><td>约 15×</td></tr>
-<tr><td>支持语言</td><td>中文 / 粤语 / 英文 / 日文 / 韩文 等</td></tr>
+<tr><td>性能验证</td><td>在目标硬件、音频分布和 batch 下实测 RTF 与 p50/p95</td></tr>
+<tr><td>支持语言</td><td>中文 / 粤语 / 英文 / 日文 / 韩文</td></tr>
 <tr><td>附加能力</td><td>语种识别 · 情感识别 · 音频事件检测</td></tr>
 <tr><td>架构</td><td>非自回归（低延迟）</td></tr>
 <tr><td>许可证</td><td>开源（可商用）</td></tr>
@@ -123,7 +127,7 @@ res = model.generate(input="long_audio.wav", language="auto", use_itn=True, batc
 <div class="cta">
 <h3>开始使用 SenseVoice</h3>
 <p>如果这篇指南对你有帮助，欢迎到 GitHub 点个 Star ⭐ 支持开源。</p>
-<a href="https://github.com/QwenAudio/SenseVoice" class="btn">SenseVoice GitHub ★</a>
+<a href="/go/sensevoice" class="btn">SenseVoice GitHub ★</a>
 </div>
 
 <p>延伸阅读：<a href="/vs-whisper.html">FunASR vs Whisper 对比</a> · <a href="/quickstart.html">FunASR 快速上手</a> · <a href="/models.html">全部模型</a></p>

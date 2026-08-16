@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>用 FunASR 自动生成字幕:从音频/视频一键导出 SRT 和 VTT | FunASR</title><meta name="description" content="本地、免费给视频/音频生成字幕:`funasr video.wav -f srt` 一行出 SRT,Python 还能同时导出 VTT、带说话人和真实时间戳。中文强、50+ 语言,无需上传云端。代码全部实测。"><meta name="keywords" content="自动生成字幕, 视频转字幕, 音频生成srt, 字幕生成器, srt 生成 python, vtt 字幕, 视频加字幕, 语音转字幕, 给视频配字幕, whisper 字幕替代">
-<link rel="icon" href="/logo.png"><meta property="og:title" content="用 FunASR 自动生成字幕:从音频/视频一键导出 SRT 和 VTT"><meta property="og:description" content="本地、免费给视频/音频生成字幕:`funasr video.wav -f srt` 一行出 SRT,Python 还能同时导出 VTT、带说话人和真实时间戳。中文强、50+ 语言,无需上传云端。代码全部实测。">
+<title>用 FunASR 自动生成字幕:从音频/视频一键导出 SRT 和 VTT | FunASR</title><meta name="description" content="本地、免费给视频/音频生成字幕:`funasr video.wav -f srt` 一行出 SRT,Python 还能同时导出 VTT、带说话人和真实时间戳。中文强、SenseVoiceSmall 五语种及 Fun-ASR-MLT-Nano 31 语种,无需上传云端。代码全部实测。"><meta name="keywords" content="自动生成字幕, 视频转字幕, 音频生成srt, 字幕生成器, srt 生成 python, vtt 字幕, 视频加字幕, 语音转字幕, 给视频配字幕, whisper 字幕替代">
+<link rel="icon" href="/logo.png"><meta property="og:title" content="用 FunASR 自动生成字幕:从音频/视频一键导出 SRT 和 VTT"><meta property="og:description" content="本地、免费给视频/音频生成字幕:`funasr video.wav -f srt` 一行出 SRT,Python 还能同时导出 VTT、带说话人和真实时间戳。中文强、SenseVoiceSmall 五语种及 Fun-ASR-MLT-Nano 31 语种,无需上传云端。代码全部实测。">
 <meta property="og:type" content="article"><meta property="og:url" content="https://www.funasr.com/blog/generate-subtitles-srt-vtt-from-audio-video.html"><meta property="og:image" content="https://www.funasr.com/logo.png">
 <link rel="canonical" href="https://www.funasr.com/blog/generate-subtitles-srt-vtt-from-audio-video.html"><link rel="alternate" hreflang="en" href="https://www.funasr.com/en/blog/generate-subtitles-srt-vtt-from-audio-video.html"><link rel="alternate" hreflang="zh" href="https://www.funasr.com/blog/generate-subtitles-srt-vtt-from-audio-video.html"><link rel="alternate" hreflang="x-default" href="https://www.funasr.com/en/blog/generate-subtitles-srt-vtt-from-audio-video.html">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"BlogPosting","headline":"用 FunASR 自动生成字幕:从音频/视频一键导出 SRT 和 VTT","description":"本地、免费给视频/音频生成字幕:`funasr video.wav -f srt` 一行出 SRT,Python 还能同时导出 VTT、带说话人和真实时间戳。中文强、50+ 语言,无需上传云端。代码全部实测。","datePublished":"2026-06-18","dateModified":"2026-06-18","author":{"@type":"Organization","name":"FunASR / Tongyi Lab"},"publisher":{"@type":"Organization","name":"FunASR","logo":{"@type":"ImageObject","url":"https://www.funasr.com/logo.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://www.funasr.com/blog/generate-subtitles-srt-vtt-from-audio-video.html"},"image":"https://www.funasr.com/logo.png"}
+{"@context":"https://schema.org","@type":"BlogPosting","headline":"用 FunASR 自动生成字幕:从音频/视频一键导出 SRT 和 VTT","description":"本地、免费给视频/音频生成字幕:`funasr video.wav -f srt` 一行出 SRT,Python 还能同时导出 VTT、带说话人和真实时间戳。中文强、SenseVoiceSmall 五语种及 Fun-ASR-MLT-Nano 31 语种,无需上传云端。代码全部实测。","datePublished":"2026-06-18","dateModified":"2026-06-18","author":{"@type":"Organization","name":"FunASR / Tongyi Lab"},"publisher":{"@type":"Organization","name":"FunASR","logo":{"@type":"ImageObject","url":"https://www.funasr.com/logo.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://www.funasr.com/blog/generate-subtitles-srt-vtt-from-audio-video.html"},"image":"https://www.funasr.com/logo.png"}
 </script>
 <style>:root{--primary:#2563eb;--primary-dark:#1d4ed8;--bg:#fff;--surface:#f8fafc;--border:#e2e8f0;--text:#0f172a;--text-soft:#475569;--text-muted:#94a3b8;--radius:12px}
 *{margin:0;padding:0;box-sizing:border-box}
@@ -43,11 +43,11 @@ p code,li code{background:var(--surface);padding:2px 6px;border-radius:5px;font-
 .post-card .date{color:var(--text-muted);font-size:0.8rem}
 footer{background:#0f172a;color:#94a3b8;padding:28px 0;text-align:center;font-size:0.8rem}
 footer a{color:#94a3b8}</style></head><body>
-<nav class="nav"><div class="container"><a href="/" class="nav-logo">Fun<span>ASR</span></a><div class="nav-links"><a href="/#capabilities">核心能力</a><a href="/#usage">如何使用</a><a href="/#benchmark">性能</a><a href="/#demo">演示</a><a href="https://modelscope.github.io/FunASR/zh/" target="_blank">文档</a><a href="/quickstart.html">快速上手</a><a href="/models.html">模型</a><a href="/ecosystem.html">生态</a><a href="/blog/">技术博客</a><a href="/vs-whisper.html">对比 Whisper</a><a href="/donors.html">功德榜</a></div><a href="https://www.funasr.com/en/blog/generate-subtitles-srt-vtt-from-audio-video.html" style="font-size:0.83rem;font-weight:600;color:var(--text-soft)">EN</a><a href="https://github.com/modelscope/FunASR" target="_blank" class="nav-btn">GitHub ★</a></div></nav>
+<nav class="nav"><div class="container"><a href="/" class="nav-logo">Fun<span>ASR</span></a><div class="nav-links"><a href="/#capabilities">核心能力</a><a href="/#usage">如何使用</a><a href="/#benchmark">性能</a><a href="/#demo">演示</a><a href="https://modelscope.github.io/FunASR/zh/" target="_blank">文档</a><a href="/quickstart.html">快速上手</a><a href="/models.html">模型</a><a href="/ecosystem.html">生态</a><a href="/blog/">技术博客</a><a href="/vs-whisper.html">对比 Whisper</a><a href="/donors.html">功德榜</a></div><a href="https://www.funasr.com/en/blog/generate-subtitles-srt-vtt-from-audio-video.html" style="font-size:0.83rem;font-weight:600;color:var(--text-soft)">EN</a><a href="/go/github" target="_blank" class="nav-btn">GitHub ★</a></div></nav>
 <article><div class="container">
 <h1>用 FunASR 自动生成字幕:从音频/视频一键导出 SRT 和 VTT</h1>
 <p class="post-meta">FunASR 技术博客 · 2026-06-18 · 教程</p>
-<p>要给视频或音频配字幕,不一定要上传到云端或买 API。FunASR 可以在本地、免费地把语音转成带时间戳的 <strong>SRT</strong> 或 <strong>VTT</strong> 字幕,还能标注说话人。中文尤其强,同时支持 50+ 语言。下面的命令和代码都已实测。</p>
+<p>要给视频或音频配字幕,不一定要上传到云端或买 API。FunASR 可以在本地、免费地把语音转成带时间戳的 <strong>SRT</strong> 或 <strong>VTT</strong> 字幕,还能标注说话人。中文尤其强,同时支持 SenseVoiceSmall 五语种及 Fun-ASR-MLT-Nano 31 语种。下面的命令和代码都已实测。</p>
 
 <h2>第一步(视频):先抽出音频</h2>
 <p>如果源文件是视频,用 ffmpeg 抽出 16kHz 单声道音频(FunASR 的标准输入):</p>
@@ -100,9 +100,9 @@ Speaker 0: 欢迎大家来体验达摩院推出的语音识别模型</code></pre
 <ul>
 <li><strong>本地、免费、隐私</strong>:无需上传、无 API key、无时长费用。</li>
 <li><strong>快</strong>:SenseVoice 非自回归,远快于 Whisper(<a href="/blog/funasr-vs-whisper-benchmark.html">实测对比</a>),长视频也能很快出字幕。</li>
-<li><strong>中文更准</strong> + 50+ 语言;自带 VAD 分句、说话人标注、真实时间戳。</li>
+<li><strong>中文更准</strong> + SenseVoiceSmall 五语种及 Fun-ASR-MLT-Nano 31 语种;自带 VAD 分句、说话人标注、真实时间戳。</li>
 </ul>
-<div class="cta"><p>FunASR 是通义实验室开源的工业级语音识别工具包。</p><a class="btn" href="https://github.com/modelscope/FunASR" target="_blank">在 GitHub 上 Star FunASR ★</a></div>
+<div class="cta"><p>FunASR 是通义实验室开源的工业级语音识别工具包。</p><a class="btn" href="/go/github" target="_blank">在 GitHub 上 Star FunASR ★</a></div>
 <!--related-posts-->
 <h2>相关文章</h2>
 <ul class="post-list">
@@ -130,5 +130,5 @@ Speaker 0: 欢迎大家来体验达摩院推出的语音识别模型</code></pre
 <li><a href="/blog/speech-to-text-timestamps-python.html">语音识别带时间戳(字级)</a></li>
 </ul>
 </div></article>
-<footer><div class="container">FunASR · 通义实验室开源语音识别 · <a href="https://github.com/modelscope/FunASR">GitHub</a></div></footer>
+<footer><div class="container">FunASR · 通义实验室开源语音识别 · <a href="/go/github">GitHub</a></div></footer>
 </body></html>

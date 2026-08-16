@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>FunASR Models — SenseVoice, Paraformer, Fun-ASR-Nano, cam++</title>
-<meta name="description" content="Choose the right FunASR model: SenseVoice (170x realtime, 50+ langs), Paraformer (Chinese accuracy and reliable character timestamps), Fun-ASR-Nano (LLM-based, vLLM accelerated), and cam++ (speaker diarization).">
+<meta name="description" content="Choose the right FunASR model: SenseVoice (Mandarin, Cantonese, English, Japanese, and Korean), Paraformer (Chinese accuracy and reliable character timestamps), Fun-ASR-Nano (LLM-based, vLLM accelerated), and cam++ (speaker diarization).">
 <link rel="icon" href="../logo.png">
 <meta property="og:title" content="FunASR Models — Speech Recognition Model Comparison">
 <meta property="og:description" content="Compare FunASR models: SenseVoice, Paraformer, Fun-ASR-Nano for speech recognition. Choose by speed, accuracy, language support, and features.">
@@ -60,7 +60,7 @@ footer a{color:#60a5fa}
 </style>
 </head>
 <body>
-<nav class="nav"><div class="container"><a class="nav-logo" href="../en/">Fun<span>ASR</span></a><div class="nav-links"><a href="/en/#capabilities">Capabilities</a><a href="/en/#usage">How to Use</a><a href="/en/#benchmark">Benchmark</a><a href="/en/#demo">Demo</a><a href="https://modelscope.github.io/FunASR/" target="_blank">Docs</a><a href="quickstart.html">Quickstart</a><a href="models.html">Models</a><a href="ecosystem.html">Ecosystem</a><a href="/en/blog/">Blog</a><a href="vs-whisper.html">vs Whisper</a><a href="/en/donors.html">Thanks</a><a href="/models.html" style="font-size:0.85rem;font-weight:500;color:var(--text-soft);text-decoration:none">中文</a><a href="https://github.com/modelscope/FunASR" target="_blank" class="nav-btn">GitHub ★</a></div></div></nav>
+<nav class="nav"><div class="container"><a class="nav-logo" href="../en/">Fun<span>ASR</span></a><div class="nav-links"><a href="/en/#capabilities">Capabilities</a><a href="/en/#usage">How to Use</a><a href="/en/#benchmark">Benchmark</a><a href="/en/#demo">Demo</a><a href="https://modelscope.github.io/FunASR/" target="_blank">Docs</a><a href="quickstart.html">Quickstart</a><a href="models.html">Models</a><a href="ecosystem.html">Ecosystem</a><a href="/en/blog/">Blog</a><a href="vs-whisper.html">vs Whisper</a><a href="/en/donors.html">Thanks</a><a href="/models.html" style="font-size:0.85rem;font-weight:500;color:var(--text-soft);text-decoration:none">中文</a><a href="/go/github" target="_blank" class="nav-btn">GitHub ★</a></div></div></nav>
 
 <article>
 <div class="container">
@@ -75,10 +75,10 @@ footer a{color:#60a5fa}
 <tr><th>Model</th><th>Speed</th><th>Languages</th><th>Params</th><th>Best For</th></tr>
 </thead>
 <tbody>
-<tr><td><strong>Fun-ASR-Nano</strong> ⭐</td><td>vLLM 340x</td><td>zh/en/ja + Chinese dialects/accents</td><td>800M</td><td>Flagship · LLM-ASR · hardest cases</td></tr>
+<tr><td><strong>Fun-ASR-Nano</strong> ⭐</td><td>vLLM; benchmark your hardware</td><td>zh/en/ja + Chinese dialects/accents</td><td>800M</td><td>Flagship · LLM-ASR · hardest cases</td></tr>
 <tr><td><strong>Fun-ASR-MLT-Nano</strong></td><td>vLLM</td><td>31</td><td>800M</td><td>Separate multilingual checkpoint</td></tr>
-<tr><td><strong>SenseVoice Small</strong></td><td>170x realtime</td><td>50+</td><td>234M</td><td>Fast multilingual, emotion detection</td></tr>
-<tr><td><strong>Paraformer-zh</strong></td><td>120x realtime</td><td>zh, yue</td><td>220M</td><td>Best Chinese accuracy</td></tr>
+<tr><td><strong>SenseVoice Small</strong></td><td>Non-autoregressive; benchmark your hardware</td><td>zh, yue, en, ja, ko</td><td>234M</td><td>Five-language ASR, emotion detection</td></tr>
+<tr><td><strong>Paraformer-zh</strong></td><td>Non-autoregressive; benchmark your hardware</td><td>zh, yue</td><td>220M</td><td>Best Chinese accuracy</td></tr>
 <tr><td><strong>cam++</strong></td><td>realtime</td><td>any</td><td>7.2M</td><td>Speaker diarization &amp; verification</td></tr>
 </tbody>
 </table>
@@ -123,10 +123,10 @@ result = model.generate(input="audio.wav")</pre>
 <div class="model-card">
 <div class="model-name">SenseVoice Small</div>
 <div class="model-meta">234M params &middot; Non-autoregressive &middot; <a href="/go/sensevoice">GitHub</a> &middot; <a href="https://huggingface.co/FunAudioLLM/SenseVoiceSmall">HuggingFace</a></div>
-<div class="model-desc">Ultra-fast speech recognition with built-in emotion and audio event detection. Supports 50+ languages including Chinese, English, Japanese, Korean, French, German, and more. Non-autoregressive architecture delivers 170x realtime speed on GPU.</div>
+<div class="model-desc">Ultra-fast speech recognition with built-in emotion and audio event detection. Supports Mandarin, Cantonese, English, Japanese, and Korean. Its non-autoregressive architecture suits low-latency deployment; throughput depends on hardware, audio length, and batch configuration.</div>
 <div class="model-features">
-<span class="badge badge-green">170x realtime</span>
-<span class="badge badge-blue">50+ languages</span>
+<span class="badge badge-green">Non-autoregressive</span>
+<span class="badge badge-blue">Five languages</span>
 <span class="badge badge-orange">Emotion detection</span>
 <span class="badge badge-blue">Audio events</span>
 <span class="badge badge-green">CPU-viable</span>
@@ -144,7 +144,7 @@ print(result[0]["text"])</pre>
 <div class="model-meta">220M params &middot; Non-autoregressive &middot; <a href="https://huggingface.co/funasr/paraformer-zh">HuggingFace</a></div>
 <div class="model-desc">Highest-accuracy Chinese speech recognition model. Non-autoregressive with CTC-guided attention, trained on 60,000+ hours of Mandarin speech. Includes built-in punctuation restoration and timestamp prediction.</div>
 <div class="model-features">
-<span class="badge badge-green">120x realtime</span>
+<span class="badge badge-green">Non-autoregressive; benchmark your hardware</span>
 <span class="badge badge-blue">Chinese + Cantonese</span>
 <span class="badge badge-green">Best accuracy</span>
 <span class="badge badge-blue">Timestamps</span>
@@ -230,6 +230,6 @@ curl http://localhost:8000/v1/audio/transcriptions \
 </div>
 </article>
 
-<footer><div class="container">FunASR &mdash; Industrial-grade speech recognition toolkit &mdash; <a href="https://github.com/modelscope/FunASR">GitHub</a> &middot; <a href="../en/">Home</a> &middot; <a href="https://www.funasr.com">funasr.com</a></div></footer>
+<footer><div class="container">FunASR &mdash; Industrial-grade speech recognition toolkit &mdash; <a href="/go/github">GitHub</a> &middot; <a href="../en/">Home</a> &middot; <a href="https://www.funasr.com">funasr.com</a></div></footer>
 </body>
 </html>

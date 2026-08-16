@@ -57,7 +57,7 @@ footer{background:#0f172a;color:#94a3b8;padding:28px 0;text-align:center;font-si
 footer a{color:#94a3b8}</style>
 </head>
 <body>
-<nav class="nav"><div class="container"><a href="/" class="nav-logo">Fun<span>ASR</span></a><div class="nav-links"><a href="/#capabilities">核心能力</a><a href="/#usage">如何使用</a><a href="/#benchmark">性能</a><a href="/#demo">演示</a><a href="https://modelscope.github.io/FunASR/zh/" target="_blank">文档</a><a href="/quickstart.html">快速上手</a><a href="/models.html">模型</a><a href="/ecosystem.html">生态</a><a href="/blog/">技术博客</a><a href="/vs-whisper.html">对比 Whisper</a><a href="/donors.html">功德榜</a></div><a href="https://www.funasr.com/en/blog/japanese-speech-recognition.html" style="font-size:0.83rem;font-weight:500;color:var(--text-soft)">EN</a><a href="https://github.com/modelscope/FunASR" target="_blank" class="nav-btn">GitHub ★</a></div></nav>
+<nav class="nav"><div class="container"><a href="/" class="nav-logo">Fun<span>ASR</span></a><div class="nav-links"><a href="/#capabilities">核心能力</a><a href="/#usage">如何使用</a><a href="/#benchmark">性能</a><a href="/#demo">演示</a><a href="https://modelscope.github.io/FunASR/zh/" target="_blank">文档</a><a href="/quickstart.html">快速上手</a><a href="/models.html">模型</a><a href="/ecosystem.html">生态</a><a href="/blog/">技术博客</a><a href="/vs-whisper.html">对比 Whisper</a><a href="/donors.html">功德榜</a></div><a href="https://www.funasr.com/en/blog/japanese-speech-recognition.html" style="font-size:0.83rem;font-weight:500;color:var(--text-soft)">EN</a><a href="/go/github" target="_blank" class="nav-btn">GitHub ★</a></div></nav>
 <article><div class="container">
 <h1>日语语音识别:SenseVoice 一个模型搞定日语转写 + 标点 + 情感(附与 Whisper 的真实对比)</h1>
 <p class="post-meta">2026-06-22 · FunASR 团队</p>
@@ -106,12 +106,12 @@ print(rich_transcription_postprocess(res[0]["text"]))
 <tr><td>情感 / 音频事件</td><td>✅ 一次出</td><td>❌</td></tr>
 <tr><td>逆文本归一化(ITN)</td><td>✅ 内置</td><td>部分</td></tr>
 <tr><td>速度</td><td>非自回归,实测 RTF≈0.04(GPU)</td><td>自回归,更慢</td></tr>
-<tr><td>多语种</td><td>一个模型覆盖 50+ 语种(ja/ko/zh/yue/en…)</td><td>多语种</td></tr>
+<tr><td>多语种</td><td>一个模型覆盖 中、粤、英、日、韩五种语言(ja/ko/zh/yue/en…)</td><td>多语种</td></tr>
 <tr><td>许可证</td><td>开源,可商用</td><td>开源</td></tr>
 </table>
 <p>如果你的场景是<strong>日语 + 中文 + 英文混合</strong>(跨境电商客服、字幕、会议),SenseVoice 一个模型就能全覆盖,还自带情感分析。想了解它的情感/事件检测能力,看 <a href="/blog/sensevoice-emotion-language-detection.html">SenseVoice 情感与音频事件识别</a>;不确定选哪个模型,看 <a href="/blog/which-funasr-model.html">FunASR 模型选型指南</a>;中文准确率对比见 <a href="/blog/funasr-vs-whisper-benchmark.html">FunASR vs Whisper benchmark</a>。</p>
 
-<div class="cta"><p><strong>FunASR 全家桶都是开源的</strong>——工业级 ASR / VAD / 标点 / 说话人 / 情感事件 / LLM-ASR,日语等 50+ 语种开箱即用。觉得有用就点个 Star 支持一下 👇</p><p><a class="btn" href="https://github.com/QwenAudio/SenseVoice" target="_blank">⭐ Star SenseVoice</a></p><p style="margin-top:10px;font-size:0.85rem">也欢迎 Star:<a href="https://github.com/modelscope/FunASR" target="_blank">FunASR</a> · <a href="https://github.com/QwenAudio/Fun-ASR" target="_blank">Fun-ASR</a> · <a href="https://github.com/modelscope/FunClip" target="_blank">FunClip</a></p></div>
+<div class="cta"><p><strong>FunASR 全家桶都是开源的</strong>——工业级 ASR / VAD / 标点 / 说话人 / 情感事件 / LLM-ASR,日语等 中、粤、英、日、韩五种语言开箱即用。觉得有用就点个 Star 支持一下 👇</p><p><a class="btn" href="/go/sensevoice" target="_blank">⭐ Star SenseVoice</a></p><p style="margin-top:10px;font-size:0.85rem">也欢迎 Star:<a href="/go/github" target="_blank">FunASR</a> · <a href="/go/fun-asr" target="_blank">Fun-ASR</a> · <a href="/go/funclip" target="_blank">FunClip</a></p></div>
 <!--related-posts-->
 <h2>相关文章</h2>
 <ul class="post-list">

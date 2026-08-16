@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Python 语音转文字:用 FunASR 本地、免费地把音频转成文本 | FunASR</title><meta name="description" content="用 Python 几行代码把音频转成文字:`AutoModel(...).generate(...)`,本地运行、免费、无 API key。带时间戳、说话人、批量处理,中文强、50+ 语言。代码全部实测。"><meta name="keywords" content="python 语音转文字, python 语音识别, 音频转文字 python, 语音转文本 python, funasr python, 离线语音识别 python, 免费语音转文字, python 语音转文本教程">
-<link rel="icon" href="/logo.png"><meta property="og:title" content="Python 语音转文字:用 FunASR 本地、免费地把音频转成文本"><meta property="og:description" content="用 Python 几行代码把音频转成文字:`AutoModel(...).generate(...)`,本地运行、免费、无 API key。带时间戳、说话人、批量处理,中文强、50+ 语言。代码全部实测。">
+<title>Python 语音转文字:用 FunASR 本地、免费地把音频转成文本 | FunASR</title><meta name="description" content="用 Python 几行代码把音频转成文字:`AutoModel(...).generate(...)`,本地运行、免费、无 API key。带时间戳、说话人、批量处理,中文强、SenseVoiceSmall 五语种及 Fun-ASR-MLT-Nano 31 语种。代码全部实测。"><meta name="keywords" content="python 语音转文字, python 语音识别, 音频转文字 python, 语音转文本 python, funasr python, 离线语音识别 python, 免费语音转文字, python 语音转文本教程">
+<link rel="icon" href="/logo.png"><meta property="og:title" content="Python 语音转文字:用 FunASR 本地、免费地把音频转成文本"><meta property="og:description" content="用 Python 几行代码把音频转成文字:`AutoModel(...).generate(...)`,本地运行、免费、无 API key。带时间戳、说话人、批量处理,中文强、SenseVoiceSmall 五语种及 Fun-ASR-MLT-Nano 31 语种。代码全部实测。">
 <meta property="og:type" content="article"><meta property="og:url" content="https://www.funasr.com/blog/speech-to-text-python-transcribe-audio.html"><meta property="og:image" content="https://www.funasr.com/logo.png">
 <link rel="canonical" href="https://www.funasr.com/blog/speech-to-text-python-transcribe-audio.html"><link rel="alternate" hreflang="en" href="https://www.funasr.com/en/blog/speech-to-text-python-transcribe-audio.html"><link rel="alternate" hreflang="zh" href="https://www.funasr.com/blog/speech-to-text-python-transcribe-audio.html"><link rel="alternate" hreflang="x-default" href="https://www.funasr.com/en/blog/speech-to-text-python-transcribe-audio.html">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"BlogPosting","headline":"Python 语音转文字:用 FunASR 本地、免费地把音频转成文本","description":"用 Python 几行代码把音频转成文字:`AutoModel(...).generate(...)`,本地运行、免费、无 API key。带时间戳、说话人、批量处理,中文强、50+ 语言。代码全部实测。","datePublished":"2026-06-18","dateModified":"2026-06-18","author":{"@type":"Organization","name":"FunASR / Tongyi Lab"},"publisher":{"@type":"Organization","name":"FunASR","logo":{"@type":"ImageObject","url":"https://www.funasr.com/logo.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://www.funasr.com/blog/speech-to-text-python-transcribe-audio.html"},"image":"https://www.funasr.com/logo.png"}
+{"@context":"https://schema.org","@type":"BlogPosting","headline":"Python 语音转文字:用 FunASR 本地、免费地把音频转成文本","description":"用 Python 几行代码把音频转成文字:`AutoModel(...).generate(...)`,本地运行、免费、无 API key。带时间戳、说话人、批量处理,中文强、SenseVoiceSmall 五语种及 Fun-ASR-MLT-Nano 31 语种。代码全部实测。","datePublished":"2026-06-18","dateModified":"2026-06-18","author":{"@type":"Organization","name":"FunASR / Tongyi Lab"},"publisher":{"@type":"Organization","name":"FunASR","logo":{"@type":"ImageObject","url":"https://www.funasr.com/logo.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://www.funasr.com/blog/speech-to-text-python-transcribe-audio.html"},"image":"https://www.funasr.com/logo.png"}
 </script>
 <style>:root{--primary:#2563eb;--primary-dark:#1d4ed8;--bg:#fff;--surface:#f8fafc;--border:#e2e8f0;--text:#0f172a;--text-soft:#475569;--text-muted:#94a3b8;--radius:12px}
 *{margin:0;padding:0;box-sizing:border-box}
@@ -45,11 +45,11 @@ footer{background:#0f172a;color:#94a3b8;padding:28px 0;text-align:center;font-si
 footer a{color:#94a3b8}
 @media(max-width:900px){.nav-links{display:none}.nav .container{gap:16px}.nav-logo{margin-right:auto}h1{font-size:1.75rem}table{table-layout:fixed;font-size:0.78rem}th,td{padding:8px 4px;overflow-wrap:anywhere}p code,li code{overflow-wrap:anywhere;word-break:break-word}}
 </style></head><body>
-<nav class="nav"><div class="container"><a href="/" class="nav-logo">Fun<span>ASR</span></a><div class="nav-links"><a href="/#capabilities">核心能力</a><a href="/#usage">如何使用</a><a href="/#benchmark">性能</a><a href="/#demo">演示</a><a href="https://modelscope.github.io/FunASR/zh/" target="_blank">文档</a><a href="/quickstart.html">快速上手</a><a href="/models.html">模型</a><a href="/ecosystem.html">生态</a><a href="/blog/">技术博客</a><a href="/vs-whisper.html">对比 Whisper</a><a href="/donors.html">功德榜</a></div><a href="https://www.funasr.com/en/blog/speech-to-text-python-transcribe-audio.html" style="font-size:0.83rem;font-weight:600;color:var(--text-soft)">EN</a><a href="https://github.com/modelscope/FunASR" target="_blank" class="nav-btn">GitHub ★</a></div></nav>
+<nav class="nav"><div class="container"><a href="/" class="nav-logo">Fun<span>ASR</span></a><div class="nav-links"><a href="/#capabilities">核心能力</a><a href="/#usage">如何使用</a><a href="/#benchmark">性能</a><a href="/#demo">演示</a><a href="https://modelscope.github.io/FunASR/zh/" target="_blank">文档</a><a href="/quickstart.html">快速上手</a><a href="/models.html">模型</a><a href="/ecosystem.html">生态</a><a href="/blog/">技术博客</a><a href="/vs-whisper.html">对比 Whisper</a><a href="/donors.html">功德榜</a></div><a href="https://www.funasr.com/en/blog/speech-to-text-python-transcribe-audio.html" style="font-size:0.83rem;font-weight:600;color:var(--text-soft)">EN</a><a href="/go/github" target="_blank" class="nav-btn">GitHub ★</a></div></nav>
 <article><div class="container">
 <h1>Python 语音转文字:用 FunASR 本地、免费地把音频转成文本</h1>
 <p class="post-meta">FunASR 技术博客 · 2026-06-18 · 教程</p>
-<p>在 Python 里把音频转成文字,不一定要用云 API 或庞大的 Whisper。FunASR 几行代码就能在本地、免费地转写,还自带时间戳、说话人分离和批量处理。中文尤其强,同时支持 50+ 语言。下面每段代码都已实测。</p>
+<p>在 Python 里把音频转成文字,不一定要用云 API 或庞大的 Whisper。FunASR 几行代码就能在本地、免费地转写,还自带时间戳、说话人分离和批量处理。中文尤其强,同时支持 SenseVoiceSmall 五语种及 Fun-ASR-MLT-Nano 31 语种。下面每段代码都已实测。</p>
 
 <h2>安装</h2>
 <pre><code>pip install -U torch torchaudio
@@ -89,7 +89,7 @@ for r in results:
 
 <h2>选哪个模型</h2>
 <table><thead><tr><th>model=</th><th>适合</th></tr></thead><tbody>
-<tr><td><code>iic/SenseVoiceSmall</code></td><td>默认,极快,50+ 语言,带情感/事件</td></tr>
+<tr><td><code>iic/SenseVoiceSmall</code></td><td>默认,极快,SenseVoiceSmall 五语种及 Fun-ASR-MLT-Nano 31 语种,带情感/事件</td></tr>
 <tr><td><code>paraformer-zh</code></td><td>经典中文生产级,稳</td></tr>
 <tr><td><code>FunAudioLLM/Fun-ASR-Nano-2512</code></td><td>旗舰 LLM 解码,中英日 + 中文方言/口音</td></tr>
 <tr><td><code>FunAudioLLM/Fun-ASR-MLT-Nano-2512</code></td><td>独立多语 checkpoint,覆盖 31 语种</td></tr>
@@ -100,9 +100,9 @@ for r in results:
 <ul>
 <li><strong>本地、免费、隐私</strong>:无需联网、无 API key、无时长费用。</li>
 <li><strong>快</strong>:SenseVoice 非自回归,远快于 Whisper(<a href="/blog/funasr-vs-whisper-benchmark.html">实测对比</a>),CPU 也能实时。</li>
-<li><strong>中文更准</strong> + 50+ 语言;时间戳、说话人、热词、批量开箱即用。</li>
+<li><strong>中文更准</strong> + SenseVoiceSmall 五语种及 Fun-ASR-MLT-Nano 31 语种;时间戳、说话人、热词、批量开箱即用。</li>
 </ul>
-<div class="cta"><p>FunASR 是通义实验室开源的工业级语音识别工具包。</p><a class="btn" href="https://github.com/modelscope/FunASR" target="_blank">在 GitHub 上 Star FunASR ★</a></div>
+<div class="cta"><p>FunASR 是通义实验室开源的工业级语音识别工具包。</p><a class="btn" href="/go/github" target="_blank">在 GitHub 上 Star FunASR ★</a></div>
 <!--related-posts-->
 <h2>相关文章</h2>
 <ul class="post-list">
@@ -130,5 +130,5 @@ for r in results:
 <li><a href="/blog/speech-to-text-timestamps-python.html">语音识别带时间戳(字级)</a></li>
 </ul>
 </div></article>
-<footer><div class="container">FunASR · 通义实验室开源语音识别 · <a href="https://github.com/modelscope/FunASR">GitHub</a></div></footer>
+<footer><div class="container">FunASR · 通义实验室开源语音识别 · <a href="/go/github">GitHub</a></div></footer>
 </body></html>

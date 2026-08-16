@@ -57,7 +57,7 @@ footer{background:#0f172a;color:#94a3b8;padding:28px 0;text-align:center;font-si
 footer a{color:#94a3b8}</style>
 </head>
 <body>
-<nav class="nav"><div class="container"><a href="/en/" class="nav-logo">Fun<span>ASR</span></a><div class="nav-links"><a href="/en/#capabilities">Capabilities</a><a href="/en/#usage">How to Use</a><a href="/en/#benchmark">Benchmark</a><a href="/en/#demo">Demo</a><a href="https://modelscope.github.io/FunASR/" target="_blank">Docs</a><a href="/en/quickstart.html">Quickstart</a><a href="/en/models.html">Models</a><a href="/en/ecosystem.html">Ecosystem</a><a href="/en/blog/">Blog</a><a href="/en/vs-whisper.html">vs Whisper</a><a href="/en/donors.html">Donors</a></div><a href="https://www.funasr.com/blog/japanese-speech-recognition.html" style="font-size:0.83rem;font-weight:500;color:var(--text-soft)">中文</a><a href="https://github.com/modelscope/FunASR" target="_blank" class="nav-btn">GitHub ★</a></div></nav>
+<nav class="nav"><div class="container"><a href="/en/" class="nav-logo">Fun<span>ASR</span></a><div class="nav-links"><a href="/en/#capabilities">Capabilities</a><a href="/en/#usage">How to Use</a><a href="/en/#benchmark">Benchmark</a><a href="/en/#demo">Demo</a><a href="https://modelscope.github.io/FunASR/" target="_blank">Docs</a><a href="/en/quickstart.html">Quickstart</a><a href="/en/models.html">Models</a><a href="/en/ecosystem.html">Ecosystem</a><a href="/en/blog/">Blog</a><a href="/en/vs-whisper.html">vs Whisper</a><a href="/en/donors.html">Donors</a></div><a href="https://www.funasr.com/blog/japanese-speech-recognition.html" style="font-size:0.83rem;font-weight:500;color:var(--text-soft)">中文</a><a href="/go/github" target="_blank" class="nav-btn">GitHub ★</a></div></nav>
 <article><div class="container">
 <h1>Japanese Speech Recognition in Python — SenseVoice Does Transcription + Punctuation + Emotion in One Pass (vs Whisper)</h1>
 <p class="post-meta">2026-06-22 · FunASR Team</p>
@@ -106,12 +106,12 @@ print(rich_transcription_postprocess(res[0]["text"]))
 <tr><td>Emotion / audio events</td><td>✅ in one pass</td><td>❌</td></tr>
 <tr><td>Inverse text normalization</td><td>✅ built-in</td><td>partial</td></tr>
 <tr><td>Speed</td><td>non-autoregressive, measured RTF≈0.04 (GPU)</td><td>autoregressive, slower</td></tr>
-<tr><td>Multilingual</td><td>one model for 50+ languages (ja/ko/zh/yue/en…)</td><td>multilingual</td></tr>
+<tr><td>Multilingual</td><td>one model for Mandarin, Cantonese, English, Japanese, and Korean (ja/ko/zh/yue/en…)</td><td>multilingual</td></tr>
 <tr><td>License</td><td>open-source, commercial-friendly</td><td>open-source</td></tr>
 </table>
 <p>If your use case mixes <strong>Japanese + Chinese + English</strong> (cross-border support, subtitles, meetings), one SenseVoice model covers all of them and bundles emotion analysis. For its emotion/event detection, see <a href="/en/blog/sensevoice-emotion-language-detection.html">SenseVoice emotion &amp; audio event detection</a>; to pick a model, see the <a href="/en/blog/which-funasr-model.html">FunASR model selection guide</a>; and for Chinese accuracy, the <a href="/en/blog/funasr-vs-whisper-benchmark.html">FunASR vs Whisper benchmark</a>.</p>
 
-<div class="cta"><p><strong>The whole FunASR stack is open-source</strong> — industrial-grade ASR / VAD / punctuation / speaker / emotion &amp; events / LLM-ASR, with Japanese and 50+ languages out of the box. If it helps, a GitHub Star really supports the project 👇</p><p><a class="btn" href="https://github.com/QwenAudio/SenseVoice" target="_blank">⭐ Star SenseVoice</a></p><p style="margin-top:10px;font-size:0.85rem">Also star:<a href="https://github.com/modelscope/FunASR" target="_blank">FunASR</a> · <a href="https://github.com/QwenAudio/Fun-ASR" target="_blank">Fun-ASR</a> · <a href="https://github.com/modelscope/FunClip" target="_blank">FunClip</a></p></div>
+<div class="cta"><p><strong>The whole FunASR stack is open-source</strong> — industrial-grade ASR / VAD / punctuation / speaker / emotion &amp; events / LLM-ASR, with Japanese and Mandarin, Cantonese, English, Japanese, and Korean out of the box. If it helps, a GitHub Star really supports the project 👇</p><p><a class="btn" href="/go/sensevoice" target="_blank">⭐ Star SenseVoice</a></p><p style="margin-top:10px;font-size:0.85rem">Also star:<a href="/go/github" target="_blank">FunASR</a> · <a href="/go/fun-asr" target="_blank">Fun-ASR</a> · <a href="/go/funclip" target="_blank">FunClip</a></p></div>
 <!--related-posts-->
 <h2>Related posts</h2>
 <ul class="post-list">

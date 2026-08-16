@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>FunASR - 工业级语音识别服务 | 语音理解一站式解决方案</title>
-<meta name="description" content="FunASR 是工业级语音识别服务，提供语音识别、语音检测、标点恢复、说话人分离、情感检测、音频事件识别，统一 Python 接口，支持 50+ 语言，私有化部署。">
+<meta name="description" content="FunASR 是工业级语音识别服务，提供语音识别、语音检测、标点恢复、说话人分离、情感检测、音频事件识别，统一 Python 接口，并提供覆盖五语种 SenseVoiceSmall 与 31 语种 MLT-Nano 的私有化部署路径。">
 <link rel="icon" href="logo.png">
 <meta property="og:title" content="FunASR - 工业级语音理解一站式解决方案">
 <meta property="og:description" content="语音识别、语音检测、标点恢复、说话人分离、情感检测、音频事件识别——统一 Python 接口，一行命令部署。">
@@ -17,7 +17,7 @@
 <link rel="alternate" hreflang="x-default" href="https://www.funasr.com/en/">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"SoftwareApplication","name":"FunASR","applicationCategory":"DeveloperApplication","operatingSystem":"Linux, Windows, macOS","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"description":"Industrial-grade speech recognition toolkit supporting 50+ languages","url":"https://www.funasr.com","downloadUrl":"https://pypi.org/project/funasr/","author":{"@type":"Organization","name":"FunAudioLLM, Tongyi Lab"}}
+{"@context":"https://schema.org","@type":"SoftwareApplication","name":"FunASR","applicationCategory":"DeveloperApplication","operatingSystem":"Linux, Windows, macOS","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"description":"Industrial-grade speech recognition toolkit with model-specific language coverage and self-hosted deployment","url":"https://www.funasr.com","downloadUrl":"https://pypi.org/project/funasr/","author":{"@type":"Organization","name":"FunAudioLLM, Tongyi Lab"}}
 </script>
 <script src="/lang-redirect.js"></script>
 <style>
@@ -141,7 +141,7 @@ footer{background:#0f172a;color:#94a3b8;padding:48px 0 32px}
 
 </div>
 <a href="/en/" style="font-size:0.85rem;font-weight:500;color:var(--text-soft);text-decoration:none">EN</a>
-<a href="https://github.com/modelscope/FunASR" target="_blank" class="nav-btn">GitHub ★</a>
+<a href="/go/github" target="_blank" class="nav-btn">GitHub ★</a>
 </div></nav>
 
 <!-- Hero -->
@@ -153,14 +153,14 @@ footer{background:#0f172a;color:#94a3b8;padding:48px 0 32px}
 <a href="https://huggingface.co/FunAudioLLM/Fun-ASR-Nano-2512" target="_blank" rel="noopener" class="hero-flagship">🚀 旗舰 <strong>Fun-ASR-Nano</strong> · 中/英/日 + 中文方言/口音</a>
 <a href="https://huggingface.co/FunAudioLLM/Fun-ASR-MLT-Nano-2512" target="_blank" rel="noopener" class="hero-flagship mlt">🌍 31 语种 <strong>Fun-ASR-MLT-Nano</strong> · 独立 checkpoint</a>
 </div>
-<p class="hero-sub">语音识别、语音检测、标点恢复、说话人分离、情感检测、音频事件识别——统一的 Python 接口，一次调用完成全部处理。50+ 语言覆盖，私有化部署，生产就绪。</p>
+<p class="hero-sub">语音识别、语音检测、标点恢复、说话人分离、情感检测、音频事件识别——统一的 Python 接口，一次调用完成全部处理。模型覆盖范围明确，支持私有化部署和生产服务。</p>
 <div class="hero-actions">
 <a href="#usage" class="btn-primary">如何使用</a>
 <a href="#demo" class="btn-outline">观看演示</a>
 </div>
 <div class="hero-stats">
-<div class="hero-stat"><strong>50+</strong><span>支持语言</span></div>
-<div class="hero-stat"><strong>170x</strong><span>实时处理速度</span></div>
+<div class="hero-stat"><strong>31</strong><span>MLT-Nano 语种</span></div>
+<div class="hero-stat"><strong>5</strong><span>SenseVoice 语种</span></div>
 <div class="hero-stat"><strong>1 API</strong><span>统一调用接口</span></div>
 </div>
 </div>
@@ -189,7 +189,7 @@ print(result.text)
 <p>从原始音频到结构化输出的完整语音理解流水线，一次调用全部搞定</p>
 </div>
 <div class="capabilities-grid">
-<div class="cap-card"><div class="cap-icon">🎙️</div><h3>语音识别</h3><p>端到端 ASR，支持 50+ 语言，中文含 7 大方言及 26 种地域口音，自动语种检测</p></div>
+<div class="cap-card"><div class="cap-icon">🎙️</div><h3>语音识别</h3><p>端到端 ASR；SenseVoiceSmall 覆盖中、粤、英、日、韩，MLT-Nano 覆盖 31 语种，Nano 面向中文方言与口音</p></div>
 <div class="cap-card"><div class="cap-icon">📍</div><h3>语音检测 (VAD)</h3><p>毫秒级语音活动检测，自适应静音阈值，精确切分语音段与静音段</p></div>
 <div class="cap-card"><div class="cap-icon">✍️</div><h3>标点恢复</h3><p>自动添加标点符号和逆文本正则化，输出可直接阅读的规范文本</p></div>
 <div class="cap-card"><div class="cap-icon">👥</div><h3>说话人分离</h3><p>自动识别"谁说了什么"，为每句话标注说话人 ID，支持多人会议</p></div>
@@ -299,7 +299,7 @@ print(result.text)
 <div class="more-grid">
 <a class="more-item" href="https://github.com/modelscope/FunASR/blob/main/docs/vllm_guide_zh_v2.md" target="_blank">🔥 热词增强 <span>→</span></a>
 <a class="more-item" href="https://modelscope.github.io/FunASR/zh/tutorial.html" target="_blank">👥 说话人分离 <span>→</span></a>
-<a class="more-item" href="https://github.com/QwenAudio/SenseVoice" target="_blank">😊 情感检测 <span>→</span></a>
+<a class="more-item" href="/go/sensevoice" target="_blank">😊 情感检测 <span>→</span></a>
 <a class="more-item" href="https://modelscope.github.io/FunASR/zh/tutorial.html" target="_blank">🌍 多语言识别 <span>→</span></a>
 <a class="more-item" href="https://modelscope.github.io/FunASR/zh/training.html" target="_blank">🎯 模型微调 <span>→</span></a>
 <a class="more-item" href="https://github.com/modelscope/FunASR/blob/main/docs/vllm_guide_zh_v2.md" target="_blank">⚡ vLLM 加速 <span>→</span></a>
@@ -350,13 +350,13 @@ print(result.text)
 <a href="https://modelscope.github.io/FunASR/api.html">API 参考</a>
 </div>
 <div class="footer-col"><h4>生态</h4>
-<a href="https://github.com/QwenAudio/Fun-ASR">Fun-ASR-Nano</a>
-<a href="https://github.com/QwenAudio/SenseVoice">SenseVoice</a>
-<a href="https://github.com/modelscope/FunClip">FunClip</a>
+<a href="/go/fun-asr">Fun-ASR-Nano</a>
+<a href="/go/sensevoice">SenseVoice</a>
+<a href="/go/funclip">FunClip</a>
 <a href="https://github.com/QwenAudio/CosyVoice">CosyVoice</a>
 </div>
 <div class="footer-col"><h4>社区</h4>
-<a href="https://github.com/modelscope/FunASR">GitHub</a>
+<a href="/go/github">GitHub</a>
 <a href="https://github.com/modelscope/FunASR/discussions">Discussions</a>
 <a href="https://github.com/modelscope/FunASR/issues">问题反馈</a>
 </div>

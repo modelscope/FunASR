@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>FunASR 模型 — SenseVoice、Paraformer、Fun-ASR-Nano、cam++</title>
-<meta name="description" content="FunASR 模型选型指南：SenseVoice（170倍实时，50+语种）、Paraformer（中文高精度与可靠字级时间戳）、Fun-ASR-Nano（LLM 架构，vLLM 加速）、cam++（说话人分离）。">
+<meta name="description" content="FunASR 模型选型指南：SenseVoice（中、粤、英、日、韩五语种）、Paraformer（中文高精度与可靠字级时间戳）、Fun-ASR-Nano（LLM 架构，vLLM 加速）、cam++（说话人分离）。">
 <link rel="icon" href="logo.png">
 <meta property="og:title" content="FunASR 模型 — 语音识别模型对比">
 <meta property="og:description" content="FunASR 模型选型：SenseVoice、Paraformer、Fun-ASR-Nano，按速度、精度、语种选择最适合的模型。">
@@ -60,7 +60,7 @@ footer a{color:#60a5fa}
 </style>
 </head>
 <body>
-<nav class="nav"><div class="container"><a class="nav-logo" href="./">Fun<span>ASR</span></a><div class="nav-links"><a href="/#capabilities">核心能力</a><a href="/#usage">如何使用</a><a href="/#benchmark">性能</a><a href="/#demo">演示</a><a href="https://modelscope.github.io/FunASR/zh/" target="_blank">文档</a><a href="quickstart.html">快速上手</a><a href="models.html">模型</a><a href="ecosystem.html">生态</a><a href="/blog/">技术博客</a><a href="vs-whisper.html">对比 Whisper</a><a href="/donors.html">功德榜</a><a href="en/models.html" style="font-size:0.85rem;font-weight:500;color:var(--text-soft);text-decoration:none">EN</a><a href="https://github.com/modelscope/FunASR" target="_blank" class="nav-btn">GitHub ★</a></div></div></nav>
+<nav class="nav"><div class="container"><a class="nav-logo" href="./">Fun<span>ASR</span></a><div class="nav-links"><a href="/#capabilities">核心能力</a><a href="/#usage">如何使用</a><a href="/#benchmark">性能</a><a href="/#demo">演示</a><a href="https://modelscope.github.io/FunASR/zh/" target="_blank">文档</a><a href="quickstart.html">快速上手</a><a href="models.html">模型</a><a href="ecosystem.html">生态</a><a href="/blog/">技术博客</a><a href="vs-whisper.html">对比 Whisper</a><a href="/donors.html">功德榜</a><a href="en/models.html" style="font-size:0.85rem;font-weight:500;color:var(--text-soft);text-decoration:none">EN</a><a href="/go/github" target="_blank" class="nav-btn">GitHub ★</a></div></div></nav>
 
 <article>
 <div class="container">
@@ -75,10 +75,10 @@ footer a{color:#60a5fa}
 <tr><th>模型</th><th>速度</th><th>语种</th><th>参数量</th><th>适用场景</th></tr>
 </thead>
 <tbody>
-<tr><td><strong>Fun-ASR-Nano</strong> ⭐</td><td>vLLM 340x</td><td>中/英/日 + 中文方言/口音</td><td>800M</td><td>旗舰 · LLM-ASR · 难例最强</td></tr>
+<tr><td><strong>Fun-ASR-Nano</strong> ⭐</td><td>vLLM；需按硬件实测</td><td>中/英/日 + 中文方言/口音</td><td>800M</td><td>旗舰 · LLM-ASR · 难例最强</td></tr>
 <tr><td><strong>Fun-ASR-MLT-Nano</strong></td><td>vLLM</td><td>31</td><td>800M</td><td>独立多语 checkpoint</td></tr>
-<tr><td><strong>SenseVoice Small</strong></td><td>170 倍实时</td><td>50+</td><td>234M</td><td>多语种、情感检测</td></tr>
-<tr><td><strong>Paraformer-zh</strong></td><td>120 倍实时</td><td>中文、粤语</td><td>220M</td><td>中文最高精度</td></tr>
+<tr><td><strong>SenseVoice Small</strong></td><td>非自回归；需按硬件实测</td><td>中、粤、英、日、韩</td><td>234M</td><td>五语种、情感检测</td></tr>
+<tr><td><strong>Paraformer-zh</strong></td><td>非自回归；需按硬件实测</td><td>中文、粤语</td><td>220M</td><td>中文最高精度</td></tr>
 <tr><td><strong>cam++</strong></td><td>实时</td><td>通用</td><td>7.2M</td><td>说话人分离与确认</td></tr>
 </tbody>
 </table>
@@ -123,10 +123,10 @@ result = model.generate(input="audio.wav")</pre>
 <div class="model-card">
 <div class="model-name">SenseVoice Small</div>
 <div class="model-meta">234M 参数 &middot; 非自回归 &middot; <a href="/go/sensevoice">GitHub</a> &middot; <a href="https://huggingface.co/FunAudioLLM/SenseVoiceSmall">HuggingFace</a></div>
-<div class="model-desc">极速语音识别，内置情感和音频事件检测。支持 50+ 语种，包括中文、英文、日文、韩文、法文、德文等。非自回归架构在 GPU 上实现 170 倍实时速度。</div>
+<div class="model-desc">极速语音识别，内置情感和音频事件检测。支持普通话、粤语、英语、日语和韩语。非自回归架构适合低延迟部署，实际吞吐取决于硬件、音频长度和 batch 配置。</div>
 <div class="model-features">
-<span class="badge badge-green">170 倍实时</span>
-<span class="badge badge-blue">50+ 语种</span>
+<span class="badge badge-green">非自回归</span>
+<span class="badge badge-blue">五语种</span>
 <span class="badge badge-orange">情感检测</span>
 <span class="badge badge-blue">音频事件</span>
 <span class="badge badge-green">支持 CPU</span>
@@ -144,7 +144,7 @@ print(result[0]["text"])</pre>
 <div class="model-meta">220M 参数 &middot; 非自回归 &middot; <a href="https://huggingface.co/funasr/paraformer-zh">HuggingFace</a></div>
 <div class="model-desc">中文语音识别最高精度模型。基于 CTC 引导注意力的非自回归架构，使用 60,000+ 小时普通话语音训练。内置标点恢复和时间戳预测。</div>
 <div class="model-features">
-<span class="badge badge-green">120 倍实时</span>
+<span class="badge badge-green">非自回归；需按硬件实测</span>
 <span class="badge badge-blue">中文 + 粤语</span>
 <span class="badge badge-green">最高精度</span>
 <span class="badge badge-blue">时间戳</span>
@@ -230,6 +230,6 @@ curl http://localhost:8000/v1/audio/transcriptions \
 </div>
 </article>
 
-<footer><div class="container">FunASR &mdash; 工业级语音识别工具包 &mdash; <a href="https://github.com/modelscope/FunASR">GitHub</a> &middot; <a href="./">首页</a> &middot; <a href="https://www.funasr.com">funasr.com</a></div></footer>
+<footer><div class="container">FunASR &mdash; 工业级语音识别工具包 &mdash; <a href="/go/github">GitHub</a> &middot; <a href="./">首页</a> &middot; <a href="https://www.funasr.com">funasr.com</a></div></footer>
 </body>
 </html>

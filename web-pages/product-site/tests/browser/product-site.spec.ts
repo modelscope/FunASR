@@ -222,3 +222,56 @@ test('llama.cpp blog heading clears fixed navigation on mobile', async ({ page }
     fullPage: true,
   });
 });
+
+test('legacy comparison pages keep accurate claims and fit mobile', async ({ page }, testInfo) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+
+  for (const route of ['/vs-whisper.html', '/en/vs-whisper.html']) {
+    await page.goto(route);
+    const audit = await page.evaluate(() => ({
+      overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+      text: document.body.innerText,
+      trackedGitHub: document.querySelector('.nav-btn')?.getAttribute('href'),
+    }));
+
+    expect(audit.overflow).toBeLessThanOrEqual(1);
+    expect(audit.text).not.toMatch(/50\+\s*(?:supported\s+|支持\s*)?(?:languages?|语言|语种)/i);
+    expect(audit.text).not.toMatch(/(?:13|15|17|170)[x×]|(?:13|15|17|170)\s*倍/);
+    expect(audit.trackedGitHub).toBe('/go/github');
+  }
+
+  await page.screenshot({
+    path: testInfo.outputPath('legacy-comparison-mobile.png'),
+    fullPage: true,
+  });
+});
+
+test('SenseVoice guides keep mobile navigation clear of the article', async ({ page }, testInfo) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+
+  for (const route of [
+    '/blog/sensevoice-deployment-guide.html',
+    '/en/blog/sensevoice-deployment-guide.html',
+  ]) {
+    await page.goto(route);
+    const layout = await page.evaluate(() => {
+      const navigation = document.querySelector<HTMLElement>('nav.nav');
+      const heading = document.querySelector<HTMLElement>('h1');
+      return {
+        overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+        navigationBottom: navigation?.getBoundingClientRect().bottom ?? 0,
+        headingTop: heading?.getBoundingClientRect().top ?? 0,
+        trackedSenseVoice: document.querySelector('.cta a')?.getAttribute('href'),
+      };
+    });
+
+    expect(layout.overflow).toBeLessThanOrEqual(1);
+    expect(layout.headingTop).toBeGreaterThanOrEqual(layout.navigationBottom + 16);
+    expect(layout.trackedSenseVoice).toBe('/go/sensevoice');
+  }
+
+  await page.screenshot({
+    path: testInfo.outputPath('sensevoice-guide-mobile.png'),
+    fullPage: true,
+  });
+});
