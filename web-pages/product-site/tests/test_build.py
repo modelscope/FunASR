@@ -127,7 +127,14 @@ def test_home_surfaces_attributed_ecosystem_repositories(tmp_path):
 
         assert section
         assert section.h2.get_text(strip=True) == expected_heading
+        assert [item.get('data-project') for item in section.select('[data-project]')] == [
+            'funasr',
+            'fun-asr',
+            'sensevoice',
+            'funclip',
+        ]
         assert {link.get('href') for link in section.select('a[href]')} == {
+            '/go/github',
             '/go/fun-asr',
             '/go/sensevoice',
             '/go/funclip',
