@@ -52,6 +52,47 @@ for (const viewport of viewports) {
   });
 }
 
+for (const viewport of [
+  { name: 'mobile', width: 390, height: 844, expectedRows: 4 },
+  { name: 'desktop', width: 1440, height: 900, expectedRows: 1 },
+]) {
+  test(`four-project selector is stable at ${viewport.name}`, async ({ page }) => {
+    await page.setViewportSize(viewport);
+    const consoleErrors: string[] = [];
+    const networkErrors: string[] = [];
+    page.on('console', (message) => {
+      if (message.type() === 'error') consoleErrors.push(message.text());
+    });
+    page.on('requestfailed', (request) => networkErrors.push(request.url()));
+
+    for (const route of ['/', '/en/']) {
+      await page.goto(route);
+      const projects = page.locator('#projects [data-project]');
+      await expect(projects).toHaveCount(4);
+      expect(
+        await projects.evaluateAll((nodes) =>
+          nodes.map((node) => node.getAttribute('data-project')),
+        ),
+      ).toEqual(['funasr', 'fun-asr', 'sensevoice', 'funclip']);
+
+      const layout = await projects.evaluateAll((nodes) => ({
+        overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+        rows: new Set(nodes.map((node) => Math.round(node.getBoundingClientRect().top))).size,
+        visible: nodes.every((node) => {
+          const rect = node.getBoundingClientRect();
+          return rect.width > 0 && rect.height > 0;
+        }),
+      }));
+      expect(layout.overflow).toBeLessThanOrEqual(1);
+      expect(layout.rows).toBe(viewport.expectedRows);
+      expect(layout.visible).toBe(true);
+    }
+
+    expect(consoleErrors).toEqual([]);
+    expect(networkErrors).toEqual([]);
+  });
+}
+
 test('mobile navigation supports keyboard operation and visible focus', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/');

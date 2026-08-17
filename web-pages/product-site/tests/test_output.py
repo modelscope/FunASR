@@ -33,6 +33,42 @@ def route_path(root: Path, route: str) -> Path:
     return root / route.lstrip('/')
 
 
+@pytest.mark.parametrize(
+    ('relative', 'markers'),
+    (
+        (
+            'index.html',
+            ('工业语音工具箱', '高精度转写', '多语种与情感', '智能视频剪辑'),
+        ),
+        (
+            'en/index.html',
+            ('Production speech toolkit', 'High-accuracy ASR', 'Languages and emotion', 'AI video editing'),
+        ),
+    ),
+)
+def test_homepage_routes_each_project_by_workload(built_site, relative, markers):
+    soup = read_soup(built_site / relative)
+    section = soup.select_one('#projects')
+
+    assert section
+    rows = section.select('[data-project]')
+    assert [row['data-project'] for row in rows] == [
+        'funasr',
+        'fun-asr',
+        'sensevoice',
+        'funclip',
+    ]
+    assert {link['href'] for link in section.select('a[href]')} == {
+        '/go/github',
+        '/go/fun-asr',
+        '/go/sensevoice',
+        '/go/funclip',
+    }
+    text = section.get_text(' ', strip=True)
+    for marker in markers:
+        assert marker in text
+
+
 def test_every_deployment_page_has_operational_contract(built_site):
     registry = load_registry(SITE_ROOT / 'data' / 'deployments.json')
 

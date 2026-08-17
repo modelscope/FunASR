@@ -612,7 +612,7 @@ td a {
 
 .ecosystem-repositories {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 44px;
 }
 
@@ -630,6 +630,10 @@ td a {
 
 .ecosystem-repositories article:nth-child(3) {
   border-color: #d08a21;
+}
+
+.ecosystem-repositories article:nth-child(4) {
+  border-color: #d84b55;
 }
 
 .repository-role {
@@ -1249,6 +1253,10 @@ td a {
   .responsibility-grid,
   .ecosystem-repositories {
     gap: 24px;
+  }
+
+  .ecosystem-repositories {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .page-intro {
