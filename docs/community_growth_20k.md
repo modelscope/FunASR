@@ -34,14 +34,46 @@ This plan focuses on useful adoption work rather than vanity marketing: if more 
 
 ## Current campaign snapshot
 
-As of 2026-07-23 04:24 UTC, the ecosystem has 35,796 combined GitHub stars, or 4,572 additional stars since the 31,224 baseline. The remaining gap to the +20,000 target is 15,428 stars by 2026-09-30, which requires roughly 224 stars/day across the remaining 69 days.
+As of 2026-08-17 00:07 UTC, the ecosystem has 36,579 combined GitHub stars, or 5,355 additional stars since the 31,224 baseline. Exceeding the +20,000 target requires another 14,646 stars to reach at least 51,225 by 2026-09-30, or roughly 326 stars/day across the remaining 45 days.
 
 | Repository | Stars | Forks | Open issues | Open PRs | Last push |
 |---|---:|---:|---:|---:|---|
-| `modelscope/FunASR` | 19,412 | 1,952 | 3 | 0 | 2026-07-23 |
-| `QwenAudio/Fun-ASR` | 1,417 | 139 | 0 | 0 | 2026-07-22 |
-| `QwenAudio/SenseVoice` | 8,920 | 796 | 0 | 0 | 2026-07-22 |
-| `modelscope/FunClip` | 6,047 | 721 | 0 | 0 | 2026-07-22 |
+| `modelscope/FunASR` | 19,867 | 1,990 | 4 | 0 | 2026-08-16 |
+| `QwenAudio/Fun-ASR` | 1,478 | 146 | 0 | 0 | 2026-07-24 |
+| `QwenAudio/SenseVoice` | 9,084 | 808 | 0 | 0 | 2026-08-12 |
+| `modelscope/FunClip` | 6,150 | 736 | 0 | 0 | 2026-08-03 |
+
+### 2026-08-16 product-site attribution and claim audit
+
+- FunASR PR [#3500](https://github.com/modelscope/FunASR/pull/3500) merged as `d7178079e03351a5ef74f6633fb358f6536cbe15`. It separates SenseVoiceSmall's five-language boundary from the 31-language Fun-ASR-MLT-Nano checkpoint, replaces universal speed multipliers with target-hardware benchmark guidance, and routes official repository CTAs through attributable `/go/*` links.
+- Local evidence passed 78 Python tests and 16 Playwright tests. Two deterministic builds each generated 27 product pages and validated 102 public pages with no diff. A 390px/1440px audit over nine key routes found zero overflow, forbidden claims, console errors, or navigation overlap.
+- GitHub Actions run `31974248343` passed both `build-and-validate` and `browser` against exact head `e5668735a46affe33a3e16725beeebbc90bf6eac`.
+- Production release `20260816T214630Z` was built from the merged tree and atomically deployed to funasr.com. The previous release `20260816T205704Z` remains available for rollback; public checks confirmed 102 pages, all four tracked redirects, no-cache HTML, and the same 18-route desktop/mobile browser audit.
+
+### 2026-08-16 MLX Audio adoption path
+
+- `Blaizzy/mlx-audio#885` merged as `6546e953908800219454d4483592c1db9d8871a8`, completing uniform hotwords/context support for the repository's documented Fun-ASR-Nano path. The community-maintained MLX runtime exposes conversion, Python/CLI transcription, and an OpenAI-compatible transcription endpoint on Apple Silicon; the current public checkpoint path is transcription-only with no timestamps, while VAD and diarization remain external.
+- FunASR PR [#3501](https://github.com/modelscope/FunASR/pull/3501) merged as `9c6df1784c3d416c5d273517d1deb63af3d0dc69`, preserving signed head `89a761ed67d3b21c794d68f76343e41fe98cf45e`. It adds MLX Audio to the bilingual community-project index and public ecosystem pages with links to the model guide, merged #885 evidence, and the `/go/fun-asr` attributable repository route.
+- Local evidence passed 79 Python tests and 18 Playwright tests. Exact-head GitHub Actions run `31975390651` passed `build-and-validate` and `browser`; production release `20260816T221039Z` was rebuilt from the merge commit and atomically deployed to funasr.com.
+
+### 2026-08-16 OpenClaw realtime transcription SDK unblock
+
+- OpenClaw PR [#118977](https://github.com/openclaw/openclaw/pull/118977) was synchronized with `openclaw/main@2d3612da6bd28f6a7956d82b0795c31fd18bab8a`, resolving its only merge conflict while preserving both upstream SDK surface-budget changes and the FunASR WebSocket subprotocol work.
+- The remaining package-boundary review finding was addressed on signed+DCO head `d2e9e8803a90b13a0a9816f2afb37a6c64aaa0e2`. Fresh local evidence passed the external package consumer, all 147 public Plugin SDK subpaths, the SDK surface budget, 21 package-contract tests, formatting, and `git diff --check`.
+- Exact-head GitHub CI completed with 154 successful, 39 skipped, and one neutral check, zero failures, and zero unresolved review threads. The permanent public SDK boundary still requires an OpenClaw maintainer decision.
+
+### 2026-08-17 Fun-ASR-Nano checkpoint owner handoff
+
+- FunASR issue [#3496](https://github.com/modelscope/FunASR/issues/3496) was routed to `LauraGPT` and `pengzhendong`, the two maintainers with direct write access to `QwenAudio/Fun-ASR`. The issue blocks the Hugging Face checkpoint path because 86 CTC tensors are absent there, while the complete ModelScope artifact is available and integrity-checked.
+- The verified ModelScope `model.pt` is 2,127,426,538 bytes with SHA-256 `81fec8616083c69377f3ceef36aba3655660ee0ca69a5d4a1e9810cd340ca499`. The current Hugging Face credential cannot update this specific model repository, so the owner action is to upload the complete artifact, verify all 86 tensors, and rerun the Hugging Face loading path before closing the issue.
+- The evidence and exact owner actions are recorded in [the maintainer handoff comment](https://github.com/modelscope/FunASR/issues/3496#issuecomment-5310197880), avoiding repeated status pings while the artifact owner completes the upload.
+
+### 2026-08-17 Vision Agents local FunASR STT integration refresh
+
+- GetStream Vision Agents PR [#606](https://github.com/GetStream/Vision-Agents/pull/606) was synchronized with `main@674ed282763ed992307cadb7e4e22f2b44babf61` on signed+DCO head `374be4b979fdc1cfe609c6fe152fc6779bd745b4`. The README conflict was resolved while preserving both the FunASR and newly-added Telnyx STT entries.
+- Fresh validation passed Ruff formatting and linting, extras validation, mypy across 120 core and 241 plugin source files, and 1,234 non-integration tests after excluding three independently reproduced upstream-baseline areas. The full run passed 1,281 tests and reported 53 setup errors; the same 53 errors reproduce on clean upstream `main`, are confined to agent launcher, session registry, and Anthropic tests, and touch no paths changed by this PR. All four FunASR plugin tests pass.
+- The exact remote head is mergeable, the labeler check passed, all four review threads are resolved, and CodeRabbit review is in progress. The maintainer-facing evidence is recorded in [the PR update](https://github.com/GetStream/Vision-Agents/pull/606#issuecomment-5310375517).
+- Rollback evidence is stored under `/cpfs_speech/user/zhifu.gzf/.cache/funasr-ops/backups/vision-agents-606-main-sync-20260817`. The post-merge Git bundle SHA-256 is `005834b45682b4690dab571010048763178a47251431f34879a3cb5880e11bed`.
 
 Keep this snapshot fresh during weekly planning. The ecosystem mode also reports the remaining gap, days left to 2026-09-30, and the required daily average:
 
