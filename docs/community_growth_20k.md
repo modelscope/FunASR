@@ -34,14 +34,14 @@ This plan focuses on useful adoption work rather than vanity marketing: if more 
 
 ## Current campaign snapshot
 
-As of 2026-08-17 00:07 UTC, the ecosystem has 36,579 combined GitHub stars, or 5,355 additional stars since the 31,224 baseline. Exceeding the +20,000 target requires another 14,646 stars to reach at least 51,225 by 2026-09-30, or roughly 326 stars/day across the remaining 45 days.
+As of 2026-08-17 00:48 UTC, the ecosystem has 36,584 combined GitHub stars, or 5,360 additional stars since the 31,224 baseline. Exceeding the +20,000 target requires another 14,641 stars to reach at least 51,225 by 2026-09-30, or roughly 326 stars/day across the remaining 45 days.
 
 | Repository | Stars | Forks | Open issues | Open PRs | Last push |
 |---|---:|---:|---:|---:|---|
-| `modelscope/FunASR` | 19,867 | 1,990 | 4 | 0 | 2026-08-16 |
+| `modelscope/FunASR` | 19,870 | 1,990 | 4 | 0 | 2026-08-17 |
 | `QwenAudio/Fun-ASR` | 1,478 | 146 | 0 | 0 | 2026-07-24 |
 | `QwenAudio/SenseVoice` | 9,084 | 808 | 0 | 0 | 2026-08-12 |
-| `modelscope/FunClip` | 6,150 | 736 | 0 | 0 | 2026-08-03 |
+| `modelscope/FunClip` | 6,152 | 736 | 0 | 0 | 2026-08-03 |
 
 ### 2026-08-16 product-site attribution and claim audit
 
@@ -55,6 +55,13 @@ As of 2026-08-17 00:07 UTC, the ecosystem has 36,579 combined GitHub stars, or 5
 - `Blaizzy/mlx-audio#885` merged as `6546e953908800219454d4483592c1db9d8871a8`, completing uniform hotwords/context support for the repository's documented Fun-ASR-Nano path. The community-maintained MLX runtime exposes conversion, Python/CLI transcription, and an OpenAI-compatible transcription endpoint on Apple Silicon; the current public checkpoint path is transcription-only with no timestamps, while VAD and diarization remain external.
 - FunASR PR [#3501](https://github.com/modelscope/FunASR/pull/3501) merged as `9c6df1784c3d416c5d273517d1deb63af3d0dc69`, preserving signed head `89a761ed67d3b21c794d68f76343e41fe98cf45e`. It adds MLX Audio to the bilingual community-project index and public ecosystem pages with links to the model guide, merged #885 evidence, and the `/go/fun-asr` attributable repository route.
 - Local evidence passed 79 Python tests and 18 Playwright tests. Exact-head GitHub Actions run `31975390651` passed `build-and-validate` and `browser`; production release `20260816T221039Z` was rebuilt from the merge commit and atomically deployed to funasr.com.
+
+### 2026-08-17 OpenMAIC local FunASR distribution path
+
+- [OpenMAIC](https://github.com/THU-MAIC/OpenMAIC), with 20,751 stars and 4,120 forks at the snapshot time, merged a native local FunASR provider in [#1044](https://github.com/THU-MAIC/OpenMAIC/pull/1044). Its documented path sends WAV audio to an OpenAI-compatible transcription endpoint, requires no API key, and exposes SenseVoiceSmall, Paraformer, and Fun-ASR-Nano through `ASR_FUNASR_BASE_URL`.
+- FunASR PR [#3503](https://github.com/modelscope/FunASR/pull/3503) merged as `7825bbbe09eaa9e81d689d3efd0b933686efbaaa`, adding the integration and its merged evidence to the bilingual community catalog and public ecosystem pages. Local evidence passed 83 Python tests and 20 Playwright tests; exact-head GitHub Actions passed both `build-and-validate` and `browser`.
+- Production release `20260817T004144Z` was rebuilt twice from the merge commit, produced identical 157-file artifacts, validated 102 pages before and after the atomic switch, and kept `20260816T221039Z` available for rollback. Public mobile and desktop checks over both languages found exactly one OpenMAIC card, zero horizontal overflow, and zero console or network errors.
+- The release audit exposed a stale patrol expectation on the two llama.cpp comparison articles: the pages correctly referenced `runtime-llamacpp-v0.2.0`, while the checker still required `v0.1.9`. FunASR PR [#3504](https://github.com/modelscope/FunASR/pull/3504) merged as `0d663c6d7fe64aecb117c0337abfab526c1733cb`, added a product-build contract test, and restored the live patrol to 20 page contracts, 98 navigation pages, and 3 static assets passing.
 
 ### 2026-08-16 OpenClaw realtime transcription SDK unblock
 
