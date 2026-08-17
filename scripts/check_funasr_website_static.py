@@ -161,25 +161,25 @@ PAGE_CONTRACTS: dict[str, PageContract] = {
     ),
     f"{BASE_URL}/blog/funasr-llama-cpp-whisper-cpp-alternative.html": PageContract(
         required=(
-            "runtime-llamacpp-v0.1.9",
+            "runtime-llamacpp-v0.2.0",
             "funasr-llamacpp-linux-x64-vulkan.tar.gz",
             "funasr-llamacpp-windows-x64-vulkan.zip",
             "Fun-ASR-Nano-GGUF",
             "Linux/Windows Vulkan 与 Windows CUDA",
             "/donors.html",
         ),
-        forbidden=("runtime-llamacpp-v0.1.1",),
+        forbidden=("runtime-llamacpp-v0.1.1", "runtime-llamacpp-v0.1.9"),
     ),
     f"{BASE_URL}/en/blog/funasr-llama-cpp-whisper-cpp-alternative.html": PageContract(
         required=(
-            "runtime-llamacpp-v0.1.9",
+            "runtime-llamacpp-v0.2.0",
             "funasr-llamacpp-linux-x64-vulkan.tar.gz",
             "funasr-llamacpp-windows-x64-vulkan.zip",
             "Fun-ASR-Nano-GGUF",
             "Linux/Windows Vulkan and Windows CUDA",
             "/en/donors.html",
         ),
-        forbidden=("runtime-llamacpp-v0.1.1",),
+        forbidden=("runtime-llamacpp-v0.1.1", "runtime-llamacpp-v0.1.9"),
     ),
     f"{BASE_URL}/blog/funasr-v1-3-26-openai-vllm-llama-cpp.html": PageContract(
         required=(

@@ -113,7 +113,7 @@ def test_website_contract_accepts_current_public_copy():
             GGUF
         """,
         "https://www.funasr.com/blog/funasr-llama-cpp-whisper-cpp-alternative.html": """
-            runtime-llamacpp-v0.1.9
+            runtime-llamacpp-v0.2.0
             funasr-llamacpp-linux-x64-vulkan.tar.gz
             funasr-llamacpp-windows-x64-vulkan.zip
             Fun-ASR-Nano-GGUF
@@ -121,7 +121,7 @@ def test_website_contract_accepts_current_public_copy():
             <a href="/donors.html">功德榜</a>
         """,
         "https://www.funasr.com/en/blog/funasr-llama-cpp-whisper-cpp-alternative.html": """
-            runtime-llamacpp-v0.1.9
+            runtime-llamacpp-v0.2.0
             funasr-llamacpp-linux-x64-vulkan.tar.gz
             funasr-llamacpp-windows-x64-vulkan.zip
             Fun-ASR-Nano-GGUF
@@ -270,6 +270,31 @@ def test_homepage_contract_accepts_current_product_site_build(tmp_path, monkeypa
         checker,
         "PAGE_CONTRACTS",
         {url: checker.PAGE_CONTRACTS[url] for url in urls},
+    )
+
+    assert checker.validate_pages(pages) == []
+
+
+def test_llamacpp_comparison_contract_accepts_current_product_site_build(
+    tmp_path, monkeypatch
+):
+    checker = _load_module()
+    builder = _load_product_site_builder()
+    builder.build(tmp_path)
+    routes = (
+        "blog/funasr-llama-cpp-whisper-cpp-alternative.html",
+        "en/blog/funasr-llama-cpp-whisper-cpp-alternative.html",
+    )
+    pages = {
+        f"https://www.funasr.com/{route}": (tmp_path / route).read_text(
+            encoding="utf-8"
+        )
+        for route in routes
+    }
+    monkeypatch.setattr(
+        checker,
+        "PAGE_CONTRACTS",
+        {url: checker.PAGE_CONTRACTS[url] for url in pages},
     )
 
     assert checker.validate_pages(pages) == []
