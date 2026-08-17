@@ -153,6 +153,49 @@ def test_mlx_audio_ecosystem_entry_is_merged_attributed_and_bounded():
         assert 'https://github.com/Blaizzy/mlx-audio/pull/885' in text
 
 
+def test_openmaic_ecosystem_entry_is_merged_attributed_and_bounded():
+    pages = {
+        'zh': LEGACY / 'ecosystem.html',
+        'en': LEGACY / 'en' / 'ecosystem.html',
+    }
+    required_links = {
+        'https://github.com/THU-MAIC/OpenMAIC',
+        'https://github.com/THU-MAIC/OpenMAIC#funasr-local-asr',
+        'https://github.com/THU-MAIC/OpenMAIC/pull/1044',
+        'https://github.com/modelscope/FunASR',
+    }
+
+    for language, path in pages.items():
+        soup = BeautifulSoup(path.read_text(encoding='utf-8'), 'html.parser')
+        cards = [
+            item
+            for item in soup.select('.card')
+            if item.select_one('.card-title').get_text(' ', strip=True) == 'OpenMAIC'
+        ]
+        assert len(cards) == 1
+
+        text = cards[0].get_text(' ', strip=True)
+        hrefs = {link.get('href') for link in cards[0].select('a[href]')}
+
+        assert required_links <= hrefs
+        assert 'FunASR' in text
+        assert 'SenseVoiceSmall' in text
+        assert 'Paraformer' in text
+        assert 'Fun-ASR-Nano' in text
+        assert 'ASR_FUNASR_BASE_URL' in text
+        assert ('本地' in text) if language == 'zh' else ('local' in text.lower())
+
+    community_docs = {
+        'en': Path(__file__).resolve().parents[3] / 'docs' / 'community_projects.md',
+        'zh': Path(__file__).resolve().parents[3] / 'docs' / 'community_projects_zh.md',
+    }
+    for text_path in community_docs.values():
+        text = text_path.read_text(encoding='utf-8')
+        assert '[OpenMAIC](https://github.com/THU-MAIC/OpenMAIC)' in text
+        assert 'ASR_FUNASR_BASE_URL' in text
+        assert 'https://github.com/THU-MAIC/OpenMAIC/pull/1044' in text
+
+
 def test_v140_release_pages_are_bilingual_indexed_and_precise():
     slug = 'funasr-v1-4-0-pypi-release.html'
     pages = {
