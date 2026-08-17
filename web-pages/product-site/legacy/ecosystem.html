@@ -122,6 +122,12 @@ footer a{color:#60a5fa}
 <h2>语音输入与桌面应用</h2>
 <div class="card-grid">
 <div class="card">
+<div class="card-title"><a href="https://github.com/BasedHardware/omi">Omi</a></div>
+<div class="card-stars">13.1K+ stars</div>
+<div class="card-desc">开源 AI 可穿戴设备与移动应用。已合并的 <a href="https://github.com/BasedHardware/omi/pull/10447">#10447</a> 增加默认开启的“向 Omi 发送原始音频”开关。关闭后，<code>raw audio</code> 仅发往所选 STT provider；转写文本和非音频数据仍可发送到 Omi。设备编码不受 Custom STT 支持时会失败关闭，不会回退上传 Omi 音频。STT provider 可配置为 FunASR / SenseVoice 兼容服务。</div>
+<div><span class="card-tag">可穿戴设备</span><span class="card-tag">Custom STT</span><span class="card-tag">隐私</span></div>
+</div>
+<div class="card">
 <div class="card-title"><a href="https://github.com/HaujetZhao/CapsWriter-Offline">CapsWriter-Offline</a></div>
 <div class="card-stars">5.5K stars</div>
 <div class="card-desc">PC 端语音输入工具。按住 CapsLock 说话，松开自动上屏。基于 FunASR Paraformer 离线识别。</div>
@@ -237,6 +243,18 @@ footer a{color:#60a5fa}
 
 <h2>AI 平台与框架</h2>
 <div class="card-grid">
+<div class="card">
+<div class="card-title"><a href="https://github.com/infiniflow/ragflow">RAGFlow</a></div>
+<div class="card-stars">88.6K+ stars</div>
+<div class="card-desc">开源 RAG 与智能体平台。已合并的 <a href="https://github.com/infiniflow/ragflow/pull/17388">#17388</a> 让本地 FunASR 使用默认 <code>http://localhost:8000/v1</code> 时无需 API key；配置密钥时仍发送 Bearer 认证，并在 multipart 转写前校验模型名，避免缺失配置触发 panic。</div>
+<div><span class="card-tag">RAG</span><span class="card-tag">本地 FunASR</span><span class="card-tag">可选认证</span></div>
+</div>
+<div class="card">
+<div class="card-title"><a href="https://github.com/OpenBMB/UltraEval-Audio">UltraEval-Audio</a></div>
+<div class="card-stars">313 stars</div>
+<div class="card-desc">音频模型评测框架。<a href="https://github.com/OpenBMB/UltraEval-Audio/pull/47">#47</a> 已注册 <code>fun-asr-nano-2512</code>，固定 Hugging Face 模型 revision 与运行依赖，通过隔离子进程执行评测；合并前在 H100 上完成了固定样例 smoke test，结果不代表所有数据集、语言或部署硬件。</div>
+<div><span class="card-tag">评测</span><span class="card-tag">Fun-ASR-Nano</span><span class="card-tag">可复现 revision</span></div>
+</div>
 <div class="card">
 <div class="card-title"><a href="https://github.com/RVC-Boss/GPT-SoVITS">GPT-SoVITS</a></div>
 <div class="card-stars">58K stars</div>

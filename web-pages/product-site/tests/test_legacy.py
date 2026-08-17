@@ -196,6 +196,49 @@ def test_openmaic_ecosystem_entry_is_merged_attributed_and_bounded():
         assert 'https://github.com/THU-MAIC/OpenMAIC/pull/1044' in text
 
 
+def test_recent_merged_ecosystem_integrations_are_bilingual_and_attributed():
+    pages = {
+        'zh': LEGACY / 'ecosystem.html',
+        'en': LEGACY / 'en' / 'ecosystem.html',
+    }
+    expected = {
+        'RAGFlow': {
+            'repo': 'https://github.com/infiniflow/ragflow',
+            'pull': 'https://github.com/infiniflow/ragflow/pull/17388',
+            'terms': ('FunASR', 'API key'),
+        },
+        'Omi': {
+            'repo': 'https://github.com/BasedHardware/omi',
+            'pull': 'https://github.com/BasedHardware/omi/pull/10447',
+            'terms': ('Custom STT', 'raw audio'),
+            'zh_terms': ('所选 STT provider', '转写文本和非音频数据仍可发送到 Omi'),
+            'en_terms': ('selected STT provider', 'transcripts and non-audio data may still reach Omi'),
+        },
+        'UltraEval-Audio': {
+            'repo': 'https://github.com/OpenBMB/UltraEval-Audio',
+            'pull': 'https://github.com/OpenBMB/UltraEval-Audio/pull/47',
+            'terms': ('Fun-ASR-Nano', 'revision'),
+        },
+    }
+
+    for language, path in pages.items():
+        soup = BeautifulSoup(path.read_text(encoding='utf-8'), 'html.parser')
+        for name, contract in expected.items():
+            cards = [
+                card
+                for card in soup.select('.card')
+                if card.select_one('.card-title').get_text(' ', strip=True) == name
+            ]
+            assert len(cards) == 1
+            text = cards[0].get_text(' ', strip=True)
+            hrefs = {link.get('href') for link in cards[0].select('a[href]')}
+
+            assert {contract['repo'], contract['pull']} <= hrefs
+            assert all(term in text for term in contract['terms'])
+            language_terms = contract.get(f'{language}_terms', ())
+            assert all(term in text for term in language_terms)
+
+
 def test_v140_release_pages_are_bilingual_indexed_and_precise():
     slug = 'funasr-v1-4-0-pypi-release.html'
     pages = {

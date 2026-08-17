@@ -123,6 +123,12 @@ footer a{color:#60a5fa}
 <h2>Voice Input & Desktop Apps</h2>
 <div class="card-grid">
 <div class="card">
+<div class="card-title"><a href="https://github.com/BasedHardware/omi">Omi</a></div>
+<div class="card-stars">13.1K+ stars</div>
+<div class="card-desc">An open-source AI wearable and mobile app. Merged <a href="https://github.com/BasedHardware/omi/pull/10447">#10447</a> adds a default-on “Send raw audio to Omi” control. When disabled, <code>raw audio</code> goes only to the selected STT provider; transcripts and non-audio data may still reach Omi. Unsupported Custom STT codecs fail closed instead of falling back to Omi audio upload. The provider can be a compatible FunASR or SenseVoice service.</div>
+<div><span class="card-tag">Wearable</span><span class="card-tag">Custom STT</span><span class="card-tag">Privacy</span></div>
+</div>
+<div class="card">
 <div class="card-title"><a href="https://github.com/HaujetZhao/CapsWriter-Offline">CapsWriter-Offline</a></div>
 <div class="card-stars">5.5K stars</div>
 <div class="card-desc">PC voice input tool with offline recognition. Hold CapsLock to speak, release to paste. Powered by FunASR Paraformer.</div>
@@ -238,6 +244,18 @@ footer a{color:#60a5fa}
 
 <h2>AI Platforms & Frameworks</h2>
 <div class="card-grid">
+<div class="card">
+<div class="card-title"><a href="https://github.com/infiniflow/ragflow">RAGFlow</a></div>
+<div class="card-stars">88.6K+ stars</div>
+<div class="card-desc">An open-source RAG and agent platform. Merged <a href="https://github.com/infiniflow/ragflow/pull/17388">#17388</a> lets local FunASR use the default <code>http://localhost:8000/v1</code> endpoint without an API key, preserves Bearer authentication when a key is configured, and validates the model name before building the multipart transcription request instead of panicking on missing configuration.</div>
+<div><span class="card-tag">RAG</span><span class="card-tag">Local FunASR</span><span class="card-tag">Optional auth</span></div>
+</div>
+<div class="card">
+<div class="card-title"><a href="https://github.com/OpenBMB/UltraEval-Audio">UltraEval-Audio</a></div>
+<div class="card-stars">313 stars</div>
+<div class="card-desc">An audio-model evaluation framework. Merged <a href="https://github.com/OpenBMB/UltraEval-Audio/pull/47">#47</a> registers <code>fun-asr-nano-2512</code>, pins the Hugging Face model revision and runtime dependencies, and evaluates through an isolated subprocess. A fixed-sample H100 smoke test passed before merge; it is not evidence for every dataset, language, or deployment target.</div>
+<div><span class="card-tag">Evaluation</span><span class="card-tag">Fun-ASR-Nano</span><span class="card-tag">Pinned revision</span></div>
+</div>
 <div class="card">
 <div class="card-title"><a href="https://github.com/RVC-Boss/GPT-SoVITS">GPT-SoVITS</a></div>
 <div class="card-stars">58K stars</div>
