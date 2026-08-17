@@ -37,6 +37,7 @@ DEFAULT_INTEGRATION_PRS = [
     "huggingface/optimum-intel#1874",
     "yuekaizhang/Fun-ASR-vllm#21",
     "ray-project/ray#64053",
+    "sgl-project/sglang-omni#1460",
     "huggingface/speech-to-speech#319",
     "livekit/agents#6176",
     "punkpeye/awesome-mcp-servers#7153",
@@ -113,7 +114,15 @@ KNOWN_EXTERNAL_CHECK_FAILURES = {
         },
         "reason": "Current Ray failures are Buildkite/ReadTheDocs gates already triaged; the remaining PR-local Black fix is waiting on the contributor branch owner",
         "action": "wait for contributor branch update",
-    }
+    },
+    "sgl-project/sglang-omni#1460": {
+        "failed_check_names": {"omni-ci-gate"},
+        "reason": (
+            "Omni CI stopped at the missing run-ci opt-in before setup or ASR GPU tests; "
+            "the PR author must run `/tag-and-rerun-ci fun-asr`"
+        ),
+        "action": "wait for PR author CI opt-in",
+    },
 }
 KNOWN_REVIEW_GATES = {
     "punkpeye/awesome-mcp-servers#7153": {
@@ -301,6 +310,7 @@ CONTRIBUTOR_WAITING_LABELS = {"good first issue", "help wanted", "ready for PR"}
 MANUAL_HANDOFF_ACTIONS = {
     "submit Glama",
     "wait for author CLA",
+    "wait for PR author CI opt-in",
     "wait for contributor conflict resolution",
     "wait for preview authorization",
 }
@@ -491,6 +501,25 @@ def summarize_commit_checks(repo: str, head_sha: str) -> Dict[str, Any]:
         github_headers(),
     )
     check_runs = check_runs_payload.get("check_runs", [])
+    latest_check_runs: Dict[tuple[str, Any], tuple[tuple[str, int, int], Dict[str, Any]]] = {}
+    for position, check_run in enumerate(check_runs):
+        app = check_run.get("app") or {}
+        key = (str(check_run.get("name") or ""), app.get("slug") or app.get("id"))
+        timestamp = str(
+            check_run.get("completed_at")
+            or check_run.get("started_at")
+            or check_run.get("created_at")
+            or ""
+        )
+        try:
+            run_id = int(check_run.get("id") or 0)
+        except (TypeError, ValueError):
+            run_id = 0
+        rank = (timestamp, run_id, -position)
+        previous = latest_check_runs.get(key)
+        if previous is None or rank > previous[0]:
+            latest_check_runs[key] = (rank, check_run)
+    check_runs = [entry[1] for entry in latest_check_runs.values()]
     failed_check_runs = []
     pending_check_runs = []
     for check_run in check_runs:
@@ -1061,7 +1090,11 @@ def format_integration_markdown(metrics: Dict[str, Any]) -> str:
     if manual_handoff_integrations:
         lines.extend(["", "## Manual handoff gates", ""])
         for integration in manual_handoff_integrations:
-            reason = integration.get("known_review_gate_reason") or "manual action required"
+            reason = (
+                integration.get("known_review_gate_reason")
+                or integration.get("known_external_failure_reason")
+                or "manual action required"
+            )
             lines.append(
                 f"- [{integration['pr']}]({integration.get('html_url')}): "
                 f"{integration.get('next_action') or 'inspect'}; {reason}"

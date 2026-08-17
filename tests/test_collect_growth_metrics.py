@@ -19,8 +19,73 @@ def load_growth_metrics_module():
 def test_default_integration_prs_include_sglang_omni_fun_asr():
     module = load_growth_metrics_module()
 
+    assert "sgl-project/sglang-omni#1460" in module.DEFAULT_INTEGRATION_PRS
     assert "sgl-project/sglang-omni#1078" not in module.DEFAULT_INTEGRATION_PRS
     assert "sgl-project/sglang-omni#898" not in module.DEFAULT_INTEGRATION_PRS
+
+
+def test_sglang_omni_fun_asr_ci_gate_waits_for_pr_author_opt_in():
+    module = load_growth_metrics_module()
+
+    failure = module.KNOWN_EXTERNAL_CHECK_FAILURES["sgl-project/sglang-omni#1460"]
+
+    assert failure["failed_check_names"] == {"omni-ci-gate"}
+    assert failure["action"] == "wait for PR author CI opt-in"
+    assert "`/tag-and-rerun-ci fun-asr`" in failure["reason"]
+    assert "before setup or ASR GPU tests" in failure["reason"]
+    assert failure["action"] in module.MANUAL_HANDOFF_ACTIONS
+
+
+def test_summarize_commit_checks_uses_latest_run_for_each_check_name(monkeypatch):
+    module = load_growth_metrics_module()
+
+    def fake_fetch_json(url, headers=None):
+        if url.endswith("/commits/head/status"):
+            return {"state": "success", "statuses": []}
+        if url.endswith("/commits/head/check-runs?per_page=100"):
+            return {
+                "total_count": 4,
+                "check_runs": [
+                    {
+                        "id": 4,
+                        "name": "build-docs",
+                        "status": "completed",
+                        "conclusion": "success",
+                        "completed_at": "2026-08-10T22:46:02Z",
+                    },
+                    {
+                        "id": 3,
+                        "name": "omni-ci-gate",
+                        "status": "completed",
+                        "conclusion": "failure",
+                        "completed_at": "2026-08-10T22:45:59Z",
+                    },
+                    {
+                        "id": 2,
+                        "name": "build-docs",
+                        "status": "completed",
+                        "conclusion": "cancelled",
+                        "completed_at": "2026-08-10T22:45:58Z",
+                    },
+                    {
+                        "id": 1,
+                        "name": "omni-ci-gate",
+                        "status": "completed",
+                        "conclusion": "cancelled",
+                        "completed_at": "2026-08-10T22:45:57Z",
+                    },
+                ],
+            }
+        raise AssertionError(f"unexpected URL: {url}")
+
+    monkeypatch.setattr(module, "fetch_json", fake_fetch_json)
+
+    checks = module.summarize_commit_checks("sgl-project/sglang-omni", "head")
+
+    assert checks["total_check_runs"] == 4
+    assert checks["failed_check_runs"] == [
+        {"name": "omni-ci-gate", "conclusion": "failure", "url": None}
+    ]
 
 
 def test_github_headers_falls_back_to_gh_auth_token(monkeypatch):

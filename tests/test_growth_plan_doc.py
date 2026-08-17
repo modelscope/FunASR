@@ -428,3 +428,22 @@ def test_growth_plan_records_four_repo_homepage_routing_release():
     ]
     for marker in required_markers:
         assert marker in text
+
+
+def test_growth_plan_records_sglang_funasr_ci_handoff():
+    text = PLAN.read_text()
+
+    required_markers = [
+        "### 2026-08-17 SGLang Omni Fun-ASR prefill coalescing",
+        "[#1460](https://github.com/sgl-project/sglang-omni/pull/1460)",
+        "concurrency-32 throughput by 19.9%",
+        "corpus WER at `0.01710`",
+        "`54361fb022a7da13e1f18a85d5125ac24752c382`",
+        "`31439644442`",
+        "setup and all ASR GPU tests were skipped",
+        "`/tag-and-rerun-ci fun-asr`",
+        "#issuecomment-5310829913",
+        "default integration patrol",
+    ]
+    for marker in required_markers:
+        assert marker in text
