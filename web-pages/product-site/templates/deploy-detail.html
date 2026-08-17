@@ -9,6 +9,7 @@
     <div class="detail-actions">
       <a class="button button-primary" href="#commands">{{ '开始部署' if language == 'zh' else 'Start deployment' }}</a>
       <a class="button button-secondary" href="{{ '/benchmarks.html' if language == 'zh' else '/en/benchmarks.html' }}">{{ '查看基准口径' if language == 'zh' else 'Review benchmark method' }}</a>
+      {% if entry.get('source_url') %}<a class="text-link" href="{{ entry.source_url }}">{{ '查看实时源码' if language == 'zh' else 'View realtime source' }} <img src="{{ assets['lucide/arrow-right.svg'] }}" alt=""></a>{% endif %}
     </div>
   </div>
   <dl class="detail-meta">

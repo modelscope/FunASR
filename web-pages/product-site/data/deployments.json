@@ -506,13 +506,14 @@
       "models": ["Paraformer-online", "FSMN-VAD", "CT-Transformer punctuation", "Fun-ASR-Nano realtime"],
       "operating_systems": ["Linux"],
       "interfaces": ["WebSocket", "Python client", "C++ client", "Go client"],
-      "tested": {"funasr": "1.3.29", "runtime": "Python and C++ WebSocket runtimes", "verified": "2026-07-26"},
+      "tested": {"funasr": "1.4.2", "runtime": "FunASR v1.4.2 Python WebSocket runtime", "verified": "2026-08-17"},
       "commands": {
-        "install": ["pip install funasr websockets ffmpeg-python"],
-        "launch": ["cd runtime/python/websocket && python funasr_wss_server.py --port 10095"],
+        "install": ["python -m pip install -U \"funasr==1.4.2\"", "git clone --branch v1.4.2 --depth 1 https://github.com/modelscope/FunASR.git && python -m pip install -r FunASR/runtime/python/websocket/requirements_server.txt"],
+        "launch": ["cd FunASR/runtime/python/websocket && python funasr_wss_server.py --port 10095"],
         "health": ["ss -ltn | grep 10095"],
-        "smoke": ["cd runtime/python/websocket && python funasr_wss_client.py --host 127.0.0.1 --port 10095 --mode 2pass --chunk_size \"8,8,4\" --audio_in ../../tests/test_audio/zh.wav"]
+        "smoke": ["cd FunASR/runtime/python/websocket && python funasr_wss_client.py --host 127.0.0.1 --port 10095 --mode 2pass --chunk_size \"8,8,4\" --audio_in ../../funasr_api/asr_example.wav"]
       },
+      "source_url": "/go/github",
       "evidence": [
         {"label": "Python WebSocket runtime", "url": "https://github.com/modelscope/FunASR/blob/main/runtime/python/websocket/README.md"},
         {"label": "WebSocket protocol", "url": "https://github.com/modelscope/FunASR/blob/main/runtime/docs/websocket_protocol.md"},
