@@ -71,6 +71,12 @@ As of 2026-08-17 00:48 UTC, the ecosystem has 36,584 combined GitHub stars, or 5
 - Local evidence passed 109 Python tests and 22 Playwright tests, including desktop and mobile order, visibility, row-layout, overflow, console, and network assertions. Two clean builds each generated 27 product pages and validated 102 public pages with no diff; exact-head GitHub Actions passed both required checks.
 - Production release `20260817T012430Z` was built twice from the exact merge commit, atomically replaced `20260817T004144Z`, and retained that previous release for rollback. The 7,175,781-byte archive has SHA-256 `5c5b96595d4cb893c83aedeca4d5dfe5a4cf0a665a1b4d489808886a7aacc1a3`; preflight, staging, post-switch, Chinese and English public-page, all four redirect, nginx, cache-header, and security-header checks passed.
 
+### 2026-08-17 SGLang Omni Fun-ASR prefill coalescing
+
+- SGLang Omni PR [#1460](https://github.com/sgl-project/sglang-omni/pull/1460) enables prefill coalescing for Fun-ASR-Nano. Its published benchmark holds corpus WER at `0.01710`, improves concurrency-32 throughput by 19.9% over current main, and reports a 5.7% gain at concurrency 8, with the expected latency trade-off at concurrency 1.
+- Exact head `54361fb022a7da13e1f18a85d5125ac24752c382` had a red Omni CI run `31439644442`, but log inspection proved the failure was only the missing `run-ci` opt-in label: environment setup and all ASR GPU tests were skipped before any PR code ran.
+- The repository's trusted slash-command handler permits the PR author, but not LauraGPT, to start the model-specific run. The [author handoff](https://github.com/sgl-project/sglang-omni/pull/1460#issuecomment-5310829913) gives the exact first-line command `/tag-and-rerun-ci fun-asr`, which adds both `run-ci` and `run-fun-asr` before a full exact-head rerun. This PR is now part of the default integration patrol until real GPU CI completes or a maintainer closes the lane.
+
 ### 2026-08-16 OpenClaw realtime transcription SDK unblock
 
 - OpenClaw PR [#118977](https://github.com/openclaw/openclaw/pull/118977) was synchronized with `openclaw/main@2d3612da6bd28f6a7956d82b0795c31fd18bab8a`, resolving its only merge conflict while preserving both upstream SDK surface-budget changes and the FunASR WebSocket subprotocol work.
