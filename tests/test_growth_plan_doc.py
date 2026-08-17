@@ -401,3 +401,30 @@ def test_growth_plan_records_metrics_tracking_completion():
 
     assert "[ ] Track stars, PyPI downloads, issue volume, and docs traffic." not in text
     assert "docs traffic remains unavailable" not in text
+
+
+def test_growth_plan_records_four_repo_homepage_routing_release():
+    text = PLAN.read_text()
+
+    required_markers = [
+        "### 2026-08-17 four-repository homepage routing",
+        "36,728 views / 8,881 unique visitors",
+        "4,580 / 1,499",
+        "8,315 / 2,996",
+        "3,408 / 1,520",
+        "2,597 / 724",
+        "575 / 231",
+        "181 / 87",
+        "96 / 43",
+        "[#3508](https://github.com/modelscope/FunASR/pull/3508)",
+        "`2cb615c42911972602cfaec739144d406b3282c5`",
+        "`20260817T012430Z`",
+        "`20260817T004144Z`",
+        "`5c5b96595d4cb893c83aedeca4d5dfe5a4cf0a665a1b4d489808886a7aacc1a3`",
+        "Production speech toolkit",
+        "High-accuracy ASR",
+        "Languages and emotion",
+        "AI video editing",
+    ]
+    for marker in required_markers:
+        assert marker in text
