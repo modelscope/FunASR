@@ -128,6 +128,29 @@ def test_detail_commands_come_from_registry(built_site):
             assert command in rendered
 
 
+def test_realtime_page_publishes_verified_v142_quickstart(built_site):
+    registry = load_registry(SITE_ROOT / 'data' / 'deployments.json')
+    entry = next(item for item in registry['deployments'] if item['id'] == 'realtime')
+    commands = '\n'.join(
+        command
+        for group in ('install', 'launch', 'smoke')
+        for command in entry['commands'][group]
+    )
+
+    assert entry['tested']['funasr'] == '1.4.2'
+    assert entry['tested']['verified'] == '2026-08-17'
+    assert 'git clone --branch v1.4.2 --depth 1' in commands
+    assert 'runtime/python/websocket/requirements_server.txt' in commands
+    assert 'cd FunASR/runtime/python/websocket && python funasr_wss_server.py' in commands
+    assert '../../funasr_api/asr_example.wav' in commands
+    assert 'tests/test_audio/zh.wav' not in commands
+
+    for relative in ('deploy/realtime.html', 'en/deploy/realtime.html'):
+        soup = read_soup(built_site / relative)
+        source = soup.select_one('.detail-actions a[href="/go/github"]')
+        assert source
+
+
 @pytest.mark.parametrize(
     ('relative', 'boundary'),
     (
