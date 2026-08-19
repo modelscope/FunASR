@@ -13,6 +13,7 @@
   <a href="https://pypi.org/project/funasr/"><img src="https://img.shields.io/pypi/v/funasr" alt="PyPI"></a>
   <a href="https://github.com/modelscope/FunASR"><img src="https://img.shields.io/github/stars/modelscope/FunASR?style=social" alt="Stars"></a>
   <a href="https://pypi.org/project/funasr/"><img src="https://img.shields.io/pypi/dm/funasr" alt="Downloads"></a>
+<a href="https://inspect.software/software/modelscope/FunASR"><img src="https://raw.githubusercontent.com/inspect-software/badges/main/v1/m/modelscope/FunASR.svg" alt="inspect.software score badge for modelscope/FunASR" /></a>
   <a href="https://modelscope.github.io/FunASR/"><img src="https://img.shields.io/badge/docs-online-blue" alt="Docs"></a>
   <a href="https://mcptoplist.com/server/io.github.modelscope%2Ffunasr-mcp"><img src="https://mcptoplist.com/badge/io.github.modelscope%2Ffunasr-mcp.svg" alt="MCP Toplist"></a>
 </p>
