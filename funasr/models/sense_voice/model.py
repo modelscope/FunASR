@@ -6,7 +6,7 @@ import torch
 import torch.nn.functional as F
 from torch import Tensor
 from torch import nn
-from torch.cuda.amp import autocast
+from funasr.utils.amp import autocast
 from funasr.metrics.compute_acc import compute_accuracy, th_accuracy
 from funasr.losses.label_smoothing_loss import LabelSmoothingLoss
 from funasr.train_utils.device_funcs import force_gatherable

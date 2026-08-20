@@ -7,7 +7,7 @@ import time
 import copy
 import torch
 import logging
-from torch.cuda.amp import autocast
+from funasr.utils.amp import autocast
 from typing import Union, Dict, List, Tuple, Optional
 
 from funasr.register import tables
