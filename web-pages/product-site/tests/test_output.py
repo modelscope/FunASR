@@ -503,3 +503,55 @@ def test_hashed_asset_tampering_fails_validation(built_site):
         stream.write(b'changed')
 
     assert any(f'asset hash mismatch {asset}' in error for error in validate_output(built_site))
+
+
+@pytest.mark.parametrize(
+    ('relative', 'peer', 'markers'),
+    (
+        (
+            'blog/funasr-v1-4-3-pypi-release.html',
+            '/en/blog/funasr-v1-4-3-pypi-release.html',
+            ('FunASR v1.4.3', 'Silero VAD', '固定 K', '167', 'SHA256SUMS-v1.4.3'),
+        ),
+        (
+            'en/blog/funasr-v1-4-3-pypi-release.html',
+            '/blog/funasr-v1-4-3-pypi-release.html',
+            ('FunASR v1.4.3', 'Silero VAD', 'fixed-K', '167', 'SHA256SUMS-v1.4.3'),
+        ),
+    ),
+)
+def test_v1_4_3_release_blog_is_bilingual_and_verifiable(
+    built_site, relative, peer, markers
+):
+    soup = read_soup(built_site / relative)
+    text = soup.get_text(' ', strip=True)
+
+    assert soup.select_one('link[rel="canonical"]')['href'].endswith('/' + relative)
+    assert soup.select_one(f'link[rel="alternate"][href$="{peer}"]')
+    assert soup.select_one('script[type="application/ld+json"]')
+    assert soup.select_one('a[href="https://github.com/modelscope/FunASR/releases/tag/v1.4.3"]')
+    for marker in markers:
+        assert marker in text
+
+    root = ET.parse(built_site / 'sitemap.xml').getroot()
+    namespace = {'sitemap': 'http://www.sitemaps.org/schemas/sitemap/0.9'}
+    urls = {
+        item.findtext('sitemap:loc', namespaces=namespace)
+        for item in root.findall('sitemap:url', namespace)
+    }
+    assert f'https://www.funasr.com/{relative}' in urls
+
+
+@pytest.mark.parametrize(
+    ('relative', 'href'),
+    (
+        ('blog/index.html', '/blog/funasr-v1-4-3-pypi-release.html'),
+        ('en/blog/index.html', '/en/blog/funasr-v1-4-3-pypi-release.html'),
+    ),
+)
+def test_blog_index_features_v1_4_3_release(built_site, relative, href):
+    soup = read_soup(built_site / relative)
+    feature = soup.select_one(f'.launch-feature a[href="{href}"]')
+
+    assert feature
+    assert 'v1.4.3' in feature.get_text(' ', strip=True)
