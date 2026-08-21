@@ -34,14 +34,20 @@ This plan focuses on useful adoption work rather than vanity marketing: if more 
 
 ## Current campaign snapshot
 
-As of 2026-08-17 00:48 UTC, the ecosystem has 36,584 combined GitHub stars, or 5,360 additional stars since the 31,224 baseline. Exceeding the +20,000 target requires another 14,641 stars to reach at least 51,225 by 2026-09-30, or roughly 326 stars/day across the remaining 45 days.
+As of 2026-08-21 03:58 UTC, the ecosystem has 36,713 combined GitHub stars, or 5,489 additional stars since the 31,224 baseline. Exceeding the +20,000 target requires another 14,511 stars to reach at least 51,224 by 2026-09-30, or roughly 363 stars/day across the remaining 40 days. Public PyPI reports 121,164 downloads over the latest 7 days and 515,283 over the latest 30 days through 2026-08-20.
 
 | Repository | Stars | Forks | Open issues | Open PRs | Last push |
 |---|---:|---:|---:|---:|---|
-| `modelscope/FunASR` | 19,870 | 1,990 | 4 | 0 | 2026-08-17 |
-| `QwenAudio/Fun-ASR` | 1,478 | 146 | 0 | 0 | 2026-07-24 |
-| `QwenAudio/SenseVoice` | 9,084 | 808 | 0 | 0 | 2026-08-12 |
-| `modelscope/FunClip` | 6,152 | 736 | 0 | 0 | 2026-08-03 |
+| `modelscope/FunASR` | 19,944 | 1,996 | 5 | 2 | 2026-08-21 |
+| `QwenAudio/Fun-ASR` | 1,483 | 147 | 0 | 0 | 2026-08-19 |
+| `QwenAudio/SenseVoice` | 9,118 | 808 | 1 | 0 | 2026-08-18 |
+| `modelscope/FunClip` | 6,168 | 738 | 0 | 0 | 2026-08-19 |
+
+### 2026-08-21 FunASR v1.4.3 stable release
+
+- FunASR PR [#3519](https://github.com/modelscope/FunASR/pull/3519) merged as `eedd4e22d10dc2e81d9c2bb321edb3750253964b`. The release adds the optional `AutoModel(vad_model="silero-vad")` adapter with millisecond segments, threshold controls, 8/16 kHz input, ONNX mode, and bounded segment lengths. Large embedding sets with a known speaker count now use fixed-K clustering instead of dense spectral clustering.
+- Exact-main validation passed 167 source tests, compileall, PEP 517 wheel/sdist builds, Twine, source-to-artifact diff checks, and isolated installs with no dependencies and full dependencies. The public wheel SHA-256 is `4b1491643a5bc6ccdd8acfc3ec438f9d9b9aaca8c2bf2d0e71f737dfc03025b9`; the sdist SHA-256 is `74a9a60eac4f05b7cba25d31bdc0f6bba5d70dbe9fd326291b362a5e425ba01a`.
+- Signed tag `v1.4.3` peels exactly to the merge commit. The unique public [GitHub Release](https://github.com/modelscope/FunASR/releases/tag/v1.4.3) has the wheel, sdist, nine `runtime-llamacpp-v0.2.0` platform archives, and `SHA256SUMS-v1.4.3`, exactly 12 assets. Public PyPI and GitHub no-cache downloads matched every expected size and SHA-256, and a fresh public-wheel installation reported version 1.4.3.
 
 ### 2026-08-16 product-site attribution and claim audit
 
