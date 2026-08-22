@@ -24,11 +24,11 @@ if hasattr(torch.amp, "autocast") and hasattr(torch.amp, "GradScaler"):
     from torch.amp import autocast as _amp_autocast
     from torch.amp import GradScaler
 
-    def autocast(*args, **kwargs):
-        """torch.amp.autocast with device_type defaulting to "cuda"."""
-        if not args and "device_type" not in kwargs:
-            kwargs["device_type"] = "cuda"
-        return _amp_autocast(*args, **kwargs)
+    def autocast(enabled=True, dtype=None, cache_enabled=True):
+        """torch.amp.autocast with the legacy CUDA autocast signature."""
+        return _amp_autocast(
+            "cuda", dtype=dtype, enabled=enabled, cache_enabled=cache_enabled
+        )
 
 else:
     from torch.cuda.amp import autocast, GradScaler
