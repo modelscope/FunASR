@@ -5,7 +5,7 @@ import time
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torch.cuda.amp import autocast
+from funasr.utils.amp import autocast
 import re
 from funasr.models.scama.utils import sequence_mask
 from funasr.losses.label_smoothing_loss import LabelSmoothingLoss
@@ -583,7 +583,7 @@ class LLMASR2(nn.Module):
 
         batch_size, frames, _ = speech.shape
 
-        with torch.cuda.amp.autocast(enabled=False):
+        with autocast(enabled=False):
             # audio encoder
             encoder_out, encoder_out_lens = self.encode(speech, speech_lengths)
 
@@ -618,7 +618,7 @@ class LLMASR2(nn.Module):
                     batch_idx, :min_len, :
                 ]
 
-        with torch.cuda.amp.autocast(
+        with autocast(
             enabled=True if self.llm_dtype != "fp32" else False, dtype=dtype_map[self.llm_dtype]
         ):
             labels_ids[labels_ids == -1] = -100
@@ -883,7 +883,7 @@ class LLMASR2(nn.Module):
             llm_dtype = "fp16" if kwargs.get("fp16", False) else llm_dtype
             llm_dtype = "bf16" if kwargs.get("bf16", False) else llm_dtype
 
-        with torch.cuda.amp.autocast(
+        with autocast(
             enabled=True if llm_dtype != "fp32" else False, dtype=dtype_map[llm_dtype]
         ):
             label = contents["assistant"][0]
@@ -1159,7 +1159,7 @@ class LLMASR4(nn.Module):
         batch_size_speech, frames, _ = speech.shape
         batch_size, token_num = input_ids.shape
 
-        with torch.cuda.amp.autocast(enabled=False):
+        with autocast(enabled=False):
             # audio encoder
             encoder_out, encoder_out_lens = self.encode(speech, speech_lengths)
 
@@ -1203,7 +1203,7 @@ class LLMASR4(nn.Module):
 
                     speech_idx += 1
 
-        with torch.cuda.amp.autocast(
+        with autocast(
             enabled=True if self.llm_dtype != "fp32" else False, dtype=dtype_map[self.llm_dtype]
         ):
             labels_ids[labels_ids == -1] = -100
@@ -1551,7 +1551,7 @@ class LLMASR4(nn.Module):
             llm_dtype = "fp16" if kwargs.get("fp16", False) else llm_dtype
             llm_dtype = "bf16" if kwargs.get("bf16", False) else llm_dtype
 
-        with torch.cuda.amp.autocast(
+        with autocast(
             enabled=True if llm_dtype != "fp32" else False, dtype=dtype_map[llm_dtype]
         ):
             label = contents["assistant"][-1]

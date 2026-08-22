@@ -6,7 +6,7 @@ import logging
 from tqdm import tqdm
 from datetime import datetime
 import torch.distributed as dist
-from torch.cuda.amp import autocast, GradScaler
+from funasr.utils.amp import autocast, GradScaler
 from contextlib import nullcontext, contextmanager
 from pathlib import Path
 from torch.nn.parallel import DistributedDataParallel as DDP
@@ -32,7 +32,7 @@ def maybe_autocast(dtype=None, use_deepspeed=False):
             use_deepspeed: TODO.
         """
     if use_deepspeed:
-        with torch.cuda.amp.autocast(enabled=True, dtype=dtype, cache_enabled=False):
+        with autocast(enabled=True, dtype=dtype, cache_enabled=False):
             yield
     else:
         if dtype == torch.float16 or dtype == torch.bfloat16:

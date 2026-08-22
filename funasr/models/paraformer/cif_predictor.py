@@ -10,7 +10,7 @@ import numpy as np
 from funasr.register import tables
 from funasr.train_utils.device_funcs import to_device
 from funasr.models.transformer.utils.nets_utils import make_pad_mask
-from torch.cuda.amp import autocast
+from funasr.utils.amp import autocast
 
 
 @tables.register("predictor_classes", "CifPredictor")

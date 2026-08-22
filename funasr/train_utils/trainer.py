@@ -6,7 +6,7 @@ import logging
 from tqdm import tqdm
 from datetime import datetime
 import torch.distributed as dist
-from torch.cuda.amp import autocast, GradScaler
+from funasr.utils.amp import autocast, GradScaler
 from contextlib import nullcontext, contextmanager
 from pathlib import Path
 
