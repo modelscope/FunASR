@@ -39,14 +39,18 @@ class Fsmn_vad:
         if not Path(model_dir).exists():
             try:
                 from modelscope.hub.snapshot_download import snapshot_download
-            except:
-                raise "You are exporting model from modelscope, please install modelscope and try it again. To install modelscope, you could:\n" "\npip3 install -U modelscope\n" "For the users in China, you could install with the command:\n" "\npip3 install -U modelscope -i https://mirror.sjtu.edu.cn/pypi/web/simple"
+            except ImportError as e:
+                raise ImportError(
+                    "You are exporting model from modelscope, please install modelscope and try it again. To install modelscope, you could:\n" "\npip3 install -U modelscope\n" "For the users in China, you could install with the command:\n" "\npip3 install -U modelscope -i https://mirror.sjtu.edu.cn/pypi/web/simple"
+                ) from e
             try:
                 model_dir = snapshot_download(model_dir, cache_dir=cache_dir)
-            except:
-                raise "model_dir must be model_name in modelscope or local path downloaded from modelscope, but is {}".format(
-                    model_dir
-                )
+            except Exception as e:
+                raise RuntimeError(
+                    "model_dir must be model_name in modelscope or local path downloaded from modelscope, but is {}".format(
+                        model_dir
+                    )
+                ) from e
 
         model_file = os.path.join(model_dir, "model.onnx")
         if quantize:
@@ -55,8 +59,10 @@ class Fsmn_vad:
             print(".onnx does not exist, begin to export onnx")
             try:
                 from funasr import AutoModel
-            except:
-                raise "You are exporting onnx, please install funasr and try it again. To install funasr, you could:\n" "\npip3 install -U funasr\n" "For the users in China, you could install with the command:\n" "\npip3 install -U funasr -i https://mirror.sjtu.edu.cn/pypi/web/simple"
+            except ImportError as e:
+                raise ImportError(
+                    "You are exporting onnx, please install funasr and try it again. To install funasr, you could:\n" "\npip3 install -U funasr\n" "For the users in China, you could install with the command:\n" "\npip3 install -U funasr -i https://mirror.sjtu.edu.cn/pypi/web/simple"
+                ) from e
 
             model = AutoModel(model=model_dir)
             model_dir = model.export(type="onnx", quantize=quantize, **kwargs)
@@ -224,14 +230,18 @@ class Fsmn_vad_online:
         if not Path(model_dir).exists():
             try:
                 from modelscope.hub.snapshot_download import snapshot_download
-            except:
-                raise "You are exporting model from modelscope, please install modelscope and try it again. To install modelscope, you could:\n" "\npip3 install -U modelscope\n" "For the users in China, you could install with the command:\n" "\npip3 install -U modelscope -i https://mirror.sjtu.edu.cn/pypi/web/simple"
+            except ImportError as e:
+                raise ImportError(
+                    "You are exporting model from modelscope, please install modelscope and try it again. To install modelscope, you could:\n" "\npip3 install -U modelscope\n" "For the users in China, you could install with the command:\n" "\npip3 install -U modelscope -i https://mirror.sjtu.edu.cn/pypi/web/simple"
+                ) from e
             try:
                 model_dir = snapshot_download(model_dir, cache_dir=cache_dir)
-            except:
-                raise "model_dir must be model_name in modelscope or local path downloaded from modelscope, but is {}".format(
-                    model_dir
-                )
+            except Exception as e:
+                raise RuntimeError(
+                    "model_dir must be model_name in modelscope or local path downloaded from modelscope, but is {}".format(
+                        model_dir
+                    )
+                ) from e
 
         model_file = os.path.join(model_dir, "model.onnx")
         if quantize:
@@ -240,8 +250,10 @@ class Fsmn_vad_online:
             print(".onnx does not exist, begin to export onnx")
             try:
                 from funasr import AutoModel
-            except:
-                raise "You are exporting onnx, please install funasr and try it again. To install funasr, you could:\n" "\npip3 install -U funasr\n" "For the users in China, you could install with the command:\n" "\npip3 install -U funasr -i https://mirror.sjtu.edu.cn/pypi/web/simple"
+            except ImportError as e:
+                raise ImportError(
+                    "You are exporting onnx, please install funasr and try it again. To install funasr, you could:\n" "\npip3 install -U funasr\n" "For the users in China, you could install with the command:\n" "\npip3 install -U funasr -i https://mirror.sjtu.edu.cn/pypi/web/simple"
+                ) from e
 
             model = AutoModel(model=model_dir)
             model_dir = model.export(type="onnx", quantize=quantize, **kwargs)
