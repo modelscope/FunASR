@@ -7,7 +7,10 @@ import librosa
 import torch.distributed as dist
 from typing import Collection
 import torch
-import torchaudio
+try:
+    import torchaudio
+except ImportError:
+    torchaudio = None
 from torch import nn
 import random
 import re
