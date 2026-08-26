@@ -20,7 +20,10 @@ the old signature (``with autocast(enabled=..., dtype=...)``).
 
 import torch
 
-if hasattr(torch.amp, "autocast") and hasattr(torch.amp, "GradScaler"):
+torch_amp = getattr(torch, "amp", None)
+if torch_amp is not None and hasattr(torch_amp, "autocast") and hasattr(
+    torch_amp, "GradScaler"
+):
     from torch.amp import autocast as _amp_autocast
     from torch.amp import GradScaler
 
