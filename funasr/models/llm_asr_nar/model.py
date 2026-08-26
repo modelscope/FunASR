@@ -5,7 +5,7 @@ import time
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torch.cuda.amp import autocast
+from funasr.utils.amp import autocast
 
 from funasr.models.scama.utils import sequence_mask
 from funasr.losses.label_smoothing_loss import LabelSmoothingLoss

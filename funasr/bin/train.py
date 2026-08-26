@@ -16,7 +16,7 @@ from contextlib import nullcontext
 import torch.distributed as dist
 
 from omegaconf import DictConfig, OmegaConf
-from torch.cuda.amp import autocast, GradScaler
+from funasr.utils.amp import autocast, GradScaler
 from torch.nn.parallel import DistributedDataParallel as DDP
 from torch.distributed.fsdp import FullyShardedDataParallel as FSDP
 from torch.distributed.algorithms.join import Join

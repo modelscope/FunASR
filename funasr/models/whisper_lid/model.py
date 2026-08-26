@@ -5,7 +5,7 @@ import time
 import torch
 import numpy as np
 import torch.nn as nn
-from torch.cuda.amp import autocast
+from funasr.utils.amp import autocast
 
 from funasr.losses.label_smoothing_loss import LabelSmoothingLoss
 from funasr.models.ctc.ctc import CTC
