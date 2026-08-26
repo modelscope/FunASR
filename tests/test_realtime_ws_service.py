@@ -9,6 +9,7 @@ import types
 from pathlib import Path
 
 import numpy as np
+import pytest
 import torch
 
 
@@ -113,6 +114,10 @@ def test_cli_defaults_disable_speaker_and_bound_partial_window():
     assert args.partial_window_sec == 15.0
     assert args.endpoint_mode == "server"
     assert args.log_session_stats_interval == 0.0
+    assert args.decode_batch_wait_ms == 10.0
+    assert args.decode_max_batch_size == 16
+    assert args.vad_device == "cpu"
+    assert args.vad_ncpu == 1
 
 
 def test_cli_accepts_client_endpoint_mode():
@@ -1628,7 +1633,400 @@ def test_speaker_history_and_identity_state_have_hard_limits(monkeypatch):
     ]
 
 
-def test_handler_keeps_event_loop_responsive_during_session_work(monkeypatch):
+def test_realtime_batching_engine_combines_compatible_concurrent_requests():
+    module = load_service_module()
+
+    class RecordingEngine:
+        def __init__(self):
+            self.calls = []
+            self._engine = object()
+
+        def generate(self, inputs, **kwargs):
+            self.calls.append((list(inputs), dict(kwargs)))
+            return [{"text": str(int(item[0]))} for item in inputs]
+
+    engine = RecordingEngine()
+    batching_engine = module.RealtimeBatchingEngine(
+        engine, batch_wait_ms=50, max_batch_size=8
+    )
+    assert batching_engine._engine is engine._engine
+    barrier = threading.Barrier(3)
+    results = [None, None]
+
+    def generate(index, values):
+        barrier.wait()
+        results[index] = batching_engine.generate(
+            [np.array([value], dtype=np.float32) for value in values],
+            language="zh",
+        )
+
+    threads = [
+        threading.Thread(target=generate, args=(0, [1, 2])),
+        threading.Thread(target=generate, args=(1, [3])),
+    ]
+    for thread in threads:
+        thread.start()
+    barrier.wait()
+    for thread in threads:
+        thread.join(timeout=2)
+
+    assert all(not thread.is_alive() for thread in threads)
+    assert [[item["text"] for item in result] for result in results] == [
+        ["1", "2"],
+        ["3"],
+    ]
+    assert len(engine.calls) == 1
+    assert len(engine.calls[0][0]) == 3
+    assert engine.calls[0][1] == {"language": "zh"}
+
+
+def test_realtime_batching_engine_keeps_incompatible_options_separate():
+    module = load_service_module()
+
+    class RecordingEngine:
+        def __init__(self):
+            self.calls = []
+
+        def generate(self, inputs, **kwargs):
+            self.calls.append((list(inputs), dict(kwargs)))
+            return [{"text": kwargs["language"]} for _ in inputs]
+
+    engine = RecordingEngine()
+    batching_engine = module.RealtimeBatchingEngine(
+        engine, batch_wait_ms=50, max_batch_size=8
+    )
+    barrier = threading.Barrier(3)
+    results = [None, None]
+
+    def generate(index, language):
+        barrier.wait()
+        results[index] = batching_engine.generate(
+            [np.array([index], dtype=np.float32)], language=language
+        )
+
+    threads = [
+        threading.Thread(target=generate, args=(0, "zh")),
+        threading.Thread(target=generate, args=(1, "en")),
+    ]
+    for thread in threads:
+        thread.start()
+    barrier.wait()
+    for thread in threads:
+        thread.join(timeout=2)
+
+    assert all(not thread.is_alive() for thread in threads)
+    assert [result[0]["text"] for result in results] == ["zh", "en"]
+    assert len(engine.calls) == 2
+
+
+def test_realtime_batching_engine_propagates_engine_errors():
+    module = load_service_module()
+
+    class FailingEngine:
+        def generate(self, inputs, **kwargs):
+            raise RuntimeError("synthetic batch failure")
+
+    batching_engine = module.RealtimeBatchingEngine(
+        FailingEngine(), batch_wait_ms=0, max_batch_size=8
+    )
+
+    with pytest.raises(RuntimeError, match="synthetic batch failure"):
+        batching_engine.generate([np.array([1], dtype=np.float32)])
+
+
+def test_realtime_batching_engine_recovers_from_request_grouping_error():
+    module = load_service_module()
+
+    class ExplodingHash:
+        def __hash__(self):
+            raise RuntimeError("synthetic grouping failure")
+
+    class RecordingEngine:
+        def generate(self, inputs, **kwargs):
+            return [{"text": "ok"} for _ in inputs]
+
+    batching_engine = module.RealtimeBatchingEngine(
+        RecordingEngine(), batch_wait_ms=10, max_batch_size=8
+    )
+    outcomes = {}
+
+    def generate(name, marker):
+        try:
+            outcomes[name] = batching_engine.generate(
+                [np.array([1], dtype=np.float32)], marker=marker
+            )
+        except Exception as error:
+            outcomes[name] = error
+
+    bad_thread = threading.Thread(
+        target=generate, args=("bad", ExplodingHash()), daemon=True
+    )
+    bad_thread.start()
+    bad_thread.join(timeout=2)
+    good_thread = threading.Thread(target=generate, args=("good", "safe"), daemon=True)
+    good_thread.start()
+    good_thread.join(timeout=2)
+
+    assert not bad_thread.is_alive()
+    assert not good_thread.is_alive()
+    assert isinstance(outcomes["bad"], RuntimeError)
+    assert "synthetic grouping failure" in str(outcomes["bad"])
+    assert outcomes["good"] == [{"text": "ok"}]
+
+
+def test_realtime_batching_engine_recovers_from_result_distribution_error():
+    module = load_service_module()
+
+    class ExplodingResult(dict):
+        def get(self, key, default=None):
+            raise RuntimeError("synthetic distribution failure")
+
+    class SelectiveEngine:
+        def generate(self, inputs, **kwargs):
+            if int(inputs[0][0]) < 0:
+                return [ExplodingResult(text="bad")]
+            return [{"key": None, "text": "ok"}]
+
+    batching_engine = module.RealtimeBatchingEngine(
+        SelectiveEngine(), batch_wait_ms=0, max_batch_size=8
+    )
+
+    with pytest.raises(RuntimeError, match="synthetic distribution failure"):
+        batching_engine.generate([np.array([-1], dtype=np.float32)])
+
+    assert batching_engine.generate([np.array([1], dtype=np.float32)]) == [
+        {"key": None, "text": "ok"}
+    ]
+
+
+def test_realtime_batching_engine_enforces_max_batch_size_between_requests():
+    module = load_service_module()
+
+    class RecordingEngine:
+        def __init__(self):
+            self.calls = []
+
+        def generate(self, inputs, **kwargs):
+            self.calls.append(list(inputs))
+            return [{"text": str(int(item[0]))} for item in inputs]
+
+    engine = RecordingEngine()
+    batching_engine = module.RealtimeBatchingEngine(
+        engine, batch_wait_ms=50, max_batch_size=3
+    )
+    barrier = threading.Barrier(3)
+    results = [None, None]
+
+    def generate(index, values):
+        barrier.wait()
+        results[index] = batching_engine.generate(
+            [np.array([value], dtype=np.float32) for value in values]
+        )
+
+    threads = [
+        threading.Thread(target=generate, args=(0, [1, 2])),
+        threading.Thread(target=generate, args=(1, [3, 4])),
+    ]
+    for thread in threads:
+        thread.start()
+    barrier.wait()
+    for thread in threads:
+        thread.join(timeout=2)
+
+    assert all(not thread.is_alive() for thread in threads)
+    assert [[item["text"] for item in result] for result in results] == [
+        ["1", "2"],
+        ["3", "4"],
+    ]
+    assert len(engine.calls) == 2
+    assert all(len(call) <= 3 for call in engine.calls)
+
+
+def test_realtime_batching_engine_rejects_request_larger_than_max_batch_size():
+    module = load_service_module()
+
+    class RecordingEngine:
+        def generate(self, inputs, **kwargs):
+            raise AssertionError("oversized request must not reach the engine")
+
+    batching_engine = module.RealtimeBatchingEngine(
+        RecordingEngine(), batch_wait_ms=0, max_batch_size=1
+    )
+
+    with pytest.raises(ValueError, match="2 inputs.*maximum is 1"):
+        batching_engine.generate(
+            [np.array([1], dtype=np.float32), np.array([2], dtype=np.float32)]
+        )
+
+
+def test_realtime_batching_engine_isolates_a_bad_request_after_batch_failure():
+    module = load_service_module()
+
+    class SelectiveEngine:
+        def generate(self, inputs, **kwargs):
+            values = [int(item[0]) for item in inputs]
+            if len(values) > 1:
+                raise RuntimeError("synthetic batch failure")
+            if values[0] < 0:
+                raise ValueError("bad audio")
+            return [{"key": "sample_0", "text": str(values[0])}]
+
+    batching_engine = module.RealtimeBatchingEngine(
+        SelectiveEngine(), batch_wait_ms=50, max_batch_size=8
+    )
+    barrier = threading.Barrier(3)
+    outcomes = [None, None]
+
+    def generate(index, value):
+        barrier.wait()
+        try:
+            outcomes[index] = batching_engine.generate(
+                [np.array([value], dtype=np.float32)]
+            )
+        except Exception as error:
+            outcomes[index] = error
+
+    threads = [
+        threading.Thread(target=generate, args=(0, -1)),
+        threading.Thread(target=generate, args=(1, 7)),
+    ]
+    for thread in threads:
+        thread.start()
+    barrier.wait()
+    for thread in threads:
+        thread.join(timeout=2)
+
+    assert all(not thread.is_alive() for thread in threads)
+    assert isinstance(outcomes[0], ValueError)
+    assert str(outcomes[0]) == "bad audio"
+    assert outcomes[1] == [{"key": "sample_0", "text": "7"}]
+
+
+def test_thread_safe_generate_model_serializes_shared_model_calls():
+    module = load_service_module()
+
+    class RecordingModel:
+        def __init__(self):
+            self.active = 0
+            self.max_active = 0
+            self.lock = threading.Lock()
+
+        def generate(self, value):
+            with self.lock:
+                self.active += 1
+                self.max_active = max(self.max_active, self.active)
+            try:
+                time.sleep(0.05)
+                return value
+            finally:
+                with self.lock:
+                    self.active -= 1
+
+    model = RecordingModel()
+    shared_model = module.ThreadSafeGenerateModel(model)
+    threads = [
+        threading.Thread(target=shared_model.generate, args=(index,))
+        for index in range(2)
+    ]
+    for thread in threads:
+        thread.start()
+    for thread in threads:
+        thread.join(timeout=1)
+
+    assert all(not thread.is_alive() for thread in threads)
+    assert model.max_active == 1
+    assert shared_model.active == 0
+
+
+def test_create_vad_shares_weights_but_copies_runtime_config(monkeypatch):
+    module = load_service_module()
+
+    class NestedVadModel:
+        def __init__(self):
+            self.encoder = object()
+            self.vad_opts = types.SimpleNamespace(max_end_silence_time=800)
+
+    class FakeAutoModel:
+        _IMMUTABLE_KWARGS_KEYS = frozenset({"frontend"})
+
+        def __init__(self):
+            self.model = NestedVadModel()
+            self.frontend = object()
+            self.kwargs = {"frontend": self.frontend, "runtime": {"items": []}}
+            self._base_kwargs_map = {"kwargs": dict(self.kwargs)}
+
+    monkeypatch.setattr(module, "DynamicStreamingVAD", lambda value: value)
+    model = FakeAutoModel()
+    args = types.SimpleNamespace(endpoint_mode="server")
+
+    first = module.create_vad(model, args)
+    second = module.create_vad(model, args)
+
+    assert first is not model
+    assert second is not model
+    assert first is not second
+    assert first.model is not model.model
+    assert second.model is not model.model
+    assert first.model is not second.model
+    assert first.model.encoder is model.model.encoder
+    assert second.model.encoder is model.model.encoder
+    assert first.model.vad_opts is not second.model.vad_opts
+    assert first.kwargs is not second.kwargs
+    assert first.kwargs["frontend"] is model.frontend
+    first.kwargs["runtime"]["items"].append("first")
+    assert second.kwargs["runtime"]["items"] == []
+
+
+def test_create_vad_isolates_concurrent_nested_model_runtime_state(monkeypatch):
+    module = load_service_module()
+    barrier = threading.Barrier(2)
+
+    class NestedVadModel:
+        def __init__(self):
+            self.encoder = object()
+            self.vad_opts = types.SimpleNamespace(max_end_silence_time=800)
+
+        def initialize(self, value):
+            self.vad_opts.max_end_silence_time = value
+            barrier.wait()
+            return self.vad_opts.max_end_silence_time
+
+    class FakeAutoModel:
+        _IMMUTABLE_KWARGS_KEYS = frozenset()
+
+        def __init__(self):
+            self.model = NestedVadModel()
+            self.kwargs = {}
+
+        def generate(self, value):
+            return self.model.initialize(value)
+
+    monkeypatch.setattr(module, "DynamicStreamingVAD", lambda value: value)
+    model = FakeAutoModel()
+    args = types.SimpleNamespace(endpoint_mode="server")
+    sessions = [module.create_vad(model, args), module.create_vad(model, args)]
+    results = [None, None]
+    threads = [
+        threading.Thread(
+            target=lambda index=index: results.__setitem__(
+                index, sessions[index].generate(index + 1)
+            )
+        )
+        for index in range(2)
+    ]
+
+    for thread in threads:
+        thread.start()
+    for thread in threads:
+        thread.join(timeout=2)
+
+    assert all(not thread.is_alive() for thread in threads)
+    assert results == [1, 2]
+
+
+def test_handler_keeps_event_loop_responsive_and_runs_connections_concurrently(
+    monkeypatch,
+):
     module = load_service_module()
 
     class BlockingSession:
@@ -1712,7 +2110,7 @@ def test_handler_keeps_event_loop_responsive_during_session_work(monkeypatch):
 
     assert gaps
     assert max(gaps) < 0.08
-    assert BlockingSession.max_active_workers == 1
+    assert BlockingSession.max_active_workers == 2
 
 
 def test_handler_logs_session_stats_on_configured_interval(monkeypatch):
