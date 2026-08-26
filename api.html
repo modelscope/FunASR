@@ -8300,7 +8300,7 @@
 
         batch_size, frames, _ = speech.shape
 
-        with torch.cuda.amp.autocast(enabled=False):
+        with autocast(enabled=False):
             # audio encoder
             encoder_out, encoder_out_lens = self.encode(speech, speech_lengths)
 
@@ -8466,7 +8466,7 @@
 
         batch_size, frames, _ = speech.shape
 
-        with torch.cuda.amp.autocast(enabled=False):
+        with autocast(enabled=False):
             # audio encoder
             encoder_out, encoder_out_lens = self.encode(speech, speech_lengths)
 
@@ -8729,7 +8729,7 @@
         batch_size_speech, frames, _ = speech.shape
         batch_size, token_num = input_ids.shape
 
-        with torch.cuda.amp.autocast(enabled=False):
+        with autocast(enabled=False):
             # audio encoder
             encoder_out, encoder_out_lens = self.encode(speech, speech_lengths)
 </code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/llm_asr/model.py#L1135" target="_blank" class="src-more">View full source →</a></details></div><div class="mblk"><code>.encode(speech, speech_lengths)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/llm_asr/model.py#L1246" target="_blank" class="gh-link">L1246</a><div class="mdoc"><p>Encode.</p>
@@ -8898,7 +8898,7 @@
             llm_dtype = &quot;fp16&quot; if kwargs.get(&quot;fp16&quot;, False) else llm_dtype
             llm_dtype = &quot;bf16&quot; if kwargs.get(&quot;bf16&quot;, False) else llm_dtype
 
-        with torch.cuda.amp.autocast(
+        with autocast(
 </code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/llm_asr/model.py#L1525" target="_blank" class="src-more">View full source →</a></details></div></div>
 <div class="api-detail" id="e140"><span class="dtag badge-m">method</span><h2><code>LLMASR4.forward(speech, speech_lengths, input_ids, attention_mask, labels_ids, fbank_beg, fbank_mask, **kwargs)</code></h2><div class="dmod">funasr.models.llm_asr.LLMASR4 · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/llm_asr/model.py#L1135" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Encoder + Decoder + Calc loss</p>
 <h4>Args:</h4>
@@ -8935,7 +8935,7 @@
         batch_size_speech, frames, _ = speech.shape
         batch_size, token_num = input_ids.shape
 
-        with torch.cuda.amp.autocast(enabled=False):
+        with autocast(enabled=False):
             # audio encoder
             encoder_out, encoder_out_lens = self.encode(speech, speech_lengths)
 </code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/llm_asr/model.py#L1135" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
@@ -9109,7 +9109,7 @@
             llm_dtype = &quot;fp16&quot; if kwargs.get(&quot;fp16&quot;, False) else llm_dtype
             llm_dtype = &quot;bf16&quot; if kwargs.get(&quot;bf16&quot;, False) else llm_dtype
 
-        with torch.cuda.amp.autocast(
+        with autocast(
 </code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/llm_asr/model.py#L1525" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
 <div class="api-detail" id="e146"><span class="dtag badge-c">class</span><h2>LLMASRNAR</h2><div class="dmod">funasr.models.llm_asr_nar · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/llm_asr_nar/model.py#L26" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source code</summary><pre><code>class LLMASRNAR(nn.Module):
     &quot;&quot;&quot; &quot;&quot;&quot;
@@ -26351,7 +26351,7 @@ Then use with OpenAI SDK:
             use_deepspeed: TODO.
         &quot;&quot;&quot;
     if use_deepspeed:
-        with torch.cuda.amp.autocast(enabled=True, dtype=dtype, cache_enabled=False):
+        with autocast(enabled=True, dtype=dtype, cache_enabled=False):
             yield
     else:
         if dtype == torch.float16 or dtype == torch.bfloat16:
