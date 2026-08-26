@@ -9,7 +9,7 @@ import librosa as sf
 import numpy as np
 import torch
 import torch.nn.functional as F
-import torchaudio.compliance.kaldi as Kaldi
+from funasr.utils import fbank as Kaldi
 from torch import nn
 
 from funasr.utils.modelscope_file import File
