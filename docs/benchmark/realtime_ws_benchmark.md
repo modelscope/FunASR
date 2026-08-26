@@ -17,11 +17,16 @@ partial window and a moderate partial refresh interval:
 ```bash
 CUDA_VISIBLE_DEVICES=0 python examples/industrial_data_pretraining/fun_asr_nano/serve_realtime_ws.py \
     --port 10095 --language 中文 \
-    --partial-window-sec 8 --decode-interval 0.8
+    --partial-window-sec 8 --decode-interval 0.8 \
+    --vad-device cpu --vad-ncpu 1 \
+    --decode-batch-wait-ms 10 --decode-max-batch-size 16
 ```
 
 Speaker diarization is disabled by default. Add `--enable-spk` only when the
 `spk` field is required, and report that setting with the benchmark result.
+Compatible cross-session decodes arriving within `--decode-batch-wait-ms` are
+submitted as one engine batch. Set the wait to `0` for a no-wait comparison,
+and keep all batching flags identical when comparing releases.
 
 ## Run a Single Realtime Replay
 
@@ -73,6 +78,30 @@ server. If you are debugging service internals, collect server logs separately
 for queue wait, VAD time, ASR decode time, speaker diarization time, GPU memory,
 and GPU utilization.
 
+## Concurrency Regression Reference
+
+The following result compares the `v1.4.3` service with the concurrent decode
+batching defaults introduced after it. Each service used one H100 80 GB GPU,
+vLLM 0.19.1, PyTorch 2.10.0 with CUDA 12.8, server-side FSMN VAD, and speaker
+diarization disabled. The candidate used CPU VAD with one thread per session,
+the 10 ms decode batch wait, and a maximum decode batch size of 16.
+
+The workload was a 47-second looped Chinese recording sent in paced 100 ms
+frames. All clients replayed the same file once and started together.
+
+| Clients | Version | Wall time | Aggregate audio/wall | First update p50/p95 | Final after STOP p50/p95 | Response lag p95 max | Errors |
+|---------|---------|-----------|----------------------|----------------------|--------------------------|-----------------------|--------|
+| 12 | `v1.4.3` | 66.897 s | 8.431x | 462.0 / 462.1 ms | 19,550.3 / 19,832.9 ms | 17,564.7 ms | 0 |
+| 12 | batched candidate | 48.765 s | 11.566x | 484.9 / 488.0 ms | 414.4 / 414.9 ms | 1,047.0 ms | 0 |
+| 16 | `v1.4.3` | 87.898 s | 8.555x | 483.4 / 483.5 ms | 40,463.0 / 40,823.3 ms | 36,786.7 ms | 0 |
+| 16 | batched candidate | 57.085 s | 13.173x | 515.9 / 525.7 ms | 9,757.6 / 10,051.6 ms | 10,231.4 ms | 0 |
+
+This is a regression reference, not a universal capacity claim. Repeat the
+test with production audio and service options before choosing a concurrency
+limit. In particular, long speech segments create synchronized, expensive
+final decodes that are not representative of every meeting or voice-agent
+workload.
+
 ## Report Template
 
 When publishing a realtime WebSocket benchmark or issue report, include:
@@ -81,7 +110,7 @@ When publishing a realtime WebSocket benchmark or issue report, include:
 |----------|----------------|
 | Data | Audio duration, sample rate, language/domain, silence ratio or speaking pattern, and whether the same file was looped |
 | Load | `--clients`, `--loops`, `--chunk-ms`, paced or `--no-pace`, and total benchmark wall time |
-| Service | `serve_realtime_ws.py` command, `--partial-window-sec`, `--decode-interval`, `--enable-spk`, language, and hotwords |
+| Service | `serve_realtime_ws.py` command, `--partial-window-sec`, `--decode-interval`, `--vad-device`, `--vad-ncpu`, `--decode-batch-wait-ms`, `--decode-max-batch-size`, `--enable-spk`, language, and hotwords |
 | Hardware | GPU/NPU model, GPU count, memory, driver, CUDA/CANN/runtime versions, CPU model, and available RAM |
 | Software | `funasr`, PyTorch, torchaudio, vLLM, Python, OS, and container image if any |
 | Output | Summary line, JSONL artifact, server logs, and any failed client IDs |

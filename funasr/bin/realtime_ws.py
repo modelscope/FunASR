@@ -12,9 +12,12 @@ Features:
 
 import asyncio
 from collections import deque
+import copy
 import json
 import logging
 import os
+import queue
+import threading
 import time
 import argparse
 import numpy as np
@@ -32,6 +35,200 @@ from funasr.utils.postprocess_hotwords import (
 warnings.filterwarnings('ignore')
 logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)s] %(message)s')
 logger = logging.getLogger(__name__)
+
+
+class _BatchRequest:
+    def __init__(self, inputs, kwargs):
+        self.inputs = inputs
+        self.kwargs = kwargs
+        self.event = threading.Event()
+        self.result = None
+        self.error = None
+
+
+class ThreadSafeGenerateModel:
+    """Protect mutable AutoModel runtime configuration across session threads."""
+
+    def __init__(self, model):
+        self.model = model
+        self.lock = threading.Lock()
+
+    def generate(self, *args, **kwargs):
+        with self.lock:
+            return self.model.generate(*args, **kwargs)
+
+    def __getattr__(self, name):
+        return getattr(self.model, name)
+
+
+class RealtimeBatchingEngine:
+    """Serialize the shared engine while batching compatible session requests."""
+
+    def __init__(self, engine, batch_wait_ms=10.0, max_batch_size=16):
+        self.engine = engine
+        self._engine = getattr(engine, "_engine", engine)
+        self.batch_wait_s = max(0.0, float(batch_wait_ms)) / 1000.0
+        self.max_batch_size = max(1, int(max_batch_size))
+        self.requests = queue.Queue()
+        self.pending_request = None
+        self.worker = threading.Thread(
+            target=self._run, name="funasr-realtime-batcher", daemon=True
+        )
+        self.worker.start()
+
+    @staticmethod
+    def _freeze(value):
+        if isinstance(value, dict):
+            return (
+                "dict",
+                tuple(
+                    (key, RealtimeBatchingEngine._freeze(item))
+                    for key, item in sorted(value.items())
+                ),
+            )
+        if isinstance(value, list):
+            return (
+                "list",
+                tuple(RealtimeBatchingEngine._freeze(item) for item in value),
+            )
+        if isinstance(value, tuple):
+            return (
+                "tuple",
+                tuple(RealtimeBatchingEngine._freeze(item) for item in value),
+            )
+        if isinstance(value, set):
+            return (
+                "set",
+                frozenset(RealtimeBatchingEngine._freeze(item) for item in value),
+            )
+        try:
+            hash(value)
+        except TypeError:
+            return ("identity", id(value))
+        return ("value", type(value), value)
+
+    def generate(self, inputs, **kwargs):
+        request_inputs = list(inputs) if isinstance(inputs, (list, tuple)) else [inputs]
+        if not request_inputs:
+            return []
+        if len(request_inputs) > self.max_batch_size:
+            raise ValueError(
+                f"Realtime decode request has {len(request_inputs)} inputs; "
+                f"the configured maximum is {self.max_batch_size}"
+            )
+        if not self.worker.is_alive():
+            raise RuntimeError("Realtime decode batch worker is not running")
+
+        request = _BatchRequest(request_inputs, dict(kwargs))
+        self.requests.put(request)
+        while not request.event.wait(timeout=1.0):
+            if not self.worker.is_alive():
+                raise RuntimeError("Realtime decode batch worker stopped unexpectedly")
+        if request.error is not None:
+            raise request.error
+        return request.result
+
+    def _collect_batch(self, first):
+        batch = [first]
+        sample_count = len(first.inputs)
+        deadline = time.monotonic() + self.batch_wait_s
+        while sample_count < self.max_batch_size:
+            timeout = deadline - time.monotonic()
+            if timeout <= 0:
+                break
+            try:
+                request = self.requests.get(timeout=timeout)
+            except queue.Empty:
+                break
+            if sample_count + len(request.inputs) > self.max_batch_size:
+                self.pending_request = request
+                break
+            batch.append(request)
+            sample_count += len(request.inputs)
+        return batch
+
+    def _run(self):
+        while True:
+            first = self.pending_request
+            if first is None:
+                first = self.requests.get()
+            else:
+                self.pending_request = None
+            requests = [first]
+            try:
+                requests = self._collect_batch(first)
+            except Exception as error:
+                logger.exception("Realtime batch collection failed")
+                for request in requests:
+                    request.error = error
+                    request.event.set()
+                continue
+
+            groups = {}
+            for request in requests:
+                try:
+                    key = self._freeze(request.kwargs)
+                except Exception as error:
+                    request.error = error
+                    request.event.set()
+                    continue
+                groups.setdefault(key, []).append(request)
+            for group in groups.values():
+                try:
+                    self._generate_group(group)
+                except Exception as error:
+                    logger.exception("Realtime batch result distribution failed")
+                    for request in group:
+                        if request.event.is_set():
+                            continue
+                        request.error = error
+                        request.event.set()
+
+    def _generate_group(self, requests):
+        inputs = [item for request in requests for item in request.inputs]
+        try:
+            results = self.engine.generate(inputs, **requests[0].kwargs)
+            if len(results) != len(inputs):
+                raise RuntimeError(
+                    "Realtime batch result count does not match the input count: "
+                    f"{len(results)} != {len(inputs)}"
+                )
+        except Exception as error:
+            if len(requests) > 1 and not isinstance(
+                error, torch.cuda.OutOfMemoryError
+            ):
+                logger.warning(
+                    "Realtime decode batch failed; retrying %d requests separately: %s",
+                    len(requests),
+                    error,
+                )
+                for request in requests:
+                    self._generate_group([request])
+                return
+            for request in requests:
+                request.error = error
+            for request in requests:
+                request.event.set()
+            return
+
+        offset = 0
+        for request in requests:
+            end = offset + len(request.inputs)
+            request.result = []
+            for local_index, (item, result) in enumerate(
+                zip(request.inputs, results[offset:end])
+            ):
+                result_key = result.get("key") if isinstance(result, dict) else None
+                if (
+                    not isinstance(item, str)
+                    and isinstance(result_key, str)
+                    and result_key.startswith("sample_")
+                ):
+                    result = dict(result)
+                    result["key"] = f"sample_{local_index}"
+                request.result.append(result)
+            offset = end
+            request.event.set()
 
 
 def _normalize_transcript_with_positions(text):
@@ -950,12 +1147,17 @@ def load_models(args):
         from funasr.auto.auto_model_vllm import AutoModelVLLM
 
         logger.info(f"Loading ASR (vLLM): {args.model}")
-        _vllm_engine = AutoModelVLLM(
+        engine = AutoModelVLLM(
             model=args.model, hub=args.hub, device=args.device,
             dtype=getattr(args, 'dtype', 'bf16'),
             tensor_parallel_size=getattr(args, 'tensor_parallel_size', 1),
             gpu_memory_utilization=getattr(args, 'gpu_memory_utilization', 0.8),
             max_model_len=getattr(args, 'max_model_len', 2048),
+        )
+        _vllm_engine = RealtimeBatchingEngine(
+            engine,
+            batch_wait_ms=getattr(args, "decode_batch_wait_ms", 10.0),
+            max_batch_size=getattr(args, "decode_max_batch_size", 16),
         )
 
         _asr_kwargs = {}
@@ -980,7 +1182,10 @@ def load_models(args):
         if getattr(args, "endpoint_mode", "server") == "server":
             logger.info("Loading VAD: fsmn-vad (streaming)")
             _vad_model = AutoModel(
-                model="fsmn-vad", device=args.device, disable_update=True
+                model="fsmn-vad",
+                device=getattr(args, "vad_device", "cpu"),
+                ncpu=getattr(args, "vad_ncpu", 1),
+                disable_update=True,
             )
         else:
             _vad_model = None
@@ -988,7 +1193,13 @@ def load_models(args):
 
         if getattr(args, "enable_spk", False):
             logger.info(f"Loading SPK: {args.spk_model}")
-            _spk_model = AutoModel(model=args.spk_model, device=args.device, disable_update=True)
+            _spk_model = ThreadSafeGenerateModel(
+                AutoModel(
+                    model=args.spk_model,
+                    device=args.device,
+                    disable_update=True,
+                )
+            )
         else:
             _spk_model = None
             logger.info("SPK disabled; use --enable-spk to include speaker diarization")
@@ -1003,15 +1214,34 @@ def create_speaker_tracker(spk_model, args):
     return HybridSpeakerTracker(spk_model, args.device)
 
 
-async def run_session_work(args, operation, *operation_args, **operation_kwargs):
-    """Run blocking session work off-loop without concurrent shared-model access."""
-    lock = getattr(args, "_session_work_lock", None)
-    if lock is None:
-        lock = asyncio.Lock()
-        args._session_work_lock = lock
+def create_vad(vad_model, args):
+    if getattr(args, "endpoint_mode", "server") == "client":
+        return ClientEndpointVAD()
 
-    async with lock:
-        return await asyncio.to_thread(operation, *operation_args, **operation_kwargs)
+    session_model = copy.copy(vad_model)
+    nested_model = getattr(vad_model, "model", None)
+    if nested_model is not None:
+        session_model.model = copy.copy(nested_model)
+        vad_opts = getattr(nested_model, "vad_opts", None)
+        if vad_opts is not None:
+            session_model.model.vad_opts = copy.deepcopy(vad_opts)
+    immutable_keys = getattr(vad_model, "_IMMUTABLE_KWARGS_KEYS", frozenset())
+    for name, config in getattr(vad_model, "__dict__", {}).items():
+        if not name.endswith("kwargs") or not isinstance(config, dict):
+            continue
+        session_config = {}
+        for key, value in config.items():
+            if key in immutable_keys or not isinstance(value, (dict, list, set)):
+                session_config[key] = value
+            else:
+                session_config[key] = copy.deepcopy(value)
+        setattr(session_model, name, session_config)
+    return DynamicStreamingVAD(session_model)
+
+
+async def run_session_work(_args, operation, *operation_args, **operation_kwargs):
+    """Run one session off-loop; shared ASR calls are serialized by the batcher."""
+    return await asyncio.to_thread(operation, *operation_args, **operation_kwargs)
 
 
 def log_session_stats(session):
@@ -1036,10 +1266,7 @@ def log_session_stats(session):
 async def handle_client(websocket, args):
     vllm_engine, asr_kwargs, vad_model, spk_model = load_models(args)
     endpoint_mode = getattr(args, "endpoint_mode", "server")
-    if endpoint_mode == "client":
-        vad = ClientEndpointVAD()
-    else:
-        vad = DynamicStreamingVAD(vad_model)
+    vad = create_vad(vad_model, args)
     spk_tracker = create_speaker_tracker(spk_model, args)
     session = RealtimeASRSession(
         vllm_engine,
@@ -1197,9 +1424,33 @@ def build_arg_parser():
     parser.add_argument("--model", type=str, default="FunAudioLLM/Fun-ASR-Nano-2512")
     parser.add_argument("--hub", type=str, default="ms", choices=["ms", "hf"])
     parser.add_argument("--device", type=str, default="cuda:0")
+    parser.add_argument(
+        "--vad-device",
+        type=str,
+        default="cpu",
+        help="Device for per-session streaming VAD; CPU avoids frequent GPU synchronization.",
+    )
+    parser.add_argument(
+        "--vad-ncpu",
+        type=int,
+        default=1,
+        help="CPU threads per streaming VAD session.",
+    )
     parser.add_argument("--use-context", action="store_true", default=True)
     parser.add_argument("--no-context", dest="use_context", action="store_false")
     parser.add_argument("--decode-interval", type=float, default=0.48)
+    parser.add_argument(
+        "--decode-batch-wait-ms",
+        type=float,
+        default=10.0,
+        help="Maximum time to collect compatible cross-session decodes into one batch.",
+    )
+    parser.add_argument(
+        "--decode-max-batch-size",
+        type=int,
+        default=16,
+        help="Maximum number of audio segments submitted in one batched decode.",
+    )
     parser.add_argument(
         "--endpoint-mode",
         choices=["server", "client"],
