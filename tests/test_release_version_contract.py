@@ -2,7 +2,7 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-RELEASE_VERSION = "1.4.3"
+RELEASE_VERSION = "1.4.4"
 README_FILES = ("README.md", "README_zh.md", "README_ja.md", "README_ko.md")
 
 
