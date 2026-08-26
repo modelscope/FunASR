@@ -76,19 +76,22 @@ static std::string lower_copy(const char*s){
 
 static ggml_backend_dev_t find_gpu_backend_device(const std::string&backend_name){
   ggml_backend_load_all();
+  ggml_backend_dev_t integrated_fallback=nullptr;
   for(size_t i=0;i<ggml_backend_dev_count();i++){
     ggml_backend_dev_t dev=ggml_backend_dev_get(i);
-    if(ggml_backend_dev_type(dev)!=GGML_BACKEND_DEVICE_TYPE_GPU) continue;
+    enum ggml_backend_dev_type type=ggml_backend_dev_type(dev);
+    if(type!=GGML_BACKEND_DEVICE_TYPE_GPU&&type!=GGML_BACKEND_DEVICE_TYPE_IGPU) continue;
     std::string reg=lower_copy(ggml_backend_reg_name(ggml_backend_dev_backend_reg(dev)));
     std::string dev_name=lower_copy(ggml_backend_dev_name(dev));
     std::string dev_desc=lower_copy(ggml_backend_dev_description(dev));
     if(reg.find(backend_name)!=std::string::npos||
        dev_name.find(backend_name)!=std::string::npos||
        dev_desc.find(backend_name)!=std::string::npos){
-      return dev;
+      if(type==GGML_BACKEND_DEVICE_TYPE_GPU) return dev;
+      if(!integrated_fallback) integrated_fallback=dev;
     }
   }
-  return nullptr;
+  return integrated_fallback;
 }
 
 static graph_backend make_graph_backend(const std::string&name){

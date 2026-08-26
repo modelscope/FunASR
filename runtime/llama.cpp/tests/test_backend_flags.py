@@ -28,3 +28,22 @@ def test_sensevoice_vulkan_backend_has_dedicated_error_message():
     assert 'name=="vulkan"' in source
     assert "GGML_VULKAN=ON" in source
     assert "unsupported backend '%s' (expected cpu|cuda|vulkan)" in source
+
+
+def test_sensevoice_prefers_discrete_gpu_and_falls_back_to_matching_igpu():
+    source = SENSEVOICE.read_text(encoding="utf-8")
+    selector = source.split(
+        "static ggml_backend_dev_t find_gpu_backend_device", maxsplit=1
+    )[1].split("static graph_backend make_graph_backend", maxsplit=1)[0]
+
+    assert "GGML_BACKEND_DEVICE_TYPE_IGPU" in selector
+    assert "integrated_fallback" in selector
+    assert "return integrated_fallback" in selector
+    discrete_return = "if(type==GGML_BACKEND_DEVICE_TYPE_GPU) return dev;"
+    integrated_save = "if(!integrated_fallback) integrated_fallback=dev;"
+    assert discrete_return in selector
+    assert integrated_save in selector
+    assert selector.index(discrete_return) < selector.index(integrated_save)
+    assert selector.index(integrated_save) < selector.index(
+        "return integrated_fallback"
+    )
