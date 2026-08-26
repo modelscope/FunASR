@@ -16,6 +16,7 @@ import random
 import re
 from funasr.tokenizer.cleaner import TextCleaner
 from funasr.register import tables
+from funasr.utils.torchaudio_compat import require_torchaudio
 
 
 @tables.register("preprocessor_classes", "SpeechPreprocessSpeedPerturb")
@@ -42,6 +43,7 @@ class SpeechPreprocessSpeedPerturb(nn.Module):
             return waveform
         speed = random.choice(self.speed_perturb)
         if speed != 1.0:
+            torchaudio = require_torchaudio("speed perturbation")
             if not isinstance(waveform, torch.Tensor):
                 waveform = torch.tensor(waveform)
             waveform, _ = torchaudio.sox_effects.apply_effects_tensor(

@@ -44,6 +44,11 @@ requirements = {
         # PAI/Aliyun
         "oss2",
     ],
+    # knf: kaldi-native-fbank fallback backend used when torchaudio is absent
+    # (e.g. Ascend NPU / aarch64 servers with no matching torchaudio wheel).
+    "knf": [
+        "kaldi-native-fbank",
+    ],
     # train: The modules invoked when training only.
     "train": [
         "rapidfuzz>=3.0.0",
