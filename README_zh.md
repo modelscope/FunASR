@@ -149,6 +149,7 @@ Whisper 是单个模型，**FunASR 是一个工具箱**——按场景挑模型�
 
 ## 最新动态
 
+- 2026/08/26：**v1.4.4 已发布到 PyPI** — 实时 WebSocket 解码会对兼容会话进行批处理，不再让所有连接排队经过同一个进程级锁。在 H100 回归负载下，12 路 STOP p95 从 19.8 秒降至 0.4 秒，16 路聚合吞吐从 8.6x 提升到 13.2x，且客户端零错误。本热修复同时兼容不提供 `torch.amp` 的 PyTorch 版本，并让运行时绑定抛出真实异常。升级命令：`python -m pip install -U "funasr==1.4.4"`。[发布页 →](https://github.com/modelscope/FunASR/releases/tag/v1.4.4)
 - 2026/08/21：**v1.4.3 已发布到 PyPI** — `AutoModel(vad_model="silero-vad")` 现可选用 Silero VAD 适配器，返回毫秒级片段，并支持阈值、8/16 kHz 输入、ONNX 模式和最长片段限制。基础升级命令：`python -m pip install -U "funasr==1.4.3"`；启用该适配器：`python -m pip install -U "funasr[silero]==1.4.3"`。已知说话人数的说话人分离在大规模 embedding 输入下改用固定 K 聚类，避免内存开销较高的稠密谱聚类。[发布页 →](https://github.com/modelscope/FunASR/releases/tag/v1.4.3)
 - 2026/08/14：**v1.4.2 已发布到 PyPI** — 标点模型的 token 边界落在带时间戳的 ASR 词内部时，句子对齐现在仍能保留正确的字幕分段。分布式训练会在每个梯度累积窗口的最后一个 microbatch 同步 DDP/FSDP 梯度，并从解析后的配置正确初始化 DeepSpeed/FSDP 模式。对应 GitHub 源码 tag 同时包含 llama.cpp SRT 输出和 v0.2.0 AMD Vulkan submission 更新。安装命令：`python -m pip install -U "funasr==1.4.2"`。[发布页 →](https://github.com/modelscope/FunASR/releases/tag/v1.4.2)
 - 2026/08/11：**llama.cpp runtime v0.2.0** — 统一固定上游 llama.cpp 到 `803b7fca`，通过同一套测试工作流发布 9 个带 SHA-256 校验值的 Linux、macOS 与 Windows 压缩包。Fun-ASR-Nano、SenseVoice 和 Paraformer CLI 现在可直接输出 SRT 字幕；Vulkan 启动会给出可操作的 AMD 诊断信息和 CPU fallback。AMD Windows Vulkan 崩溃修复仍等待 issue 报告者在原硬件上确认。[下载矩阵与快速开始 →](https://www.funasr.com/deploy/llama-cpp.html) · [发布页 →](https://github.com/modelscope/FunASR/releases/tag/runtime-llamacpp-v0.2.0)
