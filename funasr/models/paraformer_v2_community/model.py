@@ -25,7 +25,10 @@ from funasr.models.transformer.utils.nets_utils import make_pad_mask
 from funasr.utils.timestamp_tools import ts_prediction_lfr6_standard
 from funasr.utils.load_utils import load_audio_text_image_video, extract_fbank
 from torch.nn.utils.rnn import pad_sequence
-import torchaudio
+try:
+    import torchaudio
+except ImportError:
+    torchaudio = None
 
 @tables.register("model_classes", "Paraformer_v2_community")
 class Paraformer(torch.nn.Module):

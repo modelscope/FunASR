@@ -2,8 +2,12 @@ from itertools import groupby
 
 import soundfile as sf
 import torch
-import torchaudio
-import torchaudio.functional as F
+try:
+    import torchaudio
+    import torchaudio.functional as F
+except ImportError:
+    torchaudio = None
+    F = None
 
 
 def load_audio(wav_path, rate: int = None, offset: float = 0, duration: float = None):
