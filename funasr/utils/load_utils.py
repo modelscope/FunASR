@@ -6,7 +6,10 @@ import torch.distributed as dist
 import numpy as np
 import kaldiio
 import librosa
-import torchaudio
+try:
+    import torchaudio
+except ImportError:
+    torchaudio = None
 import time
 import logging
 from torch.nn.utils.rnn import pad_sequence
@@ -174,8 +177,14 @@ def load_audio_text_image_video(
         # print(f"unsupport data type: {data_or_path_or_list}, return raw data")
 
     if audio_fs != fs and data_type != "text":
-        resampler = torchaudio.transforms.Resample(audio_fs, fs)
-        data_or_path_or_list = resampler(data_or_path_or_list[None, :])[0, :]
+        if torchaudio is not None:
+            resampler = torchaudio.transforms.Resample(audio_fs, fs)
+            data_or_path_or_list = resampler(data_or_path_or_list[None, :])[0, :]
+        else:
+            y = librosa.resample(
+                data_or_path_or_list.cpu().numpy(), orig_sr=int(audio_fs), target_sr=int(fs)
+            )
+            data_or_path_or_list = torch.from_numpy(y)
     return data_or_path_or_list
 
 

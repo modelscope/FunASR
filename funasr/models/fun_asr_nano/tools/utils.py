@@ -1,14 +1,15 @@
 from itertools import groupby
 
+import librosa
 import soundfile as sf
 import torch
-import torchaudio
-import torchaudio.functional as F
+
+from funasr.utils.torchaudio_compat import require_torchaudio, torchaudio_available
 
 
 def load_audio(wav_path, rate: int = None, offset: float = 0, duration: float = None):
     """Load audio.
-    
+
         Args:
             wav_path: TODO.
             rate: TODO.
@@ -29,8 +30,14 @@ def load_audio(wav_path, rate: int = None, offset: float = 0, duration: float = 
             audio_tensor = audio_tensor.unsqueeze(0)
         else:
             audio_tensor = audio_tensor.T
-        resampler = torchaudio.transforms.Resample(orig_freq=f.samplerate, new_freq=rate)
-        audio_tensor = resampler(audio_tensor)
+        if torchaudio_available():
+            torchaudio = require_torchaudio("resampling")
+            resampler = torchaudio.transforms.Resample(orig_freq=f.samplerate, new_freq=rate)
+            audio_tensor = resampler(audio_tensor)
+        else:
+            audio_tensor = torch.from_numpy(
+                librosa.resample(audio_tensor.numpy(), orig_sr=f.samplerate, target_sr=rate)
+            )
         if audio_tensor.shape[0] == 1:
             audio_tensor = audio_tensor.squeeze(0)
     return audio_tensor, rate if rate is not None else f.samplerate
@@ -38,18 +45,19 @@ def load_audio(wav_path, rate: int = None, offset: float = 0, duration: float = 
 
 def forced_align(log_probs: torch.Tensor, targets: torch.Tensor, blank: int = 0):
     """Forced align.
-    
+
         Args:
             log_probs: TODO.
             targets: TODO.
             blank: TODO.
         """
+    torchaudio = require_torchaudio("forced_align")
     items = []
     try:
         # The current version only supports batch_size==1.
         log_probs, targets = log_probs.unsqueeze(0).cpu(), targets.unsqueeze(0).cpu()
         assert log_probs.shape[1] >= targets.shape[1]
-        alignments, scores = F.forced_align(log_probs, targets, blank=blank)
+        alignments, scores = torchaudio.functional.forced_align(log_probs, targets, blank=blank)
         alignments, scores = alignments[0], torch.exp(scores[0]).tolist()
         # use enumerate to keep track of the original indices, then group by token value
         for token, group in groupby(enumerate(alignments), key=lambda item: item[1]):
@@ -67,6 +75,6 @@ def forced_align(log_probs: torch.Tensor, targets: torch.Tensor, blank: int = 0)
                     "score": round(score, 3),
                 }
             )
-    except:
+    except Exception:
         pass
     return items

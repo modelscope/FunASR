@@ -24,8 +24,12 @@ from funasr.models.transformer.utils.add_sos_eos import add_sos_eos
 from funasr.models.transformer.utils.nets_utils import make_pad_mask
 from funasr.utils.timestamp_tools import ts_prediction_lfr6_standard
 from funasr.utils.load_utils import load_audio_text_image_video, extract_fbank
+from funasr.utils.torchaudio_compat import require_torchaudio
 from torch.nn.utils.rnn import pad_sequence
-import torchaudio
+try:
+    import torchaudio
+except ImportError:
+    torchaudio = None
 
 @tables.register("model_classes", "Paraformer_v2_community")
 class Paraformer(torch.nn.Module):
@@ -406,6 +410,7 @@ class Paraformer(torch.nn.Module):
         Returns:
             torch.Tensor: alignment result
         """
+        torchaudio = require_torchaudio("forced alignment")
         ctc_probs = ctc_probs[None].cpu()
         y = y[None].cpu()
         alignments, _ = torchaudio.functional.forced_align(ctc_probs, y, blank=blank_id)

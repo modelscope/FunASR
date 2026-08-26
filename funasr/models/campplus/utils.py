@@ -16,7 +16,7 @@ from typing import Union
 from pathlib import Path
 from typing import Generator, Union
 from abc import ABCMeta, abstractmethod
-import torchaudio.compliance.kaldi as Kaldi
+from funasr.utils import fbank as Kaldi
 
 from funasr.models.transformer.utils.nets_utils import pad_list
 

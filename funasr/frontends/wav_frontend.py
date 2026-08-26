@@ -5,7 +5,7 @@ import copy
 import numpy as np
 import torch
 import torch.nn as nn
-import torchaudio.compliance.kaldi as kaldi
+from funasr.utils import fbank as kaldi
 from torch.nn.utils.rnn import pad_sequence
 
 import funasr.frontends.eend_ola_feature as eend_ola_feature
