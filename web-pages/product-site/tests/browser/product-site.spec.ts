@@ -135,13 +135,13 @@ for (const viewport of [
   { name: 'mobile', width: 390, height: 844 },
   { name: 'desktop', width: 1440, height: 900 },
 ]) {
-  test(`llama.cpp v0.2.0 download matrix is stable at ${viewport.name}`, async ({ page }, testInfo) => {
+  test(`llama.cpp v0.2.1 download matrix is stable at ${viewport.name}`, async ({ page }, testInfo) => {
     await page.setViewportSize(viewport);
     await page.goto('/deploy/llama-cpp.html');
 
     const section = page.locator('[data-section="downloads"]');
     await expect(section.locator('[data-download-asset]')).toHaveCount(9);
-    await expect(section.locator('a[href*="runtime-llamacpp-v0.2.0"]')).toHaveCount(9);
+    await expect(section.locator('a[href*="runtime-llamacpp-v0.2.1"]')).toHaveCount(9);
     await expect(page.getByText('Windows AMD Vulkan', { exact: false }).first()).toBeVisible();
 
     await section.evaluate((node) => node.scrollIntoView({ block: 'start' }));
