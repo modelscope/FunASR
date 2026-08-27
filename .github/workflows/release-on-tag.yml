@@ -27,4 +27,4 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           RUNTIME_TAG="$(cat runtime/llama.cpp/current-release.txt)"
-          python scripts/update_release_runtime_downloads.py "${{ github.ref_name }}" "$RUNTIME_TAG"
+          python scripts/update_release_runtime_downloads.py "${{ github.ref_name }}" --runtime-tag "$RUNTIME_TAG"
