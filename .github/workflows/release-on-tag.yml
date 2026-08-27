@@ -25,4 +25,6 @@ jobs:
       - name: Add Runtime assets and downloads to GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
-        run: python scripts/update_release_runtime_downloads.py "${{ github.ref_name }}"
+        run: |
+          RUNTIME_TAG="$(cat runtime/llama.cpp/current-release.txt)"
+          python scripts/update_release_runtime_downloads.py "${{ github.ref_name }}" "$RUNTIME_TAG"
