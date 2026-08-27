@@ -98,6 +98,37 @@ def test_release_on_tag_workflow_adds_runtime_assets_and_downloads():
     assert "if !" in workflow
 
 
+def test_release_on_tag_workflow_uses_versioned_runtime_pointer():
+    workflow = (ROOT / ".github" / "workflows" / "release-on-tag.yml").read_text(
+        encoding="utf-8"
+    )
+    runtime_pointer = ROOT / "runtime" / "llama.cpp" / "current-release.txt"
+
+    assert "runtime/llama.cpp/current-release.txt" in workflow
+    assert '--runtime-tag "$RUNTIME_TAG"' in workflow
+    assert runtime_pointer.read_text(encoding="utf-8").strip() == (
+        "runtime-llamacpp-v0.2.1"
+    )
+
+
+@pytest.mark.parametrize("mutation", ("missing", "unexpected"))
+def test_runtime_assets_rejects_non_exact_platform_matrix(mutation):
+    module = load_release_script()
+    release = runtime_release_payload()
+    if mutation == "missing":
+        release["assets"].pop()
+    else:
+        release["assets"].append(
+            {
+                "name": "funasr-llamacpp-linux-riscv64.tar.gz",
+                "digest": sha256_digest("linuxriscv64"),
+            }
+        )
+
+    with pytest.raises(RuntimeError, match="exact runtime asset matrix"):
+        module.runtime_assets(release)
+
+
 def test_latest_runtime_tag_is_stable_for_python_release_time():
     module = load_release_script()
     calls = []
@@ -249,15 +280,14 @@ def test_sync_runtime_assets_downloads_verifies_and_uploads_missing_asset():
     payload = b"runtime archive"
     digest = hashlib.sha256(payload).hexdigest()
     asset_name = "funasr-llamacpp-linux-x64.tar.gz"
-    runtime_release = {
-        "tagName": "runtime-llamacpp-v0.1.9",
-        "assets": [
-            {
-                "name": asset_name,
-                "digest": f"sha256:{digest}",
-            }
-        ],
-    }
+    runtime_release = runtime_release_payload()
+    target_asset = next(
+        asset for asset in runtime_release["assets"] if asset["name"] == asset_name
+    )
+    target_asset["digest"] = f"sha256:{digest}"
+    existing_assets = [
+        asset for asset in runtime_release["assets"] if asset["name"] != asset_name
+    ]
     calls = []
 
     def fake_run_gh(args):
@@ -272,7 +302,7 @@ def test_sync_runtime_assets_downloads_verifies_and_uploads_missing_asset():
         repository="modelscope/FunASR",
         python_tag="v1.3.27",
         runtime_release=runtime_release,
-        python_release=python_release_payload(),
+        python_release=python_release_payload(existing_assets),
     )
 
     assert calls[0][:3] == [

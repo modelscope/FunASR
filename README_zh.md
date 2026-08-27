@@ -149,6 +149,7 @@ Whisper 是单个模型，**FunASR 是一个工具箱**——按场景挑模型�
 
 ## 最新动态
 
+- 2026/08/28：**v1.4.5 已发布到 PyPI** — `torchaudio` 不再是推理的硬依赖。特征提取会优先使用 `torchaudio.compliance.kaldi`，不可用时可切换到可选的 `kaldi-native-fbank` 后端；仍然必须使用 `torchaudio` 的操作会给出可执行的依赖提示。该 fallback 已在 Ascend 910B 上端到端验证：70.47 秒音频用时 1.15 秒（RTF 0.016）。常规升级：`python -m pip install -U "funasr==1.4.5"`；没有 `torchaudio` 的环境请安装：`python -m pip install -U "funasr[knf]==1.4.5"`。GitHub 发布页同时提供已验证的 llama.cpp v0.2.1 九平台运行包。[发布页 →](https://github.com/modelscope/FunASR/releases/tag/v1.4.5)
 - 2026/08/27：**llama.cpp runtime v0.2.1** — Vulkan 设备选择现在接受匹配的集成 GPU；同时存在匹配独显时优先独显，否则回退到核显。九个 Linux、macOS 与 Windows 压缩包已重新构建并通过公开 SHA-256 复核。Radeon 780M 仍需报告者实机确认；单独的 RX 9070 XT `0xC0000005` 初始化崩溃不在本次修复声明内。[下载矩阵与快速开始 →](https://www.funasr.com/deploy/llama-cpp.html) · [发布页 →](https://github.com/modelscope/FunASR/releases/tag/runtime-llamacpp-v0.2.1)
 - 2026/08/26：**v1.4.4 已发布到 PyPI** — 实时 WebSocket 解码会对兼容会话进行批处理，不再让所有连接排队经过同一个进程级锁。在 H100 回归负载下，12 路 STOP p95 从 19.8 秒降至 0.4 秒，16 路聚合吞吐从 8.6x 提升到 13.2x，且客户端零错误。本热修复同时兼容不提供 `torch.amp` 的 PyTorch 版本，并让运行时绑定抛出真实异常。升级命令：`python -m pip install -U "funasr==1.4.4"`。[发布页 →](https://github.com/modelscope/FunASR/releases/tag/v1.4.4)
 - 2026/08/21：**v1.4.3 已发布到 PyPI** — `AutoModel(vad_model="silero-vad")` 现可选用 Silero VAD 适配器，返回毫秒级片段，并支持阈值、8/16 kHz 输入、ONNX 模式和最长片段限制。基础升级命令：`python -m pip install -U "funasr==1.4.3"`；启用该适配器：`python -m pip install -U "funasr[silero]==1.4.3"`。已知说话人数的说话人分离在大规模 embedding 输入下改用固定 K 聚类，避免内存开销较高的稠密谱聚类。[发布页 →](https://github.com/modelscope/FunASR/releases/tag/v1.4.3)
