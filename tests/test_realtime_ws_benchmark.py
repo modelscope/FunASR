@@ -1,5 +1,6 @@
 import asyncio
 import importlib.util
+import json
 import sys
 from pathlib import Path
 
@@ -62,3 +63,63 @@ def test_final_message_does_not_contribute_to_response_lag(monkeypatch):
     assert metrics["response_lag_ms"] == [200.0]
     assert metrics["final_update_ms"] == 2000.0
     assert metrics["final_after_stop_ms"] == 500.0
+
+
+def test_client_ping_settings_are_forwarded_to_websocket_connect(monkeypatch):
+    module = load_benchmark_module()
+    args = module.parse_args(
+        [
+            "audio.wav",
+            "--client-ping-interval",
+            "7",
+            "--client-ping-timeout",
+            "11",
+            "--no-pace",
+        ]
+    )
+    connect_call = {}
+
+    class FakeWebSocket:
+        def __init__(self):
+            self.messages = iter(
+                [
+                    {"event": "started"},
+                    {"is_final": True, "sentences": [{"text": "hello"}]},
+                    {"event": "stopped"},
+                ]
+            )
+
+        async def send(self, _message):
+            return None
+
+        async def recv(self):
+            return json.dumps(next(self.messages))
+
+    class FakeConnection:
+        async def __aenter__(self):
+            return FakeWebSocket()
+
+        async def __aexit__(self, *_args):
+            return None
+
+    def fake_connect(server, **kwargs):
+        connect_call.update({"server": server, **kwargs})
+        return FakeConnection()
+
+    monkeypatch.setattr(module.websockets, "connect", fake_connect)
+
+    result = asyncio.run(module.run_client(0, args, b"\0\0" * 1600, 0.1))
+
+    assert result["errors"] == []
+    assert result["client_ping_interval"] == 7.0
+    assert result["client_ping_timeout"] == 11.0
+    assert connect_call["ping_interval"] == 7.0
+    assert connect_call["ping_timeout"] == 11.0
+
+
+def test_client_ping_timeout_zero_disables_timeout():
+    module = load_benchmark_module()
+
+    args = module.parse_args(["audio.wav", "--client-ping-timeout", "0"])
+
+    assert args.client_ping_timeout is None

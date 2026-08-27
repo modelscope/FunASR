@@ -127,6 +127,8 @@ async def run_client(client_id, args, audio_bytes, audio_seconds):
         "client_id": client_id,
         "audio_seconds": total_audio_seconds,
         "chunk_ms": args.chunk_ms,
+        "client_ping_interval": args.client_ping_interval,
+        "client_ping_timeout": args.client_ping_timeout,
         "messages": 0,
         "result_messages": 0,
         "partial_messages": 0,
@@ -146,7 +148,8 @@ async def run_client(client_id, args, audio_bytes, audio_seconds):
     try:
         async with websockets.connect(
             args.server,
-            ping_interval=None,
+            ping_interval=args.client_ping_interval,
+            ping_timeout=args.client_ping_timeout,
             open_timeout=args.connect_timeout,
             max_size=args.max_message_size,
         ) as ws:
@@ -270,7 +273,7 @@ async def async_main(args):
     return 1 if summary["errors"] else 0
 
 
-def parse_args():
+def parse_args(argv=None):
     parser = argparse.ArgumentParser(description="Benchmark serve_realtime_ws.py with one or more clients")
     parser.add_argument("wav", help="16 kHz mono PCM16 WAV file")
     parser.add_argument("--server", default="ws://localhost:10095", help="WebSocket server URL")
@@ -283,15 +286,33 @@ def parse_args():
     parser.add_argument("--output-jsonl", default="", help="Write per-client metrics and summary JSONL")
     parser.add_argument("--connect-timeout", type=float, default=10.0, help="Connection timeout seconds")
     parser.add_argument("--recv-timeout", type=float, default=30.0, help="Timeout waiting for server messages")
+    parser.add_argument(
+        "--client-ping-interval",
+        type=float,
+        default=0.0,
+        help="Client WebSocket ping interval in seconds; <=0 disables client pings",
+    )
+    parser.add_argument(
+        "--client-ping-timeout",
+        type=float,
+        default=20.0,
+        help="Client WebSocket ping timeout in seconds; <=0 disables ping timeout",
+    )
     parser.add_argument("--max-message-size", type=int, default=16 * 1024 * 1024, help="WebSocket max message size")
     parser.set_defaults(pace=True)
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
     if args.clients < 1:
         parser.error("--clients must be >= 1")
     if args.loops < 1:
         parser.error("--loops must be >= 1")
     if args.chunk_ms < 10:
         parser.error("--chunk-ms must be >= 10")
+    args.client_ping_interval = (
+        None if args.client_ping_interval <= 0 else args.client_ping_interval
+    )
+    args.client_ping_timeout = (
+        None if args.client_ping_timeout <= 0 else args.client_ping_timeout
+    )
     return args
 
 

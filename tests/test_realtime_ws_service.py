@@ -171,6 +171,16 @@ def test_websocket_keepalive_kwargs_can_disable_ping():
     assert kwargs["ping_timeout"] is None
 
 
+def test_websocket_defaults_keep_pings_without_a_compute_timeout():
+    module = load_service_module()
+
+    args = module.build_arg_parser().parse_args([])
+
+    kwargs = module.build_websocket_serve_kwargs(args)
+    assert kwargs["ping_interval"] == 20.0
+    assert kwargs["ping_timeout"] is None
+
+
 def test_cli_accepts_session_stats_interval():
     module = load_service_module()
 
