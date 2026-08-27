@@ -300,6 +300,64 @@ test('reduced motion disables smooth scrolling', async ({ page }) => {
   expect(behavior).toBe('auto');
 });
 
+for (const viewport of [
+  { name: 'mobile', width: 390, height: 844 },
+  { name: 'desktop', width: 1440, height: 900 },
+]) {
+  test(`v1.4.5 release discovery is stable at ${viewport.name}`, async ({ page }, testInfo) => {
+    await page.setViewportSize(viewport);
+    for (const release of [
+      {
+        language: 'zh',
+        index: '/blog/',
+        article: '/blog/funasr-v1-4-5-pypi-llama-cpp-release.html',
+      },
+      {
+        language: 'en',
+        index: '/en/blog/',
+        article: '/en/blog/funasr-v1-4-5-pypi-llama-cpp-release.html',
+      },
+    ]) {
+      await page.goto(release.index);
+      await expect(
+        page.locator(`.launch-feature a[href="${release.article}"]`),
+      ).toBeVisible();
+      const history = page.locator('.previous-release .post-card');
+      await expect(history).toHaveCount(3);
+      const indexLayout = await history.evaluateAll((cards) => ({
+        overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+        rows: new Set(cards.map((card) => Math.round(card.getBoundingClientRect().top))).size,
+      }));
+      expect(indexLayout.overflow).toBeLessThanOrEqual(1);
+      expect(indexLayout.rows).toBe(viewport.name === 'mobile' ? 3 : 1);
+
+      await page.goto(release.article);
+      await expect(page.locator('h1')).toContainText('FunASR v1.4.5');
+      await expect(page.getByText('funasr[knf]==1.4.5', { exact: false })).toBeVisible();
+      await expect(page.getByText('runtime-llamacpp-v0.2.1', { exact: false })).toBeVisible();
+
+      const articleLayout = await page.evaluate(() => {
+        const navigation = document.querySelector<HTMLElement>('nav.nav');
+        const heading = document.querySelector<HTMLElement>('h1');
+        return {
+          overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+          navigationBottom: navigation?.getBoundingClientRect().bottom ?? 0,
+          headingTop: heading?.getBoundingClientRect().top ?? 0,
+        };
+      });
+      expect(articleLayout.overflow).toBeLessThanOrEqual(1);
+      expect(articleLayout.headingTop).toBeGreaterThanOrEqual(articleLayout.navigationBottom + 16);
+
+      await page.screenshot({
+        path: testInfo.outputPath(
+          `v1.4.5-release-${release.language}-${viewport.name}.png`,
+        ),
+        fullPage: true,
+      });
+    }
+  });
+}
+
 test('llama.cpp blog heading clears fixed navigation on mobile', async ({ page }, testInfo) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/blog/funasr-llama-cpp-whisper-cpp-alternative.html');

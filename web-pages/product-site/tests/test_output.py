@@ -545,13 +545,20 @@ def test_v1_4_3_release_blog_is_bilingual_and_verifiable(
 @pytest.mark.parametrize(
     ('relative', 'href'),
     (
-        ('blog/index.html', '/blog/funasr-v1-4-3-pypi-release.html'),
-        ('en/blog/index.html', '/en/blog/funasr-v1-4-3-pypi-release.html'),
+        ('blog/index.html', '/blog/funasr-v1-4-5-pypi-llama-cpp-release.html'),
+        ('en/blog/index.html', '/en/blog/funasr-v1-4-5-pypi-llama-cpp-release.html'),
     ),
 )
-def test_blog_index_features_v1_4_3_release(built_site, relative, href):
+def test_blog_index_features_latest_release_and_preserves_history(
+    built_site, relative, href
+):
     soup = read_soup(built_site / relative)
     feature = soup.select_one(f'.launch-feature a[href="{href}"]')
 
     assert feature
-    assert 'v1.4.3' in feature.get_text(' ', strip=True)
+    assert 'v1.4.5' in feature.get_text(' ', strip=True)
+    history = soup.select_one('.previous-release')
+    assert history
+    history_text = history.get_text(' ', strip=True)
+    assert 'v1.4.3' in history_text
+    assert 'v1.4.0' in history_text
