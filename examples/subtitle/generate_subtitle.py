@@ -14,6 +14,8 @@ import sys
 import os
 import re
 
+from funasr.cli import merge_subtitle_segments
+
 
 def clean_text(text):
     return re.sub(r'<\|[^|]*\|>', '', text or "").strip()
@@ -63,6 +65,12 @@ def main():
     parser.add_argument("input", help="Audio/video file path")
     parser.add_argument("-o", "--output", help="Output file (default: input.srt)")
     parser.add_argument("--format", choices=["srt", "vtt"], default="srt")
+    parser.add_argument(
+        "--segment-mode",
+        choices=["readable", "sentence"],
+        default="readable",
+        help="Cue grouping: readable (default) or raw model sentence boundaries",
+    )
     parser.add_argument("--model", default="iic/SenseVoiceSmall")
     parser.add_argument("--device", default="cuda")
     parser.add_argument("--spk", action="store_true", help="Include speaker labels")
@@ -120,6 +128,9 @@ def main():
     if not segments:
         print("No speech detected.")
         sys.exit(0)
+
+    if args.segment_mode == "readable":
+        segments = merge_subtitle_segments(segments)
 
     fmt = format_time_srt if args.format == "srt" else format_time_vtt
     with open(output_path, "w", encoding="utf-8") as f:
