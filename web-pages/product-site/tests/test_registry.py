@@ -211,13 +211,13 @@ def test_sensevoice_tensorrt_contract_tracks_merged_native_runtime(valid_registr
     assert 'tensorrt version' in limitation
 
 
-def test_llama_cpp_contract_tracks_v021_release_assets(valid_registry):
+def test_llama_cpp_contract_tracks_v022_release_assets(valid_registry):
     entry = next(item for item in valid_registry['deployments'] if item['id'] == 'llama-cpp')
 
     assert entry['tested'] == {
-        'funasr': 'runtime-llamacpp-v0.2.1',
-        'runtime': 'llama.cpp@803b7fca',
-        'verified': '2026-08-27',
+        'funasr': 'runtime-llamacpp-v0.2.2',
+        'runtime': 'llama.cpp@05be4863',
+        'verified': '2026-08-28',
     }
     assert len(entry['downloads']) == 9
     assert {item['archive'] for item in entry['downloads']} == {
@@ -232,10 +232,10 @@ def test_llama_cpp_contract_tracks_v021_release_assets(valid_registry):
         'funasr-llamacpp-windows-x64-cuda.zip',
     }
     assert all(item['url'].startswith(
-        'https://github.com/modelscope/FunASR/releases/download/runtime-llamacpp-v0.2.1/'
+        'https://github.com/modelscope/FunASR/releases/download/runtime-llamacpp-v0.2.2/'
     ) for item in entry['downloads'])
     assert all(len(item['sha256']) == 64 for item in entry['downloads'])
-    assert any('actions/runs/32991388379' in item['url'] for item in entry['evidence'])
+    assert any('actions/runs/33182316846' in item['url'] for item in entry['evidence'])
     assert any(
         'download-funasr-model.sh sensevoice ./funasr-gguf f16' in command
         for command in entry['commands']['install']
@@ -244,6 +244,10 @@ def test_llama_cpp_contract_tracks_v021_release_assets(valid_registry):
     assert 'AMD' in entry['translations']['en']['primary_limitation']
     assert 'RX 9070 XT' in entry['translations']['en']['primary_limitation']
     assert 'Android/Mali' in entry['translations']['en']['primary_limitation']
+    troubleshooting = ' '.join(entry['translations']['en']['troubleshooting'])
+    assert 'initializing' in troubleshooting
+    assert 'resolving buffer type' in troubleshooting
+    assert 'backend ready' in troubleshooting
 
 
 def test_sensevoice_native_server_contract_tracks_merged_runtime(valid_registry):
