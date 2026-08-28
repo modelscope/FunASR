@@ -11,6 +11,7 @@
 #include "gguf.h"
 
 #include <cctype>
+#include <cstdarg>
 #include <cmath>
 #include <cstdint>
 #include <cstdio>
@@ -20,6 +21,15 @@
 #include <vector>
 
 static const float LN_EPS = 1e-5f;
+
+static void trace_stage(const char *format, ...) {
+  va_list args;
+  va_start(args, format);
+  vfprintf(stderr, format, args);
+  va_end(args);
+  fputc('\n', stderr);
+  fflush(stderr);
+}
 
 // ---- audio loader: any wav/mp3/flac, any rate/channels -> 16k mono (miniaudio) ----
 #define FUNASR_AUDIO_IMPLEMENTATION
@@ -212,6 +222,7 @@ int main(int argc,char**argv){
   graph_backend graph_be=make_graph_backend(backend_name);
 
   // load model
+  trace_stage("[sensevoice] loading model metadata");
   model m; gguf_init_params gp={false,&m.ctx_w}; gguf_context*gg=gguf_init_from_file(gguf_path.c_str(),gp);
   if(!gg){fprintf(stderr,"load gguf failed\n");return 1;}
   auto rd=[&](const char*k,int d){int i=gguf_find_key(gg,k);return i<0?d:(int)gguf_get_val_u32(gg,i);};
@@ -222,6 +233,7 @@ int main(int argc,char**argv){
   std::vector<int> qtok(nq); for(int i=0;i<nq;i++) qtok[i]=((const int32_t*)gguf_get_arr_data(gg,qi))[i];
   std::vector<std::string> vocab; {int ki=gguf_find_key(gg,"sv.vocab"); if(ki>=0){int nv=gguf_get_arr_n(gg,ki); vocab.resize(nv); for(int i=0;i<nv;i++){const char*s=gguf_get_arr_str(gg,ki,i); vocab[i]=s?s:"";}}}
   for(int i=0;i<gguf_get_n_tensors(gg);i++){const char*nm=gguf_get_tensor_name(gg,i);m.t[nm]=ggml_get_tensor(m.ctx_w,nm);}
+  trace_stage("[sensevoice] model ready: %d tensors",gguf_get_n_tensors(gg));
   gguf_free(gg);
   const int F=560, D=m.c.d_model, V=m.c.vocab;
   bool emit_ids = ids_mode || vocab.empty();   // fall back to ids if the gguf has no vocab
@@ -236,6 +248,7 @@ int main(int argc,char**argv){
     for(int i=0;i<nq;i++) memcpy(&inp[(size_t)i*F], &emb[(size_t)qtok[i]*F], F*sizeof(float));
     memcpy(&inp[(size_t)nq*F], fb.data(), (size_t)T*F*sizeof(float));
     float sc=sqrtf((float)D); for(auto&v:inp)v*=sc; add_posenc(inp,N,F);
+    trace_stage("[sensevoice] building graph: %d frames",N);
     ggml_init_params cp={(size_t)1024*1024*1024,nullptr,true}; ggml_context*c=ggml_init(cp);
     ggml_tensor*x=ggml_new_tensor_2d(c,GGML_TYPE_F32,F,N); ggml_set_input(x);
     ggml_tensor*h=sanm_layer(c,m,"encoder.encoders0.0.",x,N,false);
@@ -246,9 +259,15 @@ int main(int argc,char**argv){
     ggml_tensor*logits=lin(c,m.g("ctc.ctc_lo.weight"),m.g("ctc.ctc_lo.bias"),h);  // [V, N]
     ggml_set_output(logits);
     ggml_cgraph*gf=ggml_new_graph_custom(c,32768,false); ggml_build_forward_expand(gf,logits);
+    trace_stage("[sensevoice] graph built");
+    trace_stage("[sensevoice] allocating graph");
     ggml_gallocr_t ga=ggml_gallocr_new(graph_be.buffer_type); ggml_gallocr_alloc_graph(ga,gf);
+    trace_stage("[sensevoice] graph allocated");
     ggml_backend_tensor_set(x,inp.data(),0,ggml_nbytes(x)); if(graph_be.is_cpu) ggml_backend_cpu_set_n_threads(graph_be.backend,8);
-    if(ggml_backend_graph_compute(graph_be.backend,gf)!=GGML_STATUS_SUCCESS){fprintf(stderr,"compute failed\n");}
+    trace_stage("[sensevoice] compute starting");
+    enum ggml_status compute_status=ggml_backend_graph_compute(graph_be.backend,gf);
+    trace_stage("[sensevoice] compute complete: status=%d",(int)compute_status);
+    if(compute_status!=GGML_STATUS_SUCCESS){fprintf(stderr,"compute failed\n");}
     std::vector<float> lg((size_t)V*N); ggml_backend_tensor_get(logits,lg.data(),0,ggml_nbytes(logits));
     std::vector<int> seg_ids; int prev=-1;   // greedy CTC: argmax per frame -> collapse -> drop blank
     for(int n=0;n<N;n++){ const float*col=&lg[(size_t)n*V]; int am=0; float best=col[0];
@@ -264,9 +283,13 @@ int main(int argc,char**argv){
   int64_t t0=ggml_time_us();
   int srt_idx=0;
   if(!vad_path.empty()){
+    trace_stage("[sensevoice] loading audio");
     std::vector<float> wav; if(!funasr_load_audio_16k_mono(wav_path.c_str(),wav)){fprintf(stderr,"read audio failed\n");return 1;}
+    trace_stage("[sensevoice] audio ready: %zu samples",wav.size());
     std::vector<std::pair<int,int>> segs;
+    trace_stage("[sensevoice] running VAD");
     if(!funasr_vad_segments(vad_path,wav,vad_maxseg,segs)){fprintf(stderr,"vad failed\n");return 1;}
+    trace_stage("[sensevoice] VAD ready: %zu segments",segs.size());
     for(auto&s:segs){ int off=(int)((int64_t)s.first*16000/1000), end=(int)((int64_t)s.second*16000/1000);
       if(end>(int)wav.size())end=wav.size(); if(end-off<WINLEN)continue;
       std::vector<float> seg(wav.begin()+off,wav.begin()+end); int t=0; auto fb=compute_fbank(seg,t);
@@ -280,7 +303,9 @@ int main(int argc,char**argv){
   } else {
     int32_t T=0,Fc=F; std::vector<float> fb; int end_ms=0;
     if(!wav_path.empty()){
+      trace_stage("[sensevoice] loading audio");
       std::vector<float> wav; if(!funasr_load_audio_16k_mono(wav_path.c_str(),wav)){fprintf(stderr,"read audio failed\n");return 1;}
+      trace_stage("[sensevoice] audio ready: %zu samples",wav.size());
       end_ms=(int)((int64_t)wav.size()*1000/16000);
       int t=0; fb=compute_fbank(wav,t); T=t;
     } else {

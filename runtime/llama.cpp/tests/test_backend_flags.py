@@ -74,3 +74,39 @@ def test_sensevoice_flushes_device_initialization_boundaries_to_stderr():
     assert "initializing %s backend on %s (%s)" in initializer
     assert "initialized %s backend on %s; resolving buffer type" in initializer
     assert "fflush(stderr);" in initializer
+
+
+def test_sensevoice_traces_post_backend_pipeline_boundaries():
+    source = SENSEVOICE.read_text(encoding="utf-8")
+
+    boundaries = [
+        "loading model metadata",
+        "model ready",
+        "loading audio",
+        "audio ready",
+        "running VAD",
+        "VAD ready",
+        "building graph",
+        "graph built",
+        "allocating graph",
+        "graph allocated",
+        "compute starting",
+        "compute complete",
+    ]
+    for boundary in boundaries:
+        assert boundary in source
+
+    assert "static void trace_stage(" in source
+    trace_stage = source.split("static void trace_stage(", maxsplit=1)[1].split("}", maxsplit=1)[0]
+    assert "vfprintf(stderr" in trace_stage
+    assert "fflush(stderr);" in trace_stage
+
+    for before, after in (
+        ("loading model metadata", "model ready"),
+        ("loading audio", "audio ready"),
+        ("running VAD", "VAD ready"),
+        ("building graph", "graph built"),
+        ("allocating graph", "graph allocated"),
+        ("compute starting", "compute complete"),
+    ):
+        assert source.index(before) < source.index(after)
