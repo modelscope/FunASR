@@ -393,6 +393,28 @@ def test_ecosystem_refresh_tracks_current_release_and_merged_native_runtime(
         assert marker in card_text
 
 
+@pytest.mark.parametrize('relative', ('ecosystem.html', 'en/ecosystem.html'))
+def test_gpt_sovits_card_exposes_the_merged_qwen3_runtime_contract(
+    built_site, relative
+):
+    soup = read_soup(built_site / relative)
+    anchor = soup.select_one(
+        '.card-title a[href="https://github.com/RVC-Boss/GPT-SoVITS"]'
+    )
+    assert anchor
+    card = anchor.find_parent(class_='card')
+    assert card
+    links = {link.get('href') for link in card.select('a[href]')}
+    assert {
+        'https://github.com/RVC-Boss/GPT-SoVITS/pull/2801',
+        'https://github.com/RVC-Boss/GPT-SoVITS/pull/2803',
+        'https://github.com/RVC-Boss/GPT-SoVITS/pull/2824',
+    } <= links
+    text = card.get_text(' ', strip=True)
+    for marker in ('Fun-ASR-Nano', 'Transformers', '>=4.51,<5', 'Qwen3', 'KeyError'):
+        assert marker in text
+
+
 @pytest.mark.parametrize(
     ('relative', 'peer', 'markers'),
     (

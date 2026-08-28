@@ -219,6 +219,13 @@ def test_recent_merged_ecosystem_integrations_are_bilingual_and_attributed():
             'pull': 'https://github.com/OpenBMB/UltraEval-Audio/pull/47',
             'terms': ('Fun-ASR-Nano', 'revision'),
         },
+        'GPT-SoVITS': {
+            'repo': 'https://github.com/RVC-Boss/GPT-SoVITS',
+            'pull': 'https://github.com/RVC-Boss/GPT-SoVITS/pull/2824',
+            'terms': ('Fun-ASR-Nano', 'Transformers', '4.51', '<5'),
+            'zh_terms': ('Qwen3', '转写'),
+            'en_terms': ('Qwen3', 'transcription'),
+        },
     }
 
     for language, path in pages.items():
@@ -237,6 +244,17 @@ def test_recent_merged_ecosystem_integrations_are_bilingual_and_attributed():
             assert all(term in text for term in contract['terms'])
             language_terms = contract.get(f'{language}_terms', ())
             assert all(term in text for term in language_terms)
+
+
+def test_gpt_sovits_community_docs_track_the_merged_qwen3_dependency_fix():
+    for relative in ('community_projects.md', 'community_projects_zh.md'):
+        text = (Path(__file__).resolve().parents[3] / 'docs' / relative).read_text(
+            encoding='utf-8'
+        )
+        assert 'https://github.com/RVC-Boss/GPT-SoVITS/pull/2824' in text
+        assert 'Transformers' in text
+        assert '4.51' in text
+        assert '<5' in text
 
 
 def test_v140_release_pages_are_bilingual_indexed_and_precise():

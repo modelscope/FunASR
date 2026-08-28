@@ -293,6 +293,35 @@ for (const viewport of [
   });
 }
 
+for (const viewport of [
+  { name: 'mobile', width: 390, height: 844 },
+  { name: 'desktop', width: 1440, height: 900 },
+]) {
+  test(`GPT-SoVITS dependency contract is stable at ${viewport.name}`, async ({ page }, testInfo) => {
+    await page.setViewportSize(viewport);
+
+    for (const route of ['/ecosystem.html', '/en/ecosystem.html']) {
+      await page.goto(route);
+      const card = page.locator('.card').filter({ hasText: 'GPT-SoVITS' });
+
+      await expect(card).toHaveCount(1);
+      await expect(card).toContainText('Transformers >=4.51,<5');
+      await expect(card.locator('.card-tag', { hasText: 'Qwen3' })).toBeVisible();
+      await expect(card.locator('a[href="https://github.com/RVC-Boss/GPT-SoVITS/pull/2824"]')).toBeVisible();
+
+      const layout = await page.evaluate(() => ({
+        overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+      }));
+      expect(layout.overflow).toBeLessThanOrEqual(1);
+    }
+
+    await page.screenshot({
+      path: testInfo.outputPath(`gpt-sovits-ecosystem-${viewport.name}.png`),
+      fullPage: true,
+    });
+  });
+}
+
 test('reduced motion disables smooth scrolling', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/en/');
