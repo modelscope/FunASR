@@ -158,16 +158,20 @@ def test_realtime_page_publishes_verified_v142_quickstart(built_site):
         ('en/deploy/llama-cpp.html', 'Windows AMD'),
     ),
 )
-def test_llama_cpp_pages_render_v021_download_matrix(built_site, relative, boundary):
+def test_llama_cpp_pages_render_v022_download_matrix(built_site, relative, boundary):
     soup = read_soup(built_site / relative)
     section = soup.select_one('[data-section="downloads"]')
 
     assert section
     rows = section.select('[data-download-asset]')
     assert len(rows) == 9
-    assert all(row.select_one('a[href*="runtime-llamacpp-v0.2.1"]') for row in rows)
+    assert all(row.select_one('a[href*="runtime-llamacpp-v0.2.2"]') for row in rows)
     assert all(len(row.select_one('[data-field="sha256"]').get_text(strip=True)) == 64 for row in rows)
     assert boundary in soup.get_text(' ', strip=True)
+    text = soup.get_text(' ', strip=True)
+    assert 'initializing' in text
+    assert 'resolving buffer type' in text
+    assert 'backend ready' in text
 
 
 @pytest.mark.parametrize(
