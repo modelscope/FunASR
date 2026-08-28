@@ -638,17 +638,21 @@ CUDA_VISIBLE_DEVICES=0 python examples/industrial_data_pretraining/fun_asr_nano/
 
 说话人分离默认关闭；只有确实需要 `spk` 字段时再加 `--enable-spk`。
 
-如果麦克风长连接经过 Docker、nginx 或云负载均衡，建议保持 WebSocket
-ping/pong 开启，并把 timeout 调到能覆盖短暂网络抖动：
+服务端默认每 20 秒发送一次 WebSocket ping，但不因 ping 超时主动断开连接。
+在长音频高并发下，模型推理和 VAD 处理会延迟控制帧，即使连接仍然健康；
+固定 timeout 因此可能在计算或排队反压期间误杀正常会话。
 
 ```bash
 CUDA_VISIBLE_DEVICES=0 python examples/industrial_data_pretraining/fun_asr_nano/serve_realtime_ws.py \
-    --port 10095 --language 中文 \
-    --ws-ping-interval 20 --ws-ping-timeout 60
+    --port 10095 --language 中文
 ```
 
-只有在外部网关已经统一负责 keepalive / reconnect 策略时，才考虑设置
-`--ws-ping-interval 0` 关闭服务端 ping。
+只有在按生产流量测得最坏推理和排队延迟后，才设置正数
+`--ws-ping-timeout`；该值应高于实测延迟，并与网关 idle timeout 策略配合。
+`websockets` 库的 `max_queue` 设置只限制入站消息的接收缓冲，不会改变
+ping/pong 的超时语义，因此增大它不能解决 keepalive timeout。只有外部网关
+已经统一负责 keepalive / reconnect 策略时，才设置 `--ws-ping-interval 0`
+关闭服务端 ping。
 
 长会话排障，尤其是启用 `--enable-spk` 时，可以打开周期性 session 状态日志：
 

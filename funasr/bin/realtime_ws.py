@@ -1492,8 +1492,16 @@ def build_arg_parser():
     parser.add_argument("--max-model-len", type=int, default=2048)
     parser.add_argument("--ws-ping-interval", type=float, default=20.0,
                         help="WebSocket ping interval in seconds; <=0 disables keepalive pings.")
-    parser.add_argument("--ws-ping-timeout", type=float, default=20.0,
-                        help="WebSocket ping timeout in seconds; <=0 disables ping timeout.")
+    parser.add_argument(
+        "--ws-ping-timeout",
+        type=float,
+        default=0.0,
+        help=(
+            "WebSocket ping timeout in seconds; disabled by default because "
+            "decode/queue backpressure can delay pong handling. Set a positive "
+            "value only above the measured worst-case delay."
+        ),
+    )
     parser.add_argument("--ws-close-timeout", type=float, default=10.0,
                         help="WebSocket close handshake timeout in seconds.")
     parser.add_argument("--ws-max-size", type=int, default=10 * 1024 * 1024,

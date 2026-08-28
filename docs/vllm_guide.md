@@ -638,17 +638,22 @@ CUDA_VISIBLE_DEVICES=0 python examples/industrial_data_pretraining/fun_asr_nano/
 
 Speaker diarization is disabled by default; add `--enable-spk` only when the `spk` field is required.
 
-For long-lived microphone sessions behind Docker, nginx, or a cloud load
-balancer, keep WebSocket ping/pong enabled and tune the timeout to be longer
-than short network stalls:
+The server sends WebSocket pings every 20 seconds by default, while ping-timeout
+closure is disabled. Under concurrent long-audio load, model and VAD work can
+delay control-frame handling even though the connection is healthy. A fixed
+timeout can therefore close valid sessions during compute or queue backpressure.
 
 ```bash
 CUDA_VISIBLE_DEVICES=0 python examples/industrial_data_pretraining/fun_asr_nano/serve_realtime_ws.py \
-    --port 10095 --language 中文 \
-    --ws-ping-interval 20 --ws-ping-timeout 60
+    --port 10095 --language 中文
 ```
 
-Set `--ws-ping-interval 0` only when an external gateway already owns
+Set a positive `--ws-ping-timeout` only after measuring the worst-case decode
+and queue delay for the production traffic shape; keep it above that delay and
+coordinate it with the gateway idle-timeout policy. The `websockets` library's
+`max_queue` setting bounds receive buffering for incoming messages; it doesn't
+change ping/pong timeout semantics, so increasing it doesn't fix keepalive
+timeouts. Set `--ws-ping-interval 0` only when an external gateway already owns
 keepalive/reconnect policy.
 
 For long-session debugging, especially with `--enable-spk`, enable periodic
