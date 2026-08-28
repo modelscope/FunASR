@@ -94,10 +94,38 @@ static ggml_backend_dev_t find_gpu_backend_device(const std::string&backend_name
   return integrated_fallback;
 }
 
+static graph_backend initialize_device_backend(const std::string&name,ggml_backend_dev_t dev){
+  graph_backend out;
+  const char*dev_name=ggml_backend_dev_name(dev);
+  const char*dev_desc=ggml_backend_dev_description(dev);
+  fprintf(stderr,"initializing %s backend on %s (%s)\n",name.c_str(),dev_name,dev_desc);
+  fflush(stderr);
+  out.backend=ggml_backend_dev_init(dev,nullptr);
+  if(!out.backend){
+    fprintf(stderr,"failed to initialize %s backend on %s\n",name.c_str(),dev_name);
+    exit(1);
+  }
+  fprintf(stderr,"initialized %s backend on %s; resolving buffer type\n",name.c_str(),dev_name);
+  fflush(stderr);
+  out.buffer_type=ggml_backend_get_default_buffer_type(out.backend);
+  if(!out.buffer_type){
+    fprintf(stderr,"%s backend on %s has no default buffer type\n",name.c_str(),dev_name);
+    exit(1);
+  }
+  fprintf(stderr,"%s backend ready on %s\n",name.c_str(),dev_name);
+  fflush(stderr);
+  out.is_cpu=false;
+  return out;
+}
+
 static graph_backend make_graph_backend(const std::string&name){
   graph_backend out;
   if(name=="cpu"){
     out.backend=ggml_backend_cpu_init();
+    if(!out.backend){
+      fprintf(stderr,"failed to initialize cpu backend\n");
+      exit(1);
+    }
     out.buffer_type=ggml_backend_get_default_buffer_type(out.backend);
     out.is_cpu=true;
   } else if(name=="cuda"){
@@ -106,18 +134,14 @@ static graph_backend make_graph_backend(const std::string&name){
       fprintf(stderr,"CUDA backend requested, but no GPU backend is available; build with -DGGML_CUDA=ON\n");
       exit(1);
     }
-    out.backend=ggml_backend_dev_init(dev,nullptr);
-    out.buffer_type=ggml_backend_get_default_buffer_type(out.backend);
-    out.is_cpu=false;
+    return initialize_device_backend(name,dev);
   } else if(name=="vulkan"){
     ggml_backend_dev_t dev=find_gpu_backend_device("vulkan");
     if(!dev){
       fprintf(stderr,"Vulkan backend requested, but no Vulkan GPU backend is available; build with -DGGML_VULKAN=ON and install a Vulkan driver/ICD\n");
       exit(1);
     }
-    out.backend=ggml_backend_dev_init(dev,nullptr);
-    out.buffer_type=ggml_backend_get_default_buffer_type(out.backend);
-    out.is_cpu=false;
+    return initialize_device_backend(name,dev);
   } else {
     fprintf(stderr,"unsupported backend '%s' (expected cpu|cuda|vulkan)\n",name.c_str());
     exit(1);
