@@ -211,13 +211,13 @@ def test_sensevoice_tensorrt_contract_tracks_merged_native_runtime(valid_registr
     assert 'tensorrt version' in limitation
 
 
-def test_llama_cpp_contract_tracks_v022_release_assets(valid_registry):
+def test_llama_cpp_contract_tracks_v023_release_assets(valid_registry):
     entry = next(item for item in valid_registry['deployments'] if item['id'] == 'llama-cpp')
 
     assert entry['tested'] == {
-        'funasr': 'runtime-llamacpp-v0.2.2',
-        'runtime': 'llama.cpp@05be4863',
-        'verified': '2026-08-28',
+        'funasr': 'runtime-llamacpp-v0.2.3',
+        'runtime': 'llama.cpp@820f1c64',
+        'verified': '2026-08-29',
     }
     assert len(entry['downloads']) == 9
     assert {item['archive'] for item in entry['downloads']} == {
@@ -232,10 +232,10 @@ def test_llama_cpp_contract_tracks_v022_release_assets(valid_registry):
         'funasr-llamacpp-windows-x64-cuda.zip',
     }
     assert all(item['url'].startswith(
-        'https://github.com/modelscope/FunASR/releases/download/runtime-llamacpp-v0.2.2/'
+        'https://github.com/modelscope/FunASR/releases/download/runtime-llamacpp-v0.2.3/'
     ) for item in entry['downloads'])
     assert all(len(item['sha256']) == 64 for item in entry['downloads'])
-    assert any('actions/runs/33182316846' in item['url'] for item in entry['evidence'])
+    assert any('actions/runs/33197306623' in item['url'] for item in entry['evidence'])
     assert any(
         'download-funasr-model.sh sensevoice ./funasr-gguf f16' in command
         for command in entry['commands']['install']
@@ -248,6 +248,9 @@ def test_llama_cpp_contract_tracks_v022_release_assets(valid_registry):
     assert 'initializing' in troubleshooting
     assert 'resolving buffer type' in troubleshooting
     assert 'backend ready' in troubleshooting
+    assert 'model ready' in troubleshooting
+    assert 'graph allocated' in troubleshooting
+    assert 'compute starting' in troubleshooting
 
 
 def test_sensevoice_native_server_contract_tracks_merged_runtime(valid_registry):
