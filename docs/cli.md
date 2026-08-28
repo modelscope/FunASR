@@ -27,7 +27,9 @@ funasr audio.wav --output-format srt --output-dir ./subs
 `srt` and `tsv` outputs request sentence-level timestamps. In FunASR 1.3.18
 and newer, the default `sensevoice` CLI path also loads punctuation for subtitle
 generation, so subtitle files are split into sentence cues instead of one
-full-text block when the model returns `sentence_info`.
+full-text block when the model returns `sentence_info`. SRT output groups short
+or continuation cues into bounded, readable subtitles by default. Use
+`--subtitle-segment-mode sentence` to preserve the model's raw sentence boundaries.
 
 ## Options
 
@@ -38,6 +40,7 @@ full-text block when the model returns `sentence_info`.
 | `--language` | `-l` | auto | Language: zh, en, ja, ko, yue, auto |
 | `--device` | | auto | Device: cuda:0, cpu |
 | `--output-format` | `-f` | text | Output: text, json, srt, tsv |
+| `--subtitle-segment-mode` | | readable | SRT grouping: readable or raw sentence boundaries |
 | `--output-dir` | `-o` | stdout | Write output files to directory |
 | `--timestamps` | | off | Include word-level timestamps |
 | `--spk` | | off | Enable speaker diarization |
@@ -81,6 +84,10 @@ SubRip subtitle format:
 
 If a model does not return sentence-level timestamps, the CLI falls back to one
 valid cue spanning the known timestamp or audio duration.
+
+Readable mode only joins adjacent cues when the gap is at most 500 ms, the
+combined cue is at most 8 seconds and 42 characters, and the speaker is unchanged.
+It preserves recognized text and punctuation. JSON and TSV segments are unchanged.
 
 ### tsv
 Tab-separated values (start/end in seconds):

@@ -35,6 +35,20 @@ class SubtitleAutoModel(DummyAutoModel):
         return [{"text": "<|zh|>第一句。第二句。"}]
 
 
+class ContinuationSubtitleAutoModel(DummyAutoModel):
+    def generate(self, **kwargs):
+        self.generate_kwargs = kwargs
+        return [
+            {
+                "text": "甲，乙。",
+                "sentence_info": [
+                    {"start": 0, "end": 500, "text": "甲，"},
+                    {"start": 600, "end": 1200, "text": "乙。"},
+                ],
+            }
+        ]
+
+
 def test_cli_passes_hub_to_auto_model(tmp_path):
     audio_path = tmp_path / "sample.wav"
     audio_path.write_bytes(b"not a real wav")
@@ -143,3 +157,110 @@ def test_cli_srt_requests_sentence_timestamps_and_writes_segmented_output(tmp_pa
         "00:00:01,200 --> 00:00:02,600\n"
         "第二句。\n"
     )
+
+
+def test_cli_srt_supports_readable_and_sentence_segment_modes(tmp_path):
+    audio_path = tmp_path / "sample.wav"
+    audio_path.write_bytes(b"not a real wav")
+    fake_torch = types.SimpleNamespace(
+        cuda=types.SimpleNamespace(is_available=lambda: False)
+    )
+
+    outputs = {}
+    for mode in ("readable", "sentence"):
+        out_dir = tmp_path / mode
+        argv = [
+            "funasr",
+            str(audio_path),
+            "--output-format",
+            "srt",
+            "--output-dir",
+            str(out_dir),
+        ]
+        if mode == "sentence":
+            argv.extend(["--subtitle-segment-mode", "sentence"])
+
+        with (
+            patch.object(sys, "argv", argv),
+            patch.dict(sys.modules, {"torch": fake_torch}),
+            patch("funasr.AutoModel", ContinuationSubtitleAutoModel),
+            redirect_stdout(io.StringIO()),
+        ):
+            cli.main()
+        outputs[mode] = (out_dir / "sample.srt").read_text(encoding="utf-8")
+
+    assert outputs["readable"] == "1\n00:00:00,000 --> 00:00:01,200\n甲，乙。\n"
+    assert outputs["sentence"] == (
+        "1\n00:00:00,000 --> 00:00:00,500\n甲，\n\n"
+        "2\n00:00:00,600 --> 00:00:01,200\n乙。\n"
+    )
+
+
+def test_merge_subtitle_segments_groups_continuation_cues():
+    segments = [
+        {"start": 98520, "end": 99900, "text": "救护车上常用的呼吸机、"},
+        {"start": 100140, "end": 100500, "text": "除颤仪，"},
+        {"start": 100620, "end": 101580, "text": "属于二类医疗器械。"},
+    ]
+
+    assert cli.merge_subtitle_segments(segments) == [
+        {
+            "start": 98520,
+            "end": 101580,
+            "text": "救护车上常用的呼吸机、除颤仪，属于二类医疗器械。",
+        }
+    ]
+
+
+def test_merge_subtitle_segments_keeps_continuation_chain_with_its_ending():
+    segments = [
+        {
+            "start": 93000,
+            "end": 95500,
+            "text": "而君逸公司连医疗器械经营资质都不具备，",
+        },
+        {"start": 95700, "end": 99900, "text": "救护车上常用的呼吸机、"},
+        {"start": 100140, "end": 100500, "text": "除颤仪，"},
+        {"start": 100620, "end": 101580, "text": "属于二类医疗器械。"},
+    ]
+
+    assert cli.merge_subtitle_segments(segments) == [
+        {
+            "start": 93000,
+            "end": 95500,
+            "text": "而君逸公司连医疗器械经营资质都不具备，",
+        },
+        {
+            "start": 95700,
+            "end": 101580,
+            "text": "救护车上常用的呼吸机、除颤仪，属于二类医疗器械。",
+        },
+    ]
+
+
+def test_merge_subtitle_segments_groups_two_character_sentence():
+    segments = [
+        {"start": 12450, "end": 12690, "text": "突然。"},
+        {"start": 12750, "end": 15150, "text": "捐十万立刻被全网吹成仗义好人。"},
+    ]
+
+    assert cli.merge_subtitle_segments(segments) == [
+        {
+            "start": 12450,
+            "end": 15150,
+            "text": "突然。捐十万立刻被全网吹成仗义好人。",
+        }
+    ]
+
+
+def test_merge_subtitle_segments_preserves_hard_boundaries():
+    segments = [
+        {"start": 0, "end": 1200, "text": "第一句。", "speaker": 0},
+        {"start": 1200, "end": 2600, "text": "第二句。", "speaker": 0},
+        {"start": 2700, "end": 3000, "text": "甲，", "speaker": 0},
+        {"start": 3100, "end": 3600, "text": "乙。", "speaker": 1},
+        {"start": 5000, "end": 5300, "text": "丙，", "speaker": 1},
+        {"start": 6000, "end": 6500, "text": "丁。", "speaker": 1},
+    ]
+
+    assert cli.merge_subtitle_segments(segments) == segments

@@ -14,6 +14,24 @@ MODEL_CONFIGS = {
     "fun-asr-nano": {"model": "FunAudioLLM/Fun-ASR-Nano-2512", "vad_model": "fsmn-vad"},
 }
 
+SUBTITLE_CONTINUATION_PUNCTUATION = (
+    "，",
+    ",",
+    "、",
+    "：",
+    ":",
+    "；",
+    ";",
+)
+SUBTITLE_TRAILING_PUNCTUATION = SUBTITLE_CONTINUATION_PUNCTUATION + (
+    "。",
+    ".",
+    "！",
+    "!",
+    "？",
+    "?",
+)
+
 
 def clean_text(text):
     return re.sub(r"<\|[^|]*\|>", "", text).strip()
@@ -33,6 +51,85 @@ def format_srt(segments):
     for i, seg in enumerate(segments, 1):
         lines += [str(i), f"{_srt_time(seg.get('start',0))} --> {_srt_time(seg.get('end',0))}", seg.get('text',''), ""]
     return "\n".join(lines)
+
+
+def _subtitle_body_length(text):
+    return len(
+        str(text).strip().rstrip("".join(SUBTITLE_TRAILING_PUNCTUATION)).strip()
+    )
+
+
+def _join_subtitle_text(left, right):
+    left = str(left).rstrip()
+    right = str(right).lstrip()
+    if (
+        left
+        and right
+        and left[-1].isascii()
+        and right[0].isascii()
+        and left[-1].isalnum()
+        and right[0].isalnum()
+    ):
+        return f"{left} {right}"
+    return left + right
+
+
+def merge_subtitle_segments(
+    segments, max_gap_ms=500, max_duration_ms=8000, max_chars=42
+):
+    """Group sentence timestamps into bounded, readable subtitle cues."""
+    def can_follow(left, right):
+        left_text = str(left.get("text", ""))
+        gap_ms = right.get("start", 0) - left.get("end", 0)
+        left_speaker = left.get("speaker", left.get("spk"))
+        right_speaker = right.get("speaker", right.get("spk"))
+        return (
+            left_speaker == right_speaker
+            and 0 <= gap_ms <= max_gap_ms
+            and (
+                left_text.rstrip().endswith(SUBTITLE_CONTINUATION_PUNCTUATION)
+                or _subtitle_body_length(left_text) <= 2
+            )
+        )
+
+    def combine(group):
+        cue = dict(group[0])
+        cue["end"] = group[-1].get("end", cue.get("end", 0))
+        text = str(group[0].get("text", ""))
+        for item in group[1:]:
+            text = _join_subtitle_text(text, item.get("text", ""))
+        cue["text"] = text
+        return cue
+
+    def pack(chain):
+        groups = []
+        current = [chain[-1]]
+        for item in reversed(chain[:-1]):
+            candidate = [item, *current]
+            combined = combine(candidate)
+            duration_ms = combined.get("end", 0) - combined.get("start", 0)
+            if (
+                duration_ms <= max_duration_ms
+                and len(combined.get("text", "")) <= max_chars
+            ):
+                current = candidate
+            else:
+                groups.append(current)
+                current = [item]
+        groups.append(current)
+        return [combine(group) for group in reversed(groups)]
+
+    merged = []
+    chain = []
+    for source in segments:
+        current = dict(source)
+        if chain and not can_follow(chain[-1], current):
+            merged.extend(pack(chain))
+            chain = []
+        chain.append(current)
+    if chain:
+        merged.extend(pack(chain))
+    return merged
 
 
 def format_tsv(segments):
@@ -135,6 +232,12 @@ def main():
     p.add_argument("--language", "-l", default=None, help="Language: zh, en, ja, ko, yue, auto")
     p.add_argument("--device", default=None, help="Device: cuda:0, cpu (default: auto)")
     p.add_argument("--output-format", "-f", default="text", choices=["text", "json", "srt", "tsv"], help="Output format (default: text)")
+    p.add_argument(
+        "--subtitle-segment-mode",
+        choices=["readable", "sentence"],
+        default="readable",
+        help="SRT cue grouping: readable (default) or raw model sentence boundaries",
+    )
     p.add_argument("--output-dir", "-o", default=None, help="Write output files to directory")
     p.add_argument("--timestamps", action="store_true", help="Include word-level timestamps")
     p.add_argument("--spk", action="store_true", help="Enable speaker diarization")
@@ -207,6 +310,11 @@ def main():
                 if args.spk and "spk" in seg:
                     s["speaker"] = seg["spk"]
                 segments.append(s)
+        if (
+            args.output_format == "srt"
+            and args.subtitle_segment_mode == "readable"
+        ):
+            segments = merge_subtitle_segments(segments)
 
         timestamps = result[0].get("timestamps") or result[0].get("timestamp")
         if not args.timestamps and args.output_format not in ("srt", "tsv"):

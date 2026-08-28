@@ -18,6 +18,12 @@ def test_generate_subtitle_requests_sentence_timestamps_and_writes_segmented_srt
     module = load_generate_subtitle_module()
     captured = {}
 
+    def fake_merge_subtitle_segments(segments):
+        captured["merge_segments"] = segments
+        return segments
+
+    monkeypatch.setattr(module, "merge_subtitle_segments", fake_merge_subtitle_segments)
+
     class FakeAutoModel:
         def __init__(self, **kwargs):
             captured["model_kwargs"] = kwargs
@@ -66,6 +72,7 @@ def test_generate_subtitle_requests_sentence_timestamps_and_writes_segmented_srt
     assert captured["generate_kwargs"]["sentence_timestamp"] is True
     assert captured["generate_kwargs"]["output_timestamp"] is True
     assert captured["generate_kwargs"]["return_time_stamps"] is True
+    assert len(captured["merge_segments"]) == 2
     assert output_path.read_text(encoding="utf-8") == (
         "1\n"
         "00:00:00,000 --> 00:00:03,500\n"

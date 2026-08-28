@@ -19,6 +19,9 @@ python generate_subtitle.py audio.wav --model paraformer-zh
 
 # CPU mode
 python generate_subtitle.py audio.wav --device cpu
+
+# Preserve raw model sentence boundaries
+python generate_subtitle.py audio.wav --segment-mode sentence
 ```
 
 ## Output Example (SRT)
@@ -38,11 +41,16 @@ python generate_subtitle.py audio.wav --device cpu
 | Option | Default | Description |
 |--------|---------|-------------|
 | `--format` | srt | Output format: srt or vtt |
+| `--segment-mode` | readable | Cue grouping: readable or raw sentence boundaries |
 | `--model` | SenseVoiceSmall | ASR model |
 | `--device` | cuda | Device: cuda or cpu |
 | `--spk` | off | Add speaker labels |
 | `--lang` | auto | Language hint |
 | `-o` | input.srt | Output path |
+
+Readable mode joins only adjacent short or continuation cues within bounded
+gap, duration, length, and speaker limits. It does not rewrite recognized text
+or punctuation.
 
 ## Install
 
