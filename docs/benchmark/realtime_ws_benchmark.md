@@ -50,9 +50,15 @@ python examples/industrial_data_pretraining/fun_asr_nano/realtime_ws_benchmark.p
     --clients 8 \
     --loops 3 \
     --chunk-ms 100 \
+    --client-ping-interval 20 \
+    --client-ping-timeout 0 \
     --language 中文 \
     --output-jsonl realtime_ws_8c.jsonl
 ```
+
+Values `<=0` disable the corresponding client ping setting. Record both client
+settings when comparing disconnects. The server's `--ws-max-queue` applies to
+incoming data messages, not ping/pong control frames.
 
 Use a representative audio file. A long, pauseless monologue creates a very
 different load shape from turn-taking meetings, because nearly every client is
@@ -109,8 +115,8 @@ When publishing a realtime WebSocket benchmark or issue report, include:
 | Category | What to record |
 |----------|----------------|
 | Data | Audio duration, sample rate, language/domain, silence ratio or speaking pattern, and whether the same file was looped |
-| Load | `--clients`, `--loops`, `--chunk-ms`, paced or `--no-pace`, and total benchmark wall time |
-| Service | `serve_realtime_ws.py` command, `--partial-window-sec`, `--decode-interval`, `--vad-device`, `--vad-ncpu`, `--decode-batch-wait-ms`, `--decode-max-batch-size`, `--enable-spk`, language, and hotwords |
+| Load | `--clients`, `--loops`, `--chunk-ms`, paced or `--no-pace`, client ping interval/timeout, and total benchmark wall time |
+| Service | `serve_realtime_ws.py` command, WebSocket ping interval/timeout, `--partial-window-sec`, `--decode-interval`, `--vad-device`, `--vad-ncpu`, `--decode-batch-wait-ms`, `--decode-max-batch-size`, `--enable-spk`, language, and hotwords |
 | Hardware | GPU/NPU model, GPU count, memory, driver, CUDA/CANN/runtime versions, CPU model, and available RAM |
 | Software | `funasr`, PyTorch, torchaudio, vLLM, Python, OS, and container image if any |
 | Output | Summary line, JSONL artifact, server logs, and any failed client IDs |
