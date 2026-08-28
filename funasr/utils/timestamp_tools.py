@@ -281,16 +281,16 @@ def timestamp_sentence_en(
 
         punc_id = int(punc_id) if punc_id is not None else 1
         sentence_end = timestamp[1] if timestamp is not None else sentence_end
-        sentence_text = sentence_text[1:] if sentence_text[0] == ' ' else sentence_text
+        if sentence_text.startswith(" "):
+            sentence_text = sentence_text[1:]
         if is_sentence_start:
             sentence_start = timestamp[0] if timestamp is not None else sentence_start
             is_sentence_start = False
         if punc_id > 1:
             is_sentence_start = True
             sentence_text += punc_list[punc_id - 2]
-            sentence_text_seg = (
-                sentence_text_seg[:-1] if sentence_text_seg[-1] == " " else sentence_text_seg
-            )
+            if sentence_text_seg.endswith(" "):
+                sentence_text_seg = sentence_text_seg[:-1]
             if return_raw_text:
                 res.append(
                     {
