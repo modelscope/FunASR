@@ -47,3 +47,30 @@ def test_sensevoice_prefers_discrete_gpu_and_falls_back_to_matching_igpu():
     assert selector.index(integrated_save) < selector.index(
         "return integrated_fallback"
     )
+
+
+def test_sensevoice_checks_backend_before_resolving_buffer_type():
+    source = SENSEVOICE.read_text(encoding="utf-8")
+    initializer = source.split(
+        "static graph_backend initialize_device_backend", maxsplit=1
+    )[1].split("static graph_backend make_graph_backend", maxsplit=1)[0]
+
+    init_call = "out.backend=ggml_backend_dev_init(dev,nullptr);"
+    null_check = "if(!out.backend)"
+    buffer_type = "ggml_backend_get_default_buffer_type(out.backend)"
+    assert init_call in initializer
+    assert null_check in initializer
+    assert buffer_type in initializer
+    assert initializer.index(init_call) < initializer.index(null_check)
+    assert initializer.index(null_check) < initializer.index(buffer_type)
+
+
+def test_sensevoice_flushes_device_initialization_boundaries_to_stderr():
+    source = SENSEVOICE.read_text(encoding="utf-8")
+    initializer = source.split(
+        "static graph_backend initialize_device_backend", maxsplit=1
+    )[1].split("static graph_backend make_graph_backend", maxsplit=1)[0]
+
+    assert "initializing %s backend on %s (%s)" in initializer
+    assert "initialized %s backend on %s; resolving buffer type" in initializer
+    assert "fflush(stderr);" in initializer
