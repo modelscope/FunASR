@@ -650,10 +650,11 @@ CUDA_VISIBLE_DEVICES=0 python examples/industrial_data_pretraining/fun_asr_nano/
 
 Set a positive `--ws-ping-timeout` only after measuring the worst-case decode
 and queue delay for the production traffic shape; keep it above that delay and
-coordinate it with the gateway idle-timeout policy. `--ws-max-queue` bounds
-incoming data messages, not ping/pong control frames, so increasing it doesn't
-fix keepalive timeouts. Set `--ws-ping-interval 0` only when an external gateway
-already owns keepalive/reconnect policy.
+coordinate it with the gateway idle-timeout policy. The `websockets` library's
+`max_queue` setting bounds receive buffering for incoming messages; it doesn't
+change ping/pong timeout semantics, so increasing it doesn't fix keepalive
+timeouts. Set `--ws-ping-interval 0` only when an external gateway already owns
+keepalive/reconnect policy.
 
 For long-session debugging, especially with `--enable-spk`, enable periodic
 session-state logs:

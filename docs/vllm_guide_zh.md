@@ -649,9 +649,10 @@ CUDA_VISIBLE_DEVICES=0 python examples/industrial_data_pretraining/fun_asr_nano/
 
 只有在按生产流量测得最坏推理和排队延迟后，才设置正数
 `--ws-ping-timeout`；该值应高于实测延迟，并与网关 idle timeout 策略配合。
-`--ws-max-queue` 限制的是入站数据消息，不控制 ping/pong 控制帧，因此增大它
-不能解决 keepalive timeout。只有外部网关已经统一负责 keepalive / reconnect
-策略时，才设置 `--ws-ping-interval 0` 关闭服务端 ping。
+`websockets` 库的 `max_queue` 设置只限制入站消息的接收缓冲，不会改变
+ping/pong 的超时语义，因此增大它不能解决 keepalive timeout。只有外部网关
+已经统一负责 keepalive / reconnect 策略时，才设置 `--ws-ping-interval 0`
+关闭服务端 ping。
 
 长会话排障，尤其是启用 `--enable-spk` 时，可以打开周期性 session 状态日志：
 

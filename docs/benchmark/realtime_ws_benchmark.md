@@ -57,8 +57,9 @@ python examples/industrial_data_pretraining/fun_asr_nano/realtime_ws_benchmark.p
 ```
 
 Values `<=0` disable the corresponding client ping setting. Record both client
-settings when comparing disconnects. The server's `--ws-max-queue` applies to
-incoming data messages, not ping/pong control frames.
+settings when comparing disconnects. The `websockets` library's `max_queue`
+setting bounds receive buffering for incoming messages; it doesn't change
+ping/pong timeout semantics.
 
 Use a representative audio file. A long, pauseless monologue creates a very
 different load shape from turn-taking meetings, because nearly every client is
