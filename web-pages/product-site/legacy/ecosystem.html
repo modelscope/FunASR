@@ -258,8 +258,8 @@ footer a{color:#60a5fa}
 <div class="card">
 <div class="card-title"><a href="https://github.com/RVC-Boss/GPT-SoVITS">GPT-SoVITS</a></div>
 <div class="card-stars">58K stars</div>
-<div class="card-desc">一分钟语音数据即可训练 TTS。使用 FunASR 进行训练数据标注。</div>
-<div><span class="card-tag">TTS</span><span class="card-tag">训练</span></div>
+<div class="card-desc">训练数据标注与 WebUI 转写支持 Fun-ASR-Nano、SenseVoice 和经典 FunASR 模型。已合并的 <a href="https://github.com/RVC-Boss/GPT-SoVITS/pull/2824">#2824</a> 将项目依赖修正为 <code>Transformers &gt;=4.51,&lt;5</code>：4.51 是其验证矩阵中首个可构建 Qwen3 的版本，避免选择 Fun-ASR-Nano 后在转写前触发 <code>KeyError: qwen3</code>。另见 <a href="https://github.com/RVC-Boss/GPT-SoVITS/pull/2801">runtime fallback</a> 与 <a href="https://github.com/RVC-Boss/GPT-SoVITS/pull/2803">backend 文档</a>。</div>
+<div><span class="card-tag">TTS</span><span class="card-tag">数据集转写</span><span class="card-tag">Qwen3</span></div>
 </div>
 <div class="card">
 <div class="card-title"><a href="https://github.com/mudler/LocalAI">LocalAI</a></div>
