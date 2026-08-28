@@ -57,6 +57,7 @@ def test_website_contract_accepts_current_public_copy():
             <a href="https://github.com/0xShug0/audio.cpp">audio.cpp</a>
             <a href="https://github.com/0xShug0/audio.cpp/pull/155">merged PR</a>
             <a href="https://github.com/0xShug0/audio.cpp/blob/1778b23a5f6a4951c788e4bb0e7baa04f20012a2/docs/models/fun_asr_nano.md">pinned guide</a>
+            <a href="https://github.com/RVC-Boss/GPT-SoVITS/pull/2824">merged Transformers fix</a>
             <div>custom_openai</div>
             <div>54.3K stars</div>
             <a href="https://marketplace.dify.ai/plugin/langgenius/funasr">
@@ -72,6 +73,7 @@ def test_website_contract_accepts_current_public_copy():
             <a href="https://github.com/0xShug0/audio.cpp">audio.cpp</a>
             <a href="https://github.com/0xShug0/audio.cpp/pull/155">merged PR</a>
             <a href="https://github.com/0xShug0/audio.cpp/blob/1778b23a5f6a4951c788e4bb0e7baa04f20012a2/docs/models/fun_asr_nano.md">pinned guide</a>
+            <a href="https://github.com/RVC-Boss/GPT-SoVITS/pull/2824">merged Transformers fix</a>
             <div>custom_openai</div>
             <div>54.3K stars</div>
             <a href="https://marketplace.dify.ai/plugin/langgenius/funasr">
@@ -316,6 +318,7 @@ def test_ecosystem_contract_requires_current_release_and_native_runtime():
         "https://github.com/0xShug0/audio.cpp",
         "https://github.com/0xShug0/audio.cpp/pull/155",
         "https://github.com/0xShug0/audio.cpp/blob/1778b23a5f6a4951c788e4bb0e7baa04f20012a2/docs/models/fun_asr_nano.md",
+        "https://github.com/RVC-Boss/GPT-SoVITS/pull/2824",
     }
 
     for url in (
@@ -371,6 +374,7 @@ def _valid_english_ecosystem_html():
         <a href="https://github.com/0xShug0/audio.cpp">audio.cpp</a>
         <a href="https://github.com/0xShug0/audio.cpp/pull/155">merged PR</a>
         <a href="https://github.com/0xShug0/audio.cpp/blob/1778b23a5f6a4951c788e4bb0e7baa04f20012a2/docs/models/fun_asr_nano.md">pinned guide</a>
+        <a href="https://github.com/RVC-Boss/GPT-SoVITS/pull/2824">merged Transformers fix</a>
         <div>custom_openai</div>
         <div>54.3K stars</div>
         <a href="https://marketplace.dify.ai/plugin/langgenius/funasr">
