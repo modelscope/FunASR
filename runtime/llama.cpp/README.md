@@ -176,6 +176,28 @@ If the command reports that no Vulkan device is available, update the vendor GPU
 driver first. The package intentionally relies on the system `vulkan-1.dll`
 installed by that driver instead of shipping an SDK copy.
 
+For access violations such as Windows exit code `-1073741819` (`0xC0000005`),
+capture stderr and report the last completed boundary. Runtime v0.2.3 flushes
+each boundary immediately, so the next missing line identifies the failing stage:
+
+| Last completed boundary | Next stage to investigate |
+| --- | --- |
+| no `initializing vulkan backend ...` | device enumeration or selection |
+| `initializing ...` | `ggml_backend_dev_init()` or the driver below it |
+| `initialized ...; resolving buffer type` | default buffer-type resolution |
+| `vulkan backend ready ...` | model metadata loading |
+| `[sensevoice] model ready ...` | audio loading or feature extraction |
+| `[sensevoice] audio ready ...` | VAD, when `--vad` is enabled |
+| `[sensevoice] VAD ready ...` | graph construction |
+| `[sensevoice] graph built` | graph allocation |
+| `[sensevoice] graph allocated` | backend compute submission |
+| `[sensevoice] compute starting` | Vulkan compute or the GPU driver |
+| `[sensevoice] compute complete: status=0` | output transfer or CTC decoding |
+
+Include the GPU model, driver version, complete command, and all stderr lines in
+the issue. These boundaries diagnose the failure location; they do not by
+themselves claim that a driver- or hardware-specific access violation is fixed.
+
 To build on Windows, install the
 [LunarG Vulkan SDK](https://vulkan.lunarg.com/sdk/home#windows) with `glslc`,
 open a Developer PowerShell where `VULKAN_SDK` is set, and install the
