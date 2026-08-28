@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<meta name="description" content="FunASR 部署选型表：Python API、OpenAI 兼容 API、Docker Compose、Kubernetes、WebSocket runtime、vLLM、MCP、字幕、批处理和 Triton。">
+<meta name="description" content="FunASR 部署选型表：Python API、九平台 llama.cpp/GGUF 二进制、CUDA/Vulkan、OpenAI 兼容 API、Kubernetes、vLLM 和 Triton。">
 <meta property="og:title" content="FunASR 部署选型表">
 <meta property="og:description" content="面向产品、demo、benchmark 和内部工作流的 FunASR 部署决策表。">
 <meta property="og:type" content="website">
@@ -9,7 +9,7 @@
 <meta property="og:site_name" content="FunASR">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="FunASR 部署选型表">
-<meta name="twitter:description" content="FunASR 部署选型表：Python API、OpenAI 兼容 API、Docker Compose、Kubernetes、WebSocket runtime、vLLM、MCP、字幕、批处理和 Triton。">
+<meta name="twitter:description" content="比较 Python、llama.cpp/GGUF、CUDA/Vulkan、OpenAI 兼容 API、Kubernetes、vLLM 和 Triton 部署路径。">
 <title>FunASR 部署选型表</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../style.css">
@@ -24,12 +24,12 @@
 <div class="content"><div class="container narrow">
 <h1>部署选型表</h1>
 <p>为产品、demo、benchmark 或内部工作流选择最短部署路径。先选择能满足目标的最小方案，只有在吞吐、延迟或集成方式有明确要求时，再切换到更重的运行时。</p>
-<div class="toc-grid"><a href="#matrix">决策表</a><a href="#choices">常见选择</a><a href="#checklist">上线检查</a><a href="#help">获取帮助</a></div>
+<div class="toc-grid"><a href="#matrix">决策表</a><a href="#choices">常见选择</a><a href="#runtime-diagnostics">Runtime 诊断</a><a href="#checklist">上线检查</a><a href="#help">获取帮助</a></div>
 <section id="matrix"><h2>快速决策表</h2>
 <table><tr><th>路径</th><th>适合场景</th><th>从这里开始</th><th>运维提示</th></tr>
 <tr><td>Colab Notebook</td><td>浏览器 smoke test、首次评估、可分享 demo</td><td><a href="https://colab.research.google.com/github/modelscope/FunASR/blob/main/examples/colab/funasr_quickstart.ipynb">Colab 快速体验</a></td><td>不需要本地环境；首次运行会下载模型，GPU runtime 更快。</td></tr>
 <tr><td>Python API</td><td>Notebook、离线任务、首次模型评测</td><td><a href="tutorial.html">使用教程</a></td><td>最简单；调用方自己负责批处理、重试和文件管理。</td></tr>
-<tr><td>llama.cpp / GGUF 二进制</td><td>无需 Python runtime 的 CPU/边缘转写；SenseVoiceSmall 可使用 Linux Vulkan GPU</td><td><a href="https://github.com/modelscope/FunASR/releases/tag/runtime-llamacpp-v0.1.8">v0.1.8 二进制</a> · <a href="https://github.com/modelscope/FunASR/releases/download/runtime-llamacpp-v0.1.8/funasr-llamacpp-linux-x64-vulkan.tar.gz">Linux Vulkan tarball</a> · <a href="https://github.com/modelscope/FunASR/tree/main/runtime/llama.cpp">llama.cpp 文档</a></td><td>用随包脚本下载 GGUF 模型；Linux Vulkan 环境可加 <code>--backend vulkan</code>，便携 smoke test 使用 CPU 包。</td></tr>
+<tr><td>llama.cpp / GGUF 二进制</td><td>无需 Python 的 CPU/边缘转写；可选 Windows/Linux Vulkan 与 Windows CUDA</td><td><a href="https://github.com/modelscope/FunASR/releases/tag/runtime-llamacpp-v0.2.2">v0.2.2：全部九个包</a> · <a href="https://github.com/modelscope/FunASR/releases/download/runtime-llamacpp-v0.2.2/funasr-llamacpp-windows-x64-vulkan.zip">Windows Vulkan</a> · <a href="https://github.com/modelscope/FunASR/releases/download/runtime-llamacpp-v0.2.2/funasr-llamacpp-windows-x64-cuda.zip">Windows CUDA</a> · <a href="https://github.com/modelscope/FunASR/releases/download/runtime-llamacpp-v0.2.2/funasr-llamacpp-linux-x64-vulkan.tar.gz">Linux Vulkan</a> · <a href="https://github.com/modelscope/FunASR/tree/main/runtime/llama.cpp">文档</a></td><td>CPU 包是便携默认路径。只有使用 Vulkan 包时才选择 <code>--backend vulkan</code>；Windows CUDA 包面向 <code>sm_86</code>。</td></tr>
 <tr><td>OpenAI 兼容 API</td><td>私有语音 API、Agent、Dify/LangChain/AutoGen/n8n 风格客户端</td><td><a href="agent.html#server">OpenAI API</a> · <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/README_zh.md">中文快速上手</a> · <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/smoke_test.py">Python 烟测脚本</a> · <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/JAVASCRIPT_zh.md">JS/TS 配方</a> · <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/WORKFLOWS_zh.md">工作流配方</a> · <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/GRADIO_zh.md">Gradio 演示</a> · <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/SECURITY_zh.md">安全指南</a> · <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/POSTMAN_zh.md">Postman 集合</a> · <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/OPENAPI_zh.md">OpenAPI 规范</a></td><td>已支持 OpenAI audio API 或 multipart HTTP 节点的应用和工作流引擎最容易接入。</td></tr>
 <tr><td>Docker Compose API</td><td>可复现本地 smoke test 或小型内部服务</td><td><a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/README_zh.md">OpenAI API Docker 文档</a> · <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/smoke_test.py">Python 烟测脚本</a></td><td>默认 CPU；容器里使用 CUDA 前需要先适配 CUDA-capable 镜像。</td></tr>
 <tr><td>Kubernetes API</td><td>集群内私有语音 API</td><td><a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/kubernetes/README_zh.md">Kubernetes 模板</a> · <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/smoke_test.py">Python 烟测脚本</a></td><td>默认私有 <code>ClusterIP</code>；对外开放前补齐鉴权、TLS、网络策略和 GPU 调度。</td></tr>
@@ -42,12 +42,16 @@
 </section>
 <section id="choices"><h2>常见选择</h2>
 <div class="grid-2"><div class="card"><h3>五分钟内试跑 FunASR</h3><p>如果只想在浏览器里 smoke test，可以先用 <a href="https://colab.research.google.com/github/modelscope/FunASR/blob/main/examples/colab/funasr_quickstart.ipynb">Colab 快速体验</a>；本地工作再使用教程里的 Python API。它是验证安装、模型下载、设备选择和基础输出格式的最短路径。如果还不确定先用哪个模型，请看 <a href="model-selection.html">模型选择指南</a>。</p></div>
-<div class="card"><h3>发布无 Python 边缘二进制</h3><p>如果需要自包含的 SenseVoice、Paraformer 或 Fun-ASR-Nano 二进制，请使用 llama.cpp / GGUF runtime。下载 <a href="https://github.com/modelscope/FunASR/releases/tag/runtime-llamacpp-v0.1.8">v0.1.8</a>；Linux Vulkan 用户可搭配 Vulkan tarball 并选择 <code>--backend vulkan</code>。</p></div>
+<div class="card"><h3>发布无 Python 边缘二进制</h3><p>自包含的 SenseVoice、Paraformer 或 Fun-ASR-Nano 可使用 llama.cpp / GGUF runtime。<a href="https://github.com/modelscope/FunASR/releases/tag/runtime-llamacpp-v0.2.2">v0.2.2</a> 为 Linux x64/arm64、macOS arm64 和 Windows x64 发布九个压缩包。默认先用 CPU；确有需要时再选对应 Vulkan 包或 Windows CUDA <code>sm_86</code> 包。</p></div>
 <div class="card"><h3>本地替代云端转写</h3><p>使用 OpenAI 兼容 API。先用 <code>sensevoice</code> 跑通 bash smoke test 或 <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/smoke_test.py">Python 烟测脚本</a>，再根据客户端配方或 <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/JAVASCRIPT_zh.md">JavaScript/TypeScript 配方</a> 接入 SDK 或 HTTP 客户端。集群上线可使用 <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/kubernetes/README_zh.md">Kubernetes 模板</a>。Dify、n8n 或 webhook worker 可参考 <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/WORKFLOWS_zh.md">工作流配方</a>；图形界面 API 检查可导入 <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/POSTMAN_zh.md">Postman 集合</a>，也可启动 <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/GRADIO_zh.md">Gradio 演示</a>；网关和开发者门户可使用 <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/OPENAPI_zh.md">OpenAPI 规范</a> 和 <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/SECURITY_zh.md">安全指南</a>。</p></div></div>
 <div class="grid-2"><div class="card"><h3>可复现容器 demo</h3><pre><code>cd examples/openai_api
 cp .env.example .env
 docker compose up --build</code></pre><p>在没有 CUDA-capable PyTorch/FunASR 镜像前保持 CPU 模式。</p></div>
 <div class="card"><h3>实时音频服务</h3><p>使用 Runtime WebSocket 服务。上线前请用真实音频验证 chunk size、VAD、断句、标点、说话人分离、重连行为和客户端背压。</p></div></div>
+</section>
+<section id="runtime-diagnostics"><h2>llama.cpp 后端诊断契约</h2>
+<p>v0.2.2 按顺序向 stderr 输出三条边界：<code>initializing ... backend on ...</code>、<code>initialized ... backend on ...; resolving buffer type</code> 和 <code>... backend ready on ...</code>。最后出现的边界可区分后端创建、buffer type 解析与后续模型执行阶段。反馈问题时请附上这些行、压缩包完整名称、GPU/驱动、命令和退出码。</p>
+<p>该版本增加确定性的后端空值检查与故障定位，但不宣称已经修复所有 AMD Windows <code>0xC0000005</code> 崩溃；Android/Mali 也不属于 v0.2.2 官方预编译或已验证目标。</p>
 </section>
 <section id="checklist"><h2>上线检查清单</h2>
 <ul><li>选择模型 alias，并写入部署说明。</li><li>记录 FunASR 版本、模型版本、设备、CUDA/PyTorch 版本、Docker 镜像 tag 和启动命令。</li><li>用 <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/smoke_test.py">Python 烟测脚本</a> 跑一个公开短音频 smoke sample，再跑至少一个真实私有样本。</li><li>每次请求记录音频时长、模型、设备、延迟、响应格式和错误类型。</li><li>API 暴露到可信网络外之前，增加上传大小限制、鉴权、TLS 和限流；可用 <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/SECURITY_zh.md">安全指南</a> 规划边界。</li><li>流式场景需要测试静音、噪声、多人重叠、长连接、重连和慢客户端。</li></ul>
