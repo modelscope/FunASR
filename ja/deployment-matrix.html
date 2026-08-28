@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<meta name="description" content="FunASR のデプロイ選択表：Python API、OpenAI 互換 API、Docker Compose、Kubernetes、WebSocket runtime、vLLM、MCP、字幕、バッチ ASR、Triton を比較。">
+<meta name="description" content="FunASR のデプロイ選択表：Python API、9 プラットフォーム向け llama.cpp/GGUF、CUDA/Vulkan、OpenAI 互換 API、Kubernetes、vLLM、Triton を比較。">
 <meta property="og:title" content="FunASR デプロイ選択表">
 <meta property="og:description" content="製品、デモ、ベンチマーク、社内ワークフロー向けの FunASR デプロイ判断表。">
 <meta property="og:type" content="website">
@@ -9,7 +9,7 @@
 <meta property="og:site_name" content="FunASR">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="FunASR デプロイ選択表">
-<meta name="twitter:description" content="FunASR のデプロイ選択表：Python API、OpenAI 互換 API、Docker Compose、Kubernetes、WebSocket runtime、vLLM、MCP、字幕、バッチ ASR、Triton を比較。">
+<meta name="twitter:description" content="Python、llama.cpp/GGUF、CUDA/Vulkan、OpenAI 互換 API、Kubernetes、vLLM、Triton のデプロイ経路を比較。">
 <title>FunASR デプロイ選択表</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../style.css">
@@ -24,11 +24,12 @@
 <div class="content"><div class="container narrow">
 <h1>デプロイ選択表</h1>
 <p>製品、デモ、ベンチマーク、社内ワークフローに最短で合う FunASR の使い方を選びます。まず目的を満たす最小の構成から始め、スループット、レイテンシ、連携要件が明確になったら重い runtime に進みます。</p>
-<div class="toc-grid"><a href="#matrix">判断表</a><a href="#choices">よくある選択</a><a href="#checklist">本番前チェック</a><a href="#help">相談する</a></div>
+<div class="toc-grid"><a href="#matrix">判断表</a><a href="#choices">よくある選択</a><a href="#runtime-diagnostics">Runtime 診断</a><a href="#checklist">本番前チェック</a><a href="#help">相談する</a></div>
 <section id="matrix"><h2>クイック判断表</h2>
 <table><tr><th>パス</th><th>向いている用途</th><th>開始地点</th><th>運用メモ</th></tr>
 <tr><td>Colab notebook</td><td>ブラウザでの smoke test、初回評価、共有しやすいデモ</td><td><a href="https://colab.research.google.com/github/modelscope/FunASR/blob/main/examples/colab/funasr_quickstart.ipynb">Colab quickstart</a></td><td>ローカル環境は不要。初回実行ではモデルをダウンロードし、GPU runtime の方が高速です。</td></tr>
 <tr><td>Python API</td><td>Notebook、オフライン処理、最初のモデル評価</td><td><a href="tutorial.html">チュートリアル</a></td><td>最も軽い開始方法。バッチ化、リトライ、ファイル管理は呼び出し側で制御します。</td></tr>
+<tr><td>llama.cpp / GGUF binary</td><td>Python 不要の CPU/edge transcription。Windows/Linux Vulkan と Windows CUDA は任意</td><td><a href="https://github.com/modelscope/FunASR/releases/tag/runtime-llamacpp-v0.2.2">v0.2.2：全 9 package</a> · <a href="https://github.com/modelscope/FunASR/releases/download/runtime-llamacpp-v0.2.2/funasr-llamacpp-windows-x64-vulkan.zip">Windows Vulkan</a> · <a href="https://github.com/modelscope/FunASR/releases/download/runtime-llamacpp-v0.2.2/funasr-llamacpp-windows-x64-cuda.zip">Windows CUDA</a> · <a href="https://github.com/modelscope/FunASR/releases/download/runtime-llamacpp-v0.2.2/funasr-llamacpp-linux-x64-vulkan.tar.gz">Linux Vulkan</a> · <a href="https://github.com/modelscope/FunASR/tree/main/runtime/llama.cpp">docs</a></td><td>CPU package が portable な既定値です。Vulkan package でのみ <code>--backend vulkan</code> を選び、Windows CUDA package は <code>sm_86</code> 向けです。</td></tr>
 <tr><td>OpenAI 互換 API</td><td>社内音声 API、Agent、Dify/LangChain/AutoGen/n8n 形式のクライアント</td><td><a href="agent.html#server">OpenAI API</a> · <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/README_ja.md">日本語 quickstart</a> · <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/smoke_test.py">Python smoke test</a> · <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/JAVASCRIPT.md">JS/TS recipes</a> · <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/WORKFLOWS.md">Workflow recipes</a> · <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/GRADIO.md">Gradio demo</a> · <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/SECURITY.md">Security guide</a> · <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/POSTMAN.md">Postman collection</a> · <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/OPENAPI.md">OpenAPI spec</a></td><td>OpenAI audio API や multipart HTTP node をすでに扱えるアプリ、ワークフローエンジンに最も接続しやすい構成です。</td></tr>
 <tr><td>Docker Compose API</td><td>再現可能なローカル smoke test、小規模な社内サービス</td><td><a href="https://github.com/modelscope/FunASR/tree/main/examples/openai_api#docker-deployment">OpenAI API Docker docs</a> · <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/smoke_test.py">Python smoke test</a></td><td>既定は CPU。コンテナで CUDA を使う前に CUDA 対応の PyTorch/FunASR image を確認します。</td></tr>
 <tr><td>Kubernetes API</td><td>クラスタ内の社内向け音声 API</td><td><a href="https://github.com/modelscope/FunASR/tree/main/examples/openai_api/kubernetes">Kubernetes template</a> · <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/smoke_test.py">Python smoke test</a></td><td>既定は private <code>ClusterIP</code>。広く公開する前に認証、TLS、network policy、GPU scheduling を追加します。</td></tr>
@@ -41,11 +42,16 @@
 </section>
 <section id="choices"><h2>よくある選択</h2>
 <div class="grid-2"><div class="card"><h3>5 分で FunASR を試す</h3><p>ブラウザだけで smoke test するなら <a href="https://colab.research.google.com/github/modelscope/FunASR/blob/main/examples/colab/funasr_quickstart.ipynb">Colab quickstart</a> を使います。ローカル作業ではチュートリアルの Python API が最短です。インストール、モデルダウンロード、device selection、出力形式を確認できます。どのモデルから始めるか迷う場合は <a href="https://github.com/modelscope/FunASR/blob/main/docs/model_selection_ja.md">モデル選択ガイド</a> を見てください。</p></div>
+<div class="card"><h3>Python 不要の edge binary を配布する</h3><p>自己完結型の SenseVoice、Paraformer、Fun-ASR-Nano には llama.cpp / GGUF runtime を使います。<a href="https://github.com/modelscope/FunASR/releases/tag/runtime-llamacpp-v0.2.2">v0.2.2</a> は Linux x64/arm64、macOS arm64、Windows x64 向けに 9 archive を公開しています。まず CPU を使い、必要な場合だけ対応する Vulkan package または Windows CUDA <code>sm_86</code> package を選びます。</p></div>
 <div class="card"><h3>クラウド転写をローカル API に置き換える</h3><p>OpenAI 互換 API を使います。まず <code>sensevoice</code> で bash smoke test または <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/smoke_test.py">Python smoke test</a> を通し、既存 SDK や HTTP クライアントを接続します。クラスタ展開は <a href="https://github.com/modelscope/FunASR/tree/main/examples/openai_api/kubernetes">Kubernetes template</a> から始めます。Dify、n8n、webhook worker には <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/WORKFLOWS.md">workflow recipes</a>、GUI での API 確認には <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/POSTMAN.md">Postman collection</a> や <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/GRADIO.md">Gradio demo</a> が使えます。gateway や developer portal には <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/OPENAPI.md">OpenAPI spec</a> と <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/SECURITY.md">security guide</a> を参照します。</p></div></div>
 <div class="grid-2"><div class="card"><h3>再現可能な container demo</h3><pre><code>cd examples/openai_api
 cp .env.example .env
 docker compose up --build</code></pre><p>CUDA 対応の PyTorch/FunASR image が確定するまでは CPU mode のまま確認します。</p></div>
 <div class="card"><h3>リアルタイム音声を配信する</h3><p>Runtime WebSocket service を使います。本番前に実音声で chunk size、VAD、endpointing、punctuation、speaker diarization、reconnect、client backpressure を検証してください。</p></div></div>
+</section>
+<section id="runtime-diagnostics"><h2>llama.cpp backend の診断契約</h2>
+<p>v0.2.2 は stderr に 3 つの境界を順番に出力します：<code>initializing ... backend on ...</code>、<code>initialized ... backend on ...; resolving buffer type</code>、<code>... backend ready on ...</code>。最後に到達した行から、backend 作成、buffer type 解決、その後の model 実行を切り分けられます。報告にはこれらの行、archive の完全な名前、GPU/driver、command、exit code を含めてください。</p>
+<p>この release は deterministic な backend check と障害位置の可視化を追加しますが、すべての AMD Windows <code>0xC0000005</code> crash の修正を宣言するものではありません。Android/Mali は v0.2.2 の公式 prebuilt・検証済み target ではありません。</p>
 </section>
 <section id="checklist"><h2>本番前チェックリスト</h2>
 <ul><li>利用する model alias を決め、deployment note に固定します。</li><li>FunASR version、model version、device、CUDA/PyTorch version、Docker image tag、起動コマンドを記録します。</li><li>短い公開音声で <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/smoke_test.py">Python smoke test</a> を実行し、少なくとも 1 つの実データでも確認します。Kubernetes では <a href="https://github.com/modelscope/FunASR/tree/main/examples/openai_api/kubernetes">deployment template</a> を使い、まず <code>kubectl port-forward</code> で検証します。</li><li>各 request で audio duration、model、device、latency、response format、error type を記録します。</li><li>信頼ネットワーク外へ API を出す前に、upload size limit、authentication、TLS、rate limit を追加します。境界設計には <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/SECURITY.md">security guide</a> を使います。</li><li>Streaming では silence、noise、overlapping speakers、long sessions、reconnect、slow clients をテストします。</li></ul>
