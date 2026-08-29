@@ -542,6 +542,12 @@ class AutoModel:
         if kwargs["model"] in {"silero-vad", "silero_vad"}:
             kwargs.setdefault("model_conf", {})
             kwargs["model"] = "SileroVad"
+        if kwargs["model"] in {
+            "MOSS-Transcribe-Diarize",
+            "OpenMOSS-Team/MOSS-Transcribe-Diarize",
+        }:
+            kwargs.setdefault("model_conf", {})
+            kwargs.setdefault("model_path", kwargs["model"])
         if "model_conf" not in kwargs:
             logging.info("download models from model hub: {}".format(kwargs.get("hub", "ms")))
             kwargs = download_model(**kwargs)

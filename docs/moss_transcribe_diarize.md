@@ -5,8 +5,9 @@
 This guide connects the third-party
 [OpenMOSS/MOSS-Transcribe-Diarize](https://github.com/OpenMOSS/MOSS-Transcribe-Diarize)
 model to the FunASR deployment ecosystem. The model is published by OpenMOSS
-under Apache-2.0; it is not a FunASR model and is not registered in FunASR
-`AutoModel`.
+under Apache-2.0; it is not a FunASR model. FunASR provides an adapter for its
+public Transformers and vLLM interfaces while retaining the OpenMOSS model
+name, license, and upstream revision.
 
 MOSS-Transcribe-Diarize jointly generates transcription, timestamps, and
 speaker labels such as `[S01]`. An application therefore does not need to
@@ -24,6 +25,65 @@ This guide was verified against:
 
 Pin all three revisions. The model uses `trust_remote_code`; do not execute a
 floating model revision in a production service.
+
+## FunASR AutoModel contract
+
+Use an isolated Python 3.10+ environment with Transformers 5.6 or newer for
+the local backend. MOSS performs long-form transcription and speaker
+diarization in one generation, so do **not** pass `vad_model` or `spk_model`.
+External VAD segmentation would break the model's global speaker identity
+across chunks.
+
+```python
+from funasr import AutoModel
+
+model = AutoModel(
+    model="OpenMOSS-Team/MOSS-Transcribe-Diarize",
+    model_revision="e8681d68e7042738ffca8ac8212bc8fcb1131ab8",
+    backend="hf",
+    device="cuda:0",
+    dtype="bf16",
+    attn_implementation="sdpa",
+    disable_update=True,
+)
+
+result = model.generate("audio.wav", max_new_tokens=5120)[0]
+print(result["text"])
+for segment in result["sentence_info"]:
+    print(segment["start"], segment["end"], segment["spk"], segment["text"])
+```
+
+The adapter preserves the raw tagged generation in `raw_text` and returns the
+common FunASR fields:
+
+- `text`: readable transcript without MOSS control tags;
+- `timestamp`: segment-level `[start_ms, end_ms]` pairs;
+- `sentence_info`: `start`, `end`, `text`, `sentence`, `spk`, and `timestamp`;
+- `raw_text`: exact `[start][Sxx]text[end]` generation for auditing.
+
+If the parser cannot prove the tagged structure, it leaves the model text
+visible in `text` and `raw_text` and returns empty timestamp/segment arrays
+instead of silently inventing speaker metadata.
+
+The same result contract can wrap an already running vLLM service without
+downloading local weights:
+
+```python
+from funasr import AutoModel
+
+model = AutoModel(
+    model="OpenMOSS-Team/MOSS-Transcribe-Diarize",
+    backend="vllm",
+    vllm_base_url="http://127.0.0.1:8898/v1",
+    vllm_model="moss-transcribe-diarize",
+    disable_update=True,
+)
+result = model.generate("audio.wav")[0]
+```
+
+The vLLM adapter sends the documented OpenAI-compatible multipart request and
+normalizes the returned raw text. Authentication can be supplied with
+`vllm_api_key`; keep it in a secret store rather than source code.
 
 ## Choose a serving path
 
@@ -104,6 +164,14 @@ The FunASR ecosystem validation used vLLM
 This proves the pinned API and speaker-return contract on those inputs. It is
 not a diarization accuracy result, overlap test, throughput benchmark, or
 production capacity claim.
+
+The FunASR adapter was also tested on both `backend="hf"` and
+`backend="vllm"` with model revision
+`e8681d68e7042738ffca8ac8212bc8fcb1131ab8`. The 15.1685-second two-speaker
+probe (`43dccc068506439cb633b382b6b98185baa837363d08cc5f7152ca89b0fdc3c8`)
+returned two monotonic segments labelled `S01` and `S02` through the common
+`AutoModel` result contract. The temporary vLLM worker was stopped after the
+test; this is a contract smoke test, not an accuracy benchmark.
 
 ## SGLang Omni
 

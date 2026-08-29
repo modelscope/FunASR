@@ -29,12 +29,16 @@ def test_moss_guides_pin_upstream_and_separate_serving_contracts(guide: Path) ->
         "vllm[audio]",
         "0.23.1rc1.dev949+g68b4a1d58",
         "dbb32bcfed2e8226bedf64248a9f4a44685b293a4696d18fb4cfa701b04db912",
+        "43dccc068506439cb633b382b6b98185baa837363d08cc5f7152ca89b0fdc3c8",
         "S01 -> S02 -> S01",
         "/v1/audio/transcriptions",
         "response_format=json",
         "response_format=verbose_json",
         "[S01]",
         "Apache-2.0",
+        "sentence_info",
+        "raw_text",
+        "vad_model",
     ):
         assert marker in text, f"{guide.name} is missing {marker}"
 
