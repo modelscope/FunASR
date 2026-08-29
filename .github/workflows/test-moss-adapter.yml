@@ -37,7 +37,7 @@ jobs:
           python -m pip install \
             torch --index-url https://download.pytorch.org/whl/cpu
           python -m pip install \
-            pytest black numpy soundfile requests packaging \
+            pytest black==25.1.0 numpy soundfile requests packaging \
             omegaconf hydra-core kaldiio librosa tqdm pyyaml
       - name: Check formatting and syntax
         run: |
