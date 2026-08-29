@@ -2,8 +2,12 @@
 
 This document explains the responsibility boundaries, user entry points, and issue routing across the four FunASR ecosystem repositories, along with a directional roadmap.
 
-> **Versioned release roadmap: pending maintainer confirmation.**
-> This document does not commit to future version numbers or release dates. The repository has no established milestones; as of the 2026-07-22 maintainer patrol, GitHub and PyPI both have the `v1.3.26` / `1.3.26` release line published. The boundaries for `1.4 / 1.5 / 2.0` have not been confirmed by core maintainers.
+> **Directional roadmap, not a release promise.**
+> This document records shipped capabilities and active work, but does not commit to
+> future version numbers or dates. The current Python release is
+> [`funasr==1.4.7`](https://github.com/modelscope/FunASR/releases/tag/v1.4.7).
+> Any future breaking release still requires a maintainer-approved milestone and
+> migration plan.
 
 ---
 
@@ -33,6 +37,7 @@ The four repositories share models and tooling but their responsibility boundari
 |---|---|
 | Use Python for speech recognition / training / fine-tuning | [modelscope/FunASR](https://github.com/modelscope/FunASR) |
 | Deploy a realtime streaming ASR service, recommend **Fun-ASR-Nano + vLLM** | [modelscope/FunASR/fun_asr_nano](https://github.com/modelscope/FunASR/tree/main/examples/industrial_data_pretraining/fun_asr_nano) — **canonical implementation, see below** |
+| Transcribe long multi-speaker audio with timestamps and speaker identities in one model pass | [MOSS-Transcribe-Diarize deployment guide](./moss_transcribe_diarize.md) — an OpenMOSS model integrated with FunASR through local Transformers or vLLM; no separate VAD or speaker model |
 | Understand Fun-ASR-Nano / MLT capabilities, checkpoints, benchmarks, or use Transformers / vLLM / GGUF integrations | [QwenAudio/Fun-ASR](https://github.com/QwenAudio/Fun-ASR) |
 | Use emotion recognition / audio event detection | [QwenAudio/SenseVoice](https://github.com/QwenAudio/SenseVoice) |
 | Generate video subtitles / clip videos | [modelscope/FunClip](https://github.com/modelscope/FunClip) |
@@ -46,6 +51,7 @@ The four repositories share models and tooling but their responsibility boundari
 | Framework, inference pipeline, training, fine-tuning | `modelscope/FunASR` |
 | Deployment services: realtime WebSocket, offline service, SDK | `modelscope/FunASR` |
 | VAD / punctuation / ITN / speaker component behavior | `modelscope/FunASR` |
+| FunASR adapter or deployment behavior for a third-party model such as MOSS-Transcribe-Diarize | `modelscope/FunASR`; model weights and architecture remain with the upstream model owner |
 | Fun-ASR model family recognition quality, language support, weights, benchmarks, or model-level integrations (Transformers / vLLM / GGUF) | `QwenAudio/Fun-ASR` |
 | SenseVoice recognition / emotion / event detection quality | `QwenAudio/SenseVoice` |
 | Video clipping, subtitle export, Gradio UI | `modelscope/FunClip` |
@@ -73,23 +79,31 @@ The four repositories share models and tooling but their responsibility boundari
 
 > Each item links to an existing issue or PR where available. Items without an owner or acceptance evidence do not have completion dates.
 
-### Now
+### Delivered
 
-- **Bounded realtime long-session state** — fixes merged via [#3214](https://github.com/modelscope/FunASR/pull/3214), diagnostics shipped in `funasr==1.3.19`, and the model-repo mirror fix [QwenAudio/Fun-ASR#135](https://github.com/QwenAudio/Fun-ASR/pull/135) also merged. [#3101](https://github.com/modelscope/FunASR/issues/3101) remains open while waiting for reporter retest logs.
-- **Fun-ASR-Nano native Transformers integration** — [huggingface/transformers#46180](https://github.com/huggingface/transformers/pull/46180); in review. See the linked PR for current CI and review status.
-- **Clarify repository roles and issue routing** — [#3203](https://github.com/modelscope/FunASR/issues/3203); this document.
+- **Bounded realtime long-session state** — fixes merged via [#3214](https://github.com/modelscope/FunASR/pull/3214) and [QwenAudio/Fun-ASR#135](https://github.com/QwenAudio/Fun-ASR/pull/135), diagnostics shipped, and reporter evidence allowed [#3101](https://github.com/modelscope/FunASR/issues/3101) to close.
+- **Stable application-facing APIs** — the toolkit now ships an OpenAI-compatible transcription server, health checks, browser and command-line smoke tests, and documented Python / CLI / HTTP / WebSocket entry points in the [deployment matrix](./deployment_matrix.md).
+- **Industrial and edge deployment paths** — vLLM serving and signed release workflows are documented; the verified nine-platform [`runtime-llamacpp-v0.2.5`](https://github.com/modelscope/FunASR/releases/tag/runtime-llamacpp-v0.2.5) archives cover Linux, macOS, and Windows CPU/GPU variants.
+- **Joint transcription and diarization** — the third-party [MOSS-Transcribe-Diarize](./moss_transcribe_diarize.md) model is available through `AutoModel` with local Transformers and vLLM backends. It produces timestamps and speaker labels in one pass without a separate VAD or speaker model; OpenMOSS remains the model owner.
+- **Repository roles and issue routing** — [#3203](https://github.com/modelscope/FunASR/issues/3203) tracks this document and the remaining model-weight and vLLM entry-point questions. It stays open until those questions have evidence and the reporter has time to confirm.
+
+### In progress
+
+- **Fun-ASR-Nano native Transformers integration** — [huggingface/transformers#46180](https://github.com/huggingface/transformers/pull/46180) is in review; use the PR's exact-head CI and review state as the source of truth.
+- **Restore complete public checkpoint functionality** — [#3496](https://github.com/modelscope/FunASR/issues/3496) tracks missing CTC tensors needed by timestamp and diarization paths in the Hugging Face checkpoint.
+- **Realtime concurrency regression** — [#3528](https://github.com/modelscope/FunASR/issues/3528) remains open for reproducible load-test evidence and a bounded fix.
+- **AMD Windows Vulkan validation** — [#3479](https://github.com/modelscope/FunASR/issues/3479) remains open for reporter hardware retesting against `runtime-llamacpp-v0.2.5`; publication of the archive is not evidence that the hardware crash is fixed.
 
 ### Next
 
-- **Converge duplicate realtime services to canonical source** (see above), preventing further drift.
-- **Establish a smoke-tested support matrix**: Python / CLI / WebSocket / container. The goal is a single canonical entry point reachable from the top-level README, with pinned dependencies, a fixed test audio file and startup smoke test, and clear CPU/GPU support scope — rather than multiple scripts each claiming to be the recommended entry point.
-- **Stable headless / API contract**: CLI / HTTP / gRPC / WebSocket paths that do not depend on Gradio or browser interaction; machine-parseable requests and responses; health checks, error codes, and compatibility tests suitable for services and agent integration.
-- **Containerization (separate track)**: requires follow-up work to determine the canonical image, version tags, CPU/GPU support matrix, health checks, and build CI. This document does not provide installation steps or recommend any specific cluster solution; that work will be tracked separately by someone who can verify CPU/GPU images end to end.
+- **Converge duplicate realtime services to the canonical source** (see above), then remove or clearly deprecate mirrors after compatibility evidence.
+- **Keep the deployment matrix executable**: every recommended Python / CLI / HTTP / WebSocket / vLLM / llama.cpp path should retain pinned boundaries, a fixed test audio file, a startup smoke test, and an explicit CPU/GPU scope.
+- **Container images as a separately verified track**: choose a canonical image and version tags only after CPU and GPU startup, health-check, transcription, and rebuild tests run in CI. This roadmap does not prescribe a cluster platform.
 
 ### Later
 
-- After the interfaces and compatibility tests above are stable, evaluate `2.x` for any breaking changes needed.
-- **Version numbers and release plans are confirmed by core maintainers through milestones / release plans**, not predetermined in this document.
+- Evaluate a breaking `2.x` line only when a concrete interface migration requires it.
+- Confirm version numbers and release plans through maintainer-approved milestones rather than predicting them in this document.
 
 ---
 

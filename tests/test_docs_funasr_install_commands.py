@@ -363,6 +363,23 @@ def test_top_level_readmes_surface_current_release_and_edge_runtime():
         assert "releases/download/runtime-llamacpp-v0.2.1/" not in text, name
 
 
+def test_repository_roadmap_tracks_current_delivery_and_open_work():
+    docs = [
+        (ROOT / "docs/repository_roles.md").read_text(),
+        (ROOT / "docs/repository_roles_zh.md").read_text(),
+    ]
+
+    for text in docs:
+        assert "1.4.7" in text
+        assert "v1.3.26" not in text
+        assert "runtime-llamacpp-v0.2.5" in text
+        assert "MOSS-Transcribe-Diarize" in text
+        assert "https://github.com/modelscope/FunASR/issues/3496" in text
+        assert "https://github.com/modelscope/FunASR/issues/3528" in text
+        assert "https://github.com/modelscope/FunASR/issues/3479" in text
+        assert "https://github.com/huggingface/transformers/pull/46180" in text
+
+
 def test_realtime_demo_documents_partial_and_hotword_boundaries():
     text = (
         ROOT
