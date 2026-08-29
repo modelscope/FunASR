@@ -111,6 +111,8 @@ def test_moss_transcribe_diarize_contract_tracks_third_party_upstream(valid_regi
         'runtime': 'vLLM 0.27.1 / Torch 2.13.0+cu129 / H100 80GB',
         'verified': '2026-08-30',
     }
+    assert 'LocalAI / moss-transcribe.cpp' in entry['interfaces']
+    assert {'cpu', 'desktop-edge-gpu'} <= set(entry['hardware'])
 
     install = '\n'.join(entry['commands']['install'])
     assert 'vllm[audio]' in install
@@ -144,6 +146,8 @@ def test_moss_transcribe_diarize_contract_tracks_third_party_upstream(valid_regi
     ) in evidence_urls
     assert 'https://github.com/modelscope/FunASR/pull/3558' in evidence_urls
     assert 'https://github.com/vllm-project/vllm/pull/48543' in evidence_urls
+    assert 'https://github.com/localai-org/moss-transcribe.cpp' in evidence_urls
+    assert 'https://github.com/mudler/LocalAI' in evidence_urls
 
     english = entry['translations']['en']
     assert 'OpenMOSS' in english['summary']
@@ -158,6 +162,12 @@ def test_moss_transcribe_diarize_contract_tracks_third_party_upstream(valid_regi
     assert 'diarized_json' in english['troubleshooting'][-1]
     assert 'internal segmentation' in english['primary_limitation']
     assert 'FunASR model' in english['primary_limitation']
+    assert any('LocalAI' in item and 'GGUF' in item for item in english['fit'])
+    assert not any(
+        item == 'CPU, desktop-edge, or native Windows deployments'
+        for item in english['not_fit']
+    )
+    assert any('third-party C++' in item for item in english['operations'])
     assert any(
         benchmark['hardware'] == 'NVIDIA H100 80GB HBM3'
         and '15.1685 s' in benchmark['audio']
