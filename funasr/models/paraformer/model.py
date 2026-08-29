@@ -671,9 +671,23 @@ class Paraformer(torch.nn.Module):
                     text_postprocessed = tokenizer.tokens2text(token)
                     
                     if pred_timestamp:
+                        timestamp_pre_peak_index = pre_peak_index[i]
+                        timestamp_alphas = alphas[i]
+                        predictor = getattr(self, "predictor", None)
+                        if getattr(predictor, "tail_mask", None) is True:
+                            timestamp_len = int(encoder_out_lens[i].item())
+                            if float(getattr(predictor, "tail_threshold", 0.0)) > 0.0:
+                                timestamp_len += 1
+                            timestamp_len = min(
+                                timestamp_len,
+                                timestamp_pre_peak_index.shape[-1],
+                                timestamp_alphas.shape[-1],
+                            )
+                            timestamp_pre_peak_index = timestamp_pre_peak_index[:timestamp_len]
+                            timestamp_alphas = timestamp_alphas[:timestamp_len]
                         timestamp_str, timestamp = ts_prediction_lfr6_standard(
-                            pre_peak_index[i],
-                            alphas[i],
+                            timestamp_pre_peak_index,
+                            timestamp_alphas,
                             copy.copy(token),
                             vad_offset=kwargs.get("begin_time", 0),
                             upsample_rate=1,
