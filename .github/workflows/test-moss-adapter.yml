@@ -1,0 +1,53 @@
+name: Validate MOSS adapter
+
+on:
+  pull_request:
+    paths:
+      - "funasr/models/moss_transcribe_diarize/**"
+      - "funasr/auto/auto_model.py"
+      - "docs/moss_transcribe_diarize*.md"
+      - "tests/test_moss_transcribe_diarize_*.py"
+      - ".github/workflows/test-moss-adapter.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "funasr/models/moss_transcribe_diarize/**"
+      - "funasr/auto/auto_model.py"
+      - "docs/moss_transcribe_diarize*.md"
+      - "tests/test_moss_transcribe_diarize_*.py"
+      - ".github/workflows/test-moss-adapter.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install contract-test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install \
+            torch --index-url https://download.pytorch.org/whl/cpu
+          python -m pip install \
+            pytest black==25.1.0 numpy soundfile requests packaging \
+            omegaconf hydra-core kaldiio librosa tqdm pyyaml
+      - name: Check formatting and syntax
+        run: |
+          python -m black --check \
+            funasr/models/moss_transcribe_diarize/model.py \
+            tests/test_moss_transcribe_diarize_model.py \
+            tests/test_moss_transcribe_diarize_docs.py
+          python -m py_compile funasr/models/moss_transcribe_diarize/model.py
+      - name: Run adapter and documentation contracts
+        run: |
+          python -m pytest -q \
+            tests/test_moss_transcribe_diarize_model.py \
+            tests/test_moss_transcribe_diarize_docs.py

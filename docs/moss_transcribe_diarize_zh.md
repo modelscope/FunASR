@@ -5,7 +5,8 @@
 本文把第三方
 [OpenMOSS/MOSS-Transcribe-Diarize](https://github.com/OpenMOSS/MOSS-Transcribe-Diarize)
 模型接入 FunASR 部署生态。模型由 OpenMOSS 以 Apache-2.0 发布，不是 FunASR
-自有模型，也没有注册到 FunASR `AutoModel`。
+自有模型。FunASR 只为其公开的 Transformers 与 vLLM 接口提供适配器，并保留
+OpenMOSS 模型名称、许可证和上游 revision。
 
 MOSS-Transcribe-Diarize 会联合生成转写、时间戳和 `[S01]` 等说话人标签，应用侧
 不必再拼接外部 VAD、ASR 和 diarization 管线。这里描述的是部署形态，不表示模型
@@ -21,6 +22,59 @@ MOSS-Transcribe-Diarize 会联合生成转写、时间戳和 `[S01]` 等说话�
 - vLLM nightly 索引：`68b4a1d582818e67adc903bf1b8fc5a5447da2fa`
 
 三者都要固定。模型依赖 `trust_remote_code`，生产服务不要执行浮动的模型 revision。
+
+## FunASR AutoModel 契约
+
+本地后端应使用隔离的 Python 3.10+ 环境，并安装 Transformers 5.6 或更新版本。
+MOSS 在一次生成中完成长音频转写与说话人识别，因此不要传 `vad_model` 或
+`spk_model`。外部 VAD 会把长音频切开，并破坏跨分块的全局说话人身份。
+
+```python
+from funasr import AutoModel
+
+model = AutoModel(
+    model="OpenMOSS-Team/MOSS-Transcribe-Diarize",
+    model_revision="e8681d68e7042738ffca8ac8212bc8fcb1131ab8",
+    backend="hf",
+    device="cuda:0",
+    dtype="bf16",
+    attn_implementation="sdpa",
+    disable_update=True,
+)
+
+result = model.generate("audio.wav", max_new_tokens=5120)[0]
+print(result["text"])
+for segment in result["sentence_info"]:
+    print(segment["start"], segment["end"], segment["spk"], segment["text"])
+```
+
+适配器在 `raw_text` 中保留原始标签生成，并返回 FunASR 通用字段：
+
+- `text`：移除 MOSS 控制标签后的可读转写；
+- `timestamp`：segment 级 `[start_ms, end_ms]`；
+- `sentence_info`：包含 `start`、`end`、`text`、`sentence`、`spk` 和 `timestamp`；
+- `raw_text`：用于审计的原始 `[start][Sxx]text[end]` 生成。
+
+当解析器无法确认标签结构时，会保留 `text` 与 `raw_text`，并返回空时间戳和分段，
+不会静默编造说话人信息。
+
+同一结果契约也可以包装已经启动的 vLLM 服务，并且不会下载本地权重：
+
+```python
+from funasr import AutoModel
+
+model = AutoModel(
+    model="OpenMOSS-Team/MOSS-Transcribe-Diarize",
+    backend="vllm",
+    vllm_base_url="http://127.0.0.1:8898/v1",
+    vllm_model="moss-transcribe-diarize",
+    disable_update=True,
+)
+result = model.generate("audio.wav")[0]
+```
+
+vLLM 适配器发送官方文档中的 OpenAI-compatible multipart 请求，并统一解析返回文本。
+认证可通过 `vllm_api_key` 提供；请放在 secret store，不要写入源码。
 
 ## 选择服务后端
 
@@ -97,6 +151,12 @@ FunASR 生态验证使用 vLLM `0.23.1rc1.dev949+g68b4a1d58`、Torch
 
 这证明固定版本对这些输入满足 API 和说话人返回契约，不是 diarization 精度、重叠语音、
 吞吐或生产容量结论。
+
+FunASR 适配器还分别使用 `backend="hf"` 和 `backend="vllm"`，按模型 revision
+`e8681d68e7042738ffca8ac8212bc8fcb1131ab8` 做了真实测试。15.1685 秒的双说话人
+样例（`43dccc068506439cb633b382b6b98185baa837363d08cc5f7152ca89b0fdc3c8`）通过
+统一 `AutoModel` 结果契约返回两个单调时间分段和 `S01`、`S02`。测试完成后已停止
+临时 vLLM worker；这只是契约冒烟测试，不是精度基准。
 
 ## SGLang Omni
 
