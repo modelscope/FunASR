@@ -116,6 +116,7 @@ def test_cli_defaults_disable_speaker_and_bound_partial_window():
     assert args.log_session_stats_interval == 0.0
     assert args.decode_batch_wait_ms == 10.0
     assert args.decode_max_batch_size == 16
+    assert args.log_decode_profile is False
     assert args.vad_device == "cpu"
     assert args.vad_ncpu == 1
 
@@ -1688,6 +1689,37 @@ def test_realtime_batching_engine_combines_compatible_concurrent_requests():
     assert len(engine.calls) == 1
     assert len(engine.calls[0][0]) == 3
     assert engine.calls[0][1] == {"language": "zh"}
+
+
+def test_realtime_batching_engine_logs_opt_in_decode_profile(caplog):
+    module = load_service_module()
+
+    class RecordingEngine:
+        def generate(self, inputs, **kwargs):
+            return [{"text": "ok"} for _ in inputs]
+
+    caplog.set_level("INFO")
+    batching_engine = module.RealtimeBatchingEngine(
+        RecordingEngine(), batch_wait_ms=0, max_batch_size=8, log_profile=True
+    )
+
+    result = batching_engine.generate(
+        [
+            np.zeros(16000, dtype=np.float32),
+            np.zeros(32000, dtype=np.float32),
+        ]
+    )
+
+    assert result == [{"text": "ok"}, {"text": "ok"}]
+    assert "Realtime decode profile:" in caplog.text
+    assert "requests=1" in caplog.text
+    assert "samples=2" in caplog.text
+    assert "audio_sec_total=3.000" in caplog.text
+    assert "audio_sec_min=1.000" in caplog.text
+    assert "audio_sec_max=2.000" in caplog.text
+    assert "queue_ms_p50=" in caplog.text
+    assert "queue_ms_max=" in caplog.text
+    assert "engine_ms=" in caplog.text
 
 
 def test_realtime_batching_engine_keeps_incompatible_options_separate():

@@ -19,7 +19,8 @@ CUDA_VISIBLE_DEVICES=0 python examples/industrial_data_pretraining/fun_asr_nano/
     --port 10095 --language 中文 \
     --partial-window-sec 8 --decode-interval 0.8 \
     --vad-device cpu --vad-ncpu 1 \
-    --decode-batch-wait-ms 10 --decode-max-batch-size 16
+    --decode-batch-wait-ms 10 --decode-max-batch-size 16 \
+    --log-decode-profile
 ```
 
 Speaker diarization is disabled by default. Add `--enable-spk` only when the
@@ -81,9 +82,16 @@ stress signal, not as user-facing realtime latency.
 | `errors` | Connection, timeout, protocol, or client-side validation errors |
 
 The script can observe only client-side timing and fields returned by the
-server. If you are debugging service internals, collect server logs separately
-for queue wait, VAD time, ASR decode time, speaker diarization time, GPU memory,
-and GPU utilization.
+server. For a performance investigation, add `--log-decode-profile` to record
+one structured line per engine call with the request and sample counts, audio
+duration range, queue-wait p50/max, and total engine latency. The underlying
+Fun-ASR-Nano vLLM path also logs audio-encoder and vLLM-generation time. Collect
+those server logs together with GPU memory/utilization and the client JSONL.
+
+When comparing releases, align `partial_messages` as well as audio, clients,
+and service flags. A server that blocks its WebSocket event loop can appear to
+finish sooner simply because it processes fewer provisional decodes; that is
+not an engine-throughput improvement and gives users fewer live updates.
 
 ## Concurrency Regression Reference
 
@@ -117,7 +125,7 @@ When publishing a realtime WebSocket benchmark or issue report, include:
 |----------|----------------|
 | Data | Audio duration, sample rate, language/domain, silence ratio or speaking pattern, and whether the same file was looped |
 | Load | `--clients`, `--loops`, `--chunk-ms`, paced or `--no-pace`, client ping interval/timeout, and total benchmark wall time |
-| Service | `serve_realtime_ws.py` command, WebSocket ping interval/timeout, `--partial-window-sec`, `--decode-interval`, `--vad-device`, `--vad-ncpu`, `--decode-batch-wait-ms`, `--decode-max-batch-size`, `--enable-spk`, language, and hotwords |
+| Service | `serve_realtime_ws.py` command, WebSocket ping interval/timeout, `--partial-window-sec`, `--decode-interval`, `--vad-device`, `--vad-ncpu`, `--decode-batch-wait-ms`, `--decode-max-batch-size`, `--log-decode-profile`, `--enable-spk`, language, and hotwords |
 | Hardware | GPU/NPU model, GPU count, memory, driver, CUDA/CANN/runtime versions, CPU model, and available RAM |
 | Software | `funasr`, PyTorch, torchaudio, vLLM, Python, OS, and container image if any |
 | Output | Summary line, JSONL artifact, server logs, and any failed client IDs |
