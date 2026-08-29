@@ -7,6 +7,7 @@ https://github.com/OpenMOSS/MOSS-Transcribe-Diarize
 
 import copy
 import io
+import math
 import mimetypes
 import os
 import re
@@ -127,6 +128,66 @@ def _result_from_transcript(key, transcript):
     }
 
 
+def _result_from_diarized_response(key, response):
+    """Normalize vLLM's OpenAI-compatible diarized JSON response."""
+    text = response.get("text") if isinstance(response, dict) else None
+    segments = response.get("segments") if isinstance(response, dict) else None
+    if not isinstance(text, str) or not isinstance(segments, list):
+        raise RuntimeError(
+            "vLLM diarized_json response requires text and segments fields"
+        )
+
+    sentence_info = []
+    timestamps = []
+    for index, segment in enumerate(segments):
+        if not isinstance(segment, dict):
+            raise RuntimeError(
+                "vLLM diarized_json segment %d must be an object" % index
+            )
+        start = segment.get("start")
+        end = segment.get("end")
+        segment_text = segment.get("text")
+        speaker = segment.get("speaker")
+        numeric = (
+            isinstance(start, (int, float))
+            and not isinstance(start, bool)
+            and isinstance(end, (int, float))
+            and not isinstance(end, bool)
+        )
+        if (
+            not numeric
+            or not math.isfinite(start)
+            or not math.isfinite(end)
+            or start < 0
+            or end < start
+            or not isinstance(segment_text, str)
+            or not isinstance(speaker, str)
+            or not speaker
+        ):
+            raise RuntimeError(
+                "vLLM diarized_json segment %d has an invalid contract" % index
+            )
+        timestamp = [int(round(start * 1000)), int(round(end * 1000))]
+        timestamps.append(timestamp)
+        sentence_info.append(
+            {
+                "start": timestamp[0],
+                "end": timestamp[1],
+                "text": segment_text,
+                "sentence": segment_text,
+                "spk": speaker,
+                "timestamp": [timestamp],
+            }
+        )
+    return {
+        "key": key,
+        "text": text,
+        "raw_text": text,
+        "timestamp": timestamps,
+        "sentence_info": sentence_info,
+    }
+
+
 @tables.register("model_classes", "MOSS-Transcribe-Diarize")
 @tables.register("model_classes", DEFAULT_MODEL)
 class MossTranscribeDiarize(nn.Module):
@@ -157,6 +218,9 @@ class MossTranscribeDiarize(nn.Module):
         self.vllm_model = kwargs.get("vllm_model", DEFAULT_MODEL)
         self.vllm_api_key = kwargs.get("vllm_api_key", "EMPTY")
         self.vllm_timeout = float(kwargs.get("vllm_timeout", 600.0))
+        self.vllm_response_format = kwargs.get("vllm_response_format", "json").lower()
+        if self.vllm_response_format not in {"json", "diarized_json"}:
+            raise ValueError("vllm_response_format must be 'json' or 'diarized_json'")
         self.http_session = kwargs.get("http_session")
 
         self.hf_model = None
@@ -240,10 +304,18 @@ class MossTranscribeDiarize(nn.Module):
         results = []
         for index, audio in enumerate(inputs):
             if self.backend == "vllm":
-                transcript = self._transcribe_vllm(audio, **kwargs)
+                response = self._transcribe_vllm(audio, **kwargs)
+                if self.vllm_response_format == "diarized_json":
+                    results.append(
+                        _result_from_diarized_response(keys[index], response)
+                    )
+                else:
+                    results.append(
+                        _result_from_transcript(keys[index], response["text"])
+                    )
             else:
                 transcript = self._transcribe_hf(audio, **kwargs)
-            results.append(_result_from_transcript(keys[index], transcript))
+                results.append(_result_from_transcript(keys[index], transcript))
         return results, {
             "batch_data_time": max(audio_duration, 1e-9),
             "forward": time.perf_counter() - started,
@@ -324,7 +396,7 @@ class MossTranscribeDiarize(nn.Module):
         filename, payload, content_type = self._multipart_audio(audio)
         data = {
             "model": self.vllm_model,
-            "response_format": "json",
+            "response_format": self.vllm_response_format,
             "temperature": str(kwargs.get("temperature", 0)),
         }
         prompt = kwargs.get("prompt")
@@ -345,11 +417,15 @@ class MossTranscribeDiarize(nn.Module):
         )
         response.raise_for_status()
         result = response.json()
-        if not isinstance(result, dict) or not isinstance(result.get("text"), str):
+        if not isinstance(result, dict):
+            raise RuntimeError("vLLM transcription response must be a JSON object")
+        if self.vllm_response_format == "json" and not isinstance(
+            result.get("text"), str
+        ):
             raise RuntimeError(
                 "vLLM transcription response did not contain a text field"
             )
-        return result["text"]
+        return result
 
     @staticmethod
     def _multipart_audio(audio):
