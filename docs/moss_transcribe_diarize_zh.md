@@ -73,7 +73,7 @@ model = AutoModel(
     vllm_response_format="diarized_json",
     disable_update=True,
 )
-result = model.generate("audio.wav")[0]
+result = model.generate("audio.wav", max_completion_tokens=8192)[0]
 ```
 
 vLLM 适配器发送官方文档中的 OpenAI-compatible multipart 请求，并把官方返回的
@@ -92,6 +92,7 @@ speaker `segments` 直接映射到 `sentence_info`。认证可通过 `vllm_api_k
 | vLLM | CUDA 12（`cu129`）或 CUDA 13（`cu130`） | `response_format=diarized_json` 返回 OpenAI-compatible 说话人 segments；`response_format=json` 保留原始 `[start][Sxx]text[end]` 文本 | 已运行 vLLM，或需要其调度能力 |
 | SGLang Omni | 当前上游指南为 CUDA 13 | `response_format=verbose_json` 返回解析后的 segments | API 需要直接返回结构化说话人分段 |
 | Transformers | PyTorch 进程 | Python 对象和原始标签文本 | 评测、排障或自定义预处理 |
+| moss-transcribe.cpp / LocalAI | C++17、ggml、GGUF；CPU 或 ggml GPU 后端 | LocalAI 的 OpenAI-compatible 转写接口 | 不希望在推理机安装 Python/PyTorch，或需要量化 GGUF 和边缘部署 |
 
 两个 HTTP 后端都使用 `/v1/audio/transcriptions`，但官方文档中的响应格式不能混为
 一谈。固定的 vLLM revision 支持 `diarized_json`；承诺 `segments` 前仍要验证实际
@@ -134,6 +135,7 @@ curl -fsS http://127.0.0.1:8898/v1/audio/transcriptions \
   -F file=@audio.wav \
   -F model=moss-transcribe-diarize \
   -F response_format=diarized_json \
+  -F max_completion_tokens=8192 \
   -F temperature=0 \
   | tee moss-transcription.json
 
@@ -159,7 +161,9 @@ PY
 如需审计模型原始紧凑标签生成，请把请求改为 `response_format=json`，并验证返回
 `text` 中包含 `[S01]`。
 
-长音频需要按业务最长会议验证 `max_completion_tokens`。增大上限也会影响显存和尾延迟。
+长音频需要按业务最长会议验证 `max_completion_tokens`。FunASR vLLM 适配器同时接受
+OpenAI-compatible 名称 `max_completion_tokens` 和兼容名称 `max_new_tokens`；两者同时
+出现时以前者为准。增大上限也会影响显存和尾延迟。
 
 ### 已复现的 vLLM 契约
 
@@ -168,6 +172,21 @@ PY
 （`43dccc068506439cb633b382b6b98185baa837363d08cc5f7152ca89b0fdc3c8`）
 返回两个 `diarized_json` segments，标签为 `S01`、`S02`；同一请求通过 FunASR
 适配器后，返回两个时间单调且说话人一致的 `sentence_info`。
+
+同一环境还验证了 FunASR #3539 的两段真实中文长音频：
+
+- 309.600 秒样例
+  （`6561ee553c8f762aac4ebd65439d3414820761b547fa3a2edcea43b86a2abc02`）
+  使用默认 5120 上限返回 158 个 segments，最后时间戳为 309.41 秒，7.459 秒完成；
+- 379.664 秒样例
+  （`779899a3ce937dd7352b4db1ea53e3f6aa2cfef7109de0249082223c936f9372`）
+  使用默认 5120 上限时生成在 354.98 秒处截断，`diarized_json` 因标签不完整返回
+  HTTP 400；设置 `max_completion_tokens=8192` 后返回 224 个 segments，最后时间戳
+  覆盖到 378.55 秒，10.516 秒完成。
+
+这两段样例中，MOSS 修正了报告者指出的多处专有词和近音词，也正确保持了“转述基金会
+声明”的语义连续性；但模型输出仍包含较短的独立分段，不能据此宣称字幕切分问题已解决。
+这些数字只证明 exact input 的完整性边界，不是精度、吞吐或生产容量基准。
 
 较早的 raw-response 验证使用 vLLM `0.23.1rc1.dev949+g68b4a1d58`、Torch
 `2.11.0+cu129` 和一张 H100 80GB，结果如下：
@@ -192,6 +211,21 @@ FunASR 适配器还分别使用 `backend="hf"` 和 `backend="vllm"`，按模型 
 样例（`43dccc068506439cb633b382b6b98185baa837363d08cc5f7152ca89b0fdc3c8`）通过
 统一 `AutoModel` 结果契约返回两个单调时间分段和 `S01`、`S02`。测试完成后已停止
 临时 vLLM worker；这只是契约冒烟测试，不是精度基准。
+
+## moss-transcribe.cpp 与 LocalAI
+
+[`localai-org/moss-transcribe.cpp`](https://github.com/localai-org/moss-transcribe.cpp)
+是 LocalAI 团队维护的第三方 C++17/ggml 重写，许可证为 MIT；原始 OpenMOSS 模型
+权重仍保持 Apache-2.0。它不是 FunASR `AutoModel` 后端，也不能与上面的 Python
+适配器混用。
+
+在需要 GGUF 量化、CPU 或 ggml CUDA/Metal/Vulkan/HIP 后端时，可以选择这条路径。
+LocalAI `master@a7cc5873ef5b7c909fc9ff7d349d51738ba9bb05` 已包含
+`moss-transcribe-cpp` 后端及 Hugging Face importer；后端固定
+`moss-transcribe.cpp@190a569c13b4b247450f2fb3b2a431244e84833e`，importer 可识别
+`huggingface://mudler/moss-transcribe.cpp-gguf` 并默认选择 Q5_K。部署前应按 LocalAI
+文档验证所选 backend package、GGUF SHA-256、实际硬件后端及
+`/v1/audio/transcriptions` 响应，不要把上游 README 的性能数字当作本机基准。
 
 ## SGLang Omni
 
