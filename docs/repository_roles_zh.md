@@ -2,8 +2,10 @@
 
 本文档说明 FunASR 生态四个仓库的职责边界、用户入口和 issue 路由,并给出一份方向性路线图。
 
-> **版本化发布路线图：待维护者确认。**
-> 本文档不承诺未来版本号和发布日期。当前仓库没有已建立的 milestone;截至 2026-07-22 维护巡检，GitHub 与 PyPI 均已发布 `v1.3.26` / `1.3.26` 发布线;`1.4 / 1.5 / 2.0` 的边界尚未经核心 maintainer 确认。
+> **方向性路线图，不是版本承诺。**
+> 本文档记录已交付能力与正在推进的工作，但不承诺未来版本号或日期。当前 Python
+> 版本是 [`funasr==1.4.7`](https://github.com/modelscope/FunASR/releases/tag/v1.4.7)。
+> 任何未来的 breaking release 仍需 maintainer 确认 milestone 与迁移方案。
 
 ---
 
@@ -33,6 +35,7 @@
 |---|---|
 | 用 Python 做语音识别 / 训练 / 微调 | [modelscope/FunASR](https://github.com/modelscope/FunASR) |
 | 部署实时流式 ASR 服务，推荐 Fun-ASR-Nano + vLLM 做实时识别 | [modelscope/FunASR/fun_asr_nano](https://github.com/modelscope/FunASR/tree/main/examples/industrial_data_pretraining/fun_asr_nano) —— **推荐实现,见下节** |
+| 用一个模型完成长音频多人转写、时间戳与说话人身份识别 | [MOSS-Transcribe-Diarize 部署指南](./moss_transcribe_diarize_zh.md) —— OpenMOSS 模型通过本地 Transformers 或 vLLM 接入 FunASR，不需要额外 VAD 或说话人模型 |
 | 了解 Fun-ASR-Nano / MLT 的能力范围、权重、评测,或使用 Transformers / vLLM / GGUF 集成 | [QwenAudio/Fun-ASR](https://github.com/QwenAudio/Fun-ASR) |
 | 需要情感识别 / 音频事件检测 | [QwenAudio/SenseVoice](https://github.com/QwenAudio/SenseVoice) |
 | 做视频字幕 / 剪辑 | [modelscope/FunClip](https://github.com/modelscope/FunClip) |
@@ -46,6 +49,7 @@
 | 框架、推理管线 (pipelines)、训练、微调 | `modelscope/FunASR` |
 | 部署服务:实时 WebSocket、离线服务、SDK | `modelscope/FunASR` |
 | VAD / 标点 / ITN / 说话人 组件行为 | `modelscope/FunASR` |
+| MOSS-Transcribe-Diarize 等第三方模型的 FunASR 适配或部署行为 | `modelscope/FunASR`;模型权重和架构问题仍由上游模型所有者负责 |
 | Fun-ASR 系列模型的识别效果、语言支持、权重、评测,以及 Transformers / vLLM / GGUF 等模型级集成 | `QwenAudio/Fun-ASR` |
 | SenseVoice 的识别 / 情感 / 事件检测效果 | `QwenAudio/SenseVoice` |
 | 视频剪辑、字幕导出、Gradio UI | `modelscope/FunClip` |
@@ -73,23 +77,31 @@
 
 > 每一项均链接到现有 issue / PR。没有 owner 或验收证据的条目不写完成日期。
 
-### 当前
+### 已交付
 
-- **实时服务长会话有界状态** —— 修复已由 [#3214](https://github.com/modelscope/FunASR/pull/3214) 合并，诊断能力已随 `funasr==1.3.19` 发布；模型仓镜像修复 [QwenAudio/Fun-ASR#135](https://github.com/QwenAudio/Fun-ASR/pull/135) 亦已合并。[#3101](https://github.com/modelscope/FunASR/issues/3101) 仍保持 open，等待 reporter 提供复测日志。
-- **Fun-ASR-Nano 的 Transformers 原生集成** —— [huggingface/transformers#46180](https://github.com/huggingface/transformers/pull/46180),正在审查中;当前 CI 与审查状态请以链接的 PR 为准。
-- **明确四仓职责与 issue 路由** —— [#3203](https://github.com/modelscope/FunASR/issues/3203);即本文档。
+- **实时服务长会话状态有界** —— [#3214](https://github.com/modelscope/FunASR/pull/3214) 与 [QwenAudio/Fun-ASR#135](https://github.com/QwenAudio/Fun-ASR/pull/135) 已合并，诊断能力已发布，报告者证据使 [#3101](https://github.com/modelscope/FunASR/issues/3101) 可以关闭。
+- **稳定的应用接口** —— 工具包现已提供 OpenAI-compatible 转写服务、健康检查、浏览器与命令行 smoke test，并在[部署矩阵](./deployment_matrix_zh.md)中列出 Python / CLI / HTTP / WebSocket 入口。
+- **工业与边缘部署路径** —— vLLM 服务和签名发布流程已有文档；经验证的九平台 [`runtime-llamacpp-v0.2.5`](https://github.com/modelscope/FunASR/releases/tag/runtime-llamacpp-v0.2.5) 压缩包覆盖 Linux、macOS 与 Windows 的 CPU/GPU 变体。
+- **联合转写与说话人识别** —— 第三方 [MOSS-Transcribe-Diarize](./moss_transcribe_diarize_zh.md) 模型已通过 `AutoModel` 接入本地 Transformers 与 vLLM 后端。它在一次推理中生成时间戳与说话人标签，不需要额外 VAD 或说话人模型；模型所有者仍是 OpenMOSS。
+- **仓库职责与 issue 路由** —— [#3203](https://github.com/modelscope/FunASR/issues/3203) 继续跟踪本文档以及尚未回答完的模型权重和 vLLM 入口问题。在这些问题有证据且报告者有合理确认时间之前，issue 保持开放。
+
+### 进行中
+
+- **Fun-ASR-Nano 的 Transformers 原生集成** —— [huggingface/transformers#46180](https://github.com/huggingface/transformers/pull/46180) 正在审查；以该 PR 的 exact-head CI 与 review 状态为准。
+- **恢复公开 checkpoint 的完整能力** —— [#3496](https://github.com/modelscope/FunASR/issues/3496) 跟踪 Hugging Face checkpoint 缺少时间戳与说话人路径所需 CTC tensors 的问题。
+- **实时并发性能回归** —— [#3528](https://github.com/modelscope/FunASR/issues/3528) 保持开放，等待可复现的压测证据与有边界的修复。
+- **AMD Windows Vulkan 验证** —— [#3479](https://github.com/modelscope/FunASR/issues/3479) 保持开放，等待报告者在 `runtime-llamacpp-v0.2.5` 上进行硬件复测；发布压缩包不等于硬件崩溃已经修复。
 
 ### 下一步
 
-- **收敛重复的实时服务到唯一权威实现**(见上节),避免再次漂移。
-- **建立经过 smoke test 的支持矩阵**:Python / CLI / WebSocket / 容器。目标是从顶层 README 能找到一个权威入口、依赖锁定、有固定测试音频与启动 smoke test、CPU/GPU 支持范围写清楚——而不是多个脚本各自声称是推荐入口。
-- **稳定的 headless / API 契约**:不依赖 Gradio 或浏览器操作的 CLI / HTTP / gRPC / WebSocket 路径;请求与响应可机器解析;有健康检查、错误码和兼容性测试,适合服务与 agent 调用。
-- **容器化(独立方向)**:需要后续单独确定官方镜像、版本标签、CPU/GPU 支持矩阵、健康检查与构建 CI。本文档不提供安装步骤,也不推荐任何特定集群方案;该工作将另开任务,由能够实际验证 CPU/GPU 镜像的人负责。
+- **把重复实时服务收敛到唯一权威实现**(见上节)，在有兼容性证据后再删除或明确废弃镜像。
+- **保持部署矩阵可执行**：每条推荐的 Python / CLI / HTTP / WebSocket / vLLM / llama.cpp 路径都应保留依赖边界、固定测试音频、启动 smoke test 与明确的 CPU/GPU 范围。
+- **把容器镜像作为独立验证方向**：只有 CPU/GPU 启动、健康检查、转写与重建测试进入 CI 后，才确定权威镜像和版本标签。本文档不指定集群平台。
 
-### 下一阶段
+### 后续
 
-- 在上述接口与兼容性测试稳定之后,再评估需要 breaking changes 的 `2.x`。
-- **版本号与发布计划由核心 maintainer 通过 milestone / release plan 确认**,不在本文档中预设。
+- 仅在具体接口迁移确实需要 breaking changes 时评估 `2.x`。
+- 版本号与发布计划通过 maintainer 确认的 milestone 决定，不在本文档中预测。
 
 ---
 
