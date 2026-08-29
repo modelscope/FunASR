@@ -80,6 +80,7 @@ def merge_subtitle_segments(
     """Group sentence timestamps into bounded, readable subtitle cues."""
     def can_follow(left, right):
         left_text = str(left.get("text", ""))
+        right_text = str(right.get("text", ""))
         gap_ms = right.get("start", 0) - left.get("end", 0)
         left_speaker = left.get("speaker", left.get("spk"))
         right_speaker = right.get("speaker", right.get("spk"))
@@ -89,6 +90,13 @@ def merge_subtitle_segments(
             and (
                 left_text.rstrip().endswith(SUBTITLE_CONTINUATION_PUNCTUATION)
                 or _subtitle_body_length(left_text) <= 2
+                or (
+                    gap_ms <= min(max_gap_ms, 100)
+                    and _subtitle_body_length(right_text) > 2
+                    and right_text.rstrip().endswith(
+                        SUBTITLE_CONTINUATION_PUNCTUATION
+                    )
+                )
             )
         )
 

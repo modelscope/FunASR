@@ -238,6 +238,41 @@ def test_merge_subtitle_segments_keeps_continuation_chain_with_its_ending():
     ]
 
 
+def test_merge_subtitle_segments_repacks_false_sentence_boundary_after_tiny_gap():
+    segments = [
+        {"start": 148930, "end": 149830, "text": "就在八月二十五日，"},
+        {
+            "start": 150010,
+            "end": 151930,
+            "text": "上汽大通直接向平台发起投诉，",
+        },
+        {
+            "start": 152170,
+            "end": 153970,
+            "text": "投诉对象是那些转述基金会。",
+        },
+        {"start": 154030, "end": 155050, "text": "声明的自媒体文章，"},
+        {
+            "start": 155470,
+            "end": 157330,
+            "text": "上汽大通的投诉内容写的很清楚，",
+        },
+    ]
+
+    assert cli.merge_subtitle_segments(segments) == [
+        {
+            "start": 148930,
+            "end": 151930,
+            "text": "就在八月二十五日，上汽大通直接向平台发起投诉，",
+        },
+        {
+            "start": 152170,
+            "end": 157330,
+            "text": "投诉对象是那些转述基金会。声明的自媒体文章，上汽大通的投诉内容写的很清楚，",
+        },
+    ]
+
+
 def test_merge_subtitle_segments_groups_two_character_sentence():
     segments = [
         {"start": 12450, "end": 12690, "text": "突然。"},
