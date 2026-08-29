@@ -241,11 +241,22 @@ int main(int argc,char**argv){
   // NOTE: SenseVoiceSmall inference() feeds the RAW log-mel fbank to the encoder;
   // it does NOT apply am.mvn CMVN (that path is unused at inference). Applying it
   // makes the encoder predict <|nospeech|>. So no CMVN here.
-  float*emb=(float*)m.g("embed.weight")->data;   // [16, 560] row-major
+  ggml_tensor*embed=m.g("embed.weight");   // [16, 560] row-major
+  if(embed->ne[0]!=F){fprintf(stderr,"unexpected embed width: %lld\n",(long long)embed->ne[0]);return 1;}
+  for(int id:qtok) if(id<0||id>=embed->ne[1]){fprintf(stderr,"query token out of embed range: %d\n",id);return 1;}
+  std::vector<float> embed_f32((size_t)ggml_nelements(embed));
+  if(embed->type==GGML_TYPE_F32){
+    memcpy(embed_f32.data(),embed->data,embed_f32.size()*sizeof(float));
+  } else if(embed->type==GGML_TYPE_F16){
+    const ggml_fp16_t*src=(const ggml_fp16_t*)embed->data;
+    for(size_t i=0;i<embed_f32.size();i++)embed_f32[i]=ggml_fp16_to_fp32(src[i]);
+  } else {
+    fprintf(stderr,"unsupported embed type: %s\n",ggml_type_name(embed->type));return 1;
+  }
   // Run encoder+CTC on one fbank window [T,F]; returns decoded text string.
   auto run_seg=[&](const std::vector<float>& fb,int T) -> std::string {
     int N=nq+T; std::vector<float> inp((size_t)N*F);
-    for(int i=0;i<nq;i++) memcpy(&inp[(size_t)i*F], &emb[(size_t)qtok[i]*F], F*sizeof(float));
+    for(int i=0;i<nq;i++) memcpy(&inp[(size_t)i*F], &embed_f32[(size_t)qtok[i]*F], F*sizeof(float));
     memcpy(&inp[(size_t)nq*F], fb.data(), (size_t)T*F*sizeof(float));
     float sc=sqrtf((float)D); for(auto&v:inp)v*=sc; add_posenc(inp,N,F);
     trace_stage("[sensevoice] building graph: %d frames",N);
