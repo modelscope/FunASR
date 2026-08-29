@@ -13,6 +13,7 @@
 | Kubernetes API | Cluster service 向け internal speech API | [Kubernetes template](../examples/openai_api/kubernetes/) | private `ClusterIP` から開始。公開範囲を広げる前に auth、TLS、network policy、GPU scheduling を追加します。 |
 | Runtime WebSocket service | Live captions、meeting、call-center stream | [Runtime service docs](../runtime/readme.md) | partial result、endpointing、long-lived audio stream が重要な場合に使います。 |
 | vLLM acceleration | Fun-ASR-Nano の LLM-based ASR throughput 向上 | [vLLM guide](./vllm_guide.md) | LLM decoder throughput 向け。non-autoregressive Paraformer には適用しません。 |
+| MOSS-Transcribe-Diarize | 長時間の複数話者 transcription、timestamp、speaker label | [Third-party MOSS guide](./moss_transcribe_diarize.md) | OpenMOSS の Apache-2.0 model を vLLM / SGLang Omni で提供します。FunASR 所有 model や `AutoModel` backend ではありません。 |
 | MCP server | Claude/Cursor/desktop agent の speech tool | [MCP example](../examples/mcp_server/) | ASR 結果を local tool として Agent に渡したい場合に便利です。 |
 | Subtitle generator | 長時間 audio/video から SRT/VTT 作成 | [Subtitle example](../examples/subtitle/) | readability が重要な場合は verbose segment と speaker label を使います。 |
 | Batch ASR script | Archive、meeting、dataset、繰り返し offline run | [Batch example](../examples/batch_asr_improved.py) | production では queue、manifest、retry log を追加してください。 |

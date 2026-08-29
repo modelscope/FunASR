@@ -15,6 +15,7 @@ from registry import deployment_pairs, load_registry, validate_registry  # noqa:
 
 REGISTRY = SITE_ROOT / 'data' / 'deployments.json'
 EXPECTED_IDS = {
+    'moss-transcribe-diarize',
     'vllm',
     'sensevoice-tensorrt',
     'llama-cpp',
@@ -95,11 +96,70 @@ def test_vllm_contract_tracks_native_funasr_release_and_h100_validation(valid_re
     assert 'official funasr split-engine' in limitation
 
 
+def test_moss_transcribe_diarize_contract_tracks_third_party_upstream(valid_registry):
+    entry = next(
+        item for item in valid_registry['deployments']
+        if item['id'] == 'moss-transcribe-diarize'
+    )
+
+    assert entry['maturity'] == 'community-verified'
+    assert entry['models'] == [
+        'OpenMOSS-Team/MOSS-Transcribe-Diarize (third-party Apache-2.0 model)'
+    ]
+    assert entry['tested'] == {
+        'funasr': 'ecosystem contract; third-party model@e8681d68',
+        'runtime': 'vLLM 0.23.1rc1.dev949+g68b4a1d58 / Torch 2.11.0+cu129 / H100 80GB',
+        'verified': '2026-08-29',
+    }
+
+    install = '\n'.join(entry['commands']['install'])
+    assert 'vllm[audio]' in install
+    assert 'wheels.vllm.ai/68b4a1d582818e67adc903bf1b8fc5a5447da2fa/cu129' in install
+    assert 'OpenMOSS-Team/MOSS-Transcribe-Diarize' in install
+    assert 'e8681d68e7042738ffca8ac8212bc8fcb1131ab8' in install
+
+    launch = '\n'.join(entry['commands']['launch'])
+    assert 'vllm serve OpenMOSS-Team/MOSS-Transcribe-Diarize' in launch
+    assert '--trust-remote-code' in launch
+    smoke = '\n'.join(entry['commands']['smoke'])
+    assert '/v1/audio/transcriptions' in smoke
+    assert 'response_format=json' in smoke
+    assert '[S01]' in smoke
+
+    evidence_urls = {item['url'] for item in entry['evidence']}
+    assert 'https://github.com/OpenMOSS/MOSS-Transcribe-Diarize' in evidence_urls
+    assert (
+        'https://github.com/OpenMOSS/MOSS-Transcribe-Diarize/commit/'
+        'cb765f2b0fe6f7a298aa2002e2281ae693d1f3c3'
+    ) in evidence_urls
+    assert (
+        'https://huggingface.co/OpenMOSS-Team/MOSS-Transcribe-Diarize/tree/'
+        'e8681d68e7042738ffca8ac8212bc8fcb1131ab8'
+    ) in evidence_urls
+
+    english = entry['translations']['en']
+    assert 'OpenMOSS' in english['summary']
+    assert 'third-party' in english['summary'].lower()
+    assert 'external VAD' in english['selection_reason']
+    assert 'verbose_json' in english['operations'][-1]
+    assert 'SGLang' in english['operations'][-1]
+    assert 'internal segmentation' in english['primary_limitation']
+    assert 'FunASR model' in english['primary_limitation']
+    assert any(
+        benchmark['hardware'] == 'NVIDIA H100 80GB HBM3'
+        and '6.000 s' in benchmark['audio']
+        and '19.147 s' in benchmark['audio']
+        and 'S01 -> S02 -> S01' in benchmark['result']
+        and 'functional API contract' in benchmark['qualification']
+        for benchmark in entry['benchmarks']
+    )
+
+
 def test_audio_cpp_contract_tracks_mainline_nano_and_sensevoice(valid_registry):
     entry = next(item for item in valid_registry['deployments'] if item['id'] == 'audio-cpp')
     llama_cpp = next(item for item in valid_registry['deployments'] if item['id'] == 'llama-cpp')
 
-    assert valid_registry['verified'] == '2026-08-13'
+    assert valid_registry['verified'] == '2026-08-29'
     assert entry['maturity'] == 'community-verified'
     assert entry['selector_rank'] > llama_cpp['selector_rank']
     assert entry['tested'] == {
@@ -265,7 +325,7 @@ def test_sensevoice_native_server_contract_tracks_merged_runtime(valid_registry)
     llama_cpp = next(item for item in valid_registry['deployments'] if item['id'] == 'llama-cpp')
     audio_cpp = next(item for item in valid_registry['deployments'] if item['id'] == 'audio-cpp')
 
-    assert valid_registry['verified'] == '2026-08-13'
+    assert valid_registry['verified'] == '2026-08-29'
     assert entry['maturity'] == 'production-verified'
     assert llama_cpp['selector_rank'] < entry['selector_rank'] < audio_cpp['selector_rank']
     assert entry['tested'] == {
