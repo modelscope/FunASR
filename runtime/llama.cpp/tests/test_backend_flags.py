@@ -19,6 +19,8 @@ def test_sensevoice_reads_query_embeddings_using_their_ggml_type():
     assert "embed->type==GGML_TYPE_F32" in source
     assert "embed->type==GGML_TYPE_F16" in source
     assert "ggml_fp16_to_fp32" in source
+    assert source.count("ggml_backend_tensor_get(embed") == 2
+    assert "embed->data" not in source
     assert 'float*emb=(float*)m.g("embed.weight")->data' not in source
 
 
@@ -120,3 +122,25 @@ def test_sensevoice_traces_post_backend_pipeline_boundaries():
         ("compute starting", "compute complete"),
     ):
         assert source.index(before) < source.index(after)
+
+
+def test_sensevoice_uploads_model_weights_to_selected_backend_before_compute():
+    source = SENSEVOICE.read_text(encoding="utf-8")
+
+    assert "static bool load_model_weights(" in source
+    loader = source.split("static bool load_model_weights(", maxsplit=1)[1].split(
+        "static ggml_tensor*", maxsplit=1
+    )[0]
+
+    assert "gguf_init_from_file" in loader
+    assert "ggml_dup_tensor" in loader
+    assert "ggml_backend_alloc_ctx_tensors_from_buft" in loader
+    assert "GGML_BACKEND_BUFFER_USAGE_WEIGHTS" in loader
+    assert "gguf_get_data_offset" in loader
+    assert "ggml_backend_tensor_set" in loader
+
+    model_load = source.split("// load model", maxsplit=1)[1].split(
+        "auto run_seg=", maxsplit=1
+    )[0]
+    assert "load_model_weights(gguf_path,graph_be.buffer_type,m)" in model_load
+    assert "gguf_init_params gp={false,&m.ctx_w}" not in model_load
