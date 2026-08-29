@@ -49,6 +49,19 @@ def test_moss_guides_pin_upstream_and_separate_serving_contracts(guide: Path) ->
 @pytest.mark.parametrize("matrix", MATRICES)
 def test_all_deployment_matrices_link_moss_guide(matrix: Path) -> None:
     text = matrix.read_text(encoding="utf-8")
+    moss_row = next(
+        line
+        for line in text.splitlines()
+        if line.startswith("| MOSS-Transcribe-Diarize |")
+    )
 
-    assert "MOSS-Transcribe-Diarize" in text
-    assert "moss_transcribe_diarize.md" in text
+    assert "moss_transcribe_diarize.md" in moss_row
+    assert '`backend="hf"`' in moss_row
+    assert '`backend="vllm"`' in moss_row
+    for stale_claim in (
+        "not a FunASR-owned model or `AutoModel` backend",
+        "不是 FunASR 自有模型或 `AutoModel` 后端",
+        "FunASR 所有 model や `AutoModel` backend ではありません",
+        "FunASR 소유 model 또는 `AutoModel` backend가 아닙니다",
+    ):
+        assert stale_claim not in moss_row
