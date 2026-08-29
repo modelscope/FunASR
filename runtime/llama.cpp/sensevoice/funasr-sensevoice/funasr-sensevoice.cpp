@@ -16,6 +16,7 @@
 #include <cstdint>
 #include <cstdio>
 #include <cstring>
+#include <fstream>
 #include <map>
 #include <string>
 #include <vector>
@@ -69,7 +70,8 @@ static std::vector<float> compute_fbank(std::vector<float> wav,int&T_out){
 }
 
 struct cfg { int d_model=512,n_head=4,num_blocks=50,tp_blocks=20,kernel=11,vocab=25055,blank=0; };
-struct model { cfg c; ggml_context*ctx_w=nullptr; std::map<std::string,ggml_tensor*> t;
+struct model { cfg c; gguf_context*gguf=nullptr; ggml_context*ctx_meta=nullptr; ggml_context*ctx_w=nullptr;
+  ggml_backend_buffer_t weights_buffer=nullptr; std::map<std::string,ggml_tensor*> t;
   ggml_tensor* g(const std::string&n){auto it=t.find(n);if(it==t.end()){fprintf(stderr,"missing %s\n",n.c_str());exit(1);}return it->second;} };
 
 struct graph_backend {
@@ -163,6 +165,52 @@ static graph_backend make_graph_backend(const std::string&name){
   return out;
 }
 
+static void free_model(model&m){
+  if(m.gguf){gguf_free(m.gguf);m.gguf=nullptr;}
+  if(m.ctx_meta){ggml_free(m.ctx_meta);m.ctx_meta=nullptr;}
+  if(m.weights_buffer){ggml_backend_buffer_free(m.weights_buffer);m.weights_buffer=nullptr;}
+  if(m.ctx_w){ggml_free(m.ctx_w);m.ctx_w=nullptr;}
+  m.t.clear();
+}
+
+static bool load_model_weights(const std::string&path,ggml_backend_buffer_type_t buffer_type,model&m){
+  gguf_init_params gp={true,&m.ctx_meta};
+  m.gguf=gguf_init_from_file(path.c_str(),gp);
+  if(!m.gguf){fprintf(stderr,"load gguf failed\n");return false;}
+  const int64_t n_tensors=gguf_get_n_tensors(m.gguf);
+  ggml_init_params wp={(size_t)(n_tensors+1)*ggml_tensor_overhead(),nullptr,true};
+  m.ctx_w=ggml_init(wp);
+  if(!m.ctx_w){fprintf(stderr,"failed to initialize model tensor context\n");free_model(m);return false;}
+  for(int64_t i=0;i<n_tensors;i++){
+    const char*name=gguf_get_tensor_name(m.gguf,i);
+    ggml_tensor*meta=ggml_get_tensor(m.ctx_meta,name);
+    if(!meta){fprintf(stderr,"missing model tensor metadata: %s\n",name);free_model(m);return false;}
+    ggml_tensor*weight=ggml_dup_tensor(m.ctx_w,meta);
+    ggml_set_name(weight,name);
+    m.t[name]=weight;
+  }
+  m.weights_buffer=ggml_backend_alloc_ctx_tensors_from_buft(m.ctx_w,buffer_type);
+  if(!m.weights_buffer){fprintf(stderr,"failed to allocate model weights buffer\n");free_model(m);return false;}
+  ggml_backend_buffer_set_usage(m.weights_buffer,GGML_BACKEND_BUFFER_USAGE_WEIGHTS);
+
+  std::ifstream fin(path,std::ios::binary);
+  if(!fin){fprintf(stderr,"failed to reopen model weights: %s\n",path.c_str());free_model(m);return false;}
+  std::vector<uint8_t> read_buffer;
+  const size_t data_offset=gguf_get_data_offset(m.gguf);
+  for(int64_t i=0;i<n_tensors;i++){
+    const char*name=gguf_get_tensor_name(m.gguf,i);
+    ggml_tensor*weight=m.t[name];
+    const size_t size=ggml_nbytes(weight);
+    const size_t offset=data_offset+gguf_get_tensor_offset(m.gguf,i);
+    read_buffer.resize(size);
+    fin.seekg((std::streamoff)offset,std::ios::beg);
+    fin.read((char*)read_buffer.data(),(std::streamsize)size);
+    if(!fin){fprintf(stderr,"failed to read model tensor: %s\n",name);free_model(m);return false;}
+    ggml_backend_tensor_set(weight,read_buffer.data(),0,size);
+  }
+  return true;
+}
+
 static ggml_tensor* lin(ggml_context*c,ggml_tensor*w,ggml_tensor*b,ggml_tensor*x){auto y=ggml_mul_mat(c,w,x);return b?ggml_add(c,y,b):y;}
 static ggml_tensor* lnorm(ggml_context*c,ggml_tensor*x,ggml_tensor*g,ggml_tensor*b){return ggml_add(c,ggml_mul(c,ggml_norm(c,x,LN_EPS),g),b);}
 static ggml_tensor* sanm_attn(ggml_context*c,model&m,const std::string&p,ggml_tensor*x,int T){
@@ -223,8 +271,7 @@ int main(int argc,char**argv){
 
   // load model
   trace_stage("[sensevoice] loading model metadata");
-  model m; gguf_init_params gp={false,&m.ctx_w}; gguf_context*gg=gguf_init_from_file(gguf_path.c_str(),gp);
-  if(!gg){fprintf(stderr,"load gguf failed\n");return 1;}
+  model m; if(!load_model_weights(gguf_path,graph_be.buffer_type,m))return 1; gguf_context*gg=m.gguf;
   auto rd=[&](const char*k,int d){int i=gguf_find_key(gg,k);return i<0?d:(int)gguf_get_val_u32(gg,i);};
   m.c.d_model=rd("sv.output_size",512); m.c.n_head=rd("sv.attention_heads",4);
   m.c.num_blocks=rd("sv.num_blocks",50); m.c.tp_blocks=rd("sv.tp_blocks",20);
@@ -232,9 +279,8 @@ int main(int argc,char**argv){
   int qi=gguf_find_key(gg,"sv.query_tokens"); int nq=qi<0?0:(int)gguf_get_arr_n(gg,qi);
   std::vector<int> qtok(nq); for(int i=0;i<nq;i++) qtok[i]=((const int32_t*)gguf_get_arr_data(gg,qi))[i];
   std::vector<std::string> vocab; {int ki=gguf_find_key(gg,"sv.vocab"); if(ki>=0){int nv=gguf_get_arr_n(gg,ki); vocab.resize(nv); for(int i=0;i<nv;i++){const char*s=gguf_get_arr_str(gg,ki,i); vocab[i]=s?s:"";}}}
-  for(int i=0;i<gguf_get_n_tensors(gg);i++){const char*nm=gguf_get_tensor_name(gg,i);m.t[nm]=ggml_get_tensor(m.ctx_w,nm);}
   trace_stage("[sensevoice] model ready: %d tensors",gguf_get_n_tensors(gg));
-  gguf_free(gg);
+  gguf_free(m.gguf); m.gguf=nullptr; ggml_free(m.ctx_meta); m.ctx_meta=nullptr;
   const int F=560, D=m.c.d_model, V=m.c.vocab;
   bool emit_ids = ids_mode || vocab.empty();   // fall back to ids if the gguf has no vocab
 
@@ -246,10 +292,11 @@ int main(int argc,char**argv){
   for(int id:qtok) if(id<0||id>=embed->ne[1]){fprintf(stderr,"query token out of embed range: %d\n",id);return 1;}
   std::vector<float> embed_f32((size_t)ggml_nelements(embed));
   if(embed->type==GGML_TYPE_F32){
-    memcpy(embed_f32.data(),embed->data,embed_f32.size()*sizeof(float));
+    ggml_backend_tensor_get(embed,embed_f32.data(),0,ggml_nbytes(embed));
   } else if(embed->type==GGML_TYPE_F16){
-    const ggml_fp16_t*src=(const ggml_fp16_t*)embed->data;
-    for(size_t i=0;i<embed_f32.size();i++)embed_f32[i]=ggml_fp16_to_fp32(src[i]);
+    std::vector<ggml_fp16_t> embed_f16(embed_f32.size());
+    ggml_backend_tensor_get(embed,embed_f16.data(),0,ggml_nbytes(embed));
+    for(size_t i=0;i<embed_f32.size();i++)embed_f32[i]=ggml_fp16_to_fp32(embed_f16[i]);
   } else {
     fprintf(stderr,"unsupported embed type: %s\n",ggml_type_name(embed->type));return 1;
   }
@@ -332,7 +379,7 @@ int main(int argc,char**argv){
   }
   if(!srt_mode) printf("\n");
   fprintf(stderr,"[sensevoice] done %.2fs\n",(ggml_time_us()-t0)/1e6);
+  free_model(m);
   ggml_backend_free(graph_be.backend);
-  if(m.ctx_w) ggml_free(m.ctx_w);
   return 0;
 }
