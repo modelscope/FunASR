@@ -107,8 +107,8 @@ def test_moss_transcribe_diarize_contract_tracks_third_party_upstream(valid_regi
         'OpenMOSS-Team/MOSS-Transcribe-Diarize (third-party Apache-2.0 model)'
     ]
     assert entry['tested'] == {
-        'funasr': 'ecosystem contract; third-party model@e8681d68',
-        'runtime': 'vLLM 0.23.1rc1.dev949+g68b4a1d58 / Torch 2.11.0+cu129 / H100 80GB',
+        'funasr': 'AutoModel adapter@a3a2de0a; third-party model@e8681d68',
+        'runtime': 'Transformers 5.16.1 + vLLM 0.23.1rc1.dev949+g68b4a1d58 / Torch 2.11.0+cu129 / H100 80GB',
         'verified': '2026-08-29',
     }
 
@@ -125,6 +125,10 @@ def test_moss_transcribe_diarize_contract_tracks_third_party_upstream(valid_regi
     assert '/v1/audio/transcriptions' in smoke
     assert 'response_format=json' in smoke
     assert '[S01]' in smoke
+    assert "from funasr import AutoModel" in smoke
+    assert "backend='vllm'" in smoke
+    assert "result['raw_text']" in smoke
+    assert "result['sentence_info']" in smoke
 
     evidence_urls = {item['url'] for item in entry['evidence']}
     assert 'https://github.com/OpenMOSS/MOSS-Transcribe-Diarize' in evidence_urls
@@ -136,13 +140,17 @@ def test_moss_transcribe_diarize_contract_tracks_third_party_upstream(valid_regi
         'https://huggingface.co/OpenMOSS-Team/MOSS-Transcribe-Diarize/tree/'
         'e8681d68e7042738ffca8ac8212bc8fcb1131ab8'
     ) in evidence_urls
+    assert 'https://github.com/modelscope/FunASR/pull/3558' in evidence_urls
 
     english = entry['translations']['en']
     assert 'OpenMOSS' in english['summary']
     assert 'third-party' in english['summary'].lower()
+    assert 'FunASR AutoModel' in english['summary']
     assert 'external VAD' in english['selection_reason']
-    assert 'verbose_json' in english['operations'][-1]
-    assert 'SGLang' in english['operations'][-1]
+    assert 'FunASR AutoModel' in english['selection_reason']
+    assert 'FunASR AutoModel API' not in ' '.join(english['not_fit'])
+    assert 'sentence_info' in english['operations'][-1]
+    assert 'raw_text' in english['operations'][-1]
     assert 'internal segmentation' in english['primary_limitation']
     assert 'FunASR model' in english['primary_limitation']
     assert any(
