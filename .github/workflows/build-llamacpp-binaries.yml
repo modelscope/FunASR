@@ -20,90 +20,11 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: ubuntu-latest
-            name: linux-x64
-            cmake_flags: >-
-              -DGGML_NATIVE=OFF
-              -DGGML_AVX=OFF
-              -DGGML_AVX2=OFF
-              -DGGML_AVX_VNNI=OFF
-              -DGGML_AVX512=OFF
-              -DGGML_AVX512_VBMI=OFF
-              -DGGML_AVX512_VNNI=OFF
-              -DGGML_AVX512_BF16=OFF
-              -DGGML_FMA=OFF
-              -DGGML_F16C=OFF
-              -DGGML_BMI2=OFF
-          - os: ubuntu-latest
-            name: linux-x64-avx2
-            cmake_flags: >-
-              -DGGML_NATIVE=OFF
-              -DGGML_AVX=ON
-              -DGGML_AVX2=ON
-              -DGGML_AVX_VNNI=OFF
-              -DGGML_AVX512=OFF
-              -DGGML_AVX512_VBMI=OFF
-              -DGGML_AVX512_VNNI=OFF
-              -DGGML_AVX512_BF16=OFF
-              -DGGML_FMA=ON
-              -DGGML_F16C=ON
-              -DGGML_BMI2=ON
-          - os: ubuntu-latest
-            name: linux-x64-vulkan
-            vulkan: true
-            build_target: llama-funasr-sensevoice
-            timeout_minutes: 90
-            cmake_flags: >-
-              -DGGML_NATIVE=OFF
-              -DGGML_VULKAN=ON
-              -DGGML_AVX=OFF
-              -DGGML_AVX2=OFF
-              -DGGML_AVX_VNNI=OFF
-              -DGGML_AVX512=OFF
-              -DGGML_AVX512_VBMI=OFF
-              -DGGML_AVX512_VNNI=OFF
-              -DGGML_AVX512_BF16=OFF
-              -DGGML_FMA=OFF
-              -DGGML_F16C=OFF
-              -DGGML_BMI2=OFF
-          - os: ubuntu-24.04-arm
-            name: linux-arm64
-            cmake_flags: -DGGML_NATIVE=OFF
-          - os: macos-latest
-            name: macos-arm64
-            cmake_flags: -DGGML_NATIVE=OFF
           - os: windows-latest
-            name: windows-x64
-            cmake_flags: >-
-              -DGGML_NATIVE=OFF
-              -DGGML_AVX=OFF
-              -DGGML_AVX2=OFF
-              -DGGML_AVX_VNNI=OFF
-              -DGGML_AVX512=OFF
-              -DGGML_AVX512_VBMI=OFF
-              -DGGML_AVX512_VNNI=OFF
-              -DGGML_AVX512_BF16=OFF
-              -DGGML_FMA=OFF
-              -DGGML_F16C=OFF
-              -DGGML_BMI2=OFF
-          - os: windows-latest
-            name: windows-x64-avx2
-            cmake_flags: >-
-              -DGGML_NATIVE=OFF
-              -DGGML_AVX=ON
-              -DGGML_AVX2=ON
-              -DGGML_AVX_VNNI=OFF
-              -DGGML_AVX512=OFF
-              -DGGML_AVX512_VBMI=OFF
-              -DGGML_AVX512_VNNI=OFF
-              -DGGML_AVX512_BF16=OFF
-              -DGGML_FMA=ON
-              -DGGML_F16C=ON
-              -DGGML_BMI2=ON
-          - os: windows-latest
-            name: windows-x64-vulkan
+            name: windows-x64-vulkan-symbols
             vulkan: true
             windows_vulkan: true
+            symbol_diagnostic: true
             build_target: llama-funasr-sensevoice
             timeout_minutes: 90
             cmake_flags: >-
@@ -111,30 +32,6 @@ jobs:
               -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded
               -DGGML_VULKAN=ON
               -DGGML_OPENMP=OFF
-              -DGGML_AVX=OFF
-              -DGGML_AVX2=OFF
-              -DGGML_AVX_VNNI=OFF
-              -DGGML_AVX512=OFF
-              -DGGML_AVX512_VBMI=OFF
-              -DGGML_AVX512_VNNI=OFF
-              -DGGML_AVX512_BF16=OFF
-              -DGGML_FMA=OFF
-              -DGGML_F16C=OFF
-              -DGGML_BMI2=OFF
-          - os: windows-latest
-            name: windows-x64-cuda
-            cuda: true
-            cuda_version: '13.2.0'
-            cuda_architectures: '86'
-            build_target: llama-funasr-sensevoice
-            timeout_minutes: 90
-            cmake_flags: >-
-              -DGGML_NATIVE=OFF
-              -DGGML_CUDA=ON
-              -DGGML_CUDA_FORCE_CUBLAS=ON
-              -DGGML_CUDA_FA=OFF
-              -DGGML_CUDA_NCCL=OFF
-              -DGGML_CUDA_GRAPHS=OFF
               -DGGML_AVX=OFF
               -DGGML_AVX2=OFF
               -DGGML_AVX_VNNI=OFF
@@ -211,6 +108,13 @@ jobs:
             -DCMAKE_BUILD_TYPE=Release
             ${{ matrix.cmake_flags }}
           )
+          if [ "${{ matrix.symbol_diagnostic }}" = "true" ]; then
+            cmake_args+=(
+              "-DCMAKE_C_FLAGS_RELEASE=/O2 /Ob2 /DNDEBUG /Zi"
+              "-DCMAKE_CXX_FLAGS_RELEASE=/O2 /Ob2 /DNDEBUG /Zi /Zo"
+              "-DCMAKE_EXE_LINKER_FLAGS_RELEASE=/INCREMENTAL:NO /DEBUG:FULL /OPT:REF /OPT:ICF /MAP /MAPINFO:EXPORTS"
+            )
+          fi
           if [ -n "${{ matrix.cuda_architectures }}" ]; then
             cmake_args+=("-DCMAKE_CUDA_ARCHITECTURES=${{ matrix.cuda_architectures }}")
           fi
@@ -232,6 +136,24 @@ jobs:
           else
             tar czf "funasr-llamacpp-${{ matrix.name }}.tar.gz" -C pkg .
           fi
+      - name: Collect diagnostic symbols
+        if: matrix.symbol_diagnostic
+        run: |
+          mkdir -p symbols
+          find build -type f \( \
+            -iname 'llama-funasr-sensevoice.exe' -o \
+            -iname 'llama-funasr-sensevoice.pdb' -o \
+            -iname 'llama-funasr-sensevoice.map' \
+          \) -exec cp -v {} symbols/ \;
+          test -f symbols/llama-funasr-sensevoice.exe
+          test -f symbols/llama-funasr-sensevoice.pdb
+          test -f symbols/llama-funasr-sensevoice.map
+      - uses: actions/upload-artifact@v4
+        if: matrix.symbol_diagnostic
+        with:
+          name: funasr-llamacpp-windows-x64-vulkan-symbols
+          path: runtime/llama.cpp/symbols/*
+          if-no-files-found: error
       - uses: actions/upload-artifact@v4
         with:
           name: funasr-llamacpp-${{ matrix.name }}
