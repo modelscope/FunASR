@@ -176,31 +176,45 @@
       "models": ["SenseVoiceSmall-GGUF", "Paraformer-GGUF", "Fun-ASR-Nano-GGUF", "FSMN-VAD-GGUF"],
       "operating_systems": ["Linux", "macOS", "Windows"],
       "interfaces": ["CLI", "local HTTP server"],
-      "tested": {"funasr": "runtime-llamacpp-v0.2.3", "runtime": "llama.cpp@820f1c64", "verified": "2026-08-29"},
+      "tested": {"funasr": "runtime-llamacpp-v0.2.4", "runtime": "llama.cpp@c8d43b10", "verified": "2026-08-29"},
       "commands": {
-        "install": ["curl -fLO https://github.com/modelscope/FunASR/releases/download/runtime-llamacpp-v0.2.3/funasr-llamacpp-linux-x64.tar.gz", "echo \"5b7cf0c2339ab76d8a56594455b1607e02f1eab34392b2543b95a5273413f088  funasr-llamacpp-linux-x64.tar.gz\" | sha256sum -c -", "mkdir funasr-llamacpp && tar -xzf funasr-llamacpp-linux-x64.tar.gz -C funasr-llamacpp && cd funasr-llamacpp && bash download-funasr-model.sh sensevoice ./funasr-gguf f16"],
+        "install": ["curl -fLO https://github.com/modelscope/FunASR/releases/download/runtime-llamacpp-v0.2.4/funasr-llamacpp-linux-x64.tar.gz", "echo \"51951c8d916b4babd873780b2070b03351cf0e7fda572955c81c120439158d7e  funasr-llamacpp-linux-x64.tar.gz\" | sha256sum -c -", "mkdir funasr-llamacpp && tar -xzf funasr-llamacpp-linux-x64.tar.gz -C funasr-llamacpp && cd funasr-llamacpp && bash download-funasr-model.sh sensevoice ./funasr-gguf f16"],
         "launch": ["cd funasr-llamacpp && ./llama-funasr-sensevoice -m funasr-gguf/sensevoice-small-f16.gguf --vad funasr-gguf/fsmn-vad.gguf -a sample.wav"],
         "health": ["cd funasr-llamacpp && ./llama-funasr-sensevoice --help"],
         "smoke": ["cd funasr-llamacpp && ./llama-funasr-sensevoice -m funasr-gguf/sensevoice-small-f16.gguf --vad funasr-gguf/fsmn-vad.gguf -a sample.wav | tee transcript.txt && test -s transcript.txt"]
       },
       "downloads": [
-        {"operating_system": "Linux", "architecture": "arm64", "backend": "CPU", "archive": "funasr-llamacpp-linux-arm64.tar.gz", "url": "https://github.com/modelscope/FunASR/releases/download/runtime-llamacpp-v0.2.3/funasr-llamacpp-linux-arm64.tar.gz", "sha256": "54abd8dbdcfc200a64a62b657f40d6e4c123c423988707058ce2771096f2921a"},
-        {"operating_system": "Linux", "architecture": "x64", "backend": "CPU", "archive": "funasr-llamacpp-linux-x64.tar.gz", "url": "https://github.com/modelscope/FunASR/releases/download/runtime-llamacpp-v0.2.3/funasr-llamacpp-linux-x64.tar.gz", "sha256": "5b7cf0c2339ab76d8a56594455b1607e02f1eab34392b2543b95a5273413f088"},
-        {"operating_system": "Linux", "architecture": "x64 AVX2", "backend": "CPU", "archive": "funasr-llamacpp-linux-x64-avx2.tar.gz", "url": "https://github.com/modelscope/FunASR/releases/download/runtime-llamacpp-v0.2.3/funasr-llamacpp-linux-x64-avx2.tar.gz", "sha256": "139616c8adf6b5b306cefcfb1813fabc0f4b7727d655d79102163c5c146df200"},
-        {"operating_system": "Linux", "architecture": "x64", "backend": "Vulkan", "archive": "funasr-llamacpp-linux-x64-vulkan.tar.gz", "url": "https://github.com/modelscope/FunASR/releases/download/runtime-llamacpp-v0.2.3/funasr-llamacpp-linux-x64-vulkan.tar.gz", "sha256": "ea8eeb9e334598a59c4cdb2dba282855b9a3b909cd05684d30250914f418bf43"},
-        {"operating_system": "macOS", "architecture": "arm64", "backend": "CPU", "archive": "funasr-llamacpp-macos-arm64.tar.gz", "url": "https://github.com/modelscope/FunASR/releases/download/runtime-llamacpp-v0.2.3/funasr-llamacpp-macos-arm64.tar.gz", "sha256": "532da7810e9311b275e3dd2e6f693811421ab49881e0194a788a6db189df4000"},
-        {"operating_system": "Windows", "architecture": "x64", "backend": "CPU", "archive": "funasr-llamacpp-windows-x64.zip", "url": "https://github.com/modelscope/FunASR/releases/download/runtime-llamacpp-v0.2.3/funasr-llamacpp-windows-x64.zip", "sha256": "54520b705ffedfc2b3505f337bfff64d7890e28b660e78e7255b27e1dc34dc0e"},
-        {"operating_system": "Windows", "architecture": "x64 AVX2", "backend": "CPU", "archive": "funasr-llamacpp-windows-x64-avx2.zip", "url": "https://github.com/modelscope/FunASR/releases/download/runtime-llamacpp-v0.2.3/funasr-llamacpp-windows-x64-avx2.zip", "sha256": "55fa78e2a7522e54ead84532452afe40041a60014ba0261add611124897a7fe8"},
-        {"operating_system": "Windows", "architecture": "x64", "backend": "Vulkan", "archive": "funasr-llamacpp-windows-x64-vulkan.zip", "url": "https://github.com/modelscope/FunASR/releases/download/runtime-llamacpp-v0.2.3/funasr-llamacpp-windows-x64-vulkan.zip", "sha256": "1c90daf2292fcf9041c14a8017be65a05acc8e42443ee0bbc8a8dfddb78cbdc7"},
-        {"operating_system": "Windows", "architecture": "x64", "backend": "CUDA", "archive": "funasr-llamacpp-windows-x64-cuda.zip", "url": "https://github.com/modelscope/FunASR/releases/download/runtime-llamacpp-v0.2.3/funasr-llamacpp-windows-x64-cuda.zip", "sha256": "ee25ed9cb4dff763f94de7db5812dd69fd7e748d2940dfbf82f29c408a4d419e"}
+        {"operating_system": "Linux", "architecture": "arm64", "backend": "CPU", "archive": "funasr-llamacpp-linux-arm64.tar.gz", "url": "https://github.com/modelscope/FunASR/releases/download/runtime-llamacpp-v0.2.4/funasr-llamacpp-linux-arm64.tar.gz", "sha256": "acdda3aae906ab77ae99852336d4989a863e4125182ffc74ec6523aa6f9c8353"},
+        {"operating_system": "Linux", "architecture": "x64", "backend": "CPU", "archive": "funasr-llamacpp-linux-x64.tar.gz", "url": "https://github.com/modelscope/FunASR/releases/download/runtime-llamacpp-v0.2.4/funasr-llamacpp-linux-x64.tar.gz", "sha256": "51951c8d916b4babd873780b2070b03351cf0e7fda572955c81c120439158d7e"},
+        {"operating_system": "Linux", "architecture": "x64 AVX2", "backend": "CPU", "archive": "funasr-llamacpp-linux-x64-avx2.tar.gz", "url": "https://github.com/modelscope/FunASR/releases/download/runtime-llamacpp-v0.2.4/funasr-llamacpp-linux-x64-avx2.tar.gz", "sha256": "fec98150cd2fe845df0150e950faf17319a46b67a8c621ad24c659ba26a1ab72"},
+        {"operating_system": "Linux", "architecture": "x64", "backend": "Vulkan", "archive": "funasr-llamacpp-linux-x64-vulkan.tar.gz", "url": "https://github.com/modelscope/FunASR/releases/download/runtime-llamacpp-v0.2.4/funasr-llamacpp-linux-x64-vulkan.tar.gz", "sha256": "169f8a6532a31d9c4a9bf6ecfe5db9949f0bf78d362dc6791ef6ac4ee42faa48"},
+        {"operating_system": "macOS", "architecture": "arm64", "backend": "CPU", "archive": "funasr-llamacpp-macos-arm64.tar.gz", "url": "https://github.com/modelscope/FunASR/releases/download/runtime-llamacpp-v0.2.4/funasr-llamacpp-macos-arm64.tar.gz", "sha256": "d58dda9da783733d59797bbec49568cf3984c3b783ab152f039b22c24d3ac10e"},
+        {"operating_system": "Windows", "architecture": "x64", "backend": "CPU", "archive": "funasr-llamacpp-windows-x64.zip", "url": "https://github.com/modelscope/FunASR/releases/download/runtime-llamacpp-v0.2.4/funasr-llamacpp-windows-x64.zip", "sha256": "7beb08c3d7376643b69a4b280ea85a426e8d7cbef694290e5aa3c8d3589c75cd"},
+        {"operating_system": "Windows", "architecture": "x64 AVX2", "backend": "CPU", "archive": "funasr-llamacpp-windows-x64-avx2.zip", "url": "https://github.com/modelscope/FunASR/releases/download/runtime-llamacpp-v0.2.4/funasr-llamacpp-windows-x64-avx2.zip", "sha256": "97b4783ec5366be637621afad213ed4f3427bee1ff49e2d4f1561535fe96842c"},
+        {"operating_system": "Windows", "architecture": "x64", "backend": "Vulkan", "archive": "funasr-llamacpp-windows-x64-vulkan.zip", "url": "https://github.com/modelscope/FunASR/releases/download/runtime-llamacpp-v0.2.4/funasr-llamacpp-windows-x64-vulkan.zip", "sha256": "a1b46b31c31b32cac2e91e07b5718afb9289f47f9d22122da8ab20f630d37276"},
+        {"operating_system": "Windows", "architecture": "x64", "backend": "CUDA", "archive": "funasr-llamacpp-windows-x64-cuda.zip", "url": "https://github.com/modelscope/FunASR/releases/download/runtime-llamacpp-v0.2.4/funasr-llamacpp-windows-x64-cuda.zip", "sha256": "6c4b1bbc68a27d6acf5588e3195b85229d128ec5f576d8e47ba71611a206e1f1"}
       ],
       "evidence": [
         {"label": "llama.cpp runtime", "url": "https://github.com/modelscope/FunASR/blob/main/runtime/llama.cpp/README.md"},
-        {"label": "runtime v0.2.3 release", "url": "https://github.com/modelscope/FunASR/releases/tag/runtime-llamacpp-v0.2.3"},
-        {"label": "nine-platform release workflow", "url": "https://github.com/modelscope/FunASR/actions/runs/33197306623"},
+        {"label": "runtime v0.2.4 release", "url": "https://github.com/modelscope/FunASR/releases/tag/runtime-llamacpp-v0.2.4"},
+        {"label": "nine-platform release workflow", "url": "https://github.com/modelscope/FunASR/actions/runs/33231441888"},
+        {"label": "F16 empty-transcript fix", "url": "https://github.com/modelscope/FunASR/pull/3550"},
         {"label": "regression tests", "url": "https://github.com/modelscope/FunASR/tree/main/runtime/llama.cpp/tests"}
       ],
       "benchmarks": [
+        {
+          "model": "SenseVoiceSmall F16 GGUF",
+          "runtime": "runtime-llamacpp-v0.2.4 Linux x64 AVX2 release asset",
+          "hardware": "Intel Xeon Platinum 8480+, 8 runtime threads",
+          "workload": "100 sequential cold-process SenseVoice transcriptions",
+          "audio": "One 6.00 s Mandarin PCM sample; mono, 16 kHz, 16-bit",
+          "settings": "Published AVX2 archive; 470,197,600-byte F16 GGUF; direct SenseVoice CLI without VAD",
+          "timing_scope": "Functional stability validation only; every process included model loading and decoding, and timings were not retained",
+          "result": "100/100 processes exited successfully; 0 empty transcripts; one output SHA-256; transcript 我想问我在滨海新区有房。",
+          "qualification": "Single-host, single-sample regression evidence for the former intermittent empty-output defect, not an accuracy study or production capacity promise.",
+          "source": "https://github.com/modelscope/FunASR/releases/tag/runtime-llamacpp-v0.2.4",
+          "verified": "2026-08-29"
+        },
         {
           "model": "SenseVoiceSmall Q8 GGUF",
           "runtime": "llama.cpp/GGUF with built-in FSMN-VAD",
@@ -231,11 +245,11 @@
       "translations": {
         "zh": {
           "name": "llama.cpp / GGUF 独立运行",
-          "summary": "使用 v0.2.3 的九个预编译包或源码构建，在 CPU、Vulkan、CUDA 和边缘设备上运行 FunASR GGUF 模型。",
+          "summary": "使用 v0.2.4 的九个预编译包或源码构建，在 CPU、Vulkan、CUDA 和边缘设备上运行 FunASR GGUF 模型。",
           "fit": ["不依赖 Python ML 环境", "桌面应用和离线边缘部署", "需要 Linux、macOS、Windows 的 CPU、Vulkan 或 CUDA 发布包"],
           "not_fit": ["需要 vLLM 式大批量 GPU 调度", "未验证目标 GPU 架构的通用预编译 CUDA 包", "必须使用完整 Python 模型生态的流程"],
           "selection_reason": "GGUF 运行时和独立二进制优先满足可移植、离线和低依赖部署。",
-          "primary_limitation": "v0.2.3 将诊断边界扩展到模型加载、计算图分配和计算启动，但不宣称已经修复 RX 9070 XT 等 AMD Windows 0xC0000005 崩溃；Android/Mali 也不是本版预编译或验证目标。",
+          "primary_limitation": "v0.2.4 修复 F16 GGUF 查询 embedding 被当作 F32 读取所导致的偶发空转写，但不宣称已经修复 RX 9070 XT 等 AMD Windows 0xC0000005 崩溃；Android/Mali 也不是本版预编译或验证目标。",
           "status_label": "生产验证",
           "operations": ["按页面列出的 SHA-256 校验九个发布资产", "模型和二进制使用同一发布清单", "保留旧二进制和模型目录用于回滚"],
           "security": ["默认只读取本地音频和模型", "HTTP 服务绑定内网地址并限制上传大小", "不要从不可信地址加载 GGUF"],
@@ -243,11 +257,11 @@
         },
         "en": {
           "name": "llama.cpp / GGUF standalone",
-          "summary": "Use the nine v0.2.3 release packages or source builds to run FunASR GGUF models on CPU, Vulkan, CUDA, and edge devices.",
+          "summary": "Use the nine v0.2.4 release packages or source builds to run FunASR GGUF models on CPU, Vulkan, CUDA, and edge devices.",
           "fit": ["No Python ML environment", "Desktop applications and offline edge deployment", "CPU, Vulkan, or CUDA packages for Linux, macOS, and Windows"],
           "not_fit": ["vLLM-style large GPU batch scheduling", "A universal prebuilt CUDA package for an unverified GPU architecture", "Workflows that require the full Python model ecosystem"],
           "selection_reason": "GGUF runtimes and standalone binaries prioritize portability, offline use, and low dependency count.",
-          "primary_limitation": "v0.2.3 extends diagnostics through model loading, graph allocation, and compute start, but does not claim to fix RX 9070 XT or every AMD Windows 0xC0000005 crash; Android/Mali is not a prebuilt or validated target.",
+          "primary_limitation": "v0.2.4 fixes intermittent empty transcripts caused by reading F16 GGUF query embeddings as F32, but does not claim to fix RX 9070 XT or every AMD Windows 0xC0000005 crash; Android/Mali is not a prebuilt or validated target.",
           "status_label": "Production verified",
           "operations": ["Verify all nine release assets against the listed SHA-256 values", "Keep models and binaries on the same release manifest", "Retain the previous binary and model directory for rollback"],
           "security": ["Read local audio and models by default", "Bind the HTTP server to a private address and limit uploads", "Do not load GGUF files from untrusted sources"],

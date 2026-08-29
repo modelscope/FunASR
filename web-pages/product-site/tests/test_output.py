@@ -158,23 +158,43 @@ def test_realtime_page_publishes_verified_v142_quickstart(built_site):
         ('en/deploy/llama-cpp.html', 'Windows AMD'),
     ),
 )
-def test_llama_cpp_pages_render_v023_download_matrix(built_site, relative, boundary):
+def test_llama_cpp_pages_render_v024_download_matrix(built_site, relative, boundary):
     soup = read_soup(built_site / relative)
     section = soup.select_one('[data-section="downloads"]')
 
     assert section
     rows = section.select('[data-download-asset]')
     assert len(rows) == 9
-    assert all(row.select_one('a[href*="runtime-llamacpp-v0.2.3"]') for row in rows)
+    assert all(row.select_one('a[href*="runtime-llamacpp-v0.2.4"]') for row in rows)
     assert all(len(row.select_one('[data-field="sha256"]').get_text(strip=True)) == 64 for row in rows)
     assert boundary in soup.get_text(' ', strip=True)
     text = soup.get_text(' ', strip=True)
+    assert 'F16' in text
     assert 'initializing' in text
     assert 'resolving buffer type' in text
     assert 'backend ready' in text
     assert 'model ready' in text
     assert 'graph allocated' in text
     assert 'compute starting' in text
+
+
+@pytest.mark.parametrize('relative', ('benchmarks.html', 'en/benchmarks.html'))
+def test_benchmark_page_surfaces_v024_f16_stability(built_site, relative):
+    soup = read_soup(built_site / relative)
+    record = next(
+        row
+        for row in soup.select('[data-benchmark-record]')
+        if 'SenseVoiceSmall F16 GGUF' in row.get_text(' ', strip=True)
+    )
+    text = record.get_text(' ', strip=True)
+
+    assert 'runtime-llamacpp-v0.2.4' in text
+    assert '100/100' in text
+    assert '0 empty transcripts' in text
+    assert 'not an accuracy study or production capacity promise' in text
+    assert record.select_one(
+        'a[href="https://github.com/modelscope/FunASR/releases/tag/runtime-llamacpp-v0.2.4"]'
+    )
 
 
 @pytest.mark.parametrize(

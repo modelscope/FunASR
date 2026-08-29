@@ -211,36 +211,36 @@ def test_sensevoice_tensorrt_contract_tracks_merged_native_runtime(valid_registr
     assert 'tensorrt version' in limitation
 
 
-def test_llama_cpp_contract_tracks_v023_release_assets(valid_registry):
+def test_llama_cpp_contract_tracks_v024_release_assets(valid_registry):
     entry = next(item for item in valid_registry['deployments'] if item['id'] == 'llama-cpp')
 
     assert entry['tested'] == {
-        'funasr': 'runtime-llamacpp-v0.2.3',
-        'runtime': 'llama.cpp@820f1c64',
+        'funasr': 'runtime-llamacpp-v0.2.4',
+        'runtime': 'llama.cpp@c8d43b10',
         'verified': '2026-08-29',
     }
     assert len(entry['downloads']) == 9
-    assert {item['archive'] for item in entry['downloads']} == {
-        'funasr-llamacpp-linux-arm64.tar.gz',
-        'funasr-llamacpp-linux-x64.tar.gz',
-        'funasr-llamacpp-linux-x64-avx2.tar.gz',
-        'funasr-llamacpp-linux-x64-vulkan.tar.gz',
-        'funasr-llamacpp-macos-arm64.tar.gz',
-        'funasr-llamacpp-windows-x64.zip',
-        'funasr-llamacpp-windows-x64-avx2.zip',
-        'funasr-llamacpp-windows-x64-vulkan.zip',
-        'funasr-llamacpp-windows-x64-cuda.zip',
+    assert {item['archive']: item['sha256'] for item in entry['downloads']} == {
+        'funasr-llamacpp-linux-arm64.tar.gz': 'acdda3aae906ab77ae99852336d4989a863e4125182ffc74ec6523aa6f9c8353',
+        'funasr-llamacpp-linux-x64.tar.gz': '51951c8d916b4babd873780b2070b03351cf0e7fda572955c81c120439158d7e',
+        'funasr-llamacpp-linux-x64-avx2.tar.gz': 'fec98150cd2fe845df0150e950faf17319a46b67a8c621ad24c659ba26a1ab72',
+        'funasr-llamacpp-linux-x64-vulkan.tar.gz': '169f8a6532a31d9c4a9bf6ecfe5db9949f0bf78d362dc6791ef6ac4ee42faa48',
+        'funasr-llamacpp-macos-arm64.tar.gz': 'd58dda9da783733d59797bbec49568cf3984c3b783ab152f039b22c24d3ac10e',
+        'funasr-llamacpp-windows-x64.zip': '7beb08c3d7376643b69a4b280ea85a426e8d7cbef694290e5aa3c8d3589c75cd',
+        'funasr-llamacpp-windows-x64-avx2.zip': '97b4783ec5366be637621afad213ed4f3427bee1ff49e2d4f1561535fe96842c',
+        'funasr-llamacpp-windows-x64-vulkan.zip': 'a1b46b31c31b32cac2e91e07b5718afb9289f47f9d22122da8ab20f630d37276',
+        'funasr-llamacpp-windows-x64-cuda.zip': '6c4b1bbc68a27d6acf5588e3195b85229d128ec5f576d8e47ba71611a206e1f1',
     }
     assert all(item['url'].startswith(
-        'https://github.com/modelscope/FunASR/releases/download/runtime-llamacpp-v0.2.3/'
+        'https://github.com/modelscope/FunASR/releases/download/runtime-llamacpp-v0.2.4/'
     ) for item in entry['downloads'])
-    assert all(len(item['sha256']) == 64 for item in entry['downloads'])
-    assert any('actions/runs/33197306623' in item['url'] for item in entry['evidence'])
+    assert any('actions/runs/33231441888' in item['url'] for item in entry['evidence'])
     assert any(
         'download-funasr-model.sh sensevoice ./funasr-gguf f16' in command
         for command in entry['commands']['install']
     )
     assert 'sensevoice-small-f16.gguf' in entry['commands']['launch'][0]
+    assert 'F16' in entry['translations']['en']['primary_limitation']
     assert 'AMD' in entry['translations']['en']['primary_limitation']
     assert 'RX 9070 XT' in entry['translations']['en']['primary_limitation']
     assert 'Android/Mali' in entry['translations']['en']['primary_limitation']
@@ -251,6 +251,10 @@ def test_llama_cpp_contract_tracks_v023_release_assets(valid_registry):
     assert 'model ready' in troubleshooting
     assert 'graph allocated' in troubleshooting
     assert 'compute starting' in troubleshooting
+    assert any(
+        'F16' in benchmark['model'] and '100/100' in benchmark['result']
+        for benchmark in entry['benchmarks']
+    )
 
 
 def test_sensevoice_native_server_contract_tracks_merged_runtime(valid_registry):
