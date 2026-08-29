@@ -1,7 +1,85 @@
 {
   "schema_version": 1,
-  "verified": "2026-08-13",
+  "verified": "2026-08-29",
   "deployments": [
+    {
+      "id": "moss-transcribe-diarize",
+      "routes": {"zh": "/deploy/moss-transcribe-diarize.html", "en": "/en/deploy/moss-transcribe-diarize.html"},
+      "maturity": "community-verified",
+      "selector_rank": 12,
+      "workloads": ["batch", "private-api"],
+      "hardware": ["nvidia-gpu", "kubernetes"],
+      "priorities": ["throughput"],
+      "models": ["OpenMOSS-Team/MOSS-Transcribe-Diarize (third-party Apache-2.0 model)"],
+      "operating_systems": ["Linux"],
+      "interfaces": ["OpenAI-compatible HTTP", "vLLM", "SGLang Omni", "Transformers"],
+      "tested": {"funasr": "ecosystem contract; third-party model@e8681d68", "runtime": "vLLM 0.23.1rc1.dev949+g68b4a1d58 / Torch 2.11.0+cu129 / H100 80GB", "verified": "2026-08-29"},
+      "commands": {
+        "install": [
+          "uv venv --python 3.12 .venv-moss && uv pip install --python .venv-moss/bin/python -U 'vllm[audio]' --torch-backend=auto --extra-index-url https://wheels.vllm.ai/68b4a1d582818e67adc903bf1b8fc5a5447da2fa/cu129",
+          "HF_HUB_ENABLE_HF_TRANSFER=1 hf download OpenMOSS-Team/MOSS-Transcribe-Diarize --revision e8681d68e7042738ffca8ac8212bc8fcb1131ab8 --local-dir .models/moss-transcribe-diarize"
+        ],
+        "launch": [
+          "CUDA_VISIBLE_DEVICES=0 .venv-moss/bin/vllm serve OpenMOSS-Team/MOSS-Transcribe-Diarize --revision e8681d68e7042738ffca8ac8212bc8fcb1131ab8 --served-model-name moss-transcribe-diarize --trust-remote-code --host 127.0.0.1 --port 8898"
+        ],
+        "health": [
+          "curl -fsS http://127.0.0.1:8898/health",
+          "curl -fsS http://127.0.0.1:8898/v1/models"
+        ],
+        "smoke": [
+          "curl -fsS http://127.0.0.1:8898/v1/audio/transcriptions -F file=@runtime/llama.cpp/tests/sample.wav -F model=moss-transcribe-diarize -F response_format=json -F temperature=0 | tee /tmp/moss-transcription.json",
+          "python - <<'PY'\nimport json\n\nwith open('/tmp/moss-transcription.json', encoding='utf-8') as stream:\n    payload = json.load(stream)\ntext = payload.get('text', '')\nassert text.strip(), payload\nassert '[S01]' in text, text\nprint(text)\nPY"
+        ]
+      },
+      "evidence": [
+        {"label": "OpenMOSS upstream repository and Apache-2.0 source license", "url": "https://github.com/OpenMOSS/MOSS-Transcribe-Diarize"},
+        {"label": "upstream source pinned at cb765f2", "url": "https://github.com/OpenMOSS/MOSS-Transcribe-Diarize/commit/cb765f2b0fe6f7a298aa2002e2281ae693d1f3c3"},
+        {"label": "official model snapshot pinned at e8681d68", "url": "https://huggingface.co/OpenMOSS-Team/MOSS-Transcribe-Diarize/tree/e8681d68e7042738ffca8ac8212bc8fcb1131ab8"},
+        {"label": "official vLLM and SGLang Omni serving guide", "url": "https://github.com/OpenMOSS/MOSS-Transcribe-Diarize/blob/cb765f2b0fe6f7a298aa2002e2281ae693d1f3c3/README.md"},
+        {"label": "FunASR ecosystem integration guide", "url": "https://github.com/modelscope/FunASR/blob/main/docs/moss_transcribe_diarize.md"}
+      ],
+      "benchmarks": [
+        {
+          "model": "OpenMOSS-Team/MOSS-Transcribe-Diarize@e8681d68",
+          "runtime": "vLLM 0.23.1rc1.dev949+g68b4a1d58 / Torch 2.11.0+cu129",
+          "hardware": "NVIDIA H100 80GB HBM3",
+          "workload": "OpenAI-compatible transcription API smoke test plus synthetic A-to-B-to-A speaker-return probe",
+          "audio": "Bundled 6.000 s Mandarin sample; synthetic 19.147 s file built as sample A + 0.8 s silence + sample B + 0.8 s silence + sample A",
+          "settings": "Pinned model and vLLM revisions; vllm[audio]; response_format=json; temperature=0; one request at a time",
+          "timing_scope": "Client wall time after /health became ready; local HTTP and decoding included; model download and engine startup excluded",
+          "result": "Both requests returned HTTP 200. The 6.000 s sample produced S01 with timestamps 0.96-5.94. The 19.147 s probe produced S01 -> S02 -> S01 with timestamps covering 0.96-19.08. Observed client times were 1.034 s and 0.171 s respectively.",
+          "qualification": "A functional API contract and speaker-return probe on synthetic concatenation, not a diarization accuracy study, overlap test, throughput benchmark, or production capacity promise.",
+          "source": "https://github.com/modelscope/FunASR/blob/main/docs/moss_transcribe_diarize.md",
+          "verified": "2026-08-29"
+        }
+      ],
+      "translations": {
+        "zh": {
+          "name": "MOSS 统一转写与说话人分离",
+          "summary": "在 FunASR 部署中心接入 OpenMOSS 发布的第三方 Apache-2.0 模型，一次生成长音频转写、时间戳和说话人标签。",
+          "fit": ["会议、访谈、播客和通话的多人长音频", "希望通过同一个模型输出文本、时间戳与说话人编号", "已有 NVIDIA GPU，并需要 OpenAI 兼容的音频转写接口"],
+          "not_fit": ["实时流式字幕或低延迟端点检测", "CPU、桌面边缘设备或 Windows 原生部署", "要求 FunASR 自有模型权重或 FunASR AutoModel API 的项目"],
+          "selection_reason": "模型端到端联合生成转写与说话人标签，用户不必再拼接外部 VAD、ASR 和 diarization 管线；vLLM 与 SGLang Omni 都提供 /v1/audio/transcriptions。",
+          "primary_limitation": "这是 OpenMOSS 的第三方模型，不是 FunASR 模型；“无需外部 VAD”不表示模型内部没有分块或分段。当前 vLLM 路径固定 nightly commit，升级前必须重跑真实多人长音频。",
+          "status_label": "社区验证",
+          "operations": ["固定模型 revision、vLLM nightly commit、CUDA/Torch 与 trust_remote_code 审计结果", "用真实会议验证说话人一致性、重叠语音、长静音、时间戳和最大生成长度", "vLLM 的 json 返回原始 [Sxx] 标记文本；需要 verbose_json 结构化 speaker segments 时使用 SGLang Omni 并单独验证"],
+          "security": ["把服务绑定内网，由网关完成认证、TLS、限流及音频大小/时长限制", "固定并审计 trust_remote_code 对应的模型 revision，不执行浮动 main 代码", "隔离模型缓存、上传临时目录和生成日志，按数据保留策略清理原始音频"],
+          "troubleshooting": ["启动前确认 CUDA 12 使用 cu129 nightly 源，CUDA 13 使用上游文档列出的 cu130 源", "长音频被截断时提高 max_completion_tokens，并同时监控显存、延迟和输出完整性", "vLLM json 响应没有 segments 字段是当前接口边界；从 text 解析 [start][Sxx]text[end]，或改用 SGLang Omni verbose_json"]
+        },
+        "en": {
+          "name": "MOSS unified transcription and diarization",
+          "summary": "Use the third-party Apache-2.0 model published by OpenMOSS to produce long-form transcripts, timestamps, and speaker labels in one pass from the FunASR deployment center.",
+          "fit": ["Multi-speaker meetings, interviews, podcasts, and calls", "One model output for text, timestamps, and speaker identifiers", "NVIDIA GPU deployments that need an OpenAI-compatible audio transcription endpoint"],
+          "not_fit": ["Realtime streaming captions or low-latency endpoint detection", "CPU, desktop-edge, or native Windows deployments", "Projects that require FunASR-owned model weights or the FunASR AutoModel API"],
+          "selection_reason": "The model jointly emits transcription and speaker labels so users do not need to assemble an external VAD, ASR, and diarization pipeline; both vLLM and SGLang Omni expose /v1/audio/transcriptions.",
+          "primary_limitation": "This is an OpenMOSS third-party model, not a FunASR model; no external VAD requirement does not imply an absence of internal segmentation. The vLLM path pins a nightly commit and must be revalidated on real long multi-speaker audio before upgrades.",
+          "status_label": "Community verified",
+          "operations": ["Pin the model revision, vLLM nightly commit, CUDA/Torch stack, and trust_remote_code audit", "Validate speaker consistency, overlap, long silence, timestamps, and generation limits on real meetings", "vLLM json returns raw [Sxx]-tagged text; use and separately validate SGLang Omni verbose_json when structured speaker segments are required"],
+          "security": ["Bind workers to a private network and put authentication, TLS, rate limits, and audio size/duration limits at the gateway", "Pin and audit the trust_remote_code model revision instead of executing a floating main revision", "Isolate model caches, upload directories, and generation logs; remove source audio according to retention policy"],
+          "troubleshooting": ["Use the cu129 nightly source for CUDA 12 and the upstream cu130 source for CUDA 13", "If long audio is truncated, raise max_completion_tokens while monitoring memory, latency, and output completeness", "A vLLM json response without segments is the current API boundary; parse [start][Sxx]text[end] from text or use SGLang Omni verbose_json"]
+        }
+      }
+    },
     {
       "id": "vllm",
       "routes": {"zh": "/deploy/vllm.html", "en": "/en/deploy/vllm.html"},
