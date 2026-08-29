@@ -210,7 +210,10 @@ class MossTranscribeDiarize(nn.Module):
         )
         self.device_name = kwargs.get("device", "cuda:0")
         self.dtype_name = kwargs.get("dtype", "bf16")
-        self.max_new_tokens = int(kwargs.get("max_new_tokens", 5120))
+        max_new_tokens = kwargs.get("max_new_tokens", 5120)
+        if self.backend == "vllm":
+            max_new_tokens = kwargs.get("max_completion_tokens", max_new_tokens)
+        self.max_new_tokens = int(max_new_tokens)
         self.max_length = int(kwargs.get("max_length", 131072))
         self._placeholder = nn.Parameter(torch.empty(0), requires_grad=False)
 
@@ -402,9 +405,12 @@ class MossTranscribeDiarize(nn.Module):
         prompt = kwargs.get("prompt")
         if prompt:
             data["prompt"] = prompt
-        max_new_tokens = kwargs.get("max_new_tokens", self.max_new_tokens)
-        if max_new_tokens is not None:
-            data["max_completion_tokens"] = str(max_new_tokens)
+        max_completion_tokens = kwargs.get(
+            "max_completion_tokens",
+            kwargs.get("max_new_tokens", self.max_new_tokens),
+        )
+        if max_completion_tokens is not None:
+            data["max_completion_tokens"] = str(max_completion_tokens)
         headers = {}
         if self.vllm_api_key and self.vllm_api_key != "EMPTY":
             headers["Authorization"] = "Bearer " + self.vllm_api_key

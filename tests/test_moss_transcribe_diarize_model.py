@@ -138,6 +138,48 @@ class MossVllmBackendTest(unittest.TestCase):
         self.assertEqual(content_type, "audio/wav")
         response.raise_for_status.assert_called_once_with()
 
+    def test_prefers_native_vllm_completion_limit_for_long_audio(self):
+        session = MagicMock()
+        response = MagicMock()
+        response.json.return_value = {"text": "[0][S01]hello[1.5]"}
+        session.post.return_value = response
+        model = MossTranscribeDiarize(
+            backend="vllm",
+            vllm_base_url="http://vllm.test:8000/v1",
+            http_session=session,
+        )
+
+        model.inference(
+            [np.zeros(1600, dtype=np.float32)],
+            max_new_tokens=4096,
+            max_completion_tokens=8192,
+        )
+
+        self.assertEqual(
+            session.post.call_args.kwargs["data"]["max_completion_tokens"],
+            "8192",
+        )
+
+    def test_accepts_native_vllm_completion_limit_at_construction(self):
+        session = MagicMock()
+        response = MagicMock()
+        response.json.return_value = {"text": "[0][S01]hello[1.5]"}
+        session.post.return_value = response
+        model = MossTranscribeDiarize(
+            backend="vllm",
+            vllm_base_url="http://vllm.test:8000/v1",
+            max_new_tokens=4096,
+            max_completion_tokens=8192,
+            http_session=session,
+        )
+
+        model.inference([np.zeros(1600, dtype=np.float32)])
+
+        self.assertEqual(
+            session.post.call_args.kwargs["data"]["max_completion_tokens"],
+            "8192",
+        )
+
     def test_normalizes_official_vllm_diarized_json_response(self):
         session = MagicMock()
         response = MagicMock()
