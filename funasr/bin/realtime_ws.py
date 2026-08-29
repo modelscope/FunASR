@@ -41,6 +41,7 @@ class _BatchRequest:
     def __init__(self, inputs, kwargs):
         self.inputs = inputs
         self.kwargs = kwargs
+        self.enqueued_at = time.monotonic()
         self.event = threading.Event()
         self.result = None
         self.error = None
@@ -64,11 +65,14 @@ class ThreadSafeGenerateModel:
 class RealtimeBatchingEngine:
     """Serialize the shared engine while batching compatible session requests."""
 
-    def __init__(self, engine, batch_wait_ms=10.0, max_batch_size=16):
+    def __init__(
+        self, engine, batch_wait_ms=10.0, max_batch_size=16, log_profile=False
+    ):
         self.engine = engine
         self._engine = getattr(engine, "_engine", engine)
         self.batch_wait_s = max(0.0, float(batch_wait_ms)) / 1000.0
         self.max_batch_size = max(1, int(max_batch_size))
+        self.log_profile = bool(log_profile)
         self.requests = queue.Queue()
         self.pending_request = None
         self.worker = threading.Thread(
@@ -186,6 +190,7 @@ class RealtimeBatchingEngine:
 
     def _generate_group(self, requests):
         inputs = [item for request in requests for item in request.inputs]
+        started_at = time.monotonic()
         try:
             results = self.engine.generate(inputs, **requests[0].kwargs)
             if len(results) != len(inputs):
@@ -210,6 +215,36 @@ class RealtimeBatchingEngine:
             for request in requests:
                 request.event.set()
             return
+
+        if self.log_profile:
+            queue_waits_ms = sorted(
+                (started_at - request.enqueued_at) * 1000 for request in requests
+            )
+            midpoint = len(queue_waits_ms) // 2
+            if len(queue_waits_ms) % 2:
+                queue_p50_ms = queue_waits_ms[midpoint]
+            else:
+                queue_p50_ms = (
+                    queue_waits_ms[midpoint - 1] + queue_waits_ms[midpoint]
+                ) / 2
+            audio_seconds = [
+                item.shape[-1] / 16000.0
+                for item in inputs
+                if isinstance(item, (np.ndarray, torch.Tensor)) and item.ndim > 0
+            ]
+            logger.info(
+                "Realtime decode profile: requests=%d samples=%d "
+                "audio_sec_total=%.3f audio_sec_min=%.3f audio_sec_max=%.3f "
+                "queue_ms_p50=%.3f queue_ms_max=%.3f engine_ms=%.3f",
+                len(requests),
+                len(inputs),
+                sum(audio_seconds),
+                min(audio_seconds, default=0.0),
+                max(audio_seconds, default=0.0),
+                queue_p50_ms,
+                queue_waits_ms[-1],
+                (time.monotonic() - started_at) * 1000,
+            )
 
         offset = 0
         for request in requests:
@@ -1158,6 +1193,7 @@ def load_models(args):
             engine,
             batch_wait_ms=getattr(args, "decode_batch_wait_ms", 10.0),
             max_batch_size=getattr(args, "decode_max_batch_size", 16),
+            log_profile=getattr(args, "log_decode_profile", False),
         )
 
         _asr_kwargs = {}
@@ -1450,6 +1486,14 @@ def build_arg_parser():
         type=int,
         default=16,
         help="Maximum number of audio segments submitted in one batched decode.",
+    )
+    parser.add_argument(
+        "--log-decode-profile",
+        action="store_true",
+        help=(
+            "Log per-engine-batch request counts, audio durations, queue wait, "
+            "and engine latency for performance investigations."
+        ),
     )
     parser.add_argument(
         "--endpoint-mode",
