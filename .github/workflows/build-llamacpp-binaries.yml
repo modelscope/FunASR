@@ -118,7 +118,7 @@ jobs:
           if [ -n "${{ matrix.cuda_architectures }}" ]; then
             cmake_args+=("-DCMAKE_CUDA_ARCHITECTURES=${{ matrix.cuda_architectures }}")
           fi
-          cmake "${cmake_args[@]}"
+          MSYS2_ARG_CONV_EXCL='*' cmake "${cmake_args[@]}"
           if [ -n "${{ matrix.build_target }}" ]; then
             cmake --build build --config Release -j 2 --target "${{ matrix.build_target }}"
           else
