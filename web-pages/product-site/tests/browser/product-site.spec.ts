@@ -186,7 +186,9 @@ for (const viewport of [
     await expect(page.getByText('FunASR AutoModel', { exact: false }).first()).toBeVisible();
     await expect(page.getByText('OpenMOSS', { exact: false }).first()).toBeVisible();
     await expect(page.getByText('sentence_info', { exact: false }).first()).toBeVisible();
+    await expect(page.getByText('diarized_json', { exact: false }).first()).toBeVisible();
     await expect(page.locator('a[href="https://github.com/modelscope/FunASR/pull/3558"]')).toBeVisible();
+    await expect(page.locator('a[href="https://github.com/vllm-project/vllm/pull/48543"]')).toBeVisible();
     await expect(page.locator('a[href="/en/deploy/moss-transcribe-diarize.html"]')).toBeVisible();
 
     const layout = await page.evaluate(() => ({

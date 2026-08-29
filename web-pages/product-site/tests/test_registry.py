@@ -107,14 +107,15 @@ def test_moss_transcribe_diarize_contract_tracks_third_party_upstream(valid_regi
         'OpenMOSS-Team/MOSS-Transcribe-Diarize (third-party Apache-2.0 model)'
     ]
     assert entry['tested'] == {
-        'funasr': 'AutoModel adapter@a3a2de0a; third-party model@e8681d68',
-        'runtime': 'Transformers 5.16.1 + vLLM 0.23.1rc1.dev949+g68b4a1d58 / Torch 2.11.0+cu129 / H100 80GB',
-        'verified': '2026-08-29',
+        'funasr': 'AutoModel diarized_json adapter; third-party model@e8681d68',
+        'runtime': 'vLLM 0.27.1 / Torch 2.13.0+cu129 / H100 80GB',
+        'verified': '2026-08-30',
     }
 
     install = '\n'.join(entry['commands']['install'])
     assert 'vllm[audio]' in install
-    assert 'wheels.vllm.ai/68b4a1d582818e67adc903bf1b8fc5a5447da2fa/cu129' in install
+    assert 'vllm-0.27.1%2Bcu129' in install
+    assert 'bf0d52faa2a51e7a01c6856a7a8a2d1307fd0ff711415d34168a67ffac0fa47b' in install
     assert 'OpenMOSS-Team/MOSS-Transcribe-Diarize' in install
     assert 'e8681d68e7042738ffca8ac8212bc8fcb1131ab8' in install
 
@@ -123,10 +124,11 @@ def test_moss_transcribe_diarize_contract_tracks_third_party_upstream(valid_regi
     assert '--trust-remote-code' in launch
     smoke = '\n'.join(entry['commands']['smoke'])
     assert '/v1/audio/transcriptions' in smoke
-    assert 'response_format=json' in smoke
-    assert '[S01]' in smoke
+    assert 'response_format=diarized_json' in smoke
+    assert "payload.get('segments'" in smoke
     assert "from funasr import AutoModel" in smoke
     assert "backend='vllm'" in smoke
+    assert "vllm_response_format='diarized_json'" in smoke
     assert "result['raw_text']" in smoke
     assert "result['sentence_info']" in smoke
 
@@ -141,6 +143,7 @@ def test_moss_transcribe_diarize_contract_tracks_third_party_upstream(valid_regi
         'e8681d68e7042738ffca8ac8212bc8fcb1131ab8'
     ) in evidence_urls
     assert 'https://github.com/modelscope/FunASR/pull/3558' in evidence_urls
+    assert 'https://github.com/vllm-project/vllm/pull/48543' in evidence_urls
 
     english = entry['translations']['en']
     assert 'OpenMOSS' in english['summary']
@@ -151,14 +154,16 @@ def test_moss_transcribe_diarize_contract_tracks_third_party_upstream(valid_regi
     assert 'FunASR AutoModel API' not in ' '.join(english['not_fit'])
     assert 'sentence_info' in english['operations'][-1]
     assert 'raw_text' in english['operations'][-1]
+    assert 'diarized_json' in english['operations'][-1]
+    assert 'diarized_json' in english['troubleshooting'][-1]
     assert 'internal segmentation' in english['primary_limitation']
     assert 'FunASR model' in english['primary_limitation']
     assert any(
         benchmark['hardware'] == 'NVIDIA H100 80GB HBM3'
-        and '6.000 s' in benchmark['audio']
-        and '19.147 s' in benchmark['audio']
-        and 'S01 -> S02 -> S01' in benchmark['result']
-        and 'functional API contract' in benchmark['qualification']
+        and '15.1685 s' in benchmark['audio']
+        and '43dccc068506439cb633b382b6b98185baa837363d08cc5f7152ca89b0fdc3c8' in benchmark['audio']
+        and 'S01 and S02' in benchmark['result']
+        and 'contract smoke' in benchmark['qualification']
         for benchmark in entry['benchmarks']
     )
 
@@ -167,7 +172,7 @@ def test_audio_cpp_contract_tracks_mainline_nano_and_sensevoice(valid_registry):
     entry = next(item for item in valid_registry['deployments'] if item['id'] == 'audio-cpp')
     llama_cpp = next(item for item in valid_registry['deployments'] if item['id'] == 'llama-cpp')
 
-    assert valid_registry['verified'] == '2026-08-29'
+    assert valid_registry['verified'] == '2026-08-30'
     assert entry['maturity'] == 'community-verified'
     assert entry['selector_rank'] > llama_cpp['selector_rank']
     assert entry['tested'] == {
@@ -333,7 +338,7 @@ def test_sensevoice_native_server_contract_tracks_merged_runtime(valid_registry)
     llama_cpp = next(item for item in valid_registry['deployments'] if item['id'] == 'llama-cpp')
     audio_cpp = next(item for item in valid_registry['deployments'] if item['id'] == 'audio-cpp')
 
-    assert valid_registry['verified'] == '2026-08-29'
+    assert valid_registry['verified'] == '2026-08-30'
     assert entry['maturity'] == 'production-verified'
     assert llama_cpp['selector_rank'] < entry['selector_rank'] < audio_cpp['selector_rank']
     assert entry['tested'] == {

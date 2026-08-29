@@ -138,6 +138,89 @@ class MossVllmBackendTest(unittest.TestCase):
         self.assertEqual(content_type, "audio/wav")
         response.raise_for_status.assert_called_once_with()
 
+    def test_normalizes_official_vllm_diarized_json_response(self):
+        session = MagicMock()
+        response = MagicMock()
+        response.json.return_value = {
+            "task": "transcribe",
+            "duration": 3.5,
+            "text": "hello again",
+            "segments": [
+                {
+                    "type": "transcript.text.segment",
+                    "id": "seg_0",
+                    "start": 0.25,
+                    "end": 1.5,
+                    "text": "hello",
+                    "speaker": "S01",
+                },
+                {
+                    "type": "transcript.text.segment",
+                    "id": "seg_1",
+                    "start": 2.0,
+                    "end": 3.5,
+                    "text": "again",
+                    "speaker": "S02",
+                },
+            ],
+        }
+        session.post.return_value = response
+
+        model = MossTranscribeDiarize(
+            backend="vllm",
+            vllm_base_url="http://vllm.test:8000/v1",
+            vllm_response_format="diarized_json",
+            http_session=session,
+        )
+        results, _ = model.inference(
+            [np.zeros(1600, dtype=np.float32)], key=["meeting"]
+        )
+
+        self.assertEqual(
+            session.post.call_args.kwargs["data"]["response_format"],
+            "diarized_json",
+        )
+        self.assertEqual(results[0]["text"], "hello again")
+        self.assertEqual(results[0]["raw_text"], "hello again")
+        self.assertEqual(results[0]["timestamp"], [[250, 1500], [2000, 3500]])
+        self.assertEqual(
+            [(item["spk"], item["text"]) for item in results[0]["sentence_info"]],
+            [("S01", "hello"), ("S02", "again")],
+        )
+
+    def test_rejects_unsupported_vllm_response_format(self):
+        with self.assertRaisesRegex(ValueError, "json.*diarized_json"):
+            MossTranscribeDiarize(
+                backend="vllm",
+                vllm_base_url="http://vllm.test:8000/v1",
+                vllm_response_format="verbose_json",
+            )
+
+    def test_rejects_malformed_vllm_diarized_segment(self):
+        session = MagicMock()
+        response = MagicMock()
+        response.json.return_value = {
+            "text": "broken",
+            "segments": [
+                {
+                    "start": 2.0,
+                    "end": 1.0,
+                    "text": "broken",
+                    "speaker": "S01",
+                }
+            ],
+        }
+        session.post.return_value = response
+        model = MossTranscribeDiarize(
+            backend="vllm",
+            vllm_base_url="http://vllm.test:8000/v1",
+            vllm_response_format="diarized_json",
+            http_session=session,
+        )
+
+        with self.assertRaisesRegex(RuntimeError, "segment 0.*invalid contract"):
+            model.inference([np.zeros(1600, dtype=np.float32)], key=["meeting"])
+
 
 if __name__ == "__main__":
     unittest.main()

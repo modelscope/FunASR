@@ -21,7 +21,9 @@ This guide was verified against:
 - source: `OpenMOSS/MOSS-Transcribe-Diarize@cb765f2b0fe6f7a298aa2002e2281ae693d1f3c3`
 - model: `OpenMOSS-Team/MOSS-Transcribe-Diarize@e8681d68e7042738ffca8ac8212bc8fcb1131ab8`
 - license: Apache-2.0 in the pinned upstream source and model metadata
-- vLLM nightly index: `68b4a1d582818e67adc903bf1b8fc5a5447da2fa`
+- vLLM release: `v0.27.1@6e448d0ea9bf3d88d898b65449ca6dc2aec170ac`
+- vLLM CUDA 12.9 x86_64 wheel SHA-256:
+  `bf0d52faa2a51e7a01c6856a7a8a2d1307fd0ff711415d34168a67ffac0fa47b`
 
 Pin all three revisions. The model uses `trust_remote_code`; do not execute a
 floating model revision in a production service.
@@ -76,36 +78,48 @@ model = AutoModel(
     backend="vllm",
     vllm_base_url="http://127.0.0.1:8898/v1",
     vllm_model="moss-transcribe-diarize",
+    vllm_response_format="diarized_json",
     disable_update=True,
 )
 result = model.generate("audio.wav")[0]
 ```
 
 The vLLM adapter sends the documented OpenAI-compatible multipart request and
-normalizes the returned raw text. Authentication can be supplied with
-`vllm_api_key`; keep it in a secret store rather than source code.
+normalizes the official speaker-attributed `segments` directly into
+`sentence_info`. Authentication can be supplied with `vllm_api_key`; keep it
+in a secret store rather than source code.
+
+`vllm_response_format="diarized_json"` is the structured production path on
+the pinned vLLM revision. The compatibility default remains `json` so existing
+clients keep the exact tagged generation in `raw_text`; in structured mode,
+`raw_text` is the cleaned `text` returned by vLLM and the authoritative speaker
+metadata is in `sentence_info`.
 
 ## Choose a serving path
 
 | Path | Environment | Response contract | Use when |
 |---|---|---|---|
-| vLLM | CUDA 12 (`cu129`) or CUDA 13 (`cu130`) | `response_format=json` returns raw `[start][Sxx]text[end]` text | You already operate vLLM or need its scheduler |
+| vLLM | CUDA 12 (`cu129`) or CUDA 13 (`cu130`) | `response_format=diarized_json` returns OpenAI-compatible speaker segments; `response_format=json` keeps raw `[start][Sxx]text[end]` text | You already operate vLLM or need its scheduler |
 | SGLang Omni | CUDA 13 in the current upstream guide | `response_format=verbose_json` returns parsed segments | You need structured speaker segments directly from the API |
 | Transformers | PyTorch process | Python objects and raw tagged text | Evaluation, debugging, or custom preprocessing |
 
 The two HTTP backends share `/v1/audio/transcriptions`, but their documented
-response formats are not interchangeable. Do not promise vLLM `segments`
-without testing the exact vLLM revision.
+response formats are not interchangeable. The pinned vLLM revision supports
+`diarized_json`; test the exact server revision before promising `segments`.
 
 ## vLLM
 
-Create an isolated environment and install the upstream-pinned nightly build:
+Create an isolated environment and install the verified vLLM release:
 
 ```bash
 uv venv --python 3.12 .venv-moss
-uv pip install --python .venv-moss/bin/python -U 'vllm[audio]' \
-  --torch-backend=auto \
-  --extra-index-url https://wheels.vllm.ai/68b4a1d582818e67adc903bf1b8fc5a5447da2fa/cu129
+curl -fL \
+  https://github.com/vllm-project/vllm/releases/download/v0.27.1/vllm-0.27.1%2Bcu129-cp38-abi3-manylinux_2_28_x86_64.whl \
+  -o vllm-0.27.1+cu129-cp38-abi3-manylinux_2_28_x86_64.whl
+echo "bf0d52faa2a51e7a01c6856a7a8a2d1307fd0ff711415d34168a67ffac0fa47b  vllm-0.27.1+cu129-cp38-abi3-manylinux_2_28_x86_64.whl" \
+  | sha256sum -c -
+uv pip install --python .venv-moss/bin/python --torch-backend=auto \
+  "vllm[audio] @ file://$PWD/vllm-0.27.1+cu129-cp38-abi3-manylinux_2_28_x86_64.whl"
 ```
 
 The `audio` extra is required. A plain `vllm` install can start the server but
@@ -124,13 +138,13 @@ CUDA_VISIBLE_DEVICES=0 .venv-moss/bin/vllm serve \
   --port 8898
 ```
 
-Submit audio and validate the speaker-tagged text:
+Submit audio and validate the official speaker-attributed response:
 
 ```bash
 curl -fsS http://127.0.0.1:8898/v1/audio/transcriptions \
   -F file=@audio.wav \
   -F model=moss-transcribe-diarize \
-  -F response_format=json \
+  -F response_format=diarized_json \
   -F temperature=0 \
   | tee moss-transcription.json
 
@@ -140,19 +154,36 @@ import json
 with open("moss-transcription.json", encoding="utf-8") as stream:
     payload = json.load(stream)
 text = payload.get("text", "")
+segments = payload.get("segments", [])
 assert text.strip(), payload
-assert "[S01]" in text, text
-print(text)
+assert segments, payload
+assert all(
+    isinstance(item.get("speaker"), str)
+    and item.get("text")
+    and item.get("start") <= item.get("end")
+    for item in segments
+), payload
+print(text, sorted({item["speaker"] for item in segments}))
 PY
 ```
+
+For an audit of the model's compact tagged generation, repeat the request with
+`response_format=json` and verify `[S01]` appears in the returned `text`.
 
 For long recordings, test `max_completion_tokens` against the longest expected
 meeting. A larger limit can increase memory use and tail latency.
 
 ### Reproduced vLLM contract
 
-The FunASR ecosystem validation used vLLM
-`0.23.1rc1.dev949+g68b4a1d58`, Torch `2.11.0+cu129`, and one H100 80GB:
+The structured-response validation used vLLM 0.27.1, Torch
+`2.13.0+cu129`, and one H100 80GB. The 15.1685-second two-speaker probe
+(`43dccc068506439cb633b382b6b98185baa837363d08cc5f7152ca89b0fdc3c8`)
+returned two `diarized_json` segments labelled `S01` and `S02`; the same
+request through the FunASR adapter returned two monotonic `sentence_info`
+entries with the same speakers.
+
+Earlier raw-response validation on vLLM
+`0.23.1rc1.dev949+g68b4a1d58`, Torch `2.11.0+cu129`, and one H100 80GB found:
 
 - the bundled 6.000-second sample
   (`ea03e1f473ad1618a03da3327a545369cb8f6f06cb0f4115535e5a866167d47e`)
@@ -164,6 +195,12 @@ The FunASR ecosystem validation used vLLM
 This proves the pinned API and speaker-return contract on those inputs. It is
 not a diarization accuracy result, overlap test, throughput benchmark, or
 production capacity claim.
+
+The older nightly commit
+`68b4a1d582818e67adc903bf1b8fc5a5447da2fa` predates vLLM
+[`#48543`](https://github.com/vllm-project/vllm/pull/48543). It accepts
+`response_format=json` but returns HTTP 400 for `diarized_json`; upgrade to the
+verified release instead of silently retrying an expensive transcription.
 
 The FunASR adapter was also tested on both `backend="hf"` and
 `backend="vllm"` with model revision
