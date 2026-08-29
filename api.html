@@ -9994,19 +9994,19 @@
         )
         self.device_name = kwargs.get(&quot;device&quot;, &quot;cuda:0&quot;)
         self.dtype_name = kwargs.get(&quot;dtype&quot;, &quot;bf16&quot;)
-        self.max_new_tokens = int(kwargs.get(&quot;max_new_tokens&quot;, 5120))
+        max_new_tokens = kwargs.get(&quot;max_new_tokens&quot;, 5120)
+        if self.backend == &quot;vllm&quot;:
+            max_new_tokens = kwargs.get(&quot;max_completion_tokens&quot;, max_new_tokens)
+        self.max_new_tokens = int(max_new_tokens)
         self.max_length = int(kwargs.get(&quot;max_length&quot;, 131072))
         self._placeholder = nn.Parameter(torch.empty(0), requires_grad=False)
 
         self.vllm_base_url = kwargs.get(&quot;vllm_base_url&quot;)
         self.vllm_model = kwargs.get(&quot;vllm_model&quot;, DEFAULT_MODEL)
         self.vllm_api_key = kwargs.get(&quot;vllm_api_key&quot;, &quot;EMPTY&quot;)
-        self.vllm_timeout = float(kwargs.get(&quot;vllm_timeout&quot;, 600.0))
-        self.vllm_response_format = kwargs.get(&quot;vllm_response_format&quot;, &quot;json&quot;).lower()
-        if self.vllm_response_format not in {&quot;json&quot;, &quot;diarized_json&quot;}:
-</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/moss_transcribe_diarize/model.py#L193" target="_blank" class="src-more">View full source on GitHub →</a></details><h3 class="mt">Methods</h3><div class="mblk"><code>.forward(**kwargs)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/moss_transcribe_diarize/model.py#L295" target="_blank" class="gh-link">L295</a><div class="mdoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source</summary><pre><code>    def forward(self, **kwargs):
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/moss_transcribe_diarize/model.py#L193" target="_blank" class="src-more">View full source on GitHub →</a></details><h3 class="mt">Methods</h3><div class="mblk"><code>.forward(**kwargs)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/moss_transcribe_diarize/model.py#L298" target="_blank" class="gh-link">L298</a><div class="mdoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source</summary><pre><code>    def forward(self, **kwargs):
         raise NotImplementedError(&quot;MOSS-Transcribe-Diarize supports inference only&quot;)
-</code></pre></details></div><div class="mblk"><code>.inference(data_in, data_lengths, key, **kwargs)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/moss_transcribe_diarize/model.py#L298" target="_blank" class="gh-link">L298</a><div class="mdoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source</summary><pre><code>    def inference(self, data_in, data_lengths=None, key=None, **kwargs):
+</code></pre></details></div><div class="mblk"><code>.inference(data_in, data_lengths, key, **kwargs)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/moss_transcribe_diarize/model.py#L301" target="_blank" class="gh-link">L301</a><div class="mdoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source</summary><pre><code>    def inference(self, data_in, data_lengths=None, key=None, **kwargs):
         del data_lengths
         started = time.perf_counter()
         inputs = list(data_in) if isinstance(data_in, (list, tuple)) else [data_in]
@@ -10032,10 +10032,10 @@
             &quot;forward&quot;: time.perf_counter() - started,
         }
 </code></pre></details></div></div>
-<div class="api-detail" id="e160"><span class="dtag badge-m">method</span><h2><code>MossTranscribeDiarize.forward(**kwargs)</code></h2><div class="dmod">funasr.models.moss_transcribe_diarize.MossTranscribeDiarize · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/moss_transcribe_diarize/model.py#L295" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source code</summary><pre><code>    def forward(self, **kwargs):
+<div class="api-detail" id="e160"><span class="dtag badge-m">method</span><h2><code>MossTranscribeDiarize.forward(**kwargs)</code></h2><div class="dmod">funasr.models.moss_transcribe_diarize.MossTranscribeDiarize · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/moss_transcribe_diarize/model.py#L298" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source code</summary><pre><code>    def forward(self, **kwargs):
         raise NotImplementedError(&quot;MOSS-Transcribe-Diarize supports inference only&quot;)
 </code></pre></details></div>
-<div class="api-detail" id="e161"><span class="dtag badge-m">method</span><h2><code>MossTranscribeDiarize.inference(data_in, data_lengths, key, **kwargs)</code></h2><div class="dmod">funasr.models.moss_transcribe_diarize.MossTranscribeDiarize · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/moss_transcribe_diarize/model.py#L298" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source code</summary><pre><code>    def inference(self, data_in, data_lengths=None, key=None, **kwargs):
+<div class="api-detail" id="e161"><span class="dtag badge-m">method</span><h2><code>MossTranscribeDiarize.inference(data_in, data_lengths, key, **kwargs)</code></h2><div class="dmod">funasr.models.moss_transcribe_diarize.MossTranscribeDiarize · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/moss_transcribe_diarize/model.py#L301" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source code</summary><pre><code>    def inference(self, data_in, data_lengths=None, key=None, **kwargs):
         del data_lengths
         started = time.perf_counter()
         inputs = list(data_in) if isinstance(data_in, (list, tuple)) else [data_in]
