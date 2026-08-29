@@ -107,7 +107,7 @@ def test_release_on_tag_workflow_uses_versioned_runtime_pointer():
     assert "runtime/llama.cpp/current-release.txt" in workflow
     assert '--runtime-tag "$RUNTIME_TAG"' in workflow
     assert runtime_pointer.read_text(encoding="utf-8").strip() == (
-        "runtime-llamacpp-v0.2.1"
+        "runtime-llamacpp-v0.2.3"
     )
 
 
