@@ -443,6 +443,57 @@ class TestPuncModelNone(unittest.TestCase):
         )
         mock_distribute_spk.assert_called_once()
 
+    @patch("funasr.auto.auto_model.distribute_spk")
+    @patch("funasr.auto.auto_model.postprocess")
+    @patch("funasr.auto.auto_model.sv_chunk")
+    @patch("funasr.auto.auto_model.slice_padding_audio_samples")
+    @patch("funasr.auto.auto_model.load_audio_text_image_video")
+    @patch("funasr.auto.auto_model.prepare_data_iterator")
+    def test_no_timestamp_speaker_fallback_keeps_sentence_and_adds_text(
+        self,
+        mock_prep,
+        mock_load,
+        mock_slice,
+        mock_sv_chunk,
+        mock_postprocess,
+        _mock_distribute_spk,
+    ):
+        """Speaker VAD fallback exposes documented text without dropping sentence."""
+        am = self._make_auto_model(
+            punc_model=None, spk_model=MagicMock(), spk_mode="vad_segment"
+        )
+        am.cb_model = MagicMock(return_value=np.array([0]))
+        inference_calls = []
+        results_seq = [
+            [{"key": "test_utt", "value": [[0, 1000]]}],
+            [{"text": "hello"}],
+            [{"spk_embedding": torch.tensor([[1.0, 0.0]])}],
+        ]
+
+        def mock_inference(data, *args, **kwargs):
+            inference_calls.append(kwargs)
+            return results_seq.pop(0)
+
+        am.inference = MagicMock(side_effect=mock_inference)
+        mock_prep.return_value = (
+            ["test_utt"],
+            [np.zeros(16000, dtype=np.float32)],
+        )
+        mock_load.return_value = np.zeros(16000, dtype=np.float32)
+        mock_slice.return_value = ([np.zeros(16000, dtype=np.float32)], [16000])
+        mock_sv_chunk.return_value = [
+            [0.0, 1.0, np.zeros(16000, dtype=np.float32)]
+        ]
+        mock_postprocess.return_value = [{"start": 0.0, "end": 1.0, "spk": 0}]
+
+        results = am.inference_with_vad("dummy_input")
+
+        self.assertIs(inference_calls[1]["output_timestamp"], True)
+        self.assertIs(inference_calls[1]["return_time_stamps"], True)
+        sentence = results[0]["sentence_info"][0]
+        self.assertEqual(sentence["text"], "hello")
+        self.assertEqual(sentence["sentence"], "hello")
+
     @patch("funasr.auto.auto_model.slice_padding_audio_samples")
     @patch("funasr.auto.auto_model.load_audio_text_image_video")
     @patch("funasr.auto.auto_model.prepare_data_iterator")
