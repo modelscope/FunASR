@@ -25595,13 +25595,23 @@ Then use with OpenAI SDK:
     parser = argparse.ArgumentParser()
     parser.add_argument(&quot;--model-name&quot;, type=str, required=True)
     parser.add_argument(&quot;--export-dir&quot;, type=str, required=True)
-    parser.add_argument(&quot;--export&quot;, type=str2bool, default=True, help=&quot;whether to export model&quot;)
-    parser.add_argument(&quot;--type&quot;, type=str, default=&quot;onnx&quot;, help=&#x27;[&quot;onnx&quot;, &quot;torchscript&quot;, &quot;bladedisc&quot;]&#x27;)
+    parser.add_argument(
+        &quot;--export&quot;, type=str2bool, default=True, help=&quot;whether to export model&quot;
+    )
+    parser.add_argument(
+        &quot;--type&quot;, type=str, default=&quot;onnx&quot;, help=&#x27;[&quot;onnx&quot;, &quot;torchscript&quot;, &quot;bladedisc&quot;]&#x27;
+    )
     parser.add_argument(&quot;--device&quot;, type=str, default=&quot;cpu&quot;, help=&#x27;[&quot;cpu&quot;, &quot;cuda&quot;]&#x27;)
-    parser.add_argument(&quot;--quantize&quot;, type=str2bool, default=False, help=&quot;export quantized model&quot;)
-    parser.add_argument(&quot;--fallback-num&quot;, type=int, default=0, help=&quot;amp fallback number&quot;)
+    parser.add_argument(
+        &quot;--quantize&quot;, type=str2bool, default=False, help=&quot;export quantized model&quot;
+    )
+    parser.add_argument(
+        &quot;--fallback-num&quot;, type=int, default=0, help=&quot;amp fallback number&quot;
+    )
     parser.add_argument(&quot;--audio_in&quot;, type=str, default=None, help=&#x27;[&quot;wav&quot;, &quot;wav.scp&quot;]&#x27;)
-    parser.add_argument(&quot;--model_revision&quot;, type=str, default=None, help=&quot;model_revision&quot;)
+    parser.add_argument(
+        &quot;--model_revision&quot;, type=str, default=None, help=&quot;model_revision&quot;
+    )
     parser.add_argument(&quot;--calib_num&quot;, type=int, default=200, help=&quot;calib max num&quot;)
     args = parser.parse_args()
 
@@ -25610,16 +25620,6 @@ Then use with OpenAI SDK:
     if not Path(args.model_name).exists():
         from modelscope.hub.snapshot_download import snapshot_download
 
-        try:
-            model_dir = snapshot_download(
-                args.model_name, cache_dir=args.export_dir, revision=args.model_revision
-            )
-            output_dir = os.path.join(args.export_dir, args.model_name)
-        except:
-            raise &quot;model_dir must be model_name in modelscope or local path downloaded from modelscope, but is {}&quot;.format(
-                model_dir
-            )
-    if args.export:
 </code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/download/runtime_sdk_download_tool.py#L8" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
 <div class="api-detail" id="e545"><span class="dtag badge-f">function</span><h2><code>add_gradient_noise(model, iteration, duration, eta, scale_factor)</code></h2><div class="dmod">funasr.train_utils.add_gradient_noise · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/add_gradient_noise.py#L4" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Adds noise from a standard normal distribution to the gradients.</p>
 <p>The standard deviation (`sigma`) is controlled</p>
