@@ -12,6 +12,16 @@ def test_sensevoice_exposes_backend_flag():
     assert "cpu|cuda|vulkan" in source
 
 
+def test_sensevoice_reads_query_embeddings_using_their_ggml_type():
+    source = SENSEVOICE.read_text(encoding="utf-8")
+
+    assert 'ggml_tensor*embed=m.g("embed.weight")' in source
+    assert "embed->type==GGML_TYPE_F32" in source
+    assert "embed->type==GGML_TYPE_F16" in source
+    assert "ggml_fp16_to_fp32" in source
+    assert 'float*emb=(float*)m.g("embed.weight")->data' not in source
+
+
 def test_sensevoice_does_not_hardcode_cpu_graph_backend():
     source = SENSEVOICE.read_text(encoding="utf-8")
     run_seg_body = source.split("auto run_seg=", maxsplit=1)[1].split("int64_t t0=", maxsplit=1)[0]
