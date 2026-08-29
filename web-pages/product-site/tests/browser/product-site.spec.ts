@@ -178,6 +178,38 @@ for (const viewport of [
   { name: 'mobile', width: 390, height: 844 },
   { name: 'desktop', width: 1440, height: 900 },
 ]) {
+  test(`MOSS AutoModel deployment is stable at ${viewport.name}`, async ({ page }, testInfo) => {
+    await page.setViewportSize(viewport);
+    await page.goto('/deploy/moss-transcribe-diarize.html');
+
+    await expect(page.locator('h1')).toHaveText('MOSS 统一转写与说话人分离');
+    await expect(page.getByText('FunASR AutoModel', { exact: false }).first()).toBeVisible();
+    await expect(page.getByText('OpenMOSS', { exact: false }).first()).toBeVisible();
+    await expect(page.getByText('sentence_info', { exact: false }).first()).toBeVisible();
+    await expect(page.locator('a[href="https://github.com/modelscope/FunASR/pull/3558"]')).toBeVisible();
+    await expect(page.locator('a[href="/en/deploy/moss-transcribe-diarize.html"]')).toBeVisible();
+
+    const layout = await page.evaluate(() => ({
+      overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+      commandWidths: [...document.querySelectorAll<HTMLElement>('.command-block')].map((node) => ({
+        parent: node.parentElement?.getBoundingClientRect().width ?? 0,
+        width: node.getBoundingClientRect().width,
+      })),
+    }));
+    expect(layout.overflow).toBeLessThanOrEqual(1);
+    expect(layout.commandWidths.every(({ parent, width }) => width <= parent + 1)).toBe(true);
+
+    await page.screenshot({
+      path: testInfo.outputPath(`moss-automodel-${viewport.name}.png`),
+      fullPage: true,
+    });
+  });
+}
+
+for (const viewport of [
+  { name: 'mobile', width: 390, height: 844 },
+  { name: 'desktop', width: 1440, height: 900 },
+]) {
   test(`SenseVoice TensorRT deployment is stable at ${viewport.name}`, async ({ page }, testInfo) => {
     await page.setViewportSize(viewport);
     await page.goto('/deploy/sensevoice-tensorrt.html');
