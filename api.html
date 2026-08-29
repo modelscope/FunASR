@@ -9971,7 +9971,7 @@
         )
         time2 = time.perf_counter()
 </code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/monotonic_aligner/model.py#L182" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
-<div class="api-detail" id="e159"><span class="dtag badge-c">class</span><h2>MossTranscribeDiarize</h2><div class="dmod">funasr.models.moss_transcribe_diarize · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/moss_transcribe_diarize/model.py#L132" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><ul>
+<div class="api-detail" id="e159"><span class="dtag badge-c">class</span><h2>MossTranscribeDiarize</h2><div class="dmod">funasr.models.moss_transcribe_diarize · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/moss_transcribe_diarize/model.py#L193" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><ul>
 <li><code>End</code> — to-end ASR, diarization, timestamps, and acoustic-event inference.</li>
 </ul>
 </div><details class="src-block"><summary>📄 Source code</summary><pre><code>class MossTranscribeDiarize(nn.Module):
@@ -10002,11 +10002,11 @@
         self.vllm_model = kwargs.get(&quot;vllm_model&quot;, DEFAULT_MODEL)
         self.vllm_api_key = kwargs.get(&quot;vllm_api_key&quot;, &quot;EMPTY&quot;)
         self.vllm_timeout = float(kwargs.get(&quot;vllm_timeout&quot;, 600.0))
-        self.http_session = kwargs.get(&quot;http_session&quot;)
-
-</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/moss_transcribe_diarize/model.py#L132" target="_blank" class="src-more">View full source on GitHub →</a></details><h3 class="mt">Methods</h3><div class="mblk"><code>.forward(**kwargs)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/moss_transcribe_diarize/model.py#L231" target="_blank" class="gh-link">L231</a><div class="mdoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source</summary><pre><code>    def forward(self, **kwargs):
+        self.vllm_response_format = kwargs.get(&quot;vllm_response_format&quot;, &quot;json&quot;).lower()
+        if self.vllm_response_format not in {&quot;json&quot;, &quot;diarized_json&quot;}:
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/moss_transcribe_diarize/model.py#L193" target="_blank" class="src-more">View full source on GitHub →</a></details><h3 class="mt">Methods</h3><div class="mblk"><code>.forward(**kwargs)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/moss_transcribe_diarize/model.py#L295" target="_blank" class="gh-link">L295</a><div class="mdoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source</summary><pre><code>    def forward(self, **kwargs):
         raise NotImplementedError(&quot;MOSS-Transcribe-Diarize supports inference only&quot;)
-</code></pre></details></div><div class="mblk"><code>.inference(data_in, data_lengths, key, **kwargs)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/moss_transcribe_diarize/model.py#L234" target="_blank" class="gh-link">L234</a><div class="mdoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source</summary><pre><code>    def inference(self, data_in, data_lengths=None, key=None, **kwargs):
+</code></pre></details></div><div class="mblk"><code>.inference(data_in, data_lengths, key, **kwargs)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/moss_transcribe_diarize/model.py#L298" target="_blank" class="gh-link">L298</a><div class="mdoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source</summary><pre><code>    def inference(self, data_in, data_lengths=None, key=None, **kwargs):
         del data_lengths
         started = time.perf_counter()
         inputs = list(data_in) if isinstance(data_in, (list, tuple)) else [data_in]
@@ -10015,19 +10015,27 @@
         results = []
         for index, audio in enumerate(inputs):
             if self.backend == &quot;vllm&quot;:
-                transcript = self._transcribe_vllm(audio, **kwargs)
+                response = self._transcribe_vllm(audio, **kwargs)
+                if self.vllm_response_format == &quot;diarized_json&quot;:
+                    results.append(
+                        _result_from_diarized_response(keys[index], response)
+                    )
+                else:
+                    results.append(
+                        _result_from_transcript(keys[index], response[&quot;text&quot;])
+                    )
             else:
                 transcript = self._transcribe_hf(audio, **kwargs)
-            results.append(_result_from_transcript(keys[index], transcript))
+                results.append(_result_from_transcript(keys[index], transcript))
         return results, {
             &quot;batch_data_time&quot;: max(audio_duration, 1e-9),
             &quot;forward&quot;: time.perf_counter() - started,
         }
 </code></pre></details></div></div>
-<div class="api-detail" id="e160"><span class="dtag badge-m">method</span><h2><code>MossTranscribeDiarize.forward(**kwargs)</code></h2><div class="dmod">funasr.models.moss_transcribe_diarize.MossTranscribeDiarize · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/moss_transcribe_diarize/model.py#L231" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source code</summary><pre><code>    def forward(self, **kwargs):
+<div class="api-detail" id="e160"><span class="dtag badge-m">method</span><h2><code>MossTranscribeDiarize.forward(**kwargs)</code></h2><div class="dmod">funasr.models.moss_transcribe_diarize.MossTranscribeDiarize · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/moss_transcribe_diarize/model.py#L295" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source code</summary><pre><code>    def forward(self, **kwargs):
         raise NotImplementedError(&quot;MOSS-Transcribe-Diarize supports inference only&quot;)
 </code></pre></details></div>
-<div class="api-detail" id="e161"><span class="dtag badge-m">method</span><h2><code>MossTranscribeDiarize.inference(data_in, data_lengths, key, **kwargs)</code></h2><div class="dmod">funasr.models.moss_transcribe_diarize.MossTranscribeDiarize · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/moss_transcribe_diarize/model.py#L234" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source code</summary><pre><code>    def inference(self, data_in, data_lengths=None, key=None, **kwargs):
+<div class="api-detail" id="e161"><span class="dtag badge-m">method</span><h2><code>MossTranscribeDiarize.inference(data_in, data_lengths, key, **kwargs)</code></h2><div class="dmod">funasr.models.moss_transcribe_diarize.MossTranscribeDiarize · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/moss_transcribe_diarize/model.py#L298" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source code</summary><pre><code>    def inference(self, data_in, data_lengths=None, key=None, **kwargs):
         del data_lengths
         started = time.perf_counter()
         inputs = list(data_in) if isinstance(data_in, (list, tuple)) else [data_in]
@@ -10036,10 +10044,18 @@
         results = []
         for index, audio in enumerate(inputs):
             if self.backend == &quot;vllm&quot;:
-                transcript = self._transcribe_vllm(audio, **kwargs)
+                response = self._transcribe_vllm(audio, **kwargs)
+                if self.vllm_response_format == &quot;diarized_json&quot;:
+                    results.append(
+                        _result_from_diarized_response(keys[index], response)
+                    )
+                else:
+                    results.append(
+                        _result_from_transcript(keys[index], response[&quot;text&quot;])
+                    )
             else:
                 transcript = self._transcribe_hf(audio, **kwargs)
-            results.append(_result_from_transcript(keys[index], transcript))
+                results.append(_result_from_transcript(keys[index], transcript))
         return results, {
             &quot;batch_data_time&quot;: max(audio_duration, 1e-9),
             &quot;forward&quot;: time.perf_counter() - started,
