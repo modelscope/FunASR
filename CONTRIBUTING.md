@@ -65,6 +65,16 @@ For docs-only changes, preview the Markdown or generated HTML and verify relativ
 
 Please use the templates and include environment details, exact commands, logs, and whether the audio can be shared. If audio is private, describe duration, sample rate, language, speaker count, format, and noise level.
 
+## Maintainer issue lifecycle
+
+Issue closure records a verified outcome, not only that a related pull request was merged or a package was released.
+
+- Keep a bug open with the `needs feedback` label while the reporter tests the fix in the environment that reproduced it.
+- Close after the reporter confirms the problem is resolved, or after a maintainer reproduces the original failure, verifies the fix under equivalent conditions, and leaves a reasonable feedback window.
+- For long-running, hardware-specific, accuracy, or deployment bugs, synthetic and unit tests are supporting evidence; they do not replace a reporter's real workload unless the original workload is available and reproduced.
+- If a reporter says the problem still occurs, reopen the issue and record the new evidence, even when the associated code change has already shipped.
+- When closing, link the exact fix or documentation, the released version when applicable, and the verification evidence. State any remaining boundary explicitly.
+
 ## Maintainer focus for 20k+ stars
 
 When reviewing changes, prioritize work that helps new users reach a good result in under five minutes, helps teams deploy FunASR privately, or gives external writers a clear story to share.
