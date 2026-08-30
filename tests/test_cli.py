@@ -299,3 +299,24 @@ def test_merge_subtitle_segments_preserves_hard_boundaries():
     ]
 
     assert cli.merge_subtitle_segments(segments) == segments
+
+
+def test_merge_subtitle_segments_splits_overlong_source_with_token_timestamps():
+    text = "甲" * 60
+    timestamps = [[index * 300, index * 300 + 120] for index in range(len(text))]
+    segments = [
+        {
+            "start": timestamps[0][0],
+            "end": timestamps[-1][1],
+            "text": text,
+            "timestamp": timestamps,
+        }
+    ]
+
+    cues = cli.merge_subtitle_segments(segments)
+
+    assert len(cues) > 1
+    assert "".join(cue["text"] for cue in cues) == text
+    assert [timestamp for cue in cues for timestamp in cue["timestamp"]] == timestamps
+    assert all(cue["end"] - cue["start"] <= 8000 for cue in cues)
+    assert all(len(cue["text"]) <= 42 for cue in cues)

@@ -117,7 +117,15 @@ def main():
         start = int(seg.get("start", 0) or 0)
         end = int(seg.get("end", 0) or 0)
         if text and end > start:
-            segments.append({"start": start, "end": end, "text": text, "spk": seg.get("spk")})
+            segments.append(
+                {
+                    "start": start,
+                    "end": end,
+                    "text": text,
+                    "spk": seg.get("spk"),
+                    "timestamp": seg.get("timestamp") or seg.get("timestamps"),
+                }
+            )
 
     if not segments:
         text = clean_text(result_item.get("text", ""))

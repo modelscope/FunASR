@@ -74,6 +74,78 @@ def _join_subtitle_text(left, right):
     return left + right
 
 
+def _split_subtitle_segment(segment, max_duration_ms, max_chars):
+    text = str(segment.get("text", ""))
+    start = int(segment.get("start", 0) or 0)
+    end = int(segment.get("end", start) or start)
+    if not text or (end - start <= max_duration_ms and len(text) <= max_chars):
+        return [dict(segment)]
+
+    raw_timestamps = segment.get("timestamp") or segment.get("timestamps") or []
+    timestamps = []
+    for item in raw_timestamps:
+        if isinstance(item, (list, tuple)) and len(item) >= 2:
+            item_start = int(item[0])
+            item_end = int(item[1])
+            if item_end > item_start:
+                timestamps.append([item_start, item_end])
+
+    has_timestamps = bool(timestamps)
+    if not timestamps:
+        duration = max(end - start, len(text))
+        timestamps = [
+            [
+                start + duration * index // len(text),
+                start + duration * (index + 1) // len(text),
+            ]
+            for index in range(len(text))
+        ]
+
+    cues = []
+    char_start = 0
+    while char_start < len(text):
+        timestamp_start = min(
+            len(timestamps) - 1,
+            len(timestamps) * char_start // len(text),
+        )
+        char_end = char_start
+        timestamp_end = timestamp_start
+        while char_end < len(text) and char_end - char_start < max_chars:
+            candidate_char_end = char_end + 1
+            candidate_timestamp_end = max(
+                timestamp_start + 1,
+                len(timestamps) * candidate_char_end // len(text),
+            )
+            candidate_timestamp_end = min(candidate_timestamp_end, len(timestamps))
+            candidate_duration = (
+                timestamps[candidate_timestamp_end - 1][1]
+                - timestamps[timestamp_start][0]
+            )
+            if candidate_duration > max_duration_ms and char_end > char_start:
+                break
+            char_end = candidate_char_end
+            timestamp_end = candidate_timestamp_end
+
+        if char_end == char_start:
+            char_end += 1
+            timestamp_end = min(timestamp_start + 1, len(timestamps))
+
+        cue = dict(segment)
+        cue["text"] = text[char_start:char_end]
+        cue["start"] = timestamps[timestamp_start][0]
+        cue["end"] = timestamps[timestamp_end - 1][1]
+        if has_timestamps:
+            cue["timestamp"] = timestamps[timestamp_start:timestamp_end]
+            cue.pop("timestamps", None)
+        else:
+            cue.pop("timestamp", None)
+            cue.pop("timestamps", None)
+        cues.append(cue)
+        char_start = char_end
+
+    return cues
+
+
 def merge_subtitle_segments(
     segments, max_gap_ms=500, max_duration_ms=8000, max_chars=42
 ):
@@ -107,6 +179,12 @@ def merge_subtitle_segments(
         for item in group[1:]:
             text = _join_subtitle_text(text, item.get("text", ""))
         cue["text"] = text
+        if any(item.get("timestamp") for item in group):
+            cue["timestamp"] = [
+                timestamp
+                for item in group
+                for timestamp in item.get("timestamp", [])
+            ]
         return cue
 
     def pack(chain):
@@ -130,11 +208,13 @@ def merge_subtitle_segments(
     merged = []
     chain = []
     for source in segments:
-        current = dict(source)
-        if chain and not can_follow(chain[-1], current):
-            merged.extend(pack(chain))
-            chain = []
-        chain.append(current)
+        for current in _split_subtitle_segment(
+            source, max_duration_ms=max_duration_ms, max_chars=max_chars
+        ):
+            if chain and not can_follow(chain[-1], current):
+                merged.extend(pack(chain))
+                chain = []
+            chain.append(current)
     if chain:
         merged.extend(pack(chain))
     return merged
@@ -314,7 +394,12 @@ def main():
         segments = []
         if "sentence_info" in result[0]:
             for seg in result[0]["sentence_info"]:
-                s = {"start": seg.get("start", 0), "end": seg.get("end", 0), "text": clean_text(seg.get("sentence") or seg.get("text", ""))}
+                s = {
+                    "start": seg.get("start", 0),
+                    "end": seg.get("end", 0),
+                    "text": clean_text(seg.get("sentence") or seg.get("text", "")),
+                    "timestamp": seg.get("timestamp") or seg.get("timestamps"),
+                }
                 if args.spk and "spk" in seg:
                     s["speaker"] = seg["spk"]
                 segments.append(s)
