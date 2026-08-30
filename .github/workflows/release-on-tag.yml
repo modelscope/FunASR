@@ -15,6 +15,31 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Build and validate Python packages
+        run: |
+          set -euo pipefail
+          VERSION="$(cat funasr/version.txt)"
+          if [ "v${VERSION}" != "${{ github.ref_name }}" ]; then
+            echo "Tag ${{ github.ref_name }} does not match funasr/version.txt (${VERSION})" >&2
+            exit 1
+          fi
+          python -m pip install --upgrade build twine
+          export SOURCE_DATE_EPOCH="$(git log -1 --format=%ct)"
+          python -m build
+          SDIST="dist/funasr-${VERSION}.tar.gz"
+          SDIST_ROOT="funasr-${VERSION}"
+          SDIST_TMP="$(mktemp -d)"
+          trap 'rm -rf "$SDIST_TMP"' EXIT
+          tar -xzf "$SDIST" -C "$SDIST_TMP"
+          tar --sort=name --mtime="@${SOURCE_DATE_EPOCH}" \
+            --owner=0 --group=0 --numeric-owner \
+            -C "$SDIST_TMP" -cf - "$SDIST_ROOT" \
+            | gzip -n > "${SDIST}.reproducible"
+          mv "${SDIST}.reproducible" "$SDIST"
+          python -m twine check dist/*
       - name: Create GitHub Release with auto-generated notes
         env:
           GH_TOKEN: ${{ github.token }}
@@ -22,6 +47,14 @@ jobs:
           if ! gh release view "${{ github.ref_name }}" >/dev/null 2>&1; then
             gh release create "${{ github.ref_name }}" --generate-notes --verify-tag --title "${{ github.ref_name }}"
           fi
+      - name: Add Python packages to GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release upload "${{ github.ref_name }}" \
+            dist/funasr-*.whl \
+            dist/funasr-*.tar.gz \
+            --clobber
       - name: Add Runtime assets and downloads to GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
