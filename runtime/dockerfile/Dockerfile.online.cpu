@@ -1,0 +1,38 @@
+# syntax=docker/dockerfile:1.7
+
+ARG BASE_IMAGE=registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-online-cpu-0.1.13@sha256:2a54c20f6b9e2fd253b24abd5c083545751485bcc26e038ed12eab3380c86d51
+FROM ${BASE_IMAGE}
+
+ARG TARGETARCH
+
+WORKDIR /workspace
+RUN rm -rf /workspace/FunASR
+COPY . /workspace/FunASR
+
+WORKDIR /workspace/FunASR
+RUN pip install --no-cache-dir -e ./ && \
+    case "${TARGETARCH}" in \
+      amd64) \
+        onnxruntime_dir=/workspace/onnxruntime-linux-x64-1.14.0; \
+        ffmpeg_dir=/workspace/ffmpeg-master-latest-linux64-gpl-shared \
+        ;; \
+      arm64) \
+        onnxruntime_dir=/workspace/onnxruntime-linux-aarch64-1.17.1; \
+        ffmpeg_dir=/workspace/ffmpeg-master-latest-linuxarm64-gpl-shared \
+        ;; \
+      *) echo "Unsupported TARGETARCH: ${TARGETARCH}" >&2; exit 2 ;; \
+    esac && \
+    cmake -S runtime/websocket -B runtime/websocket/build \
+      -DCMAKE_BUILD_TYPE=Release \
+      -DENABLE_PORTAUDIO=OFF \
+      -DONNXRUNTIME_DIR="${onnxruntime_dir}" \
+      -DFFMPEG_DIR="${ffmpeg_dir}" && \
+    cmake --build runtime/websocket/build --parallel "$(nproc)"
+
+COPY runtime/dockerfile/online-cpu-entrypoint.sh /usr/local/bin/online-cpu-entrypoint.sh
+RUN chmod 0755 /usr/local/bin/online-cpu-entrypoint.sh
+
+WORKDIR /workspace/FunASR/runtime
+EXPOSE 10095
+VOLUME ["/workspace/models"]
+ENTRYPOINT ["/usr/local/bin/online-cpu-entrypoint.sh"]

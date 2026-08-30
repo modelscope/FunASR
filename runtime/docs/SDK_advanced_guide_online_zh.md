@@ -48,6 +48,30 @@ sudo docker run -p 10096:10095 -it --privileged=true \
   registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-online-cpu-0.1.13
 ```
 
+### 从源码构建 online CPU 镜像
+
+上面的 0.1.13 镜像是公开预构建版本。如果需要基于当前 FunASR 源码自行构建，
+请使用仓库内的 `runtime/dockerfile/Dockerfile.online.cpu`：
+
+```shell
+git clone https://github.com/modelscope/FunASR.git
+cd FunASR
+docker build \
+  -f runtime/dockerfile/Dockerfile.online.cpu \
+  -t funasr-online-cpu:local .
+mkdir -p ./funasr-runtime-resources/models
+docker run --rm -p 10096:10095 \
+  -v $PWD/funasr-runtime-resources/models:/workspace/models \
+  funasr-online-cpu:local
+```
+
+该 Dockerfile 将公开的 0.1.13 多架构镜像按 manifest digest 固定为编译与运行
+工具链，然后复制当前 checkout 并重新编译 `funasr-wss-server-2pass`。构建出的
+容器会直接在 10095 端口启动服务，不依赖预构建镜像中的交互式 daemon 包装。
+可通过 `FUNASR_MODEL_DIR`、`FUNASR_ONLINE_MODEL_DIR`、
+`FUNASR_VAD_DIR`、`FUNASR_PUNC_DIR`、`FUNASR_DECODER_THREAD_NUM`
+和 `FUNASR_PORT` 环境变量覆盖模型、线程数及容器端口。
+
 ### 服务端启动
 
 docker启动之后，启动 funasr-wss-server-2pass服务程序：
@@ -166,4 +190,4 @@ kill -9 PID
 [基于FST的中文ITN](https://www.modelscope.cn/models/thuduj12/fst_itn_zh/summary)
 
 如果，您希望部署您finetune后的模型（例如10epoch.pb），需要手动将模型重命名为model.pb，并将原modelscope中模型model.pb替换掉，将路径指定为`model_dir`即可。
-
+-

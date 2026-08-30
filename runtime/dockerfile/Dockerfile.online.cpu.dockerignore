@@ -1,0 +1,8 @@
+.git
+.github
+.mcp-tasks
+**/.mcp-tasks
+**/__pycache__
+**/.pytest_cache
+**/*.pyc
+web-pages
