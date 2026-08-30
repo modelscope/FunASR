@@ -5,7 +5,7 @@ This document explains the responsibility boundaries, user entry points, and iss
 > **Directional roadmap, not a release promise.**
 > This document records shipped capabilities and active work, but does not commit to
 > future version numbers or dates. The current Python release is
-> [`funasr==1.4.8`](https://github.com/modelscope/FunASR/releases/tag/v1.4.8).
+> [`funasr==1.4.9`](https://github.com/modelscope/FunASR/releases/tag/v1.4.9).
 > Any future breaking release still requires a maintainer-approved milestone and
 > migration plan.
 
