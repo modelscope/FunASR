@@ -5,7 +5,7 @@ This document explains the responsibility boundaries, user entry points, and iss
 > **Directional roadmap, not a release promise.**
 > This document records shipped capabilities and active work, but does not commit to
 > future version numbers or dates. The current Python release is
-> [`funasr==1.4.7`](https://github.com/modelscope/FunASR/releases/tag/v1.4.7).
+> [`funasr==1.4.8`](https://github.com/modelscope/FunASR/releases/tag/v1.4.8).
 > Any future breaking release still requires a maintainer-approved milestone and
 > migration plan.
 
@@ -92,7 +92,7 @@ The four repositories share models and tooling but their responsibility boundari
 - **Fun-ASR-Nano native Transformers integration** — [huggingface/transformers#46180](https://github.com/huggingface/transformers/pull/46180) is in review; use the PR's exact-head CI and review state as the source of truth.
 - **Restore complete public checkpoint functionality** — [#3496](https://github.com/modelscope/FunASR/issues/3496) tracks missing CTC tensors needed by timestamp and diarization paths in the Hugging Face checkpoint.
 - **Realtime concurrency regression** — [#3528](https://github.com/modelscope/FunASR/issues/3528) remains open for reproducible load-test evidence and a bounded fix.
-- **AMD Windows Vulkan validation** — [#3479](https://github.com/modelscope/FunASR/issues/3479) remains open for reporter hardware retesting against `runtime-llamacpp-v0.2.5`; publication of the archive is not evidence that the hardware crash is fixed.
+- **AMD Windows Vulkan validation** — [#3479](https://github.com/modelscope/FunASR/issues/3479) remains open for reporter hardware retesting against `runtime-llamacpp-v0.2.6`; publication of the archive is not evidence that the hardware crash is fixed.
 
 ### Next
 
