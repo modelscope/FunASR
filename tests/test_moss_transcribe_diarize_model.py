@@ -264,5 +264,171 @@ class MossVllmBackendTest(unittest.TestCase):
             model.inference([np.zeros(1600, dtype=np.float32)], key=["meeting"])
 
 
+class MossSglangBackendTest(unittest.TestCase):
+    def test_auto_model_sglang_path_bypasses_weight_download(self):
+        from funasr.auto.auto_model import AutoModel
+
+        with patch(
+            "funasr.auto.auto_model.download_model",
+            side_effect=AssertionError(
+                "SGLang client mode must not download model weights"
+            ),
+        ):
+            auto_model = AutoModel(
+                model="OpenMOSS-Team/MOSS-Transcribe-Diarize",
+                backend="sglang",
+                sglang_base_url="http://sglang.test:8000/v1",
+                device="cpu",
+                disable_update=True,
+            )
+
+        self.assertIsInstance(auto_model.model, MossTranscribeDiarize)
+
+    def test_normalizes_official_sglang_verbose_json_response(self):
+        session = MagicMock()
+        response = MagicMock()
+        response.json.return_value = {
+            "text": "[0.25][S01]hello[1.5][2.0][S02]again[3.5]",
+            "segments": [
+                {"start": 0.25, "end": 1.5, "text": "[S01]hello"},
+                {"start": 2.0, "end": 3.5, "text": "[S02] again"},
+            ],
+        }
+        session.post.return_value = response
+
+        model = MossTranscribeDiarize(
+            backend="sglang",
+            sglang_base_url="http://sglang.test:8000/v1",
+            sglang_model="OpenMOSS-Team/MOSS-Transcribe-Diarize",
+            sglang_api_key="secret",
+            http_session=session,
+        )
+        results, _ = model.inference(
+            [np.zeros(1600, dtype=np.float32)],
+            key=["meeting"],
+            prompt="transcribe and diarize",
+            max_new_tokens=8192,
+        )
+
+        request = session.post.call_args
+        self.assertEqual(
+            request.args[0],
+            "http://sglang.test:8000/v1/audio/transcriptions",
+        )
+        self.assertEqual(
+            request.kwargs["data"],
+            {
+                "model": "OpenMOSS-Team/MOSS-Transcribe-Diarize",
+                "response_format": "verbose_json",
+                "temperature": "0",
+                "prompt": "transcribe and diarize",
+                "max_new_tokens": "8192",
+            },
+        )
+        self.assertEqual(request.kwargs["headers"], {"Authorization": "Bearer secret"})
+        self.assertEqual(results[0]["text"], "hello again")
+        self.assertEqual(
+            results[0]["raw_text"],
+            "[0.25][S01]hello[1.5][2.0][S02]again[3.5]",
+        )
+        self.assertEqual(results[0]["timestamp"], [[250, 1500], [2000, 3500]])
+        self.assertEqual(
+            [(item["spk"], item["text"]) for item in results[0]["sentence_info"]],
+            [("S01", "hello"), ("S02", "again")],
+        )
+
+    def test_rejects_sglang_segment_without_speaker_prefix(self):
+        session = MagicMock()
+        response = MagicMock()
+        response.json.return_value = {
+            "text": "hello",
+            "segments": [{"start": 0.0, "end": 1.0, "text": "hello"}],
+        }
+        session.post.return_value = response
+        model = MossTranscribeDiarize(
+            backend="sglang",
+            sglang_base_url="http://sglang.test:8000/v1",
+            http_session=session,
+        )
+
+        with self.assertRaisesRegex(RuntimeError, "segment 0.*speaker prefix"):
+            model.inference([np.zeros(1600, dtype=np.float32)], key=["meeting"])
+
+    def test_rejects_sglang_fallback_speaker_not_backed_by_raw_transcript(self):
+        session = MagicMock()
+        response = MagicMock()
+        response.json.return_value = {
+            "text": "hello",
+            "segments": [{"start": 0.0, "end": 1.0, "text": "[S01]hello"}],
+        }
+        session.post.return_value = response
+        model = MossTranscribeDiarize(
+            backend="sglang",
+            sglang_base_url="http://sglang.test:8000/v1",
+            http_session=session,
+        )
+
+        with self.assertRaisesRegex(RuntimeError, "not backed by raw transcript"):
+            model.inference([np.zeros(1600, dtype=np.float32)], key=["meeting"])
+
+    def test_rejects_one_digit_sglang_speaker_label(self):
+        session = MagicMock()
+        response = MagicMock()
+        response.json.return_value = {
+            "text": "[0][S1]hello[1]",
+            "segments": [{"start": 0.0, "end": 1.0, "text": "[S1]hello"}],
+        }
+        session.post.return_value = response
+        model = MossTranscribeDiarize(
+            backend="sglang",
+            sglang_base_url="http://sglang.test:8000/v1",
+            http_session=session,
+        )
+
+        with self.assertRaisesRegex(RuntimeError, "segment 0.*speaker prefix"):
+            model.inference([np.zeros(1600, dtype=np.float32)], key=["meeting"])
+
+    def test_rejects_sglang_segments_with_decreasing_start_times(self):
+        session = MagicMock()
+        response = MagicMock()
+        response.json.return_value = {
+            "text": "[2][S01]late[3][1][S02]early[1.5]",
+            "segments": [
+                {"start": 2.0, "end": 3.0, "text": "[S01]late"},
+                {"start": 1.0, "end": 1.5, "text": "[S02]early"},
+            ],
+        }
+        session.post.return_value = response
+        model = MossTranscribeDiarize(
+            backend="sglang",
+            sglang_base_url="http://sglang.test:8000/v1",
+            http_session=session,
+        )
+
+        with self.assertRaisesRegex(RuntimeError, "segment 1.*non-monotonic"):
+            model.inference([np.zeros(1600, dtype=np.float32)], key=["meeting"])
+
+    def test_accepts_sglang_timestamp_clamp_when_speaker_and_text_match_raw(self):
+        session = MagicMock()
+        response = MagicMock()
+        response.json.return_value = {
+            "text": "[0][S01]hello[99]",
+            "segments": [{"start": 0.0, "end": 10.0, "text": "[S01]hello"}],
+        }
+        session.post.return_value = response
+        model = MossTranscribeDiarize(
+            backend="sglang",
+            sglang_base_url="http://sglang.test:8000/v1",
+            http_session=session,
+        )
+
+        results, _ = model.inference(
+            [np.zeros(1600, dtype=np.float32)], key=["meeting"]
+        )
+
+        self.assertEqual(results[0]["timestamp"], [[0, 10000]])
+        self.assertEqual(results[0]["sentence_info"][0]["spk"], "S01")
+
+
 if __name__ == "__main__":
     unittest.main()
