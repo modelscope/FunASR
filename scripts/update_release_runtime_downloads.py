@@ -25,6 +25,7 @@ EXPECTED_RUNTIME_ASSET_NAMES = {
     "funasr-llamacpp-linux-x64.tar.gz",
     "funasr-llamacpp-macos-arm64.tar.gz",
     "funasr-llamacpp-windows-x64-avx2.zip",
+    "funasr-llamacpp-windows-x64-cuda-blackwell.zip",
     "funasr-llamacpp-windows-x64-cuda.zip",
     "funasr-llamacpp-windows-x64-vulkan.zip",
     "funasr-llamacpp-windows-x64.zip",
@@ -58,6 +59,8 @@ def platform_label(asset_name: str) -> str:
         return "macOS arm64"
     if "windows-x64-vulkan" in asset_name:
         return "Windows x64 Vulkan"
+    if "windows-x64-cuda-blackwell" in asset_name:
+        return "Windows x64 CUDA Blackwell (sm_120)"
     if "windows-x64-cuda" in asset_name:
         return "Windows x64 CUDA"
     if "windows-x64-avx2" in asset_name:

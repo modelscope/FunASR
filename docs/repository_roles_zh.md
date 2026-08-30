@@ -4,7 +4,7 @@
 
 > **方向性路线图，不是版本承诺。**
 > 本文档记录已交付能力与正在推进的工作，但不承诺未来版本号或日期。当前 Python
-> 版本是 [`funasr==1.4.7`](https://github.com/modelscope/FunASR/releases/tag/v1.4.7)。
+> 版本是 [`funasr==1.4.8`](https://github.com/modelscope/FunASR/releases/tag/v1.4.8)。
 > 任何未来的 breaking release 仍需 maintainer 确认 milestone 与迁移方案。
 
 ---
@@ -90,7 +90,7 @@
 - **Fun-ASR-Nano 的 Transformers 原生集成** —— [huggingface/transformers#46180](https://github.com/huggingface/transformers/pull/46180) 正在审查；以该 PR 的 exact-head CI 与 review 状态为准。
 - **恢复公开 checkpoint 的完整能力** —— [#3496](https://github.com/modelscope/FunASR/issues/3496) 跟踪 Hugging Face checkpoint 缺少时间戳与说话人路径所需 CTC tensors 的问题。
 - **实时并发性能回归** —— [#3528](https://github.com/modelscope/FunASR/issues/3528) 保持开放，等待可复现的压测证据与有边界的修复。
-- **AMD Windows Vulkan 验证** —— [#3479](https://github.com/modelscope/FunASR/issues/3479) 保持开放，等待报告者在 `runtime-llamacpp-v0.2.5` 上进行硬件复测；发布压缩包不等于硬件崩溃已经修复。
+- **AMD Windows Vulkan 验证** —— [#3479](https://github.com/modelscope/FunASR/issues/3479) 保持开放，等待报告者在 `runtime-llamacpp-v0.2.6` 上进行硬件复测；发布压缩包不等于硬件崩溃已经修复。
 
 ### 下一步
 
