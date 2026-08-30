@@ -253,7 +253,15 @@ curl -fsS http://127.0.0.1:8898/v1/audio/transcriptions \
   -F response_format=verbose_json
 ```
 
-接入字幕、会议纪要或分析系统前，验证每个 segment 都包含起止时间、文本和预期的 speaker 字段。
+验证每个 segment 都有起止时间与非空文本。SGLang Omni 当前的
+`verbose_json` 合同把说话人编号保留为 `segments[].text` 的 `[Sxx]` 前缀，
+并没有单独的 `speaker` 字段。接入字幕、会议纪要或分析系统前，应解析并校验此前缀。
+
+原生 runtime 已通过 SGLang Omni
+[#914](https://github.com/sgl-project/sglang-omni/pull/914) 合并。其单张 H100
+Seed-TTS EN benchmark 完成 1088/1088 条请求且无请求失败。WER 是在移除
+timestamp 与 speaker markup 后针对单说话人英文片段计算的，因此不评估
+diarization 或 timestamp 准确率，也不是生产容量承诺。
 
 ## 上线前验证
 

@@ -281,8 +281,18 @@ curl -fsS http://127.0.0.1:8898/v1/audio/transcriptions \
   -F response_format=verbose_json
 ```
 
-Verify every segment has start/end timing, text, and the expected speaker
-field before wiring the response into subtitles, meeting notes, or analytics.
+Verify every segment has start/end timing and non-empty text. In SGLang Omni's
+current `verbose_json` contract, the speaker identifier is retained as the
+`[Sxx]` prefix in `segments[].text`; it is not a separate `speaker` field.
+Parse and validate that prefix before wiring the response into subtitles,
+meeting notes, or analytics.
+
+The native runtime was merged in SGLang Omni
+[#914](https://github.com/sgl-project/sglang-omni/pull/914). Its single-H100
+Seed-TTS EN benchmark completed 1088/1088 clips with no request failures. WER
+was measured only after removing timestamp and speaker markup from
+single-speaker English clips, so it does not evaluate diarization or timestamp
+accuracy and is not a production capacity promise.
 
 ## Production validation
 

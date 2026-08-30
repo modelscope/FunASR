@@ -13,7 +13,7 @@
 | Kubernetes API | Cluster service용 internal speech API | [Kubernetes template](../examples/openai_api/kubernetes/) | private `ClusterIP`부터 시작합니다. 범위를 넓히기 전에 auth, TLS, network policy, GPU scheduling을 추가하세요. |
 | Runtime WebSocket service | Live captions, meeting, call-center stream | [Runtime service docs](../runtime/readme.md) | partial result, endpointing, long-lived audio stream이 중요할 때 사용합니다. |
 | vLLM acceleration | Fun-ASR-Nano의 LLM-based ASR throughput 향상 | [vLLM guide](./vllm_guide.md) | LLM decoder throughput용입니다. non-autoregressive Paraformer에는 적용되지 않습니다. |
-| MOSS-Transcribe-Diarize | 긴 다중 화자 transcription, timestamp, speaker label | [Third-party MOSS guide](./moss_transcribe_diarize.md) | OpenMOSS의 Apache-2.0 model이며 FunASR `AutoModel`에 통합되어 있습니다. local HF(`backend="hf"`) 또는 vLLM(`backend="vllm"`)을 선택할 수 있고, model의 공개 및 유지 관리는 계속 OpenMOSS가 담당합니다. |
+| MOSS-Transcribe-Diarize | 긴 다중 화자 transcription, timestamp, speaker label | [Third-party MOSS guide](./moss_transcribe_diarize.md) | OpenMOSS의 Apache-2.0 model이며 FunASR `AutoModel`에 통합되어 있습니다. local HF(`backend="hf"`) 또는 vLLM(`backend="vllm"`)을 선택하거나 native SGLang Omni에서 독립적으로 serve할 수 있습니다. SGLang Omni는 `AutoModel` backend가 아니며, model의 공개 및 유지 관리는 계속 OpenMOSS가 담당합니다. |
 | MCP server | Claude/Cursor/desktop agent speech tool | [MCP example](../examples/mcp_server/) | ASR 결과를 local tool로 Agent에 전달할 때 유용합니다. |
 | Subtitle generator | 긴 audio/video에서 SRT/VTT 생성 | [Subtitle example](../examples/subtitle/) | readability가 중요하면 verbose segment와 speaker label을 사용합니다. |
 | Batch ASR script | Archive, meeting, dataset, 반복 offline run | [Batch example](../examples/batch_asr_improved.py) | production에서는 queue, manifest, retry log를 추가하세요. |

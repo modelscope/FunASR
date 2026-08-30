@@ -35,7 +35,7 @@
 |---|---|
 | 用 Python 做语音识别 / 训练 / 微调 | [modelscope/FunASR](https://github.com/modelscope/FunASR) |
 | 部署实时流式 ASR 服务，推荐 Fun-ASR-Nano + vLLM 做实时识别 | [modelscope/FunASR/fun_asr_nano](https://github.com/modelscope/FunASR/tree/main/examples/industrial_data_pretraining/fun_asr_nano) —— **推荐实现,见下节** |
-| 用一个模型完成长音频多人转写、时间戳与说话人身份识别 | [MOSS-Transcribe-Diarize 部署指南](./moss_transcribe_diarize_zh.md) —— OpenMOSS 模型通过本地 Transformers 或 vLLM 接入 FunASR，不需要额外 VAD 或说话人模型 |
+| 用一个模型完成长音频多人转写、时间戳与说话人身份识别 | [MOSS-Transcribe-Diarize 部署指南](./moss_transcribe_diarize_zh.md) —— OpenMOSS 模型通过本地 Transformers 或 vLLM 接入 FunASR，也可通过原生 SGLang Omni 独立服务，不需要额外的外部 VAD 或说话人模型 |
 | 了解 Fun-ASR-Nano / MLT 的能力范围、权重、评测,或使用 Transformers / vLLM / GGUF 集成 | [QwenAudio/Fun-ASR](https://github.com/QwenAudio/Fun-ASR) |
 | 需要情感识别 / 音频事件检测 | [QwenAudio/SenseVoice](https://github.com/QwenAudio/SenseVoice) |
 | 做视频字幕 / 剪辑 | [modelscope/FunClip](https://github.com/modelscope/FunClip) |
@@ -82,7 +82,7 @@
 - **实时服务长会话状态有界** —— [#3214](https://github.com/modelscope/FunASR/pull/3214) 与 [QwenAudio/Fun-ASR#135](https://github.com/QwenAudio/Fun-ASR/pull/135) 已合并，诊断能力已发布，报告者证据使 [#3101](https://github.com/modelscope/FunASR/issues/3101) 可以关闭。
 - **稳定的应用接口** —— 工具包现已提供 OpenAI-compatible 转写服务、健康检查、浏览器与命令行 smoke test，并在[部署矩阵](./deployment_matrix_zh.md)中列出 Python / CLI / HTTP / WebSocket 入口。
 - **工业与边缘部署路径** —— vLLM 服务和签名发布流程已有文档；经验证的十平台 [`runtime-llamacpp-v0.2.6`](https://github.com/modelscope/FunASR/releases/tag/runtime-llamacpp-v0.2.6) 压缩包覆盖 Linux、macOS 与 Windows 的 CPU/GPU 变体，并提供面向 RTX 50 / Blackwell 的 Windows CUDA architecture 120 专用包。
-- **联合转写与说话人识别** —— 第三方 [MOSS-Transcribe-Diarize](./moss_transcribe_diarize_zh.md) 模型已通过 `AutoModel` 接入本地 Transformers 与 vLLM 后端。它在一次推理中生成时间戳与说话人标签，不需要额外 VAD 或说话人模型；模型所有者仍是 OpenMOSS。
+- **联合转写与说话人识别** —— 第三方 [MOSS-Transcribe-Diarize](./moss_transcribe_diarize_zh.md) 模型已通过 `AutoModel` 接入本地 Transformers 与 vLLM 后端，也可通过原生 SGLang Omni 独立服务。SGLang Omni 不是 `AutoModel` backend。它在一次推理中生成时间戳与说话人标签，不需要额外的外部 VAD 或说话人模型；模型所有者仍是 OpenMOSS。
 - **仓库职责与 issue 路由** —— [#3203](https://github.com/modelscope/FunASR/issues/3203) 继续跟踪本文档以及尚未回答完的模型权重和 vLLM 入口问题。在这些问题有证据且报告者有合理确认时间之前，issue 保持开放。
 
 ### 进行中

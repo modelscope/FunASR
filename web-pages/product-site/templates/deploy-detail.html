@@ -86,6 +86,29 @@
     <h2>{{ '从安装到已知音频验证' if language == 'zh' else 'From installation to known-audio verification' }}</h2>
     <p>{{ '以下命令来自当前验证清单；上线前固定依赖、模型和硬件。' if language == 'zh' else 'These commands come from the current verification registry. Pin dependencies, model, and hardware before rollout.' }}</p>
   </div>
+  {% if entry.get('runtime_paths') %}
+  {% for path in entry.runtime_paths %}
+  {% set path_copy = path.translations[language] %}
+  <article class="runtime-path" data-runtime-path="{{ path.id }}">
+    <div class="section-heading compact-heading">
+      <h3>{{ path_copy.name }}</h3>
+      <p>{{ path_copy.summary }}</p>
+      <p><strong>{{ '验证口径' if language == 'zh' else 'Validation scope' }}:</strong> {{ path.tested }}</p>
+    </div>
+    {% for group, commands in [('install', path.commands.install), ('launch', path.commands.launch), ('health', path.commands.health), ('smoke', path.commands.smoke)] %}
+    <div class="command-group"{% if group == 'smoke' %} data-section="smoke-test"{% endif %}>
+      <h3>{{ {'install': ('安装' if language == 'zh' else 'Install'), 'launch': ('启动' if language == 'zh' else 'Launch'), 'health': ('健康检查' if language == 'zh' else 'Health check'), 'smoke': 'Smoke test'}[group] }}</h3>
+      {% for command in commands %}
+      <div class="command-block">
+        <button class="icon-button command-copy" type="button" data-copy-target="#{{ entry.id }}-{{ path.id }}-{{ group }}-{{ loop.index }}" title="{{ '复制命令' if language == 'zh' else 'Copy command' }}"><img src="{{ assets['lucide/copy.svg'] }}" alt=""></button>
+        <pre><code id="{{ entry.id }}-{{ path.id }}-{{ group }}-{{ loop.index }}">{{ command }}</code></pre>
+      </div>
+      {% endfor %}
+    </div>
+    {% endfor %}
+  </article>
+  {% endfor %}
+  {% else %}
   {% for group, commands in [('install', entry.commands.install), ('launch', entry.commands.launch), ('health', entry.commands.health)] %}
   <div class="command-group">
     <h3>{{ {'install': ('安装' if language == 'zh' else 'Install'), 'launch': ('启动' if language == 'zh' else 'Launch'), 'health': ('健康检查' if language == 'zh' else 'Health check')}[group] }}</h3>
@@ -97,8 +120,10 @@
     {% endfor %}
   </div>
   {% endfor %}
+  {% endif %}
 </section>
 
+{% if not entry.get('runtime_paths') %}
 <section class="section content-section smoke-section" data-section="smoke-test">
   <div class="section-heading compact-heading">
     <p class="eyebrow">Smoke test</p>
@@ -111,6 +136,7 @@
   </div>
   {% endfor %}
 </section>
+{% endif %}
 
 <section class="section content-section" data-section="operations">
   <div class="section-heading compact-heading">
