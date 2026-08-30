@@ -6,8 +6,8 @@ This guide connects the third-party
 [OpenMOSS/MOSS-Transcribe-Diarize](https://github.com/OpenMOSS/MOSS-Transcribe-Diarize)
 model to the FunASR deployment ecosystem. The model is published by OpenMOSS
 under Apache-2.0; it is not a FunASR model. FunASR provides an adapter for its
-public Transformers and vLLM interfaces while retaining the OpenMOSS model
-name, license, and upstream revision.
+public Transformers, vLLM, and SGLang Omni interfaces while retaining the
+OpenMOSS model name, license, and upstream revision.
 
 MOSS-Transcribe-Diarize jointly generates transcription, timestamps, and
 speaker labels such as `[S01]`. An application therefore does not need to
@@ -260,6 +260,16 @@ Follow the pinned upstream SGLang Omni installation guide for CUDA 13, then
 download the immutable model snapshot and serve the local directory:
 
 ```bash
+git clone https://github.com/sgl-project/sglang-omni.git
+git -C sglang-omni checkout 3f819f9cdae3d4eeec22f73306c9067a1ec2542e
+```
+
+This source pin includes the transcription API's `max_new_tokens` forwarding.
+The original #914 merge predates that request field, so it is not sufficient
+for the long-audio command below even though its published H100 benchmark
+remains useful upstream evidence.
+
+```bash
 hf download OpenMOSS-Team/MOSS-Transcribe-Diarize \
   --revision e8681d68e7042738ffca8ac8212bc8fcb1131ab8 \
   --local-dir .models/moss-transcribe-diarize
@@ -286,6 +296,31 @@ current `verbose_json` contract, the speaker identifier is retained as the
 `[Sxx]` prefix in `segments[].text`; it is not a separate `speaker` field.
 Parse and validate that prefix before wiring the response into subtitles,
 meeting notes, or analytics.
+
+The FunASR adapter performs that validation and maps the official SGLang
+segments into the same `sentence_info` contract as the HF and vLLM paths:
+
+```python
+from funasr import AutoModel
+
+model = AutoModel(
+    model="OpenMOSS-Team/MOSS-Transcribe-Diarize",
+    backend="sglang",
+    sglang_base_url="http://127.0.0.1:8898/v1",
+    sglang_model="OpenMOSS-Team/MOSS-Transcribe-Diarize",
+    max_new_tokens=65536,
+    disable_update=True,
+)
+result = model.generate(input="audio.wav", max_new_tokens=65536)[0]
+for segment in result["sentence_info"]:
+    print(segment["start"], segment["end"], segment["spk"], segment["text"])
+```
+
+Do not pass `vad_model` or `spk_model`: MOSS performs segmentation and
+anonymous speaker attribution jointly, and external splitting can destroy
+speaker consistency across long turns. The adapter preserves the upstream
+tagged transcript in `raw_text`, strips only the validated `[Sxx]` prefix from
+each normalized segment, and fails closed if SGLang omits that prefix.
 
 The native runtime was merged in SGLang Omni
 [#914](https://github.com/sgl-project/sglang-omni/pull/914). Its single-H100

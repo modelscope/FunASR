@@ -13,7 +13,7 @@
       "models": ["OpenMOSS-Team/MOSS-Transcribe-Diarize (third-party Apache-2.0 model)"],
       "operating_systems": ["Linux"],
       "interfaces": ["OpenAI-compatible HTTP", "vLLM", "SGLang Omni", "Transformers", "LocalAI / moss-transcribe.cpp"],
-      "tested": {"funasr": "AutoModel diarized_json adapter; third-party model@e8681d68", "runtime": "vLLM 0.27.1 / Torch 2.13.0+cu129 / H100 80GB", "verified": "2026-08-30"},
+      "tested": {"funasr": "AutoModel vLLM + SGLang adapters; third-party model@e8681d68", "runtime": "vLLM 0.27.1 / Torch 2.13.0+cu129 / H100 80GB", "verified": "2026-08-30"},
       "commands": {
         "install": [
           "uv venv --python 3.12 .venv-moss && curl -fL https://github.com/vllm-project/vllm/releases/download/v0.27.1/vllm-0.27.1%2Bcu129-cp38-abi3-manylinux_2_28_x86_64.whl -o vllm-0.27.1+cu129-cp38-abi3-manylinux_2_28_x86_64.whl && echo 'bf0d52faa2a51e7a01c6856a7a8a2d1307fd0ff711415d34168a67ffac0fa47b  vllm-0.27.1+cu129-cp38-abi3-manylinux_2_28_x86_64.whl' | sha256sum -c - && uv pip install --python .venv-moss/bin/python --torch-backend=auto \"vllm[audio] @ file://$PWD/vllm-0.27.1+cu129-cp38-abi3-manylinux_2_28_x86_64.whl\"",
@@ -61,14 +61,14 @@
         },
         {
           "id": "sglang-omni",
-          "tested": "SGLang Omni merge 8458f76a / single H100 upstream benchmark",
+          "tested": "SGLang Omni 3f819f9c / FunASR adapter contract-tested / #914 H100 upstream benchmark",
           "translations": {
-            "zh": {"name": "SGLang Omni 原生服务", "summary": "使用已合并的原生 MOSS pipeline 和 OpenAI-compatible verbose_json 接口；它是独立上游 runtime，不是 FunASR AutoModel backend。"},
-            "en": {"name": "Native SGLang Omni serving", "summary": "Use the merged native MOSS pipeline and OpenAI-compatible verbose_json endpoint. This is an independent upstream runtime, not a FunASR AutoModel backend."}
+            "zh": {"name": "SGLang Omni + FunASR AutoModel", "summary": "使用已合并的原生 MOSS pipeline 和 OpenAI-compatible verbose_json 接口，并通过 FunASR AutoModel 校验 [Sxx] 前缀、统一为 sentence_info。"},
+            "en": {"name": "SGLang Omni + FunASR AutoModel", "summary": "Use the merged native MOSS pipeline and OpenAI-compatible verbose_json endpoint, then validate [Sxx] prefixes and normalize them into sentence_info through FunASR AutoModel."}
           },
           "commands": {
             "install": [
-              "git clone https://github.com/sgl-project/sglang-omni.git && cd sglang-omni && git checkout 8458f76ab25f5ba9152b05929b40e07618aff2ce && uv venv .venv -p 3.12 && uv pip install --python .venv/bin/python -v -e .",
+              "git clone https://github.com/sgl-project/sglang-omni.git && cd sglang-omni && git checkout 3f819f9cdae3d4eeec22f73306c9067a1ec2542e && uv venv .venv -p 3.12 && uv pip install --python .venv/bin/python -v -e .",
               "HF_HUB_ENABLE_HF_TRANSFER=1 hf download OpenMOSS-Team/MOSS-Transcribe-Diarize --revision e8681d68e7042738ffca8ac8212bc8fcb1131ab8 --local-dir .models/moss-transcribe-diarize",
               "curl -fsSL https://raw.githubusercontent.com/modelscope/FunASR/8d65a38a8f4f3b5301be72905096219dde443f73/runtime/llama.cpp/tests/sample.wav -o moss-sample.wav && echo 'ea03e1f473ad1618a03da3327a545369cb8f6f06cb0f4115535e5a866167d47e  moss-sample.wav' | sha256sum -c -"
             ],
@@ -81,7 +81,8 @@
             ],
             "smoke": [
               "curl -fsS http://127.0.0.1:8898/v1/audio/transcriptions -F file=@moss-sample.wav -F model=OpenMOSS-Team/MOSS-Transcribe-Diarize -F response_format=verbose_json | tee /tmp/moss-sglang-transcription.json",
-              "python - <<'PY'\nimport json\nimport re\n\nwith open('/tmp/moss-sglang-transcription.json', encoding='utf-8') as stream:\n    payload = json.load(stream)\nsegments = payload.get('segments', [])\nassert payload.get('text', '').strip() and segments, payload\nassert all(item.get('start') <= item.get('end') and re.match(r'^\\[S\\d{2,}\\]', item.get('text', '')) for item in segments), payload\nprint(payload['text'])\nprint([(item['start'], item['end'], item['text'][:5]) for item in segments])\nPY"
+              "python - <<'PY'\nimport json\nimport re\n\nwith open('/tmp/moss-sglang-transcription.json', encoding='utf-8') as stream:\n    payload = json.load(stream)\nsegments = payload.get('segments', [])\nassert payload.get('text', '').strip() and segments, payload\nassert all(item.get('start') <= item.get('end') and re.match(r'^\\[S\\d{2,}\\]', item.get('text', '')) for item in segments), payload\nprint(payload['text'])\nprint([(item['start'], item['end'], item['text'][:5]) for item in segments])\nPY",
+              "python - <<'PY'\nfrom funasr import AutoModel\n\nmodel = AutoModel(model='OpenMOSS-Team/MOSS-Transcribe-Diarize', backend='sglang', sglang_base_url='http://127.0.0.1:8898/v1', sglang_model='OpenMOSS-Team/MOSS-Transcribe-Diarize', max_new_tokens=65536, disable_update=True)\nresult = model.generate('moss-sample.wav', max_new_tokens=65536)[0]\nassert result['raw_text'] and result['sentence_info'], result\nprint(result['text'])\nprint(result['sentence_info'])\nPY"
             ]
           }
         }
@@ -134,24 +135,24 @@
           "summary": "通过 FunASR AutoModel 或 OpenAI 兼容服务接入 OpenMOSS 发布的第三方 Apache-2.0 模型，一次生成长音频转写、时间戳和说话人标签。",
           "fit": ["会议、访谈、播客和通话的多人长音频", "希望通过同一个模型输出文本、时间戳与说话人编号", "已有 NVIDIA GPU，并需要 vLLM 或 SGLang Omni 的 OpenAI 兼容音频转写接口", "通过 LocalAI / moss-transcribe.cpp 在 CPU 或桌面边缘 GPU 上运行第三方 GGUF 实现"],
           "not_fit": ["实时流式字幕或低延迟端点检测", "要求 FunASR AutoModel 与 LocalAI C++ 路径输出完全相同结果的部署", "未经目标硬件复测的原生 Windows 部署", "要求 FunASR 自有模型权重的项目"],
-          "selection_reason": "模型端到端联合生成转写与说话人标签，用户不必再拼接外部 VAD、ASR 和 diarization 管线；FunASR AutoModel 为 Transformers 与 vLLM 提供统一的结构化结果，SGLang Omni 提供独立的原生上游服务，LocalAI 则提供独立的第三方 C++/GGUF 边缘路径。",
-          "primary_limitation": "这是 OpenMOSS 的第三方模型，不是 FunASR 模型；“无需外部 VAD”不表示模型内部没有分块或分段。vLLM 路径固定 0.27.1，SGLang Omni 路径固定 merge 8458f76a；升级前必须重跑真实多人长音频。SGLang Omni 不是 FunASR AutoModel backend，其 verbose_json 把说话人编号保留在 segments[].text 的 [Sxx] 前缀。LocalAI / moss-transcribe.cpp 也是独立第三方重写。",
+          "selection_reason": "模型端到端联合生成转写与说话人标签，用户不必再拼接外部 VAD、ASR 和 diarization 管线；FunASR AutoModel 为 Transformers、vLLM 与 SGLang Omni 提供统一的结构化结果，LocalAI 则提供独立的第三方 C++/GGUF 边缘路径。",
+          "primary_limitation": "这是 OpenMOSS 的第三方模型，不是 FunASR 模型；“无需外部 VAD”不表示模型内部没有分块或分段。vLLM 路径固定 0.27.1，SGLang Omni 路径固定 3f819f9c；升级前必须重跑真实多人长音频。SGLang Omni 的 verbose_json 把说话人编号保留在 segments[].text 的 [Sxx] 前缀，FunASR adapter 会校验该分段能够回溯到 raw_text 后再解析。LocalAI / moss-transcribe.cpp 也是独立第三方重写。",
           "status_label": "社区验证",
-          "operations": ["固定模型 revision、FunASR adapter merge、vLLM 0.27.1、SGLang Omni merge 8458f76a、CUDA/Torch 与 trust_remote_code 审计结果", "用真实会议验证说话人一致性、重叠语音、长静音、时间戳和最大生成长度", "SGLang Omni 的 1088 条单说话人英文 benchmark 不覆盖 diarization 或 timestamp 准确率，生产前必须单独验证", "LocalAI 路径固定第三方 C++ backend 与 GGUF revision，并分别验证 CPU/GPU backend、量化精度和 OpenAI 接口响应", "FunASR AutoModel 可用 vLLM diarized_json 直接统一 text、timestamp 和带 spk 的 sentence_info；json 兼容路径仍在 raw_text 保留原始 [Sxx] 标记文本"],
+          "operations": ["固定模型 revision、FunASR adapter merge、vLLM 0.27.1、SGLang Omni 3f819f9c、CUDA/Torch 与 trust_remote_code 审计结果", "用真实会议验证说话人一致性、重叠语音、长静音、时间戳和最大生成长度", "SGLang Omni #914 的 1088 条单说话人英文 benchmark 不覆盖 diarization 或 timestamp 准确率，生产前必须单独验证", "LocalAI 路径固定第三方 C++ backend 与 GGUF revision，并分别验证 CPU/GPU backend、量化精度和 OpenAI 接口响应", "FunASR AutoModel 可把 vLLM diarized_json 与 SGLang Omni verbose_json 统一为 text、timestamp 和带 spk 的 sentence_info；SGLang 分段必须能回溯到 raw_text，避免接受上游合成的 S01 fallback"],
           "security": ["把服务绑定内网，由网关完成认证、TLS、限流及音频大小/时长限制", "固定并审计 trust_remote_code 对应的模型 revision，不执行浮动 main 代码", "隔离模型缓存、上传临时目录和生成日志，按数据保留策略清理原始音频"],
-          "troubleshooting": ["CUDA 12 使用已校验 SHA256 的 vLLM 0.27.1 cu129 wheel；SGLang Omni 当前固定 CUDA 13 安装契约和 merge 8458f76a", "长音频被截断时提高 max_completion_tokens，并同时监控显存、延迟和输出完整性", "vLLM diarized_json 提供独立 speaker 字段；SGLang Omni verbose_json 当前把说话人编号放在 segments[].text 的 [Sxx] 前缀"]
+          "troubleshooting": ["CUDA 12 使用已校验 SHA256 的 vLLM 0.27.1 cu129 wheel；SGLang Omni 当前固定 CUDA 13 安装契约和 3f819f9c", "长音频被截断时，vLLM 提高 max_completion_tokens，SGLang Omni 提高 max_new_tokens，并同时监控显存、延迟和输出完整性", "vLLM diarized_json 提供独立 speaker 字段；SGLang Omni verbose_json 当前把说话人编号放在 segments[].text 的 [Sxx] 前缀"]
         },
         "en": {
           "name": "MOSS unified transcription and diarization",
           "summary": "Use FunASR AutoModel or an OpenAI-compatible service with the third-party Apache-2.0 model published by OpenMOSS to produce long-form transcripts, timestamps, and speaker labels in one pass.",
           "fit": ["Multi-speaker meetings, interviews, podcasts, and calls", "One model output for text, timestamps, and speaker identifiers", "NVIDIA GPU deployments that need a vLLM or SGLang Omni OpenAI-compatible audio transcription endpoint", "The third-party LocalAI / moss-transcribe.cpp GGUF path on CPU or desktop-edge GPUs"],
           "not_fit": ["Realtime streaming captions or low-latency endpoint detection", "Deployments that require identical output from FunASR AutoModel and the LocalAI C++ path", "Native Windows deployments without validation on the target hardware", "Projects that require FunASR-owned model weights"],
-          "selection_reason": "The model jointly emits transcription and speaker labels so users do not need to assemble an external VAD, ASR, and diarization pipeline; FunASR AutoModel provides one structured result across Transformers and vLLM, SGLang Omni provides an independent native upstream service, and LocalAI exposes a separate third-party C++/GGUF edge path.",
-          "primary_limitation": "This is an OpenMOSS third-party model, not a FunASR model; no external VAD requirement does not imply an absence of internal segmentation. The vLLM path pins 0.27.1 and the SGLang Omni path pins merge 8458f76a; revalidate real long multi-speaker audio before upgrades. SGLang Omni is not a FunASR AutoModel backend, and its verbose_json keeps the speaker identifier in the [Sxx] prefix of segments[].text. LocalAI / moss-transcribe.cpp is another independent third-party reimplementation.",
+          "selection_reason": "The model jointly emits transcription and speaker labels so users do not need to assemble an external VAD, ASR, and diarization pipeline; FunASR AutoModel provides one structured result across Transformers, vLLM, and SGLang Omni, while LocalAI exposes a separate third-party C++/GGUF edge path.",
+          "primary_limitation": "This is an OpenMOSS third-party model, not a FunASR model; no external VAD requirement does not imply an absence of internal segmentation. The vLLM path pins 0.27.1 and the SGLang Omni path pins 3f819f9c; revalidate real long multi-speaker audio before upgrades. SGLang Omni verbose_json keeps the speaker identifier in the [Sxx] prefix of segments[].text, which the FunASR adapter parses only after validating that the segment is backed by raw_text. LocalAI / moss-transcribe.cpp is another independent third-party reimplementation.",
           "status_label": "Community verified",
-          "operations": ["Pin the model revision, FunASR adapter merge, vLLM 0.27.1, SGLang Omni merge 8458f76a, CUDA/Torch stack, and trust_remote_code audit", "Validate speaker consistency, overlap, long silence, timestamps, and generation limits on real meetings", "The 1088-clip SGLang Omni single-speaker English benchmark does not cover diarization or timestamp accuracy; validate both independently before production", "For LocalAI, pin the third-party C++ backend and GGUF revision, then validate CPU/GPU backends, quantization accuracy, and the OpenAI response independently", "FunASR AutoModel can map vLLM diarized_json directly into text, timestamp, and sentence_info with spk; the json compatibility path still preserves raw [Sxx]-tagged text in raw_text"],
+          "operations": ["Pin the model revision, FunASR adapter merge, vLLM 0.27.1, SGLang Omni 3f819f9c, CUDA/Torch stack, and trust_remote_code audit", "Validate speaker consistency, overlap, long silence, timestamps, and generation limits on real meetings", "The 1088-clip SGLang Omni #914 single-speaker English benchmark does not cover diarization or timestamp accuracy; validate both independently before production", "For LocalAI, pin the third-party C++ backend and GGUF revision, then validate CPU/GPU backends, quantization accuracy, and the OpenAI response independently", "FunASR AutoModel maps both vLLM diarized_json and SGLang Omni verbose_json into text, timestamp, and sentence_info with spk; SGLang segments must be backed by raw_text so an upstream synthesized S01 fallback is not accepted"],
           "security": ["Bind workers to a private network and put authentication, TLS, rate limits, and audio size/duration limits at the gateway", "Pin and audit the trust_remote_code model revision instead of executing a floating main revision", "Isolate model caches, upload directories, and generation logs; remove source audio according to retention policy"],
-          "troubleshooting": ["For CUDA 12, use the SHA256-verified vLLM 0.27.1 cu129 wheel; the SGLang Omni path currently pins its CUDA 13 installation contract and merge 8458f76a", "If long audio is truncated, raise max_completion_tokens while monitoring memory, latency, and output completeness", "vLLM diarized_json returns a separate speaker field; SGLang Omni verbose_json currently keeps the speaker identifier in the [Sxx] prefix of segments[].text"]
+          "troubleshooting": ["For CUDA 12, use the SHA256-verified vLLM 0.27.1 cu129 wheel; the SGLang Omni path currently pins its CUDA 13 installation contract and 3f819f9c", "If long audio is truncated, raise max_completion_tokens for vLLM or max_new_tokens for SGLang Omni while monitoring memory, latency, and output completeness", "vLLM diarized_json returns a separate speaker field; SGLang Omni verbose_json currently keeps the speaker identifier in the [Sxx] prefix of segments[].text"]
         }
       }
     },

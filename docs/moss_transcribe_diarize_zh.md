@@ -5,8 +5,8 @@
 本文把第三方
 [OpenMOSS/MOSS-Transcribe-Diarize](https://github.com/OpenMOSS/MOSS-Transcribe-Diarize)
 模型接入 FunASR 部署生态。模型由 OpenMOSS 以 Apache-2.0 发布，不是 FunASR
-自有模型。FunASR 只为其公开的 Transformers 与 vLLM 接口提供适配器，并保留
-OpenMOSS 模型名称、许可证和上游 revision。
+自有模型。FunASR 为其公开的 Transformers、vLLM 与 SGLang Omni 接口提供适配器，
+并保留 OpenMOSS 模型名称、许可证和上游 revision。
 
 MOSS-Transcribe-Diarize 会联合生成转写、时间戳和 `[S01]` 等说话人标签，应用侧
 不必再拼接外部 VAD、ASR 和 diarization 管线。这里描述的是部署形态，不表示模型
@@ -232,6 +232,15 @@ LocalAI `master@a7cc5873ef5b7c909fc9ff7d349d51738ba9bb05` 已包含
 按固定上游 SGLang Omni 安装指南准备 CUDA 13 环境，然后下载不可变模型快照并从本地目录启动：
 
 ```bash
+git clone https://github.com/sgl-project/sglang-omni.git
+git -C sglang-omni checkout 3f819f9cdae3d4eeec22f73306c9067a1ec2542e
+```
+
+该源码 pin 已把 `max_new_tokens` 传入 transcription 生成请求。最初的 #914
+merge 早于这个请求字段，因此虽然它的 H100 benchmark 仍可作为上游证据，却不能
+支撑下方长音频命令。
+
+```bash
 hf download OpenMOSS-Team/MOSS-Transcribe-Diarize \
   --revision e8681d68e7042738ffca8ac8212bc8fcb1131ab8 \
   --local-dir .models/moss-transcribe-diarize
@@ -256,6 +265,30 @@ curl -fsS http://127.0.0.1:8898/v1/audio/transcriptions \
 验证每个 segment 都有起止时间与非空文本。SGLang Omni 当前的
 `verbose_json` 合同把说话人编号保留为 `segments[].text` 的 `[Sxx]` 前缀，
 并没有单独的 `speaker` 字段。接入字幕、会议纪要或分析系统前，应解析并校验此前缀。
+
+FunASR 适配器会完成该校验，并把 SGLang 官方 segments 映射为与 HF、vLLM
+一致的 `sentence_info` 合同：
+
+```python
+from funasr import AutoModel
+
+model = AutoModel(
+    model="OpenMOSS-Team/MOSS-Transcribe-Diarize",
+    backend="sglang",
+    sglang_base_url="http://127.0.0.1:8898/v1",
+    sglang_model="OpenMOSS-Team/MOSS-Transcribe-Diarize",
+    max_new_tokens=65536,
+    disable_update=True,
+)
+result = model.generate(input="audio.wav", max_new_tokens=65536)[0]
+for segment in result["sentence_info"]:
+    print(segment["start"], segment["end"], segment["spk"], segment["text"])
+```
+
+不要传入 `vad_model` 或 `spk_model`：MOSS 在一次生成中联合完成分段和匿名说话人
+归属，外部分段会破坏长轮次中的说话人一致性。适配器把上游带标签原文保存在
+`raw_text`，只从标准化 segment 中移除已经校验的 `[Sxx]` 前缀；如果 SGLang
+没有返回此前缀，则明确失败，不会伪造说话人身份。
 
 原生 runtime 已通过 SGLang Omni
 [#914](https://github.com/sgl-project/sglang-omni/pull/914) 合并。其单张 H100

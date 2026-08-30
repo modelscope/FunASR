@@ -29,6 +29,7 @@ DEFAULT_PROMPT = (
 _NUMBER = r"(?:\d+(?:\.\d+)?|\.\d+)"
 _SEGMENT_START = re.compile(r"\[(%s)\]\[(S\d+)\]" % _NUMBER)
 _TIMESTAMP = re.compile(r"\[(%s)\]" % _NUMBER)
+_SGLANG_SPEAKER_PREFIX = re.compile(r"^\s*\[(S\d{2,})\]\s*")
 
 
 def _parse_transcript(transcript):
@@ -188,6 +189,87 @@ def _result_from_diarized_response(key, response):
     }
 
 
+def _result_from_sglang_response(key, response):
+    """Normalize SGLang Omni's MOSS ``verbose_json`` response."""
+    raw_text = response.get("text") if isinstance(response, dict) else None
+    segments = response.get("segments") if isinstance(response, dict) else None
+    if not isinstance(raw_text, str) or not isinstance(segments, list):
+        raise RuntimeError(
+            "SGLang verbose_json response requires text and segments fields"
+        )
+    source_segments = _parse_transcript(raw_text)
+
+    sentence_info = []
+    timestamps = []
+    texts = []
+    previous_start = None
+    for index, segment in enumerate(segments):
+        if not isinstance(segment, dict):
+            raise RuntimeError("SGLang segment %d must be an object" % index)
+        start = segment.get("start")
+        end = segment.get("end")
+        tagged_text = segment.get("text")
+        numeric = (
+            isinstance(start, (int, float))
+            and not isinstance(start, bool)
+            and isinstance(end, (int, float))
+            and not isinstance(end, bool)
+        )
+        if (
+            not numeric
+            or not math.isfinite(start)
+            or not math.isfinite(end)
+            or start < 0
+            or end < start
+            or not isinstance(tagged_text, str)
+        ):
+            raise RuntimeError("SGLang segment %d has an invalid contract" % index)
+        if previous_start is not None and start < previous_start:
+            raise RuntimeError("SGLang segment %d has non-monotonic start time" % index)
+        previous_start = start
+        speaker_match = _SGLANG_SPEAKER_PREFIX.match(tagged_text)
+        if speaker_match is None:
+            raise RuntimeError(
+                "SGLang segment %d is missing the required speaker prefix" % index
+            )
+        text = tagged_text[speaker_match.end() :].strip()
+        if not text:
+            raise RuntimeError("SGLang segment %d has an invalid contract" % index)
+        if index >= len(source_segments):
+            raise RuntimeError(
+                "SGLang segment %d is not backed by raw transcript markers" % index
+            )
+        _, _, source_speaker, source_text = source_segments[index]
+        if source_speaker != speaker_match.group(1) or source_text != text:
+            raise RuntimeError(
+                "SGLang segment %d is not backed by raw transcript markers" % index
+            )
+        timestamp = [int(round(start * 1000)), int(round(end * 1000))]
+        timestamps.append(timestamp)
+        texts.append(text)
+        sentence_info.append(
+            {
+                "start": timestamp[0],
+                "end": timestamp[1],
+                "text": text,
+                "sentence": text,
+                "spk": speaker_match.group(1),
+                "timestamp": [timestamp],
+            }
+        )
+    if len(source_segments) != len(segments):
+        raise RuntimeError(
+            "SGLang segments are not backed by raw transcript speaker markers"
+        )
+    return {
+        "key": key,
+        "text": _join_texts(texts),
+        "raw_text": raw_text,
+        "timestamp": timestamps,
+        "sentence_info": sentence_info,
+    }
+
+
 @tables.register("model_classes", "MOSS-Transcribe-Diarize")
 @tables.register("model_classes", DEFAULT_MODEL)
 class MossTranscribeDiarize(nn.Module):
@@ -203,8 +285,8 @@ class MossTranscribeDiarize(nn.Module):
             )
 
         self.backend = kwargs.get("backend", "hf").lower()
-        if self.backend not in {"hf", "vllm"}:
-            raise ValueError("backend must be 'hf' or 'vllm'")
+        if self.backend not in {"hf", "vllm", "sglang"}:
+            raise ValueError("backend must be 'hf', 'vllm', or 'sglang'")
         self.model_path = (
             kwargs.get("model_path") or kwargs.get("model") or DEFAULT_MODEL
         )
@@ -225,12 +307,19 @@ class MossTranscribeDiarize(nn.Module):
         if self.vllm_response_format not in {"json", "diarized_json"}:
             raise ValueError("vllm_response_format must be 'json' or 'diarized_json'")
         self.http_session = kwargs.get("http_session")
+        self.sglang_base_url = kwargs.get("sglang_base_url")
+        self.sglang_model = kwargs.get("sglang_model", DEFAULT_MODEL)
+        self.sglang_api_key = kwargs.get("sglang_api_key", "EMPTY")
+        self.sglang_timeout = float(kwargs.get("sglang_timeout", 600.0))
 
         self.hf_model = None
         self.processor = None
         if self.backend == "vllm":
             if not self.vllm_base_url:
                 raise ValueError("vllm_base_url is required when backend='vllm'")
+        elif self.backend == "sglang":
+            if not self.sglang_base_url:
+                raise ValueError("sglang_base_url is required when backend='sglang'")
         else:
             self._load_hf_backend(kwargs)
 
@@ -316,6 +405,9 @@ class MossTranscribeDiarize(nn.Module):
                     results.append(
                         _result_from_transcript(keys[index], response["text"])
                     )
+            elif self.backend == "sglang":
+                response = self._transcribe_sglang(audio, **kwargs)
+                results.append(_result_from_sglang_response(keys[index], response))
             else:
                 transcript = self._transcribe_hf(audio, **kwargs)
                 results.append(_result_from_transcript(keys[index], transcript))
@@ -384,8 +476,9 @@ class MossTranscribeDiarize(nn.Module):
             generated, skip_special_tokens=True
         ).strip()
 
-    def _transcriptions_url(self):
-        base = self.vllm_base_url.rstrip("/")
+    @staticmethod
+    def _transcriptions_url(base_url):
+        base = base_url.rstrip("/")
         if base.endswith("/v1/audio/transcriptions"):
             return base
         if not base.endswith("/v1"):
@@ -415,7 +508,7 @@ class MossTranscribeDiarize(nn.Module):
         if self.vllm_api_key and self.vllm_api_key != "EMPTY":
             headers["Authorization"] = "Bearer " + self.vllm_api_key
         response = session.post(
-            self._transcriptions_url(),
+            self._transcriptions_url(self.vllm_base_url),
             data=data,
             files={"file": (filename, payload, content_type)},
             headers=headers,
@@ -431,6 +524,36 @@ class MossTranscribeDiarize(nn.Module):
             raise RuntimeError(
                 "vLLM transcription response did not contain a text field"
             )
+        return result
+
+    def _transcribe_sglang(self, audio, **kwargs):
+        import requests
+
+        session = self.http_session or requests.Session()
+        filename, payload, content_type = self._multipart_audio(audio)
+        data = {
+            "model": self.sglang_model,
+            "response_format": "verbose_json",
+            "temperature": str(kwargs.get("temperature", 0)),
+            "max_new_tokens": str(kwargs.get("max_new_tokens", self.max_new_tokens)),
+        }
+        prompt = kwargs.get("prompt")
+        if prompt:
+            data["prompt"] = prompt
+        headers = {}
+        if self.sglang_api_key and self.sglang_api_key != "EMPTY":
+            headers["Authorization"] = "Bearer " + self.sglang_api_key
+        response = session.post(
+            self._transcriptions_url(self.sglang_base_url),
+            data=data,
+            files={"file": (filename, payload, content_type)},
+            headers=headers,
+            timeout=self.sglang_timeout,
+        )
+        response.raise_for_status()
+        result = response.json()
+        if not isinstance(result, dict):
+            raise RuntimeError("SGLang transcription response must be a JSON object")
         return result
 
     @staticmethod

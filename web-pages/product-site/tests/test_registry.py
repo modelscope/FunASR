@@ -107,7 +107,7 @@ def test_moss_transcribe_diarize_contract_tracks_third_party_upstream(valid_regi
         'OpenMOSS-Team/MOSS-Transcribe-Diarize (third-party Apache-2.0 model)'
     ]
     assert entry['tested'] == {
-        'funasr': 'AutoModel diarized_json adapter; third-party model@e8681d68',
+        'funasr': 'AutoModel vLLM + SGLang adapters; third-party model@e8681d68',
         'runtime': 'vLLM 0.27.1 / Torch 2.13.0+cu129 / H100 80GB',
         'verified': '2026-08-30',
     }
@@ -120,7 +120,7 @@ def test_moss_transcribe_diarize_contract_tracks_third_party_upstream(valid_regi
         'vLLM 0.27.1 / Torch 2.13.0+cu129 / H100 80GB; FunASR adapter verified'
     )
     assert runtime_paths['sglang-omni']['tested'] == (
-        'SGLang Omni merge 8458f76a / single H100 upstream benchmark'
+        'SGLang Omni 3f819f9c / FunASR adapter contract-tested / #914 H100 upstream benchmark'
     )
 
     sglang_commands = '\n'.join(
@@ -128,12 +128,15 @@ def test_moss_transcribe_diarize_contract_tracks_third_party_upstream(valid_regi
         for group in ('install', 'launch', 'health', 'smoke')
         for command in runtime_paths['sglang-omni']['commands'][group]
     )
-    assert 'git checkout 8458f76ab25f5ba9152b05929b40e07618aff2ce' in sglang_commands
+    assert 'git checkout 3f819f9cdae3d4eeec22f73306c9067a1ec2542e' in sglang_commands
     assert 'sgl-omni serve' in sglang_commands
     assert '--model-path .models/moss-transcribe-diarize' in sglang_commands
     assert 'response_format=verbose_json' in sglang_commands
     assert "payload.get('segments'" in sglang_commands
-    assert 'backend=\'sglang\'' not in sglang_commands
+    assert "from funasr import AutoModel" in sglang_commands
+    assert "backend='sglang'" in sglang_commands
+    assert "sglang_base_url='http://127.0.0.1:8898/v1'" in sglang_commands
+    assert 'max_new_tokens=65536' in sglang_commands
 
     install = '\n'.join(entry['commands']['install'])
     assert 'vllm[audio]' in install
@@ -188,6 +191,8 @@ def test_moss_transcribe_diarize_contract_tracks_third_party_upstream(valid_regi
     assert 'diarized_json' in english['operations'][-1]
     assert 'diarized_json' in english['troubleshooting'][-1]
     assert 'internal segmentation' in english['primary_limitation']
+    assert 'not a FunASR AutoModel backend' not in english['primary_limitation']
+    assert 'SGLang Omni' in english['operations'][-1]
     assert 'FunASR model' in english['primary_limitation']
     assert any('LocalAI' in item and 'GGUF' in item for item in english['fit'])
     assert not any(
