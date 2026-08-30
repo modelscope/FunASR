@@ -114,6 +114,27 @@ def test_moss_transcribe_diarize_contract_tracks_third_party_upstream(valid_regi
     assert 'LocalAI / moss-transcribe.cpp' in entry['interfaces']
     assert {'cpu', 'desktop-edge-gpu'} <= set(entry['hardware'])
 
+    runtime_paths = {path['id']: path for path in entry['runtime_paths']}
+    assert set(runtime_paths) == {'vllm', 'sglang-omni'}
+    assert runtime_paths['vllm']['tested'] == (
+        'vLLM 0.27.1 / Torch 2.13.0+cu129 / H100 80GB; FunASR adapter verified'
+    )
+    assert runtime_paths['sglang-omni']['tested'] == (
+        'SGLang Omni merge 8458f76a / single H100 upstream benchmark'
+    )
+
+    sglang_commands = '\n'.join(
+        command
+        for group in ('install', 'launch', 'health', 'smoke')
+        for command in runtime_paths['sglang-omni']['commands'][group]
+    )
+    assert 'git checkout 8458f76ab25f5ba9152b05929b40e07618aff2ce' in sglang_commands
+    assert 'sgl-omni serve' in sglang_commands
+    assert '--model-path .models/moss-transcribe-diarize' in sglang_commands
+    assert 'response_format=verbose_json' in sglang_commands
+    assert "payload.get('segments'" in sglang_commands
+    assert 'backend=\'sglang\'' not in sglang_commands
+
     install = '\n'.join(entry['commands']['install'])
     assert 'vllm[audio]' in install
     assert 'vllm-0.27.1%2Bcu129' in install
@@ -153,6 +174,7 @@ def test_moss_transcribe_diarize_contract_tracks_third_party_upstream(valid_regi
     ) in evidence_urls
     assert 'https://github.com/localai-org/moss-transcribe.cpp' in evidence_urls
     assert 'https://github.com/mudler/LocalAI' in evidence_urls
+    assert 'https://github.com/sgl-project/sglang-omni/pull/914' in evidence_urls
 
     english = entry['translations']['en']
     assert 'OpenMOSS' in english['summary']
@@ -179,6 +201,14 @@ def test_moss_transcribe_diarize_contract_tracks_third_party_upstream(valid_regi
         and '43dccc068506439cb633b382b6b98185baa837363d08cc5f7152ca89b0fdc3c8' in benchmark['audio']
         and 'S01 and S02' in benchmark['result']
         and 'contract smoke' in benchmark['qualification']
+        for benchmark in entry['benchmarks']
+    )
+    assert any(
+        benchmark['runtime'] == 'SGLang Omni merge 8458f76a'
+        and benchmark['hardware'] == 'NVIDIA H100 80GB'
+        and '1088 / 1088' in benchmark['result']
+        and 'diarization/timestamp correctness is not evaluated' in benchmark['qualification']
+        and benchmark['source'] == 'https://github.com/sgl-project/sglang-omni/pull/914'
         for benchmark in entry['benchmarks']
     )
 
@@ -442,6 +472,26 @@ def test_evidence_must_be_https(valid_registry):
     data['deployments'][0]['evidence'][0]['url'] = 'http://example.com/evidence'
 
     assert any('evidence URL must use https' in error for error in validate_registry(data))
+
+
+def test_runtime_paths_require_unique_ids_translations_and_commands(valid_registry):
+    data = copy.deepcopy(valid_registry)
+    entry = next(
+        item for item in data['deployments']
+        if item['id'] == 'moss-transcribe-diarize'
+    )
+    entry['runtime_paths'][1]['id'] = 'vllm'
+    del entry['runtime_paths'][0]['translations']['en']['summary']
+    del entry['runtime_paths'][1]['commands']['health']
+
+    errors = validate_registry(data)
+
+    assert 'moss-transcribe-diarize: duplicate runtime path id vllm' in errors
+    assert (
+        'moss-transcribe-diarize: runtime path vllm translations.en.summary is required'
+        in errors
+    )
+    assert 'moss-transcribe-diarize: runtime path vllm commands.health is required' in errors
 
 
 def test_benchmark_requires_reproducibility_fields(valid_registry):

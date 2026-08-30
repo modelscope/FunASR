@@ -47,6 +47,8 @@ BENCHMARK_FIELDS = (
     'verified',
 )
 DOWNLOAD_FIELDS = ('operating_system', 'architecture', 'backend', 'archive', 'url', 'sha256')
+RUNTIME_PATH_COMMAND_GROUPS = ('install', 'launch', 'health', 'smoke')
+RUNTIME_PATH_TRANSLATION_FIELDS = ('name', 'summary')
 
 
 def load_registry(path: Path) -> dict[str, Any]:
@@ -162,6 +164,64 @@ def validate_registry(data: dict[str, Any]) -> list[str]:
                     errors.append(
                         f'{label}: production-verified entry requires {field_name}'
                     )
+
+        runtime_paths = entry.get('runtime_paths', [])
+        if not isinstance(runtime_paths, list):
+            errors.append(f'{label}: runtime_paths must be a list')
+        else:
+            seen_runtime_path_ids: set[str] = set()
+            for runtime_index, runtime_path in enumerate(runtime_paths):
+                if not isinstance(runtime_path, dict):
+                    errors.append(f'{label}: runtime path {runtime_index} must be an object')
+                    continue
+                runtime_id = runtime_path.get('id')
+                runtime_label = (
+                    runtime_id if isinstance(runtime_id, str) and runtime_id
+                    else str(runtime_index)
+                )
+                if not isinstance(runtime_id, str) or not runtime_id:
+                    errors.append(f'{label}: runtime path {runtime_index} id is required')
+                elif runtime_id in seen_runtime_path_ids:
+                    errors.append(f'{label}: duplicate runtime path id {runtime_id}')
+                else:
+                    seen_runtime_path_ids.add(runtime_id)
+                if not runtime_path.get('tested'):
+                    errors.append(f'{label}: runtime path {runtime_label} tested is required')
+
+                runtime_translations = runtime_path.get('translations')
+                if not isinstance(runtime_translations, dict):
+                    errors.append(
+                        f'{label}: runtime path {runtime_label} translations must be an object'
+                    )
+                else:
+                    for language in LANGUAGES:
+                        content = runtime_translations.get(language)
+                        if not isinstance(content, dict):
+                            errors.append(
+                                f'{label}: runtime path {runtime_label} '
+                                f'translations.{language} must be an object'
+                            )
+                            continue
+                        for field in RUNTIME_PATH_TRANSLATION_FIELDS:
+                            if not content.get(field):
+                                errors.append(
+                                    f'{label}: runtime path {runtime_label} '
+                                    f'translations.{language}.{field} is required'
+                                )
+
+                runtime_commands = runtime_path.get('commands')
+                if not isinstance(runtime_commands, dict):
+                    errors.append(
+                        f'{label}: runtime path {runtime_label} commands must be an object'
+                    )
+                else:
+                    for group in RUNTIME_PATH_COMMAND_GROUPS:
+                        commands = runtime_commands.get(group)
+                        if not isinstance(commands, list) or not commands:
+                            errors.append(
+                                f'{label}: runtime path {runtime_label} '
+                                f'commands.{group} is required'
+                            )
 
         downloads = entry.get('downloads', [])
         if not isinstance(downloads, list):

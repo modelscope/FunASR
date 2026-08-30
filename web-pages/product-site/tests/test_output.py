@@ -128,6 +128,22 @@ def test_detail_commands_come_from_registry(built_site):
             assert command in rendered
 
 
+def test_moss_detail_renders_separate_vllm_and_sglang_runtime_paths(built_site):
+    for relative in (
+        'deploy/moss-transcribe-diarize.html',
+        'en/deploy/moss-transcribe-diarize.html',
+    ):
+        soup = read_soup(built_site / relative)
+        paths = soup.select('[data-runtime-path]')
+
+        assert [path['data-runtime-path'] for path in paths] == ['vllm', 'sglang-omni']
+        rendered = '\n'.join(path.get_text('\n') for path in paths)
+        assert 'vllm serve OpenMOSS-Team/MOSS-Transcribe-Diarize' in rendered
+        assert 'sgl-omni serve' in rendered
+        assert 'response_format=diarized_json' in rendered
+        assert 'response_format=verbose_json' in rendered
+
+
 def test_realtime_page_publishes_verified_v142_quickstart(built_site):
     registry = load_registry(SITE_ROOT / 'data' / 'deployments.json')
     entry = next(item for item in registry['deployments'] if item['id'] == 'realtime')
