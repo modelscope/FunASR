@@ -555,7 +555,11 @@ class Paraformer(torch.nn.Module):
         is_use_lm = (
             kwargs.get("lm_weight", 0.0) > 0.00001 and kwargs.get("lm_file", None) is not None
         )
-        pred_timestamp = kwargs.get("pred_timestamp", False)
+        pred_timestamp = (
+            kwargs["pred_timestamp"]
+            if "pred_timestamp" in kwargs
+            else kwargs.get("output_timestamp", False)
+        )
         if self.beam_search is None and (is_use_lm or is_use_ctc):
             logging.info("enable beam_search")
             self.init_beam_search(**kwargs)

@@ -1170,6 +1170,7 @@ class AutoModel:
                             {
                                 "start": vadsegment[0],
                                 "end": vadsegment[1],
+                                "text": rest["text"],
                                 "sentence": rest["text"],
                                 "timestamp": ts,
                             }
