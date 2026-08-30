@@ -390,6 +390,56 @@ class TestPuncModelNone(unittest.TestCase):
             ],
         )
 
+    @patch(
+        "funasr.auto.auto_model._get_punc_tokens",
+        return_value=["你", "好", "真", "的"],
+    )
+    @patch("funasr.auto.auto_model.slice_padding_audio_samples")
+    @patch("funasr.auto.auto_model.load_audio_text_image_video")
+    @patch("funasr.auto.auto_model.prepare_data_iterator")
+    def test_sentence_timestamp_ignores_sentencepiece_word_boundary_marker(
+        self, mock_prep, mock_load, mock_slice, _mock_get_punc_tokens
+    ):
+        punc_model = MagicMock()
+        punc_model.punc_list = None
+        am = self._make_auto_model(punc_model=punc_model)
+        tag = "<|zh|><|NEUTRAL|><|Speech|><|woitn|>"
+        results_seq = [
+            [{"key": "test_utt", "value": [[0, 2000]]}],
+            [
+                {
+                    "text": f"{tag}你好真的",
+                    "timestamp": [[0, 500], [500, 1000], [1000, 2000]],
+                    "words": ["你", "好", "▁真的"],
+                }
+            ],
+            [{"text": "你好，真的。", "punc_array": [1, 2, 1, 3]}],
+        ]
+        am.inference = MagicMock(side_effect=lambda *args, **kwargs: results_seq.pop(0))
+        mock_prep.return_value = (["test_utt"], [np.zeros(32000, dtype=np.float32)])
+        mock_load.return_value = np.zeros(32000, dtype=np.float32)
+        mock_slice.return_value = ([np.zeros(32000, dtype=np.float32)], [32000])
+
+        results = am.inference_with_vad("dummy_input", sentence_timestamp=True)
+
+        self.assertEqual(
+            results[0]["sentence_info"],
+            [
+                {
+                    "text": "你好，",
+                    "start": 0,
+                    "end": 1000,
+                    "timestamp": [[0, 500], [500, 1000]],
+                },
+                {
+                    "text": "真的。",
+                    "start": 1000,
+                    "end": 2000,
+                    "timestamp": [[1000, 1500], [1500, 2000]],
+                },
+            ],
+        )
+
     @patch("funasr.auto.auto_model.distribute_spk")
     @patch("funasr.auto.auto_model.postprocess")
     @patch("funasr.auto.auto_model.sv_chunk")
