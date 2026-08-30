@@ -193,7 +193,7 @@ def _merge_timestamp_units(text, words, timestamps, punc_array, punc_model):
         return None
 
     def normalize(value):
-        return "".join(value.split()).casefold()
+        return "".join(value.split()).replace("▁", "").casefold()
 
     if len(words) != len(timestamps):
         return None
