@@ -67,6 +67,20 @@ def test_windows_cuda_build_uses_cuda_toolkit_and_flags():
     assert "--target \"${{ matrix.build_target }}\"" in workflow
 
 
+def test_windows_cuda_archives_bundle_runtime_dependencies():
+    workflow = WORKFLOW.read_text(encoding="utf-8")
+
+    assert "-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded" in workflow
+    assert "-DGGML_OPENMP=OFF" in workflow
+    assert "cublas64_13.dll" in workflow
+    assert "cublasLt64_13.dll" in workflow
+    assert "NVIDIA-CUDA-LICENSE.txt" in workflow
+    assert "Audit Windows CUDA package dependencies" in workflow
+    assert "objdump -p" in workflow
+    assert "MSVCP140.dll" in workflow
+    assert "VCOMP140.DLL" in workflow
+
+
 def test_linux_vulkan_build_uses_vulkan_sdk_and_flags():
     workflow = WORKFLOW.read_text(encoding="utf-8")
 
