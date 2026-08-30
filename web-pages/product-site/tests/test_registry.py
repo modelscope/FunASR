@@ -146,6 +146,11 @@ def test_moss_transcribe_diarize_contract_tracks_third_party_upstream(valid_regi
     ) in evidence_urls
     assert 'https://github.com/modelscope/FunASR/pull/3558' in evidence_urls
     assert 'https://github.com/vllm-project/vllm/pull/48543' in evidence_urls
+    assert (
+        'https://github.com/vllm-project/recipes/blob/'
+        'd3f3136ad9d549ddf488f56c9b149ff4a92fc646/'
+        'models/OpenMOSS-Team/MOSS-Transcribe-Diarize.yaml'
+    ) in evidence_urls
     assert 'https://github.com/localai-org/moss-transcribe.cpp' in evidence_urls
     assert 'https://github.com/mudler/LocalAI' in evidence_urls
 
@@ -294,36 +299,39 @@ def test_sensevoice_tensorrt_contract_tracks_merged_native_runtime(valid_registr
     assert 'tensorrt version' in limitation
 
 
-def test_llama_cpp_contract_tracks_v025_release_assets(valid_registry):
+def test_llama_cpp_contract_tracks_v026_release_assets(valid_registry):
     entry = next(item for item in valid_registry['deployments'] if item['id'] == 'llama-cpp')
 
     assert entry['tested'] == {
-        'funasr': 'runtime-llamacpp-v0.2.5',
+        'funasr': 'runtime-llamacpp-v0.2.6',
         'runtime': 'llama.cpp@c8d43b10',
-        'verified': '2026-08-29',
+        'verified': '2026-08-30',
     }
-    assert len(entry['downloads']) == 9
+    assert len(entry['downloads']) == 10
     assert {item['archive']: item['sha256'] for item in entry['downloads']} == {
-        'funasr-llamacpp-linux-arm64.tar.gz': '4350ed49b1220374231ddafc84fed2dbe6a1d5e19d830edcb6a252d19d78b5db',
-        'funasr-llamacpp-linux-x64.tar.gz': '69d47bf724216093bedc89a50efe0a97c80a2f4b89367378a72d2d3d94e4f241',
-        'funasr-llamacpp-linux-x64-avx2.tar.gz': 'f9bb3fe78776ef86feb334b02488d3b1a5c16926a9a1cc79b3d5b1219ef1fb30',
-        'funasr-llamacpp-linux-x64-vulkan.tar.gz': '88cd52ba1ce92af9bf344944521a9d47ed9ceb424b312a5993369228c1e8c4fb',
-        'funasr-llamacpp-macos-arm64.tar.gz': 'c6b3cea2c5238ae48175c931365231b1c47351f95ca289455536de0a959648af',
-        'funasr-llamacpp-windows-x64.zip': 'dc90e85bc9a22477c5a8b556427fa5a6e0caf8951b5b6ec0237317406ce11bf5',
-        'funasr-llamacpp-windows-x64-avx2.zip': '6f19b8af0ce623122c767a0160bb8faabbc9666ae4f0cef1675cdf6250a9ea26',
-        'funasr-llamacpp-windows-x64-vulkan.zip': 'd51e34afed66c0898dba3d944cb17d2abc92c5fb7758fa4ee376561d5ce35a4c',
-        'funasr-llamacpp-windows-x64-cuda.zip': '3bb704e6b86f2e2e613aba84c361a51273e729c107183c7b69a1f2781c95cce8',
+        'funasr-llamacpp-linux-arm64.tar.gz': '7bca29cfa3c9a08e235a62212ca9e00f6656e59a8f07078966a2bfda1e5aa1f9',
+        'funasr-llamacpp-linux-x64.tar.gz': '779967de1c528c2be966bcc47f246e7d3e6fcdb748d9491263062f4120f35e52',
+        'funasr-llamacpp-linux-x64-avx2.tar.gz': 'aaebc5470f846ce915200b35d6e9f9bd0a0d3ed399d39e49bdeb7a1f1782bc70',
+        'funasr-llamacpp-linux-x64-vulkan.tar.gz': 'f02d41e98e9d4041f0896661007193810f025484d2175958f7c1313d5c90ec46',
+        'funasr-llamacpp-macos-arm64.tar.gz': 'bda59474202b887190f59d25b7b42c714469efae71276072c12fa0a38de68792',
+        'funasr-llamacpp-windows-x64.zip': 'f6a73a548413ba9fbaf2145263ea66ec53cbdad1fb11790dbeeee493e339492e',
+        'funasr-llamacpp-windows-x64-avx2.zip': '062cda8fefadd31c3e811227116daccf448a8520f4b0bb168d225c896e65ebbd',
+        'funasr-llamacpp-windows-x64-vulkan.zip': 'debf8007e55011cad06081e7b8a78972f1b8fe672bc324d41e650d68821f6a6a',
+        'funasr-llamacpp-windows-x64-cuda.zip': '148657911fb666b7af6ec43af2e23a0984e3259012b4c39f95631b717feb6840',
+        'funasr-llamacpp-windows-x64-cuda-blackwell.zip': 'e32961a753f40888182f352fa551159c5165a6a77718ae4ade316aedfea4b1c2',
     }
     assert all(item['url'].startswith(
-        'https://github.com/modelscope/FunASR/releases/download/runtime-llamacpp-v0.2.5/'
+        'https://github.com/modelscope/FunASR/releases/download/runtime-llamacpp-v0.2.6/'
     ) for item in entry['downloads'])
-    assert any('actions/runs/33256725222' in item['url'] for item in entry['evidence'])
+    assert any('actions/runs/33290555297' in item['url'] for item in entry['evidence'])
+    assert any('pull/3570' in item['url'] for item in entry['evidence'])
     assert any(
         'download-funasr-model.sh sensevoice ./funasr-gguf f16' in command
         for command in entry['commands']['install']
     )
     assert 'sensevoice-small-f16.gguf' in entry['commands']['launch'][0]
-    assert 'F16' in entry['translations']['en']['primary_limitation']
+    assert 'Blackwell' in entry['translations']['en']['primary_limitation']
+    assert 'cuBLAS' in entry['translations']['en']['primary_limitation']
     assert 'AMD' in entry['translations']['en']['primary_limitation']
     assert 'RX 9070 XT' in entry['translations']['en']['primary_limitation']
     assert 'Android/Mali' in entry['translations']['en']['primary_limitation']
