@@ -492,6 +492,215 @@ def test_completed_segment_keeps_aligned_partial_when_final_is_truncated_prefix(
     assert session.last_partial_text == ""
 
 
+def make_reported_long_segment_reconciliation_session(module, partial, partial_end_ms):
+    session = module.RealtimeASRSession(
+        FixedTextEngine(""),
+        {},
+        ControllableVad(),
+        sample_rate=16000,
+        chunk_ms=960,
+    )
+    session.last_partial_text = partial
+    session.last_partial_start_ms = 2920
+    session.last_partial_end_ms = partial_end_ms
+    session.last_partial_eligible = True
+    session.segment_partial_observation_count = 2
+    session.segment_best_partial_text = partial
+    session.segment_best_partial_start_ms = 2920
+    session.segment_best_partial_end_ms = partial_end_ms
+    session.segment_best_partial_observation_count = 2
+    return session
+
+
+def test_long_segment_recovers_when_final_regresses_after_shared_prefix():
+    module = load_service_module()
+    partial = (
+        "哇，不好意思，上午高雄交通比较混乱一点，我们不晓得我们有点。"
+        "哎，OK OK，好嘞，胡总各位长官。"
+    )
+    session = make_reported_long_segment_reconciliation_session(
+        module, partial, partial_end_ms=13500
+    )
+
+    text = session._reconcile_completed_segment_text(
+        "哇，不好意思，上午高雄交通比较混乱一点，我们不晓得我们有点哎。好，拜",
+        [2920, 14420],
+        decode_succeeded=True,
+    )
+
+    assert text == partial
+
+
+def test_long_segment_recovers_from_catastrophically_short_final():
+    module = load_service_module()
+    partial = (
+        "哇，不好意思，上午高雄交通比较混乱一点，我们不晓得我们有点。"
+        "哎，O K O K，好嘞，胡总各位长官。"
+    )
+    session = make_reported_long_segment_reconciliation_session(
+        module, partial, partial_end_ms=13500
+    )
+
+    text = session._reconcile_completed_segment_text(
+        "哇，嘿",
+        [2920, 14000],
+        decode_succeeded=True,
+    )
+
+    assert text == partial
+
+
+def test_long_segment_keeps_distinct_short_final_without_prefix_alignment():
+    module = load_service_module()
+    partial = "会议取消，稍后另行通知，请各位等待后续的完整安排和确认消息。"
+    session = make_reported_long_segment_reconciliation_session(
+        module, partial, partial_end_ms=13500
+    )
+
+    text = session._reconcile_completed_segment_text(
+        "项目批准",
+        [2920, 14000],
+        decode_succeeded=True,
+    )
+
+    assert text == "项目批准"
+
+
+def test_long_segment_does_not_trust_a_single_regressed_partial_observation():
+    module = load_service_module()
+    partial = (
+        "哇，不好意思，上午高雄交通比较混乱一点，我们不晓得我们有点。"
+        "哎，OK OK，好嘞，胡总各位长官。"
+    )
+    session = make_reported_long_segment_reconciliation_session(
+        module, partial, partial_end_ms=13500
+    )
+    session.segment_partial_observation_count = 1
+    final = "哇，不好意思，上午高雄交通比较混乱一点，我们不晓得我们有点哎。好，拜"
+
+    text = session._reconcile_completed_segment_text(
+        final,
+        [2920, 14420],
+        decode_succeeded=True,
+    )
+
+    assert text == final
+
+
+def test_long_segment_can_recover_the_best_earlier_partial():
+    module = load_service_module()
+    best_partial = (
+        "哇，不好意思，上午高雄交通比较混乱一点，我们不晓得我们有点哎，"
+        "OK OK OK。"
+    )
+    final = "哇，不好意思，上午高雄交通比较混乱一点，我们不晓得我们有点哎。好，拜"
+    session = make_reported_long_segment_reconciliation_session(
+        module, final, partial_end_ms=13500
+    )
+    session.segment_partial_observation_count = 10
+    session.segment_best_partial_text = best_partial
+    session.segment_best_partial_start_ms = 2920
+    session.segment_best_partial_end_ms = 12500
+    session.segment_best_partial_observation_count = 10
+
+    text = session._reconcile_completed_segment_text(
+        final,
+        [2920, 14420],
+        decode_succeeded=True,
+    )
+
+    assert text == best_partial
+
+
+def test_long_segment_keeps_clean_history_after_a_hallucinated_partial():
+    module = load_service_module()
+    best_partial = (
+        "哇，不好意思，上午高雄交通比较混乱一点，我们不晓得我们有点。"
+        "哎，OK OK，好嘞，胡总各位长官。"
+    )
+    final = "哇，不好意思，上午高雄交通比较混乱一点，我们不晓得我们有点哎。好，拜"
+    session = make_reported_long_segment_reconciliation_session(
+        module, best_partial, partial_end_ms=13500
+    )
+    session.segment_best_partial_observation_count = 8
+
+    session.last_partial_text = final
+    session.last_partial_start_ms = 2920
+    session.last_partial_end_ms = 13500
+    session.last_partial_eligible = False
+    session._reset_partial_history(preserve_best=True)
+
+    text = session._reconcile_completed_segment_text(
+        final,
+        [2920, 14420],
+        decode_succeeded=True,
+    )
+
+    assert text == best_partial
+
+
+def test_retry_extension_requires_a_longer_aligned_clean_transcript():
+    module = load_service_module()
+    fallback = (
+        "哇，不好意思，上午高雄交通比较混乱一点，我们不晓得我们有点哎，"
+        "OK OK OK。"
+    )
+    extension = (
+        "哇，不好意思，上午高雄交通比较混乱一点，我们不晓得我们有点。"
+        "哎，OK OK，好嘞，胡总各位长官。"
+    )
+
+    assert module._is_supported_transcript_extension(extension, fallback) is True
+    assert module._is_supported_transcript_extension("完全不同的较长结果文本", fallback) is False
+    assert module._is_supported_transcript_extension("哇，不好意思。", fallback) is False
+
+
+def test_completed_segment_retries_only_after_a_supported_regression():
+    module = load_service_module()
+    fallback = (
+        "哇，不好意思，上午高雄交通比较混乱一点，我们不晓得我们有点哎，"
+        "OK OK OK。"
+    )
+    extension = (
+        "哇，不好意思，上午高雄交通比较混乱一点，我们不晓得我们有点。"
+        "哎，OK OK，好嘞，胡总各位长官。"
+    )
+    engine = ScriptedTextEngine(
+        [
+            "哇，不好意思，上午高雄交通比较混乱一点，我们不晓得我们有点哎。好，拜",
+            extension,
+        ]
+    )
+    session = make_reported_long_segment_reconciliation_session(
+        module, fallback, partial_end_ms=13500
+    )
+    session.vllm_engine = engine
+    session.total_samples = int(14.42 * session.sample_rate)
+    session.audio_buffer = np.zeros(session.total_samples, dtype=np.float32)
+
+    text = session._decode_segment([2920, 14420])
+
+    assert text == extension
+    assert len(engine.generate_kwargs) == 2
+
+
+def test_completed_segment_does_not_retry_a_normal_final():
+    module = load_service_module()
+    final = "感谢各位今天参加会议，后续安排将在明天正式通知。"
+    engine = ScriptedTextEngine([final])
+    session = make_reported_long_segment_reconciliation_session(
+        module, "感谢各位今天参加会以。", partial_end_ms=13500
+    )
+    session.vllm_engine = engine
+    session.total_samples = int(14.42 * session.sample_rate)
+    session.audio_buffer = np.zeros(session.total_samples, dtype=np.float32)
+
+    text = session._decode_segment([2920, 14420])
+
+    assert text == final
+    assert len(engine.generate_kwargs) == 1
+
+
 def test_completed_segment_keeps_clean_aligned_partial_when_final_hallucinates():
     module = load_service_module()
     partial = "不好意思，上午杭高架交通比较混乱一点，我们不晓得我们有点耽误。"
