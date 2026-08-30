@@ -61,9 +61,13 @@ def test_online_cpu_docker_workflow_builds_and_smokes_the_server():
 
     required = [
         "runtime/dockerfile/Dockerfile.online.cpu",
-        "docker buildx build",
-        "--platform linux/amd64",
-        "--load",
+        "timeout-minutes: 120",
+        "docker/setup-buildx-action@v3",
+        "docker/build-push-action@v6",
+        "platforms: linux/amd64",
+        "load: true",
+        "cache-from: type=gha,scope=online-cpu-amd64",
+        "cache-to: type=gha,mode=max,scope=online-cpu-amd64",
         "funasr-wss-server-2pass",
         "--help",
         "bash -n runtime/dockerfile/online-cpu-entrypoint.sh",

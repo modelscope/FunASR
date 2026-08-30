@@ -31,21 +31,26 @@ concurrency:
 jobs:
   build-amd64:
     runs-on: ubuntu-24.04
-    timeout-minutes: 60
+    timeout-minutes: 120
     steps:
       - uses: actions/checkout@v4
 
       - name: Validate entrypoint
         run: bash -n runtime/dockerfile/online-cpu-entrypoint.sh
 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
       - name: Build source image
-        run: |
-          docker buildx build \
-            --platform linux/amd64 \
-            --load \
-            --tag funasr-online-cpu:test \
-            --file runtime/dockerfile/Dockerfile.online.cpu \
-            .
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: runtime/dockerfile/Dockerfile.online.cpu
+          platforms: linux/amd64
+          load: true
+          tags: funasr-online-cpu:test
+          cache-from: type=gha,scope=online-cpu-amd64
+          cache-to: type=gha,mode=max,scope=online-cpu-amd64
 
       - name: Smoke test linked server
         run: |
