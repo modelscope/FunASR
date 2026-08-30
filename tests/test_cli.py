@@ -546,3 +546,66 @@ def test_merge_subtitle_segments_drops_incomplete_word_surfaces():
             "timestamp": [[0, 900], [1000, 1900]],
         }
     ]
+
+
+def test_merge_subtitle_segments_keeps_chinese_words_and_balances_long_source():
+    text = (
+        "百分之九十九看过寄生虫的人都极易忽略一个藏着阶级真相与人性褶皱的细节"
+        "当金家母亲钟书成为朴家保姆后他给正在辅导多会英语的儿子基语送水果时"
+        "不仅毫无顾忌的未敲门还轻易的偷偷扭了一下儿子的耳朵可转身给辅导多送的"
+        "女儿基婷送水果时却被基婷厉声斥责质问他为何不敲门就擅自闯入这段看似"
+        "无关紧要的日常是凤俊浩用极简镜头精准刻画人物特质阶级心里的神来之笔"
+        "基婷斥责母亲从"
+    )
+    timestamps = [[index * 180, index * 180 + 120] for index in range(len(text))]
+
+    cues = cli.merge_subtitle_segments(
+        [
+            {
+                "start": timestamps[0][0],
+                "end": timestamps[-1][1],
+                "text": text,
+                "timestamp": timestamps,
+            }
+        ]
+    )
+
+    assert "".join(cue["text"] for cue in cues) == text
+    assert all(len(cue["text"]) <= 42 for cue in cues)
+    assert all(cue["end"] - cue["start"] <= 8000 for cue in cues)
+    assert min(len(cue["text"]) for cue in cues) >= 24
+
+    boundaries = {
+        "".join(cue["text"] for cue in cues[:index])
+        for index in range(1, len(cues))
+    }
+    for phrase in ("成为", "扭了一下", "无关紧要", "神来之笔"):
+        start = text.index(phrase)
+        assert not any(start < len(boundary) < start + len(phrase) for boundary in boundaries)
+
+
+def test_merge_subtitle_segments_avoids_single_character_phrase_breaks():
+    phrase = "钟书成为朴家保姆后他轻易的偷偷扭了一下儿子的耳朵"
+    text = phrase * 4
+    timestamps = [[index * 180, index * 180 + 120] for index in range(len(text))]
+
+    cues = cli.merge_subtitle_segments(
+        [{"start": 0, "end": timestamps[-1][1], "text": text, "timestamp": timestamps}]
+    )
+
+    boundary_offsets = []
+    offset = 0
+    for cue in cues[:-1]:
+        offset += len(cue["text"])
+        boundary_offsets.append(offset)
+
+    search_from = 0
+    while True:
+        phrase_start = text.find("扭了一下", search_from)
+        if phrase_start < 0:
+            break
+        assert not any(
+            phrase_start < boundary < phrase_start + len("扭了一下")
+            for boundary in boundary_offsets
+        )
+        search_from = phrase_start + 1
