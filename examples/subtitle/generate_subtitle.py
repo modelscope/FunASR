@@ -14,7 +14,7 @@ import sys
 import os
 import re
 
-from funasr.cli import merge_subtitle_segments
+from funasr.cli import _sentence_timestamp_words, merge_subtitle_segments
 
 
 def clean_text(text):
@@ -112,20 +112,22 @@ def main():
 
     segments = []
     result_item = result[0]
-    for seg in result_item.get("sentence_info", []) or []:
+    sentence_words = _sentence_timestamp_words(result_item)
+    for index, seg in enumerate(result_item.get("sentence_info", []) or []):
         text = clean_text(seg.get("sentence") or seg.get("text", ""))
         start = int(seg.get("start", 0) or 0)
         end = int(seg.get("end", 0) or 0)
         if text and end > start:
-            segments.append(
-                {
-                    "start": start,
-                    "end": end,
-                    "text": text,
-                    "spk": seg.get("spk"),
-                    "timestamp": seg.get("timestamp") or seg.get("timestamps"),
-                }
-            )
+            item = {
+                "start": start,
+                "end": end,
+                "text": text,
+                "spk": seg.get("spk"),
+                "timestamp": seg.get("timestamp") or seg.get("timestamps"),
+            }
+            if sentence_words[index]:
+                item["words"] = sentence_words[index]
+            segments.append(item)
 
     if not segments:
         text = clean_text(result_item.get("text", ""))
