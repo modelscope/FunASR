@@ -145,6 +145,30 @@ jobs:
               -DGGML_FMA=OFF
               -DGGML_F16C=OFF
               -DGGML_BMI2=OFF
+          - os: windows-latest
+            name: windows-x64-cuda-blackwell
+            cuda: true
+            cuda_version: '13.2.0'
+            cuda_architectures: '120'
+            build_target: llama-funasr-sensevoice
+            timeout_minutes: 90
+            cmake_flags: >-
+              -DGGML_NATIVE=OFF
+              -DGGML_CUDA=ON
+              -DGGML_CUDA_FORCE_CUBLAS=ON
+              -DGGML_CUDA_FA=OFF
+              -DGGML_CUDA_NCCL=OFF
+              -DGGML_CUDA_GRAPHS=OFF
+              -DGGML_AVX=OFF
+              -DGGML_AVX2=OFF
+              -DGGML_AVX_VNNI=OFF
+              -DGGML_AVX512=OFF
+              -DGGML_AVX512_VBMI=OFF
+              -DGGML_AVX512_VNNI=OFF
+              -DGGML_AVX512_BF16=OFF
+              -DGGML_FMA=OFF
+              -DGGML_F16C=OFF
+              -DGGML_BMI2=OFF
     runs-on: ${{ matrix.os }}
     timeout-minutes: ${{ matrix.timeout_minutes || 30 }}
     defaults:
@@ -257,4 +281,4 @@ jobs:
           gh release create "$tag" dist/* \
             --repo "${{ github.repository }}" \
             --title "FunASR llama.cpp runtime $version" \
-            --notes "Prebuilt self-contained binaries for the FunASR llama.cpp / GGUF runtime: SenseVoice, Paraformer and Fun-ASR-Nano with built-in FSMN-VAD. Download the default quantized model with \`bash download-funasr-model.sh <sensevoice|paraformer|nano>\` (the helper requires the Hugging Face CLI: \`pip install -U huggingface_hub\`), then run \`llama-funasr-cli\` / \`llama-funasr-sensevoice\` / \`llama-funasr-paraformer\`. Use the default x64 asset for maximum CPU compatibility; use the x64-avx2 asset on CPUs with AVX2/FMA/F16C/BMI2 for higher throughput. The Vulkan assets are \`linux-x64-vulkan\` and \`windows-x64-vulkan\`; they require a working Vulkan driver/ICD and enable SenseVoiceSmall graph execution with \`llama-funasr-sensevoice ... --backend vulkan\`. Build from source with \`-DGGML_VULKAN=ON\` to validate platform-specific GPU stacks. The Windows CUDA asset is \`windows-x64-cuda\`; it requires an NVIDIA driver compatible with the CUDA Toolkit version configured by the release workflow, targets CUDA architecture 86, and enables SenseVoiceSmall graph execution with \`llama-funasr-sensevoice ... --backend cuda\`. Build from source for other GPU architectures. No Python ASR runtime or local build is required. Docs: $docs"
+            --notes "Prebuilt self-contained binaries for the FunASR llama.cpp / GGUF runtime: SenseVoice, Paraformer and Fun-ASR-Nano with built-in FSMN-VAD. Download the default quantized model with \`bash download-funasr-model.sh <sensevoice|paraformer|nano>\` (the helper requires the Hugging Face CLI: \`pip install -U huggingface_hub\`), then run \`llama-funasr-cli\` / \`llama-funasr-sensevoice\` / \`llama-funasr-paraformer\`. Use the default x64 asset for maximum CPU compatibility; use the x64-avx2 asset on CPUs with AVX2/FMA/F16C/BMI2 for higher throughput. The Vulkan assets are \`linux-x64-vulkan\` and \`windows-x64-vulkan\`; they require a working Vulkan driver/ICD and enable SenseVoiceSmall graph execution with \`llama-funasr-sensevoice ... --backend vulkan\`. Build from source with \`-DGGML_VULKAN=ON\` to validate platform-specific GPU stacks. The Windows CUDA assets are \`windows-x64-cuda\` for CUDA architecture 86 and \`windows-x64-cuda-blackwell\` for CUDA architecture 120 (RTX 50 / Blackwell); both require a compatible NVIDIA driver and enable SenseVoiceSmall graph execution with \`llama-funasr-sensevoice ... --backend cuda\`. Build from source for other GPU architectures. A successful CI build verifies code generation and archive integrity, not execution on physical Blackwell hardware. No Python ASR runtime or local build is required. Docs: $docs"

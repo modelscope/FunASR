@@ -93,11 +93,11 @@ FSMN-VAD without Python.
 
 ### Optional Windows CUDA backend for SenseVoiceSmall
 
-The CPU release ZIPs are portable packages. Tagged releases also publish
-`funasr-llamacpp-windows-x64-cuda.zip` for SenseVoiceSmall graph execution on
-NVIDIA GPUs that match CUDA architecture 86. Download the CUDA ZIP from
-[runtime-llamacpp-v0.1.9](https://github.com/modelscope/FunASR/releases/tag/runtime-llamacpp-v0.1.9),
-then select the backend at runtime:
+The CPU release ZIPs are portable packages. Tagged releases publish separate
+SenseVoiceSmall CUDA packages: `funasr-llamacpp-windows-x64-cuda.zip` targets
+CUDA architecture 86, while `funasr-llamacpp-windows-x64-cuda-blackwell.zip`
+targets CUDA architecture 120 (`sm_120`) for RTX 50 / Blackwell GPUs. Select the
+matching archive, then enable the backend at runtime:
 
 ```bash
 # From the extracted windows-x64-cuda package:
@@ -105,7 +105,9 @@ then select the backend at runtime:
   -m sensevoice-small-q8.gguf --vad fsmn-vad.gguf -a sample.wav --backend cuda
 ```
 
-Build from source to target other GPU architectures:
+The Blackwell package uses the same command from its extracted directory. Build
+from source to target other GPU architectures or to reproduce the architecture
+120 build locally:
 
 ```bash
 cmake -B build-cuda -DCMAKE_BUILD_TYPE=Release -DGGML_CUDA=ON \
@@ -115,10 +117,11 @@ cmake --build build-cuda -j --target llama-funasr-sensevoice
   -m sensevoice-small-f16.gguf -a sample.wav --backend cuda
 ```
 
-Use the matching `CMAKE_CUDA_ARCHITECTURES` value for your GPU. RTX 50 /
-Blackwell cards report compute capability 12.0 (`sm_120`), so the current
-`windows-x64-cuda` prebuilt package for architecture 86 will not cover those
-cards.
+Use the matching `CMAKE_CUDA_ARCHITECTURES` value for your GPU. A successful
+release workflow build verifies architecture 120 code generation and ZIP
+integrity; it does not prove execution on physical Blackwell hardware. Keep
+hardware-specific reports open until the matching archive is retested on the
+reported GPU.
 
 `--backend cpu` remains the default and is what the portable cross-platform
 prebuilt binaries use. The CUDA package requires an NVIDIA driver compatible
