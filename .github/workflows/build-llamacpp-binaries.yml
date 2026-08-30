@@ -135,6 +135,34 @@ jobs:
               -DGGML_CUDA_FA=OFF
               -DGGML_CUDA_NCCL=OFF
               -DGGML_CUDA_GRAPHS=OFF
+              -DGGML_OPENMP=OFF
+              -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded
+              -DGGML_AVX=OFF
+              -DGGML_AVX2=OFF
+              -DGGML_AVX_VNNI=OFF
+              -DGGML_AVX512=OFF
+              -DGGML_AVX512_VBMI=OFF
+              -DGGML_AVX512_VNNI=OFF
+              -DGGML_AVX512_BF16=OFF
+              -DGGML_FMA=OFF
+              -DGGML_F16C=OFF
+              -DGGML_BMI2=OFF
+          - os: windows-latest
+            name: windows-x64-cuda-blackwell
+            cuda: true
+            cuda_version: '13.2.0'
+            cuda_architectures: '120'
+            build_target: llama-funasr-sensevoice
+            timeout_minutes: 90
+            cmake_flags: >-
+              -DGGML_NATIVE=OFF
+              -DGGML_CUDA=ON
+              -DGGML_CUDA_FORCE_CUBLAS=ON
+              -DGGML_CUDA_FA=OFF
+              -DGGML_CUDA_NCCL=OFF
+              -DGGML_CUDA_GRAPHS=OFF
+              -DGGML_OPENMP=OFF
+              -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded
               -DGGML_AVX=OFF
               -DGGML_AVX2=OFF
               -DGGML_AVX_VNNI=OFF
@@ -226,12 +254,47 @@ jobs:
           cp build/bin/llama-funasr-* pkg/ 2>/dev/null || true
           cp build/bin/Release/llama-funasr-* pkg/ 2>/dev/null || true
           cp README.md download-funasr-model.sh pkg/ 2>/dev/null || true
+          if [ "${{ matrix.cuda }}" = "true" ]; then
+            cuda_root="$(cygpath -u "$CUDA_PATH")"
+            for dll in cublas64_13.dll cublasLt64_13.dll; do
+              source_path="$(find "$cuda_root" -type f -iname "$dll" -print -quit)"
+              if [ -z "$source_path" ]; then
+                echo "Missing CUDA redistributable: $dll" >&2
+                exit 1
+              fi
+              cp "$source_path" pkg/
+            done
+            license_path="$(find "$cuda_root" -maxdepth 3 -type f \
+              \( -iname 'EULA.txt' -o -iname 'LICENSE' \) -print -quit)"
+            if [ -z "$license_path" ]; then
+              echo "Missing CUDA redistribution license" >&2
+              exit 1
+            fi
+            cp "$license_path" pkg/NVIDIA-CUDA-LICENSE.txt
+          fi
           echo "--- packaged binaries ---"; ls -la pkg
           if [ "${{ runner.os }}" = "Windows" ]; then
             7z a "funasr-llamacpp-${{ matrix.name }}.zip" ./pkg/*
           else
             tar czf "funasr-llamacpp-${{ matrix.name }}.tar.gz" -C pkg .
           fi
+      - name: Audit Windows CUDA package dependencies
+        if: matrix.cuda
+        run: |
+          exe="pkg/llama-funasr-sensevoice.exe"
+          test -f "$exe"
+          test -f pkg/cublas64_13.dll
+          test -f pkg/cublasLt64_13.dll
+          test -f pkg/NVIDIA-CUDA-LICENSE.txt
+          dependencies="$(objdump -p "$exe" | awk '/DLL Name:/ { print $3 }')"
+          printf '%s\n' "$dependencies"
+          grep -Fxi 'cublas64_13.dll' <<<"$dependencies"
+          for dll in MSVCP140.dll VCOMP140.DLL VCRUNTIME140.dll VCRUNTIME140_1.dll; do
+            if grep -Fxi "$dll" <<<"$dependencies"; then
+              echo "Unexpected dynamic runtime dependency: $dll" >&2
+              exit 1
+            fi
+          done
       - uses: actions/upload-artifact@v4
         with:
           name: funasr-llamacpp-${{ matrix.name }}
@@ -257,4 +320,4 @@ jobs:
           gh release create "$tag" dist/* \
             --repo "${{ github.repository }}" \
             --title "FunASR llama.cpp runtime $version" \
-            --notes "Prebuilt self-contained binaries for the FunASR llama.cpp / GGUF runtime: SenseVoice, Paraformer and Fun-ASR-Nano with built-in FSMN-VAD. Download the default quantized model with \`bash download-funasr-model.sh <sensevoice|paraformer|nano>\` (the helper requires the Hugging Face CLI: \`pip install -U huggingface_hub\`), then run \`llama-funasr-cli\` / \`llama-funasr-sensevoice\` / \`llama-funasr-paraformer\`. Use the default x64 asset for maximum CPU compatibility; use the x64-avx2 asset on CPUs with AVX2/FMA/F16C/BMI2 for higher throughput. The Vulkan assets are \`linux-x64-vulkan\` and \`windows-x64-vulkan\`; they require a working Vulkan driver/ICD and enable SenseVoiceSmall graph execution with \`llama-funasr-sensevoice ... --backend vulkan\`. Build from source with \`-DGGML_VULKAN=ON\` to validate platform-specific GPU stacks. The Windows CUDA asset is \`windows-x64-cuda\`; it requires an NVIDIA driver compatible with the CUDA Toolkit version configured by the release workflow, targets CUDA architecture 86, and enables SenseVoiceSmall graph execution with \`llama-funasr-sensevoice ... --backend cuda\`. Build from source for other GPU architectures. No Python ASR runtime or local build is required. Docs: $docs"
+            --notes "Prebuilt self-contained binaries for the FunASR llama.cpp / GGUF runtime: SenseVoice, Paraformer and Fun-ASR-Nano with built-in FSMN-VAD. Download the default quantized model with \`bash download-funasr-model.sh <sensevoice|paraformer|nano>\` (the helper requires the Hugging Face CLI: \`pip install -U huggingface_hub\`), then run \`llama-funasr-cli\` / \`llama-funasr-sensevoice\` / \`llama-funasr-paraformer\`. Use the default x64 asset for maximum CPU compatibility; use the x64-avx2 asset on CPUs with AVX2/FMA/F16C/BMI2 for higher throughput. The Vulkan assets are \`linux-x64-vulkan\` and \`windows-x64-vulkan\`; they require a working Vulkan driver/ICD and enable SenseVoiceSmall graph execution with \`llama-funasr-sensevoice ... --backend vulkan\`. Build from source with \`-DGGML_VULKAN=ON\` to validate platform-specific GPU stacks. The Windows CUDA assets are \`windows-x64-cuda\` for CUDA architecture 86 and \`windows-x64-cuda-blackwell\` for CUDA architecture 120 (RTX 50 / Blackwell); both require a compatible NVIDIA driver and enable SenseVoiceSmall graph execution with \`llama-funasr-sensevoice ... --backend cuda\`. Build from source for other GPU architectures. A successful CI build verifies code generation and archive integrity, not execution on physical Blackwell hardware. No Python ASR runtime or local build is required. Docs: $docs"

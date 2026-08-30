@@ -16,6 +16,19 @@ def test_windows_cuda_release_asset_is_in_matrix():
     assert "timeout_minutes: 90" in workflow
 
 
+def test_windows_blackwell_cuda_release_asset_is_in_matrix():
+    workflow = WORKFLOW.read_text(encoding="utf-8")
+    entry = workflow.split("name: windows-x64-cuda-blackwell", maxsplit=1)[1].split(
+        "          - os:", maxsplit=1
+    )[0]
+
+    assert "cuda: true" in entry
+    assert "cuda_version: '13.2.0'" in entry
+    assert "cuda_architectures: '120'" in entry
+    assert "build_target: llama-funasr-sensevoice" in entry
+    assert "timeout_minutes: 90" in entry
+
+
 def test_linux_vulkan_release_asset_is_in_matrix():
     workflow = WORKFLOW.read_text(encoding="utf-8")
 
@@ -54,6 +67,20 @@ def test_windows_cuda_build_uses_cuda_toolkit_and_flags():
     assert "--target \"${{ matrix.build_target }}\"" in workflow
 
 
+def test_windows_cuda_archives_bundle_runtime_dependencies():
+    workflow = WORKFLOW.read_text(encoding="utf-8")
+
+    assert "-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded" in workflow
+    assert "-DGGML_OPENMP=OFF" in workflow
+    assert "cublas64_13.dll" in workflow
+    assert "cublasLt64_13.dll" in workflow
+    assert "NVIDIA-CUDA-LICENSE.txt" in workflow
+    assert "Audit Windows CUDA package dependencies" in workflow
+    assert "objdump -p" in workflow
+    assert "MSVCP140.dll" in workflow
+    assert "VCOMP140.DLL" in workflow
+
+
 def test_linux_vulkan_build_uses_vulkan_sdk_and_flags():
     workflow = WORKFLOW.read_text(encoding="utf-8")
 
@@ -88,10 +115,13 @@ def test_release_notes_explain_cpu_and_cuda_windows_assets():
     assert "--backend cuda" in readme
     assert "Windows CUDA" in readme
     assert "CUDA architecture 86" in readme
+    assert "windows-x64-cuda-blackwell" in readme
+    assert "CUDA architecture 120" in readme
     assert "Build from source" in readme
     assert "other GPU architectures" in readme
     assert "CMAKE_CUDA_ARCHITECTURES=120" in readme
     assert "sm_120" in readme
+    assert "does not prove execution on physical Blackwell hardware" in readme
 
 
 def test_release_notes_explain_vulkan_linux_asset():
@@ -133,6 +163,16 @@ def test_github_release_notes_mention_vulkan_asset():
     assert "windows-x64-vulkan" in release_notes
     assert "--backend vulkan" in release_notes
     assert "GGML_VULKAN=ON" in release_notes
+
+
+def test_github_release_notes_distinguish_cuda_architecture_assets():
+    workflow = WORKFLOW.read_text(encoding="utf-8")
+    release_notes = workflow.split('--notes "', maxsplit=1)[1]
+
+    assert "windows-x64-cuda-blackwell" in release_notes
+    assert "CUDA architecture 86" in release_notes
+    assert "CUDA architecture 120" in release_notes
+
 
 def test_readme_documents_lightweight_http_server():
     readme = (ROOT / "runtime" / "llama.cpp" / "README.md").read_text(encoding="utf-8")
