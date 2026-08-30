@@ -98,6 +98,8 @@
         {"label": "merged native SGLang Omni MOSS runtime and H100 benchmark", "url": "https://github.com/sgl-project/sglang-omni/pull/914"},
         {"label": "FunASR ecosystem integration guide", "url": "https://github.com/modelscope/FunASR/blob/main/docs/moss_transcribe_diarize.md"},
         {"label": "FunASR AutoModel adapter merge and exact-head CI", "url": "https://github.com/modelscope/FunASR/pull/3558"},
+        {"label": "FunClip v2.2.0 MOSS speaker-clipping guide", "url": "https://www.funasr.com/en/blog/funclip-v2-2-0-moss-speaker-clipping.html"},
+        {"label": "FunClip v2.2.0 release and checksums", "url": "https://github.com/modelscope/FunClip/releases/tag/v2.2.0"},
         {"label": "moss-transcribe.cpp third-party C++17 and GGUF runtime", "url": "https://github.com/localai-org/moss-transcribe.cpp"},
         {"label": "LocalAI third-party moss-transcribe-cpp backend", "url": "https://github.com/mudler/LocalAI"}
       ],

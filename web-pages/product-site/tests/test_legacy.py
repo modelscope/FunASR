@@ -421,3 +421,53 @@ def test_public_pages_do_not_overstate_sensevoice_language_or_speed_claims():
             violations.append(path.relative_to(LEGACY).as_posix())
 
     assert violations == []
+
+
+def test_funclip_v220_moss_release_pages_are_bilingual_indexed_and_verifiable():
+    slug = 'funclip-v2-2-0-moss-speaker-clipping.html'
+    pages = {
+        'zh': LEGACY / 'blog' / slug,
+        'en': LEGACY / 'en' / 'blog' / slug,
+    }
+    language_contracts = {
+        'zh': ('第三方模型', '段级时间戳', '不接外部 VAD 或说话人模型'),
+        'en': ('third-party model', 'segment-level timestamps', 'no external VAD or speaker model'),
+    }
+
+    for language, path in pages.items():
+        text = path.read_text(encoding='utf-8')
+        soup = BeautifulSoup(text, 'html.parser')
+        hrefs = {link.get('href') for link in soup.select('a[href]')}
+
+        assert 'FunClip v2.2.0' in text
+        assert 'OpenMOSS-Team/MOSS-Transcribe-Diarize' in text
+        assert 'e8681d68e7042738ffca8ac8212bc8fcb1131ab8' in text
+        assert '/v1/audio/transcriptions' in text
+        assert 'response_format=json' in text
+        assert '994c5d9cf392b74b36284d526eca8bada1560a3e7825ab7baa9c673a1b4ef216' in text
+        assert '4f5a7d33d9ea65467f29b55b15ed5be18e64de7e57e2f9f36fe51a23b40557e7' in text
+        assert all(marker in text for marker in language_contracts[language])
+        assert {
+            'https://github.com/modelscope/FunClip/releases/tag/v2.2.0',
+            '/deploy/moss-transcribe-diarize.html'
+            if language == 'zh'
+            else '/en/deploy/moss-transcribe-diarize.html',
+        } <= hrefs
+
+        route = f'/{"" if language == "zh" else "en/"}blog/{slug}'
+        peer = f'/{"en/" if language == "zh" else ""}blog/{slug}'
+        assert soup.select_one('link[rel="canonical"]')['href'].endswith(route)
+        assert soup.select_one(f'link[rel="alternate"][href$="{peer}"]')
+        image = soup.select_one('article img[src="/img/funclip-v2-1-0-interface.jpg"]')
+        assert image
+        metadata = json.loads(soup.select_one('script[type="application/ld+json"]').string)
+        assert metadata['datePublished'] == '2026-08-31'
+        assert metadata['dateModified'] == '2026-08-31'
+
+    zh_index = (LEGACY / 'blog' / 'index.html').read_text(encoding='utf-8')
+    en_index = (LEGACY / 'en' / 'blog' / 'index.html').read_text(encoding='utf-8')
+    sitemap = (LEGACY / 'sitemap.xml').read_text(encoding='utf-8')
+    assert f'/blog/{slug}' in zh_index
+    assert f'/en/blog/{slug}' in en_index
+    assert f'https://www.funasr.com/blog/{slug}' in sitemap
+    assert f'https://www.funasr.com/en/blog/{slug}' in sitemap

@@ -12,6 +12,8 @@
   <url><loc>https://www.funasr.com/en/ecosystem.html</loc><priority>0.8</priority><changefreq>weekly</changefreq></url>
   <url><loc>https://www.funasr.com/blog/</loc><priority>0.9</priority><changefreq>weekly</changefreq></url>
   <url><loc>https://www.funasr.com/en/blog/</loc><priority>0.9</priority><changefreq>weekly</changefreq></url>
+  <url><loc>https://www.funasr.com/blog/funclip-v2-2-0-moss-speaker-clipping.html</loc><lastmod>2026-08-31</lastmod><priority>0.9</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://www.funasr.com/en/blog/funclip-v2-2-0-moss-speaker-clipping.html</loc><lastmod>2026-08-31</lastmod><priority>0.9</priority><changefreq>monthly</changefreq></url>
   <url><loc>https://www.funasr.com/blog/funasr-v1-4-5-pypi-llama-cpp-release.html</loc><lastmod>2026-08-28</lastmod><priority>0.9</priority><changefreq>monthly</changefreq></url>
   <url><loc>https://www.funasr.com/en/blog/funasr-v1-4-5-pypi-llama-cpp-release.html</loc><lastmod>2026-08-28</lastmod><priority>0.9</priority><changefreq>monthly</changefreq></url>
   <url><loc>https://www.funasr.com/blog/funasr-v1-4-0-pypi-release.html</loc><lastmod>2026-07-31</lastmod><priority>0.9</priority><changefreq>monthly</changefreq></url>
