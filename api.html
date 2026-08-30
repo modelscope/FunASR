@@ -9971,7 +9971,7 @@
         )
         time2 = time.perf_counter()
 </code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/monotonic_aligner/model.py#L182" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
-<div class="api-detail" id="e159"><span class="dtag badge-c">class</span><h2>MossTranscribeDiarize</h2><div class="dmod">funasr.models.moss_transcribe_diarize · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/moss_transcribe_diarize/model.py#L193" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><ul>
+<div class="api-detail" id="e159"><span class="dtag badge-c">class</span><h2>MossTranscribeDiarize</h2><div class="dmod">funasr.models.moss_transcribe_diarize · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/moss_transcribe_diarize/model.py#L275" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><ul>
 <li><code>End</code> — to-end ASR, diarization, timestamps, and acoustic-event inference.</li>
 </ul>
 </div><details class="src-block"><summary>📄 Source code</summary><pre><code>class MossTranscribeDiarize(nn.Module):
@@ -9987,8 +9987,8 @@
             )
 
         self.backend = kwargs.get(&quot;backend&quot;, &quot;hf&quot;).lower()
-        if self.backend not in {&quot;hf&quot;, &quot;vllm&quot;}:
-            raise ValueError(&quot;backend must be &#x27;hf&#x27; or &#x27;vllm&#x27;&quot;)
+        if self.backend not in {&quot;hf&quot;, &quot;vllm&quot;, &quot;sglang&quot;}:
+            raise ValueError(&quot;backend must be &#x27;hf&#x27;, &#x27;vllm&#x27;, or &#x27;sglang&#x27;&quot;)
         self.model_path = (
             kwargs.get(&quot;model_path&quot;) or kwargs.get(&quot;model&quot;) or DEFAULT_MODEL
         )
@@ -10004,9 +10004,9 @@
         self.vllm_base_url = kwargs.get(&quot;vllm_base_url&quot;)
         self.vllm_model = kwargs.get(&quot;vllm_model&quot;, DEFAULT_MODEL)
         self.vllm_api_key = kwargs.get(&quot;vllm_api_key&quot;, &quot;EMPTY&quot;)
-</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/moss_transcribe_diarize/model.py#L193" target="_blank" class="src-more">View full source on GitHub →</a></details><h3 class="mt">Methods</h3><div class="mblk"><code>.forward(**kwargs)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/moss_transcribe_diarize/model.py#L298" target="_blank" class="gh-link">L298</a><div class="mdoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source</summary><pre><code>    def forward(self, **kwargs):
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/moss_transcribe_diarize/model.py#L275" target="_blank" class="src-more">View full source on GitHub →</a></details><h3 class="mt">Methods</h3><div class="mblk"><code>.forward(**kwargs)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/moss_transcribe_diarize/model.py#L387" target="_blank" class="gh-link">L387</a><div class="mdoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source</summary><pre><code>    def forward(self, **kwargs):
         raise NotImplementedError(&quot;MOSS-Transcribe-Diarize supports inference only&quot;)
-</code></pre></details></div><div class="mblk"><code>.inference(data_in, data_lengths, key, **kwargs)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/moss_transcribe_diarize/model.py#L301" target="_blank" class="gh-link">L301</a><div class="mdoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source</summary><pre><code>    def inference(self, data_in, data_lengths=None, key=None, **kwargs):
+</code></pre></details></div><div class="mblk"><code>.inference(data_in, data_lengths, key, **kwargs)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/moss_transcribe_diarize/model.py#L390" target="_blank" class="gh-link">L390</a><div class="mdoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source</summary><pre><code>    def inference(self, data_in, data_lengths=None, key=None, **kwargs):
         del data_lengths
         started = time.perf_counter()
         inputs = list(data_in) if isinstance(data_in, (list, tuple)) else [data_in]
@@ -10024,6 +10024,9 @@
                     results.append(
                         _result_from_transcript(keys[index], response[&quot;text&quot;])
                     )
+            elif self.backend == &quot;sglang&quot;:
+                response = self._transcribe_sglang(audio, **kwargs)
+                results.append(_result_from_sglang_response(keys[index], response))
             else:
                 transcript = self._transcribe_hf(audio, **kwargs)
                 results.append(_result_from_transcript(keys[index], transcript))
@@ -10032,10 +10035,10 @@
             &quot;forward&quot;: time.perf_counter() - started,
         }
 </code></pre></details></div></div>
-<div class="api-detail" id="e160"><span class="dtag badge-m">method</span><h2><code>MossTranscribeDiarize.forward(**kwargs)</code></h2><div class="dmod">funasr.models.moss_transcribe_diarize.MossTranscribeDiarize · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/moss_transcribe_diarize/model.py#L298" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source code</summary><pre><code>    def forward(self, **kwargs):
+<div class="api-detail" id="e160"><span class="dtag badge-m">method</span><h2><code>MossTranscribeDiarize.forward(**kwargs)</code></h2><div class="dmod">funasr.models.moss_transcribe_diarize.MossTranscribeDiarize · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/moss_transcribe_diarize/model.py#L387" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source code</summary><pre><code>    def forward(self, **kwargs):
         raise NotImplementedError(&quot;MOSS-Transcribe-Diarize supports inference only&quot;)
 </code></pre></details></div>
-<div class="api-detail" id="e161"><span class="dtag badge-m">method</span><h2><code>MossTranscribeDiarize.inference(data_in, data_lengths, key, **kwargs)</code></h2><div class="dmod">funasr.models.moss_transcribe_diarize.MossTranscribeDiarize · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/moss_transcribe_diarize/model.py#L301" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source code</summary><pre><code>    def inference(self, data_in, data_lengths=None, key=None, **kwargs):
+<div class="api-detail" id="e161"><span class="dtag badge-m">method</span><h2><code>MossTranscribeDiarize.inference(data_in, data_lengths, key, **kwargs)</code></h2><div class="dmod">funasr.models.moss_transcribe_diarize.MossTranscribeDiarize · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/moss_transcribe_diarize/model.py#L390" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source code</summary><pre><code>    def inference(self, data_in, data_lengths=None, key=None, **kwargs):
         del data_lengths
         started = time.perf_counter()
         inputs = list(data_in) if isinstance(data_in, (list, tuple)) else [data_in]
@@ -10053,6 +10056,9 @@
                     results.append(
                         _result_from_transcript(keys[index], response[&quot;text&quot;])
                     )
+            elif self.backend == &quot;sglang&quot;:
+                response = self._transcribe_sglang(audio, **kwargs)
+                results.append(_result_from_sglang_response(keys[index], response))
             else:
                 transcript = self._transcribe_hf(audio, **kwargs)
                 results.append(_result_from_transcript(keys[index], transcript))
