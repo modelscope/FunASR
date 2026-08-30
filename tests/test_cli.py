@@ -299,3 +299,250 @@ def test_merge_subtitle_segments_preserves_hard_boundaries():
     ]
 
     assert cli.merge_subtitle_segments(segments) == segments
+
+
+def test_merge_subtitle_segments_splits_overlong_source_with_token_timestamps():
+    text = "甲" * 60
+    timestamps = [[index * 300, index * 300 + 120] for index in range(len(text))]
+    segments = [
+        {
+            "start": timestamps[0][0],
+            "end": timestamps[-1][1],
+            "text": text,
+            "timestamp": timestamps,
+        }
+    ]
+
+    cues = cli.merge_subtitle_segments(segments)
+
+    assert len(cues) > 1
+    assert "".join(cue["text"] for cue in cues) == text
+    assert [timestamp for cue in cues for timestamp in cue["timestamp"]] == timestamps
+    assert all(cue["end"] - cue["start"] <= 8000 for cue in cues)
+    assert all(len(cue["text"]) <= 42 for cue in cues)
+
+
+def test_merge_subtitle_segments_keeps_word_timestamp_boundaries():
+    timestamps = [[0, 900], [1000, 1900], [2000, 2900]]
+    segments = [
+        {
+            "start": 0,
+            "end": 2900,
+            "text": "hello, world! again",
+            "timestamp": timestamps,
+        }
+    ]
+
+    assert cli.merge_subtitle_segments(
+        segments, max_duration_ms=2000, max_chars=13
+    ) == [
+        {
+            "start": 0,
+            "end": 1900,
+            "text": "hello, world!",
+            "timestamp": timestamps[:2],
+        },
+        {
+            "start": 2000,
+            "end": 2900,
+            "text": "again",
+            "timestamp": timestamps[2:],
+        },
+    ]
+
+
+def test_merge_subtitle_segments_preserves_overlong_source_without_timestamps():
+    segment = {"start": 0, "end": 12000, "text": "没有时间戳的长句" * 8}
+
+    assert cli.merge_subtitle_segments([segment]) == [segment]
+
+
+def test_merge_subtitle_segments_preserves_unalignable_token_timestamps():
+    segment = {
+        "start": 0,
+        "end": 12000,
+        "text": "어디 통화하고 있는 거네 지금",
+        "timestamp": [[index * 1000, index * 1000 + 900] for index in range(8)],
+    }
+
+    assert cli.merge_subtitle_segments([segment]) == [segment]
+
+
+def test_merge_subtitle_segments_keeps_indivisible_overlong_token():
+    segment = {
+        "start": 0,
+        "end": 12000,
+        "text": "supercalifragilisticexpialidocious",
+        "timestamps": [[0, 12000]],
+        "words": ["supercalifragilisticexpialidocious"],
+    }
+
+    assert cli.merge_subtitle_segments([segment]) == [segment]
+
+
+def test_merge_subtitle_segments_preserves_source_around_indivisible_token():
+    segment = {
+        "start": 0,
+        "end": 14000,
+        "text": "before supercalifragilisticexpialidocious after",
+        "timestamps": [[0, 900], [1000, 13000], [13100, 14000]],
+        "words": ["before", "supercalifragilisticexpialidocious", "after"],
+    }
+
+    assert cli.merge_subtitle_segments([segment]) == [segment]
+
+
+def test_merge_subtitle_segments_rejects_partially_invalid_timestamps():
+    segment = {
+        "start": 0,
+        "end": 12000,
+        "text": "hello world",
+        "timestamp": [[0, 900], [1000], [11100, 12000]],
+    }
+
+    assert cli.merge_subtitle_segments([segment]) == [segment]
+
+
+def test_merge_subtitle_segments_rejects_out_of_order_timestamps():
+    segment = {
+        "start": 0,
+        "end": 12000,
+        "text": "hello world again",
+        "timestamp": [[0, 1000], [5000, 6000], [2000, 3000]],
+    }
+
+    assert cli.merge_subtitle_segments([segment]) == [segment]
+
+
+def test_merge_subtitle_segments_rejects_negative_timestamps():
+    segment = {
+        "start": 0,
+        "end": 12000,
+        "text": "hello world",
+        "timestamp": [[-100, 3900], [4000, 7900]],
+    }
+
+    assert cli.merge_subtitle_segments([segment]) == [segment]
+
+
+def test_merge_subtitle_segments_rejects_non_finite_timestamps():
+    segment = {
+        "start": 0,
+        "end": 12000,
+        "text": "hello",
+        "timestamp": [[0, float("inf")]],
+    }
+
+    assert cli.merge_subtitle_segments([segment]) == [segment]
+
+
+def test_merge_subtitle_segments_does_not_infer_unsupported_script_surfaces():
+    segment = {
+        "start": 0,
+        "end": 12000,
+        "text": "مرح",
+        "timestamp": [[0, 3900], [4000, 7900], [8000, 12000]],
+    }
+
+    assert cli.merge_subtitle_segments([segment]) == [segment]
+
+
+def test_merge_subtitle_segments_uses_explicit_word_surfaces():
+    timestamps = [[index * 1000, index * 1000 + 900] for index in range(8)]
+    segment = {
+        "start": 0,
+        "end": 7900,
+        "text": "어디 통화하고 있는 거네 지금",
+        "timestamp": timestamps,
+        "words": ["어", "디", "통화", "하고", "있는", "거", "네", "지금"],
+    }
+
+    assert cli.merge_subtitle_segments(
+        [segment], max_duration_ms=3900, max_chars=42
+    ) == [
+        {
+            "start": 0,
+            "end": 3900,
+            "text": "어디 통화하고",
+            "timestamp": timestamps[:4],
+        },
+        {
+            "start": 4000,
+            "end": 7900,
+            "text": "있는 거네 지금",
+            "timestamp": timestamps[4:],
+        },
+    ]
+
+
+def test_sentence_timestamp_words_tracks_global_word_surfaces():
+    result = {
+        "words": ["hello", "世", "界", "▁진짜"],
+        "timestamp": [[0, 100], [110, 210], [220, 320], [330, 430]],
+        "sentence_info": [
+            {"timestamp": [[0, 100], [110, 210], [220, 320]]},
+            {"timestamp": [[330, 430]]},
+        ],
+    }
+
+    assert cli._sentence_timestamp_words(result) == [
+        ["hello", "世", "界"],
+        ["▁진짜"],
+    ]
+
+
+def test_merge_subtitle_segments_combines_explicit_word_surfaces():
+    segments = [
+        {
+            "start": 0,
+            "end": 900,
+            "text": "hello,",
+            "timestamp": [[0, 900]],
+            "words": ["hello"],
+        },
+        {
+            "start": 1000,
+            "end": 1900,
+            "text": "world",
+            "timestamp": [[1000, 1900]],
+            "words": ["world"],
+        },
+    ]
+
+    assert cli.merge_subtitle_segments(segments) == [
+        {
+            "start": 0,
+            "end": 1900,
+            "text": "hello,world",
+            "timestamp": [[0, 900], [1000, 1900]],
+            "words": ["hello", "world"],
+        }
+    ]
+
+
+def test_merge_subtitle_segments_drops_incomplete_word_surfaces():
+    segments = [
+        {
+            "start": 0,
+            "end": 900,
+            "text": "hello,",
+            "timestamp": [[0, 900]],
+            "words": ["hello"],
+        },
+        {
+            "start": 1000,
+            "end": 1900,
+            "text": "world",
+            "timestamp": [[1000, 1900]],
+            "words": [],
+        },
+    ]
+
+    assert cli.merge_subtitle_segments(segments) == [
+        {
+            "start": 0,
+            "end": 1900,
+            "text": "hello,world",
+            "timestamp": [[0, 900], [1000, 1900]],
+        }
+    ]
