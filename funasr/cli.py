@@ -184,6 +184,133 @@ def _timestamps_are_ordered(timestamps):
     )
 
 
+def _subtitle_break_weights(text, token_spans):
+    """Map token-boundary indices to lexical and punctuation preferences."""
+    boundary_to_token = {span[1]: index + 1 for index, span in enumerate(token_spans)}
+    breaks = {len(token_spans): 0.0}
+
+    try:
+        import logging
+        import warnings
+
+        with warnings.catch_warnings():
+            warnings.filterwarnings(
+                "ignore",
+                message="pkg_resources is deprecated as an API.*",
+                category=UserWarning,
+            )
+            import jieba
+
+        jieba.setLogLevel(logging.ERROR)
+        cursor = 0
+        for piece in jieba.cut(text, cut_all=False, HMM=True):
+            cursor += len(piece)
+            if piece.strip() and any(
+                char.isalnum() or _is_supported_subtitle_character(char)
+                for char in piece
+            ):
+                token_index = boundary_to_token.get(cursor)
+                if token_index is not None:
+                    body_length = sum(
+                        not (
+                            char.isspace()
+                            or unicodedata.category(char).startswith("P")
+                        )
+                        for char in piece
+                    )
+                    strength = 1.0 if body_length > 1 else 0.2
+                    breaks[token_index] = max(
+                        breaks.get(token_index, 0.0), strength
+                    )
+    except (ImportError, RuntimeError, ValueError):
+        pass
+
+    for index, span in enumerate(token_spans[:-1], 1):
+        boundary = span[1]
+        left = text[:boundary].rstrip()
+        right = text[boundary:].lstrip()
+        strength = 0.0
+        if left and left[-1] in ".!?。！？;；":
+            strength = 4.0
+        elif left and unicodedata.category(left[-1]).startswith("P"):
+            strength = 2.0
+        elif (
+            text[boundary - 1 : boundary].isspace()
+            or text[boundary : boundary + 1].isspace()
+        ):
+            strength = 1.5
+        elif left and right and left[-1].isascii() != right[0].isascii():
+            strength = 1.0
+        if strength:
+            breaks[index] = max(breaks.get(index, 0.0), strength)
+    return breaks
+
+
+def _balanced_subtitle_ranges(
+    text, token_spans, timestamps, max_duration_ms, max_chars
+):
+    """Find the fewest valid cues, then optimize their readable boundaries."""
+    token_count = len(token_spans)
+    if not token_count:
+        return []
+
+    total_chars = len(text.strip())
+    total_duration = sum(timestamp[1] - timestamp[0] for timestamp in timestamps)
+    min_cues = max(1, (total_chars + max_chars - 1) // max_chars)
+    break_weights = _subtitle_break_weights(text, token_spans)
+
+    # Dynamic programming avoids the short final fragment produced by a greedy split.
+    for cue_count in range(min_cues, token_count + 1):
+        target_chars = total_chars / cue_count
+        target_duration = total_duration / cue_count
+        states = {0: (0.0, [])}
+        for cue_index in range(cue_count):
+            next_states = {}
+            cues_left = cue_count - cue_index - 1
+            for token_start, (cost, path) in states.items():
+                min_end = token_start + 1
+                max_end = token_count - cues_left
+                for token_end in range(min_end, max_end + 1):
+                    cue_text = text[
+                        token_spans[token_start][0] : token_spans[token_end - 1][1]
+                    ].strip()
+                    cue_duration = timestamps[token_end - 1][1] - timestamps[token_start][0]
+                    if len(cue_text) > max_chars or cue_duration > max_duration_ms:
+                        if token_end > min_end:
+                            break
+                        continue
+
+                    break_strength = break_weights.get(token_end)
+                    unsafe_break = token_end < token_count and break_strength is None
+                    char_error = (len(cue_text) - target_chars) / max(target_chars, 1.0)
+                    duration_error = (cue_duration - target_duration) / max(
+                        target_duration, 1.0
+                    )
+                    gap_ms = (
+                        timestamps[token_end][0] - timestamps[token_end - 1][1]
+                        if token_end < token_count
+                        else 0
+                    )
+                    cue_cost = (
+                        (1000.0 if unsafe_break else 0.0)
+                        + 8.0 * char_error * char_error
+                        + 2.0 * duration_error * duration_error
+                        - 2.0 * (break_strength or 0.0)
+                        - min(max(gap_ms, 0), 1000) / 1000.0
+                    )
+                    candidate = (cost + cue_cost, [*path, (token_start, token_end)])
+                    previous = next_states.get(token_end)
+                    if previous is None or candidate[0] < previous[0]:
+                        next_states[token_end] = candidate
+            states = next_states
+            if not states:
+                break
+
+        if token_count in states:
+            return states[token_count][1]
+    return []
+
+
 def _sentence_timestamp_words(result):
     sentence_info = result.get("sentence_info", []) or []
     words = result.get("words", []) or []
@@ -254,29 +381,14 @@ def _split_subtitle_segment(segment, max_duration_ms, max_chars):
         ):
             return [dict(segment)]
 
-    cues = []
-    token_start = 0
-    while token_start < len(token_spans):
-        token_end = token_start
-        while token_end < len(token_spans):
-            candidate_token_end = token_end + 1
-            candidate_text = text[
-                token_spans[token_start][0] : token_spans[candidate_token_end - 1][1]
-            ].strip()
-            candidate_duration = (
-                timestamps[candidate_token_end - 1][1]
-                - timestamps[token_start][0]
-            )
-            exceeds_limit = (
-                candidate_duration > max_duration_ms
-                or len(candidate_text) > max_chars
-            )
-            if exceeds_limit and token_end > token_start:
-                break
-            token_end = candidate_token_end
-            if exceeds_limit:
-                break
+    ranges = _balanced_subtitle_ranges(
+        text, token_spans, timestamps, max_duration_ms, max_chars
+    )
+    if not ranges:
+        return [dict(segment)]
 
+    cues = []
+    for token_start, token_end in ranges:
         cue = dict(segment)
         cue["text"] = text[
             token_spans[token_start][0] : token_spans[token_end - 1][1]
@@ -287,7 +399,6 @@ def _split_subtitle_segment(segment, max_duration_ms, max_chars):
         cue.pop("timestamps", None)
         cue.pop("words", None)
         cues.append(cue)
-        token_start = token_end
 
     return cues
 
