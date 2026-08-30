@@ -1,1 +1,1 @@
-runtime-llamacpp-v0.2.5
+runtime-llamacpp-v0.2.6

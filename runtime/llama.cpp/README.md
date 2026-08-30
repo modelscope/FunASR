@@ -124,10 +124,13 @@ hardware-specific reports open until the matching archive is retested on the
 reported GPU.
 
 `--backend cpu` remains the default and is what the portable cross-platform
-prebuilt binaries use. The CUDA package requires an NVIDIA driver compatible
-with the CUDA Toolkit version configured by the release workflow. A binary built
-without `-DGGML_CUDA=ON` exits with a clear message if `--backend cuda` is
-requested.
+prebuilt binaries use. The CUDA ZIPs bundle `cublas64_13.dll` and
+`cublasLt64_13.dll`, include the NVIDIA license, and link the MSVC runtime
+statically, so running the package does not require a separate CUDA Toolkit or
+Visual C++ redistributable installation. It still requires an NVIDIA driver
+compatible with the CUDA Toolkit version configured by the release workflow. A
+binary built without `-DGGML_CUDA=ON` exits with a clear message if
+`--backend cuda` is requested.
 
 ### Optional Linux Vulkan backend for SenseVoiceSmall
 

@@ -81,7 +81,7 @@
 
 - **实时服务长会话状态有界** —— [#3214](https://github.com/modelscope/FunASR/pull/3214) 与 [QwenAudio/Fun-ASR#135](https://github.com/QwenAudio/Fun-ASR/pull/135) 已合并，诊断能力已发布，报告者证据使 [#3101](https://github.com/modelscope/FunASR/issues/3101) 可以关闭。
 - **稳定的应用接口** —— 工具包现已提供 OpenAI-compatible 转写服务、健康检查、浏览器与命令行 smoke test，并在[部署矩阵](./deployment_matrix_zh.md)中列出 Python / CLI / HTTP / WebSocket 入口。
-- **工业与边缘部署路径** —— vLLM 服务和签名发布流程已有文档；经验证的九平台 [`runtime-llamacpp-v0.2.5`](https://github.com/modelscope/FunASR/releases/tag/runtime-llamacpp-v0.2.5) 压缩包覆盖 Linux、macOS 与 Windows 的 CPU/GPU 变体。
+- **工业与边缘部署路径** —— vLLM 服务和签名发布流程已有文档；经验证的十平台 [`runtime-llamacpp-v0.2.6`](https://github.com/modelscope/FunASR/releases/tag/runtime-llamacpp-v0.2.6) 压缩包覆盖 Linux、macOS 与 Windows 的 CPU/GPU 变体，并提供面向 RTX 50 / Blackwell 的 Windows CUDA architecture 120 专用包。
 - **联合转写与说话人识别** —— 第三方 [MOSS-Transcribe-Diarize](./moss_transcribe_diarize_zh.md) 模型已通过 `AutoModel` 接入本地 Transformers 与 vLLM 后端。它在一次推理中生成时间戳与说话人标签，不需要额外 VAD 或说话人模型；模型所有者仍是 OpenMOSS。
 - **仓库职责与 issue 路由** —— [#3203](https://github.com/modelscope/FunASR/issues/3203) 继续跟踪本文档以及尚未回答完的模型权重和 vLLM 入口问题。在这些问题有证据且报告者有合理确认时间之前，issue 保持开放。
 
