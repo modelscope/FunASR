@@ -37,6 +37,33 @@ mkdir -p ./funasr-runtime-resources/models
 sudo docker run -p 10096:10095 -it --privileged=true -v $PWD/funasr-runtime-resources/models:/workspace/models registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-online-cpu-0.1.13
 ```
 
+### Build the online CPU image from source
+
+The public 0.1.13 image above is the supported prebuilt release. To rebuild the
+online CPU server from the current FunASR checkout, use the repository-owned
+`runtime/dockerfile/Dockerfile.online.cpu`:
+
+```shell
+git clone https://github.com/modelscope/FunASR.git
+cd FunASR
+docker build \
+  -f runtime/dockerfile/Dockerfile.online.cpu \
+  -t funasr-online-cpu:local .
+mkdir -p ./funasr-runtime-resources/models
+docker run --rm -p 10096:10095 \
+  -v $PWD/funasr-runtime-resources/models:/workspace/models \
+  funasr-online-cpu:local
+```
+
+This Dockerfile pins the public 0.1.13 multi-architecture image by manifest
+digest as its compiler/runtime toolchain, copies the current checkout, and
+rebuilds `funasr-wss-server-2pass`. The resulting container starts the server
+directly on port 10095 without the prebuilt image's interactive daemon wrapper.
+Model IDs, thread counts, and the container port can be overridden with the
+`FUNASR_MODEL_DIR`, `FUNASR_ONLINE_MODEL_DIR`, `FUNASR_VAD_DIR`,
+`FUNASR_PUNC_DIR`, `FUNASR_DECODER_THREAD_NUM`, and `FUNASR_PORT`
+environment variables.
+
 ### Launching the Server
 
 After Docker is launched, start the funasr-wss-server-2pass service program:

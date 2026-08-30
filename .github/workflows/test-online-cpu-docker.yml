@@ -1,0 +1,60 @@
+name: Test online CPU Docker image
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/test-online-cpu-docker.yml"
+      - "runtime/dockerfile/Dockerfile.online.cpu"
+      - "runtime/dockerfile/Dockerfile.online.cpu.dockerignore"
+      - "runtime/dockerfile/online-cpu-entrypoint.sh"
+      - "runtime/docs/SDK_advanced_guide_online.md"
+      - "runtime/docs/SDK_advanced_guide_online_zh.md"
+      - "runtime/onnxruntime/**"
+      - "runtime/websocket/**"
+      - "tests/test_online_cpu_dockerfile.py"
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/test-online-cpu-docker.yml"
+      - "runtime/dockerfile/**"
+      - "runtime/onnxruntime/**"
+      - "runtime/websocket/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: online-cpu-docker-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-amd64:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate entrypoint
+        run: bash -n runtime/dockerfile/online-cpu-entrypoint.sh
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build source image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: runtime/dockerfile/Dockerfile.online.cpu
+          platforms: linux/amd64
+          load: true
+          tags: funasr-online-cpu:test
+          cache-from: type=gha,scope=online-cpu-amd64
+          cache-to: type=gha,mode=max,scope=online-cpu-amd64
+
+      - name: Smoke test linked server
+        run: |
+          docker run --rm \
+            --entrypoint /workspace/FunASR/runtime/websocket/build/bin/funasr-wss-server-2pass \
+            funasr-online-cpu:test \
+            --help
