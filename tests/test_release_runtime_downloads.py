@@ -116,6 +116,25 @@ def test_release_on_tag_workflow_uses_versioned_runtime_pointer():
     )
 
 
+def test_release_on_tag_workflow_builds_and_uploads_python_packages():
+    workflow = (ROOT / ".github" / "workflows" / "release-on-tag.yml").read_text(
+        encoding="utf-8"
+    )
+
+    assert "python -m build" in workflow
+    assert "python -m twine check dist/*" in workflow
+    assert "SOURCE_DATE_EPOCH" in workflow
+    assert "git log -1 --format=%ct" in workflow
+    assert "tar --sort=name" in workflow
+    assert 'gzip -n' in workflow
+    assert "funasr/version.txt" in workflow
+    assert "github.ref_name" in workflow
+    assert "gh release upload" in workflow
+    assert "dist/funasr-*.whl" in workflow
+    assert "dist/funasr-*.tar.gz" in workflow
+    assert "--clobber" in workflow
+
+
 @pytest.mark.parametrize("mutation", ("missing", "unexpected"))
 def test_runtime_assets_rejects_non_exact_platform_matrix(mutation):
     module = load_release_script()
