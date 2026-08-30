@@ -373,18 +373,20 @@ for (const viewport of [
   { name: 'mobile', width: 390, height: 844 },
   { name: 'desktop', width: 1440, height: 900 },
 ]) {
-  test(`v1.4.5 release discovery is stable at ${viewport.name}`, async ({ page }, testInfo) => {
+  test(`FunClip v2.2.0 MOSS release discovery is stable at ${viewport.name}`, async ({ page }, testInfo) => {
     await page.setViewportSize(viewport);
     for (const release of [
       {
         language: 'zh',
         index: '/blog/',
-        article: '/blog/funasr-v1-4-5-pypi-llama-cpp-release.html',
+        article: '/blog/funclip-v2-2-0-moss-speaker-clipping.html',
+        previous: '/blog/funasr-v1-4-5-pypi-llama-cpp-release.html',
       },
       {
         language: 'en',
         index: '/en/blog/',
-        article: '/en/blog/funasr-v1-4-5-pypi-llama-cpp-release.html',
+        article: '/en/blog/funclip-v2-2-0-moss-speaker-clipping.html',
+        previous: '/en/blog/funasr-v1-4-5-pypi-llama-cpp-release.html',
       },
     ]) {
       await page.goto(release.index);
@@ -392,18 +394,22 @@ for (const viewport of [
         page.locator(`.launch-feature a[href="${release.article}"]`),
       ).toBeVisible();
       const history = page.locator('.previous-release .post-card');
-      await expect(history).toHaveCount(3);
+      await expect(history).toHaveCount(4);
+      await expect(
+        page.locator(`.previous-release a[href="${release.previous}"]`),
+      ).toBeVisible();
       const indexLayout = await history.evaluateAll((cards) => ({
         overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
         rows: new Set(cards.map((card) => Math.round(card.getBoundingClientRect().top))).size,
       }));
       expect(indexLayout.overflow).toBeLessThanOrEqual(1);
-      expect(indexLayout.rows).toBe(viewport.name === 'mobile' ? 3 : 1);
+      expect(indexLayout.rows).toBe(viewport.name === 'mobile' ? 4 : 1);
 
       await page.goto(release.article);
-      await expect(page.locator('h1')).toContainText('FunASR v1.4.5');
-      await expect(page.getByText('funasr[knf]==1.4.5', { exact: false })).toBeVisible();
-      await expect(page.getByText('runtime-llamacpp-v0.2.1', { exact: false })).toBeVisible();
+      await expect(page.locator('h1')).toContainText('FunClip v2.2.0');
+      await expect(page.getByText('OpenMOSS-Team/MOSS-Transcribe-Diarize', { exact: false }).first()).toBeVisible();
+      await expect(page.getByText('/v1/audio/transcriptions', { exact: false }).first()).toBeVisible();
+      await expect(page.locator('img[src="/img/funclip-v2-1-0-interface.jpg"]')).toBeVisible();
 
       const articleLayout = await page.evaluate(() => {
         const navigation = document.querySelector<HTMLElement>('nav.nav');
@@ -419,7 +425,7 @@ for (const viewport of [
 
       await page.screenshot({
         path: testInfo.outputPath(
-          `v1.4.5-release-${release.language}-${viewport.name}.png`,
+          `funclip-v2.2.0-moss-${release.language}-${viewport.name}.png`,
         ),
         fullPage: true,
       });

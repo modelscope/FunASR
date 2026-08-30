@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>FunClip v2.2.0: MOSS Speaker-Aware Video Clipping | FunASR</title>
+  <meta name="description" content="FunClip v2.2.0 integrates the third-party MOSS-Transcribe-Diarize model through vLLM for long-form ASR, speaker segments, SRT, and speaker-based clipping.">
+  <meta property="og:title" content="FunClip v2.2.0: MOSS Speaker-Aware Video Clipping">
+  <meta property="og:description" content="An end-to-end tested vLLM path for speaker segments, SRT, and speaker-based video clipping.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://www.funasr.com/en/blog/funclip-v2-2-0-moss-speaker-clipping.html">
+  <meta property="og:image" content="https://www.funasr.com/img/funclip-v2-1-0-interface.jpg">
+  <link rel="canonical" href="https://www.funasr.com/en/blog/funclip-v2-2-0-moss-speaker-clipping.html">
+  <link rel="alternate" hreflang="en" href="https://www.funasr.com/en/blog/funclip-v2-2-0-moss-speaker-clipping.html">
+  <link rel="alternate" hreflang="zh" href="https://www.funasr.com/blog/funclip-v2-2-0-moss-speaker-clipping.html">
+  <link rel="alternate" hreflang="x-default" href="https://www.funasr.com/en/blog/funclip-v2-2-0-moss-speaker-clipping.html">
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"FunClip v2.2.0: MOSS Speaker-Aware Video Clipping","datePublished":"2026-08-31","dateModified":"2026-08-31","author":{"@type":"Organization","name":"FunASR / Tongyi Lab"},"publisher":{"@type":"Organization","name":"FunASR"},"mainEntityOfPage":{"@type":"WebPage","@id":"https://www.funasr.com/en/blog/funclip-v2-2-0-moss-speaker-clipping.html"},"image":"https://www.funasr.com/img/funclip-v2-1-0-interface.jpg"}</script>
+  <style>
+  p code,li code,td code,.proof code{overflow-wrap:anywhere}
+  :root{--primary:#2563eb;--accent:#047857;--surface:#f8fafc;--border:#dbe3ec;--text:#0f172a;--soft:#475569}
+  *{box-sizing:border-box}body{margin:0;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--text);line-height:1.72;background:#fff}a{color:var(--primary);text-decoration:none}a:hover{text-decoration:underline}.container{max-width:840px;margin:auto;padding:0 24px}.nav{position:sticky;top:0;z-index:10;background:#fff;border-bottom:1px solid var(--border);padding:14px 0}.nav .container{max-width:1120px;display:flex;align-items:center;gap:20px}.nav-logo{font-weight:800;color:var(--text)}.nav-logo span{color:var(--primary)}.nav-links{display:flex;gap:16px;margin-left:auto}.nav-btn{padding:8px 14px;background:var(--primary);color:#fff;border-radius:7px}article{padding:64px 0 80px}h1{font-size:2.1rem;line-height:1.28;margin:0 0 12px}h2{font-size:1.35rem;margin:36px 0 12px;padding-top:20px;border-top:1px solid var(--border)}p,li{color:var(--soft)}.meta{color:#64748b}.lead{font-size:1.08rem;color:var(--text)}.hero-media{width:100%;aspect-ratio:2.04/1;object-fit:cover;border:1px solid var(--border);border-radius:8px;margin:18px 0 24px}pre{overflow:auto;background:#172033;color:#e2e8f0;padding:18px;border-radius:8px;line-height:1.6}code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}p code,li code,td code{background:var(--surface);padding:2px 5px;border-radius:4px;color:#1d4ed8}table{width:100%;border-collapse:collapse;margin:18px 0}th,td{text-align:left;vertical-align:top;padding:11px;border-bottom:1px solid var(--border)}th{background:var(--surface)}.proof{border-left:4px solid var(--accent);background:#f0fdf4;padding:14px 16px;color:#14532d}.cta{margin-top:30px;padding:22px;border:1px solid var(--border);border-radius:8px}.cta a{font-weight:700}footer{padding:28px;background:#0f172a;color:#94a3b8;text-align:center}@media(max-width:800px){.nav-links{display:none}h1{font-size:1.65rem}}
+  </style>
+</head>
+<body>
+<nav class="nav"><div class="container"><a class="nav-logo" href="/en/">Fun<span>ASR</span></a><div class="nav-links"><a href="/en/deploy/">Deploy</a><a href="/en/blog/">Blog</a><a href="/en/ecosystem.html">Ecosystem</a></div><a href="/blog/funclip-v2-2-0-moss-speaker-clipping.html">中文</a><a class="nav-btn" href="https://github.com/modelscope/FunASR">GitHub</a></div></nav>
+<article><div class="container">
+  <h1>FunClip v2.2.0: Long-Form Speaker-Aware Video Clipping with MOSS</h1>
+  <p class="meta">August 31, 2026 · FunClip Release</p>
+  <img class="hero-media" src="/img/funclip-v2-1-0-interface.jpg" alt="FunClip local video, subtitle recognition, and intelligent clipping interface">
+  <p class="lead">FunClip v2.2.0 adds an opt-in MOSS path: send long audio to a vLLM service, normalize text, speaker identities, and time ranges through FunASR, then generate SRT or clip by <code>spkS01</code>, <code>spkS02</code>, and later speaker IDs.</p>
+  <p><a href="https://github.com/OpenMOSS/MOSS-Transcribe-Diarize">MOSS-Transcribe-Diarize</a> is a third-party model maintained by OpenMOSS, not a FunASR or FunClip-owned checkpoint. The integration pins <code>OpenMOSS-Team/MOSS-Transcribe-Diarize</code> revision <code>e8681d68e7042738ffca8ac8212bc8fcb1131ab8</code> and keeps ownership and support boundaries explicit.</p>
+
+  <h2>Data path</h2>
+  <table><thead><tr><th>Stage</th><th>Responsibility</th></tr></thead><tbody>
+    <tr><td>vLLM</td><td>Loads the pinned MOSS revision and serves timestamped speaker markup through <code>/v1/audio/transcriptions</code>.</td></tr>
+    <tr><td>FunASR 1.4.9+</td><td>Parses the response into common <code>text</code>, <code>timestamp</code>, and <code>sentence_info</code> fields.</td></tr>
+    <tr><td>FunClip 2.2.0</td><td>Renders speaker-labeled SRT and sends selected speaker ranges into the existing audio/video clipping workflow.</td></tr>
+  </tbody></table>
+
+  <h2>1. Start vLLM at the pinned revision</h2>
+  <pre><code>python -m venv .venv-moss
+. .venv-moss/bin/activate
+pip install -U vllm
+
+vllm serve OpenMOSS-Team/MOSS-Transcribe-Diarize \
+  --revision e8681d68e7042738ffca8ac8212bc8fcb1131ab8 \
+  --served-model-name moss-transcribe-diarize \
+  --trust-remote-code --host 127.0.0.1 --port 8898</code></pre>
+  <p>Verify the service with real audio before starting FunClip. The tested contract uses <code>response_format=json</code>:</p>
+  <pre><code>curl -fsS http://127.0.0.1:8898/v1/audio/transcriptions \
+  -F file=@sample.wav \
+  -F model=moss-transcribe-diarize \
+  -F response_format=json \
+  -F max_completion_tokens=8192</code></pre>
+
+  <h2>2. Start FunClip</h2>
+  <pre><code>python -m pip install -U -r requirements.txt
+python funclip/launch.py \
+  --model moss \
+  --moss-backend vllm \
+  --moss-base-url http://127.0.0.1:8898/v1 \
+  --moss-max-tokens 8192</code></pre>
+  <p>For an authenticated remote service, put the bearer credential in the <code>MOSS_API_KEY</code> environment variable. FunClip does not require putting the token in the command line or repository.</p>
+
+  <h2>Capabilities and boundaries</h2>
+  <ul>
+    <li>Long-form ASR, speaker identity, SRT, and speaker-based clipping are supported, including valid speaker turns shorter than one second.</li>
+    <li>MOSS provides segment-level timestamps. Use it for whole-segment or speaker clipping; keep Paraformer for precise arbitrary character-level text clipping.</li>
+    <li>Global speaker identity depends on continuous context, so the MOSS path attaches no external VAD or speaker model that would pre-chunk the recording.</li>
+    <li>If the final segment is missing its ending timestamp after token exhaustion, FunClip raises an explicit truncation error and asks for a higher <code>--moss-max-tokens</code> value instead of silently dropping the tail.</li>
+  </ul>
+  <p>See the <a href="/en/deploy/moss-transcribe-diarize.html">bilingual MOSS production guide</a> for health checks, runtime choices, and capacity boundaries.</p>
+
+  <h2>Download and verify v2.2.0</h2>
+  <pre><code>FunClip-2.2.0.tar.gz
+SHA256 994c5d9cf392b74b36284d526eca8bada1560a3e7825ab7baa9c673a1b4ef216
+
+FunClip-2.2.0.zip
+SHA256 4f5a7d33d9ea65467f29b55b15ed5be18e64de7e57e2f9f36fe51a23b40557e7</code></pre>
+  <p>Download the archives and <code>SHA256SUMS</code> from the <a href="https://github.com/modelscope/FunClip/releases/tag/v2.2.0">FunClip v2.2.0 release</a>.</p>
+
+  <div class="proof">Release content resolves to commit <code>c205bf32a8b11226ff5e8acb9a3c7a1f00cd3b06</code>. The repository suite completed with 84 passed and 1 skipped. A live H100 + vLLM two-speaker run returned S01/S02, valid SRT, and the expected S02 clip. This verifies the release path, not every language, audio condition, or production concurrency level.</div>
+  <div class="cta"><p>Run one real two-speaker recording through the production guide, then bring the same service into FunClip.</p><a href="https://github.com/modelscope/FunClip/releases/tag/v2.2.0">Open the FunClip v2.2.0 release and downloads</a></div>
+</div></article>
+<footer>© 2024-2026 Tongyi Lab, Alibaba Group</footer>
+</body>
+</html>

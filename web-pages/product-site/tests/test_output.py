@@ -609,22 +609,61 @@ def test_v1_4_3_release_blog_is_bilingual_and_verifiable(
 
 
 @pytest.mark.parametrize(
-    ('relative', 'href'),
+    ('relative', 'feature_href', 'history_href'),
     (
-        ('blog/index.html', '/blog/funasr-v1-4-5-pypi-llama-cpp-release.html'),
-        ('en/blog/index.html', '/en/blog/funasr-v1-4-5-pypi-llama-cpp-release.html'),
+        (
+            'blog/index.html',
+            '/blog/funclip-v2-2-0-moss-speaker-clipping.html',
+            '/blog/funasr-v1-4-5-pypi-llama-cpp-release.html',
+        ),
+        (
+            'en/blog/index.html',
+            '/en/blog/funclip-v2-2-0-moss-speaker-clipping.html',
+            '/en/blog/funasr-v1-4-5-pypi-llama-cpp-release.html',
+        ),
     ),
 )
 def test_blog_index_features_latest_release_and_preserves_history(
-    built_site, relative, href
+    built_site, relative, feature_href, history_href
 ):
     soup = read_soup(built_site / relative)
-    feature = soup.select_one(f'.launch-feature a[href="{href}"]')
+    feature = soup.select_one(f'.launch-feature a[href="{feature_href}"]')
 
     assert feature
-    assert 'v1.4.5' in feature.get_text(' ', strip=True)
+    assert 'FunClip v2.2.0' in feature.get_text(' ', strip=True)
     history = soup.select_one('.previous-release')
     assert history
+    assert history.select_one(f'a[href="{history_href}"]')
     history_text = history.get_text(' ', strip=True)
+    assert 'v1.4.5' in history_text
     assert 'v1.4.3' in history_text
     assert 'v1.4.0' in history_text
+
+
+@pytest.mark.parametrize(
+    ('relative', 'peer', 'guide'),
+    (
+        (
+            'blog/funclip-v2-2-0-moss-speaker-clipping.html',
+            '/en/blog/funclip-v2-2-0-moss-speaker-clipping.html',
+            '/deploy/moss-transcribe-diarize.html',
+        ),
+        (
+            'en/blog/funclip-v2-2-0-moss-speaker-clipping.html',
+            '/blog/funclip-v2-2-0-moss-speaker-clipping.html',
+            '/en/deploy/moss-transcribe-diarize.html',
+        ),
+    ),
+)
+def test_funclip_v220_blog_builds_with_real_media_and_product_routes(
+    built_site, relative, peer, guide
+):
+    soup = read_soup(built_site / relative)
+    assert soup.select_one(f'link[rel="alternate"][href$="{peer}"]')
+    image = soup.select_one('article img[src]')
+    assert image
+    assert (built_site / image['src'].lstrip('/')).is_file()
+    assert soup.select_one(f'a[href="{guide}"]')
+    assert soup.select_one(
+        'a[href="https://github.com/modelscope/FunClip/releases/tag/v2.2.0"]'
+    )
