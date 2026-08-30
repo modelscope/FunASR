@@ -170,12 +170,16 @@ assert_readme_quickstart() {
     printf 'non-portable Releases link in %s\n' "$readme" >&2
     exit 1
   fi
-  if ! grep -F 'runtime-llamacpp-v0.2.5' <<<"$section" >/dev/null; then
-    printf 'missing current runtime v0.2.5 link in %s\n' "$readme" >&2
+  if ! grep -F 'runtime-llamacpp-v0.2.6' <<<"$section" >/dev/null; then
+    printf 'missing current runtime v0.2.6 link in %s\n' "$readme" >&2
     exit 1
   fi
   if ! grep -F 'funasr-llamacpp-linux-x64-vulkan' <<<"$section" >/dev/null; then
     printf 'missing Linux Vulkan runtime asset in %s\n' "$readme" >&2
+    exit 1
+  fi
+  if ! grep -F 'funasr-llamacpp-windows-x64-cuda-blackwell' <<<"$section" >/dev/null; then
+    printf 'missing Windows Blackwell CUDA runtime asset in %s\n' "$readme" >&2
     exit 1
   fi
   if ! grep -F -- '--backend vulkan' <<<"$section" >/dev/null; then

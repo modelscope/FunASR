@@ -149,6 +149,7 @@ Whisper 是单个模型，**FunASR 是一个工具箱**——按场景挑模型�
 
 ## 最新动态
 
+- 2026/08/30：**llama.cpp runtime v0.2.6** — 新增面向 RTX 50 / Blackwell 的 Windows CUDA architecture 120（`sm_120`）专用包，同时保留 architecture 86 包。两个 CUDA ZIP 都包含所需的 NVIDIA cuBLAS DLL 与许可证，静态链接 MSVC runtime，并通过 PE 导入审计；十个 Linux、macOS 与 Windows 压缩包由同一个准确发布提交构建，并按公开 SHA-256 逐一复核。构建与打包通过不代表 Blackwell 实机推理已经验证，因此硬件报告会保持开放，等待用户使用匹配资产复测。[实现 →](https://github.com/modelscope/FunASR/pull/3570) · [发布页 →](https://github.com/modelscope/FunASR/releases/tag/runtime-llamacpp-v0.2.6)
 - 2026/08/30：**v1.4.7 已发布到 PyPI** — OpenMOSS 的第三方模型 MOSS-Transcribe-Diarize 已接入 FunASR `AutoModel`。可选择本地 Transformers（`backend="hf"`）或已有 vLLM 服务（`backend="vllm"`）；两条路径都会将模型标签输出统一为 `text`、`raw_text`、毫秒级 `timestamp` 和带说话人标签的 `sentence_info`。MOSS 在一次推理中完成转写、时间戳和说话人分离，因此不要再外挂 `vad_model` 或 `spk_model`。本版本还改善了同一说话人极短间隔处的 SRT 字幕连续性，并增加可选的实时解码性能统计，便于定位长会话延迟。升级命令：`python -m pip install -U "funasr==1.4.7"`。GitHub 发布页同时提供已验证的 llama.cpp v0.2.5 九平台运行包。[MOSS 部署指南 →](./docs/moss_transcribe_diarize_zh.md) · [发布页 →](https://github.com/modelscope/FunASR/releases/tag/v1.4.7)
 - 2026/08/29：**llama.cpp runtime v0.2.5** — 在计算图执行前，将 host 权重上传到所选 Vulkan backend buffer。Q8 与 F16 权重已通过本地 Linux Vulkan llvmpipe 验证，九个 Linux、macOS 与 Windows 压缩包均由准确提交 `f371370d4c5e4c61d13d4eb9c55cda2f4dd95e4f` 构建，并按公开 SHA-256 逐一复核。本版本不宣称 AMD Windows 硬件崩溃已经修复；[#3479](https://github.com/modelscope/FunASR/issues/3479) 保持开放，等待报告者实机复测。[修复 →](https://github.com/modelscope/FunASR/pull/3555) · [发布页 →](https://github.com/modelscope/FunASR/releases/tag/runtime-llamacpp-v0.2.5)
 - 2026/08/29：**llama.cpp runtime v0.2.4** — 修复 F16 GGUF 模型偶发空转写。运行时现在按 GGML 的 F16/F32 类型解码查询 embedding，不再把 F16 存储误读为 F32。精确的 v0.2.3 AVX2 发布包在 298 次完整运行中复现 22 次空结果；修复后 100/100 次输出稳定唯一，并与 Q8 模型逐字节一致。发布工作流将在同一准确提交上构建九个 Linux、macOS 与 Windows 压缩包。[修复 →](https://github.com/modelscope/FunASR/pull/3550) · [发布页 →](https://github.com/modelscope/FunASR/releases/tag/runtime-llamacpp-v0.2.4)
@@ -362,11 +363,13 @@ Vulkan driver/ICD 的机器上运行：
 
 Windows Vulkan ZIP 使用显卡驱动提供的系统 Vulkan loader，不需要另外安装 Vulkan SDK；当前与 Linux Vulkan 包一样，仅加速 SenseVoiceSmall。
 
-当前 Windows CUDA 包面向 CUDA architecture 86。RTX 50 / Blackwell GPU 会报告
-compute capability 12.0（`sm_120`），在专用 CUDA 产物发布前，请使用 CPU 包，或从
-源码构建并设置 `-DCMAKE_CUDA_ARCHITECTURES=120`。
+带 tag 的发布提供两个 Windows CUDA 包：标准 `windows-x64-cuda` ZIP 面向 CUDA
+architecture 86，`windows-x64-cuda-blackwell` 面向 RTX 50 / Blackwell 的 architecture
+120（`sm_120`）。两个 ZIP 都包含所需的 cuBLAS DLL，并使用静态 MSVC runtime；用户只需
+安装兼容的 NVIDIA 驱动，无需另装 CUDA Toolkit。CI 验证架构与打包边界，但不代表已经在
+Blackwell 实机上完成推理验证。
 
-**预编译二进制：** [Releases](https://github.com/modelscope/FunASR/releases) · [v0.2.5](https://github.com/modelscope/FunASR/releases/tag/runtime-llamacpp-v0.2.5) · [Linux Vulkan tarball](https://github.com/modelscope/FunASR/releases/download/runtime-llamacpp-v0.2.5/funasr-llamacpp-linux-x64-vulkan.tar.gz) · [Windows Vulkan zip](https://github.com/modelscope/FunASR/releases/download/runtime-llamacpp-v0.2.5/funasr-llamacpp-windows-x64-vulkan.zip) · [Windows CUDA zip](https://github.com/modelscope/FunASR/releases/download/runtime-llamacpp-v0.2.5/funasr-llamacpp-windows-x64-cuda.zip) · **下载与快速开始：** [funasr.com/deploy/llama-cpp](https://www.funasr.com/deploy/llama-cpp.html) · **GGUF 模型：** [Hugging Face](https://huggingface.co/FunAudioLLM) · **文档与评测：** [runtime/llama.cpp/](./runtime/llama.cpp/)
+**预编译二进制：** [Releases](https://github.com/modelscope/FunASR/releases) · [v0.2.6](https://github.com/modelscope/FunASR/releases/tag/runtime-llamacpp-v0.2.6) · [Linux Vulkan tarball](https://github.com/modelscope/FunASR/releases/download/runtime-llamacpp-v0.2.6/funasr-llamacpp-linux-x64-vulkan.tar.gz) · [Windows Vulkan zip](https://github.com/modelscope/FunASR/releases/download/runtime-llamacpp-v0.2.6/funasr-llamacpp-windows-x64-vulkan.zip) · [Windows CUDA zip](https://github.com/modelscope/FunASR/releases/download/runtime-llamacpp-v0.2.6/funasr-llamacpp-windows-x64-cuda.zip) · [Windows Blackwell CUDA zip](https://github.com/modelscope/FunASR/releases/download/runtime-llamacpp-v0.2.6/funasr-llamacpp-windows-x64-cuda-blackwell.zip) · **下载与快速开始：** [funasr.com/deploy/llama-cpp](https://www.funasr.com/deploy/llama-cpp.html) · **GGUF 模型：** [Hugging Face](https://huggingface.co/FunAudioLLM) · **文档与评测：** [runtime/llama.cpp/](./runtime/llama.cpp/)
 
 [OpenAI API 示例 →](./examples/openai_api/README_zh.md) · [Gradio Demo →](./examples/openai_api/GRADIO_zh.md) · [客户端配方 →](./examples/openai_api/CLIENTS.md) · [JavaScript/TypeScript 配方 →](./examples/openai_api/JAVASCRIPT_zh.md) · [Kubernetes 模板 →](./examples/openai_api/kubernetes/README_zh.md) · [工作流配方 →](./examples/openai_api/WORKFLOWS_zh.md) · [Postman 集合 →](./examples/openai_api/POSTMAN_zh.md) · [OpenAPI 规范 →](./examples/openai_api/OPENAPI_zh.md) · [安全指南 →](./examples/openai_api/SECURITY_zh.md) · [部署选型 →](./docs/deployment_matrix_zh.md) · [部署文档 →](./runtime/readme_cn.md) · [Agent 集成 →](https://modelscope.github.io/FunASR/agent.html)
 
