@@ -135,13 +135,14 @@ for (const viewport of [
   { name: 'mobile', width: 390, height: 844 },
   { name: 'desktop', width: 1440, height: 900 },
 ]) {
-  test(`llama.cpp v0.2.5 download matrix is stable at ${viewport.name}`, async ({ page }, testInfo) => {
+  test(`llama.cpp v0.2.6 download matrix is stable at ${viewport.name}`, async ({ page }, testInfo) => {
     await page.setViewportSize(viewport);
     await page.goto('/deploy/llama-cpp.html');
 
     const section = page.locator('[data-section="downloads"]');
-    await expect(section.locator('[data-download-asset]')).toHaveCount(9);
-    await expect(section.locator('a[href*="runtime-llamacpp-v0.2.5"]')).toHaveCount(9);
+    await expect(section.locator('[data-download-asset]')).toHaveCount(10);
+    await expect(section.locator('a[href*="runtime-llamacpp-v0.2.6"]')).toHaveCount(10);
+    await expect(page.getByText('Blackwell', { exact: false }).first()).toBeVisible();
     await expect(page.getByText('Windows AMD Vulkan', { exact: false }).first()).toBeVisible();
     await expect(page.getByText('resolving buffer type', { exact: false }).first()).toBeVisible();
     await expect(page.getByText('model ready', { exact: false }).first()).toBeVisible();
@@ -189,6 +190,7 @@ for (const viewport of [
     await expect(page.getByText('diarized_json', { exact: false }).first()).toBeVisible();
     await expect(page.locator('a[href="https://github.com/modelscope/FunASR/pull/3558"]')).toBeVisible();
     await expect(page.locator('a[href="https://github.com/vllm-project/vllm/pull/48543"]')).toBeVisible();
+    await expect(page.locator('a[href*="vllm-project/recipes/blob/d3f3136"]')).toBeVisible();
     await expect(page.locator('a[href="/en/deploy/moss-transcribe-diarize.html"]')).toBeVisible();
 
     const layout = await page.evaluate(() => ({
