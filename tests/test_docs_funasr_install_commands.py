@@ -341,8 +341,8 @@ def test_top_level_readmes_surface_current_release_and_edge_runtime():
     }
 
     for name, text in readmes.items():
-        assert 'python -m pip install -U "funasr==1.4.9"' in text, name
-        assert "https://github.com/modelscope/FunASR/releases/tag/v1.4.9" in text, name
+        assert 'python -m pip install -U "funasr==1.4.11"' in text, name
+        assert "https://github.com/modelscope/FunASR/releases/tag/v1.4.11" in text, name
         assert "runtime-llamacpp-v0.2.6" in text, name
 
     assert "https://www.funasr.com/en/deploy/llama-cpp.html" in readmes["README.md"]
@@ -362,6 +362,21 @@ def test_top_level_readmes_surface_current_release_and_edge_runtime():
                 f"releases/download/runtime-llamacpp-v0.2.6/{asset}" in text
             ), name
         assert "releases/download/runtime-llamacpp-v0.2.1/" not in text, name
+
+
+def test_top_level_readme_news_stays_concise():
+    headings = {
+        "README.md": "## What's new",
+        "README_zh.md": "## 最新动态",
+        "README_ja.md": "## 最新情報",
+        "README_ko.md": "## 최신 소식",
+    }
+
+    for name, heading in headings.items():
+        text = (ROOT / name).read_text()
+        news = text.split(heading, 1)[1].split("\n---", 1)[0]
+        assert news.count("\n- ") <= 5, name
+        assert "https://github.com/modelscope/FunASR/releases" in news, name
 
 
 def test_repository_roadmap_tracks_current_delivery_and_open_work():
