@@ -371,7 +371,7 @@ def test_repository_roadmap_tracks_current_delivery_and_open_work():
     ]
 
     for text in docs:
-        assert "1.4.9" in text
+        assert "1.4.11" in text
         assert "v1.3.26" not in text
         assert "runtime-llamacpp-v0.2.6" in text
         assert "MOSS-Transcribe-Diarize" in text
@@ -379,6 +379,36 @@ def test_repository_roadmap_tracks_current_delivery_and_open_work():
         assert "https://github.com/modelscope/FunASR/issues/3528" in text
         assert "https://github.com/modelscope/FunASR/issues/3479" in text
         assert "https://github.com/huggingface/transformers/pull/46180" in text
+
+    assert "speaker identities" not in docs[0]
+    assert "说话人身份识别" not in docs[1]
+
+
+def test_repository_roadmap_exposes_live_contribution_entry_points():
+    docs = [
+        (ROOT / "docs/repository_roles.md").read_text(),
+        (ROOT / "docs/repository_roles_zh.md").read_text(),
+    ]
+    live_queries = [
+        "is%3Aissue+is%3Aopen+label%3A%22help+wanted%22",
+        "is%3Aissue+is%3Aopen+label%3A%22ready+for+PR%22",
+    ]
+
+    for text in docs:
+        for query in live_queries:
+            assert query in text
+        assert "needs feedback" in text
+
+    assert "exact commit" in docs[0]
+    assert "acceptance evidence" in docs[0]
+    assert "exact commit" in docs[1]
+    assert "验收证据" in docs[1]
+
+    contributing = (ROOT / "CONTRIBUTING.md").read_text()
+    assert "## Find a task" in contributing
+    for query in live_queries:
+        assert query in contributing
+    assert "needs feedback" in contributing
 
 
 def test_realtime_demo_documents_partial_and_hotword_boundaries():

@@ -17,6 +17,14 @@ FunASR spans four repositories. Before opening an issue or PR, check which repo 
 
 Full details: [Repository roles & roadmap](./docs/repository_roles.md) ([中文](./docs/repository_roles_zh.md))
 
+## Find a task
+
+- [good first issue](https://github.com/modelscope/FunASR/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) lists bounded work with a clear starting point.
+- [help wanted](https://github.com/modelscope/FunASR/issues?q=is%3Aissue+is%3Aopen+label%3A%22help+wanted%22) lists work that needs community hardware, domain knowledge, or implementation capacity.
+- [ready for PR](https://github.com/modelscope/FunASR/issues?q=is%3Aissue+is%3Aopen+label%3A%22ready+for+PR%22) lists work whose expected behavior and acceptance evidence are defined.
+
+Read the complete issue timeline and comment before starting so work is not duplicated. An issue marked `needs feedback` is waiting for reporter or hardware validation; a related PR may merge while the issue remains open. The roadmap's [contributor table](./docs/repository_roles.md#contribute-to-the-roadmap) lists current hardware and upstream-review needs.
+
 ## High-impact areas
 
 - **Quick start reliability:** installation notes, CPU/GPU/MPS compatibility, dependency fixes, and runnable examples.
