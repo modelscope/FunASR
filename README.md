@@ -333,10 +333,9 @@ inference on physical Blackwell hardware.
 
 ## What's new
 
-- **FunASR 1.4.11** is the current PyPI release. It improves readable multilingual subtitles while preserving real model timestamps. Install with `python -m pip install -U "funasr==1.4.11"`. [Release ->](https://github.com/modelscope/FunASR/releases/tag/v1.4.11)
-- **MOSS-Transcribe-Diarize integration** adds long-form ASR, timestamps, and anonymous speaker labels in one generation, without an external VAD or speaker pipeline. FunASR supports local Transformers and existing vLLM/SGLang services; FunClip can export speaker-aware SRT and clips. [Deployment guide ->](./docs/moss_transcribe_diarize.md)
-- **llama.cpp runtime v0.2.6** provides verified prebuilt archives for ten Linux, macOS, and Windows targets, including dedicated Windows CUDA packages for RTX 30/40 and RTX 50 GPUs. [Download matrix ->](https://www.funasr.com/en/deploy/llama-cpp.html)
-- **Realtime serving is faster and more resilient**: compatible WebSocket sessions are batched instead of serialized, and queued decoding no longer closes healthy sessions by default. On the H100 regression workload, 12-client STOP p95 fell from 19.8 s to 0.4 s. [Production guide ->](./docs/vllm_guide.md)
+- **Latest release:** FunASR 1.4.11 improves multilingual subtitles while preserving model timestamps. Install with `python -m pip install -U "funasr==1.4.11"`. [Release notes ->](https://github.com/modelscope/FunASR/releases/tag/v1.4.11)
+- **New model integration:** MOSS-Transcribe-Diarize provides long-form ASR, timestamps, and anonymous speaker labels in one pass, without an external VAD or speaker pipeline. [Deployment guide ->](./docs/moss_transcribe_diarize.md)
+- **Production deployment:** use faster realtime vLLM serving or verified llama.cpp runtime v0.2.6 packages for Linux, macOS, and Windows. [vLLM guide ->](./docs/vllm_guide.md) · [runtime release ->](https://github.com/modelscope/FunASR/releases/tag/runtime-llamacpp-v0.2.6) · [downloads ->](https://www.funasr.com/en/deploy/llama-cpp.html)
 
 > See [GitHub Releases](https://github.com/modelscope/FunASR/releases) for the complete changelog and downloadable assets.
 

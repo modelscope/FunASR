@@ -99,10 +99,9 @@ Whisper は単一モデルですが、**FunASR はツールキット**です—�
 
 ## 最新情報
 
-- **FunASR 1.4.11** は現在の PyPI 安定版です。実際のモデル timestamp を保持しながら、多言語字幕の可読性を改善しました。更新：`python -m pip install -U "funasr==1.4.11"`。[Release ->](https://github.com/modelscope/FunASR/releases/tag/v1.4.11)
-- **MOSS-Transcribe-Diarize 連携**では、長時間音声の ASR、timestamp、匿名 speaker label を 1 回の生成で処理でき、外部 VAD や speaker pipeline は不要です。FunASR は local Transformers と既存の vLLM/SGLang service に対応し、FunClip は speaker 付き SRT と clip を出力できます。[Deployment guide ->](./docs/moss_transcribe_diarize.md)
-- **llama.cpp runtime v0.2.6** は Linux、macOS、Windows の 10 target 向け検証済み archive を提供し、RTX 30/40 と RTX 50 向け Windows CUDA package を分けて用意しています。[Download matrix ->](https://www.funasr.com/en/deploy/llama-cpp.html) · [Release ->](https://github.com/modelscope/FunASR/releases/tag/runtime-llamacpp-v0.2.6)
-- **Realtime serving の高速化と安定化**：互換 WebSocket session を直列処理せず batch 化し、decode queue によって正常な session を default で切断しないようにしました。H100 regression workload では 12-client STOP p95 が 19.8 秒から 0.4 秒に短縮しました。[Production guide ->](./docs/vllm_guide.md)
+- **最新リリース：** FunASR 1.4.11 はモデルの timestamp を保持しながら、多言語字幕を改善します。更新：`python -m pip install -U "funasr==1.4.11"`。[Release notes ->](https://github.com/modelscope/FunASR/releases/tag/v1.4.11)
+- **新しいモデル連携：** MOSS-Transcribe-Diarize は長時間 ASR、timestamp、匿名 speaker label を 1 回で処理し、外部 VAD や speaker pipeline を必要としません。[Deployment guide ->](./docs/moss_transcribe_diarize.md)
+- **本番デプロイ：** 高速な realtime vLLM serving、または Linux、macOS、Windows 向け llama.cpp runtime v0.2.6 package を利用できます。[vLLM guide ->](./docs/vllm_guide.md) · [runtime release ->](https://github.com/modelscope/FunASR/releases/tag/runtime-llamacpp-v0.2.6) · [downloads ->](https://www.funasr.com/en/deploy/llama-cpp.html)
 
 > 完全な変更履歴と download asset は [GitHub Releases](https://github.com/modelscope/FunASR/releases) を参照してください。
 

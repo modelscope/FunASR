@@ -99,10 +99,9 @@ Whisper는 단일 모델이지만, **FunASR는 툴킷**입니다. 용도에 맞�
 
 ## 최신 소식
 
-- **FunASR 1.4.11**은 현재 PyPI 안정 버전입니다. 실제 모델 timestamp를 유지하면서 다국어 자막의 가독성을 개선했습니다. 업데이트: `python -m pip install -U "funasr==1.4.11"`. [Release ->](https://github.com/modelscope/FunASR/releases/tag/v1.4.11)
-- **MOSS-Transcribe-Diarize 연동**은 긴 오디오의 ASR, timestamp, 익명 speaker label을 한 번의 생성으로 처리하므로 외부 VAD 또는 speaker pipeline이 필요하지 않습니다. FunASR은 local Transformers와 기존 vLLM/SGLang service를 지원하고, FunClip은 speaker별 SRT와 clip을 내보낼 수 있습니다. [Deployment guide ->](./docs/moss_transcribe_diarize.md)
-- **llama.cpp runtime v0.2.6**은 Linux, macOS, Windows 10개 target용 검증된 archive를 제공하며 RTX 30/40 및 RTX 50용 Windows CUDA package를 별도로 제공합니다. [Download matrix ->](https://www.funasr.com/en/deploy/llama-cpp.html) · [Release ->](https://github.com/modelscope/FunASR/releases/tag/runtime-llamacpp-v0.2.6)
-- **Realtime serving 성능과 안정성 개선**: 호환 WebSocket session을 직렬 처리하지 않고 batch 처리하며, decode queue 때문에 정상 session을 기본적으로 종료하지 않습니다. H100 regression workload에서 12-client STOP p95가 19.8초에서 0.4초로 줄었습니다. [Production guide ->](./docs/vllm_guide.md)
+- **최신 릴리스:** FunASR 1.4.11은 모델 timestamp를 유지하면서 다국어 자막을 개선합니다. 업데이트: `python -m pip install -U "funasr==1.4.11"`. [릴리스 노트 ->](https://github.com/modelscope/FunASR/releases/tag/v1.4.11)
+- **새 모델 연동:** MOSS-Transcribe-Diarize는 긴 오디오 ASR, timestamp, 익명 speaker label을 한 번에 처리하며 외부 VAD나 speaker pipeline이 필요하지 않습니다. [배포 가이드 ->](./docs/moss_transcribe_diarize.md)
+- **프로덕션 배포:** 더 빠른 realtime vLLM serving 또는 Linux, macOS, Windows용 llama.cpp runtime v0.2.6 package를 사용할 수 있습니다. [vLLM guide ->](./docs/vllm_guide.md) · [runtime release ->](https://github.com/modelscope/FunASR/releases/tag/runtime-llamacpp-v0.2.6) · [downloads ->](https://www.funasr.com/en/deploy/llama-cpp.html)
 
 > 전체 변경 기록과 download asset은 [GitHub Releases](https://github.com/modelscope/FunASR/releases)에서 확인할 수 있습니다.
 

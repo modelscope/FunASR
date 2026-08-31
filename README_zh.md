@@ -149,10 +149,9 @@ Whisper 是单个模型，**FunASR 是一个工具箱**——按场景挑模型�
 
 ## 最新动态
 
-- **FunASR 1.4.11** 是当前 PyPI 稳定版，重点改善多语言可读字幕，并保留模型真实时间戳。升级命令：`python -m pip install -U "funasr==1.4.11"`。[发布页 ->](https://github.com/modelscope/FunASR/releases/tag/v1.4.11)
-- **MOSS-Transcribe-Diarize 已接入生态**：一次生成同时完成长音频转写、时间戳和匿名说话人标签，无需外挂 VAD 或说话人流水线。FunASR 支持本地 Transformers 及已有 vLLM/SGLang 服务，FunClip 可导出带说话人的 SRT 和片段。[部署指南 ->](./docs/moss_transcribe_diarize_zh.md)
-- **llama.cpp runtime v0.2.6** 提供覆盖 Linux、macOS、Windows 十种目标的已验证预编译包，并为 RTX 30/40 与 RTX 50 显卡分别提供 Windows CUDA 包。[下载矩阵 ->](https://www.funasr.com/deploy/llama-cpp.html)
-- **实时服务更快、更稳定**：兼容的 WebSocket 会话改为批处理，排队解码也不再默认误关健康连接。在 H100 回归负载下，12 路客户端 STOP p95 从 19.8 秒降至 0.4 秒。[生产部署指南 ->](./docs/vllm_guide_zh.md)
+- **最新版本：** FunASR 1.4.11 改善多语言字幕，同时保留模型真实时间戳。升级：`python -m pip install -U "funasr==1.4.11"`。[发布说明 ->](https://github.com/modelscope/FunASR/releases/tag/v1.4.11)
+- **新模型接入：** MOSS-Transcribe-Diarize 一次完成长音频转写、时间戳和匿名说话人标签，无需外挂 VAD 或说话人流水线。[部署指南 ->](./docs/moss_transcribe_diarize_zh.md)
+- **工业部署：** 可选更快的实时 vLLM 服务，或覆盖 Linux、macOS、Windows 的 llama.cpp runtime v0.2.6 预编译包。[vLLM 指南 ->](./docs/vllm_guide_zh.md) · [运行包发布页 ->](https://github.com/modelscope/FunASR/releases/tag/runtime-llamacpp-v0.2.6) · [下载 ->](https://www.funasr.com/deploy/llama-cpp.html)
 
 > 完整改动记录和可下载资产请查看 [GitHub Releases](https://github.com/modelscope/FunASR/releases)。
 
