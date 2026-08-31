@@ -11,6 +11,8 @@
 MOSS-Transcribe-Diarize 会联合生成转写、时间戳和 `[S01]` 等说话人标签，应用侧
 不必再拼接外部 VAD、ASR 和 diarization 管线。这里描述的是部署形态，不表示模型
 内部没有分块或分段。
+这些是单次录音内的匿名说话人标签：`[S01]` 不能识别已知人物，不做已注册声纹
+验证，也不保证与另一段录音中的 `[S01]` 是同一个人。
 
 ## 固定上游版本
 
@@ -28,8 +30,8 @@ MOSS-Transcribe-Diarize 会联合生成转写、时间戳和 `[S01]` 等说话�
 ## FunASR AutoModel 契约
 
 本地后端应使用隔离的 Python 3.10+ 环境，并安装 Transformers 5.6 或更新版本。
-MOSS 在一次生成中完成长音频转写与说话人识别，因此不要传 `vad_model` 或
-`spk_model`。外部 VAD 会把长音频切开，并破坏跨分块的全局说话人身份。
+MOSS 在一次生成中完成长音频转写与说话人分离，因此不要传 `vad_model` 或
+`spk_model`。外部 VAD 会把长音频切开，并破坏跨分块的匿名标签一致性。
 
 ```python
 from funasr import AutoModel
@@ -323,7 +325,7 @@ for segment in result["sentence_info"]:
 不要传入 `vad_model` 或 `spk_model`：MOSS 在一次生成中联合完成分段和匿名说话人
 归属，外部分段会破坏长轮次中的说话人一致性。适配器把上游带标签原文保存在
 `raw_text`，只从标准化 segment 中移除已经校验的 `[Sxx]` 前缀；如果 SGLang
-没有返回此前缀，则明确失败，不会伪造说话人身份。
+没有返回此前缀，则明确失败，不会伪造说话人标签。
 
 原生 runtime 已通过 SGLang Omni
 [#914](https://github.com/sgl-project/sglang-omni/pull/914) 合并。其单张 H100

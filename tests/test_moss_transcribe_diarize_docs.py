@@ -15,6 +15,24 @@ MATRICES = (
     ROOT / "docs" / "deployment_matrix_ja.md",
     ROOT / "docs" / "deployment_matrix_ko.md",
 )
+BOUNDARY_DOCS = (
+    *GUIDES,
+    ROOT / "docs" / "repository_roles.md",
+    ROOT / "docs" / "repository_roles_zh.md",
+    ROOT
+    / "web-pages"
+    / "product-site"
+    / "legacy"
+    / "en"
+    / "blog"
+    / "funclip-v2-2-0-moss-speaker-clipping.html",
+    ROOT
+    / "web-pages"
+    / "product-site"
+    / "legacy"
+    / "blog"
+    / "funclip-v2-2-0-moss-speaker-clipping.html",
+)
 
 
 @pytest.mark.parametrize("guide", GUIDES)
@@ -158,3 +176,20 @@ def test_openai_consumer_docs_expose_moss_alias_and_boundaries() -> None:
     spec = json.loads((root / "openapi.json").read_text(encoding="utf-8"))
     model = spec["components"]["schemas"]["TranscriptionRequest"]["properties"]["model"]
     assert "moss-transcribe-diarize" in model["enum"]
+
+
+def test_moss_docs_describe_anonymous_labels_not_known_person_identity() -> None:
+    combined = "\n".join(path.read_text(encoding="utf-8") for path in BOUNDARY_DOCS)
+
+    for misleading_claim in (
+        "speaker identity",
+        "speaker identities",
+        "说话人身份",
+        "身份识别",
+    ):
+        assert misleading_claim not in combined
+
+    assert "anonymous speaker labels" in combined
+    assert "匿名说话人标签" in combined
+    assert "does not identify a known person" in combined
+    assert "不能识别已知人物" in combined
