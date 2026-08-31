@@ -569,6 +569,48 @@ def test_long_segment_recovers_from_single_character_final():
     assert text == partial
 
 
+def test_long_segment_accepts_partial_slightly_past_vad_end():
+    module = load_service_module()
+    partial = (
+        "哎，不好意思，上午好，高雄交通比较混乱，影响人有点。"
+        "哎，哎，胡总，各位长官，大家好。"
+    )
+    session = make_reported_long_segment_reconciliation_session(
+        module, partial, partial_end_ms=126976
+    )
+    session.last_partial_start_ms = 114430
+    session.segment_best_partial_start_ms = 114430
+
+    text = session._reconcile_completed_segment_text(
+        "哎",
+        [114430, 126740],
+        decode_succeeded=True,
+    )
+
+    assert text == partial
+
+
+def test_long_segment_rejects_partial_far_past_vad_end():
+    module = load_service_module()
+    partial = (
+        "哎，不好意思，上午好，高雄交通比较混乱，影响人有点。"
+        "哎，哎，胡总，各位长官，大家好。"
+    )
+    session = make_reported_long_segment_reconciliation_session(
+        module, partial, partial_end_ms=128800
+    )
+    session.last_partial_start_ms = 114430
+    session.segment_best_partial_start_ms = 114430
+
+    text = session._reconcile_completed_segment_text(
+        "哎",
+        [114430, 126740],
+        decode_succeeded=True,
+    )
+
+    assert text == "哎"
+
+
 def test_long_segment_recovers_when_an_early_partial_correction_hides_tail_regression():
     module = load_service_module()
     partial = (
