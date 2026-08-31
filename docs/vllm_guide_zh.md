@@ -777,7 +777,7 @@ Fun-ASR-Nano 的声学编码器（SenseVoice）是**全上下文、非流式**�
 
 **使用建议**
 - 正常对话语音有自然停顿，VAD 会把它切成一句句较短的语音，每句 partial 的开销自然受限，**通常无需关注**。
-- 只有**超长、不停顿的连续语音**（如长篇朗读）会让单句不断变长、partial 预览逐渐变慢。`serve_realtime_ws.py` 默认用 `--partial-window-sec 15` 限制临时预览窗口；多客户端或连续独白压测时可降到 `8-10`，并把 `--decode-interval` 提高到 `0.8-1.0`。这只影响临时 `partial`，VAD 锁定句和 STOP 最终结果仍走完整音频。
+- 只有**超长、不停顿的连续语音**（如长篇朗读）会让单句不断变长、partial 预览逐渐变慢。`serve_realtime_ws.py` 默认用 `--partial-window-sec 15` 限制临时预览窗口；多客户端连续独白负载应根据实测输出滞后缩短窗口并增大 `--decode-interval`。这只影响临时 `partial`，VAD 锁定句和 STOP 最终结果仍走完整音频。可先参考 §6.7 的 L20 实测起点。
 
 ### 6.6 说话人分离（SPK）的代价与开关
 
@@ -797,6 +797,12 @@ Fun-ASR-Nano 的声学编码器（SenseVoice）是**全上下文、非流式**�
 - **先把单进程作为第一扩展单元。** 先用内置批处理压测单进程；只有当单进程达到实测 GPU、CPU 或尾延迟上限后，再增加进程或按 GPU 横向扩容。每个额外进程都会复制模型显存，也可能减少单进程内形成 batch 的机会。
 - **vLLM 收益取决于请求是否同时到达。** 真实轮流对话可能连接很多，但同时解码很少；把同一段连续独白同步回放给所有客户端，则会刻意形成大批次。发布结果时必须同时报告话务形态和批处理参数。
 - **可持续并发没有通用的“支持 N 路”数字。** 上限主要取决于同时说话数、静音比例、句长、partial 刷新间隔、说话人分离、batch 等待时间以及 GPU/CPU 能力。长时间不停顿的语音仍会重复编码临时窗口（见 §6.5），成本更高。请按自己的真实话务压测，不要把其他部署的连接数直接当成规格。
+- **L20 实测起点，不是全局默认值。** [#3528](https://github.com/modelscope/FunASR/issues/3528) 在单张 L20 上同步回放 47 秒连续语音、16 路客户端，并关闭 SPK 与客户端 ping；`--partial-window-sec 8 --decode-interval 2.0` 是该负载的最优组合：408 次解码请求、累计编码 3,072.1 秒音频、完成 p50 51.18 秒、输出滞后 4.5 秒、聚合实时率 14.2x、首词 1.31 秒。默认 15 秒窗口在这组 16 路负载上未完成。请只把 `8 / 2.0` 当作 L20 高并发初始配置，再按自己的首词、输出滞后、最终完成时间、请求数和累计编码量调优。
+
+```bash
+CUDA_VISIBLE_DEVICES=0 python examples/industrial_data_pretraining/fun_asr_nano/serve_realtime_ws.py \
+  --partial-window-sec 8 --decode-interval 2.0 --log-decode-profile
+```
 
 ---
 
