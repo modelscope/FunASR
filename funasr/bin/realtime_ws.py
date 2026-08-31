@@ -13,6 +13,7 @@ Features:
 import asyncio
 from collections import deque
 import copy
+from difflib import SequenceMatcher
 import json
 import logging
 import os
@@ -1104,24 +1105,31 @@ class RealtimeASRSession:
             ):
                 final_cmp = _normalize_transcript(final_text)
                 recent_cmp = _normalize_transcript(recent_partial)
-                common_prefix_len = 0
-                for final_char, partial_char in zip(final_cmp, recent_cmp):
-                    if final_char != partial_char:
-                        break
-                    common_prefix_len += 1
-                diverged = common_prefix_len < min(len(final_cmp), len(recent_cmp))
+                matcher = SequenceMatcher(None, final_cmp, recent_cmp, autojunk=False)
+                matching_blocks = matcher.get_matching_blocks()
+                matched_chars = sum(block.size for block in matching_blocks)
+                final_coverage = matched_chars / max(1, len(final_cmp))
+                first_match = next(
+                    (block for block in matching_blocks if block.size), None
+                )
+                starts_aligned = bool(
+                    first_match and first_match.a <= 1 and first_match.b <= 2
+                )
+                diverged = final_cmp != recent_cmp
                 catastrophically_short = (
                     diverged
-                    and len(final_cmp) >= 2
+                    and len(final_cmp) >= 1
                     and len(recent_cmp) >= 24
                     and len(recent_cmp) >= len(final_cmp) * 3
-                    and common_prefix_len >= max(1, len(final_cmp) // 2)
+                    and starts_aligned
+                    and matched_chars >= max(1, len(final_cmp) // 2)
                 )
                 tail_regressed = (
                     diverged
                     and len(final_cmp) >= 16
                     and len(recent_cmp) - len(final_cmp) >= 4
-                    and common_prefix_len >= max(12, (len(final_cmp) * 3) // 4)
+                    and starts_aligned
+                    and final_coverage >= 0.75
                 )
                 if catastrophically_short or tail_regressed:
                     partial_text = recent_partial

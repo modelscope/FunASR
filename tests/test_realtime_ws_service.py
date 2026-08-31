@@ -550,6 +550,48 @@ def test_long_segment_recovers_from_catastrophically_short_final():
     assert text == partial
 
 
+def test_long_segment_recovers_from_single_character_final():
+    module = load_service_module()
+    partial = (
+        "哎，不好意思，上午高雄交通比较混乱一点，我们不晓得我们有点。"
+        "胡总，各位长官。"
+    )
+    session = make_reported_long_segment_reconciliation_session(
+        module, partial, partial_end_ms=35328
+    )
+
+    text = session._reconcile_completed_segment_text(
+        "哎",
+        [2920, 36260],
+        decode_succeeded=True,
+    )
+
+    assert text == partial
+
+
+def test_long_segment_recovers_when_an_early_partial_correction_hides_tail_regression():
+    module = load_service_module()
+    partial = (
+        "哇，哎，不好意思，上午杭高雄的交通比较混乱一点，我们不晓得我们有点。"
+        "哎，好嘞，胡总各位长官。"
+    )
+    final = (
+        "哇，不好意思，上午高雄的交通比较混乱一点，我们不晓得我们有点。"
+        "哎，好嘞，"
+    )
+    session = make_reported_long_segment_reconciliation_session(
+        module, partial, partial_end_ms=14336
+    )
+
+    text = session._reconcile_completed_segment_text(
+        final,
+        [2920, 14420],
+        decode_succeeded=True,
+    )
+
+    assert text == partial
+
+
 def test_long_segment_keeps_distinct_short_final_without_prefix_alignment():
     module = load_service_module()
     partial = "会议取消，稍后另行通知，请各位等待后续的完整安排和确认消息。"
