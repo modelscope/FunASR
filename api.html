@@ -22923,7 +22923,7 @@
     else:
         print(f&quot;You are using the latest version of funasr-{current_version}&quot;)
 </code></pre></details></div>
-<div class="api-detail" id="e455"><span class="dtag badge-f">function</span><h2><code>extract_language_from_asr_text(text)</code></h2><div class="dmod">funasr.bin._server_app · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/_server_app.py#L37" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Extract a SenseVoice language code before special tokens are removed.</p>
+<div class="api-detail" id="e455"><span class="dtag badge-f">function</span><h2><code>extract_language_from_asr_text(text)</code></h2><div class="dmod">funasr.bin._server_app · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/_server_app.py#L40" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Extract a SenseVoice language code before special tokens are removed.</p>
 </div><details class="src-block"><summary>📄 Source code</summary><pre><code>def extract_language_from_asr_text(text):
     &quot;&quot;&quot;Extract a SenseVoice language code before special tokens are removed.&quot;&quot;&quot;
     if not isinstance(text, str):
@@ -22931,7 +22931,7 @@
     match = _LANGUAGE_TAG_RE.search(text)
     return match.group(1) if match else None
 </code></pre></details></div>
-<div class="api-detail" id="e456"><span class="dtag badge-f">function</span><h2><code>resolve_transcription_language(requested_language, result)</code></h2><div class="dmod">funasr.bin._server_app · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/_server_app.py#L45" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Prefer the caller&#x27;s language hint, then backend detection, else unknown.</p>
+<div class="api-detail" id="e456"><span class="dtag badge-f">function</span><h2><code>resolve_transcription_language(requested_language, result)</code></h2><div class="dmod">funasr.bin._server_app · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/_server_app.py#L48" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Prefer the caller&#x27;s language hint, then backend detection, else unknown.</p>
 </div><details class="src-block"><summary>📄 Source code</summary><pre><code>def resolve_transcription_language(requested_language, result):
     &quot;&quot;&quot;Prefer the caller&#x27;s language hint, then backend detection, else unknown.&quot;&quot;&quot;
     if requested_language and requested_language.strip().lower() != &quot;auto&quot;:
@@ -22941,7 +22941,7 @@
         return detected_language
     return &quot;unknown&quot;
 </code></pre></details></div>
-<div class="api-detail" id="e457"><span class="dtag badge-f">function</span><h2><code>build_openai_fallback_segments(text, duration, max_chars)</code></h2><div class="dmod">funasr.bin._server_app · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/_server_app.py#L91" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Build coarse timestamped segments when a backend returns text only.</p>
+<div class="api-detail" id="e457"><span class="dtag badge-f">function</span><h2><code>build_openai_fallback_segments(text, duration, max_chars)</code></h2><div class="dmod">funasr.bin._server_app · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/_server_app.py#L94" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Build coarse timestamped segments when a backend returns text only.</p>
 </div><details class="src-block"><summary>📄 Source code</summary><pre><code>def build_openai_fallback_segments(text: str, duration: float, max_chars: int = 80):
     &quot;&quot;&quot;Build coarse timestamped segments when a backend returns text only.&quot;&quot;&quot;
     parts = _split_text_for_openai_segments(text, max_chars=max_chars)
@@ -22966,7 +22966,7 @@
 
     return segments
 </code></pre></details></div>
-<div class="api-detail" id="e458"><span class="dtag badge-f">function</span><h2><code>prepare_audio_for_inference(audio_data, sr, target_sr)</code></h2><div class="dmod">funasr.bin._server_app · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/_server_app.py#L116" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Return mono float32 audio at target_sr for ASR inference.</p>
+<div class="api-detail" id="e458"><span class="dtag badge-f">function</span><h2><code>prepare_audio_for_inference(audio_data, sr, target_sr)</code></h2><div class="dmod">funasr.bin._server_app · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/_server_app.py#L119" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Return mono float32 audio at target_sr for ASR inference.</p>
 </div><details class="src-block"><summary>📄 Source code</summary><pre><code>def prepare_audio_for_inference(audio_data, sr, target_sr=16000):
     &quot;&quot;&quot;Return mono float32 audio at target_sr for ASR inference.&quot;&quot;&quot;
     audio_data = np.asarray(audio_data)
@@ -22981,7 +22981,7 @@
 
     return audio_data.astype(np.float32), sr
 </code></pre></details></div>
-<div class="api-detail" id="e459"><span class="dtag badge-f">function</span><h2><code>attach_speaker_labels(audio_data, sr, segments, speaker_model, device)</code></h2><div class="dmod">funasr.bin._server_app · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/_server_app.py#L131" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Run speaker diarization once and attach labels to timestamped segments.</p>
+<div class="api-detail" id="e459"><span class="dtag badge-f">function</span><h2><code>attach_speaker_labels(audio_data, sr, segments, speaker_model, device)</code></h2><div class="dmod">funasr.bin._server_app · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/_server_app.py#L134" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Run speaker diarization once and attach labels to timestamped segments.</p>
 </div><details class="src-block"><summary>📄 Source code</summary><pre><code>def attach_speaker_labels(audio_data, sr, segments, speaker_model, device):
     &quot;&quot;&quot;Run speaker diarization once and attach labels to timestamped segments.&quot;&quot;&quot;
     if not segments:
@@ -23012,8 +23012,8 @@
     speaker_results = speaker_model.generate(
         input=[chunk[2] for chunk in chunks], cache={}, is_final=True
     )
-</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/_server_app.py#L131" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
-<div class="api-detail" id="e460"><span class="dtag badge-f">function</span><h2><code>build_openai_verbose_json(result, requested_language)</code></h2><div class="dmod">funasr.bin._server_app · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/_server_app.py#L189" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Build OpenAI-compatible verbose JSON while preserving FunASR extensions.</p>
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/_server_app.py#L134" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
+<div class="api-detail" id="e460"><span class="dtag badge-f">function</span><h2><code>build_openai_verbose_json(result, requested_language)</code></h2><div class="dmod">funasr.bin._server_app · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/_server_app.py#L192" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Build OpenAI-compatible verbose JSON while preserving FunASR extensions.</p>
 </div><details class="src-block"><summary>📄 Source code</summary><pre><code>def build_openai_verbose_json(result, requested_language=None):
     &quot;&quot;&quot;Build OpenAI-compatible verbose JSON while preserving FunASR extensions.&quot;&quot;&quot;
     segments = []
@@ -23037,7 +23037,7 @@
         &quot;segments&quot;: segments,
     }
 </code></pre></details></div>
-<div class="api-detail" id="e461"><span class="dtag badge-f">function</span><h2><code>create_app(device, preload_model, model_path, hub, spk_model, cors_origins)</code></h2><div class="dmod">funasr.bin._server_app · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/_server_app.py#L213" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source code</summary><pre><code>def create_app(
+<div class="api-detail" id="e461"><span class="dtag badge-f">function</span><h2><code>create_app(device, preload_model, model_path, hub, spk_model, cors_origins)</code></h2><div class="dmod">funasr.bin._server_app · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/_server_app.py#L216" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source code</summary><pre><code>def create_app(
     device: str = &quot;cuda&quot;,
     preload_model: str = &quot;auto&quot;,
     model_path: str = None,
@@ -23067,7 +23067,7 @@
         app.add_middleware(
             CORSMiddleware,
             allow_origins=normalized_origins,
-</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/_server_app.py#L213" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/_server_app.py#L216" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
 <div class="api-detail" id="e462"><span class="dtag badge-f">function</span><h2><code>main_hydra(kwargs)</code></h2><div class="dmod">funasr.bin.compute_audio_cmvn · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/compute_audio_cmvn.py#L15" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Main hydra.</p>
 <h4>Args:</h4>
 <ul>
@@ -23935,10 +23935,10 @@
     args = build_arg_parser().parse_args()
     asyncio.run(main(args))
 </code></pre></details></div>
-<div class="api-detail" id="e495"><span class="dtag badge-f">function</span><h2><code>server_version_label()</code></h2><div class="dmod">funasr.bin.server · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/server.py#L21" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source code</summary><pre><code>def server_version_label():
+<div class="api-detail" id="e495"><span class="dtag badge-f">function</span><h2><code>server_version_label()</code></h2><div class="dmod">funasr.bin.server · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/server.py#L22" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source code</summary><pre><code>def server_version_label():
     return f&quot;FunASR Server v{PACKAGE_VERSION}&quot;
 </code></pre></details></div>
-<div class="api-detail" id="e496"><span class="dtag badge-f">function</span><h2><code>build_parser()</code></h2><div class="dmod">funasr.bin.server · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/server.py#L25" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source code</summary><pre><code>def build_parser():
+<div class="api-detail" id="e496"><span class="dtag badge-f">function</span><h2><code>build_parser()</code></h2><div class="dmod">funasr.bin.server · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/server.py#L26" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source code</summary><pre><code>def build_parser():
     parser = argparse.ArgumentParser(
         description=&quot;FunASR OpenAI-Compatible API Server&quot;,
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -23947,6 +23947,7 @@ Examples:
   funasr-server                          # Start with SenseVoice on GPU
   funasr-server --device cpu             # Start on CPU
   funasr-server --model paraformer       # Use Paraformer model
+  funasr-server --model moss-transcribe-diarize --device cuda:0
   funasr-server --port 9000             # Custom port
   funasr-server --model-path /path/to/local/model  # Use local model
   funasr-server --model-path username/model --hub hf  # Use HuggingFace model
@@ -23961,15 +23962,14 @@ Then use with OpenAI SDK:
     parser.add_argument(&quot;--host&quot;, default=&quot;0.0.0.0&quot;, help=&quot;Bind address (default: 0.0.0.0)&quot;)
     parser.add_argument(&quot;--port&quot;, type=int, default=8000, help=&quot;Port (default: 8000)&quot;)
     parser.add_argument(&quot;--device&quot;, default=&quot;cuda&quot;, help=&quot;Device: cuda, cpu, mps (default: cuda)&quot;)
-    parser.add_argument(&quot;--model&quot;, default=&quot;auto&quot;, help=&quot;Pre-load model: auto (GPU=fun-asr-nano, CPU=sensevoice), sensevoice, paraformer, fun-asr-nano&quot;)
-    parser.add_argument(&quot;--model-path&quot;, default=None, help=&quot;Local model path or model ID (overrides --model)&quot;)
-    parser.add_argument(&quot;--hub&quot;, default=&quot;ms&quot;, help=&quot;Model hub: ms (ModelScope), hf (HuggingFace) (default: ms)&quot;)
     parser.add_argument(
-        &quot;--spk-model&quot;,
-        default=&quot;cam++&quot;,
-        help=&quot;Speaker model loaded on the first spk=true request (default: cam++)&quot;,
-</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/server.py#L25" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
-<div class="api-detail" id="e497"><span class="dtag badge-f">function</span><h2><code>main()</code></h2><div class="dmod">funasr.bin.server · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/server.py#L66" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source code</summary><pre><code>def main():
+        &quot;--model&quot;,
+        default=&quot;auto&quot;,
+        help=(
+            &quot;Pre-load model: auto (GPU=fun-asr-nano, CPU=sensevoice), &quot;
+            &quot;sensevoice, paraformer, fun-asr-nano, moss-transcribe-diarize&quot;
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/server.py#L26" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
+<div class="api-detail" id="e497"><span class="dtag badge-f">function</span><h2><code>main()</code></h2><div class="dmod">funasr.bin.server · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/server.py#L75" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>📄 Source code</summary><pre><code>def main():
     args = build_parser().parse_args()
 
     try:
@@ -23999,7 +23999,7 @@ Then use with OpenAI SDK:
     print(f&quot;╔══════════════════════════════════════════════╗&quot;)
     print(f&quot;║  {server_version_label():&lt;44}║&quot;)
     print(f&quot;║  Device: {args.device:&lt;8}                          ║&quot;)
-</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/server.py#L66" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/server.py#L75" target="_blank" class="src-more">View full source on GitHub →</a></details></div>
 <div class="api-detail" id="e498"><span class="dtag badge-f">function</span><h2><code>field2slice(field)</code></h2><div class="dmod">funasr.bin.tokenize_text · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/tokenize_text.py#L23" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Convert field string to slice</p>
 <p>Note that field string accepts 1-based integer.</p>
 <h4>Examples:</h4>
