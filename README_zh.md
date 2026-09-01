@@ -150,7 +150,7 @@ Whisper 是单个模型，**FunASR 是一个工具箱**——按场景挑模型�
 ## 最新动态
 
 - **MOSS-Transcribe-Diarize** 已接入 FunASR 服务、Docker、Kubernetes、vLLM/SGLang 工作流和 FunClip，一次完成长音频转写、时间戳与匿名说话人标注。[部署 MOSS ->](./docs/moss_transcribe_diarize_zh.md)
-- **FunASR 1.4.11** 是当前 PyPI 稳定版，重点改善多语言可读字幕并保留模型真实时间戳。[安装或升级 ->](https://github.com/modelscope/FunASR/releases/tag/v1.4.11)
+- **FunASR 1.4.12** 修复 Fun-ASR-Nano 使用 FP16 音频计算时的 vLLM 异常输出：Qwen3 解码器改用 BF16，不支持 BF16 的 GPU 可显式选择 FP32。升级命令：`python -m pip install -U "funasr==1.4.12"`。[发布页 ->](https://github.com/modelscope/FunASR/releases/tag/v1.4.12)
 - **工业部署** 新增更快、更稳定的实时服务，以及覆盖 Linux、macOS、Windows 十种目标的 llama.cpp 预编译包。[GPU 服务 ->](./docs/vllm_guide_zh.md) · [CPU/端侧包 ->](https://www.funasr.com/deploy/llama-cpp.html)
 
 > 完整改动记录和可下载资产请查看 [GitHub Releases](https://github.com/modelscope/FunASR/releases)。
