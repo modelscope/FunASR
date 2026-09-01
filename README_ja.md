@@ -150,6 +150,8 @@ docker pull registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-
 
 CPU/エッジで Python なしのオフライン ASR が必要な場合は、llama.cpp / GGUF ランタイムを使えます：[funasr.com/deploy/llama-cpp](https://www.funasr.com/en/deploy/llama-cpp.html) · [Fun-ASR-Nano-GGUF](https://huggingface.co/FunAudioLLM/Fun-ASR-Nano-GGUF) · [SenseVoiceSmall-GGUF](https://huggingface.co/FunAudioLLM/SenseVoiceSmall-GGUF)。
 
+Windows GPU では、[runtime-llamacpp-v0.2.6](https://github.com/modelscope/FunASR/releases/tag/runtime-llamacpp-v0.2.6) の `windows-x64-vulkan`、`windows-x64-cuda` または `windows-x64-cuda-blackwell` パッケージを選択してください。RTX 50 / Blackwell (`sm_120`) には専用の `windows-x64-cuda-blackwell` パッケージがあります。CI のアーカイブ検証は実機での Blackwell 推論を保証しません。詳細は [llama.cpp 配布ガイド](https://www.funasr.com/en/deploy/llama-cpp.html) を参照してください。
+
 [Colab quickstart →](./examples/colab/README_ja.md) · [OpenAI API example →](./examples/openai_api/README_ja.md) · [Client recipes →](./examples/openai_api/CLIENTS.md) · [Workflow recipes →](./examples/openai_api/WORKFLOWS.md) · [Postman collection →](./examples/openai_api/POSTMAN.md) · [OpenAPI spec →](./examples/openai_api/OPENAPI.md) · [Security guide →](./examples/openai_api/SECURITY.md) · [Deployment matrix →](./docs/deployment_matrix_ja.md) · [デプロイドキュメント →](./runtime/readme.md) · [Agent連携 →](https://modelscope.github.io/FunASR/agent.html)
 
 ---

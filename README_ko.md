@@ -150,6 +150,8 @@ docker pull registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-
 
 CPU/엣지에서 Python 없이 오프라인 ASR만 필요하다면 llama.cpp / GGUF 런타임을 사용할 수 있습니다: [funasr.com/deploy/llama-cpp](https://www.funasr.com/en/deploy/llama-cpp.html) · [Fun-ASR-Nano-GGUF](https://huggingface.co/FunAudioLLM/Fun-ASR-Nano-GGUF) · [SenseVoiceSmall-GGUF](https://huggingface.co/FunAudioLLM/SenseVoiceSmall-GGUF).
 
+Windows GPU에서는 [runtime-llamacpp-v0.2.6](https://github.com/modelscope/FunASR/releases/tag/runtime-llamacpp-v0.2.6)의 `windows-x64-vulkan`, `windows-x64-cuda` 또는 `windows-x64-cuda-blackwell` 패키지를 선택하세요. RTX 50 / Blackwell (`sm_120`)에는 전용 `windows-x64-cuda-blackwell` 패키지가 있습니다. CI 아카이브 검증은 실제 Blackwell 하드웨어에서의 추론을 보장하지 않습니다. 자세한 내용은 [llama.cpp 배포 가이드](https://www.funasr.com/en/deploy/llama-cpp.html)를 참조하세요.
+
 [Colab quickstart →](./examples/colab/README_ko.md) · [OpenAI API example →](./examples/openai_api/README_ko.md) · [Client recipes →](./examples/openai_api/CLIENTS.md) · [Workflow recipes →](./examples/openai_api/WORKFLOWS.md) · [Postman collection →](./examples/openai_api/POSTMAN.md) · [OpenAPI spec →](./examples/openai_api/OPENAPI.md) · [Security guide →](./examples/openai_api/SECURITY.md) · [Deployment matrix →](./docs/deployment_matrix_ko.md) · [배포 문서 →](./runtime/readme.md) · [Agent 연동 →](https://modelscope.github.io/FunASR/agent.html)
 
 ---
