@@ -116,6 +116,19 @@ The response contains `text`, audio `duration`, and `segments` with `start`,
 `spk=true`; if a generic client sends it, the service still uses MOSS's native
 labels and does not start a second diarization pipeline.
 
+### Open WebUI
+
+[Open WebUI](https://github.com/open-webui/open-webui) can use this service as
+an OpenAI-compatible speech-to-text provider. In **Admin Panel > Settings >
+Audio**, select the OpenAI STT engine, set **OpenAI API Base URL** to
+`http://funasr:8000/v1` (or the reachable host address), select
+`moss-transcribe-diarize`, and keep the request format as `multipart`. Open
+WebUI then sends the selected model, optional language, and complete audio file
+to `/v1/audio/transcriptions`.
+
+MOSS remains an offline long-form model: this enables file transcription in
+Open WebUI, not a realtime microphone/WebSocket diarization path.
+
 For a reproducible GPU container, build from the repository root with
 `examples/openai_api/docker-compose.moss.yml`. Kubernetes operators can build
 the same `funasr-moss-api:local` image and apply

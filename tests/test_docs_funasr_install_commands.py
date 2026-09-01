@@ -341,8 +341,8 @@ def test_top_level_readmes_surface_current_release_and_edge_runtime():
     }
 
     for name, text in readmes.items():
-        assert 'python -m pip install -U "funasr==1.4.11"' in text, name
-        assert "https://github.com/modelscope/FunASR/releases/tag/v1.4.11" in text, name
+        assert 'python -m pip install -U "funasr==1.4.12"' in text, name
+        assert "https://github.com/modelscope/FunASR/releases/tag/v1.4.12" in text, name
         assert "runtime-llamacpp-v0.2.6" in text, name
 
     assert "https://www.funasr.com/en/deploy/llama-cpp.html" in readmes["README.md"]
