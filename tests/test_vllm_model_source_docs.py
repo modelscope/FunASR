@@ -29,3 +29,17 @@ def test_vllm_guides_distinguish_official_and_native_model_paths(relpath):
 
     for marker in required_markers:
         assert marker in text, f"{relpath} is missing {marker}"
+
+
+def test_v2_guide_keeps_native_vllm_and_funasr_realtime_paths_separate():
+    text = (ROOT / "docs/vllm_guide_zh_v2.md").read_text(encoding="utf-8")
+
+    required_markers = [
+        "FunAudioLLM/Fun-ASR-Nano-2512-vllm",
+        "vllm serve FunAudioLLM/Fun-ASR-Nano-2512-vllm --port 8000",
+        "serve_realtime_ws.py",
+        "realtime speech-to-text",
+    ]
+
+    for marker in required_markers:
+        assert marker in text, f"docs/vllm_guide_zh_v2.md is missing {marker}"

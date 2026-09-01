@@ -84,12 +84,26 @@ model = AutoModelVLLM(
 
 #### B. vLLM 原生转写路径
 
-vLLM 的支持模型表把
+vLLM 原生 `FunASRForConditionalGeneration` 路径使用完整的 native checkpoint，
+不是上文的 FunASR `model.pt` 布局。官方维护的模型为
+[`FunAudioLLM/Fun-ASR-Nano-2512-vllm`](https://huggingface.co/FunAudioLLM/Fun-ASR-Nano-2512-vllm)：
+
+```bash
+vllm serve FunAudioLLM/Fun-ASR-Nano-2512-vllm --port 8000
+```
+
+vLLM 的支持模型表也曾使用
 [`allendou/Fun-ASR-Nano-2512-vllm`](https://huggingface.co/allendou/Fun-ASR-Nano-2512-vllm)
-列为原生 `FunASRForConditionalGeneration` 架构的示例。这是托管在官方
-FunAudioLLM 组织之外的社区转换完整 checkpoint。只有明确选择 vLLM 原生转写
-接口时，才应按该模型卡与 vLLM 文档使用它；不要用它替换下文 FunASR
-`AutoModelVLLM` 示例中的官方 checkpoint。
+这一社区转换示例。它同样必须通过 `vllm serve` 的原生接口使用；不要把任一
+native checkpoint 传给 `AutoModelVLLM` 或
+`examples/industrial_data_pretraining/fun_asr_nano/serve_realtime_ws.py`。后两者预期
+官方 `model.pt`、`config.yaml` 与 `Qwen3-0.6B/` 目录，因而会拒绝 native layout。
+
+原生 `vllm serve` 的转写 API 不会自动获得 FunASR WebSocket 服务的 VAD、partial
+预览、会话状态或说话人处理。需要实时行为时，请按 vLLM 的
+[realtime speech-to-text 示例](https://docs.vllm.ai/en/latest/examples/speech_to_text/realtime/)
+在应用侧实现音频分段、请求调度与可替换预览；需要 FunASR 已实现的 WebSocket
+协议时，继续使用上文的官方 checkpoint + `serve_realtime_ws.py` 路径。
 
 **硬件**：GPU ≥ 8GB VRAM，CUDA ≥ 11.8。推荐 16GB+。
 
