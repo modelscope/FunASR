@@ -158,3 +158,25 @@ def test_openai_consumer_docs_expose_moss_alias_and_boundaries() -> None:
     spec = json.loads((root / "openapi.json").read_text(encoding="utf-8"))
     model = spec["components"]["schemas"]["TranscriptionRequest"]["properties"]["model"]
     assert "moss-transcribe-diarize" in model["enum"]
+
+
+def test_use_case_showcases_surface_offline_moss_diarization() -> None:
+    showcases = {
+        "docs/use_case_showcase.md": (
+            "Offline long-form diarized transcripts",
+            "offline long audio",
+            "anonymous speaker labels",
+        ),
+        "docs/use_case_showcase_zh.md": (
+            "离线长音频一体化转写与说话人标签",
+            "离线长音频",
+            "匿名说话人标签",
+        ),
+    }
+
+    for name, markers in showcases.items():
+        text = (ROOT / name).read_text()
+        assert "MOSS-Transcribe-Diarize" in text, name
+        assert "moss_transcribe_diarize" in text, name
+        for marker in markers:
+            assert marker in text, name

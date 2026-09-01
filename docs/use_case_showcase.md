@@ -81,6 +81,7 @@ For a deeper comparison of SenseVoice, Paraformer, Fun-ASR-Nano, streaming runti
 | Mandarin production ASR | Paraformer-Large | Mature choice for Chinese speech recognition. |
 | LLM-based ASR experiments | Fun-ASR-Nano | Pair with the [vLLM guide](./vllm_guide.md) when throughput matters. |
 | Speaker-aware transcripts | SenseVoice or Paraformer with `spk_model="cam++"` | Useful for meetings, interviews, and customer calls. |
+| Offline long-form diarized transcripts | [MOSS-Transcribe-Diarize](./moss_transcribe_diarize.md) | Joint offline long audio transcription with timestamps and anonymous speaker labels; not a realtime WebSocket path. |
 | Live audio | Runtime WebSocket service | Validate chunking, VAD, and endpointing with real traffic. |
 
 ## Share your result

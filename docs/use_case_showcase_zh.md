@@ -81,6 +81,7 @@ curl http://localhost:8000/v1/audio/transcriptions \
 | 中文生产 ASR | Paraformer-Large | 中文语音识别的成熟选择。 |
 | LLM-based ASR 实验 | Fun-ASR-Nano | 吞吐敏感时配合 [vLLM 指南](./vllm_guide.md)。 |
 | 带说话人信息的转写 | SenseVoice 或 Paraformer + `spk_model="cam++"` | 适合会议、访谈、客服录音。 |
+| 离线长音频一体化转写与说话人标签 | [MOSS-Transcribe-Diarize](./moss_transcribe_diarize_zh.md) | 一次生成离线长音频转写、时间戳和匿名说话人标签；不是实时 WebSocket 路径。 |
 | 实时音频 | Runtime WebSocket 服务 | 用真实流量验证分块、VAD 和断句。 |
 
 ## 分享你的结果
