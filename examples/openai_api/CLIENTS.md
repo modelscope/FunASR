@@ -20,6 +20,10 @@ If the server is on another machine, replace `localhost` with the reachable host
 | `paraformer` | Mandarin production transcription | Includes VAD and punctuation. |
 | `paraformer-en` | English transcription | Smaller English-only route. |
 | `fun-asr-nano` | LLM-based ASR experiments | Pair with vLLM for higher throughput deployments. |
+| `moss-transcribe-diarize` | Offline multi-speaker long-form audio | Returns timestamps and anonymous speaker labels in `verbose_json`; do not add external VAD or diarization. |
+
+For MOSS server, Docker, Kubernetes, vLLM, SGLang Omni, LocalAI, and FunClip
+paths, use the [dedicated deployment guide](../../docs/moss_transcribe_diarize.md).
 
 ## Python OpenAI SDK
 

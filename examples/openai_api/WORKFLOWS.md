@@ -25,6 +25,11 @@ If the workflow engine runs in Docker, `localhost` usually means the workflow co
 
 Before configuring a low-code tool, you can import the [Postman collection](POSTMAN.md) and run health, model-list, and transcription requests from a GUI. For schema-driven imports, use the [OpenAPI spec](OPENAPI.md). Set `FUNASR_BASE_URL`, choose a local audio file for the multipart `file` field, and keep `MODEL_ALIAS=sensevoice` for the first test.
 
+For offline multi-speaker meetings, set `MODEL_ALIAS=moss-transcribe-diarize`
+and keep `response_format=verbose_json` so downstream nodes receive native
+anonymous speaker segments. Use the [MOSS deployment guide](../../docs/moss_transcribe_diarize.md)
+for the isolated GPU service and file-duration limits.
+
 ## Multipart HTTP request
 
 Every workflow engine eventually needs to send this request shape:

@@ -275,7 +275,11 @@ funasr *.wav --output-format srt --output-dir ./output
 pip install funasr fastapi uvicorn python-multipart
 funasr-server --model sensevoice --device cuda
 # → POST /v1/audio/transcriptions，地址 localhost:8000
+# 离线长音频联合转写 + 匿名说话人标签：
+funasr-server --model moss-transcribe-diarize --device cuda:0
 ```
+
+[MOSS 服务、Docker、Kubernetes、vLLM、SGLang、LocalAI 与 FunClip 部署指南 →](./docs/moss_transcribe_diarize_zh.md)
 
 使用公开样例音频验证服务：
 

@@ -57,6 +57,11 @@ python smoke_test.py --base-url http://localhost:8000
 | 内存 request | `8Gi` | 根据启动过程和真实音频负载观测结果调整。 |
 | Startup probe | 10 分钟 | registry、模型下载或存储后端较慢时增大。 |
 
+`moss-transcribe-diarize` 使用独立的 GPU 镜像与资源配置。先构建
+`examples/openai_api/Dockerfile.moss`，将 `funasr-moss-api.yaml` 中的
+`funasr-moss-api:local` 替换为内部镜像仓库的不可变 digest 后再应用。完整运行矩阵
+见 [MOSS 部署指南](../../../docs/moss_transcribe_diarize_zh.md)。
+
 ## GPU 说明
 
 示例 Dockerfile 默认面向 CPU。GPU 集群需要先把镜像改成 CUDA-capable PyTorch/FunASR 依赖，再根据集群增加 GPU 调度字段，例如：

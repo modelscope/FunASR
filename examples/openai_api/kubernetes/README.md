@@ -57,6 +57,11 @@ For in-cluster clients, use `http://funasr-api.speech.svc.cluster.local:8000` as
 | Memory request | `8Gi` | Tune after observing startup and real audio workloads. |
 | Startup probe | 10 minutes | Increase if your registry, model hub, or storage backend is slow. |
 
+The `moss-transcribe-diarize` alias uses a separate GPU image and resource profile. Build
+`examples/openai_api/Dockerfile.moss`, then apply `funasr-moss-api.yaml` after
+replacing `funasr-moss-api:local` with your registry's immutable image digest.
+The complete runtime matrix is in the [MOSS deployment guide](../../../docs/moss_transcribe_diarize.md).
+
 ## GPU notes
 
 The example Dockerfile is CPU-first. For GPU clusters you need to adapt the image to CUDA-capable PyTorch/FunASR dependencies, then add your cluster's GPU scheduling fields, for example:

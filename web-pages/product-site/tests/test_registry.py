@@ -107,15 +107,24 @@ def test_moss_transcribe_diarize_contract_tracks_third_party_upstream(valid_regi
         'OpenMOSS-Team/MOSS-Transcribe-Diarize (third-party Apache-2.0 model)'
     ]
     assert entry['tested'] == {
-        'funasr': 'AutoModel vLLM + SGLang adapters; third-party model@e8681d68',
-        'runtime': 'vLLM 0.27.1 / Torch 2.13.0+cu129 / H100 80GB',
-        'verified': '2026-08-30',
+        'funasr': 'AutoModel HF + vLLM + SGLang adapters and OpenAI HTTP service; third-party model@e8681d68',
+        'runtime': 'Transformers 5.16.0.dev0 + Torch 2.11.0+cu130 and vLLM 0.27.1 + Torch 2.13.0+cu129 / H100 80GB',
+        'verified': '2026-09-01',
     }
     assert 'LocalAI / moss-transcribe.cpp' in entry['interfaces']
     assert {'cpu', 'desktop-edge-gpu'} <= set(entry['hardware'])
 
     runtime_paths = {path['id']: path for path in entry['runtime_paths']}
-    assert set(runtime_paths) == {'vllm', 'sglang-omni'}
+    assert set(runtime_paths) == {'funasr-server', 'vllm', 'sglang-omni'}
+    service_commands = '\n'.join(
+        command
+        for group in ('install', 'launch', 'health', 'smoke')
+        for command in runtime_paths['funasr-server']['commands'][group]
+    )
+    assert 'funasr-server --model moss-transcribe-diarize' in service_commands
+    assert 'docker-compose.moss.yml' in service_commands
+    assert 'response_format=verbose_json' in service_commands
+    assert 'real HTTP response verified 2026-09-01' in runtime_paths['funasr-server']['tested']
     assert runtime_paths['vllm']['tested'] == (
         'vLLM 0.27.1 / Torch 2.13.0+cu129 / H100 80GB; FunASR adapter verified'
     )
@@ -222,7 +231,7 @@ def test_audio_cpp_contract_tracks_mainline_nano_and_sensevoice(valid_registry):
     entry = next(item for item in valid_registry['deployments'] if item['id'] == 'audio-cpp')
     llama_cpp = next(item for item in valid_registry['deployments'] if item['id'] == 'llama-cpp')
 
-    assert valid_registry['verified'] == '2026-08-30'
+    assert valid_registry['verified'] == '2026-09-01'
     assert entry['maturity'] == 'community-verified'
     assert entry['selector_rank'] > llama_cpp['selector_rank']
     assert entry['tested'] == {
@@ -391,7 +400,7 @@ def test_sensevoice_native_server_contract_tracks_merged_runtime(valid_registry)
     llama_cpp = next(item for item in valid_registry['deployments'] if item['id'] == 'llama-cpp')
     audio_cpp = next(item for item in valid_registry['deployments'] if item['id'] == 'audio-cpp')
 
-    assert valid_registry['verified'] == '2026-08-30'
+    assert valid_registry['verified'] == '2026-09-01'
     assert entry['maturity'] == 'production-verified'
     assert llama_cpp['selector_rank'] < entry['selector_rank'] < audio_cpp['selector_rank']
     assert entry['tested'] == {
@@ -485,9 +494,9 @@ def test_runtime_paths_require_unique_ids_translations_and_commands(valid_regist
         item for item in data['deployments']
         if item['id'] == 'moss-transcribe-diarize'
     )
-    entry['runtime_paths'][1]['id'] = 'vllm'
-    del entry['runtime_paths'][0]['translations']['en']['summary']
-    del entry['runtime_paths'][1]['commands']['health']
+    entry['runtime_paths'][2]['id'] = 'vllm'
+    del entry['runtime_paths'][1]['translations']['en']['summary']
+    del entry['runtime_paths'][2]['commands']['health']
 
     errors = validate_registry(data)
 

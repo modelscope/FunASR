@@ -251,7 +251,11 @@ pip install torch torchaudio
 pip install funasr vllm fastapi uvicorn python-multipart
 funasr-server --device cuda
 # → POST /v1/audio/transcriptions at localhost:8000
+# Joint long-form ASR + anonymous speaker labels (offline HTTP):
+funasr-server --model moss-transcribe-diarize --device cuda:0
 ```
+
+[MOSS service, Docker, Kubernetes, vLLM, SGLang, LocalAI, and FunClip guide →](./docs/moss_transcribe_diarize.md)
 
 Verify it with a public sample:
 

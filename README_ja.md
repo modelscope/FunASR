@@ -140,10 +140,14 @@ pip install funasr
 # OpenAI互換API（推奨）
 pip install funasr fastapi uvicorn python-multipart
 funasr-server --device cuda
+# オフライン長時間音声 ASR + 匿名 speaker label:
+funasr-server --model moss-transcribe-diarize --device cuda:0
 
 # Dockerストリーミングサービス
 docker pull registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-online-cpu-0.1.12
 ```
+
+[MOSS service / Docker / Kubernetes / vLLM / SGLang / LocalAI / FunClip guide →](./docs/moss_transcribe_diarize.md)
 
 CPU/エッジで Python なしのオフライン ASR が必要な場合は、llama.cpp / GGUF ランタイムを使えます：[funasr.com/deploy/llama-cpp](https://www.funasr.com/en/deploy/llama-cpp.html) · [Fun-ASR-Nano-GGUF](https://huggingface.co/FunAudioLLM/Fun-ASR-Nano-GGUF) · [SenseVoiceSmall-GGUF](https://huggingface.co/FunAudioLLM/SenseVoiceSmall-GGUF)。
 

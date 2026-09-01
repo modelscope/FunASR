@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 
 import pytest
@@ -78,3 +79,82 @@ def test_all_deployment_matrices_link_moss_guide(matrix: Path) -> None:
         "FunASR 소유 model 또는 `AutoModel` backend가 아닙니다",
     ):
         assert stale_claim not in moss_row
+
+
+def test_moss_guides_cover_funasr_service_and_offline_boundaries() -> None:
+    for guide in GUIDES:
+        text = guide.read_text(encoding="utf-8")
+        assert "funasr-server --model moss-transcribe-diarize" in text
+        assert "response_format=verbose_json" in text
+        assert "examples/openai_api/docker-compose.moss.yml" in text
+        assert "examples/openai_api/kubernetes/funasr-moss-api.yaml" in text
+        assert "WebSocket" in text
+        assert "FunClip" in text
+
+
+def test_moss_service_recipes_are_pinned_and_gpu_scoped() -> None:
+    dockerfile = ROOT / "examples" / "openai_api" / "Dockerfile.moss"
+    compose = ROOT / "examples" / "openai_api" / "docker-compose.moss.yml"
+    kubernetes = (
+        ROOT / "examples" / "openai_api" / "kubernetes" / "funasr-moss-api.yaml"
+    )
+
+    assert dockerfile.is_file()
+    assert compose.is_file()
+    assert kubernetes.is_file()
+    docker_text = dockerfile.read_text(encoding="utf-8")
+    compose_text = compose.read_text(encoding="utf-8")
+    kubernetes_text = kubernetes.read_text(encoding="utf-8")
+    for text in (docker_text, compose_text, kubernetes_text):
+        assert "moss-transcribe-diarize" in text
+    assert "transformers>=5.6,<6" in docker_text
+    assert "capabilities: [gpu]" in compose_text
+    assert "nvidia.com/gpu" in kubernetes_text
+
+
+def test_github_pages_indexes_moss_deployment_guide() -> None:
+    index = (ROOT / "docs" / "index.rst").read_text(encoding="utf-8")
+    assert "./moss_transcribe_diarize.md" in index
+    assert "./moss_transcribe_diarize_zh.md" in index
+
+
+def test_readmes_link_the_runnable_moss_service() -> None:
+    readmes = [
+        ROOT / "README.md",
+        ROOT / "README_zh.md",
+        ROOT / "README_ja.md",
+        ROOT / "README_ko.md",
+        ROOT / "examples" / "openai_api" / "README.md",
+        ROOT / "examples" / "openai_api" / "README_zh.md",
+        ROOT / "examples" / "openai_api" / "README_ja.md",
+        ROOT / "examples" / "openai_api" / "README_ko.md",
+    ]
+    for readme in readmes:
+        text = readme.read_text(encoding="utf-8")
+        assert "moss-transcribe-diarize" in text
+        assert "moss_transcribe_diarize" in text
+
+
+def test_openai_consumer_docs_expose_moss_alias_and_boundaries() -> None:
+    paths = [
+        "CLIENTS.md",
+        "GRADIO.md",
+        "GRADIO_zh.md",
+        "OPENAPI.md",
+        "OPENAPI_zh.md",
+        "WORKFLOWS.md",
+        "WORKFLOWS_zh.md",
+        "JAVASCRIPT.md",
+        "JAVASCRIPT_zh.md",
+        "kubernetes/README.md",
+        "kubernetes/README_zh.md",
+    ]
+    root = ROOT / "examples" / "openai_api"
+    for relative in paths:
+        text = (root / relative).read_text(encoding="utf-8")
+        assert "moss-transcribe-diarize" in text
+        assert "moss_transcribe_diarize" in text
+
+    spec = json.loads((root / "openapi.json").read_text(encoding="utf-8"))
+    model = spec["components"]["schemas"]["TranscriptionRequest"]["properties"]["model"]
+    assert "moss-transcribe-diarize" in model["enum"]

@@ -89,6 +89,11 @@ curl http://localhost:8000/v1/audio/transcriptions \
 | `paraformer` | 120x realtime | 15x realtime | zh/en | 标点恢复 |
 | `paraformer-en` | 120x realtime | 15x realtime | en | 英文识别 |
 | `fun-asr-nano` | 17x realtime | 3.6x realtime | 中/英/日 + 中文方言/口音 | LLM-based，时间戳 |
+| `moss-transcribe-diarize` | 需在目标 GPU 验证 | 仅离线 | 多语言 | 长音频时间戳 + 匿名说话人标签 |
+
+MOSS 使用固定 revision 的第三方 HF 模型，不能外挂 VAD 或说话人模型。完整的
+`funasr-server`、Docker Compose、Kubernetes、vLLM、SGLang Omni、LocalAI 与
+FunClip 路径见 [MOSS 部署指南](../../docs/moss_transcribe_diarize_zh.md)。
 
 ## API 端点
 

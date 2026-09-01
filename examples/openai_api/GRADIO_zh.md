@@ -51,6 +51,10 @@ OpenAI SDK 的 base URL 需要包含 `/v1`；这个 Gradio demo 使用的是不�
 | `paraformer` | 中文生产转写。 |
 | `paraformer-en` | 英文兼容性检查。 |
 | `fun-asr-nano` | LLM-based ASR 和 vLLM 实验。 |
+| `moss-transcribe-diarize` | 离线长音频转写、时间戳和匿名说话人标签；请选择 `verbose_json`。 |
+
+MOSS 需要专用 GPU 服务环境，不适合作为实时麦克风模型。详见
+[MOSS 部署指南](../../docs/moss_transcribe_diarize_zh.md)。
 
 更完整的对比见 [模型选择指南](../../docs/model_selection_zh.md)。
 

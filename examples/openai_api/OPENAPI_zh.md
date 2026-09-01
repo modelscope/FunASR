@@ -38,7 +38,7 @@
 | Field | Type | Required | 说明 |
 |---|---|---|---|
 | `file` | binary | yes | 音频文件，例如 wav、mp3、flac、m4a、ogg 或 webm。 |
-| `model` | string | no | 默认 `sensevoice`；可用别名由 `/v1/models` 返回。 |
+| `model` | string | no | 默认 `sensevoice`；`/v1/models` 也会列出用于离线长音频与原生匿名说话人标签的 `moss-transcribe-diarize`。 |
 | `language` | string | no | 可选语言提示。 |
 | `response_format` | string | no | 使用 `json` 或 `verbose_json`。 |
 
@@ -51,3 +51,7 @@ curl -fsS http://localhost:8000/openapi.json > /tmp/funasr-openapi-live.json
 ```
 
 实时 FastAPI schema 可能包含框架级校验细节；仓库中的静态规范保留更小、更稳定的公开集成面。
+
+MOSS 需要独立 Transformers 环境。使用
+`funasr-server --model moss-transcribe-diarize --device cuda:0` 启动，并请求
+`response_format=verbose_json`；详见 [部署指南](../../docs/moss_transcribe_diarize_zh.md)。

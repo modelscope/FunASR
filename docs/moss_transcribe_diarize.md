@@ -95,6 +95,44 @@ clients keep the exact tagged generation in `raw_text`; in structured mode,
 `raw_text` is the cleaned `text` returned by vLLM and the authoritative speaker
 metadata is in `sentence_info`.
 
+## FunASR OpenAI-compatible service
+
+The built-in offline HTTP service exposes the same normalized result through
+`/v1/audio/transcriptions`. It loads the pinned Transformers revision and does
+not attach an external VAD or speaker model:
+
+```bash
+python -m pip install "transformers>=5.6,<6" fastapi uvicorn python-multipart
+funasr-server --model moss-transcribe-diarize --device cuda:0 --port 8000
+
+curl -fsS http://127.0.0.1:8000/v1/audio/transcriptions \
+  -F file=@meeting.wav \
+  -F model=moss-transcribe-diarize \
+  -F response_format=verbose_json
+```
+
+The response contains `text`, audio `duration`, and `segments` with `start`,
+`end`, `text`, and anonymous `speaker` labels. The request does not need
+`spk=true`; if a generic client sends it, the service still uses MOSS's native
+labels and does not start a second diarization pipeline.
+
+For a reproducible GPU container, build from the repository root with
+`examples/openai_api/docker-compose.moss.yml`. Kubernetes operators can build
+the same `funasr-moss-api:local` image and apply
+`examples/openai_api/kubernetes/funasr-moss-api.yaml`; replace the local image
+reference with the immutable digest from their registry before rollout.
+
+MOSS is an offline long-form model, so it is not exposed by FunASR's realtime
+WebSocket service. Use the HTTP endpoint for complete files. FunClip consumes
+the same `sentence_info` contract for speaker-aware subtitles and clips.
+
+The built-in service path was reproduced on one H100 80GB with Transformers
+`5.16.0.dev0` and Torch `2.11.0+cu130`. The pinned model processed the bundled
+6.000-second sample (`ea03e1f473ad1618a03da3327a545369cb8f6f06cb0f4115535e5a866167d47e`)
+through the real HTTP endpoint and returned one non-empty monotonic segment
+labelled `S01`, with `duration=6.0`. This is a functional service-contract
+smoke, not an accuracy, throughput, concurrency, or production-capacity claim.
+
 ## Choose a serving path
 
 | Path | Environment | Response contract | Use when |
