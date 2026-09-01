@@ -17,8 +17,10 @@ try:
         get_available_providers,
         get_device,
     )
-except:
-    print("please pip3 install onnxruntime")
+except ImportError as error:
+    raise ImportError(
+        "funasr_onnx requires onnxruntime. Install it with `pip install onnxruntime`."
+    ) from error
 import jieba
 import warnings
 
