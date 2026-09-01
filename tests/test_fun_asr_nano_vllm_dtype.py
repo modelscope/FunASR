@@ -67,12 +67,13 @@ def test_fp16_keeps_audio_compute_but_promotes_vllm_to_bf16(monkeypatch, caplog)
     assert streaming.torch_dtype is torch.float16
     assert [call["dtype"] for call in _FakeLLM.calls] == ["bfloat16", "bfloat16"]
     assert "audio components remain in float16" in caplog.text
+    assert "dtype='fp32'" in caplog.text
 
 
 def test_vllm_dtype_mapping_preserves_supported_values(caplog):
     with caplog.at_level(logging.WARNING):
         assert inference_vllm._resolve_vllm_dtype("bf16") == "bfloat16"
-        assert inference_vllm._resolve_vllm_dtype("fp32") == "auto"
+        assert inference_vllm._resolve_vllm_dtype("fp32") == "float32"
         assert inference_vllm._resolve_vllm_dtype("custom") == "custom"
 
     assert not caplog.text

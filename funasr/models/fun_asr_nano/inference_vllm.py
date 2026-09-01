@@ -47,10 +47,11 @@ def _resolve_vllm_dtype(dtype: str) -> str:
             "Fun-ASR-Nano's Qwen3 language model is numerically unstable in "
             "float16; vLLM will use bfloat16 while audio components remain in "
             "float16. This keeps the same memory footprint and avoids degraded "
-            "or repetitive transcription."
+            "or repetitive transcription. On GPUs without bfloat16 support, "
+            "use dtype='fp32' so both audio and vLLM compute use float32."
         )
         return "bfloat16"
-    return {"bf16": "bfloat16", "fp32": "auto"}.get(dtype, dtype)
+    return {"bf16": "bfloat16", "fp32": "float32"}.get(dtype, dtype)
 
 
 def prepare_vllm_model_dir(model_dir: str, output_dir: str = None) -> str:
