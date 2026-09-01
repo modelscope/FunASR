@@ -40,6 +40,20 @@ logger = logging.getLogger(__name__)
 dtype_map = {"bf16": torch.bfloat16, "fp16": torch.float16, "fp32": torch.float32}
 
 
+def _resolve_vllm_dtype(dtype: str) -> str:
+    """Use a numerically stable dtype for the Qwen3 language model."""
+    if dtype == "fp16":
+        logger.warning(
+            "Fun-ASR-Nano's Qwen3 language model is numerically unstable in "
+            "float16; vLLM will use bfloat16 while audio components remain in "
+            "float16. This keeps the same memory footprint and avoids degraded "
+            "or repetitive transcription. On GPUs without bfloat16 support, "
+            "use dtype='fp32' so both audio and vLLM compute use float32."
+        )
+        return "bfloat16"
+    return {"bf16": "bfloat16", "fp32": "float32"}.get(dtype, dtype)
+
+
 def prepare_vllm_model_dir(model_dir: str, output_dir: str = None) -> str:
     """Extract LLM weights from Fun-ASR-Nano model.pt and save in HuggingFace format.
 
@@ -141,7 +155,8 @@ class FunASRNanoVLLM:
     Args:
         model_dir: Path to the Fun-ASR-Nano model directory.
         device: Device for audio encoder/adaptor (e.g. "cuda:0").
-        dtype: Dtype for audio processing ("bf16", "fp16", "fp32").
+        dtype: Dtype for audio processing ("bf16", "fp16", "fp32"). The Qwen3
+            language model uses bf16 when audio processing uses fp16.
         tensor_parallel_size: Number of GPUs for vLLM tensor parallelism.
         gpu_memory_utilization: Fraction of GPU memory for vLLM KV cache.
         max_model_len: Maximum sequence length for vLLM.
@@ -177,13 +192,6 @@ class FunASRNanoVLLM:
         self.device = device
         self.dtype = dtype
         self.torch_dtype = dtype_map.get(dtype, torch.bfloat16)
-        if self.torch_dtype == torch.float16:
-            logger.warning(
-                "dtype='fp16' can produce degraded or garbage transcription for "
-                "Fun-ASR-Nano (numerical overflow in the audio embedding path). "
-                "Use dtype='bf16' (recommended) or dtype='fp32'. On GPUs without "
-                "bfloat16 support (e.g. NVIDIA V100), use 'fp32'."
-            )
         self.model_dir = model_dir
 
         # Step 1: Prepare LLM weights for vLLM (extract from model.pt if needed)
@@ -205,7 +213,7 @@ class FunASRNanoVLLM:
             gpu_memory_utilization=gpu_memory_utilization,
             max_model_len=max_model_len,
             enforce_eager=enforce_eager,
-            dtype={"bf16": "bfloat16", "fp16": "float16", "fp32": "auto"}.get(dtype, dtype),
+            dtype=_resolve_vllm_dtype(dtype),
             trust_remote_code=True,
             **vllm_kwargs,
         )
@@ -712,7 +720,8 @@ class FunASRNanoVLLM:
             model: Model name or local directory path.
             hub: "ms" (ModelScope) or "hf" (HuggingFace).
             device: Device for audio encoder/adaptor.
-            dtype: Compute dtype ("bf16", "fp16", "fp32").
+            dtype: Audio compute dtype ("bf16", "fp16", "fp32"). The Qwen3
+                language model uses bf16 when audio compute uses fp16.
             tensor_parallel_size: GPUs for vLLM tensor parallel.
             gpu_memory_utilization: GPU memory fraction for vLLM.
             max_model_len: Maximum sequence length.

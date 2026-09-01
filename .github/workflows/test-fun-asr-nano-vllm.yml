@@ -1,0 +1,62 @@
+name: Validate Fun-ASR-Nano vLLM
+
+on:
+  pull_request:
+    paths:
+      - "funasr/models/fun_asr_nano/**"
+      - "funasr/models/glm_asr/**"
+      - "tests/test_fun_asr_nano_*.py"
+      - "tests/test_glm_asr_vllm_*.py"
+      - "tests/test_vllm_model_source_docs.py"
+      - ".github/workflows/test-fun-asr-nano-vllm.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "funasr/models/fun_asr_nano/**"
+      - "funasr/models/glm_asr/**"
+      - "tests/test_fun_asr_nano_*.py"
+      - "tests/test_glm_asr_vllm_*.py"
+      - "tests/test_vllm_model_source_docs.py"
+      - ".github/workflows/test-fun-asr-nano-vllm.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install contract-test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install \
+            torch --index-url https://download.pytorch.org/whl/cpu
+          python -m pip install \
+            pytest numpy soundfile requests packaging \
+            omegaconf hydra-core kaldiio librosa tqdm pyyaml
+      - name: Check syntax
+        run: |
+          python -m py_compile \
+            funasr/models/fun_asr_nano/inference_vllm.py \
+            funasr/models/fun_asr_nano/inference_vllm_streaming.py
+      - name: Run vLLM regression contracts
+        run: |
+          python -m pytest -q \
+            tests/test_fun_asr_nano_autocast_device.py \
+            tests/test_fun_asr_nano_ctc_batch_fallback.py \
+            tests/test_fun_asr_nano_lora_injection.py \
+            tests/test_fun_asr_nano_missing_ctc_weights.py \
+            tests/test_fun_asr_nano_openai_response.py \
+            tests/test_fun_asr_nano_repetition_penalty.py \
+            tests/test_fun_asr_nano_vllm_dtype.py \
+            tests/test_glm_asr_vllm_dedup_keys.py \
+            tests/test_glm_asr_vllm_dtype.py \
+            tests/test_glm_asr_vllm_sampling.py \
+            tests/test_vllm_model_source_docs.py
