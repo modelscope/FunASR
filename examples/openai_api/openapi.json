@@ -181,7 +181,8 @@
               "sensevoice",
               "paraformer",
               "paraformer-en",
-              "fun-asr-nano"
+              "fun-asr-nano",
+              "moss-transcribe-diarize"
             ],
             "default": "sensevoice",
             "description": "FunASR model alias."

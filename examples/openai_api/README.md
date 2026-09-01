@@ -92,6 +92,12 @@ curl http://localhost:8000/v1/audio/transcriptions \
 | `paraformer` | 120x realtime | 15x realtime | zh/en | Punctuation |
 | `paraformer-en` | 120x realtime | 15x realtime | en | English only |
 | `fun-asr-nano` | 17x realtime | 3.6x realtime | zh/en/ja + Chinese dialects/accents | LLM-based, timestamps |
+| `moss-transcribe-diarize` | Validate on target GPU | Offline only | Multilingual | Long-form timestamps + anonymous speaker labels |
+
+MOSS uses a pinned third-party HF revision and must not be combined with an
+external VAD or speaker model. See the [complete MOSS deployment guide](../../docs/moss_transcribe_diarize.md)
+for `funasr-server`, Docker Compose, Kubernetes, vLLM, SGLang Omni, LocalAI,
+and FunClip paths.
 
 ## API Endpoints
 

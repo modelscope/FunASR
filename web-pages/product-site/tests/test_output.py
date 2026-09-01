@@ -128,7 +128,7 @@ def test_detail_commands_come_from_registry(built_site):
             assert command in rendered
 
 
-def test_moss_detail_renders_separate_vllm_and_sglang_runtime_paths(built_site):
+def test_moss_detail_renders_all_service_runtime_paths(built_site):
     for relative in (
         'deploy/moss-transcribe-diarize.html',
         'en/deploy/moss-transcribe-diarize.html',
@@ -136,8 +136,14 @@ def test_moss_detail_renders_separate_vllm_and_sglang_runtime_paths(built_site):
         soup = read_soup(built_site / relative)
         paths = soup.select('[data-runtime-path]')
 
-        assert [path['data-runtime-path'] for path in paths] == ['vllm', 'sglang-omni']
+        assert [path['data-runtime-path'] for path in paths] == [
+            'funasr-server',
+            'vllm',
+            'sglang-omni',
+        ]
         rendered = '\n'.join(path.get_text('\n') for path in paths)
+        assert 'funasr-server --model moss-transcribe-diarize' in rendered
+        assert 'docker-compose.moss.yml' in rendered
         assert 'vllm serve OpenMOSS-Team/MOSS-Transcribe-Diarize' in rendered
         assert 'sgl-omni serve' in rendered
         assert 'response_format=diarized_json' in rendered

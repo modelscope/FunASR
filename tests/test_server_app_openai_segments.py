@@ -442,6 +442,53 @@ def test_spk_request_lazily_loads_and_reuses_speaker_model(monkeypatch):
     ]
 
 
+def test_moss_service_uses_pinned_joint_transcription_config(monkeypatch):
+    module = load_server_app(monkeypatch)
+    DummyAutoModel = install_dummy_funasr(monkeypatch)
+
+    module.create_app(device="cuda:0", preload_model="moss-transcribe-diarize")
+
+    config = DummyAutoModel.instances[-1]
+    assert config["model"] == "OpenMOSS-Team/MOSS-Transcribe-Diarize"
+    assert config["model_revision"] == "e8681d68e7042738ffca8ac8212bc8fcb1131ab8"
+    assert config["hub"] == "hf"
+    assert config["backend"] == "hf"
+    assert config["trust_remote_code"] is True
+    assert "vad_model" not in config
+    assert "spk_model" not in config
+
+
+def test_moss_verbose_json_preserves_native_speaker_segments(monkeypatch):
+    module = load_server_app(monkeypatch)
+    DummyAutoModel = install_dummy_funasr(
+        monkeypatch,
+        generated_result={
+            "text": "hello again",
+            "sentence_info": [
+                {"start": 100, "end": 900, "spk": "S01", "text": "hello"},
+                {"start": 950, "end": 1700, "spk": "S02", "sentence": "again"},
+            ],
+        },
+    )
+    monkeypatch.setattr(module.sf, "info", lambda path: types.SimpleNamespace(duration=1.7))
+    app = module.create_app(device="cuda:0", preload_model="moss-transcribe-diarize")
+    transcribe = app.routes[("POST", "/v1/audio/transcriptions")]
+
+    response = asyncio.run(
+        transcribe(
+            file=DummyUpload(),
+            model="moss-transcribe-diarize",
+            language=None,
+            response_format="verbose_json",
+            spk=True,
+        )
+    )
+
+    assert [segment["speaker"] for segment in response["segments"]] == ["S01", "S02"]
+    assert [segment["text"] for segment in response["segments"]] == ["hello", "again"]
+    assert not any(config.get("model") == "cam++" for config in DummyAutoModel.instances)
+
+
 def test_server_versions_follow_package_version(monkeypatch):
     expected = (REPO_ROOT / "funasr" / "version.txt").read_text().strip()
     module = load_server_app(monkeypatch)

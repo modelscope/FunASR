@@ -99,10 +99,9 @@ Whisper는 단일 모델이지만, **FunASR는 툴킷**입니다. 용도에 맞�
 
 ## 최신 소식
 
-- **FunASR 1.4.11**은 현재 PyPI 안정 버전입니다. 실제 모델 timestamp를 유지하면서 다국어 자막의 가독성을 개선했습니다. 업데이트: `python -m pip install -U "funasr==1.4.11"`. [Release ->](https://github.com/modelscope/FunASR/releases/tag/v1.4.11)
-- **MOSS-Transcribe-Diarize 연동**은 긴 오디오의 ASR, timestamp, 익명 speaker label을 한 번의 생성으로 처리하므로 외부 VAD 또는 speaker pipeline이 필요하지 않습니다. FunASR은 local Transformers와 기존 vLLM/SGLang service를 지원하고, FunClip은 speaker별 SRT와 clip을 내보낼 수 있습니다. [Deployment guide ->](./docs/moss_transcribe_diarize.md)
-- **llama.cpp runtime v0.2.6**은 Linux, macOS, Windows 10개 target용 검증된 archive를 제공하며 RTX 30/40 및 RTX 50용 Windows CUDA package를 별도로 제공합니다. [Download matrix ->](https://www.funasr.com/en/deploy/llama-cpp.html) · [Release ->](https://github.com/modelscope/FunASR/releases/tag/runtime-llamacpp-v0.2.6)
-- **Realtime serving 성능과 안정성 개선**: 호환 WebSocket session을 직렬 처리하지 않고 batch 처리하며, decode queue 때문에 정상 session을 기본적으로 종료하지 않습니다. H100 regression workload에서 12-client STOP p95가 19.8초에서 0.4초로 줄었습니다. [Production guide ->](./docs/vllm_guide.md)
+- **MOSS-Transcribe-Diarize**를 FunASR service, Docker, Kubernetes, vLLM/SGLang workflow, FunClip에 통합해 긴 오디오 ASR, timestamp, 익명 speaker label을 한 번에 처리합니다. [MOSS 배포 ->](./docs/moss_transcribe_diarize.md)
+- **FunASR 1.4.11**은 현재 PyPI 안정 버전으로, 모델의 실제 timestamp를 유지하면서 다국어 자막 가독성을 개선합니다. [Install / upgrade ->](https://github.com/modelscope/FunASR/releases/tag/v1.4.11)
+- **Production deployment**에 더 빠르고 안정적인 realtime serving과 Linux, macOS, Windows 10개 target용 llama.cpp package를 추가했습니다. [GPU service ->](./docs/vllm_guide.md) · [CPU / edge package ->](https://www.funasr.com/en/deploy/llama-cpp.html)
 
 > 전체 변경 기록과 download asset은 [GitHub Releases](https://github.com/modelscope/FunASR/releases)에서 확인할 수 있습니다.
 
@@ -140,10 +139,14 @@ pip install funasr
 # OpenAI 호환 API (권장)
 pip install funasr fastapi uvicorn python-multipart
 funasr-server --device cuda
+# 오프라인 장시간 ASR + 익명 speaker label:
+funasr-server --model moss-transcribe-diarize --device cuda:0
 
 # Docker 스트리밍 서비스
 docker pull registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-online-cpu-0.1.12
 ```
+
+[MOSS service / Docker / Kubernetes / vLLM / SGLang / LocalAI / FunClip guide →](./docs/moss_transcribe_diarize.md)
 
 CPU/엣지에서 Python 없이 오프라인 ASR만 필요하다면 llama.cpp / GGUF 런타임을 사용할 수 있습니다: [funasr.com/deploy/llama-cpp](https://www.funasr.com/en/deploy/llama-cpp.html) · [Fun-ASR-Nano-GGUF](https://huggingface.co/FunAudioLLM/Fun-ASR-Nano-GGUF) · [SenseVoiceSmall-GGUF](https://huggingface.co/FunAudioLLM/SenseVoiceSmall-GGUF).
 

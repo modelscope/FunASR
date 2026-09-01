@@ -1,0 +1,26 @@
+services:
+  funasr-moss-api:
+    build:
+      context: ../..
+      dockerfile: examples/openai_api/Dockerfile.moss
+    image: funasr-moss-api:local
+    ports:
+      - "${FUNASR_HOST_PORT:-8000}:8000"
+    environment:
+      FUNASR_PORT: "8000"
+      FUNASR_DEVICE: "${FUNASR_DEVICE:-cuda:0}"
+      FUNASR_MODEL: moss-transcribe-diarize
+      HF_HOME: /root/.cache/huggingface
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    volumes:
+      - funasr-moss-cache:/root/.cache
+    shm_size: "8gb"
+
+volumes:
+  funasr-moss-cache:

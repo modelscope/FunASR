@@ -73,6 +73,8 @@ Overview
 
    ./deployment_matrix.md
    ./deployment_matrix_zh.md
+   ./moss_transcribe_diarize.md
+   ./moss_transcribe_diarize_zh.md
    ./runtime/readme.md
    ./runtime/docs/SDK_tutorial_online.md
    ./runtime/docs/SDK_tutorial.md

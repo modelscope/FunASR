@@ -1,7 +1,8 @@
 """FunASR Server — unified vLLM-based inference service.
 
 Provides OpenAI-compatible API (/v1/audio/transcriptions) and REST API (/asr).
-Uses vLLM for Fun-ASR-Nano (GPU) or falls back to AutoModel for non-LLM models (SenseVoice/Paraformer).
+Uses vLLM for Fun-ASR-Nano (GPU) or AutoModel for supported models, including
+MOSS-Transcribe-Diarize's joint transcription and anonymous speaker labels.
 """
 
 import io
@@ -32,6 +33,8 @@ PACKAGE_VERSION = (Path(__file__).resolve().parents[1] / "version.txt").read_tex
 
 
 _LANGUAGE_TAG_RE = re.compile(r"<\|(zh|en|yue|ja|ko)\|>")
+MOSS_MODEL_REVISION = "e8681d68e7042738ffca8ac8212bc8fcb1131ab8"
+NATIVE_DIARIZATION_MODELS = {"moss-transcribe-diarize"}
 
 
 def extract_language_from_asr_text(text):
@@ -257,6 +260,13 @@ def create_app(
             "vad_model": "fsmn-vad",
             "punc_model": "ct-punc",
         },
+        "moss-transcribe-diarize": {
+            "model": "OpenMOSS-Team/MOSS-Transcribe-Diarize",
+            "model_revision": MOSS_MODEL_REVISION,
+            "hub": "hf",
+            "backend": "hf",
+            "trust_remote_code": True,
+        },
     }
 
     def _load_spk_model():
@@ -335,7 +345,7 @@ def create_app(
         if app.state.model_path:
             cfg["model"] = app.state.model_path
             cfg["hub"] = app.state.hub
-        elif app.state.hub:
+        elif app.state.hub and "hub" not in cfg:
             cfg["hub"] = app.state.hub
         cfg["device"] = device
         cfg["disable_update"] = True
@@ -434,7 +444,7 @@ def create_app(
                 segments.append(segment)
         if not segments and text:
             segments = build_openai_fallback_segments(text, duration)
-        if use_spk and segments:
+        if use_spk and model_name not in NATIVE_DIARIZATION_MODELS and segments:
             audio_data, sr = sf.read(audio_path)
             attach_speaker_labels(
                 audio_data,

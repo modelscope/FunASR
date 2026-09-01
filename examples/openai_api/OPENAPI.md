@@ -38,7 +38,7 @@ Replace them with the URL reachable from your app, container, or workflow runtim
 | Field | Type | Required | Notes |
 |---|---|---|---|
 | `file` | binary | yes | Audio file such as wav, mp3, flac, m4a, ogg, or webm. |
-| `model` | string | no | Defaults to `sensevoice`; available aliases are listed by `/v1/models`. |
+| `model` | string | no | Defaults to `sensevoice`; `/v1/models` also lists `moss-transcribe-diarize` for offline long-form transcription with native anonymous speaker labels. |
 | `language` | string | no | Optional language hint. |
 | `response_format` | string | no | Use `json` or `verbose_json`. |
 
@@ -51,3 +51,7 @@ curl -fsS http://localhost:8000/openapi.json > /tmp/funasr-openapi-live.json
 ```
 
 The live FastAPI schema may include framework-specific validation details; this checked-in spec keeps the public integration surface small and stable.
+
+MOSS requires its isolated Transformers environment. Start it with
+`funasr-server --model moss-transcribe-diarize --device cuda:0` and request
+`response_format=verbose_json`; see the [deployment guide](../../docs/moss_transcribe_diarize.md).

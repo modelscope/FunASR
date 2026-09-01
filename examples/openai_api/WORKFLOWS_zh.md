@@ -25,6 +25,10 @@ curl -fsS "$FUNASR_BASE_URL/v1/models"
 
 在配置低代码工具前，可以先导入 [Postman collection](POSTMAN_zh.md)，从图形界面跑通 health、模型列表和转写请求；需要按 schema 导入时可使用 [OpenAPI spec](OPENAPI_zh.md)。设置 `FUNASR_BASE_URL`，在 multipart `file` 字段选择本地音频文件，第一次测试建议保持 `MODEL_ALIAS=sensevoice`。
 
+处理离线多人会议时，将 `MODEL_ALIAS` 改为 `moss-transcribe-diarize`，并保留
+`response_format=verbose_json`，下游节点即可收到模型原生匿名说话人 segments。
+独立 GPU 服务与文件时长边界见 [MOSS 部署指南](../../docs/moss_transcribe_diarize_zh.md)。
+
 ## Multipart HTTP 请求
 
 所有工作流引擎最终都需要发出下面这种请求：

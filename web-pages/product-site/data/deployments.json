@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "verified": "2026-08-30",
+  "verified": "2026-09-01",
   "deployments": [
     {
       "id": "moss-transcribe-diarize",
@@ -13,7 +13,7 @@
       "models": ["OpenMOSS-Team/MOSS-Transcribe-Diarize (third-party Apache-2.0 model)"],
       "operating_systems": ["Linux"],
       "interfaces": ["OpenAI-compatible HTTP", "vLLM", "SGLang Omni", "Transformers", "LocalAI / moss-transcribe.cpp"],
-      "tested": {"funasr": "AutoModel vLLM + SGLang adapters; third-party model@e8681d68", "runtime": "vLLM 0.27.1 / Torch 2.13.0+cu129 / H100 80GB", "verified": "2026-08-30"},
+      "tested": {"funasr": "AutoModel HF + vLLM + SGLang adapters and OpenAI HTTP service; third-party model@e8681d68", "runtime": "Transformers 5.16.0.dev0 + Torch 2.11.0+cu130 and vLLM 0.27.1 + Torch 2.13.0+cu129 / H100 80GB", "verified": "2026-09-01"},
       "commands": {
         "install": [
           "uv venv --python 3.12 .venv-moss && curl -fL https://github.com/vllm-project/vllm/releases/download/v0.27.1/vllm-0.27.1%2Bcu129-cp38-abi3-manylinux_2_28_x86_64.whl -o vllm-0.27.1+cu129-cp38-abi3-manylinux_2_28_x86_64.whl && echo 'bf0d52faa2a51e7a01c6856a7a8a2d1307fd0ff711415d34168a67ffac0fa47b  vllm-0.27.1+cu129-cp38-abi3-manylinux_2_28_x86_64.whl' | sha256sum -c - && uv pip install --python .venv-moss/bin/python --torch-backend=auto \"vllm[audio] @ file://$PWD/vllm-0.27.1+cu129-cp38-abi3-manylinux_2_28_x86_64.whl\"",
@@ -33,6 +33,31 @@
         ]
       },
       "runtime_paths": [
+        {
+          "id": "funasr-server",
+          "tested": "Transformers 5.16.0.dev0 / Torch 2.11.0+cu130 / H100 80GB; real HTTP response verified 2026-09-01",
+          "translations": {
+            "zh": {"name": "FunASR OpenAI 兼容服务", "summary": "直接使用内置 funasr-server 加载固定 revision 的 HF 后端，返回带匿名说话人标签的 verbose_json；可使用专用 Docker Compose 与 Kubernetes GPU 配方。"},
+            "en": {"name": "FunASR OpenAI-compatible service", "summary": "Load the pinned HF backend directly with funasr-server and return verbose_json with anonymous speaker labels; dedicated Docker Compose and Kubernetes GPU recipes are included."}
+          },
+          "commands": {
+            "install": [
+              "python -m pip install 'transformers>=5.6,<6' fastapi uvicorn python-multipart"
+            ],
+            "launch": [
+              "funasr-server --model moss-transcribe-diarize --device cuda:0 --port 8000",
+              "docker compose -f examples/openai_api/docker-compose.moss.yml up --build"
+            ],
+            "health": [
+              "curl -fsS http://127.0.0.1:8000/health",
+              "curl -fsS http://127.0.0.1:8000/v1/models"
+            ],
+            "smoke": [
+              "curl -fsS http://127.0.0.1:8000/v1/audio/transcriptions -F file=@runtime/llama.cpp/tests/sample.wav -F model=moss-transcribe-diarize -F response_format=verbose_json | tee /tmp/funasr-moss-transcription.json",
+              "python - <<'PY'\nimport json\n\nwith open('/tmp/funasr-moss-transcription.json', encoding='utf-8') as stream:\n    payload = json.load(stream)\nsegments = payload.get('segments', [])\nassert payload.get('text', '').strip() and segments, payload\nassert all(item.get('speaker') and item.get('start') <= item.get('end') for item in segments), payload\nprint(payload['text'], sorted({item['speaker'] for item in segments}))\nPY"
+            ]
+          }
+        },
         {
           "id": "vllm",
           "tested": "vLLM 0.27.1 / Torch 2.13.0+cu129 / H100 80GB; FunASR adapter verified",

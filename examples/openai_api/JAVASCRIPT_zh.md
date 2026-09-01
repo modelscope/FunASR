@@ -11,6 +11,11 @@ cd examples/openai_api
 python server.py --model sensevoice --device cuda --port 8000
 ```
 
+处理离线多人音频时，使用
+`funasr-server --model moss-transcribe-diarize --device cuda:0` 启动独立服务，设置
+`FUNASR_MODEL=moss-transcribe-diarize` 并请求 `verbose_json`。详见
+[MOSS 部署指南](../../docs/moss_transcribe_diarize_zh.md)。
+
 在另一个终端验证服务：
 
 ```bash

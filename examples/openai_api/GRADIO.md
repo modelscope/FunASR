@@ -51,6 +51,10 @@ For OpenAI SDK clients, remember that SDK base URLs include `/v1`; this Gradio d
 | `paraformer` | Mandarin-oriented production transcription. |
 | `paraformer-en` | English-only compatibility checks. |
 | `fun-asr-nano` | LLM-based ASR and vLLM experiments. |
+| `moss-transcribe-diarize` | Offline long-form transcription with timestamps and anonymous speaker labels; select `verbose_json`. |
+
+MOSS requires the dedicated GPU service environment and is not a realtime
+microphone model. See the [MOSS deployment guide](../../docs/moss_transcribe_diarize.md).
 
 See the [model selection guide](../../docs/model_selection.md) for a deeper comparison.
 

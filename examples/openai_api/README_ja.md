@@ -89,6 +89,11 @@ curl http://localhost:8000/v1/audio/transcriptions \
 | `paraformer` | 120x realtime | 15x realtime | zh/en | 句読点復元 |
 | `paraformer-en` | 120x realtime | 15x realtime | en | 英語認識 |
 | `fun-asr-nano` | 17x realtime | 3.6x realtime | 中英日 + 中国語方言・地域アクセント | LLM-based、タイムスタンプ |
+| `moss-transcribe-diarize` | 対象 GPU で要検証 | オフラインのみ | 多言語 | 長時間 timestamp + 匿名 speaker label |
+
+MOSS は固定 revision の third-party HF model を使用し、外部 VAD / speaker model
+とは併用しません。[MOSS deployment guide](../../docs/moss_transcribe_diarize.md) に
+`funasr-server`、Docker、Kubernetes、vLLM、SGLang、LocalAI、FunClip をまとめています。
 
 ## API エンドポイント
 

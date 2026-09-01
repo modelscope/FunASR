@@ -1,0 +1,27 @@
+FROM pytorch/pytorch:2.9.1-cuda12.8-cudnn9-runtime
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1 \
+    FUNASR_MODEL=moss-transcribe-diarize \
+    FUNASR_DEVICE=cuda:0 \
+    FUNASR_PORT=8000
+
+WORKDIR /opt/funasr
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends ffmpeg git libsndfile1 \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY . /opt/funasr
+
+RUN python -m pip install --upgrade pip \
+    && python -m pip install . fastapi "uvicorn[standard]" python-multipart \
+    && python -m pip install "transformers>=5.6,<6"
+
+EXPOSE 8000
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10m --retries=3 \
+    CMD python -c "import os, urllib.request; urllib.request.urlopen('http://127.0.0.1:%s/health' % os.getenv('FUNASR_PORT', '8000'), timeout=3).read()" || exit 1
+
+CMD ["sh", "-c", "funasr-server --host 0.0.0.0 --port ${FUNASR_PORT:-8000} --device ${FUNASR_DEVICE:-cuda:0} --model ${FUNASR_MODEL:-moss-transcribe-diarize}"]

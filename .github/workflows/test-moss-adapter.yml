@@ -5,7 +5,13 @@ on:
     paths:
       - "funasr/models/moss_transcribe_diarize/**"
       - "funasr/auto/auto_model.py"
+      - "funasr/bin/_server_app.py"
+      - "funasr/bin/server.py"
+      - "examples/openai_api/**"
+      - "README*.md"
+      - "docs/index.rst"
       - "docs/moss_transcribe_diarize*.md"
+      - "web-pages/product-site/data/deployments.json"
       - "tests/test_moss_transcribe_diarize_*.py"
       - ".github/workflows/test-moss-adapter.yml"
   push:
@@ -14,7 +20,13 @@ on:
     paths:
       - "funasr/models/moss_transcribe_diarize/**"
       - "funasr/auto/auto_model.py"
+      - "funasr/bin/_server_app.py"
+      - "funasr/bin/server.py"
+      - "examples/openai_api/**"
+      - "README*.md"
+      - "docs/index.rst"
       - "docs/moss_transcribe_diarize*.md"
+      - "web-pages/product-site/data/deployments.json"
       - "tests/test_moss_transcribe_diarize_*.py"
       - ".github/workflows/test-moss-adapter.yml"
 
@@ -45,9 +57,14 @@ jobs:
             funasr/models/moss_transcribe_diarize/model.py \
             tests/test_moss_transcribe_diarize_model.py \
             tests/test_moss_transcribe_diarize_docs.py
-          python -m py_compile funasr/models/moss_transcribe_diarize/model.py
+          python -m py_compile \
+            funasr/models/moss_transcribe_diarize/model.py \
+            funasr/bin/_server_app.py \
+            funasr/bin/server.py \
+            examples/openai_api/server.py
       - name: Run adapter and documentation contracts
         run: |
           python -m pytest -q \
             tests/test_moss_transcribe_diarize_model.py \
-            tests/test_moss_transcribe_diarize_docs.py
+            tests/test_moss_transcribe_diarize_docs.py \
+            tests/test_server_app_openai_segments.py

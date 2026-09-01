@@ -5,6 +5,7 @@ Usage:
     funasr-server                          # default: sensevoice on cuda:0, port 8000
     funasr-server --device cpu --port 9000
     funasr-server --model paraformer
+    funasr-server --model moss-transcribe-diarize --device cuda:0
     funasr-server --model-path /path/to/local/model
     funasr-server --model-path username/paraformer --hub hf
     funasr-server --cors-origin http://localhost:3000
@@ -31,6 +32,7 @@ Examples:
   funasr-server                          # Start with SenseVoice on GPU
   funasr-server --device cpu             # Start on CPU
   funasr-server --model paraformer       # Use Paraformer model
+  funasr-server --model moss-transcribe-diarize --device cuda:0
   funasr-server --port 9000             # Custom port
   funasr-server --model-path /path/to/local/model  # Use local model
   funasr-server --model-path username/model --hub hf  # Use HuggingFace model
@@ -45,7 +47,14 @@ Then use with OpenAI SDK:
     parser.add_argument("--host", default="0.0.0.0", help="Bind address (default: 0.0.0.0)")
     parser.add_argument("--port", type=int, default=8000, help="Port (default: 8000)")
     parser.add_argument("--device", default="cuda", help="Device: cuda, cpu, mps (default: cuda)")
-    parser.add_argument("--model", default="auto", help="Pre-load model: auto (GPU=fun-asr-nano, CPU=sensevoice), sensevoice, paraformer, fun-asr-nano")
+    parser.add_argument(
+        "--model",
+        default="auto",
+        help=(
+            "Pre-load model: auto (GPU=fun-asr-nano, CPU=sensevoice), "
+            "sensevoice, paraformer, fun-asr-nano, moss-transcribe-diarize"
+        ),
+    )
     parser.add_argument("--model-path", default=None, help="Local model path or model ID (overrides --model)")
     parser.add_argument("--hub", default="ms", help="Model hub: ms (ModelScope), hf (HuggingFace) (default: ms)")
     parser.add_argument(

@@ -11,6 +11,11 @@ cd examples/openai_api
 python server.py --model sensevoice --device cuda --port 8000
 ```
 
+For offline multi-speaker files, start the isolated MOSS service with
+`funasr-server --model moss-transcribe-diarize --device cuda:0`, set
+`FUNASR_MODEL=moss-transcribe-diarize`, and request `verbose_json`. See the
+[MOSS deployment guide](../../docs/moss_transcribe_diarize.md).
+
 Then verify the service from another terminal:
 
 ```bash

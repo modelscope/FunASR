@@ -6,6 +6,7 @@ Works with any agent framework that supports OpenAI audio API.
 
 Usage:
     python server.py --model sensevoice --device cuda --port 8000
+    python server.py --model moss-transcribe-diarize --device cuda:0 --port 8000
 
 Then use with any OpenAI-compatible client:
     curl http://localhost:8000/v1/audio/transcriptions \
@@ -54,6 +55,13 @@ MODEL_CONFIGS = {
         "vad_model": "fsmn-vad",
         "vad_kwargs": {"max_single_segment_time": 30000},
     },
+    "moss-transcribe-diarize": {
+        "model": "OpenMOSS-Team/MOSS-Transcribe-Diarize",
+        "model_revision": "e8681d68e7042738ffca8ac8212bc8fcb1131ab8",
+        "hub": "hf",
+        "backend": "hf",
+        "trust_remote_code": True,
+    },
 }
 
 
@@ -99,7 +107,7 @@ async def transcribe(
     
     Accepts the same parameters as OpenAI's /v1/audio/transcriptions:
     - file: Audio file (wav, mp3, flac, m4a, ogg, webm)
-    - model: Model to use (sensevoice, paraformer, fun-asr-nano)
+    - model: Model to use (sensevoice, paraformer, fun-asr-nano, moss-transcribe-diarize)
     - language: Optional language hint
     - response_format: json or verbose_json
     """

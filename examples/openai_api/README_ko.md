@@ -89,6 +89,11 @@ curl http://localhost:8000/v1/audio/transcriptions \
 | `paraformer` | 120x realtime | 15x realtime | zh/en | 문장부호 복원 |
 | `paraformer-en` | 120x realtime | 15x realtime | en | 영어 인식 |
 | `fun-asr-nano` | 17x realtime | 3.6x realtime | 중영일 + 중국어 방언/지역 억양 | LLM-based, 타임스탬프 |
+| `moss-transcribe-diarize` | 대상 GPU 검증 필요 | 오프라인 전용 | 다국어 | 장시간 timestamp + 익명 speaker label |
+
+MOSS는 고정 revision의 third-party HF model을 사용하며 외부 VAD / speaker model과
+결합하지 않습니다. `funasr-server`, Docker, Kubernetes, vLLM, SGLang, LocalAI,
+FunClip 경로는 [MOSS deployment guide](../../docs/moss_transcribe_diarize.md)를 참고하세요.
 
 ## API 엔드포인트
 
