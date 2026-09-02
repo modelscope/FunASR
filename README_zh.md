@@ -32,6 +32,8 @@
 
 不想先配置本地环境？可以打开 [Colab 快速体验](./examples/colab/README_zh.md) 在浏览器里转写公开样例或上传自己的音频。
 
+FunASR 对你有帮助？欢迎 [Star 项目](https://github.com/modelscope/FunASR)，让更多开发者找到它。
+
 ```bash
 pip install torch torchaudio
 pip install funasr
