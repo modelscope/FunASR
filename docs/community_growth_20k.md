@@ -34,7 +34,7 @@ This plan focuses on useful adoption work rather than vanity marketing: if more 
 
 ## Current campaign snapshot
 
-As of 2026-09-02 10:31 UTC, the ecosystem has 37,055 combined GitHub stars, or 5,831 additional stars since the 31,224 baseline. Exceeding the +20,000 target requires another 14,169 stars to reach at least 51,224 by 2026-09-30, or roughly 506 stars/day across the remaining 28 days. Public PyPI reports 59,903 downloads over the latest 7 days and 448,764 over the latest 30 days.
+As of 2026-09-02 12:29 UTC, the ecosystem has 37,058 combined GitHub stars, or 5,834 additional stars since the 31,224 baseline. Exceeding the +20,000 target requires another 14,166 stars to reach at least 51,224 by 2026-09-30, or roughly 506 stars/day across the remaining 28 days. Public PyPI reports 59,903 downloads over the latest 7 days and 448,764 over the latest 30 days.
 
 | Repository | Stars | Forks | Open issues | Open PRs | Last push |
 |---|---:|---:|---:|---:|---|
