@@ -59,9 +59,11 @@ cd /path/to/FunASR && pip install -e .
 
 请从 [ModelScope](https://modelscope.cn/models/FunAudioLLM/Fun-ASR-Nano-2512)
 或 [Hugging Face](https://huggingface.co/FunAudioLLM/Fun-ASR-Nano-2512)
-下载官方 `FunAudioLLM/Fun-ASR-Nano-2512`。官方 Hugging Face 仓库的根目录
-实际包含完整的 `model.pt`；`Qwen3-0.6B/` 子目录按设计只保存 LLM 配置与
-tokenizer，不是可以单独加载的权重目录。
+下载官方 `FunAudioLLM/Fun-ASR-Nano-2512`。当前 Hugging Face 的 `model.pt`
+CTC 权重不完整，因此仍可用于转写，但 FunASR 会禁用受影响的 CTC 路径，避免
+返回不可靠的时间戳或说话人分离结果。部署需要时间戳或说话人分离时，请使用
+ModelScope checkpoint；权重发布修复进度见 [#3496](https://github.com/modelscope/FunASR/issues/3496)。
+`Qwen3-0.6B/` 子目录按设计只保存 LLM 配置与 tokenizer，不是可以单独加载的权重目录。
 
 ```python
 from funasr.auto.auto_model_vllm import AutoModelVLLM
