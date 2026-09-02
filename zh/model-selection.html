@@ -42,6 +42,7 @@ result = model.generate(input="meeting.wav")</code></pre>
 <tr><td>中文生产 ASR</td><td>Paraformer-Large</td><td>成熟中文 ASR 路径，可组合 VAD 和标点。</td><td><a href="tutorial.html">教程</a></td></tr>
 <tr><td>API 示例中的英文路由</td><td><code>paraformer-en</code></td><td>适合在 OpenAI 风格客户端里验证较轻量英文路径。</td><td><a href="agent.html#server">OpenAI API</a></td></tr>
 <tr><td>LLM-based ASR 或 31 语种实验</td><td>Fun-ASR-Nano</td><td>LLM-based 模型路径；解码吞吐敏感时配合 vLLM。</td><td><a href="vllm.html">vLLM 指南</a></td></tr>
+<tr><td>离线多人会议转写与匿名说话人聚类</td><td>OpenMOSS-Team/MOSS-Transcribe-Diarize</td><td>一个模型联合输出长音频文本、时间戳与匿名说话人标签；不需要外挂 VAD 或说话人流水线。</td><td><a href="moss-transcribe-diarize.html">MOSS 指南</a></td></tr>
 <tr><td>实时字幕或客服流式音频</td><td>Runtime WebSocket 服务</td><td>面向长连接流式会话和中间结果。</td><td><a href="tutorial.html#streaming">实时示例</a></td></tr>
 <tr><td>从 Whisper/云端 ASR 迁移</td><td>先用 SenseVoice-Small</td><td>先建立强基线，再做模型专项调优。</td><td><a href="migration.html">迁移指南</a></td></tr></table>
 </section>
@@ -62,7 +63,8 @@ python examples/openai_api/smoke_test.py --base-url http://localhost:8000 --mode
 <tr><td>可复现本地容器 demo</td><td>Docker Compose API</td><td>CPU-first smoke test；使用 CUDA 前先适配镜像。</td></tr>
 <tr><td>集群内私有服务</td><td>Kubernetes API 模板</td><td>私有 ClusterIP、持久化模型缓存、健康检查和 port-forward smoke test。</td></tr>
 <tr><td>实时音频</td><td>Runtime WebSocket 服务</td><td>用真实音频验证分块、VAD、断句、重连和客户端背压。</td></tr>
-<tr><td>LLM-based ASR 吞吐</td><td>Fun-ASR-Nano 的 vLLM 路径</td><td>vLLM 加速自回归解码；不适用于非自回归 Paraformer。</td></tr></table>
+<tr><td>LLM-based ASR 吞吐</td><td>Fun-ASR-Nano 的 vLLM 路径</td><td>vLLM 加速自回归解码；不适用于非自回归 Paraformer。</td></tr>
+<tr><td>离线 MOSS 服务</td><td>FunASR HTTP、vLLM 或 SGLang Omni</td><td>保持原生说话人分段契约；MOSS 是 OpenMOSS 第三方离线模型，不走实时 WebSocket 路径。</td></tr></table>
 <p>选择部署方式时可以参考 <a href="deployment-matrix.html">部署选型表</a>。</p>
 </section>
 <section id="benchmark"><h2>上线前先 benchmark</h2>

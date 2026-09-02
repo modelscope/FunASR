@@ -43,6 +43,7 @@ result = model.generate(input="meeting.wav")</code></pre>
 <tr><td>Mandarin production ASR</td><td>Paraformer-Large</td><td>Mature Chinese ASR path with VAD and punctuation.</td><td><a href="tutorial.html">Tutorial</a></td></tr>
 <tr><td>English-only route in the API example</td><td><code>paraformer-en</code></td><td>Compact English route for OpenAI-style compatibility checks.</td><td><a href="agent.html#server">OpenAI API</a></td></tr>
 <tr><td>LLM-based ASR or 31-language experiments</td><td>Fun-ASR-Nano</td><td>LLM-based path; use vLLM when decoder throughput matters.</td><td><a href="vllm.html">vLLM guide</a></td></tr>
+<tr><td>Offline multi-speaker meeting transcription and anonymous diarization</td><td>OpenMOSS-Team/MOSS-Transcribe-Diarize</td><td>One model jointly emits long-form text, timestamps, and anonymous speaker labels; do not add an external VAD or diarization pipeline.</td><td><a href="moss-transcribe-diarize.html">MOSS guide</a></td></tr>
 <tr><td>Live captions or call-center streams</td><td>Runtime WebSocket service</td><td>Designed for long-lived streaming sessions and partial results.</td><td><a href="tutorial.html#streaming">Realtime examples</a></td></tr>
 <tr><td>Migration from Whisper/cloud ASR</td><td>SenseVoice-Small first</td><td>Gives a strong baseline before deeper model-specific tuning.</td><td><a href="migration.html">Migration guide</a></td></tr></table>
 </section>
@@ -63,7 +64,8 @@ python examples/openai_api/smoke_test.py --base-url http://localhost:8000 --mode
 <tr><td>Repeatable local container demo</td><td>Docker Compose API</td><td>CPU-first smoke test; adapt the image before using CUDA.</td></tr>
 <tr><td>Internal cluster service</td><td>Kubernetes API template</td><td>Private ClusterIP, persistent model cache, health probes, and port-forward smoke test.</td></tr>
 <tr><td>Live audio</td><td>Runtime WebSocket service</td><td>Validate chunking, VAD, endpointing, reconnects, and client backpressure with real audio.</td></tr>
-<tr><td>LLM-based ASR throughput</td><td>vLLM path for Fun-ASR-Nano</td><td>vLLM accelerates autoregressive decoding; it does not apply to non-autoregressive Paraformer.</td></tr></table>
+<tr><td>LLM-based ASR throughput</td><td>vLLM path for Fun-ASR-Nano</td><td>vLLM accelerates autoregressive decoding; it does not apply to non-autoregressive Paraformer.</td></tr>
+<tr><td>Offline MOSS service</td><td>FunASR HTTP, vLLM, or SGLang Omni</td><td>Keep the native speaker-segment contract; MOSS is an OpenMOSS third-party offline model, not the realtime WebSocket route.</td></tr></table>
 <p>See the <a href="deployment-matrix.html">deployment matrix</a> when you are choosing between these paths.</p>
 </section>
 <section id="benchmark"><h2>Benchmark before committing</h2>
