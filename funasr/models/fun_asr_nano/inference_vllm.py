@@ -39,6 +39,13 @@ logger = logging.getLogger(__name__)
 
 dtype_map = {"bf16": torch.bfloat16, "fp16": torch.float16, "fp32": torch.float32}
 
+_LANGUAGE_PROMPT_ALIASES = {
+    "zh": "中文",
+    "en": "英文",
+    "ja": "日文",
+    "ko": "韩文",
+}
+
 
 def _resolve_vllm_dtype(dtype: str) -> str:
     """Use a numerically stable dtype for the Qwen3 language model."""
@@ -462,6 +469,8 @@ class FunASRNanoVLLM:
         itn: bool = True,
     ) -> str:
         """Build the ASR prompt string."""
+        if language:
+            language = _LANGUAGE_PROMPT_ALIASES.get(language.lower(), language)
         hotwords = hotwords or []
         if len(hotwords) > 0:
             hotwords_str = ", ".join(hotwords)
