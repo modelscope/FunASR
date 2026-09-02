@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="FunASR 是工业级开源语音识别工具包，支持 GPU 170x 实时、50+ 语言、说话人分离、情感检测、OpenAI 兼容 API、vLLM 加速和 Agent 集成。">
+    <meta property="og:title" content="FunASR - 开源语音理解工具包">
+    <meta property="og:description" content="GPU 170x 实时、50+ 语言、说话人分离、vLLM 加速和本地 OpenAI 兼容语音 API。">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://modelscope.github.io/FunASR/zh/">
+    <link rel="canonical" href="https://modelscope.github.io/FunASR/zh/">
+    <link rel="alternate" hreflang="en" href="https://modelscope.github.io/FunASR/">
+    <link rel="alternate" hreflang="zh" href="https://modelscope.github.io/FunASR/zh/">
+    <link rel="alternate" hreflang="ja" href="https://modelscope.github.io/FunASR/ja/">
+    <link rel="alternate" hreflang="ko" href="https://modelscope.github.io/FunASR/ko/">
+    <link rel="alternate" hreflang="x-default" href="https://modelscope.github.io/FunASR/">
+    <meta property="og:site_name" content="FunASR">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="FunASR - 开源语音理解工具包">
+    <meta name="twitter:description" content="GPU 170x 实时、50+ 语言、说话人分离、vLLM 加速和本地 OpenAI 兼容语音 API。">
+    <script type="application/ld+json">
+{"@context":"https://schema.org","@type":"SoftwareSourceCode","name":"FunASR","description":"FunASR 是开源语音识别与语音理解工具包，支持 ASR、VAD、标点恢复、说话人分离、情感检测、vLLM 加速和 OpenAI 兼容 API 示例。","url":"https://modelscope.github.io/FunASR/zh/","codeRepository":"https://github.com/modelscope/FunASR","programmingLanguage":"Python","license":"https://github.com/modelscope/FunASR/blob/main/LICENSE","applicationCategory":"Speech recognition toolkit","operatingSystem":["Linux","macOS","Windows"]}
+    </script>
+    <title>FunASR - 端到端语音识别工具包</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <nav class="nav">
+        <div class="container">
+            <a href="index.html" class="nav-logo">FunASR</a>
+            <div class="nav-links">
+                <a href="index.html" class="active">首页</a>
+                <a href="tutorial.html">教程</a>
+                <a href="training.html">训练</a>
+                <a href="model-registration.html">开发</a>
+                <a href="../api.html">API</a>
+                <a href="vllm.html">vLLM</a>
+                <a href="agent.html">Agent</a>
+                <a href="benchmark.html">Benchmark</a>
+                <a href="../donors.html">功德榜</a>
+            </div>
+
+<div class="lang-dropdown"><button class="lang-btn">中文</button><div class="lang-menu"><a href="../index.html">English</a><a href="index.html" class="current">中文</a><a href="../ja/index.html">日本語</a><a href="../ko/index.html">한국어</a></div></div>
+<a href="https://github.com/modelscope/FunASR" class="nav-github">GitHub</a>
+        </div>
+    </nav>
+
+    <div class="hero">
+        <div class="container hero-content">
+            <div class="hero-copy">
+                <p class="eyebrow">开源语音理解工具包</p>
+                <h1>FunASR</h1>
+                <p>生产级语音识别、语音检测、标点恢复、说话人分离、情感检测、音频事件识别——统一的 Python 接口。</p>
+                <div class="hero-badges">
+                    <a href="https://pypi.org/project/funasr/"><img src="https://img.shields.io/pypi/v/funasr?style=flat-square&color=2563eb" alt="PyPI"></a>
+                    <a href="https://github.com/modelscope/FunASR/stargazers"><img src="https://img.shields.io/github/stars/modelscope/FunASR?style=flat-square&color=b45309" alt="Stars"></a>
+                    <a href="https://github.com/modelscope/FunASR/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-059669?style=flat-square" alt="License"></a>
+                </div>
+                <div class="hero-actions">
+                    <a href="tutorial.html" class="btn btn-white">快速开始</a>
+                    <a href="training.html" class="btn btn-outline-white">训练指南</a>
+                    <a href="../api.html" class="btn btn-outline-white">API 文档</a>
+                </div>
+            </div>
+
+            <div class="hero-panel" aria-label="FunASR 识别预览">
+                <div class="terminal-bar">
+                    <span class="terminal-dots"><span></span><span></span><span></span></span>
+                    <span>funasr-pipeline.py</span>
+                </div>
+<pre>from funasr import AutoModel
+
+model = AutoModel(
+    model="paraformer-zh",
+    vad_model="fsmn-vad",
+    punc_model="ct-punc",
+    spk_model="cam++",
+)
+res = model.generate(input="meeting.wav")
+print(res[0]["sentence_info"])</pre>
+                <div class="hero-metrics">
+                    <div><strong>50+</strong><span>语言</span></div>
+                    <div><strong>170x</strong><span>实时</span></div>
+                    <div><strong>1个API</strong><span>全流程</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <section class="alt">
+        <div class="container">
+            <h2 class="section-title">最新动态</h2>
+            <p class="section-subtitle">网站文档已对齐 README 和 main 分支最新能力。</p>
+            <div class="grid-3">
+                <div class="card"><h3>llama.cpp / GGUF 运行时</h3><p>runtime-llamacpp-v0.1.8 新增 SenseVoiceSmall GGUF 的 Linux Vulkan 包。支持 Vulkan 的 GPU 可用自包含二进制和 <code>--backend vulkan</code> 运行。</p><p><a href="deployment-matrix.html#runtime-llamacpp-v0.1.8">选择 GGUF 运行时</a></p></div>
+                <div class="card"><h3>MOSS-Transcribe-Diarize</h3><p>使用 OpenMOSS 的第三方离线模型处理多人会议：一次请求返回文本、时间戳和匿名说话人标签，不需要外挂 VAD 流水线。</p><p><a href="moss-transcribe-diarize.html">选择 MOSS 部署路径</a></p></div>
+                <div class="card"><h3>vLLM 推理引擎</h3><p>Fun-ASR-Nano LLM 解码加速 2-3 倍，支持 tensor parallel 批量推理和实时 WebSocket 服务。</p><p><a href="vllm.html">阅读 vLLM 文档</a></p></div>
+                <div class="card"><h3>Agent 基础设施</h3><p><code>funasr-server</code> 提供 OpenAI 兼容转写 API；MCP 和语音输入示例可把本地 ASR 接入 AI 工具。</p><p><a href="agent.html">配置 Agent 集成</a></p></div>
+                <div class="card"><h3>性能评测</h3><p>长音频评测覆盖 SenseVoice、Paraformer、Fun-ASR-Nano、GLM-ASR 和 Whisper 变体，包含 GPU/CPU 结果。</p><p><a href="benchmark.html">查看评测</a></p></div>
+            </div>
+        </div>
+    </section>
+
+
+    <section class="alt">
+        <div class="container">
+            <h2 class="section-title">几分钟部署私有语音 API</h2>
+            <p class="section-subtitle">在本地启动 OpenAI 兼容的转写接口，将语音能力接入 Agent、应用和批处理流水线，无需把音频发送到云端 ASR 服务。</p>
+            <div class="grid-2">
+                <div class="card">
+                    <h3>启动服务</h3>
+                    <p>先用 SenseVoice 快速验证，服务启动后也可以切换到其他模型。</p>
+<pre>pip install funasr fastapi uvicorn python-multipart
+funasr-server --model sensevoice --device cuda</pre>
+                </div>
+                <div class="card">
+                    <h3>用 curl 验证</h3>
+                    <p>下载公开测试音频，调用与 OpenAI 兼容客户端一致的接口路径。</p>
+<pre>curl -L https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/BAC009S0764W0121.wav -o sample.wav
+curl http://localhost:8000/v1/audio/transcriptions \
+  -F file=@sample.wav \
+  -F model=sensevoice \
+  -F response_format=verbose_json</pre>
+                </div>
+            </div>
+            <div class="section-cta">
+                <a href="https://colab.research.google.com/github/modelscope/FunASR/blob/main/examples/colab/funasr_quickstart.ipynb" class="btn btn-primary">打开 Colab</a>
+                <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/README_zh.md" class="btn btn-primary">OpenAI API 示例</a>
+                <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/WORKFLOWS_zh.md" class="btn btn-primary">工作流配方</a>
+                <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/GRADIO_zh.md" class="btn btn-primary">Gradio 演示</a>
+                <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/SECURITY_zh.md" class="btn btn-primary">安全指南</a>
+                <a href="agent.html" class="btn btn-primary">Agent 集成</a>
+            </div>
+        </div>
+    </section>
+
+
+    <section class="docs-band">
+        <div class="container">
+            <h2 class="section-title">文档中心</h2>
+            <p class="section-subtitle">从示例开始，在自己的数据上微调，扩展模型注册表，或查阅带源码链接的 API 文档。</p>
+            <div class="doc-grid">
+                <a class="doc-card" href="model-selection.html">
+                    <span class="doc-kicker">选型</span>
+                    <h3>模型选择</h3>
+                    <p>为你的场景选择 SenseVoice、Paraformer、Fun-ASR-Nano、流式服务或 OpenAI API alias。</p>
+                </a>
+                <a class="doc-card" href="deployment-matrix.html">
+                    <span class="doc-kicker">部署</span>
+                    <h3>部署选型</h3>
+                    <p>对比 Python API、OpenAI API、Docker Compose、Kubernetes、WebSocket、vLLM、MCP、批处理、字幕和 Triton。</p>
+                </a>
+                <a class="doc-card" href="migration.html">
+                    <span class="doc-kicker">对比</span>
+                    <h3>迁移指南</h3>
+                    <p>用功能映射、代表性评测和上线检查，评估是否从 Whisper 或云端 ASR 切到 FunASR。</p>
+                </a>
+                <a class="doc-card" href="use-cases.html">
+                    <span class="doc-kicker">选型</span>
+                    <h3>场景速览</h3>
+                    <p>快速找到私有 API、Agent、流式、vLLM、字幕、批处理和评测的最佳入口。</p>
+                </a>
+                <a class="doc-card" href="tutorial.html">
+                    <span class="doc-kicker">学习</span>
+                    <h3>使用教程</h3>
+                    <p>安装 FunASR，选择模型，运行语音识别、VAD、说话人分离和导出流程。</p>
+                </a>
+                <a class="doc-card" href="training.html">
+                    <span class="doc-kicker">微调</span>
+                    <h3>模型训练</h3>
+                    <p>准备 JSONL 数据，微调 Paraformer、SenseVoice、Fun-ASR-Nano，监控训练过程。</p>
+                </a>
+                <a class="doc-card" href="model-registration.html">
+                    <span class="doc-kicker">扩展</span>
+                    <h3>开发指南</h3>
+                    <p>理解注册表机制，添加新模型，打包独立仓库代码，避免集成陷阱。</p>
+                </a>
+                <a class="doc-card" href="vllm.html">
+                    <span class="doc-kicker">加速</span>
+                    <h3>vLLM 推理</h3>
+                    <p>使用 vLLM 加速 LLM-based ASR，支持多卡批量解码、流式 SDK 和 WebSocket 服务。</p>
+                </a>
+                <a class="doc-card" href="agent.html">
+                    <span class="doc-kicker">集成</span>
+                    <h3>Agent 与 API</h3>
+                    <p>将 FunASR 暴露为 OpenAI 兼容接口、低代码工作流节点、MCP 工具、语音输入法或字幕生成器。</p>
+                </a>
+                <a class="doc-card" href="benchmark.html">
+                    <span class="doc-kicker">评测</span>
+                    <h3>性能评测</h3>
+                    <p>对比 FunASR 与 Whisper 在长音频上的 GPU/CPU 速度和 CER。</p>
+                </a>
+                <a class="doc-card" href="../api.html">
+                    <span class="doc-kicker">参考</span>
+                    <h3>API</h3>
+                    <p>浏览自动生成的类、方法文档，查看源码预览和 GitHub 行号链接。</p>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <div class="container">
+            <h2 class="section-title">核心能力</h2>
+            <p class="section-subtitle">语音理解所需的一切——从音频分段到带说话人标注的转写结果。</p>
+            <div class="grid-3">
+                <div class="card">
+                    <div class="card-icon">ASR</div>
+                    <h3>语音识别</h3>
+                    <p>支持流式和离线 ASR，内置 VAD 分段。单次 API 调用即可处理数小时的长音频。</p>
+                </div>
+                <div class="card">
+                    <div class="card-icon">50+</div>
+                    <h3>多语言模型</h3>
+                    <p>Fun-ASR-Nano 覆盖 31 种语言含中文方言，Qwen3-ASR 覆盖 52 种语言并自动检测语种。</p>
+                </div>
+                <div class="card">
+                    <div class="card-icon">SPK</div>
+                    <h3>说话人分离</h3>
+                    <p>识别"谁在什么时候说了什么"，将说话人标签附加到句子级 ASR 输出。</p>
+                </div>
+                <div class="card">
+                    <div class="card-icon">SFX</div>
+                    <h3>情感与音频事件</h3>
+                    <p>SenseVoice 可检测语音情感和音频事件——背景音乐、掌声、笑声、哭声。</p>
+                </div>
+                <div class="card">
+                    <div class="card-icon">RTF</div>
+                    <h3>低延迟</h3>
+                    <p>非自回归模型支持高效批处理和实时场景，可部署在各种硬件上。</p>
+                </div>
+                <div class="card">
+                    <div class="card-icon">OPS</div>
+                    <h3>训练与部署</h3>
+                    <p>支持 DeepSpeed 微调、ONNX 导出、Docker 运行时和 Python SDK 部署。</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="alt">
+        <div class="container">
+            <h2 class="section-title">模型</h2>
+            <p class="section-subtitle">预训练工业级模型，用于语音识别、音频分段和语音理解流水线。</p>
+            <div class="grid-2">
+                <div class="card">
+                    <h3>Fun-ASR-Nano</h3>
+                    <p>基于数千万小时数据训练的端到端 ASR。支持 31 种语言、方言、歌词、时间戳和热词。</p>
+                    <div class="card-tags">
+                        <span class="tag">8亿参数</span>
+                        <span class="tag">31种语言</span>
+                        <span class="tag">时间戳</span>
+                        <span class="tag">说话人分离</span>
+                        <span class="tag">热词</span>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3>Paraformer</h3>
+                    <p>非自回归中英文语音识别，提供流式和离线版本，适用于生产系统。</p>
+                    <div class="card-tags">
+                        <span class="tag">流式</span>
+                        <span class="tag">离线</span>
+                        <span class="tag">热词</span>
+                        <span class="tag">ONNX</span>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3>SenseVoice</h3>
+                    <p>多任务语音理解：语音识别、语种识别、情感检测、音频事件检测，支持 5 种语言。</p>
+                    <div class="card-tags">
+                        <span class="tag">情感</span>
+                        <span class="tag">音频事件</span>
+                        <span class="tag">说话人分离</span>
+                        <span class="tag">70ms/10s</span>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3>Qwen3-ASR</h3>
+                    <p>基于大语言模型的语音识别，支持 52 种语言，具备上下文理解和自动语种检测能力。</p>
+                    <div class="card-tags">
+                        <span class="tag">52种语言</span>
+                        <span class="tag">0.6B / 1.7B</span>
+                        <span class="tag">上下文感知</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <div class="container narrow">
+            <h2 class="section-title">快速开始</h2>
+            <p class="section-subtitle">可以本地安装，也可以先运行 <a href="https://github.com/modelscope/FunASR/blob/main/examples/colab/README_zh.md">Colab 快速体验</a>，在浏览器里转写样例音频。</p>
+<pre>pip install funasr
+# 或安装最新版：pip install git+https://github.com/modelscope/FunASR.git</pre>
+<pre>from funasr import AutoModel
+
+model = AutoModel(
+    model="paraformer-zh",
+    vad_model="fsmn-vad",
+    punc_model="ct-punc",
+    spk_model="cam++",
+)
+res = model.generate(input="meeting.wav", batch_size_s=300)
+
+for sent in res[0]["sentence_info"]:
+    print(f"[说话人 {sent['spk']}] {sent['text']}")</pre>
+            <div class="section-cta">
+                <a href="https://colab.research.google.com/github/modelscope/FunASR/blob/main/examples/colab/funasr_quickstart.ipynb" class="btn btn-primary">打开 Colab</a>
+                <a href="tutorial.html" class="btn btn-primary">完整教程</a>
+            </div>
+        </div>
+    </section>
+
+    <section class="alt">
+        <div class="container">
+            <h2 class="section-title">生态系统</h2>
+            <p class="section-subtitle">围绕语音识别、语音理解、视频剪辑、语音合成的相关项目。</p>
+            <div class="grid-2">
+                <div class="card">
+                    <h3><a class="card-title-link" href="https://github.com/QwenAudio/Fun-ASR">Fun-ASR-Nano</a></h3>
+                    <p>最新的语音识别大模型，支持多语言识别、时间戳、说话人分离和热词定制。</p>
+                </div>
+                <div class="card">
+                    <h3><a class="card-title-link" href="https://github.com/QwenAudio/SenseVoice">SenseVoice</a></h3>
+                    <p>多任务语音理解：语音识别、情感检测、音频事件识别。</p>
+                </div>
+                <div class="card">
+                    <h3><a class="card-title-link" href="https://github.com/modelscope/FunClip">FunClip</a></h3>
+                    <p>基于 FunASR 的 AI 视频剪辑，支持大模型辅助的智能编辑流程。</p>
+                </div>
+                <div class="card">
+                    <h3><a class="card-title-link" href="https://github.com/QwenAudio/CosyVoice">CosyVoice</a></h3>
+                    <p>自然语音生成，支持多语言、音色和情感控制。</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <p>FunASR &middot; 通义实验室，阿里巴巴集团</p>
+        <p>
+            <a href="https://github.com/modelscope/FunASR">GitHub</a> &middot;
+            <a href="training.html">训练</a> &middot;
+            <a href="use-cases.html">场景速览</a> &middot;
+            <a href="deployment-matrix.html">部署选型</a> &middot;
+            <a href="../api.html">API</a> &middot;
+            <a href="vllm.html">vLLM</a> &middot;
+            <a href="agent.html">Agent</a> &middot;
+            <a href="benchmark.html">Benchmark</a> &middot;
+            <a href="https://github.com/modelscope/FunASR/blob/main/MODEL_LICENSE">许可证</a> &middot;
+            <a href="https://pypi.org/project/funasr/">PyPI</a> &middot;
+            <a href="https://github.com/modelscope/FunASR/issues">问题反馈</a>
+        </p>
+    </footer>
+</body>
+</html>
