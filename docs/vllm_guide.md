@@ -785,7 +785,7 @@ Because each refresh re-encodes from the sentence start, the longer a sentence, 
 
 **Usage guidance**
 - Normal conversational speech has natural pauses, so VAD splits it into relatively short utterances and each partial's cost is naturally bounded — **usually nothing to worry about**.
-- Only **very long, pauseless continuous speech** (e.g. reading aloud) makes a single utterance keep growing and the partial preview progressively slower. `serve_realtime_ws.py` bounds provisional previews with `--partial-window-sec 15` by default; for multi-client or continuous-monologue load tests, try `8-10` and raise `--decode-interval` to `0.8-1.0`. This only affects provisional `partial`; VAD-locked sentences and STOP final output still run on the full audio.
+- Only **very long, pauseless continuous speech** (e.g. reading aloud) makes a single utterance keep growing and the partial preview progressively slower. `serve_realtime_ws.py` bounds provisional previews with `--partial-window-sec 15` by default; under multi-client continuous-monologue load, reduce the window and lengthen `--decode-interval` based on measured output lag. This only affects provisional `partial`; VAD-locked sentences and STOP final output still run on the full audio. See the measured L20 starting point in §6.7.
 
 ### 6.6 Cost of speaker diarization (SPK) and how to enable it
 
@@ -805,6 +805,12 @@ Because each refresh re-encodes from the sentence start, the longer a sentence, 
 - **One process is the first scaling unit.** Benchmark a single process with the built-in batching path before adding replicas. Use multiple processes or one instance per GPU only after a single process reaches its measured GPU, CPU, or tail-latency limit; each extra process duplicates model memory and may reduce batching opportunities.
 - **vLLM benefits depend on requests arriving together.** Turn-taking traffic may have many connected clients but only a few simultaneous decodes, while replaying the same continuous monologue across every client creates deliberately synchronized batches. Report both traffic shape and batching flags with every result.
 - **Sustainable concurrency has no universal "supports N connections" number.** It depends mainly on simultaneous speakers, silence ratio, utterance length, partial refresh interval, speaker diarization, batch wait, and GPU/CPU capacity. Long pauseless speech still costs more because provisional windows are repeatedly encoded (see §6.5). Benchmark your own workload instead of adopting another deployment's connection count as a specification.
+- **Measured L20 starting point, not a global default.** In [#3528](https://github.com/modelscope/FunASR/issues/3528), one L20 running 16 synchronized clients on a 47-second continuous utterance, with SPK and client ping disabled, performed best at `--partial-window-sec 8 --decode-interval 2.0`: 408 decode requests, 3,072.1 seconds of encoded audio, 51.18-second p50 completion, 4.5-second output lag, 14.2x aggregate realtime, and 1.31-second first text. The default 15-second window did not complete that exact 16-client workload. Use `8 / 2.0` as an initial L20 high-concurrency profile only, then tune against your own first-text latency, output lag, final completion, request count, and encoded-audio total.
+
+```bash
+CUDA_VISIBLE_DEVICES=0 python examples/industrial_data_pretraining/fun_asr_nano/serve_realtime_ws.py \
+  --partial-window-sec 8 --decode-interval 2.0 --log-decode-profile
+```
 
 ---
 
