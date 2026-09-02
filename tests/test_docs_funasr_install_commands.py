@@ -386,7 +386,7 @@ def test_repository_roadmap_tracks_current_delivery_and_open_work():
     ]
 
     for text in docs:
-        assert "1.4.11" in text
+        assert "1.4.13" in text
         assert "v1.3.26" not in text
         assert "runtime-llamacpp-v0.2.6" in text
         assert "MOSS-Transcribe-Diarize" in text
