@@ -9,6 +9,7 @@
 - **应该用哪个安装命令、模型 id 或 hub？** 看[安装或 import 失败](#安装或-import-失败)和[模型下载慢或失败](#模型下载慢或失败)。对应 #3321、#3045、#3042、#2973、#2976 等问题。
 - **CPU、CUDA、Vulkan、GGUF 应该下载哪个 runtime 包？** 看[llama.cpp 或 GGUF runtime 无法启动](#llamacpp-或-gguf-runtime-无法启动)。对应 #3298、#3297、#3296、#3289、#3243 等问题。
 - **实时服务、VAD、vLLM 或 server 输出为什么延迟、为空，或和本地 Python 不一致？** 看[`funasr-server` 启动后 OpenAI 兼容接口请求失败](#funasr-server-启动后-openai-兼容接口请求失败)和[WebSocket 实时输出为空或延迟很大](#websocket-实时输出为空或延迟很大)。对应 #3101、#3109、#3038、#3031、#2968、#2965 等问题。
+- **电话车牌、方言、重复确认语音怎么微调和评测？** 看[电话车牌语音的微调与评测](./vehicle_plate_finetuning_zh.md)。热词是软提示，不是确定性车牌纠错。
 
 ## 安装或 import 失败
 
