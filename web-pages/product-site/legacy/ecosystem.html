@@ -244,6 +244,12 @@ footer a{color:#60a5fa}
 <h2>AI 平台与框架</h2>
 <div class="card-grid">
 <div class="card">
+<div class="card-title"><a href="https://github.com/langflow-ai/langflow">Langflow</a></div>
+<div class="card-stars">75K+ stars</div>
+<div class="card-desc">可视化工作流与 Agent 平台，已通过 <a href="https://github.com/langflow-ai/langflow/pull/14225">#14225</a> 合并专用 FunASR speech-to-text 组件。默认连接本地 <code>/v1</code> 与 <code>sensevoice</code>，支持可选网关鉴权和语言选择；自托管服务启用 SSRF 防护时，请把服务主机加入 allow-list。</div>
+<div><span class="card-tag">Workflow</span><span class="card-tag">Local FunASR</span><span class="card-tag">OpenAI 兼容</span></div>
+</div>
+<div class="card">
 <div class="card-title"><a href="https://github.com/infiniflow/ragflow">RAGFlow</a></div>
 <div class="card-stars">88.6K+ stars</div>
 <div class="card-desc">开源 RAG 与智能体平台。已合并的 <a href="https://github.com/infiniflow/ragflow/pull/17388">#17388</a> 让本地 FunASR 使用默认 <code>http://localhost:8000/v1</code> 时无需 API key；配置密钥时仍发送 Bearer 认证，并在 multipart 转写前校验模型名，避免缺失配置触发 panic。</div>
