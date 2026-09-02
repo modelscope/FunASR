@@ -352,6 +352,56 @@ img {
   max-width: 900px;
 }
 
+.repository-router-links {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 28px;
+}
+
+.repository-router-links a {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 6px 16px;
+  min-height: 112px;
+  padding: 18px 0 0;
+  border-top: 3px solid var(--green);
+  color: inherit;
+  text-decoration: none;
+}
+
+.repository-router-links a:nth-child(2) {
+  border-color: #d08a21;
+}
+
+.repository-router-links a:nth-child(3) {
+  border-color: #d84b55;
+}
+
+.repository-router-links span {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 750;
+}
+
+.repository-router-links strong {
+  font-size: 18px;
+  line-height: 1.35;
+}
+
+.repository-router-links img {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  width: 20px;
+  height: 20px;
+  align-self: center;
+  transition: transform 160ms ease;
+}
+
+.repository-router-links a:hover img,
+.repository-router-links a:focus-visible img {
+  transform: translateX(4px);
+}
+
 .selector {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -1251,11 +1301,13 @@ td a {
   }
 
   .responsibility-grid,
-  .ecosystem-repositories {
+  .ecosystem-repositories,
+  .repository-router-links {
     gap: 24px;
   }
 
-  .ecosystem-repositories {
+  .ecosystem-repositories,
+  .repository-router-links {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
@@ -1458,6 +1510,7 @@ td a {
 
   .responsibility-grid,
   .ecosystem-repositories,
+  .repository-router-links,
   .deploy-grid {
     grid-template-columns: 1fr;
   }

@@ -69,6 +69,35 @@ def test_homepage_routes_each_project_by_workload(built_site, relative, markers)
         assert marker in text
 
 
+@pytest.mark.parametrize(
+    ('relative', 'heading', 'routes'),
+    (
+        (
+            'index.html',
+            '按工作流进入专用仓库',
+            ('/go/fun-asr', '/go/sensevoice', '/go/funclip'),
+        ),
+        (
+            'en/index.html',
+            'Choose the focused repository',
+            ('/go/fun-asr', '/go/sensevoice', '/go/funclip'),
+        ),
+    ),
+)
+def test_homepage_surfaces_focused_repository_router_before_deployment_choice(
+    built_site, relative, heading, routes
+):
+    soup = read_soup(built_site / relative)
+    router = soup.select_one('[data-section="repository-router"]')
+    selector = soup.select_one('[data-section="deployment-selector"]')
+
+    assert router
+    assert selector
+    assert router.get_text(' ', strip=True).find(heading) >= 0
+    assert list(soup.select('section')).index(router) < list(soup.select('section')).index(selector)
+    assert tuple(link['href'] for link in router.select('a[href]')) == routes
+
+
 def test_every_deployment_page_has_operational_contract(built_site):
     registry = load_registry(SITE_ROOT / 'data' / 'deployments.json')
 
