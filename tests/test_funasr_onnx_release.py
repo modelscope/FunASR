@@ -80,6 +80,37 @@ class FunASROnnxReleaseContractTest(unittest.TestCase):
                     offenders.append(f"{source_path.relative_to(ROOT)}:{node.lineno}")
         self.assertEqual(offenders, [])
 
+    def test_onnxruntime_import_failure_preserves_the_original_cause(self):
+        source_path = PACKAGE_ROOT / "funasr_onnx" / "utils" / "utils.py"
+        tree = ast.parse(source_path.read_text(encoding="utf-8"), filename=str(source_path))
+
+        onnx_imports = [
+            node
+            for node in tree.body
+            if isinstance(node, ast.Try)
+            and any(
+                isinstance(statement, ast.ImportFrom) and statement.module == "onnxruntime"
+                for statement in node.body
+            )
+        ]
+        self.assertEqual(len(onnx_imports), 1)
+
+        handlers = onnx_imports[0].handlers
+        self.assertEqual(len(handlers), 1)
+        handler = handlers[0]
+        self.assertIsInstance(handler.type, ast.Name)
+        self.assertEqual(handler.type.id, "ImportError")
+        self.assertIsNotNone(handler.name)
+        self.assertEqual(len(handler.body), 1)
+
+        raised = handler.body[0]
+        self.assertIsInstance(raised, ast.Raise)
+        self.assertIsInstance(raised.exc, ast.Call)
+        self.assertIsInstance(raised.exc.func, ast.Name)
+        self.assertEqual(raised.exc.func.id, "ImportError")
+        self.assertIsInstance(raised.cause, ast.Name)
+        self.assertEqual(raised.cause.id, handler.name)
+
 
 if __name__ == "__main__":
     unittest.main()
