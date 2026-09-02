@@ -27,6 +27,31 @@
   </div>
 </section>
 
+<section class="section repository-router" data-section="repository-router">
+  <div class="section-heading compact-heading">
+    <p class="eyebrow">{{ '生态路由' if language == 'zh' else 'Ecosystem routing' }}</p>
+    <h2>{{ '按工作流进入专用仓库' if language == 'zh' else 'Choose the focused repository' }}</h2>
+    <p>{{ '部署路径适用于 FunASR 运行时；当需求由模型能力或视频工作流定义时，直接进入对应仓库。' if language == 'zh' else 'Deployment paths serve the FunASR runtime. When the requirement is defined by model capability or a video workflow, start in the focused repository.' }}</p>
+  </div>
+  <div class="repository-router-links">
+    <a href="/go/fun-asr">
+      <span>Fun-ASR</span>
+      <strong>{{ '高精度与 31 语种转写' if language == 'zh' else 'High-accuracy and 31-language transcription' }}</strong>
+      <img src="{{ assets['lucide/arrow-right.svg'] }}" alt="">
+    </a>
+    <a href="/go/sensevoice">
+      <span>SenseVoice</span>
+      <strong>{{ '多语种、情感与音频事件' if language == 'zh' else 'Languages, emotion, and audio events' }}</strong>
+      <img src="{{ assets['lucide/arrow-right.svg'] }}" alt="">
+    </a>
+    <a href="/go/funclip">
+      <span>FunClip</span>
+      <strong>{{ '从语音定位到视频剪辑' if language == 'zh' else 'From speech localization to video clipping' }}</strong>
+      <img src="{{ assets['lucide/arrow-right.svg'] }}" alt="">
+    </a>
+  </div>
+</section>
+
 <section id="deployment-selector" class="section selector-section" data-section="deployment-selector">
   <div class="section-heading">
     <p class="eyebrow">{{ '部署选择器' if language == 'zh' else 'Deployment selector' }}</p>
