@@ -39,6 +39,8 @@ def test_v2_guide_keeps_native_vllm_and_funasr_realtime_paths_separate():
         "vllm serve FunAudioLLM/Fun-ASR-Nano-2512-vllm --port 8000",
         "serve_realtime_ws.py",
         "realtime speech-to-text",
+        "没有可用的实时转写会话",
+        "不是稳定的 API 契约",
     ]
 
     for marker in required_markers:

@@ -100,7 +100,10 @@ native checkpoint 传给 `AutoModelVLLM` 或
 官方 `model.pt`、`config.yaml` 与 `Qwen3-0.6B/` 目录，因而会拒绝 native layout。
 
 原生 `vllm serve` 的转写 API 不会自动获得 FunASR WebSocket 服务的 VAD、partial
-预览、会话状态或说话人处理。需要实时行为时，请按 vLLM 的
+预览、会话状态或说话人处理，因此 native Fun-ASR 模型没有可用的实时转写会话。
+即使对 `/v1/realtime` 发起 WebSocket 握手，也不能据此判断模型支持实时转写；当前
+vLLM 服务会拒绝这类握手，Uvicorn 通常显示 `403 Forbidden`。这是当前实现的拒绝表现，
+不是稳定的 API 契约，也不应据此编写支持性探测。需要实时行为时，请按 vLLM 的
 [realtime speech-to-text 示例](https://docs.vllm.ai/en/latest/examples/speech_to_text/realtime/)
 在应用侧实现音频分段、请求调度与可替换预览；需要 FunASR 已实现的 WebSocket
 协议时，继续使用上文的官方 checkpoint + `serve_realtime_ws.py` 路径。
