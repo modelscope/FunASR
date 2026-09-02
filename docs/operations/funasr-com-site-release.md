@@ -2,39 +2,38 @@
 
 ## Production record
 
-- Released: `2026-07-26`
-- Source commit: `5a51d04d684528f1884f7c0a6e95d33748bb3805`
-- Product release: `20260726T171818Z`
-- Previous release: `20260726T171800Z`
+- Released: `2026-09-02`
+- Source commit: `e25fb88f4c06dfe186baee9d0d3f9a840346955d`
+- Product release: `20260902T104600Z`
+- Previous release: `20260901T065930Z`
 - Current link: `/root/FunASR/web-pages/current`
 - Release root: `/root/FunASR/web-pages/releases`
-- Backup root: `/root/FunASR/web-pages/backups/product-site-20260726T171818Z`
-- Build archive SHA-256: `f1184ff9c1b8b7130d146549ed911e2349eee93f6c0d745d526da02cb5412280`
-- Active Nginx SHA-256: `241eebf7f0b2aa7a148ccb2c8c8ab58818efba9a37b8dc7392b25076d18a994d`
+- Backup root: `/root/FunASR/web-pages/backups/product-site-20260902T103700Z`
+- Build archive SHA-256: `4e224fbd23b55515bcbf7c5d02a7af1953ba9e02ea4221857c2bbf2f032e2d16`
+- Release manifest SHA-256: `d73f247d951d8e49703d089ca7cca7de9077b73260f907f26c2f287b42e14276`
+- Active Nginx SHA-256: `4450f8616438fdf095728c12f50e0fa878a5afd6ccb63cd1cd4af4cc91f88233`
 
-The build from the final source commit was byte-identical to the reviewed build from `caa948d9`. The final two commits only change release-script behavior.
+The product-site tree was verified unchanged between the release source commit and the subsequent growth-snapshot documentation merge.
 
 ## Backup evidence
 
-The pre-release site and Nginx configuration were archived before the first switch.
+The pre-release site and Nginx configuration were archived before the atomic switch.
 
 | Artifact | SHA-256 |
 | --- | --- |
-| `live-dist.tar.gz` | `61f79a97d7a6677b1b11e01b18f03cdff1bef617960769549256244e489687f5` |
-| `nginx.conf` | `46da00bd6c51b19b22a21658f141417653327fb670bf58cb574311c337e469dc` |
-| `live-dist.sha256` | `a9e26f1b50deb759902a011351aefc70e356cdccdca3f8ce571b88ffeddb7395` |
+| `live-dist.tar.gz` | `4c8957d6f2212ea6753494078dcfbfe6abb5d24e1454587500e0af15c6758244` |
+| `nginx.conf` | `4450f8616438fdf095728c12f50e0fa878a5afd6ccb63cd1cd4af4cc91f88233` |
+| `build.tar.gz` | `4e224fbd23b55515bcbf7c5d02a7af1953ba9e02ea4221857c2bbf2f032e2d16` |
 
-The previous release was checked against the backup manifest before the rollback exercise: 289 immutable files matched. `stats/data.json` is excluded from that comparison because the legacy statistics process writes it continuously.
+The previous release remains intact at `20260901T065930Z`. The release script's rollback trap was exercised twice during publish dry attempts, preserving that target before the final atomic switch.
 
 ## Verification
 
-- Python suite: 41 passed.
-- Playwright suite: 7 passed at 390x844, 768x1024, 1440x900, and 1920x1080.
-- Static validator: 92 HTML pages passed before upload, after upload, and after release copy.
-- Public smoke: 25 pages, 5 fixed redirects, security headers, HTML no-cache, and one hashed immutable asset passed.
-- TLS: TLS 1.2 and TLS 1.3 handshakes passed; the 443 server only enables those protocols.
-- Production screenshots at 390x844 and 1440x900 were byte-identical to the committed reference screenshots.
-- Rollback was exercised from `20260726T171818Z` to `20260726T171800Z`, the legacy home/blog/donor/llama routes passed, and the product release was restored and revalidated.
+- Exact-main GitHub Actions run `33619555092` passed both product-site build/validation and Playwright browser jobs.
+- Static validator: 110 pages passed on ind-gpu8 before transfer and again in the production staging directory.
+- Public smoke: `/`, both ecosystem pages, `/deploy/`, `/blog/`, `/donors.html`, and both llama.cpp routes returned successfully.
+- The Chinese and English ecosystem pages both contain the updated `37K+` social proof.
+- Production HTML is no-cache and the checked response includes `X-Frame-Options`, `X-Content-Type-Options`, and HSTS headers.
 
 ## Release commands
 
