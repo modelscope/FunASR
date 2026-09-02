@@ -365,6 +365,32 @@ def test_model_pages_use_attributed_repository_routes(built_site, relative):
     assert 'https://github.com/QwenAudio/SenseVoice' not in hrefs
 
 
+@pytest.mark.parametrize(
+    ('relative', 'third_party_marker'),
+    (
+        ('models.html', '第三方模型'),
+        ('en/models.html', 'third-party model'),
+    ),
+)
+def test_model_pages_surface_moss_with_accurate_ownership_and_deployment(
+    built_site, relative, third_party_marker
+):
+    soup = read_soup(built_site / relative)
+    card = next(
+        item
+        for item in soup.select('.model-card')
+        if 'MOSS-Transcribe-Diarize' in item.get_text(' ', strip=True)
+    )
+    text = card.get_text(' ', strip=True)
+    hrefs = {link.get('href') for link in card.select('a[href]')}
+
+    assert 'OpenMOSS-Team/MOSS-Transcribe-Diarize' in text
+    assert third_party_marker in text
+    assert 'VAD' in text
+    assert 'https://huggingface.co/OpenMOSS-Team/MOSS-Transcribe-Diarize' in hrefs
+    assert ('/deploy/moss-transcribe-diarize.html' if relative == 'models.html' else '/en/deploy/moss-transcribe-diarize.html') in hrefs
+
+
 @pytest.mark.parametrize('relative', ('ecosystem.html', 'en/ecosystem.html'))
 def test_ecosystem_pages_use_attributed_funclip_route(built_site, relative):
     soup = read_soup(built_site / relative)

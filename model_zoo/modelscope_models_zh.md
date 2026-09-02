@@ -111,6 +111,12 @@
 | [SOND](https://www.modelscope.cn/models/damo/speech_diarization_sond-zh-cn-alimeeting-16k-n16k4-pytorch/summary) | AliMeeting (120 小时) |   40.5M    | 中文  |
 | [SOND](https://www.modelscope.cn/models/damo/speech_diarization_sond-en-us-callhome-8k-n16k4-pytorch/summary)    |  CallHome (60 小时)  |     12M     | 英文  |
 
+### 第三方统一转写与说话人分离
+
+| 模型名字 | 发布方 | 模型参数 | 备注 |
+|:--------:|:------:|:--------:|:----|
+| [MOSS-Transcribe-Diarize](https://huggingface.co/OpenMOSS-Team/MOSS-Transcribe-Diarize) | OpenMOSS | 以官方模型卡为准 | 第三方 Apache-2.0 模型，单次非实时请求输出转写、时间戳和说话人标签；FunASR 集成无需额外拼接 VAD 服务。参见[部署指南](../docs/moss_transcribe_diarize_zh.md)。 |
+
 ### 时间戳预测模型
 
 |                                                    模型名字                                     |  语言  |    训练数据    | 模型参数 | 备注       |
