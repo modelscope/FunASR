@@ -150,7 +150,7 @@ def test_readmes_surface_current_windows_vulkan_release():
     for name in ("README.md", "README_zh.md", "README_ja.md", "README_ko.md"):
         readme = (ROOT / name).read_text(encoding="utf-8")
 
-        assert "runtime-llamacpp-v0.1.9" in readme
+        assert "runtime-llamacpp-v0.2.6" in readme
         assert "windows-x64-vulkan" in readme
 
 
