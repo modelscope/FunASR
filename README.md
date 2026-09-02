@@ -33,6 +33,8 @@
 
 No local setup? Open the [Colab quickstart](./examples/colab/) to transcribe a public sample or upload your own audio in a browser.
 
+Found FunASR useful? [Star the project](https://github.com/modelscope/FunASR) so more builders can find it.
+
 ```bash
 # CPU-only installs can use the default PyPI wheels.
 pip install torch torchaudio
