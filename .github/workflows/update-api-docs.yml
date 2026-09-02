@@ -7,6 +7,9 @@ on:
       - 'funasr/**/*.py'
       - 'scripts/gen_api_docs.py'
       - 'training.html'
+      - 'docs/moss_transcribe_diarize*.md'
+      - 'model_zoo/**'
+      - 'gh-pages-output/**'
       - '.github/workflows/update-api-docs.yml'
 
 jobs:
