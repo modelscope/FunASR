@@ -3,11 +3,11 @@
 <head><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>FunASR 模型 — SenseVoice、Paraformer、Fun-ASR-Nano、cam++</title>
-<meta name="description" content="FunASR 模型选型指南：SenseVoice（中、粤、英、日、韩五语种）、Paraformer（中文高精度与可靠字级时间戳）、Fun-ASR-Nano（LLM 架构，vLLM 加速）、cam++（说话人分离）。">
+<title>FunASR 模型 — SenseVoice、Paraformer、Fun-ASR-Nano、MOSS、cam++</title>
+<meta name="description" content="FunASR 模型选型指南：SenseVoice（中、粤、英、日、韩五语种）、Paraformer（中文高精度与可靠字级时间戳）、Fun-ASR-Nano（LLM 架构，vLLM 加速）、MOSS（第三方转写与说话人标签）和 cam++。">
 <link rel="icon" href="logo.png">
 <meta property="og:title" content="FunASR 模型 — 语音识别模型对比">
-<meta property="og:description" content="FunASR 模型选型：SenseVoice、Paraformer、Fun-ASR-Nano，按速度、精度、语种选择最适合的模型。">
+<meta property="og:description" content="FunASR 模型选型：SenseVoice、Paraformer、Fun-ASR-Nano 和第三方 MOSS，按速度、精度、语种和说话人标签需求选择。">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://www.funasr.com/models.html">
 <meta property="og:image" content="https://www.funasr.com/logo.png">
@@ -79,6 +79,7 @@ footer a{color:#60a5fa}
 <tr><td><strong>Fun-ASR-MLT-Nano</strong></td><td>vLLM</td><td>31</td><td>800M</td><td>独立多语 checkpoint</td></tr>
 <tr><td><strong>SenseVoice Small</strong></td><td>非自回归；需按硬件实测</td><td>中、粤、英、日、韩</td><td>234M</td><td>五语种、情感检测</td></tr>
 <tr><td><strong>Paraformer-zh</strong></td><td>非自回归；需按硬件实测</td><td>中文、粤语</td><td>220M</td><td>中文最高精度</td></tr>
+<tr><td><strong>MOSS-Transcribe-Diarize</strong></td><td>批处理；NVIDIA GPU</td><td>以官方模型卡为准</td><td>第三方</td><td>长音频转写 + 说话人标签</td></tr>
 <tr><td><strong>cam++</strong></td><td>实时</td><td>通用</td><td>7.2M</td><td>说话人分离与确认</td></tr>
 </tbody>
 </table>
@@ -160,6 +161,20 @@ model = AutoModel(
 )
 result = model.generate(input="audio.wav")
 print(result[0]["text"])</pre>
+</div>
+
+<div class="model-card">
+<div class="model-name">MOSS-Transcribe-Diarize <span class="badge badge-orange">第三方模型</span></div>
+<div class="model-meta">OpenMOSS 发布 &middot; 模型 ID: <code>OpenMOSS-Team/MOSS-Transcribe-Diarize</code> &middot; <a href="https://huggingface.co/OpenMOSS-Team/MOSS-Transcribe-Diarize">HuggingFace</a> &middot; <a href="/deploy/moss-transcribe-diarize.html">FunASR 部署指南</a></div>
+<div class="model-desc">OpenMOSS 发布的第三方 Apache-2.0 模型，可在一次离线请求中生成长音频转写、时间戳和说话人标签。FunASR 提供 AutoModel、vLLM 与 SGLang Omni 的结构化结果接入；无需在服务前额外拼接 VAD，并不表示模型内部没有分段。</div>
+<div class="model-features">
+<span class="badge badge-blue">转写 + 说话人标签</span>
+<span class="badge badge-green">无需外置 VAD</span>
+<span class="badge badge-blue">vLLM / SGLang Omni</span>
+<span class="badge badge-orange">非实时</span>
+</div>
+<h3>适用场景</h3>
+<p>多人会议、访谈、播客和通话的长音频离线转写。它不是 FunASR 自有模型权重；生产前请用真实多人音频验证重叠语音、时间戳、说话人一致性和目标硬件容量。</p>
 </div>
 
 <h2>辅助模型</h2>

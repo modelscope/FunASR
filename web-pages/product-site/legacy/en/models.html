@@ -3,11 +3,11 @@
 <head><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>FunASR Models — SenseVoice, Paraformer, Fun-ASR-Nano, cam++</title>
-<meta name="description" content="Choose the right FunASR model: SenseVoice (Mandarin, Cantonese, English, Japanese, and Korean), Paraformer (Chinese accuracy and reliable character timestamps), Fun-ASR-Nano (LLM-based, vLLM accelerated), and cam++ (speaker diarization).">
+<title>FunASR Models — SenseVoice, Paraformer, Fun-ASR-Nano, MOSS, cam++</title>
+<meta name="description" content="Choose the right FunASR model: SenseVoice, Paraformer, Fun-ASR-Nano, the third-party MOSS transcription and diarization model, and cam++.">
 <link rel="icon" href="../logo.png">
 <meta property="og:title" content="FunASR Models — Speech Recognition Model Comparison">
-<meta property="og:description" content="Compare FunASR models: SenseVoice, Paraformer, Fun-ASR-Nano for speech recognition. Choose by speed, accuracy, language support, and features.">
+<meta property="og:description" content="Compare FunASR models: SenseVoice, Paraformer, Fun-ASR-Nano, and third-party MOSS. Choose by speed, accuracy, language support, and speaker-label needs.">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://www.funasr.com/en/models.html">
 <meta property="og:image" content="https://www.funasr.com/logo.png">
@@ -79,6 +79,7 @@ footer a{color:#60a5fa}
 <tr><td><strong>Fun-ASR-MLT-Nano</strong></td><td>vLLM</td><td>31</td><td>800M</td><td>Separate multilingual checkpoint</td></tr>
 <tr><td><strong>SenseVoice Small</strong></td><td>Non-autoregressive; benchmark your hardware</td><td>zh, yue, en, ja, ko</td><td>234M</td><td>Five-language ASR, emotion detection</td></tr>
 <tr><td><strong>Paraformer-zh</strong></td><td>Non-autoregressive; benchmark your hardware</td><td>zh, yue</td><td>220M</td><td>Best Chinese accuracy</td></tr>
+<tr><td><strong>MOSS-Transcribe-Diarize</strong></td><td>Batch; NVIDIA GPU</td><td>See official model card</td><td>Third-party</td><td>Long-form transcription + speaker labels</td></tr>
 <tr><td><strong>cam++</strong></td><td>realtime</td><td>any</td><td>7.2M</td><td>Speaker diarization &amp; verification</td></tr>
 </tbody>
 </table>
@@ -160,6 +161,20 @@ model = AutoModel(
 )
 result = model.generate(input="audio.wav")
 print(result[0]["text"])</pre>
+</div>
+
+<div class="model-card">
+<div class="model-name">MOSS-Transcribe-Diarize <span class="badge badge-orange">third-party model</span></div>
+<div class="model-meta">Published by OpenMOSS &middot; Model ID: <code>OpenMOSS-Team/MOSS-Transcribe-Diarize</code> &middot; <a href="https://huggingface.co/OpenMOSS-Team/MOSS-Transcribe-Diarize">HuggingFace</a> &middot; <a href="/en/deploy/moss-transcribe-diarize.html">FunASR deployment guide</a></div>
+<div class="model-desc">A third-party Apache-2.0 model published by OpenMOSS that produces long-form transcription, timestamps, and speaker labels in one offline request. FunASR maps structured results for AutoModel, vLLM, and SGLang Omni. It does not require an external VAD service, which does not mean the model has no internal segmentation.</div>
+<div class="model-features">
+<span class="badge badge-blue">Transcription + speaker labels</span>
+<span class="badge badge-green">No external VAD</span>
+<span class="badge badge-blue">vLLM / SGLang Omni</span>
+<span class="badge badge-orange">Non-realtime</span>
+</div>
+<h3>When to use</h3>
+<p>Long-form offline transcription for multi-speaker meetings, interviews, podcasts, and calls. This is not FunASR-owned model weight; validate overlap, timestamps, speaker consistency, and capacity on real multi-speaker audio before production.</p>
 </div>
 
 <h2>Supporting Models</h2>

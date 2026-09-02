@@ -117,6 +117,12 @@ Here we provided several pretrained models on different datasets. The details of
 
 [//]: # (| [SOND]&#40;https://www.modelscope.cn/models/damo/speech_diarization_sond-en-us-callhome-8k-n16k4-pytorch/summary&#41;    |  CallHome &#40;60 hours&#41;  |     12M     |    Speaker diarization, profiles and records, English   |)
 
+### Third-party Unified Transcription and Diarization
+
+| Model Name | Publisher | Parameters | Notes |
+|:----------:|:---------:|:----------:|:------|
+| [MOSS-Transcribe-Diarize](https://huggingface.co/OpenMOSS-Team/MOSS-Transcribe-Diarize) | OpenMOSS | See official model card | Third-party Apache-2.0 model. One offline request returns transcription, timestamps, and speaker labels; the FunASR integration does not require an external VAD service. See the [deployment guide](../docs/moss_transcribe_diarize.md). |
+
 ### Timestamp Prediction Models
 
 [//]: # (|                                                    Model Name                                     |  Language  |    Training Data    | Parameters | Notes |)
