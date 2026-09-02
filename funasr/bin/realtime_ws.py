@@ -1099,7 +1099,8 @@ class RealtimeASRSession:
                 and recent_eligible
                 and recent_observations >= 2
                 and int(recent_start_ms) == int(seg[0])
-                and 0 <= tail_gap_ms <= max(100, decode_chunk_ms * 2)
+                and -max(100, decode_chunk_ms) <= tail_gap_ms
+                and tail_gap_ms <= max(100, decode_chunk_ms * 2)
                 and recent_partial
                 and not recent_hallucinated
             ):
