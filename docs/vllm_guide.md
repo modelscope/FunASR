@@ -872,6 +872,13 @@ Streaming: `serve_realtime_ws.RealtimeASRSession`
 **Q: Slow first startup?**
 vLLM initialization takes 60–90 s (KV Cache + CUDA Graph warmup). Subsequent inferences are instant.
 
+**Q: What happens when Fun-ASR-Nano vLLM uses `dtype="fp16"`?**
+The audio frontend and adaptor remain float16, but FunASR runs the Qwen3 decoder
+in bfloat16 because vLLM float16 decoding can produce degraded repeated output.
+This is automatic and keeps the two-byte decoder weight footprint. On hardware
+without BF16 support, use `dtype="fp32"`; the vLLM path does not claim an
+end-to-end FP16 decoder mode.
+
 **Q: vLLM returns repeated punctuation such as `!!!!!!!!` but PyTorch/HF generate is normal. What should I check?**
 This usually means the audio frontend and checkpoint can work, but the vLLM
 prompt-embedding path or decoding parameters differ from the upstream runner.

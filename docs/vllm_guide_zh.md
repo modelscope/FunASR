@@ -866,6 +866,12 @@ RTFx 102 → 46。CER 不变。默认关闭。
 **Q: 首次慢？**
 vLLM 初始化 60-90s，之后即时。
 
+**Q: Fun-ASR-Nano vLLM 使用 `dtype="fp16"` 时实际会怎样？**
+音频 frontend 与 adaptor 仍使用 FP16，但 FunASR 会让 Qwen3 decoder 使用 BF16，
+因为 vLLM 的 FP16 decoder 可能产生退化的重复输出。该行为自动生效，decoder 权重
+仍是两字节精度；不支持 BF16 的硬件请使用 `dtype="fp32"`。vLLM 路径不宣称支持
+端到端 FP16 decoder。
+
 **Q: vLLM 输出连续标点（例如 `!!!!!!!!`），但 PyTorch/HF generate 正常，应该先查什么？**
 这通常说明音频 frontend 和 checkpoint 本身能工作，但 vLLM prompt-embedding
 路径或解码参数和 upstream runner 不一致。改模型前先检查这些项：
