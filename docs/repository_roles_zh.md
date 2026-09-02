@@ -4,7 +4,7 @@
 
 > **方向性路线图，不是版本承诺。**
 > 本文档记录已交付能力与正在推进的工作，但不承诺未来版本号或日期。当前 Python
-> 版本是 [`funasr==1.4.9`](https://github.com/modelscope/FunASR/releases/tag/v1.4.9)。
+> 版本是 [`funasr==1.4.11`](https://github.com/modelscope/FunASR/releases/tag/v1.4.11)。
 > 任何未来的 breaking release 仍需 maintainer 确认 milestone 与迁移方案。
 
 ---
@@ -73,6 +73,37 @@
 
 ---
 
+## 参与路线图
+
+路线图是一组可验收的结果，不是只有维护者才能处理的愿望清单。请从实时的 [help wanted](https://github.com/modelscope/FunASR/issues?q=is%3Aissue+is%3Aopen+label%3A%22help+wanted%22) 和 [ready for PR](https://github.com/modelscope/FunASR/issues?q=is%3Aissue+is%3Aopen+label%3A%22ready+for+PR%22) 查询中选择任务，避免复制很快过期的静态清单。范围较小的任务位于 [good first issue](https://github.com/modelscope/FunASR/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22)。
+
+| 标签 | 含义 |
+|---|---|
+| `good first issue` | 范围已有边界，维护者可以指出相关代码或文档。 |
+| `help wanted` | 结果重要，但仍缺维护者没有的硬件、领域知识或实现精力。 |
+| `ready for PR` | 预期行为和验收证据已经足够明确，可以开始实现；动手前先留言，避免重复劳动。 |
+| `needs feedback` | 正等待报告者或硬件所有者验证结果。仅有 PR 合并或版本发布不能作为关闭 issue 的理由。 |
+
+### 当前需要贡献者的工作
+
+| 方向 | 当前问题 | 验收证据 | 特别有价值的贡献 |
+|---|---|---|---|
+| [L20 等 GPU 上的实时预览效率](https://github.com/modelscope/FunASR/issues/3528) | 对齐 partial 消息数量后，怎样选择刷新间隔和 partial window，才能在不静默跳过预览的前提下取得合适的延迟/吞吐平衡？ | 基于 exact commit 的客户端 JSONL 和 `--log-decode-profile` 服务端日志；固定 SPK、ping、音频、并发数、partial window 与 partial 消息数量 | 在 L20、L4、A10 或其他非 H100 GPU 上复现，并分析 queue、encoder 与 engine 时间 |
+| [AMD Windows Vulkan 稳定性](https://github.com/modelscope/FunASR/issues/3479) | 当前 runtime 能否在报告者的 AMD GPU 上完成模型初始化和转写；若不能，最后成功的初始化边界在哪里？ | 精确压缩包名称和 SHA256、GPU/驱动/Windows 版本、完整初始化日志，以及报告者硬件复测 | AMD Windows 硬件所有者和 Vulkan/llama.cpp 贡献者 |
+| [恢复公开 checkpoint 的完整能力](https://github.com/modelscope/FunASR/issues/3496) | 如何从有权限的模型所有者账号发布缺失 CTC tensors，并在上传后完成验证？ | 不可变模型 revision、文件哈希、公开 clean-cache 回下载和真实时间戳/说话人推理 | 有 Hugging Face 写权限的模型所有者和 checkpoint 验证贡献者 |
+| [上游模型集成](https://github.com/huggingface/transformers/pull/46180) | 如何让 Fun-ASR-Nano 保持 Transformers 上游兼容，同时保留固定的 model card 和回归测试边界？ | exact-head 上游 CI、聚焦本地测试、model card review 与维护者 review | Transformers reviewer，以及能在合并前验证下游加载的用户 |
+
+### 认领前
+
+1. 读完 issue 的完整时间线，确认没有其他贡献者正在处理。
+2. 留言说明可以负责的环境或模块，以及计划提供的证据。
+3. 结论必须基于 exact commit、不可变模型 revision 或 release asset，并附可复现命令。
+4. 区分 issue 与 PR 的关闭条件：实现可以合并，但报告者验证仍可保持开放。
+
+贡献和 issue 证据可以使用中文或英文。路线图或仓库职责变更应在同一个 PR 中同步更新本文与 [`repository_roles.md`](./repository_roles.md)。
+
+---
+
 ## 路线图（方向性）
 
 > 每一项均链接到现有 issue / PR。没有 owner 或验收证据的条目不写完成日期。
@@ -89,7 +120,8 @@
 
 - **Fun-ASR-Nano 的 Transformers 原生集成** —— [huggingface/transformers#46180](https://github.com/huggingface/transformers/pull/46180) 正在审查；以该 PR 的 exact-head CI 与 review 状态为准。
 - **恢复公开 checkpoint 的完整能力** —— [#3496](https://github.com/modelscope/FunASR/issues/3496) 跟踪 Hugging Face checkpoint 缺少时间戳与说话人路径所需 CTC tensors 的问题。
-- **实时并发性能回归** —— [#3528](https://github.com/modelscope/FunASR/issues/3528) 保持开放，等待可复现的压测证据与有边界的修复。
+- **实时预览效率与 L20 验证** —— [#3528](https://github.com/modelscope/FunASR/issues/3528) 已确认 v1.3.9 看似更快，是因为事件循环阻塞时静默跳过了大部分 partial 预览。该 issue 继续开放，用于等工作量的 L20 profiling 和明确的刷新/window 策略；不能把它当成已经解决的吞吐回退。
+- **Qwen3-ASR 离线 vLLM 工作流** —— [#3592](https://github.com/modelscope/FunASR/pull/3592) 增加经过验证的原生 `Qwen3ASRModel.LLM` 示例。[#3419](https://github.com/modelscope/FunASR/issues/3419) 继续开放，直到能用精确模型 revision、服务配置和评分脚本复现报告者的 8–9% CER。
 - **AMD Windows Vulkan 验证** —— [#3479](https://github.com/modelscope/FunASR/issues/3479) 保持开放，等待报告者在 `runtime-llamacpp-v0.2.6` 上进行硬件复测；发布压缩包不等于硬件崩溃已经修复。
 
 ### 下一步
