@@ -422,7 +422,7 @@ def test_ecosystem_refresh_tracks_current_release_and_merged_native_runtime(
     soup = read_soup(built_site / relative)
     text = soup.get_text(' ', strip=True)
 
-    assert '36K+' in text
+    assert '37K+' in text
     assert soup.select_one(
         'a[href="https://github.com/modelscope/FunClip/releases/tag/v2.1.1"]'
     )
