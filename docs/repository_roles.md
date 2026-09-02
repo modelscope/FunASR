@@ -5,7 +5,7 @@ This document explains the responsibility boundaries, user entry points, and iss
 > **Directional roadmap, not a release promise.**
 > This document records shipped capabilities and active work, but does not commit to
 > future version numbers or dates. The current Python release is
-> [`funasr==1.4.9`](https://github.com/modelscope/FunASR/releases/tag/v1.4.9).
+> [`funasr==1.4.11`](https://github.com/modelscope/FunASR/releases/tag/v1.4.11).
 > Any future breaking release still requires a maintainer-approved milestone and
 > migration plan.
 
@@ -75,6 +75,37 @@ The four repositories share models and tooling but their responsibility boundari
 
 ---
 
+## Contribute to the roadmap
+
+The roadmap is a queue of testable outcomes, not a list reserved for maintainers. Use the live [help wanted](https://github.com/modelscope/FunASR/issues?q=is%3Aissue+is%3Aopen+label%3A%22help+wanted%22) and [ready for PR](https://github.com/modelscope/FunASR/issues?q=is%3Aissue+is%3Aopen+label%3A%22ready+for+PR%22) queries instead of copying a static task list. Smaller bounded tasks are listed under [good first issue](https://github.com/modelscope/FunASR/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22).
+
+| Label | What it means |
+|---|---|
+| `good first issue` | The scope is bounded and maintainers can point to the relevant code or documentation. |
+| `help wanted` | The outcome matters, but maintainer hardware, domain knowledge, or implementation capacity is missing. |
+| `ready for PR` | The expected behavior and acceptance evidence are clear enough to implement. Comment before starting so work is not duplicated. |
+| `needs feedback` | A reporter or hardware owner is validating an outcome. A merged PR or release alone is not a reason to close the issue. |
+
+### Work that needs contributors now
+
+| Area | Current question | Acceptance evidence | Especially useful contribution |
+|---|---|---|---|
+| [Realtime preview efficiency on L20-class GPUs](https://github.com/modelscope/FunASR/issues/3528) | After matching the number of partial messages, which refresh interval and partial window provide the best latency/throughput trade-off without silently skipping previews? | Client JSONL and `--log-decode-profile` server logs from the exact commit, with SPK, ping, audio, concurrency, partial window, and partial-message count held constant | Reproduction on L20, L4, A10, or other non-H100 GPUs; analysis of queue, encoder, and engine time |
+| [AMD Windows Vulkan stability](https://github.com/modelscope/FunASR/issues/3479) | Does the current runtime reach model initialization and transcription on the reporter's AMD GPU, and where is the last successful initialization boundary if it does not? | Exact archive name and SHA256, GPU/driver/Windows versions, full initialization log, and a reporter hardware retest | AMD Windows hardware owners and Vulkan/llama.cpp contributors |
+| [Complete public checkpoint functionality](https://github.com/modelscope/FunASR/issues/3496) | How should the missing CTC tensors be published from an authorized model-owner account and validated after upload? | Immutable model revision, file hashes, public clean-cache download, and real timestamp/diarization inference | Model owners with Hugging Face write access and checkpoint validation experience |
+| [Upstream model integrations](https://github.com/huggingface/transformers/pull/46180) | Can Fun-ASR-Nano remain compatible with upstream Transformers while preserving pinned model-card and regression-test boundaries? | Exact-head upstream CI, focused local tests, model-card review, and maintainer review | Transformers reviewers and users who can test downstream loading before merge |
+
+### Before claiming an item
+
+1. Read the complete issue timeline and confirm that no contributor is already working on it.
+2. Comment with the environment or part you can own and the evidence you plan to produce.
+3. Base conclusions on an exact commit, immutable model revision or release asset, and include the command needed to reproduce them.
+4. Keep issue and PR closure separate: implementation can merge while reporter validation remains open.
+
+Contributions and issue evidence may be written in Chinese or English. A roadmap or repository-role change should update both this file and [`repository_roles_zh.md`](./repository_roles_zh.md) in the same PR.
+
+---
+
 ## Roadmap (directional)
 
 > Each item links to an existing issue or PR where available. Items without an owner or acceptance evidence do not have completion dates.
@@ -91,7 +122,8 @@ The four repositories share models and tooling but their responsibility boundari
 
 - **Fun-ASR-Nano native Transformers integration** — [huggingface/transformers#46180](https://github.com/huggingface/transformers/pull/46180) is in review; use the PR's exact-head CI and review state as the source of truth.
 - **Restore complete public checkpoint functionality** — [#3496](https://github.com/modelscope/FunASR/issues/3496) tracks missing CTC tensors needed by timestamp and diarization paths in the Hugging Face checkpoint.
-- **Realtime concurrency regression** — [#3528](https://github.com/modelscope/FunASR/issues/3528) remains open for reproducible load-test evidence and a bounded fix.
+- **Realtime preview efficiency and L20 validation** — [#3528](https://github.com/modelscope/FunASR/issues/3528) established that v1.3.9 appeared faster by silently skipping most partial previews while its event loop was blocked. The issue remains open for equal-work L20 profiling and a deliberate refresh/window policy; it is not treated as a resolved throughput regression.
+- **Qwen3-ASR offline vLLM workflow** — [#3592](https://github.com/modelscope/FunASR/pull/3592) adds a tested native `Qwen3ASRModel.LLM` example. [#3419](https://github.com/modelscope/FunASR/issues/3419) remains open until the reporter's 8–9% CER result can be reproduced with an exact model revision, service configuration, and scoring script.
 - **AMD Windows Vulkan validation** — [#3479](https://github.com/modelscope/FunASR/issues/3479) remains open for reporter hardware retesting against `runtime-llamacpp-v0.2.6`; publication of the archive is not evidence that the hardware crash is fixed.
 
 ### Next
