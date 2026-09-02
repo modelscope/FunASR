@@ -14,7 +14,8 @@ requirements = {
         "scipy>=1.4.1",
         "librosa",
         "soundfile>=0.12.1",
-        "numpy",
+        # Keep the scientific stack ABI-compatible with the supported SciPy wheels.
+        "numpy<2",
         "PyYAML>=5.1.2",
         "tqdm",
         "requests",
