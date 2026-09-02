@@ -52,6 +52,9 @@ def test_moss_guides_pin_upstream_and_separate_serving_contracts(guide: Path) ->
         "6561ee553c8f762aac4ebd65439d3414820761b547fa3a2edcea43b86a2abc02",
         "779899a3ce937dd7352b4db1ea53e3f6aa2cfef7109de0249082223c936f9372",
         "localai-org/moss-transcribe.cpp",
+        "Open WebUI",
+        "OpenAI API Base URL",
+        "/v1/audio/transcriptions",
     ):
         assert marker in text, f"{guide.name} is missing {marker}"
 

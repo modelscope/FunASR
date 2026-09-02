@@ -104,6 +104,17 @@ curl -fsS http://127.0.0.1:8000/v1/audio/transcriptions \
 `speaker` 标签的 `segments`。请求不需要设置 `spk=true`；即使通用客户端传入
 该字段，服务也只使用 MOSS 原生标签，不会启动第二套说话人流水线。
 
+### Open WebUI
+
+[Open WebUI](https://github.com/open-webui/open-webui) 可将该服务配置为 OpenAI
+兼容的语音转写提供方。在 **Admin Panel > Settings > Audio** 中选择 OpenAI STT
+engine，将 **OpenAI API Base URL** 设为 `http://funasr:8000/v1`（或可访问的主机
+地址），模型选择 `moss-transcribe-diarize`，请求格式保持 `multipart`。Open WebUI
+会把模型、可选语言和完整音频文件提交到 `/v1/audio/transcriptions`。
+
+MOSS 仍是离线长音频模型：这里提供的是 Open WebUI 文件转写，不是实时麦克风或
+WebSocket 说话人分离路径。
+
 GPU 容器可在仓库根目录使用
 `examples/openai_api/docker-compose.moss.yml` 构建。Kubernetes 运维可构建同一
 `funasr-moss-api:local` 镜像，再应用
