@@ -32,3 +32,9 @@ def test_package_keywords_surface_deployment_discovery_terms():
         '"llama-cpp"',
     ]:
         assert keyword in text
+
+
+def test_core_dependencies_prevent_numpy_two_abi_mismatches():
+    text = _setup_text()
+
+    assert '"numpy<2"' in text
