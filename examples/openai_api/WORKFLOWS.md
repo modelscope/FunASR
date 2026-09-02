@@ -122,6 +122,16 @@ Recommended HTTP Request settings:
 
 After the request, use `{{$json.text}}` as the transcript. If `verbose_json` is enabled, route `{{$json.segments}}` to subtitle, speaker, or QA steps.
 
+### n8n OpenAI Audio node
+
+The built-in OpenAI node can also run its Audio > Transcribe operation against
+FunASR. In OpenAI credentials, set Base URL to
+`http://<funasr-host>:8000/v1` and provide any non-empty API key. The node
+always sends `model=whisper-1`; FunASR maps that compatibility alias to the
+model selected when the server starts. This path is transcription-only. Use the
+HTTP Request node above when you need `verbose_json`, segments, or speaker
+labels.
+
 ## Webhook worker pattern
 
 Use this when the workflow engine cannot send multipart files reliably or when audio needs pre-processing.

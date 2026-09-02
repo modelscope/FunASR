@@ -35,6 +35,7 @@ PACKAGE_VERSION = (Path(__file__).resolve().parents[1] / "version.txt").read_tex
 _LANGUAGE_TAG_RE = re.compile(r"<\|(zh|en|yue|ja|ko)\|>")
 MOSS_MODEL_REVISION = "e8681d68e7042738ffca8ac8212bc8fcb1131ab8"
 NATIVE_DIARIZATION_MODELS = {"moss-transcribe-diarize"}
+N8N_OPENAI_MODEL_ALIAS = "whisper-1"
 
 
 def extract_language_from_asr_text(text):
@@ -53,6 +54,13 @@ def resolve_transcription_language(requested_language, result):
     if isinstance(detected_language, str) and detected_language:
         return detected_language
     return "unknown"
+
+
+def resolve_openai_transcription_model(requested_model, default_model):
+    """Map n8n's fixed OpenAI transcription model to the server default."""
+    if requested_model == N8N_OPENAI_MODEL_ALIAS:
+        return default_model
+    return requested_model
 
 
 def _split_text_for_openai_segments(text: str, max_chars: int = 80):
@@ -233,6 +241,7 @@ def create_app(
     app.state.fallback_models = {}
     app.state.model_path = model_path
     app.state.hub = hub
+    app.state.openai_transcription_model = "custom" if model_path else preload_model
 
     normalized_origins = []
     for origin in cors_origins or []:
@@ -480,6 +489,9 @@ def create_app(
     ):
         content = await file.read()
         t0 = time.perf_counter()
+        model = resolve_openai_transcription_model(
+            model, app.state.openai_transcription_model
+        )
 
         if model == "fun-asr-nano":
             _load_vllm_engine()

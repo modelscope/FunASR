@@ -237,6 +237,29 @@ def test_verbose_json_reports_sensevoice_detected_language(monkeypatch):
     ]
 
 
+def test_n8n_whisper_model_alias_uses_preloaded_model(monkeypatch):
+    module = load_server_app(monkeypatch)
+    DummyAutoModel = install_dummy_funasr(monkeypatch)
+    monkeypatch.setattr(module.sf, "info", lambda path: types.SimpleNamespace(duration=1.25))
+    app = module.create_app(device="cpu", preload_model="sensevoice")
+    transcribe = app.routes[("POST", "/v1/audio/transcriptions")]
+
+    response = asyncio.run(
+        transcribe(
+            file=DummyUpload(),
+            model="whisper-1",
+            language=None,
+            response_format="json",
+            spk=False,
+        )
+    )
+
+    assert response == {"text": "transcript"}
+    assert [instance["model"] for instance in DummyAutoModel.instances] == [
+        "iic/SenseVoiceSmall"
+    ]
+
+
 def test_openai_verbose_json_preserves_speaker_labels(monkeypatch):
     module = load_server_app(monkeypatch)
 

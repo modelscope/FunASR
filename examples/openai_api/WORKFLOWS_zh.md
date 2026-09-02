@@ -121,6 +121,14 @@ def transcribe_from_url(audio_url: str) -> dict:
 
 请求之后，使用 `{{$json.text}}` 作为转写文本。如果启用了 `verbose_json`，可以把 `{{$json.segments}}` 传给字幕、说话人分析或质检节点。
 
+### n8n OpenAI Audio 节点
+
+也可以让内置 OpenAI 节点的 Audio > Transcribe 操作调用 FunASR。在 OpenAI
+凭据中将 Base URL 设为 `http://<funasr-host>:8000/v1`，并填写任意非空 API
+key。该节点固定发送 `model=whisper-1`，FunASR 会将这个兼容别名映射到服务
+启动时选择的模型。此路径只返回转写文本；需要 `verbose_json`、分段或说话人
+标签时，仍使用上面的 HTTP Request 节点。
+
 ## Webhook worker 模式
 
 当工作流引擎不能稳定发送 multipart 文件，或音频需要预处理时，可以把转写封装成一个内部 webhook worker。
