@@ -13,6 +13,9 @@ MOSS-Transcribe-Diarize jointly generates transcription, timestamps, and
 speaker labels such as `[S01]`. An application therefore does not need to
 assemble an external VAD, ASR, and diarization pipeline. This is a deployment
 property, not a claim that the model has no internal segmentation or chunking.
+The labels are anonymous within a recording: `[S01]` does not identify a known
+person, verify an enrolled voiceprint, or necessarily map to `[S01]` in another
+recording.
 
 ## Pinned sources
 
@@ -33,7 +36,7 @@ floating model revision in a production service.
 Use an isolated Python 3.10+ environment with Transformers 5.6 or newer for
 the local backend. MOSS performs long-form transcription and speaker
 diarization in one generation, so do **not** pass `vad_model` or `spk_model`.
-External VAD segmentation would break the model's global speaker identity
+External VAD segmentation would break consistent anonymous speaker assignment
 across chunks.
 
 ```python

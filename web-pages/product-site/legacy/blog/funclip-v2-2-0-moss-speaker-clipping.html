@@ -24,11 +24,12 @@
 <body>
 <nav class="nav"><div class="container"><a class="nav-logo" href="/">Fun<span>ASR</span></a><div class="nav-links"><a href="/deploy/">部署</a><a href="/blog/">博客</a><a href="/ecosystem.html">生态</a></div><a href="/en/blog/funclip-v2-2-0-moss-speaker-clipping.html">EN</a><a class="nav-btn" href="https://github.com/modelscope/FunASR">GitHub</a></div></nav>
 <article><div class="container">
-  <h1>FunClip v2.2.0：用 MOSS 做长音频说话人识别与视频剪辑</h1>
+  <h1>FunClip v2.2.0：用 MOSS 做长音频说话人分离与视频剪辑</h1>
   <p class="meta">2026-08-31 · FunClip Release</p>
   <img class="hero-media" src="/img/funclip-v2-1-0-interface.jpg" alt="FunClip 本地视频、字幕识别和智能剪辑界面">
-  <p class="lead">FunClip v2.2.0 新增一条可选的 MOSS 路径：把长音频交给 vLLM 服务，FunASR 将模型输出归一化为文本、说话人身份和时间段，FunClip 再生成 SRT 或按 <code>spkS01</code>、<code>spkS02</code> 剪辑。</p>
+  <p class="lead">FunClip v2.2.0 新增一条可选的 MOSS 路径：把长音频交给 vLLM 服务，FunASR 将模型输出归一化为文本、匿名说话人标签和时间段，FunClip 再生成 SRT 或按 <code>spkS01</code>、<code>spkS02</code> 剪辑。</p>
   <p><a href="https://github.com/OpenMOSS/MOSS-Transcribe-Diarize">MOSS-Transcribe-Diarize</a> 是 OpenMOSS 维护的第三方模型，不属于 FunASR 或 FunClip。集成固定使用 <code>OpenMOSS-Team/MOSS-Transcribe-Diarize</code> revision <code>e8681d68e7042738ffca8ac8212bc8fcb1131ab8</code>，并明确保留模型归属与支持边界。</p>
+  <p><code>spkS01</code> 与 <code>spkS02</code> 只是当前录音内的匿名标签，不能识别已知人物、验证已注册声纹，也不保证不同录音中的同名标签对应同一个人。</p>
 
   <h2>数据路径</h2>
   <table><thead><tr><th>阶段</th><th>职责</th></tr></thead><tbody>
@@ -64,9 +65,9 @@ python funclip/launch.py \
 
   <h2>能力与边界</h2>
   <ul>
-    <li>支持长音频 ASR、说话人身份、SRT，以及按说话人剪辑，包括不足一秒的有效短说话片段。</li>
+    <li>支持长音频 ASR、匿名说话人标注、SRT，以及按说话人剪辑，包括不足一秒的有效短说话片段。</li>
     <li>MOSS 提供段级时间戳，适合按整段或说话人剪辑；任意文本的精确字符级剪辑仍应使用 Paraformer。</li>
-    <li>全局说话人身份依赖模型看到连续音频，因此不接外部 VAD 或说话人模型，避免预切块破坏身份一致性。</li>
+    <li>单次录音内的标签一致性依赖模型看到连续音频，因此不接外部 VAD 或说话人模型，避免预切块破坏标签一致性。</li>
     <li>如果最后一个 MOSS 片段因 token 上限没有结束时间戳，FunClip 会明确报错并提示提高 <code>--moss-max-tokens</code>，不会静默丢掉尾段。</li>
   </ul>
   <p>完整生产部署、健康检查和容量边界见 <a href="/deploy/moss-transcribe-diarize.html">MOSS 双语部署指南</a>。</p>

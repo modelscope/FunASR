@@ -37,7 +37,7 @@ The four repositories share models and tooling but their responsibility boundari
 |---|---|
 | Use Python for speech recognition / training / fine-tuning | [modelscope/FunASR](https://github.com/modelscope/FunASR) |
 | Deploy a realtime streaming ASR service, recommend **Fun-ASR-Nano + vLLM** | [modelscope/FunASR/fun_asr_nano](https://github.com/modelscope/FunASR/tree/main/examples/industrial_data_pretraining/fun_asr_nano) — **canonical implementation, see below** |
-| Transcribe long multi-speaker audio with timestamps and speaker identities in one model pass | [MOSS-Transcribe-Diarize deployment guide](./moss_transcribe_diarize.md) — an OpenMOSS model integrated with FunASR through local Transformers or vLLM, and independently available through native SGLang Omni; no separate external VAD or speaker model |
+| Transcribe long multi-speaker audio with timestamps and anonymous speaker labels in one model pass | [MOSS-Transcribe-Diarize deployment guide](./moss_transcribe_diarize.md) — an OpenMOSS model integrated with FunASR through local Transformers or vLLM, and independently available through native SGLang Omni; no separate external VAD or speaker model. Labels distinguish speakers within the recording and do not identify a known person. |
 | Understand Fun-ASR-Nano / MLT capabilities, checkpoints, benchmarks, or use Transformers / vLLM / GGUF integrations | [QwenAudio/Fun-ASR](https://github.com/QwenAudio/Fun-ASR) |
 | Use emotion recognition / audio event detection | [QwenAudio/SenseVoice](https://github.com/QwenAudio/SenseVoice) |
 | Generate video subtitles / clip videos | [modelscope/FunClip](https://github.com/modelscope/FunClip) |
