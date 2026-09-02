@@ -89,13 +89,23 @@ do not try to serve that config-only directory directly with vLLM.
 
 #### B. Native vLLM transcription integration
 
-The vLLM supported-model table lists
-[`allendou/Fun-ASR-Nano-2512-vllm`](https://huggingface.co/allendou/Fun-ASR-Nano-2512-vllm)
-for its native `FunASRForConditionalGeneration` architecture. That is a
-community-converted full checkpoint hosted outside the official FunAudioLLM
-organization. Use its model card and vLLM's native transcription API only when
-you intentionally choose that separate path. Do not substitute it for the
-official checkpoint in the FunASR `AutoModelVLLM` examples below.
+The official native checkpoint is
+[`FunAudioLLM/Fun-ASR-Nano-2512-vllm`](https://huggingface.co/FunAudioLLM/Fun-ASR-Nano-2512-vllm).
+The vLLM supported-model table also lists
+[`allendou/Fun-ASR-Nano-2512-vllm`](https://huggingface.co/allendou/Fun-ASR-Nano-2512-vllm),
+a community-converted full checkpoint hosted outside the official FunAudioLLM
+organization, for its native `FunASRForConditionalGeneration` architecture.
+Use either native checkpoint only when you intentionally choose vLLM's native
+transcription API. Do not substitute either one for the official checkpoint in
+the FunASR `AutoModelVLLM` examples below.
+
+Both native paths use `vllm serve` for non-realtime request/response
+transcription at `/v1/audio/transcriptions`; they do not register
+`/v1/realtime`. vLLM registers that WebSocket endpoint only for models that
+declare the realtime task, and `FunASRForConditionalGeneration` is not in its
+[Realtime Transcription table](https://docs.vllm.ai/en/latest/models/supported_models/#realtime-transcription).
+For realtime streaming, use the FunASR streaming SDK inference or streaming ASR
+service. The `AutoModelVLLM` examples in path A are offline inference as well.
 
 **Hardware**: GPU ≥ 8 GB VRAM, CUDA ≥ 11.8. 16 GB+ recommended.
 

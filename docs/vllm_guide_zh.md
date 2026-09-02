@@ -86,12 +86,21 @@ model = AutoModelVLLM(
 
 #### B. vLLM 原生转写路径
 
-vLLM 的支持模型表把
+官方维护的 native checkpoint 是
+[`FunAudioLLM/Fun-ASR-Nano-2512-vllm`](https://huggingface.co/FunAudioLLM/Fun-ASR-Nano-2512-vllm)。
+vLLM 的支持模型表也把
 [`allendou/Fun-ASR-Nano-2512-vllm`](https://huggingface.co/allendou/Fun-ASR-Nano-2512-vllm)
-列为原生 `FunASRForConditionalGeneration` 架构的示例。这是托管在官方
+列为原生 `FunASRForConditionalGeneration` 架构示例；后者是托管在官方
 FunAudioLLM 组织之外的社区转换完整 checkpoint。只有明确选择 vLLM 原生转写
-接口时，才应按该模型卡与 vLLM 文档使用它；不要用它替换下文 FunASR
+接口时，才应使用这两种 native checkpoint；不要用它们替换下文 FunASR
 `AutoModelVLLM` 示例中的官方 checkpoint。
+
+两种 native 路径都通过 `vllm serve` 提供非实时的请求/响应式转写
+`/v1/audio/transcriptions`，不会注册 `/v1/realtime`。vLLM 只为声明
+realtime 任务的模型注册该 WebSocket 端点，`FunASRForConditionalGeneration`
+当前不在它的 [Realtime Transcription 表](https://docs.vllm.ai/en/latest/models/supported_models/#realtime-transcription)
+中。需要实时流式识别时，请使用 FunASR 流式 SDK 推理或流式 ASR 服务；路径 A 的
+`AutoModelVLLM` 示例同样属于离线推理。
 
 **硬件**：GPU ≥ 8GB VRAM，CUDA ≥ 11.8。推荐 16GB+。
 

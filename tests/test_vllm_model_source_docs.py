@@ -48,6 +48,38 @@ def test_v2_guide_keeps_native_vllm_and_funasr_realtime_paths_separate():
 
 
 @pytest.mark.parametrize(
+    ("relpath", "required_markers"),
+    [
+        (
+            "docs/vllm_guide.md",
+            (
+                "FunAudioLLM/Fun-ASR-Nano-2512-vllm",
+                "/v1/audio/transcriptions",
+                "/v1/realtime",
+                "realtime streaming",
+            ),
+        ),
+        (
+            "docs/vllm_guide_zh.md",
+            (
+                "FunAudioLLM/Fun-ASR-Nano-2512-vllm",
+                "/v1/audio/transcriptions",
+                "/v1/realtime",
+                "实时流式识别",
+            ),
+        ),
+    ],
+)
+def test_primary_vllm_guides_bound_native_transcription_to_request_response(
+    relpath, required_markers
+):
+    text = (ROOT / relpath).read_text(encoding="utf-8")
+
+    for marker in required_markers:
+        assert marker in text, f"{relpath} is missing {marker}"
+
+
+@pytest.mark.parametrize(
     ("relpath", "required_markers", "stale_claim"),
     [
         (
