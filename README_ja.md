@@ -100,7 +100,7 @@ Whisper は単一モデルですが、**FunASR はツールキット**です—�
 ## 最新情報
 
 - **MOSS-Transcribe-Diarize** を FunASR service、Docker、Kubernetes、vLLM/SGLang workflow、FunClip に統合し、長時間 ASR、timestamp、匿名 speaker label を一度に処理できます。[MOSS をデプロイ ->](./docs/moss_transcribe_diarize.md)
-- **FunASR 1.4.12** は、audio compute が FP16 のときの Fun-ASR-Nano vLLM 出力を安定化します。Qwen3 decoder は BF16 を使い、BF16 非対応 GPU では FP32 を選択できます。`python -m pip install -U "funasr==1.4.12"`。[Release ->](https://github.com/modelscope/FunASR/releases/tag/v1.4.12)
+- **FunASR 1.4.13** は、バイナリ ABI の import 失敗を避けるため、core NumPy 依存を 2 未満に固定します。`python -m pip install -U "funasr==1.4.13"`。[Release ->](https://github.com/modelscope/FunASR/releases/tag/v1.4.13)
 - **Production deployment** に、より高速で安定した realtime serving と、Linux、macOS、Windows の 10 target 向け llama.cpp package を追加しました。[GPU service ->](./docs/vllm_guide.md) · [CPU / edge package ->](https://www.funasr.com/en/deploy/llama-cpp.html) · [v0.2.6 binaries ->](https://github.com/modelscope/FunASR/releases/tag/runtime-llamacpp-v0.2.6)
 
 > 完全な変更履歴と download asset は [GitHub Releases](https://github.com/modelscope/FunASR/releases) を参照してください。

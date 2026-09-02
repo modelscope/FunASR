@@ -338,7 +338,7 @@ inference on physical Blackwell hardware.
 ## What's new
 
 - **MOSS-Transcribe-Diarize** brings long-form ASR, timestamps, and anonymous speaker labels to FunASR services, Docker, Kubernetes, vLLM/SGLang workflows, and FunClip. [Deploy MOSS ->](./docs/moss_transcribe_diarize.md)
-- **FunASR 1.4.12** stabilizes Fun-ASR-Nano vLLM decoding when audio compute uses FP16: the Qwen3 decoder uses BF16, while GPUs without BF16 can select FP32. Install with `python -m pip install -U "funasr==1.4.12"`. [Release ->](https://github.com/modelscope/FunASR/releases/tag/v1.4.12)
+- **FunASR 1.4.13** pins the core NumPy dependency below 2 to prevent binary ABI import failures. Install with `python -m pip install -U "funasr==1.4.13"`. [Release ->](https://github.com/modelscope/FunASR/releases/tag/v1.4.13)
 - **Production deployment** now includes faster, more resilient realtime serving and verified llama.cpp archives for ten Linux, macOS, and Windows targets. [GPU services ->](./docs/vllm_guide.md) · [CPU/edge packages ->](https://www.funasr.com/en/deploy/llama-cpp.html)
 
 > See [GitHub Releases](https://github.com/modelscope/FunASR/releases) for the complete changelog and downloadable assets.
