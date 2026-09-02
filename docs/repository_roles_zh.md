@@ -35,7 +35,7 @@
 |---|---|
 | 用 Python 做语音识别 / 训练 / 微调 | [modelscope/FunASR](https://github.com/modelscope/FunASR) |
 | 部署实时流式 ASR 服务，推荐 Fun-ASR-Nano + vLLM 做实时识别 | [modelscope/FunASR/fun_asr_nano](https://github.com/modelscope/FunASR/tree/main/examples/industrial_data_pretraining/fun_asr_nano) —— **推荐实现,见下节** |
-| 用一个模型完成长音频多人转写、时间戳与说话人身份识别 | [MOSS-Transcribe-Diarize 部署指南](./moss_transcribe_diarize_zh.md) —— OpenMOSS 模型通过本地 Transformers 或 vLLM 接入 FunASR，也可通过原生 SGLang Omni 独立服务，不需要额外的外部 VAD 或说话人模型 |
+| 用一个模型完成长音频多人转写、时间戳与匿名说话人标签 | [MOSS-Transcribe-Diarize 部署指南](./moss_transcribe_diarize_zh.md) —— OpenMOSS 模型通过本地 Transformers 或 vLLM 接入 FunASR，也可通过原生 SGLang Omni 独立服务，不需要额外的外部 VAD 或说话人模型 |
 | 了解 Fun-ASR-Nano / MLT 的能力范围、权重、评测,或使用 Transformers / vLLM / GGUF 集成 | [QwenAudio/Fun-ASR](https://github.com/QwenAudio/Fun-ASR) |
 | 需要情感识别 / 音频事件检测 | [QwenAudio/SenseVoice](https://github.com/QwenAudio/SenseVoice) |
 | 做视频字幕 / 剪辑 | [modelscope/FunClip](https://github.com/modelscope/FunClip) |

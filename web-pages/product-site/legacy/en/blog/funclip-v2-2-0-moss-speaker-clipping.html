@@ -27,7 +27,7 @@
   <h1>FunClip v2.2.0: Long-Form Speaker-Aware Video Clipping with MOSS</h1>
   <p class="meta">August 31, 2026 · FunClip Release</p>
   <img class="hero-media" src="/img/funclip-v2-1-0-interface.jpg" alt="FunClip local video, subtitle recognition, and intelligent clipping interface">
-  <p class="lead">FunClip v2.2.0 adds an opt-in MOSS path: send long audio to a vLLM service, normalize text, speaker identities, and time ranges through FunASR, then generate SRT or clip by <code>spkS01</code>, <code>spkS02</code>, and later speaker IDs.</p>
+  <p class="lead">FunClip v2.2.0 adds an opt-in MOSS path: send long audio to a vLLM service, normalize text, anonymous speaker labels, and time ranges through FunASR, then generate SRT or clip by <code>spkS01</code> and <code>spkS02</code>.</p>
   <p><a href="https://github.com/OpenMOSS/MOSS-Transcribe-Diarize">MOSS-Transcribe-Diarize</a> is a third-party model maintained by OpenMOSS, not a FunASR or FunClip-owned checkpoint. The integration pins <code>OpenMOSS-Team/MOSS-Transcribe-Diarize</code> revision <code>e8681d68e7042738ffca8ac8212bc8fcb1131ab8</code> and keeps ownership and support boundaries explicit.</p>
 
   <h2>Data path</h2>
@@ -64,9 +64,9 @@ python funclip/launch.py \
 
   <h2>Capabilities and boundaries</h2>
   <ul>
-    <li>Long-form ASR, speaker identity, SRT, and speaker-based clipping are supported, including valid speaker turns shorter than one second.</li>
+    <li>Long-form ASR, anonymous speaker labels, SRT, and speaker-based clipping are supported, including valid speaker turns shorter than one second.</li>
     <li>MOSS provides segment-level timestamps. Use it for whole-segment or speaker clipping; keep Paraformer for precise arbitrary character-level text clipping.</li>
-    <li>Global speaker identity depends on continuous context, so the MOSS path attaches no external VAD or speaker model that would pre-chunk the recording.</li>
+    <li>Consistent anonymous speaker labels depend on continuous context, so the MOSS path attaches no external VAD or speaker model that would pre-chunk the recording.</li>
     <li>If the final segment is missing its ending timestamp after token exhaustion, FunClip raises an explicit truncation error and asks for a higher <code>--moss-max-tokens</code> value instead of silently dropping the tail.</li>
   </ul>
   <p>See the <a href="/en/deploy/moss-transcribe-diarize.html">bilingual MOSS production guide</a> for health checks, runtime choices, and capacity boundaries.</p>

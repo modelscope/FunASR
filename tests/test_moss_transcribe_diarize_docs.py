@@ -135,6 +135,29 @@ def test_readmes_link_the_runnable_moss_service() -> None:
         assert "moss_transcribe_diarize" in text
 
 
+def test_moss_docs_describe_anonymous_labels_not_speaker_identity() -> None:
+    paths = (
+        "docs/repository_roles.md",
+        "docs/repository_roles_zh.md",
+        "web-pages/product-site/legacy/blog/funclip-v2-2-0-moss-speaker-clipping.html",
+        "web-pages/product-site/legacy/en/blog/funclip-v2-2-0-moss-speaker-clipping.html",
+    )
+    forbidden = (
+        "speaker identities",
+        "speaker identity",
+        "说话人身份识别",
+        "说话人身份和时间段",
+    )
+    for relative in paths:
+        text = (ROOT / relative).read_text(encoding="utf-8")
+        assert "anonymous speaker label" in text or "匿名说话人标签" in text
+        for claim in forbidden:
+            assert claim not in text
+
+    chinese_blog = (ROOT / paths[2]).read_text(encoding="utf-8")
+    assert "用 MOSS 做长音频说话人分段与视频剪辑" in chinese_blog
+
+
 def test_openai_consumer_docs_expose_moss_alias_and_boundaries() -> None:
     paths = [
         "CLIENTS.md",
