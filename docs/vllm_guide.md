@@ -59,9 +59,13 @@ APIs are not interchangeable:
 Use the official `FunAudioLLM/Fun-ASR-Nano-2512` checkpoint from
 [ModelScope](https://modelscope.cn/models/FunAudioLLM/Fun-ASR-Nano-2512) or
 [Hugging Face](https://huggingface.co/FunAudioLLM/Fun-ASR-Nano-2512). The
-official Hugging Face repository does contain the complete `model.pt` at its
-root. The `Qwen3-0.6B/` subdirectory intentionally contains only the LLM config
-and tokenizer; it is not a standalone model download.
+current Hugging Face `model.pt` has incomplete CTC weights, so it remains
+usable for transcription but FunASR disables the affected CTC path rather than
+returning unreliable timestamps or speaker diarization. Use the ModelScope
+checkpoint when your deployment requires timestamps or speaker diarization;
+the publication repair is tracked in [#3496](https://github.com/modelscope/FunASR/issues/3496).
+The `Qwen3-0.6B/` subdirectory intentionally contains only the LLM config and
+tokenizer; it is not a standalone model download.
 
 ```python
 from funasr.auto.auto_model_vllm import AutoModelVLLM
