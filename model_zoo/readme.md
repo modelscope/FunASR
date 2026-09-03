@@ -30,3 +30,9 @@ FunASR has open-sourced a large number of pre-trained models on industrial data.
 |                     ct-punc <br> ( [⭐](https://modelscope.cn/models/iic/punc_ct-transformer_cn-en-common-vocab471067-large/summary) [🤗](https://huggingface.co/funasr/ct-punc) )                      |                           punctuation restoration                           |    100M, Mandarin and English    |    1.1G    |
 |                          fsmn-vad <br> ( [⭐](https://modelscope.cn/models/iic/speech_fsmn_vad_zh-cn-16k-common-pytorch/summary) [🤗](https://huggingface.co/funasr/fsmn-vad) )                          |                          voice activity detection                           | 5000 hours, Mandarin and English |    0.4M    |
 |                          fa-zh <br> ( [⭐](https://modelscope.cn/models/damo/speech_timestamp_prediction-v1-16k-offline/summary) [🤗]() )                           |                            timestamp prediction                             |       5000 hours, Mandarin       |    38M     |
+
+### Third-party Unified Transcription and Diarization
+
+| Model Name | Task Details | Publisher | Parameters |
+|:----------:|:------------:|:---------:|:----------:|
+| [MOSS-Transcribe-Diarize](https://huggingface.co/OpenMOSS-Team/MOSS-Transcribe-Diarize) | Offline transcription, timestamps, and anonymous per-recording speaker labels in one request. It is not a realtime or known-person identification model. See the [deployment guide](../docs/moss_transcribe_diarize.md). | OpenMOSS | See official model card |
