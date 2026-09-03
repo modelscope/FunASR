@@ -1333,6 +1333,7 @@ def load_models(args):
             tensor_parallel_size=getattr(args, 'tensor_parallel_size', 1),
             gpu_memory_utilization=getattr(args, 'gpu_memory_utilization', 0.8),
             max_model_len=getattr(args, 'max_model_len', 2048),
+            enforce_eager=getattr(args, 'enforce_eager', False),
         )
         _vllm_engine = RealtimeBatchingEngine(
             engine,
@@ -1679,6 +1680,11 @@ def build_arg_parser():
     parser.add_argument("--tensor-parallel-size", type=int, default=1)
     parser.add_argument("--gpu-memory-utilization", type=float, default=0.8)
     parser.add_argument("--max-model-len", type=int, default=2048)
+    parser.add_argument(
+        "--enforce-eager",
+        action="store_true",
+        help="Disable vLLM compilation and CUDA graphs.",
+    )
     parser.add_argument("--ws-ping-interval", type=float, default=20.0,
                         help="WebSocket ping interval in seconds; <=0 disables keepalive pings.")
     parser.add_argument(
