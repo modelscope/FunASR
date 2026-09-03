@@ -38,6 +38,7 @@ Switch to Paraformer when your workload is Mandarin-only and you want character-
 | Mandarin production ASR | Paraformer-Large | Mature Chinese ASR path with VAD and punctuation. | [Tutorial](./tutorial/README.md) |
 | English-only route in the OpenAI API example | `paraformer-en` alias | Smaller English route for API compatibility checks. | [OpenAI API example](../examples/openai_api/) |
 | LLM-based ASR or Chinese/English/Japanese + dialect experiments | Fun-ASR-Nano | LLM-based model path; use vLLM when decoder throughput matters. | [vLLM guide](./vllm_guide.md) |
+| Offline long-form ASR with anonymous diarization | MOSS-Transcribe-Diarize | One offline request returns transcription, timestamps, and per-recording anonymous speaker labels; it does not identify known people and needs no external VAD or speaker model. | [MOSS deployment guide](./moss_transcribe_diarize.md) |
 | Live captions or call-center streams | Runtime WebSocket service | Designed for long-lived streaming sessions and partial results. | [Runtime service docs](../runtime/readme.md) |
 | Batch archive processing | SenseVoice-Small or Paraformer-Large | Stable offline transcription path; caller owns manifests, retries, and logs. | [Batch ASR example](../examples/batch_asr_improved.py) |
 | Migration from Whisper/cloud ASR | SenseVoice-Small first, then benchmark alternatives | Gives a strong baseline before deeper model-specific tuning. | [Migration guide](./migration_from_whisper.md) |
@@ -94,6 +95,7 @@ For migration work, use the [migration benchmark example](../examples/migration/
 - With a GPU, default to Fun-ASR-Nano — the flagship LLM-based model for Chinese, English, Japanese, and Chinese dialects/accents, strongest on hard, contextual, and proper-noun-heavy audio. For the separate 31-language checkpoint, use Fun-ASR-MLT-Nano.
 - On CPU, or for multilingual + emotion workloads, use SenseVoice-Small (fast non-autoregressive, CPU-viable).
 - Use Paraformer when your production traffic is primarily Mandarin and you want timestamps or hotwords.
+- For offline long recordings that need anonymous per-recording speaker labels in the same request, use MOSS-Transcribe-Diarize; it is not a realtime WebSocket or known-person identification path.
 - Use the streaming runtime when partial results and long-lived connections matter more than a single final transcript.
 - Keep model aliases stable in production runbooks so benchmark results and bug reports are reproducible.
 - Open a [Deployment Help issue](https://github.com/modelscope/FunASR/issues/new?template=deployment_help.md) with model, device, command, logs, audio duration, and runtime path when you get stuck.
