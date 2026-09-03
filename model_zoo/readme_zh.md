@@ -24,3 +24,9 @@
 |    paraformer-zh-streaming <br> ( [⭐](https://modelscope.cn/models/iic/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online/summary) [🤗](https://huggingface.co/funasr/paraformer-zh-streaming) )    |        语音识别，实时        |  60000小时，中文  | 220M |
 | paraformer-zh-streaming-small <br> ( [⭐](https://www.modelscope.cn/models/iic/speech_paraformer_asr_nat-zh-cn-16k-common-vocab8404-online/summary) [🤗]() ) |        语音识别，实时        |  60000小时，中文  | 220M |
 | paraformer-en <br> ( [⭐](https://www.modelscope.cn/models/damo/speech_paraformer-large-vad-punc_asr_nat-en-16k-common-vocab10020/summary) [🤗]() )       |       语音识别，非实时        |  50000小时，英文  | 220M |
+
+### 第三方统一转写与说话人分离
+
+| 模型名字 | 任务详情 | 发布方 | 模型参数 |
+|:--------:|:--------:|:------:|:--------:|
+| [MOSS-Transcribe-Diarize](https://huggingface.co/OpenMOSS-Team/MOSS-Transcribe-Diarize) | 单次离线请求输出转写、时间戳和录音内匿名说话人标签；不是实时服务或已知人物身份识别。参见[部署指南](../docs/moss_transcribe_diarize_zh.md)。 | OpenMOSS | 以官方模型卡为准 |

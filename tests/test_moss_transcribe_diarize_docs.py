@@ -173,6 +173,21 @@ def test_readme_model_zoos_expose_moss_with_its_model_card_and_guide() -> None:
         assert guide in text, name
 
 
+def test_model_zoo_indexes_expose_moss_with_its_model_card_and_guide() -> None:
+    indexes = {
+        "model_zoo/readme.md": "../docs/moss_transcribe_diarize.md",
+        "model_zoo/readme_zh.md": "../docs/moss_transcribe_diarize_zh.md",
+    }
+
+    for name, guide in indexes.items():
+        text = (ROOT / name).read_text(encoding="utf-8")
+        assert "MOSS-Transcribe-Diarize" in text, name
+        assert (
+            "https://huggingface.co/OpenMOSS-Team/MOSS-Transcribe-Diarize" in text
+        ), name
+        assert guide in text, name
+
+
 def test_model_selection_guides_surface_offline_moss_diarization() -> None:
     guides = {
         "model_selection.md": ("./moss_transcribe_diarize.md", "offline"),
