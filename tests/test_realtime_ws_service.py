@@ -111,7 +111,7 @@ def test_cli_defaults_disable_speaker_and_bound_partial_window():
     args = module.build_arg_parser().parse_args([])
 
     assert args.enable_spk is False
-    assert args.partial_window_sec == 15.0
+    assert args.partial_window_sec == 8.0
     assert args.endpoint_mode == "server"
     assert args.log_session_stats_interval == 0.0
     assert args.decode_batch_wait_ms == 10.0

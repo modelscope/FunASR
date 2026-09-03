@@ -795,7 +795,7 @@ Because each refresh re-encodes from the sentence start, the longer a sentence, 
 
 **Usage guidance**
 - Normal conversational speech has natural pauses, so VAD splits it into relatively short utterances and each partial's cost is naturally bounded — **usually nothing to worry about**.
-- Only **very long, pauseless continuous speech** (e.g. reading aloud) makes a single utterance keep growing and the partial preview progressively slower. `serve_realtime_ws.py` bounds provisional previews with `--partial-window-sec 15` by default; under multi-client continuous-monologue load, reduce the window and lengthen `--decode-interval` based on measured output lag. This only affects provisional `partial`; VAD-locked sentences and STOP final output still run on the full audio. See the measured L20 starting point in §6.7.
+- Only **very long, pauseless continuous speech** (e.g. reading aloud) makes a single utterance keep growing and the partial preview progressively slower. `serve_realtime_ws.py` bounds provisional previews with `--partial-window-sec 8` by default; raise the window only after measuring headroom for multi-client continuous-monologue load. This only affects provisional `partial`; VAD-locked sentences and STOP final output still run on the full audio. See the measured L20 starting point in §6.7.
 
 ### 6.6 Cost of speaker diarization (SPK) and how to enable it
 
