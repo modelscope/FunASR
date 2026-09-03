@@ -38,6 +38,7 @@ result = model.generate(input="meeting.wav")
 | 中文生产 ASR | Paraformer-Large | 成熟中文 ASR 路径，可组合 VAD 和标点。 | [教程](./tutorial/README_zh.md) |
 | OpenAI API 示例中的英文路由 | `paraformer-en` alias | 适合在 OpenAI 风格客户端里验证较轻量英文路径。 | [OpenAI API 示例](../examples/openai_api/README_zh.md) |
 | LLM-based ASR 或中文/英文/日语 + 方言实验 | Fun-ASR-Nano | LLM-based 模型路径；解码吞吐敏感时配合 vLLM。 | [vLLM 指南](./vllm_guide.md) |
+| 离线长音频 ASR 与匿名说话人标签 | MOSS-Transcribe-Diarize | 一次离线请求返回转写、时间戳和录音内匿名说话人标签；不识别已知人物，也不需要外部 VAD 或说话人模型。 | [MOSS 部署指南](./moss_transcribe_diarize_zh.md) |
 | 实时字幕或客服流式音频 | Runtime WebSocket 服务 | 面向长连接流式会话和中间结果。 | [Runtime 服务文档](../runtime/readme_cn.md) |
 | 录音归档批处理 | SenseVoice-Small 或 Paraformer-Large | 稳定离线转写路径；调用方负责 manifest、重试和日志。 | [批处理示例](../examples/batch_asr_improved.py) |
 | 从 Whisper/云端 ASR 迁移 | 先用 SenseVoice-Small，再 benchmark 其他模型 | 先建立强基线，再做模型专项调优。 | [迁移指南](./migration_from_whisper_zh.md) |
@@ -94,6 +95,7 @@ SDK、JavaScript、工作流、Postman、OpenAPI、Docker 和 Kubernetes 路径�
 - demo、私有 API、Agent 语音输入和多语种场景优先试 SenseVoice-Small。
 - 中文生产流量优先试 Paraformer，尤其是希望走成熟非自回归 ASR 路径时。
 - 明确需要 LLM-based 模型路径或 vLLM 加速实验时，再试 Fun-ASR-Nano；如需单独的 31 语种覆盖，请改用 Fun-ASR-MLT-Nano。
+- 离线长录音需要同一次请求给出录音内匿名说话人标签时，使用 MOSS-Transcribe-Diarize；它不是实时 WebSocket 或已知人物身份识别路径。
 - 需要中间结果和长连接时，优先使用 streaming runtime，而不是普通 HTTP 转写接口。
 - 生产 runbook 中固定模型 alias，保证 benchmark 和问题复现可追踪。
 - 遇到阻塞时，用 [Deployment Help issue](https://github.com/modelscope/FunASR/issues/new?template=deployment_help.md) 提供模型、设备、命令、日志、音频时长和运行路径。

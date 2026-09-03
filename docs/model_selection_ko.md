@@ -28,6 +28,7 @@ result = model.generate(input="meeting.wav")
 | 중국어 중심 프로덕션 ASR | Paraformer-Large | VAD와 문장부호 복원을 함께 쓰는 성숙한 중국어 ASR 경로입니다. | [Tutorial](./tutorial/README.md) |
 | OpenAI API 예제의 영어 경로 | `paraformer-en` alias | OpenAI-style client에서 호환성을 확인하기 쉬운 가벼운 영어 경로입니다. | [OpenAI API example](../examples/openai_api/README_ko.md) |
 | LLM-based ASR 또는 중영일 + 중국어 방언/지역 억양 평가 | Fun-ASR-Nano | LLM-based 모델입니다. decoder throughput이 중요하면 vLLM을 사용합니다. | [vLLM guide](./vllm_guide.md) |
+| 오프라인 장시간 ASR 및 익명 화자 라벨 | MOSS-Transcribe-Diarize | 한 번의 오프라인 request로 전사, timestamps, 녹음 내 익명 화자 라벨을 반환합니다. 알려진 인물을 식별하지 않으며 외부 VAD / speaker model도 필요하지 않습니다. | [MOSS deployment guide](./moss_transcribe_diarize.md) |
 | 라이브 자막 또는 콜센터 스트림 | Runtime WebSocket service | 장시간 연결, 부분 결과, endpointing에 맞춘 런타임입니다. | [Runtime service docs](../runtime/readme.md) |
 | Whisper / cloud ASR에서 전환 | SenseVoice-Small로 baseline을 만들고 필요하면 비교 | 강한 기본 경로로 먼저 평가한 뒤 용도별로 조정하는 편이 안전합니다. | [Migration guide](./migration_from_whisper.md) |
 

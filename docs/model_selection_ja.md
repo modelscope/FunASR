@@ -28,6 +28,7 @@ result = model.generate(input="meeting.wav")
 | 中国語中心の本番 ASR | Paraformer-Large | VAD と句読点復元を組み合わせた成熟した中国語 ASR ルート。 | [Tutorial](./tutorial/README.md) |
 | OpenAI API 例の英語ルート | `paraformer-en` alias | OpenAI-style client で互換性を確認しやすい軽量な英語ルート。 | [OpenAI API example](../examples/openai_api/README_ja.md) |
 | LLM-based ASR や中英日 + 中国語方言・地域アクセントの評価 | Fun-ASR-Nano | LLM-based モデル。decoder throughput が重要なら vLLM を使います。 | [vLLM guide](./vllm_guide.md) |
+| オフライン長時間 ASR と匿名話者ラベル | MOSS-Transcribe-Diarize | 1 回のオフライン request で文字起こし、timestamps、録音内の匿名話者ラベルを返します。既知人物の識別ではなく、外部 VAD / speaker model も不要です。 | [MOSS deployment guide](./moss_transcribe_diarize.md) |
 | ライブ字幕やコールセンターストリーム | Runtime WebSocket service | 長時間接続、部分結果、エンドポイント検出に向いたランタイム。 | [Runtime service docs](../runtime/readme.md) |
 | Whisper / cloud ASR からの移行 | SenseVoice-Small で baseline を作り、必要に応じて比較 | まず強い標準ルートで評価してから、用途別に詰めるのが安全です。 | [Migration guide](./migration_from_whisper.md) |
 
