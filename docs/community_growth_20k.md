@@ -34,14 +34,14 @@ This plan focuses on useful adoption work rather than vanity marketing: if more 
 
 ## Current campaign snapshot
 
-As of 2026-09-03 09:22 UTC, the ecosystem has 37,080 combined GitHub stars, or 5,856 additional stars since the 31,224 baseline. Exceeding the +20,000 target requires another 14,144 stars to reach at least 51,224 by 2026-09-30, or roughly 524 stars/day across the remaining 27 days. Public PyPI reports 61,684 downloads over the latest 7 days and 440,232 over the latest 30 days (through 2026-09-02).
+As of 2026-09-04 12:20 UTC, the ecosystem has 37,138 combined GitHub stars, or 5,914 additional stars since the 31,224 baseline. Exceeding the +20,000 target requires another 14,086 stars to reach at least 51,224 by 2026-09-30, or roughly 542 stars/day across the remaining 26 days. Public PyPI last reported 61,684 downloads over the latest 7 days and 440,232 over the latest 30 days (through 2026-09-02); a newer PyPI refresh was unavailable during the GitHub snapshot.
 
 | Repository | Stars | Forks | Open issues | Open PRs | Last push |
 |---|---:|---:|---:|---:|---|
-| `modelscope/FunASR` | 20,141 | 2,014 | 22 | 0 | 2026-09-03 |
-| `QwenAudio/Fun-ASR` | 1,517 | 149 | 6 | 0 | 2026-09-02 |
-| `QwenAudio/SenseVoice` | 9,211 | 817 | 7 | 0 | 2026-08-31 |
-| `modelscope/FunClip` | 6,211 | 742 | 5 | 0 | 2026-09-01 |
+| `modelscope/FunASR` | 20,167 | 2,014 | 20 | 0 | 2026-09-04 |
+| `QwenAudio/Fun-ASR` | 1,519 | 149 | 6 | 0 | 2026-09-04 |
+| `QwenAudio/SenseVoice` | 9,232 | 817 | 7 | 0 | 2026-09-04 |
+| `modelscope/FunClip` | 6,220 | 743 | 5 | 0 | 2026-09-04 |
 
 ### 2026-09-04 FunASR v1.4.14 weekly release audit
 
