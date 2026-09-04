@@ -507,3 +507,31 @@ test('SenseVoice guides keep mobile navigation clear of the article', async ({ p
     fullPage: true,
   });
 });
+
+test('FunASR v1.4.14 release hashes wrap on mobile', async ({ page }, testInfo) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+
+  for (const route of [
+    '/blog/funasr-v1-4-14-portable-source-release.html',
+    '/en/blog/funasr-v1-4-14-portable-source-release.html',
+  ]) {
+    await page.goto(route);
+    await expect(page.locator('h1')).toContainText('v1.4.14');
+    const layout = await page.evaluate(() => ({
+      overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+      assetCount: document.body.innerText.includes('12'),
+      blackwell: document.querySelector<HTMLAnchorElement>(
+        'a[href*="runtime-llamacpp-v0.2.6/funasr-llamacpp-windows-x64-cuda-blackwell.zip"]',
+      )?.href,
+    }));
+
+    expect(layout.overflow).toBeLessThanOrEqual(1);
+    expect(layout.assetCount).toBe(true);
+    expect(layout.blackwell).toContain('runtime-llamacpp-v0.2.6');
+  }
+
+  await page.screenshot({
+    path: testInfo.outputPath('v1.4.14-release-mobile.png'),
+    fullPage: true,
+  });
+});
