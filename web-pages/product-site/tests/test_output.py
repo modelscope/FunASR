@@ -670,17 +670,78 @@ def test_v1_4_3_release_blog_is_bilingual_and_verifiable(
 
 
 @pytest.mark.parametrize(
+    ('relative', 'peer', 'markers'),
+    (
+        (
+            'blog/funasr-v1-4-14-portable-source-release.html',
+            '/en/blog/funasr-v1-4-14-portable-source-release.html',
+            (
+                'FunASR v1.4.14',
+                '可移植源码包',
+                'MOSS-Transcribe-Diarize',
+                '12 个 v1.4.14 资产',
+                '9 个镜像运行时',
+                'Blackwell 独立运行时',
+                'SHA256SUMS',
+            ),
+        ),
+        (
+            'en/blog/funasr-v1-4-14-portable-source-release.html',
+            '/blog/funasr-v1-4-14-portable-source-release.html',
+            (
+                'FunASR v1.4.14',
+                'Portable Source Archives',
+                'MOSS-Transcribe-Diarize',
+                '12 v1.4.14 assets',
+                '9 mirrored runtimes',
+                'separate Blackwell runtime',
+                'SHA256SUMS',
+            ),
+        ),
+    ),
+)
+def test_v1_4_14_release_blog_is_bilingual_and_verifiable(
+    built_site, relative, peer, markers
+):
+    soup = read_soup(built_site / relative)
+    text = soup.get_text(' ', strip=True)
+
+    assert soup.select_one('link[rel="canonical"]')['href'].endswith('/' + relative)
+    assert soup.select_one(f'link[rel="alternate"][href$="{peer}"]')
+    assert soup.select_one('script[type="application/ld+json"]')
+    assert soup.select_one('a[href="https://github.com/modelscope/FunASR/releases/tag/v1.4.14"]')
+    assert soup.select_one('a[href="https://pypi.org/project/funasr/1.4.14/"]')
+    assert soup.select_one(
+        'a[href="https://github.com/modelscope/FunASR/releases/tag/runtime-llamacpp-v0.2.6"]'
+    )
+    assert soup.select_one(
+        'a[href="https://github.com/modelscope/FunASR/releases/download/'
+        'runtime-llamacpp-v0.2.6/funasr-llamacpp-windows-x64-cuda-blackwell.zip"]'
+    )
+    for marker in markers:
+        assert marker in text
+
+    root = ET.parse(built_site / 'sitemap.xml').getroot()
+    namespace = {'sitemap': 'http://www.sitemaps.org/schemas/sitemap/0.9'}
+    urls = {
+        item.findtext('sitemap:loc', namespaces=namespace)
+        for item in root.findall('sitemap:url', namespace)
+    }
+    assert f'https://www.funasr.com/{relative}' in urls
+
+
+@pytest.mark.parametrize(
     ('relative', 'feature_href', 'history_href'),
     (
         (
             'blog/index.html',
             '/blog/funclip-v2-2-0-moss-speaker-clipping.html',
-            '/blog/funasr-v1-4-5-pypi-llama-cpp-release.html',
+            '/blog/funasr-v1-4-14-portable-source-release.html',
         ),
         (
             'en/blog/index.html',
             '/en/blog/funclip-v2-2-0-moss-speaker-clipping.html',
-            '/en/blog/funasr-v1-4-5-pypi-llama-cpp-release.html',
+            '/en/blog/funasr-v1-4-14-portable-source-release.html',
         ),
     ),
 )
@@ -696,6 +757,7 @@ def test_blog_index_features_latest_release_and_preserves_history(
     assert history
     assert history.select_one(f'a[href="{history_href}"]')
     history_text = history.get_text(' ', strip=True)
+    assert 'v1.4.14' in history_text
     assert 'v1.4.5' in history_text
     assert 'v1.4.3' in history_text
     assert 'v1.4.0' in history_text
