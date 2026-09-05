@@ -679,9 +679,9 @@ def test_v1_4_3_release_blog_is_bilingual_and_verifiable(
                 'FunASR v1.4.14',
                 '可移植源码包',
                 'MOSS-Transcribe-Diarize',
-                '12 个 v1.4.14 资产',
-                '9 个镜像运行时',
-                'Blackwell 独立运行时',
+                '13 个 v1.4.14 资产',
+                '10 个镜像运行时',
+                '含 Blackwell 运行时',
                 'SHA256SUMS',
             ),
         ),
@@ -692,9 +692,9 @@ def test_v1_4_3_release_blog_is_bilingual_and_verifiable(
                 'FunASR v1.4.14',
                 'Portable Source Archives',
                 'MOSS-Transcribe-Diarize',
-                '12 v1.4.14 assets',
-                '9 mirrored runtimes',
-                'separate Blackwell runtime',
+                '13 v1.4.14 assets',
+                '10 mirrored runtimes',
+                'including the Blackwell runtime',
                 'SHA256SUMS',
             ),
         ),
@@ -716,7 +716,7 @@ def test_v1_4_14_release_blog_is_bilingual_and_verifiable(
     )
     assert soup.select_one(
         'a[href="https://github.com/modelscope/FunASR/releases/download/'
-        'runtime-llamacpp-v0.2.6/funasr-llamacpp-windows-x64-cuda-blackwell.zip"]'
+        'v1.4.14/funasr-llamacpp-windows-x64-cuda-blackwell.zip"]'
     )
     for marker in markers:
         assert marker in text

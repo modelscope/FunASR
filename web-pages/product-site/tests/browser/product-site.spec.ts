@@ -519,15 +519,15 @@ test('FunASR v1.4.14 release hashes wrap on mobile', async ({ page }, testInfo) 
     await expect(page.locator('h1')).toContainText('v1.4.14');
     const layout = await page.evaluate(() => ({
       overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
-      assetCount: document.body.innerText.includes('12'),
+      assetCount: document.body.innerText.includes('13'),
       blackwell: document.querySelector<HTMLAnchorElement>(
-        'a[href*="runtime-llamacpp-v0.2.6/funasr-llamacpp-windows-x64-cuda-blackwell.zip"]',
+        'a[href*="v1.4.14/funasr-llamacpp-windows-x64-cuda-blackwell.zip"]',
       )?.href,
     }));
 
     expect(layout.overflow).toBeLessThanOrEqual(1);
     expect(layout.assetCount).toBe(true);
-    expect(layout.blackwell).toContain('runtime-llamacpp-v0.2.6');
+    expect(layout.blackwell).toContain('v1.4.14');
   }
 
   await page.screenshot({

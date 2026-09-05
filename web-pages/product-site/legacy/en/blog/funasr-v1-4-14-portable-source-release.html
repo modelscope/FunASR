@@ -44,20 +44,19 @@
   <h2>Release verification</h2>
   <p>The signed <code>v1.4.14</code> tag resolves exactly to <code>a23946a8b3e9146f9bf80e18f768298f0cd000b7</code>. The audit reran 210 release, documentation, and site regressions plus compileall, PEP 517 builds, Twine, an isolated wheel install, and public PyPI round trips. Extracted contents from the rebuilt wheel and sdist had zero differences from the public artifacts.</p>
 
-  <h2>12 v1.4.14 assets plus a separate Blackwell runtime</h2>
-  <p>The <a href="https://github.com/modelscope/FunASR/releases/tag/v1.4.14" target="_blank" rel="noopener">v1.4.14 Release</a> pins <a href="https://github.com/modelscope/FunASR/releases/tag/runtime-llamacpp-v0.2.6" target="_blank" rel="noopener">runtime-llamacpp-v0.2.6</a>. Its 12 assets are two Python distributions, 9 mirrored runtimes, and one checksum manifest; the tenth, Blackwell runtime remains on the separate runtime release:</p>
+  <h2>13 v1.4.14 assets, including the Blackwell runtime</h2>
+  <p>The <a href="https://github.com/modelscope/FunASR/releases/tag/v1.4.14" target="_blank" rel="noopener">v1.4.14 Release</a> pins <a href="https://github.com/modelscope/FunASR/releases/tag/runtime-llamacpp-v0.2.6" target="_blank" rel="noopener">runtime-llamacpp-v0.2.6</a>. Its 13 assets are two Python distributions, 10 mirrored runtimes, and one checksum manifest; the Windows CUDA Blackwell (sm_120) archive is now attached beside the other runtime packages.</p>
   <ul>
     <li>Python: <code>funasr-1.4.14-py3-none-any.whl</code> and <code>funasr-1.4.14.tar.gz</code></li>
     <li>Linux: <code>funasr-llamacpp-linux-arm64.tar.gz</code>, <code>funasr-llamacpp-linux-x64.tar.gz</code>, <code>funasr-llamacpp-linux-x64-avx2.tar.gz</code>, <code>funasr-llamacpp-linux-x64-vulkan.tar.gz</code></li>
     <li>macOS: <code>funasr-llamacpp-macos-arm64.tar.gz</code></li>
-    <li>Mirrored Windows runtimes: <code>funasr-llamacpp-windows-x64.zip</code>, <code>funasr-llamacpp-windows-x64-avx2.zip</code>, <code>funasr-llamacpp-windows-x64-cuda.zip</code>, <code>funasr-llamacpp-windows-x64-vulkan.zip</code></li>
-    <li>Separate Blackwell runtime: <a href="https://github.com/modelscope/FunASR/releases/download/runtime-llamacpp-v0.2.6/funasr-llamacpp-windows-x64-cuda-blackwell.zip" target="_blank" rel="noopener"><code>funasr-llamacpp-windows-x64-cuda-blackwell.zip</code></a></li>
+    <li>Mirrored Windows runtimes: <code>funasr-llamacpp-windows-x64.zip</code>, <code>funasr-llamacpp-windows-x64-avx2.zip</code>, <code>funasr-llamacpp-windows-x64-cuda.zip</code>, <code>funasr-llamacpp-windows-x64-vulkan.zip</code>, and the Blackwell (sm_120) <a href="https://github.com/modelscope/FunASR/releases/download/v1.4.14/funasr-llamacpp-windows-x64-cuda-blackwell.zip" target="_blank" rel="noopener"><code>funasr-llamacpp-windows-x64-cuda-blackwell.zip</code></a></li>
     <li>Verification: <code>SHA256SUMS</code></li>
   </ul>
   <pre><code>sha256sum -c SHA256SUMS</code></pre>
   <p>Use the <a href="/en/deploy/llama-cpp.html">llama.cpp production deployment page</a> for hardware selection, launch commands, smoke tests, and known boundaries. GPU API deployments can continue with the <a href="/en/deploy/vllm.html">vLLM guide</a>.</p>
 
-  <div class="cta"><p>Start from a pinned version and verified assets, then revalidate on the target hardware with representative audio before rollout.</p><a class="btn" href="https://github.com/modelscope/FunASR/releases/tag/v1.4.14" target="_blank" rel="noopener">Open all 12 v1.4.14 assets</a></div>
+  <div class="cta"><p>Start from a pinned version and verified assets, then revalidate on the target hardware with representative audio before rollout.</p><a class="btn" href="https://github.com/modelscope/FunASR/releases/tag/v1.4.14" target="_blank" rel="noopener">Open all 13 v1.4.14 assets</a></div>
 </div></article>
 <footer><div class="container">© 2024-2026 Tongyi Lab, Alibaba Group · <a href="https://github.com/modelscope/FunASR/blob/main/LICENSE">MIT License</a></div></footer>
 </body>

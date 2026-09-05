@@ -44,20 +44,19 @@
   <h2>发布验证</h2>
   <p>签名标签 <code>v1.4.14</code> 精确指向 <code>a23946a8b3e9146f9bf80e18f768298f0cd000b7</code>。审计重新执行 210 项发布、文档与站点回归，并通过 compileall、PEP 517 构建、Twine、隔离 wheel 安装和 public PyPI 回源校验；重建 wheel/sdist 的解包内容与公网制品零差异。</p>
 
-  <h2>12 个 v1.4.14 资产与 Blackwell 独立运行时</h2>
-  <p><a href="https://github.com/modelscope/FunASR/releases/tag/v1.4.14" target="_blank" rel="noopener">v1.4.14 Release</a> 固定复用 <a href="https://github.com/modelscope/FunASR/releases/tag/runtime-llamacpp-v0.2.6" target="_blank" rel="noopener">runtime-llamacpp-v0.2.6</a>。v1.4.14 页面共 12 个资产：2 个 Python 制品、9 个镜像运行时和 1 份校验清单；第 10 个 Blackwell 运行时保留在独立运行时发布页：</p>
+  <h2>13 个 v1.4.14 资产，含 Blackwell 运行时</h2>
+  <p><a href="https://github.com/modelscope/FunASR/releases/tag/v1.4.14" target="_blank" rel="noopener">v1.4.14 Release</a> 固定复用 <a href="https://github.com/modelscope/FunASR/releases/tag/runtime-llamacpp-v0.2.6" target="_blank" rel="noopener">runtime-llamacpp-v0.2.6</a>。v1.4.14 页面现有 13 个资产：2 个 Python 制品、10 个镜像运行时和 1 份校验清单；Windows CUDA Blackwell（sm_120）包已与其余运行时一同附在此发布页。</p>
   <ul>
     <li>Python：<code>funasr-1.4.14-py3-none-any.whl</code>、<code>funasr-1.4.14.tar.gz</code></li>
     <li>Linux：<code>funasr-llamacpp-linux-arm64.tar.gz</code>、<code>funasr-llamacpp-linux-x64.tar.gz</code>、<code>funasr-llamacpp-linux-x64-avx2.tar.gz</code>、<code>funasr-llamacpp-linux-x64-vulkan.tar.gz</code></li>
     <li>macOS：<code>funasr-llamacpp-macos-arm64.tar.gz</code></li>
-    <li>Windows 镜像：<code>funasr-llamacpp-windows-x64.zip</code>、<code>funasr-llamacpp-windows-x64-avx2.zip</code>、<code>funasr-llamacpp-windows-x64-cuda.zip</code>、<code>funasr-llamacpp-windows-x64-vulkan.zip</code></li>
-    <li>Blackwell 独立运行时：<a href="https://github.com/modelscope/FunASR/releases/download/runtime-llamacpp-v0.2.6/funasr-llamacpp-windows-x64-cuda-blackwell.zip" target="_blank" rel="noopener"><code>funasr-llamacpp-windows-x64-cuda-blackwell.zip</code></a></li>
+    <li>Windows 镜像：<code>funasr-llamacpp-windows-x64.zip</code>、<code>funasr-llamacpp-windows-x64-avx2.zip</code>、<code>funasr-llamacpp-windows-x64-cuda.zip</code>、<code>funasr-llamacpp-windows-x64-vulkan.zip</code>，以及 Blackwell（sm_120）<a href="https://github.com/modelscope/FunASR/releases/download/v1.4.14/funasr-llamacpp-windows-x64-cuda-blackwell.zip" target="_blank" rel="noopener"><code>funasr-llamacpp-windows-x64-cuda-blackwell.zip</code></a></li>
     <li>校验：<code>SHA256SUMS</code></li>
   </ul>
   <pre><code>sha256sum -c SHA256SUMS</code></pre>
   <p>按硬件选择、启动命令、烟测和已知边界见<a href="/deploy/llama-cpp.html"> llama.cpp 工业部署页</a>；GPU 服务可继续参考 <a href="/deploy/vllm.html">vLLM 部署页</a>。</p>
 
-  <div class="cta"><p>从固定版本和可校验资产开始，在目标硬件与真实业务音频上复测后再上线。</p><a class="btn" href="https://github.com/modelscope/FunASR/releases/tag/v1.4.14" target="_blank" rel="noopener">查看 v1.4.14 的 12 个资产</a></div>
+  <div class="cta"><p>从固定版本和可校验资产开始，在目标硬件与真实业务音频上复测后再上线。</p><a class="btn" href="https://github.com/modelscope/FunASR/releases/tag/v1.4.14" target="_blank" rel="noopener">查看 v1.4.14 的 13 个资产</a></div>
 </div></article>
 <footer><div class="container">© 2024-2026 Tongyi Lab, Alibaba Group · <a href="https://github.com/modelscope/FunASR/blob/main/LICENSE">MIT License</a></div></footer>
 </body>
