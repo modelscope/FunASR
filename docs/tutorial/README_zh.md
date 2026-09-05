@@ -1,6 +1,6 @@
 (简体中文|[English](./README.md))
 
-FunASR开源了大量在工业数据上预训练模型，您可以在 [模型许可协议](https://github.com/modelscope/FunASR/blob/main/MODEL_LICENSE)下自由使用、复制、修改和分享FunASR模型，下面列举代表性的模型，更多模型请参考 [模型仓库](https://github.com/modelscope/FunASR/tree/main/model_zoo)。
+FunASR开源了大量在工业数据上预训练的模型。每个模型权重都有各自的许可：请记录完整模型 ID 与 revision，并以模型卡中展示的许可材料为准。只有模型卡明确链接 [FunASR 模型许可协议](https://github.com/modelscope/FunASR/blob/main/MODEL_LICENSE) 时，该协议才适用。下面列举代表性的模型，更多模型请参考 [模型仓库](https://github.com/modelscope/FunASR/tree/main/model_zoo)。
 
 <div align="center">  
 <h4>

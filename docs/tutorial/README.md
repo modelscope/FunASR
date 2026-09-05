@@ -1,6 +1,6 @@
 ([简体中文](https://github.com/modelscope/FunASR/blob/main/docs/tutorial/README_zh.md)|English)
 
-FunASR has open-sourced a large number of pre-trained models on industrial data. You are free to use, copy, modify, and share FunASR models under the [Model License Agreement](https://github.com/modelscope/FunASR/blob/main/MODEL_LICENSE). Below, we list some representative models. For a comprehensive list, please refer to our [Model Zoo](https://github.com/modelscope/FunASR/tree/main/model_zoo).
+FunASR has open-sourced a large number of pre-trained models on industrial data. Each model weight has its own license: record the exact model ID and revision, and follow the license materials on its model card. The [FunASR Model License Agreement](https://github.com/modelscope/FunASR/blob/main/MODEL_LICENSE) applies only when that model card explicitly links to it. Below, we list some representative models. For a comprehensive list, please refer to our [Model Zoo](https://github.com/modelscope/FunASR/tree/main/model_zoo).
 
 <div align="center">  
 <h4>

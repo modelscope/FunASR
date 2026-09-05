@@ -129,6 +129,22 @@ def test_troubleshooting_faq_covers_common_install_and_deploy_failures():
             assert marker in text
 
 
+def test_tutorials_keep_model_license_boundaries_model_card_specific():
+    docs = {
+        "en": (ROOT / "docs/tutorial/README.md").read_text(),
+        "zh": (ROOT / "docs/tutorial/README_zh.md").read_text(),
+    }
+
+    assert "Each model weight has its own license" in docs["en"]
+    assert "model card explicitly links" in docs["en"]
+    assert "每个模型权重都有各自的许可" in docs["zh"]
+    assert "模型卡明确链接" in docs["zh"]
+
+    for text in docs.values():
+        assert "自由使用、复制、修改和分享FunASR模型" not in text
+        assert "free to use, copy, modify, and share FunASR models" not in text
+
+
 def test_public_docs_do_not_advertise_stale_release_or_star_copy():
     checked_docs = [
         "docs/repository_roles.md",
