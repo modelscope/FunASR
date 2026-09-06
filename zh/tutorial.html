@@ -247,7 +247,7 @@ for item in corrected_results:
 <li><strong>流式识别：</strong><a href="https://github.com/modelscope/FunASR/blob/main/examples/industrial_data_pretraining/paraformer_streaming/demo.py">Paraformer 流式示例</a>。每个音频流维护独立 <code>cache={}</code>，最后一块设置 <code>is_final=True</code>。16 kHz 下 <code>[0, 10, 5]</code> 的 600 ms 对应 <strong>9600 个采样点</strong>，不是 960；分块时长不代表端到端延时。流式 VAD 可能返回 <code>[start, -1]</code>、<code>[-1, end]</code>、完整区间或空区间，单位为毫秒。</li>
 <li><strong>标点与对齐：</strong><a href="https://github.com/modelscope/FunASR/blob/main/examples/industrial_data_pretraining/ct_transformer/demo.py">标点示例</a>与<a href="https://github.com/modelscope/FunASR/blob/main/examples/industrial_data_pretraining/monotonic_aligner/demo.py">时间戳预测示例</a>。对齐需要对应的文本输入，不等同于语音识别。</li>
 <li><strong>其他模型系列：</strong><a href="https://github.com/modelscope/FunASR/blob/main/examples/industrial_data_pretraining/sense_voice/README_zh.md">SenseVoice</a>、<a href="https://github.com/modelscope/FunASR/blob/main/examples/industrial_data_pretraining/fun_asr_nano/README_zh.md">Fun-ASR-Nano</a>、<a href="https://www.funasr.com/docs/moss-transcribe-diarize.html">第三方 OpenMOSS 集成</a>。更多入口统一在模型仓库查找。</li>
-<li><strong>命令行与服务：</strong><a href="https://www.funasr.com/docs/command-line.html">CLI 参考</a>、<a href="https://www.funasr.com/docs/runtime-guide.html">运行时概览</a>和 <a href="https://www.funasr.com/docs/docker.html">Docker</a>。Python 参数不代表服务请求具有相同结构。</li>
+<li><strong>命令行与服务：</strong><a href="https://www.funasr.com/en/docs/command-line.html">CLI 参考</a>、<a href="https://www.funasr.com/docs/runtime-guide.html">运行时概览</a>和 <a href="https://www.funasr.com/docs/docker.html">Docker</a>。Python 参数不代表服务请求具有相同结构。</li>
 </ul>
 <p><a id="模型训练与测试" name="模型训练与测试"></a></p>
 <h2 id="训练与验证入口">训练与验证入口</h2>
