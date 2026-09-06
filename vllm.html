@@ -183,7 +183,7 @@
 </tbody>
 </table>
 <blockquote>
-<p>vLLM matches PyTorch CER exactly (delta &lt; 0.2%) while achieving 16–340x speedup.</p>
+<p>In the reported table, Fun-ASR-Nano batch throughput is <code>340 / 21 = 16.2</code> times the PyTorch baseline when timing scopes match. <code>RTFx 340</code> means 340 times realtime, not 340 times faster than PyTorch. CER changes from <code>8.06%</code> to <code>8.20%</code> (+0.14 percentage points), not identical accuracy. These historical measurements are not a guarantee for other hardware, workloads, or configurations.</p>
 </blockquote>
 <hr/>
 <h2 id="table-of-contents">Table of Contents</h2>
@@ -337,9 +337,9 @@ service. The <code>AutoModelVLLM</code> examples in path A are offline inference
 <td>Tensor Parallel with one-line config</td>
 </tr>
 <tr>
-<td>Throughput</td>
-<td>RTFx ~20</td>
-<td><strong>RTFx 340+</strong></td>
+<td>Reported batch throughput</td>
+<td>RTFx 21</td>
+<td>RTFx 340; see Benchmark scope</td>
 </tr>
 </tbody>
 </table>
@@ -350,7 +350,7 @@ service. The <code>AutoModelVLLM</code> examples in path A are offline inference
 <th>Model</th>
 <th>LLM component</th>
 <th>Audio encoder</th>
-<th>vLLM speedup</th>
+<th>Integration</th>
 </tr>
 </thead>
 <tbody>
@@ -358,13 +358,13 @@ service. The <code>AutoModelVLLM</code> examples in path A are offline inference
 <td><strong>Fun-ASR-Nano</strong></td>
 <td>Qwen3-0.6B</td>
 <td>SenseVoice</td>
-<td>✓ 21.7x</td>
+<td>Specialized split engine</td>
 </tr>
 <tr>
 <td><strong>GLM-ASR-Nano</strong></td>
 <td>Llama-2B</td>
 <td>Whisper-like</td>
-<td>✓ 7.6x</td>
+<td>Specialized split engine</td>
 </tr>
 <tr>
 <td>LLMASR</td>
@@ -480,9 +480,9 @@ service. The <code>AutoModelVLLM</code> examples in path A are offline inference
 <td>Tensor Parallel one-line config</td>
 </tr>
 <tr>
-<td>Result</td>
-<td>RTFx ~20</td>
-<td><strong>RTFx 340+</strong> (16x speedup)</td>
+<td>Reported batch result</td>
+<td>RTFx 21</td>
+<td>RTFx 340; hardware and timing scope must match</td>
 </tr>
 </tbody>
 </table>
@@ -513,12 +513,13 @@ engine = FunASRNanoVLLM.from_pretrained(
 )
 
 results = engine.generate(
-    inputs="wav.scp",  # supports scp/jsonl/file lists
+    inputs=["audio1.wav", "audio2.wav"],  # existing audio files, not manifests
     hotwords=["开放时间"],
     language="中文",
     max_new_tokens=512,
 )
 </code></pre>
+<p>The direct engine accepts an audio path, a list of audio paths, or 16 kHz waveform arrays/tensors. It does not expand SCP/JSONL manifests. Use <a href="https://github.com/modelscope/FunASR/blob/main/examples/industrial_data_pretraining/fun_asr_nano/demo_vllm.py">demo_vllm.py</a> below for manifests: SCP rows contain a path or <code>key path</code>; JSONL rows contain a <code>source</code> audio-path field. Paths must resolve from the process working directory.</p>
 <h3 id="command-line">Command Line</h3>
 <pre id="code-6"><code class="language-bash">cd examples/industrial_data_pretraining/fun_asr_nano
 
@@ -692,23 +693,24 @@ for _ in range(2):
 </tbody>
 </table>
 <p><strong>Response</strong>:</p>
+<p>Illustrative values, not a measured run. HTTP timestamps and duration are in seconds. Optional <code>words</code> and <code>speaker</code> fields require their respective processing paths; see <a href="https://github.com/modelscope/FunASR/blob/main/examples/industrial_data_pretraining/fun_asr_nano/serve_vllm.py">the serializer and service</a>.</p>
 <pre id="code-12"><code class="language-json">{
-    "text": "Full transcription text",
+    "text": "你好",
     "segments": [
         {
-            "text": "Segment text",
-            "start": 1.7,
-            "end": 14.8,
+            "text": "你好",
+            "start": 0.3,
+            "end": 1.2,
             "speaker": "SPK0",
             "words": [
-                {"word": "砸", "start": 2.02, "end": 2.08},
-                {"word": "了", "start": 2.26, "end": 2.32}
+                {"word": "你", "start": 0.3, "end": 0.6},
+                {"word": "好", "start": 0.6, "end": 1.2}
             ]
         }
     ],
-    "duration": 227.4,
-    "processing_time": 3.422,
-    "rtf": 0.015
+    "duration": 2.0,
+    "processing_time": 0.1,
+    "rtf": 0.05
 }
 </code></pre>
 <p><strong>Client examples</strong>:</p>
@@ -783,16 +785,20 @@ const result = await resp.json();
 </tbody>
 </table>
 <p><strong>Response</strong> (<code>verbose_json</code>):</p>
+<p>Illustrative complete response; timestamps are in seconds and are not a recognition-quality guarantee.</p>
 <pre id="code-16"><code class="language-json">{
     "task": "transcribe",
     "language": "zh",
-    "duration": 5.17,
-    "text": "我一直没有照顾孩子，但是我想要抚养权。",
+    "duration": 2.0,
+    "text": "你好",
     "segments": [
         {
-            "id": 0, "start": 0.0, "end": 5.15,
-            "text": "我一直没有照顾孩子，但是我想要抚养权。",
-            "words": [{"word": "我", "start": 0.42, "end": 0.48}, ...]
+            "id": 0, "start": 0.3, "end": 1.2,
+            "text": "你好",
+            "words": [
+                {"word": "你", "start": 0.3, "end": 0.6},
+                {"word": "好", "start": 0.6, "end": 1.2}
+            ]
         }
     ]
 }
@@ -846,9 +852,10 @@ curl -X POST http://localhost:8899/v1/audio/transcriptions \
 </tbody>
 </table>
 <p><strong>Server → Client</strong>:</p>
-<pre id="code-19"><code class="language-json">{"event": "started"}
+<p>Each line below represents a separate JSON WebSocket message, not one JSON document. Values are illustrative; WebSocket offsets are in milliseconds.</p>
+<pre id="code-19"><code class="language-text">{"event": "started"}
 {"event": "language_set", "language": "中文"}
-{"sentences": [{"text":"...","start":..,"end":..}], "is_final": true, "duration_ms": 5170}
+{"sentences": [{"text": "你好", "start": 300, "end": 1200}], "is_final": true, "duration_ms": 2000}
 {"event": "stopped"}
 </code></pre>
 <p><strong>Client example</strong>:</p>
@@ -901,7 +908,7 @@ asyncio.run(offline_ws("audio.wav"))
 - Natural sentence segmentation based on VAD endpoints
 - Confirmed segment text is locked and never changes; partial text updates in real time
 - Optional streaming speaker assignment (<code>--enable-spk</code>) + global re-clustering on STOP
-- First-word latency ~480 ms</p>
+- The partial-decode interval is a scheduling setting, not a first-word latency guarantee; measure end-to-end latency on your workload</p>
 <h3 id="62-starting-the-service">6.2 Starting the Service</h3>
 <pre id="code-22"><code class="language-bash">CUDA_VISIBLE_DEVICES=0 python examples/industrial_data_pretraining/fun_asr_nano/serve_realtime_ws.py \
     --port 10095 --language 中文 --hotword-file hotword_list
@@ -975,9 +982,10 @@ the final disconnect log.</p>
 </tbody>
 </table>
 <p><strong>Server → Client</strong>:</p>
-<pre id="code-26"><code class="language-json">{"event": "started"}
-{"sentences": [{"text":"你好","start":300,"end":1200}], "partial": "世界", "is_final": false}
-{"sentences": [...], "is_final": true}
+<p>Illustrative message sequence, one JSON object per WebSocket message. Offsets are in milliseconds; this is not a measured latency trace.</p>
+<pre id="code-26"><code class="language-text">{"event": "started"}
+{"sentences": [{"text": "你好", "start": 300, "end": 1200}], "partial": "世界", "is_final": false}
+{"sentences": [{"text": "你好", "start": 300, "end": 1200}, {"text": "世界", "start": 1500, "end": 2200}], "is_final": true}
 {"event": "stopped"}
 </code></pre>
 <p><strong>Fields</strong>: <code>sentences[]</code> = locked segments, <code>partial</code> = text being spoken (may change), <code>partial_start_ms</code> = where the current provisional <code>partial</code> begins, <code>is_final</code> = true after STOP. When <code>--enable-spk</code> is enabled, <code>sentences[]</code> also includes <code>spk</code>.</p>
@@ -1074,64 +1082,85 @@ Because each refresh re-encodes from the sentence start, the longer a sentence, 
 </code></pre>
 <hr/>
 <span data-legacy-doc-anchor="7-dynamic-vad" id="dynamic-vad"></span><h2 id="7-dynamic-vad">7. Dynamic VAD</h2>
-<p>fsmn-vad enables dynamic silence thresholds by default. Offline and streaming modes use different configurations.</p>
+<p>Dynamic silence is a <strong>VAD-stage</strong> option, not an ASR decoder option. <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py">FSMN-VAD</a> reads <code>dynamic_silence</code> and <code>silence_schedule</code>; an explicit <code>max_end_silence_time</code> disables the dynamic default unless overridden. <code>AutoModelVLLM.generate(inputs, **kwargs)</code> forwards to the ASR engine and does not run VAD.</p>
+<p>The table samples the SDK's <code>DEFAULT_SILENCE_SCHEDULE</code> and <code>STREAMING_SILENCE_SCHEDULE</code> constants at boundary durations. Each schedule selects the first entry whose duration limit is greater than or equal to accumulated speech; these are silence thresholds, not maximum utterance lengths.</p>
 <table>
 <thead>
 <tr>
-<th>Accumulated duration</th>
-<th>Offline (preserve long segs ≤60 s)</th>
-<th>Streaming (balance latency)</th>
+<th>Accumulated speech sample</th>
+<th>DEFAULT_SILENCE_SCHEDULE</th>
+<th>STREAMING_SILENCE_SCHEDULE</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>≤ 5 s</td>
+<td>5000 ms</td>
 <td>2000 ms</td>
 <td>2000 ms</td>
 </tr>
 <tr>
-<td>5–10 s</td>
+<td>10000 ms</td>
 <td>2000 ms</td>
 <td>1500 ms</td>
 </tr>
 <tr>
-<td>10–15 s</td>
+<td>15000 ms</td>
 <td>1000 ms</td>
 <td>1000 ms</td>
 </tr>
 <tr>
-<td>15–20 s</td>
+<td>20000 ms</td>
 <td>1000 ms</td>
 <td>800 ms</td>
 </tr>
 <tr>
-<td>20–30 s</td>
+<td>30000 ms</td>
 <td>800 ms</td>
 <td>800 ms</td>
 </tr>
 <tr>
-<td>30–45 s</td>
+<td>40000 ms</td>
 <td>600 ms</td>
 <td>400 ms</td>
 </tr>
 <tr>
-<td>45–60 s</td>
-<td>200–400 ms</td>
+<td>45000 ms</td>
+<td>400 ms</td>
+<td>400 ms</td>
+</tr>
+<tr>
+<td>50000 ms</td>
+<td>400 ms</td>
 <td>100 ms</td>
 </tr>
 <tr>
-<td>&gt; 60 s</td>
+<td>60000 ms</td>
+<td>200 ms</td>
+<td>100 ms</td>
+</tr>
+<tr>
+<td>60001 ms</td>
 <td>100 ms</td>
 <td>100 ms</td>
 </tr>
 </tbody>
 </table>
-<p>Offline mode favors longer segments to reduce boundary-cut losses; streaming mode tightens faster to reduce latency.</p>
+<p>The streaming-named constant is not automatically selected just because audio arrives in chunks. Service wrappers can choose their own policy; for example <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/dynamic_vad.py">DynamicStreamingVAD</a> maintains its own schedule and calls the underlying VAD with <code>dynamic_silence=False</code>. Do not treat this SDK table as the configuration of every server.</p>
 <h3 id="customization">Customization</h3>
-<pre id="code-33"><code class="language-python">model.generate(input="audio.wav", silence_schedule=[(5000,1500), (20000,800), (float('inf'),300)])
+<pre id="code-33"><code class="language-python">from funasr import AutoModel
+
+vad = AutoModel(model="fsmn-vad", device="cpu", disable_update=True)
+segments = vad.generate(
+    input="audio.wav",
+    cache={},
+    dynamic_silence=True,
+    silence_schedule=[(5000, 1500), (20000, 800), (float("inf"), 300)],
+)
+print(segments[0]["value"])
 </code></pre>
+<p>Replace <code>audio.wav</code> with an existing recording. This standalone VAD call returns <code>[start_ms, end_ms]</code> intervals in <code>value</code>, not transcripts. To feed an ASR engine, load/resample audio to its required sample rate, slice by these millisecond offsets, and pass the waveform list as <code>model.generate(inputs=audio_segments)</code>. Preserve the offsets when merging results. This example only demonstrates segmentation; it does not automatically connect VAD to vLLM.</p>
 <blockquote>
-<p>GLM-ASR does not support long-segment inference; pass <code>dynamic_silence=False</code> when using it.</p>
+<p>For GLM-ASR, pre-segment and validate duration limits for the selected checkpoint. To request fixed silence, pass <code>dynamic_silence=False</code> to the <strong>VAD</strong> call, not the ASR engine. Fixed silence alone does not cap segment duration.</p>
 </blockquote>
 <hr/>
 <span data-legacy-doc-anchor="8-api-reference" id="api-reference"></span><h2 id="8-api-reference">8. API Reference</h2>
@@ -1188,14 +1217,14 @@ Because each refresh re-encodes from the sentence start, the longer a sentence, 
 <p><strong>Q: Offline or streaming?</strong>
 Complete files → offline (high throughput). Microphone / live stream → streaming (low latency).</p>
 <p><strong>Q: Can GLM-ASR use dynamic VAD?</strong>
-It does not support long-segment inference. Use <code>dynamic_silence=False</code>.</p>
+Pre-segment long recordings and validate segment lengths with the chosen GLM checkpoint. <code>dynamic_silence=False</code> configures the separate FSMN-VAD stage, not <code>AutoModelVLLM</code>; disabling dynamic silence alone does not enforce an ASR-safe maximum segment length.</p>
 <p><strong>Q: Performance impact of SPK?</strong>
-RTFx drops from 102 to 46. CER is unchanged. Disabled by default.</p>
+In the reported offline-service table, RTFx is 102 without SPK and 46 with SPK; CER is 8.14% and 8.19%, respectively. SPK is disabled by default. These measurements do not predict the cost or accuracy of another deployment.</p>
 <p><strong>Q: Entry points for custom development?</strong>
 Offline: <code>serve_vllm.process_audio()</code> / <code>FunASRNanoVLLM.generate()</code>
 Streaming: <code>serve_realtime_ws.RealtimeASRSession</code></p>
 <p><strong>Q: Slow first startup?</strong>
-vLLM initialization takes 60–90 s (KV Cache + CUDA Graph warmup). Subsequent inferences are instant.</p>
+Model loading, KV-cache allocation, and optional CUDA Graph warmup contribute to startup time. Measure cold startup and warm inference separately; neither has a fixed duration or an instant-response guarantee.</p>
 <p><strong>Q: What happens when Fun-ASR-Nano vLLM uses <code>dtype="fp16"</code>?</strong>
 The audio frontend and adaptor remain float16, but FunASR runs the Qwen3 decoder
 in bfloat16 because vLLM float16 decoding can produce degraded repeated output.
