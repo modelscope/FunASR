@@ -14,7 +14,7 @@
 <meta content="Runtime &amp; deployment matrix - FunASR" property="og:title"/>
 <meta content="Runtime &amp; deployment matrix" property="og:description"/>
 <meta content="https://www.funasr.com/en/docs/deployment-matrix.html" property="og:url"/>
-<link href="assets/css/site.d651b1dbf605.css" rel="stylesheet"/>
+<link href="assets/css/site.4a0f4749ba00.css" rel="stylesheet"/>
 <link href="assets/css/experience.5803993934f8.css" rel="stylesheet"/>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "SoftwareApplication", "applicationCategory": "DeveloperApplication", "codeRepository": "https://github.com/modelscope/FunASR", "dateModified": "2026-09-01", "license": "https://github.com/modelscope/FunASR/blob/main/LICENSE", "name": "FunASR", "operatingSystem": "Linux, macOS, Windows", "url": "https://www.funasr.com/en/docs/deployment-matrix.html"}</script>
 </head>
@@ -88,7 +88,8 @@
 <a href="https://www.funasr.com/en/docs/kubernetes.html">Kubernetes deployment</a>
 <a aria-current="page" href="https://www.funasr.com/en/docs/deployment-matrix.html">Runtime &amp; deployment matrix</a>
 <a href="https://www.funasr.com/en/docs/vllm.html">vLLM split-engine inference</a>
-<a href="https://www.funasr.com/en/docs/native-vllm.html">Native vLLM validation record</a>
+<a href="https://www.funasr.com/en/docs/official-native-vllm.html">Official native vLLM functional validation (2026-09-07)</a>
+<a href="https://www.funasr.com/en/docs/native-vllm.html">Historical community native vLLM record (2026-08-13)</a>
 </nav>
 </details>
 <details open="">
@@ -187,9 +188,9 @@
 </tr>
 <tr>
 <td>vLLM acceleration</td>
-<td>Higher-throughput LLM-based ASR with Fun-ASR-Nano</td>
-<td><a href="https://www.funasr.com/en/docs/vllm.html">vLLM guide</a></td>
-<td>Use for LLM decoder throughput; does not apply to non-autoregressive Paraformer.</td>
+<td>Native file transcription or split-engine LLM decoding with Fun-ASR-Nano</td>
+<td><a href="https://www.funasr.com/en/docs/official-native-vllm.html">Official native validation</a>; <a href="https://www.funasr.com/en/docs/vllm.html">split-engine guide</a></td>
+<td>Native: official a4362c94 local snapshot, vLLM 0.27.1, existing-environment functional smoke only, not clean-install or capacity validation. Does not apply to non-autoregressive Paraformer.</td>
 </tr>
 <tr>
 <td>MOSS-Transcribe-Diarize</td>

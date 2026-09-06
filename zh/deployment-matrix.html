@@ -14,7 +14,7 @@
 <meta content="运行时与部署矩阵 - FunASR" property="og:title"/>
 <meta content="运行时与部署矩阵" property="og:description"/>
 <meta content="https://www.funasr.com/docs/deployment-matrix.html" property="og:url"/>
-<link href="../assets/css/site.d651b1dbf605.css" rel="stylesheet"/>
+<link href="../assets/css/site.4a0f4749ba00.css" rel="stylesheet"/>
 <link href="../assets/css/experience.5803993934f8.css" rel="stylesheet"/>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "SoftwareApplication", "applicationCategory": "DeveloperApplication", "codeRepository": "https://github.com/modelscope/FunASR", "dateModified": "2026-09-01", "license": "https://github.com/modelscope/FunASR/blob/main/LICENSE", "name": "FunASR", "operatingSystem": "Linux, macOS, Windows", "url": "https://www.funasr.com/docs/deployment-matrix.html"}</script>
 </head>
@@ -88,7 +88,8 @@
 <a href="https://www.funasr.com/docs/kubernetes.html">Kubernetes 部署</a>
 <a aria-current="page" href="https://www.funasr.com/docs/deployment-matrix.html">运行时与部署矩阵</a>
 <a href="https://www.funasr.com/docs/vllm.html">vLLM split-engine 推理</a>
-<a href="https://www.funasr.com/docs/native-vllm.html">原生 vLLM 验证记录</a>
+<a href="https://www.funasr.com/docs/official-native-vllm.html">官方原生 vLLM 功能验证（2026-09-07）</a>
+<a href="https://www.funasr.com/docs/native-vllm.html">社区原生 vLLM 历史记录（2026-08-13）</a>
 </nav>
 </details>
 <details open="">
@@ -187,9 +188,9 @@
 </tr>
 <tr>
 <td>vLLM 加速</td>
-<td>Fun-ASR-Nano 等 LLM-based ASR 高吞吐</td>
-<td><a href="https://www.funasr.com/en/docs/vllm.html">vLLM 指南</a></td>
-<td>适合 LLM 解码吞吐；不适用于非自回归 Paraformer。</td>
+<td>Fun-ASR-Nano 原生文件转写或 split-engine LLM 解码</td>
+<td><a href="https://www.funasr.com/docs/official-native-vllm.html">官方原生验证</a>；<a href="https://www.funasr.com/docs/vllm.html">split-engine 指南</a></td>
+<td>原生路径固定官方 a4362c94 本地快照、vLLM 0.27.1，仅为既有环境功能验证，不是全新安装或容量验证；不适用于非自回归 Paraformer。</td>
 </tr>
 <tr>
 <td>MOSS-Transcribe-Diarize</td>
