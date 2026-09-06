@@ -1,0 +1,33 @@
+:root {color-scheme:light;font-family:Inter,Arial,"PingFang SC","Microsoft YaHei","WenQuanYi Zen Hei",sans-serif;color:#1b2723;background:#fff;line-height:1.65;letter-spacing:0}
+* {box-sizing:border-box}
+body {margin:0}
+a {color:inherit;text-decoration:none;overflow-wrap:anywhere}
+a:hover {color:#087a5b;text-decoration:underline;text-underline-offset:4px}
+a:focus-visible,button:focus-visible,input:focus-visible {outline:3px solid #cb5e48;outline-offset:4px}
+header,footer {display:flex;align-items:center;justify-content:space-between;gap:20px;max-width:1200px;margin:auto;padding:24px 32px}
+header {border-bottom:1px solid #dce3df}
+nav {display:flex;gap:24px;flex-wrap:wrap;font-size:14px}
+.brand {font-size:22px;font-weight:700}
+main {max-width:1120px;margin:auto;padding:56px 32px}
+.eyebrow {font-size:12px;color:#087a5b;margin:0 0 12px}
+h1 {font-size:56px;line-height:1.1;font-weight:600;margin:0}
+.lead {font-size:22px;color:#52645b;margin:20px 0 32px}
+form {max-width:680px;margin-bottom:48px}
+label {display:block;font-size:13px;margin-bottom:8px}
+.search {display:flex;border:1px solid #becdc5;border-radius:4px;overflow:hidden}
+input {min-width:0;flex:1;border:0;padding:14px;font:inherit;background:transparent}
+button {border:0;border-left:1px solid #becdc5;background:#eaf6f0;color:#145f49;padding:0 20px;font:inherit;cursor:pointer}
+.chapters {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:40px 48px}
+.chapters section {border-top:2px solid #2d9272;padding-top:20px;min-width:0}
+.chapters section:nth-child(2) {border-color:#cd7965}
+.chapters section:nth-child(3) {border-color:#8a7cad}
+.chapters section:nth-child(4) {border-color:#a5a05d}
+.number {font-size:12px;color:#748b80}
+h2 {font-size:22px;font-weight:600;margin:8px 0 16px}
+.chapters a {display:block;padding:7px 0}
+.reference {border-top:1px solid #dce3df;margin-top:48px;padding-top:24px}
+.reference p {color:#52645b}
+footer {border-top:1px solid #dce3df;font-size:13px;color:#52645b;flex-wrap:wrap}
+.skip {position:absolute;top:-100px;left:20px;padding:12px;background:white;z-index:10}
+.skip:focus {top:8px}
+@media(max-width:600px) {header,footer {padding:20px}header {align-items:flex-start;flex-wrap:wrap}nav {gap:16px}main {padding:36px 20px}h1 {font-size:42px}.lead {font-size:19px}.chapters {grid-template-columns:1fr;gap:32px}h2 {font-size:20px}button {padding:0 14px}}
