@@ -1,100 +1,493 @@
 <!DOCTYPE html>
-<html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<meta name="description" content="使用 vLLM 加速自回归 LLM-based ASR 模型。新版引擎支持离线批量转写、SDK 级 chunk 流式推理，以及集成 VAD、热词和说话人标签的生产级 WebSocket 服务。">
-<meta property="og:title" content="FunASR vLLM 推理引擎">
-<meta property="og:description" content="使用 vLLM 加速自回归 LLM-based ASR 模型。新版引擎支持离线批量转写、SDK 级 chunk 流式推理，以及集成 VAD、热词和说话人标签的生产级 WebSocket 服务。">
-<meta property="og:type" content="website">
-<meta property="og:url" content="https://modelscope.github.io/FunASR/zh/vllm.html">
-<link rel="canonical" href="https://modelscope.github.io/FunASR/zh/vllm.html">
-<meta property="og:site_name" content="FunASR">
-<meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="FunASR vLLM 推理引擎">
-<meta name="twitter:description" content="使用 vLLM 加速自回归 LLM-based ASR 模型。新版引擎支持离线批量转写、SDK 级 chunk 流式推理，以及集成 VAD、热词和说话人标签的生产级 WebSocket 服务。">
-<title>FunASR vLLM 推理引擎</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../style.css">
-</head><body>
-<nav class="nav"><div class="container">
-<a href="index.html" class="nav-logo">FunASR</a>
-<div class="nav-links">
-<a href="index.html">首页</a>
-<a href="tutorial.html">教程</a>
-<a href="training.html">训练</a>
-<a href="model-registration.html">开发</a>
-<a href="../api.html">API</a>
-<a href="vllm.html" class="active">vLLM</a><a href="agent.html">Agent</a><a href="benchmark.html">Benchmark</a>
-                <a href="../donors.html">功德榜</a>
+
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>vLLM split-engine 推理 - FunASR</title>
+<meta content="vLLM split-engine 推理" name="description"/>
+<meta content="#ffffff" name="theme-color"/>
+<link href="https://www.funasr.com/docs/vllm.html" rel="canonical"/>
+<link href="https://www.funasr.com/en/docs/vllm.html" hreflang="en" rel="alternate"/>
+<link href="https://www.funasr.com/docs/vllm.html" hreflang="zh-CN" rel="alternate"/>
+<meta content="website" property="og:type"/>
+<meta content="vLLM split-engine 推理 - FunASR" property="og:title"/>
+<meta content="vLLM split-engine 推理" property="og:description"/>
+<meta content="https://www.funasr.com/docs/vllm.html" property="og:url"/>
+<link href="../assets/css/site.d651b1dbf605.css" rel="stylesheet"/>
+<link href="../assets/css/experience.5803993934f8.css" rel="stylesheet"/>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "SoftwareApplication", "applicationCategory": "DeveloperApplication", "codeRepository": "https://github.com/modelscope/FunASR", "dateModified": "2026-09-01", "license": "https://github.com/modelscope/FunASR/blob/main/LICENSE", "name": "FunASR", "operatingSystem": "Linux, macOS, Windows", "url": "https://www.funasr.com/docs/vllm.html"}</script>
+</head>
+<body data-copy-icon="../assets/lucide/copy.ea80e566c7a1.svg" data-language="zh" data-route="/docs/vllm.html">
+<a class="skip-link" href="#main">跳到主要内容</a>
+<header class="site-header">
+<a aria-label="FunASR 首页" class="brand" href="https://www.funasr.com/">
+<span aria-hidden="true" class="brand-mark">F</span>
+<span>FunASR</span>
+</a>
+<button aria-controls="primary-navigation" aria-expanded="false" class="icon-button menu-button" data-menu-toggle="" title="打开目录" type="button">
+<img alt="" src="../assets/lucide/menu.90a31b3ab1cf.svg"/>
+</button>
+<nav aria-label="主目录" class="primary-navigation" data-primary-nav="" id="primary-navigation">
+<a href="https://www.funasr.com/">产品</a>
+<a href="https://www.funasr.com/deploy/">部署</a>
+<a href="https://www.funasr.com/models.html">模型</a>
+<a href="https://www.funasr.com/benchmarks.html">性能</a>
+<a href="https://www.funasr.com/ecosystem.html">生态</a>
+<a href="https://www.funasr.com/blog/">博客</a>
+<a href="https://www.funasr.com/docs/">文档</a>
+<a href="https://www.funasr.com/donors.html">功德榜</a>
+</nav>
+<div class="header-actions">
+<a class="icon-link" href="https://www.funasr.com/en/docs/vllm.html" title="English">
+<img alt="" src="../assets/lucide/languages.ae9048feb2c7.svg"/>
+<span>EN</span>
+</a>
+<a aria-label="GitHub" class="icon-button" href="https://www.funasr.com/go/github" title="GitHub">
+<img alt="" src="../assets/lucide/github.793554449a30.svg"/>
+</a>
 </div>
-<div class="lang-dropdown"><button class="lang-btn">中文</button><div class="lang-menu"><a href="../vllm.html">English</a><a href="vllm.html" class="current">中文</a><a href="../ja/vllm.html">日本語</a><a href="../ko/vllm.html">한국어</a></div></div>
-<a href="https://github.com/modelscope/FunASR" class="nav-github">GitHub</a>
-</div></nav>
-
-<div class="content"><div class="container narrow">
-<h1>vLLM 推理引擎</h1>
-<p>使用 vLLM 加速自回归 LLM-based ASR 模型。新版引擎支持离线批量转写、SDK 级 chunk 流式推理，以及集成 VAD、热词和说话人标签的生产级 WebSocket 服务。</p>
-
-<div class="toc-grid">
-<a href="#overview">概述</a>
-<a href="#install">安装环境</a>
-<a href="#offline">离线批量</a>
-<a href="#streaming-sdk">流式 SDK</a>
-<a href="#websocket">WebSocket 服务</a>
-<a href="#dynamic-vad">动态 VAD</a>
-<a href="#performance">性能</a>
-<a href="#api-reference">API 参考</a>
-<a href="#faq">FAQ</a>
-</div>
-
-<section id="overview">
-<h2>概述</h2>
-<p>音频 frontend、encoder、adaptor 和可选 CTC 时间戳解码器仍在 PyTorch 中运行；LLM 解码部分通过 prompt embedding 交给 vLLM，获得 PagedAttention、连续批处理和 tensor parallel 多卡并行能力。</p>
-
-<h3>适用模型</h3>
+</header>
+<main id="main">
+<div class="docs-layout">
+<aside class="docs-sidebar">
+<a class="docs-home" href="https://www.funasr.com/docs/">文档中心</a>
+<details class="docs-navigation" open="">
+<summary class="docs-navigation-toggle">浏览目录</summary>
+<details open="">
+<summary>开始使用</summary>
+<nav aria-label="开始使用">
+<a href="https://www.funasr.com/docs/installation.html">安装与环境验证</a>
+<a href="https://www.funasr.com/docs/quickstart.html">第一次转写</a>
+<a href="https://www.funasr.com/docs/python-api.html">Python SDK: AutoModel</a>
+<a href="https://www.funasr.com/docs/model-selection.html">选择第一个模型</a>
+<a href="https://www.funasr.com/docs/command-line.html">命令行转写</a>
+<a href="https://www.funasr.com/docs/migration.html">从 Whisper 与云 API 迁移</a>
+</nav>
+</details>
+<details open="">
+<summary>模型与能力</summary>
+<nav aria-label="模型与能力">
+<a href="https://www.funasr.com/docs/moss-transcribe-diarize.html">MOSS 转写与说话人分离</a>
+<a href="https://www.funasr.com/docs/model-zoo.html">Model Zoo</a>
+</nav>
+</details>
+<details open="">
+<summary>训练与扩展</summary>
+<nav aria-label="训练与扩展">
+<a href="https://www.funasr.com/docs/training.html">微调与评测</a>
+<a href="https://www.funasr.com/docs/model-registration.html">自定义模型注册</a>
+</nav>
+</details>
+<details open="">
+<summary>部署与接口</summary>
+<nav aria-label="部署与接口">
+<a href="https://www.funasr.com/docs/docker.html">容器环境与镜像选择</a>
+<a href="https://www.funasr.com/docs/runtime-guide.html">服务部署入口</a>
+<a href="https://www.funasr.com/docs/http-server.html">Python HTTP 服务</a>
+<a href="https://www.funasr.com/docs/kubernetes.html">Kubernetes 部署</a>
+<a href="https://www.funasr.com/docs/deployment-matrix.html">运行时与部署矩阵</a>
+<a aria-current="page" href="https://www.funasr.com/docs/vllm.html">vLLM split-engine 推理</a>
+<a href="https://www.funasr.com/docs/native-vllm.html">原生 vLLM 验证记录</a>
+</nav>
+</details>
+<details open="">
+<summary>评测与运维</summary>
+<nav aria-label="评测与运维">
+<a href="https://www.funasr.com/docs/troubleshooting.html">安装与推理故障排查</a>
+<a href="https://www.funasr.com/docs/security.html">服务安全边界</a>
+<a href="https://www.funasr.com/docs/benchmark-method.html">可复现性能评测</a>
+<a href="https://www.funasr.com/docs/realtime-benchmark.html">实时 WebSocket 压测</a>
+</nav>
+</details>
+<details open="">
+<summary>应用与生态</summary>
+<nav aria-label="应用与生态">
+<a href="https://www.funasr.com/docs/use-cases.html">应用场景与示例</a>
+<a href="https://www.funasr.com/docs/community.html">社区集成</a>
+<a href="https://www.funasr.com/docs/repositories.html">四仓职责与贡献入口</a>
+<a href="https://www.funasr.com/docs/javascript.html">JavaScript 客户端</a>
+<a href="https://www.funasr.com/docs/workflows.html">工作流集成</a>
+</nav>
+</details>
+<details open="">
+<summary>协议与参考</summary>
+<nav aria-label="协议与参考">
+<a href="https://www.funasr.com/docs/service-api.html">HTTP API 契约</a>
+<a href="https://www.funasr.com/docs/websocket-protocol.html">C++ WebSocket 协议</a>
+<a href="https://www.funasr.com/docs/onnx-output.html">ONNX 二进制输出契约</a>
+</nav>
+</details>
+<a href="https://www.funasr.com/deploy/">部署手册 →</a>
+</details>
+</aside>
+<div class="docs-body">
+<nav aria-label="面包屑" class="breadcrumbs"><a href="https://www.funasr.com/">FunASR</a><span>/</span><a href="https://www.funasr.com/docs/">文档</a><span>/</span><span>vLLM split-engine 推理</span></nav>
+<header class="docs-title"><h1>vLLM split-engine 推理</h1><a class="source-link" data-source-link="" href="https://github.com/modelscope/FunASR/blob/main/docs/vllm_guide_zh.md">查看 / 编辑源文档 ↗</a></header>
+<article class="docs-article"><div class="source-title-anchor" id="funasr-vllm-推理引擎指南"></div>
+<hr/>
+<span data-legacy-doc-anchor="benchmark" id="performance"></span><h2 id="benchmark">Benchmark</h2>
+<p><strong>测试集</strong>：184 文件，11541 秒，Fun-ASR-Nano / GLM-ASR-Nano。RTFx 定义、计时口径和可复现字段请见 <a href="https://www.funasr.com/docs/benchmark-method.html">Benchmark RTF and Reproducibility Notes</a>。</p>
 <table>
-<tr><th>模型系列</th><th>vLLM 支持</th><th>说明</th></tr>
-<tr><td><b>FunASRNano</b></td><td>支持</td><td>Audio encoder + adaptor + Qwen3-0.6B LLM。</td></tr>
-<tr><td><b>LLMASR / LLMASRNAR</b></td><td>支持</td><td>Whisper-style 音频编码器后接 Qwen、Vicuna 或 LLaMA 解码。</td></tr>
-<tr><td><b>GLMASR</b></td><td>支持</td><td>GLM-ASR-Nano 使用自回归 LLM 解码。</td></tr>
-<tr><td><b>QwenAudioWarp</b></td><td>支持</td><td>LLM-based audio generation path。</td></tr>
-<tr><td>Paraformer、SenseVoice、Conformer、Transformer</td><td>不支持</td><td>这些模型不是 LLM 自回归解码路径，请使用标准 <code>AutoModel</code>。</td></tr>
+<thead>
+<tr>
+<th>模型</th>
+<th>引擎</th>
+<th>VAD</th>
+<th>RTFx</th>
+<th>CER</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Fun-ASR-Nano</td>
+<td>PyTorch</td>
+<td>dynamic</td>
+<td>21</td>
+<td>8.06%</td>
+<td>基准</td>
+</tr>
+<tr>
+<td>Fun-ASR-Nano</td>
+<td><strong>vLLM batch</strong></td>
+<td>dynamic</td>
+<td><strong>340</strong></td>
+<td><strong>8.20%</strong></td>
+<td>16x 加速</td>
+</tr>
+<tr>
+<td>Fun-ASR-Nano</td>
+<td><strong>离线服务 (no SPK)</strong></td>
+<td>dynamic</td>
+<td><strong>102</strong></td>
+<td>8.14%</td>
+<td></td>
+</tr>
+<tr>
+<td>Fun-ASR-Nano</td>
+<td><strong>离线服务 (+SPK)</strong></td>
+<td>dynamic</td>
+<td><strong>46</strong></td>
+<td>8.19%</td>
+<td>SPK 默认关闭</td>
+</tr>
+<tr>
+<td>GLM-ASR-Nano</td>
+<td><strong>vLLM batch</strong></td>
+<td>fixed</td>
+<td><strong>265</strong></td>
+<td>12.93%</td>
+<td>不支持长音频推理</td>
+</tr>
+</tbody>
 </table>
+<blockquote>
+<p>vLLM 与 PyTorch CER 完全一致（差 &lt; 0.2%），速度提升 16-340x。</p>
+</blockquote>
+<hr/>
+<h2 id="目录">目录</h2>
+<ol>
+<li><a href="#1-安装与环境">安装与环境</a></li>
+<li><a href="#2-vllm-推理引擎架构">vLLM 推理引擎架构</a></li>
+<li><a href="#3-离线-sdk-推理">离线 SDK 推理</a></li>
+<li><a href="#4-流式-sdk-推理">流式 SDK 推理</a></li>
+<li><a href="#5-离线语音识别服务">离线语音识别服务</a></li>
+<li><a href="#6-流式语音识别服务">流式语音识别服务</a></li>
+<li><a href="#7-动态-vad">动态 VAD</a></li>
+<li><a href="#8-api-参考">API 参考</a></li>
+<li><a href="#9-faq">FAQ</a></li>
+</ol>
+<hr/>
+<span data-legacy-doc-anchor="1-安装与环境" id="install"></span><h2 id="1-安装与环境">1. 安装与环境</h2>
+<p>先安装 vLLM,按 NVIDIA 驱动的 CUDA 版本选对应版本;vLLM 会自动钉定并安装匹配的 torch / torchaudio / torchvision 三件套,所以不要自己装 torch/torchaudio——三者 ABI 锁死,必须是互相编译匹配的同一组(如 torch 2.10.0 ↔ torchaudio 2.10.0 ↔ torchvision 0.25.0),只能随 vLLM 一起来。</p>
+<pre id="code-0"><code class="language-bash"># 1) 先装 vLLM。按 `nvidia-smi` 显示的 CUDA 版本(驱动支持的最高 CUDA,不是 runtime CUDA)选版本,
+#    vLLM 会带来匹配的 torch/torchaudio/torchvision。
+#    驱动 CUDA 12.x  -&gt; pip install vllm==0.19.1   (附带 torch 2.10 / cu128)
+#    驱动 CUDA &gt;= 13 -&gt; pip install vllm           (最新版;附带 torch 2.11 / cu130)
 
-<h3>三种入口</h3>
+pip install "vllm==0.19.1"   # 按你的驱动 CUDA 调整;见下方说明
+
+# 2) 再装 FunASR 与其余依赖。
+pip install "funasr&gt;=1.3.26"
+pip install safetensors tiktoken websockets regex fastapi uvicorn python-multipart
+
+cd /path/to/FunASR &amp;&amp; pip install -e .
+</code></pre>
+<h3 id="开始前先选定模型路径">开始前先选定模型路径</h3>
+<p>目前有两条不同的 Fun-ASR-Nano vLLM 集成路径，checkpoint 与调用接口不能混用：</p>
+<h4 id="a-funasr-拆分引擎路径本指南">A. FunASR 拆分引擎路径（本指南）</h4>
+<p>请从 <a href="https://modelscope.cn/models/FunAudioLLM/Fun-ASR-Nano-2512">ModelScope</a>
+或 <a href="https://huggingface.co/FunAudioLLM/Fun-ASR-Nano-2512">Hugging Face</a>
+下载官方 <code>FunAudioLLM/Fun-ASR-Nano-2512</code>。当前 Hugging Face 的 <code>model.pt</code>
+CTC 权重不完整，因此仍可用于转写，但 FunASR 会禁用受影响的 CTC 路径，避免
+返回不可靠的时间戳或说话人分离结果。部署需要时间戳或说话人分离时，请使用
+ModelScope checkpoint；权重发布修复进度见 <a href="https://github.com/modelscope/FunASR/issues/3496">#3496</a>。
+<code>Qwen3-0.6B/</code> 子目录按设计只保存 LLM 配置与 tokenizer，不是可以单独加载的权重目录。</p>
+<pre id="code-1"><code class="language-python">from funasr.auto.auto_model_vllm import AutoModelVLLM
+
+# 二选一；默认使用 ModelScope。
+model = AutoModelVLLM(
+    model="FunAudioLLM/Fun-ASR-Nano-2512",
+    hub="ms",
+)
+# model = AutoModelVLLM(
+#     model="FunAudioLLM/Fun-ASR-Nano-2512",
+#     hub="hf",
+# )
+</code></pre>
+<p>首次加载时，FunASR 会自动调用 <code>prepare_vllm_model_dir()</code>：从
+<code>Qwen3-0.6B/</code> 复制配置与 tokenizer，从根目录 <code>model.pt</code> 提取 <code>llm.*</code>
+权重，并生成 <code>Qwen3-0.6B-vllm/model.safetensors</code>。不要把 <code>model</code> 指向
+<code>Qwen3-0.6B/</code>，也不要直接让 vLLM 加载这个只有配置的子目录。</p>
+<h4 id="b-vllm-原生转写路径">B. vLLM 原生转写路径</h4>
+<p>官方维护的 native checkpoint 是
+<a href="https://huggingface.co/FunAudioLLM/Fun-ASR-Nano-2512-vllm"><code>FunAudioLLM/Fun-ASR-Nano-2512-vllm</code></a>。
+vLLM 的支持模型表也把
+<a href="https://huggingface.co/allendou/Fun-ASR-Nano-2512-vllm"><code>allendou/Fun-ASR-Nano-2512-vllm</code></a>
+列为原生 <code>FunASRForConditionalGeneration</code> 架构示例；后者是托管在官方
+FunAudioLLM 组织之外的社区转换完整 checkpoint。只有明确选择 vLLM 原生转写
+接口时，才应使用这两种 native checkpoint；不要用它们替换下文 FunASR
+<code>AutoModelVLLM</code> 示例中的官方 checkpoint。</p>
+<p>两种 native 路径都通过 <code>vllm serve</code> 提供非实时的请求/响应式转写
+<code>/v1/audio/transcriptions</code>，不会注册 <code>/v1/realtime</code>。vLLM 只为声明
+realtime 任务的模型注册该 WebSocket 端点，<code>FunASRForConditionalGeneration</code>
+当前不在它的 <a href="https://docs.vllm.ai/en/latest/models/supported_models/#realtime-transcription">Realtime Transcription 表</a>
+中。需要实时流式识别时，请使用 FunASR 流式 SDK 推理或流式 ASR 服务；路径 A 的
+<code>AutoModelVLLM</code> 示例同样属于离线推理。</p>
+<p><strong>硬件</strong>：GPU ≥ 8GB VRAM，CUDA ≥ 11.8。推荐 16GB+。</p>
+<p>为什么不要单独执行 <code>pip install torch torchaudio</code> ? torch/torchaudio/torchvision 的版本由 vLLM 版本决定—— 每个大版本会一起升级(见 vLLM 的 <a href="https://github.com/vllm-project/vllm/blob/main/requirements/cuda.txt">requirements/cuda.txt</a>)。手动安装会拉到最新 wheel,可能是为比你驱动更新的 CUDA runtime 编译的;PyTorch 会在 CUDA 初始化阶段、FunASR 启动前就报 The NVIDIA driver on your system is too old。让 vLLM 统一钉定这三件套即可避免。若仍遇到该错误,请安装其 CUDA 构建与 nvidia-smi 显示的 CUDA 匹配的 vLLM 版本(如 CUDA 12.x 用 vllm==0.19.1),或先升级 NVIDIA 驱动。</p>
+<hr/>
+<span data-legacy-doc-anchor="2-vllm-推理引擎架构" id="overview"></span><h2 id="2-vllm-推理引擎架构">2. vLLM 推理引擎架构</h2>
+<h3 id="整体架构">整体架构</h3>
+<p>FunASR 的 vLLM 集成将 ASR 模型拆分为两部分独立运行：</p>
+<pre id="code-2"><code>┌──────────────────────────────────────────────────────────────┐
+│                    FunASR + vLLM 推理架构                      │
+├──────────────────────────────────────────────────────────────┤
+│                                                              │
+│  ┌─────────────── PyTorch (单 GPU) ───────────────┐          │
+│  │                                                │          │
+│  │  Audio ──→ Frontend ──→ Audio Encoder ──→ Adaptor         │
+│  │            (fbank)      (SenseVoice/     (Transformer/    │
+│  │                          Whisper)         MLP)            │
+│  │                              │                            │
+│  │                              ▼                            │
+│  │                     Audio Embeddings                      │
+│  │                              │                            │
+│  │  Text Prompt ──→ Tokenize ──→ Embed                       │
+│  │  (system/user/                  │                         │
+│  │   hotwords/language)            │                         │
+│  │                                 ▼                         │
+│  │                          [Concat Embeddings]              │
+│  └─────────────────────────────────┼─────────────┘           │
+│                                    │                         │
+│                                    ▼ EmbedsPrompt            │
+│  ┌─────────────── vLLM Engine ────────────────────┐          │
+│  │                                                │          │
+│  │   PagedAttention + Continuous Batching         │          │
+│  │   KV Cache 管理 + CUDA Graph                   │          │
+│  │   Tensor Parallel (多卡)                       │          │
+│  │                                                │          │
+│  │   Qwen3-0.6B / Llama-2B (LLM 解码)              │          │
+│  │                                                │          │
+│  └────────────────────┬───────────────────────────┘          │
+│                       │                                      │
+│                       ▼                                      │
+│                Generated Text                                │
+│                       │                                      │
+│  ┌────────────────────┼──────────────────────────┐           │
+│  │  (可选) CTC Decoder ──→ Forced Alignment      │            │
+│  │           ──→ 字级别时间戳                     │            │
+│  └───────────────────────────────────────────────┘           │
+└──────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3 id="为什么用-vllm">为什么用 vLLM？</h3>
 <table>
-<tr><th>模式</th><th>入口</th><th>适用场景</th></tr>
-<tr><td>离线 SDK 推理</td><td><code>AutoModelVLLM</code> 或 <code>FunASRNanoVLLM</code></td><td>大规模文件转写、吞吐优先的任务。</td></tr>
-<tr><td>流式 SDK 推理</td><td><code>FunASRNanoStreamingVLLM</code></td><td>Python 应用中需要 chunk 级增量文本。</td></tr>
-<tr><td>WebSocket 实时服务</td><td><code>serve_realtime_ws.py</code></td><td>生产实时客户端，支持 VAD 分句和说话人标签。</td></tr>
+<thead>
+<tr>
+<th>特性</th>
+<th>PyTorch generate()</th>
+<th>vLLM</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>KV Cache 管理</td>
+<td>固定分配，浪费显存</td>
+<td>PagedAttention，按需分配</td>
+</tr>
+<tr>
+<td>批处理</td>
+<td>需手动 padding</td>
+<td>Continuous Batching，自动调度</td>
+</tr>
+<tr>
+<td>CUDA 优化</td>
+<td>无</td>
+<td>CUDA Graph + 算子融合</td>
+</tr>
+<tr>
+<td>多卡并行</td>
+<td>手动实现</td>
+<td>Tensor Parallel 一行配置</td>
+</tr>
+<tr>
+<td>吞吐量</td>
+<td>RTFx ~20</td>
+<td><strong>RTFx 340+</strong></td>
+</tr>
+</tbody>
 </table>
-</section>
-
-<section id="install">
-<h2>安装环境</h2>
-<pre><code>pip install "funasr&gt;=1.3.0"
-pip install "vllm&gt;=0.12.0"
-pip install safetensors tiktoken websockets regex
-
-# 如果使用源码树中的 AutoModelVLLM
-cd /path/to/FunASR
-pip install -e .</code></pre>
+<h3 id="支持模型">支持模型</h3>
 <table>
-<tr><th>资源</th><th>最低要求</th><th>推荐</th></tr>
-<tr><td>GPU 显存</td><td>8 GB</td><td>16 GB 以上，给 KV cache 留出更充足空间。</td></tr>
-<tr><td>CUDA</td><td>11.8</td><td>12.x</td></tr>
-<tr><td>GPU 数量</td><td>1</td><td>使用 tensor parallel 时建议 2 张或更多。</td></tr>
+<thead>
+<tr>
+<th>模型</th>
+<th>LLM 部分</th>
+<th>audio encoder</th>
+<th>vLLM 加速</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Fun-ASR-Nano</strong></td>
+<td>Qwen3-0.6B</td>
+<td>SenseVoice</td>
+<td>✓ 21.7x</td>
+</tr>
+<tr>
+<td><strong>GLM-ASR-Nano</strong></td>
+<td>Llama-2B</td>
+<td>Whisper-like</td>
+<td>✓ 7.6x</td>
+</tr>
+<tr>
+<td>LLMASR</td>
+<td>Qwen/Vicuna</td>
+<td>Whisper</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>Paraformer</td>
+<td>无 LLM</td>
+<td>—</td>
+<td>✗ 非自回归</td>
+</tr>
+<tr>
+<td>SenseVoice</td>
+<td>无 LLM</td>
+<td>—</td>
+<td>✗ encoder-decoder</td>
+</tr>
+</tbody>
 </table>
-<p>首次运行时，FunASR 会从 <code>model.pt</code> 提取 LLM 权重到 vLLM 兼容目录，例如 <code>Qwen3-0.6B-vllm</code>；后续启动会复用已准备好的权重。</p>
-</section>
-
-<section id="offline">
-<h2>离线 SDK 推理</h2>
-<h3>推荐通用接口</h3>
-<pre><code>from funasr.auto.auto_model_vllm import AutoModelVLLM
+<h3 id="关键实现细节">关键实现细节</h3>
+<ol>
+<li><strong>权重分离</strong>：从 <code>model.pt</code> 提取 LLM 权重，转为 HuggingFace 格式供 vLLM 加载</li>
+<li><strong>EmbedsPrompt</strong>：直接把<strong>已算好的 embedding 向量</strong>（而非通常的 token ID）作为 prompt 送入 vLLM（开关 <code>enable_prompt_embeds=True</code>）。Fun-ASR-Nano 必须用它，因为音频经 adaptor 得到的是连续向量、不是 token，需把音频 embedding 与文本 embedding 在序列维拼接后整体送入 vLLM</li>
+<li><strong>use_low_frame_rate</strong>：Fun-ASR-Nano 的 adaptor 输出需按公式截断到正确 token 数（一致性关键）</li>
+<li><strong>batch encode</strong>：多条音频通过 <code>extract_fbank</code> → <code>audio_encoder</code> → <code>audio_adaptor</code> 一次前向</li>
+<li><strong>CTC 时间戳</strong>：保留 encoder_out，生成文本后做 forced alignment 得到字级别时间</li>
+</ol>
+<hr/>
+<span data-legacy-doc-anchor="3-离线-sdk-推理" id="offline"></span><h2 id="3-离线-sdk-推理">3. 离线 SDK 推理</h2>
+<p>适用于大规模音频转写、离线批量处理。vLLM 的批处理能力在此场景优势最大。</p>
+<h3 id="设计原理">设计原理</h3>
+<p>离线 SDK 推理将 ASR 流水线拆分为两阶段独立执行：</p>
+<pre id="code-3"><code>┌─────────────────────────────────────────────────────────────────────┐
+│                  阶段 1: 音频编码（PyTorch, 单 GPU）                   │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                     │
+│  音频文件列表 ──→ 分组（每 8 条）──→ Frontend(Fbank)                    │
+│       │                                     │                       │
+│       │                                     ▼                       │
+│       │                            SenseVoice Encoder               │
+│       │                                     │                       │
+│       │                                     ▼                       │
+│       │                            Audio Adaptor                    │
+│       │                            (dim 转换 + low_frame_rate 截断)  │
+│       │                                     │                       │
+│       └─── 共享文本 prompt 预编码 ─────┐      ▼                       │
+│            (system/hotwords/language)  │  audio_embeds               │
+│                     │                 │      │                       │
+│                     ▼                 │      ▼                       │
+│                prefix_emb ──→ [concat: prefix | audio | suffix]      │
+│                                              │                       │
+│                                              ▼                       │
+│                                     EmbedsPrompt（N 条）             │
+└──────────────────────────────────────────────┼──────────────────────┘
+                                               │
+                                               ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│              阶段 2: LLM 解码（vLLM, 多 GPU Tensor Parallel）         │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                     │
+│  EmbedsPrompt × N ──→ vLLM Continuous Batching                      │
+│                        (PagedAttention + CUDA Graph)                │
+│                              │                                      │
+│                              ▼                                      │
+│                     Generated token_ids × N                         │
+│                              │                                      │
+│                              ▼                                      │
+│                     Decode + 后处理（去特殊标记、清洗）                 │
+│                              │                                      │
+│                              ▼                                      │
+│                     (可选) CTC Forced Alignment → 字级别时间戳         │
+└─────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<p><strong>关键设计决策：</strong></p>
+<ol>
+<li><strong>权重分离</strong>：首次运行时从 <code>model.pt</code> 提取 <code>llm.*</code> 前缀的权重，保存为 HuggingFace safetensors 格式供 vLLM 加载（缓存到 <code>Qwen3-0.6B-vllm/</code> 目录）</li>
+<li><strong>Embedding 拼接</strong>：文本 prompt 通过 LLM 的 <code>embed_tokens</code> 层编码为 embedding，与音频 adaptor 输出在序列维度拼接：<code>[prefix_emb | audio_emb | suffix_emb]</code>，以 <code>EmbedsPrompt</code> 形式送入 vLLM</li>
+<li><strong>Low Frame Rate 截断</strong>：adaptor 输出需按公式 <code>fake_token_len = ((((fbank_len - 3 + 2) // 2 - 3 + 2) // 2) - 1) // 2 + 1</code> 截断到正确长度，确保与 PyTorch 训练时一致</li>
+<li><strong>批量音频编码</strong>：多条音频按 batch_size=8 分组通过 encoder + adaptor 前向，减少 GPU kernel launch 开销</li>
+<li><strong>文本 prompt 共享</strong>：同一批次内 hotwords/language 相同时，prefix_emb 和 suffix_emb 只计算一次</li>
+<li><strong>CTC 时间戳</strong>：保留 encoder_out，LLM 生成文本后做 forced alignment 得到字级别时间</li>
+</ol>
+<p><strong>为什么比 PyTorch generate() 快？</strong></p>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>PyTorch</th>
+<th>vLLM</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>KV Cache</td>
+<td>固定预分配（浪费显存）</td>
+<td>PagedAttention 按需分配</td>
+</tr>
+<tr>
+<td>批处理</td>
+<td>需手动 padding 对齐</td>
+<td>Continuous Batching 自动调度</td>
+</tr>
+<tr>
+<td>CUDA</td>
+<td>逐 sample 串行</td>
+<td>CUDA Graph + 算子融合</td>
+</tr>
+<tr>
+<td>多卡</td>
+<td>需手动实现</td>
+<td>Tensor Parallel 一行配置</td>
+</tr>
+<tr>
+<td>结果</td>
+<td>RTFx ~20</td>
+<td><strong>RTFx 340+</strong>（16倍加速）</td>
+</tr>
+</tbody>
+</table>
+<h3 id="通用接口推荐">通用接口（推荐）</h3>
+<pre id="code-4"><code class="language-python">from funasr.auto.auto_model_vllm import AutoModelVLLM
 
 model = AutoModelVLLM(
     model="FunAudioLLM/Fun-ASR-Nano-2512",
-    hub="ms",                    # 也可以使用 "hf"
-    tensor_parallel_size=2,
+    hub="ms",                    # 或 "hf"
+    tensor_parallel_size=2,      # 多卡并行
     gpu_memory_utilization=0.8,
 )
 
@@ -103,11 +496,11 @@ results = model.generate(
     language="中文",
     hotwords=["张三", "北京"],
 )
-for item in results:
-    print(f"[{item['key']}] {item['text']}")</code></pre>
-
-<h3>Fun-ASR-Nano 直接接口</h3>
-<pre><code>from funasr.models.fun_asr_nano.inference_vllm import FunASRNanoVLLM
+for r in results:
+    print(f"[{r['key']}] {r['text']}")
+</code></pre>
+<h3 id="直接接口">直接接口</h3>
+<pre id="code-5"><code class="language-python">from funasr.models.fun_asr_nano.inference_vllm import FunASRNanoVLLM
 
 engine = FunASRNanoVLLM.from_pretrained(
     model="FunAudioLLM/Fun-ASR-Nano-2512",
@@ -115,29 +508,44 @@ engine = FunASRNanoVLLM.from_pretrained(
 )
 
 results = engine.generate(
-    inputs="wav.scp",
-    language="中文",
+    inputs="wav.scp",  # 支持 scp/jsonl/文件列表
     hotwords=["开放时间"],
+    language="中文",
     max_new_tokens=512,
-)</code></pre>
-
-<h3>命令行</h3>
-<pre><code>cd examples/industrial_data_pretraining/fun_asr_nano
+)
+</code></pre>
+<h3 id="命令行">命令行</h3>
+<pre id="code-6"><code class="language-bash">cd examples/industrial_data_pretraining/fun_asr_nano
 
 # 单文件
 python demo_vllm.py --input audio.wav --language 中文
 
-# 批量 + 多卡 tensor parallel
+# 批量 + 多卡
 python demo_vllm.py --input wav.scp --tensor-parallel-size 4 --batch-size 32
 
-# 热词 + JSONL 输出
-python demo_vllm.py --input audio.wav --hotwords 张三 北京 --output results.jsonl</code></pre>
-</section>
-
-<section id="streaming-sdk">
-<h2>流式 SDK 推理</h2>
-<p><code>FunASRNanoStreamingVLLM</code> 将音频切成 720 ms chunk，对累积音频重编码，把各 chunk prompt 批量送入 vLLM，并返回 fixed/unfixed 文本区域。适合 Python 应用做实时字幕或增量展示。</p>
-<pre><code>from funasr.models.fun_asr_nano.inference_vllm_streaming import FunASRNanoStreamingVLLM
+# 带热词 + 保存结果
+python demo_vllm.py --input audio.wav --hotwords 张三 北京 --output results.jsonl
+</code></pre>
+<hr/>
+<span data-legacy-doc-anchor="4-流式-sdk-推理" id="streaming-sdk"></span><h2 id="4-流式-sdk-推理">4. 流式 SDK 推理</h2>
+<p>将音频按 720ms chunk 逐步处理，输出逐步稳定的识别结果。适用于 SDK 集成实时字幕场景。</p>
+<h3 id="设计原理_1">设计原理</h3>
+<pre id="code-7"><code>音频流（720ms chunks）
+    │ 累积重编码（每个 chunk 包含从头到当前的全部音频）
+    ▼
+┌──────────────────────┐
+│ Stage 1: 前 10 chunk │  ← 无 prev_text，批量生成
+│ 找到稳定输出           │
+└──────────┬───────────┘
+           ▼
+┌──────────────────────┐
+│ Stage 2: 后续 chunk   │  ← 用稳定输出作 prev_text
+└──────────┬───────────┘
+           ▼
+每个 chunk: [fixed 区域（确认）] + [8字 unfixed（可能变）]
+</code></pre>
+<h3 id="用法">用法</h3>
+<pre id="code-8"><code class="language-python">from funasr.models.fun_asr_nano.inference_vllm_streaming import FunASRNanoStreamingVLLM
 
 engine = FunASRNanoStreamingVLLM.from_pretrained(
     model="FunAudioLLM/Fun-ASR-Nano-2512",
@@ -149,188 +557,741 @@ for result in engine.streaming_generate("audio.wav", language="中文"):
     if result["is_final"]:
         print(f"最终: {result['text']}")
     else:
-        print(f"[{result['audio_duration_ms']:.0f} ms] 确认: {result['fixed_text']}")</code></pre>
+        print(f"[{result['audio_duration_ms']:.0f}ms] 确认: {result['fixed_text']}")
+</code></pre>
+<p><strong>注意：EmbedsPrompt 下不能用 <code>repetition_penalty</code>。</strong> 此时 prompt 是 embedding 向量、没有对应的 token ID，而 <code>repetition_penalty</code> 要靠 prompt 的 token ID 在 logits 上给已出现的词降分；用在 EmbedsPrompt 上会<strong>索引越界、触发 CUDA device-side assert</strong>。</p>
+<h3 id="生产-api-稳定性清单">生产 API 稳定性清单</h3>
+<p>把 <code>AutoModelVLLM</code> 封装成长驻 API 服务时，请隔离每次请求的状态，并固定安全的解码默认值：</p>
+<pre id="code-9"><code class="language-python">common = dict(
+    language="auto",
+    temperature=0.0,
+    repetition_penalty=1.0,
+    max_new_tokens=200,
+)
+
+for _ in range(2):
+    results = model.generate(["vad_segment_01.wav", "vad_segment_02.wav"], **common)
+    print([r["text"] for r in results])
+</code></pre>
+<p>如果同一个音频第一次请求正常、第二次请求开始重复：</p>
+<ol>
+<li>先把 API 层拿掉，用相同 VAD 分段跑上面的最小脚本。</li>
+<li>如果最小脚本稳定，优先检查 API 封装是否复用了请求级变量、上一轮 VAD 分段列表、上一轮 <code>results</code> 或累积文本。</li>
+<li>如果最小脚本也重复，再记录完整的 <code>funasr</code>、<code>vllm</code>、<code>torch</code> 版本，以及第一次和第二次输出文本，再调整其它解码参数。</li>
+</ol>
+<p>不要通过调大 <code>repetition_penalty</code> 来压制 Fun-ASR-Nano vLLM 重复输出；prompt-embeds 路径应保持中性值 <code>1.0</code>。</p>
+<h3 id="输出特性">输出特性</h3>
 <table>
-<tr><th>行为</th><th>说明</th></tr>
-<tr><td>Stage 1</td><td>前 10 个 chunk 不使用 <code>prev_text</code>，用于找到稳定前缀。</td></tr>
-<tr><td>Stage 2</td><td>后续 chunk 使用稳定前缀作为 assistant context。</td></tr>
-<tr><td>Rollback</td><td>最后 <code>rollback_chars</code> 个字符保持未确认，等待后续 chunk 修正。</td></tr>
-<tr><td>短音频</td><td>前 1.5 到 3 秒可能为空或不稳定，这是模型特性。</td></tr>
+<thead>
+<tr>
+<th>累积音频</th>
+<th>输出质量</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>&lt; 1.5s</td>
+<td>空或噪声</td>
+</tr>
+<tr>
+<td>1.5-3.0s</td>
+<td>部分正确</td>
+</tr>
+<tr>
+<td>&gt; 3.0s</td>
+<td>准确输出</td>
+</tr>
+</tbody>
 </table>
-</section>
-
-<section id="websocket">
-<h2>WebSocket 实时服务</h2>
-<p>实时服务集成 streaming VAD、vLLM 分段解码、partial 预览、幻觉重复清理、热词、语种提示和说话人分离。</p>
-
-<h3>启动服务</h3>
-<pre><code>cd examples/industrial_data_pretraining/fun_asr_nano
-
-# 单卡
-CUDA_VISIBLE_DEVICES=0 python serve_realtime_ws.py --port 10095 --language 中文
-
-# 多卡 tensor parallel
-CUDA_VISIBLE_DEVICES=0,1 python serve_realtime_ws.py \
-    --port 10095 \
-    --tensor-parallel-size 2 \
-    --language 中文
-
-# 完整参数示例
-python serve_realtime_ws.py \
-    --port 10095 \
+<hr/>
+<h2 id="5-离线语音识别服务">5. 离线语音识别服务</h2>
+<h3 id="51-服务架构">5.1 服务架构</h3>
+<pre id="code-10"><code>客户端                                  serve_vllm.py
+  │                                        │
+  │── HTTP/OpenAI/WebSocket ──────────────→│
+  │                                        │
+  │                                   ┌────┴────────────────────────┐
+  │                                   │ 1. 接收完整音频文件            │
+  │                                   │ 2. 动态 VAD 分段（≤60s/段）    │
+  │                                   │ 3. vLLM batch 推理所有段      │
+  │                                   │ 4. CTC 时间戳（逐字）          │
+  │                                   │ 5. 说话人分离（可选）          │
+  │                                   └────┬────────────────────────┘
+  │                                        │
+  │←── JSON 结果 ─────────────────────────│
+</code></pre>
+<p><strong>特点</strong>：
+- 音频完整到达后处理，适合文件转写
+- 动态 VAD 保留长段（≤60s），减少边界切割损失
+- batch 推理所有 VAD 段，吞吐量高
+- 自动输出字级别时间戳
+- SPK 说话人分离默认关闭，客户端可开启</p>
+<h3 id="52-启动服务">5.2 启动服务</h3>
+<pre id="code-11"><code class="language-bash">CUDA_VISIBLE_DEVICES=0 python examples/industrial_data_pretraining/fun_asr_nano/serve_vllm.py \
+    --port 8899 \
     --model FunAudioLLM/Fun-ASR-Nano-2512 \
-    --hub ms \
-    --device cuda:0 \
-    --decode-interval 0.48 \
-    --hotword-file 热词列表 \
-    --language 中文 \
-    --dtype bf16 \
-    --tensor-parallel-size 1 \
-    --gpu-memory-utilization 0.8 \
-    --max-model-len 2048</code></pre>
-
-<h3>客户端</h3>
+    --gpu-memory-utilization 0.5
+</code></pre>
+<blockquote>
+<p><strong>关于 <code>CUDA_VISIBLE_DEVICES</code></strong>：这是<a href="https://docs.vllm.ai/en/v0.4.3/serving/env_vars.html">vllm的一个环境变量</a> ，示例中的 <code>=0</code> 只是"用第 0 张卡"的示例值，<strong>不是固定写法</strong>，它选择本进程可见的 GPU（编号同 <code>nvidia-smi</code>），单卡机器也不需要设置。</p>
+<p><strong>单卡多实例</strong>：0.6B / 1.7B 这类小模型一张卡可起多个实例，多进程可都指向同一张卡（如都 <code>=0</code>）+ MPS 共享；分卡则进程 A <code>=0</code>、B <code>=1</code>（见 §6.7）。</p>
+</blockquote>
+<h3 id="53-协议一http-rest--post-asr">5.3 协议一：HTTP REST — <code>POST /asr</code></h3>
+<p>功能最全的接口，支持 SPK、时间戳、热词。</p>
+<p><strong>请求</strong>：<code>multipart/form-data</code></p>
 <table>
-<tr><th>客户端</th><th>用法</th></tr>
-<tr><td>浏览器</td><td>打开 <code>client_mic.html</code>，支持麦克风、文件上传、热词和说话人标签。</td></tr>
-<tr><td>Python CLI</td><td><code>python client_python.py --server ws://localhost:10095 --mic</code></td></tr>
-<tr><td>测试脚本</td><td><code>python client_test.py --server ws://localhost:10095 --file audio.wav</code></td></tr>
+<thead>
+<tr>
+<th>参数</th>
+<th>类型</th>
+<th>默认值</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>file</code></td>
+<td>file</td>
+<td>必填</td>
+<td>音频文件（wav/mp3/flac）</td>
+</tr>
+<tr>
+<td><code>language</code></td>
+<td>string</td>
+<td>None</td>
+<td>语种（"中文"/"English"/...），None 为自动</td>
+</tr>
+<tr>
+<td><code>hotwords</code></td>
+<td>string</td>
+<td>""</td>
+<td>热词，逗号分隔</td>
+</tr>
+<tr>
+<td><code>spk</code></td>
+<td>bool</td>
+<td>false</td>
+<td>是否开启说话人分离</td>
+</tr>
+<tr>
+<td><code>timestamp</code></td>
+<td>bool</td>
+<td>true</td>
+<td>是否输出字级别时间戳</td>
+</tr>
+</tbody>
 </table>
-<p>远程 GPU 服务器访问前先做端口转发：<code>ssh -L 10095:localhost:10095 &lt;server&gt;</code>。</p>
-
-<h3>协议</h3>
-<pre><code>客户端 -&gt; 服务端:
-  "START"                 初始化会话
-  "HOTWORDS:词1,词2"      设置热词，可选
-  "LANGUAGE:中文"          设置语种，可选
-  [binary bytes]          PCM16 16 kHz 单声道音频
-  "STOP"                  结束并触发最终解码
-
-服务端 -&gt; 客户端:
-  {"event": "started"}
-  {"event": "hotwords_set", "hotwords": ["词1", "词2"]}
-  {"event": "language_set", "language": "中文"}
-  {"sentences": [...], "partial": "...", "is_final": false}
-  {"sentences": [...], "partial": "", "is_final": true}
-  {"event": "stopped"}</code></pre>
-
-<h3>推理逻辑</h3>
+<p><strong>响应</strong>：</p>
+<pre id="code-12"><code class="language-json">{
+    "text": "完整识别文本",
+    "segments": [
+        {
+            "text": "段文本",
+            "start": 1.7,
+            "end": 14.8,
+            "speaker": "SPK0",
+            "words": [
+                {"word": "砸", "start": 2.02, "end": 2.08},
+                {"word": "了", "start": 2.26, "end": 2.32}
+            ]
+        }
+    ],
+    "duration": 227.4,
+    "processing_time": 3.422,
+    "rtf": 0.015
+}
+</code></pre>
+<p><strong>客户端示例</strong>：</p>
+<pre id="code-13"><code class="language-bash"># cURL
+curl -X POST http://localhost:8899/asr \
+    -F "file=@meeting.wav" -F "language=中文" -F "spk=true"
+</code></pre>
+<pre id="code-14"><code class="language-python"># Python requests
+import requests
+resp = requests.post("http://localhost:8899/asr",
+    files={"file": open("audio.wav", "rb")},
+    data={"language": "中文", "spk": "true"})
+result = resp.json()
+</code></pre>
+<pre id="code-15"><code class="language-javascript">// JavaScript fetch
+const form = new FormData();
+form.append("file", audioBlob, "audio.wav");
+form.append("language", "中文");
+form.append("spk", "true");
+const resp = await fetch("http://localhost:8899/asr", { method: "POST", body: form });
+const result = await resp.json();
+</code></pre>
+<h3 id="54-协议二openai-whisper-兼容--post-v1audiotranscriptions">5.4 协议二：OpenAI Whisper 兼容 — <code>POST /v1/audio/transcriptions</code></h3>
+<p>兼容 OpenAI Whisper API 标准，可直接用 OpenAI SDK 接入。</p>
+<p><strong>请求</strong>：<code>multipart/form-data</code></p>
 <table>
-<tr><th>路径</th><th>触发条件</th><th>输出</th></tr>
-<tr><td>确认段解码</td><td>动态 VAD 检测到端点。</td><td>整段音频送入 vLLM 解码，结果锁定到 <code>sentences</code>。</td></tr>
-<tr><td>Partial 预览</td><td>达到 <code>--decode-interval</code>，默认 0.48 秒，且有足够新音频。</td><td>临时 <code>partial</code> 文本，后续可能覆盖。</td></tr>
-<tr><td>最终处理</td><td>收到 <code>STOP</code>。</td><td>flush 剩余 VAD 音频，强制结束当前语音段，执行最终说话人重聚类，返回 <code>is_final: true</code>。</td></tr>
+<thead>
+<tr>
+<th>参数</th>
+<th>类型</th>
+<th>默认值</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>file</code></td>
+<td>file</td>
+<td>必填</td>
+<td>音频文件</td>
+</tr>
+<tr>
+<td><code>model</code></td>
+<td>string</td>
+<td>"fun-asr-nano"</td>
+<td>模型名（兼容字段）</td>
+</tr>
+<tr>
+<td><code>language</code></td>
+<td>string</td>
+<td>None</td>
+<td>语种</td>
+</tr>
+<tr>
+<td><code>response_format</code></td>
+<td>string</td>
+<td>"json"</td>
+<td>"json" / "text" / "verbose_json"</td>
+</tr>
+<tr>
+<td><code>timestamp_granularities</code></td>
+<td>string</td>
+<td>"word"</td>
+<td>"word" / "segment"</td>
+</tr>
+<tr>
+<td><code>spk</code></td>
+<td>bool</td>
+<td>false</td>
+<td>说话人分离（FunASR 扩展字段）</td>
+</tr>
+</tbody>
 </table>
-</section>
-
-<section id="dynamic-vad">
-<h2>动态 VAD</h2>
-<p>动态 VAD 会根据当前语音段累计时长调整静音阈值：短句等待更长静音，避免切碎；长句更快切分，避免 ASR 输入过长。</p>
-<h3>流式封装默认阈值</h3>
+<p><strong>响应</strong>（<code>verbose_json</code>）：</p>
+<pre id="code-16"><code class="language-json">{
+    "task": "transcribe",
+    "language": "zh",
+    "duration": 5.17,
+    "text": "我一直没有照顾孩子，但是我想要抚养权。",
+    "segments": [
+        {
+            "id": 0, "start": 0.0, "end": 5.15,
+            "text": "我一直没有照顾孩子，但是我想要抚养权。",
+            "words": [{"word": "我", "start": 0.42, "end": 0.48}, ...]
+        }
+    ]
+}
+</code></pre>
+<p><strong>客户端示例</strong>：</p>
+<pre id="code-17"><code class="language-python"># OpenAI SDK（推荐）
+from openai import OpenAI
+client = OpenAI(base_url="http://localhost:8899/v1", api_key="none")
+result = client.audio.transcriptions.create(
+    model="fun-asr-nano",
+    file=open("audio.wav", "rb"),
+    response_format="verbose_json",
+)
+print(result.text)
+</code></pre>
+<pre id="code-18"><code class="language-bash"># cURL
+curl -X POST http://localhost:8899/v1/audio/transcriptions \
+    -F "file=@audio.wav" -F "model=fun-asr-nano" -F "response_format=verbose_json"
+</code></pre>
+<h3 id="55-协议三websocket--wshostportws">5.5 协议三：WebSocket — <code>ws://host:port/ws</code></h3>
+<p>离线服务的 WebSocket 接口，发送完整音频后获取结果。STOP 时自动进行说话人聚类，结果中包含 <code>spk</code> 字段。</p>
+<p><strong>客户端 → 服务端</strong>：</p>
 <table>
-<tr><th>累计语音时长</th><th>静音阈值</th><th>效果</th></tr>
-<tr><td>&le; 5 秒</td><td>2.0 秒</td><td>短句不被过早切断。</td></tr>
-<tr><td>5-10 秒</td><td>1.5 秒</td><td>正常对话分句。</td></tr>
-<tr><td>10-15 秒</td><td>1.0 秒</td><td>长句开始收紧。</td></tr>
-<tr><td>15-30 秒</td><td>0.8 秒</td><td>更快切分。</td></tr>
-<tr><td>30-45 秒</td><td>0.4 秒</td><td>防止 ASR 段过长。</td></tr>
-<tr><td>&gt; 45 秒</td><td>0.1 秒</td><td>强制切分。</td></tr>
+<thead>
+<tr>
+<th>消息</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>"START"</code></td>
+<td>开始会话</td>
+</tr>
+<tr>
+<td><code>"LANGUAGE:中文"</code></td>
+<td>设置语种（可选）</td>
+</tr>
+<tr>
+<td><code>"HOTWORDS:词1,词2"</code></td>
+<td>设置热词（可选）</td>
+</tr>
+<tr>
+<td><code>[binary]</code></td>
+<td>PCM16 16kHz mono 音频数据</td>
+</tr>
+<tr>
+<td><code>"STOP"</code></td>
+<td>结束，请求识别结果</td>
+</tr>
+</tbody>
 </table>
-<h3>fsmn-vad 原生默认阈值</h3>
+<p><strong>服务端 → 客户端</strong>：</p>
+<pre id="code-19"><code class="language-json">{"event": "started"}
+{"event": "language_set", "language": "中文"}
+{"sentences": [{"text":"...","start":..,"end":..}], "is_final": true, "duration_ms": 5170}
+{"event": "stopped"}
+</code></pre>
+<p><strong>客户端示例</strong>：</p>
+<pre id="code-20"><code class="language-python">import asyncio, websockets, json, numpy as np, soundfile as sf
+
+async def offline_ws(audio_path):
+    audio, sr = sf.read(audio_path)
+    pcm = (audio * 32768).astype(np.int16)
+
+    async with websockets.connect("ws://localhost:8899/ws") as ws:
+        await ws.send("START")
+        await ws.recv()
+        await ws.send("LANGUAGE:中文")
+        await ws.recv()
+
+        # 发送完整音频
+        await ws.send(pcm.tobytes())
+        await ws.send("STOP")
+
+        # 接收结果
+        async for msg in ws:
+            data = json.loads(msg)
+            if data.get("is_final"):
+                for s in data["sentences"]:
+                    print(f"[{s['start']/1000:.1f}s] {s['text']}")
+                break
+
+asyncio.run(offline_ws("audio.wav"))
+</code></pre>
+<hr/>
+<span data-legacy-doc-anchor="6-流式语音识别服务" id="websocket"></span><h2 id="6-流式语音识别服务">6. 流式语音识别服务</h2>
+<h3 id="61-服务架构">6.1 服务架构</h3>
+<pre id="code-21"><code>客户端（麦克风/音频流）              serve_realtime_ws.py
+  │                                      │
+  │── WebSocket PCM16 16kHz ────────────→│
+  │   (每帧 ~100ms，持续发送)             │
+  │                                      │
+  │                                 ┌────┴─────────────────────────┐
+  │                                 │ 实时循环：                     │
+  │                                 │  ├─ 动态 VAD（60ms chunk）    │
+  │                                 │  ├─ 检测到端点 → vLLM 解码     │
+  │                                 │  ├─ 未结束 → partial 预览     │
+  │                                 │  └─ 说话人流式分配             │
+  │                                 └────┬─────────────────────────┘
+  │                                      │
+  │←── JSON 实时推送 ───────────────────│
+</code></pre>
+<p><strong>特点</strong>：
+- 音频逐帧到达，边收边处理
+- 基于 VAD 端点自然分句
+- 确认段文字锁定不变，partial 实时更新
+- 可选流式说话人分配（<code>--enable-spk</code>）+ STOP 时全局重聚类
+- 首字延迟 ~480ms</p>
+<h3 id="62-启动服务">6.2 启动服务</h3>
+<pre id="code-22"><code class="language-bash">CUDA_VISIBLE_DEVICES=0 python examples/industrial_data_pretraining/fun_asr_nano/serve_realtime_ws.py \
+    --port 10095 --language 中文 --hotword-file 热词列表
+</code></pre>
+<p>多客户端或长时间连续语音场景，建议先限制 partial 预览窗口并适当降低刷新频率：</p>
+<pre id="code-23"><code class="language-bash">CUDA_VISIBLE_DEVICES=0 python examples/industrial_data_pretraining/fun_asr_nano/serve_realtime_ws.py \
+    --port 10095 --language 中文 \
+    --partial-window-sec 8 --decode-interval 0.8
+</code></pre>
+<p>说话人分离默认关闭；只有确实需要 <code>spk</code> 字段时再加 <code>--enable-spk</code>。</p>
+<p>服务端默认每 20 秒发送一次 WebSocket ping，但不因 ping 超时主动断开连接。
+在长音频高并发下，模型推理和 VAD 处理会延迟控制帧，即使连接仍然健康；
+固定 timeout 因此可能在计算或排队反压期间误杀正常会话。</p>
+<pre id="code-24"><code class="language-bash">CUDA_VISIBLE_DEVICES=0 python examples/industrial_data_pretraining/fun_asr_nano/serve_realtime_ws.py \
+    --port 10095 --language 中文
+</code></pre>
+<p>只有在按生产流量测得最坏推理和排队延迟后，才设置正数
+<code>--ws-ping-timeout</code>；该值应高于实测延迟，并与网关 idle timeout 策略配合。
+<code>websockets</code> 库的 <code>max_queue</code> 设置只限制入站消息的接收缓冲，不会改变
+ping/pong 的超时语义，因此增大它不能解决 keepalive timeout。只有外部网关
+已经统一负责 keepalive / reconnect 策略时，才设置 <code>--ws-ping-interval 0</code>
+关闭服务端 ping。</p>
+<p>长会话排障，尤其是启用 <code>--enable-spk</code> 时，可以打开周期性 session 状态日志：</p>
+<pre id="code-25"><code class="language-bash">CUDA_VISIBLE_DEVICES=0 python examples/industrial_data_pretraining/fun_asr_nano/serve_realtime_ws.py \
+    --port 10095 --language 中文 --enable-spk \
+    --log-session-stats-interval 30
+</code></pre>
+<p>服务端会每 30 秒输出一行 <code>Session stats:</code>。提交 issue 时请连同最后几行
+<code>Session stats</code>、末段 RTF、进程 RSS、GPU memory 和断线前后的服务端日志一起提供。</p>
+<h3 id="63-websocket-协议">6.3 WebSocket 协议</h3>
+<p><strong>连接</strong>：<code>ws://host:10095</code></p>
+<p><strong>客户端 → 服务端</strong>：</p>
 <table>
-<tr><th>累计语音时长</th><th>静音阈值</th></tr>
-<tr><td>&le; 5 秒</td><td>800 ms</td></tr>
-<tr><td>5-10 秒</td><td>600 ms</td></tr>
-<tr><td>10-20 秒</td><td>500 ms</td></tr>
-<tr><td>20-30 秒</td><td>400 ms</td></tr>
-<tr><td>&gt; 30 秒</td><td>300 ms</td></tr>
+<thead>
+<tr>
+<th>消息</th>
+<th>格式</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>开始</td>
+<td><code>"START"</code></td>
+<td>初始化 session</td>
+</tr>
+<tr>
+<td>热词</td>
+<td><code>"HOTWORDS:词1,词2"</code></td>
+<td>可选</td>
+</tr>
+<tr>
+<td>语种</td>
+<td><code>"LANGUAGE:中文"</code></td>
+<td>可选</td>
+</tr>
+<tr>
+<td>音频</td>
+<td><code>binary</code></td>
+<td>PCM16 16kHz mono</td>
+</tr>
+<tr>
+<td>结束</td>
+<td><code>"STOP"</code></td>
+<td>最终解码；启用 <code>--enable-spk</code> 时会做 SPK 重聚类</td>
+</tr>
+</tbody>
 </table>
-<pre><code># 默认 dynamic_silence=True
-model.generate(input="audio.wav")
+<p><strong>服务端 → 客户端</strong>：</p>
+<pre id="code-26"><code class="language-json">{"event": "started"}
+{"sentences": [{"text":"你好","start":300,"end":1200}], "partial": "世界", "is_final": false}
+{"sentences": [...], "is_final": true}
+{"event": "stopped"}
+</code></pre>
+<p><strong>字段</strong>：<code>sentences[]</code> = 已锁定句子，<code>partial</code> = 当前正在说的临时文本（可能变化），<code>partial_start_ms</code> = 当前 <code>partial</code> 对应音频窗口的起点，<code>is_final</code> = STOP 后为 true。启用 <code>--enable-spk</code> 后，<code>sentences[]</code> 会包含 <code>spk</code>。</p>
+<p><strong>时序</strong>：</p>
+<pre id="code-27"><code>Client              Server
+  │── START ───────→│
+  │←─ started ──────│
+  │── [audio] ─────→│
+  │←─ {partial} ────│    # partial 的原理是注意事项见 6.5
+  │── [audio] ─────→│
+  │←─ {sentences+partial} ─│  (VAD 切了一句)
+  │── STOP ────────→│
+  │←─ {is_final:true} ────│
+  │←─ stopped ─────│
+</code></pre>
+<h3 id="64-客户端调用">6.4 客户端调用</h3>
+<p><strong>Python CLI</strong>：</p>
+<pre id="code-28"><code class="language-bash">python client_python.py --server ws://localhost:10095 --mic
+python client_python.py --server ws://localhost:10095 --file audio.wav
+</code></pre>
+<p><strong>实时压测</strong>：</p>
+<pre id="code-29"><code class="language-bash">python examples/industrial_data_pretraining/fun_asr_nano/realtime_ws_benchmark.py \
+    audio_16k_mono_pcm16.wav --server ws://localhost:10095 --clients 4 \
+    --output-jsonl realtime_ws_4c.jsonl
+</code></pre>
+<p>指标定义和报告字段见 <a href="https://www.funasr.com/docs/realtime-benchmark.html">Realtime WebSocket Benchmark</a>。</p>
+<p><strong>浏览器</strong>：打开 <code>client_mic.html</code></p>
+<p><strong>自定义 Python</strong>：</p>
+<pre id="code-30"><code class="language-python">import asyncio, websockets, numpy as np, json
 
-# 关闭动态静音阈值
-model.generate(input="audio.wav", dynamic_silence=False)
+async def stream(audio_path):
+    import soundfile as sf
+    audio, sr = sf.read(audio_path)
+    pcm = (audio * 32768).astype(np.int16)
 
-# 自定义 schedule: (累计时长上限ms, 静音阈值ms)
-model.generate(input="audio.wav", silence_schedule=[
-    (5000, 1000),
-    (15000, 500),
-    (float("inf"), 200),
-])</code></pre>
-<pre><code>from funasr import AutoModel
-from funasr.models.fsmn_vad_streaming.dynamic_vad import DynamicStreamingVAD
+    async with websockets.connect("ws://localhost:10095") as ws:
+        await ws.send("START")
+        await ws.recv()
 
-vad_model = AutoModel(model="fsmn-vad", device="cuda:0")
-vad = DynamicStreamingVAD(vad_model)
+        for i in range(0, len(pcm), 1600):
+            await ws.send(pcm[i:i+1600].tobytes())
+            await asyncio.sleep(0.05)
 
-for chunk in audio_stream:
-    segments = vad.feed(chunk)
-    for start_ms, end_ms in segments:
-        print(f"Speech: {start_ms}-{end_ms} ms")
+        await ws.send("STOP")
+        async for msg in ws:
+            data = json.loads(msg)
+            if data.get("is_final"):
+                for s in data["sentences"]:
+                    print(f"[{s['start']/1000:.1f}s] {s['text']}")
+                break
 
-final_segments = vad.finalize()</code></pre>
-</section>
-
-<section id="performance">
-<h2>性能</h2>
+asyncio.run(stream("audio.wav"))
+</code></pre>
+<h3 id="65-partial-预览机制与长句特性">6.5 partial 预览机制与长句特性</h3>
+<p><strong>partial 是什么、怎么产生的</strong>
+流式服务在用户说话过程中会周期性地（<code>serve_realtime_ws.py</code> 默认 <code>decode_interval≈0.48s</code>）对"当前这句话从句首到现在"的音频解码一次，输出<strong>临时文字</strong>（即协议里的 <code>partial</code> 字段，可被后续刷新覆盖），直到 VAD 判定句尾才锁定进 <code>sentences</code>。这让用户边说边看到字。</p>
+<blockquote>
+<p>注：<code>serve_vllm.py</code>（§5）的 <code>/ws</code> <strong>没有 partial</strong>、只在句尾返回；要实时预览请用 <code>serve_realtime_ws.py</code>。</p>
+</blockquote>
+<p><strong>前端渲染原则</strong>
+<code>partial</code> 只能当作“可替换预览”，不要把连续两次 <code>partial</code> 直接追加到最终文本里。推荐把已锁定文本和临时预览分开：</p>
+<pre id="code-31"><code class="language-js">const committed = data.sentences.map((s) =&gt; s.text).join("");
+const preview = data.partial || "";
+render(committed + preview);
+</code></pre>
+<p>如果启用了 <code>--partial-window-sec</code>，<code>partial_start_ms</code> 可能随着窗口向前滑动；这时 <code>partial</code> 只描述当前受限窗口内的临时识别结果。前端应每次替换 preview 区域，只把 VAD 已锁定的 <code>sentences</code> 或最终 <code>is_final=true</code> 结果追加到正式转写区。</p>
+<p><strong>原理：为什么每次 partial 都从句首整段重编</strong>
+Fun-ASR-Nano 的声学编码器（SenseVoice）是<strong>全上下文、非流式</strong>编码器——每一帧的表示都依赖整段音频的前后文。当这句话又往下说了一截、音频变长时，先前那些帧的上下文随之改变，<strong>之前算出的编码不再成立</strong>，因此无法像流式 / 因果编码器那样"缓存历史、只算新增帧"，只能把"句首→当前"的整段重新过一遍编码器。</p>
+<p><strong>由此带来的特性：长句的 partial 会越来越慢（O(L²)）</strong>
+正因每次都从句首重编，一句话越长，单次 partial 要编的音频越长、刷新次数也越多——<strong>总编码量随句长二次增长</strong>。实测一句约 29s 的连续发言会被完整重编十余次，单次 encoder 耗时从几十毫秒爬到数百毫秒。（§4 SDK 流式"每个 chunk 包含从头到当前的全部音频"是同一机制，长文件同理。）</p>
+<p><strong>使用建议</strong>
+- 正常对话语音有自然停顿，VAD 会把它切成一句句较短的语音，每句 partial 的开销自然受限，<strong>通常无需关注</strong>。
+- 只有<strong>超长、不停顿的连续语音</strong>（如长篇朗读）会让单句不断变长、partial 预览逐渐变慢。<code>serve_realtime_ws.py</code> 默认用 <code>--partial-window-sec 8</code> 限制临时预览窗口；多客户端连续独白负载应先从该值开始，并只在实测有余量时再提高窗口。它只影响临时 <code>partial</code>，VAD 锁定句和 STOP 最终结果仍走完整音频。可先参考 §6.7 的 L20 实测起点。</p>
+<h3 id="66-说话人分离spk的代价与开关">6.6 说话人分离（SPK）的代价与开关</h3>
+<p><code>serve_realtime_ws.py</code> 默认<strong>不加载</strong> SPK 模型。只有启动时显式加 <code>--enable-spk</code>，才会加载 <code>--spk-model</code>（默认 <code>iic/speech_eres2netv2_sv_zh-cn_16k-common</code>）并在流式中对每个 VAD 完成句调用一次说话人分配。需要注意：</p>
+<ul>
+<li><strong>Fun-ASR-Nano 上 SPK 效果有限</strong>（见 #2944），多数实时 ASR 场景并不需要说话人分离。</li>
+<li><strong>流式 SPK 代价高且随会话变长</strong>：每句会在该 session 的 worker 中对<strong>全部历史 embedding</strong> 做一次全量重聚类（<strong>O(N²)</strong>，会话越长每句越贵）；而会话结束时还会<strong>全量重聚一遍</strong>，流式期间每句的聚类结果会被最终结果覆盖——对最终输出而言属于重复计算。长会话 + 高并发下尤其明显。</li>
+<li><strong>建议</strong>：多客户端实时转写优先保持默认关闭；确需 diarization 时再加 <code>--enable-spk</code>，并以 STOP 后的最终 <code>spk</code> 标签为准。</li>
+<li><strong>长会话诊断</strong>：如果 session 仍然逐渐变慢或断开，请用 <code>--log-session-stats-interval 30</code> 复测，并观察 <code>audio_buffer_samples</code>、<code>locked_sentences</code>、<code>speaker_history_chunks</code>、<code>speaker_history_embeddings</code> 和 <code>speaker_centers</code> 是否保持有界。如果这些计数都接近上限但 RTF 仍持续升高，剩余瓶颈更可能在模型推理、返回 payload 大小或环境调度，而不是 session 状态继续泄漏。</li>
+</ul>
+<h3 id="67-生产并发与多进程部署">6.7 生产并发与多进程部署</h3>
+<p><code>serve_realtime_ws.py</code> 把网络 I/O 保留在一个 asyncio 事件循环中，但每个连接的阻塞 session 工作会在线程中执行。同时到达且解码参数兼容的 ASR 请求，会在 <code>--decode-batch-wait-ms</code> 窗口内汇聚（默认 10 ms），合并为一次 <code>AutoModelVLLM.generate()</code> 调用，并由 <code>--decode-max-batch-size</code> 限制单批音频段数（默认 16）。共享 vLLM 引擎仍只有一个受控调用入口，但音频接收和 session 状态不再被全进程锁串行化。</p>
+<ul>
+<li><strong>流式 VAD 默认使用 CPU。</strong> 每个连接拥有独立 FSMN-VAD 实例，默认参数为 <code>--vad-device cpu --vad-ncpu 1</code>，从而隔离可变 cache，并避免每帧触发 CUDA allocator 同步。只有在完整 WebSocket 压测证明有收益后才建议改到 GPU；同时也要避免“每 session 线程数 × 活跃 session 数”造成 CPU 过量并行。</li>
+<li><strong>按真实话务调整批处理。</strong> 默认 10 ms 相对 480 ms 的 partial 解码周期很小，又能让同时说话的连接共享 encoder 与 vLLM batch。追求最低单路排队延迟时可降到 <code>0</code>；吞吐优先时可谨慎调高。扩大最大 batch 前，应先测显存与尾延迟。</li>
+<li><strong>先把单进程作为第一扩展单元。</strong> 先用内置批处理压测单进程；只有当单进程达到实测 GPU、CPU 或尾延迟上限后，再增加进程或按 GPU 横向扩容。每个额外进程都会复制模型显存，也可能减少单进程内形成 batch 的机会。</li>
+<li><strong>vLLM 收益取决于请求是否同时到达。</strong> 真实轮流对话可能连接很多，但同时解码很少；把同一段连续独白同步回放给所有客户端，则会刻意形成大批次。发布结果时必须同时报告话务形态和批处理参数。</li>
+<li><strong>可持续并发没有通用的“支持 N 路”数字。</strong> 上限主要取决于同时说话数、静音比例、句长、partial 刷新间隔、说话人分离、batch 等待时间以及 GPU/CPU 能力。长时间不停顿的语音仍会重复编码临时窗口（见 §6.5），成本更高。请按自己的真实话务压测，不要把其他部署的连接数直接当成规格。</li>
+<li><strong>L20 实测起点，不是全局默认值。</strong> <a href="https://github.com/modelscope/FunASR/issues/3528">#3528</a> 在单张 L20 上同步回放 47 秒连续语音、16 路客户端，并关闭 SPK 与客户端 ping；<code>--partial-window-sec 8 --decode-interval 2.0</code> 是该负载的最优组合：408 次解码请求、累计编码 3,072.1 秒音频、完成 p50 51.18 秒、输出滞后 4.5 秒、聚合实时率 14.2x、首词 1.31 秒。默认 15 秒窗口在这组 16 路负载上未完成。请只把 <code>8 / 2.0</code> 当作 L20 高并发初始配置，再按自己的首词、输出滞后、最终完成时间、请求数和累计编码量调优。</li>
+</ul>
+<pre id="code-32"><code class="language-bash">CUDA_VISIBLE_DEVICES=0 python examples/industrial_data_pretraining/fun_asr_nano/serve_realtime_ws.py \
+  --partial-window-sec 8 --decode-interval 2.0 --log-decode-profile
+</code></pre>
+<hr/>
+<span data-legacy-doc-anchor="7-动态-vad" id="dynamic-vad"></span><h2 id="7-动态-vad">7. 动态 VAD</h2>
+<p>fsmn-vad 默认启用动态静音阈值。离线和流式使用不同配置。</p>
 <table>
-<tr><th>场景</th><th>PyTorch baseline</th><th>vLLM</th><th>加速</th></tr>
-<tr><td>离线，5.6 秒音频</td><td>0.89 秒</td><td>0.30 秒</td><td><b>3x</b></td></tr>
-<tr><td>离线，2-GPU tensor parallel</td><td>0.89 秒</td><td>~0.20 秒</td><td><b>4.5x</b></td></tr>
-<tr><td>批量 16 条</td><td>约 16x 串行成本</td><td>约 4x</td><td><b>4x</b></td></tr>
-<tr><td>批量 32 条</td><td>约 32x 串行成本</td><td>约 5x</td><td><b>6x</b></td></tr>
-<tr><td>WebSocket RTF</td><td>0.156</td><td>0.078</td><td><b>2x</b></td></tr>
+<thead>
+<tr>
+<th>累积时长</th>
+<th>离线（保留长段 ≤60s）</th>
+<th>流式（平衡延迟）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>≤ 5s</td>
+<td>2000ms</td>
+<td>2000ms</td>
+</tr>
+<tr>
+<td>5-10s</td>
+<td>2000ms</td>
+<td>1500ms</td>
+</tr>
+<tr>
+<td>10-15s</td>
+<td>1000ms</td>
+<td>1000ms</td>
+</tr>
+<tr>
+<td>15-20s</td>
+<td>1000ms</td>
+<td>800ms</td>
+</tr>
+<tr>
+<td>20-30s</td>
+<td>800ms</td>
+<td>800ms</td>
+</tr>
+<tr>
+<td>30-45s</td>
+<td>600ms</td>
+<td>400ms</td>
+</tr>
+<tr>
+<td>45-60s</td>
+<td>200-400ms</td>
+<td>100ms</td>
+</tr>
+<tr>
+<td>&gt; 60s</td>
+<td>100ms</td>
+<td>100ms</td>
+</tr>
+</tbody>
 </table>
-</section>
-
-<section id="api-reference">
-<h2>API 参考</h2>
-<h3>AutoModelVLLM</h3>
+<p>离线倾向保留长段减少边界损失；流式更快收紧以降低延迟。</p>
+<h3 id="自定义">自定义</h3>
+<pre id="code-33"><code class="language-python">model.generate(input="audio.wav", silence_schedule=[(5000,1500), (20000,800), (float('inf'),300)])
+</code></pre>
+<blockquote>
+<p>GLM-ASR 不支持长段，使用时传 <code>dynamic_silence=False</code>。</p>
+</blockquote>
+<hr/>
+<span data-legacy-doc-anchor="8-api-参考" id="api-reference"></span><h2 id="8-api-参考">8. API 参考</h2>
 <table>
-<tr><th>参数</th><th>默认值</th><th>说明</th></tr>
-<tr><td><code>model</code></td><td>-</td><td>ModelScope/Hugging Face 模型 id 或本地模型目录。</td></tr>
-<tr><td><code>hub</code></td><td><code>"ms"</code></td><td><code>"ms"</code>、<code>"modelscope"</code>、<code>"hf"</code> 或 <code>"huggingface"</code>。</td></tr>
-<tr><td><code>device</code></td><td><code>"cuda:0"</code></td><td>PyTorch 音频 encoder 和 adaptor 运行设备。</td></tr>
-<tr><td><code>dtype</code></td><td><code>"bf16"</code></td><td><code>"bf16"</code>、<code>"fp16"</code> 或 <code>"fp32"</code>。</td></tr>
-<tr><td><code>tensor_parallel_size</code></td><td><code>1</code></td><td>vLLM tensor parallel 使用的 GPU 数量。</td></tr>
-<tr><td><code>gpu_memory_utilization</code></td><td><code>0.8</code></td><td>vLLM KV cache 使用的 GPU 显存比例。</td></tr>
-<tr><td><code>max_model_len</code></td><td><code>4096</code></td><td>vLLM 最大序列长度。</td></tr>
+<thead>
+<tr>
+<th>参数</th>
+<th>AutoModelVLLM</th>
+<th>serve_vllm.py</th>
+<th>serve_realtime_ws.py</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>model</td>
+<td>✓</td>
+<td>--model</td>
+<td>--model</td>
+</tr>
+<tr>
+<td>gpu_memory_utilization</td>
+<td>✓</td>
+<td>--gpu-memory-utilization</td>
+<td>--gpu-memory-utilization</td>
+</tr>
+<tr>
+<td>tensor_parallel_size</td>
+<td>✓</td>
+<td>—</td>
+<td>--tensor-parallel-size</td>
+</tr>
+<tr>
+<td>max_model_len</td>
+<td>✓</td>
+<td>--max-model-len</td>
+<td>--max-model-len</td>
+</tr>
+<tr>
+<td>language</td>
+<td>generate() 参数</td>
+<td>API 参数</td>
+<td>--language / LANGUAGE:</td>
+</tr>
+<tr>
+<td>hotwords</td>
+<td>generate() 参数</td>
+<td>API 参数</td>
+<td>--hotword-file / HOTWORDS:</td>
+</tr>
+</tbody>
 </table>
-
-<h3><code>generate()</code></h3>
-<table>
-<tr><th>参数</th><th>默认值</th><th>说明</th></tr>
-<tr><td><code>inputs</code></td><td>-</td><td>音频路径、路径列表、numpy array、tensor、<code>wav.scp</code> 或 JSONL。</td></tr>
-<tr><td><code>language</code></td><td><code>None</code></td><td>语种提示，例如 <code>"中文"</code>、<code>"English"</code>、<code>"日本語"</code>。</td></tr>
-<tr><td><code>hotwords</code></td><td><code>None</code></td><td>热词列表，会写入 ASR prompt。</td></tr>
-<tr><td><code>itn</code></td><td><code>True</code></td><td>是否进行逆文本正则化。</td></tr>
-<tr><td><code>max_new_tokens</code></td><td><code>512</code></td><td>每条音频最大生成 token 数。</td></tr>
-<tr><td><code>temperature</code></td><td><code>0.0</code></td><td>默认贪心解码。</td></tr>
-<tr><td><code>repetition_penalty</code></td><td><code>1.0</code></td><td>vLLM generation 的重复惩罚参数。</td></tr>
-</table>
-<p>返回格式：<code>[{"key": str, "text": str, "timestamps": [...]}]</code>。当模型包含可选 CTC decoder 和 tokenizer 时，会返回时间戳。</p>
-</section>
-
-<section id="faq">
-<h2>FAQ</h2>
-<dl>
-<dt>Q: 首次启动为什么慢？</dt>
-<dd>vLLM 需要初始化 KV cache 和 CUDA graph，FunASR 也可能需要从 <code>model.pt</code> 提取 LLM 权重，首次启动通常约 60-90 秒。</dd>
-<dt>Q: CUDA OOM 怎么办？</dt>
-<dd>降低 <code>gpu_memory_utilization</code>，降低 <code>max_model_len</code>，或增加 <code>tensor_parallel_size</code>。</dd>
-<dt>Q: Paraformer 能用 vLLM 吗？</dt>
-<dd>不能。Paraformer 是非自回归模型，不使用 vLLM KV-cache 解码。</dd>
-<dt>Q: WebSocket 服务和 <code>streaming_generate()</code> 如何选择？</dt>
-<dd>生产实时 ASR 推荐 WebSocket 服务，它基于 VAD 自然端点切分；SDK 集成或 chunk 级演示可使用 <code>streaming_generate()</code>。</dd>
-<dt>Q: 浏览器无法访问远程服务器麦克风？</dt>
-<dd>Chrome 要求 HTTPS 或 localhost。可先执行 <code>ssh -L 10095:localhost:10095 &lt;server&gt;</code>，再从本机 localhost 打开客户端。</dd>
-</dl>
-</section>
-
-</div></div>
-
-<footer>
-<p>FunASR &middot; 通义实验室，阿里巴巴集团</p>
-<p><a href="index.html">首页</a> &middot; <a href="tutorial.html">教程</a> &middot; <a href="training.html">训练</a> &middot; <a href="model-registration.html">开发</a> &middot; <a href="../api.html">API</a> &middot; <a href="vllm.html">vLLM</a> &middot; <a href="agent.html">Agent</a> &middot; <a href="benchmark.html">Benchmark</a> &middot; <a href="https://github.com/modelscope/FunASR">GitHub</a></p>
+<hr/>
+<span data-legacy-doc-anchor="9-faq" id="faq"></span><h2 id="9-faq">9. FAQ</h2>
+<p><strong>Q: 离线还是流式？</strong>
+完整文件 → 离线（高吞吐）。麦克风/直播 → 流式（低延迟）。</p>
+<p><strong>Q: GLM-ASR 用动态 VAD？</strong>
+不支持长段推理，用 <code>dynamic_silence=False</code>。</p>
+<p><strong>Q: SPK 性能影响？</strong>
+RTFx 102 → 46。CER 不变。默认关闭。</p>
+<p><strong>Q: 二次开发入口？</strong>
+离线：<code>serve_vllm.process_audio()</code> / <code>FunASRNanoVLLM.generate()</code>
+流式：<code>serve_realtime_ws.RealtimeASRSession</code></p>
+<p><strong>Q: 首次慢？</strong>
+vLLM 初始化 60-90s，之后即时。</p>
+<p><strong>Q: Fun-ASR-Nano vLLM 使用 <code>dtype="fp16"</code> 时实际会怎样？</strong>
+音频 frontend 与 adaptor 仍使用 FP16，但 FunASR 会让 Qwen3 decoder 使用 BF16，
+因为 vLLM 的 FP16 decoder 可能产生退化的重复输出。该行为自动生效，decoder 权重
+仍是两字节精度；不支持 BF16 的硬件请使用 <code>dtype="fp32"</code>。vLLM 路径不宣称支持
+端到端 FP16 decoder。</p>
+<p><strong>Q: vLLM 输出连续标点（例如 <code>!!!!!!!!</code>），但 PyTorch/HF generate 正常，应该先查什么？</strong>
+这通常说明音频 frontend 和 checkpoint 本身能工作，但 vLLM prompt-embedding
+路径或解码参数和 upstream runner 不一致。改模型前先检查这些项：</p>
+<ul>
+<li>传给 vLLM 的 prompt embeddings 要显式转成 float32：
+  <code>EmbedsPrompt(prompt_embeds=input_embeds.float())</code>。</li>
+<li>使用 ASR 更合适的确定性解码。Fun-ASR-Nano vLLM 路径默认使用
+  <code>temperature=0.0</code>、<code>top_p=1.0</code> 和 <code>skip_special_tokens=True</code>。在
+  prompt-embeds 模式下，<code>repetition_penalty</code> 保持中性的 <code>1.0</code>，除非你走的是
+  token prompt 路径；FunASR 的 vLLM helper 会把其他值归一化，避免 vLLM CUDA scatter
+  错误。</li>
+<li>确认 <code>model_dir</code> 和 <code>vllm_model_dir</code> 是匹配的一组 Fun-ASR-Nano 模型。如果清空
+  <code>vllm_model_dir</code> 后同一音频走 HF generate 正常，就继续排查 vLLM 路径，而不是音频文件。</li>
+<li>对一个失败样本记录 vLLM <code>finish_reason</code>、生成 token ids、prompt embedding dtype
+  和 shape。连续标点且 <code>finish_reason="length"</code> 时，通常更像解码/prompt 不匹配，而不是
+  VAD 或音频读取问题。</li>
+</ul></article>
+<nav aria-label="相邻文档" class="docs-next">
+<a href="https://www.funasr.com/docs/deployment-matrix.html">← 运行时与部署矩阵</a><a href="https://www.funasr.com/docs/native-vllm.html">原生 vLLM 验证记录 →</a> </nav>
+</div>
+<aside class="docs-toc"><strong>本页目录</strong><div class="toc">
+<ul>
+<li><a href="#funasr-vllm-推理引擎指南">FunASR vLLM 推理引擎指南</a><ul>
+<li><a href="#benchmark">Benchmark</a></li>
+<li><a href="#目录">目录</a></li>
+<li><a href="#1-安装与环境">1. 安装与环境</a><ul>
+<li><a href="#开始前先选定模型路径">开始前先选定模型路径</a><ul>
+<li><a href="#a-funasr-拆分引擎路径本指南">A. FunASR 拆分引擎路径（本指南）</a></li>
+<li><a href="#b-vllm-原生转写路径">B. vLLM 原生转写路径</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#2-vllm-推理引擎架构">2. vLLM 推理引擎架构</a><ul>
+<li><a href="#整体架构">整体架构</a></li>
+<li><a href="#为什么用-vllm">为什么用 vLLM？</a></li>
+<li><a href="#支持模型">支持模型</a></li>
+<li><a href="#关键实现细节">关键实现细节</a></li>
+</ul>
+</li>
+<li><a href="#3-离线-sdk-推理">3. 离线 SDK 推理</a><ul>
+<li><a href="#设计原理">设计原理</a></li>
+<li><a href="#通用接口推荐">通用接口（推荐）</a></li>
+<li><a href="#直接接口">直接接口</a></li>
+<li><a href="#命令行">命令行</a></li>
+</ul>
+</li>
+<li><a href="#4-流式-sdk-推理">4. 流式 SDK 推理</a><ul>
+<li><a href="#设计原理_1">设计原理</a></li>
+<li><a href="#用法">用法</a></li>
+<li><a href="#生产-api-稳定性清单">生产 API 稳定性清单</a></li>
+<li><a href="#输出特性">输出特性</a></li>
+</ul>
+</li>
+<li><a href="#5-离线语音识别服务">5. 离线语音识别服务</a><ul>
+<li><a href="#51-服务架构">5.1 服务架构</a></li>
+<li><a href="#52-启动服务">5.2 启动服务</a></li>
+<li><a href="#53-协议一http-rest--post-asr">5.3 协议一：HTTP REST — POST /asr</a></li>
+<li><a href="#54-协议二openai-whisper-兼容--post-v1audiotranscriptions">5.4 协议二：OpenAI Whisper 兼容 — POST /v1/audio/transcriptions</a></li>
+<li><a href="#55-协议三websocket--wshostportws">5.5 协议三：WebSocket — ws://host:port/ws</a></li>
+</ul>
+</li>
+<li><a href="#6-流式语音识别服务">6. 流式语音识别服务</a><ul>
+<li><a href="#61-服务架构">6.1 服务架构</a></li>
+<li><a href="#62-启动服务">6.2 启动服务</a></li>
+<li><a href="#63-websocket-协议">6.3 WebSocket 协议</a></li>
+<li><a href="#64-客户端调用">6.4 客户端调用</a></li>
+<li><a href="#65-partial-预览机制与长句特性">6.5 partial 预览机制与长句特性</a></li>
+<li><a href="#66-说话人分离spk的代价与开关">6.6 说话人分离（SPK）的代价与开关</a></li>
+<li><a href="#67-生产并发与多进程部署">6.7 生产并发与多进程部署</a></li>
+</ul>
+</li>
+<li><a href="#7-动态-vad">7. 动态 VAD</a><ul>
+<li><a href="#自定义">自定义</a></li>
+</ul>
+</li>
+<li><a href="#8-api-参考">8. API 参考</a></li>
+<li><a href="#9-faq">9. FAQ</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</aside></div>
+</main>
+<footer class="site-footer">
+<div>
+<strong>FunASR</strong>
+<p>面向生产部署的开源语音基础设施。</p>
+</div>
+<nav aria-label="官方仓库" class="footer-repositories" data-footer-repositories="">
+<strong>官方仓库</strong>
+<div class="footer-links">
+<a href="https://www.funasr.com/go/fun-asr">Fun-ASR</a>
+<a href="https://www.funasr.com/go/sensevoice">SenseVoice</a>
+<a href="https://www.funasr.com/go/funclip">FunClip</a>
+</div>
+</nav>
+<div class="footer-links">
+<a href="https://www.funasr.com/deploy/">部署</a>
+<a href="https://www.funasr.com/docs/">文档</a>
+<a href="https://www.funasr.com/go/releases">发布</a>
+<a href="https://www.funasr.com/donors.html">功德榜</a>
+</div>
 </footer>
-</body></html>
+<script defer="" src="../assets/js/site.d446f5fbcfe2.js"></script>
+<script defer="" src="../assets/js/experience.3f688a12942a.js"></script>
+</body>
+</html>

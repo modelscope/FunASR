@@ -1,22 +1,496 @@
 <!DOCTYPE html>
-<html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<meta name="description" content="通过 FunASR、vLLM、SGLang Omni、LocalAI、Docker、Kubernetes 与 FunClip 部署 OpenMOSS 的 MOSS-Transcribe-Diarize 第三方模型。">
-<meta property="og:title" content="MOSS-Transcribe-Diarize 部署指南"><meta property="og:description" content="长音频转写、时间戳与匿名说话人标签的 FunASR 生态部署。">
-<meta property="og:type" content="website"><meta property="og:url" content="https://modelscope.github.io/FunASR/zh/moss-transcribe-diarize.html">
-<link rel="canonical" href="https://modelscope.github.io/FunASR/zh/moss-transcribe-diarize.html"><meta property="og:site_name" content="FunASR"><title>MOSS-Transcribe-Diarize 部署指南</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"><link rel="stylesheet" href="../style.css"></head><body>
-<nav class="nav"><div class="container"><a href="index.html" class="nav-logo">FunASR</a><div class="nav-links"><a href="index.html">首页</a><a href="deployment-matrix.html" class="active">部署</a><a href="../api.html">API</a><a href="agent.html">Agent</a></div><div class="lang-dropdown"><button class="lang-btn">中文</button><div class="lang-menu"><a href="../moss-transcribe-diarize.html">English</a><a href="moss-transcribe-diarize.html" class="current">中文</a></div></div><a href="https://github.com/modelscope/FunASR" class="nav-github">GitHub</a></div></nav>
-<div class="content"><div class="container narrow"><h1>MOSS-Transcribe-Diarize</h1><p>FunASR 接入 OpenMOSS 发布的 Apache-2.0 第三方模型 <a href="https://huggingface.co/OpenMOSS-Team/MOSS-Transcribe-Diarize"><code>OpenMOSS-Team/MOSS-Transcribe-Diarize</code></a>。它一次生成长音频转写、时间戳和 <code>S01</code>、<code>S02</code> 等匿名说话人标签，不需要外挂 VAD 或说话人流水线。</p>
-<div class="toc-grid"><a href="#contract">输出契约</a><a href="#server">FunASR 服务</a><a href="#runtimes">运行矩阵</a><a href="#evidence">验证证据</a><a href="#boundaries">边界</a></div>
-<section id="contract"><h2>输出契约</h2><table><tr><th>字段</th><th>含义</th></tr><tr><td><code>text</code></td><td>移除 MOSS 控制标记后的可读转写。</td></tr><tr><td><code>timestamp</code></td><td>毫秒级 segment 起止时间。</td></tr><tr><td><code>sentence_info</code></td><td>包含 <code>start</code>、<code>end</code>、<code>text</code> 与匿名 <code>spk</code> 的统一分段。</td></tr><tr><td><code>raw_text</code></td><td>保留供审计的原始带标记生成。</td></tr></table></section>
-<section id="server"><h2>FunASR OpenAI 兼容服务</h2><pre><code>python -m pip install "transformers&gt;=5.6,&lt;6" fastapi uvicorn python-multipart
+
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>MOSS 转写与说话人分离 - FunASR</title>
+<meta content="MOSS 转写与说话人分离" name="description"/>
+<meta content="#ffffff" name="theme-color"/>
+<link href="https://www.funasr.com/docs/moss-transcribe-diarize.html" rel="canonical"/>
+<link href="https://www.funasr.com/en/docs/moss-transcribe-diarize.html" hreflang="en" rel="alternate"/>
+<link href="https://www.funasr.com/docs/moss-transcribe-diarize.html" hreflang="zh-CN" rel="alternate"/>
+<meta content="website" property="og:type"/>
+<meta content="MOSS 转写与说话人分离 - FunASR" property="og:title"/>
+<meta content="MOSS 转写与说话人分离" property="og:description"/>
+<meta content="https://www.funasr.com/docs/moss-transcribe-diarize.html" property="og:url"/>
+<link href="../assets/css/site.d651b1dbf605.css" rel="stylesheet"/>
+<link href="../assets/css/experience.5803993934f8.css" rel="stylesheet"/>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "SoftwareApplication", "applicationCategory": "DeveloperApplication", "codeRepository": "https://github.com/modelscope/FunASR", "dateModified": "2026-09-01", "license": "https://github.com/modelscope/FunASR/blob/main/LICENSE", "name": "FunASR", "operatingSystem": "Linux, macOS, Windows", "url": "https://www.funasr.com/docs/moss-transcribe-diarize.html"}</script>
+</head>
+<body data-copy-icon="../assets/lucide/copy.ea80e566c7a1.svg" data-language="zh" data-route="/docs/moss-transcribe-diarize.html">
+<a class="skip-link" href="#main">跳到主要内容</a>
+<header class="site-header">
+<a aria-label="FunASR 首页" class="brand" href="https://www.funasr.com/">
+<span aria-hidden="true" class="brand-mark">F</span>
+<span>FunASR</span>
+</a>
+<button aria-controls="primary-navigation" aria-expanded="false" class="icon-button menu-button" data-menu-toggle="" title="打开目录" type="button">
+<img alt="" src="../assets/lucide/menu.90a31b3ab1cf.svg"/>
+</button>
+<nav aria-label="主目录" class="primary-navigation" data-primary-nav="" id="primary-navigation">
+<a href="https://www.funasr.com/">产品</a>
+<a href="https://www.funasr.com/deploy/">部署</a>
+<a href="https://www.funasr.com/models.html">模型</a>
+<a href="https://www.funasr.com/benchmarks.html">性能</a>
+<a href="https://www.funasr.com/ecosystem.html">生态</a>
+<a href="https://www.funasr.com/blog/">博客</a>
+<a href="https://www.funasr.com/docs/">文档</a>
+<a href="https://www.funasr.com/donors.html">功德榜</a>
+</nav>
+<div class="header-actions">
+<a class="icon-link" href="https://www.funasr.com/en/docs/moss-transcribe-diarize.html" title="English">
+<img alt="" src="../assets/lucide/languages.ae9048feb2c7.svg"/>
+<span>EN</span>
+</a>
+<a aria-label="GitHub" class="icon-button" href="https://www.funasr.com/go/github" title="GitHub">
+<img alt="" src="../assets/lucide/github.793554449a30.svg"/>
+</a>
+</div>
+</header>
+<main id="main">
+<div class="docs-layout">
+<aside class="docs-sidebar">
+<a class="docs-home" href="https://www.funasr.com/docs/">文档中心</a>
+<details class="docs-navigation" open="">
+<summary class="docs-navigation-toggle">浏览目录</summary>
+<details open="">
+<summary>开始使用</summary>
+<nav aria-label="开始使用">
+<a href="https://www.funasr.com/docs/installation.html">安装与环境验证</a>
+<a href="https://www.funasr.com/docs/quickstart.html">第一次转写</a>
+<a href="https://www.funasr.com/docs/python-api.html">Python SDK: AutoModel</a>
+<a href="https://www.funasr.com/docs/model-selection.html">选择第一个模型</a>
+<a href="https://www.funasr.com/docs/command-line.html">命令行转写</a>
+<a href="https://www.funasr.com/docs/migration.html">从 Whisper 与云 API 迁移</a>
+</nav>
+</details>
+<details open="">
+<summary>模型与能力</summary>
+<nav aria-label="模型与能力">
+<a aria-current="page" href="https://www.funasr.com/docs/moss-transcribe-diarize.html">MOSS 转写与说话人分离</a>
+<a href="https://www.funasr.com/docs/model-zoo.html">Model Zoo</a>
+</nav>
+</details>
+<details open="">
+<summary>训练与扩展</summary>
+<nav aria-label="训练与扩展">
+<a href="https://www.funasr.com/docs/training.html">微调与评测</a>
+<a href="https://www.funasr.com/docs/model-registration.html">自定义模型注册</a>
+</nav>
+</details>
+<details open="">
+<summary>部署与接口</summary>
+<nav aria-label="部署与接口">
+<a href="https://www.funasr.com/docs/docker.html">容器环境与镜像选择</a>
+<a href="https://www.funasr.com/docs/runtime-guide.html">服务部署入口</a>
+<a href="https://www.funasr.com/docs/http-server.html">Python HTTP 服务</a>
+<a href="https://www.funasr.com/docs/kubernetes.html">Kubernetes 部署</a>
+<a href="https://www.funasr.com/docs/deployment-matrix.html">运行时与部署矩阵</a>
+<a href="https://www.funasr.com/docs/vllm.html">vLLM split-engine 推理</a>
+<a href="https://www.funasr.com/docs/native-vllm.html">原生 vLLM 验证记录</a>
+</nav>
+</details>
+<details open="">
+<summary>评测与运维</summary>
+<nav aria-label="评测与运维">
+<a href="https://www.funasr.com/docs/troubleshooting.html">安装与推理故障排查</a>
+<a href="https://www.funasr.com/docs/security.html">服务安全边界</a>
+<a href="https://www.funasr.com/docs/benchmark-method.html">可复现性能评测</a>
+<a href="https://www.funasr.com/docs/realtime-benchmark.html">实时 WebSocket 压测</a>
+</nav>
+</details>
+<details open="">
+<summary>应用与生态</summary>
+<nav aria-label="应用与生态">
+<a href="https://www.funasr.com/docs/use-cases.html">应用场景与示例</a>
+<a href="https://www.funasr.com/docs/community.html">社区集成</a>
+<a href="https://www.funasr.com/docs/repositories.html">四仓职责与贡献入口</a>
+<a href="https://www.funasr.com/docs/javascript.html">JavaScript 客户端</a>
+<a href="https://www.funasr.com/docs/workflows.html">工作流集成</a>
+</nav>
+</details>
+<details open="">
+<summary>协议与参考</summary>
+<nav aria-label="协议与参考">
+<a href="https://www.funasr.com/docs/service-api.html">HTTP API 契约</a>
+<a href="https://www.funasr.com/docs/websocket-protocol.html">C++ WebSocket 协议</a>
+<a href="https://www.funasr.com/docs/onnx-output.html">ONNX 二进制输出契约</a>
+</nav>
+</details>
+<a href="https://www.funasr.com/deploy/">部署手册 →</a>
+</details>
+</aside>
+<div class="docs-body">
+<nav aria-label="面包屑" class="breadcrumbs"><a href="https://www.funasr.com/">FunASR</a><span>/</span><a href="https://www.funasr.com/docs/">文档</a><span>/</span><span>MOSS 转写与说话人分离</span></nav>
+<header class="docs-title"><h1>MOSS 转写与说话人分离</h1><a class="source-link" data-source-link="" href="https://github.com/modelscope/FunASR/blob/main/docs/moss_transcribe_diarize_zh.md">查看 / 编辑源文档 ↗</a></header>
+<article class="docs-article"><div class="source-title-anchor" id="在-funasr-生态中部署-moss-transcribe-diarize"></div>
+<p><a href="https://www.funasr.com/en/docs/moss-transcribe-diarize.html">English</a></p>
+<p>本文把第三方
+<a href="https://github.com/OpenMOSS/MOSS-Transcribe-Diarize">OpenMOSS/MOSS-Transcribe-Diarize</a>
+模型接入 FunASR 部署生态。模型由 OpenMOSS 以 Apache-2.0 发布，不是 FunASR
+自有模型。FunASR 为其公开的 Transformers、vLLM 与 SGLang Omni 接口提供适配器，
+并保留 OpenMOSS 模型名称、许可证和上游 revision。</p>
+<p>MOSS-Transcribe-Diarize 会联合生成转写、时间戳和 <code>[S01]</code> 等说话人标签，应用侧
+不必再拼接外部 VAD、ASR 和 diarization 管线。这里描述的是部署形态，不表示模型
+内部没有分块或分段。
+这些是单次录音内的匿名说话人标签：<code>[S01]</code> 不能识别已知人物，不做已注册声纹
+验证，也不保证与另一段录音中的 <code>[S01]</code> 是同一个人。</p>
+<h2 id="固定上游版本">固定上游版本</h2>
+<p>本文按以下不可变版本验证：</p>
+<ul>
+<li>源码：<code>OpenMOSS/MOSS-Transcribe-Diarize@cb765f2b0fe6f7a298aa2002e2281ae693d1f3c3</code></li>
+<li>模型：<code>OpenMOSS-Team/MOSS-Transcribe-Diarize@e8681d68e7042738ffca8ac8212bc8fcb1131ab8</code></li>
+<li>许可证：固定上游源码和模型元数据中的 Apache-2.0</li>
+<li>vLLM 发布版：<code>v0.27.1@6e448d0ea9bf3d88d898b65449ca6dc2aec170ac</code></li>
+<li>vLLM CUDA 12.9 x86_64 wheel SHA-256：
+  <code>bf0d52faa2a51e7a01c6856a7a8a2d1307fd0ff711415d34168a67ffac0fa47b</code></li>
+</ul>
+<p>三者都要固定。模型依赖 <code>trust_remote_code</code>，生产服务不要执行浮动的模型 revision。</p>
+<span data-legacy-doc-anchor="funasr-automodel-契约" id="contract"></span><h2 id="funasr-automodel-契约">FunASR AutoModel 契约</h2>
+<p>本地后端应使用隔离的 Python 3.10+ 环境，并安装 Transformers 5.6 或更新版本。
+MOSS 在一次生成中完成长音频转写与说话人分离，因此不要传 <code>vad_model</code> 或
+<code>spk_model</code>。外部 VAD 会把长音频切开，并破坏跨分块的匿名标签一致性。</p>
+<pre id="code-0"><code class="language-python">from funasr import AutoModel
+
+model = AutoModel(
+    model="OpenMOSS-Team/MOSS-Transcribe-Diarize",
+    model_revision="e8681d68e7042738ffca8ac8212bc8fcb1131ab8",
+    backend="hf",
+    device="cuda:0",
+    dtype="bf16",
+    attn_implementation="sdpa",
+    disable_update=True,
+)
+
+result = model.generate("audio.wav", max_new_tokens=5120)[0]
+print(result["text"])
+for segment in result["sentence_info"]:
+    print(segment["start"], segment["end"], segment["spk"], segment["text"])
+</code></pre>
+<p>适配器在 <code>raw_text</code> 中保留原始标签生成，并返回 FunASR 通用字段：</p>
+<ul>
+<li><code>text</code>：移除 MOSS 控制标签后的可读转写；</li>
+<li><code>timestamp</code>：segment 级 <code>[start_ms, end_ms]</code>；</li>
+<li><code>sentence_info</code>：包含 <code>start</code>、<code>end</code>、<code>text</code>、<code>sentence</code>、<code>spk</code> 和 <code>timestamp</code>；</li>
+<li><code>raw_text</code>：用于审计的原始 <code>[start][Sxx]text[end]</code> 生成。</li>
+</ul>
+<p>当解析器无法确认标签结构时，会保留 <code>text</code> 与 <code>raw_text</code>，并返回空时间戳和分段，
+不会静默编造说话人信息。</p>
+<p>同一结果契约也可以包装已经启动的 vLLM 服务，并且不会下载本地权重：</p>
+<pre id="code-1"><code class="language-python">from funasr import AutoModel
+
+model = AutoModel(
+    model="OpenMOSS-Team/MOSS-Transcribe-Diarize",
+    backend="vllm",
+    vllm_base_url="http://127.0.0.1:8898/v1",
+    vllm_model="moss-transcribe-diarize",
+    vllm_response_format="diarized_json",
+    disable_update=True,
+)
+result = model.generate("audio.wav", max_completion_tokens=8192)[0]
+</code></pre>
+<p>vLLM 适配器发送官方文档中的 OpenAI-compatible multipart 请求，并把官方返回的
+speaker <code>segments</code> 直接映射到 <code>sentence_info</code>。认证可通过 <code>vllm_api_key</code> 提供；
+请放在 secret store，不要写入源码。</p>
+<p>固定 vLLM revision 的生产结构化路径是
+<code>vllm_response_format="diarized_json"</code>。为保持已有客户端兼容，默认值仍是 <code>json</code>，
+此时 <code>raw_text</code> 保留原始标签生成；结构化模式下，<code>raw_text</code> 是 vLLM 返回的清理后
+<code>text</code>，权威说话人信息位于 <code>sentence_info</code>。</p>
+<span data-legacy-doc-anchor="funasr-openai-兼容服务" id="server"></span><span data-legacy-doc-anchor="funasr-openai-兼容服务" id="evidence"></span><h2 id="funasr-openai-兼容服务">FunASR OpenAI 兼容服务</h2>
+<p>内置离线 HTTP 服务通过 <code>/v1/audio/transcriptions</code> 返回同一套标准化结果。
+服务加载固定的 Transformers revision，不会外挂 VAD 或第二套说话人模型：</p>
+<pre id="code-2"><code class="language-bash">python -m pip install "transformers&gt;=5.6,&lt;6" fastapi uvicorn python-multipart
 funasr-server --model moss-transcribe-diarize --device cuda:0 --port 8000
 
 curl -fsS http://127.0.0.1:8000/v1/audio/transcriptions \
   -F file=@meeting.wav \
   -F model=moss-transcribe-diarize \
-  -F response_format=verbose_json</code></pre><p>响应保留模型原生匿名 speaker segments。即使通用客户端传入 <code>spk=true</code>，服务也不会为 MOSS 启动第二套说话人模型。</p></section>
-<section id="runtimes"><h2>部署路径</h2><table><tr><th>路径</th><th>适合场景</th><th>契约</th></tr><tr><td>FunASR 服务</td><td>自托管 HF GPU 接口、Docker Compose 或 Kubernetes。</td><td><code>verbose_json</code> 返回 speaker segments。</td></tr><tr><td>vLLM</td><td>已有 vLLM 调度和原生音频接口。</td><td><code>diarized_json</code>，可由 FunASR <code>AutoModel</code> 统一。</td></tr><tr><td>SGLang Omni</td><td>使用其原生 MOSS pipeline。</td><td><code>verbose_json</code>，FunASR 校验说话人前缀后统一。</td></tr><tr><td>LocalAI / moss-transcribe.cpp</td><td>第三方 GGUF CPU 或桌面边缘路径。</td><td>独立 C++ 实现，必须单独验证输出。</td></tr><tr><td>FunClip</td><td>生成带说话人的 SRT 与片段。</td><td>消费统一 <code>sentence_info</code>。</td></tr></table><p><a href="https://www.funasr.com/deploy/moss-transcribe-diarize.html">在生产部署中心查看完整固定版本命令 →</a></p></section>
-<section id="evidence"><h2>真实服务 smoke</h2><p>在一张 H100 80GB、Transformers <code>5.16.0.dev0</code>、Torch <code>2.11.0+cu130</code> 和模型 revision <code>e8681d68</code> 上，真实 FunASR HTTP 接口处理仓库 6.0 秒样例后返回 HTTP 200、<code>duration=6.0</code> 和一个非空、时间单调、标记为 <code>S01</code> 的 segment。这只证明服务契约，不代表准确率、吞吐、并发或容量。</p></section>
-<section id="boundaries"><h2>生产边界</h2><ul><li>MOSS 由 OpenMOSS 发布和维护；FunASR 负责适配器与部署契约。</li><li>HF 路径使用 <code>trust_remote_code</code>，必须固定并审计模型 revision。</li><li>MOSS 是离线长音频模型，不接入实时 WebSocket 服务。</li><li>说话人标签是匿名聚类标签，不是已知人物身份或声纹认证。</li><li>需要全局说话人连续性时，不要在外部用 VAD 切碎会议音频。</li></ul><p><a href="https://github.com/modelscope/FunASR/blob/main/docs/moss_transcribe_diarize_zh.md">仓库指南</a> · <a href="https://github.com/OpenMOSS/MOSS-Transcribe-Diarize">OpenMOSS 上游</a> · <a href="https://www.funasr.com/blog/funclip-v2-2-0-moss-speaker-clipping.html">FunClip 集成</a></p></section>
-</div></div><footer><p>FunASR &middot; 通义实验室，阿里巴巴集团</p><p><a href="index.html">首页</a> &middot; <a href="deployment-matrix.html">部署选型</a> &middot; <a href="https://github.com/modelscope/FunASR">GitHub</a></p></footer></body></html>
+  -F response_format=verbose_json
+</code></pre>
+<p>响应包含 <code>text</code>、音频 <code>duration</code>，以及带 <code>start</code>、<code>end</code>、<code>text</code> 和匿名
+<code>speaker</code> 标签的 <code>segments</code>。请求不需要设置 <code>spk=true</code>；即使通用客户端传入
+该字段，服务也只使用 MOSS 原生标签，不会启动第二套说话人流水线。</p>
+<h3 id="open-webui">Open WebUI</h3>
+<p><a href="https://github.com/open-webui/open-webui">Open WebUI</a> 可将该服务配置为 OpenAI
+兼容的语音转写提供方。在 <strong>Admin Panel &gt; Settings &gt; Audio</strong> 中选择 OpenAI STT
+engine，将 <strong>OpenAI API Base URL</strong> 设为 <code>http://funasr:8000/v1</code>（或可访问的主机
+地址），模型选择 <code>moss-transcribe-diarize</code>，请求格式保持 <code>multipart</code>。Open WebUI
+会把模型、可选语言和完整音频文件提交到 <code>/v1/audio/transcriptions</code>。</p>
+<p>MOSS 仍是离线长音频模型：这里提供的是 Open WebUI 文件转写，不是实时麦克风或
+WebSocket 说话人分离路径。</p>
+<p>GPU 容器可在仓库根目录使用
+<code>examples/openai_api/docker-compose.moss.yml</code> 构建。Kubernetes 运维可构建同一
+<code>funasr-moss-api:local</code> 镜像，再应用
+<code>examples/openai_api/kubernetes/funasr-moss-api.yaml</code>；上线前应将本地镜像名
+替换为内部镜像仓库的不可变 digest。</p>
+<p>MOSS 是离线长音频模型，不接入 FunASR 的实时 WebSocket 服务；完整文件请使用
+HTTP 接口。FunClip 通过同一套 <code>sentence_info</code> 契约生成带说话人信息的字幕与
+片段。</p>
+<p>内置服务路径已在一张 H100 80GB、Transformers <code>5.16.0.dev0</code>、Torch
+<code>2.11.0+cu130</code> 环境复现。固定 revision 的模型通过真实 HTTP 接口处理仓库自带
+6.000 秒样例（<code>ea03e1f473ad1618a03da3327a545369cb8f6f06cb0f4115535e5a866167d47e</code>），
+返回一个非空、时间单调且标记为 <code>S01</code> 的 segment，<code>duration=6.0</code>。这只是服务
+契约 smoke test，不代表准确率、吞吐、并发或生产容量。</p>
+<span data-legacy-doc-anchor="选择服务后端" id="runtimes"></span><h2 id="选择服务后端">选择服务后端</h2>
+<table>
+<thead>
+<tr>
+<th>路径</th>
+<th>环境</th>
+<th>响应契约</th>
+<th>适用场景</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>vLLM</td>
+<td>CUDA 12（<code>cu129</code>）或 CUDA 13（<code>cu130</code>）</td>
+<td><code>response_format=diarized_json</code> 返回 OpenAI-compatible 说话人 segments；<code>response_format=json</code> 保留原始 <code>[start][Sxx]text[end]</code> 文本</td>
+<td>已运行 vLLM，或需要其调度能力</td>
+</tr>
+<tr>
+<td>SGLang Omni</td>
+<td>当前上游指南为 CUDA 13</td>
+<td><code>response_format=verbose_json</code> 返回解析后的 segments</td>
+<td>API 需要直接返回结构化说话人分段</td>
+</tr>
+<tr>
+<td>Transformers</td>
+<td>PyTorch 进程</td>
+<td>Python 对象和原始标签文本</td>
+<td>评测、排障或自定义预处理</td>
+</tr>
+<tr>
+<td>moss-transcribe.cpp / LocalAI</td>
+<td>C++17、ggml、GGUF；CPU 或 ggml GPU 后端</td>
+<td>LocalAI 的 OpenAI-compatible 转写接口</td>
+<td>不希望在推理机安装 Python/PyTorch，或需要量化 GGUF 和边缘部署</td>
+</tr>
+</tbody>
+</table>
+<p>两个 HTTP 后端都使用 <code>/v1/audio/transcriptions</code>，但官方文档中的响应格式不能混为
+一谈。固定的 vLLM revision 支持 <code>diarized_json</code>；承诺 <code>segments</code> 前仍要验证实际
+部署的 exact server revision。</p>
+<h2 id="vllm">vLLM</h2>
+<p>创建隔离环境并安装已验证的 vLLM 发布版：</p>
+<pre id="code-3"><code class="language-bash">uv venv --python 3.12 .venv-moss
+curl -fL \
+  https://github.com/vllm-project/vllm/releases/download/v0.27.1/vllm-0.27.1%2Bcu129-cp38-abi3-manylinux_2_28_x86_64.whl \
+  -o vllm-0.27.1+cu129-cp38-abi3-manylinux_2_28_x86_64.whl
+echo "bf0d52faa2a51e7a01c6856a7a8a2d1307fd0ff711415d34168a67ffac0fa47b  vllm-0.27.1+cu129-cp38-abi3-manylinux_2_28_x86_64.whl" \
+  | sha256sum -c -
+uv pip install --python .venv-moss/bin/python --torch-backend=auto \
+  "vllm[audio] @ file://$PWD/vllm-0.27.1+cu129-cp38-abi3-manylinux_2_28_x86_64.whl"
+</code></pre>
+<p>必须安装 <code>audio</code> extra。只安装 plain <code>vllm</code> 时服务可以启动，但因为没有音频解码器，
+请求会返回 HTTP 400（<code>Invalid or unsupported audio file</code>）。</p>
+<p>使用不可变模型 revision 启动：</p>
+<pre id="code-4"><code class="language-bash">CUDA_VISIBLE_DEVICES=0 .venv-moss/bin/vllm serve \
+  OpenMOSS-Team/MOSS-Transcribe-Diarize \
+  --revision e8681d68e7042738ffca8ac8212bc8fcb1131ab8 \
+  --served-model-name moss-transcribe-diarize \
+  --trust-remote-code \
+  --host 127.0.0.1 \
+  --port 8898
+</code></pre>
+<p>提交音频并验证官方结构化说话人响应：</p>
+<pre id="code-5"><code class="language-bash">curl -fsS http://127.0.0.1:8898/v1/audio/transcriptions \
+  -F file=@audio.wav \
+  -F model=moss-transcribe-diarize \
+  -F response_format=diarized_json \
+  -F max_completion_tokens=8192 \
+  -F temperature=0 \
+  | tee moss-transcription.json
+
+python - &lt;&lt;'PY'
+import json
+
+with open("moss-transcription.json", encoding="utf-8") as stream:
+    payload = json.load(stream)
+text = payload.get("text", "")
+segments = payload.get("segments", [])
+assert text.strip(), payload
+assert segments, payload
+assert all(
+    isinstance(item.get("speaker"), str)
+    and item.get("text")
+    and item.get("start") &lt;= item.get("end")
+    for item in segments
+), payload
+print(text, sorted({item["speaker"] for item in segments}))
+PY
+</code></pre>
+<p>如需审计模型原始紧凑标签生成，请把请求改为 <code>response_format=json</code>，并验证返回
+<code>text</code> 中包含 <code>[S01]</code>。</p>
+<p>长音频需要按业务最长会议验证 <code>max_completion_tokens</code>。FunASR vLLM 适配器同时接受
+OpenAI-compatible 名称 <code>max_completion_tokens</code> 和兼容名称 <code>max_new_tokens</code>；两者同时
+出现时以前者为准。增大上限也会影响显存和尾延迟。</p>
+<h3 id="已复现的-vllm-契约">已复现的 vLLM 契约</h3>
+<p>结构化响应验证使用 vLLM 0.27.1、Torch <code>2.13.0+cu129</code> 和一张 H100 80GB。
+15.1685 秒双说话人样例
+（<code>43dccc068506439cb633b382b6b98185baa837363d08cc5f7152ca89b0fdc3c8</code>）
+返回两个 <code>diarized_json</code> segments，标签为 <code>S01</code>、<code>S02</code>；同一请求通过 FunASR
+适配器后，返回两个时间单调且说话人一致的 <code>sentence_info</code>。</p>
+<p>同一环境还验证了 FunASR #3539 的两段真实中文长音频：</p>
+<ul>
+<li>309.600 秒样例
+  （<code>6561ee553c8f762aac4ebd65439d3414820761b547fa3a2edcea43b86a2abc02</code>）
+  使用默认 5120 上限返回 158 个 segments，最后时间戳为 309.41 秒，7.459 秒完成；</li>
+<li>379.664 秒样例
+  （<code>779899a3ce937dd7352b4db1ea53e3f6aa2cfef7109de0249082223c936f9372</code>）
+  使用默认 5120 上限时生成在 354.98 秒处截断，<code>diarized_json</code> 因标签不完整返回
+  HTTP 400；设置 <code>max_completion_tokens=8192</code> 后返回 224 个 segments，最后时间戳
+  覆盖到 378.55 秒，10.516 秒完成。</li>
+</ul>
+<p>这两段样例中，MOSS 修正了报告者指出的多处专有词和近音词，也正确保持了“转述基金会
+声明”的语义连续性；但模型输出仍包含较短的独立分段，不能据此宣称字幕切分问题已解决。
+这些数字只证明 exact input 的完整性边界，不是精度、吞吐或生产容量基准。</p>
+<p>较早的 raw-response 验证使用 vLLM <code>0.23.1rc1.dev949+g68b4a1d58</code>、Torch
+<code>2.11.0+cu129</code> 和一张 H100 80GB，结果如下：</p>
+<ul>
+<li>仓库内 6.000 秒样例
+  （<code>ea03e1f473ad1618a03da3327a545369cb8f6f06cb0f4115535e5a866167d47e</code>）
+  返回 HTTP 200 和 <code>[0.96][S01]... [5.94]</code>；</li>
+<li>A + 0.8 秒静音 + B + 0.8 秒静音 + A 的拼接样例
+  （<code>dbb32bcfed2e8226bedf64248a9f4a44685b293a4696d18fb4cfa701b04db912</code>）
+  返回 HTTP 200、<code>S01 -&gt; S02 -&gt; S01</code>，时间戳覆盖到 19.08 秒。</li>
+</ul>
+<p>这证明固定版本对这些输入满足 API 和说话人返回契约，不是 diarization 精度、重叠语音、
+吞吐或生产容量结论。</p>
+<p>旧 nightly commit <code>68b4a1d582818e67adc903bf1b8fc5a5447da2fa</code> 早于 vLLM
+<a href="https://github.com/vllm-project/vllm/pull/48543"><code>#48543</code></a>：它支持
+<code>response_format=json</code>，但 <code>diarized_json</code> 会返回 HTTP 400。应升级到已验证发布版，
+不要静默重试一次成本较高的转写请求。</p>
+<p>FunASR 适配器还分别使用 <code>backend="hf"</code> 和 <code>backend="vllm"</code>，按模型 revision
+<code>e8681d68e7042738ffca8ac8212bc8fcb1131ab8</code> 做了真实测试。15.1685 秒的双说话人
+样例（<code>43dccc068506439cb633b382b6b98185baa837363d08cc5f7152ca89b0fdc3c8</code>）通过
+统一 <code>AutoModel</code> 结果契约返回两个单调时间分段和 <code>S01</code>、<code>S02</code>。测试完成后已停止
+临时 vLLM worker；这只是契约冒烟测试，不是精度基准。</p>
+<h2 id="moss-transcribecpp-与-localai">moss-transcribe.cpp 与 LocalAI</h2>
+<p><a href="https://github.com/localai-org/moss-transcribe.cpp"><code>localai-org/moss-transcribe.cpp</code></a>
+是 LocalAI 团队维护的第三方 C++17/ggml 重写，许可证为 MIT；原始 OpenMOSS 模型
+权重仍保持 Apache-2.0。它不是 FunASR <code>AutoModel</code> 后端，也不能与上面的 Python
+适配器混用。</p>
+<p>在需要 GGUF 量化、CPU 或 ggml CUDA/Metal/Vulkan/HIP 后端时，可以选择这条路径。
+LocalAI <code>master@a7cc5873ef5b7c909fc9ff7d349d51738ba9bb05</code> 已包含
+<code>moss-transcribe-cpp</code> 后端及 Hugging Face importer；后端固定
+<code>moss-transcribe.cpp@190a569c13b4b247450f2fb3b2a431244e84833e</code>，importer 可识别
+<code>huggingface://mudler/moss-transcribe.cpp-gguf</code> 并默认选择 Q5_K。部署前应按 LocalAI
+文档验证所选 backend package、GGUF SHA-256、实际硬件后端及
+<code>/v1/audio/transcriptions</code> 响应，不要把上游 README 的性能数字当作本机基准。</p>
+<h2 id="sglang-omni">SGLang Omni</h2>
+<p>按固定上游 SGLang Omni 安装指南准备 CUDA 13 环境，然后下载不可变模型快照并从本地目录启动：</p>
+<pre id="code-6"><code class="language-bash">git clone https://github.com/sgl-project/sglang-omni.git
+git -C sglang-omni checkout 3f819f9cdae3d4eeec22f73306c9067a1ec2542e
+</code></pre>
+<p>该源码 pin 已把 <code>max_new_tokens</code> 传入 transcription 生成请求。最初的 #914
+merge 早于这个请求字段，因此虽然它的 H100 benchmark 仍可作为上游证据，却不能
+支撑下方长音频命令。</p>
+<pre id="code-7"><code class="language-bash">hf download OpenMOSS-Team/MOSS-Transcribe-Diarize \
+  --revision e8681d68e7042738ffca8ac8212bc8fcb1131ab8 \
+  --local-dir .models/moss-transcribe-diarize
+
+sgl-omni serve \
+  --model-path .models/moss-transcribe-diarize \
+  --port 8898 \
+  --max-running-requests 16 \
+  --cuda-graph-max-bs 16 \
+  --mem-fraction-static 0.80
+</code></pre>
+<p>请求结构化分段：</p>
+<pre id="code-8"><code class="language-bash">curl -fsS http://127.0.0.1:8898/v1/audio/transcriptions \
+  -F file=@audio.wav \
+  -F model=OpenMOSS-Team/MOSS-Transcribe-Diarize \
+  -F response_format=verbose_json
+</code></pre>
+<p>验证每个 segment 都有起止时间与非空文本。SGLang Omni 当前的
+<code>verbose_json</code> 合同把说话人编号保留为 <code>segments[].text</code> 的 <code>[Sxx]</code> 前缀，
+并没有单独的 <code>speaker</code> 字段。接入字幕、会议纪要或分析系统前，应解析并校验此前缀。</p>
+<p>FunASR 适配器会完成该校验，并把 SGLang 官方 segments 映射为与 HF、vLLM
+一致的 <code>sentence_info</code> 合同：</p>
+<pre id="code-9"><code class="language-python">from funasr import AutoModel
+
+model = AutoModel(
+    model="OpenMOSS-Team/MOSS-Transcribe-Diarize",
+    backend="sglang",
+    sglang_base_url="http://127.0.0.1:8898/v1",
+    sglang_model="OpenMOSS-Team/MOSS-Transcribe-Diarize",
+    max_new_tokens=65536,
+    disable_update=True,
+)
+result = model.generate(input="audio.wav", max_new_tokens=65536)[0]
+for segment in result["sentence_info"]:
+    print(segment["start"], segment["end"], segment["spk"], segment["text"])
+</code></pre>
+<p>不要传入 <code>vad_model</code> 或 <code>spk_model</code>：MOSS 在一次生成中联合完成分段和匿名说话人
+归属，外部分段会破坏长轮次中的说话人一致性。适配器把上游带标签原文保存在
+<code>raw_text</code>，只从标准化 segment 中移除已经校验的 <code>[Sxx]</code> 前缀；如果 SGLang
+没有返回此前缀，则明确失败，不会伪造说话人标签。</p>
+<p>原生 runtime 已通过 SGLang Omni
+<a href="https://github.com/sgl-project/sglang-omni/pull/914">#914</a> 合并。其单张 H100
+Seed-TTS EN benchmark 完成 1088/1088 条请求且无请求失败。WER 是在移除
+timestamp 与 speaker markup 后针对单说话人英文片段计算的，因此不评估
+diarization 或 timestamp 准确率，也不是生产容量承诺。</p>
+<span data-legacy-doc-anchor="上线前验证" id="boundaries"></span><h2 id="上线前验证">上线前验证</h2>
+<p>不要只用短单人音频，应使用真实多人长音频：</p>
+<ul>
+<li>检查长轮次及说话人再次出现时的身份一致性；</li>
+<li>覆盖重叠语音、串音、音乐、噪声和长静音；</li>
+<li>验证时间戳单调递增并覆盖完整音频；</li>
+<li>记录 GPU、CUDA、Torch、后端 commit、模型 revision、音频时长、生成上限、
+  墙钟延迟和峰值显存；</li>
+<li>在 API 网关完成认证、TLS、请求限制和数据留存策略，模型 worker 只绑定内网。</li>
+</ul>
+<p>向 FunASR 报告问题时，请明确这是 OpenMOSS 第三方路径，并附上后端与上游 exact
+revision。模型架构或权重问题应反馈给上游；部署中心的契约或文档问题可以在 FunASR 提交。</p></article>
+<nav aria-label="相邻文档" class="docs-next">
+<a href="https://www.funasr.com/docs/migration.html">← 从 Whisper 与云 API 迁移</a><a href="https://www.funasr.com/docs/model-zoo.html">Model Zoo →</a> </nav>
+</div>
+<aside class="docs-toc"><strong>本页目录</strong><div class="toc">
+<ul>
+<li><a href="#在-funasr-生态中部署-moss-transcribe-diarize">在 FunASR 生态中部署 MOSS-Transcribe-Diarize</a><ul>
+<li><a href="#固定上游版本">固定上游版本</a></li>
+<li><a href="#funasr-automodel-契约">FunASR AutoModel 契约</a></li>
+<li><a href="#funasr-openai-兼容服务">FunASR OpenAI 兼容服务</a><ul>
+<li><a href="#open-webui">Open WebUI</a></li>
+</ul>
+</li>
+<li><a href="#选择服务后端">选择服务后端</a></li>
+<li><a href="#vllm">vLLM</a><ul>
+<li><a href="#已复现的-vllm-契约">已复现的 vLLM 契约</a></li>
+</ul>
+</li>
+<li><a href="#moss-transcribecpp-与-localai">moss-transcribe.cpp 与 LocalAI</a></li>
+<li><a href="#sglang-omni">SGLang Omni</a></li>
+<li><a href="#上线前验证">上线前验证</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</aside></div>
+</main>
+<footer class="site-footer">
+<div>
+<strong>FunASR</strong>
+<p>面向生产部署的开源语音基础设施。</p>
+</div>
+<nav aria-label="官方仓库" class="footer-repositories" data-footer-repositories="">
+<strong>官方仓库</strong>
+<div class="footer-links">
+<a href="https://www.funasr.com/go/fun-asr">Fun-ASR</a>
+<a href="https://www.funasr.com/go/sensevoice">SenseVoice</a>
+<a href="https://www.funasr.com/go/funclip">FunClip</a>
+</div>
+</nav>
+<div class="footer-links">
+<a href="https://www.funasr.com/deploy/">部署</a>
+<a href="https://www.funasr.com/docs/">文档</a>
+<a href="https://www.funasr.com/go/releases">发布</a>
+<a href="https://www.funasr.com/donors.html">功德榜</a>
+</div>
+</footer>
+<script defer="" src="../assets/js/site.d446f5fbcfe2.js"></script>
+<script defer="" src="../assets/js/experience.3f688a12942a.js"></script>
+</body>
+</html>

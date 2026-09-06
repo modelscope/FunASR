@@ -1,419 +1,293 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<meta name="description" content="From understanding the architecture to contributing your own model — a step-by-step guide.">
-<meta property="og:title" content="FunASR Developer Guide">
-<meta property="og:description" content="From understanding the architecture to contributing your own model — a step-by-step guide.">
-<meta property="og:type" content="website">
-<meta property="og:url" content="https://modelscope.github.io/FunASR/model-registration.html">
-<link rel="canonical" href="https://modelscope.github.io/FunASR/model-registration.html">
-<meta property="og:site_name" content="FunASR">
-<meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="FunASR Developer Guide">
-<meta name="twitter:description" content="From understanding the architecture to contributing your own model — a step-by-step guide.">
-<title>FunASR Developer Guide</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
-</head><body>
-<nav class="nav"><div class="container">
-<a href="index.html" class="nav-logo">FunASR</a>
-            <div class="nav-links">
-                <a href="index.html">Home</a>
-                <a href="tutorial.html">Tutorial</a>
-                <a href="training.html">Training</a>
-                <a href="model-registration.html" class="active">Develop</a>
-                <a href="api.html">API</a>
-                <a href="vllm.html">vLLM</a>
-                <a href="agent.html">Agent</a>
-                <a href="benchmark.html">Benchmark</a>
-                <a href="donors.html">Donors</a>
-            </div>
 
-<div class="lang-dropdown"><button class="lang-btn">English</button><div class="lang-menu"><a href="model-registration.html" class="current">English</a><a href="zh/model-registration.html">中文</a><a href="ja/model-registration.html">日本語</a></div></div>
-<a href="https://github.com/modelscope/FunASR" class="nav-github">GitHub</a>
-</div></nav>
-
-<div class="content"><div class="container narrow">
-<h1>Developer Guide</h1>
-<p>From understanding the architecture to contributing your own model — a step-by-step guide.</p>
-
-<div class="toc-grid">
-<a href="#architecture">1. Architecture Overview</a>
-<a href="#setup">2. Development Setup</a>
-<a href="#understand">3. How Inference Works</a>
-<a href="#add-model">4. Add a New Model</a>
-<a href="#add-component">5. Add Frontend/Tokenizer</a>
-<a href="#standalone">6. Standalone Repository</a>
-<a href="#testing">7. Testing Your Model</a>
-<a href="#pitfalls">8. Common Pitfalls</a>
-<a href="#contribute">9. Contributing</a>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Custom model registration - FunASR</title>
+<meta content="Custom model registration" name="description"/>
+<meta content="#ffffff" name="theme-color"/>
+<link href="https://www.funasr.com/en/docs/model-registration.html" rel="canonical"/>
+<link href="https://www.funasr.com/docs/model-registration.html" hreflang="zh-CN" rel="alternate"/>
+<link href="https://www.funasr.com/en/docs/model-registration.html" hreflang="en" rel="alternate"/>
+<meta content="website" property="og:type"/>
+<meta content="Custom model registration - FunASR" property="og:title"/>
+<meta content="Custom model registration" property="og:description"/>
+<meta content="https://www.funasr.com/en/docs/model-registration.html" property="og:url"/>
+<link href="assets/css/site.d651b1dbf605.css" rel="stylesheet"/>
+<link href="assets/css/experience.5803993934f8.css" rel="stylesheet"/>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "SoftwareApplication", "applicationCategory": "DeveloperApplication", "codeRepository": "https://github.com/modelscope/FunASR", "dateModified": "2026-09-01", "license": "https://github.com/modelscope/FunASR/blob/main/LICENSE", "name": "FunASR", "operatingSystem": "Linux, macOS, Windows", "url": "https://www.funasr.com/en/docs/model-registration.html"}</script>
+</head>
+<body data-copy-icon="assets/lucide/copy.ea80e566c7a1.svg" data-language="en" data-route="/en/docs/model-registration.html">
+<a class="skip-link" href="#main">Skip to main content</a>
+<header class="site-header">
+<a aria-label="FunASR home" class="brand" href="https://www.funasr.com/en/">
+<span aria-hidden="true" class="brand-mark">F</span>
+<span>FunASR</span>
+</a>
+<button aria-controls="primary-navigation" aria-expanded="false" class="icon-button menu-button" data-menu-toggle="" title="Open navigation" type="button">
+<img alt="" src="assets/lucide/menu.90a31b3ab1cf.svg"/>
+</button>
+<nav aria-label="Primary navigation" class="primary-navigation" data-primary-nav="" id="primary-navigation">
+<a href="https://www.funasr.com/en/">Product</a>
+<a href="https://www.funasr.com/en/deploy/">Deploy</a>
+<a href="https://www.funasr.com/en/models.html">Models</a>
+<a href="https://www.funasr.com/en/benchmarks.html">Benchmarks</a>
+<a href="https://www.funasr.com/en/ecosystem.html">Ecosystem</a>
+<a href="https://www.funasr.com/en/blog/">Blog</a>
+<a href="https://www.funasr.com/en/docs/">Docs</a>
+<a href="https://www.funasr.com/en/donors.html">Donors</a>
+</nav>
+<div class="header-actions">
+<a class="icon-link" href="https://www.funasr.com/docs/model-registration.html" title="简体中文">
+<img alt="" src="assets/lucide/languages.ae9048feb2c7.svg"/>
+<span>中文</span>
+</a>
+<a aria-label="GitHub" class="icon-button" href="https://www.funasr.com/go/github" title="GitHub">
+<img alt="" src="assets/lucide/github.793554449a30.svg"/>
+</a>
 </div>
-
-<!-- 1. Architecture -->
-<h2 id="architecture">1. Architecture Overview</h2>
-<p>FunASR is built around three core ideas: a <strong>registry</strong> for component discovery, <strong>AutoModel</strong> as the unified entry point, and <strong>config.yaml</strong> as the declarative model definition.</p>
-
-<div class="arch-box">User Code                         FunASR Framework                    Model Hub
-─────────                         ────────────────                    ─────────
-AutoModel(model="name")
-    │
-    ├─→ download_model()  ──────→  ModelScope / HuggingFace
-    │       ↓                          ↓
-    │   read config.yaml          download model.pt
-    │       ↓
-    ├─→ tables.model_classes["Name"]   ← @tables.register decorator
-    │       ↓
-    ├─→ model_class(**config)          ← __init__: build encoder/decoder
-    │       ↓
-    ├─→ load_pretrained_model()        ← load weights from model.pt
-    │       ↓
-    └─→ model.eval()                   ← ready for inference
-
-generate(input="audio.wav")
-    │
-    ├─ No VAD  → inference()           ← single utterance
-    │               ↓
-    │           model.inference(data_in, tokenizer, frontend, **kwargs)
-    │               ↓
-    │           return [{"key", "text", "timestamp", ...}]
-    │
-    └─ With VAD → inference_with_vad()  ← long audio
-                    ↓
-                1. VAD: segment audio → [[start_ms, end_ms], ...]
-                2. Sort segments by length (for efficient batching)
-                3. ASR: recognize each segment
-                4. Merge timestamps (add VAD offset)
-                5. Punctuation (optional)
-                6. Speaker diarization (optional)
-                    ↓
-                return [{"key", "text", "timestamp", "sentence_info"}]
-</div>
-
-<h3>Registry System</h3>
-<p>Every component in FunASR is registered by name. The registry is the lookup table that connects config strings to Python classes:</p>
-
-<table>
-<tr><th>Registry</th><th>Purpose</th><th>Example</th></tr>
-<tr><td><code>model_classes</code></td><td>ASR, VAD, PUNC, SPK models</td><td>"Paraformer", "FsmnVADStreaming"</td></tr>
-<tr><td><code>encoder_classes</code></td><td>Encoder architectures</td><td>"SANMEncoder", "ConformerEncoder"</td></tr>
-<tr><td><code>decoder_classes</code></td><td>Decoder architectures</td><td>"ParaformerSANMDecoder"</td></tr>
-<tr><td><code>frontend_classes</code></td><td>Audio feature extraction</td><td>"WavFrontend", "WhisperFrontend"</td></tr>
-<tr><td><code>tokenizer_classes</code></td><td>Text tokenization</td><td>"SentencepiecesTokenizer"</td></tr>
-<tr><td><code>dataset_classes</code></td><td>Training data loading</td><td>"AudioDataset"</td></tr>
-</table>
-
-<pre>from funasr.register import tables
-
-# Register a new model
-@tables.register("model_classes", "MyModel")
-class MyModel(nn.Module):
-    ...
-
-# View all registered models
-tables.print("model")</pre>
-
-<!-- 2. Setup -->
-<h2 id="setup">2. Development Setup</h2>
-
-<div class="step">
-<h4>Clone and install in development mode</h4>
-<pre>git clone https://github.com/modelscope/FunASR.git
-cd FunASR
-pip install -e .              # editable install
-pip install -e ".[train]"     # with training dependencies</pre>
-</div>
-
-<div class="step">
-<h4>Verify installation</h4>
-<pre>python -c "from funasr import AutoModel; print('OK')"
-python -c "from funasr.register import tables; tables.print('model')"</pre>
-</div>
-
-<div class="step">
-<h4>Run existing tests</h4>
-<pre># Quick smoke test
-python tests_models/test_fsmn_vad.py
-python tests_models/test_paraformer.py
-
-# Full test suite
-cd tests_models && python run_all_tests.py</pre>
-</div>
-
-<!-- 3. How Inference Works -->
-<h2 id="understand">3. How Inference Works (Deep Dive)</h2>
-
-<p>Understanding the inference data flow is essential before adding a new model. Here's what happens when you call <code>model.generate(input="audio.wav")</code>:</p>
-
-<h4>Step 1: Input Preparation</h4>
-<p><code>prepare_data_iterator()</code> normalizes any input type (file path, URL, numpy, bytes, list) into a uniform <code>(key_list, data_list)</code> format.</p>
-
-<h4>Step 2: Model Inference</h4>
-<p>Each model's <code>inference()</code> method receives:</p>
-<pre>def inference(self, data_in, data_lengths=None, key=None,
-              tokenizer=None, frontend=None, **kwargs):
-    # data_in: list of audio samples (numpy arrays)
-    # tokenizer: for decoding token IDs → text
-    # frontend: for extracting fbank features
-    # **kwargs: all config.yaml params + user runtime params
-
-    # Must return: (results_list, meta_data_dict)
-    return [{"key": "id", "text": "hello", "timestamp": [...]}], {"batch_data_time": 5.5}</pre>
-
-<h4>Step 3: Output Format</h4>
-<p>The <code>results_list</code> must be a list of dicts. Required/optional fields:</p>
-<table>
-<tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr>
-<tr><td><code>key</code></td><td>str</td><td>Yes</td><td>Sample identifier</td></tr>
-<tr><td><code>text</code></td><td>str</td><td>Yes (ASR)</td><td>Recognized text</td></tr>
-<tr><td><code>timestamp</code></td><td>list</td><td>For SPK</td><td><code>[[start_ms, end_ms], ...]</code> per character</td></tr>
-<tr><td><code>value</code></td><td>list</td><td>VAD only</td><td><code>[[start_ms, end_ms], ...]</code> speech segments</td></tr>
-<tr><td><code>spk_embedding</code></td><td>Tensor</td><td>SPK only</td><td>Shape <code>[N, 192]</code></td></tr>
-</table>
-
-<div class="warning">
-<strong>Timestamp format matters!</strong> If your model outputs timestamps differently (e.g., dict format like Fun-ASR-Nano), FunASR's <code>inference_with_vad</code> will auto-convert it. But the standard expected format is <code>[[start_ms, end_ms], ...]</code> (list of 2-element lists in milliseconds).
-</div>
-
-<!-- 4. Add a New Model -->
-<h2 id="add-model">4. Add a New Model</h2>
-
-<div class="step">
-<h4>Create model directory</h4>
-<pre>funasr/models/my_model/
-├── __init__.py      # empty file
-├── model.py         # main model class
-├── encoder.py       # (optional) custom encoder
-└── decoder.py       # (optional) custom decoder</pre>
-<div class="warning"><strong>Rule:</strong> Each model directory is self-contained. Never import from other model directories. Never modify existing models.</div>
-</div>
-
-<div class="step">
-<h4>Implement the model class</h4>
-<pre>import torch.nn as nn
+</header>
+<main id="main">
+<div class="docs-layout">
+<aside class="docs-sidebar">
+<a class="docs-home" href="https://www.funasr.com/en/docs/">Documentation</a>
+<details class="docs-navigation" open="">
+<summary class="docs-navigation-toggle">Browse topics</summary>
+<details open="">
+<summary>Get started</summary>
+<nav aria-label="Get started">
+<a href="https://www.funasr.com/en/docs/installation.html">Installation &amp; environment checks</a>
+<a href="https://www.funasr.com/en/docs/quickstart.html">Your first transcription</a>
+<a href="https://www.funasr.com/en/docs/python-api.html">Python SDK: AutoModel</a>
+<a href="https://www.funasr.com/en/docs/model-selection.html">Choose your first model</a>
+<a href="https://www.funasr.com/en/docs/command-line.html">Command-line transcription</a>
+<a href="https://www.funasr.com/en/docs/migration.html">Migrate from Whisper &amp; cloud APIs</a>
+</nav>
+</details>
+<details open="">
+<summary>Models &amp; capabilities</summary>
+<nav aria-label="Models &amp; capabilities">
+<a href="https://www.funasr.com/en/docs/moss-transcribe-diarize.html">MOSS transcription &amp; diarization</a>
+<a href="https://www.funasr.com/en/docs/model-zoo.html">Model Zoo</a>
+</nav>
+</details>
+<details open="">
+<summary>Train &amp; extend</summary>
+<nav aria-label="Train &amp; extend">
+<a href="https://www.funasr.com/en/docs/training.html">Fine-tuning &amp; evaluation</a>
+<a aria-current="page" href="https://www.funasr.com/en/docs/model-registration.html">Custom model registration</a>
+</nav>
+</details>
+<details open="">
+<summary>Deploy &amp; integrate</summary>
+<nav aria-label="Deploy &amp; integrate">
+<a href="https://www.funasr.com/en/docs/docker.html">Containers &amp; image selection</a>
+<a href="https://www.funasr.com/en/docs/runtime-guide.html">Serving entry points</a>
+<a href="https://www.funasr.com/en/docs/http-server.html">Python HTTP service</a>
+<a href="https://www.funasr.com/en/docs/kubernetes.html">Kubernetes deployment</a>
+<a href="https://www.funasr.com/en/docs/deployment-matrix.html">Runtime &amp; deployment matrix</a>
+<a href="https://www.funasr.com/en/docs/vllm.html">vLLM split-engine inference</a>
+<a href="https://www.funasr.com/en/docs/native-vllm.html">Native vLLM validation record</a>
+</nav>
+</details>
+<details open="">
+<summary>Evaluate &amp; operate</summary>
+<nav aria-label="Evaluate &amp; operate">
+<a href="https://www.funasr.com/en/docs/troubleshooting.html">Troubleshooting</a>
+<a href="https://www.funasr.com/en/docs/security.html">Service security boundaries</a>
+<a href="https://www.funasr.com/en/docs/benchmark-method.html">Reproducible performance tests</a>
+<a href="https://www.funasr.com/en/docs/realtime-benchmark.html">Realtime WebSocket benchmarking</a>
+</nav>
+</details>
+<details open="">
+<summary>Applications &amp; ecosystem</summary>
+<nav aria-label="Applications &amp; ecosystem">
+<a href="https://www.funasr.com/en/docs/use-cases.html">Use cases &amp; examples</a>
+<a href="https://www.funasr.com/en/docs/community.html">Community integrations</a>
+<a href="https://www.funasr.com/en/docs/repositories.html">Repositories &amp; contribution paths</a>
+<a href="https://www.funasr.com/en/docs/javascript.html">JavaScript clients</a>
+<a href="https://www.funasr.com/en/docs/workflows.html">Workflow integrations</a>
+</nav>
+</details>
+<details open="">
+<summary>Protocols &amp; reference</summary>
+<nav aria-label="Protocols &amp; reference">
+<a href="https://www.funasr.com/en/docs/service-api.html">HTTP API contract</a>
+<a href="https://www.funasr.com/en/docs/websocket-protocol.html">C++ WebSocket protocol</a>
+<a href="https://www.funasr.com/en/docs/onnx-output.html">ONNX binary output contract</a>
+</nav>
+</details>
+<a href="https://www.funasr.com/en/deploy/">Deployment guides →</a>
+</details>
+</aside>
+<div class="docs-body">
+<nav aria-label="Breadcrumbs" class="breadcrumbs"><a href="https://www.funasr.com/en/">FunASR</a><span>/</span><a href="https://www.funasr.com/en/docs/">Docs</a><span>/</span><span>Custom model registration</span></nav>
+<header class="docs-title"><h1>Custom model registration</h1><a class="source-link" data-source-link="" href="https://github.com/modelscope/FunASR/blob/main/docs/model_registration.md">View / edit source ↗</a></header>
+<article class="docs-article"><div class="source-title-anchor" id="model-registration"></div>
+<p><a href="https://www.funasr.com/docs/model-registration.html">简体中文</a> | <a href="https://www.funasr.com/en/docs/quickstart.html">Documentation</a> | <a href="https://www.funasr.com/en/docs/training.html">Training</a> | <a href="https://github.com/modelscope/FunASR/blob/main/docs/tutorial/Tables.md">Historical registry tutorial</a></p>
+<p>Registration connects a Python implementation to a configuration name. It does not download weights, make an arbitrary Transformers model compatible, provide training/export support, or certify model quality. This guide describes the checked-in <a href="https://github.com/modelscope/FunASR/blob/main/funasr/register.py">registry</a>, <a href="https://github.com/modelscope/FunASR/blob/main/funasr/auto/auto_model.py">AutoModel</a>, <a href="https://github.com/modelscope/FunASR/blob/main/funasr/download/download_model_from_hub.py">hub loader</a> and <a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/dynamic_import.py">dynamic importer</a>.</p>
+<span data-legacy-doc-anchor="names-and-import-order" id="architecture"></span><span data-legacy-doc-anchor="names-and-import-order" id="add-component"></span><h2 id="names-and-import-order">Names and Import Order</h2>
+<p>Use <code>@tables.register("model_classes", "YourUniqueModelName")</code> on a class imported before construction. <code>tables</code> comes from <code>funasr.register</code>. The second argument is the exact, case-sensitive registry key; omitting it uses the Python class name. The decorator returns the original class and records its source location with <code>inspect</code>, so define examples in importable <code>.py</code> files, not only a REPL or dynamically generated class.</p>
+<p>Keys live in process-global dictionaries. An existing key is overwritten, with a debug log rather than an error; imports and their order therefore matter. Use an organization/project-specific name and a collision guard. Avoid names such as <code>SenseVoiceSmall</code>, <code>Paraformer</code> or <code>FunASRNano</code> for unrelated custom models. <code>tables.print("model")</code> displays registration metadata; <code>tables.model_classes[name]</code> gives the active implementation.</p>
+<p>Other tables include <code>encoder_classes</code>, <code>decoder_classes</code>, <code>frontend_classes</code>, <code>tokenizer_classes</code>, <code>dataset_classes</code>, <code>index_ds_classes</code> and <code>batch_sampler_classes</code>. Each consumer has its own contract: registering an encoder does not make it a complete <code>AutoModel</code> model. The registry also permits new table names, so a typo can create an unused table instead of failing.</p>
+<span data-legacy-doc-anchor="minimal-local-contract-example" id="setup"></span><span data-legacy-doc-anchor="minimal-local-contract-example" id="add-model"></span><h2 id="minimal-local-contract-example">Minimal Local Contract Example</h2>
+<p>Put the following example in an importable <code>custom_model_demo.py</code> in a scratch directory, then run <code>python custom_model_demo.py</code> with this checkout installed. It intentionally returns input text, not speech recognition. It does not need weights, audio, a hub download, or GPU. The parameter is present because this <code>AutoModel.inference</code> inspects <code>next(model.parameters()).device</code>; a parameterless toy fails that path.</p>
+<pre id="code-0"><code class="language-python">import torch
+from funasr import AutoModel
 from funasr.register import tables
 
-@tables.register("model_classes", "MyModel")
-class MyModel(nn.Module):
+MODEL_NAME = "DocsEchoModelV1"
+if MODEL_NAME in tables.model_classes:
+    raise RuntimeError(f"Registry collision: {MODEL_NAME}")
 
+
+@tables.register("model_classes", MODEL_NAME)
+class DocsEchoModel(torch.nn.Module):
     def __init__(self, **kwargs):
-        super().__init__()    # ← MUST call super().__init__()
-        # Build your architecture from kwargs (comes from config.yaml)
-        # kwargs includes: input_size, vocab_size, tokenizer, frontend, etc.
-
-    def forward(self, speech, speech_lengths, text, text_lengths, **kwargs):
-        """Training forward pass. Return (loss, stats_dict, weight)."""
-        ...
-
-    def inference(self, data_in, data_lengths=None, key=None,
-                  tokenizer=None, frontend=None, **kwargs):
-        """Inference. Return (results_list, meta_data)."""
-        ...
-</pre>
-</div>
-
-<div class="step">
-<h4>Create config.yaml</h4>
-<pre># This file defines what components to use
-model: MyModel              # matches @tables.register key
-model_conf:
-    hidden_size: 512
-
-frontend: WavFrontend       # reuse existing frontend
-frontend_conf:
-    fs: 16000
-    n_mels: 80
-    frame_length: 25
-    frame_shift: 10
-    cmvn_file: null
-
-tokenizer: SentencepiecesTokenizer
-tokenizer_conf:
-    bpemodel: null</pre>
-</div>
-
-<div class="step">
-<h4>Create configuration.json (for Hub upload)</h4>
-<pre>{
-  "framework": "pytorch",
-  "task": "auto-speech-recognition",
-  "model": {"type": "funasr"},
-  "file_path_metas": {
-    "init_param": "model.pt",
-    "config": "config.yaml",
-    "tokenizer_conf": {"bpemodel": "my_tokenizer.model"},
-    "frontend_conf": {"cmvn_file": "am.mvn"}
-  }
-}</pre>
-<p>This file tells AutoModel how to resolve relative paths. When the model is downloaded, each path in <code>file_path_metas</code> gets the model directory prepended.</p>
-</div>
-
-<div class="step">
-<h4>Test locally</h4>
-<pre>from funasr import AutoModel
-
-# From local directory
-model = AutoModel(model="./my_model_dir")
-res = model.generate(input="test.wav")
-print(res)</pre>
-</div>
-
-<!-- 5. Add Component -->
-<h2 id="add-component">5. Add a New Frontend / Tokenizer / Dataset</h2>
-<p>The same registry pattern applies to all components. Example — adding a new frontend:</p>
-
-<pre>from funasr.register import tables
-
-@tables.register("frontend_classes", "MyFrontend")
-class MyFrontend(nn.Module):
-    def __init__(self, fs=16000, **kwargs):
         super().__init__()
-        self.fs = fs
+        self.anchor = torch.nn.Parameter(torch.zeros(1), requires_grad=False)
 
-    def output_size(self):
-        return 80  # feature dimension
+    def inference(
+        self, data_in, data_lengths=None, key=None,
+        tokenizer=None, frontend=None, **kwargs,
+    ):
+        results = [
+            {"key": sample_key, "text": str(value)}
+            for sample_key, value in zip(key, data_in)
+        ]
+        return results, {}
 
-    def forward(self, input, input_lengths):
-        # input: raw waveform (batch, samples)
-        # return: features (batch, frames, dim), lengths
-        ...</pre>
-
-<p>Then reference it in config.yaml:</p>
-<pre>frontend: MyFrontend
-frontend_conf:
-    fs: 16000</pre>
-
-<p>Same pattern for tokenizer (<code>tokenizer_classes</code>), dataset (<code>dataset_classes</code>), encoder (<code>encoder_classes</code>), etc.</p>
-
-<!-- 6. Standalone -->
-<h2 id="standalone">6. Standalone Repository Mode</h2>
-<p>Your model doesn't need to live inside the FunASR source tree. With <code>trust_remote_code=True</code>, FunASR dynamically loads your model class from an external file:</p>
-
-<pre># User code — loads YOUR model.py from a separate repo
-model = AutoModel(
-    model="your-org/your-model",      # HuggingFace/ModelScope repo
-    trust_remote_code=True,
-    remote_code="./model.py",          # path to model class definition
-    hub="hf",
-)</pre>
-
-<p><strong>How it works:</strong></p>
-<ol>
-<li>FunASR downloads the model repo (weights + config + model.py)</li>
-<li><code>remote_code="./model.py"</code> is dynamically imported</li>
-<li>The <code>@tables.register</code> decorator in that file registers the model class</li>
-<li>Normal <code>build_model()</code> flow proceeds with the registered class</li>
-</ol>
-
-<p><strong>Your repo structure:</strong></p>
-<pre>your-model-repo/
-├── model.py              # model class with @tables.register
-├── config.yaml           # model architecture config
-├── configuration.json    # path resolution
-├── model.pt              # trained weights
-└── example/test.wav      # demo audio</pre>
-
-<p>Examples: <a href="https://github.com/QwenAudio/Fun-ASR">Fun-ASR-Nano</a>, <a href="https://github.com/QwenAudio/SenseVoice">SenseVoice</a></p>
-
-<!-- 7. Testing -->
-<h2 id="testing">7. Testing Your Model</h2>
-
-<h4>Write a test script</h4>
-<pre># tests_models/test_my_model.py
-import sys, time
-from funasr import AutoModel
-
-def main():
-    model = AutoModel(model="path/to/model", device="cpu", disable_update=True)
-    res = model.generate(input="test.wav")
-
-    assert res and len(res) > 0, "empty result"
-    assert "text" in res[0], "missing text field"
-    print("PASSED")
-    return 0
 
 if __name__ == "__main__":
-    sys.exit(main())</pre>
+    model = AutoModel(
+        model=MODEL_NAME,
+        model_conf={},
+        device="cpu",
+        disable_update=True,
+        disable_pbar=True,
+    )
+    result = model.generate(input=["hello", "world"], data_type="text")
+    assert [row["text"] for row in result] == ["hello", "world"]
+    assert all(isinstance(row["key"], str) for row in result)
+    print([row["text"] for row in result])
+</code></pre>
+<p>Expected final printed list: <code>['hello', 'world']</code>. This is a wiring check only. The focused documentation test executes this block in a temporary file against the checked-out implementation; it does not validate a speech model.</p>
+<p>The presence of <code>model_conf={}</code> is intentional: <code>AutoModel.build_model</code> skips hub/config resolution when that key is supplied. Thus <code>model</code> is the already-registered class key here, not a model directory or hub ID. Import the custom module yourself first; adding <code>remote_code</code> to this direct path does not cause it to be imported. Resolved kwargs are merged over <code>model_conf</code> and passed to the constructor, including built tokenizer/frontend objects, device and vocabulary/input sizes. Accept appropriate named arguments plus <code>**kwargs</code>, as the real models do.</p>
+<span data-legacy-doc-anchor="inference-and-training-contracts" id="understand"></span><h2 id="inference-and-training-contracts">Inference and Training Contracts</h2>
+<table>
+<thead>
+<tr>
+<th>Interface</th>
+<th>Contract in this checkout</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Model object</td>
+<td>Normally <code>torch.nn.Module</code>; must support <code>.to(...)</code>, <code>.eval()</code> and <code>.parameters()</code>. Constructor configuration is model-specific.</td>
+</tr>
+<tr>
+<td><code>inference</code> inputs</td>
+<td>Without VAD, AutoModel batches input into <code>data_in</code> and <code>key</code> lists and calls <code>model.inference(**batch, **kwargs)</code> under <code>torch.no_grad()</code>. With <code>data_type="fbank"</code> and one item, it passes the feature object directly and supplies <code>data_lengths=input_len</code>. Tokenizer/frontend are resolved objects or <code>None</code>.</td>
+</tr>
+<tr>
+<td>Model-level return</td>
+<td>Return a two-item tuple <code>(results, meta_data)</code>: <code>results</code> is <code>list[dict]</code>, <code>meta_data</code> is a dictionary. For ASR use string <code>key</code> and <code>text</code> fields, preserving the input order/keys. Returning a bare list of result dictionaries is wrong: AutoModel treats its first item as the entire batch result.</td>
+</tr>
+<tr>
+<td>Metadata</td>
+<td>Optional <code>load_data</code>, <code>extract_feat</code>, <code>batch_data_time</code>. For audio, <code>batch_data_time</code> is a positive duration in seconds, not milliseconds; zero causes division by zero in timing code. Omitting it gives the internal <code>-1</code> sentinel, as in the non-audio toy, not a meaningful speed measurement.</td>
+</tr>
+<tr>
+<td>Public return</td>
+<td><code>AutoModel.generate(...)</code> returns the flattened result list. Additional fields such as timestamps are model-specific; registration does not promise them. VAD, punctuation, speaker and streaming integrations need additional compatible behavior and independent tests.</td>
+</tr>
+<tr>
+<td>Training</td>
+<td>Implement differentiable <code>forward</code> matching the dataset collator's named tensor fields. <a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer_ds.py">Trainer</a> unpacks <code>(loss, stats, weight)</code>; <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/sense_voice/model.py">SenseVoice</a> and <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fun_asr_nano/model.py">Nano</a> use <code>force_gatherable</code>. The toy deliberately has no training forward.</td>
+</tr>
+<tr>
+<td>Export</td>
+<td><a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/export_utils.py">Export utility</a> calls the model's <code>export</code> and then model-specific methods such as <code>export_dummy_inputs</code>, input/output names and dynamic axes. Registration alone does not implement these.</td>
+</tr>
+</tbody>
+</table>
+<p>A custom model must itself implement audio loading, feature preparation, tokenization/decoding and batching where needed. Copy the contract from a close real model, not its capabilities without implementation. For training, also implement/configure the appropriate dataset and loss; see <a href="https://www.funasr.com/en/docs/training.html">training</a>.</p>
+<span data-legacy-doc-anchor="loading-reviewed-custom-code-and-weights" id="standalone"></span><h2 id="loading-reviewed-custom-code-and-weights">Loading Reviewed Custom Code and Weights</h2>
+<p>There are two distinct routes:</p>
+<ol>
+<li><strong>Direct registration:</strong> import your module; pass its key and <code>model_conf</code> as in the toy. Provide compatible tokenizer/frontend/configuration and an existing <code>init_param</code> if weights are needed. No hub code import is performed on this path.</li>
+<li><strong>Model-directory resolution:</strong> pass a reviewed local directory or hub ID without <code>model_conf</code>. The loader reads <code>configuration.json</code> file metadata or <code>config.yaml</code>, resolves the model key/assets and loads weights. A simple local <code>config.yaml</code> directory normally also needs <code>model.pt</code> plus all referenced tokenizer/frontend assets. Arbitrary HF weight folders are not automatically FunASR model directories.</li>
+</ol>
+<p>For the second route, this is the ModelScope-path interface, not a self-contained runnable example. <code>models/custom-asr</code> must already contain the compatible reviewed configuration and weights, and <code>custom_asr_model.py</code> must register the exact configuration key:</p>
+<pre id="code-1"><code class="language-python">from funasr import AutoModel
 
-<h4>Test with VAD + SPK pipeline</h4>
-<pre># If your model should work with speaker diarization:
 model = AutoModel(
-    model="path/to/model",
-    vad_model="fsmn-vad",
-    spk_model="cam++",
+    model="./models/custom-asr",
+    hub="ms",
+    trust_remote_code=True,
+    remote_code="./custom_asr_model.py",
+    device="cpu",
+    disable_update=True,
 )
-res = model.generate(input="meeting.wav", cache={})
-assert "sentence_info" in res[0]
-assert "spk" in res[0]["sentence_info"][0]</pre>
-
-<h4>Test streaming (if applicable)</h4>
-<pre>cache = {}
-for i in range(total_chunks):
-    chunk = audio[i*stride:(i+1)*stride]
-    res = model.generate(input=chunk, cache=cache,
-                         is_final=(i == total_chunks-1), ...)
-# Verify: same audio gives same result across multiple sessions</pre>
-
-<!-- 8. Pitfalls -->
-<h2 id="pitfalls">8. Common Pitfalls</h2>
-
-<h4>❌ Forgetting <code>super().__init__()</code></h4>
-<pre># WRONG — causes "object has no attribute '_state_dict_pre_hooks'"
-class MyEncoder(nn.Module):
-    def __init__(self):
-        pass
-
-# CORRECT
-class MyEncoder(nn.Module):
-    def __init__(self):
-        super().__init__()</pre>
-
-<h4>❌ Checking <code>kwargs["batch_size"]</code> in your model</h4>
-<p><code>batch_size</code> in kwargs is set by <code>inference_with_vad</code> for segment batching (a large number in ms). Don't use it to check actual data batch size. Use <code>len(data_in)</code> instead.</p>
-
-<h4>❌ Not handling empty/short input</h4>
-<p>VAD may produce empty segments. Your <code>inference()</code> should handle <code>data_in = []</code> gracefully.</p>
-
-<h4>❌ Timestamp format mismatch</h4>
-<p>If your model returns timestamps as dicts (<code>{"start_time": 0.5, "end_time": 0.8}</code>), the pipeline handles conversion. But if you output <code>[start_time, end_time, text]</code> (3 elements), strip the text — downstream expects <code>[start_ms, end_ms]</code> (2 elements, in milliseconds).</p>
-
-<h4>❌ Importing from other model directories</h4>
-<pre># WRONG — creates tight coupling
-from funasr.models.paraformer.model import Paraformer
-
-# CORRECT — copy what you need into your own directory
-# Or inherit via the registry name in config.yaml</pre>
-
-<h4>❌ Modifying <code>self.kwargs</code> during inference</h4>
-<p>Don't mutate <code>kwargs</code> that came from AutoModel. The framework resets state between calls, but persistent mutations can leak between sessions.</p>
-
-<!-- 9. Contributing -->
-<h2 id="contribute">9. Contributing</h2>
-
-<h4>Code Style</h4>
+print(model.generate(input="data/audio/heldout.wav"))
+</code></pre>
+<p>The current <code>download_from_ms</code> imports <code>remote_code</code> when <code>trust_remote_code=True</code>, defaulting to module name <code>model</code> if omitted. The importer supports module/file paths (and URL download), appends the directory to <code>sys.path</code> and imports by basename. A relative path is relative to the working directory, not automatically to the weights directory. Basename collisions and Python's import cache can select an already-loaded module; use distinct module names and verify the active class. Import exceptions are printed rather than re-raised by this helper, so inspect errors and registry state.</p>
+<p><strong>The <code>hub="hf"</code> path differs:</strong> in this checkout <code>download_from_hf</code> can install model requirements under the trust flag but does not call <code>import_module_from_path</code>. Do not assume <code>remote_code</code> is executed there. Import your reviewed custom module explicitly before constructing with <code>hub="hf"</code>, or use the direct-registration route with complete configuration. The local <code>config.yaml</code> fallback also handles <code>init_param</code> differently between hubs: ModelScope retains an existing explicit path; Hugging Face assigns the directory's <code>model.pt</code>. Check the resolved path rather than assuming a selected checkpoint override survived.</p>
+<span data-legacy-doc-anchor="real-examples-and-boundaries" id="contribute"></span><h2 id="real-examples-and-boundaries">Real Examples and Boundaries</h2>
 <ul>
-<li>Follow existing patterns — look at <code>paraformer/model.py</code> as reference</li>
-<li>Add docstrings to all public methods (Args, Returns)</li>
-<li>No comments explaining WHAT — use clear naming. Comments for WHY only.</li>
+<li><a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/sense_voice/model.py">SenseVoiceSmall implementation</a> demonstrates a registered model with training, inference and export integration. Retain its model-specific configuration and tokenizer assumptions.</li>
+<li><a href="https://github.com/modelscope/FunASR/blob/main/examples/industrial_data_pretraining/fun_asr_nano/demo1.py">Nano demo1.py</a> shows <code>trust_remote_code=True</code>, <code>remote_code="./model.py"</code>, <code>hub="ms"</code>; it assumes the recipe directory. Its <a href="https://github.com/modelscope/FunASR/blob/main/examples/industrial_data_pretraining/fun_asr_nano/model.py">local implementation</a> registers <code>FunASRNano</code> and imports sibling <code>ctc</code> and <code>tools</code> modules. That can overwrite the <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fun_asr_nano/model.py">built-in implementation</a>; the two are not interchangeable for every feature, including built-in LoRA. Audit the active class and checkpoint keys.</li>
+<li><a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/moss_transcribe_diarize/model.py">MOSS adapter</a> integrates the third-party OpenMOSS model, and explicitly rejects training in <code>forward</code>. It is not evidence that a registered model supports fine-tuning or export.</li>
+<li>The <a href="https://github.com/modelscope/FunASR/blob/main/docs/tutorial/Tables.md">original registration tutorial</a> and <a href="https://www.funasr.com/en/docs/quickstart.html">general tutorial</a> remain useful historical references; use the current source behavior above when their examples differ.</li>
 </ul>
-
-<h4>PR Checklist</h4>
+<span data-legacy-doc-anchor="safety-and-verification" id="testing"></span><span data-legacy-doc-anchor="safety-and-verification" id="pitfalls"></span><h2 id="safety-and-verification">Safety and Verification</h2>
+<p><code>trust_remote_code=True</code> permits Python execution; the hub loaders can also install a model directory's <code>requirements.txt</code>. A local directory is not inherently trustworthy. Review source, dependencies and weight serialization, use isolated environments, and do not load untrusted pickled checkpoints. Never interpolate untrusted URLs, module names or configs into this workflow. Keep a reviewed local snapshot with hashes when remote revision handling cannot be relied on; <code>model_revision</code> is not a universal pin across all loader paths here.</p>
+<p>Check the active registry key/class/source before loading. Confirm exact model/config/tokenizer compatibility and inspect missing/unexpected weights: <code>ignore_init_mismatch</code> defaults to true in AutoModel, and a nonexistent direct <code>init_param</code> prints an error rather than guaranteeing construction fails. Validate checkpoint existence yourself. Test one item, multiple items, error handling and the intended pipeline before training/export/deployment. FunASR software's MIT license does not replace model or upstream component licenses.</p>
+<p>Focused syntax, repository-link and no-download toy-contract checks:</p>
+<pre id="code-2"><code class="language-bash">python -m pytest -q tests/test_training_docs_contract.py
+</code></pre>
+<p>These checks do not certify arbitrary custom code, actual ASR quality, GPU training, real-checkpoint restoration or export compatibility.</p></article>
+<nav aria-label="Adjacent documents" class="docs-next">
+<a href="https://www.funasr.com/en/docs/training.html">← Fine-tuning &amp; evaluation</a><a href="https://www.funasr.com/en/docs/docker.html">Containers &amp; image selection →</a> </nav>
+</div>
+<aside class="docs-toc"><strong>On this page</strong><div class="toc">
 <ul>
-<li>New model: self-contained directory, no cross-model imports</li>
-<li>Include a test script in <code>tests_models/</code></li>
-<li>Include a demo in <code>examples/industrial_data_pretraining/</code></li>
-<li>All existing tests still pass</li>
-<li>Add entry to README What's New if user-facing</li>
+<li><a href="#model-registration">Model Registration</a><ul>
+<li><a href="#names-and-import-order">Names and Import Order</a></li>
+<li><a href="#minimal-local-contract-example">Minimal Local Contract Example</a></li>
+<li><a href="#inference-and-training-contracts">Inference and Training Contracts</a></li>
+<li><a href="#loading-reviewed-custom-code-and-weights">Loading Reviewed Custom Code and Weights</a></li>
+<li><a href="#real-examples-and-boundaries">Real Examples and Boundaries</a></li>
+<li><a href="#safety-and-verification">Safety and Verification</a></li>
 </ul>
-
-<h4>License</h4>
-<p>Code: MIT. Model weights: FunASR Model License (commercial use allowed with attribution).</p>
-
-</div></div>
-
-<footer>
-<p>FunASR &middot; Tongyi Lab, Alibaba Group</p>
-<p><a href="index.html">Home</a> &middot; <a href="tutorial.html">Tutorial</a> &middot; <a href="training.html">Training</a> &middot; <a href="model-registration.html">Develop</a> &middot; <a href="api.html">API</a> &middot;
-            <a href="vllm.html">vLLM</a> &middot;
-            <a href="agent.html">Agent</a> &middot;
-            <a href="benchmark.html">Benchmark</a> &middot; <a href="https://github.com/modelscope/FunASR">GitHub</a></p>
+</li>
+</ul>
+</div>
+</aside></div>
+</main>
+<footer class="site-footer">
+<div>
+<strong>FunASR</strong>
+<p>Open speech infrastructure for production deployment.</p>
+</div>
+<nav aria-label="Official repositories" class="footer-repositories" data-footer-repositories="">
+<strong>Official repositories</strong>
+<div class="footer-links">
+<a href="https://www.funasr.com/go/fun-asr">Fun-ASR</a>
+<a href="https://www.funasr.com/go/sensevoice">SenseVoice</a>
+<a href="https://www.funasr.com/go/funclip">FunClip</a>
+</div>
+</nav>
+<div class="footer-links">
+<a href="https://www.funasr.com/en/deploy/">Deploy</a>
+<a href="https://www.funasr.com/en/docs/">Docs</a>
+<a href="https://www.funasr.com/go/releases">Releases</a>
+<a href="https://www.funasr.com/en/donors.html">Donors</a>
+</div>
 </footer>
-</body></html>
+<script defer="" src="assets/js/site.d446f5fbcfe2.js"></script>
+<script defer="" src="assets/js/experience.3f688a12942a.js"></script>
+</body>
+</html>

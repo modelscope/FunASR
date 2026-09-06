@@ -1,415 +1,305 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<meta name="description" content="From zero to production — learn FunASR in 10 minutes.">
-<meta property="og:title" content="FunASR Tutorial">
-<meta property="og:description" content="From zero to production — learn FunASR in 10 minutes.">
-<meta property="og:type" content="website">
-<meta property="og:url" content="https://modelscope.github.io/FunASR/tutorial.html">
-<link rel="canonical" href="https://modelscope.github.io/FunASR/tutorial.html">
-<meta property="og:site_name" content="FunASR">
-<meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="FunASR Tutorial">
-<meta name="twitter:description" content="From zero to production — learn FunASR in 10 minutes.">
-<title>FunASR Tutorial</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
-</head><body>
-<nav class="nav"><div class="container">
-<a href="index.html" class="nav-logo">FunASR</a>
-            <div class="nav-links">
-                <a href="index.html">Home</a>
-                <a href="tutorial.html" class="active">Tutorial</a>
-                <a href="training.html">Training</a>
-                <a href="model-registration.html">Develop</a>
-                <a href="api.html">API</a>
-                <a href="vllm.html">vLLM</a>
-                <a href="agent.html">Agent</a>
-                <a href="benchmark.html">Benchmark</a>
-                <a href="donors.html">Donors</a>
-            </div>
 
-<div class="lang-dropdown"><button class="lang-btn">English</button><div class="lang-menu"><a href="tutorial.html" class="current">English</a><a href="zh/tutorial.html">中文</a><a href="ja/tutorial.html">日本語</a></div></div>
-<a href="https://github.com/modelscope/FunASR" class="nav-github">GitHub</a>
-</div></nav>
-
-<div class="content"><div class="container narrow">
-<h1>Tutorial</h1>
-<p>From zero to production — learn FunASR in 10 minutes.</p>
-
-<div class="toc-grid">
-<a href="#quick">30-Second Demo</a>
-<a href="#install">Install</a>
-<a href="#choose">Choose a Model</a>
-<a href="#scenarios">Usage Scenarios</a>
-<a href="#offline">Offline ASR</a>
-<a href="#streaming">Streaming ASR</a>
-<a href="#spk">Speaker Diarization</a>
-<a href="#emotion">Emotion Detection</a>
-<a href="#vad">VAD</a>
-<a href="#punc">Punctuation</a>
-<a href="#deploy-agent">Deploy & Agent</a>
-<a href="#subtitle">Subtitles</a>
-<a href="#export">ONNX Export</a>
-<a href="#faq">FAQ & Troubleshooting</a>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Your first transcription - FunASR</title>
+<meta content="Your first transcription" name="description"/>
+<meta content="#ffffff" name="theme-color"/>
+<link href="https://www.funasr.com/en/docs/quickstart.html" rel="canonical"/>
+<link href="https://www.funasr.com/docs/quickstart.html" hreflang="zh-CN" rel="alternate"/>
+<link href="https://www.funasr.com/en/docs/quickstart.html" hreflang="en" rel="alternate"/>
+<meta content="website" property="og:type"/>
+<meta content="Your first transcription - FunASR" property="og:title"/>
+<meta content="Your first transcription" property="og:description"/>
+<meta content="https://www.funasr.com/en/docs/quickstart.html" property="og:url"/>
+<link href="assets/css/site.d651b1dbf605.css" rel="stylesheet"/>
+<link href="assets/css/experience.5803993934f8.css" rel="stylesheet"/>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "SoftwareApplication", "applicationCategory": "DeveloperApplication", "codeRepository": "https://github.com/modelscope/FunASR", "dateModified": "2026-09-01", "license": "https://github.com/modelscope/FunASR/blob/main/LICENSE", "name": "FunASR", "operatingSystem": "Linux, macOS, Windows", "url": "https://www.funasr.com/en/docs/quickstart.html"}</script>
+</head>
+<body data-copy-icon="assets/lucide/copy.ea80e566c7a1.svg" data-language="en" data-route="/en/docs/quickstart.html">
+<a class="skip-link" href="#main">Skip to main content</a>
+<header class="site-header">
+<a aria-label="FunASR home" class="brand" href="https://www.funasr.com/en/">
+<span aria-hidden="true" class="brand-mark">F</span>
+<span>FunASR</span>
+</a>
+<button aria-controls="primary-navigation" aria-expanded="false" class="icon-button menu-button" data-menu-toggle="" title="Open navigation" type="button">
+<img alt="" src="assets/lucide/menu.90a31b3ab1cf.svg"/>
+</button>
+<nav aria-label="Primary navigation" class="primary-navigation" data-primary-nav="" id="primary-navigation">
+<a href="https://www.funasr.com/en/">Product</a>
+<a href="https://www.funasr.com/en/deploy/">Deploy</a>
+<a href="https://www.funasr.com/en/models.html">Models</a>
+<a href="https://www.funasr.com/en/benchmarks.html">Benchmarks</a>
+<a href="https://www.funasr.com/en/ecosystem.html">Ecosystem</a>
+<a href="https://www.funasr.com/en/blog/">Blog</a>
+<a href="https://www.funasr.com/en/docs/">Docs</a>
+<a href="https://www.funasr.com/en/donors.html">Donors</a>
+</nav>
+<div class="header-actions">
+<a class="icon-link" href="https://www.funasr.com/docs/quickstart.html" title="简体中文">
+<img alt="" src="assets/lucide/languages.ae9048feb2c7.svg"/>
+<span>中文</span>
+</a>
+<a aria-label="GitHub" class="icon-button" href="https://www.funasr.com/go/github" title="GitHub">
+<img alt="" src="assets/lucide/github.793554449a30.svg"/>
+</a>
 </div>
+</header>
+<main id="main">
+<div class="docs-layout">
+<aside class="docs-sidebar">
+<a class="docs-home" href="https://www.funasr.com/en/docs/">Documentation</a>
+<details class="docs-navigation" open="">
+<summary class="docs-navigation-toggle">Browse topics</summary>
+<details open="">
+<summary>Get started</summary>
+<nav aria-label="Get started">
+<a href="https://www.funasr.com/en/docs/installation.html">Installation &amp; environment checks</a>
+<a aria-current="page" href="https://www.funasr.com/en/docs/quickstart.html">Your first transcription</a>
+<a href="https://www.funasr.com/en/docs/python-api.html">Python SDK: AutoModel</a>
+<a href="https://www.funasr.com/en/docs/model-selection.html">Choose your first model</a>
+<a href="https://www.funasr.com/en/docs/command-line.html">Command-line transcription</a>
+<a href="https://www.funasr.com/en/docs/migration.html">Migrate from Whisper &amp; cloud APIs</a>
+</nav>
+</details>
+<details open="">
+<summary>Models &amp; capabilities</summary>
+<nav aria-label="Models &amp; capabilities">
+<a href="https://www.funasr.com/en/docs/moss-transcribe-diarize.html">MOSS transcription &amp; diarization</a>
+<a href="https://www.funasr.com/en/docs/model-zoo.html">Model Zoo</a>
+</nav>
+</details>
+<details open="">
+<summary>Train &amp; extend</summary>
+<nav aria-label="Train &amp; extend">
+<a href="https://www.funasr.com/en/docs/training.html">Fine-tuning &amp; evaluation</a>
+<a href="https://www.funasr.com/en/docs/model-registration.html">Custom model registration</a>
+</nav>
+</details>
+<details open="">
+<summary>Deploy &amp; integrate</summary>
+<nav aria-label="Deploy &amp; integrate">
+<a href="https://www.funasr.com/en/docs/docker.html">Containers &amp; image selection</a>
+<a href="https://www.funasr.com/en/docs/runtime-guide.html">Serving entry points</a>
+<a href="https://www.funasr.com/en/docs/http-server.html">Python HTTP service</a>
+<a href="https://www.funasr.com/en/docs/kubernetes.html">Kubernetes deployment</a>
+<a href="https://www.funasr.com/en/docs/deployment-matrix.html">Runtime &amp; deployment matrix</a>
+<a href="https://www.funasr.com/en/docs/vllm.html">vLLM split-engine inference</a>
+<a href="https://www.funasr.com/en/docs/native-vllm.html">Native vLLM validation record</a>
+</nav>
+</details>
+<details open="">
+<summary>Evaluate &amp; operate</summary>
+<nav aria-label="Evaluate &amp; operate">
+<a href="https://www.funasr.com/en/docs/troubleshooting.html">Troubleshooting</a>
+<a href="https://www.funasr.com/en/docs/security.html">Service security boundaries</a>
+<a href="https://www.funasr.com/en/docs/benchmark-method.html">Reproducible performance tests</a>
+<a href="https://www.funasr.com/en/docs/realtime-benchmark.html">Realtime WebSocket benchmarking</a>
+</nav>
+</details>
+<details open="">
+<summary>Applications &amp; ecosystem</summary>
+<nav aria-label="Applications &amp; ecosystem">
+<a href="https://www.funasr.com/en/docs/use-cases.html">Use cases &amp; examples</a>
+<a href="https://www.funasr.com/en/docs/community.html">Community integrations</a>
+<a href="https://www.funasr.com/en/docs/repositories.html">Repositories &amp; contribution paths</a>
+<a href="https://www.funasr.com/en/docs/javascript.html">JavaScript clients</a>
+<a href="https://www.funasr.com/en/docs/workflows.html">Workflow integrations</a>
+</nav>
+</details>
+<details open="">
+<summary>Protocols &amp; reference</summary>
+<nav aria-label="Protocols &amp; reference">
+<a href="https://www.funasr.com/en/docs/service-api.html">HTTP API contract</a>
+<a href="https://www.funasr.com/en/docs/websocket-protocol.html">C++ WebSocket protocol</a>
+<a href="https://www.funasr.com/en/docs/onnx-output.html">ONNX binary output contract</a>
+</nav>
+</details>
+<a href="https://www.funasr.com/en/deploy/">Deployment guides →</a>
+</details>
+</aside>
+<div class="docs-body">
+<nav aria-label="Breadcrumbs" class="breadcrumbs"><a href="https://www.funasr.com/en/">FunASR</a><span>/</span><a href="https://www.funasr.com/en/docs/">Docs</a><span>/</span><span>Your first transcription</span></nav>
+<header class="docs-title"><h1>Your first transcription</h1><a class="source-link" data-source-link="" href="https://github.com/modelscope/FunASR/blob/main/docs/tutorial/README.md">View / edit source ↗</a></header>
+<article class="docs-article"><p>(<a href="https://www.funasr.com/docs/quickstart.html">简体中文</a> | English)</p>
+<div class="source-title-anchor" id="python-sdk-tutorial"></div>
+<p>Start with <a href="https://www.funasr.com/en/docs/installation.html">installation and environment verification</a>. This path covers one transcript, result inspection, VAD, batching, and model-specific options. For model selection, languages, dependencies, and model cards, use the <a href="https://www.funasr.com/en/docs/model-zoo.html">Model Zoo</a>, not a universal capability list. No local setup yet? See the <a href="https://github.com/modelscope/FunASR/blob/main/examples/colab/README.md">Colab quickstart</a>.</p>
+<p>FunASR software uses the <a href="https://github.com/modelscope/FunASR/blob/main/LICENSE">MIT license</a>. Each model weight has its own license: record the full model ID and revision, and follow its model card. The <a href="https://github.com/modelscope/FunASR/blob/main/MODEL_LICENSE">FunASR Model License Agreement</a> applies only when the model card explicitly links to it. Third-party integrations remain third-party models; for example, MOSS-Transcribe-Diarize is from OpenMOSS, not a FunASR-trained checkpoint.</p>
+<p><a id="Inference" name="Inference"></a></p>
+<span data-legacy-doc-anchor="1-produce-a-first-transcript" id="quick"></span><span data-legacy-doc-anchor="1-produce-a-first-transcript" id="install"></span><span data-legacy-doc-anchor="1-produce-a-first-transcript" id="offline"></span><h2 id="1-produce-a-first-transcript">1. Produce a first transcript</h2>
+<p>Run the following Python block after installing the SDK and a matching PyTorch/torchaudio environment. The first run needs network access for the model and this public example WAV, plus sufficient disk and memory. It is based on the repository's <a href="https://github.com/modelscope/FunASR/blob/main/examples/industrial_data_pretraining/paraformer/demo.py">Paraformer example</a>; it is not a recorded inference result from this documentation review.</p>
+<pre id="code-0"><code class="language-python">from funasr import AutoModel
 
-<!-- 30-Second Demo -->
-<h2 id="quick">30-Second Demo</h2>
-<p>Copy-paste this and run. No config needed — FunASR downloads everything automatically. No local setup? Open the <a href="https://colab.research.google.com/github/modelscope/FunASR/blob/main/examples/colab/funasr_quickstart.ipynb">Colab quickstart</a> first.</p>
-<pre>pip install funasr
-
-python -c "
-from funasr import AutoModel
-model = AutoModel(model='paraformer-zh', vad_model='fsmn-vad', punc_model='ct-punc')
-res = model.generate(input='https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav')
-print(res[0]['text'])
-"</pre>
-<p><strong>Output:</strong></p>
-<div class="output-box">欢迎大家来体验达摩院推出的语音识别模型。</div>
-
-<p>That's it. One model object handles everything: loading audio, VAD segmentation, ASR, and punctuation.</p>
-
-<!-- Install -->
-<h2 id="install">Install</h2>
-<pre># Stable release
-pip install funasr
-
-# Latest (recommended — has newest models and bug fixes)
-pip install git+https://github.com/modelscope/FunASR.git</pre>
-
-<div class="tip"><strong>China users:</strong> Models download from ModelScope by default (fast in China). International users: add <code>hub="hf"</code> to download from HuggingFace.</div>
-
-<!-- Choose a Model -->
-<h2 id="choose">Which Model Should I Use?</h2>
-
+audio = "https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav"
+model = AutoModel(
+    model="paraformer-zh", hub="ms", device="cpu", ncpu=4,
+    disable_update=True, trust_remote_code=False,
+)
+results = model.generate(input=audio)
+for item in results:
+    print(item.get("key"), item.get("text", ""))
+print("Model directory:", model.model_path)
+</code></pre>
+<p>To transcribe your recording, replace <code>audio</code> with an existing local WAV path. Start with a short mono recording matching the selected model's sample rate (16 kHz for this example). File decoding depends on installed audio backends; a readable WAV is a simpler first check than an arbitrary media container. NumPy waveform input has no sample-rate header: supply the actual rate with <code>fs=sample_rate</code>, as used by the <a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/load_utils.py">audio loader</a>. Do not merely relabel a waveform's rate.</p>
+<p>The remaining Python blocks reuse <code>AutoModel</code>, <code>audio</code>, and <code>model</code> from this first block in the same session. For disconnected use, prepare complete local model directories and local input files using the <a href="https://www.funasr.com/en/docs/installation.html">offline checklist</a>. <code>disable_update=True</code> only skips the SDK's startup version check.</p>
+<h2 id="2-understand-parameters-and-results">2. Understand parameters and results</h2>
+<p><code>AutoModel(...)</code> constructs the model and optional pipeline components. <code>model.generate(input=..., **options)</code> performs inference. Source references: <a href="https://github.com/modelscope/FunASR/blob/main/funasr/auto/auto_model.py">AutoModel</a>, <a href="https://github.com/modelscope/FunASR/blob/main/funasr/download/name_maps_from_hub.py">hub aliases</a>, and the chosen model's <code>inference()</code> implementation.</p>
 <table>
-<tr><th>Model</th><th>Best For</th><th>Languages</th><th>Speed</th><th>Punctuation</th></tr>
-<tr><td><strong>Paraformer</strong></td><td>Chinese production ASR</td><td>Chinese, English</td><td>Fast</td><td>Needs punc_model</td></tr>
-<tr><td><strong>Fun-ASR-Nano</strong></td><td>Multi-language, dialects, lyrics</td><td>31 languages</td><td>Medium</td><td>Built-in ✓</td></tr>
-<tr><td><strong>SenseVoice</strong></td><td>Emotion + events + ASR</td><td>5 languages</td><td>Ultra-fast (70ms/10s)</td><td>Built-in ✓</td></tr>
-<tr><td><strong>Qwen3-ASR</strong></td><td>Highest accuracy, context-aware</td><td>52 languages</td><td>Slow (LLM)</td><td>Built-in ✓</td></tr>
-<tr><td><strong>Paraformer-Streaming</strong></td><td>Real-time transcription</td><td>Chinese</td><td>Real-time</td><td>Needs punc_model</td></tr>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Scope and meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>model</code>, <code>hub</code></td>
+<td>Model ID/alias or local directory; hub defaults to ModelScope (<code>ms</code>), with <code>hf</code> for Hugging Face. Aliases can resolve to different hub repositories.</td>
+</tr>
+<tr>
+<td><code>device</code>, <code>ncpu</code></td>
+<td>Explicitly use <code>cpu</code> to begin; choose an accelerator only after validating its PyTorch build and model support. The loader has CPU fallback paths; <code>ncpu</code> controls PyTorch CPU threads.</td>
+</tr>
+<tr>
+<td><code>vad_model</code>, <code>punc_model</code>, <code>spk_model</code></td>
+<td>Optional, separately loaded models. Configure them through <code>vad_kwargs</code>, <code>punc_kwargs</code>, and <code>spk_kwargs</code>. They are not automatically supported by every ASR backend.</td>
+</tr>
+<tr>
+<td><code>batch_size</code></td>
+<td>Number of inputs per decoding batch on the ordinary non-VAD path; backend restrictions still apply.</td>
+</tr>
+<tr>
+<td><code>batch_size_s</code></td>
+<td>Duration budget in seconds for VAD-segment batching, based on padded segment length, not a count of files. The current CPU VAD path decodes segments individually.</td>
+</tr>
+<tr>
+<td><code>batch_size_threshold_s</code></td>
+<td>Segment-duration threshold used by the VAD batching heuristic; not an input duration limit or a universal memory cap.</td>
+</tr>
+<tr>
+<td><code>output_dir</code></td>
+<td>Optional backend output directory. The returned Python result is still available; files and formats depend on the model.</td>
+</tr>
+</tbody>
 </table>
-
-<div class="note">
-<strong>Quick recommendation:</strong><br>
-• Chinese meeting/call → <code>paraformer-zh</code> + <code>fsmn-vad</code> + <code>ct-punc</code> + <code>cam++</code><br>
-• Multi-language → <code>Fun-ASR-Nano</code><br>
-• Need emotion/sound events → <code>SenseVoice</code><br>
-• Real-time subtitles → <code>paraformer-zh-streaming</code><br>
-• Highest quality, no latency concern → <code>Qwen3-ASR</code>
-</div>
-
-<!-- Scenarios -->
-<h2 id="scenarios">Usage Scenarios</h2>
-
-<div class="scenario-card">
-<h4>🎤 "I have a meeting recording and want text + who said what"</h4>
-<p>→ Paraformer + VAD + Punctuation + Speaker Diarization → <a href="#spk">Jump to Speaker Diarization</a></p>
-</div>
-
-<div class="scenario-card">
-<h4>📺 "I want real-time subtitles for a live stream"</h4>
-<p>→ Paraformer-Streaming, feed audio chunks every 600ms → <a href="#streaming">Jump to Streaming ASR</a></p>
-</div>
-
-<div class="scenario-card">
-<h4>😊 "I want to detect user emotions from voice"</h4>
-<p>→ SenseVoice (outputs emotion tags: happy, sad, angry, neutral) → <a href="#emotion">Jump to Emotion Detection</a></p>
-</div>
-
-<div class="scenario-card">
-<h4>🌍 "I have audio in Japanese/Korean/Arabic/etc."</h4>
-<p>→ Fun-ASR-Nano (31 languages) or Qwen3-ASR (52 languages) → <a href="#offline">Jump to Offline ASR</a></p>
-</div>
-
-<div class="scenario-card">
-<h4>✂️ "I want to clip a video by spoken content"</h4>
-<p>→ Use <a href="https://github.com/modelscope/FunClip">FunClip</a> which integrates FunASR for smart video editing</p>
-</div>
-
-<!-- Offline ASR -->
-<h2 id="offline">Offline ASR</h2>
-
-<h3>Paraformer (Chinese)</h3>
-<pre>from funasr import AutoModel
-
-model = AutoModel(
-    model="paraformer-zh",          # Chinese ASR
-    vad_model="fsmn-vad",           # handles any audio length
-    vad_kwargs={"max_single_segment_time": 60000},
-    punc_model="ct-punc",           # adds punctuation
-)
-res = model.generate(input="meeting.wav", batch_size_s=300, hotword='达摩院 语音识别')
-print(res[0]["text"])       # "欢迎大家来体验达摩院推出的语音识别模型。"
-print(res[0]["timestamp"])  # [[880,1120],[1120,1360],...] (ms per character)</pre>
-
-<h3>Fun-ASR-Nano (31 Languages)</h3>
-<pre>from funasr import AutoModel
-
-model = AutoModel(
-    model="FunAudioLLM/Fun-ASR-Nano-2512",
-    trust_remote_code=True,
-    remote_code="./model.py",
-    vad_model="fsmn-vad",
+<p><code>generate()</code> returns a list of dictionaries, normally one per input recording. Inspect keys before depending on optional fields:</p>
+<pre id="code-1"><code class="language-python">for item in results:
+    print(sorted(item.keys()))
+    print(item.get("text", ""))
+    print(item.get("timestamp", []))
+</code></pre>
+<p>For the Paraformer path, <code>timestamp</code> contains character/token/word intervals as <code>[start_ms, end_ms]</code> pairs when supplied by the checkpoint. Do not assume one pair per displayed character after punctuation or text normalization. Other backends may return <code>timestamps</code> with a different schema; follow that backend's guide. Empty speech may produce empty text/timestamps, not a meaningful transcript.</p>
+<span data-legacy-doc-anchor="3-add-vad-punctuation-and-sentence-timestamps" id="spk"></span><span data-legacy-doc-anchor="3-add-vad-punctuation-and-sentence-timestamps" id="vad"></span><span data-legacy-doc-anchor="3-add-vad-punctuation-and-sentence-timestamps" id="punc"></span><span data-legacy-doc-anchor="3-add-vad-punctuation-and-sentence-timestamps" id="subtitle"></span><h2 id="3-add-vad-punctuation-and-sentence-timestamps">3. Add VAD, punctuation, and sentence timestamps</h2>
+<p>VAD detects speech spans; it does not transcribe them. This standalone call uses the same audio:</p>
+<pre id="code-2"><code class="language-python">vad = AutoModel(model="fsmn-vad", device="cpu", disable_update=True)
+vad_results = vad.generate(input=audio)
+for item in vad_results:
+    print(item["key"], item["value"])
+</code></pre>
+<p><code>value</code> is a list of <code>[start_ms, end_ms]</code> speech intervals relative to the recording start. An empty list means no detected spans. See the <a href="https://github.com/modelscope/FunASR/blob/main/examples/industrial_data_pretraining/fsmn_vad_streaming/demo.py">FSMN VAD example</a>.</p>
+<p>For segmented ASR with punctuation:</p>
+<pre id="code-3"><code class="language-python">pipeline = AutoModel(
+    model="paraformer-zh", vad_model="fsmn-vad", punc_model="ct-punc",
     vad_kwargs={"max_single_segment_time": 30000},
-    device="cuda:0",
-    hub="hf",
+    device="cpu", disable_update=True, trust_remote_code=False,
 )
-res = model.generate(input=["audio.wav"], cache={}, batch_size=1,
-                     hotwords=["keyword"], language="中文")
-print(res[0]["text"])        # recognized text with punctuation
-print(res[0]["timestamps"])  # [{"token":"开","start_time":0.42,"end_time":0.48}, ...]</pre>
-
-<div class="note"><strong>Fun-ASR-Nano outputs punctuation natively</strong> — no need for <code>punc_model</code>.</div>
-
-<h3>SenseVoice (ASR + Emotion + Events)</h3>
-<pre>from funasr import AutoModel
-from funasr.utils.postprocess_utils import rich_transcription_postprocess
-
-model = AutoModel(
-    model="iic/SenseVoiceSmall",
-    vad_model="fsmn-vad",
-    vad_kwargs={"max_single_segment_time": 30000},
-    device="cuda:0",
+segmented_results = pipeline.generate(
+    input=audio, batch_size_s=60, batch_size_threshold_s=30,
+    sentence_timestamp=True,
 )
-res = model.generate(input="audio.wav", cache={}, language="auto",
-                     use_itn=True, batch_size_s=60, merge_vad=True, merge_length_s=15)
-
-# Raw output contains emotion/event tags: <|zh|><|HAPPY|><|Speech|>你好
-text = rich_transcription_postprocess(res[0]["text"])
-print(text)  # "你好" (clean text)</pre>
-
-<h3>Qwen3-ASR (52 Languages, Highest Accuracy)</h3>
-<pre># pip install qwen-asr
-from funasr import AutoModel
-
-model = AutoModel(model="Qwen/Qwen3-ASR-1.7B", hub="hf", device="cuda:0")
-res = model.generate(input="audio.wav")
-print(res[0]["text"])             # recognized text
-print(res[0].get("language"))    # auto-detected language</pre>
-
-<!-- Streaming -->
-<h2 id="streaming">Streaming ASR (Real-time)</h2>
-<p>Process audio chunk-by-chunk for real-time transcription. Each chunk produces partial text immediately.</p>
-
-<pre>from funasr import AutoModel
-import soundfile
-
-model = AutoModel(model="paraformer-zh-streaming")
-
-speech, sr = soundfile.read("audio.wav")
-chunk_size = [0, 10, 5]          # 600ms display, 300ms lookahead
-chunk_stride = chunk_size[1] * 960  # 9600 samples per chunk
-
-cache = {}
-total_chunks = int((len(speech) - 1) / chunk_stride + 1)
-for i in range(total_chunks):
-    chunk = speech[i * chunk_stride:(i + 1) * chunk_stride]
-    is_final = (i == total_chunks - 1)
-
-    res = model.generate(input=chunk, cache=cache, is_final=is_final,
-                         chunk_size=chunk_size,
-                         encoder_chunk_look_back=4,
-                         decoder_chunk_look_back=1)
-    if res[0]["text"]:
-        print(res[0]["text"], end="", flush=True)  # incremental output</pre>
-
-<p><strong>Output (printed incrementally):</strong></p>
-<div class="output-box">欢迎大 | 家来 | 体验达 | 摩院推 | 出的语 | 音识 | 别模型</div>
-
-<div class="note">
-<strong>Key points:</strong><br>
-• <code>cache={}</code> must persist across all chunks (don't recreate it)<br>
-• <code>is_final=True</code> on last chunk flushes remaining buffered text<br>
-• <code>chunk_size=[0,10,5]</code>: first number unused, second=display granularity (×60ms), third=lookahead (×60ms)
+for item in segmented_results:
+    print(item.get("text", ""))
+    for sentence in item.get("sentence_info", []):
+        print(sentence.get("start"), sentence.get("end"), sentence.get("text", ""))
+</code></pre>
+<p><code>max_single_segment_time</code> is in <strong>milliseconds</strong>; the two batching controls are in <strong>seconds</strong>. Segmentation can help with longer files but does not guarantee unlimited duration or bounded memory: the audio-loading stage and each model still consume resources. On memory pressure, use shorter recordings/segments and smaller supported batches, then measure again. Sentence boundaries depend on available timestamp/punctuation alignment and may fall back to VAD segments; inspect the returned data.</p>
+<p>For diarization, construct the same pipeline with <code>spk_model="cam++"</code> if supported by the chosen components. Iterate each input's <code>item.get("sentence_info", [])</code>, then read <code>sentence.get("spk")</code>. Do not read <code>spk</code> directly from the outer result list. Cluster labels are not verified real-world identities. <a href="https://github.com/modelscope/FunASR/blob/main/examples/industrial_data_pretraining/sense_voice/demo_spk.py">Speaker integration example</a>.</p>
+<h2 id="4-process-multiple-recordings">4. Process multiple recordings</h2>
+<p>The following deliberately repeats the sample to demonstrate a list input without requiring extra files. Replace the entries with your local WAV paths:</p>
+<pre id="code-4"><code class="language-python">batch_results = model.generate(input=[audio, audio], batch_size=1)
+for index, item in enumerate(batch_results):
+    print(index, item.get("key"), item.get("text", ""))
+</code></pre>
+<p>Increase <code>batch_size</code> only if the selected model supports it and memory permits. A file list such as <code>wav.scp</code> is also supported: use one <code>utterance_id path</code> per line, resolve paths from the process working directory, and give each recording a unique ID. Set <code>output_dir</code> if you need model-written artifacts; it is not required simply to receive the returned list. See <a href="https://github.com/modelscope/FunASR/blob/main/data/list/train_wav.scp">data-list examples</a>. Do not confuse independent file batching with streaming chunks of one utterance.</p>
+<span data-legacy-doc-anchor="5-hotwords-and-language-boundaries" id="choose"></span><h2 id="5-hotwords-and-language-boundaries">5. Hotwords and language boundaries</h2>
+<p>The ModelScope <code>paraformer-zh</code> alias in this checkout resolves to a SeACo Paraformer model, whose implementation accepts singular <code>hotword</code> as a space-separated string:</p>
+<pre id="code-5"><code class="language-python">biased_results = model.generate(input=audio, hotword="魔搭 达摩院")
+print([item.get("text", "") for item in biased_results])
+</code></pre>
+<p>This is model-level context biasing, not guaranteed word insertion or deterministic replacement. Verify the resolved model and compare against a no-hotword baseline. <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/seaco_paraformer/model.py">SeACo implementation</a> and <a href="https://github.com/modelscope/FunASR/blob/main/examples/industrial_data_pretraining/contextual_paraformer/demo.py">contextual Paraformer example</a>.</p>
+<p>Postprocessing is a different operation in this source checkout:</p>
+<pre id="code-6"><code class="language-python">corrected_results = model.generate(
+    input=audio,
+    postprocess_hotwords={"科大迅飞": "科大讯飞"},
+    return_postprocess_hotword_matches=True,
+)
+for item in corrected_results:
+    print(item.get("text", ""), item.get("postprocess_hotword_matches", []))
+</code></pre>
+<p>Explicit mappings replace matching output text. <code>postprocess_hotword_file</code> also accepts one target per line or <code>wrong=&gt;right</code> mappings. Fuzzy matching additionally needs <code>pypinyin</code> and <code>rapidfuzz</code>; explicit mappings do not. The <a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/postprocess_hotwords.py">postprocessor</a> preserves existing timestamps rather than realigning corrected text, so review replacements before making subtitles or alignment claims.</p>
+<p><code>hotword</code>, <code>hotwords</code>, and <code>language</code> are <strong>not interchangeable universal SDK options</strong>. For example, <a href="https://github.com/modelscope/FunASR/blob/main/examples/industrial_data_pretraining/fun_asr_nano/README.md">Fun-ASR-Nano</a> reads plural <code>hotwords</code> and a model-specific language hint. Changing a hint does not turn a monolingual checkpoint into a multilingual one. Use the <a href="https://www.funasr.com/en/docs/model-zoo.html">Model Zoo</a> and the exact checkpoint guide for supported languages, accepted hint values, streaming, alignment, and dependency versions. Avoid copying language counts or installation pins between model families.</p>
+<span data-legacy-doc-anchor="6-continue-with-a-specific-workflow" id="scenarios"></span><span data-legacy-doc-anchor="6-continue-with-a-specific-workflow" id="streaming"></span><span data-legacy-doc-anchor="6-continue-with-a-specific-workflow" id="emotion"></span><span data-legacy-doc-anchor="6-continue-with-a-specific-workflow" id="deploy-agent"></span><span data-legacy-doc-anchor="6-continue-with-a-specific-workflow" id="faq"></span><h2 id="6-continue-with-a-specific-workflow">6. Continue with a specific workflow</h2>
+<ul>
+<li><strong>Streaming:</strong> <a href="https://github.com/modelscope/FunASR/blob/main/examples/industrial_data_pretraining/paraformer_streaming/demo.py">Paraformer streaming example</a>. Keep a separate <code>cache={}</code> per stream and set <code>is_final=True</code> for the final chunk. For <code>[0, 10, 5]</code> at 16 kHz, 600 ms is <strong>9600 samples</strong>, not 960; chunk duration is not an end-to-end latency guarantee. Streaming VAD may return <code>[start, -1]</code>, <code>[-1, end]</code>, complete spans, or no spans, in milliseconds.</li>
+<li><strong>Punctuation and alignment:</strong> <a href="https://github.com/modelscope/FunASR/blob/main/examples/industrial_data_pretraining/ct_transformer/demo.py">punctuation example</a> and <a href="https://github.com/modelscope/FunASR/blob/main/examples/industrial_data_pretraining/monotonic_aligner/demo.py">timestamp prediction example</a>. Alignment needs the corresponding text input; it is not equivalent to ASR.</li>
+<li><strong>Other model families:</strong> <a href="https://github.com/modelscope/FunASR/blob/main/examples/industrial_data_pretraining/sense_voice/README.md">SenseVoice</a>, <a href="https://github.com/modelscope/FunASR/blob/main/examples/industrial_data_pretraining/fun_asr_nano/README.md">Fun-ASR-Nano</a>, and <a href="https://www.funasr.com/en/docs/moss-transcribe-diarize.html">third-party OpenMOSS integration</a>. Discover further entries through the Model Zoo.</li>
+<li><strong>CLI and services:</strong> <a href="https://www.funasr.com/en/docs/command-line.html">CLI reference</a>, <a href="https://www.funasr.com/en/docs/runtime-guide.html">runtime overview</a>, and <a href="https://www.funasr.com/en/docs/docker.html">Docker</a>. Python options do not imply an identical server request schema.</li>
+</ul>
+<p><a id="Training" name="Training"></a></p>
+<h2 id="model-training-and-testing">Model Training and Testing</h2>
+<p>Use the <a href="https://github.com/modelscope/FunASR/blob/main/examples/industrial_data_pretraining/paraformer/README.md">Paraformer recipe</a>, <a href="https://github.com/modelscope/FunASR/blob/main/examples/industrial_data_pretraining/paraformer/finetune.sh">finetune.sh</a>, and <a href="https://github.com/modelscope/FunASR/blob/main/data/list/train.jsonl">training-data examples</a>. Inspect dataset paths, label alignment, model license, GPU allocation, and output directories before launching. Training is not an installation smoke test. For trained weights, inspect <a href="https://github.com/modelscope/FunASR/blob/main/examples/industrial_data_pretraining/paraformer/infer_from_local.sh">infer_from_local.sh</a>: configuration, tokenizer/frontend assets, and checkpoint paths must agree. Keep <a href="https://github.com/modelscope/FunASR/blob/main/data/list/val.jsonl">validation data</a> separate from training data.</p>
+<p><a id="Export" name="Export"></a></p>
+<span data-legacy-doc-anchor="model-export-and-testing" id="export"></span><h2 id="model-export-and-testing">Model Export and Testing</h2>
+<p>Follow the model's <a href="https://github.com/modelscope/FunASR/blob/main/examples/industrial_data_pretraining/paraformer/export.py">Paraformer export example</a> and <a href="https://github.com/modelscope/FunASR/blob/main/runtime/python/onnxruntime/README.md">ONNX Runtime guide</a>. Export support and extra dependencies are model/backend-specific. Successful export is not evidence of output equivalence: test the exported artifact on representative inputs and compare with the original model before deployment.</p>
+<p><a id="new-model-registration-tutorial" name="new-model-registration-tutorial"></a></p>
+<h2 id="register-a-custom-model">Register a Custom Model</h2>
+<p>Use the <a href="https://github.com/modelscope/FunASR/blob/main/docs/tutorial/Tables.md">registry tutorial</a> and a real implementation such as <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/sense_voice/model.py">SenseVoice</a>. Registration alone does not establish a working <code>generate()</code> contract; the model's inference result must match the downstream components it will use.</p>
+<p>For failures, return to <a href="https://www.funasr.com/en/docs/troubleshooting.html">troubleshooting</a> with interpreter/package versions, resolved model ID/revision, input format, and a minimal reproduction. Do not include private audio or credentials.</p></article>
+<nav aria-label="Adjacent documents" class="docs-next">
+<a href="https://www.funasr.com/en/docs/installation.html">← Installation &amp; environment checks</a><a href="https://www.funasr.com/en/docs/python-api.html">Python SDK: AutoModel →</a> </nav>
 </div>
-
-<!-- Speaker Diarization -->
-<h2 id="spk">Speaker Diarization ("Who Said What")</h2>
-<p>Works with <strong>all three major models</strong>: Paraformer, Fun-ASR-Nano, and SenseVoice. Add <code>spk_model="cam++"</code> to get speaker labels per sentence.</p>
-
-<h3>Paraformer + Speaker</h3>
-<pre>from funasr import AutoModel
-
-model = AutoModel(
-    model="paraformer-zh",
-    vad_model="fsmn-vad",
-    punc_model="ct-punc",      # Paraformer needs this for sentence segmentation
-    spk_model="cam++",
-)
-res = model.generate(input="meeting.wav", batch_size_s=300)
-
-for sent in res[0]["sentence_info"]:
-    print(f"[Speaker {sent['spk']}] [{sent['start']}-{sent['end']}ms] {sent['text']}")</pre>
-
-<p><strong>Output:</strong></p>
-<div class="output-box">[Speaker 0] [880-5195ms] 欢迎大家来体验达摩院推出的语音识别模型。</div>
-
-<h3>Fun-ASR-Nano + Speaker (no punc needed)</h3>
-<pre>model = AutoModel(
-    model="FunAudioLLM/Fun-ASR-Nano-2512",
-    trust_remote_code=True, remote_code="./model.py",
-    vad_model="fsmn-vad", vad_kwargs={"max_single_segment_time": 30000},
-    spk_model="cam++",     # no punc_model needed!
-    device="cuda:0", hub="hf",
-)
-res = model.generate(input=["meeting.wav"], cache={}, batch_size=1, language="中文")
-for sent in res[0]["sentence_info"]:
-    print(f"Speaker {sent['spk']}: {sent.get('text', sent.get('sentence', ''))}")</pre>
-
-<h3>SenseVoice + Speaker (no punc needed)</h3>
-<pre>model = AutoModel(
-    model="iic/SenseVoiceSmall",
-    vad_model="fsmn-vad", vad_kwargs={"max_single_segment_time": 30000},
-    spk_model="cam++",    # no punc_model needed!
-    device="cuda:0",
-)
-res = model.generate(input="meeting.wav", cache={}, language="auto",
-                     use_itn=True, batch_size_s=60, merge_vad=True, merge_length_s=15)
-for sent in res[0]["sentence_info"]:
-    print(f"Speaker {sent['spk']}: {rich_transcription_postprocess(sent['text'])}")</pre>
-
-<!-- Emotion -->
-<h2 id="emotion">Emotion Detection</h2>
-
-<h3>Dedicated Emotion Model (emotion2vec)</h3>
-<pre>from funasr import AutoModel
-
-model = AutoModel(model="iic/emotion2vec_plus_large", device="cuda:0")
-res = model.generate(input="audio.wav", granularity="utterance")
-
-print(res[0]["labels"])  # ['angry', 'happy', 'neutral', 'sad', ...]
-print(res[0]["scores"])  # [0.01,   0.03,   0.89,      0.05, ...]
-# → This audio is "neutral" with 89% confidence</pre>
-
-<h3>SenseVoice (ASR + Emotion in one shot)</h3>
-<p>SenseVoice embeds emotion tags directly in the transcription output:</p>
-<pre># Raw output: "<|zh|><|HAPPY|><|Speech|><|withitn|>今天真是太开心了。"
-# The <|HAPPY|> tag tells you the emotion
-# Use rich_transcription_postprocess() to get clean text</pre>
-
-<!-- VAD -->
-<h2 id="vad">Voice Activity Detection</h2>
-
-<h3>Offline (full audio)</h3>
-<pre>from funasr import AutoModel
-
-model = AutoModel(model="fsmn-vad")
-res = model.generate(input="audio.wav")
-print(res[0]["value"])  # [[610, 5530], [7200, 12400], ...]
-                         # Each pair: [start_ms, end_ms] of speech</pre>
-
-<h3>Streaming (chunk-by-chunk)</h3>
-<pre>import soundfile
-from funasr import AutoModel
-
-model = AutoModel(model="fsmn-vad")
-speech, sr = soundfile.read("audio.wav")
-chunk_stride = int(200 * sr / 1000)  # 200ms chunks
-
-cache = {}
-for i in range(int((len(speech)-1)/chunk_stride+1)):
-    chunk = speech[i*chunk_stride:(i+1)*chunk_stride]
-    is_final = i == int((len(speech)-1)/chunk_stride)
-    res = model.generate(input=chunk, cache=cache, is_final=is_final, chunk_size=200)
-    if res[0]["value"]:
-        print(res[0]["value"])
-        # [[610, -1]]   → speech started at 610ms
-        # [[-1, 5530]]  → speech ended at 5530ms
-        # [[610, 5530]] → complete segment</pre>
-
-<!-- Punctuation -->
-<h2 id="punc">Punctuation Restoration</h2>
-<pre>from funasr import AutoModel
-
-model = AutoModel(model="ct-punc")
-res = model.generate(input="那今天的会就到这里吧 happy new year 明年见")
-print(res[0]["text"])  # "那今天的会就到这里吧，happy new year，明年见。"</pre>
-<div class="note"><strong>When do you need this?</strong> Only with Paraformer (which outputs raw text without punctuation). Fun-ASR-Nano, SenseVoice, and Qwen3-ASR output punctuation natively.</div>
-
-<!-- Export -->
-
-<h2 id="deploy-agent">Deploy & Agent Integration</h2>
-<p>Use <code>funasr-server</code> when you need a local OpenAI-compatible endpoint for applications and agents.</p>
-<pre>pip install funasr fastapi uvicorn python-multipart
-funasr-server --device cuda --port 8000</pre>
-<pre>from openai import OpenAI
-client = OpenAI(base_url="http://localhost:8000/v1", api_key="x")
-result = client.audio.transcriptions.create(
-    model="sensevoice",
-    file=open("meeting.wav", "rb"),
-    response_format="verbose_json",
-)</pre>
-<p>For Claude Code, Cursor, and other MCP clients, configure <code>examples/mcp_server/funasr_mcp.py</code>. See the <a href="agent.html">Agent integration guide</a>.</p>
-
-<h2 id="subtitle">Subtitle Generation</h2>
-<p>Generate SRT or VTT subtitles from audio/video files, with optional speaker labels.</p>
-<pre>cd examples/subtitle
-python generate_subtitle.py video.mp4
-python generate_subtitle.py meeting.wav --spk
-python generate_subtitle.py podcast.mp3 --format vtt</pre>
-
-<h2 id="export">ONNX Export</h2>
-<pre># Export model to ONNX format
-from funasr import AutoModel
-model = AutoModel(model="paraformer", device="cpu")
-model.export(quantize=False)   # saves to model cache directory
-
-# Use ONNX model (faster, no PyTorch needed)
-# pip install funasr-onnx
-from funasr_onnx import Paraformer
-model = Paraformer("damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch",
-                   batch_size=1, quantize=True)
-result = model(["audio.wav"])
-print(result)</pre>
-
-<!-- FAQ -->
-<h2 id="faq">FAQ & Troubleshooting</h2>
-
-<h4>Model download is slow</h4>
-<p>Set <code>hub="hf"</code> for HuggingFace (faster outside China), or download once and use local path:</p>
-<pre>model = AutoModel(model="/path/to/local/model", disable_update=True)</pre>
-
-<h4>Out of Memory (OOM)</h4>
-<p>Three knobs to reduce memory:</p>
-<ol>
-<li>Reduce <code>batch_size_s</code> (e.g., from 300 to 60)</li>
-<li>Reduce <code>max_single_segment_time</code> in vad_kwargs (e.g., 30000 → 15000)</li>
-<li>Add <code>batch_size_threshold_s=30</code> to force batch=1 for long segments</li>
-</ol>
-
-<h4>Every startup shows "Downloading Model..."</h4>
-<p>Not actually re-downloading — just verifying cache. To skip entirely:</p>
-<pre>model = AutoModel(model="/local/path/to/model", disable_update=True)</pre>
-
-<h4>"ModelName is not registered"</h4>
-<p>Usually means pypi version is outdated. Install from source:</p>
-<pre>pip install git+https://github.com/modelscope/FunASR.git</pre>
-
-<h4>Want to suppress all progress bars and logs?</h4>
-<pre>model = AutoModel(model="...", disable_update=True, disable_pbar=True, log_level="ERROR")</pre>
-
-<h4>How to pass pre-loaded numpy audio?</h4>
-<pre>import soundfile as sf
-audio, sr = sf.read("audio.wav")  # numpy array, 16kHz
-res = model.generate(input=audio)  # pass directly — no file needed</pre>
-
-<h4>GPU not being used?</h4>
-<pre># Check:
-import torch
-print(torch.cuda.is_available())  # must be True
-
-# Specify GPU explicitly:
-model = AutoModel(model="...", device="cuda:0")</pre>
-
-</div></div>
-
-<footer>
-<p>FunASR &middot; Tongyi Lab, Alibaba Group</p>
-<p><a href="index.html">Home</a> &middot; <a href="tutorial.html">Tutorial</a> &middot; <a href="training.html">Training</a> &middot; <a href="model-registration.html">Develop</a> &middot; <a href="api.html">API</a> &middot;
-            <a href="vllm.html">vLLM</a> &middot;
-            <a href="agent.html">Agent</a> &middot;
-            <a href="benchmark.html">Benchmark</a> &middot; <a href="https://github.com/modelscope/FunASR">GitHub</a></p>
+<aside class="docs-toc"><strong>On this page</strong><div class="toc">
+<ul>
+<li><a href="#python-sdk-tutorial">Python SDK tutorial</a><ul>
+<li><a href="#1-produce-a-first-transcript">1. Produce a first transcript</a></li>
+<li><a href="#2-understand-parameters-and-results">2. Understand parameters and results</a></li>
+<li><a href="#3-add-vad-punctuation-and-sentence-timestamps">3. Add VAD, punctuation, and sentence timestamps</a></li>
+<li><a href="#4-process-multiple-recordings">4. Process multiple recordings</a></li>
+<li><a href="#5-hotwords-and-language-boundaries">5. Hotwords and language boundaries</a></li>
+<li><a href="#6-continue-with-a-specific-workflow">6. Continue with a specific workflow</a></li>
+<li><a href="#model-training-and-testing">Model Training and Testing</a></li>
+<li><a href="#model-export-and-testing">Model Export and Testing</a></li>
+<li><a href="#register-a-custom-model">Register a Custom Model</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</aside></div>
+</main>
+<footer class="site-footer">
+<div>
+<strong>FunASR</strong>
+<p>Open speech infrastructure for production deployment.</p>
+</div>
+<nav aria-label="Official repositories" class="footer-repositories" data-footer-repositories="">
+<strong>Official repositories</strong>
+<div class="footer-links">
+<a href="https://www.funasr.com/go/fun-asr">Fun-ASR</a>
+<a href="https://www.funasr.com/go/sensevoice">SenseVoice</a>
+<a href="https://www.funasr.com/go/funclip">FunClip</a>
+</div>
+</nav>
+<div class="footer-links">
+<a href="https://www.funasr.com/en/deploy/">Deploy</a>
+<a href="https://www.funasr.com/en/docs/">Docs</a>
+<a href="https://www.funasr.com/go/releases">Releases</a>
+<a href="https://www.funasr.com/en/donors.html">Donors</a>
+</div>
 </footer>
-</body></html>
+<script defer="" src="assets/js/site.d446f5fbcfe2.js"></script>
+<script defer="" src="assets/js/experience.3f688a12942a.js"></script>
+</body>
+</html>

@@ -1,32 +1,141 @@
 <!DOCTYPE html>
-<html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<meta name="description" content="FunASR 模型选择指南：SenseVoice、Paraformer、Fun-ASR-Nano、streaming runtime、OpenAI API alias 和部署路径。">
-<meta property="og:title" content="FunASR 模型选择指南">
-<meta property="og:description" content="在部署前选择合适的 FunASR 模型、API alias、运行时和 benchmark 路径。">
-<meta property="og:type" content="website">
-<meta property="og:url" content="https://modelscope.github.io/FunASR/zh/model-selection.html">
-<link rel="canonical" href="https://modelscope.github.io/FunASR/zh/model-selection.html">
-<meta property="og:site_name" content="FunASR">
-<meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="FunASR 模型选择指南">
-<meta name="twitter:description" content="FunASR 模型选择指南：SenseVoice、Paraformer、Fun-ASR-Nano、streaming runtime、OpenAI API alias 和部署路径。">
-<title>FunASR 模型选择指南</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../style.css">
-</head><body>
-<nav class="nav"><div class="container">
-<a href="index.html" class="nav-logo">FunASR</a>
-<div class="nav-links"><a href="index.html">首页</a><a href="tutorial.html">教程</a><a href="training.html">训练</a><a href="model-registration.html">开发</a><a href="api.html">API</a><a href="vllm.html">vLLM</a><a href="agent.html">Agent</a><a href="benchmark.html">评测</a><a href="../donors.html">功德榜</a></div>
-<div class="lang-dropdown"><button class="lang-btn">中文</button><div class="lang-menu"><a href="../model-selection.html">English</a><a href="model-selection.html" class="current">中文</a><a href="../ja/model-selection.html">日本語</a><a href="../ko/model-selection.html">한국어</a></div></div>
-<a href="https://github.com/modelscope/FunASR" class="nav-github">GitHub</a>
-</div></nav>
-<div class="content"><div class="container narrow">
-<h1>模型选择指南</h1>
-<p>第一次选择模型、评估是否从 Whisper 或云端 ASR 迁移，或者准备通过 OpenAI 兼容 API 暴露模型别名时，可以先看这份指南。</p>
-<div class="toc-grid"><a href="#default">默认路径</a><a href="#decision">决策表</a><a href="#aliases">API alias</a><a href="#runtime">运行路径</a><a href="#benchmark">上线前评测</a></div>
-<section id="default"><h2>默认快速路径</h2>
-<p>如果还不确定，先从 <strong>SenseVoice-Small</strong> 开始。它适合 demo、私有 API、多语种转写、带说话人信息的会议转写和 Agent 语音输入。</p>
-<pre><code>from funasr import AutoModel
+
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>选择第一个模型 - FunASR</title>
+<meta content="选择第一个模型" name="description"/>
+<meta content="#ffffff" name="theme-color"/>
+<link href="https://www.funasr.com/docs/model-selection.html" rel="canonical"/>
+<link href="https://www.funasr.com/en/docs/model-selection.html" hreflang="en" rel="alternate"/>
+<link href="https://www.funasr.com/docs/model-selection.html" hreflang="zh-CN" rel="alternate"/>
+<meta content="website" property="og:type"/>
+<meta content="选择第一个模型 - FunASR" property="og:title"/>
+<meta content="选择第一个模型" property="og:description"/>
+<meta content="https://www.funasr.com/docs/model-selection.html" property="og:url"/>
+<link href="../assets/css/site.d651b1dbf605.css" rel="stylesheet"/>
+<link href="../assets/css/experience.5803993934f8.css" rel="stylesheet"/>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "SoftwareApplication", "applicationCategory": "DeveloperApplication", "codeRepository": "https://github.com/modelscope/FunASR", "dateModified": "2026-09-01", "license": "https://github.com/modelscope/FunASR/blob/main/LICENSE", "name": "FunASR", "operatingSystem": "Linux, macOS, Windows", "url": "https://www.funasr.com/docs/model-selection.html"}</script>
+</head>
+<body data-copy-icon="../assets/lucide/copy.ea80e566c7a1.svg" data-language="zh" data-route="/docs/model-selection.html">
+<a class="skip-link" href="#main">跳到主要内容</a>
+<header class="site-header">
+<a aria-label="FunASR 首页" class="brand" href="https://www.funasr.com/">
+<span aria-hidden="true" class="brand-mark">F</span>
+<span>FunASR</span>
+</a>
+<button aria-controls="primary-navigation" aria-expanded="false" class="icon-button menu-button" data-menu-toggle="" title="打开目录" type="button">
+<img alt="" src="../assets/lucide/menu.90a31b3ab1cf.svg"/>
+</button>
+<nav aria-label="主目录" class="primary-navigation" data-primary-nav="" id="primary-navigation">
+<a href="https://www.funasr.com/">产品</a>
+<a href="https://www.funasr.com/deploy/">部署</a>
+<a href="https://www.funasr.com/models.html">模型</a>
+<a href="https://www.funasr.com/benchmarks.html">性能</a>
+<a href="https://www.funasr.com/ecosystem.html">生态</a>
+<a href="https://www.funasr.com/blog/">博客</a>
+<a href="https://www.funasr.com/docs/">文档</a>
+<a href="https://www.funasr.com/donors.html">功德榜</a>
+</nav>
+<div class="header-actions">
+<a class="icon-link" href="https://www.funasr.com/en/docs/model-selection.html" title="English">
+<img alt="" src="../assets/lucide/languages.ae9048feb2c7.svg"/>
+<span>EN</span>
+</a>
+<a aria-label="GitHub" class="icon-button" href="https://www.funasr.com/go/github" title="GitHub">
+<img alt="" src="../assets/lucide/github.793554449a30.svg"/>
+</a>
+</div>
+</header>
+<main id="main">
+<div class="docs-layout">
+<aside class="docs-sidebar">
+<a class="docs-home" href="https://www.funasr.com/docs/">文档中心</a>
+<details class="docs-navigation" open="">
+<summary class="docs-navigation-toggle">浏览目录</summary>
+<details open="">
+<summary>开始使用</summary>
+<nav aria-label="开始使用">
+<a href="https://www.funasr.com/docs/installation.html">安装与环境验证</a>
+<a href="https://www.funasr.com/docs/quickstart.html">第一次转写</a>
+<a href="https://www.funasr.com/docs/python-api.html">Python SDK: AutoModel</a>
+<a aria-current="page" href="https://www.funasr.com/docs/model-selection.html">选择第一个模型</a>
+<a href="https://www.funasr.com/docs/command-line.html">命令行转写</a>
+<a href="https://www.funasr.com/docs/migration.html">从 Whisper 与云 API 迁移</a>
+</nav>
+</details>
+<details open="">
+<summary>模型与能力</summary>
+<nav aria-label="模型与能力">
+<a href="https://www.funasr.com/docs/moss-transcribe-diarize.html">MOSS 转写与说话人分离</a>
+<a href="https://www.funasr.com/docs/model-zoo.html">Model Zoo</a>
+</nav>
+</details>
+<details open="">
+<summary>训练与扩展</summary>
+<nav aria-label="训练与扩展">
+<a href="https://www.funasr.com/docs/training.html">微调与评测</a>
+<a href="https://www.funasr.com/docs/model-registration.html">自定义模型注册</a>
+</nav>
+</details>
+<details open="">
+<summary>部署与接口</summary>
+<nav aria-label="部署与接口">
+<a href="https://www.funasr.com/docs/docker.html">容器环境与镜像选择</a>
+<a href="https://www.funasr.com/docs/runtime-guide.html">服务部署入口</a>
+<a href="https://www.funasr.com/docs/http-server.html">Python HTTP 服务</a>
+<a href="https://www.funasr.com/docs/kubernetes.html">Kubernetes 部署</a>
+<a href="https://www.funasr.com/docs/deployment-matrix.html">运行时与部署矩阵</a>
+<a href="https://www.funasr.com/docs/vllm.html">vLLM split-engine 推理</a>
+<a href="https://www.funasr.com/docs/native-vllm.html">原生 vLLM 验证记录</a>
+</nav>
+</details>
+<details open="">
+<summary>评测与运维</summary>
+<nav aria-label="评测与运维">
+<a href="https://www.funasr.com/docs/troubleshooting.html">安装与推理故障排查</a>
+<a href="https://www.funasr.com/docs/security.html">服务安全边界</a>
+<a href="https://www.funasr.com/docs/benchmark-method.html">可复现性能评测</a>
+<a href="https://www.funasr.com/docs/realtime-benchmark.html">实时 WebSocket 压测</a>
+</nav>
+</details>
+<details open="">
+<summary>应用与生态</summary>
+<nav aria-label="应用与生态">
+<a href="https://www.funasr.com/docs/use-cases.html">应用场景与示例</a>
+<a href="https://www.funasr.com/docs/community.html">社区集成</a>
+<a href="https://www.funasr.com/docs/repositories.html">四仓职责与贡献入口</a>
+<a href="https://www.funasr.com/docs/javascript.html">JavaScript 客户端</a>
+<a href="https://www.funasr.com/docs/workflows.html">工作流集成</a>
+</nav>
+</details>
+<details open="">
+<summary>协议与参考</summary>
+<nav aria-label="协议与参考">
+<a href="https://www.funasr.com/docs/service-api.html">HTTP API 契约</a>
+<a href="https://www.funasr.com/docs/websocket-protocol.html">C++ WebSocket 协议</a>
+<a href="https://www.funasr.com/docs/onnx-output.html">ONNX 二进制输出契约</a>
+</nav>
+</details>
+<a href="https://www.funasr.com/deploy/">部署手册 →</a>
+</details>
+</aside>
+<div class="docs-body">
+<nav aria-label="面包屑" class="breadcrumbs"><a href="https://www.funasr.com/">FunASR</a><span>/</span><a href="https://www.funasr.com/docs/">文档</a><span>/</span><span>选择第一个模型</span></nav>
+<header class="docs-title"><h1>选择第一个模型</h1><a class="source-link" data-source-link="" href="https://github.com/modelscope/FunASR/blob/main/docs/model_selection_zh.md">查看 / 编辑源文档 ↗</a></header>
+<article class="docs-article"><div class="source-title-anchor" id="funasr-模型选择指南"></div>
+<p>当你第一次选择模型、评估是否从 Whisper 或云端 ASR 迁移，或者准备通过 OpenAI 兼容 API 暴露模型别名时，可以先看这份指南。</p>
+<span data-legacy-doc-anchor="默认快速路径" id="default"></span><h2 id="默认快速路径">默认快速路径</h2>
+<p>如果有 GPU，先从旗舰 <strong>Fun-ASR-Nano</strong> 开始 —— 基于 LLM 的识别模型（SenseVoice 编码器 + Qwen3 解码），覆盖中文、英文、日语，以及 7 种中文方言和 26 种地域口音，在难例、上下文和专名上精度最强：</p>
+<pre id="code-0"><code class="language-python">from funasr import AutoModel
+
+model = AutoModel(model="FunAudioLLM/Fun-ASR-Nano-2512", device="cuda")
+result = model.generate(input="meeting.wav")
+print(result[0]["text"])
+</code></pre>
+<p>在 CPU 上，或当你想要多语种 + 情感/事件标签、带说话人信息的会议转写一次完成时，用 <strong>SenseVoice-Small</strong>：</p>
+<pre id="code-1"><code class="language-python">from funasr import AutoModel
 
 model = AutoModel(
     model="iic/SenseVoiceSmall",
@@ -34,43 +143,211 @@ model = AutoModel(
     spk_model="cam++",
     device="cuda",  # 便携 smoke test 可改为 "cpu"
 )
-result = model.generate(input="meeting.wav")</code></pre>
-</section>
-<section id="decision"><h2>决策表</h2>
-<table><tr><th>需求</th><th>优先尝试</th><th>原因</th><th>下一步文档</th></tr>
-<tr><td>快速多语种私有转写</td><td>SenseVoice-Small</td><td>兼顾 ASR、情感标签、音频事件标签和 CPU 可用性。</td><td><a href="tutorial.html">教程</a></td></tr>
-<tr><td>中文生产 ASR</td><td>Paraformer-Large</td><td>成熟中文 ASR 路径，可组合 VAD 和标点。</td><td><a href="tutorial.html">教程</a></td></tr>
-<tr><td>API 示例中的英文路由</td><td><code>paraformer-en</code></td><td>适合在 OpenAI 风格客户端里验证较轻量英文路径。</td><td><a href="agent.html#server">OpenAI API</a></td></tr>
-<tr><td>LLM-based ASR 或 31 语种实验</td><td>Fun-ASR-Nano</td><td>LLM-based 模型路径；解码吞吐敏感时配合 vLLM。</td><td><a href="vllm.html">vLLM 指南</a></td></tr>
-<tr><td>离线多人会议转写与匿名说话人聚类</td><td>OpenMOSS-Team/MOSS-Transcribe-Diarize</td><td>一个模型联合输出长音频文本、时间戳与匿名说话人标签；不需要外挂 VAD 或说话人流水线。</td><td><a href="moss-transcribe-diarize.html">MOSS 指南</a></td></tr>
-<tr><td>实时字幕或客服流式音频</td><td>Runtime WebSocket 服务</td><td>面向长连接流式会话和中间结果。</td><td><a href="tutorial.html#streaming">实时示例</a></td></tr>
-<tr><td>从 Whisper/云端 ASR 迁移</td><td>先用 SenseVoice-Small</td><td>先建立强基线，再做模型专项调优。</td><td><a href="migration.html">迁移指南</a></td></tr></table>
-</section>
-<section id="aliases"><h2>OpenAI 兼容 API 别名</h2>
-<p><code>examples/openai_api</code> 服务提供短别名，应用团队不需要了解具体模型仓库 ID。</p>
-<table><tr><th>Alias</th><th>底层路径</th><th>适合场景</th></tr>
-<tr><td><code>sensevoice</code></td><td><code>iic/SenseVoiceSmall</code></td><td>默认私有语音 API，多语种 ASR、事件标签和 CPU/GPU 行为较均衡。</td></tr>
-<tr><td><code>paraformer</code></td><td><code>paraformer-zh</code></td><td>中文生产流量优先尝试。</td></tr>
-<tr><td><code>paraformer-en</code></td><td><code>paraformer-en</code></td><td>OpenAI 风格客户端里的英文轻量路由。</td></tr>
-<tr><td><code>fun-asr-nano</code></td><td><code>FunAudioLLM/Fun-ASR-Nano-2512</code></td><td>评估 LLM-based ASR、31 语种覆盖或 vLLM 加速。</td></tr></table>
-<pre><code>curl http://localhost:8000/v1/models
-python examples/openai_api/smoke_test.py --base-url http://localhost:8000 --model sensevoice</code></pre>
-</section>
-<section id="runtime"><h2>按工作负载选择运行路径</h2>
-<table><tr><th>工作负载</th><th>运行路径</th><th>说明</th></tr>
-<tr><td>Notebook 或一次性评估</td><td>Python <code>AutoModel</code></td><td>验证安装、模型下载和输出结构的最短路径。</td></tr>
-<tr><td>内部 HTTP 服务</td><td>OpenAI 兼容 API</td><td>复用 OpenAI 风格客户端、Dify、n8n、LangChain、AutoGen 和 HTTP 节点。</td></tr>
-<tr><td>可复现本地容器 demo</td><td>Docker Compose API</td><td>CPU-first smoke test；使用 CUDA 前先适配镜像。</td></tr>
-<tr><td>集群内私有服务</td><td>Kubernetes API 模板</td><td>私有 ClusterIP、持久化模型缓存、健康检查和 port-forward smoke test。</td></tr>
-<tr><td>实时音频</td><td>Runtime WebSocket 服务</td><td>用真实音频验证分块、VAD、断句、重连和客户端背压。</td></tr>
-<tr><td>LLM-based ASR 吞吐</td><td>Fun-ASR-Nano 的 vLLM 路径</td><td>vLLM 加速自回归解码；不适用于非自回归 Paraformer。</td></tr>
-<tr><td>离线 MOSS 服务</td><td>FunASR HTTP、vLLM 或 SGLang Omni</td><td>保持原生说话人分段契约；MOSS 是 OpenMOSS 第三方离线模型，不走实时 WebSocket 路径。</td></tr></table>
-<p>选择部署方式时可以参考 <a href="deployment-matrix.html">部署选型表</a>。</p>
-</section>
-<section id="benchmark"><h2>上线前先 benchmark</h2>
-<ul><li>准备 20-50 条音频，覆盖短音频、长会议、静音、噪声、多人重叠、领域词汇和目标语言。</li><li>记录模型名、模型版本、FunASR 版本、设备、CPU/GPU 型号、CUDA/PyTorch 版本、运行路径、batch size，以及是否排除 warmup/模型下载时间。</li><li>使用已有 WER/CER 流程或人工审阅，不要只看转写文本是否“读起来还行”。</li><li>同时记录延迟、吞吐、内存、失败样例和上传大小限制。</li><li>保留至少一个公开样例用于 smoke test，也保留至少一个真实私有样本用于部署验证。</li></ul>
-<p>迁移场景可以使用 <a href="https://github.com/modelscope/FunASR/tree/main/examples/migration">迁移评测示例</a> 和 <a href="migration.html">迁移指南</a>。</p>
-</section>
-</div></div>
-<footer><p>FunASR &middot; 通义实验室，阿里巴巴集团</p><p><a href="index.html">首页</a> &middot; <a href="model-selection.html">模型选择</a> &middot; <a href="migration.html">迁移</a> &middot; <a href="use-cases.html">场景</a> &middot; <a href="deployment-matrix.html">部署</a> &middot; <a href="agent.html">Agent</a> &middot; <a href="benchmark.html">评测</a> &middot; <a href="https://github.com/modelscope/FunASR">GitHub</a></p></footer>
-</body></html>
+result = model.generate(input="meeting.wav")
+</code></pre>
+<p>当你的场景是纯中文、需要字级时间戳或热词时，切换到 Paraformer。</p>
+<span data-legacy-doc-anchor="决策表" id="decision"></span><h2 id="决策表">决策表</h2>
+<table>
+<thead>
+<tr>
+<th>需求</th>
+<th>优先尝试</th>
+<th>原因</th>
+<th>下一步文档</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>快速多语种私有转写</td>
+<td>SenseVoice-Small</td>
+<td>兼顾 ASR、情感标签、音频事件标签和 CPU 可用性。</td>
+<td><a href="https://github.com/modelscope/FunASR/blob/main/README_zh.md#快速开始">README 快速开始</a></td>
+</tr>
+<tr>
+<td>中文生产 ASR</td>
+<td>Paraformer-Large</td>
+<td>成熟中文 ASR 路径，可组合 VAD 和标点。</td>
+<td><a href="https://www.funasr.com/docs/quickstart.html">教程</a></td>
+</tr>
+<tr>
+<td>OpenAI API 示例中的英文路由</td>
+<td><code>paraformer-en</code> alias</td>
+<td>适合在 OpenAI 风格客户端里验证较轻量英文路径。</td>
+<td><a href="https://www.funasr.com/docs/http-server.html">OpenAI API 示例</a></td>
+</tr>
+<tr>
+<td>LLM-based ASR 或中文/英文/日语 + 方言实验</td>
+<td>Fun-ASR-Nano</td>
+<td>LLM-based 模型路径；解码吞吐敏感时配合 vLLM。</td>
+<td><a href="https://www.funasr.com/en/docs/vllm.html">vLLM 指南</a></td>
+</tr>
+<tr>
+<td>离线长音频 ASR 与匿名说话人标签</td>
+<td>MOSS-Transcribe-Diarize</td>
+<td>一次离线请求返回转写、时间戳和录音内匿名说话人标签；不识别已知人物，也不需要外部 VAD 或说话人模型。</td>
+<td><a href="https://www.funasr.com/docs/moss-transcribe-diarize.html">MOSS 部署指南</a></td>
+</tr>
+<tr>
+<td>实时字幕或客服流式音频</td>
+<td>Runtime WebSocket 服务</td>
+<td>面向长连接流式会话和中间结果。</td>
+<td><a href="https://www.funasr.com/docs/runtime-guide.html">Runtime 服务文档</a></td>
+</tr>
+<tr>
+<td>录音归档批处理</td>
+<td>SenseVoice-Small 或 Paraformer-Large</td>
+<td>稳定离线转写路径；调用方负责 manifest、重试和日志。</td>
+<td><a href="https://github.com/modelscope/FunASR/blob/main/examples/batch_asr_improved.py">批处理示例</a></td>
+</tr>
+<tr>
+<td>从 Whisper/云端 ASR 迁移</td>
+<td>先用 SenseVoice-Small，再 benchmark 其他模型</td>
+<td>先建立强基线，再做模型专项调优。</td>
+<td><a href="https://www.funasr.com/docs/migration.html">迁移指南</a></td>
+</tr>
+</tbody>
+</table>
+<span data-legacy-doc-anchor="openai-兼容-api-别名" id="aliases"></span><h2 id="openai-兼容-api-别名">OpenAI 兼容 API 别名</h2>
+<p><code>examples/openai_api</code> 服务提供短别名，应用团队不需要了解具体模型仓库 ID：</p>
+<table>
+<thead>
+<tr>
+<th>Alias</th>
+<th>底层路径</th>
+<th>适合场景</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>sensevoice</code></td>
+<td><code>iic/SenseVoiceSmall</code></td>
+<td>默认私有语音 API，多语种 ASR、事件标签和 CPU/GPU 行为较均衡。</td>
+</tr>
+<tr>
+<td><code>paraformer</code></td>
+<td><code>paraformer-zh</code> + VAD + 标点</td>
+<td>中文生产流量优先尝试。</td>
+</tr>
+<tr>
+<td><code>paraformer-en</code></td>
+<td><code>paraformer-en</code> + VAD</td>
+<td>OpenAI 风格客户端里的英文轻量路由。</td>
+</tr>
+<tr>
+<td><code>fun-asr-nano</code></td>
+<td><code>FunAudioLLM/Fun-ASR-Nano-2512</code></td>
+<td>评估 LLM-based ASR 的中文、英文、日语与中文方言/口音覆盖，或测试 vLLM 加速。</td>
+</tr>
+</tbody>
+</table>
+<p>如果部署目标是昇腾 NPU，请把 <code>fun-asr-nano</code> 和 SenseVoice / Paraformer 分开看。Fun-ASR-Nano 的 PyTorch <code>AutoModel</code> 路径在修复 NPU autocast 后已有 310P3 社区兼容性 smoke 结果，但该测试明显慢于 CPU；<code>AutoModelVLLM</code> 仍依赖 vLLM-Ascend 算子支持，并已遇到 Qwen3 rotary / <code>TransData</code> 失败。生产部署优先使用 CUDA/vLLM、标准 PyTorch CPU/GPU 或 GGUF runtime，除非你正在主动验证 Ascend 后端。</p>
+<p>接入客户端前先检查在线服务：</p>
+<pre id="code-2"><code class="language-bash">curl http://localhost:8000/v1/models
+python examples/openai_api/smoke_test.py --base-url http://localhost:8000 --model sensevoice
+</code></pre>
+<p>SDK、JavaScript、工作流、Postman、OpenAPI、Docker 和 Kubernetes 路径可从 <a href="https://www.funasr.com/docs/http-server.html">OpenAI API 示例</a> 开始。</p>
+<span data-legacy-doc-anchor="按工作负载选择运行路径" id="runtime"></span><h2 id="按工作负载选择运行路径">按工作负载选择运行路径</h2>
+<table>
+<thead>
+<tr>
+<th>工作负载</th>
+<th>运行路径</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Notebook 或一次性评估</td>
+<td>Python <code>AutoModel</code></td>
+<td>验证安装、模型下载和输出结构的最短路径。</td>
+</tr>
+<tr>
+<td>内部 HTTP 服务</td>
+<td>OpenAI 兼容 API</td>
+<td>复用 OpenAI 风格客户端、Dify、n8n、LangChain、AutoGen 和 HTTP 节点。</td>
+</tr>
+<tr>
+<td>可复现本地容器 demo</td>
+<td>Docker Compose API</td>
+<td>CPU-first smoke test；使用 CUDA 前先适配镜像。</td>
+</tr>
+<tr>
+<td>集群内私有服务</td>
+<td>Kubernetes API 模板</td>
+<td>私有 <code>ClusterIP</code>、持久化模型缓存、<code>/health</code> probes 和 port-forward smoke test。</td>
+</tr>
+<tr>
+<td>实时音频</td>
+<td>Runtime WebSocket 服务</td>
+<td>用真实音频验证 chunk size、VAD、断句、重连和客户端背压。</td>
+</tr>
+<tr>
+<td>LLM-based ASR 吞吐</td>
+<td>Fun-ASR-Nano 的 vLLM 路径</td>
+<td>vLLM 加速自回归解码；不适用于非自回归 Paraformer。</td>
+</tr>
+</tbody>
+</table>
+<p>选择部署方式时可以参考 <a href="https://www.funasr.com/docs/deployment-matrix.html">部署选型表</a>。</p>
+<span data-legacy-doc-anchor="上线前先-benchmark" id="benchmark"></span><h2 id="上线前先-benchmark">上线前先 benchmark</h2>
+<p>不要只用一个干净 demo 文件选型。先准备一个小而有代表性的集合：</p>
+<ul>
+<li>20-50 条音频，覆盖短音频、长会议、静音、噪声、多人重叠、领域词汇和目标语言。</li>
+<li>记录模型名、模型版本、FunASR 版本、设备、CPU/GPU 型号、CUDA/PyTorch 版本、运行路径、batch size，以及是否排除 warmup/模型下载时间。</li>
+<li>使用你已有的 WER/CER 流程或人工审阅，不要只看转写文本是否“读起来还行”。</li>
+<li>同时记录延迟、吞吐、内存、失败样例和上传大小限制。</li>
+<li>保留至少一个公开样例用于 smoke test，也保留至少一个真实私有样本用于部署验证。</li>
+</ul>
+<p>迁移场景可以使用 <a href="https://github.com/modelscope/FunASR/blob/main/examples/migration">迁移评测示例</a> 和 <a href="https://www.funasr.com/docs/migration.html">迁移指南</a>。</p>
+<h2 id="实用建议">实用建议</h2>
+<ul>
+<li>demo、私有 API、Agent 语音输入和多语种场景优先试 SenseVoice-Small。</li>
+<li>中文生产流量优先试 Paraformer，尤其是希望走成熟非自回归 ASR 路径时。</li>
+<li>明确需要 LLM-based 模型路径或 vLLM 加速实验时，再试 Fun-ASR-Nano；如需单独的 31 语种覆盖，请改用 Fun-ASR-MLT-Nano。</li>
+<li>离线长录音需要同一次请求给出录音内匿名说话人标签时，使用 MOSS-Transcribe-Diarize；它不是实时 WebSocket 或已知人物身份识别路径。</li>
+<li>需要中间结果和长连接时，优先使用 streaming runtime，而不是普通 HTTP 转写接口。</li>
+<li>生产 runbook 中固定模型 alias，保证 benchmark 和问题复现可追踪。</li>
+<li>遇到阻塞时，用 <a href="https://github.com/modelscope/FunASR/issues/new?template=deployment_help.md">Deployment Help issue</a> 提供模型、设备、命令、日志、音频时长和运行路径。</li>
+</ul></article>
+<nav aria-label="相邻文档" class="docs-next">
+<a href="https://www.funasr.com/docs/python-api.html">← Python SDK: AutoModel</a><a href="https://www.funasr.com/docs/command-line.html">命令行转写 →</a> </nav>
+</div>
+<aside class="docs-toc"><strong>本页目录</strong><div class="toc">
+<ul>
+<li><a href="#funasr-模型选择指南">FunASR 模型选择指南</a><ul>
+<li><a href="#默认快速路径">默认快速路径</a></li>
+<li><a href="#决策表">决策表</a></li>
+<li><a href="#openai-兼容-api-别名">OpenAI 兼容 API 别名</a></li>
+<li><a href="#按工作负载选择运行路径">按工作负载选择运行路径</a></li>
+<li><a href="#上线前先-benchmark">上线前先 benchmark</a></li>
+<li><a href="#实用建议">实用建议</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</aside></div>
+</main>
+<footer class="site-footer">
+<div>
+<strong>FunASR</strong>
+<p>面向生产部署的开源语音基础设施。</p>
+</div>
+<nav aria-label="官方仓库" class="footer-repositories" data-footer-repositories="">
+<strong>官方仓库</strong>
+<div class="footer-links">
+<a href="https://www.funasr.com/go/fun-asr">Fun-ASR</a>
+<a href="https://www.funasr.com/go/sensevoice">SenseVoice</a>
+<a href="https://www.funasr.com/go/funclip">FunClip</a>
+</div>
+</nav>
+<div class="footer-links">
+<a href="https://www.funasr.com/deploy/">部署</a>
+<a href="https://www.funasr.com/docs/">文档</a>
+<a href="https://www.funasr.com/go/releases">发布</a>
+<a href="https://www.funasr.com/donors.html">功德榜</a>
+</div>
+</footer>
+<script defer="" src="../assets/js/site.d446f5fbcfe2.js"></script>
+<script defer="" src="../assets/js/experience.3f688a12942a.js"></script>
+</body>
+</html>

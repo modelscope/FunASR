@@ -1,341 +1,320 @@
 <!DOCTYPE html>
-<html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<meta name="description" content="使用 FunASR 训练框架，在你自己的数据上微调预训练模型。">
-<meta property="og:title" content="FunASR 训练与微调">
-<meta property="og:description" content="使用 FunASR 训练框架，在你自己的数据上微调预训练模型。">
-<meta property="og:type" content="website">
-<meta property="og:url" content="https://modelscope.github.io/FunASR/zh/training.html">
-<link rel="canonical" href="https://modelscope.github.io/FunASR/zh/training.html">
-<meta property="og:site_name" content="FunASR">
-<meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="FunASR 训练与微调">
-<meta name="twitter:description" content="使用 FunASR 训练框架，在你自己的数据上微调预训练模型。">
-<title>FunASR 训练与微调</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../style.css">
-</head><body>
-<nav class="nav"><div class="container">
-<a href="index.html" class="nav-logo">FunASR</a>
-<div class="nav-links">
-<a href="index.html">首页</a>
-<a href="tutorial.html">教程</a>
-<a href="training.html" class="active">训练</a>
-<a href="model-registration.html">开发</a>
-<a href="../api.html">API</a>
-<a href="vllm.html">vLLM</a>
-                <a href="agent.html">Agent</a>
-                <a href="benchmark.html">Benchmark</a>
-                <a href="../donors.html">功德榜</a>
+
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>微调与评测 - FunASR</title>
+<meta content="微调与评测" name="description"/>
+<meta content="#ffffff" name="theme-color"/>
+<link href="https://www.funasr.com/docs/training.html" rel="canonical"/>
+<link href="https://www.funasr.com/en/docs/training.html" hreflang="en" rel="alternate"/>
+<link href="https://www.funasr.com/docs/training.html" hreflang="zh-CN" rel="alternate"/>
+<meta content="website" property="og:type"/>
+<meta content="微调与评测 - FunASR" property="og:title"/>
+<meta content="微调与评测" property="og:description"/>
+<meta content="https://www.funasr.com/docs/training.html" property="og:url"/>
+<link href="../assets/css/site.d651b1dbf605.css" rel="stylesheet"/>
+<link href="../assets/css/experience.5803993934f8.css" rel="stylesheet"/>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "SoftwareApplication", "applicationCategory": "DeveloperApplication", "codeRepository": "https://github.com/modelscope/FunASR", "dateModified": "2026-09-01", "license": "https://github.com/modelscope/FunASR/blob/main/LICENSE", "name": "FunASR", "operatingSystem": "Linux, macOS, Windows", "url": "https://www.funasr.com/docs/training.html"}</script>
+</head>
+<body data-copy-icon="../assets/lucide/copy.ea80e566c7a1.svg" data-language="zh" data-route="/docs/training.html">
+<a class="skip-link" href="#main">跳到主要内容</a>
+<header class="site-header">
+<a aria-label="FunASR 首页" class="brand" href="https://www.funasr.com/">
+<span aria-hidden="true" class="brand-mark">F</span>
+<span>FunASR</span>
+</a>
+<button aria-controls="primary-navigation" aria-expanded="false" class="icon-button menu-button" data-menu-toggle="" title="打开目录" type="button">
+<img alt="" src="../assets/lucide/menu.90a31b3ab1cf.svg"/>
+</button>
+<nav aria-label="主目录" class="primary-navigation" data-primary-nav="" id="primary-navigation">
+<a href="https://www.funasr.com/">产品</a>
+<a href="https://www.funasr.com/deploy/">部署</a>
+<a href="https://www.funasr.com/models.html">模型</a>
+<a href="https://www.funasr.com/benchmarks.html">性能</a>
+<a href="https://www.funasr.com/ecosystem.html">生态</a>
+<a href="https://www.funasr.com/blog/">博客</a>
+<a href="https://www.funasr.com/docs/">文档</a>
+<a href="https://www.funasr.com/donors.html">功德榜</a>
+</nav>
+<div class="header-actions">
+<a class="icon-link" href="https://www.funasr.com/en/docs/training.html" title="English">
+<img alt="" src="../assets/lucide/languages.ae9048feb2c7.svg"/>
+<span>EN</span>
+</a>
+<a aria-label="GitHub" class="icon-button" href="https://www.funasr.com/go/github" title="GitHub">
+<img alt="" src="../assets/lucide/github.793554449a30.svg"/>
+</a>
 </div>
-
-<div class="lang-dropdown"><button class="lang-btn">中文</button><div class="lang-menu"><a href="../training.html">English</a><a href="training.html" class="current">中文</a><a href="../ja/training.html">日本語</a></div></div>
-<a href="https://github.com/modelscope/FunASR" class="nav-github">GitHub</a>
-</div></nav>
-
-<div class="content"><div class="container narrow">
-<h1>训练与微调</h1>
-<p>使用 FunASR 训练框架，在你自己的数据上微调预训练模型。</p>
-
-<div class="toc-grid">
-<a href="#overview">概览</a>
-<a href="#data">数据准备</a>
-<a href="#paraformer">微调 Paraformer</a>
-<a href="#sensevoice">微调 SenseVoice</a>
-<a href="#nano">微调 Fun-ASR-Nano</a>
-<a href="#params">参数参考</a>
-<a href="#multi-gpu">多 GPU 训练</a>
-<a href="#deepspeed">DeepSpeed</a>
-<a href="#monitor">训练监控</a>
-<a href="#inference-after">使用微调后的模型</a>
-<a href="#tips">技巧与常见问题</a>
-</div>
-
-<!-- 概览 -->
-<h2 id="overview">概览</h2>
-<p>FunASR 训练框架支持：</p>
-<ul>
-<li>在自定义领域数据上<strong>微调</strong>任意预训练模型</li>
-<li>基于 PyTorch DDP 的<strong>多 GPU</strong> 训练（单机/多机）</li>
-<li><strong>DeepSpeed</strong> ZeRO Stage 1/2/3 大模型训练</li>
-<li>按 token 数或样本数的<strong>动态批处理</strong></li>
-<li><strong>模型平均</strong>以获得最佳性能</li>
-<li>中断后<strong>断点续训</strong></li>
-</ul>
-
-<p>训练入口为 <code>funasr-train-ds</code>（即 <code>funasr/bin/train_ds.py</code>），通过 <code>torchrun</code> 启动分布式训练。</p>
-
-<!-- 数据准备 -->
-<h2 id="data">数据准备</h2>
-
-<h3>标准格式（Paraformer、SenseVoice）</h3>
-<p>训练数据使用 JSONL 格式——每行一个 JSON 对象：</p>
-<pre>{"key": "utt001", "source": "/path/to/audio.wav", "source_len": 90, "target": "这是转写文本", "target_len": 6}
-{"key": "utt002", "source": "/path/to/audio2.wav", "source_len": 150, "target": "hello world", "target_len": 2}</pre>
-
+</header>
+<main id="main">
+<div class="docs-layout">
+<aside class="docs-sidebar">
+<a class="docs-home" href="https://www.funasr.com/docs/">文档中心</a>
+<details class="docs-navigation" open="">
+<summary class="docs-navigation-toggle">浏览目录</summary>
+<details open="">
+<summary>开始使用</summary>
+<nav aria-label="开始使用">
+<a href="https://www.funasr.com/docs/installation.html">安装与环境验证</a>
+<a href="https://www.funasr.com/docs/quickstart.html">第一次转写</a>
+<a href="https://www.funasr.com/docs/python-api.html">Python SDK: AutoModel</a>
+<a href="https://www.funasr.com/docs/model-selection.html">选择第一个模型</a>
+<a href="https://www.funasr.com/docs/command-line.html">命令行转写</a>
+<a href="https://www.funasr.com/docs/migration.html">从 Whisper 与云 API 迁移</a>
+</nav>
+</details>
+<details open="">
+<summary>模型与能力</summary>
+<nav aria-label="模型与能力">
+<a href="https://www.funasr.com/docs/moss-transcribe-diarize.html">MOSS 转写与说话人分离</a>
+<a href="https://www.funasr.com/docs/model-zoo.html">Model Zoo</a>
+</nav>
+</details>
+<details open="">
+<summary>训练与扩展</summary>
+<nav aria-label="训练与扩展">
+<a aria-current="page" href="https://www.funasr.com/docs/training.html">微调与评测</a>
+<a href="https://www.funasr.com/docs/model-registration.html">自定义模型注册</a>
+</nav>
+</details>
+<details open="">
+<summary>部署与接口</summary>
+<nav aria-label="部署与接口">
+<a href="https://www.funasr.com/docs/docker.html">容器环境与镜像选择</a>
+<a href="https://www.funasr.com/docs/runtime-guide.html">服务部署入口</a>
+<a href="https://www.funasr.com/docs/http-server.html">Python HTTP 服务</a>
+<a href="https://www.funasr.com/docs/kubernetes.html">Kubernetes 部署</a>
+<a href="https://www.funasr.com/docs/deployment-matrix.html">运行时与部署矩阵</a>
+<a href="https://www.funasr.com/docs/vllm.html">vLLM split-engine 推理</a>
+<a href="https://www.funasr.com/docs/native-vllm.html">原生 vLLM 验证记录</a>
+</nav>
+</details>
+<details open="">
+<summary>评测与运维</summary>
+<nav aria-label="评测与运维">
+<a href="https://www.funasr.com/docs/troubleshooting.html">安装与推理故障排查</a>
+<a href="https://www.funasr.com/docs/security.html">服务安全边界</a>
+<a href="https://www.funasr.com/docs/benchmark-method.html">可复现性能评测</a>
+<a href="https://www.funasr.com/docs/realtime-benchmark.html">实时 WebSocket 压测</a>
+</nav>
+</details>
+<details open="">
+<summary>应用与生态</summary>
+<nav aria-label="应用与生态">
+<a href="https://www.funasr.com/docs/use-cases.html">应用场景与示例</a>
+<a href="https://www.funasr.com/docs/community.html">社区集成</a>
+<a href="https://www.funasr.com/docs/repositories.html">四仓职责与贡献入口</a>
+<a href="https://www.funasr.com/docs/javascript.html">JavaScript 客户端</a>
+<a href="https://www.funasr.com/docs/workflows.html">工作流集成</a>
+</nav>
+</details>
+<details open="">
+<summary>协议与参考</summary>
+<nav aria-label="协议与参考">
+<a href="https://www.funasr.com/docs/service-api.html">HTTP API 契约</a>
+<a href="https://www.funasr.com/docs/websocket-protocol.html">C++ WebSocket 协议</a>
+<a href="https://www.funasr.com/docs/onnx-output.html">ONNX 二进制输出契约</a>
+</nav>
+</details>
+<a href="https://www.funasr.com/deploy/">部署手册 →</a>
+</details>
+</aside>
+<div class="docs-body">
+<nav aria-label="面包屑" class="breadcrumbs"><a href="https://www.funasr.com/">FunASR</a><span>/</span><a href="https://www.funasr.com/docs/">文档</a><span>/</span><span>微调与评测</span></nav>
+<header class="docs-title"><h1>微调与评测</h1><a class="source-link" data-source-link="" href="https://github.com/modelscope/FunASR/blob/main/docs/training_zh.md">查看 / 编辑源文档 ↗</a></header>
+<article class="docs-article"><div class="source-title-anchor" id="训练与适配"></div>
+<p><a href="https://www.funasr.com/en/docs/training.html">English</a> | <a href="https://www.funasr.com/docs/quickstart.html">文档</a> | <a href="https://www.funasr.com/docs/model-registration.html">模型注册</a> | <a href="https://www.funasr.com/en/docs/model-selection.html">模型选择</a></p>
+<p>本指南把仓库中的训练脚本与数据集、训练器实现对应起来。命令默认从仓库根目录执行，环境需安装当前 checkout 及所选 recipe 的依赖。命令是针对自有数据和已审查模型资产的模板，不表示已验证完整训练、收敛、显存需求或导出。</p>
+<span data-legacy-doc-anchor="先确定任务" id="overview"></span><h2 id="先确定任务">先确定任务</h2>
 <table>
-<tr><th>字段</th><th>类型</th><th>说明</th></tr>
-<tr><td><code>key</code></td><td>str</td><td>唯一语音 ID</td></tr>
-<tr><td><code>source</code></td><td>str</td><td>音频文件路径（本地路径或 URL）</td></tr>
-<tr><td><code>source_len</code></td><td>int</td><td>音频长度，单位为 fbank 帧（1 帧 = 10ms）</td></tr>
-<tr><td><code>target</code></td><td>str</td><td>转写文本</td></tr>
-<tr><td><code>target_len</code></td><td>int</td><td>文本 token 数</td></tr>
+<thead>
+<tr>
+<th>任务</th>
+<th>改变什么</th>
+<th>入口</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>推理</td>
+<td>不修改权重，识别已有音频</td>
+<td><a href="https://www.funasr.com/docs/quickstart.html">推理教程</a></td>
+</tr>
+<tr>
+<td>适配</td>
+<td>从预训练权重开始，微调部分参数、全部参数或受支持的 LoRA 适配器</td>
+<td>下表中的 recipe；先记录独立留出集基线</td>
+</tr>
+<tr>
+<td>从头训练</td>
+<td>不加载预训练权重，准备架构配置、分词器、特征及训练计划</td>
+<td><a href="https://github.com/modelscope/FunASR/blob/main/examples/aishell/paraformer/demo_train_or_finetune.sh">AISHELL Paraformer 脚本</a>及其<a href="https://github.com/modelscope/FunASR/blob/main/examples/aishell/paraformer/conf/paraformer_conformer_12e_6d_2048_256.yaml">配置</a></td>
+</tr>
+</tbody>
 </table>
-
-<h4>从 wav.scp + text.txt 生成</h4>
-<p>如果你有 Kaldi 格式的数据文件，可以用以下方式转换：</p>
-<pre># train_wav.scp（制表符分隔：id \t 路径）
-utt001  /data/audio/001.wav
-utt002  /data/audio/002.wav
-
-# train_text.txt（制表符分隔：id \t 文本）
-utt001  这是转写文本
-utt002  hello world</pre>
-
-<pre># 转换为 jsonl
-scp2jsonl \
-  ++scp_file_list='["/data/list/train_wav.scp", "/data/list/train_text.txt"]' \
+<p>全参数微调不等于从头训练。历史 AISHELL 脚本包含作者本机路径，且传入了 <code>init_param</code>；必须替换路径并明确配置初始化方式，才能用于从头训练。目录名 <code>industrial_data_pretraining</code> 不表示公开脚本可复现原始工业预训练数据和流程。</p>
+<table>
+<thead>
+<tr>
+<th>模型系列</th>
+<th>实际 recipe 与说明</th>
+<th>使用边界</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>SenseVoice</td>
+<td><a href="https://github.com/modelscope/FunASR/blob/main/examples/industrial_data_pretraining/sense_voice/finetune.sh">finetune.sh</a>、<a href="https://github.com/modelscope/FunASR/blob/main/examples/industrial_data_pretraining/sense_voice/README_zh.md">中文说明</a>、<a href="https://github.com/modelscope/FunASR/blob/main/examples/industrial_data_pretraining/sense_voice/CONTINUAL_FINETUNING_zh.md">持续适配</a></td>
+<td>需要正确的富标签与特殊 token。脚本使用用户准备的 <code>data/train_example.jsonl</code>、<code>data/val_example.jsonl</code>，不会自动创建这些文件。</td>
+</tr>
+<tr>
+<td>FunASRNano</td>
+<td><a href="https://github.com/modelscope/FunASR/blob/main/examples/industrial_data_pretraining/fun_asr_nano/finetune.sh">finetune.sh</a>、<a href="https://github.com/modelscope/FunASR/blob/main/examples/industrial_data_pretraining/fun_asr_nano/lora_finetune.sh">LoRA 脚本</a>、<a href="https://github.com/modelscope/FunASR/blob/main/examples/industrial_data_pretraining/fun_asr_nano/docs/finetune_zh.md">微调指南</a></td>
+<td>默认冻结音频编码器和适配模块、解冻 LLM，并非全参数方案。纯 LoRA 另设 <code>llm_conf.use_lora=true</code>、<code>lora_only=true</code>、<code>llm_conf.freeze=true</code>。应检查实际可训练参数，包括可能存在的 CTC 组件。</td>
+</tr>
+<tr>
+<td>Paraformer</td>
+<td><a href="https://github.com/modelscope/FunASR/blob/main/examples/industrial_data_pretraining/paraformer/finetune.sh">finetune.sh</a>、<a href="https://github.com/modelscope/FunASR/blob/main/examples/industrial_data_pretraining/paraformer/README_zh.md">中文说明</a>、<a href="https://github.com/modelscope/FunASR/blob/main/examples/industrial_data_pretraining/paraformer/README_LoRA_zh.md">LoRA 指南</a></td>
+<td>工业数据微调脚本显式使用 <code>AudioDataset</code> / <code>IndexDSJsonl</code>。Paraformer LoRA 是独立 recipe，不能套用 Nano 的适配器配置。</td>
+</tr>
+<tr>
+<td>MOSS-Transcribe-Diarize</td>
+<td><a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/moss_transcribe_diarize/model.py">FunASR 适配器源码</a></td>
+<td>属于第三方 OpenMOSS 模型。该适配器的 <code>forward</code> 明确抛出仅支持推理的异常；本指南不覆盖 MOSS 训练。</td>
+</tr>
+</tbody>
+</table>
+<p>FunASR 软件采用 MIT 许可证；模型权重、上游代码、数据集和派生 checkpoint 可能采用不同条款。训练、分发前请检查各项许可和数据授权。</p>
+<span data-legacy-doc-anchor="准备数据" id="data"></span><h2 id="准备数据">准备数据</h2>
+<p>训练集、验证集和最终测试集应分开，尽量按说话人、录音会话划分，而非只按句子划分。检查重复 ID、音频与文本 ID 对齐、文件可读性、解码后的时长与采样率、文本规整方式及语言覆盖。音频相对路径按进程工作目录解析，不会自动按 JSONL 所在目录解析。需要可复现或隐私保护时优先使用稳定的本地音频路径。</p>
+<h3 id="paraformer音频与文本-jsonl">Paraformer：音频与文本 JSONL</h3>
+<p><a href="https://github.com/modelscope/FunASR/blob/main/funasr/datasets/audio_datasets/scp2jsonl.py">转换器</a>按 utterance ID 合并 SCP 和文本；输入每行是 <code>utterance_id value</code>，文本可以包含空格。以下为两秒音频的结构示例：</p>
+<pre id="code-0"><code class="language-json">{"key":"utt001","source":"data/audio/utt001.wav","source_len":200,"target":"hello world","target_len":2}
+</code></pre>
+<p><code>key</code>、<code>source</code>、<code>target</code> 是字符串，长度字段是整数。<code>source_len</code> 为 <code>int(16kHz采样点数 / 160)</code>，约为 10 ms 单位，不是秒。转换器对有空格的文本按空格统计词数，否则统计字符数，得到 <code>target_len</code>；它并不统一等于分词器 token 数。<a href="https://github.com/modelscope/FunASR/blob/main/funasr/datasets/audio_datasets/index_ds.py">索引读取器</a>按配置的长度限制过滤数据，<a href="https://github.com/modelscope/FunASR/blob/main/funasr/datasets/audio_datasets/datasets.py">数据集</a>再执行特征提取和分词。</p>
+<p>准备 <code>data/list/train_wav.scp</code>、<code>train_text.txt</code>、<code>val_wav.scp</code>、<code>val_text.txt</code>，从仓库根目录执行：</p>
+<pre id="code-1"><code class="language-bash">python -m funasr.datasets.audio_datasets.scp2jsonl \
+  ++scp_file_list='["data/list/train_wav.scp", "data/list/train_text.txt"]' \
   ++data_type_list='["source", "target"]' \
-  ++jsonl_file_out="/data/list/train.jsonl"</pre>
-
-<h3>ChatML 格式（Fun-ASR-Nano）</h3>
-<p>Fun-ASR-Nano 使用 ChatML 对话格式：</p>
-<pre>{"messages": [
-  {"role": "system", "content": "You are a helpful assistant."},
-  {"role": "user", "content": "语音转写：<|startofspeech|>!/path/to/audio.wav<|endofspeech|>"},
-  {"role": "assistant", "content": "几点了？"}
-], "speech_length": 145, "text_length": 3}</pre>
-
-<table>
-<tr><th>字段</th><th>说明</th></tr>
-<tr><td><code>messages[0]</code></td><td>系统提示词（固定为 "You are a helpful assistant."）</td></tr>
-<tr><td><code>messages[1]</code></td><td>用户输入：提示词 + 音频路径（用 <code>&lt;|startofspeech|&gt;!...&lt;|endofspeech|&gt;</code> 包裹）</td></tr>
-<tr><td><code>messages[2]</code></td><td>助手回复：转写文本</td></tr>
-<tr><td><code>speech_length</code></td><td>fbank 帧数（每帧 10ms）</td></tr>
-<tr><td><code>text_length</code></td><td>token 数（由 Qwen3-0.6B 分词器计算）</td></tr>
-</table>
-
-<div class="tip"><strong>提示词变体：</strong><br>
-• 中文转写：<code>语音转写：</code><br>
-• 英文转写：<code>Speech transcription:</code><br>
-• 跨语言转写：<code>语音转写成英文：</code><br>
-• 不做文本规整：<code>语音转写，不进行文本规整：</code></div>
-
-<p>从 wav.scp + text.txt 转换：</p>
-<pre>python tools/scp2jsonl.py \
-  ++scp_file=data/train_wav.scp \
-  ++transcript_file=data/train_text.txt \
-  ++jsonl_file=data/train_example.jsonl</pre>
-
-<!-- 微调 Paraformer -->
-<h2 id="paraformer">微调 Paraformer</h2>
-<pre>cd examples/industrial_data_pretraining/paraformer
-bash finetune.sh</pre>
-
-<p>或者自定义关键参数：</p>
-<pre>export CUDA_VISIBLE_DEVICES="0,1"
-gpu_num=2
-
-torchrun --nproc_per_node $gpu_num \
-  funasr/bin/train_ds.py \
-  ++model="iic/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch" \
-  ++train_data_set_list="data/train.jsonl" \
-  ++valid_data_set_list="data/val.jsonl" \
-  ++dataset_conf.batch_size=6000 \
-  ++dataset_conf.batch_type="token" \
-  ++dataset_conf.num_workers=4 \
-  ++train_conf.max_epoch=50 \
-  ++train_conf.validate_interval=2000 \
-  ++train_conf.save_checkpoint_interval=2000 \
-  ++train_conf.keep_nbest_models=20 \
-  ++train_conf.avg_nbest_model=10 \
-  ++optim_conf.lr=0.0002 \
-  ++output_dir="./outputs"</pre>
-
-<!-- 微调 SenseVoice -->
-<h2 id="sensevoice">微调 SenseVoice</h2>
-<pre>cd examples/industrial_data_pretraining/sense_voice
-bash finetune.sh</pre>
-
-<p>数据格式与 Paraformer 相同（source/target JSONL）。区别在于 SenseVoice 内部使用自己的 dataset 类。</p>
-
-<!-- 微调 Fun-ASR-Nano -->
-<h2 id="nano">微调 Fun-ASR-Nano</h2>
-<pre>cd examples/industrial_data_pretraining/fun_asr_nano
-bash finetune.sh</pre>
-
-<p>与 Paraformer 的关键区别：</p>
-<ul>
-<li>使用 ChatML 数据格式（见上文）</li>
-<li>需要设置 <code>++trust_remote_code=true</code></li>
-<li>支持<strong>选择性冻结</strong>：冻结 encoder/adaptor，只训练 LLM decoder</li>
-</ul>
-
-<pre># 冻结 encoder + adaptor，只训练 LLM（推荐用于领域适配）
-++audio_encoder_conf.freeze=true
-++audio_adaptor_conf.freeze=true
-++llm_conf.freeze=false
-
-# 全参数微调
-++audio_encoder_conf.freeze=false
-++audio_adaptor_conf.freeze=false
-++llm_conf.freeze=false</pre>
-
-<div class="note"><strong>推荐策略：</strong>先只训练 LLM（速度快、所需数据量少）。如果效果不够，再解冻 adaptor。只有在数据量非常大（>1000 小时）的情况下才解冻 encoder。</div>
-
-<!-- 参数参考 -->
-<h2 id="params">参数参考</h2>
-
-<h3>数据集参数</h3>
-<table>
-<tr><th>参数</th><th>默认值</th><th>说明</th></tr>
-<tr><td><code>dataset_conf.batch_type</code></td><td>"token"</td><td><code>"token"</code>：按总 token 数动态组批。<code>"example"</code>：按固定样本数组批。</td></tr>
-<tr><td><code>dataset_conf.batch_size</code></td><td>6000</td><td>token 模式：每批总帧数。example 模式：每批样本数。</td></tr>
-<tr><td><code>dataset_conf.sort_size</code></td><td>1024</td><td>按长度排序的缓冲区大小（提高 padding 效率）。</td></tr>
-<tr><td><code>dataset_conf.num_workers</code></td><td>4</td><td>数据加载线程数。</td></tr>
-<tr><td><code>dataset_conf.data_split_num</code></td><td>1</td><td>将数据分为 N 组用于大规模训练（减少内存占用）。</td></tr>
-<tr><td><code>dataset_conf.max_token_length</code></td><td>—</td><td>过滤：跳过长度超过此值的样本（单位为帧/token）。</td></tr>
-<tr><td><code>dataset_conf.min_token_length</code></td><td>—</td><td>过滤：跳过长度不足此值的样本。</td></tr>
-</table>
-
-<h3>训练参数</h3>
-<table>
-<tr><th>参数</th><th>默认值</th><th>说明</th></tr>
-<tr><td><code>train_conf.max_epoch</code></td><td>50</td><td>总训练轮数。</td></tr>
-<tr><td><code>train_conf.log_interval</code></td><td>1</td><td>每 N 步打印一次 loss。</td></tr>
-<tr><td><code>train_conf.validate_interval</code></td><td>2000</td><td>每 N 步进行一次验证。</td></tr>
-<tr><td><code>train_conf.save_checkpoint_interval</code></td><td>2000</td><td>每 N 步保存一次模型。</td></tr>
-<tr><td><code>train_conf.keep_nbest_models</code></td><td>20</td><td>保留验证准确率最高的 N 个模型。</td></tr>
-<tr><td><code>train_conf.avg_nbest_model</code></td><td>10</td><td>对最优的 N 个模型做平均，生成最终 checkpoint。</td></tr>
-<tr><td><code>train_conf.resume</code></td><td>true</td><td>若存在上次的 checkpoint，则自动恢复训练。</td></tr>
-<tr><td><code>train_conf.use_deepspeed</code></td><td>false</td><td>启用 DeepSpeed ZeRO 优化。</td></tr>
-<tr><td><code>optim_conf.lr</code></td><td>0.0002</td><td>学习率。</td></tr>
-</table>
-
-<!-- 多 GPU 训练 -->
-<h2 id="multi-gpu">多 GPU 训练</h2>
-
-<h3>单机多卡</h3>
-<pre>export CUDA_VISIBLE_DEVICES="0,1,2,3"
-gpu_num=4
-
-torchrun --nnodes 1 --nproc_per_node $gpu_num \
-  funasr/bin/train_ds.py ${train_args}</pre>
-
-<h3>多机多卡</h3>
-<pre># 机器 1（主节点，IP=192.168.1.1）
-torchrun --nnodes 2 --node_rank 0 --nproc_per_node 4 \
-  --master_addr=192.168.1.1 --master_port=12345 \
-  funasr/bin/train_ds.py ${train_args}
-
-# 机器 2
-torchrun --nnodes 2 --node_rank 1 --nproc_per_node 4 \
-  --master_addr=192.168.1.1 --master_port=12345 \
-  funasr/bin/train_ds.py ${train_args}</pre>
-
-<!-- DeepSpeed -->
-<h2 id="deepspeed">DeepSpeed</h2>
-<p>对于大模型（如 Fun-ASR-Nano 8 亿参数），启用 DeepSpeed ZeRO：</p>
-<pre>++train_conf.use_deepspeed=true
-++train_conf.deepspeed_config=./deepspeed_conf/ds_stage1.json</pre>
-
-<p>Stage 1 配置（推荐的起点）：</p>
-<pre>{
-  "train_micro_batch_size_per_gpu": 1,
-  "gradient_accumulation_steps": 1,
-  "bf16": {"enabled": true},
-  "zero_optimization": {
-    "stage": 1,
-    "reduce_bucket_size": 5e8,
-    "allgather_bucket_size": 5e8
-  }
-}</pre>
-
-<div class="note"><strong>各 Stage 的适用场景：</strong><br>
-• Stage 1：切分优化器状态。适用于大多数情况。<br>
-• Stage 2：额外切分梯度。适用于更大的模型。<br>
-• Stage 3：额外切分模型参数。最大限度节省显存，但训练速度较慢。</div>
-
-<!-- 训练监控 -->
-<h2 id="monitor">训练监控</h2>
-
-<h4>日志文件</h4>
-<pre>tail -f outputs/log.txt
-
-# 输出示例：
-# train, rank: 0, epoch: 0/50, step: 6990, (loss_avg_rank: 0.327),
-# (acc_avg_epoch: 0.795), (lr: 1.165e-04),
-# GPU memory: usage: 3.8GB, peak: 18.3GB</pre>
-
-<p>需要关注的关键指标：</p>
-<ul>
-<li><code>loss_avg_epoch</code>：应随训练持续下降</li>
-<li><code>acc_avg_epoch</code>：应持续上升（最重要的指标）</li>
-<li><code>lr</code>：当前步的学习率</li>
-<li><code>GPU memory</code>：峰值不应超过你的 GPU 显存容量</li>
-</ul>
-
-<h4>TensorBoard</h4>
-<pre>tensorboard --logdir outputs/log/tensorboard
-# 打开 http://localhost:6006</pre>
-
-<!-- 使用微调后的模型 -->
-<h2 id="inference-after">使用微调后的模型</h2>
-
-<h4>如果 outputs/ 目录中有 configuration.json</h4>
-<pre>from funasr import AutoModel
-model = AutoModel(model="./outputs")
-res = model.generate(input="test.wav")
-print(res[0]["text"])</pre>
-
-<h4>如果没有 configuration.json</h4>
-<pre>funasr ++model="./outputs" \
-  ++config-path="./outputs" \
-  ++config-name="config.yaml" \
-  ++init_param="./outputs/model.pt" \
-  ++input="test.wav"</pre>
-
-<!-- 技巧与常见问题 -->
-<h2 id="tips">技巧与常见问题</h2>
-
-<h4>训练时显存溢出（OOM）</h4>
+  ++jsonl_file_out=data/list/train.jsonl
+python -m funasr.datasets.audio_datasets.scp2jsonl \
+  ++scp_file_list='["data/list/val_wav.scp", "data/list/val_text.txt"]' \
+  ++data_type_list='["source", "target"]' \
+  ++jsonl_file_out=data/list/val.jsonl
+</code></pre>
+<p>转换器可能跳过缺失音频，或在缺少文本时输出不完整记录。必须比较输入输出数量并拒绝不完整行，不能只看进程退出状态。CLI 配置应来自可信来源：该历史转换器对字符串列表存在 <code>eval</code> 回退分支。</p>
+<span data-legacy-doc-anchor="sensevoice保留富标签" id="sensevoice"></span><h3 id="sensevoice保留富标签">SenseVoice：保留富标签</h3>
+<p>使用 <code>SenseVoiceCTCDataset</code> 时，在音频文本结构上增加明确的监督字段：</p>
+<pre id="code-2"><code class="language-json">{"key":"utt001","source":"data/audio/utt001.wav","source_len":200,"target":"你好","target_len":2,"text_language":"&lt;|zh|&gt;","emo_target":"&lt;|NEUTRAL|&gt;","event_target":"&lt;|Speech|&gt;","with_or_wo_itn":"&lt;|woitn|&gt;"}
+</code></pre>
+<p>标签必须对应实际录音，不能不加区分地填入示例值。<a href="https://github.com/modelscope/FunASR/blob/main/funasr/datasets/sense_voice_datasets/datasets.py">CTC 数据集源码</a>在缺字段时使用上例默认值，但默认值不是经过验证的标注。旧版 <code>SenseVoiceDataset</code> 是另一种实现，应保持数据集类与所选模型配置一致。</p>
+<p><a href="https://github.com/modelscope/FunASR/blob/main/funasr/datasets/audio_datasets/sensevoice2jsonl.py">sensevoice2jsonl.py</a>通过 <code>scp_file_list</code>、<code>data_type_list</code> 接收对齐的音频、文本、语言、情感、事件文件。如果缺少语言、情感或事件标签，它会调用 SenseVoice 生成伪标签，可能下载并运行模型；ITN 标志由标点启发式生成。训练前需审核标签与规整规则。增加新语言标签不是改一个字符串，需要分词器与模型协同修改，参见<a href="https://github.com/modelscope/FunASR/blob/main/examples/industrial_data_pretraining/sense_voice/CONTINUAL_FINETUNING_zh.md">持续微调指南</a>。</p>
+<span data-legacy-doc-anchor="funasrnanochatml-jsonl" id="nano"></span><h3 id="funasrnanochatml-jsonl">FunASRNano：ChatML JSONL</h3>
+<p>Nano 提供的 recipe 不使用普通 Paraformer 数据结构。实际文件见<a href="https://github.com/modelscope/FunASR/blob/main/examples/industrial_data_pretraining/fun_asr_nano/data/train_example.jsonl">训练示例</a>和<a href="https://github.com/modelscope/FunASR/blob/main/examples/industrial_data_pretraining/fun_asr_nano/data/val_example.jsonl">验证示例</a>。下面仅展示结构，真实数据必须重新计算长度：</p>
+<pre id="code-3"><code class="language-json">{"messages":[{"role":"system","content":"You are a helpful assistant."},{"role":"user","content":"语音转写：&lt;|startofspeech|&gt;!data/audio/utt001.wav&lt;|endofspeech|&gt;"},{"role":"assistant","content":"你好"}],"speech_length":198,"text_length":1}
+</code></pre>
+<p><code>messages</code> 是 role/content 字典列表；assistant 内容为参考转写。<a href="https://github.com/modelscope/FunASR/blob/main/examples/industrial_data_pretraining/fun_asr_nano/tools/scp2jsonl.py">recipe 转换器</a>按行配对 SCP 和文本并要求 ID 一致，计算 <code>speech_length = int((duration * 1000 - 25) // 10 + 1)</code>，用 <code>Qwen/Qwen3-0.6B</code> 分词得到 <code>text_length</code>。可能下载分词器或 URL 音频。行数不一致只会产生警告，错误样本可能被省略，必须核对输出数量和全部错误。</p>
+<p>使用自己的输入输出文件，不要覆盖仓库示例：</p>
+<pre id="code-4"><code class="language-bash">python examples/industrial_data_pretraining/fun_asr_nano/tools/scp2jsonl.py \
+  ++scp_file=data/list/train_wav.scp \
+  ++transcript_file=data/list/train_text.txt \
+  ++jsonl_file=data/list/nano_train.jsonl
+python examples/industrial_data_pretraining/fun_asr_nano/tools/scp2jsonl.py \
+  ++scp_file=data/list/val_wav.scp \
+  ++transcript_file=data/list/val_text.txt \
+  ++jsonl_file=data/list/nano_val.jsonl
+</code></pre>
+<span data-legacy-doc-anchor="先做小规模验证" id="paraformer"></span><span data-legacy-doc-anchor="先做小规模验证" id="params"></span><span data-legacy-doc-anchor="先做小规模验证" id="multi-gpu"></span><span data-legacy-doc-anchor="先做小规模验证" id="monitor"></span><span data-legacy-doc-anchor="先做小规模验证" id="tips"></span><h2 id="先做小规模验证">先做小规模验证</h2>
 <ol>
-<li>减小 <code>dataset_conf.batch_size</code></li>
-<li>添加 <code>dataset_conf.max_token_length=2000</code> 过滤过长的语音</li>
-<li>启用 DeepSpeed（自动切分优化器状态）</li>
-<li>减少 <code>dataset_conf.num_workers</code></li>
+<li>固定 checkout 与模型资产，记录依赖、分词器与前端配置、GPU 配置、数据哈希和随机种子。启用 <code>trust_remote_code</code> 前审核下载的 Python 与 requirements。</li>
+<li>用已验证样本准备小而互不重叠的 <code>data/list/train_smoke.jsonl</code>、<code>data/list/val_smoke.jsonl</code>，实际加载音频、分词，确认长度过滤后仍有非空 batch、loss 有限、可训练参数符合预期。</li>
+<li>扩大规模前先完成短训练、验证和 checkpoint 保存流程。不要直接运行历史 shell 脚本：其内部设置 GPU、输出目录和依赖工作目录的路径，通常不会透传附加在脚本末尾的 CLI 参数。</li>
 </ol>
+<p>以下是从工业数据 recipe 提炼的 Paraformer 小规模验证模板，路径以仓库根目录为基准。需要兼容 GPU、已安装训练依赖、上述两个 JSONL 文件，以及位于 <code>models/paraformer</code> 的完整且已审查模型目录。<code>2000</code> 是用于短音频的起始 token 预算，不是显存保证；调整时仍须确保单条样本能容纳。只有数据集足够小，一个 epoch 才是小规模运行。</p>
+<pre id="code-5"><code class="language-bash">CUDA_VISIBLE_DEVICES=0 torchrun --nnodes=1 --nproc_per_node=1 \
+  --master_addr=127.0.0.1 --master_port=29619 \
+  funasr/bin/train_ds.py \
+  ++model=./models/paraformer \
+  ++train_data_set_list=data/list/train_smoke.jsonl \
+  ++valid_data_set_list=data/list/val_smoke.jsonl \
+  ++dataset=AudioDataset ++dataset_conf.index_ds=IndexDSJsonl \
+  ++dataset_conf.data_split_num=1 ++dataset_conf.batch_sampler=BatchSampler \
+  ++dataset_conf.batch_type=token ++dataset_conf.batch_size=2000 \
+  ++dataset_conf.sort_size=16 ++dataset_conf.num_workers=0 \
+  ++train_conf.max_epoch=1 ++train_conf.log_interval=1 \
+  ++train_conf.resume=false ++train_conf.use_deepspeed=false \
+  ++train_conf.validate_interval=1 ++train_conf.save_checkpoint_interval=1 \
+  ++train_conf.keep_nbest_models=1 ++train_conf.avg_nbest_model=1 \
+  ++optim_conf.lr=0.0002 ++output_dir=./outputs/paraformer-smoke
+</code></pre>
+<p>每次新实验使用新输出目录，并选用空闲 rendezvous 端口。SenseVoice、Nano 应从各自 recipe、模型配置和数据结构出发，不能只替换上例的模型名而保留 <code>AudioDataset</code>。Nano 脚本通过 <code>PATH</code> 找到 <code>funasr-train-ds</code>，请确认它属于预期安装。SenseVoice、Paraformer 脚本在 <code>use_deepspeed=false</code> 时也传入 DeepSpeed 配置路径；启用前必须确认真实配置存在。完整分布式训练和资源需求仍需单独验证。</p>
+<span data-legacy-doc-anchor="checkpoint-与恢复" id="deepspeed"></span><h2 id="checkpoint-与恢复">Checkpoint 与恢复</h2>
+<p><a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/train_ds.py">训练入口</a>调用 <a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer_ds.py">Trainer.resume_checkpoint</a>。非 DeepSpeed 分支中，<code>++train_conf.resume=true</code> 从 <code>output_dir/model.pt</code> 恢复模型、优化器、调度器及存在的 scaler/训练进度状态。这是布尔开关，不是任意 checkpoint 路径。文件不存在时训练器会提示未恢复并继续，必须检查日志确认实际恢复成功。</p>
+<p>继续上面的 smoke run 时，保持输出目录和配置，改为 <code>++train_conf.resume=true</code>、<code>++train_conf.max_epoch=2</code> 后重新执行。epoch 上限是总轮数，不是新增轮数。<code>++init_param=...</code> 仅用于初始化权重，不恢复优化器和进度。新适配阶段应使用新输出目录、<code>resume=false</code> 和明确选定的初始化权重。</p>
+<p>非 DeepSpeed 保存包括 <code>model.pt</code>、<code>model.pt.ep{epoch}</code> 或 <code>model.pt.ep{epoch}.{step}</code>，<code>model.pt.best</code> 取决于验证排序。DeepSpeed 使用目录/tag，需要对应恢复或转换流程。不要把这些目录、不完整状态或仅适配器状态当成普通独立权重。保留配置、分词器、前端资产和基座模型来源，检查保存排除项与 LoRA 配置。单个 checkpoint 文件不一定是可加载的模型目录。</p>
+<span data-legacy-doc-anchor="评估与导出" id="inference-after"></span><h2 id="评估与导出">评估与导出</h2>
+<p>使用准备好的 Paraformer 模型目录及真实 checkpoint，先检查单条音频：</p>
+<pre id="code-6"><code class="language-python">from pathlib import Path
+from funasr import AutoModel
 
-<h4>训练 loss 不下降 / 梯度出现 NaN</h4>
+checkpoint = Path("outputs/paraformer-smoke/model.pt")
+assert checkpoint.is_file(), checkpoint
+model = AutoModel(
+    model="./models/paraformer",
+    hub="ms",
+    init_param=str(checkpoint),
+    device="cpu",
+    disable_update=True,
+)
+print(model.generate(input="data/audio/heldout.wav"))
+</code></pre>
+<p>随后在未参与训练或选模的留出集上解码，基线与适配模型使用一致的规整方式及 CER/WER 单位定义。报告各领域、各语言和整体结果、原任务退化、样本数量与 checkpoint 身份。训练 loss 或训练器验证 accuracy 不自动等于转写 CER/WER。<a href="https://github.com/modelscope/FunASR/blob/main/examples/industrial_data_pretraining/fun_asr_nano/docs/finetune_zh.md">Nano 微调指南</a>保留了解码、规整、评分入口；<a href="https://github.com/modelscope/FunASR/blob/main/examples/industrial_data_pretraining/fun_asr_nano/decode.py">decode.py</a>使用 VAD 和 <code>remote_code="./model.py"</code>，需要 recipe 工作目录。该<a href="https://github.com/modelscope/FunASR/blob/main/examples/industrial_data_pretraining/fun_asr_nano/model.py">历史本地类</a>可能覆盖<a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fun_asr_nano/model.py">内置 Nano 类</a>，不能假定它保留内置 LoRA 功能；评估前确认实际类、适配器注入和权重加载结果。</p>
+<p>导出是单独的兼容性验证任务。<a href="https://github.com/modelscope/FunASR/blob/main/examples/industrial_data_pretraining/sense_voice/export.py">SenseVoice ONNX 示例</a>、<a href="https://github.com/modelscope/FunASR/blob/main/examples/industrial_data_pretraining/paraformer/export.py">Paraformer 导出示例</a>及<a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/export_utils.py">导出工具</a>只是入口，不承诺所有模型均支持。Paraformer 示例实际选择 contextual checkpoint，必须检查并明确替换为自己的模型。模型导出 hook、分词器、前端、动态形状和运行时解码都需要验证。部署前在留出输入上比较导出运行时与 Python 输出。本次文档修改未运行完整训练、质量基准、真实 checkpoint 恢复、模型下载或模型导出。</p></article>
+<nav aria-label="相邻文档" class="docs-next">
+<a href="https://www.funasr.com/docs/model-zoo.html">← Model Zoo</a><a href="https://www.funasr.com/docs/model-registration.html">自定义模型注册 →</a> </nav>
+</div>
+<aside class="docs-toc"><strong>本页目录</strong><div class="toc">
 <ul>
-<li>降低学习率（建议尝试 0.00005）</li>
-<li>检查数据质量——损坏的音频文件会导致 NaN</li>
-<li>对于 Fun-ASR-Nano：先冻结 encoder 开始训练</li>
+<li><a href="#训练与适配">训练与适配</a><ul>
+<li><a href="#先确定任务">先确定任务</a></li>
+<li><a href="#准备数据">准备数据</a><ul>
+<li><a href="#paraformer音频与文本-jsonl">Paraformer：音频与文本 JSONL</a></li>
+<li><a href="#sensevoice保留富标签">SenseVoice：保留富标签</a></li>
+<li><a href="#funasrnanochatml-jsonl">FunASRNano：ChatML JSONL</a></li>
 </ul>
-
-<h4>验证集准确率不提升</h4>
-<ul>
-<li>增加训练数据（微调至少需要约 10 小时数据）</li>
-<li>检查领域匹配度——模型在差异极大的领域上可能效果不佳</li>
-<li>尝试逐步解冻更多层</li>
+</li>
+<li><a href="#先做小规模验证">先做小规模验证</a></li>
+<li><a href="#checkpoint-与恢复">Checkpoint 与恢复</a></li>
+<li><a href="#评估与导出">评估与导出</a></li>
 </ul>
-
-<h4>大规模数据（超过 10,000 小时）</h4>
-<p>使用数据分片避免内存问题：</p>
-<pre># 将数据分为多个片段，每次加载 2 个
-++dataset_conf.data_split_num=256
-# data.list 中包含各片段的 jsonl 路径：
-# data/train.0.jsonl
-# data/train.1.jsonl
-# ...
-++train_data_set_list="data/data.list"</pre>
-
-<h4>崩溃后恢复训练</h4>
-<p>设置 <code>++train_conf.resume=true</code>（默认已开启）。训练会自动从 <code>output_dir</code> 中最新的 checkpoint 恢复。</p>
-
-</div></div>
-
-<footer>
-<p>FunASR &middot; 通义实验室，阿里巴巴集团</p>
-<p><a href="index.html">首页</a> &middot; <a href="tutorial.html">教程</a> &middot; <a href="training.html">训练</a> &middot; <a href="model-registration.html">开发</a> &middot; <a href="../api.html">API</a> &middot; <a href="vllm.html">vLLM</a> &middot; <a href="agent.html">Agent</a> &middot; <a href="benchmark.html">Benchmark</a> &middot; <a href="https://github.com/modelscope/FunASR">GitHub</a></p>
+</li>
+</ul>
+</div>
+</aside></div>
+</main>
+<footer class="site-footer">
+<div>
+<strong>FunASR</strong>
+<p>面向生产部署的开源语音基础设施。</p>
+</div>
+<nav aria-label="官方仓库" class="footer-repositories" data-footer-repositories="">
+<strong>官方仓库</strong>
+<div class="footer-links">
+<a href="https://www.funasr.com/go/fun-asr">Fun-ASR</a>
+<a href="https://www.funasr.com/go/sensevoice">SenseVoice</a>
+<a href="https://www.funasr.com/go/funclip">FunClip</a>
+</div>
+</nav>
+<div class="footer-links">
+<a href="https://www.funasr.com/deploy/">部署</a>
+<a href="https://www.funasr.com/docs/">文档</a>
+<a href="https://www.funasr.com/go/releases">发布</a>
+<a href="https://www.funasr.com/donors.html">功德榜</a>
+</div>
 </footer>
-</body></html>
+<script defer="" src="../assets/js/site.d446f5fbcfe2.js"></script>
+<script defer="" src="../assets/js/experience.3f688a12942a.js"></script>
+</body>
+</html>

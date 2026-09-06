@@ -1,416 +1,293 @@
 <!DOCTYPE html>
-<html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<meta name="description" content="从理解框架架构到贡献你自己的模型——循序渐进的完整指南。">
-<meta property="og:title" content="FunASR 开发指南">
-<meta property="og:description" content="从理解框架架构到贡献你自己的模型——循序渐进的完整指南。">
-<meta property="og:type" content="website">
-<meta property="og:url" content="https://modelscope.github.io/FunASR/zh/model-registration.html">
-<link rel="canonical" href="https://modelscope.github.io/FunASR/zh/model-registration.html">
-<meta property="og:site_name" content="FunASR">
-<meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="FunASR 开发指南">
-<meta name="twitter:description" content="从理解框架架构到贡献你自己的模型——循序渐进的完整指南。">
-<title>FunASR 开发指南</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../style.css">
-</head><body>
-<nav class="nav"><div class="container">
-<a href="index.html" class="nav-logo">FunASR</a>
-<div class="nav-links">
-<a href="index.html">首页</a>
-<a href="tutorial.html">教程</a>
-<a href="training.html">训练</a>
-<a href="model-registration.html" class="active">开发</a>
-<a href="../api.html">API</a>
-<a href="vllm.html">vLLM</a>
-                <a href="agent.html">Agent</a>
-                <a href="benchmark.html">Benchmark</a>
-                <a href="../donors.html">功德榜</a>
+
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>自定义模型注册 - FunASR</title>
+<meta content="自定义模型注册" name="description"/>
+<meta content="#ffffff" name="theme-color"/>
+<link href="https://www.funasr.com/docs/model-registration.html" rel="canonical"/>
+<link href="https://www.funasr.com/en/docs/model-registration.html" hreflang="en" rel="alternate"/>
+<link href="https://www.funasr.com/docs/model-registration.html" hreflang="zh-CN" rel="alternate"/>
+<meta content="website" property="og:type"/>
+<meta content="自定义模型注册 - FunASR" property="og:title"/>
+<meta content="自定义模型注册" property="og:description"/>
+<meta content="https://www.funasr.com/docs/model-registration.html" property="og:url"/>
+<link href="../assets/css/site.d651b1dbf605.css" rel="stylesheet"/>
+<link href="../assets/css/experience.5803993934f8.css" rel="stylesheet"/>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "SoftwareApplication", "applicationCategory": "DeveloperApplication", "codeRepository": "https://github.com/modelscope/FunASR", "dateModified": "2026-09-01", "license": "https://github.com/modelscope/FunASR/blob/main/LICENSE", "name": "FunASR", "operatingSystem": "Linux, macOS, Windows", "url": "https://www.funasr.com/docs/model-registration.html"}</script>
+</head>
+<body data-copy-icon="../assets/lucide/copy.ea80e566c7a1.svg" data-language="zh" data-route="/docs/model-registration.html">
+<a class="skip-link" href="#main">跳到主要内容</a>
+<header class="site-header">
+<a aria-label="FunASR 首页" class="brand" href="https://www.funasr.com/">
+<span aria-hidden="true" class="brand-mark">F</span>
+<span>FunASR</span>
+</a>
+<button aria-controls="primary-navigation" aria-expanded="false" class="icon-button menu-button" data-menu-toggle="" title="打开目录" type="button">
+<img alt="" src="../assets/lucide/menu.90a31b3ab1cf.svg"/>
+</button>
+<nav aria-label="主目录" class="primary-navigation" data-primary-nav="" id="primary-navigation">
+<a href="https://www.funasr.com/">产品</a>
+<a href="https://www.funasr.com/deploy/">部署</a>
+<a href="https://www.funasr.com/models.html">模型</a>
+<a href="https://www.funasr.com/benchmarks.html">性能</a>
+<a href="https://www.funasr.com/ecosystem.html">生态</a>
+<a href="https://www.funasr.com/blog/">博客</a>
+<a href="https://www.funasr.com/docs/">文档</a>
+<a href="https://www.funasr.com/donors.html">功德榜</a>
+</nav>
+<div class="header-actions">
+<a class="icon-link" href="https://www.funasr.com/en/docs/model-registration.html" title="English">
+<img alt="" src="../assets/lucide/languages.ae9048feb2c7.svg"/>
+<span>EN</span>
+</a>
+<a aria-label="GitHub" class="icon-button" href="https://www.funasr.com/go/github" title="GitHub">
+<img alt="" src="../assets/lucide/github.793554449a30.svg"/>
+</a>
 </div>
-
-<div class="lang-dropdown"><button class="lang-btn">中文</button><div class="lang-menu"><a href="../model-registration.html">English</a><a href="model-registration.html" class="current">中文</a><a href="../ja/model-registration.html">日本語</a></div></div>
-<a href="https://github.com/modelscope/FunASR" class="nav-github">GitHub</a>
-</div></nav>
-
-<div class="content"><div class="container narrow">
-<h1>开发指南</h1>
-<p>从理解框架架构到贡献你自己的模型——循序渐进的完整指南。</p>
-
-<div class="toc-grid">
-<a href="#architecture">1. 架构概览</a>
-<a href="#setup">2. 开发环境配置</a>
-<a href="#understand">3. 推理流程详解</a>
-<a href="#add-model">4. 添加新模型</a>
-<a href="#add-component">5. 添加前端/分词器</a>
-<a href="#standalone">6. 独立仓库模式</a>
-<a href="#testing">7. 测试你的模型</a>
-<a href="#pitfalls">8. 常见陷阱</a>
-<a href="#contribute">9. 贡献代码</a>
-</div>
-
-<!-- 1. 架构概览 -->
-<h2 id="architecture">1. 架构概览</h2>
-<p>FunASR 围绕三个核心概念构建：<strong>注册表</strong>（Registry）用于组件发现，<strong>AutoModel</strong> 作为统一入口，<strong>config.yaml</strong> 作为模型的声明式定义。</p>
-
-<div class="arch-box">用户代码                          FunASR 框架                         模型仓库
-─────────                         ────────────────                    ─────────
-AutoModel(model="name")
-    │
-    ├─→ download_model()  ──────→  ModelScope / HuggingFace
-    │       ↓                          ↓
-    │   读取 config.yaml          下载 model.pt
-    │       ↓
-    ├─→ tables.model_classes["Name"]   ← @tables.register 装饰器
-    │       ↓
-    ├─→ model_class(**config)          ← __init__: 构建 encoder/decoder
-    │       ↓
-    ├─→ load_pretrained_model()        ← 从 model.pt 加载权重
-    │       ↓
-    └─→ model.eval()                   ← 准备就绪，可以推理
-
-generate(input="audio.wav")
-    │
-    ├─ 无 VAD  → inference()           ← 单条语音
-    │               ↓
-    │           model.inference(data_in, tokenizer, frontend, **kwargs)
-    │               ↓
-    │           返回 [{"key", "text", "timestamp", ...}]
-    │
-    └─ 有 VAD → inference_with_vad()   ← 长音频
-                    ↓
-                1. VAD：切分音频 → [[起始ms, 结束ms], ...]
-                2. 按长度排序（提高批处理效率）
-                3. ASR：逐段识别
-                4. 合并时间戳（加上 VAD 偏移量）
-                5. 标点恢复（可选）
-                6. 说话人分离（可选）
-                    ↓
-                返回 [{"key", "text", "timestamp", "sentence_info"}]
-</div>
-
-<h3>注册表系统</h3>
-<p>FunASR 中的每个组件都通过名称注册。注册表是将配置字符串映射到 Python 类的查找表：</p>
-
-<table>
-<tr><th>注册表</th><th>用途</th><th>示例</th></tr>
-<tr><td><code>model_classes</code></td><td>ASR、VAD、标点、说话人模型</td><td>"Paraformer", "FsmnVADStreaming"</td></tr>
-<tr><td><code>encoder_classes</code></td><td>编码器架构</td><td>"SANMEncoder", "ConformerEncoder"</td></tr>
-<tr><td><code>decoder_classes</code></td><td>解码器架构</td><td>"ParaformerSANMDecoder"</td></tr>
-<tr><td><code>frontend_classes</code></td><td>音频特征提取</td><td>"WavFrontend", "WhisperFrontend"</td></tr>
-<tr><td><code>tokenizer_classes</code></td><td>文本分词</td><td>"SentencepiecesTokenizer"</td></tr>
-<tr><td><code>dataset_classes</code></td><td>训练数据加载</td><td>"AudioDataset"</td></tr>
-</table>
-
-<pre>from funasr.register import tables
-
-# 注册一个新模型
-@tables.register("model_classes", "MyModel")
-class MyModel(nn.Module):
-    ...
-
-# 查看所有已注册的模型
-tables.print("model")</pre>
-
-<!-- 2. 开发环境配置 -->
-<h2 id="setup">2. 开发环境配置</h2>
-
-<div class="step">
-<h4>克隆并以开发模式安装</h4>
-<pre>git clone https://github.com/modelscope/FunASR.git
-cd FunASR
-pip install -e .              # 可编辑安装
-pip install -e ".[train]"     # 包含训练依赖</pre>
-</div>
-
-<div class="step">
-<h4>验证安装</h4>
-<pre>python -c "from funasr import AutoModel; print('OK')"
-python -c "from funasr.register import tables; tables.print('model')"</pre>
-</div>
-
-<div class="step">
-<h4>运行已有测试</h4>
-<pre># 快速冒烟测试
-python tests_models/test_fsmn_vad.py
-python tests_models/test_paraformer.py
-
-# 完整测试套件
-cd tests_models && python run_all_tests.py</pre>
-</div>
-
-<!-- 3. 推理流程详解 -->
-<h2 id="understand">3. 推理流程详解</h2>
-
-<p>在添加新模型之前，必须理解推理的数据流。以下是调用 <code>model.generate(input="audio.wav")</code> 时的完整流程：</p>
-
-<h4>步骤 1：输入准备</h4>
-<p><code>prepare_data_iterator()</code> 将各种输入类型（文件路径、URL、numpy 数组、bytes、列表）统一为 <code>(key_list, data_list)</code> 格式。</p>
-
-<h4>步骤 2：模型推理</h4>
-<p>每个模型的 <code>inference()</code> 方法接收以下参数：</p>
-<pre>def inference(self, data_in, data_lengths=None, key=None,
-              tokenizer=None, frontend=None, **kwargs):
-    # data_in: 音频样本列表（numpy 数组）
-    # tokenizer: 将 token ID 解码为文本
-    # frontend: 提取 fbank 特征
-    # **kwargs: config.yaml 中的所有参数 + 用户运行时参数
-
-    # 必须返回：(结果列表, 元数据字典)
-    return [{"key": "id", "text": "hello", "timestamp": [...]}], {"batch_data_time": 5.5}</pre>
-
-<h4>步骤 3：输出格式</h4>
-<p><code>results_list</code> 必须是字典列表。必填/可选字段：</p>
-<table>
-<tr><th>字段</th><th>类型</th><th>是否必填</th><th>说明</th></tr>
-<tr><td><code>key</code></td><td>str</td><td>是</td><td>样本标识符</td></tr>
-<tr><td><code>text</code></td><td>str</td><td>是（ASR）</td><td>识别文本</td></tr>
-<tr><td><code>timestamp</code></td><td>list</td><td>说话人分离时需要</td><td><code>[[起始ms, 结束ms], ...]</code> 逐字时间戳</td></tr>
-<tr><td><code>value</code></td><td>list</td><td>仅 VAD</td><td><code>[[起始ms, 结束ms], ...]</code> 有声段</td></tr>
-<tr><td><code>spk_embedding</code></td><td>Tensor</td><td>仅说话人模型</td><td>形状 <code>[N, 192]</code></td></tr>
-</table>
-
-<div class="warning">
-<strong>时间戳格式很重要！</strong>如果你的模型输出的时间戳是字典格式（如 Fun-ASR-Nano 的 <code>{"start_time": 0.5, "end_time": 0.8}</code>），FunASR 的 <code>inference_with_vad</code> 会自动转换。但标准的期望格式是 <code>[[起始ms, 结束ms], ...]</code>（毫秒级的二元列表）。
-</div>
-
-<!-- 4. 添加新模型 -->
-<h2 id="add-model">4. 添加新模型</h2>
-
-<div class="step">
-<h4>创建模型目录</h4>
-<pre>funasr/models/my_model/
-├── __init__.py      # 空文件
-├── model.py         # 主模型类
-├── encoder.py       # （可选）自定义编码器
-└── decoder.py       # （可选）自定义解码器</pre>
-<div class="warning"><strong>规则：</strong>每个模型目录必须是自包含的。不要从其他模型目录导入。不要修改已有模型。</div>
-</div>
-
-<div class="step">
-<h4>实现模型类</h4>
-<pre>import torch.nn as nn
+</header>
+<main id="main">
+<div class="docs-layout">
+<aside class="docs-sidebar">
+<a class="docs-home" href="https://www.funasr.com/docs/">文档中心</a>
+<details class="docs-navigation" open="">
+<summary class="docs-navigation-toggle">浏览目录</summary>
+<details open="">
+<summary>开始使用</summary>
+<nav aria-label="开始使用">
+<a href="https://www.funasr.com/docs/installation.html">安装与环境验证</a>
+<a href="https://www.funasr.com/docs/quickstart.html">第一次转写</a>
+<a href="https://www.funasr.com/docs/python-api.html">Python SDK: AutoModel</a>
+<a href="https://www.funasr.com/docs/model-selection.html">选择第一个模型</a>
+<a href="https://www.funasr.com/docs/command-line.html">命令行转写</a>
+<a href="https://www.funasr.com/docs/migration.html">从 Whisper 与云 API 迁移</a>
+</nav>
+</details>
+<details open="">
+<summary>模型与能力</summary>
+<nav aria-label="模型与能力">
+<a href="https://www.funasr.com/docs/moss-transcribe-diarize.html">MOSS 转写与说话人分离</a>
+<a href="https://www.funasr.com/docs/model-zoo.html">Model Zoo</a>
+</nav>
+</details>
+<details open="">
+<summary>训练与扩展</summary>
+<nav aria-label="训练与扩展">
+<a href="https://www.funasr.com/docs/training.html">微调与评测</a>
+<a aria-current="page" href="https://www.funasr.com/docs/model-registration.html">自定义模型注册</a>
+</nav>
+</details>
+<details open="">
+<summary>部署与接口</summary>
+<nav aria-label="部署与接口">
+<a href="https://www.funasr.com/docs/docker.html">容器环境与镜像选择</a>
+<a href="https://www.funasr.com/docs/runtime-guide.html">服务部署入口</a>
+<a href="https://www.funasr.com/docs/http-server.html">Python HTTP 服务</a>
+<a href="https://www.funasr.com/docs/kubernetes.html">Kubernetes 部署</a>
+<a href="https://www.funasr.com/docs/deployment-matrix.html">运行时与部署矩阵</a>
+<a href="https://www.funasr.com/docs/vllm.html">vLLM split-engine 推理</a>
+<a href="https://www.funasr.com/docs/native-vllm.html">原生 vLLM 验证记录</a>
+</nav>
+</details>
+<details open="">
+<summary>评测与运维</summary>
+<nav aria-label="评测与运维">
+<a href="https://www.funasr.com/docs/troubleshooting.html">安装与推理故障排查</a>
+<a href="https://www.funasr.com/docs/security.html">服务安全边界</a>
+<a href="https://www.funasr.com/docs/benchmark-method.html">可复现性能评测</a>
+<a href="https://www.funasr.com/docs/realtime-benchmark.html">实时 WebSocket 压测</a>
+</nav>
+</details>
+<details open="">
+<summary>应用与生态</summary>
+<nav aria-label="应用与生态">
+<a href="https://www.funasr.com/docs/use-cases.html">应用场景与示例</a>
+<a href="https://www.funasr.com/docs/community.html">社区集成</a>
+<a href="https://www.funasr.com/docs/repositories.html">四仓职责与贡献入口</a>
+<a href="https://www.funasr.com/docs/javascript.html">JavaScript 客户端</a>
+<a href="https://www.funasr.com/docs/workflows.html">工作流集成</a>
+</nav>
+</details>
+<details open="">
+<summary>协议与参考</summary>
+<nav aria-label="协议与参考">
+<a href="https://www.funasr.com/docs/service-api.html">HTTP API 契约</a>
+<a href="https://www.funasr.com/docs/websocket-protocol.html">C++ WebSocket 协议</a>
+<a href="https://www.funasr.com/docs/onnx-output.html">ONNX 二进制输出契约</a>
+</nav>
+</details>
+<a href="https://www.funasr.com/deploy/">部署手册 →</a>
+</details>
+</aside>
+<div class="docs-body">
+<nav aria-label="面包屑" class="breadcrumbs"><a href="https://www.funasr.com/">FunASR</a><span>/</span><a href="https://www.funasr.com/docs/">文档</a><span>/</span><span>自定义模型注册</span></nav>
+<header class="docs-title"><h1>自定义模型注册</h1><a class="source-link" data-source-link="" href="https://github.com/modelscope/FunASR/blob/main/docs/model_registration_zh.md">查看 / 编辑源文档 ↗</a></header>
+<article class="docs-article"><div class="source-title-anchor" id="模型注册"></div>
+<p><a href="https://www.funasr.com/en/docs/model-registration.html">English</a> | <a href="https://www.funasr.com/docs/quickstart.html">文档</a> | <a href="https://www.funasr.com/docs/training.html">训练</a> | <a href="https://github.com/modelscope/FunASR/blob/main/docs/tutorial/Tables_zh.md">历史注册教程</a></p>
+<p>注册把 Python 实现与配置名称连接起来，不会下载权重、自动兼容任意 Transformers 模型、提供训练或导出能力，也不代表质量认证。本指南依据当前仓库的<a href="https://github.com/modelscope/FunASR/blob/main/funasr/register.py">注册表</a>、<a href="https://github.com/modelscope/FunASR/blob/main/funasr/auto/auto_model.py">AutoModel</a>、<a href="https://github.com/modelscope/FunASR/blob/main/funasr/download/download_model_from_hub.py">模型加载器</a>和<a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/dynamic_import.py">动态导入工具</a>。</p>
+<span data-legacy-doc-anchor="名称与导入顺序" id="architecture"></span><span data-legacy-doc-anchor="名称与导入顺序" id="add-component"></span><h2 id="名称与导入顺序">名称与导入顺序</h2>
+<p>对构造前已导入的类使用 <code>@tables.register("model_classes", "YourUniqueModelName")</code>，其中 <code>tables</code> 来自 <code>funasr.register</code>。第二个参数是区分大小写的精确注册键，省略时使用 Python 类名。装饰器返回原类，并通过 <code>inspect</code> 记录源码位置，所以应把示例定义在可导入的 <code>.py</code> 文件中，而非仅在 REPL 或动态生成类中定义。</p>
+<p>注册键保存在进程级字典中。同名键会被覆盖，只记录 debug 日志而不报错，因此导入顺序会影响行为。使用组织或项目专属名称并增加冲突检查，不要给无关自定义模型使用 <code>SenseVoiceSmall</code>、<code>Paraformer</code>、<code>FunASRNano</code> 等已有名称。<code>tables.print("model")</code> 显示注册元数据，<code>tables.model_classes[name]</code> 给出当前生效实现。</p>
+<p>其他表包括 <code>encoder_classes</code>、<code>decoder_classes</code>、<code>frontend_classes</code>、<code>tokenizer_classes</code>、<code>dataset_classes</code>、<code>index_ds_classes</code>、<code>batch_sampler_classes</code>。每个调用方都有自己的接口约定，注册 encoder 不等于注册完整 <code>AutoModel</code> 模型。注册器也允许创建新表，表名拼错可能生成无人使用的表，而不是报错。</p>
+<span data-legacy-doc-anchor="最小本地接口示例" id="setup"></span><span data-legacy-doc-anchor="最小本地接口示例" id="add-model"></span><h2 id="最小本地接口示例">最小本地接口示例</h2>
+<p>在临时目录中创建可导入的 <code>custom_model_demo.py</code>，内容如下，然后在已安装当前 checkout 的环境执行 <code>python custom_model_demo.py</code>。它只回显文本，不执行语音识别；不需要权重、音频、模型下载或 GPU。保留一个参数是因为当前 <code>AutoModel.inference</code> 会读取 <code>next(model.parameters()).device</code>，无参数的玩具模型会在此失败。</p>
+<pre id="code-0"><code class="language-python">import torch
+from funasr import AutoModel
 from funasr.register import tables
 
-@tables.register("model_classes", "MyModel")
-class MyModel(nn.Module):
+MODEL_NAME = "DocsEchoModelV1"
+if MODEL_NAME in tables.model_classes:
+    raise RuntimeError(f"Registry collision: {MODEL_NAME}")
 
+
+@tables.register("model_classes", MODEL_NAME)
+class DocsEchoModel(torch.nn.Module):
     def __init__(self, **kwargs):
-        super().__init__()    # ← 必须调用 super().__init__()
-        # 从 kwargs 构建你的网络结构（kwargs 来自 config.yaml）
-        # kwargs 包含：input_size, vocab_size, tokenizer, frontend 等
-
-    def forward(self, speech, speech_lengths, text, text_lengths, **kwargs):
-        """训练前向传播。返回 (loss, stats_dict, weight)。"""
-        ...
-
-    def inference(self, data_in, data_lengths=None, key=None,
-                  tokenizer=None, frontend=None, **kwargs):
-        """推理。返回 (results_list, meta_data)。"""
-        ...
-</pre>
-</div>
-
-<div class="step">
-<h4>创建 config.yaml</h4>
-<pre># 该文件定义使用哪些组件
-model: MyModel              # 与 @tables.register 中的名称对应
-model_conf:
-    hidden_size: 512
-
-frontend: WavFrontend       # 复用已有的前端
-frontend_conf:
-    fs: 16000
-    n_mels: 80
-    frame_length: 25
-    frame_shift: 10
-    cmvn_file: null
-
-tokenizer: SentencepiecesTokenizer
-tokenizer_conf:
-    bpemodel: null</pre>
-</div>
-
-<div class="step">
-<h4>创建 configuration.json（用于上传到 Hub）</h4>
-<pre>{
-  "framework": "pytorch",
-  "task": "auto-speech-recognition",
-  "model": {"type": "funasr"},
-  "file_path_metas": {
-    "init_param": "model.pt",
-    "config": "config.yaml",
-    "tokenizer_conf": {"bpemodel": "my_tokenizer.model"},
-    "frontend_conf": {"cmvn_file": "am.mvn"}
-  }
-}</pre>
-<p>该文件告诉 AutoModel 如何解析相对路径。模型下载后，<code>file_path_metas</code> 中的每个路径都会加上模型目录前缀。</p>
-</div>
-
-<div class="step">
-<h4>本地测试</h4>
-<pre>from funasr import AutoModel
-
-# 从本地目录加载
-model = AutoModel(model="./my_model_dir")
-res = model.generate(input="test.wav")
-print(res)</pre>
-</div>
-
-<!-- 5. 添加前端/分词器 -->
-<h2 id="add-component">5. 添加新的前端 / 分词器 / 数据集</h2>
-<p>所有组件都使用相同的注册表模式。以添加新前端为例：</p>
-
-<pre>from funasr.register import tables
-
-@tables.register("frontend_classes", "MyFrontend")
-class MyFrontend(nn.Module):
-    def __init__(self, fs=16000, **kwargs):
         super().__init__()
-        self.fs = fs
+        self.anchor = torch.nn.Parameter(torch.zeros(1), requires_grad=False)
 
-    def output_size(self):
-        return 80  # 特征维度
+    def inference(
+        self, data_in, data_lengths=None, key=None,
+        tokenizer=None, frontend=None, **kwargs,
+    ):
+        results = [
+            {"key": sample_key, "text": str(value)}
+            for sample_key, value in zip(key, data_in)
+        ]
+        return results, {}
 
-    def forward(self, input, input_lengths):
-        # input: 原始波形 (batch, samples)
-        # 返回: 特征 (batch, frames, dim), 长度
-        ...</pre>
-
-<p>然后在 config.yaml 中引用：</p>
-<pre>frontend: MyFrontend
-frontend_conf:
-    fs: 16000</pre>
-
-<p>分词器（<code>tokenizer_classes</code>）、数据集（<code>dataset_classes</code>）、编码器（<code>encoder_classes</code>）等都是同样的模式。</p>
-
-<!-- 6. 独立仓库模式 -->
-<h2 id="standalone">6. 独立仓库模式</h2>
-<p>你的模型不需要放在 FunASR 源码树内。通过 <code>trust_remote_code=True</code>，FunASR 可以从外部文件动态加载模型类：</p>
-
-<pre># 用户代码 — 从独立仓库加载你的 model.py
-model = AutoModel(
-    model="your-org/your-model",      # HuggingFace/ModelScope 仓库
-    trust_remote_code=True,
-    remote_code="./model.py",          # 模型类定义文件路径
-    hub="hf",
-)</pre>
-
-<p><strong>工作原理：</strong></p>
-<ol>
-<li>FunASR 下载模型仓库（权重 + 配置 + model.py）</li>
-<li><code>remote_code="./model.py"</code> 被动态导入</li>
-<li>该文件中的 <code>@tables.register</code> 装饰器将模型类注册到注册表</li>
-<li>后续正常执行 <code>build_model()</code> 流程</li>
-</ol>
-
-<p><strong>你的仓库结构：</strong></p>
-<pre>your-model-repo/
-├── model.py              # 带 @tables.register 的模型类
-├── config.yaml           # 模型架构配置
-├── configuration.json    # 路径解析配置
-├── model.pt              # 训练好的权重
-└── example/test.wav      # 示例音频</pre>
-
-<p>参考实现：<a href="https://github.com/QwenAudio/Fun-ASR">Fun-ASR-Nano</a>、<a href="https://github.com/QwenAudio/SenseVoice">SenseVoice</a></p>
-
-<!-- 7. 测试你的模型 -->
-<h2 id="testing">7. 测试你的模型</h2>
-
-<h4>编写测试脚本</h4>
-<pre># tests_models/test_my_model.py
-import sys, time
-from funasr import AutoModel
-
-def main():
-    model = AutoModel(model="path/to/model", device="cpu", disable_update=True)
-    res = model.generate(input="test.wav")
-
-    assert res and len(res) > 0, "结果为空"
-    assert "text" in res[0], "缺少 text 字段"
-    print("PASSED")
-    return 0
 
 if __name__ == "__main__":
-    sys.exit(main())</pre>
+    model = AutoModel(
+        model=MODEL_NAME,
+        model_conf={},
+        device="cpu",
+        disable_update=True,
+        disable_pbar=True,
+    )
+    result = model.generate(input=["hello", "world"], data_type="text")
+    assert [row["text"] for row in result] == ["hello", "world"]
+    assert all(isinstance(row["key"], str) for row in result)
+    print([row["text"] for row in result])
+</code></pre>
+<p>最后输出应为 <code>['hello', 'world']</code>。这只是接口连通性验证，专项文档测试会在临时文件中针对当前源码执行这段代码，不验证语音模型。</p>
+<p><code>model_conf={}</code> 是有意传入的：只要该键存在，<code>AutoModel.build_model</code> 就跳过 hub/配置解析。因此这里的 <code>model</code> 是已注册类名，不是目录或 hub ID。必须先自行导入模块；在该直接构造路径中添加 <code>remote_code</code> 不会触发导入。解析后的 kwargs 覆盖合并到 <code>model_conf</code>，一起传给构造器，包括已构造的 tokenizer/frontend、设备、词表与输入维度。请像真实模型一样接收相应命名参数及 <code>**kwargs</code>。</p>
+<span data-legacy-doc-anchor="推理与训练接口" id="understand"></span><h2 id="推理与训练接口">推理与训练接口</h2>
+<table>
+<thead>
+<tr>
+<th>接口</th>
+<th>当前源码约定</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>模型对象</td>
+<td>通常为 <code>torch.nn.Module</code>，需要支持 <code>.to(...)</code>、<code>.eval()</code>、<code>.parameters()</code>；构造配置由模型决定。</td>
+</tr>
+<tr>
+<td><code>inference</code> 输入</td>
+<td>不使用 VAD 时，AutoModel 把输入组织成 <code>data_in</code> 和 <code>key</code> 列表，在 <code>torch.no_grad()</code> 下调用 <code>model.inference(**batch, **kwargs)</code>。单条 <code>data_type="fbank"</code> 输入会直接传入特征对象，并设 <code>data_lengths=input_len</code>。tokenizer/frontend 是已构造对象或 <code>None</code>。</td>
+</tr>
+<tr>
+<td>模型层返回值</td>
+<td>返回二元组 <code>(results, meta_data)</code>，其中 <code>results</code> 是 <code>list[dict]</code>，<code>meta_data</code> 是字典。ASR 结果使用字符串 <code>key</code>、<code>text</code> 并保持输入顺序与标识。不能只返回结果字典列表，否则 AutoModel 会把第一条当成整个 batch 结果。</td>
+</tr>
+<tr>
+<td>元数据</td>
+<td>可包含 <code>load_data</code>、<code>extract_feat</code>、<code>batch_data_time</code>。音频的 <code>batch_data_time</code> 是以秒为单位的正时长，不能填毫秒或零，零会导致计时代码除零。省略时使用内部 <code>-1</code> 哨兵值，如上述非音频示例，并不代表有效速度测量。</td>
+</tr>
+<tr>
+<td>公开返回值</td>
+<td><code>AutoModel.generate(...)</code> 返回展开后的结果列表。时间戳等附加字段由模型决定，注册并不承诺这些字段。VAD、标点、说话人和流式集成还需额外兼容实现与独立测试。</td>
+</tr>
+<tr>
+<td>训练</td>
+<td>实现可微 <code>forward</code>，命名张量参数应匹配 dataset collator。<a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer_ds.py">训练器</a>解包 <code>(loss, stats, weight)</code>；<a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/sense_voice/model.py">SenseVoice</a>和 <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fun_asr_nano/model.py">Nano</a>使用 <code>force_gatherable</code>。玩具模型故意不实现训练 forward。</td>
+</tr>
+<tr>
+<td>导出</td>
+<td><a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/export_utils.py">导出工具</a>调用模型的 <code>export</code>，再使用 <code>export_dummy_inputs</code>、输入输出名称、动态轴等模型专属方法。注册本身不会实现这些方法。</td>
+</tr>
+</tbody>
+</table>
+<p>自定义模型仍需自行实现所需的音频加载、特征处理、分词、解码及 batching。参考相近模型的接口，不能在缺少实现时宣称具有其能力。训练还需适配数据集与损失函数，参见<a href="https://www.funasr.com/docs/training.html">训练指南</a>。</p>
+<span data-legacy-doc-anchor="加载已审查代码与权重" id="standalone"></span><h2 id="加载已审查代码与权重">加载已审查代码与权重</h2>
+<p>有两条不同路径：</p>
+<ol>
+<li><strong>直接注册构造：</strong>先导入模块，再像玩具示例一样传注册键和 <code>model_conf</code>。需要权重时提供兼容的 tokenizer/frontend/配置及真实存在的 <code>init_param</code>。该路径不执行 hub 代码导入。</li>
+<li><strong>模型目录解析：</strong>传已审查的本地目录或 hub ID，不传 <code>model_conf</code>。加载器读取 <code>configuration.json</code> 文件元数据或 <code>config.yaml</code>，解析类名和资产并加载权重。简单的本地 <code>config.yaml</code> 目录通常还需要 <code>model.pt</code> 及配置引用的分词器、前端文件。任意 HF 权重文件夹不会自动成为 FunASR 模型目录。</li>
+</ol>
+<p>第二条路径的 ModelScope 接口如下，它不是无需准备即可运行的例子。<code>models/custom-asr</code> 必须已有兼容且审查过的配置和权重，<code>custom_asr_model.py</code> 必须注册配置指定的精确键：</p>
+<pre id="code-1"><code class="language-python">from funasr import AutoModel
 
-<h4>测试 VAD + 说话人分离流水线</h4>
-<pre># 如果你的模型需要支持说话人分离：
 model = AutoModel(
-    model="path/to/model",
-    vad_model="fsmn-vad",
-    spk_model="cam++",
+    model="./models/custom-asr",
+    hub="ms",
+    trust_remote_code=True,
+    remote_code="./custom_asr_model.py",
+    device="cpu",
+    disable_update=True,
 )
-res = model.generate(input="meeting.wav", cache={})
-assert "sentence_info" in res[0]
-assert "spk" in res[0]["sentence_info"][0]</pre>
-
-<h4>测试流式推理（如果支持）</h4>
-<pre>cache = {}
-for i in range(total_chunks):
-    chunk = audio[i*stride:(i+1)*stride]
-    res = model.generate(input=chunk, cache=cache,
-                         is_final=(i == total_chunks-1), ...)
-# 验证：相同音频在多次会话中应产生相同结果</pre>
-
-<!-- 8. 常见陷阱 -->
-<h2 id="pitfalls">8. 常见陷阱</h2>
-
-<h4>❌ 忘记调用 <code>super().__init__()</code></h4>
-<pre># 错误 — 会导致 "object has no attribute '_state_dict_pre_hooks'"
-class MyEncoder(nn.Module):
-    def __init__(self):
-        pass
-
-# 正确
-class MyEncoder(nn.Module):
-    def __init__(self):
-        super().__init__()</pre>
-
-<h4>❌ 在模型中检查 <code>kwargs["batch_size"]</code></h4>
-<p>kwargs 中的 <code>batch_size</code> 是 <code>inference_with_vad</code> 用于分段批处理的值（一个很大的毫秒数）。不要用它来判断实际的数据批量大小，应该使用 <code>len(data_in)</code>。</p>
-
-<h4>❌ 未处理空输入或极短输入</h4>
-<p>VAD 可能产生空的片段。你的 <code>inference()</code> 应该能优雅地处理 <code>data_in = []</code> 的情况。</p>
-
-<h4>❌ 时间戳格式不匹配</h4>
-<p>如果你的模型返回字典格式的时间戳（<code>{"start_time": 0.5, "end_time": 0.8}</code>），流水线会自动转换。但如果你输出 <code>[start_time, end_time, text]</code>（3 个元素），需要去掉文本——下游期望的是 <code>[起始ms, 结束ms]</code>（2 个元素，毫秒单位）。</p>
-
-<h4>❌ 从其他模型目录导入</h4>
-<pre># 错误 — 产生紧耦合
-from funasr.models.paraformer.model import Paraformer
-
-# 正确 — 将需要的代码复制到自己的目录
-# 或者在 config.yaml 中通过注册名引用</pre>
-
-<h4>❌ 在推理过程中修改 <code>self.kwargs</code></h4>
-<p>不要改动 AutoModel 传入的 kwargs。框架会在每次调用之间重置状态，但持久性的修改可能在不同会话间泄漏。</p>
-
-<!-- 9. 贡献代码 -->
-<h2 id="contribute">9. 贡献代码</h2>
-
-<h4>代码风格</h4>
+print(model.generate(input="data/audio/heldout.wav"))
+</code></pre>
+<p>当前 <code>download_from_ms</code> 在 <code>trust_remote_code=True</code> 时导入 <code>remote_code</code>，未指定时默认为模块名 <code>model</code>。导入器支持模块/文件路径及 URL 下载，把目录加入 <code>sys.path</code> 后按文件基本名导入。相对路径按工作目录解析，不会自动相对权重目录解析。文件基本名冲突及 Python 导入缓存可能选中已加载模块，应使用独立模块名并验证当前类。该辅助函数打印导入异常而不重新抛出，应检查错误日志与注册结果。</p>
+<p><strong><code>hub="hf"</code> 路径不同：</strong>本 checkout 的 <code>download_from_hf</code> 在信任开关下可安装模型依赖，但不调用 <code>import_module_from_path</code>，不能假定它会执行 <code>remote_code</code>。在 <code>hub="hf"</code> 构造前显式导入已审查模块，或使用完整配置的直接注册构造路径。两条路径的本地 <code>config.yaml</code> 回退对 <code>init_param</code> 也不同：ModelScope 保留已有且存在的显式路径，Hugging Face 则指定目录内 <code>model.pt</code>。必须检查解析后的真实路径，不要假定 checkpoint 覆盖始终有效。</p>
+<span data-legacy-doc-anchor="真实示例与边界" id="contribute"></span><h2 id="真实示例与边界">真实示例与边界</h2>
 <ul>
-<li>遵循已有模式——以 <code>paraformer/model.py</code> 作为参考</li>
-<li>所有公开方法添加 docstring（包含 Args 和 Returns）</li>
-<li>注释只说明"为什么"，不解释"是什么"——用清晰的命名代替注释</li>
+<li><a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/sense_voice/model.py">SenseVoiceSmall 实现</a>展示注册、训练、推理和导出集成，但需保持其模型配置与分词器假设。</li>
+<li><a href="https://github.com/modelscope/FunASR/blob/main/examples/industrial_data_pretraining/fun_asr_nano/demo1.py">Nano demo1.py</a>使用 <code>trust_remote_code=True</code>、<code>remote_code="./model.py"</code>、<code>hub="ms"</code>，要求 recipe 工作目录。其<a href="https://github.com/modelscope/FunASR/blob/main/examples/industrial_data_pretraining/fun_asr_nano/model.py">本地实现</a>注册 <code>FunASRNano</code> 并导入同目录的 <code>ctc</code>、<code>tools</code> 模块，可能覆盖<a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fun_asr_nano/model.py">内置实现</a>。两者并非对所有功能可互换，尤其不能假定保留内置 LoRA，应检查实际类和权重键。</li>
+<li><a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/moss_transcribe_diarize/model.py">MOSS 适配器</a>集成第三方 OpenMOSS 模型，其 <code>forward</code> 明确拒绝训练。注册模型不意味着支持微调或导出。</li>
+<li><a href="https://github.com/modelscope/FunASR/blob/main/docs/tutorial/Tables_zh.md">原始注册教程</a>和<a href="https://www.funasr.com/docs/quickstart.html">通用教程</a>保留为历史入口；示例有差异时，以这里说明的当前源码行为为准。</li>
 </ul>
-
-<h4>PR 检查清单</h4>
+<span data-legacy-doc-anchor="安全与验证" id="testing"></span><span data-legacy-doc-anchor="安全与验证" id="pitfalls"></span><h2 id="安全与验证">安全与验证</h2>
+<p><code>trust_remote_code=True</code> 允许执行 Python；hub 加载器还可能安装模型目录的 <code>requirements.txt</code>。本地目录不天然可信。审核源码、依赖与权重序列化方式，使用隔离环境，不加载不可信的 pickle checkpoint。不要把不可信 URL、模块名或配置直接接入流程。远程 revision 行为不可靠时保留带哈希的已审查本地快照；这里的 <code>model_revision</code> 并非所有加载路径都能统一固定版本。</p>
+<p>加载前检查当前注册键、类和源码位置。确认模型、配置、分词器兼容，并检查缺失或多余权重：AutoModel 的 <code>ignore_init_mismatch</code> 默认为 true，直接传入不存在的 <code>init_param</code> 会打印错误，不保证构造失败。应自行验证 checkpoint 存在。训练、导出、部署前分别测试单条、多条、异常输入与目标流水线。FunASR 软件的 MIT 许可证不替代模型或上游组件的许可。</p>
+<p>运行专项语法、仓库链接和不下载模型的玩具接口测试：</p>
+<pre id="code-2"><code class="language-bash">python -m pytest -q tests/test_training_docs_contract.py
+</code></pre>
+<p>这些检查不认证任意自定义代码、真实 ASR 质量、GPU 训练、真实 checkpoint 恢复或导出兼容性。</p></article>
+<nav aria-label="相邻文档" class="docs-next">
+<a href="https://www.funasr.com/docs/training.html">← 微调与评测</a><a href="https://www.funasr.com/docs/docker.html">容器环境与镜像选择 →</a> </nav>
+</div>
+<aside class="docs-toc"><strong>本页目录</strong><div class="toc">
 <ul>
-<li>新模型：自包含目录，无跨模型导入</li>
-<li>在 <code>tests_models/</code> 中包含测试脚本</li>
-<li>在 <code>examples/industrial_data_pretraining/</code> 中包含示例</li>
-<li>所有已有测试仍然通过</li>
-<li>如果是面向用户的功能，在 README 的 What's New 中添加条目</li>
+<li><a href="#模型注册">模型注册</a><ul>
+<li><a href="#名称与导入顺序">名称与导入顺序</a></li>
+<li><a href="#最小本地接口示例">最小本地接口示例</a></li>
+<li><a href="#推理与训练接口">推理与训练接口</a></li>
+<li><a href="#加载已审查代码与权重">加载已审查代码与权重</a></li>
+<li><a href="#真实示例与边界">真实示例与边界</a></li>
+<li><a href="#安全与验证">安全与验证</a></li>
 </ul>
-
-<h4>许可证</h4>
-<p>代码：MIT 许可。模型权重：FunASR 模型许可（允许商业使用，需注明出处）。</p>
-
-</div></div>
-
-<footer>
-<p>FunASR &middot; 通义实验室，阿里巴巴集团</p>
-<p><a href="index.html">首页</a> &middot; <a href="tutorial.html">教程</a> &middot; <a href="training.html">训练</a> &middot; <a href="model-registration.html">开发</a> &middot; <a href="../api.html">API</a> &middot; <a href="vllm.html">vLLM</a> &middot; <a href="agent.html">Agent</a> &middot; <a href="benchmark.html">Benchmark</a> &middot; <a href="https://github.com/modelscope/FunASR">GitHub</a></p>
+</li>
+</ul>
+</div>
+</aside></div>
+</main>
+<footer class="site-footer">
+<div>
+<strong>FunASR</strong>
+<p>面向生产部署的开源语音基础设施。</p>
+</div>
+<nav aria-label="官方仓库" class="footer-repositories" data-footer-repositories="">
+<strong>官方仓库</strong>
+<div class="footer-links">
+<a href="https://www.funasr.com/go/fun-asr">Fun-ASR</a>
+<a href="https://www.funasr.com/go/sensevoice">SenseVoice</a>
+<a href="https://www.funasr.com/go/funclip">FunClip</a>
+</div>
+</nav>
+<div class="footer-links">
+<a href="https://www.funasr.com/deploy/">部署</a>
+<a href="https://www.funasr.com/docs/">文档</a>
+<a href="https://www.funasr.com/go/releases">发布</a>
+<a href="https://www.funasr.com/donors.html">功德榜</a>
+</div>
 </footer>
-</body></html>
+<script defer="" src="../assets/js/site.d446f5fbcfe2.js"></script>
+<script defer="" src="../assets/js/experience.3f688a12942a.js"></script>
+</body>
+</html>

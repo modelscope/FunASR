@@ -1,325 +1,320 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>FunASR Training Guide</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
-</head><body>
-<nav class="nav"><div class="container">
-<a href="index.html" class="nav-logo">FunASR</a>
-<div class="nav-links">
-<a href="index.html">Home</a>
-<a href="tutorial.html">Tutorial</a>
-<a href="training.html" class="active">Training</a>
-<a href="model-registration.html">Develop</a>
-<a href="api.html">API</a>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Fine-tuning &amp; evaluation - FunASR</title>
+<meta content="Fine-tuning &amp; evaluation" name="description"/>
+<meta content="#ffffff" name="theme-color"/>
+<link href="https://www.funasr.com/en/docs/training.html" rel="canonical"/>
+<link href="https://www.funasr.com/docs/training.html" hreflang="zh-CN" rel="alternate"/>
+<link href="https://www.funasr.com/en/docs/training.html" hreflang="en" rel="alternate"/>
+<meta content="website" property="og:type"/>
+<meta content="Fine-tuning &amp; evaluation - FunASR" property="og:title"/>
+<meta content="Fine-tuning &amp; evaluation" property="og:description"/>
+<meta content="https://www.funasr.com/en/docs/training.html" property="og:url"/>
+<link href="assets/css/site.d651b1dbf605.css" rel="stylesheet"/>
+<link href="assets/css/experience.5803993934f8.css" rel="stylesheet"/>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "SoftwareApplication", "applicationCategory": "DeveloperApplication", "codeRepository": "https://github.com/modelscope/FunASR", "dateModified": "2026-09-01", "license": "https://github.com/modelscope/FunASR/blob/main/LICENSE", "name": "FunASR", "operatingSystem": "Linux, macOS, Windows", "url": "https://www.funasr.com/en/docs/training.html"}</script>
+</head>
+<body data-copy-icon="assets/lucide/copy.ea80e566c7a1.svg" data-language="en" data-route="/en/docs/training.html">
+<a class="skip-link" href="#main">Skip to main content</a>
+<header class="site-header">
+<a aria-label="FunASR home" class="brand" href="https://www.funasr.com/en/">
+<span aria-hidden="true" class="brand-mark">F</span>
+<span>FunASR</span>
+</a>
+<button aria-controls="primary-navigation" aria-expanded="false" class="icon-button menu-button" data-menu-toggle="" title="Open navigation" type="button">
+<img alt="" src="assets/lucide/menu.90a31b3ab1cf.svg"/>
+</button>
+<nav aria-label="Primary navigation" class="primary-navigation" data-primary-nav="" id="primary-navigation">
+<a href="https://www.funasr.com/en/">Product</a>
+<a href="https://www.funasr.com/en/deploy/">Deploy</a>
+<a href="https://www.funasr.com/en/models.html">Models</a>
+<a href="https://www.funasr.com/en/benchmarks.html">Benchmarks</a>
+<a href="https://www.funasr.com/en/ecosystem.html">Ecosystem</a>
+<a href="https://www.funasr.com/en/blog/">Blog</a>
+<a href="https://www.funasr.com/en/docs/">Docs</a>
+<a href="https://www.funasr.com/en/donors.html">Donors</a>
+</nav>
+<div class="header-actions">
+<a class="icon-link" href="https://www.funasr.com/docs/training.html" title="简体中文">
+<img alt="" src="assets/lucide/languages.ae9048feb2c7.svg"/>
+<span>中文</span>
+</a>
+<a aria-label="GitHub" class="icon-button" href="https://www.funasr.com/go/github" title="GitHub">
+<img alt="" src="assets/lucide/github.793554449a30.svg"/>
+</a>
 </div>
-<a href="https://github.com/modelscope/FunASR" class="nav-github">GitHub</a>
-</div></nav>
-
-<div class="content"><div class="container narrow">
-<h1>Training & Fine-tuning</h1>
-<p>Fine-tune pretrained models on your own data using FunASR's training framework.</p>
-
-<div class="toc-grid">
-<a href="#overview">Overview</a>
-<a href="#data">Data Preparation</a>
-<a href="#paraformer">Fine-tune Paraformer</a>
-<a href="#sensevoice">Fine-tune SenseVoice</a>
-<a href="#nano">Fine-tune Fun-ASR-Nano</a>
-<a href="#params">Parameter Reference</a>
-<a href="#multi-gpu">Multi-GPU Training</a>
-<a href="#deepspeed">DeepSpeed</a>
-<a href="#monitor">Monitoring</a>
-<a href="#inference-after">Use Fine-tuned Model</a>
-<a href="#tips">Tips & Troubleshooting</a>
-</div>
-
-<!-- Overview -->
-<h2 id="overview">Overview</h2>
-<p>FunASR's training framework supports:</p>
-<ul>
-<li><strong>Fine-tuning</strong> any pretrained model on custom domain data</li>
-<li><strong>Multi-GPU</strong> training with PyTorch DDP (single/multi-node)</li>
-<li><strong>DeepSpeed</strong> ZeRO Stage 1/2/3 for large model training</li>
-<li><strong>Dynamic batching</strong> by token count or example count</li>
-<li><strong>Checkpoint averaging</strong> for best performance</li>
-<li><strong>Resume training</strong> from interruption</li>
-</ul>
-
-<p>The training entry point is <code>funasr-train-ds</code> (or <code>funasr/bin/train_ds.py</code>), launched via <code>torchrun</code> for distributed training.</p>
-
-<!-- Data -->
-<h2 id="data">Data Preparation</h2>
-
-<h3>Standard Format (Paraformer, SenseVoice)</h3>
-<p>Training data uses JSONL format — one JSON object per line:</p>
-<pre>{"key": "utt001", "source": "/path/to/audio.wav", "source_len": 90, "target": "这是转写文本", "target_len": 6}
-{"key": "utt002", "source": "/path/to/audio2.wav", "source_len": 150, "target": "hello world", "target_len": 2}</pre>
-
+</header>
+<main id="main">
+<div class="docs-layout">
+<aside class="docs-sidebar">
+<a class="docs-home" href="https://www.funasr.com/en/docs/">Documentation</a>
+<details class="docs-navigation" open="">
+<summary class="docs-navigation-toggle">Browse topics</summary>
+<details open="">
+<summary>Get started</summary>
+<nav aria-label="Get started">
+<a href="https://www.funasr.com/en/docs/installation.html">Installation &amp; environment checks</a>
+<a href="https://www.funasr.com/en/docs/quickstart.html">Your first transcription</a>
+<a href="https://www.funasr.com/en/docs/python-api.html">Python SDK: AutoModel</a>
+<a href="https://www.funasr.com/en/docs/model-selection.html">Choose your first model</a>
+<a href="https://www.funasr.com/en/docs/command-line.html">Command-line transcription</a>
+<a href="https://www.funasr.com/en/docs/migration.html">Migrate from Whisper &amp; cloud APIs</a>
+</nav>
+</details>
+<details open="">
+<summary>Models &amp; capabilities</summary>
+<nav aria-label="Models &amp; capabilities">
+<a href="https://www.funasr.com/en/docs/moss-transcribe-diarize.html">MOSS transcription &amp; diarization</a>
+<a href="https://www.funasr.com/en/docs/model-zoo.html">Model Zoo</a>
+</nav>
+</details>
+<details open="">
+<summary>Train &amp; extend</summary>
+<nav aria-label="Train &amp; extend">
+<a aria-current="page" href="https://www.funasr.com/en/docs/training.html">Fine-tuning &amp; evaluation</a>
+<a href="https://www.funasr.com/en/docs/model-registration.html">Custom model registration</a>
+</nav>
+</details>
+<details open="">
+<summary>Deploy &amp; integrate</summary>
+<nav aria-label="Deploy &amp; integrate">
+<a href="https://www.funasr.com/en/docs/docker.html">Containers &amp; image selection</a>
+<a href="https://www.funasr.com/en/docs/runtime-guide.html">Serving entry points</a>
+<a href="https://www.funasr.com/en/docs/http-server.html">Python HTTP service</a>
+<a href="https://www.funasr.com/en/docs/kubernetes.html">Kubernetes deployment</a>
+<a href="https://www.funasr.com/en/docs/deployment-matrix.html">Runtime &amp; deployment matrix</a>
+<a href="https://www.funasr.com/en/docs/vllm.html">vLLM split-engine inference</a>
+<a href="https://www.funasr.com/en/docs/native-vllm.html">Native vLLM validation record</a>
+</nav>
+</details>
+<details open="">
+<summary>Evaluate &amp; operate</summary>
+<nav aria-label="Evaluate &amp; operate">
+<a href="https://www.funasr.com/en/docs/troubleshooting.html">Troubleshooting</a>
+<a href="https://www.funasr.com/en/docs/security.html">Service security boundaries</a>
+<a href="https://www.funasr.com/en/docs/benchmark-method.html">Reproducible performance tests</a>
+<a href="https://www.funasr.com/en/docs/realtime-benchmark.html">Realtime WebSocket benchmarking</a>
+</nav>
+</details>
+<details open="">
+<summary>Applications &amp; ecosystem</summary>
+<nav aria-label="Applications &amp; ecosystem">
+<a href="https://www.funasr.com/en/docs/use-cases.html">Use cases &amp; examples</a>
+<a href="https://www.funasr.com/en/docs/community.html">Community integrations</a>
+<a href="https://www.funasr.com/en/docs/repositories.html">Repositories &amp; contribution paths</a>
+<a href="https://www.funasr.com/en/docs/javascript.html">JavaScript clients</a>
+<a href="https://www.funasr.com/en/docs/workflows.html">Workflow integrations</a>
+</nav>
+</details>
+<details open="">
+<summary>Protocols &amp; reference</summary>
+<nav aria-label="Protocols &amp; reference">
+<a href="https://www.funasr.com/en/docs/service-api.html">HTTP API contract</a>
+<a href="https://www.funasr.com/en/docs/websocket-protocol.html">C++ WebSocket protocol</a>
+<a href="https://www.funasr.com/en/docs/onnx-output.html">ONNX binary output contract</a>
+</nav>
+</details>
+<a href="https://www.funasr.com/en/deploy/">Deployment guides →</a>
+</details>
+</aside>
+<div class="docs-body">
+<nav aria-label="Breadcrumbs" class="breadcrumbs"><a href="https://www.funasr.com/en/">FunASR</a><span>/</span><a href="https://www.funasr.com/en/docs/">Docs</a><span>/</span><span>Fine-tuning &amp; evaluation</span></nav>
+<header class="docs-title"><h1>Fine-tuning &amp; evaluation</h1><a class="source-link" data-source-link="" href="https://github.com/modelscope/FunASR/blob/main/docs/training.md">View / edit source ↗</a></header>
+<article class="docs-article"><div class="source-title-anchor" id="training-and-adaptation"></div>
+<p><a href="https://www.funasr.com/docs/training.html">简体中文</a> | <a href="https://www.funasr.com/en/docs/quickstart.html">Documentation</a> | <a href="https://www.funasr.com/en/docs/model-registration.html">Model registration</a> | <a href="https://www.funasr.com/en/docs/model-selection.html">Model selection</a></p>
+<p>This guide connects the checked-in recipes to their dataset and trainer implementations. Commands assume the repository root and an environment with this checkout and the selected recipe's dependencies installed. They are templates for your own data and reviewed model assets, not evidence that full training, convergence, GPU memory use, or export has been tested.</p>
+<span data-legacy-doc-anchor="choose-the-work" id="overview"></span><h2 id="choose-the-work">Choose the Work</h2>
 <table>
-<tr><th>Field</th><th>Type</th><th>Description</th></tr>
-<tr><td><code>key</code></td><td>str</td><td>Unique utterance ID</td></tr>
-<tr><td><code>source</code></td><td>str</td><td>Audio file path (local path or URL)</td></tr>
-<tr><td><code>source_len</code></td><td>int</td><td>Audio length in fbank frames (1 frame = 10ms)</td></tr>
-<tr><td><code>target</code></td><td>str</td><td>Transcription text</td></tr>
-<tr><td><code>target_len</code></td><td>int</td><td>Number of text tokens</td></tr>
+<thead>
+<tr>
+<th>Work</th>
+<th>What changes</th>
+<th>Starting point</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Inference</td>
+<td>No weights change; decode existing audio</td>
+<td><a href="https://www.funasr.com/en/docs/quickstart.html">Inference tutorial</a></td>
+</tr>
+<tr>
+<td>Adaptation</td>
+<td>Fine-tune selected parameters, all parameters, or supported LoRA adapters from pretrained weights</td>
+<td>Recipes below; first record a held-out baseline</td>
+</tr>
+<tr>
+<td>Training from scratch</td>
+<td>Initialize a configured architecture without pretrained weights; prepare tokenizer, features and training schedule</td>
+<td><a href="https://github.com/modelscope/FunASR/blob/main/examples/aishell/paraformer/demo_train_or_finetune.sh">AISHELL Paraformer recipe</a> and its <a href="https://github.com/modelscope/FunASR/blob/main/examples/aishell/paraformer/conf/paraformer_conformer_12e_6d_2048_256.yaml">configuration</a></td>
+</tr>
+</tbody>
 </table>
-
-<h4>Generate from wav.scp + text.txt</h4>
-<p>If you have Kaldi-style data files, convert them:</p>
-<pre># train_wav.scp (tab-separated: id \t path)
-utt001  /data/audio/001.wav
-utt002  /data/audio/002.wav
-
-# train_text.txt (tab-separated: id \t text)
-utt001  这是转写文本
-utt002  hello world</pre>
-
-<pre># Convert to jsonl
-scp2jsonl \
-  ++scp_file_list='["/data/list/train_wav.scp", "/data/list/train_text.txt"]' \
+<p>Full-parameter fine-tuning is not training from scratch. The historical AISHELL script contains author-local paths and supplies <code>init_param</code>; replace its paths and deliberately configure initialization before using it for a scratch run. A script under <code>industrial_data_pretraining</code> does not reproduce the original industrial pretraining corpus or procedure.</p>
+<table>
+<thead>
+<tr>
+<th>Family</th>
+<th>Real recipe and companion material</th>
+<th>Important boundary</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>SenseVoice</td>
+<td><a href="https://github.com/modelscope/FunASR/blob/main/examples/industrial_data_pretraining/sense_voice/finetune.sh">finetune.sh</a>, <a href="https://github.com/modelscope/FunASR/blob/main/examples/industrial_data_pretraining/sense_voice/README.md">English README</a>, <a href="https://github.com/modelscope/FunASR/blob/main/examples/industrial_data_pretraining/sense_voice/CONTINUAL_FINETUNING.md">continual adaptation</a></td>
+<td>Rich labels and tokenizer special tokens matter. The script expects user-prepared <code>data/train_example.jsonl</code> and <code>data/val_example.jsonl</code>; it does not create them.</td>
+</tr>
+<tr>
+<td>FunASRNano</td>
+<td><a href="https://github.com/modelscope/FunASR/blob/main/examples/industrial_data_pretraining/fun_asr_nano/finetune.sh">finetune.sh</a>, <a href="https://github.com/modelscope/FunASR/blob/main/examples/industrial_data_pretraining/fun_asr_nano/lora_finetune.sh">LoRA script</a>, <a href="https://github.com/modelscope/FunASR/blob/main/examples/industrial_data_pretraining/fun_asr_nano/docs/finetune.md">fine-tuning guide</a></td>
+<td>Default script freezes audio encoder/adaptor and unfreezes the LLM; it is not an all-parameter recipe. Pure LoRA additionally uses <code>llm_conf.use_lora=true</code>, <code>lora_only=true</code>, <code>llm_conf.freeze=true</code>. Audit trainable parameters, including any CTC component.</td>
+</tr>
+<tr>
+<td>Paraformer</td>
+<td><a href="https://github.com/modelscope/FunASR/blob/main/examples/industrial_data_pretraining/paraformer/finetune.sh">finetune.sh</a>, <a href="https://github.com/modelscope/FunASR/blob/main/examples/industrial_data_pretraining/paraformer/README.md">README</a>, <a href="https://github.com/modelscope/FunASR/blob/main/examples/industrial_data_pretraining/paraformer/README_LoRA_zh.md">LoRA guide</a></td>
+<td>The industrial recipe explicitly selects <code>AudioDataset</code> / <code>IndexDSJsonl</code>. Paraformer LoRA is a separate recipe, not Nano's adapter configuration.</td>
+</tr>
+<tr>
+<td>MOSS-Transcribe-Diarize</td>
+<td><a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/moss_transcribe_diarize/model.py">FunASR adapter source</a></td>
+<td>Third-party OpenMOSS model. This adapter's <code>forward</code> raises an inference-only error; MOSS training is not covered here.</td>
+</tr>
+</tbody>
+</table>
+<p>FunASR software is MIT-licensed; model weights, upstream code, datasets and derived checkpoints can have different licenses. Check each asset's terms and data consent before training or redistribution.</p>
+<span data-legacy-doc-anchor="prepare-the-dataset" id="data"></span><h2 id="prepare-the-dataset">Prepare the Dataset</h2>
+<p>Keep training, validation and final test sets separate, ideally split by speaker/session as well as utterance. Check duplicate IDs, matching audio/transcript IDs, file readability, decoded duration/sample rate, transcript normalization and language coverage. Resolve relative audio paths from the process working directory, not implicitly from the JSONL file's directory. Prefer stable local audio paths when reproducibility or privacy matters.</p>
+<h3 id="paraformer-audio-and-text-jsonl">Paraformer: Audio and Text JSONL</h3>
+<p>The <a href="https://github.com/modelscope/FunASR/blob/main/funasr/datasets/audio_datasets/scp2jsonl.py">converter</a> joins <code>wav.scp</code> and text by utterance ID. Each input line is <code>utterance_id value</code>; transcript text may contain spaces. For a two-second recording the structural example is:</p>
+<pre id="code-0"><code class="language-json">{"key":"utt001","source":"data/audio/utt001.wav","source_len":200,"target":"hello world","target_len":2}
+</code></pre>
+<p><code>key</code>, <code>source</code>, <code>target</code> are strings; length fields are integers. <code>source_len</code> is <code>int(samples_at_16kHz / 160)</code>, approximately 10 ms units, not seconds. The converter's <code>target_len</code> is whitespace-word count when spaces exist, otherwise character count; it is not universally a tokenizer count. The <a href="https://github.com/modelscope/FunASR/blob/main/funasr/datasets/audio_datasets/index_ds.py">index reader</a> filters by configured source/target/token limits, and the <a href="https://github.com/modelscope/FunASR/blob/main/funasr/datasets/audio_datasets/datasets.py">dataset</a> performs feature extraction/tokenization.</p>
+<p>Prepare <code>data/list/train_wav.scp</code>, <code>train_text.txt</code>, <code>val_wav.scp</code>, <code>val_text.txt</code>, then run from the repository root:</p>
+<pre id="code-1"><code class="language-bash">python -m funasr.datasets.audio_datasets.scp2jsonl \
+  ++scp_file_list='["data/list/train_wav.scp", "data/list/train_text.txt"]' \
   ++data_type_list='["source", "target"]' \
-  ++jsonl_file_out="/data/list/train.jsonl"</pre>
-
-<h3>ChatML Format (Fun-ASR-Nano)</h3>
-<p>Fun-ASR-Nano uses ChatML conversation format:</p>
-<pre>{"messages": [
-  {"role": "system", "content": "You are a helpful assistant."},
-  {"role": "user", "content": "语音转写：<|startofspeech|>!/path/to/audio.wav<|endofspeech|>"},
-  {"role": "assistant", "content": "几点了？"}
-], "speech_length": 145, "text_length": 3}</pre>
-
-<table>
-<tr><th>Field</th><th>Description</th></tr>
-<tr><td><code>messages[0]</code></td><td>System prompt (fixed: "You are a helpful assistant.")</td></tr>
-<tr><td><code>messages[1]</code></td><td>User: prompt + audio path wrapped in <code>&lt;|startofspeech|&gt;!...&lt;|endofspeech|&gt;</code></td></tr>
-<tr><td><code>messages[2]</code></td><td>Assistant: transcription text</td></tr>
-<tr><td><code>speech_length</code></td><td>Number of fbank frames (10ms each)</td></tr>
-<tr><td><code>text_length</code></td><td>Number of tokens (tokenized by Qwen3-0.6B)</td></tr>
-</table>
-
-<div class="tip"><strong>Prompt variations:</strong><br>
-• Chinese: <code>语音转写：</code><br>
-• English: <code>Speech transcription:</code><br>
-• Cross-language: <code>语音转写成英文：</code><br>
-• No ITN: <code>语音转写，不进行文本规整：</code></div>
-
-<p>Convert from wav.scp + text.txt:</p>
-<pre>python tools/scp2jsonl.py \
-  ++scp_file=data/train_wav.scp \
-  ++transcript_file=data/train_text.txt \
-  ++jsonl_file=data/train_example.jsonl</pre>
-
-<!-- Paraformer -->
-<h2 id="paraformer">Fine-tune Paraformer</h2>
-<pre>cd examples/industrial_data_pretraining/paraformer
-bash finetune.sh</pre>
-
-<p>Or customize the key parameters:</p>
-<pre>export CUDA_VISIBLE_DEVICES="0,1"
-gpu_num=2
-
-torchrun --nproc_per_node $gpu_num \
-  funasr/bin/train_ds.py \
-  ++model="iic/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch" \
-  ++train_data_set_list="data/train.jsonl" \
-  ++valid_data_set_list="data/val.jsonl" \
-  ++dataset_conf.batch_size=6000 \
-  ++dataset_conf.batch_type="token" \
-  ++dataset_conf.num_workers=4 \
-  ++train_conf.max_epoch=50 \
-  ++train_conf.validate_interval=2000 \
-  ++train_conf.save_checkpoint_interval=2000 \
-  ++train_conf.keep_nbest_models=20 \
-  ++train_conf.avg_nbest_model=10 \
-  ++optim_conf.lr=0.0002 \
-  ++output_dir="./outputs"</pre>
-
-<!-- SenseVoice -->
-<h2 id="sensevoice">Fine-tune SenseVoice</h2>
-<pre>cd examples/industrial_data_pretraining/sense_voice
-bash finetune.sh</pre>
-
-<p>Same data format as Paraformer (source/target JSONL). Key difference: SenseVoice uses its own dataset class internally.</p>
-
-<!-- Fun-ASR-Nano -->
-<h2 id="nano">Fine-tune Fun-ASR-Nano</h2>
-<pre>cd examples/industrial_data_pretraining/fun_asr_nano
-bash finetune.sh</pre>
-
-<p>Key differences from Paraformer:</p>
-<ul>
-<li>Uses ChatML data format (see above)</li>
-<li><code>++trust_remote_code=true</code> required</li>
-<li>Supports <strong>selective freezing</strong>: freeze encoder/adaptor while training LLM decoder</li>
-</ul>
-
-<pre># Freeze encoder + adaptor, only train LLM (recommended for domain adaptation)
-++audio_encoder_conf.freeze=true
-++audio_adaptor_conf.freeze=true
-++llm_conf.freeze=false
-
-# Full fine-tune (all parameters)
-++audio_encoder_conf.freeze=false
-++audio_adaptor_conf.freeze=false
-++llm_conf.freeze=false</pre>
-
-<div class="note"><strong>Recommended strategy:</strong> Start with LLM-only fine-tuning (faster, less data needed). If results are insufficient, unfreeze adaptor. Only unfreeze encoder with very large datasets (>1000h).</div>
-
-<!-- Parameters -->
-<h2 id="params">Parameter Reference</h2>
-
-<h3>Dataset Parameters</h3>
-<table>
-<tr><th>Parameter</th><th>Default</th><th>Description</th></tr>
-<tr><td><code>dataset_conf.batch_type</code></td><td>"token"</td><td><code>"token"</code>: dynamic batch by total tokens. <code>"example"</code>: fixed batch count.</td></tr>
-<tr><td><code>dataset_conf.batch_size</code></td><td>6000</td><td>Token mode: total frames per batch. Example mode: number of samples.</td></tr>
-<tr><td><code>dataset_conf.sort_size</code></td><td>1024</td><td>Buffer size for length-based sorting (improves padding efficiency).</td></tr>
-<tr><td><code>dataset_conf.num_workers</code></td><td>4</td><td>Data loading threads.</td></tr>
-<tr><td><code>dataset_conf.data_split_num</code></td><td>1</td><td>Split data into N groups for large-scale training (reduces memory).</td></tr>
-<tr><td><code>dataset_conf.max_token_length</code></td><td>—</td><td>Filter: skip samples longer than this (in frames/tokens).</td></tr>
-<tr><td><code>dataset_conf.min_token_length</code></td><td>—</td><td>Filter: skip samples shorter than this.</td></tr>
-</table>
-
-<h3>Training Parameters</h3>
-<table>
-<tr><th>Parameter</th><th>Default</th><th>Description</th></tr>
-<tr><td><code>train_conf.max_epoch</code></td><td>50</td><td>Total training epochs.</td></tr>
-<tr><td><code>train_conf.log_interval</code></td><td>1</td><td>Print loss every N steps.</td></tr>
-<tr><td><code>train_conf.validate_interval</code></td><td>2000</td><td>Run validation every N steps.</td></tr>
-<tr><td><code>train_conf.save_checkpoint_interval</code></td><td>2000</td><td>Save model every N steps.</td></tr>
-<tr><td><code>train_conf.keep_nbest_models</code></td><td>20</td><td>Keep top N models (by validation accuracy).</td></tr>
-<tr><td><code>train_conf.avg_nbest_model</code></td><td>10</td><td>Average top N models for final checkpoint.</td></tr>
-<tr><td><code>train_conf.resume</code></td><td>true</td><td>Resume from last checkpoint if exists.</td></tr>
-<tr><td><code>train_conf.use_deepspeed</code></td><td>false</td><td>Enable DeepSpeed ZeRO optimization.</td></tr>
-<tr><td><code>optim_conf.lr</code></td><td>0.0002</td><td>Learning rate.</td></tr>
-</table>
-
-<!-- Multi-GPU -->
-<h2 id="multi-gpu">Multi-GPU Training</h2>
-
-<h3>Single Machine, Multiple GPUs</h3>
-<pre>export CUDA_VISIBLE_DEVICES="0,1,2,3"
-gpu_num=4
-
-torchrun --nnodes 1 --nproc_per_node $gpu_num \
-  funasr/bin/train_ds.py ${train_args}</pre>
-
-<h3>Multiple Machines</h3>
-<pre># Machine 1 (master, IP=192.168.1.1)
-torchrun --nnodes 2 --node_rank 0 --nproc_per_node 4 \
-  --master_addr=192.168.1.1 --master_port=12345 \
-  funasr/bin/train_ds.py ${train_args}
-
-# Machine 2
-torchrun --nnodes 2 --node_rank 1 --nproc_per_node 4 \
-  --master_addr=192.168.1.1 --master_port=12345 \
-  funasr/bin/train_ds.py ${train_args}</pre>
-
-<!-- DeepSpeed -->
-<h2 id="deepspeed">DeepSpeed</h2>
-<p>For large models (Fun-ASR-Nano 800M params), enable DeepSpeed ZeRO:</p>
-<pre>++train_conf.use_deepspeed=true
-++train_conf.deepspeed_config=./deepspeed_conf/ds_stage1.json</pre>
-
-<p>Stage 1 config (recommended starting point):</p>
-<pre>{
-  "train_micro_batch_size_per_gpu": 1,
-  "gradient_accumulation_steps": 1,
-  "bf16": {"enabled": true},
-  "zero_optimization": {
-    "stage": 1,
-    "reduce_bucket_size": 5e8,
-    "allgather_bucket_size": 5e8
-  }
-}</pre>
-
-<div class="note"><strong>When to use which stage:</strong><br>
-• Stage 1: Optimizer state partitioned. Good for most cases.<br>
-• Stage 2: + Gradient partitioned. For larger models.<br>
-• Stage 3: + Parameter partitioned. Maximum memory savings but slower.</div>
-
-<!-- Monitor -->
-<h2 id="monitor">Monitoring Training</h2>
-
-<h4>Log file</h4>
-<pre>tail -f outputs/log.txt
-
-# Example output:
-# train, rank: 0, epoch: 0/50, step: 6990, (loss_avg_rank: 0.327),
-# (acc_avg_epoch: 0.795), (lr: 1.165e-04),
-# GPU memory: usage: 3.8GB, peak: 18.3GB</pre>
-
-<p>Key metrics to watch:</p>
-<ul>
-<li><code>loss_avg_epoch</code>: should decrease over time</li>
-<li><code>acc_avg_epoch</code>: should increase (most important metric)</li>
-<li><code>lr</code>: learning rate at current step</li>
-<li><code>GPU memory</code>: peak should not exceed your GPU VRAM</li>
-</ul>
-
-<h4>TensorBoard</h4>
-<pre>tensorboard --logdir outputs/log/tensorboard
-# Open http://localhost:6006</pre>
-
-<!-- Use Fine-tuned Model -->
-<h2 id="inference-after">Use Your Fine-tuned Model</h2>
-
-<h4>If outputs/ has configuration.json</h4>
-<pre>from funasr import AutoModel
-model = AutoModel(model="./outputs")
-res = model.generate(input="test.wav")
-print(res[0]["text"])</pre>
-
-<h4>If no configuration.json</h4>
-<pre>funasr ++model="./outputs" \
-  ++config-path="./outputs" \
-  ++config-name="config.yaml" \
-  ++init_param="./outputs/model.pt" \
-  ++input="test.wav"</pre>
-
-<!-- Tips -->
-<h2 id="tips">Tips & Troubleshooting</h2>
-
-<h4>OOM during training</h4>
+  ++jsonl_file_out=data/list/train.jsonl
+python -m funasr.datasets.audio_datasets.scp2jsonl \
+  ++scp_file_list='["data/list/val_wav.scp", "data/list/val_text.txt"]' \
+  ++data_type_list='["source", "target"]' \
+  ++jsonl_file_out=data/list/val.jsonl
+</code></pre>
+<p>The converter can skip missing audio and emit incomplete records when transcripts are missing. Compare input/output counts and reject incomplete rows; a successful process exit is insufficient. Use trusted CLI configuration only: this historical converter has an <code>eval</code> fallback for string-valued lists.</p>
+<span data-legacy-doc-anchor="sensevoice-preserve-rich-labels" id="sensevoice"></span><h3 id="sensevoice-preserve-rich-labels">SenseVoice: Preserve Rich Labels</h3>
+<p>For the <code>SenseVoiceCTCDataset</code> path, add explicit supervision fields to the audio/text schema:</p>
+<pre id="code-2"><code class="language-json">{"key":"utt001","source":"data/audio/utt001.wav","source_len":200,"target":"你好","target_len":2,"text_language":"&lt;|zh|&gt;","emo_target":"&lt;|NEUTRAL|&gt;","event_target":"&lt;|Speech|&gt;","with_or_wo_itn":"&lt;|woitn|&gt;"}
+</code></pre>
+<p>These strings must be appropriate labels for the recording, not placeholders applied indiscriminately. The <a href="https://github.com/modelscope/FunASR/blob/main/funasr/datasets/sense_voice_datasets/datasets.py">CTC dataset implementation</a> defaults missing fields to the values above; defaults are not validated ground truth. The older <code>SenseVoiceDataset</code> is a different dataset implementation. Keep the dataset class consistent with the selected model configuration.</p>
+<p><a href="https://github.com/modelscope/FunASR/blob/main/funasr/datasets/audio_datasets/sensevoice2jsonl.py">sensevoice2jsonl.py</a> accepts aligned source/target/language/emotion/event files via <code>scp_file_list</code> and <code>data_type_list</code>. If language, emotion or event labels are missing, it invokes SenseVoice to generate pseudo-labels, which can download/run a model. Its ITN flag uses a punctuation heuristic. Review labels and normalization before training. Do not invent a new language tag without coordinated tokenizer/model changes; see the <a href="https://github.com/modelscope/FunASR/blob/main/examples/industrial_data_pretraining/sense_voice/CONTINUAL_FINETUNING.md">continual fine-tuning guide</a>.</p>
+<span data-legacy-doc-anchor="funasrnano-chatml-jsonl" id="nano"></span><h3 id="funasrnano-chatml-jsonl">FunASRNano: ChatML JSONL</h3>
+<p>Nano does not consume the plain Paraformer schema in its provided recipe. See the actual <a href="https://github.com/modelscope/FunASR/blob/main/examples/industrial_data_pretraining/fun_asr_nano/data/train_example.jsonl">training sample</a> and <a href="https://github.com/modelscope/FunASR/blob/main/examples/industrial_data_pretraining/fun_asr_nano/data/val_example.jsonl">validation sample</a>. A structural example, whose lengths must be recomputed for real data:</p>
+<pre id="code-3"><code class="language-json">{"messages":[{"role":"system","content":"You are a helpful assistant."},{"role":"user","content":"语音转写：&lt;|startofspeech|&gt;!data/audio/utt001.wav&lt;|endofspeech|&gt;"},{"role":"assistant","content":"你好"}],"speech_length":198,"text_length":1}
+</code></pre>
+<p><code>messages</code> is a list of role/content dictionaries; assistant content is the target transcript. The <a href="https://github.com/modelscope/FunASR/blob/main/examples/industrial_data_pretraining/fun_asr_nano/tools/scp2jsonl.py">recipe converter</a> pairs SCP/transcript lines in order, requires matching IDs, computes <code>speech_length = int((duration * 1000 - 25) // 10 + 1)</code>, and obtains <code>text_length</code> from <code>Qwen/Qwen3-0.6B</code> tokenization. It may fetch that tokenizer or URL audio. Line-count mismatches are only warnings, and bad pairs can be omitted: check the resulting counts and every error.</p>
+<p>Use your prepared inputs and output files rather than overwriting the shipped examples:</p>
+<pre id="code-4"><code class="language-bash">python examples/industrial_data_pretraining/fun_asr_nano/tools/scp2jsonl.py \
+  ++scp_file=data/list/train_wav.scp \
+  ++transcript_file=data/list/train_text.txt \
+  ++jsonl_file=data/list/nano_train.jsonl
+python examples/industrial_data_pretraining/fun_asr_nano/tools/scp2jsonl.py \
+  ++scp_file=data/list/val_wav.scp \
+  ++transcript_file=data/list/val_text.txt \
+  ++jsonl_file=data/list/nano_val.jsonl
+</code></pre>
+<span data-legacy-doc-anchor="validate-small-then-launch" id="paraformer"></span><span data-legacy-doc-anchor="validate-small-then-launch" id="params"></span><span data-legacy-doc-anchor="validate-small-then-launch" id="multi-gpu"></span><span data-legacy-doc-anchor="validate-small-then-launch" id="monitor"></span><span data-legacy-doc-anchor="validate-small-then-launch" id="tips"></span><h2 id="validate-small-then-launch">Validate Small, Then Launch</h2>
 <ol>
-<li>Reduce <code>dataset_conf.batch_size</code></li>
-<li>Add <code>dataset_conf.max_token_length=2000</code> to filter long utterances</li>
-<li>Enable DeepSpeed (partitions optimizer states)</li>
-<li>Reduce <code>dataset_conf.num_workers</code></li>
+<li>Pin the checkout and model assets; record dependencies, tokenizer/frontend settings, GPU configuration, data hashes and random seed. Review all downloaded Python and requirements before enabling <code>trust_remote_code</code>.</li>
+<li>Build tiny, disjoint <code>data/list/train_smoke.jsonl</code> and <code>data/list/val_smoke.jsonl</code> from validated records. Actually load their audio and tokenize their targets. Check non-empty batches after length filtering, finite loss and the intended trainable parameter names.</li>
+<li>Run a short training/validation/checkpoint cycle before scaling. Do not run the historical shell scripts blindly: they set GPU IDs, output paths and working-directory-dependent paths internally and do not generally forward appended CLI overrides.</li>
 </ol>
+<p>Here is a root-relative Paraformer smoke-run template derived from the industrial recipe. It requires a compatible GPU, installed training dependencies, the two prepared JSONL files, and a reviewed complete model directory at <code>models/paraformer</code>. The token budget <code>2000</code> is a starting value for short clips, not a memory guarantee; reduce it only while ensuring individual samples still fit. One epoch is only small if the input dataset is small.</p>
+<pre id="code-5"><code class="language-bash">CUDA_VISIBLE_DEVICES=0 torchrun --nnodes=1 --nproc_per_node=1 \
+  --master_addr=127.0.0.1 --master_port=29619 \
+  funasr/bin/train_ds.py \
+  ++model=./models/paraformer \
+  ++train_data_set_list=data/list/train_smoke.jsonl \
+  ++valid_data_set_list=data/list/val_smoke.jsonl \
+  ++dataset=AudioDataset ++dataset_conf.index_ds=IndexDSJsonl \
+  ++dataset_conf.data_split_num=1 ++dataset_conf.batch_sampler=BatchSampler \
+  ++dataset_conf.batch_type=token ++dataset_conf.batch_size=2000 \
+  ++dataset_conf.sort_size=16 ++dataset_conf.num_workers=0 \
+  ++train_conf.max_epoch=1 ++train_conf.log_interval=1 \
+  ++train_conf.resume=false ++train_conf.use_deepspeed=false \
+  ++train_conf.validate_interval=1 ++train_conf.save_checkpoint_interval=1 \
+  ++train_conf.keep_nbest_models=1 ++train_conf.avg_nbest_model=1 \
+  ++optim_conf.lr=0.0002 ++output_dir=./outputs/paraformer-smoke
+</code></pre>
+<p>Use a new output directory for every fresh experiment and an available rendezvous port. For SenseVoice or Nano, start from that family's recipe/configuration and schema, not a substitution into this <code>AudioDataset</code> command. Nano's scripts locate <code>funasr-train-ds</code> on <code>PATH</code>; confirm it belongs to the intended installation. The SenseVoice and Paraformer scripts contain DeepSpeed config paths even with <code>use_deepspeed=false</code>; verify a real config before enabling DeepSpeed. Full distributed training and resource sizing require separate validation.</p>
+<span data-legacy-doc-anchor="checkpoints-and-resume" id="deepspeed"></span><h2 id="checkpoints-and-resume">Checkpoints and Resume</h2>
+<p>The <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/train_ds.py">entry point</a> calls <a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/trainer_ds.py">Trainer.resume_checkpoint</a>. In the non-DeepSpeed path, <code>++train_conf.resume=true</code> restores <code>output_dir/model.pt</code>, including model, optimizer, scheduler and available scaler/progress state. It is a boolean switch, not an arbitrary checkpoint path. If that file is missing, the trainer reports no resume and continues. Confirm restoration in logs.</p>
+<p>To continue the smoke run, rerun its command with the same output directory/configuration, <code>++train_conf.resume=true</code> and <code>++train_conf.max_epoch=2</code>. The epoch limit is total, not additional epochs. <code>++init_param=...</code> loads initial weights; it does not restore optimizer/progress state. Use a fresh output directory and <code>resume=false</code> for a new adaptation stage with a selected initialization checkpoint.</p>
+<p>Non-DeepSpeed saves include <code>model.pt</code>, <code>model.pt.ep{epoch}</code> or <code>model.pt.ep{epoch}.{step}</code>; <code>model.pt.best</code> depends on validation ranking. DeepSpeed saves use checkpoint directories/tags and require its corresponding restore/conversion path. Do not treat those directories or incomplete/adaptor-only state as ordinary standalone weights. Preserve configuration, tokenizer/frontend assets and base-model provenance; inspect save exclusions and LoRA settings. A checkpoint file alone is not necessarily a loadable model directory.</p>
+<span data-legacy-doc-anchor="evaluate-and-export" id="inference-after"></span><h2 id="evaluate-and-export">Evaluate and Export</h2>
+<p>Load a prepared Paraformer model directory and a real selected checkpoint for a one-file sanity check:</p>
+<pre id="code-6"><code class="language-python">from pathlib import Path
+from funasr import AutoModel
 
-<h4>Training loss stuck / NaN gradients</h4>
+checkpoint = Path("outputs/paraformer-smoke/model.pt")
+assert checkpoint.is_file(), checkpoint
+model = AutoModel(
+    model="./models/paraformer",
+    hub="ms",
+    init_param=str(checkpoint),
+    device="cpu",
+    disable_update=True,
+)
+print(model.generate(input="data/audio/heldout.wav"))
+</code></pre>
+<p>Then decode an untouched held-out set with the same normalization and CER/WER unit definition for baseline and adapted weights. Report per-domain/language results as well as aggregate scores, retained-task regressions, data counts and checkpoint identity. Training loss or trainer validation accuracy is not automatically transcription CER/WER. <a href="https://github.com/modelscope/FunASR/blob/main/examples/industrial_data_pretraining/fun_asr_nano/docs/finetune.md">Nano's fine-tuning guide</a> retains the decoding/normalization/scoring references; <a href="https://github.com/modelscope/FunASR/blob/main/examples/industrial_data_pretraining/fun_asr_nano/decode.py">decode.py</a> uses VAD and <code>remote_code="./model.py"</code>, so it assumes the recipe working directory. That <a href="https://github.com/modelscope/FunASR/blob/main/examples/industrial_data_pretraining/fun_asr_nano/model.py">legacy local class</a> can replace the <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fun_asr_nano/model.py">built-in Nano class</a>. Do not assume it preserves built-in LoRA support; verify the active class, adapter injection and loaded keys before evaluation.</p>
+<p>Export is a separate compatibility task. <a href="https://github.com/modelscope/FunASR/blob/main/examples/industrial_data_pretraining/sense_voice/export.py">SenseVoice's ONNX example</a>, <a href="https://github.com/modelscope/FunASR/blob/main/examples/industrial_data_pretraining/paraformer/export.py">Paraformer export example</a> and <a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/export_utils.py">export utility</a> are entry points, not universal support promises. The Paraformer example itself selects a contextual checkpoint; inspect and deliberately choose your model. Model-specific export hooks, tokenizer/frontend assets, dynamic shapes and runtime decoding all need validation. Compare the exported runtime against Python on held-out inputs before deployment. No full training, quality benchmark, real-checkpoint resume, model download or export run was performed for this documentation change.</p></article>
+<nav aria-label="Adjacent documents" class="docs-next">
+<a href="https://www.funasr.com/en/docs/model-zoo.html">← Model Zoo</a><a href="https://www.funasr.com/en/docs/model-registration.html">Custom model registration →</a> </nav>
+</div>
+<aside class="docs-toc"><strong>On this page</strong><div class="toc">
 <ul>
-<li>Reduce learning rate (try 0.00005)</li>
-<li>Check data quality — corrupted audio files cause NaN</li>
-<li>For Fun-ASR-Nano: start with encoder frozen</li>
+<li><a href="#training-and-adaptation">Training and Adaptation</a><ul>
+<li><a href="#choose-the-work">Choose the Work</a></li>
+<li><a href="#prepare-the-dataset">Prepare the Dataset</a><ul>
+<li><a href="#paraformer-audio-and-text-jsonl">Paraformer: Audio and Text JSONL</a></li>
+<li><a href="#sensevoice-preserve-rich-labels">SenseVoice: Preserve Rich Labels</a></li>
+<li><a href="#funasrnano-chatml-jsonl">FunASRNano: ChatML JSONL</a></li>
 </ul>
-
-<h4>Validation accuracy not improving</h4>
-<ul>
-<li>Increase training data (min ~10h for fine-tuning)</li>
-<li>Check domain match — model may not generalize to very different domains</li>
-<li>Try unfreezing more layers gradually</li>
+</li>
+<li><a href="#validate-small-then-launch">Validate Small, Then Launch</a></li>
+<li><a href="#checkpoints-and-resume">Checkpoints and Resume</a></li>
+<li><a href="#evaluate-and-export">Evaluate and Export</a></li>
 </ul>
-
-<h4>Large-scale data (>10,000 hours)</h4>
-<p>Use data splitting to avoid memory issues:</p>
-<pre># Split data into chunks, load 2 at a time
-++dataset_conf.data_split_num=256
-# data.list contains paths to split jsonl files:
-# data/train.0.jsonl
-# data/train.1.jsonl
-# ...
-++train_data_set_list="data/data.list"</pre>
-
-<h4>Resume after crash</h4>
-<p>Set <code>++train_conf.resume=true</code> (default). Training automatically restarts from the latest checkpoint in <code>output_dir</code>.</p>
-
-</div></div>
-
-<footer>
-<p>FunASR &middot; Tongyi Lab, Alibaba Group</p>
-<p><a href="index.html">Home</a> &middot; <a href="tutorial.html">Tutorial</a> &middot; <a href="training.html">Training</a> &middot; <a href="model-registration.html">Develop</a> &middot; <a href="api.html">API</a> &middot; <a href="https://github.com/modelscope/FunASR">GitHub</a></p>
+</li>
+</ul>
+</div>
+</aside></div>
+</main>
+<footer class="site-footer">
+<div>
+<strong>FunASR</strong>
+<p>Open speech infrastructure for production deployment.</p>
+</div>
+<nav aria-label="Official repositories" class="footer-repositories" data-footer-repositories="">
+<strong>Official repositories</strong>
+<div class="footer-links">
+<a href="https://www.funasr.com/go/fun-asr">Fun-ASR</a>
+<a href="https://www.funasr.com/go/sensevoice">SenseVoice</a>
+<a href="https://www.funasr.com/go/funclip">FunClip</a>
+</div>
+</nav>
+<div class="footer-links">
+<a href="https://www.funasr.com/en/deploy/">Deploy</a>
+<a href="https://www.funasr.com/en/docs/">Docs</a>
+<a href="https://www.funasr.com/go/releases">Releases</a>
+<a href="https://www.funasr.com/en/donors.html">Donors</a>
+</div>
 </footer>
-</body></html>
+<script defer="" src="assets/js/site.d446f5fbcfe2.js"></script>
+<script defer="" src="assets/js/experience.3f688a12942a.js"></script>
+</body>
+</html>

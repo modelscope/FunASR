@@ -1,33 +1,141 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<meta name="description" content="Choose the right FunASR model: SenseVoice, Paraformer, Fun-ASR-Nano, streaming runtime, OpenAI API aliases, and deployment paths.">
-<meta property="og:title" content="FunASR Model Selection Guide">
-<meta property="og:description" content="A practical guide for choosing FunASR models, API aliases, runtimes, and benchmark paths before deployment.">
-<meta property="og:type" content="website">
-<meta property="og:url" content="https://modelscope.github.io/FunASR/model-selection.html">
-<link rel="canonical" href="https://modelscope.github.io/FunASR/model-selection.html">
-<meta property="og:site_name" content="FunASR">
-<meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="FunASR Model Selection Guide">
-<meta name="twitter:description" content="Choose the right FunASR model: SenseVoice, Paraformer, Fun-ASR-Nano, streaming runtime, OpenAI API aliases, and deployment paths.">
-<title>FunASR Model Selection Guide</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
-</head><body>
-<nav class="nav"><div class="container">
-<a href="index.html" class="nav-logo">FunASR</a>
-<div class="nav-links"><a href="index.html">Home</a><a href="tutorial.html">Tutorial</a><a href="training.html">Training</a><a href="model-registration.html">Develop</a><a href="api.html">API</a><a href="vllm.html">vLLM</a><a href="agent.html">Agent</a><a href="benchmark.html">Benchmark</a>
-                <a href="donors.html">Donors</a></div>
-<div class="lang-dropdown"><button class="lang-btn">English</button><div class="lang-menu"><a href="model-selection.html" class="current">English</a><a href="zh/model-selection.html">中文</a><a href="ja/model-selection.html">日本語</a><a href="ko/model-selection.html">한국어</a></div></div>
-<a href="https://github.com/modelscope/FunASR" class="nav-github">GitHub</a>
-</div></nav>
-<div class="content"><div class="container narrow">
-<h1>Model Selection Guide</h1>
-<p>Choose a first model, compare FunASR with Whisper or cloud ASR, and decide which model alias to expose through the OpenAI-compatible API.</p>
-<div class="toc-grid"><a href="#default">Fast default</a><a href="#decision">Decision table</a><a href="#aliases">API aliases</a><a href="#runtime">Runtime path</a><a href="#benchmark">Benchmark</a></div>
-<section id="default"><h2>Fast default path</h2>
-<p>If you are unsure, start with <strong>SenseVoice-Small</strong>. It is the strongest first choice for demos, private APIs, multilingual transcription, speaker-aware meeting transcripts, and agent voice input.</p>
-<pre><code>from funasr import AutoModel
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Choose your first model - FunASR</title>
+<meta content="Choose your first model" name="description"/>
+<meta content="#ffffff" name="theme-color"/>
+<link href="https://www.funasr.com/en/docs/model-selection.html" rel="canonical"/>
+<link href="https://www.funasr.com/docs/model-selection.html" hreflang="zh-CN" rel="alternate"/>
+<link href="https://www.funasr.com/en/docs/model-selection.html" hreflang="en" rel="alternate"/>
+<meta content="website" property="og:type"/>
+<meta content="Choose your first model - FunASR" property="og:title"/>
+<meta content="Choose your first model" property="og:description"/>
+<meta content="https://www.funasr.com/en/docs/model-selection.html" property="og:url"/>
+<link href="assets/css/site.d651b1dbf605.css" rel="stylesheet"/>
+<link href="assets/css/experience.5803993934f8.css" rel="stylesheet"/>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "SoftwareApplication", "applicationCategory": "DeveloperApplication", "codeRepository": "https://github.com/modelscope/FunASR", "dateModified": "2026-09-01", "license": "https://github.com/modelscope/FunASR/blob/main/LICENSE", "name": "FunASR", "operatingSystem": "Linux, macOS, Windows", "url": "https://www.funasr.com/en/docs/model-selection.html"}</script>
+</head>
+<body data-copy-icon="assets/lucide/copy.ea80e566c7a1.svg" data-language="en" data-route="/en/docs/model-selection.html">
+<a class="skip-link" href="#main">Skip to main content</a>
+<header class="site-header">
+<a aria-label="FunASR home" class="brand" href="https://www.funasr.com/en/">
+<span aria-hidden="true" class="brand-mark">F</span>
+<span>FunASR</span>
+</a>
+<button aria-controls="primary-navigation" aria-expanded="false" class="icon-button menu-button" data-menu-toggle="" title="Open navigation" type="button">
+<img alt="" src="assets/lucide/menu.90a31b3ab1cf.svg"/>
+</button>
+<nav aria-label="Primary navigation" class="primary-navigation" data-primary-nav="" id="primary-navigation">
+<a href="https://www.funasr.com/en/">Product</a>
+<a href="https://www.funasr.com/en/deploy/">Deploy</a>
+<a href="https://www.funasr.com/en/models.html">Models</a>
+<a href="https://www.funasr.com/en/benchmarks.html">Benchmarks</a>
+<a href="https://www.funasr.com/en/ecosystem.html">Ecosystem</a>
+<a href="https://www.funasr.com/en/blog/">Blog</a>
+<a href="https://www.funasr.com/en/docs/">Docs</a>
+<a href="https://www.funasr.com/en/donors.html">Donors</a>
+</nav>
+<div class="header-actions">
+<a class="icon-link" href="https://www.funasr.com/docs/model-selection.html" title="简体中文">
+<img alt="" src="assets/lucide/languages.ae9048feb2c7.svg"/>
+<span>中文</span>
+</a>
+<a aria-label="GitHub" class="icon-button" href="https://www.funasr.com/go/github" title="GitHub">
+<img alt="" src="assets/lucide/github.793554449a30.svg"/>
+</a>
+</div>
+</header>
+<main id="main">
+<div class="docs-layout">
+<aside class="docs-sidebar">
+<a class="docs-home" href="https://www.funasr.com/en/docs/">Documentation</a>
+<details class="docs-navigation" open="">
+<summary class="docs-navigation-toggle">Browse topics</summary>
+<details open="">
+<summary>Get started</summary>
+<nav aria-label="Get started">
+<a href="https://www.funasr.com/en/docs/installation.html">Installation &amp; environment checks</a>
+<a href="https://www.funasr.com/en/docs/quickstart.html">Your first transcription</a>
+<a href="https://www.funasr.com/en/docs/python-api.html">Python SDK: AutoModel</a>
+<a aria-current="page" href="https://www.funasr.com/en/docs/model-selection.html">Choose your first model</a>
+<a href="https://www.funasr.com/en/docs/command-line.html">Command-line transcription</a>
+<a href="https://www.funasr.com/en/docs/migration.html">Migrate from Whisper &amp; cloud APIs</a>
+</nav>
+</details>
+<details open="">
+<summary>Models &amp; capabilities</summary>
+<nav aria-label="Models &amp; capabilities">
+<a href="https://www.funasr.com/en/docs/moss-transcribe-diarize.html">MOSS transcription &amp; diarization</a>
+<a href="https://www.funasr.com/en/docs/model-zoo.html">Model Zoo</a>
+</nav>
+</details>
+<details open="">
+<summary>Train &amp; extend</summary>
+<nav aria-label="Train &amp; extend">
+<a href="https://www.funasr.com/en/docs/training.html">Fine-tuning &amp; evaluation</a>
+<a href="https://www.funasr.com/en/docs/model-registration.html">Custom model registration</a>
+</nav>
+</details>
+<details open="">
+<summary>Deploy &amp; integrate</summary>
+<nav aria-label="Deploy &amp; integrate">
+<a href="https://www.funasr.com/en/docs/docker.html">Containers &amp; image selection</a>
+<a href="https://www.funasr.com/en/docs/runtime-guide.html">Serving entry points</a>
+<a href="https://www.funasr.com/en/docs/http-server.html">Python HTTP service</a>
+<a href="https://www.funasr.com/en/docs/kubernetes.html">Kubernetes deployment</a>
+<a href="https://www.funasr.com/en/docs/deployment-matrix.html">Runtime &amp; deployment matrix</a>
+<a href="https://www.funasr.com/en/docs/vllm.html">vLLM split-engine inference</a>
+<a href="https://www.funasr.com/en/docs/native-vllm.html">Native vLLM validation record</a>
+</nav>
+</details>
+<details open="">
+<summary>Evaluate &amp; operate</summary>
+<nav aria-label="Evaluate &amp; operate">
+<a href="https://www.funasr.com/en/docs/troubleshooting.html">Troubleshooting</a>
+<a href="https://www.funasr.com/en/docs/security.html">Service security boundaries</a>
+<a href="https://www.funasr.com/en/docs/benchmark-method.html">Reproducible performance tests</a>
+<a href="https://www.funasr.com/en/docs/realtime-benchmark.html">Realtime WebSocket benchmarking</a>
+</nav>
+</details>
+<details open="">
+<summary>Applications &amp; ecosystem</summary>
+<nav aria-label="Applications &amp; ecosystem">
+<a href="https://www.funasr.com/en/docs/use-cases.html">Use cases &amp; examples</a>
+<a href="https://www.funasr.com/en/docs/community.html">Community integrations</a>
+<a href="https://www.funasr.com/en/docs/repositories.html">Repositories &amp; contribution paths</a>
+<a href="https://www.funasr.com/en/docs/javascript.html">JavaScript clients</a>
+<a href="https://www.funasr.com/en/docs/workflows.html">Workflow integrations</a>
+</nav>
+</details>
+<details open="">
+<summary>Protocols &amp; reference</summary>
+<nav aria-label="Protocols &amp; reference">
+<a href="https://www.funasr.com/en/docs/service-api.html">HTTP API contract</a>
+<a href="https://www.funasr.com/en/docs/websocket-protocol.html">C++ WebSocket protocol</a>
+<a href="https://www.funasr.com/en/docs/onnx-output.html">ONNX binary output contract</a>
+</nav>
+</details>
+<a href="https://www.funasr.com/en/deploy/">Deployment guides →</a>
+</details>
+</aside>
+<div class="docs-body">
+<nav aria-label="Breadcrumbs" class="breadcrumbs"><a href="https://www.funasr.com/en/">FunASR</a><span>/</span><a href="https://www.funasr.com/en/docs/">Docs</a><span>/</span><span>Choose your first model</span></nav>
+<header class="docs-title"><h1>Choose your first model</h1><a class="source-link" data-source-link="" href="https://github.com/modelscope/FunASR/blob/main/docs/model_selection.md">View / edit source ↗</a></header>
+<article class="docs-article"><div class="source-title-anchor" id="funasr-model-selection-guide"></div>
+<p>Use this guide when you are choosing a first model, comparing FunASR with Whisper or a cloud ASR provider, or deciding which model alias to expose through the OpenAI-compatible API.</p>
+<span data-legacy-doc-anchor="fast-default-path" id="default"></span><h2 id="fast-default-path">Fast default path</h2>
+<p>If you have a GPU, start with the flagship <strong>Fun-ASR-Nano</strong> — an LLM-based ASR model (SenseVoice encoder + a Qwen3 decoder) for Chinese, English, and Japanese, plus Chinese dialect groups and regional accents, with strong accuracy on hard cases, context, and proper nouns:</p>
+<pre id="code-0"><code class="language-python">from funasr import AutoModel
+
+model = AutoModel(model="FunAudioLLM/Fun-ASR-Nano-2512", device="cuda")
+result = model.generate(input="meeting.wav")
+print(result[0]["text"])
+</code></pre>
+<p>On CPU, or when you want multilingual + emotion/event tags and speaker-aware meeting transcripts in one fast non-autoregressive pass, use <strong>SenseVoice-Small</strong>:</p>
+<pre id="code-1"><code class="language-python">from funasr import AutoModel
 
 model = AutoModel(
     model="iic/SenseVoiceSmall",
@@ -35,43 +143,211 @@ model = AutoModel(
     spk_model="cam++",
     device="cuda",  # use "cpu" for a portable smoke test
 )
-result = model.generate(input="meeting.wav")</code></pre>
-</section>
-<section id="decision"><h2>Decision table</h2>
-<table><tr><th>Need</th><th>Start with</th><th>Why</th><th>Next doc</th></tr>
-<tr><td>Fast multilingual private transcription</td><td>SenseVoice-Small</td><td>Strong default with ASR, emotion tags, audio event tags, and CPU viability.</td><td><a href="tutorial.html">Tutorial</a></td></tr>
-<tr><td>Mandarin production ASR</td><td>Paraformer-Large</td><td>Mature Chinese ASR path with VAD and punctuation.</td><td><a href="tutorial.html">Tutorial</a></td></tr>
-<tr><td>English-only route in the API example</td><td><code>paraformer-en</code></td><td>Compact English route for OpenAI-style compatibility checks.</td><td><a href="agent.html#server">OpenAI API</a></td></tr>
-<tr><td>LLM-based ASR or 31-language experiments</td><td>Fun-ASR-Nano</td><td>LLM-based path; use vLLM when decoder throughput matters.</td><td><a href="vllm.html">vLLM guide</a></td></tr>
-<tr><td>Offline multi-speaker meeting transcription and anonymous diarization</td><td>OpenMOSS-Team/MOSS-Transcribe-Diarize</td><td>One model jointly emits long-form text, timestamps, and anonymous speaker labels; do not add an external VAD or diarization pipeline.</td><td><a href="moss-transcribe-diarize.html">MOSS guide</a></td></tr>
-<tr><td>Live captions or call-center streams</td><td>Runtime WebSocket service</td><td>Designed for long-lived streaming sessions and partial results.</td><td><a href="tutorial.html#streaming">Realtime examples</a></td></tr>
-<tr><td>Migration from Whisper/cloud ASR</td><td>SenseVoice-Small first</td><td>Gives a strong baseline before deeper model-specific tuning.</td><td><a href="migration.html">Migration guide</a></td></tr></table>
-</section>
-<section id="aliases"><h2>OpenAI-compatible API aliases</h2>
-<p>The <code>examples/openai_api</code> server exposes short aliases so application teams do not need to know model repository IDs.</p>
-<table><tr><th>Alias</th><th>Underlying path</th><th>Use when</th></tr>
-<tr><td><code>sensevoice</code></td><td><code>iic/SenseVoiceSmall</code></td><td>You want the default private speech API with multilingual ASR, event tags, and good CPU/GPU behavior.</td></tr>
-<tr><td><code>paraformer</code></td><td><code>paraformer-zh</code></td><td>You want a Mandarin-oriented production route with VAD and punctuation.</td></tr>
-<tr><td><code>paraformer-en</code></td><td><code>paraformer-en</code></td><td>You want a compact English route in OpenAI-style clients.</td></tr>
-<tr><td><code>fun-asr-nano</code></td><td><code>FunAudioLLM/Fun-ASR-Nano-2512</code></td><td>You are evaluating LLM-based ASR, 31-language coverage, or vLLM acceleration.</td></tr></table>
-<pre><code>curl http://localhost:8000/v1/models
-python examples/openai_api/smoke_test.py --base-url http://localhost:8000 --model sensevoice</code></pre>
-</section>
-<section id="runtime"><h2>Runtime path by workload</h2>
-<table><tr><th>Workload</th><th>Runtime path</th><th>Notes</th></tr>
-<tr><td>Notebook or one-off evaluation</td><td>Python <code>AutoModel</code></td><td>Shortest path for install, model download, and output-shape checks.</td></tr>
-<tr><td>Internal HTTP service</td><td>OpenAI-compatible API</td><td>Reuse OpenAI-style clients, Dify, n8n, LangChain, AutoGen, and HTTP nodes.</td></tr>
-<tr><td>Repeatable local container demo</td><td>Docker Compose API</td><td>CPU-first smoke test; adapt the image before using CUDA.</td></tr>
-<tr><td>Internal cluster service</td><td>Kubernetes API template</td><td>Private ClusterIP, persistent model cache, health probes, and port-forward smoke test.</td></tr>
-<tr><td>Live audio</td><td>Runtime WebSocket service</td><td>Validate chunking, VAD, endpointing, reconnects, and client backpressure with real audio.</td></tr>
-<tr><td>LLM-based ASR throughput</td><td>vLLM path for Fun-ASR-Nano</td><td>vLLM accelerates autoregressive decoding; it does not apply to non-autoregressive Paraformer.</td></tr>
-<tr><td>Offline MOSS service</td><td>FunASR HTTP, vLLM, or SGLang Omni</td><td>Keep the native speaker-segment contract; MOSS is an OpenMOSS third-party offline model, not the realtime WebSocket route.</td></tr></table>
-<p>See the <a href="deployment-matrix.html">deployment matrix</a> when you are choosing between these paths.</p>
-</section>
-<section id="benchmark"><h2>Benchmark before committing</h2>
-<ul><li>Use 20-50 representative audio files that cover short clips, long meetings, silence, noise, overlapping speakers, domain vocabulary, and target languages.</li><li>Record model name, model revision, FunASR version, device, CPU/GPU type, CUDA/PyTorch version, runtime path, batch size, and whether warmup/model download time is excluded.</li><li>Track quality with your normal WER/CER or human review process, not only transcript readability.</li><li>Track latency, throughput, memory, failures, and upload size limits together.</li><li>Keep at least one public sample for smoke tests and at least one private realistic sample for deployment validation.</li></ul>
-<p>For migration work, use the <a href="https://github.com/modelscope/FunASR/tree/main/examples/migration">migration benchmark example</a> and the <a href="migration.html">migration guide</a>.</p>
-</section>
-</div></div>
-<footer><p>FunASR &middot; Tongyi Lab, Alibaba Group</p><p><a href="index.html">Home</a> &middot; <a href="model-selection.html">Model Selection</a> &middot; <a href="migration.html">Migration</a> &middot; <a href="use-cases.html">Use Cases</a> &middot; <a href="deployment-matrix.html">Deployment</a> &middot; <a href="agent.html">Agent</a> &middot; <a href="benchmark.html">Benchmark</a> &middot; <a href="https://github.com/modelscope/FunASR">GitHub</a></p></footer>
-</body></html>
+result = model.generate(input="meeting.wav")
+</code></pre>
+<p>Switch to Paraformer when your workload is Mandarin-only and you want character-level timestamps or hotwords.</p>
+<span data-legacy-doc-anchor="decision-table" id="decision"></span><h2 id="decision-table">Decision table</h2>
+<table>
+<thead>
+<tr>
+<th>Need</th>
+<th>Start with</th>
+<th>Why</th>
+<th>Next doc</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Fast multilingual private transcription</td>
+<td>SenseVoice-Small</td>
+<td>Strong default with ASR, emotion tags, audio event tags, and CPU viability.</td>
+<td><a href="https://github.com/modelscope/FunASR/blob/main/README.md#quick-start">README quick start</a></td>
+</tr>
+<tr>
+<td>Mandarin production ASR</td>
+<td>Paraformer-Large</td>
+<td>Mature Chinese ASR path with VAD and punctuation.</td>
+<td><a href="https://www.funasr.com/en/docs/quickstart.html">Tutorial</a></td>
+</tr>
+<tr>
+<td>English-only route in the OpenAI API example</td>
+<td><code>paraformer-en</code> alias</td>
+<td>Smaller English route for API compatibility checks.</td>
+<td><a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api">OpenAI API example</a></td>
+</tr>
+<tr>
+<td>LLM-based ASR or Chinese/English/Japanese + dialect experiments</td>
+<td>Fun-ASR-Nano</td>
+<td>LLM-based model path; use vLLM when decoder throughput matters.</td>
+<td><a href="https://www.funasr.com/en/docs/vllm.html">vLLM guide</a></td>
+</tr>
+<tr>
+<td>Offline long-form ASR with anonymous diarization</td>
+<td>MOSS-Transcribe-Diarize</td>
+<td>One offline request returns transcription, timestamps, and per-recording anonymous speaker labels; it does not identify known people and needs no external VAD or speaker model.</td>
+<td><a href="https://www.funasr.com/en/docs/moss-transcribe-diarize.html">MOSS deployment guide</a></td>
+</tr>
+<tr>
+<td>Live captions or call-center streams</td>
+<td>Runtime WebSocket service</td>
+<td>Designed for long-lived streaming sessions and partial results.</td>
+<td><a href="https://www.funasr.com/en/docs/runtime-guide.html">Runtime service docs</a></td>
+</tr>
+<tr>
+<td>Batch archive processing</td>
+<td>SenseVoice-Small or Paraformer-Large</td>
+<td>Stable offline transcription path; caller owns manifests, retries, and logs.</td>
+<td><a href="https://github.com/modelscope/FunASR/blob/main/examples/batch_asr_improved.py">Batch ASR example</a></td>
+</tr>
+<tr>
+<td>Migration from Whisper/cloud ASR</td>
+<td>SenseVoice-Small first, then benchmark alternatives</td>
+<td>Gives a strong baseline before deeper model-specific tuning.</td>
+<td><a href="https://www.funasr.com/en/docs/migration.html">Migration guide</a></td>
+</tr>
+</tbody>
+</table>
+<span data-legacy-doc-anchor="openai-compatible-api-aliases" id="aliases"></span><h2 id="openai-compatible-api-aliases">OpenAI-compatible API aliases</h2>
+<p>The <code>examples/openai_api</code> server exposes short aliases so application teams do not need to know model repository IDs:</p>
+<table>
+<thead>
+<tr>
+<th>Alias</th>
+<th>Underlying path</th>
+<th>Use when</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>sensevoice</code></td>
+<td><code>iic/SenseVoiceSmall</code></td>
+<td>You want the default private speech API with multilingual ASR, event tags, and good CPU/GPU behavior.</td>
+</tr>
+<tr>
+<td><code>paraformer</code></td>
+<td><code>paraformer-zh</code> with VAD and punctuation</td>
+<td>You want a Mandarin-oriented production route.</td>
+</tr>
+<tr>
+<td><code>paraformer-en</code></td>
+<td><code>paraformer-en</code> with VAD</td>
+<td>You want a compact English route in OpenAI-style clients.</td>
+</tr>
+<tr>
+<td><code>fun-asr-nano</code></td>
+<td><code>FunAudioLLM/Fun-ASR-Nano-2512</code></td>
+<td>You are evaluating LLM-based ASR for Chinese, English, Japanese, and Chinese dialect/accent coverage, or want to test vLLM acceleration.</td>
+</tr>
+</tbody>
+</table>
+<p>For Ascend NPU deployments, treat <code>fun-asr-nano</code> separately from SenseVoice / Paraformer. The Fun-ASR-Nano PyTorch <code>AutoModel</code> path has community compatibility evidence on 310P3 after the NPU autocast fix, but it was much slower than CPU in that smoke test; <code>AutoModelVLLM</code> still depends on vLLM-Ascend operator support and has hit Qwen3 rotary / <code>TransData</code> failures. Use CUDA/vLLM, standard PyTorch CPU/GPU, or GGUF runtime for production unless you are actively validating an Ascend backend.</p>
+<p>Check the live service before wiring clients:</p>
+<pre id="code-2"><code class="language-bash">curl http://localhost:8000/v1/models
+python examples/openai_api/smoke_test.py --base-url http://localhost:8000 --model sensevoice
+</code></pre>
+<p>For SDK, JavaScript, workflow, Postman, OpenAPI, Docker, and Kubernetes paths, start from the <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api">OpenAI API example</a>.</p>
+<span data-legacy-doc-anchor="runtime-choice-by-workload" id="runtime"></span><h2 id="runtime-choice-by-workload">Runtime choice by workload</h2>
+<table>
+<thead>
+<tr>
+<th>Workload</th>
+<th>Runtime path</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Notebook or one-off evaluation</td>
+<td>Python <code>AutoModel</code></td>
+<td>Shortest path for install, model download, and output-shape checks.</td>
+</tr>
+<tr>
+<td>Internal HTTP service</td>
+<td>OpenAI-compatible API</td>
+<td>Reuse OpenAI-style clients, Dify, n8n, LangChain, AutoGen, and HTTP nodes.</td>
+</tr>
+<tr>
+<td>Repeatable local container demo</td>
+<td>Docker Compose API</td>
+<td>CPU-first smoke test; adapt the image before using CUDA.</td>
+</tr>
+<tr>
+<td>Internal cluster service</td>
+<td>Kubernetes API template</td>
+<td>Private <code>ClusterIP</code>, persistent model cache, <code>/health</code> probes, and port-forward smoke test.</td>
+</tr>
+<tr>
+<td>Live audio</td>
+<td>Runtime WebSocket service</td>
+<td>Validate chunk size, VAD, endpointing, reconnects, and client backpressure with real audio.</td>
+</tr>
+<tr>
+<td>LLM-based ASR throughput</td>
+<td>vLLM path for Fun-ASR-Nano</td>
+<td>vLLM accelerates autoregressive decoding; it does not apply to non-autoregressive Paraformer.</td>
+</tr>
+</tbody>
+</table>
+<p>See the <a href="https://www.funasr.com/en/docs/deployment-matrix.html">deployment matrix</a> when you are choosing between these paths.</p>
+<span data-legacy-doc-anchor="benchmark-before-committing" id="benchmark"></span><h2 id="benchmark-before-committing">Benchmark before committing</h2>
+<p>Do not choose a model from a single clean demo file. Use a small representative set first:</p>
+<ul>
+<li>20-50 audio files that cover short clips, long meetings, silence, noise, overlapping speakers, domain vocabulary, and target languages.</li>
+<li>Record model name, model revision, FunASR version, device, CPU/GPU type, CUDA/PyTorch version, runtime path, batch size, and whether warmup/model download time is excluded.</li>
+<li>Track quality with your normal WER/CER or human review process, not only transcript readability.</li>
+<li>Track latency, throughput, memory, failures, and upload size limits together.</li>
+<li>Keep at least one public sample for smoke tests and at least one private realistic sample for deployment validation.</li>
+</ul>
+<p>For migration work, use the <a href="https://github.com/modelscope/FunASR/blob/main/examples/migration">migration benchmark example</a> and the <a href="https://www.funasr.com/en/docs/migration.html">migration guide</a>.</p>
+<h2 id="practical-recommendations">Practical recommendations</h2>
+<ul>
+<li>With a GPU, default to Fun-ASR-Nano — the flagship LLM-based model for Chinese, English, Japanese, and Chinese dialects/accents, strongest on hard, contextual, and proper-noun-heavy audio. For the separate 31-language checkpoint, use Fun-ASR-MLT-Nano.</li>
+<li>On CPU, or for multilingual + emotion workloads, use SenseVoice-Small (fast non-autoregressive, CPU-viable).</li>
+<li>Use Paraformer when your production traffic is primarily Mandarin and you want timestamps or hotwords.</li>
+<li>For offline long recordings that need anonymous per-recording speaker labels in the same request, use MOSS-Transcribe-Diarize; it is not a realtime WebSocket or known-person identification path.</li>
+<li>Use the streaming runtime when partial results and long-lived connections matter more than a single final transcript.</li>
+<li>Keep model aliases stable in production runbooks so benchmark results and bug reports are reproducible.</li>
+<li>Open a <a href="https://github.com/modelscope/FunASR/issues/new?template=deployment_help.md">Deployment Help issue</a> with model, device, command, logs, audio duration, and runtime path when you get stuck.</li>
+</ul></article>
+<nav aria-label="Adjacent documents" class="docs-next">
+<a href="https://www.funasr.com/en/docs/python-api.html">← Python SDK: AutoModel</a><a href="https://www.funasr.com/en/docs/command-line.html">Command-line transcription →</a> </nav>
+</div>
+<aside class="docs-toc"><strong>On this page</strong><div class="toc">
+<ul>
+<li><a href="#funasr-model-selection-guide">FunASR Model Selection Guide</a><ul>
+<li><a href="#fast-default-path">Fast default path</a></li>
+<li><a href="#decision-table">Decision table</a></li>
+<li><a href="#openai-compatible-api-aliases">OpenAI-compatible API aliases</a></li>
+<li><a href="#runtime-choice-by-workload">Runtime choice by workload</a></li>
+<li><a href="#benchmark-before-committing">Benchmark before committing</a></li>
+<li><a href="#practical-recommendations">Practical recommendations</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</aside></div>
+</main>
+<footer class="site-footer">
+<div>
+<strong>FunASR</strong>
+<p>Open speech infrastructure for production deployment.</p>
+</div>
+<nav aria-label="Official repositories" class="footer-repositories" data-footer-repositories="">
+<strong>Official repositories</strong>
+<div class="footer-links">
+<a href="https://www.funasr.com/go/fun-asr">Fun-ASR</a>
+<a href="https://www.funasr.com/go/sensevoice">SenseVoice</a>
+<a href="https://www.funasr.com/go/funclip">FunClip</a>
+</div>
+</nav>
+<div class="footer-links">
+<a href="https://www.funasr.com/en/deploy/">Deploy</a>
+<a href="https://www.funasr.com/en/docs/">Docs</a>
+<a href="https://www.funasr.com/go/releases">Releases</a>
+<a href="https://www.funasr.com/en/donors.html">Donors</a>
+</div>
+</footer>
+<script defer="" src="assets/js/site.d446f5fbcfe2.js"></script>
+<script defer="" src="assets/js/experience.3f688a12942a.js"></script>
+</body>
+</html>

@@ -1,27 +1,538 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<meta name="description" content="Deploy the third-party OpenMOSS MOSS-Transcribe-Diarize model through FunASR, vLLM, SGLang Omni, LocalAI, Docker, Kubernetes, and FunClip.">
-<meta property="og:title" content="MOSS-Transcribe-Diarize deployment guide">
-<meta property="og:description" content="Long-form transcription, timestamps, and anonymous speaker labels through the FunASR ecosystem.">
-<meta property="og:type" content="website"><meta property="og:url" content="https://modelscope.github.io/FunASR/moss-transcribe-diarize.html">
-<link rel="canonical" href="https://modelscope.github.io/FunASR/moss-transcribe-diarize.html"><meta property="og:site_name" content="FunASR">
-<title>MOSS-Transcribe-Diarize deployment guide</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css"></head><body>
-<nav class="nav"><div class="container"><a href="index.html" class="nav-logo">FunASR</a><div class="nav-links"><a href="index.html">Home</a><a href="deployment-matrix.html" class="active">Deployment</a><a href="api.html">API</a><a href="agent.html">Agent</a></div><div class="lang-dropdown"><button class="lang-btn">English</button><div class="lang-menu"><a href="moss-transcribe-diarize.html" class="current">English</a><a href="zh/moss-transcribe-diarize.html">中文</a></div></div><a href="https://github.com/modelscope/FunASR" class="nav-github">GitHub</a></div></nav>
-<div class="content"><div class="container narrow">
-<h1>MOSS-Transcribe-Diarize</h1>
-<p>FunASR integrates the third-party Apache-2.0 model <a href="https://huggingface.co/OpenMOSS-Team/MOSS-Transcribe-Diarize"><code>OpenMOSS-Team/MOSS-Transcribe-Diarize</code></a> published by OpenMOSS. It jointly generates long-form transcription, timestamps, and anonymous labels such as <code>S01</code> and <code>S02</code>, without an external VAD or speaker pipeline.</p>
-<div class="toc-grid"><a href="#contract">Contract</a><a href="#server">FunASR server</a><a href="#runtimes">Runtime matrix</a><a href="#evidence">Evidence</a><a href="#boundaries">Boundaries</a></div>
-<section id="contract"><h2>Output contract</h2><table><tr><th>Field</th><th>Meaning</th></tr><tr><td><code>text</code></td><td>Readable transcript without MOSS control tags.</td></tr><tr><td><code>timestamp</code></td><td>Segment-level start and end times in milliseconds.</td></tr><tr><td><code>sentence_info</code></td><td>Normalized segments with <code>start</code>, <code>end</code>, <code>text</code>, and anonymous <code>spk</code>.</td></tr><tr><td><code>raw_text</code></td><td>Exact tagged model generation retained for auditing.</td></tr></table></section>
-<section id="server"><h2>FunASR OpenAI-compatible service</h2><pre><code>python -m pip install "transformers&gt;=5.6,&lt;6" fastapi uvicorn python-multipart
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>MOSS transcription &amp; diarization - FunASR</title>
+<meta content="MOSS transcription &amp; diarization" name="description"/>
+<meta content="#ffffff" name="theme-color"/>
+<link href="https://www.funasr.com/en/docs/moss-transcribe-diarize.html" rel="canonical"/>
+<link href="https://www.funasr.com/docs/moss-transcribe-diarize.html" hreflang="zh-CN" rel="alternate"/>
+<link href="https://www.funasr.com/en/docs/moss-transcribe-diarize.html" hreflang="en" rel="alternate"/>
+<meta content="website" property="og:type"/>
+<meta content="MOSS transcription &amp; diarization - FunASR" property="og:title"/>
+<meta content="MOSS transcription &amp; diarization" property="og:description"/>
+<meta content="https://www.funasr.com/en/docs/moss-transcribe-diarize.html" property="og:url"/>
+<link href="assets/css/site.d651b1dbf605.css" rel="stylesheet"/>
+<link href="assets/css/experience.5803993934f8.css" rel="stylesheet"/>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "SoftwareApplication", "applicationCategory": "DeveloperApplication", "codeRepository": "https://github.com/modelscope/FunASR", "dateModified": "2026-09-01", "license": "https://github.com/modelscope/FunASR/blob/main/LICENSE", "name": "FunASR", "operatingSystem": "Linux, macOS, Windows", "url": "https://www.funasr.com/en/docs/moss-transcribe-diarize.html"}</script>
+</head>
+<body data-copy-icon="assets/lucide/copy.ea80e566c7a1.svg" data-language="en" data-route="/en/docs/moss-transcribe-diarize.html">
+<a class="skip-link" href="#main">Skip to main content</a>
+<header class="site-header">
+<a aria-label="FunASR home" class="brand" href="https://www.funasr.com/en/">
+<span aria-hidden="true" class="brand-mark">F</span>
+<span>FunASR</span>
+</a>
+<button aria-controls="primary-navigation" aria-expanded="false" class="icon-button menu-button" data-menu-toggle="" title="Open navigation" type="button">
+<img alt="" src="assets/lucide/menu.90a31b3ab1cf.svg"/>
+</button>
+<nav aria-label="Primary navigation" class="primary-navigation" data-primary-nav="" id="primary-navigation">
+<a href="https://www.funasr.com/en/">Product</a>
+<a href="https://www.funasr.com/en/deploy/">Deploy</a>
+<a href="https://www.funasr.com/en/models.html">Models</a>
+<a href="https://www.funasr.com/en/benchmarks.html">Benchmarks</a>
+<a href="https://www.funasr.com/en/ecosystem.html">Ecosystem</a>
+<a href="https://www.funasr.com/en/blog/">Blog</a>
+<a href="https://www.funasr.com/en/docs/">Docs</a>
+<a href="https://www.funasr.com/en/donors.html">Donors</a>
+</nav>
+<div class="header-actions">
+<a class="icon-link" href="https://www.funasr.com/docs/moss-transcribe-diarize.html" title="简体中文">
+<img alt="" src="assets/lucide/languages.ae9048feb2c7.svg"/>
+<span>中文</span>
+</a>
+<a aria-label="GitHub" class="icon-button" href="https://www.funasr.com/go/github" title="GitHub">
+<img alt="" src="assets/lucide/github.793554449a30.svg"/>
+</a>
+</div>
+</header>
+<main id="main">
+<div class="docs-layout">
+<aside class="docs-sidebar">
+<a class="docs-home" href="https://www.funasr.com/en/docs/">Documentation</a>
+<details class="docs-navigation" open="">
+<summary class="docs-navigation-toggle">Browse topics</summary>
+<details open="">
+<summary>Get started</summary>
+<nav aria-label="Get started">
+<a href="https://www.funasr.com/en/docs/installation.html">Installation &amp; environment checks</a>
+<a href="https://www.funasr.com/en/docs/quickstart.html">Your first transcription</a>
+<a href="https://www.funasr.com/en/docs/python-api.html">Python SDK: AutoModel</a>
+<a href="https://www.funasr.com/en/docs/model-selection.html">Choose your first model</a>
+<a href="https://www.funasr.com/en/docs/command-line.html">Command-line transcription</a>
+<a href="https://www.funasr.com/en/docs/migration.html">Migrate from Whisper &amp; cloud APIs</a>
+</nav>
+</details>
+<details open="">
+<summary>Models &amp; capabilities</summary>
+<nav aria-label="Models &amp; capabilities">
+<a aria-current="page" href="https://www.funasr.com/en/docs/moss-transcribe-diarize.html">MOSS transcription &amp; diarization</a>
+<a href="https://www.funasr.com/en/docs/model-zoo.html">Model Zoo</a>
+</nav>
+</details>
+<details open="">
+<summary>Train &amp; extend</summary>
+<nav aria-label="Train &amp; extend">
+<a href="https://www.funasr.com/en/docs/training.html">Fine-tuning &amp; evaluation</a>
+<a href="https://www.funasr.com/en/docs/model-registration.html">Custom model registration</a>
+</nav>
+</details>
+<details open="">
+<summary>Deploy &amp; integrate</summary>
+<nav aria-label="Deploy &amp; integrate">
+<a href="https://www.funasr.com/en/docs/docker.html">Containers &amp; image selection</a>
+<a href="https://www.funasr.com/en/docs/runtime-guide.html">Serving entry points</a>
+<a href="https://www.funasr.com/en/docs/http-server.html">Python HTTP service</a>
+<a href="https://www.funasr.com/en/docs/kubernetes.html">Kubernetes deployment</a>
+<a href="https://www.funasr.com/en/docs/deployment-matrix.html">Runtime &amp; deployment matrix</a>
+<a href="https://www.funasr.com/en/docs/vllm.html">vLLM split-engine inference</a>
+<a href="https://www.funasr.com/en/docs/native-vllm.html">Native vLLM validation record</a>
+</nav>
+</details>
+<details open="">
+<summary>Evaluate &amp; operate</summary>
+<nav aria-label="Evaluate &amp; operate">
+<a href="https://www.funasr.com/en/docs/troubleshooting.html">Troubleshooting</a>
+<a href="https://www.funasr.com/en/docs/security.html">Service security boundaries</a>
+<a href="https://www.funasr.com/en/docs/benchmark-method.html">Reproducible performance tests</a>
+<a href="https://www.funasr.com/en/docs/realtime-benchmark.html">Realtime WebSocket benchmarking</a>
+</nav>
+</details>
+<details open="">
+<summary>Applications &amp; ecosystem</summary>
+<nav aria-label="Applications &amp; ecosystem">
+<a href="https://www.funasr.com/en/docs/use-cases.html">Use cases &amp; examples</a>
+<a href="https://www.funasr.com/en/docs/community.html">Community integrations</a>
+<a href="https://www.funasr.com/en/docs/repositories.html">Repositories &amp; contribution paths</a>
+<a href="https://www.funasr.com/en/docs/javascript.html">JavaScript clients</a>
+<a href="https://www.funasr.com/en/docs/workflows.html">Workflow integrations</a>
+</nav>
+</details>
+<details open="">
+<summary>Protocols &amp; reference</summary>
+<nav aria-label="Protocols &amp; reference">
+<a href="https://www.funasr.com/en/docs/service-api.html">HTTP API contract</a>
+<a href="https://www.funasr.com/en/docs/websocket-protocol.html">C++ WebSocket protocol</a>
+<a href="https://www.funasr.com/en/docs/onnx-output.html">ONNX binary output contract</a>
+</nav>
+</details>
+<a href="https://www.funasr.com/en/deploy/">Deployment guides →</a>
+</details>
+</aside>
+<div class="docs-body">
+<nav aria-label="Breadcrumbs" class="breadcrumbs"><a href="https://www.funasr.com/en/">FunASR</a><span>/</span><a href="https://www.funasr.com/en/docs/">Docs</a><span>/</span><span>MOSS transcription &amp; diarization</span></nav>
+<header class="docs-title"><h1>MOSS transcription &amp; diarization</h1><a class="source-link" data-source-link="" href="https://github.com/modelscope/FunASR/blob/main/docs/moss_transcribe_diarize.md">View / edit source ↗</a></header>
+<article class="docs-article"><div class="source-title-anchor" id="moss-transcribe-diarize-in-the-funasr-ecosystem"></div>
+<p><a href="https://www.funasr.com/docs/moss-transcribe-diarize.html">中文</a></p>
+<p>This guide connects the third-party
+<a href="https://github.com/OpenMOSS/MOSS-Transcribe-Diarize">OpenMOSS/MOSS-Transcribe-Diarize</a>
+model to the FunASR deployment ecosystem. The model is published by OpenMOSS
+under Apache-2.0; it is not a FunASR model. FunASR provides an adapter for its
+public Transformers, vLLM, and SGLang Omni interfaces while retaining the
+OpenMOSS model name, license, and upstream revision.</p>
+<p>MOSS-Transcribe-Diarize jointly generates transcription, timestamps, and
+speaker labels such as <code>[S01]</code>. An application therefore does not need to
+assemble an external VAD, ASR, and diarization pipeline. This is a deployment
+property, not a claim that the model has no internal segmentation or chunking.
+The labels are anonymous within a recording: <code>[S01]</code> does not identify a known
+person, verify an enrolled voiceprint, or necessarily map to <code>[S01]</code> in another
+recording.</p>
+<h2 id="pinned-sources">Pinned sources</h2>
+<p>This guide was verified against:</p>
+<ul>
+<li>source: <code>OpenMOSS/MOSS-Transcribe-Diarize@cb765f2b0fe6f7a298aa2002e2281ae693d1f3c3</code></li>
+<li>model: <code>OpenMOSS-Team/MOSS-Transcribe-Diarize@e8681d68e7042738ffca8ac8212bc8fcb1131ab8</code></li>
+<li>license: Apache-2.0 in the pinned upstream source and model metadata</li>
+<li>vLLM release: <code>v0.27.1@6e448d0ea9bf3d88d898b65449ca6dc2aec170ac</code></li>
+<li>vLLM CUDA 12.9 x86_64 wheel SHA-256:
+  <code>bf0d52faa2a51e7a01c6856a7a8a2d1307fd0ff711415d34168a67ffac0fa47b</code></li>
+</ul>
+<p>Pin all three revisions. The model uses <code>trust_remote_code</code>; do not execute a
+floating model revision in a production service.</p>
+<span data-legacy-doc-anchor="funasr-automodel-contract" id="contract"></span><h2 id="funasr-automodel-contract">FunASR AutoModel contract</h2>
+<p>Use an isolated Python 3.10+ environment with Transformers 5.6 or newer for
+the local backend. MOSS performs long-form transcription and speaker
+diarization in one generation, so do <strong>not</strong> pass <code>vad_model</code> or <code>spk_model</code>.
+External VAD segmentation would break consistent anonymous speaker assignment
+across chunks.</p>
+<pre id="code-0"><code class="language-python">from funasr import AutoModel
+
+model = AutoModel(
+    model="OpenMOSS-Team/MOSS-Transcribe-Diarize",
+    model_revision="e8681d68e7042738ffca8ac8212bc8fcb1131ab8",
+    backend="hf",
+    device="cuda:0",
+    dtype="bf16",
+    attn_implementation="sdpa",
+    disable_update=True,
+)
+
+result = model.generate("audio.wav", max_new_tokens=5120)[0]
+print(result["text"])
+for segment in result["sentence_info"]:
+    print(segment["start"], segment["end"], segment["spk"], segment["text"])
+</code></pre>
+<p>The adapter preserves the raw tagged generation in <code>raw_text</code> and returns the
+common FunASR fields:</p>
+<ul>
+<li><code>text</code>: readable transcript without MOSS control tags;</li>
+<li><code>timestamp</code>: segment-level <code>[start_ms, end_ms]</code> pairs;</li>
+<li><code>sentence_info</code>: <code>start</code>, <code>end</code>, <code>text</code>, <code>sentence</code>, <code>spk</code>, and <code>timestamp</code>;</li>
+<li><code>raw_text</code>: exact <code>[start][Sxx]text[end]</code> generation for auditing.</li>
+</ul>
+<p>If the parser cannot prove the tagged structure, it leaves the model text
+visible in <code>text</code> and <code>raw_text</code> and returns empty timestamp/segment arrays
+instead of silently inventing speaker metadata.</p>
+<p>The same result contract can wrap an already running vLLM service without
+downloading local weights:</p>
+<pre id="code-1"><code class="language-python">from funasr import AutoModel
+
+model = AutoModel(
+    model="OpenMOSS-Team/MOSS-Transcribe-Diarize",
+    backend="vllm",
+    vllm_base_url="http://127.0.0.1:8898/v1",
+    vllm_model="moss-transcribe-diarize",
+    vllm_response_format="diarized_json",
+    disable_update=True,
+)
+result = model.generate("audio.wav", max_completion_tokens=8192)[0]
+</code></pre>
+<p>The vLLM adapter sends the documented OpenAI-compatible multipart request and
+normalizes the official speaker-attributed <code>segments</code> directly into
+<code>sentence_info</code>. Authentication can be supplied with <code>vllm_api_key</code>; keep it
+in a secret store rather than source code.</p>
+<p><code>vllm_response_format="diarized_json"</code> is the structured production path on
+the pinned vLLM revision. The compatibility default remains <code>json</code> so existing
+clients keep the exact tagged generation in <code>raw_text</code>; in structured mode,
+<code>raw_text</code> is the cleaned <code>text</code> returned by vLLM and the authoritative speaker
+metadata is in <code>sentence_info</code>.</p>
+<span data-legacy-doc-anchor="funasr-openai-compatible-service" id="server"></span><span data-legacy-doc-anchor="funasr-openai-compatible-service" id="evidence"></span><h2 id="funasr-openai-compatible-service">FunASR OpenAI-compatible service</h2>
+<p>The built-in offline HTTP service exposes the same normalized result through
+<code>/v1/audio/transcriptions</code>. It loads the pinned Transformers revision and does
+not attach an external VAD or speaker model:</p>
+<pre id="code-2"><code class="language-bash">python -m pip install "transformers&gt;=5.6,&lt;6" fastapi uvicorn python-multipart
 funasr-server --model moss-transcribe-diarize --device cuda:0 --port 8000
 
 curl -fsS http://127.0.0.1:8000/v1/audio/transcriptions \
   -F file=@meeting.wav \
   -F model=moss-transcribe-diarize \
-  -F response_format=verbose_json</code></pre><p>The response preserves native anonymous speaker segments. A generic <code>spk=true</code> field does not start a second diarization model for MOSS.</p></section>
-<section id="runtimes"><h2>Deployment paths</h2><table><tr><th>Path</th><th>Use when</th><th>Contract</th></tr><tr><td>FunASR server</td><td>You need a self-hosted HF GPU endpoint, Docker Compose, or Kubernetes.</td><td><code>verbose_json</code> with speaker segments.</td></tr><tr><td>vLLM</td><td>You operate its scheduler and need the native audio endpoint.</td><td><code>diarized_json</code>; FunASR can normalize it through <code>AutoModel</code>.</td></tr><tr><td>SGLang Omni</td><td>You use its native MOSS pipeline.</td><td><code>verbose_json</code>; FunASR validates speaker prefixes before normalization.</td></tr><tr><td>LocalAI / moss-transcribe.cpp</td><td>You need a third-party GGUF CPU or desktop-edge path.</td><td>Independent C++ implementation; validate its output separately.</td></tr><tr><td>FunClip</td><td>You need speaker-aware SRT and clips.</td><td>Consumes the normalized <code>sentence_info</code> contract.</td></tr></table><p><a href="https://www.funasr.com/en/deploy/moss-transcribe-diarize.html">Open the production deployment hub for complete pinned commands →</a></p></section>
-<section id="evidence"><h2>Verified service smoke</h2><p>On one H100 80GB with Transformers <code>5.16.0.dev0</code>, Torch <code>2.11.0+cu130</code>, and model revision <code>e8681d68</code>, the real FunASR HTTP endpoint processed the bundled 6.0-second sample and returned HTTP 200, <code>duration=6.0</code>, and one non-empty monotonic segment labelled <code>S01</code>. This proves the service contract only, not accuracy, throughput, concurrency, or capacity.</p></section>
-<section id="boundaries"><h2>Production boundaries</h2><ul><li>MOSS is owned and published by OpenMOSS; FunASR owns this adapter and deployment contract.</li><li>Pin and audit the model revision because the HF path uses <code>trust_remote_code</code>.</li><li>MOSS is an offline long-form model and is not exposed by the realtime WebSocket service.</li><li>Speaker labels are anonymous clustering labels, not known-person identity or voiceprint verification.</li><li>Do not externally VAD-split a meeting when global speaker continuity matters.</li></ul><p><a href="https://github.com/modelscope/FunASR/blob/main/docs/moss_transcribe_diarize.md">Repository guide</a> · <a href="https://github.com/OpenMOSS/MOSS-Transcribe-Diarize">OpenMOSS upstream</a> · <a href="https://www.funasr.com/en/blog/funclip-v2-2-0-moss-speaker-clipping.html">FunClip integration</a></p></section>
-</div></div><footer><p>FunASR &middot; Tongyi Lab, Alibaba Group</p><p><a href="index.html">Home</a> &middot; <a href="deployment-matrix.html">Deployment</a> &middot; <a href="https://github.com/modelscope/FunASR">GitHub</a></p></footer></body></html>
+  -F response_format=verbose_json
+</code></pre>
+<p>The response contains <code>text</code>, audio <code>duration</code>, and <code>segments</code> with <code>start</code>,
+<code>end</code>, <code>text</code>, and anonymous <code>speaker</code> labels. The request does not need
+<code>spk=true</code>; if a generic client sends it, the service still uses MOSS's native
+labels and does not start a second diarization pipeline.</p>
+<h3 id="open-webui">Open WebUI</h3>
+<p><a href="https://github.com/open-webui/open-webui">Open WebUI</a> can use this service as
+an OpenAI-compatible speech-to-text provider. In <strong>Admin Panel &gt; Settings &gt;
+Audio</strong>, select the OpenAI STT engine, set <strong>OpenAI API Base URL</strong> to
+<code>http://funasr:8000/v1</code> (or the reachable host address), select
+<code>moss-transcribe-diarize</code>, and keep the request format as <code>multipart</code>. Open
+WebUI then sends the selected model, optional language, and complete audio file
+to <code>/v1/audio/transcriptions</code>.</p>
+<p>MOSS remains an offline long-form model: this enables file transcription in
+Open WebUI, not a realtime microphone/WebSocket diarization path.</p>
+<p>For a reproducible GPU container, build from the repository root with
+<code>examples/openai_api/docker-compose.moss.yml</code>. Kubernetes operators can build
+the same <code>funasr-moss-api:local</code> image and apply
+<code>examples/openai_api/kubernetes/funasr-moss-api.yaml</code>; replace the local image
+reference with the immutable digest from their registry before rollout.</p>
+<p>MOSS is an offline long-form model, so it is not exposed by FunASR's realtime
+WebSocket service. Use the HTTP endpoint for complete files. FunClip consumes
+the same <code>sentence_info</code> contract for speaker-aware subtitles and clips.</p>
+<p>The built-in service path was reproduced on one H100 80GB with Transformers
+<code>5.16.0.dev0</code> and Torch <code>2.11.0+cu130</code>. The pinned model processed the bundled
+6.000-second sample (<code>ea03e1f473ad1618a03da3327a545369cb8f6f06cb0f4115535e5a866167d47e</code>)
+through the real HTTP endpoint and returned one non-empty monotonic segment
+labelled <code>S01</code>, with <code>duration=6.0</code>. This is a functional service-contract
+smoke, not an accuracy, throughput, concurrency, or production-capacity claim.</p>
+<span data-legacy-doc-anchor="choose-a-serving-path" id="runtimes"></span><h2 id="choose-a-serving-path">Choose a serving path</h2>
+<table>
+<thead>
+<tr>
+<th>Path</th>
+<th>Environment</th>
+<th>Response contract</th>
+<th>Use when</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>vLLM</td>
+<td>CUDA 12 (<code>cu129</code>) or CUDA 13 (<code>cu130</code>)</td>
+<td><code>response_format=diarized_json</code> returns OpenAI-compatible speaker segments; <code>response_format=json</code> keeps raw <code>[start][Sxx]text[end]</code> text</td>
+<td>You already operate vLLM or need its scheduler</td>
+</tr>
+<tr>
+<td>SGLang Omni</td>
+<td>CUDA 13 in the current upstream guide</td>
+<td><code>response_format=verbose_json</code> returns parsed segments</td>
+<td>You need structured speaker segments directly from the API</td>
+</tr>
+<tr>
+<td>Transformers</td>
+<td>PyTorch process</td>
+<td>Python objects and raw tagged text</td>
+<td>Evaluation, debugging, or custom preprocessing</td>
+</tr>
+<tr>
+<td>moss-transcribe.cpp / LocalAI</td>
+<td>C++17, ggml, and GGUF on CPU or ggml GPU backends</td>
+<td>LocalAI's OpenAI-compatible transcription endpoint</td>
+<td>You need quantized GGUF or edge deployment without Python/PyTorch on the inference host</td>
+</tr>
+</tbody>
+</table>
+<p>The two HTTP backends share <code>/v1/audio/transcriptions</code>, but their documented
+response formats are not interchangeable. The pinned vLLM revision supports
+<code>diarized_json</code>; test the exact server revision before promising <code>segments</code>.</p>
+<h2 id="vllm">vLLM</h2>
+<p>Create an isolated environment and install the verified vLLM release:</p>
+<pre id="code-3"><code class="language-bash">uv venv --python 3.12 .venv-moss
+curl -fL \
+  https://github.com/vllm-project/vllm/releases/download/v0.27.1/vllm-0.27.1%2Bcu129-cp38-abi3-manylinux_2_28_x86_64.whl \
+  -o vllm-0.27.1+cu129-cp38-abi3-manylinux_2_28_x86_64.whl
+echo "bf0d52faa2a51e7a01c6856a7a8a2d1307fd0ff711415d34168a67ffac0fa47b  vllm-0.27.1+cu129-cp38-abi3-manylinux_2_28_x86_64.whl" \
+  | sha256sum -c -
+uv pip install --python .venv-moss/bin/python --torch-backend=auto \
+  "vllm[audio] @ file://$PWD/vllm-0.27.1+cu129-cp38-abi3-manylinux_2_28_x86_64.whl"
+</code></pre>
+<p>The <code>audio</code> extra is required. A plain <code>vllm</code> install can start the server but
+returns HTTP 400 (<code>Invalid or unsupported audio file</code>) because no audio decoder
+is installed.</p>
+<p>Start the service with the immutable model revision:</p>
+<pre id="code-4"><code class="language-bash">CUDA_VISIBLE_DEVICES=0 .venv-moss/bin/vllm serve \
+  OpenMOSS-Team/MOSS-Transcribe-Diarize \
+  --revision e8681d68e7042738ffca8ac8212bc8fcb1131ab8 \
+  --served-model-name moss-transcribe-diarize \
+  --trust-remote-code \
+  --host 127.0.0.1 \
+  --port 8898
+</code></pre>
+<p>Submit audio and validate the official speaker-attributed response:</p>
+<pre id="code-5"><code class="language-bash">curl -fsS http://127.0.0.1:8898/v1/audio/transcriptions \
+  -F file=@audio.wav \
+  -F model=moss-transcribe-diarize \
+  -F response_format=diarized_json \
+  -F max_completion_tokens=8192 \
+  -F temperature=0 \
+  | tee moss-transcription.json
+
+python - &lt;&lt;'PY'
+import json
+
+with open("moss-transcription.json", encoding="utf-8") as stream:
+    payload = json.load(stream)
+text = payload.get("text", "")
+segments = payload.get("segments", [])
+assert text.strip(), payload
+assert segments, payload
+assert all(
+    isinstance(item.get("speaker"), str)
+    and item.get("text")
+    and item.get("start") &lt;= item.get("end")
+    for item in segments
+), payload
+print(text, sorted({item["speaker"] for item in segments}))
+PY
+</code></pre>
+<p>For an audit of the model's compact tagged generation, repeat the request with
+<code>response_format=json</code> and verify <code>[S01]</code> appears in the returned <code>text</code>.</p>
+<p>For long recordings, test <code>max_completion_tokens</code> against the longest expected
+meeting. The FunASR vLLM adapter accepts both the OpenAI-compatible
+<code>max_completion_tokens</code> name and the compatibility alias <code>max_new_tokens</code>; the
+native name wins when both are present. A larger limit can increase memory use
+and tail latency.</p>
+<h3 id="reproduced-vllm-contract">Reproduced vLLM contract</h3>
+<p>The structured-response validation used vLLM 0.27.1, Torch
+<code>2.13.0+cu129</code>, and one H100 80GB. The 15.1685-second two-speaker probe
+(<code>43dccc068506439cb633b382b6b98185baa837363d08cc5f7152ca89b0fdc3c8</code>)
+returned two <code>diarized_json</code> segments labelled <code>S01</code> and <code>S02</code>; the same
+request through the FunASR adapter returned two monotonic <code>sentence_info</code>
+entries with the same speakers.</p>
+<p>The same environment also processed the two real Chinese long recordings from
+FunASR #3539:</p>
+<ul>
+<li>the 309.600-second sample
+  (<code>6561ee553c8f762aac4ebd65439d3414820761b547fa3a2edcea43b86a2abc02</code>)
+  returned 158 segments through 309.41 seconds with the default 5120-token
+  limit in 7.459 seconds;</li>
+<li>the 379.664-second sample
+  (<code>779899a3ce937dd7352b4db1ea53e3f6aa2cfef7109de0249082223c936f9372</code>)
+  truncated at 354.98 seconds with the default 5120-token limit, causing an
+  HTTP 400 for incomplete <code>diarized_json</code> tags. With
+  <code>max_completion_tokens=8192</code>, it returned 224 segments through 378.55
+  seconds in 10.516 seconds.</li>
+</ul>
+<p>MOSS corrected several proper-noun and near-homophone errors named by the
+reporter and preserved the semantic continuity of the foundation-statement
+phrase. It still emitted some short standalone segments, so this does not prove
+the subtitle-grouping issue is resolved. These measurements establish an exact
+input completeness boundary, not accuracy, throughput, or production capacity.</p>
+<p>Earlier raw-response validation on vLLM
+<code>0.23.1rc1.dev949+g68b4a1d58</code>, Torch <code>2.11.0+cu129</code>, and one H100 80GB found:</p>
+<ul>
+<li>the bundled 6.000-second sample
+  (<code>ea03e1f473ad1618a03da3327a545369cb8f6f06cb0f4115535e5a866167d47e</code>)
+  returned HTTP 200 and <code>[0.96][S01]... [5.94]</code>;</li>
+<li>an A + 0.8-second silence + B + 0.8-second silence + A probe
+  (<code>dbb32bcfed2e8226bedf64248a9f4a44685b293a4696d18fb4cfa701b04db912</code>)
+  returned HTTP 200 with <code>S01 -&gt; S02 -&gt; S01</code> and timestamps through 19.08 seconds.</li>
+</ul>
+<p>This proves the pinned API and speaker-return contract on those inputs. It is
+not a diarization accuracy result, overlap test, throughput benchmark, or
+production capacity claim.</p>
+<p>The older nightly commit
+<code>68b4a1d582818e67adc903bf1b8fc5a5447da2fa</code> predates vLLM
+<a href="https://github.com/vllm-project/vllm/pull/48543"><code>#48543</code></a>. It accepts
+<code>response_format=json</code> but returns HTTP 400 for <code>diarized_json</code>; upgrade to the
+verified release instead of silently retrying an expensive transcription.</p>
+<p>The FunASR adapter was also tested on both <code>backend="hf"</code> and
+<code>backend="vllm"</code> with model revision
+<code>e8681d68e7042738ffca8ac8212bc8fcb1131ab8</code>. The 15.1685-second two-speaker
+probe (<code>43dccc068506439cb633b382b6b98185baa837363d08cc5f7152ca89b0fdc3c8</code>)
+returned two monotonic segments labelled <code>S01</code> and <code>S02</code> through the common
+<code>AutoModel</code> result contract. The temporary vLLM worker was stopped after the
+test; this is a contract smoke test, not an accuracy benchmark.</p>
+<h2 id="moss-transcribecpp-and-localai">moss-transcribe.cpp and LocalAI</h2>
+<p><a href="https://github.com/localai-org/moss-transcribe.cpp"><code>localai-org/moss-transcribe.cpp</code></a>
+is a third-party C++17/ggml reimplementation maintained by the LocalAI team and
+licensed under MIT. The original OpenMOSS model weights remain Apache-2.0. It is
+not a FunASR <code>AutoModel</code> backend and is not interchangeable with the Python
+adapter above.</p>
+<p>Choose this path for GGUF quantization, CPU inference, or ggml
+CUDA/Metal/Vulkan/HIP backends. LocalAI
+<code>master@a7cc5873ef5b7c909fc9ff7d349d51738ba9bb05</code> includes a
+<code>moss-transcribe-cpp</code> backend and Hugging Face importer. The backend pins
+<code>moss-transcribe.cpp@190a569c13b4b247450f2fb3b2a431244e84833e</code>, while the
+importer recognizes <code>huggingface://mudler/moss-transcribe.cpp-gguf</code> and selects
+Q5_K by default. Before production, follow LocalAI's documentation and verify
+the backend package, GGUF SHA-256, actual hardware backend, and
+<code>/v1/audio/transcriptions</code> response. Do not treat upstream README performance
+claims as measurements of your host.</p>
+<h2 id="sglang-omni">SGLang Omni</h2>
+<p>Follow the pinned upstream SGLang Omni installation guide for CUDA 13, then
+download the immutable model snapshot and serve the local directory:</p>
+<pre id="code-6"><code class="language-bash">git clone https://github.com/sgl-project/sglang-omni.git
+git -C sglang-omni checkout 3f819f9cdae3d4eeec22f73306c9067a1ec2542e
+</code></pre>
+<p>This source pin includes the transcription API's <code>max_new_tokens</code> forwarding.
+The original #914 merge predates that request field, so it is not sufficient
+for the long-audio command below even though its published H100 benchmark
+remains useful upstream evidence.</p>
+<pre id="code-7"><code class="language-bash">hf download OpenMOSS-Team/MOSS-Transcribe-Diarize \
+  --revision e8681d68e7042738ffca8ac8212bc8fcb1131ab8 \
+  --local-dir .models/moss-transcribe-diarize
+
+sgl-omni serve \
+  --model-path .models/moss-transcribe-diarize \
+  --port 8898 \
+  --max-running-requests 16 \
+  --cuda-graph-max-bs 16 \
+  --mem-fraction-static 0.80
+</code></pre>
+<p>Request parsed segments:</p>
+<pre id="code-8"><code class="language-bash">curl -fsS http://127.0.0.1:8898/v1/audio/transcriptions \
+  -F file=@audio.wav \
+  -F model=OpenMOSS-Team/MOSS-Transcribe-Diarize \
+  -F response_format=verbose_json
+</code></pre>
+<p>Verify every segment has start/end timing and non-empty text. In SGLang Omni's
+current <code>verbose_json</code> contract, the speaker identifier is retained as the
+<code>[Sxx]</code> prefix in <code>segments[].text</code>; it is not a separate <code>speaker</code> field.
+Parse and validate that prefix before wiring the response into subtitles,
+meeting notes, or analytics.</p>
+<p>The FunASR adapter performs that validation and maps the official SGLang
+segments into the same <code>sentence_info</code> contract as the HF and vLLM paths:</p>
+<pre id="code-9"><code class="language-python">from funasr import AutoModel
+
+model = AutoModel(
+    model="OpenMOSS-Team/MOSS-Transcribe-Diarize",
+    backend="sglang",
+    sglang_base_url="http://127.0.0.1:8898/v1",
+    sglang_model="OpenMOSS-Team/MOSS-Transcribe-Diarize",
+    max_new_tokens=65536,
+    disable_update=True,
+)
+result = model.generate(input="audio.wav", max_new_tokens=65536)[0]
+for segment in result["sentence_info"]:
+    print(segment["start"], segment["end"], segment["spk"], segment["text"])
+</code></pre>
+<p>Do not pass <code>vad_model</code> or <code>spk_model</code>: MOSS performs segmentation and
+anonymous speaker attribution jointly, and external splitting can destroy
+speaker consistency across long turns. The adapter preserves the upstream
+tagged transcript in <code>raw_text</code>, strips only the validated <code>[Sxx]</code> prefix from
+each normalized segment, and fails closed if SGLang omits that prefix.</p>
+<p>The native runtime was merged in SGLang Omni
+<a href="https://github.com/sgl-project/sglang-omni/pull/914">#914</a>. Its single-H100
+Seed-TTS EN benchmark completed 1088/1088 clips with no request failures. WER
+was measured only after removing timestamp and speaker markup from
+single-speaker English clips, so it does not evaluate diarization or timestamp
+accuracy and is not a production capacity promise.</p>
+<span data-legacy-doc-anchor="production-validation" id="boundaries"></span><h2 id="production-validation">Production validation</h2>
+<p>Use real multi-speaker audio, not only a short single-speaker smoke sample:</p>
+<ul>
+<li>measure speaker consistency across long turns and speaker returns;</li>
+<li>test overlap, crosstalk, music, noise, and long silence;</li>
+<li>verify timestamp monotonicity and full-audio coverage;</li>
+<li>record GPU, CUDA, Torch, backend commit, model revision, audio duration,
+  generation limit, wall latency, and peak memory;</li>
+<li>keep authentication, TLS, request limits, and retention policy at the API
+  gateway; bind the model worker to a private address.</li>
+</ul>
+<p>When reporting a problem to FunASR, state that this is the OpenMOSS third-party
+path and include the exact backend and upstream revisions. Model architecture or
+weight issues belong upstream; deployment-center contract and documentation
+issues can be filed in FunASR.</p></article>
+<nav aria-label="Adjacent documents" class="docs-next">
+<a href="https://www.funasr.com/en/docs/migration.html">← Migrate from Whisper &amp; cloud APIs</a><a href="https://www.funasr.com/en/docs/model-zoo.html">Model Zoo →</a> </nav>
+</div>
+<aside class="docs-toc"><strong>On this page</strong><div class="toc">
+<ul>
+<li><a href="#moss-transcribe-diarize-in-the-funasr-ecosystem">MOSS-Transcribe-Diarize in the FunASR ecosystem</a><ul>
+<li><a href="#pinned-sources">Pinned sources</a></li>
+<li><a href="#funasr-automodel-contract">FunASR AutoModel contract</a></li>
+<li><a href="#funasr-openai-compatible-service">FunASR OpenAI-compatible service</a><ul>
+<li><a href="#open-webui">Open WebUI</a></li>
+</ul>
+</li>
+<li><a href="#choose-a-serving-path">Choose a serving path</a></li>
+<li><a href="#vllm">vLLM</a><ul>
+<li><a href="#reproduced-vllm-contract">Reproduced vLLM contract</a></li>
+</ul>
+</li>
+<li><a href="#moss-transcribecpp-and-localai">moss-transcribe.cpp and LocalAI</a></li>
+<li><a href="#sglang-omni">SGLang Omni</a></li>
+<li><a href="#production-validation">Production validation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</aside></div>
+</main>
+<footer class="site-footer">
+<div>
+<strong>FunASR</strong>
+<p>Open speech infrastructure for production deployment.</p>
+</div>
+<nav aria-label="Official repositories" class="footer-repositories" data-footer-repositories="">
+<strong>Official repositories</strong>
+<div class="footer-links">
+<a href="https://www.funasr.com/go/fun-asr">Fun-ASR</a>
+<a href="https://www.funasr.com/go/sensevoice">SenseVoice</a>
+<a href="https://www.funasr.com/go/funclip">FunClip</a>
+</div>
+</nav>
+<div class="footer-links">
+<a href="https://www.funasr.com/en/deploy/">Deploy</a>
+<a href="https://www.funasr.com/en/docs/">Docs</a>
+<a href="https://www.funasr.com/go/releases">Releases</a>
+<a href="https://www.funasr.com/en/donors.html">Donors</a>
+</div>
+</footer>
+<script defer="" src="assets/js/site.d446f5fbcfe2.js"></script>
+<script defer="" src="assets/js/experience.3f688a12942a.js"></script>
+</body>
+</html>
