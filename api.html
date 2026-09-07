@@ -5471,7 +5471,7 @@
         meta_data = {}
         if isinstance(data_in, torch.Tensor) and kwargs.get(&quot;data_type&quot;, &quot;sound&quot;) == &quot;fbank&quot;: # fbank
 </code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_kws/model.py#L199" target="_blank" rel="noopener noreferrer" class="src-more">View full source on GitHub →</a></details></div>
-<div class="api-detail" tabindex="-1" id="e73"><span class="dtag badge-c">class</span><h2><code>FsmnKWSConvert(encoder: str = None, encoder_conf: Optional[Dict] = None, ctc: str = None, ctc_conf: Optional[Dict] = None, ctc_weight: float = 1.0, input_size: int = 360, vocab_size: int = -1, blank_id: int = 0, **kwargs)</code></h2><div class="dmod">funasr.models.fsmn_kws · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_kws/model.py#L279" target="_blank" rel="noopener noreferrer">View on GitHub ↗</a></div><div class="ddoc"><ul>
+<div class="api-detail" tabindex="-1" id="e73"><span class="dtag badge-c">class</span><h2><code>FsmnKWSConvert(encoder: str = None, encoder_conf: Optional[Dict] = None, ctc: str = None, ctc_conf: Optional[Dict] = None, ctc_weight: float = 1.0, input_size: int = 360, vocab_size: int = -1, blank_id: int = 0, **kwargs)</code></h2><div class="dmod">funasr.models.fsmn_kws · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_kws/model.py#L280" target="_blank" rel="noopener noreferrer">View on GitHub ↗</a></div><div class="ddoc"><ul>
 <li><code>Author</code> — Speech Lab of DAMO Academy, Alibaba Group</li>
 <li><code>Deep</code> — FSMN for Large Vocabulary Continuous Speech Recognition</li>
 </ul>
@@ -5506,7 +5506,7 @@
                 input_size: Size/dimension parameter.
                 vocab_size: Size/dimension parameter.
                 blank_id: TODO.
-</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_kws/model.py#L279" target="_blank" rel="noopener noreferrer" class="src-more">View full source on GitHub →</a></details><h3 class="mt">Constructor</h3><div class="mblk"><a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_kws/model.py#L286" class="gh-link">L286</a><p>Initialize FsmnKWSConvert.</p>
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_kws/model.py#L280" target="_blank" rel="noopener noreferrer" class="src-more">View full source on GitHub →</a></details><h3 class="mt">Constructor</h3><div class="mblk"><a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_kws/model.py#L287" class="gh-link">L287</a><p>Initialize FsmnKWSConvert.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>encoder</code> — TODO.</li>
@@ -5519,11 +5519,11 @@
 <li><code>blank_id</code> — TODO.</li>
 <li><code>**kwargs</code> — Additional keyword arguments.</li>
 </ul>
-</div><h3 class="mt">Methods</h3><div class="mblk"><code>.to_kaldi_net()</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_kws/model.py#L331" target="_blank" rel="noopener noreferrer" class="gh-link">L331</a><div class="mdoc"><p>To kaldi net.</p>
+</div><h3 class="mt">Methods</h3><div class="mblk"><code>.to_kaldi_net()</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_kws/model.py#L332" target="_blank" rel="noopener noreferrer" class="gh-link">L332</a><div class="mdoc"><p>To kaldi net.</p>
 </div><details class="src-block"><summary>Source</summary><pre><code>    def to_kaldi_net(self):
 		    &quot;&quot;&quot;To kaldi net.&quot;&quot;&quot;
 		    return self.encoder.to_kaldi_net()
-</code></pre></details></div><div class="mblk"><code>.to_pytorch_net(kaldi_file)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_kws/model.py#L336" target="_blank" rel="noopener noreferrer" class="gh-link">L336</a><div class="mdoc"><p>To pytorch net.</p>
+</code></pre></details></div><div class="mblk"><code>.to_pytorch_net(kaldi_file)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_kws/model.py#L337" target="_blank" rel="noopener noreferrer" class="gh-link">L337</a><div class="mdoc"><p>To pytorch net.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>kaldi_file</code> — TODO.</li>
@@ -5536,12 +5536,12 @@
 		        &quot;&quot;&quot;
 		    return self.encoder.to_pytorch_net(kaldi_file)
 </code></pre></details></div></div>
-<div class="api-detail" tabindex="-1" id="e74"><span class="dtag badge-m">method</span><h2><code>FsmnKWSConvert.to_kaldi_net()</code></h2><div class="dmod">funasr.models.fsmn_kws.FsmnKWSConvert · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_kws/model.py#L331" target="_blank" rel="noopener noreferrer">View on GitHub ↗</a></div><div class="ddoc"><p>To kaldi net.</p>
+<div class="api-detail" tabindex="-1" id="e74"><span class="dtag badge-m">method</span><h2><code>FsmnKWSConvert.to_kaldi_net()</code></h2><div class="dmod">funasr.models.fsmn_kws.FsmnKWSConvert · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_kws/model.py#L332" target="_blank" rel="noopener noreferrer">View on GitHub ↗</a></div><div class="ddoc"><p>To kaldi net.</p>
 </div><details class="src-block"><summary>Source code</summary><pre><code>    def to_kaldi_net(self):
 		    &quot;&quot;&quot;To kaldi net.&quot;&quot;&quot;
 		    return self.encoder.to_kaldi_net()
 </code></pre></details></div>
-<div class="api-detail" tabindex="-1" id="e75"><span class="dtag badge-m">method</span><h2><code>FsmnKWSConvert.to_pytorch_net(kaldi_file)</code></h2><div class="dmod">funasr.models.fsmn_kws.FsmnKWSConvert · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_kws/model.py#L336" target="_blank" rel="noopener noreferrer">View on GitHub ↗</a></div><div class="ddoc"><p>To pytorch net.</p>
+<div class="api-detail" tabindex="-1" id="e75"><span class="dtag badge-m">method</span><h2><code>FsmnKWSConvert.to_pytorch_net(kaldi_file)</code></h2><div class="dmod">funasr.models.fsmn_kws.FsmnKWSConvert · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_kws/model.py#L337" target="_blank" rel="noopener noreferrer">View on GitHub ↗</a></div><div class="ddoc"><p>To pytorch net.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>kaldi_file</code> — TODO.</li>
@@ -5850,7 +5850,7 @@
             ctc=self.ctc2,
             keywords=keywords,
 </code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_kws_mt/model.py#L242" target="_blank" rel="noopener noreferrer" class="src-more">View full source on GitHub →</a></details></div>
-<div class="api-detail" tabindex="-1" id="e80"><span class="dtag badge-c">class</span><h2><code>FsmnKWSMTConvert(encoder: str = None, encoder_conf: Optional[Dict] = None, ctc_conf: Optional[Dict] = None, ctc_weight: float = 1.0, input_size: int = 360, blank_id: int = 0, **kwargs)</code></h2><div class="dmod">funasr.models.fsmn_kws_mt · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_kws_mt/model.py#L352" target="_blank" rel="noopener noreferrer">View on GitHub ↗</a></div><div class="ddoc"><ul>
+<div class="api-detail" tabindex="-1" id="e80"><span class="dtag badge-c">class</span><h2><code>FsmnKWSMTConvert(encoder: str = None, encoder_conf: Optional[Dict] = None, ctc_conf: Optional[Dict] = None, ctc_weight: float = 1.0, input_size: int = 360, blank_id: int = 0, **kwargs)</code></h2><div class="dmod">funasr.models.fsmn_kws_mt · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_kws_mt/model.py#L354" target="_blank" rel="noopener noreferrer">View on GitHub ↗</a></div><div class="ddoc"><ul>
 <li><code>Author</code> — Speech Lab of DAMO Academy, Alibaba Group</li>
 <li><code>Deep</code> — FSMN for Large Vocabulary Continuous Speech Recognition</li>
 </ul>
@@ -5885,7 +5885,7 @@
             &quot;&quot;&quot;
         super().__init__()
 
-</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_kws_mt/model.py#L352" target="_blank" rel="noopener noreferrer" class="src-more">View full source on GitHub →</a></details><h3 class="mt">Constructor</h3><div class="mblk"><a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_kws_mt/model.py#L359" class="gh-link">L359</a><p>Initialize FsmnKWSMTConvert.</p>
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_kws_mt/model.py#L354" target="_blank" rel="noopener noreferrer" class="src-more">View full source on GitHub →</a></details><h3 class="mt">Constructor</h3><div class="mblk"><a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_kws_mt/model.py#L361" class="gh-link">L361</a><p>Initialize FsmnKWSMTConvert.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>encoder</code> — TODO.</li>
@@ -5896,15 +5896,15 @@
 <li><code>blank_id</code> — TODO.</li>
 <li><code>**kwargs</code> — Additional keyword arguments.</li>
 </ul>
-</div><h3 class="mt">Methods</h3><div class="mblk"><code>.to_kaldi_net()</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_kws_mt/model.py#L390" target="_blank" rel="noopener noreferrer" class="gh-link">L390</a><div class="mdoc"><p>To kaldi net.</p>
+</div><h3 class="mt">Methods</h3><div class="mblk"><code>.to_kaldi_net()</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_kws_mt/model.py#L392" target="_blank" rel="noopener noreferrer" class="gh-link">L392</a><div class="mdoc"><p>To kaldi net.</p>
 </div><details class="src-block"><summary>Source</summary><pre><code>    def to_kaldi_net(self):
         &quot;&quot;&quot;To kaldi net.&quot;&quot;&quot;
         return self.encoder.to_kaldi_net()
-</code></pre></details></div><div class="mblk"><code>.to_kaldi_net2()</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_kws_mt/model.py#L394" target="_blank" rel="noopener noreferrer" class="gh-link">L394</a><div class="mdoc"><p>To kaldi net2.</p>
+</code></pre></details></div><div class="mblk"><code>.to_kaldi_net2()</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_kws_mt/model.py#L396" target="_blank" rel="noopener noreferrer" class="gh-link">L396</a><div class="mdoc"><p>To kaldi net2.</p>
 </div><details class="src-block"><summary>Source</summary><pre><code>    def to_kaldi_net2(self):
         &quot;&quot;&quot;To kaldi net2.&quot;&quot;&quot;
         return self.encoder.to_kaldi_net2()
-</code></pre></details></div><div class="mblk"><code>.to_pytorch_net(kaldi_file)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_kws_mt/model.py#L398" target="_blank" rel="noopener noreferrer" class="gh-link">L398</a><div class="mdoc"><p>To pytorch net.</p>
+</code></pre></details></div><div class="mblk"><code>.to_pytorch_net(kaldi_file)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_kws_mt/model.py#L400" target="_blank" rel="noopener noreferrer" class="gh-link">L400</a><div class="mdoc"><p>To pytorch net.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>kaldi_file</code> — TODO.</li>
@@ -5917,17 +5917,17 @@
             &quot;&quot;&quot;
         return self.encoder.to_pytorch_net(kaldi_file)
 </code></pre></details></div></div>
-<div class="api-detail" tabindex="-1" id="e81"><span class="dtag badge-m">method</span><h2><code>FsmnKWSMTConvert.to_kaldi_net()</code></h2><div class="dmod">funasr.models.fsmn_kws_mt.FsmnKWSMTConvert · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_kws_mt/model.py#L390" target="_blank" rel="noopener noreferrer">View on GitHub ↗</a></div><div class="ddoc"><p>To kaldi net.</p>
+<div class="api-detail" tabindex="-1" id="e81"><span class="dtag badge-m">method</span><h2><code>FsmnKWSMTConvert.to_kaldi_net()</code></h2><div class="dmod">funasr.models.fsmn_kws_mt.FsmnKWSMTConvert · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_kws_mt/model.py#L392" target="_blank" rel="noopener noreferrer">View on GitHub ↗</a></div><div class="ddoc"><p>To kaldi net.</p>
 </div><details class="src-block"><summary>Source code</summary><pre><code>    def to_kaldi_net(self):
         &quot;&quot;&quot;To kaldi net.&quot;&quot;&quot;
         return self.encoder.to_kaldi_net()
 </code></pre></details></div>
-<div class="api-detail" tabindex="-1" id="e82"><span class="dtag badge-m">method</span><h2><code>FsmnKWSMTConvert.to_kaldi_net2()</code></h2><div class="dmod">funasr.models.fsmn_kws_mt.FsmnKWSMTConvert · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_kws_mt/model.py#L394" target="_blank" rel="noopener noreferrer">View on GitHub ↗</a></div><div class="ddoc"><p>To kaldi net2.</p>
+<div class="api-detail" tabindex="-1" id="e82"><span class="dtag badge-m">method</span><h2><code>FsmnKWSMTConvert.to_kaldi_net2()</code></h2><div class="dmod">funasr.models.fsmn_kws_mt.FsmnKWSMTConvert · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_kws_mt/model.py#L396" target="_blank" rel="noopener noreferrer">View on GitHub ↗</a></div><div class="ddoc"><p>To kaldi net2.</p>
 </div><details class="src-block"><summary>Source code</summary><pre><code>    def to_kaldi_net2(self):
         &quot;&quot;&quot;To kaldi net2.&quot;&quot;&quot;
         return self.encoder.to_kaldi_net2()
 </code></pre></details></div>
-<div class="api-detail" tabindex="-1" id="e83"><span class="dtag badge-m">method</span><h2><code>FsmnKWSMTConvert.to_pytorch_net(kaldi_file)</code></h2><div class="dmod">funasr.models.fsmn_kws_mt.FsmnKWSMTConvert · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_kws_mt/model.py#L398" target="_blank" rel="noopener noreferrer">View on GitHub ↗</a></div><div class="ddoc"><p>To pytorch net.</p>
+<div class="api-detail" tabindex="-1" id="e83"><span class="dtag badge-m">method</span><h2><code>FsmnKWSMTConvert.to_pytorch_net(kaldi_file)</code></h2><div class="dmod">funasr.models.fsmn_kws_mt.FsmnKWSMTConvert · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_kws_mt/model.py#L400" target="_blank" rel="noopener noreferrer">View on GitHub ↗</a></div><div class="ddoc"><p>To pytorch net.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>kaldi_file</code> — TODO.</li>
@@ -13367,7 +13367,7 @@
 
         meta_data = {}
         if (
-</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/sanm_kws/model.py#L209" target="_blank" rel="noopener noreferrer" class="src-more">View full source →</a></details></div><div class="mblk"><code>.export(**kwargs)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/sanm_kws/model.py#L300" target="_blank" rel="noopener noreferrer" class="gh-link">L300</a><div class="mdoc"><p>Export.</p>
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/sanm_kws/model.py#L209" target="_blank" rel="noopener noreferrer" class="src-more">View full source →</a></details></div><div class="mblk"><code>.export(**kwargs)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/sanm_kws/model.py#L301" target="_blank" rel="noopener noreferrer" class="gh-link">L301</a><div class="mdoc"><p>Export.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>**kwargs</code> — Additional keyword arguments.</li>
@@ -13500,7 +13500,7 @@
         meta_data = {}
         if (
 </code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/sanm_kws/model.py#L209" target="_blank" rel="noopener noreferrer" class="src-more">View full source on GitHub →</a></details></div>
-<div class="api-detail" tabindex="-1" id="e206"><span class="dtag badge-m">method</span><h2><code>SanmKWS.export(**kwargs)</code></h2><div class="dmod">funasr.models.sanm_kws.SanmKWS · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/sanm_kws/model.py#L300" target="_blank" rel="noopener noreferrer">View on GitHub ↗</a></div><div class="ddoc"><p>Export.</p>
+<div class="api-detail" tabindex="-1" id="e206"><span class="dtag badge-m">method</span><h2><code>SanmKWS.export(**kwargs)</code></h2><div class="dmod">funasr.models.sanm_kws.SanmKWS · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/sanm_kws/model.py#L301" target="_blank" rel="noopener noreferrer">View on GitHub ↗</a></div><div class="ddoc"><p>Export.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>**kwargs</code> — Additional keyword arguments.</li>
@@ -13711,7 +13711,7 @@
         )
         if isinstance(encoder_out, tuple):
             encoder_out = encoder_out[0]
-</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/sanm_kws_streaming/model.py#L204" target="_blank" rel="noopener noreferrer" class="src-more">View full source →</a></details></div><div class="mblk"><code>.inference(data_in, data_lengths=None, key: list = None, tokenizer=None, frontend=None, cache: dict = None, **kwargs)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/sanm_kws_streaming/model.py#L287" target="_blank" rel="noopener noreferrer" class="gh-link">L287</a><div class="mdoc"><p>Run inference on input data.</p>
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/sanm_kws_streaming/model.py#L204" target="_blank" rel="noopener noreferrer" class="src-more">View full source →</a></details></div><div class="mblk"><code>.inference(data_in, data_lengths=None, key: list = None, tokenizer=None, frontend=None, cache: dict = None, **kwargs)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/sanm_kws_streaming/model.py#L288" target="_blank" rel="noopener noreferrer" class="gh-link">L288</a><div class="mdoc"><p>Run inference on input data.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>data_in</code> — Input data (audio samples, file paths, or text).</li>
@@ -13752,7 +13752,7 @@
             keywords=keywords,
             token_list=tokenizer.token_list,
             seg_dict=tokenizer.seg_dict,
-</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/sanm_kws_streaming/model.py#L287" target="_blank" rel="noopener noreferrer" class="src-more">View full source →</a></details></div><div class="mblk"><code>.export(**kwargs)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/sanm_kws_streaming/model.py#L490" target="_blank" rel="noopener noreferrer" class="gh-link">L490</a><div class="mdoc"><p>Export.</p>
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/sanm_kws_streaming/model.py#L288" target="_blank" rel="noopener noreferrer" class="src-more">View full source →</a></details></div><div class="mblk"><code>.export(**kwargs)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/sanm_kws_streaming/model.py#L491" target="_blank" rel="noopener noreferrer" class="gh-link">L491</a><div class="mdoc"><p>Export.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>**kwargs</code> — Additional keyword arguments.</li>
@@ -13924,7 +13924,7 @@
         if isinstance(encoder_out, tuple):
             encoder_out = encoder_out[0]
 </code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/sanm_kws_streaming/model.py#L204" target="_blank" rel="noopener noreferrer" class="src-more">View full source on GitHub →</a></details></div>
-<div class="api-detail" tabindex="-1" id="e212"><span class="dtag badge-m">method</span><h2><code>SanmKWSStreaming.inference(data_in, data_lengths=None, key: list = None, tokenizer=None, frontend=None, cache: dict = None, **kwargs)</code></h2><div class="dmod">funasr.models.sanm_kws_streaming.SanmKWSStreaming · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/sanm_kws_streaming/model.py#L287" target="_blank" rel="noopener noreferrer">View on GitHub ↗</a></div><div class="ddoc"><p>Run inference on input data.</p>
+<div class="api-detail" tabindex="-1" id="e212"><span class="dtag badge-m">method</span><h2><code>SanmKWSStreaming.inference(data_in, data_lengths=None, key: list = None, tokenizer=None, frontend=None, cache: dict = None, **kwargs)</code></h2><div class="dmod">funasr.models.sanm_kws_streaming.SanmKWSStreaming · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/sanm_kws_streaming/model.py#L288" target="_blank" rel="noopener noreferrer">View on GitHub ↗</a></div><div class="ddoc"><p>Run inference on input data.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>data_in</code> — Input data (audio samples, file paths, or text).</li>
@@ -13965,8 +13965,8 @@
             keywords=keywords,
             token_list=tokenizer.token_list,
             seg_dict=tokenizer.seg_dict,
-</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/sanm_kws_streaming/model.py#L287" target="_blank" rel="noopener noreferrer" class="src-more">View full source on GitHub →</a></details></div>
-<div class="api-detail" tabindex="-1" id="e213"><span class="dtag badge-m">method</span><h2><code>SanmKWSStreaming.export(**kwargs)</code></h2><div class="dmod">funasr.models.sanm_kws_streaming.SanmKWSStreaming · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/sanm_kws_streaming/model.py#L490" target="_blank" rel="noopener noreferrer">View on GitHub ↗</a></div><div class="ddoc"><p>Export.</p>
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/sanm_kws_streaming/model.py#L288" target="_blank" rel="noopener noreferrer" class="src-more">View full source on GitHub →</a></details></div>
+<div class="api-detail" tabindex="-1" id="e213"><span class="dtag badge-m">method</span><h2><code>SanmKWSStreaming.export(**kwargs)</code></h2><div class="dmod">funasr.models.sanm_kws_streaming.SanmKWSStreaming · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/sanm_kws_streaming/model.py#L491" target="_blank" rel="noopener noreferrer">View on GitHub ↗</a></div><div class="ddoc"><p>Export.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>**kwargs</code> — Additional keyword arguments.</li>
