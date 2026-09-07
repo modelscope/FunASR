@@ -13671,7 +13671,7 @@
             &quot;tail_chunk&quot;: False,
         }
         cache[&quot;encoder&quot;] = cache_encoder
-</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/sanm_kws_streaming/model.py#L161" target="_blank" rel="noopener noreferrer" class="src-more">View full source →</a></details></div><div class="mblk"><code>.generate_chunk(speech, speech_lengths=None, key: list = None, tokenizer=None, frontend=None, **kwargs)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/sanm_kws_streaming/model.py#L204" target="_blank" rel="noopener noreferrer" class="gh-link">L204</a><div class="mdoc"><p>Generate chunk.</p>
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/sanm_kws_streaming/model.py#L161" target="_blank" rel="noopener noreferrer" class="src-more">View full source →</a></details></div><div class="mblk"><code>.generate_chunk(speech, speech_lengths=None, key: list = None, tokenizer=None, frontend=None, **kwargs)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/sanm_kws_streaming/model.py#L207" target="_blank" rel="noopener noreferrer" class="gh-link">L207</a><div class="mdoc"><p>Generate chunk.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>speech</code> — Speech audio tensor, shape (batch, time).</li>
@@ -13704,24 +13704,32 @@
         speech = speech.to(device=kwargs[&quot;device&quot;])
         speech_lengths = speech_lengths.to(device=kwargs[&quot;device&quot;])
 
-        # Encoder
         is_final = kwargs.get(&quot;is_final&quot;, False)
-        encoder_out, encoder_out_lens = self.encode_chunk(
-            speech, speech_lengths, cache=cache, is_final=is_final
+        no_pending_context = (
+            is_final
+            and speech.shape[1] == 0
+            and cache[&quot;encoder&quot;][&quot;chunk_size&quot;][2] == 0
+            and cache[&quot;encoder&quot;][&quot;encoder_out&quot;] is not None
         )
-        if isinstance(encoder_out, tuple):
-            encoder_out = encoder_out[0]
-</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/sanm_kws_streaming/model.py#L204" target="_blank" rel="noopener noreferrer" class="src-more">View full source →</a></details></div><div class="mblk"><code>.inference(data_in, data_lengths=None, key: list = None, tokenizer=None, frontend=None, cache: dict = None, **kwargs)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/sanm_kws_streaming/model.py#L288" target="_blank" rel="noopener noreferrer" class="gh-link">L288</a><div class="mdoc"><p>Run inference on input data.</p>
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/sanm_kws_streaming/model.py#L207" target="_blank" rel="noopener noreferrer" class="src-more">View full source →</a></details></div><div class="mblk"><code>.inference(data_in, data_lengths=None, key: list = None, tokenizer=None, frontend=None, cache: dict = None, **kwargs)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/sanm_kws_streaming/model.py#L340" target="_blank" rel="noopener noreferrer" class="gh-link">L340</a><div class="mdoc"><p>Consume audio packets and decode once at the end of an utterance.</p>
+<p>Array/tensor packets must share the same caller-owned cache. Nonfinal</p>
+<p>calls return an empty result list while retaining unconsumed audio and</p>
+<p>features. Finalization flushes valid frames, returns detection results,</p>
+<p>and resets cache fields in place. File/URL inputs finalize automatically.</p>
 <h4>Args:</h4>
 <ul>
-<li><code>data_in</code> — Input data (audio samples, file paths, or text).</li>
-<li><code>data_lengths</code> — Lengths of each input sample in the batch.</li>
-<li><code>key</code> — Sample identifiers.</li>
-<li><code>tokenizer</code> — Tokenizer instance for text encoding/decoding.</li>
-<li><code>frontend</code> — Audio frontend for feature extraction.</li>
-<li><code>cache</code> — State cache dict for streaming inference.</li>
-<li><code>**kwargs</code> — Additional keyword arguments.</li>
+<li><code>data_in</code> — Mono audio samples, a file path, or a URL.</li>
+<li><code>data_lengths</code> — Optional input lengths.</li>
+<li><code>key</code> — Utterance identifiers; batch size must be one.</li>
+<li><code>tokenizer</code> — Keyword tokenizer with token_list and seg_dict.</li>
+<li><code>frontend</code> — Streaming audio frontend.</li>
+<li><code>cache</code> — Caller-owned state, reused until is_final=True.</li>
+<li><code>**kwargs</code> — Includes device, keywords, is_final, and chunk_size</li>
+<li class="sub">[left, middle, right] in frontend feature frames.</li>
 </ul>
+<h4>Returns:</h4>
+<p>Tuple of a result list and timing metadata. Results are emitted</p>
+<p>only at utterance end; this is not a per-packet wake-event API.</p>
 </div><details class="src-block"><summary>Source</summary><pre><code>    def inference(
         self,
         data_in,
@@ -13732,27 +13740,27 @@
         cache: dict = None,
         **kwargs,
     ):
-        &quot;&quot;&quot;Run inference on input data.
-        
-            Args:
-                data_in: Input data (audio samples, file paths, or text).
-                data_lengths: Lengths of each input sample in the batch.
-                key: Sample identifiers.
-                tokenizer: Tokenizer instance for text encoding/decoding.
-                frontend: Audio frontend for feature extraction.
-                cache: State cache dict for streaming inference.
-                **kwargs: Additional keyword arguments.
-            &quot;&quot;&quot;
-        if cache is None:
-            cache = {}
-        keywords = kwargs.get(&quot;keywords&quot;)
-        from funasr.utils.kws_utils import KwsCtcPrefixDecoder
-        self.kws_decoder = KwsCtcPrefixDecoder(
-            ctc=self.ctc,
-            keywords=keywords,
-            token_list=tokenizer.token_list,
-            seg_dict=tokenizer.seg_dict,
-</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/sanm_kws_streaming/model.py#L288" target="_blank" rel="noopener noreferrer" class="src-more">View full source →</a></details></div><div class="mblk"><code>.export(**kwargs)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/sanm_kws_streaming/model.py#L491" target="_blank" rel="noopener noreferrer" class="gh-link">L491</a><div class="mdoc"><p>Export.</p>
+        &quot;&quot;&quot;Consume audio packets and decode once at the end of an utterance.
+
+        Array/tensor packets must share the same caller-owned cache. Nonfinal
+        calls return an empty result list while retaining unconsumed audio and
+        features. Finalization flushes valid frames, returns detection results,
+        and resets cache fields in place. File/URL inputs finalize automatically.
+
+        Args:
+            data_in: Mono audio samples, a file path, or a URL.
+            data_lengths: Optional input lengths.
+            key: Utterance identifiers; batch size must be one.
+            tokenizer: Keyword tokenizer with token_list and seg_dict.
+            frontend: Streaming audio frontend.
+            cache: Caller-owned state, reused until is_final=True.
+            **kwargs: Includes device, keywords, is_final, and chunk_size
+                [left, middle, right] in frontend feature frames.
+
+        Returns:
+            Tuple of a result list and timing metadata. Results are emitted
+            only at utterance end; this is not a per-packet wake-event API.
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/sanm_kws_streaming/model.py#L340" target="_blank" rel="noopener noreferrer" class="src-more">View full source →</a></details></div><div class="mblk"><code>.export(**kwargs)</code> <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/sanm_kws_streaming/model.py#L452" target="_blank" rel="noopener noreferrer" class="gh-link">L452</a><div class="mdoc"><p>Export.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>**kwargs</code> — Additional keyword arguments.</li>
@@ -13883,7 +13891,7 @@
         }
         cache[&quot;encoder&quot;] = cache_encoder
 </code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/sanm_kws_streaming/model.py#L161" target="_blank" rel="noopener noreferrer" class="src-more">View full source on GitHub →</a></details></div>
-<div class="api-detail" tabindex="-1" id="e211"><span class="dtag badge-m">method</span><h2><code>SanmKWSStreaming.generate_chunk(speech, speech_lengths=None, key: list = None, tokenizer=None, frontend=None, **kwargs)</code></h2><div class="dmod">funasr.models.sanm_kws_streaming.SanmKWSStreaming · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/sanm_kws_streaming/model.py#L204" target="_blank" rel="noopener noreferrer">View on GitHub ↗</a></div><div class="ddoc"><p>Generate chunk.</p>
+<div class="api-detail" tabindex="-1" id="e211"><span class="dtag badge-m">method</span><h2><code>SanmKWSStreaming.generate_chunk(speech, speech_lengths=None, key: list = None, tokenizer=None, frontend=None, **kwargs)</code></h2><div class="dmod">funasr.models.sanm_kws_streaming.SanmKWSStreaming · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/sanm_kws_streaming/model.py#L207" target="_blank" rel="noopener noreferrer">View on GitHub ↗</a></div><div class="ddoc"><p>Generate chunk.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>speech</code> — Speech audio tensor, shape (batch, time).</li>
@@ -13916,25 +13924,33 @@
         speech = speech.to(device=kwargs[&quot;device&quot;])
         speech_lengths = speech_lengths.to(device=kwargs[&quot;device&quot;])
 
-        # Encoder
         is_final = kwargs.get(&quot;is_final&quot;, False)
-        encoder_out, encoder_out_lens = self.encode_chunk(
-            speech, speech_lengths, cache=cache, is_final=is_final
+        no_pending_context = (
+            is_final
+            and speech.shape[1] == 0
+            and cache[&quot;encoder&quot;][&quot;chunk_size&quot;][2] == 0
+            and cache[&quot;encoder&quot;][&quot;encoder_out&quot;] is not None
         )
-        if isinstance(encoder_out, tuple):
-            encoder_out = encoder_out[0]
-</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/sanm_kws_streaming/model.py#L204" target="_blank" rel="noopener noreferrer" class="src-more">View full source on GitHub →</a></details></div>
-<div class="api-detail" tabindex="-1" id="e212"><span class="dtag badge-m">method</span><h2><code>SanmKWSStreaming.inference(data_in, data_lengths=None, key: list = None, tokenizer=None, frontend=None, cache: dict = None, **kwargs)</code></h2><div class="dmod">funasr.models.sanm_kws_streaming.SanmKWSStreaming · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/sanm_kws_streaming/model.py#L288" target="_blank" rel="noopener noreferrer">View on GitHub ↗</a></div><div class="ddoc"><p>Run inference on input data.</p>
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/sanm_kws_streaming/model.py#L207" target="_blank" rel="noopener noreferrer" class="src-more">View full source on GitHub →</a></details></div>
+<div class="api-detail" tabindex="-1" id="e212"><span class="dtag badge-m">method</span><h2><code>SanmKWSStreaming.inference(data_in, data_lengths=None, key: list = None, tokenizer=None, frontend=None, cache: dict = None, **kwargs)</code></h2><div class="dmod">funasr.models.sanm_kws_streaming.SanmKWSStreaming · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/sanm_kws_streaming/model.py#L340" target="_blank" rel="noopener noreferrer">View on GitHub ↗</a></div><div class="ddoc"><p>Consume audio packets and decode once at the end of an utterance.</p>
+<p>Array/tensor packets must share the same caller-owned cache. Nonfinal</p>
+<p>calls return an empty result list while retaining unconsumed audio and</p>
+<p>features. Finalization flushes valid frames, returns detection results,</p>
+<p>and resets cache fields in place. File/URL inputs finalize automatically.</p>
 <h4>Args:</h4>
 <ul>
-<li><code>data_in</code> — Input data (audio samples, file paths, or text).</li>
-<li><code>data_lengths</code> — Lengths of each input sample in the batch.</li>
-<li><code>key</code> — Sample identifiers.</li>
-<li><code>tokenizer</code> — Tokenizer instance for text encoding/decoding.</li>
-<li><code>frontend</code> — Audio frontend for feature extraction.</li>
-<li><code>cache</code> — State cache dict for streaming inference.</li>
-<li><code>**kwargs</code> — Additional keyword arguments.</li>
+<li><code>data_in</code> — Mono audio samples, a file path, or a URL.</li>
+<li><code>data_lengths</code> — Optional input lengths.</li>
+<li><code>key</code> — Utterance identifiers; batch size must be one.</li>
+<li><code>tokenizer</code> — Keyword tokenizer with token_list and seg_dict.</li>
+<li><code>frontend</code> — Streaming audio frontend.</li>
+<li><code>cache</code> — Caller-owned state, reused until is_final=True.</li>
+<li><code>**kwargs</code> — Includes device, keywords, is_final, and chunk_size</li>
+<li class="sub">[left, middle, right] in frontend feature frames.</li>
 </ul>
+<h4>Returns:</h4>
+<p>Tuple of a result list and timing metadata. Results are emitted</p>
+<p>only at utterance end; this is not a per-packet wake-event API.</p>
 </div><details class="src-block"><summary>Source code</summary><pre><code>    def inference(
         self,
         data_in,
@@ -13945,28 +13961,28 @@
         cache: dict = None,
         **kwargs,
     ):
-        &quot;&quot;&quot;Run inference on input data.
-        
-            Args:
-                data_in: Input data (audio samples, file paths, or text).
-                data_lengths: Lengths of each input sample in the batch.
-                key: Sample identifiers.
-                tokenizer: Tokenizer instance for text encoding/decoding.
-                frontend: Audio frontend for feature extraction.
-                cache: State cache dict for streaming inference.
-                **kwargs: Additional keyword arguments.
-            &quot;&quot;&quot;
-        if cache is None:
-            cache = {}
-        keywords = kwargs.get(&quot;keywords&quot;)
-        from funasr.utils.kws_utils import KwsCtcPrefixDecoder
-        self.kws_decoder = KwsCtcPrefixDecoder(
-            ctc=self.ctc,
-            keywords=keywords,
-            token_list=tokenizer.token_list,
-            seg_dict=tokenizer.seg_dict,
-</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/sanm_kws_streaming/model.py#L288" target="_blank" rel="noopener noreferrer" class="src-more">View full source on GitHub →</a></details></div>
-<div class="api-detail" tabindex="-1" id="e213"><span class="dtag badge-m">method</span><h2><code>SanmKWSStreaming.export(**kwargs)</code></h2><div class="dmod">funasr.models.sanm_kws_streaming.SanmKWSStreaming · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/sanm_kws_streaming/model.py#L491" target="_blank" rel="noopener noreferrer">View on GitHub ↗</a></div><div class="ddoc"><p>Export.</p>
+        &quot;&quot;&quot;Consume audio packets and decode once at the end of an utterance.
+
+        Array/tensor packets must share the same caller-owned cache. Nonfinal
+        calls return an empty result list while retaining unconsumed audio and
+        features. Finalization flushes valid frames, returns detection results,
+        and resets cache fields in place. File/URL inputs finalize automatically.
+
+        Args:
+            data_in: Mono audio samples, a file path, or a URL.
+            data_lengths: Optional input lengths.
+            key: Utterance identifiers; batch size must be one.
+            tokenizer: Keyword tokenizer with token_list and seg_dict.
+            frontend: Streaming audio frontend.
+            cache: Caller-owned state, reused until is_final=True.
+            **kwargs: Includes device, keywords, is_final, and chunk_size
+                [left, middle, right] in frontend feature frames.
+
+        Returns:
+            Tuple of a result list and timing metadata. Results are emitted
+            only at utterance end; this is not a per-packet wake-event API.
+</code></pre><a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/sanm_kws_streaming/model.py#L340" target="_blank" rel="noopener noreferrer" class="src-more">View full source on GitHub →</a></details></div>
+<div class="api-detail" tabindex="-1" id="e213"><span class="dtag badge-m">method</span><h2><code>SanmKWSStreaming.export(**kwargs)</code></h2><div class="dmod">funasr.models.sanm_kws_streaming.SanmKWSStreaming · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/sanm_kws_streaming/model.py#L452" target="_blank" rel="noopener noreferrer">View on GitHub ↗</a></div><div class="ddoc"><p>Export.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>**kwargs</code> — Additional keyword arguments.</li>
