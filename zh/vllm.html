@@ -15,7 +15,7 @@
 <meta content="vLLM split-engine 推理" property="og:description"/>
 <meta content="https://www.funasr.com/docs/vllm.html" property="og:url"/>
 <link href="../assets/css/site.4a0f4749ba00.css" rel="stylesheet"/>
-<link href="../assets/css/experience.5803993934f8.css" rel="stylesheet"/>
+<link href="../assets/css/experience.23603ff092cf.css" rel="stylesheet"/>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "SoftwareApplication", "applicationCategory": "DeveloperApplication", "codeRepository": "https://github.com/modelscope/FunASR", "dateModified": "2026-09-01", "license": "https://github.com/modelscope/FunASR/blob/main/LICENSE", "name": "FunASR", "operatingSystem": "Linux, macOS, Windows", "url": "https://www.funasr.com/docs/vllm.html"}</script>
 </head>
 <body data-copy-icon="../assets/lucide/copy.ea80e566c7a1.svg" data-language="zh" data-route="/docs/vllm.html">
@@ -204,20 +204,22 @@
 </ol>
 <hr/>
 <span data-legacy-doc-anchor="1-安装与环境" id="install"></span><h2 id="1-安装与环境">1. 安装与环境</h2>
-<p>先安装 vLLM,按 NVIDIA 驱动的 CUDA 版本选对应版本;vLLM 会自动钉定并安装匹配的 torch / torchaudio / torchvision 三件套,所以不要自己装 torch/torchaudio——三者 ABI 锁死,必须是互相编译匹配的同一组(如 torch 2.10.0 ↔ torchaudio 2.10.0 ↔ torchvision 0.25.0),只能随 vLLM 一起来。</p>
-<pre id="code-0"><code class="language-bash"># 1) 先装 vLLM。按 `nvidia-smi` 显示的 CUDA 版本(驱动支持的最高 CUDA,不是 runtime CUDA)选版本,
-#    vLLM 会带来匹配的 torch/torchaudio/torchvision。
-#    驱动 CUDA 12.x  -&gt; pip install vllm==0.19.1   (附带 torch 2.10 / cu128)
-#    驱动 CUDA &gt;= 13 -&gt; pip install vllm           (最新版;附带 torch 2.11 / cu130)
+<p>本指南的 SDK、离线与 WebSocket 服务使用 <strong>FunASR 拆分引擎</strong>；不要把它的环境与下文原生 <code>vllm serve</code> 的验证环境混用。先选定 vLLM 版本和对应的 GPU wheel，再在独立虚拟环境中安装。<code>nvidia-smi</code> 的 CUDA 数字是驱动支持的上限，不是已安装的 CUDA runtime，也不能仅凭“12.x / 13.x”判断 wheel 是否兼容。</p>
+<p>下面以拆分引擎使用过的 <code>vllm==0.19.1</code> 和固定 FunASR 源码为起点。它固定了两个项目的版本，但<strong>不是完整依赖锁文件，也不是所有 GPU 的干净安装验收</strong>。GPU 构建与驱动要求请核对该版本的 <a href="https://github.com/vllm-project/vllm/blob/v0.19.1/docs/getting_started/installation/gpu.md">vLLM 安装文档</a>。</p>
+<pre id="code-0"><code class="language-bash">python3.12 -m venv .venv-funasr-vllm
+source .venv-funasr-vllm/bin/activate
+python -m pip install "vllm==0.19.1"
 
-pip install "vllm==0.19.1"   # 按你的驱动 CUDA 调整;见下方说明
-
-# 2) 再装 FunASR 与其余依赖。
-pip install "funasr&gt;=1.3.26"
-pip install safetensors tiktoken websockets regex fastapi uvicorn python-multipart
-
-cd /path/to/FunASR &amp;&amp; pip install -e .
+# 服务脚本来自源码；在新的目录中安装，不覆盖已有工作区。
+git clone https://github.com/modelscope/FunASR.git FunASR-vllm
+cd FunASR-vllm
+git checkout --detach e42443f55971d0c804dcf2973fdd2e6e09bd5611
+python -m pip install -e .
+python -m pip install safetensors tiktoken websockets regex fastapi uvicorn python-multipart
+python -m pip check
+python -m pip freeze &gt; environment.txt
 </code></pre>
+<p>保存 GPU/驱动、Python、源码提交、模型 revision 和 <code>environment.txt</code>，再执行单请求、真实 WebSocket 及目标并发验收。<code>pip check</code> 只能检查声明的依赖关系，不证明 CUDA、音频算子或端到端服务可用。单纯安装 PyPI 包不会提供本指南引用的仓库服务脚本。</p>
 <h3 id="开始前先选定模型路径">开始前先选定模型路径</h3>
 <p>目前有两条不同的 Fun-ASR-Nano vLLM 集成路径，checkpoint 与调用接口不能混用：</p>
 <h4 id="a-funasr-拆分引擎路径本指南">A. FunASR 拆分引擎路径（本指南）</h4>
@@ -245,22 +247,26 @@ model = AutoModelVLLM(
 权重，并生成 <code>Qwen3-0.6B-vllm/model.safetensors</code>。不要把 <code>model</code> 指向
 <code>Qwen3-0.6B/</code>，也不要直接让 vLLM 加载这个只有配置的子目录。</p>
 <h4 id="b-vllm-原生转写路径">B. vLLM 原生转写路径</h4>
-<p>官方维护的 native checkpoint 是
+<p>原生 <code>FunASRForConditionalGeneration</code> 使用完整 native checkpoint，不是路径 A 的 <code>model.pt</code> 拆分布局。官方维护的 native checkpoint 是
 <a href="https://huggingface.co/FunAudioLLM/Fun-ASR-Nano-2512-vllm"><code>FunAudioLLM/Fun-ASR-Nano-2512-vllm</code></a>。
 vLLM 的支持模型表也把
 <a href="https://huggingface.co/allendou/Fun-ASR-Nano-2512-vllm"><code>allendou/Fun-ASR-Nano-2512-vllm</code></a>
 列为原生 <code>FunASRForConditionalGeneration</code> 架构示例；后者是托管在官方
 FunAudioLLM 组织之外的社区转换完整 checkpoint。只有明确选择 vLLM 原生转写
 接口时，才应使用这两种 native checkpoint；不要用它们替换下文 FunASR
-<code>AutoModelVLLM</code> 示例中的官方 checkpoint。</p>
+<code>AutoModelVLLM</code> 示例中的官方 checkpoint，也不要传给
+<a href="https://github.com/modelscope/FunASR/blob/main/examples/industrial_data_pretraining/fun_asr_nano/serve_realtime_ws.py">serve_realtime_ws.py</a>；这些服务预期
+<code>model.pt</code>、<code>config.yaml</code> 与 <code>Qwen3-0.6B/</code>，不能用 native layout 替代。</p>
 <p>两种 native 路径都通过 <code>vllm serve</code> 提供非实时的请求/响应式转写
 <code>/v1/audio/transcriptions</code>，不会注册 <code>/v1/realtime</code>。vLLM 只为声明
 realtime 任务的模型注册该 WebSocket 端点，<code>FunASRForConditionalGeneration</code>
 当前不在它的 <a href="https://docs.vllm.ai/en/latest/models/supported_models/#realtime-transcription">Realtime Transcription 表</a>
 中。需要实时流式识别时，请使用 FunASR 流式 SDK 推理或流式 ASR 服务；路径 A 的
 <code>AutoModelVLLM</code> 示例同样属于离线推理。</p>
-<p><strong>硬件</strong>：GPU ≥ 8GB VRAM，CUDA ≥ 11.8。推荐 16GB+。</p>
-<p>为什么不要单独执行 <code>pip install torch torchaudio</code> ? torch/torchaudio/torchvision 的版本由 vLLM 版本决定—— 每个大版本会一起升级(见 vLLM 的 <a href="https://github.com/vllm-project/vllm/blob/main/requirements/cuda.txt">requirements/cuda.txt</a>)。手动安装会拉到最新 wheel,可能是为比你驱动更新的 CUDA runtime 编译的;PyTorch 会在 CUDA 初始化阶段、FunASR 启动前就报 The NVIDIA driver on your system is too old。让 vLLM 统一钉定这三件套即可避免。若仍遇到该错误,请安装其 CUDA 构建与 nvidia-smi 显示的 CUDA 匹配的 vLLM 版本(如 CUDA 12.x 用 vllm==0.19.1),或先升级 NVIDIA 驱动。</p>
+<p>原生 HTTP API 不会自动获得 FunASR WebSocket 服务的 VAD、partial 预览、会话状态或 SPK 处理。WebSocket 握手的拒绝状态不是稳定的 API 契约，也不是模型支持实时转写的探测方法。</p>
+<p>官方权重的固定 revision、启动参数和实际输出见 <a href="https://www.funasr.com/docs/official-native-vllm.html">原生转写验证记录</a>。该记录仅覆盖既有 H100 环境中的 vLLM 0.27.1 文件转写，不是干净安装、精度、容量、长音频、实时流式或说话人分离验收；不要把它的环境替换到上面的 0.19.1 拆分引擎命令中。</p>
+<p><strong>硬件</strong>：以所选 vLLM GPU 构建的要求为准。显存需求还取决于模型、精度、KV cache、batch 和会话数；本指南不承诺统一的最低显存或并发容量。</p>
+<p>不要在已验证环境中单独升级 <code>torch</code> 或 <code>torchaudio</code>。依赖约束随 vLLM 版本变化，不能概括成“始终自动安装相同版本的三件套”：例如 <a href="https://pypi.org/pypi/vllm/0.19.1/json">0.19.1 的发布元数据</a>声明 <code>torch==2.10.0</code>、<code>torchaudio==2.10.0</code>、<code>torchvision==0.25.0</code>；<a href="https://pypi.org/pypi/vllm/0.27.1/json">0.27.1 的发布元数据</a>声明 <code>torch==2.13.0</code>、<code>torchaudio==2.11.0</code>、<code>torchvision==0.28.0</code>。这些只是声明约束，不是安装成功或 ABI 兼容的证明。升级时新建环境并重新验收；遇到驱动过旧错误，应检查实际 wheel 的 CUDA 构建与驱动要求，而不是盲目安装最新版。</p>
 <hr/>
 <span data-legacy-doc-anchor="2-vllm-推理引擎架构" id="overview"></span><h2 id="2-vllm-推理引擎架构">2. vLLM 推理引擎架构</h2>
 <h3 id="整体架构">整体架构</h3>
@@ -1065,7 +1071,7 @@ Fun-ASR-Nano 的声学编码器（SenseVoice）是<strong>全上下文、非流�
 <li><strong>先把单进程作为第一扩展单元。</strong> 先用内置批处理压测单进程；只有当单进程达到实测 GPU、CPU 或尾延迟上限后，再增加进程或按 GPU 横向扩容。每个额外进程都会复制模型显存，也可能减少单进程内形成 batch 的机会。</li>
 <li><strong>vLLM 收益取决于请求是否同时到达。</strong> 真实轮流对话可能连接很多，但同时解码很少；把同一段连续独白同步回放给所有客户端，则会刻意形成大批次。发布结果时必须同时报告话务形态和批处理参数。</li>
 <li><strong>可持续并发没有通用的“支持 N 路”数字。</strong> 上限主要取决于同时说话数、静音比例、句长、partial 刷新间隔、说话人分离、batch 等待时间以及 GPU/CPU 能力。长时间不停顿的语音仍会重复编码临时窗口（见 §6.5），成本更高。请按自己的真实话务压测，不要把其他部署的连接数直接当成规格。</li>
-<li><strong>L20 实测起点，不是全局默认值。</strong> <a href="https://github.com/modelscope/FunASR/issues/3528">#3528</a> 在单张 L20 上同步回放 47 秒连续语音、16 路客户端，并关闭 SPK 与客户端 ping；<code>--partial-window-sec 8 --decode-interval 2.0</code> 是该负载的最优组合：408 次解码请求、累计编码 3,072.1 秒音频、完成 p50 51.18 秒、输出滞后 4.5 秒、聚合实时率 14.2x、首词 1.31 秒。默认 15 秒窗口在这组 16 路负载上未完成。请只把 <code>8 / 2.0</code> 当作 L20 高并发初始配置，再按自己的首词、输出滞后、最终完成时间、请求数和累计编码量调优。</li>
+<li><strong>L20 历史实测起点，不是容量承诺。</strong> <a href="https://github.com/modelscope/FunASR/issues/3528">#3528</a> 的一组历史测量在单张 L20 上同步回放 47 秒连续语音、16 路客户端，并关闭 SPK 与客户端 ping；<code>--partial-window-sec 8 --decode-interval 2.0</code> 是该组测量中表现最好的配置：408 次解码请求、累计编码 3,072.1 秒音频、完成 p50 51.18 秒、输出滞后 4.5 秒、聚合实时率 14.2x、首词 1.31 秒。该组测量当时采用的默认 15 秒窗口在 16 路负载上未完成；这不是当前源码的默认值（当前为 8 秒），也不能代替后续版本和不同 keepalive 配置的结果。请只把 <code>8 / 2.0</code> 当作该话务的调优起点，记录版本、窗口、keepalive、首词、输出滞后、最终完成时间、请求数和累计编码量。Git 安装成功不等于并发问题解决；该问题仍需独立验收。</li>
 </ul>
 <pre id="code-32"><code class="language-bash">CUDA_VISIBLE_DEVICES=0 python examples/industrial_data_pretraining/fun_asr_nano/serve_realtime_ws.py \
   --partial-window-sec 8 --decode-interval 2.0 --log-decode-profile
@@ -1225,7 +1231,7 @@ print(segments[0]["value"])
 路径或解码参数和 upstream runner 不一致。改模型前先检查这些项：</p>
 <ul>
 <li>传给 vLLM 的 prompt embeddings 要显式转成 float32：
-  <code>EmbedsPrompt(prompt_embeds=input_embeds.float())</code>。</li>
+  <code>EmbedsPrompt</code> 的 <code>prompt_embeds</code> 参数应接收 <code>input_embeds.float()</code>。</li>
 <li>使用 ASR 更合适的确定性解码。Fun-ASR-Nano vLLM 路径默认使用
   <code>temperature=0.0</code>、<code>top_p=1.0</code> 和 <code>skip_special_tokens=True</code>。在
   prompt-embeds 模式下，<code>repetition_penalty</code> 保持中性的 <code>1.0</code>，除非你走的是
