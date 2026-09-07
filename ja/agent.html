@@ -1,94 +1,231 @@
 <!DOCTYPE html>
-<html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<meta name="description" content="音声認識を Agent、プロダクト、デスクトップワークフローのローカル基盤として利用できます。OpenAI 互換 API、MCP server、音声入力、字幕生成に対応します。">
-<meta property="og:title" content="FunASR Agent 連携">
-<meta property="og:description" content="音声認識を Agent、プロダクト、デスクトップワークフローのローカル基盤として利用できます。OpenAI 互換 API、MCP server、音声入力、字幕生成に対応します。">
-<meta property="og:type" content="website">
-<meta property="og:url" content="https://modelscope.github.io/FunASR/ja/agent.html">
-<link rel="canonical" href="https://modelscope.github.io/FunASR/ja/agent.html">
-<meta property="og:site_name" content="FunASR">
-<meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="FunASR Agent 連携">
-<meta name="twitter:description" content="音声認識を Agent、プロダクト、デスクトップワークフローのローカル基盤として利用できます。OpenAI 互換 API、MCP server、音声入力、字幕生成に対応します。">
-<title>FunASR Agent 連携</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../style.css">
-</head><body>
-<nav class="nav"><div class="container">
-<a href="index.html" class="nav-logo">FunASR</a>
-<div class="nav-links"><a href="index.html">ホーム</a><a href="tutorial.html">チュートリアル</a><a href="training.html">トレーニング</a><a href="model-registration.html">開発</a><a href="../api.html">API</a><a href="vllm.html">vLLM</a><a href="agent.html" class="active">Agent</a><a href="benchmark.html">Benchmark</a>
-                <a href="../donors.html">Donors</a></div>
-<div class="lang-dropdown"><button class="lang-btn">日本語</button><div class="lang-menu"><a href="../agent.html">English</a><a href="../zh/agent.html">中文</a><a href="agent.html" class="current">日本語</a><a href="../ko/agent.html">한국어</a></div></div>
-<a href="https://github.com/modelscope/FunASR" class="nav-github">GitHub</a>
-</div></nav>
-<div class="content"><div class="container narrow">
-<h1>Agent 連携</h1>
-<p>音声認識を Agent、プロダクト、デスクトップワークフローのローカル基盤として利用できます。OpenAI 互換 API、MCP server、音声入力、字幕生成に対応します。</p>
-<div class="toc-grid"><a href="#server">OpenAI API</a><a href="#sdk">SDK / curl</a><a href="#mcp">MCP Server</a><a href="#voice">音声入力</a><a href="#subtitle">字幕生成</a></div>
-<section id="server"><h2>OpenAI 互換 API Server</h2>
-<p><code>funasr-server</code> exposes <code>/v1/audio/transcriptions</code>, <code>/v1/models</code>, <code>/health</code>, and Swagger docs at <code>/docs</code>. It works with frameworks that already know the OpenAI audio API.</p>
-<pre><code>pip install funasr fastapi uvicorn python-multipart
-funasr-server --device cuda --port 8000
 
-# CPU fallback
-funasr-server --device cpu --model sensevoice --port 8000</code></pre>
-<table><tr><th>Model alias</th><th>Backend</th><th>Best for</th></tr><tr><td><code>sensevoice</code></td><td><code>iic/SenseVoiceSmall</code></td><td>Fast multilingual ASR with language/emotion/event tags.</td></tr><tr><td><code>paraformer</code></td><td><code>paraformer-zh</code> + VAD + punctuation</td><td>Chinese production transcription.</td></tr><tr><td><code>paraformer-en</code></td><td><code>paraformer-en</code> + VAD</td><td>English transcription.</td></tr><tr><td><code>fun-asr-nano</code></td><td><code>FunAudioLLM/Fun-ASR-Nano-2512</code></td><td>31-language LLM-based ASR with timestamps.</td></tr></table>
-<p>日本語の導入手順は <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/README_ja.md">OpenAI API 日本語クイックスタート</a> を参照してください。ローカルで動作確認する場合は <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/smoke_test.py">Python smoke test</a> も利用できます。</p>
-</section>
-<section id="sdk"><h2>OpenAI SDK と curl</h2>
-<pre><code>from openai import OpenAI
+<html lang="ja">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>FunASR Agent 連携 | FunASR</title>
+<link href="https://modelscope.github.io/FunASR/ja/agent.html" rel="canonical"/>
+<link href="../assets/css/site.4a0f4749ba00.css" rel="stylesheet"/><link href="../assets/css/experience.34d6e632686e.css" rel="stylesheet"/>
+</head>
+<body class="localized-legacy-doc" data-copy-icon="../assets/lucide/copy.ea80e566c7a1.svg" data-language="ja">
+<a class="skip-link" href="#main">本文へ</a>
+<header class="legacy-doc-header">
+<a class="brand" href="https://www.funasr.com/en/"><span aria-hidden="true" class="brand-mark">F</span><span>FunASR</span></a>
+<nav aria-label="言語">
+<a href="https://www.funasr.com/en/docs/">English</a>
+<a href="https://www.funasr.com/docs/">中文</a>
+<a data-peer-link="" href="../ko/agent.html">한국어</a>
+</nav>
+</header>
+<main class="docs-layout" id="main">
+<aside class="docs-sidebar">
+<nav aria-label="ガイド">
+<a aria-current="page" href="agent.html">FunASR Agent 連携</a><a href="benchmark.html">ASR ベンチマークの過去の記録</a>
+</nav>
+</aside>
+<div class="docs-body">
+<header class="docs-title">
+<h1>FunASR Agent 連携</h1>
+<a class="source-link" data-source-link="" href="https://github.com/modelscope/FunASR/blob/main/docs/agent_integration_ja.md">GitHub で原稿を読む</a>
+</header>
+<article class="docs-article"><div class="source-title-anchor" id="funasr-agent-連携"></div>
+<p><a href="https://www.funasr.com/en/docs/agent-integration.html">English</a> | <a href="https://www.funasr.com/docs/agent-integration.html">中文</a> | <a href="../ko/agent.html">한국어</a></p>
+<p>用途に合ったインターフェースを選んでください。HTTP によるファイル文字起こし、
+ローカル MCP ツール、デスクトップ録音、ローカル字幕生成では、利用できるモデル、
+オプション、出力フィールドが異なります。プロセス内で直接推論する場合は
+<a href="https://www.funasr.com/en/docs/python-api.html">Python SDK（英語）</a>を参照してください。</p>
+<span data-legacy-doc-anchor="http-サーバー" id="server"></span><h2 id="http-サーバー">HTTP サーバー</h2>
+<p>以下は、後の節で使うサンプルスクリプトも含めたソースからの準備手順です。
+POSIX シェルで、新しいチェックアウトと仮想環境を使ってください。
+PyPI パッケージだけをインストールしても、これらのリポジトリ内サンプルは配置されません。</p>
+<pre id="code-0"><code class="language-bash">git clone https://github.com/modelscope/FunASR.git FunASR-agent
+cd FunASR-agent
+git checkout --detach e19029adca384a06a2f60bd8c18cb98f1a0499aa
+python3.11 -m venv .venv
+source .venv/bin/activate
+python -m pip install -e .
+python -m pip install fastapi uvicorn python-multipart
+python -m pip check
+</code></pre>
+<p>固定されるのはソースのリビジョンであり、依存パッケージやモデルの重みのすべてではありません。
+<a href="https://www.funasr.com/en/docs/installation.html">インストールガイド（英語）</a>に従って CPU/GPU 環境を準備し、
+実際のパッケージ・モデルのバージョンを記録して、対象モデルでリクエストを確認してください。
+<code>pip check</code> だけでは CUDA、音声デコード、新規環境へのインストール成功を検証できません。</p>
+<p>準備した環境で、次のコマンドの<strong>どちらか一方</strong>を実行します。
+CPU の例では SenseVoice を明示的に指定しています。CUDA の例には動作する GPU 環境が必要です。
+サーバーのターミナルを開いたままにし、クライアントは別の準備済みターミナルから実行してください。</p>
+<pre id="code-1"><code class="language-bash">funasr-server --host 127.0.0.1 --device cpu --model sensevoice --port 8000
+# Alternative: stop the CPU server before using the same port.
+funasr-server --host 127.0.0.1 --device cuda --model sensevoice --port 8000
+</code></pre>
+<pre id="code-2"><code class="language-bash">curl -fsS http://localhost:8000/health
+curl -fsS http://localhost:8000/v1/models
+</code></pre>
+<ul>
+<li>ファイルアップロード先は <code>/v1/audio/transcriptions</code> です。</li>
+<li>稼働中のサービスのスキーマは <code>/openapi.json</code> にあります。</li>
+<li>Swagger UI は <code>/docs</code> です。このパスは FunASR のウェブサイトの文書ディレクトリではありません。</li>
+</ul>
+<p>ヘルスチェックやモデル一覧の応答だけでは、対象モデルによる文字起こしの成功は確認できません。</p>
+<p>パッケージ付属の <code>funasr-server</code> と<a href="https://www.funasr.com/en/docs/http-server.html#api-contract">サンプル HTTP サーバー（英語）</a>では、
+デフォルト、モデルの別名、応答スキーマが異なります。起動時だけでなく、リクエストにも
+<code>model</code> を指定してください。<code>paraformer-en</code> はサンプルサーバーの別名であり、
+パッケージ付属サーバーの組み込み別名ではありません。
+カスタムモデルは適切な <code>--hub</code> と <code>--model-path</code> で指定し、リクエストには
+<code>model="custom"</code> を使います。任意のモデル ID がそのまま <code>--model</code> の組み込み別名になるわけではありません。</p>
+<p>SenseVoice の HTTP 表示テキストからはリッチタグが除去されます。
+これは感情・イベントを専用フィールドで返す API ではありません。
+基本の Fun-ASR-Nano は中国語・英語・日本語と中国語方言・地域アクセントの評価経路であり、
+31 言語の Fun-ASR-MLT-Nano は<strong>別の checkpoint</strong>です。
+基本 Nano の範囲から韓国語対応を推測したり、HTTP インターフェースだけを根拠に
+タイムスタンプを保証したりしないでください。
+<a href="https://github.com/modelscope/FunASR/blob/main/docs/model_selection_ja.md">モデル選択</a>と<a href="https://github.com/modelscope/FunASR/blob/main/docs/deployment_matrix_ja.md">デプロイ方式</a>で実際の経路を確認してください。</p>
+<p><a href="https://www.funasr.com/en/docs/moss-transcribe-diarize.html">MOSS-Transcribe-Diarize（英語）</a>は OpenMOSS が提供する第三者モデルで、
+独自のデプロイ要件があります。ネイティブの話者ラベルは録音内の匿名ラベルであり、実在する人物の識別ではありません。
+外部 VAD や外部話者モデルは不要なので、これらの段階を追加しないでください。
+すべてのクライアントがモデル出力を余さず表示するとも限りません。</p>
+<p>ローカルサーバーは、以下の SDK の仮の API キーを認証しません。
+ネットワークに公開する前に、<a href="https://www.funasr.com/en/docs/security.html">セキュリティガイド（英語）</a>に従い、
+TLS、認証、アップロードサイズ制限、レート制限を設けてください。CORS は認証ではありません。</p>
+<span data-legacy-doc-anchor="sdk-と-curl" id="sdk"></span><h2 id="sdk-と-curl">SDK と curl</h2>
+<p>クライアント環境には、OpenAI HTTP クライアントを別途インストールします。</p>
+<pre id="code-3"><code class="language-bash">python -m pip install openai
+</code></pre>
+<pre id="code-4"><code class="language-python">from openai import OpenAI
 
-client = OpenAI(base_url="http://localhost:8000/v1", api_key="not-needed")
-result = client.audio.transcriptions.create(
-    model="sensevoice",
-    file=open("meeting.wav", "rb"),
-)
+client = OpenAI(base_url="http://localhost:8000/v1", api_key="local-development")
+with open("meeting.wav", "rb") as audio:
+    result = client.audio.transcriptions.create(
+        model="sensevoice",
+        file=audio,
+        response_format="verbose_json",
+    )
 print(result.text)
-
-verbose = client.audio.transcriptions.create(
-    model="sensevoice",
-    file=open("meeting.wav", "rb"),
-    response_format="verbose_json",
-)
-print(verbose.segments)</code></pre>
-<pre><code>curl http://localhost:8000/v1/audio/transcriptions \
+for segment in getattr(result, "segments", []):
+    print(segment)
+</code></pre>
+<pre id="code-5"><code class="language-bash">curl -fsS http://localhost:8000/v1/audio/transcriptions \
   -F file=@audio.wav \
   -F model=sensevoice \
-  -F response_format=verbose_json</code></pre>
-</section>
-<section id="mcp"><h2>MCP Server</h2>
-<p>MCP server は Claude Code、Claude Desktop、Cursor、Windsurf などの MCP client にローカル <code>transcribe_audio</code> tool を提供します。</p>
-<pre><code>pip install funasr
-python examples/mcp_server/funasr_mcp.py</code></pre>
-<pre><code>{
+  -F response_format=verbose_json
+</code></pre>
+<p><code>verbose_json</code> は応答形式を選ぶだけで、話者分離を有効にしたり、リッチタグを復元したり、
+単語単位の時刻やアラインメントを保証したりするものではありません。
+サンプルサーバーは既存の <code>sentence_info</code> から segments を作り、情報がなければ空リストを返します。
+パッケージ付属サーバーは粗い代替区間を生成する場合があります。
+両方とも segment の時刻は秒単位ですが、<code>duration</code> の意味は異なります。
+時刻を利用する前に<a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/CLIENTS.md#response-formats">クライアント応答の契約（英語）</a>を確認してください。
+<code>json</code> と <code>text</code> はより単純な応答形式です。
+<code>spk=true</code> による話者処理はパッケージ付属 API の機能であり、サンプルサーバーのリクエストスキーマにはありません。
+<a href="https://www.funasr.com/en/docs/speaker-emotion.html">話者ラベルと人物識別の違い（英語）</a>も参照してください。</p>
+<h3 id="ワークフロー連携">ワークフロー連携</h3>
+<p>Dify/n8n などの HTTP ノードでは、文字起こしエンドポイントに <code>POST</code> で multipart を送ります。
+バイナリファイルのフィールド名は <code>file</code>、テキストフィールドは <code>model</code> と <code>response_format</code> です。
+<code>file</code> に音声 URL を入れることは、音声のバイト列をアップロードすることとは異なります。
+コンテナ内の <code>localhost</code> はそのコンテナ自身を指し、FunASR のホストではありません。
+意図したゲートウェイを経由してアクセスできるサービスアドレスを設定してください。</p>
+<ul>
+<li><a href="https://www.funasr.com/en/docs/workflows.html">Dify、n8n、webhook worker（英語）</a>: リクエストの接続例。</li>
+<li><a href="https://www.funasr.com/en/docs/javascript.html">JavaScript / TypeScript（英語）</a>: SDK と multipart クライアント。</li>
+<li><a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/POSTMAN.md">Postman（英語）</a>と<a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/smoke_test.py">スモークテスト</a>: デプロイ済みエンドポイントの確認。</li>
+<li><a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/GRADIO.md">Gradio（英語）</a>: ブラウザのアップロードとマイク入力。</li>
+<li><a href="https://www.funasr.com/en/docs/service-api.html">OpenAPI（英語）</a>: リポジトリ内サンプルのスキーマと稼働中のパッケージ付属サービスのスキーマの区別。</li>
+</ul>
+<p>ホストフレームワークには、これらのリクエスト・応答の範囲に従って文字起こしツールを登録します。
+URL worker の例は完全な安全対策を備えたダウンローダーではありません。
+信頼できない URL を受け付ける前に、宛先の許可リスト、プライベートネットワークへのアクセス遮断、
+リダイレクトの検証、サイズ制限、タイムアウトを追加してください。
+ワークフローのフィールド表が両サーバーにそのまま当てはまるとは限らないため、上記の応答契約を使ってください。
+これらの例は、すべてのフレームワークのバージョンで連携を検証した証拠でも、任意の URL の安全性を保証するものでもありません。</p>
+<span data-legacy-doc-anchor="mcp-サーバー" id="mcp"></span><h2 id="mcp-サーバー">MCP サーバー</h2>
+<p>準備済みのリポジトリのルートと環境から実行します。</p>
+<pre id="code-6"><code class="language-bash">python examples/mcp_server/funasr_mcp.py
+</code></pre>
+<p>文字起こしの前に、インストールガイドに従って PyTorch と互換性のある音声特徴抽出バックエンドを準備してください。
+ツールキットのインストールや MCP のハンドシェイク成功だけでは、モデルの実行は検証できません。
+このスクリプトに追加の MCP SDK パッケージは不要です。
+MCP クライアントは HTTP ではなく stdio でスクリプトを起動します。
+準備済み Python 環境とチェックアウトの絶対パスを設定してください。</p>
+<pre id="code-7"><code class="language-json">{
   "mcpServers": {
     "funasr": {
-      "command": "python",
-      "args": ["/path/to/examples/mcp_server/funasr_mcp.py"],
-      "env": {"FUNASR_DEVICE": "cuda"}
+      "command": "/path/to/FunASR-agent/.venv/bin/python",
+      "args": ["/path/to/FunASR-agent/examples/mcp_server/funasr_mcp.py"],
+      "env": {
+        "FUNASR_DEVICE": "cpu",
+        "FUNASR_MODEL": "iic/SenseVoiceSmall"
+      }
     }
   }
-}</code></pre>
-<table><tr><th>Variable</th><th>Default</th><th>Description</th></tr><tr><td><code>FUNASR_DEVICE</code></td><td><code>cpu</code></td><td><code>cuda</code>, <code>cpu</code>, or <code>mps</code>.</td></tr><tr><td><code>FUNASR_MODEL</code></td><td><code>iic/SenseVoiceSmall</code></td><td>ASR model used by the MCP tool.</td></tr></table>
-</section>
-<section id="voice"><h2>Desktop 音声入力</h2>
-<p>音声入力サンプルはマイクから録音し、<code>funasr-server</code> に送信して、認識結果を現在のカーソル位置へ貼り付けます。</p>
-<pre><code>pip install funasr sounddevice numpy pyperclip openai pynput
-funasr-server --device cuda
-
-cd examples/voice_input
-python funasr_input.py --server http://localhost:8000/v1 --model sensevoice</code></pre>
-<table><tr><th>Platform</th><th>Recording</th><th>Paste</th></tr><tr><td>macOS</td><td>Yes</td><td>AppleScript</td></tr><tr><td>Linux</td><td>Yes</td><td>xdotool</td></tr><tr><td>Windows</td><td>Yes</td><td>Manual Ctrl+V if needed</td></tr></table>
-</section>
-<section id="subtitle"><h2>字幕生成</h2>
-<p>字幕サンプルは音声または動画ファイルを SRT/VTT に変換し、必要に応じて話者ラベルを付けられます。</p>
-<pre><code>cd examples/subtitle
-python generate_subtitle.py video.mp4
-python generate_subtitle.py meeting.wav --spk
-python generate_subtitle.py podcast.mp3 --format vtt
-python generate_subtitle.py audio.wav --device cpu</code></pre>
-<table><tr><th>Option</th><th>Default</th><th>Description</th></tr><tr><td><code>--format</code></td><td><code>srt</code></td><td><code>srt</code> or <code>vtt</code>.</td></tr><tr><td><code>--model</code></td><td><code>iic/SenseVoiceSmall</code></td><td>ASR model.</td></tr><tr><td><code>--spk</code></td><td>off</td><td>Add speaker labels.</td></tr><tr><td><code>--lang</code></td><td><code>auto</code></td><td>Language hint.</td></tr></table>
-</section>
-</div></div>
-<footer><p>FunASR &middot; Tongyi Lab, Alibaba Group</p><p><a href="index.html">ホーム</a> &middot; <a href="tutorial.html">チュートリアル</a> &middot; <a href="agent.html">Agent</a> &middot; <a href="benchmark.html">Benchmark</a> &middot; <a href="vllm.html">vLLM</a> &middot; <a href="https://github.com/modelscope/FunASR">GitHub</a></p></footer>
-</body></html>
+}
+</code></pre>
+<p><code>transcribe_audio</code> はサーバーから見える既存のローカル <code>audio_path</code> を受け取ります。
+コンテナに読み取り専用でマウントしたパスも使えますが、URL やライブストリームは受け取りません。
+初回呼び出しでは重みのダウンロードとロードが発生する場合があります。
+言語ヒントは <code>auto</code>、<code>zh</code>、<code>yue</code>、<code>en</code>、<code>ja</code>、<code>ko</code> です。
+<code>FUNASR_MODEL</code> を変更してもツールのスキーマは変わらず、別のモデルとその VAD 経路の互換性も保証されません。</p>
+<p>結果は MCP の <code>content</code> 内の <code>type=text</code> として整形され、必要に応じて区間情報を含みます。
+HTTP の応答オブジェクトではありません。トップレベルの転写テキストからはリッチタグを除去しますが、
+任意の区間テキストはモデル出力からコピーされます。
+<code>FUNASR_DEVICE</code> のデフォルトは <code>cpu</code>、<code>FUNASR_MODEL</code> は <code>iic/SenseVoiceSmall</code> です。
+<a href="https://github.com/modelscope/FunASR/blob/main/examples/mcp_server/README.md">MCP のソースとコンテナ設定</a>でクライアント設定とマウント方法を確認してください。
+アシスタントとサーバーがアクセスできるファイルを制限してください。ローカルツール自体はファイルシステムの権限境界ではありません。</p>
+<span data-legacy-doc-anchor="デスクトップ音声入力" id="voice"></span><h2 id="デスクトップ音声入力">デスクトップ音声入力</h2>
+<p>HTTP サーバーを起動したまま、準備済みチェックアウトで別のターミナルを開きます。</p>
+<pre id="code-8"><code class="language-bash">python -m pip install sounddevice numpy pyperclip openai pynput
+python examples/voice_input/funasr_input.py --server http://localhost:8000/v1 --model sensevoice
+</code></pre>
+<p>スクリプトは録音を開始・停止し、WAV を HTTP サービスにアップロードして、転写テキストをコピーします。
+マイクの権限と音声デバイスの対応が必要です。macOS ではアクセシビリティ権限が必要な場合もあり、
+Linux の自動貼り付けには <code>xdotool</code> を使います。クリップボードや貼り付けの挙動はデスクトップ環境に依存します。
+現在の <code>--lang</code> は解析されますが文字起こしリクエストには渡されないため、この経路では有効な言語指定ではありません。</p>
+<p>リモートの <code>--server</code> を指定すると、録音がそのエンドポイントに送信されます。
+常に完全オフラインである、音声が端末外に出ない、一定の遅延を達成する、といった保証はありません。
+デプロイ前に<a href="https://github.com/modelscope/FunASR/blob/main/examples/voice_input/README.md#配置选项">設定項目</a>と
+<a href="https://github.com/modelscope/FunASR/blob/main/examples/voice_input/funasr_input.py">実装</a>を確認してください。</p>
+<span data-legacy-doc-anchor="字幕生成" id="subtitle"></span><h2 id="字幕生成">字幕生成</h2>
+<p>これはローカルの <code>AutoModel</code> パイプラインであり、HTTP や MCP のクライアントではありません。
+準備済みチェックアウトで、ローカルの入力ファイルと適切な推論環境を使います。</p>
+<pre id="code-9"><code class="language-bash">python examples/subtitle/generate_subtitle.py video.mp4
+python examples/subtitle/generate_subtitle.py meeting.wav --spk
+python examples/subtitle/generate_subtitle.py podcast.mp3 --format vtt
+python examples/subtitle/generate_subtitle.py audio.wav --device cpu
+</code></pre>
+<p>デフォルトのデバイスは CUDA です。最後のコマンドは CPU を明示的に選びます。
+デフォルトのモデルは SenseVoiceSmall で、VAD と句読点モデルを併用します。
+この固定パイプラインは任意のモデルに適用できる汎用手順ではありません。
+<code>--spk</code> は CAM++ による匿名話者ラベルを追加しますが、人物の身元は検証しません。
+<code>--format</code> は SRT/VTT を選択し、<code>--output</code> は出力先を指定します。
+<strong>既存の出力ファイルは上書きされます</strong>。以前の字幕を残す場合は別のパスを指定してください。
+<code>--lang</code> は <code>auto</code> 以外の言語ヒントを推論に渡します。
+<code>--max-single-segment-time</code> の単位はミリ秒で、現在のデフォルトは <code>60000</code> です。</p>
+<p><code>--segment-mode readable</code> は認識テキストや句読点を書き換えず、表示用の字幕をまとめます。
+<code>sentence</code> はモデルの元の文単位の区切りを保ちます。どちらも句読点の誤りを修正せず、音素の境界も保証しません。
+実際のタイムスタンプの有無を確認し、元の音声と再生を照合してください。
+時間情報が欠けると、長さがゼロの <code>(0, 0)</code> 区間にフォールバックする場合があります。
+これは妥当性が確認された字幕ではありません。入力デコード、モデル・依存パッケージのロード、
+GPU 容量は環境ごとに検証が必要です。
+出力の解釈には<a href="https://github.com/modelscope/FunASR/blob/main/examples/subtitle/README.md#options">字幕オプション（英語）</a>と
+<a href="https://www.funasr.com/en/docs/speaker-emotion.html">話者ガイド（英語）</a>を参照してください。</p></article>
+</div>
+<aside aria-label="目次" class="docs-toc"><div class="toc">
+<ul>
+<li><a href="#funasr-agent-連携">FunASR Agent 連携</a><ul>
+<li><a href="#http-サーバー">HTTP サーバー</a></li>
+<li><a href="#sdk-と-curl">SDK と curl</a><ul>
+<li><a href="#ワークフロー連携">ワークフロー連携</a></li>
+</ul>
+</li>
+<li><a href="#mcp-サーバー">MCP サーバー</a></li>
+<li><a href="#デスクトップ音声入力">デスクトップ音声入力</a></li>
+<li><a href="#字幕生成">字幕生成</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</aside>
+</main>
+<script defer="" src="../assets/js/site.d446f5fbcfe2.js"></script><script defer="" src="../assets/js/experience.3f688a12942a.js"></script>
+</body>
+</html>

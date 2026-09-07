@@ -1,46 +1,246 @@
 <!DOCTYPE html>
-<html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<meta name="description" content="長時間 ASR ワークロードの速度と精度の測定結果です。実運用の書き起こしでは、FunASR の CPU 推論が Whisper の GPU 推論より速くなる場合があります。">
-<meta property="og:title" content="FunASR ベンチマーク">
-<meta property="og:description" content="長時間 ASR ワークロードの速度と精度の測定結果です。実運用の書き起こしでは、FunASR の CPU 推論が Whisper の GPU 推論より速くなる場合があります。">
-<meta property="og:type" content="website">
-<meta property="og:url" content="https://modelscope.github.io/FunASR/ja/benchmark.html">
-<link rel="canonical" href="https://modelscope.github.io/FunASR/ja/benchmark.html">
-<meta property="og:site_name" content="FunASR">
-<meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="FunASR ベンチマーク">
-<meta name="twitter:description" content="長時間 ASR ワークロードの速度と精度の測定結果です。実運用の書き起こしでは、FunASR の CPU 推論が Whisper の GPU 推論より速くなる場合があります。">
-<title>FunASR ベンチマーク</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../style.css">
-</head><body>
-<nav class="nav"><div class="container">
-<a href="index.html" class="nav-logo">FunASR</a>
-<div class="nav-links"><a href="index.html">ホーム</a><a href="tutorial.html">チュートリアル</a><a href="training.html">トレーニング</a><a href="model-registration.html">開発</a><a href="../api.html">API</a><a href="vllm.html">vLLM</a><a href="agent.html">Agent</a><a href="benchmark.html" class="active">Benchmark</a></div>
-<div class="lang-dropdown"><button class="lang-btn">日本語</button><div class="lang-menu"><a href="../benchmark.html">English</a><a href="../zh/benchmark.html">中文</a><a href="benchmark.html" class="current">日本語</a><a href="../ko/benchmark.html">한국어</a></div></div>
-<a href="https://github.com/modelscope/FunASR" class="nav-github">GitHub</a>
-</div></nav>
-<div class="content"><div class="container narrow">
-<h1>ベンチマーク</h1>
-<p>長時間 ASR ワークロードの速度と精度の測定結果です。実運用の書き起こしでは、FunASR の CPU 推論が Whisper の GPU 推論より速くなる場合があります。</p>
-<div class="toc-grid"><a href="#summary">概要</a><a href="#table">結果</a><a href="#method">測定方法</a><a href="#choose">選び方</a></div>
-<section id="summary"><h2>概要</h2>
-<table><tr><th>指標</th><th>結果</th></tr><tr><td>データセット</td><td>中国語の長時間音声 184 ファイル、合計 11,539 秒、192.3 分。</td></tr><tr><td>GPU</td><td>NVIDIA H100 80GB HBM3.</td></tr><tr><td>最高 GPU 速度</td><td>SenseVoice-Small: 169.6x realtime in the full benchmark, 211.8x in the initial run.</td></tr><tr><td>最高 CPU 速度</td><td>SenseVoice-Small: 17.2x realtime; Paraformer-Large: 15.6x realtime.</td></tr><tr><td>ベースライン</td><td>OpenAI Whisper-large-v3: 13.4x realtime on GPU.</td></tr></table>
-</section>
-<section id="table"><h2>結果</h2>
-<table><tr><th>モデル</th><th>デバイス</th><th>RTF</th><th>速度</th><th>CER</th><th>メモ</th></tr><tr><td><b>SenseVoice-Small</b></td><td>GPU</td><td>0.005896</td><td><b>169.6x</b></td><td>7.81%</td><td>ASR + language / emotion / event tags; CER after tag stripping.</td></tr><tr><td><b>Paraformer-Large</b></td><td>GPU</td><td>0.008359</td><td><b>119.6x</b></td><td>10.18%</td><td>Fast non-autoregressive Chinese ASR with VAD/punctuation pipeline.</td></tr><tr><td><b>Fun-ASR-Nano</b></td><td>GPU</td><td>0.058803</td><td>17.0x</td><td>8.06%</td><td>中国語・英語・日本語、7つの中国語方言グループ、26の地域アクセントに対応する LLM-based ASR。hotword に対応。信頼できる checkpoint-native timestamp は未対応（<a href="https://github.com/QwenAudio/Fun-ASR/issues/106">#106</a>）。</td></tr><tr><td>GLM-ASR-Nano</td><td>GPU</td><td>0.026974</td><td>37.1x</td><td>31.07%</td><td>LLM-based multilingual ASR.</td></tr><tr><td>Whisper-large-v3-turbo (OpenAI)</td><td>GPU</td><td>0.021708</td><td>46.1x</td><td>21.71%</td><td>OpenAI Whisper implementation.</td></tr><tr><td>Whisper-large-v3 (OpenAI)</td><td>GPU</td><td>0.074694</td><td>13.4x</td><td>20.02%</td><td>ベースライン for large Whisper quality.</td></tr><tr><td><b>SenseVoice-Small</b></td><td>CPU</td><td>0.057988</td><td><b>17.2x</b></td><td>7.81%</td><td>CPU run from the remaining benchmark script.</td></tr><tr><td><b>Paraformer-Large</b></td><td>CPU</td><td>0.064056</td><td><b>15.6x</b></td><td>10.18%</td><td>CPU viable for batch jobs.</td></tr><tr><td>Fun-ASR-Nano</td><td>CPU</td><td>0.274318</td><td>3.6x</td><td>8.06%</td><td>LLM-based model is heavier but still above realtime.</td></tr></table>
-</section>
-<section id="method"><h2>測定方法</h2>
-<p>測定はワークスペース内の benchmark scripts を使い、184 音声ファイルで実施しました。RTF は <code>総推論時間 / 総音声時間</code>、速度は <code>1 / RTF</code> です。CER は SenseVoice タグなどモデル固有の出力を整理した後に計算しています。</p>
-<pre><code>python benchmark/run_full_benchmark.py
+
+<html lang="ja">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>ASR ベンチマークの過去の記録 | FunASR</title>
+<link href="https://modelscope.github.io/FunASR/ja/benchmark.html" rel="canonical"/>
+<link href="../assets/css/site.4a0f4749ba00.css" rel="stylesheet"/><link href="../assets/css/experience.34d6e632686e.css" rel="stylesheet"/>
+</head>
+<body class="localized-legacy-doc" data-copy-icon="../assets/lucide/copy.ea80e566c7a1.svg" data-language="ja">
+<a class="skip-link" href="#main">本文へ</a>
+<header class="legacy-doc-header">
+<a class="brand" href="https://www.funasr.com/en/"><span aria-hidden="true" class="brand-mark">F</span><span>FunASR</span></a>
+<nav aria-label="言語">
+<a href="https://www.funasr.com/en/docs/">English</a>
+<a href="https://www.funasr.com/docs/">中文</a>
+<a data-peer-link="" href="../ko/benchmark.html">한국어</a>
+</nav>
+</header>
+<main class="docs-layout" id="main">
+<aside class="docs-sidebar">
+<nav aria-label="ガイド">
+<a href="agent.html">FunASR Agent 連携</a><a aria-current="page" href="benchmark.html">ASR ベンチマークの過去の記録</a>
+</nav>
+</aside>
+<div class="docs-body">
+<header class="docs-title">
+<h1>ASR ベンチマークの過去の記録</h1>
+<a class="source-link" data-source-link="" href="https://github.com/modelscope/FunASR/blob/main/docs/benchmark/historical_asr_ja.md">GitHub で原稿を読む</a>
+</header>
+<article class="docs-article"><div class="source-title-anchor" id="asr-ベンチマークの過去の記録"></div>
+<p><a href="https://www.funasr.com/en/docs/historical-asr-benchmark.html">English</a> | <a href="https://www.funasr.com/docs/historical-asr-benchmark.html">中文</a> | <a href="../ko/benchmark.html">한국어</a></p>
+<p>このページは、以前の FunASR 比較を参照する読者のために、<strong>出典情報が不完全な過去の記録</strong>を保存したものです。
+新しい測定、汎用ランキング、現在の checkpoint・機器・デプロイに対する保証ではありません。
+対象データは<strong>中国語の音声</strong>であり、この日本語ページは日本語や韓国語の認識精度を測ったものではありません。
+新しい評価を行う場合は<a href="https://www.funasr.com/en/docs/benchmark-method.html">性能測定の方法（英語）</a>から始めてください。</p>
+<span data-legacy-doc-anchor="過去の概要" id="summary"></span><h2 id="過去の概要">過去の概要</h2>
+<p>下表は元の日本語ページの表現と数値を保持しています。
+「最高」などの表現はその報告の範囲だけを指し、すべてのモデルやハードウェアには適用できません。</p>
+<table>
+<thead>
+<tr>
+<th>指標</th>
+<th>結果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>データセット</td>
+<td>中国語の長時間音声 184 ファイル、合計 11,539 秒、192.3 分。</td>
+</tr>
+<tr>
+<td>GPU</td>
+<td>NVIDIA H100 80GB HBM3.</td>
+</tr>
+<tr>
+<td>最高 GPU 速度</td>
+<td>SenseVoice-Small: 169.6x realtime in the full benchmark, 211.8x in the initial run.</td>
+</tr>
+<tr>
+<td>最高 CPU 速度</td>
+<td>SenseVoice-Small: 17.2x realtime; Paraformer-Large: 15.6x realtime.</td>
+</tr>
+<tr>
+<td>ベースライン</td>
+<td>OpenAI Whisper-large-v3: 13.4x realtime on GPU.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>全体実行の 169.6x と初回実行の 211.8x は、別々に報告された結果</strong>です。
+元のページは測定日を明記していません。<strong>2026-09-07 は出典スナップショットを確認した日であり、測定日ではありません</strong>。</p>
+<span data-legacy-doc-anchor="過去の結果" id="table"></span><h2 id="過去の結果">過去の結果</h2>
+<p>この表のすべての数値とメモは元の報告の歴史的な記述であり、<strong>現在の API の機能保証ではありません</strong>。
+モデルが生のタグを出力することは、HTTP エンドポイントがそのタグを返すことを意味しません。
+過去のタイムスタンプに関する記述も、現在の<a href="https://github.com/modelscope/FunASR/blob/main/docs/model_selection_ja.md">モデル選択ガイド</a>に代わるものではありません。</p>
+<table>
+<thead>
+<tr>
+<th>モデル</th>
+<th>デバイス</th>
+<th>RTF</th>
+<th>速度</th>
+<th>CER</th>
+<th>メモ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>SenseVoice-Small</td>
+<td>GPU</td>
+<td>0.005896</td>
+<td>169.6x</td>
+<td>7.81%</td>
+<td>ASR + language / emotion / event tags; CER after tag stripping.</td>
+</tr>
+<tr>
+<td>Paraformer-Large</td>
+<td>GPU</td>
+<td>0.008359</td>
+<td>119.6x</td>
+<td>10.18%</td>
+<td>Fast non-autoregressive Chinese ASR with VAD/punctuation pipeline.</td>
+</tr>
+<tr>
+<td>Fun-ASR-Nano</td>
+<td>GPU</td>
+<td>0.058803</td>
+<td>17.0x</td>
+<td>8.06%</td>
+<td>中国語・英語・日本語、7つの中国語方言グループ、26の地域アクセントに対応する LLM-based ASR。hotword に対応。信頼できる checkpoint-native timestamp は未対応（<a href="https://github.com/QwenAudio/Fun-ASR/issues/106">#106</a>）。</td>
+</tr>
+<tr>
+<td>GLM-ASR-Nano</td>
+<td>GPU</td>
+<td>0.026974</td>
+<td>37.1x</td>
+<td>31.07%</td>
+<td>LLM-based multilingual ASR.</td>
+</tr>
+<tr>
+<td>Whisper-large-v3-turbo (OpenAI)</td>
+<td>GPU</td>
+<td>0.021708</td>
+<td>46.1x</td>
+<td>21.71%</td>
+<td>OpenAI Whisper implementation.</td>
+</tr>
+<tr>
+<td>Whisper-large-v3 (OpenAI)</td>
+<td>GPU</td>
+<td>0.074694</td>
+<td>13.4x</td>
+<td>20.02%</td>
+<td>ベースライン for large Whisper quality.</td>
+</tr>
+<tr>
+<td>SenseVoice-Small</td>
+<td>CPU</td>
+<td>0.057988</td>
+<td>17.2x</td>
+<td>7.81%</td>
+<td>CPU run from the remaining benchmark script.</td>
+</tr>
+<tr>
+<td>Paraformer-Large</td>
+<td>CPU</td>
+<td>0.064056</td>
+<td>15.6x</td>
+<td>10.18%</td>
+<td>CPU viable for batch jobs.</td>
+</tr>
+<tr>
+<td>Fun-ASR-Nano</td>
+<td>CPU</td>
+<td>0.274318</td>
+<td>3.6x</td>
+<td>8.06%</td>
+<td>LLM-based model is heavier but still above realtime.</td>
+</tr>
+</tbody>
+</table>
+<p>CPU/GPU の行で同じ CER が繰り返されていても、それぞれを独立に採点した証拠にはなりません。
+確認した資料には、生の予測、参照テキスト、採点プログラムがありません。
+「タグを除去してから CER を計算」という記述は過去の主張として保存しており、今回検証した採点結果ではありません。
+数値の桁数や丸められた速度・RTF の組は、再計算せずに保持しています。</p>
+<span data-legacy-doc-anchor="出典と制約" id="method"></span><h2 id="出典と制約">出典と制約</h2>
+<p><a href="https://github.com/modelscope/FunASR/blob/67d63b80a246dc33749e43904c294e0409cd9183/ja/benchmark.html">元の日本語 HTML</a>は
+過去の GitHub Pages のコミットに固定されています。出典確認時に、このファイルは保存済みの公開ページの
+スナップショットとバイト単位で一致しました。これは表の出典を示すものであり、
+測定の正しさや再現可能性を証明するものではありません。</p>
+<p>元の報告では RTF を総推論時間と総音声時間の比、速度をその逆数としています。
+速度は RTFx とも呼ばれます。</p>
+<pre id="code-0"><code class="language-text">RTF  = total inference time / total audio duration
+RTFx = total audio duration / total inference time = 1 / RTF
+</code></pre>
+<p>次のコマンドは<strong>過去の記録であり、確認したチェックアウトからそのまま実行することはできません</strong>。
+確認した FunASR ソースのリビジョン <code>386f6f9106684ba5a114e796147db4396a09eab5</code> には、
+参照先の三つのファイルがありません。本ページは代替スクリプトや再現用データを提供しません。</p>
+<pre id="code-1"><code class="language-text">python benchmark/run_full_benchmark.py
 python benchmark/run_remaining.py
-python benchmark/fix_sensevoice_cer.py</code></pre>
-<p>これらの数値は汎用ランキングではなく、実装時の目安です。ハードウェア、batch size、音声長、decode 設定、テキスト正規化によって結果は変わります。</p>
-</section>
-<section id="choose"><h2>選び方</h2>
-<table><tr><th>用途</th><th>推奨モデル</th></tr><tr><td>最速の本番書き起こし</td><td>SenseVoice-Small または Paraformer-Large。</td></tr><tr><td>CPU バッチ書き起こし</td><td>まず SenseVoice-Small。中国語の本番 pipeline では Paraformer-Large。</td></tr><tr><td>中国語・英語・日本語、および中国語の方言/アクセントを扱う LLM-style 認識</td><td>Fun-ASR-Nano。31言語が必要な場合は別 checkpoint の <a href="https://huggingface.co/FunAudioLLM/Fun-ASR-MLT-Nano-2512">Fun-ASR-MLT-Nano</a> を使用し、LLM decode throughput を高める場合は <a href="vllm.html">vLLM</a> を使用。</td></tr><tr><td>OpenAI 互換ローカル endpoint</td><td><a href="agent.html">funasr-server</a> を使い、model alias は <code>sensevoice</code>、<code>paraformer</code>、または <code>fun-asr-nano</code>。</td></tr></table>
-</section>
-</div></div>
-<footer><p>FunASR &middot; Tongyi Lab, Alibaba Group</p><p><a href="index.html">ホーム</a> &middot; <a href="tutorial.html">チュートリアル</a> &middot; <a href="agent.html">Agent</a> &middot; <a href="benchmark.html">Benchmark</a>
-                <a href="../donors.html">Donors</a> &middot; <a href="vllm.html">vLLM</a> &middot; <a href="https://github.com/modelscope/FunASR">GitHub</a></p></footer>
-</body></html>
+python benchmark/fix_sensevoice_cer.py
+</code></pre>
+<p>元の報告では CPU の型番・スレッド数、データの構成と参照テキストの一覧、正確な checkpoint のリビジョン、
+ソフトウェア・ドライバーのバージョン、ファイルごとの予測や計時ログが明らかではありません。
+ウォームアップ、I/O、前処理を含むかなど、計時範囲も十分には記録されていません。
+これらがないため、この表を直接再現することはできず、CPU と GPU の比較をあらゆる本番環境に一般化できません。</p>
+<p>この記録の <strong>11,539 秒</strong>と、<a href="https://www.funasr.com/en/docs/benchmark-method.html">vLLM の測定方法（英語）</a>に記載された
+<strong>11,541 秒</strong>は別々に引用してください。両方が 184 ファイルと述べていても、同じファイル群であるとは限りません。
+二つの表を統合したり、2 秒の差を勝手に補正したりしないでください。</p>
+<span data-legacy-doc-anchor="現在の選び方" id="choose"></span><h2 id="現在の選び方">現在の選び方</h2>
+<p>以下は<strong>元の推奨表を過去の文脈として保存したもの</strong>です。
+新たに検証した推奨や性能ランキングではありません。</p>
+<table>
+<thead>
+<tr>
+<th>用途</th>
+<th>推奨モデル</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>最速の本番書き起こし</td>
+<td>SenseVoice-Small または Paraformer-Large。</td>
+</tr>
+<tr>
+<td>CPU バッチ書き起こし</td>
+<td>まず SenseVoice-Small。中国語の本番 pipeline では Paraformer-Large。</td>
+</tr>
+<tr>
+<td>中国語・英語・日本語、および中国語の方言/アクセントを扱う LLM-style 認識</td>
+<td>Fun-ASR-Nano。31言語が必要な場合は別 checkpoint の <a href="https://huggingface.co/FunAudioLLM/Fun-ASR-MLT-Nano-2512">Fun-ASR-MLT-Nano</a> を使用し、LLM decode throughput を高める場合は <a href="https://www.funasr.com/en/docs/vllm.html">vLLM</a> を使用。</td>
+</tr>
+<tr>
+<td>OpenAI 互換ローカル endpoint</td>
+<td><a href="agent.html">funasr-server</a> を使い、model alias は <code>sensevoice</code>、<code>paraformer</code>、または <code>fun-asr-nano</code>。</td>
+</tr>
+</tbody>
+</table>
+<p>現在の判断には、<a href="https://github.com/modelscope/FunASR/blob/main/docs/model_selection_ja.md">モデル選択</a>、<a href="agent.html">Agent のインターフェースと制約</a>、
+<a href="https://github.com/modelscope/FunASR/blob/main/docs/deployment_matrix_ja.md">デプロイ方式</a>、<a href="https://www.funasr.com/en/docs/vllm.html">vLLM ガイド（英語）</a>を使ってください。
+別 checkpoint である MLT-Nano の 31 言語対応を、基本 Fun-ASR-Nano の対応範囲と混同しないでください。
+対象言語、手元の音声、実行環境、エンドツーエンドの遅延を評価してから方式を選びます。
+公式 native vLLM と split-engine は checkpoint と API が異なるため、相互に置き換えないでください。</p>
+<p>新しい計測には<a href="https://www.funasr.com/en/docs/benchmark-method.html">性能測定の方法（英語）</a>、同時接続を伴うリアルタイムサービスには
+<a href="https://www.funasr.com/en/docs/realtime-benchmark.html">WebSocket ベンチマーク（英語）</a>を参照してください。
+現在の<a href="https://github.com/modelscope/FunASR/blob/main/examples/migration/benchmark_funasr.py">移行用計時ツール</a>は手元の音声で FunASR の時間を測るもので、
+<strong>CER/WER を計算せず、Whisper も実行せず、欠けている過去のスクリプトを再現しません</strong>。
+計時範囲、失敗したファイル、品質評価は分けて明示してください。</p></article>
+</div>
+<aside aria-label="目次" class="docs-toc"><div class="toc">
+<ul>
+<li><a href="#asr-ベンチマークの過去の記録">ASR ベンチマークの過去の記録</a><ul>
+<li><a href="#過去の概要">過去の概要</a></li>
+<li><a href="#過去の結果">過去の結果</a></li>
+<li><a href="#出典と制約">出典と制約</a></li>
+<li><a href="#現在の選び方">現在の選び方</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</aside>
+</main>
+<script defer="" src="../assets/js/site.d446f5fbcfe2.js"></script><script defer="" src="../assets/js/experience.3f688a12942a.js"></script>
+</body>
+</html>
