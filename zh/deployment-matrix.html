@@ -113,6 +113,7 @@
 <a href="https://www.funasr.com/docs/community.html">社区集成</a>
 <a href="https://www.funasr.com/docs/repositories.html">四仓职责与贡献入口</a>
 <a href="https://www.funasr.com/docs/javascript.html">JavaScript 客户端</a>
+<a href="https://www.funasr.com/docs/gradio.html">Gradio 浏览器客户端</a>
 <a href="https://www.funasr.com/docs/workflows.html">工作流集成</a>
 </nav>
 </details>
@@ -233,7 +234,7 @@
 <h3 id="我想五分钟内试跑-funasr">我想五分钟内试跑 FunASR</h3>
 <p>如果只想在浏览器里 smoke test，可以先用 <a href="https://github.com/modelscope/FunASR/blob/main/examples/colab/README_zh.md">Colab 快速体验</a>；本地工作再使用 README 里的 Python API。它是验证安装、模型下载、设备选择和基础输出格式的最短路径。如果还不确定先用哪个模型，请看 <a href="https://www.funasr.com/docs/model-selection.html">模型选择指南</a>。</p>
 <h3 id="我想替代云端转写服务">我想替代云端转写服务</h3>
-<p>使用 OpenAI 兼容 API。它提供 <code>/v1/audio/transcriptions</code>、<code>/v1/models</code>、<code>/health</code> 和 Swagger docs。先用 <code>sensevoice</code> 跑通 <code>examples/openai_api/smoke_test.sh</code> 或 <code>examples/openai_api/smoke_test.py</code>，再根据 <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/CLIENTS.md">客户端配方</a> 和 <a href="https://www.funasr.com/docs/javascript.html">JavaScript/TypeScript 配方</a> 接入 SDK 或 HTTP 客户端。浏览器上传或麦克风 demo 可使用 <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/GRADIO_zh.md">Gradio 浏览器 Demo</a>。Dify、n8n、HTTP 节点或 webhook worker 可参考 <a href="https://www.funasr.com/docs/workflows.html">工作流配方</a>。API 网关、开发者门户或按 schema 导入时可使用 <a href="https://www.funasr.com/docs/service-api.html">OpenAPI 规范</a>。跨团队共享服务前，请先阅读 <a href="https://www.funasr.com/docs/security.html">安全与网关指南</a>。</p>
+<p>使用 OpenAI 兼容 API。它提供 <code>/v1/audio/transcriptions</code>、<code>/v1/models</code>、<code>/health</code> 和 Swagger docs。先用 <code>sensevoice</code> 跑通 <code>examples/openai_api/smoke_test.sh</code> 或 <code>examples/openai_api/smoke_test.py</code>，再根据 <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/CLIENTS.md">客户端配方</a> 和 <a href="https://www.funasr.com/docs/javascript.html">JavaScript/TypeScript 配方</a> 接入 SDK 或 HTTP 客户端。浏览器上传或麦克风 demo 可使用 <a href="https://www.funasr.com/docs/gradio.html">Gradio 浏览器 Demo</a>。Dify、n8n、HTTP 节点或 webhook worker 可参考 <a href="https://www.funasr.com/docs/workflows.html">工作流配方</a>。API 网关、开发者门户或按 schema 导入时可使用 <a href="https://www.funasr.com/docs/service-api.html">OpenAPI 规范</a>。跨团队共享服务前，请先阅读 <a href="https://www.funasr.com/docs/security.html">安全与网关指南</a>。</p>
 <h3 id="我已经在使用-xinference">我已经在使用 Xinference</h3>
 <p>如果你的系统已经用 Xinference 管理模型注册、virtualenv 隔离和服务生命周期，可以选择 Xinference 路径。请确认使用的 Xinference 版本或 commit 包含 <a href="https://github.com/xorbitsai/inference/pull/5140">xorbitsai/inference#5140</a>；该更新把 Fun-ASR-Nano model spec 从旧的 FunASR git SHA 改为打包发布的 <code>funasr~=1.3.0</code> 依赖。首次评估 FunASR，或需要面向 Agent 的 OpenAI 兼容转写接口时，仍建议先从上面的 FunASR 原生 OpenAI API 示例开始。</p>
 <h3 id="我想要可复现的容器-demo">我想要可复现的容器 demo</h3>
