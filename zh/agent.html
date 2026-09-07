@@ -1,94 +1,326 @@
 <!DOCTYPE html>
-<html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<meta name="description" content="把语音识别作为本地基础设施接入 Agent、产品和桌面工作流：OpenAI 兼容 API、MCP 服务、语音输入和字幕生成。">
-<meta property="og:title" content="FunASR Agent 集成">
-<meta property="og:description" content="把语音识别作为本地基础设施接入 Agent、产品和桌面工作流：OpenAI 兼容 API、MCP 服务、语音输入和字幕生成。">
-<meta property="og:type" content="website">
-<meta property="og:url" content="https://modelscope.github.io/FunASR/zh/agent.html">
-<link rel="canonical" href="https://modelscope.github.io/FunASR/zh/agent.html">
-<meta property="og:site_name" content="FunASR">
-<meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="FunASR Agent 集成">
-<meta name="twitter:description" content="把语音识别作为本地基础设施接入 Agent、产品和桌面工作流：OpenAI 兼容 API、MCP 服务、语音输入和字幕生成。">
-<title>FunASR Agent 集成</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../style.css">
-</head><body>
-<nav class="nav"><div class="container">
-<a href="index.html" class="nav-logo">FunASR</a>
-<div class="nav-links"><a href="index.html">首页</a><a href="tutorial.html">教程</a><a href="training.html">训练</a><a href="model-registration.html">开发</a><a href="../api.html">API</a><a href="vllm.html">vLLM</a><a href="agent.html" class="active">Agent</a><a href="benchmark.html">Benchmark</a>
-                <a href="../donors.html">功德榜</a></div>
-<div class="lang-dropdown"><button class="lang-btn">中文</button><div class="lang-menu"><a href="../agent.html">English</a><a href="agent.html" class="current">中文</a><a href="../ja/agent.html">日本語</a><a href="../ko/agent.html">한국어</a></div></div>
-<a href="https://github.com/modelscope/FunASR" class="nav-github">GitHub</a>
-</div></nav>
-<div class="content"><div class="container narrow">
-<h1>Agent 集成</h1>
-<p>把语音识别作为本地基础设施接入 Agent、产品和桌面工作流：OpenAI 兼容 API、MCP 服务、语音输入和字幕生成。</p>
-<div class="toc-grid"><a href="#server">OpenAI API</a><a href="#sdk">SDK 与 curl</a><a href="#workflows">工作流</a><a href="#mcp">MCP 服务</a><a href="#voice">语音输入</a><a href="#subtitle">字幕生成</a></div>
-<section id="server"><h2>OpenAI 兼容 API 服务</h2>
-<p><code>funasr-server</code> 提供 <code>/v1/audio/transcriptions</code>、<code>/v1/models</code>、<code>/health</code>，并在 <code>/docs</code> 提供 Swagger 文档。任何支持 OpenAI audio API 的框架都可以接入。</p>
-<pre><code>pip install funasr fastapi uvicorn python-multipart
-funasr-server --device cuda --port 8000
 
-# CPU fallback
-funasr-server --device cpu --model sensevoice --port 8000</code></pre>
-<table><tr><th>模型别名</th><th>后端</th><th>适用场景</th></tr><tr><td><code>sensevoice</code></td><td><code>iic/SenseVoiceSmall</code></td><td>高速多语种 ASR，支持语种、情感和事件标签。</td></tr><tr><td><code>paraformer</code></td><td><code>paraformer-zh</code> + VAD + punctuation</td><td>中文生产转写。</td></tr><tr><td><code>paraformer-en</code></td><td><code>paraformer-en</code> + VAD</td><td>英文转写。</td></tr><tr><td><code>fun-asr-nano</code></td><td><code>FunAudioLLM/Fun-ASR-Nano-2512</code></td><td>31 语种 LLM-based ASR，支持时间戳。</td></tr></table>
-</section>
-<section id="sdk"><h2>OpenAI SDK 与 curl</h2>
-<pre><code>from openai import OpenAI
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Agent 集成 - FunASR</title>
+<meta content="Agent 集成" name="description"/>
+<meta content="#ffffff" name="theme-color"/>
+<link href="https://www.funasr.com/docs/agent-integration.html" rel="canonical"/>
+<link href="https://www.funasr.com/en/docs/agent-integration.html" hreflang="en" rel="alternate"/>
+<link href="https://www.funasr.com/docs/agent-integration.html" hreflang="zh-CN" rel="alternate"/>
+<meta content="website" property="og:type"/>
+<meta content="Agent 集成 - FunASR" property="og:title"/>
+<meta content="Agent 集成" property="og:description"/>
+<meta content="https://www.funasr.com/docs/agent-integration.html" property="og:url"/>
+<link href="../assets/css/site.4a0f4749ba00.css" rel="stylesheet"/>
+<link href="../assets/css/experience.23603ff092cf.css" rel="stylesheet"/>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "SoftwareApplication", "applicationCategory": "DeveloperApplication", "codeRepository": "https://github.com/modelscope/FunASR", "dateModified": "2026-09-01", "license": "https://github.com/modelscope/FunASR/blob/main/LICENSE", "name": "FunASR", "operatingSystem": "Linux, macOS, Windows", "url": "https://www.funasr.com/docs/agent-integration.html"}</script>
+</head>
+<body data-copy-icon="../assets/lucide/copy.ea80e566c7a1.svg" data-language="zh" data-route="/docs/agent-integration.html">
+<a class="skip-link" href="#main">跳到主要内容</a>
+<header class="site-header">
+<a aria-label="FunASR 首页" class="brand" href="https://www.funasr.com/">
+<span aria-hidden="true" class="brand-mark">F</span>
+<span>FunASR</span>
+</a>
+<button aria-controls="primary-navigation" aria-expanded="false" class="icon-button menu-button" data-menu-toggle="" title="打开目录" type="button">
+<img alt="" src="../assets/lucide/menu.90a31b3ab1cf.svg"/>
+</button>
+<nav aria-label="主目录" class="primary-navigation" data-primary-nav="" id="primary-navigation">
+<a href="https://www.funasr.com/">产品</a>
+<a href="https://www.funasr.com/deploy/">部署</a>
+<a href="https://www.funasr.com/models.html">模型</a>
+<a href="https://www.funasr.com/benchmarks.html">性能</a>
+<a href="https://www.funasr.com/ecosystem.html">生态</a>
+<a href="https://www.funasr.com/blog/">博客</a>
+<a href="https://www.funasr.com/docs/">文档</a>
+<a href="https://www.funasr.com/donors.html">功德榜</a>
+</nav>
+<div class="header-actions">
+<a class="icon-link" href="https://www.funasr.com/en/docs/agent-integration.html" title="English">
+<img alt="" src="../assets/lucide/languages.ae9048feb2c7.svg"/>
+<span>EN</span>
+</a>
+<a aria-label="GitHub" class="icon-button" href="https://www.funasr.com/go/github" title="GitHub">
+<img alt="" src="../assets/lucide/github.793554449a30.svg"/>
+</a>
+</div>
+</header>
+<main id="main">
+<div class="docs-layout">
+<aside class="docs-sidebar">
+<a class="docs-home" href="https://www.funasr.com/docs/">文档中心</a>
+<details class="docs-navigation" open="">
+<summary class="docs-navigation-toggle">浏览目录</summary>
+<details open="">
+<summary>开始使用</summary>
+<nav aria-label="开始使用">
+<a href="https://www.funasr.com/docs/installation.html">安装与环境验证</a>
+<a href="https://www.funasr.com/docs/quickstart.html">第一次转写</a>
+<a href="https://www.funasr.com/docs/python-api.html">Python SDK: AutoModel</a>
+<a href="https://www.funasr.com/docs/model-selection.html">选择第一个模型</a>
+<a href="https://www.funasr.com/docs/command-line.html">命令行转写</a>
+<a href="https://www.funasr.com/docs/migration.html">从 Whisper 与云 API 迁移</a>
+</nav>
+</details>
+<details open="">
+<summary>模型与能力</summary>
+<nav aria-label="模型与能力">
+<a href="https://www.funasr.com/docs/moss-transcribe-diarize.html">MOSS 转写与说话人分离</a>
+<a href="https://www.funasr.com/docs/model-zoo.html">Model Zoo</a>
+<a href="https://www.funasr.com/docs/streaming-vad.html">流式语音活动检测</a>
+<a href="https://www.funasr.com/docs/keyword-spotting.html">关键词检测</a>
+<a href="https://www.funasr.com/docs/speaker-emotion.html">说话人与情感标签</a>
+</nav>
+</details>
+<details open="">
+<summary>训练与扩展</summary>
+<nav aria-label="训练与扩展">
+<a href="https://www.funasr.com/docs/training.html">微调与评测</a>
+<a href="https://www.funasr.com/docs/model-registration.html">自定义模型注册</a>
+</nav>
+</details>
+<details open="">
+<summary>部署与接口</summary>
+<nav aria-label="部署与接口">
+<a href="https://www.funasr.com/docs/docker.html">容器环境与镜像选择</a>
+<a href="https://www.funasr.com/docs/runtime-guide.html">服务部署入口</a>
+<a href="https://www.funasr.com/docs/http-server.html">Python HTTP 服务</a>
+<a href="https://www.funasr.com/docs/kubernetes.html">Kubernetes 部署</a>
+<a href="https://www.funasr.com/docs/deployment-matrix.html">运行时与部署矩阵</a>
+<a href="https://www.funasr.com/docs/vllm.html">vLLM split-engine 推理</a>
+<a href="https://www.funasr.com/docs/official-native-vllm.html">官方原生 vLLM 功能验证（2026-09-07）</a>
+<a href="https://www.funasr.com/docs/native-vllm.html">社区原生 vLLM 历史记录（2026-08-13）</a>
+</nav>
+</details>
+<details open="">
+<summary>评测与运维</summary>
+<nav aria-label="评测与运维">
+<a href="https://www.funasr.com/docs/troubleshooting.html">安装与推理故障排查</a>
+<a href="https://www.funasr.com/docs/security.html">服务安全边界</a>
+<a href="https://www.funasr.com/docs/benchmark-method.html">可复现性能评测</a>
+<a href="https://www.funasr.com/docs/realtime-benchmark.html">实时 WebSocket 压测</a>
+</nav>
+</details>
+<details open="">
+<summary>应用与生态</summary>
+<nav aria-label="应用与生态">
+<a aria-current="page" href="https://www.funasr.com/docs/agent-integration.html">Agent 集成</a>
+<a href="https://www.funasr.com/docs/use-cases.html">应用场景与示例</a>
+<a href="https://www.funasr.com/docs/community.html">社区集成</a>
+<a href="https://www.funasr.com/docs/repositories.html">四仓职责与贡献入口</a>
+<a href="https://www.funasr.com/docs/javascript.html">JavaScript 客户端</a>
+<a href="https://www.funasr.com/docs/workflows.html">工作流集成</a>
+</nav>
+</details>
+<details open="">
+<summary>协议与参考</summary>
+<nav aria-label="协议与参考">
+<a href="https://www.funasr.com/docs/service-api.html">HTTP API 契约</a>
+<a href="https://www.funasr.com/docs/websocket-protocol.html">C++ WebSocket 协议</a>
+<a href="https://www.funasr.com/docs/onnx-output.html">ONNX 二进制输出契约</a>
+</nav>
+</details>
+<a href="https://www.funasr.com/deploy/">部署手册 →</a>
+</details>
+</aside>
+<div class="docs-body">
+<nav aria-label="面包屑" class="breadcrumbs"><a href="https://www.funasr.com/">FunASR</a><span>/</span><a href="https://www.funasr.com/docs/">文档</a><span>/</span><span>Agent 集成</span></nav>
+<header class="docs-title"><h1>Agent 集成</h1><a class="source-link" data-source-link="" href="https://github.com/modelscope/FunASR/blob/main/docs/agent_integration_zh.md">查看 / 编辑源文档 ↗</a></header>
+<article class="docs-article"><div class="source-title-anchor" id="funasr-agent-集成"></div>
+<p><a href="https://www.funasr.com/en/docs/agent-integration.html">English</a></p>
+<p>按应用需要选择接口：HTTP 文件转写、本地 MCP 工具、桌面录音或本地字幕流水线。
+这些路径的模型、选项和输出字段并不完全相同。直接在进程内推理请使用
+<a href="https://www.funasr.com/docs/python-api.html">Python SDK</a>。</p>
+<span data-legacy-doc-anchor="http-服务" id="server"></span><h2 id="http-服务">HTTP 服务</h2>
+<p>以下源码安装起点包含本页后续用到的示例脚本，命令使用 POSIX shell。
+使用新目录和虚拟环境；仅安装
+PyPI 包不会安装这些仓库示例。</p>
+<pre id="code-0"><code class="language-bash">git clone https://github.com/modelscope/FunASR.git FunASR-agent
+cd FunASR-agent
+git checkout --detach e19029adca384a06a2f60bd8c18cb98f1a0499aa
+python3.11 -m venv .venv
+source .venv/bin/activate
+python -m pip install -e .
+python -m pip install fastapi uvicorn python-multipart
+python -m pip check
+</code></pre>
+<p>这只固定源码，不会锁定所有依赖和模型权重。按照<a href="https://www.funasr.com/docs/installation.html">安装指南</a>
+准备 CPU/GPU 环境，记录实际依赖版本和模型版本，再验证真实请求。
+<code>pip check</code> 不能代替 CUDA、音频解码或全新环境安装测试。</p>
+<p>在该环境中选择以下<strong>一条</strong>命令运行。CPU 示例显式选择 SenseVoice；CUDA 方案需要
+可用的 GPU 环境。保持服务终端运行，在另一个已准备好的终端执行客户端命令。</p>
+<pre id="code-1"><code class="language-bash">funasr-server --host 127.0.0.1 --device cpu --model sensevoice --port 8000
+# 备选：使用相同端口前先停止 CPU 服务。
+funasr-server --host 127.0.0.1 --device cuda --model sensevoice --port 8000
+</code></pre>
+<pre id="code-2"><code class="language-bash">curl -fsS http://localhost:8000/health
+curl -fsS http://localhost:8000/v1/models
+</code></pre>
+<p>上传文件使用 <code>/v1/audio/transcriptions</code>，运行中服务的 schema 位于 <code>/openapi.json</code>，
+Swagger UI 位于 <code>/docs</code>。这个服务的 <code>/docs</code> 不是 FunASR 官网文档目录。
+健康检查或模型列表返回成功，不能代替目标模型的真实转写验收。</p>
+<p>打包的 <code>funasr-server</code> 与<a href="https://www.funasr.com/docs/http-server.html#api-contract">示例 HTTP 服务</a>
+具有不同的默认值、别名和响应结构。启动和请求时都应显式指定 <code>model</code>。
+<code>paraformer-en</code> 是示例服务的注册别名，不是打包服务内置别名。
+SenseVoice 的 HTTP 展示文本已清除富标签，不是专用的情感或事件输出 API。
+Nano 与 MLT-Nano 的语种和时间戳能力应按<a href="https://www.funasr.com/docs/model-selection.html">模型选择指南</a>
+及实际运行路径区分，不能从 HTTP 接口名称推断。打包服务的自定义模型应通过
+<code>--model-path</code> 配合正确的 <code>--hub</code> 加载，并在请求中指定 <code>model=custom</code>；
+任意模型 ID 不会自动成为内置 <code>--model</code> 别名。</p>
+<p><a href="https://www.funasr.com/docs/moss-transcribe-diarize.html">MOSS-Transcribe-Diarize</a> 是 OpenMOSS 的第三方模型，
+有独立部署要求。其原生匿名说话人标签不需要外接 VAD 或说话人模型，不要叠加这些阶段，
+也不要假设所有客户端都能呈现其全部输出。</p>
+<p>本地服务不会认证下方 SDK 的占位 key。对外提供网络访问前，按
+<a href="https://www.funasr.com/docs/security.html">安全指南</a> 配置 TLS、鉴权、上传大小及速率限制。
+CORS 不是身份认证。</p>
+<span data-legacy-doc-anchor="sdk-与-curl" id="sdk"></span><h2 id="sdk-与-curl">SDK 与 curl</h2>
+<p>在客户端环境单独安装 OpenAI HTTP 客户端：</p>
+<pre id="code-3"><code class="language-bash">python -m pip install openai
+</code></pre>
+<pre id="code-4"><code class="language-python">from openai import OpenAI
 
-client = OpenAI(base_url="http://localhost:8000/v1", api_key="not-needed")
-result = client.audio.transcriptions.create(
-    model="sensevoice",
-    file=open("meeting.wav", "rb"),
-)
+client = OpenAI(base_url="http://localhost:8000/v1", api_key="local-development")
+with open("meeting.wav", "rb") as audio:
+    result = client.audio.transcriptions.create(
+        model="sensevoice",
+        file=audio,
+        response_format="verbose_json",
+    )
 print(result.text)
-
-verbose = client.audio.transcriptions.create(
-    model="sensevoice",
-    file=open("meeting.wav", "rb"),
-    response_format="verbose_json",
-)
-print(verbose.segments)</code></pre>
-<pre><code>curl http://localhost:8000/v1/audio/transcriptions \
+for segment in getattr(result, "segments", []):
+    print(segment)
+</code></pre>
+<pre id="code-5"><code class="language-bash">curl -fsS http://localhost:8000/v1/audio/transcriptions \
   -F file=@audio.wav \
   -F model=sensevoice \
-  -F response_format=verbose_json</code></pre>
-</section>
-<section id="workflows"><h2>Dify、n8n 与工作流引擎</h2><p>OpenAI API 中文快速上手见 <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/README_zh.md">README_zh.md</a>。低代码工具如果通过 HTTP 节点或 webhook worker 调用语音 API，请参考 <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/WORKFLOWS_zh.md">工作流配方</a>。其中覆盖 multipart 上传配置、Dify custom tool、n8n binary file 字段、音频 URL worker、超时设置和生产防护。Node.js、TypeScript 或 Next.js 服务可从 <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/JAVASCRIPT_zh.md">JavaScript/TypeScript 配方</a> 开始。需要图形界面 smoke test 时，可导入 <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/POSTMAN_zh.md">Postman 集合</a>；需要在 Windows、Linux 或 macOS 上做命令行检查时，可运行 <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/smoke_test.py">Python 烟测脚本</a>；需要浏览器上传和麦克风检查时，可启动 <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/GRADIO_zh.md">Gradio 演示</a>；跨团队共享服务前，请先看 <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/SECURITY_zh.md">安全与网关指南</a>；按 schema 导入时可使用 <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/OPENAPI_zh.md">OpenAPI 规范</a>。</p><p><a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/WORKFLOWS_zh.md">打开工作流配方</a> · <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/JAVASCRIPT_zh.md">JS/TS 配方</a> · <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/smoke_test.py">Python 烟测脚本</a> · <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/GRADIO_zh.md">Gradio 演示</a> · <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/SECURITY_zh.md">安全指南</a> · <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/POSTMAN_zh.md">打开 Postman 集合</a> · <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/OPENAPI_zh.md">OpenAPI 规范</a></p></section>
-<section id="mcp"><h2>MCP 服务</h2>
-<p>MCP 服务为 Claude Code、Claude Desktop、Cursor、Windsurf 和其他 MCP 客户端提供本地 <code>transcribe_audio</code> 工具。</p>
-<pre><code>pip install funasr
-python examples/mcp_server/funasr_mcp.py</code></pre>
-<pre><code>{
+  -F response_format=verbose_json
+</code></pre>
+<p><code>verbose_json</code> 只选择格式，不会开启说话人分离、恢复富标签或保证词级对齐。
+示例服务把已有 <code>sentence_info</code> 转为 segments，没有时返回空列表；打包服务可能生成
+粗粒度回退分段。二者的分段时间均为秒，但 <code>duration</code> 字段语义不同。
+使用时间戳前请阅读<a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/CLIENTS.md#response-formats">客户端输出契约</a>。
+<code>json</code> 和 <code>text</code> 是更简单的响应格式。<code>spk=true</code> 的说话人处理属于打包 API，
+不属于示例服务的请求 schema；另见<a href="https://www.funasr.com/docs/speaker-emotion.html">说话人标签与身份边界</a>。</p>
+<span data-legacy-doc-anchor="工作流集成" id="workflows"></span><h2 id="工作流集成">工作流集成</h2>
+<p>HTTP 节点使用 <code>POST</code> 转写端点和 multipart 请求体：二进制文件字段为 <code>file</code>，
+文本字段为 <code>model</code> 与 <code>response_format</code>。把音频 URL 写入 <code>file</code> 字段不等于上传音频字节。
+当 Dify/n8n 运行在容器中时，<code>localhost</code> 指该容器而非 FunASR 主机，
+应配置经过预期网关、工作流实际可达的服务地址。</p>
+<ul>
+<li><a href="https://www.funasr.com/docs/workflows.html">Dify、n8n 与 webhook worker</a> 提供请求连接示例。</li>
+<li><a href="https://www.funasr.com/docs/javascript.html">JavaScript 和 TypeScript</a> 提供 SDK 和 multipart 客户端。</li>
+<li><a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/POSTMAN_zh.md">Postman</a> 与<a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/smoke_test.py">冒烟测试</a> 检查已部署端点。</li>
+<li><a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/GRADIO_zh.md">Gradio</a> 提供浏览器上传及麦克风示例。</li>
+<li><a href="https://www.funasr.com/docs/service-api.html">OpenAPI</a> 区分仓库内示例 schema 与已部署打包服务的 schema。</li>
+</ul>
+<p>在宿主框架中按这些请求和输出边界注册转写工具。URL worker 示例不是完整的安全下载器；
+接受不可信 URL 前，应补充目标白名单、私网阻断、重定向校验、大小限制和超时。
+响应字段以上方客户端契约为准，不要假设工作流字段表适用于两种服务实现。
+这些示例不代表所有框架版本均已完成
+集成验证，也不代表任意不可信下载 URL 都是安全的。</p>
+<span data-legacy-doc-anchor="mcp-服务" id="mcp"></span><h2 id="mcp-服务">MCP 服务</h2>
+<p>在已准备好的仓库根目录和环境中运行：</p>
+<pre id="code-6"><code class="language-bash">python examples/mcp_server/funasr_mcp.py
+</code></pre>
+<p>执行转写前，应按安装指南准备 PyTorch 和兼容的音频特征后端。
+安装工具包或完成 MCP 握手，都不等于模型执行已通过验证；此脚本不需要额外安装 MCP SDK。
+MCP 客户端通过 stdio 启动此脚本，它不是 HTTP 监听服务。
+配置时使用已准备好的 Python 环境与仓库绝对路径：</p>
+<pre id="code-7"><code class="language-json">{
   "mcpServers": {
     "funasr": {
-      "command": "python",
-      "args": ["/path/to/examples/mcp_server/funasr_mcp.py"],
-      "env": {"FUNASR_DEVICE": "cuda"}
+      "command": "/path/to/FunASR-agent/.venv/bin/python",
+      "args": ["/path/to/FunASR-agent/examples/mcp_server/funasr_mcp.py"],
+      "env": {
+        "FUNASR_DEVICE": "cpu",
+        "FUNASR_MODEL": "iic/SenseVoiceSmall"
+      }
     }
   }
-}</code></pre>
-<table><tr><th>变量</th><th>默认值</th><th>说明</th></tr><tr><td><code>FUNASR_DEVICE</code></td><td><code>cpu</code></td><td><code>cuda</code>, <code>cpu</code>, or <code>mps</code>.</td></tr><tr><td><code>FUNASR_MODEL</code></td><td><code>iic/SenseVoiceSmall</code></td><td>MCP 工具使用的 ASR 模型。</td></tr></table>
-</section>
-<section id="voice"><h2>Desktop 语音输入</h2>
-<p>语音输入示例会从麦克风录音，把音频发送到 <code>funasr-server</code>，再把识别结果粘贴到当前光标位置。</p>
-<pre><code>pip install funasr sounddevice numpy pyperclip openai pynput
-funasr-server --device cuda
-
-cd examples/voice_input
-python funasr_input.py --server http://localhost:8000/v1 --model sensevoice</code></pre>
-<table><tr><th>平台</th><th>录音</th><th>粘贴</th></tr><tr><td>macOS</td><td>Yes</td><td>AppleScript</td></tr><tr><td>Linux</td><td>Yes</td><td>xdotool</td></tr><tr><td>Windows</td><td>Yes</td><td>必要时手动 Ctrl+V</td></tr></table>
-</section>
-<section id="subtitle"><h2>字幕生成</h2>
-<p>字幕示例可以把音频或视频文件转成 SRT/VTT，并可选择加入说话人标签。</p>
-<pre><code>cd examples/subtitle
-python generate_subtitle.py video.mp4
-python generate_subtitle.py meeting.wav --spk
-python generate_subtitle.py podcast.mp3 --format vtt
-python generate_subtitle.py audio.wav --device cpu</code></pre>
-<table><tr><th>选项</th><th>默认值</th><th>说明</th></tr><tr><td><code>--format</code></td><td><code>srt</code></td><td><code>srt</code> or <code>vtt</code>.</td></tr><tr><td><code>--model</code></td><td><code>iic/SenseVoiceSmall</code></td><td>ASR 模型。</td></tr><tr><td><code>--spk</code></td><td>off</td><td>添加说话人标签。</td></tr><tr><td><code>--lang</code></td><td><code>auto</code></td><td>语种提示。</td></tr></table>
-</section>
-</div></div>
-<footer><p>FunASR &middot; 通义实验室，阿里巴巴集团</p><p><a href="index.html">首页</a> &middot; <a href="tutorial.html">教程</a> &middot; <a href="agent.html">Agent</a> &middot; <a href="benchmark.html">Benchmark</a> &middot; <a href="vllm.html">vLLM</a> &middot; <a href="https://github.com/modelscope/FunASR">GitHub</a></p></footer>
-</body></html>
+}
+</code></pre>
+<p><code>transcribe_audio</code> 接受服务端可见、已存在的本地 <code>audio_path</code>，也可以是容器中
+只读挂载的路径，不接受 URL 或实时流。首次调用可能下载并加载权重。
+语种提示为 <code>auto</code>、<code>zh</code>、<code>yue</code>、<code>en</code>、<code>ja</code>、<code>ko</code>；设置 <code>FUNASR_MODEL</code> 不会改变
+工具 schema，也不能保证另一模型兼容该工具的 VAD 路径。</p>
+<p>结果被格式化为 MCP <code>content</code> 中的 <code>type=text</code>，可包含分段，而不是 HTTP 响应对象。
+顶层转写文本会清除富标签；可选的分段文本来自模型输出。
+<code>FUNASR_DEVICE</code> 默认为 <code>cpu</code>，<code>FUNASR_MODEL</code> 默认为 <code>iic/SenseVoiceSmall</code>。
+<a href="https://github.com/modelscope/FunASR/blob/main/examples/mcp_server/README.md">MCP 源码与容器说明</a> 提供客户端配置和文件挂载方法。
+控制助手及服务端可访问的文件；本地工具本身不是文件系统权限隔离机制。</p>
+<span data-legacy-doc-anchor="桌面语音输入" id="voice"></span><h2 id="桌面语音输入">桌面语音输入</h2>
+<p>保持 HTTP 服务运行，在已准备好的仓库内打开另一个终端：</p>
+<pre id="code-8"><code class="language-bash">python -m pip install sounddevice numpy pyperclip openai pynput
+python examples/voice_input/funasr_input.py --server http://localhost:8000/v1 --model sensevoice
+</code></pre>
+<p>脚本切换录音状态，将 WAV 上传至 HTTP 服务，再复制转写结果供粘贴。
+需要麦克风权限和音频设备支持；macOS 还可能需要辅助功能权限，Linux 自动粘贴使用
+<code>xdotool</code>，剪贴板及粘贴行为随桌面会话而异。当前 <code>--lang</code> 虽然被解析，却没有传入
+转写请求，因此在此路径中不是有效的语种控制项。</p>
+<p>远程 <code>--server</code> 会把录音发送给该端点，不能无条件宣称完全离线、音频不离开本机或
+达到固定延迟。部署前请阅读<a href="https://github.com/modelscope/FunASR/blob/main/examples/voice_input/README.md#配置选项">配置选项</a>
+及<a href="https://github.com/modelscope/FunASR/blob/main/examples/voice_input/funasr_input.py">实现</a>。</p>
+<span data-legacy-doc-anchor="字幕生成" id="subtitle"></span><h2 id="字幕生成">字幕生成</h2>
+<p>这是本地 <code>AutoModel</code> 流水线，不是 HTTP 或 MCP 客户端。
+在已准备好的仓库中，使用本地输入文件及适合的推理环境：</p>
+<pre id="code-9"><code class="language-bash">python examples/subtitle/generate_subtitle.py video.mp4
+python examples/subtitle/generate_subtitle.py meeting.wav --spk
+python examples/subtitle/generate_subtitle.py podcast.mp3 --format vtt
+python examples/subtitle/generate_subtitle.py audio.wav --device cpu
+</code></pre>
+<p>默认设备为 CUDA，最后一条命令显式选择 CPU。默认模型为 SenseVoiceSmall，并使用
+VAD 和标点模型；这套固定流水线不是任意模型的通用配方。<code>--spk</code> 添加 CAM++ 匿名标签，
+不验证真实身份。<code>--format</code> 选择 SRT/VTT，<code>--output</code> 指定输出路径，已有输出文件会被覆盖；
+需要保留旧字幕时应指定新路径。<code>--lang</code> 将非 auto
+语种提示传给推理。<code>--max-single-segment-time</code> 的单位是毫秒，当前默认 <code>60000</code>。</p>
+<p><code>--segment-mode readable</code> 对展示字幕分组，不改写识别文本或标点；<code>sentence</code> 保留
+原始模型句段分组。两种模式都不修复标点错误，也不保证音素级边界。
+应检查实际时间戳是否可用，并对照原音频回放；缺少时间信息时可能回退到零时长 <code>(0, 0)</code>
+区间，这不是经过验证的字幕。输入解码、模型与依赖加载、GPU 容量
+仍需针对环境验证。输出语义见<a href="https://github.com/modelscope/FunASR/blob/main/examples/subtitle/README.md#options">字幕选项</a>
+及<a href="https://www.funasr.com/docs/speaker-emotion.html">说话人指南</a>。</p></article>
+<nav aria-label="相邻文档" class="docs-next">
+<a href="https://www.funasr.com/docs/realtime-benchmark.html">← 实时 WebSocket 压测</a><a href="https://www.funasr.com/docs/use-cases.html">应用场景与示例 →</a> </nav>
+</div>
+<aside class="docs-toc"><strong>本页目录</strong><div class="toc">
+<ul>
+<li><a href="#funasr-agent-集成">FunASR Agent 集成</a><ul>
+<li><a href="#http-服务">HTTP 服务</a></li>
+<li><a href="#sdk-与-curl">SDK 与 curl</a></li>
+<li><a href="#工作流集成">工作流集成</a></li>
+<li><a href="#mcp-服务">MCP 服务</a></li>
+<li><a href="#桌面语音输入">桌面语音输入</a></li>
+<li><a href="#字幕生成">字幕生成</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</aside></div>
+</main>
+<footer class="site-footer">
+<div>
+<strong>FunASR</strong>
+<p>面向生产部署的开源语音基础设施。</p>
+</div>
+<nav aria-label="官方仓库" class="footer-repositories" data-footer-repositories="">
+<strong>官方仓库</strong>
+<div class="footer-links">
+<a href="https://www.funasr.com/go/fun-asr">Fun-ASR</a>
+<a href="https://www.funasr.com/go/sensevoice">SenseVoice</a>
+<a href="https://www.funasr.com/go/funclip">FunClip</a>
+</div>
+</nav>
+<div class="footer-links">
+<a href="https://www.funasr.com/deploy/">部署</a>
+<a href="https://www.funasr.com/docs/">文档</a>
+<a href="https://www.funasr.com/go/releases">发布</a>
+<a href="https://www.funasr.com/donors.html">功德榜</a>
+</div>
+</footer>
+<script defer="" src="../assets/js/site.d446f5fbcfe2.js"></script>
+<script defer="" src="../assets/js/experience.3f688a12942a.js"></script>
+</body>
+</html>

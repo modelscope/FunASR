@@ -1,94 +1,349 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<meta name="description" content="Run speech recognition as local infrastructure for agents, products, and desktop workflows: OpenAI-compatible API, MCP server, voice input, and subtitle generation.">
-<meta property="og:title" content="FunASR Agent Integration">
-<meta property="og:description" content="Run speech recognition as local infrastructure for agents, products, and desktop workflows: OpenAI-compatible API, MCP server, voice input, and subtitle generation.">
-<meta property="og:type" content="website">
-<meta property="og:url" content="https://modelscope.github.io/FunASR/agent.html">
-<link rel="canonical" href="https://modelscope.github.io/FunASR/agent.html">
-<meta property="og:site_name" content="FunASR">
-<meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="FunASR Agent Integration">
-<meta name="twitter:description" content="Run speech recognition as local infrastructure for agents, products, and desktop workflows: OpenAI-compatible API, MCP server, voice input, and subtitle generation.">
-<title>FunASR Agent Integration</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
-</head><body>
-<nav class="nav"><div class="container">
-<a href="index.html" class="nav-logo">FunASR</a>
-<div class="nav-links"><a href="index.html">Home</a><a href="tutorial.html">Tutorial</a><a href="training.html">Training</a><a href="model-registration.html">Develop</a><a href="api.html">API</a><a href="vllm.html">vLLM</a><a href="agent.html" class="active">Agent</a><a href="benchmark.html">Benchmark</a>
-                <a href="donors.html">Donors</a></div>
-<div class="lang-dropdown"><button class="lang-btn">English</button><div class="lang-menu"><a href="agent.html" class="current">English</a><a href="zh/agent.html">中文</a><a href="ja/agent.html">日本語</a><a href="ko/agent.html">한국어</a></div></div>
-<a href="https://github.com/modelscope/FunASR" class="nav-github">GitHub</a>
-</div></nav>
-<div class="content"><div class="container narrow">
-<h1>Agent Integration</h1>
-<p>Run speech recognition as local infrastructure for agents, products, and desktop workflows: OpenAI-compatible API, MCP server, voice input, and subtitle generation.</p>
-<div class="toc-grid"><a href="#server">OpenAI API</a><a href="#sdk">SDK & curl</a><a href="#workflows">Workflows</a><a href="#mcp">MCP Server</a><a href="#voice">Voice Input</a><a href="#subtitle">Subtitle Generator</a></div>
-<section id="server"><h2>OpenAI-Compatible API Server</h2>
-<p><code>funasr-server</code> exposes <code>/v1/audio/transcriptions</code>, <code>/v1/models</code>, <code>/health</code>, and Swagger docs at <code>/docs</code>. It works with frameworks that already know the OpenAI audio API.</p>
-<pre><code>pip install funasr fastapi uvicorn python-multipart
-funasr-server --device cuda --port 8000
 
-# CPU fallback
-funasr-server --device cpu --model sensevoice --port 8000</code></pre>
-<table><tr><th>Model alias</th><th>Backend</th><th>Best for</th></tr><tr><td><code>sensevoice</code></td><td><code>iic/SenseVoiceSmall</code></td><td>Fast multilingual ASR with language/emotion/event tags.</td></tr><tr><td><code>paraformer</code></td><td><code>paraformer-zh</code> + VAD + punctuation</td><td>Chinese production transcription.</td></tr><tr><td><code>paraformer-en</code></td><td><code>paraformer-en</code> + VAD</td><td>English transcription.</td></tr><tr><td><code>fun-asr-nano</code></td><td><code>FunAudioLLM/Fun-ASR-Nano-2512</code></td><td>31-language LLM-based ASR with timestamps.</td></tr></table>
-</section>
-<section id="sdk"><h2>OpenAI SDK and curl</h2>
-<pre><code>from openai import OpenAI
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Agent integration - FunASR</title>
+<meta content="Agent integration" name="description"/>
+<meta content="#ffffff" name="theme-color"/>
+<link href="https://www.funasr.com/en/docs/agent-integration.html" rel="canonical"/>
+<link href="https://www.funasr.com/docs/agent-integration.html" hreflang="zh-CN" rel="alternate"/>
+<link href="https://www.funasr.com/en/docs/agent-integration.html" hreflang="en" rel="alternate"/>
+<meta content="website" property="og:type"/>
+<meta content="Agent integration - FunASR" property="og:title"/>
+<meta content="Agent integration" property="og:description"/>
+<meta content="https://www.funasr.com/en/docs/agent-integration.html" property="og:url"/>
+<link href="assets/css/site.4a0f4749ba00.css" rel="stylesheet"/>
+<link href="assets/css/experience.23603ff092cf.css" rel="stylesheet"/>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "SoftwareApplication", "applicationCategory": "DeveloperApplication", "codeRepository": "https://github.com/modelscope/FunASR", "dateModified": "2026-09-01", "license": "https://github.com/modelscope/FunASR/blob/main/LICENSE", "name": "FunASR", "operatingSystem": "Linux, macOS, Windows", "url": "https://www.funasr.com/en/docs/agent-integration.html"}</script>
+</head>
+<body data-copy-icon="assets/lucide/copy.ea80e566c7a1.svg" data-language="en" data-route="/en/docs/agent-integration.html">
+<a class="skip-link" href="#main">Skip to main content</a>
+<header class="site-header">
+<a aria-label="FunASR home" class="brand" href="https://www.funasr.com/en/">
+<span aria-hidden="true" class="brand-mark">F</span>
+<span>FunASR</span>
+</a>
+<button aria-controls="primary-navigation" aria-expanded="false" class="icon-button menu-button" data-menu-toggle="" title="Open navigation" type="button">
+<img alt="" src="assets/lucide/menu.90a31b3ab1cf.svg"/>
+</button>
+<nav aria-label="Primary navigation" class="primary-navigation" data-primary-nav="" id="primary-navigation">
+<a href="https://www.funasr.com/en/">Product</a>
+<a href="https://www.funasr.com/en/deploy/">Deploy</a>
+<a href="https://www.funasr.com/en/models.html">Models</a>
+<a href="https://www.funasr.com/en/benchmarks.html">Benchmarks</a>
+<a href="https://www.funasr.com/en/ecosystem.html">Ecosystem</a>
+<a href="https://www.funasr.com/en/blog/">Blog</a>
+<a href="https://www.funasr.com/en/docs/">Docs</a>
+<a href="https://www.funasr.com/en/donors.html">Donors</a>
+</nav>
+<div class="header-actions">
+<a class="icon-link" href="https://www.funasr.com/docs/agent-integration.html" title="简体中文">
+<img alt="" src="assets/lucide/languages.ae9048feb2c7.svg"/>
+<span>中文</span>
+</a>
+<a aria-label="GitHub" class="icon-button" href="https://www.funasr.com/go/github" title="GitHub">
+<img alt="" src="assets/lucide/github.793554449a30.svg"/>
+</a>
+</div>
+</header>
+<main id="main">
+<div class="docs-layout">
+<aside class="docs-sidebar">
+<a class="docs-home" href="https://www.funasr.com/en/docs/">Documentation</a>
+<details class="docs-navigation" open="">
+<summary class="docs-navigation-toggle">Browse topics</summary>
+<details open="">
+<summary>Get started</summary>
+<nav aria-label="Get started">
+<a href="https://www.funasr.com/en/docs/installation.html">Installation &amp; environment checks</a>
+<a href="https://www.funasr.com/en/docs/quickstart.html">Your first transcription</a>
+<a href="https://www.funasr.com/en/docs/python-api.html">Python SDK: AutoModel</a>
+<a href="https://www.funasr.com/en/docs/model-selection.html">Choose your first model</a>
+<a href="https://www.funasr.com/en/docs/command-line.html">Command-line transcription</a>
+<a href="https://www.funasr.com/en/docs/migration.html">Migrate from Whisper &amp; cloud APIs</a>
+</nav>
+</details>
+<details open="">
+<summary>Models &amp; capabilities</summary>
+<nav aria-label="Models &amp; capabilities">
+<a href="https://www.funasr.com/en/docs/moss-transcribe-diarize.html">MOSS transcription &amp; diarization</a>
+<a href="https://www.funasr.com/en/docs/model-zoo.html">Model Zoo</a>
+<a href="https://www.funasr.com/en/docs/streaming-vad.html">Streaming voice activity detection</a>
+<a href="https://www.funasr.com/en/docs/keyword-spotting.html">Keyword spotting</a>
+<a href="https://www.funasr.com/en/docs/speaker-emotion.html">Speakers and emotion tags</a>
+</nav>
+</details>
+<details open="">
+<summary>Train &amp; extend</summary>
+<nav aria-label="Train &amp; extend">
+<a href="https://www.funasr.com/en/docs/training.html">Fine-tuning &amp; evaluation</a>
+<a href="https://www.funasr.com/en/docs/model-registration.html">Custom model registration</a>
+</nav>
+</details>
+<details open="">
+<summary>Deploy &amp; integrate</summary>
+<nav aria-label="Deploy &amp; integrate">
+<a href="https://www.funasr.com/en/docs/docker.html">Containers &amp; image selection</a>
+<a href="https://www.funasr.com/en/docs/runtime-guide.html">Serving entry points</a>
+<a href="https://www.funasr.com/en/docs/http-server.html">Python HTTP service</a>
+<a href="https://www.funasr.com/en/docs/kubernetes.html">Kubernetes deployment</a>
+<a href="https://www.funasr.com/en/docs/deployment-matrix.html">Runtime &amp; deployment matrix</a>
+<a href="https://www.funasr.com/en/docs/vllm.html">vLLM split-engine inference</a>
+<a href="https://www.funasr.com/en/docs/official-native-vllm.html">Official native vLLM functional validation (2026-09-07)</a>
+<a href="https://www.funasr.com/en/docs/native-vllm.html">Historical community native vLLM record (2026-08-13)</a>
+</nav>
+</details>
+<details open="">
+<summary>Evaluate &amp; operate</summary>
+<nav aria-label="Evaluate &amp; operate">
+<a href="https://www.funasr.com/en/docs/troubleshooting.html">Troubleshooting</a>
+<a href="https://www.funasr.com/en/docs/security.html">Service security boundaries</a>
+<a href="https://www.funasr.com/en/docs/benchmark-method.html">Reproducible performance tests</a>
+<a href="https://www.funasr.com/en/docs/realtime-benchmark.html">Realtime WebSocket benchmarking</a>
+</nav>
+</details>
+<details open="">
+<summary>Applications &amp; ecosystem</summary>
+<nav aria-label="Applications &amp; ecosystem">
+<a aria-current="page" href="https://www.funasr.com/en/docs/agent-integration.html">Agent integration</a>
+<a href="https://www.funasr.com/en/docs/use-cases.html">Use cases &amp; examples</a>
+<a href="https://www.funasr.com/en/docs/community.html">Community integrations</a>
+<a href="https://www.funasr.com/en/docs/repositories.html">Repositories &amp; contribution paths</a>
+<a href="https://www.funasr.com/en/docs/javascript.html">JavaScript clients</a>
+<a href="https://www.funasr.com/en/docs/workflows.html">Workflow integrations</a>
+</nav>
+</details>
+<details open="">
+<summary>Protocols &amp; reference</summary>
+<nav aria-label="Protocols &amp; reference">
+<a href="https://www.funasr.com/en/docs/service-api.html">HTTP API contract</a>
+<a href="https://www.funasr.com/en/docs/websocket-protocol.html">C++ WebSocket protocol</a>
+<a href="https://www.funasr.com/en/docs/onnx-output.html">ONNX binary output contract</a>
+</nav>
+</details>
+<a href="https://www.funasr.com/en/deploy/">Deployment guides →</a>
+</details>
+</aside>
+<div class="docs-body">
+<nav aria-label="Breadcrumbs" class="breadcrumbs"><a href="https://www.funasr.com/en/">FunASR</a><span>/</span><a href="https://www.funasr.com/en/docs/">Docs</a><span>/</span><span>Agent integration</span></nav>
+<header class="docs-title"><h1>Agent integration</h1><a class="source-link" data-source-link="" href="https://github.com/modelscope/FunASR/blob/main/docs/agent_integration.md">View / edit source ↗</a></header>
+<article class="docs-article"><div class="source-title-anchor" id="funasr-agent-integration"></div>
+<p><a href="https://www.funasr.com/docs/agent-integration.html">中文</a></p>
+<p>Connect a speech application through the interface it actually needs: an HTTP
+file-transcription request, a local MCP tool, desktop recording, or a local
+subtitle pipeline. These paths do not share every model, option, or result field.
+For direct in-process inference, use the <a href="https://www.funasr.com/en/docs/python-api.html">Python SDK</a>.</p>
+<span data-legacy-doc-anchor="http-server" id="server"></span><h2 id="http-server">HTTP server</h2>
+<p>The following source-based starting point includes the example scripts used
+later on this page. The commands use a POSIX shell. Use a new checkout and virtual environment; installing the
+PyPI package alone does not install these repository examples.</p>
+<pre id="code-0"><code class="language-bash">git clone https://github.com/modelscope/FunASR.git FunASR-agent
+cd FunASR-agent
+git checkout --detach e19029adca384a06a2f60bd8c18cb98f1a0499aa
+python3.11 -m venv .venv
+source .venv/bin/activate
+python -m pip install -e .
+python -m pip install fastapi uvicorn python-multipart
+python -m pip check
+</code></pre>
+<p>This pins the source, not all dependencies or model weights. Use the
+<a href="https://www.funasr.com/en/docs/installation.html">installation guide</a> to prepare the selected
+CPU/GPU environment, record resolved package/model versions, and validate a
+real request. <code>pip check</code> alone is not a CUDA, audio-decoder, or clean-install test.</p>
+<p>From that environment, run <strong>one</strong> of these commands. The CPU recipe selects
+SenseVoice explicitly; the CUDA alternative needs a working GPU environment.
+Keep this terminal running and use another prepared terminal for clients.</p>
+<pre id="code-1"><code class="language-bash">funasr-server --host 127.0.0.1 --device cpu --model sensevoice --port 8000
+# Alternative: stop the CPU server before using the same port.
+funasr-server --host 127.0.0.1 --device cuda --model sensevoice --port 8000
+</code></pre>
+<pre id="code-2"><code class="language-bash">curl -fsS http://localhost:8000/health
+curl -fsS http://localhost:8000/v1/models
+</code></pre>
+<p>Use <code>/v1/audio/transcriptions</code> for uploaded files, <code>/openapi.json</code> for the running
+service schema, and <code>/docs</code> for its Swagger UI. This service <code>/docs</code> is not the
+FunASR website's documentation directory. Health or model-list responses do not
+replace a successful transcription with the intended model.</p>
+<p>The packaged <code>funasr-server</code> and <a href="https://www.funasr.com/en/docs/http-server.html#api-contract">example HTTP server</a>
+have different defaults, aliases, and response schemas. Specify <code>model</code> in the
+request as well as at startup. <code>paraformer-en</code> is an example-server alias, not a
+built-in packaged-server alias. SenseVoice HTTP display text has rich tags removed;
+it is not a dedicated emotion/event output API. Nano and MLT-Nano language coverage
+and timestamp paths must be selected through the <a href="https://www.funasr.com/en/docs/model-selection.html">model guide</a>,
+not inferred from the HTTP interface. For a custom packaged-server model, use
+<code>--model-path</code> with the appropriate <code>--hub</code> and request <code>model=custom</code>; an
+arbitrary model ID is not automatically a built-in <code>--model</code> alias.</p>
+<p><a href="https://www.funasr.com/en/docs/moss-transcribe-diarize.html">MOSS-Transcribe-Diarize</a> is a third-party OpenMOSS
+model with its own deployment requirements. Its native anonymous speaker labels
+do not require external VAD or an external speaker model; do not add those stages
+or assume every client exposes all of its output.</p>
+<p>The local server does not authenticate the placeholder SDK key below. Before
+network access, add TLS, authentication, upload limits and rate limits according
+to the <a href="https://www.funasr.com/en/docs/security.html">security guide</a>. CORS is not authentication.</p>
+<span data-legacy-doc-anchor="sdk-and-curl" id="sdk"></span><h2 id="sdk-and-curl">SDK and curl</h2>
+<p>Install the separate OpenAI HTTP client in the client environment:</p>
+<pre id="code-3"><code class="language-bash">python -m pip install openai
+</code></pre>
+<pre id="code-4"><code class="language-python">from openai import OpenAI
 
-client = OpenAI(base_url="http://localhost:8000/v1", api_key="not-needed")
-result = client.audio.transcriptions.create(
-    model="sensevoice",
-    file=open("meeting.wav", "rb"),
-)
+client = OpenAI(base_url="http://localhost:8000/v1", api_key="local-development")
+with open("meeting.wav", "rb") as audio:
+    result = client.audio.transcriptions.create(
+        model="sensevoice",
+        file=audio,
+        response_format="verbose_json",
+    )
 print(result.text)
-
-verbose = client.audio.transcriptions.create(
-    model="sensevoice",
-    file=open("meeting.wav", "rb"),
-    response_format="verbose_json",
-)
-print(verbose.segments)</code></pre>
-<pre><code>curl http://localhost:8000/v1/audio/transcriptions \
+for segment in getattr(result, "segments", []):
+    print(segment)
+</code></pre>
+<pre id="code-5"><code class="language-bash">curl -fsS http://localhost:8000/v1/audio/transcriptions \
   -F file=@audio.wav \
   -F model=sensevoice \
-  -F response_format=verbose_json</code></pre>
-</section>
-<section id="workflows"><h2>Dify, n8n, and workflow engines</h2><p>For low-code tools that call HTTP nodes or webhook workers, use the <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/WORKFLOWS.md">workflow recipes</a>. They cover multipart upload settings, Dify custom tools, n8n binary file fields, audio URL workers, timeouts, and production guardrails. For Node.js, TypeScript, or Next.js services, start from the <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/JAVASCRIPT.md">JavaScript/TypeScript recipes</a>. For GUI smoke tests, import the <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/POSTMAN.md">Postman collection</a>; for CLI checks on Windows, Linux, or macOS, run the <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/smoke_test.py">Python smoke test</a>; for browser upload and microphone checks, launch the <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/GRADIO.md">Gradio demo</a>; before sharing the service, review the <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/SECURITY.md">security and gateway guide</a>; for schema-driven imports, use the <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/OPENAPI.md">OpenAPI spec</a>.</p><p><a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/WORKFLOWS.md">Open workflow recipes</a> · <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/JAVASCRIPT.md">JS/TS recipes</a> · <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/smoke_test.py">Python smoke test</a> · <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/GRADIO.md">Gradio demo</a> · <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/SECURITY.md">Security guide</a> · <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/POSTMAN.md">Open Postman collection</a> · <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/OPENAPI.md">OpenAPI spec</a></p></section>
-<section id="mcp"><h2>MCP Server</h2>
-<p>The MCP server gives Claude Code, Claude Desktop, Cursor, Windsurf, and other MCP clients a local <code>transcribe_audio</code> tool.</p>
-<pre><code>pip install funasr
-python examples/mcp_server/funasr_mcp.py</code></pre>
-<pre><code>{
+  -F response_format=verbose_json
+</code></pre>
+<p><code>verbose_json</code> chooses a format; it does not enable diarization, recover rich
+tags, or guarantee word alignment. The example server copies available
+<code>sentence_info</code> into segments, otherwise returning an empty list. The packaged
+server can supply coarse fallback segments. Both expose segment times in seconds,
+but their <code>duration</code> fields differ. Use the <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/CLIENTS.md#response-formats">client result contract</a>
+before consuming timestamps. <code>json</code> and <code>text</code> are simpler response choices.
+Speaker processing via <code>spk=true</code> belongs to the packaged API, not the example's
+request schema; see <a href="https://www.funasr.com/en/docs/speaker-emotion.html">speaker labels and identity limits</a>.</p>
+<span data-legacy-doc-anchor="workflow-integrations" id="workflows"></span><h2 id="workflow-integrations">Workflow integrations</h2>
+<p>Use a multipart HTTP node with method <code>POST</code>, the transcription endpoint, a
+binary file field named <code>file</code>, and text fields <code>model</code> and <code>response_format</code>.
+A file URL in the <code>file</code> field is not equivalent to uploading audio bytes.
+For Dify/n8n running in a container, <code>localhost</code> means that container, not the
+FunASR host; configure a reachable service address behind the intended gateway.</p>
+<ul>
+<li><a href="https://www.funasr.com/en/docs/workflows.html">Dify, n8n and webhook workers</a> provide request wiring examples.</li>
+<li><a href="https://www.funasr.com/en/docs/javascript.html">JavaScript and TypeScript</a> cover SDK and multipart clients.</li>
+<li><a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/POSTMAN.md">Postman</a> and the <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/smoke_test.py">smoke test</a> check a deployed endpoint.</li>
+<li><a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/GRADIO.md">Gradio</a> provides a browser upload/microphone example.</li>
+<li><a href="https://www.funasr.com/en/docs/service-api.html">OpenAPI</a> distinguishes the checked-in example schema from the deployed packaged schema.</li>
+</ul>
+<p>Register transcription as a tool in the host framework using these request and
+result boundaries. The URL worker example does not implement a complete secure
+downloader: add destination allowlists, private-network blocking, redirect
+validation, size limits and timeouts before accepting untrusted URLs. Use the
+client result contract above instead of assuming the workflow field table fits
+both server implementations. These recipes are not proof that every framework version has
+been integrated or that untrusted download URLs are safe.</p>
+<span data-legacy-doc-anchor="mcp-server" id="mcp"></span><h2 id="mcp-server">MCP server</h2>
+<p>From the prepared repository root and environment:</p>
+<pre id="code-6"><code class="language-bash">python examples/mcp_server/funasr_mcp.py
+</code></pre>
+<p>Prepare PyTorch and a compatible audio-feature backend using the installation
+guide before attempting transcription. Installing the toolkit or completing an
+MCP handshake alone does not verify model execution; this script does not need
+a separate MCP SDK package. An MCP client launches it over stdio, not HTTP.
+Configure absolute paths to the prepared Python environment and checkout:</p>
+<pre id="code-7"><code class="language-json">{
   "mcpServers": {
     "funasr": {
-      "command": "python",
-      "args": ["/path/to/examples/mcp_server/funasr_mcp.py"],
-      "env": {"FUNASR_DEVICE": "cuda"}
+      "command": "/path/to/FunASR-agent/.venv/bin/python",
+      "args": ["/path/to/FunASR-agent/examples/mcp_server/funasr_mcp.py"],
+      "env": {
+        "FUNASR_DEVICE": "cpu",
+        "FUNASR_MODEL": "iic/SenseVoiceSmall"
+      }
     }
   }
-}</code></pre>
-<table><tr><th>Variable</th><th>Default</th><th>Description</th></tr><tr><td><code>FUNASR_DEVICE</code></td><td><code>cpu</code></td><td><code>cuda</code>, <code>cpu</code>, or <code>mps</code>.</td></tr><tr><td><code>FUNASR_MODEL</code></td><td><code>iic/SenseVoiceSmall</code></td><td>ASR model used by the MCP tool.</td></tr></table>
-</section>
-<section id="voice"><h2>Desktop Voice Input</h2>
-<p>The voice input example records from your microphone, sends audio to <code>funasr-server</code>, and pastes recognized text into the current cursor position.</p>
-<pre><code>pip install funasr sounddevice numpy pyperclip openai pynput
-funasr-server --device cuda
-
-cd examples/voice_input
-python funasr_input.py --server http://localhost:8000/v1 --model sensevoice</code></pre>
-<table><tr><th>Platform</th><th>Recording</th><th>Paste</th></tr><tr><td>macOS</td><td>Yes</td><td>AppleScript</td></tr><tr><td>Linux</td><td>Yes</td><td>xdotool</td></tr><tr><td>Windows</td><td>Yes</td><td>Manual Ctrl+V if needed</td></tr></table>
-</section>
-<section id="subtitle"><h2>Subtitle Generator</h2>
-<p>The subtitle example turns audio or video files into SRT/VTT, optionally with speaker labels.</p>
-<pre><code>cd examples/subtitle
-python generate_subtitle.py video.mp4
-python generate_subtitle.py meeting.wav --spk
-python generate_subtitle.py podcast.mp3 --format vtt
-python generate_subtitle.py audio.wav --device cpu</code></pre>
-<table><tr><th>Option</th><th>Default</th><th>Description</th></tr><tr><td><code>--format</code></td><td><code>srt</code></td><td><code>srt</code> or <code>vtt</code>.</td></tr><tr><td><code>--model</code></td><td><code>iic/SenseVoiceSmall</code></td><td>ASR model.</td></tr><tr><td><code>--spk</code></td><td>off</td><td>Add speaker labels.</td></tr><tr><td><code>--lang</code></td><td><code>auto</code></td><td>Language hint.</td></tr></table>
-</section>
-</div></div>
-<footer><p>FunASR &middot; Tongyi Lab, Alibaba Group</p><p><a href="index.html">Home</a> &middot; <a href="tutorial.html">Tutorial</a> &middot; <a href="agent.html">Agent</a> &middot; <a href="benchmark.html">Benchmark</a> &middot; <a href="vllm.html">vLLM</a> &middot; <a href="https://github.com/modelscope/FunASR">GitHub</a></p></footer>
-</body></html>
+}
+</code></pre>
+<p><code>transcribe_audio</code> accepts an existing local <code>audio_path</code> visible to the server,
+including a read-only mounted path in a container. It does not accept URLs or
+live streams. The first call may download and load weights. The language hints
+are <code>auto</code>, <code>zh</code>, <code>yue</code>, <code>en</code>, <code>ja</code>, and <code>ko</code>; setting <code>FUNASR_MODEL</code> does not
+change that tool schema or guarantee another model is compatible with its VAD path.</p>
+<p>The result is formatted MCP <code>content</code> with <code>type=text</code>, optionally including
+segments, not the HTTP response object. Top-level transcript rich tags are
+removed; optional segment text is copied from model output. <code>FUNASR_DEVICE</code>
+defaults to <code>cpu</code>, and <code>FUNASR_MODEL</code> defaults to <code>iic/SenseVoiceSmall</code>.
+See the <a href="https://github.com/modelscope/FunASR/blob/main/examples/mcp_server/README.md">MCP source and container setup</a> for
+client configuration and filesystem mounts. Control which files the assistant
+and server can access; a local tool is not a filesystem authorization boundary.</p>
+<span data-legacy-doc-anchor="desktop-voice-input" id="voice"></span><h2 id="desktop-voice-input">Desktop voice input</h2>
+<p>With the HTTP server already running, use a second terminal in the prepared checkout:</p>
+<pre id="code-8"><code class="language-bash">python -m pip install sounddevice numpy pyperclip openai pynput
+python examples/voice_input/funasr_input.py --server http://localhost:8000/v1 --model sensevoice
+</code></pre>
+<p>The script toggles recording, uploads WAV audio to the HTTP service, and copies
+the transcript for pasting. Microphone permissions and audio-device support are
+required; macOS may also require accessibility permissions, and Linux automatic
+paste uses <code>xdotool</code>. Clipboard/paste behavior varies by desktop session.
+The current <code>--lang</code> option is parsed but not forwarded to the transcription
+request, so it is not an effective language control in this path.</p>
+<p>A remote <code>--server</code> sends the recorded audio to that endpoint. Do not treat this
+as an unconditional offline/privacy guarantee or a measured latency promise.
+See <a href="https://github.com/modelscope/FunASR/blob/main/examples/voice_input/README.md#配置选项">configuration</a> and the
+<a href="https://github.com/modelscope/FunASR/blob/main/examples/voice_input/funasr_input.py">implementation</a> before deployment.</p>
+<span data-legacy-doc-anchor="subtitle-generation" id="subtitle"></span><h2 id="subtitle-generation">Subtitle generation</h2>
+<p>This is a local <code>AutoModel</code> pipeline, not an HTTP or MCP client. From the prepared
+checkout, with local input files and a suitable inference environment:</p>
+<pre id="code-9"><code class="language-bash">python examples/subtitle/generate_subtitle.py video.mp4
+python examples/subtitle/generate_subtitle.py meeting.wav --spk
+python examples/subtitle/generate_subtitle.py podcast.mp3 --format vtt
+python examples/subtitle/generate_subtitle.py audio.wav --device cpu
+</code></pre>
+<p>The default device is CUDA; the last command explicitly selects CPU. The default
+model is SenseVoiceSmall with VAD and punctuation. This fixed pipeline is not a
+generic recipe for arbitrary models. <code>--spk</code> adds
+CAM++ anonymous labels, not verified identities. <code>--format</code> selects SRT or VTT;
+<code>--output</code> chooses a path, and existing output files are overwritten. Choose a
+new output path when preserving prior subtitles. <code>--lang</code> passes a non-auto language hint to generation.
+<code>--max-single-segment-time</code> is in milliseconds, with current default <code>60000</code>.</p>
+<p><code>--segment-mode readable</code> groups display cues without rewriting recognized
+text or punctuation; <code>sentence</code> retains raw model sentence grouping. Neither
+mode fixes punctuation errors or guarantees phonetic boundaries. Check actual
+timestamp availability and playback against the original audio: a missing timing
+result can fall back to a zero-duration <code>(0, 0)</code> interval, not a validated subtitle.
+Input decoding,
+model/dependency loading and GPU capacity still require environment-specific
+validation. See <a href="https://github.com/modelscope/FunASR/blob/main/examples/subtitle/README.md#options">subtitle options</a> and
+the <a href="https://www.funasr.com/en/docs/speaker-emotion.html">speaker guide</a> for output interpretation.</p></article>
+<nav aria-label="Adjacent documents" class="docs-next">
+<a href="https://www.funasr.com/en/docs/realtime-benchmark.html">← Realtime WebSocket benchmarking</a><a href="https://www.funasr.com/en/docs/use-cases.html">Use cases &amp; examples →</a> </nav>
+</div>
+<aside class="docs-toc"><strong>On this page</strong><div class="toc">
+<ul>
+<li><a href="#funasr-agent-integration">FunASR Agent Integration</a><ul>
+<li><a href="#http-server">HTTP server</a></li>
+<li><a href="#sdk-and-curl">SDK and curl</a></li>
+<li><a href="#workflow-integrations">Workflow integrations</a></li>
+<li><a href="#mcp-server">MCP server</a></li>
+<li><a href="#desktop-voice-input">Desktop voice input</a></li>
+<li><a href="#subtitle-generation">Subtitle generation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</aside></div>
+</main>
+<footer class="site-footer">
+<div>
+<strong>FunASR</strong>
+<p>Open speech infrastructure for production deployment.</p>
+</div>
+<nav aria-label="Official repositories" class="footer-repositories" data-footer-repositories="">
+<strong>Official repositories</strong>
+<div class="footer-links">
+<a href="https://www.funasr.com/go/fun-asr">Fun-ASR</a>
+<a href="https://www.funasr.com/go/sensevoice">SenseVoice</a>
+<a href="https://www.funasr.com/go/funclip">FunClip</a>
+</div>
+</nav>
+<div class="footer-links">
+<a href="https://www.funasr.com/en/deploy/">Deploy</a>
+<a href="https://www.funasr.com/en/docs/">Docs</a>
+<a href="https://www.funasr.com/go/releases">Releases</a>
+<a href="https://www.funasr.com/en/donors.html">Donors</a>
+</div>
+</footer>
+<script defer="" src="assets/js/site.d446f5fbcfe2.js"></script>
+<script defer="" src="assets/js/experience.3f688a12942a.js"></script>
+</body>
+</html>
