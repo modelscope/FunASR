@@ -249,10 +249,12 @@ model = AutoModelVLLM(
 <h4 id="b-vllm-原生转写路径">B. vLLM 原生转写路径</h4>
 <p>原生 <code>FunASRForConditionalGeneration</code> 使用完整 native checkpoint，不是路径 A 的 <code>model.pt</code> 拆分布局。官方维护的 native checkpoint 是
 <a href="https://huggingface.co/FunAudioLLM/Fun-ASR-Nano-2512-vllm"><code>FunAudioLLM/Fun-ASR-Nano-2512-vllm</code></a>。
-vLLM 的支持模型表也把
+2026-09-07 审计时，v0.28.0 的模型注册表仍将
 <a href="https://huggingface.co/allendou/Fun-ASR-Nano-2512-vllm"><code>allendou/Fun-ASR-Nano-2512-vllm</code></a>
 列为原生 <code>FunASRForConditionalGeneration</code> 架构示例；后者是托管在官方
-FunAudioLLM 组织之外的社区转换完整 checkpoint。只有明确选择 vLLM 原生转写
+FunAudioLLM 组织之外的社区转换完整 checkpoint。main 与发布版不一定使用同一引用，
+下方官方验证记录区分了当时核查的版本，不能把不同版本的模型列表混为一谈。
+只有明确选择 vLLM 原生转写
 接口时，才应使用这两种 native checkpoint；不要用它们替换下文 FunASR
 <code>AutoModelVLLM</code> 示例中的官方 checkpoint，也不要传给
 <a href="https://github.com/modelscope/FunASR/blob/main/examples/industrial_data_pretraining/fun_asr_nano/serve_realtime_ws.py">serve_realtime_ws.py</a>；这些服务预期

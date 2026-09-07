@@ -204,18 +204,22 @@
 </ol>
 <hr/>
 <span data-legacy-doc-anchor="1-installation--environment" id="install"></span><h2 id="1-installation--environment">1. Installation &amp; Environment</h2>
-<p>Install vLLM first, choosing a version compatible with your NVIDIA driver's CUDA. vLLM pins and installs a matching torch / torchaudio / torchvision trio automatically, so do not install torch/torchaudio yourself — the three are ABI-locked, i.e. they must be the matching set built against each other (e.g. torch 2.10.0 ↔ torchaudio 2.10.0 ↔ torchvision 0.25.0). </p>
-<pre id="code-0"><code class="language-bash"># 1) Install vLLM first. Pick the version by the CUDA version shown in `nvidia-smi`
-#    (the driver's max CUDA), NOT the runtime CUDA. vLLM brings a matching torch/torchaudio/torchvision.
-#    driver CUDA 12.x  -&gt; pip install vllm==0.19.1   (ships torch 2.10 / cu128)
-#    driver CUDA &gt;= 13 -&gt; pip install vllm           (latest; ships torch 2.11 / cu130)
-pip install "vllm==0.19.1"   # adjust to your driver CUDA; see note below
+<p>The SDK, offline service, and WebSocket service in this guide use the <strong>FunASR split engine</strong>. Keep its environment separate from the native <code>vllm serve</code> validation described below. Choose a vLLM release and GPU wheel before installing into a dedicated virtual environment. The CUDA number in <code>nvidia-smi</code> is the driver's supported upper bound, not the installed CUDA runtime; a broad label such as "12.x" or "13.x" is not sufficient to establish wheel compatibility.</p>
+<p>The following starting point uses the split-engine version <code>vllm==0.19.1</code> and a fixed FunASR source commit. It pins those two projects, but <strong>is not a complete dependency lockfile or a clean-install validation for every GPU</strong>. Check GPU builds and driver requirements in the <a href="https://github.com/vllm-project/vllm/blob/v0.19.1/docs/getting_started/installation/gpu.md">versioned vLLM installation documentation</a>.</p>
+<pre id="code-0"><code class="language-bash">python3.12 -m venv .venv-funasr-vllm
+source .venv-funasr-vllm/bin/activate
+python -m pip install "vllm==0.19.1"
 
-# 2) Then FunASR and the rest.
-pip install "funasr&gt;=1.3.26"
-
-cd /path/to/FunASR &amp;&amp; pip install -e .
+# Service scripts come from source. Use a new directory, not an existing checkout.
+git clone https://github.com/modelscope/FunASR.git FunASR-vllm
+cd FunASR-vllm
+git checkout --detach e42443f55971d0c804dcf2973fdd2e6e09bd5611
+python -m pip install -e .
+python -m pip install safetensors tiktoken websockets regex fastapi uvicorn python-multipart
+python -m pip check
+python -m pip freeze &gt; environment.txt
 </code></pre>
+<p>Save the GPU/driver, Python version, source commit, model revision, and <code>environment.txt</code>, then validate single requests, actual WebSocket sessions, and the intended concurrent workload. <code>pip check</code> checks declared dependency relationships only; it does not verify CUDA, audio operators, or end-to-end serving. Installing the PyPI package alone does not provide the repository service scripts referenced here.</p>
 <h3 id="choose-the-model-path-before-you-start">Choose the model path before you start</h3>
 <p>There are two different Fun-ASR-Nano vLLM integrations. Their checkpoints and
 APIs are not interchangeable:</p>
@@ -248,15 +252,22 @@ root <code>model.pt</code>, and writes
 <code>Qwen3-0.6B-vllm/model.safetensors</code>. Do not point <code>model</code> at <code>Qwen3-0.6B/</code> and
 do not try to serve that config-only directory directly with vLLM.</p>
 <h4 id="b-native-vllm-transcription-integration">B. Native vLLM transcription integration</h4>
-<p>The official native checkpoint is
+<p>Native <code>FunASRForConditionalGeneration</code> uses a full native checkpoint, not the
+split <code>model.pt</code> layout in path A. The official native checkpoint is
 <a href="https://huggingface.co/FunAudioLLM/Fun-ASR-Nano-2512-vllm"><code>FunAudioLLM/Fun-ASR-Nano-2512-vllm</code></a>.
-The vLLM supported-model table also lists
+At the 2026-09-07 audit, the v0.28.0 model registry still referenced
 <a href="https://huggingface.co/allendou/Fun-ASR-Nano-2512-vllm"><code>allendou/Fun-ASR-Nano-2512-vllm</code></a>,
 a community-converted full checkpoint hosted outside the official FunAudioLLM
 organization, for its native <code>FunASRForConditionalGeneration</code> architecture.
+Main and released versions need not use the same reference; the official
+validation record below identifies the versions checked, rather than treating
+all vLLM model lists as interchangeable.
 Use either native checkpoint only when you intentionally choose vLLM's native
 transcription API. Do not substitute either one for the official checkpoint in
-the FunASR <code>AutoModelVLLM</code> examples below.</p>
+the FunASR <code>AutoModelVLLM</code> examples below or pass it to
+<a href="https://github.com/modelscope/FunASR/blob/main/examples/industrial_data_pretraining/fun_asr_nano/serve_realtime_ws.py">serve_realtime_ws.py</a>.
+Those services expect <code>model.pt</code>, <code>config.yaml</code>, and <code>Qwen3-0.6B/</code>, not the
+native layout.</p>
 <p>Both native paths use <code>vllm serve</code> for non-realtime request/response
 transcription at <code>/v1/audio/transcriptions</code>; they do not register
 <code>/v1/realtime</code>. vLLM registers that WebSocket endpoint only for models that
@@ -264,8 +275,30 @@ declare the realtime task, and <code>FunASRForConditionalGeneration</code> is no
 <a href="https://docs.vllm.ai/en/latest/models/supported_models/#realtime-transcription">Realtime Transcription table</a>.
 For realtime streaming, use the FunASR streaming SDK inference or streaming ASR
 service. The <code>AutoModelVLLM</code> examples in path A are offline inference as well.</p>
-<p><strong>Hardware</strong>: GPU ≥ 8 GB VRAM, CUDA ≥ 11.8. 16 GB+ recommended.</p>
-<p>Why not pip install torch torchaudio? The torch/torchaudio/torchvision versions are determined by the vLLM release — each major vLLM version bumps them together (see vLLM's requirements/cuda.txt). Installing them by hand pulls the newest wheel, which may be built for a newer CUDA runtime than your driver supports; PyTorch then fails during CUDA initialization with The NVIDIA driver on your system is too old before FunASR even starts. Letting vLLM own the trio avoids this. If you still hit a driver-too-old error, install a vLLM version whose CUDA build matches the CUDA reported by nvidia-smi (e.g. vllm==0.19.1 for CUDA 12.x), or update the NVIDIA driver first.</p>
+<p>The native HTTP API does not inherit the FunASR WebSocket service's VAD, partial
+previews, session state, or SPK processing. A WebSocket handshake rejection
+status is not a stable API contract or a way to probe model realtime support.</p>
+<p>See the <a href="https://www.funasr.com/en/docs/official-native-vllm.html">official native validation record</a>
+for the pinned model revision, launch arguments, and recorded output. It covers
+file transcription with vLLM 0.27.1 in an existing H100 environment, not a clean
+installation, accuracy, capacity, long-audio, realtime streaming, or speaker
+diarization validation. Do not substitute that environment for the 0.19.1
+split-engine installation above.</p>
+<p><strong>Hardware</strong>: follow the requirements of the selected vLLM GPU build. Memory
+usage also depends on the model, precision, KV cache, batch size, and active
+sessions. This guide does not promise a universal minimum VRAM or concurrency
+capacity.</p>
+<p>Do not upgrade <code>torch</code> or <code>torchaudio</code> individually inside a validated environment.
+Dependency constraints change between vLLM releases; there is no universal
+"automatically matching trio" guarantee. For example, the
+<a href="https://pypi.org/pypi/vllm/0.19.1/json">0.19.1 release metadata</a> declares
+<code>torch==2.10.0</code>, <code>torchaudio==2.10.0</code>, and <code>torchvision==0.25.0</code>, whereas the
+<a href="https://pypi.org/pypi/vllm/0.27.1/json">0.27.1 release metadata</a> declares
+<code>torch==2.13.0</code>, <code>torchaudio==2.11.0</code>, and <code>torchvision==0.28.0</code>.
+These are declared constraints, not proof of successful installation or ABI
+compatibility. Upgrade in a new environment and validate again. For a
+driver-too-old error, check the actual wheel's CUDA build and driver requirements
+instead of blindly installing the latest release.</p>
 <hr/>
 <span data-legacy-doc-anchor="2-vllm-engine-architecture" id="overview"></span><h2 id="2-vllm-engine-architecture">2. vLLM Engine Architecture</h2>
 <h3 id="overall-architecture">Overall Architecture</h3>
@@ -1079,7 +1112,7 @@ Because each refresh re-encodes from the sentence start, the longer a sentence, 
 <li><strong>One process is the first scaling unit.</strong> Benchmark a single process with the built-in batching path before adding replicas. Use multiple processes or one instance per GPU only after a single process reaches its measured GPU, CPU, or tail-latency limit; each extra process duplicates model memory and may reduce batching opportunities.</li>
 <li><strong>vLLM benefits depend on requests arriving together.</strong> Turn-taking traffic may have many connected clients but only a few simultaneous decodes, while replaying the same continuous monologue across every client creates deliberately synchronized batches. Report both traffic shape and batching flags with every result.</li>
 <li><strong>Sustainable concurrency has no universal "supports N connections" number.</strong> It depends mainly on simultaneous speakers, silence ratio, utterance length, partial refresh interval, speaker diarization, batch wait, and GPU/CPU capacity. Long pauseless speech still costs more because provisional windows are repeatedly encoded (see §6.5). Benchmark your own workload instead of adopting another deployment's connection count as a specification.</li>
-<li><strong>Measured L20 starting point, not a global default.</strong> In <a href="https://github.com/modelscope/FunASR/issues/3528">#3528</a>, one L20 running 16 synchronized clients on a 47-second continuous utterance, with SPK and client ping disabled, performed best at <code>--partial-window-sec 8 --decode-interval 2.0</code>: 408 decode requests, 3,072.1 seconds of encoded audio, 51.18-second p50 completion, 4.5-second output lag, 14.2x aggregate realtime, and 1.31-second first text. The default 15-second window did not complete that exact 16-client workload. Use <code>8 / 2.0</code> as an initial L20 high-concurrency profile only, then tune against your own first-text latency, output lag, final completion, request count, and encoded-audio total.</li>
+<li><strong>Historical L20 starting point, not a capacity guarantee.</strong> In one historical measurement from <a href="https://github.com/modelscope/FunASR/issues/3528">#3528</a>, one L20 running 16 synchronized clients on a 47-second continuous utterance, with SPK and client ping disabled, performed best at <code>--partial-window-sec 8 --decode-interval 2.0</code>: 408 decode requests, 3,072.1 seconds of encoded audio, 51.18-second p50 completion, 4.5-second output lag, 14.2x aggregate realtime, and 1.31-second first text. The then-default 15-second window did not complete that exact 16-client workload; the current source default is 8 seconds. This observation does not replace results from later versions or different keepalive settings. Use <code>8 / 2.0</code> only as a workload-specific tuning starting point, recording the version, window, keepalive, first-text latency, output lag, final completion, request count, and encoded-audio total. A successful Git installation is not resolution of the concurrency issue, which requires separate acceptance evidence.</li>
 </ul>
 <pre id="code-32"><code class="language-bash">CUDA_VISIBLE_DEVICES=0 python examples/industrial_data_pretraining/fun_asr_nano/serve_realtime_ws.py \
   --partial-window-sec 8 --decode-interval 2.0 --log-decode-profile
@@ -1241,7 +1274,7 @@ prompt-embedding path or decoding parameters differ from the upstream runner.
 Check these items before changing the model:</p>
 <ul>
 <li>Pass prompt embeddings to vLLM as float32:
-  <code>EmbedsPrompt(prompt_embeds=input_embeds.float())</code>.</li>
+  pass <code>input_embeds.float()</code> to the <code>prompt_embeds</code> argument of <code>EmbedsPrompt</code>.</li>
 <li>Use ASR-style deterministic decoding. The Fun-ASR-Nano vLLM path defaults to
   <code>temperature=0.0</code>, <code>top_p=1.0</code>, and <code>skip_special_tokens=True</code>. In
   prompt-embeds mode, keep <code>repetition_penalty</code> at the neutral <code>1.0</code> unless you
