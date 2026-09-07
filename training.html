@@ -70,6 +70,7 @@
 <nav aria-label="Models &amp; capabilities">
 <a href="https://www.funasr.com/en/docs/moss-transcribe-diarize.html">MOSS transcription &amp; diarization</a>
 <a href="https://www.funasr.com/en/docs/model-zoo.html">Model Zoo</a>
+<a href="https://www.funasr.com/en/docs/streaming-vad.html">Streaming voice activity detection</a>
 </nav>
 </details>
 <details open="">
@@ -274,7 +275,7 @@ print(model.generate(input="data/audio/heldout.wav"))
 <p>Then decode an untouched held-out set with the same normalization and CER/WER unit definition for baseline and adapted weights. Report per-domain/language results as well as aggregate scores, retained-task regressions, data counts and checkpoint identity. Training loss or trainer validation accuracy is not automatically transcription CER/WER. <a href="https://github.com/modelscope/FunASR/blob/main/examples/industrial_data_pretraining/fun_asr_nano/docs/finetune.md">Nano's fine-tuning guide</a> retains the decoding/normalization/scoring references; <a href="https://github.com/modelscope/FunASR/blob/main/examples/industrial_data_pretraining/fun_asr_nano/decode.py">decode.py</a> uses VAD and <code>remote_code="./model.py"</code>, so it assumes the recipe working directory. That <a href="https://github.com/modelscope/FunASR/blob/main/examples/industrial_data_pretraining/fun_asr_nano/model.py">legacy local class</a> can replace the <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fun_asr_nano/model.py">built-in Nano class</a>. Do not assume it preserves built-in LoRA support; verify the active class, adapter injection and loaded keys before evaluation.</p>
 <p>Export is a separate compatibility task. <a href="https://github.com/modelscope/FunASR/blob/main/examples/industrial_data_pretraining/sense_voice/export.py">SenseVoice's ONNX example</a>, <a href="https://github.com/modelscope/FunASR/blob/main/examples/industrial_data_pretraining/paraformer/export.py">Paraformer export example</a> and <a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/export_utils.py">export utility</a> are entry points, not universal support promises. The Paraformer example itself selects a contextual checkpoint; inspect and deliberately choose your model. Model-specific export hooks, tokenizer/frontend assets, dynamic shapes and runtime decoding all need validation. Compare the exported runtime against Python on held-out inputs before deployment. No full training, quality benchmark, real-checkpoint resume, model download or export run was performed for this documentation change.</p></article>
 <nav aria-label="Adjacent documents" class="docs-next">
-<a href="https://www.funasr.com/en/docs/model-zoo.html">← Model Zoo</a><a href="https://www.funasr.com/en/docs/model-registration.html">Custom model registration →</a> </nav>
+<a href="https://www.funasr.com/en/docs/streaming-vad.html">← Streaming voice activity detection</a><a href="https://www.funasr.com/en/docs/model-registration.html">Custom model registration →</a> </nav>
 </div>
 <aside class="docs-toc"><strong>On this page</strong><div class="toc">
 <ul>

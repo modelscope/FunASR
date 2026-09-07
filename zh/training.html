@@ -70,6 +70,7 @@
 <nav aria-label="模型与能力">
 <a href="https://www.funasr.com/docs/moss-transcribe-diarize.html">MOSS 转写与说话人分离</a>
 <a href="https://www.funasr.com/docs/model-zoo.html">Model Zoo</a>
+<a href="https://www.funasr.com/docs/streaming-vad.html">流式语音活动检测</a>
 </nav>
 </details>
 <details open="">
@@ -274,7 +275,7 @@ print(model.generate(input="data/audio/heldout.wav"))
 <p>随后在未参与训练或选模的留出集上解码，基线与适配模型使用一致的规整方式及 CER/WER 单位定义。报告各领域、各语言和整体结果、原任务退化、样本数量与 checkpoint 身份。训练 loss 或训练器验证 accuracy 不自动等于转写 CER/WER。<a href="https://github.com/modelscope/FunASR/blob/main/examples/industrial_data_pretraining/fun_asr_nano/docs/finetune_zh.md">Nano 微调指南</a>保留了解码、规整、评分入口；<a href="https://github.com/modelscope/FunASR/blob/main/examples/industrial_data_pretraining/fun_asr_nano/decode.py">decode.py</a>使用 VAD 和 <code>remote_code="./model.py"</code>，需要 recipe 工作目录。该<a href="https://github.com/modelscope/FunASR/blob/main/examples/industrial_data_pretraining/fun_asr_nano/model.py">历史本地类</a>可能覆盖<a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fun_asr_nano/model.py">内置 Nano 类</a>，不能假定它保留内置 LoRA 功能；评估前确认实际类、适配器注入和权重加载结果。</p>
 <p>导出是单独的兼容性验证任务。<a href="https://github.com/modelscope/FunASR/blob/main/examples/industrial_data_pretraining/sense_voice/export.py">SenseVoice ONNX 示例</a>、<a href="https://github.com/modelscope/FunASR/blob/main/examples/industrial_data_pretraining/paraformer/export.py">Paraformer 导出示例</a>及<a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/export_utils.py">导出工具</a>只是入口，不承诺所有模型均支持。Paraformer 示例实际选择 contextual checkpoint，必须检查并明确替换为自己的模型。模型导出 hook、分词器、前端、动态形状和运行时解码都需要验证。部署前在留出输入上比较导出运行时与 Python 输出。本次文档修改未运行完整训练、质量基准、真实 checkpoint 恢复、模型下载或模型导出。</p></article>
 <nav aria-label="相邻文档" class="docs-next">
-<a href="https://www.funasr.com/docs/model-zoo.html">← Model Zoo</a><a href="https://www.funasr.com/docs/model-registration.html">自定义模型注册 →</a> </nav>
+<a href="https://www.funasr.com/docs/streaming-vad.html">← 流式语音活动检测</a><a href="https://www.funasr.com/docs/model-registration.html">自定义模型注册 →</a> </nav>
 </div>
 <aside class="docs-toc"><strong>本页目录</strong><div class="toc">
 <ul>
