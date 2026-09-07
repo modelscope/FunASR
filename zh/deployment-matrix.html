@@ -14,7 +14,7 @@
 <meta content="运行时与部署矩阵 - FunASR" property="og:title"/>
 <meta content="运行时与部署矩阵" property="og:description"/>
 <meta content="https://www.funasr.com/docs/deployment-matrix.html" property="og:url"/>
-<link href="../assets/css/site.4a0f4749ba00.css" rel="stylesheet"/>
+<link href="../assets/css/site.7be954c8e106.css" rel="stylesheet"/>
 <link href="../assets/css/experience.34d6e632686e.css" rel="stylesheet"/>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "SoftwareApplication", "applicationCategory": "DeveloperApplication", "codeRepository": "https://github.com/modelscope/FunASR", "dateModified": "2026-09-01", "license": "https://github.com/modelscope/FunASR/blob/main/LICENSE", "name": "FunASR", "operatingSystem": "Linux, macOS, Windows", "url": "https://www.funasr.com/docs/deployment-matrix.html"}</script>
 </head>
@@ -170,7 +170,7 @@
 </tr>
 <tr>
 <td>Docker Compose API</td>
-<td>可复现本地 smoke test 或小型内部服务</td>
+<td>本地 smoke test 或小型内部服务</td>
 <td><a href="https://www.funasr.com/docs/http-server.html">OpenAI API Docker 文档</a></td>
 <td>默认 CPU；容器里使用 CUDA 前需要先适配 CUDA-capable 镜像。</td>
 </tr>
@@ -238,12 +238,15 @@
 <h3 id="我已经在使用-xinference">我已经在使用 Xinference</h3>
 <p>如果你的系统已经用 Xinference 管理模型注册、virtualenv 隔离和服务生命周期，可以选择 Xinference 路径。请确认使用的 Xinference 版本或 commit 包含 <a href="https://github.com/xorbitsai/inference/pull/5140">xorbitsai/inference#5140</a>；该更新把 Fun-ASR-Nano model spec 从旧的 FunASR git SHA 改为打包发布的 <code>funasr~=1.3.0</code> 依赖。首次评估 FunASR，或需要面向 Agent 的 OpenAI 兼容转写接口时，仍建议先从上面的 FunASR 原生 OpenAI API 示例开始。</p>
 <h3 id="我想要可复现的容器-demo">我想要可复现的容器 demo</h3>
-<p>使用 <code>examples/openai_api/docker-compose.yml</code> 跑 CPU smoke test：</p>
-<pre id="code-0"><code class="language-bash">cd examples/openai_api
-cp .env.example .env
-docker compose up --build
+<p>在 <strong>FunASR 仓库根目录</strong>，准备好 Docker Engine 和 Docker Compose 插件后，启动本地 SenseVoice CPU 服务。这条命令不会覆盖已有 <code>.env</code>，显式设置会在本次启动中覆盖环境里遗留的端口、设备和模型值。主机端口仅绑定 loopback，不是鉴权网关；共享前先阅读<a href="https://www.funasr.com/docs/security.html">安全与网关指南</a>。</p>
+<pre id="code-0"><code class="language-bash">FUNASR_HOST_PORT=127.0.0.1:8000 FUNASR_DEVICE=cpu FUNASR_MODEL=sensevoice \
+  docker compose -f examples/openai_api/docker-compose.yml up --build
 </code></pre>
-<p>在没有 CUDA-capable PyTorch/FunASR 镜像前保持 CPU 模式。准备好 CUDA 镜像后，再设置 <code>FUNASR_DEVICE=cuda</code> 并用同一个 smoke test 验证。没有 bash/curl 时可运行 <code>python examples/openai_api/smoke_test.py --base-url http://localhost:8000</code>。</p>
+<p>保持该终端中的 Compose 运行。打开<strong>第二个终端，仍位于同一仓库根目录</strong>，使用 Python 3.10 或更高版本运行；smoke 客户端仅依赖标准库，不需要在主机安装 FunASR：</p>
+<pre id="code-1"><code class="language-bash">python3 examples/openai_api/smoke_test.py --base-url http://127.0.0.1:8000 --model sensevoice --response-format verbose_json
+</code></pre>
+<p>客户端仅在当前目录不存在 <code>sample.wav</code> 时下载公开中文样本，已有文件会被复用。它打印 health、模型 metadata 和转写 JSON；请自行检查文本，退出码成功不代表识别质量或并发验收。客户端不发送 Authorization，安全指南的仅转写网关会拒绝该 smoke 使用的 metadata 路由。请通过本地端点运行，避免保留敏感音频和未脱敏输出。</p>
+<p>CPU 镜像复制 example 服务，但从 PyPI 安装 FunASR，依赖环境未锁定。声称可复现前，请记录实际包版本和镜像 digest。单独修改 <code>FUNASR_DEVICE</code> 不会增加 CUDA 依赖或容器 GPU 访问能力；GPU 镜像与调度需要另外准备和验证，参见<a href="https://www.funasr.com/docs/http-server.html#docker-部署">完整 HTTP 部署指南</a>及所选模型的服务要求。</p>
 <h3 id="我想部署集群内服务">我想部署集群内服务</h3>
 <p>使用 <a href="https://www.funasr.com/docs/kubernetes.html">Kubernetes 模板</a> 部署私有 <code>ClusterIP</code> OpenAI 兼容 API，包含持久化模型缓存、<code>/health</code> probes 和 port-forward smoke test 路径。在没有 CUDA-capable 镜像和集群 GPU 调度前，请保持默认 CPU 模式。</p>
 <h3 id="我需要流式识别或实时字幕">我需要流式识别或实时字幕</h3>

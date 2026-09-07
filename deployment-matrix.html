@@ -14,7 +14,7 @@
 <meta content="Runtime &amp; deployment matrix - FunASR" property="og:title"/>
 <meta content="Runtime &amp; deployment matrix" property="og:description"/>
 <meta content="https://www.funasr.com/en/docs/deployment-matrix.html" property="og:url"/>
-<link href="assets/css/site.4a0f4749ba00.css" rel="stylesheet"/>
+<link href="assets/css/site.7be954c8e106.css" rel="stylesheet"/>
 <link href="assets/css/experience.34d6e632686e.css" rel="stylesheet"/>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "SoftwareApplication", "applicationCategory": "DeveloperApplication", "codeRepository": "https://github.com/modelscope/FunASR", "dateModified": "2026-09-01", "license": "https://github.com/modelscope/FunASR/blob/main/LICENSE", "name": "FunASR", "operatingSystem": "Linux, macOS, Windows", "url": "https://www.funasr.com/en/docs/deployment-matrix.html"}</script>
 </head>
@@ -170,7 +170,7 @@
 </tr>
 <tr>
 <td>Docker Compose API</td>
-<td>Reproducible local smoke test or small internal service</td>
+<td>Local smoke test or small internal service</td>
 <td><a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api#docker-deployment">OpenAI API Docker docs</a></td>
 <td>CPU by default; adapt the image before using CUDA in containers.</td>
 </tr>
@@ -244,12 +244,15 @@ packaged <code>funasr~=1.3.0</code> dependency line. For first-time FunASR evalu
 agent-oriented OpenAI-compatible transcription, start with the native FunASR
 OpenAI API example above instead.</p>
 <h3 id="i-want-a-repeatable-container-demo">I want a repeatable container demo</h3>
-<p>Use <code>examples/openai_api/docker-compose.yml</code> for a CPU-mode smoke test:</p>
-<pre id="code-0"><code class="language-bash">cd examples/openai_api
-cp .env.example .env
-docker compose up --build
+<p>From the <strong>FunASR repository root</strong>, with Docker Engine and the Docker Compose plugin available, start a local SenseVoice CPU service. This command does not overwrite an existing <code>.env</code>; its explicit settings override inherited port, device and model values for this launch. The host listener is loopback only, not an authentication gateway. Review the <a href="https://www.funasr.com/en/docs/security.html">security and gateway guide</a> before sharing it.</p>
+<pre id="code-0"><code class="language-bash">FUNASR_HOST_PORT=127.0.0.1:8000 FUNASR_DEVICE=cpu FUNASR_MODEL=sensevoice \
+  docker compose -f examples/openai_api/docker-compose.yml up --build
 </code></pre>
-<p>Keep CPU mode until you have a CUDA-capable PyTorch/FunASR image. After that, set <code>FUNASR_DEVICE=cuda</code> and verify with the same smoke test. Use <code>python examples/openai_api/smoke_test.py --base-url http://localhost:8000</code> on systems without bash/curl.</p>
+<p>Keep Compose running in that terminal. Open a <strong>second terminal at the same repository root</strong> and use Python 3.10 or newer; this smoke client only needs the standard library, not a host FunASR installation:</p>
+<pre id="code-1"><code class="language-bash">python3 examples/openai_api/smoke_test.py --base-url http://127.0.0.1:8000 --model sensevoice --response-format verbose_json
+</code></pre>
+<p>The client downloads a public Chinese sample only if <code>sample.wav</code> is missing in the current directory; an existing file is reused. It prints health, model metadata and transcription JSON. Inspect the text yourself: a successful exit does not certify recognition quality or concurrency. The client sends no Authorization, and the security guide's transcription-only gateway denies the metadata routes used by this smoke test. Keep the request on the local endpoint and avoid retaining sensitive audio or unredacted output.</p>
+<p>This CPU image copies the example server but installs FunASR from PyPI. It is not a locked dependency environment; record the resolved package versions and image digest before making reproducibility claims. Changing <code>FUNASR_DEVICE</code> alone does not add CUDA dependencies or container GPU access. Prepare and validate a GPU image and scheduling separately; use the <a href="https://www.funasr.com/en/docs/http-server.html#docker-deployment">complete HTTP deployment guide</a> and the selected model's serving requirements.</p>
 <h3 id="i-want-an-internal-kubernetes-service">I want an internal Kubernetes service</h3>
 <p>Use the <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/kubernetes">Kubernetes template</a> for a private <code>ClusterIP</code> OpenAI-compatible API with persistent model cache, <code>/health</code> probes, and a port-forward smoke-test path. Keep the CPU default until you have a CUDA-capable image and cluster GPU scheduling in place.</p>
 <h3 id="i-need-streaming-or-live-captioning">I need streaming or live captioning</h3>
