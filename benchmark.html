@@ -1,46 +1,378 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<meta name="description" content="Speed and accuracy measurements for long-form ASR workloads. The headline result: FunASR CPU inference can be faster than Whisper GPU inference for production transcription...">
-<meta property="og:title" content="FunASR Benchmark">
-<meta property="og:description" content="Speed and accuracy measurements for long-form ASR workloads. The headline result: FunASR CPU inference can be faster than Whisper GPU inference for production transcription...">
-<meta property="og:type" content="website">
-<meta property="og:url" content="https://modelscope.github.io/FunASR/benchmark.html">
-<link rel="canonical" href="https://modelscope.github.io/FunASR/benchmark.html">
-<meta property="og:site_name" content="FunASR">
-<meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="FunASR Benchmark">
-<meta name="twitter:description" content="Speed and accuracy measurements for long-form ASR workloads. The headline result: FunASR CPU inference can be faster than Whisper GPU inference for production transcription...">
-<title>FunASR Benchmark</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
-</head><body>
-<nav class="nav"><div class="container">
-<a href="index.html" class="nav-logo">FunASR</a>
-<div class="nav-links"><a href="index.html">Home</a><a href="tutorial.html">Tutorial</a><a href="training.html">Training</a><a href="model-registration.html">Develop</a><a href="api.html">API</a><a href="vllm.html">vLLM</a><a href="agent.html">Agent</a><a href="benchmark.html" class="active">Benchmark</a></div>
-<div class="lang-dropdown"><button class="lang-btn">English</button><div class="lang-menu"><a href="benchmark.html" class="current">English</a><a href="zh/benchmark.html">中文</a><a href="ja/benchmark.html">日本語</a><a href="ko/benchmark.html">한국어</a></div></div>
-<a href="https://github.com/modelscope/FunASR" class="nav-github">GitHub</a>
-</div></nav>
-<div class="content"><div class="container narrow">
-<h1>Benchmark</h1>
-<p>Speed and accuracy measurements for long-form ASR workloads. The headline result: FunASR CPU inference can be faster than Whisper GPU inference for production transcription pipelines.</p>
-<div class="toc-grid"><a href="#summary">Summary</a><a href="#table">Results</a><a href="#method">Methodology</a><a href="#choose">How to Choose</a></div>
-<section id="summary"><h2>Summary</h2>
-<table><tr><th>Metric</th><th>Result</th></tr><tr><td>Dataset</td><td>184 long-form Chinese audio files, 11,539 s total, 192.3 min.</td></tr><tr><td>GPU</td><td>NVIDIA H100 80GB HBM3.</td></tr><tr><td>Best GPU speed</td><td>SenseVoice-Small: 169.6x realtime in the full benchmark, 211.8x in the initial run.</td></tr><tr><td>Best CPU speed</td><td>SenseVoice-Small: 17.2x realtime; Paraformer-Large: 15.6x realtime.</td></tr><tr><td>Baseline</td><td>OpenAI Whisper-large-v3: 13.4x realtime on GPU.</td></tr></table>
-</section>
-<section id="table"><h2>Results</h2>
-<table><tr><th>Model</th><th>Device</th><th>RTF</th><th>Speed</th><th>CER</th><th>Notes</th></tr><tr><td><b>SenseVoice-Small</b></td><td>GPU</td><td>0.005896</td><td><b>169.6x</b></td><td>7.81%</td><td>ASR + language / emotion / event tags; CER after tag stripping.</td></tr><tr><td><b>Paraformer-Large</b></td><td>GPU</td><td>0.008359</td><td><b>119.6x</b></td><td>10.18%</td><td>Fast non-autoregressive Chinese ASR with VAD/punctuation pipeline.</td></tr><tr><td><b>Fun-ASR-Nano</b></td><td>GPU</td><td>0.058803</td><td>17.0x</td><td>8.06%</td><td>LLM-based ASR for Chinese, English, Japanese, seven Chinese dialect groups, and 26 regional accents; supports hotwords. Reliable checkpoint-native timestamps are not available (<a href="https://github.com/QwenAudio/Fun-ASR/issues/106">#106</a>).</td></tr><tr><td>GLM-ASR-Nano</td><td>GPU</td><td>0.026974</td><td>37.1x</td><td>31.07%</td><td>LLM-based multilingual ASR.</td></tr><tr><td>Whisper-large-v3-turbo (OpenAI)</td><td>GPU</td><td>0.021708</td><td>46.1x</td><td>21.71%</td><td>OpenAI Whisper implementation.</td></tr><tr><td>Whisper-large-v3 (OpenAI)</td><td>GPU</td><td>0.074694</td><td>13.4x</td><td>20.02%</td><td>Baseline for large Whisper quality.</td></tr><tr><td><b>SenseVoice-Small</b></td><td>CPU</td><td>0.057988</td><td><b>17.2x</b></td><td>7.81%</td><td>CPU run from the remaining benchmark script.</td></tr><tr><td><b>Paraformer-Large</b></td><td>CPU</td><td>0.064056</td><td><b>15.6x</b></td><td>10.18%</td><td>CPU viable for batch jobs.</td></tr><tr><td>Fun-ASR-Nano</td><td>CPU</td><td>0.274318</td><td>3.6x</td><td>8.06%</td><td>LLM-based model is heavier but still above realtime.</td></tr></table>
-</section>
-<section id="method"><h2>Methodology</h2>
-<p>Measurements were collected with the benchmark scripts in the workspace on 184 audio files. RTF is <code>total inference time / total audio duration</code>; speed is <code>1 / RTF</code>. CER is computed after model-specific text cleanup, especially for SenseVoice tags.</p>
-<pre><code>python benchmark/run_full_benchmark.py
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Historical ASR benchmark - FunASR</title>
+<meta content="Historical ASR benchmark" name="description"/>
+<meta content="#ffffff" name="theme-color"/>
+<link href="https://www.funasr.com/en/docs/historical-asr-benchmark.html" rel="canonical"/>
+<link href="https://www.funasr.com/docs/historical-asr-benchmark.html" hreflang="zh-CN" rel="alternate"/>
+<link href="https://www.funasr.com/en/docs/historical-asr-benchmark.html" hreflang="en" rel="alternate"/>
+<meta content="website" property="og:type"/>
+<meta content="Historical ASR benchmark - FunASR" property="og:title"/>
+<meta content="Historical ASR benchmark" property="og:description"/>
+<meta content="https://www.funasr.com/en/docs/historical-asr-benchmark.html" property="og:url"/>
+<link href="assets/css/site.4a0f4749ba00.css" rel="stylesheet"/>
+<link href="assets/css/experience.f9a17772474a.css" rel="stylesheet"/>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "SoftwareApplication", "applicationCategory": "DeveloperApplication", "codeRepository": "https://github.com/modelscope/FunASR", "dateModified": "2026-09-01", "license": "https://github.com/modelscope/FunASR/blob/main/LICENSE", "name": "FunASR", "operatingSystem": "Linux, macOS, Windows", "url": "https://www.funasr.com/en/docs/historical-asr-benchmark.html"}</script>
+</head>
+<body data-copy-icon="assets/lucide/copy.ea80e566c7a1.svg" data-language="en" data-route="/en/docs/historical-asr-benchmark.html">
+<a class="skip-link" href="#main">Skip to main content</a>
+<header class="site-header">
+<a aria-label="FunASR home" class="brand" href="https://www.funasr.com/en/">
+<span aria-hidden="true" class="brand-mark">F</span>
+<span>FunASR</span>
+</a>
+<button aria-controls="primary-navigation" aria-expanded="false" class="icon-button menu-button" data-menu-toggle="" title="Open navigation" type="button">
+<img alt="" src="assets/lucide/menu.90a31b3ab1cf.svg"/>
+</button>
+<nav aria-label="Primary navigation" class="primary-navigation" data-primary-nav="" id="primary-navigation">
+<a href="https://www.funasr.com/en/">Product</a>
+<a href="https://www.funasr.com/en/deploy/">Deploy</a>
+<a href="https://www.funasr.com/en/models.html">Models</a>
+<a href="https://www.funasr.com/en/benchmarks.html">Benchmarks</a>
+<a href="https://www.funasr.com/en/ecosystem.html">Ecosystem</a>
+<a href="https://www.funasr.com/en/blog/">Blog</a>
+<a href="https://www.funasr.com/en/docs/">Docs</a>
+<a href="https://www.funasr.com/en/donors.html">Donors</a>
+</nav>
+<div class="header-actions">
+<a class="icon-link" href="https://www.funasr.com/docs/historical-asr-benchmark.html" title="简体中文">
+<img alt="" src="assets/lucide/languages.ae9048feb2c7.svg"/>
+<span>中文</span>
+</a>
+<a aria-label="GitHub" class="icon-button" href="https://www.funasr.com/go/github" title="GitHub">
+<img alt="" src="assets/lucide/github.793554449a30.svg"/>
+</a>
+</div>
+</header>
+<main id="main">
+<div class="docs-layout">
+<aside class="docs-sidebar">
+<a class="docs-home" href="https://www.funasr.com/en/docs/">Documentation</a>
+<details class="docs-navigation" open="">
+<summary class="docs-navigation-toggle">Browse topics</summary>
+<details open="">
+<summary>Get started</summary>
+<nav aria-label="Get started">
+<a href="https://www.funasr.com/en/docs/installation.html">Installation &amp; environment checks</a>
+<a href="https://www.funasr.com/en/docs/quickstart.html">Your first transcription</a>
+<a href="https://www.funasr.com/en/docs/python-api.html">Python SDK: AutoModel</a>
+<a href="https://www.funasr.com/en/docs/model-selection.html">Choose your first model</a>
+<a href="https://www.funasr.com/en/docs/command-line.html">Command-line transcription</a>
+<a href="https://www.funasr.com/en/docs/migration.html">Migrate from Whisper &amp; cloud APIs</a>
+</nav>
+</details>
+<details open="">
+<summary>Models &amp; capabilities</summary>
+<nav aria-label="Models &amp; capabilities">
+<a href="https://www.funasr.com/en/docs/moss-transcribe-diarize.html">MOSS transcription &amp; diarization</a>
+<a href="https://www.funasr.com/en/docs/model-zoo.html">Model Zoo</a>
+<a href="https://www.funasr.com/en/docs/streaming-vad.html">Streaming voice activity detection</a>
+<a href="https://www.funasr.com/en/docs/keyword-spotting.html">Keyword spotting</a>
+<a href="https://www.funasr.com/en/docs/speaker-emotion.html">Speakers and emotion tags</a>
+</nav>
+</details>
+<details open="">
+<summary>Train &amp; extend</summary>
+<nav aria-label="Train &amp; extend">
+<a href="https://www.funasr.com/en/docs/training.html">Fine-tuning &amp; evaluation</a>
+<a href="https://www.funasr.com/en/docs/model-registration.html">Custom model registration</a>
+</nav>
+</details>
+<details open="">
+<summary>Deploy &amp; integrate</summary>
+<nav aria-label="Deploy &amp; integrate">
+<a href="https://www.funasr.com/en/docs/docker.html">Containers &amp; image selection</a>
+<a href="https://www.funasr.com/en/docs/runtime-guide.html">Serving entry points</a>
+<a href="https://www.funasr.com/en/docs/http-server.html">Python HTTP service</a>
+<a href="https://www.funasr.com/en/docs/kubernetes.html">Kubernetes deployment</a>
+<a href="https://www.funasr.com/en/docs/deployment-matrix.html">Runtime &amp; deployment matrix</a>
+<a href="https://www.funasr.com/en/docs/vllm.html">vLLM split-engine inference</a>
+<a href="https://www.funasr.com/en/docs/official-native-vllm.html">Official native vLLM functional validation (2026-09-07)</a>
+<a href="https://www.funasr.com/en/docs/native-vllm.html">Historical community native vLLM record (2026-08-13)</a>
+</nav>
+</details>
+<details open="">
+<summary>Evaluate &amp; operate</summary>
+<nav aria-label="Evaluate &amp; operate">
+<a href="https://www.funasr.com/en/docs/troubleshooting.html">Troubleshooting</a>
+<a href="https://www.funasr.com/en/docs/security.html">Service security boundaries</a>
+<a href="https://www.funasr.com/en/docs/benchmark-method.html">Reproducible performance tests</a>
+<a aria-current="page" href="https://www.funasr.com/en/docs/historical-asr-benchmark.html">Historical ASR benchmark</a>
+<a href="https://www.funasr.com/en/docs/realtime-benchmark.html">Realtime WebSocket benchmarking</a>
+</nav>
+</details>
+<details open="">
+<summary>Applications &amp; ecosystem</summary>
+<nav aria-label="Applications &amp; ecosystem">
+<a href="https://www.funasr.com/en/docs/agent-integration.html">Agent integration</a>
+<a href="https://www.funasr.com/en/docs/use-cases.html">Use cases &amp; examples</a>
+<a href="https://www.funasr.com/en/docs/community.html">Community integrations</a>
+<a href="https://www.funasr.com/en/docs/repositories.html">Repositories &amp; contribution paths</a>
+<a href="https://www.funasr.com/en/docs/javascript.html">JavaScript clients</a>
+<a href="https://www.funasr.com/en/docs/workflows.html">Workflow integrations</a>
+</nav>
+</details>
+<details open="">
+<summary>Protocols &amp; reference</summary>
+<nav aria-label="Protocols &amp; reference">
+<a href="https://www.funasr.com/en/docs/service-api.html">HTTP API contract</a>
+<a href="https://www.funasr.com/en/docs/websocket-protocol.html">C++ WebSocket protocol</a>
+<a href="https://www.funasr.com/en/docs/onnx-output.html">ONNX binary output contract</a>
+</nav>
+</details>
+<a href="https://www.funasr.com/en/deploy/">Deployment guides →</a>
+</details>
+</aside>
+<div class="docs-body">
+<nav aria-label="Breadcrumbs" class="breadcrumbs"><a href="https://www.funasr.com/en/">FunASR</a><span>/</span><a href="https://www.funasr.com/en/docs/">Docs</a><span>/</span><span>Historical ASR benchmark</span></nav>
+<header class="docs-title"><h1>Historical ASR benchmark</h1><a class="source-link" data-source-link="" href="https://github.com/modelscope/FunASR/blob/main/docs/benchmark/historical_asr.md">View / edit source ↗</a></header>
+<article class="docs-article"><div class="source-title-anchor" id="historical-asr-benchmark"></div>
+<p><a href="https://www.funasr.com/docs/historical-asr-benchmark.html">中文</a></p>
+<p>This is a historical record with incomplete provenance, retained for readers of
+earlier FunASR comparisons. It is not a new measurement, a universal leaderboard,
+or a guarantee for a current checkpoint, machine or deployment. For a new
+evaluation, start with the <a href="https://www.funasr.com/en/docs/benchmark-method.html">performance methodology</a>.</p>
+<span data-legacy-doc-anchor="historical-summary" id="summary"></span><h2 id="historical-summary">Historical Summary</h2>
+<p>The table below preserves the original report's wording and numbers. Its
+"best" labels refer only to that report, not to all available models or hardware.</p>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Dataset</td>
+<td>184 long-form Chinese audio files, 11,539 s total, 192.3 min.</td>
+</tr>
+<tr>
+<td>GPU</td>
+<td>NVIDIA H100 80GB HBM3.</td>
+</tr>
+<tr>
+<td>Best GPU speed</td>
+<td>SenseVoice-Small: 169.6x realtime in the full benchmark, 211.8x in the initial run.</td>
+</tr>
+<tr>
+<td>Best CPU speed</td>
+<td>SenseVoice-Small: 17.2x realtime; Paraformer-Large: 15.6x realtime.</td>
+</tr>
+<tr>
+<td>Baseline</td>
+<td>OpenAI Whisper-large-v3: 13.4x realtime on GPU.</td>
+</tr>
+</tbody>
+</table>
+<p>The <strong>169.6x full run and 211.8x initial run are separate reported results</strong>.
+The original page does not disclose the measurement date. The source was
+checked on <strong>2026-09-07</strong>, which is a snapshot audit date, not the measurement date.</p>
+<span data-legacy-doc-anchor="historical-results" id="table"></span><h2 id="historical-results">Historical Results</h2>
+<p>All values and notes in this table are archived claims from the original report.
+The notes are not current API capability guarantees. In particular, a model's
+raw tags do not imply that an HTTP endpoint returns those tags, and an old
+timestamp limitation must not replace the current <a href="https://www.funasr.com/en/docs/model-selection.html">model selection guide</a>.</p>
+<table>
+<thead>
+<tr>
+<th>Model</th>
+<th>Device</th>
+<th>RTF</th>
+<th>Speed</th>
+<th>CER</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>SenseVoice-Small</td>
+<td>GPU</td>
+<td>0.005896</td>
+<td>169.6x</td>
+<td>7.81%</td>
+<td>ASR + language / emotion / event tags; CER after tag stripping.</td>
+</tr>
+<tr>
+<td>Paraformer-Large</td>
+<td>GPU</td>
+<td>0.008359</td>
+<td>119.6x</td>
+<td>10.18%</td>
+<td>Fast non-autoregressive Chinese ASR with VAD/punctuation pipeline.</td>
+</tr>
+<tr>
+<td>Fun-ASR-Nano</td>
+<td>GPU</td>
+<td>0.058803</td>
+<td>17.0x</td>
+<td>8.06%</td>
+<td>LLM-based ASR for Chinese, English, Japanese, seven Chinese dialect groups, and 26 regional accents; supports hotwords. Reliable checkpoint-native timestamps are not available (<a href="https://github.com/QwenAudio/Fun-ASR/issues/106">#106</a>).</td>
+</tr>
+<tr>
+<td>GLM-ASR-Nano</td>
+<td>GPU</td>
+<td>0.026974</td>
+<td>37.1x</td>
+<td>31.07%</td>
+<td>LLM-based multilingual ASR.</td>
+</tr>
+<tr>
+<td>Whisper-large-v3-turbo (OpenAI)</td>
+<td>GPU</td>
+<td>0.021708</td>
+<td>46.1x</td>
+<td>21.71%</td>
+<td>OpenAI Whisper implementation.</td>
+</tr>
+<tr>
+<td>Whisper-large-v3 (OpenAI)</td>
+<td>GPU</td>
+<td>0.074694</td>
+<td>13.4x</td>
+<td>20.02%</td>
+<td>Baseline for large Whisper quality.</td>
+</tr>
+<tr>
+<td>SenseVoice-Small</td>
+<td>CPU</td>
+<td>0.057988</td>
+<td>17.2x</td>
+<td>7.81%</td>
+<td>CPU run from the remaining benchmark script.</td>
+</tr>
+<tr>
+<td>Paraformer-Large</td>
+<td>CPU</td>
+<td>0.064056</td>
+<td>15.6x</td>
+<td>10.18%</td>
+<td>CPU viable for batch jobs.</td>
+</tr>
+<tr>
+<td>Fun-ASR-Nano</td>
+<td>CPU</td>
+<td>0.274318</td>
+<td>3.6x</td>
+<td>8.06%</td>
+<td>LLM-based model is heavier but still above realtime.</td>
+</tr>
+</tbody>
+</table>
+<p>The repeated CPU/GPU CER values do not establish independent per-device scoring.
+The raw predictions, references and scoring program are not available in the
+audited record. The tag-stripping statement is preserved as a historical claim,
+not as newly verified scorer output. Numerical precision and rounded speed/RTF
+pairs are retained without recalculation.</p>
+<span data-legacy-doc-anchor="provenance-and-limitations" id="method"></span><h2 id="provenance-and-limitations">Provenance and Limitations</h2>
+<p>The <a href="https://github.com/modelscope/FunASR/blob/67d63b80a246dc33749e43904c294e0409cd9183/benchmark.html">original English HTML</a>
+is pinned to its historical GitHub Pages commit. Its bytes matched the archived
+public page during the source audit. That establishes the source of this table,
+not the correctness or reproducibility of the underlying measurements.</p>
+<p>The old report describes RTF as total inference time divided by total audio
+duration, and speed as its reciprocal. The latter is also called RTFx:</p>
+<pre id="code-0"><code class="language-text">RTF  = total inference time / total audio duration
+RTFx = total audio duration / total inference time = 1 / RTF
+</code></pre>
+<p>The following commands are <strong>historical text and cannot be run directly from
+the audited checkout</strong>. All three referenced files were absent at FunASR source
+revision <code>386f6f9106684ba5a114e796147db4396a09eab5</code>; no replacement scripts or
+reproduction data are supplied by this document.</p>
+<pre id="code-1"><code class="language-text">python benchmark/run_full_benchmark.py
 python benchmark/run_remaining.py
-python benchmark/fix_sensevoice_cer.py</code></pre>
-<p>Use these numbers as practical guidance, not a universal leaderboard: hardware, batch size, audio length, decoding options, and text normalization all affect results.</p>
-</section>
-<section id="choose"><h2>How to Choose</h2>
-<table><tr><th>Need</th><th>Recommended model</th></tr><tr><td>Fastest production transcription</td><td>SenseVoice-Small or Paraformer-Large.</td></tr><tr><td>CPU batch transcription</td><td>SenseVoice-Small first; Paraformer-Large for Chinese production pipelines.</td></tr><tr><td>Chinese/English/Japanese LLM-style recognition with dialect and accent coverage</td><td>Fun-ASR-Nano; use the separate <a href="https://huggingface.co/FunAudioLLM/Fun-ASR-MLT-Nano-2512">Fun-ASR-MLT-Nano</a> checkpoint for 31 languages, and use <a href="vllm.html">vLLM</a> for higher LLM decoding throughput.</td></tr><tr><td>OpenAI-compatible local endpoint</td><td><a href="agent.html">funasr-server</a> with model alias <code>sensevoice</code>, <code>paraformer</code>, or <code>fun-asr-nano</code>.</td></tr></table>
-</section>
-</div></div>
-<footer><p>FunASR &middot; Tongyi Lab, Alibaba Group</p><p><a href="index.html">Home</a> &middot; <a href="tutorial.html">Tutorial</a> &middot; <a href="agent.html">Agent</a> &middot; <a href="benchmark.html">Benchmark</a>
-                <a href="donors.html">Donors</a> &middot; <a href="vllm.html">vLLM</a> &middot; <a href="https://github.com/modelscope/FunASR">GitHub</a></p></footer>
-</body></html>
+python benchmark/fix_sensevoice_cer.py
+</code></pre>
+<p>The audited report does not provide a CPU model/thread count, dataset membership
+and reference manifest, exact checkpoint revisions, software/driver versions,
+per-file predictions or timing logs, or a complete timing scope covering warmup,
+I/O and preprocessing. Without these materials, the old table is not directly
+reproducible and its CPU-versus-GPU headline is not a production-wide guarantee.</p>
+<p>This record's <strong>11,539 seconds</strong> must remain separate from the <strong>11,541 seconds</strong>
+reported in the <a href="https://www.funasr.com/en/docs/benchmark-method.html">vLLM methodology</a>. Both mention 184 files,
+but that alone does not prove identical dataset membership. Do not merge their
+rows or silently normalize the two-second discrepancy.</p>
+<span data-legacy-doc-anchor="choosing-a-current-path" id="choose"></span><h2 id="choosing-a-current-path">Choosing a Current Path</h2>
+<p>The following is the <strong>original recommendation table, retained as historical
+context only</strong>. It is not a newly validated recommendation or performance ranking.</p>
+<table>
+<thead>
+<tr>
+<th>Need</th>
+<th>Recommended model</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Fastest production transcription</td>
+<td>SenseVoice-Small or Paraformer-Large.</td>
+</tr>
+<tr>
+<td>CPU batch transcription</td>
+<td>SenseVoice-Small first; Paraformer-Large for Chinese production pipelines.</td>
+</tr>
+<tr>
+<td>Chinese/English/Japanese LLM-style recognition with dialect and accent coverage</td>
+<td>Fun-ASR-Nano; use the separate <a href="https://huggingface.co/FunAudioLLM/Fun-ASR-MLT-Nano-2512">Fun-ASR-MLT-Nano</a> checkpoint for 31 languages, and use <a href="https://www.funasr.com/en/docs/vllm.html">vLLM</a> for higher LLM decoding throughput.</td>
+</tr>
+<tr>
+<td>OpenAI-compatible local endpoint</td>
+<td><a href="https://www.funasr.com/en/docs/agent-integration.html">funasr-server</a> with model alias <code>sensevoice</code>, <code>paraformer</code>, or <code>fun-asr-nano</code>.</td>
+</tr>
+</tbody>
+</table>
+<p>For current decisions, use the <a href="https://www.funasr.com/en/docs/model-selection.html">model and capability guide</a>,
+<a href="https://www.funasr.com/en/docs/agent-integration.html">Agent integration contracts</a>, and
+<a href="https://www.funasr.com/en/docs/vllm.html">vLLM deployment guide</a>. The separate MLT checkpoint's language
+coverage must not be attributed to Fun-ASR-Nano. Evaluate your own audio, runtime
+and end-to-end latency before selecting a deployment.</p>
+<p>Use the <a href="https://www.funasr.com/en/docs/benchmark-method.html">performance methodology</a> for new measurements
+and the <a href="https://www.funasr.com/en/docs/realtime-benchmark.html">WebSocket benchmark guide</a> for concurrent
+realtime services. The current
+<a href="https://github.com/modelscope/FunASR/blob/main/examples/migration/benchmark_funasr.py">migration timing helper</a> measures
+FunASR on your own audio; it does not compute CER/WER, run Whisper or reproduce
+the missing historical scripts. Keep your timing scope, failed files and quality
+evaluation separate and explicit.</p></article>
+<nav aria-label="Adjacent documents" class="docs-next">
+<a href="https://www.funasr.com/en/docs/benchmark-method.html">← Reproducible performance tests</a><a href="https://www.funasr.com/en/docs/realtime-benchmark.html">Realtime WebSocket benchmarking →</a> </nav>
+</div>
+<aside class="docs-toc"><strong>On this page</strong><div class="toc">
+<ul>
+<li><a href="#historical-asr-benchmark">Historical ASR Benchmark</a><ul>
+<li><a href="#historical-summary">Historical Summary</a></li>
+<li><a href="#historical-results">Historical Results</a></li>
+<li><a href="#provenance-and-limitations">Provenance and Limitations</a></li>
+<li><a href="#choosing-a-current-path">Choosing a Current Path</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</aside></div>
+</main>
+<footer class="site-footer">
+<div>
+<strong>FunASR</strong>
+<p>Open speech infrastructure for production deployment.</p>
+</div>
+<nav aria-label="Official repositories" class="footer-repositories" data-footer-repositories="">
+<strong>Official repositories</strong>
+<div class="footer-links">
+<a href="https://www.funasr.com/go/fun-asr">Fun-ASR</a>
+<a href="https://www.funasr.com/go/sensevoice">SenseVoice</a>
+<a href="https://www.funasr.com/go/funclip">FunClip</a>
+</div>
+</nav>
+<div class="footer-links">
+<a href="https://www.funasr.com/en/deploy/">Deploy</a>
+<a href="https://www.funasr.com/en/docs/">Docs</a>
+<a href="https://www.funasr.com/go/releases">Releases</a>
+<a href="https://www.funasr.com/en/donors.html">Donors</a>
+</div>
+</footer>
+<script defer="" src="assets/js/site.d446f5fbcfe2.js"></script>
+<script defer="" src="assets/js/experience.3f688a12942a.js"></script>
+</body>
+</html>
