@@ -131,14 +131,14 @@
 <article class="docs-article"><div class="source-title-anchor" id="funasr-model-selection-guide"></div>
 <p>Use this guide when you are choosing a first model, comparing FunASR with Whisper or a cloud ASR provider, or deciding which model alias to expose through the OpenAI-compatible API.</p>
 <span data-legacy-doc-anchor="fast-default-path" id="default"></span><h2 id="fast-default-path">Fast default path</h2>
-<p>If you have a GPU, start with the flagship <strong>Fun-ASR-Nano</strong> — an LLM-based ASR model (SenseVoice encoder + a Qwen3 decoder) for Chinese, English, and Japanese, plus Chinese dialect groups and regional accents, with strong accuracy on hard cases, context, and proper nouns:</p>
+<p>For GPU evaluation of Chinese, English, Japanese, or Chinese dialects and regional accents, start with the flagship <strong>Fun-ASR-Nano</strong> (SenseVoice encoder + Qwen3 decoder). Compare it on your own audio before choosing a production model:</p>
 <pre id="code-0"><code class="language-python">from funasr import AutoModel
 
 model = AutoModel(model="FunAudioLLM/Fun-ASR-Nano-2512", device="cuda")
 result = model.generate(input="meeting.wav")
 print(result[0]["text"])
 </code></pre>
-<p>On CPU, or when you want multilingual + emotion/event tags and speaker-aware meeting transcripts in one fast non-autoregressive pass, use <strong>SenseVoice-Small</strong>:</p>
+<p>For non-autoregressive multilingual ASR with emotion/event tags, or a CPU evaluation path, start with <strong>SenseVoice-Small</strong>. The example below adds separate VAD and speaker-processing stages for meeting transcripts; speaker diarization is not a SenseVoice output from the same recognition pass:</p>
 <pre id="code-1"><code class="language-python">from funasr import AutoModel
 
 model = AutoModel(
@@ -149,6 +149,10 @@ model = AutoModel(
 )
 result = model.generate(input="meeting.wav")
 </code></pre>
+<p>SenseVoice produces transcription and rich tags. <code>fsmn-vad</code> locates speech;
+<code>cam++</code> produces speaker embeddings, which the pipeline clusters into anonymous
+labels within a recording. These labels do not identify registered people and
+are not stable identities across recordings.</p>
 <p>Switch to Paraformer when your workload is Mandarin-only and you want character-level timestamps or hotwords.</p>
 <span data-legacy-doc-anchor="decision-table" id="decision"></span><h2 id="decision-table">Decision table</h2>
 <table>
@@ -213,37 +217,16 @@ result = model.generate(input="meeting.wav")
 </table>
 <span data-legacy-doc-anchor="openai-compatible-api-aliases" id="aliases"></span><h2 id="openai-compatible-api-aliases">OpenAI-compatible API aliases</h2>
 <p>The <code>examples/openai_api</code> server exposes short aliases so application teams do not need to know model repository IDs:</p>
-<table>
-<thead>
-<tr>
-<th>Alias</th>
-<th>Underlying path</th>
-<th>Use when</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>sensevoice</code></td>
-<td><code>iic/SenseVoiceSmall</code></td>
-<td>You want the default private speech API with multilingual ASR, event tags, and good CPU/GPU behavior.</td>
-</tr>
-<tr>
-<td><code>paraformer</code></td>
-<td><code>paraformer-zh</code> with VAD and punctuation</td>
-<td>You want a Mandarin-oriented production route.</td>
-</tr>
-<tr>
-<td><code>paraformer-en</code></td>
-<td><code>paraformer-en</code> with VAD</td>
-<td>You want a compact English route in OpenAI-style clients.</td>
-</tr>
-<tr>
-<td><code>fun-asr-nano</code></td>
-<td><code>FunAudioLLM/Fun-ASR-Nano-2512</code></td>
-<td>You are evaluating LLM-based ASR for Chinese, English, Japanese, and Chinese dialect/accent coverage, or want to test vLLM acceleration.</td>
-</tr>
-</tbody>
-</table>
+<ul>
+<li><strong><code>sensevoice</code></strong> uses <code>iic/SenseVoiceSmall</code> for multilingual HTTP transcription on CPU/GPU. Returned text has rich tags removed.</li>
+<li><strong><code>paraformer</code></strong> uses <code>paraformer-zh</code> with VAD and punctuation for a Mandarin-oriented route.</li>
+<li><strong><code>paraformer-en</code></strong> uses <code>paraformer-en</code> with VAD for English transcription in OpenAI-style clients.</li>
+<li><strong><code>fun-asr-nano</code></strong> uses <code>FunAudioLLM/Fun-ASR-Nano-2512</code> for evaluating Chinese, English, Japanese, and Chinese dialect/accent coverage. Select a compatible runtime when evaluating vLLM acceleration.</li>
+</ul>
+<p>The example HTTP service cleans both top-level <code>text</code> and segment <code>text</code> in
+<code>verbose_json</code>; that format does not restore emotion/event tags. If you need
+the original tags, use the Python SDK and preserve the returned <code>text</code> before
+display postprocessing. See the <a href="https://www.funasr.com/en/docs/speaker-emotion.html">raw-tag recipe</a>.</p>
 <p>For Ascend NPU deployments, treat <code>fun-asr-nano</code> separately from SenseVoice / Paraformer. The Fun-ASR-Nano PyTorch <code>AutoModel</code> path has community compatibility evidence on 310P3 after the NPU autocast fix, but it was much slower than CPU in that smoke test; <code>AutoModelVLLM</code> still depends on vLLM-Ascend operator support and has hit Qwen3 rotary / <code>TransData</code> failures. Use CUDA/vLLM, standard PyTorch CPU/GPU, or GGUF runtime for production unless you are actively validating an Ascend backend.</p>
 <p>Check the live service before wiring clients:</p>
 <pre id="code-2"><code class="language-bash">curl http://localhost:8000/v1/models
@@ -305,7 +288,7 @@ python examples/openai_api/smoke_test.py --base-url http://localhost:8000 --mode
 <p>For migration work, use the <a href="https://github.com/modelscope/FunASR/blob/main/examples/migration">migration benchmark example</a> and the <a href="https://www.funasr.com/en/docs/migration.html">migration guide</a>.</p>
 <h2 id="practical-recommendations">Practical recommendations</h2>
 <ul>
-<li>With a GPU, default to Fun-ASR-Nano — the flagship LLM-based model for Chinese, English, Japanese, and Chinese dialects/accents, strongest on hard, contextual, and proper-noun-heavy audio. For the separate 31-language checkpoint, use Fun-ASR-MLT-Nano.</li>
+<li>With a GPU, evaluate Fun-ASR-Nano for Chinese, English, Japanese, and Chinese dialects/accents. Include difficult audio, context and proper nouns in your own comparison. For the separate 31-language checkpoint, use Fun-ASR-MLT-Nano.</li>
 <li>On CPU, or for multilingual + emotion workloads, use SenseVoice-Small (fast non-autoregressive, CPU-viable).</li>
 <li>Use Paraformer when your production traffic is primarily Mandarin and you want timestamps or hotwords.</li>
 <li>For offline long recordings that need anonymous per-recording speaker labels in the same request, use MOSS-Transcribe-Diarize; it is not a realtime WebSocket or known-person identification path.</li>
