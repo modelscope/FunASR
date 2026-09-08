@@ -98,6 +98,13 @@ clients keep the exact tagged generation in `raw_text`; in structured mode,
 `raw_text` is the cleaned `text` returned by vLLM and the authoritative speaker
 metadata is in `sentence_info`.
 
+For a runnable CLI that writes speaker-attributed JSON and prints segment times, use
+[`transcribe_vllm_offline.py --engine moss`](../examples/industrial_data_pretraining/qwen3_asr/transcribe_vllm_offline_notes_en.md#moss-offline-transcription-and-anonymous-speakers).
+It sends a complete recording to a separate MOSS vLLM service, without Qwen3 chunking
+or local weight downloads. The example preserves the default Qwen3-only path; it does
+not combine Qwen3 text with MOSS labels. See the linked recipe for client installation,
+authentication, output fields, and long-recording completion limits.
+
 ## FunASR OpenAI-compatible service
 
 The built-in offline HTTP service exposes the same normalized result through

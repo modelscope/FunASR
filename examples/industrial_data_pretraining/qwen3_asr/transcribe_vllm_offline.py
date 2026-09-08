@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
-"""Transcribe long audio with Qwen3-ASR's native vLLM backend."""
+"""Offline Qwen3-ASR transcription or MOSS HTTP transcription and diarization."""
 
 import argparse
 import json
+import math
+import os
 import subprocess
 import tempfile
 from pathlib import Path
@@ -30,9 +32,7 @@ def transcribe_chunks(model, chunks, sample_rate, language):
         segments.append(
             {
                 "start_ms": round(offset_seconds * 1000),
-                "end_ms": round(
-                    (offset_seconds + len(audio) / sample_rate) * 1000
-                ),
+                "end_ms": round((offset_seconds + len(audio) / sample_rate) * 1000),
                 "text": (_result_value(result, "text", "") or "").strip(),
                 "language": _result_value(result, "language"),
             }
@@ -42,14 +42,23 @@ def transcribe_chunks(model, chunks, sample_rate, language):
 
 def build_parser():
     parser = argparse.ArgumentParser(
-        description="Offline long-audio Qwen3-ASR using its native vLLM backend"
+        description="Offline Qwen3-ASR (native vLLM) or MOSS diarization (HTTP)"
     )
     parser.add_argument("audio", type=Path)
-    parser.add_argument("--model", default="Qwen/Qwen3-ASR-1.7B")
-    parser.add_argument("--language", default=None)
-    parser.add_argument("--chunk-seconds", type=float, default=180.0)
-    parser.add_argument("--max-inference-batch-size", type=int, default=4)
-    parser.add_argument("--gpu-memory-utilization", type=float, default=0.8)
+    parser.add_argument("--engine", choices=("qwen3", "moss"), default="qwen3")
+    qwen = parser.add_argument_group("Qwen3 native vLLM only")
+    qwen.add_argument("--model", default="Qwen/Qwen3-ASR-1.7B")
+    qwen.add_argument("--language", default=None)
+    qwen.add_argument("--chunk-seconds", type=float, default=180.0)
+    qwen.add_argument("--max-inference-batch-size", type=int, default=4)
+    qwen.add_argument("--gpu-memory-utilization", type=float, default=0.8)
+    moss = parser.add_argument_group(
+        "MOSS HTTP only (MOSS_VLLM_API_KEY for authentication)"
+    )
+    moss.add_argument("--vllm-base-url", default=None)
+    moss.add_argument("--served-model", default="moss-transcribe-diarize")
+    moss.add_argument("--request-timeout", type=float, default=600.0)
+    moss.add_argument("--max-completion-tokens", type=int, default=8192)
     parser.add_argument("--output", type=Path, default=None)
     return parser
 
@@ -74,13 +83,70 @@ def _convert_to_mono_wav(audio_path, wav_path):
         raise RuntimeError("ffmpeg is required to normalize the input audio") from exc
 
 
+def run_moss(args):
+    if not args.vllm_base_url or not args.served_model.strip():
+        raise ValueError("MOSS requires --vllm-base-url and a non-empty --served-model")
+    if not math.isfinite(args.request_timeout) or args.request_timeout <= 0:
+        raise ValueError("request_timeout must be finite and positive")
+    if args.max_completion_tokens <= 0:
+        raise ValueError("max_completion_tokens must be positive")
+    if (
+        args.language is not None
+        or args.model != "Qwen/Qwen3-ASR-1.7B"
+        or args.chunk_seconds != 180.0
+        or args.max_inference_batch_size != 4
+        or args.gpu_memory_utilization != 0.8
+    ):
+        raise ValueError("Qwen3 model/language/chunk/GPU options do not apply to MOSS")
+    output = args.output or args.audio.with_suffix(".moss-vllm.json")
+    if output.resolve() == args.audio.resolve() or (
+        output.exists() and output.samefile(args.audio)
+    ):
+        raise ValueError("output must not overwrite the input audio")
+
+    from funasr import AutoModel
+
+    model = AutoModel(
+        model="OpenMOSS-Team/MOSS-Transcribe-Diarize",
+        backend="vllm",
+        device="cpu",
+        vllm_base_url=args.vllm_base_url,
+        vllm_model=args.served_model,
+        vllm_response_format="diarized_json",
+        vllm_timeout=args.request_timeout,
+        vllm_api_key=os.environ.get("MOSS_VLLM_API_KEY", "EMPTY"),
+        disable_update=True,
+        disable_pbar=True,
+    )
+    # Keep one recording in one request so anonymous speaker labels share a scope.
+    results = model.generate(
+        str(args.audio), max_completion_tokens=args.max_completion_tokens
+    )
+    if len(results) != 1:
+        raise RuntimeError("MOSS must return one result for the complete recording")
+    payload = results[0]
+    output.write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+    )
+    return output, payload
+
+
 def run(args):
+    if not args.audio.is_file():
+        raise FileNotFoundError(args.audio)
+    if args.engine == "moss":
+        return run_moss(args)
+    if (
+        args.vllm_base_url is not None
+        or args.served_model != "moss-transcribe-diarize"
+        or args.request_timeout != 600.0
+        or args.max_completion_tokens != 8192
+    ):
+        raise ValueError("MOSS HTTP options require --engine moss")
     if args.chunk_seconds <= 0:
         raise ValueError("chunk_seconds must be positive")
     if args.max_inference_batch_size <= 0:
         raise ValueError("max_inference_batch_size must be positive")
-    if not args.audio.is_file():
-        raise FileNotFoundError(args.audio)
 
     import soundfile as sf
     from qwen_asr import Qwen3ASRModel
@@ -123,7 +189,15 @@ def main():
     args = build_parser().parse_args()
     output, payload = run(args)
     print(payload["text"])
-    print(f"Wrote {len(payload['segments'])} segments to {output}")
+    if args.engine == "moss":
+        segments = payload["sentence_info"]
+        for segment in segments:
+            print(
+                f"{segment['start']}..{segment['end']} ms [{segment['spk']}] {segment['text']}"
+            )
+    else:
+        segments = payload["segments"]
+    print(f"Wrote {len(segments)} segments to {output}")
 
 
 if __name__ == "__main__":
