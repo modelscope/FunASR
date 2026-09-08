@@ -204,6 +204,11 @@ speaker <code>segments</code> 直接映射到 <code>sentence_info</code>。认�
 <code>vllm_response_format="diarized_json"</code>。为保持已有客户端兼容，默认值仍是 <code>json</code>，
 此时 <code>raw_text</code> 保留原始标签生成；结构化模式下，<code>raw_text</code> 是 vLLM 返回的清理后
 <code>text</code>，权威说话人信息位于 <code>sentence_info</code>。</p>
+<p>需要可直接运行、保存说话人 JSON 并打印分段时间的命令行示例，可用
+<a href="https://github.com/modelscope/FunASR/blob/main/examples/industrial_data_pretraining/qwen3_asr/transcribe_vllm_offline_notes.md#moss-离线转写与匿名说话人"><code>transcribe_vllm_offline.py --engine moss</code></a>。
+它将整条录音发送给独立的 MOSS vLLM 服务，不经过 Qwen3 切块，也不下载本地权重。
+示例保留默认的 Qwen3 单独转写路径，不混拼 Qwen3 文本与 MOSS 标签；客户端安装、
+认证、输出字段和长音频输出上限见该说明。</p>
 <span data-legacy-doc-anchor="funasr-openai-兼容服务" id="server"></span><span data-legacy-doc-anchor="funasr-openai-兼容服务" id="evidence"></span><h2 id="funasr-openai-兼容服务">FunASR OpenAI 兼容服务</h2>
 <p>内置离线 HTTP 服务通过 <code>/v1/audio/transcriptions</code> 返回同一套标准化结果。
 服务加载固定的 Transformers revision，不会外挂 VAD 或第二套说话人模型：</p>

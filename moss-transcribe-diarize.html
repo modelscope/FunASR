@@ -215,6 +215,12 @@ the pinned vLLM revision. The compatibility default remains <code>json</code> so
 clients keep the exact tagged generation in <code>raw_text</code>; in structured mode,
 <code>raw_text</code> is the cleaned <code>text</code> returned by vLLM and the authoritative speaker
 metadata is in <code>sentence_info</code>.</p>
+<p>For a runnable CLI that writes speaker-attributed JSON and prints segment times, use
+<a href="https://github.com/modelscope/FunASR/blob/main/examples/industrial_data_pretraining/qwen3_asr/transcribe_vllm_offline_notes_en.md#moss-offline-transcription-and-anonymous-speakers"><code>transcribe_vllm_offline.py --engine moss</code></a>.
+It sends a complete recording to a separate MOSS vLLM service, without Qwen3 chunking
+or local weight downloads. The example preserves the default Qwen3-only path; it does
+not combine Qwen3 text with MOSS labels. See the linked recipe for client installation,
+authentication, output fields, and long-recording completion limits.</p>
 <span data-legacy-doc-anchor="funasr-openai-compatible-service" id="server"></span><span data-legacy-doc-anchor="funasr-openai-compatible-service" id="evidence"></span><h2 id="funasr-openai-compatible-service">FunASR OpenAI-compatible service</h2>
 <p>The built-in offline HTTP service exposes the same normalized result through
 <code>/v1/audio/transcriptions</code>. It loads the pinned Transformers revision and does
