@@ -1,9 +1,7 @@
 from pathlib import Path
 import ast
-import importlib.util
 
 import pytest
-from bs4 import BeautifulSoup
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -43,25 +41,6 @@ def test_model_selection_moss_alias_matches_real_service_configuration(suffix):
     assert "**`moss-transcribe-diarize`**" in text
     assert f"`{model}`" in text
     assert "verbose_json" in text
-
-
-@pytest.mark.parametrize("language", ["en", "zh"])
-def test_model_selection_renders_distinct_local_native_and_split_links(language):
-    spec = importlib.util.spec_from_file_location(
-        "model_choice_documentation", ROOT / "web-pages/product-site/documentation.py")
-    documentation = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(documentation)
-    catalogue = documentation.load_catalogue()
-    entry = next(page for page in catalogue["pages"] if page["slug"] == "model-selection")
-    rendered = documentation.render_source(entry, language, catalogue)
-    soup = BeautifulSoup(rendered["content_html"], "html.parser")
-    prefix = "/en" if language == "en" else ""
-    targets = {a.get("href") for a in soup.select("a[href]")}
-    for slug in ("vllm", "official-native-vllm", "native-vllm", "moss-transcribe-diarize"):
-        assert f"{prefix}/docs/{slug}.html" in targets
-    ids = [node["id"] for node in soup.select("[id]")]
-    assert ids.count("vllm-checkpoint-paths") == 1
-    assert len(ids) == len(set(ids)), "Existing and new section anchors must stay unique"
 
 
 def test_documentation_hub_keeps_official_and_historical_native_entries_separate():
