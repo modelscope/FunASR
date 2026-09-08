@@ -94,6 +94,18 @@ class DynamicStreamingVAD:
         self.confirmed_segments: List[List[int]] = []
         self.current_speech_start: Optional[int] = None
         self.accumulated_since_cut_ms: int = 0
+        self._total_audio_samples: int = 0
+        self._needs_stream_reset: bool = False
+
+    def _update_speech_duration(self):
+        if self.current_speech_start is None:
+            self.accumulated_since_cut_ms = 0
+        else:
+            # VAD start signals use the session clock, including preceding silence.
+            audio_end_ms = self._total_audio_samples * 1000 // self.sample_rate
+            self.accumulated_since_cut_ms = max(
+                0, audio_end_ms - int(self.current_speech_start)
+            )
 
     def _get_silence_threshold(self) -> int:
         """根据当前累积时长，从 schedule 中查询静音阈值。"""
@@ -123,11 +135,14 @@ class DynamicStreamingVAD:
             新确认的语音段列表，每段为 [start_ms, end_ms]。
             仅在检测到语音结束时返回非空列表。
         """
+        if self._needs_stream_reset:
+            self.reset()
         if audio_chunk.dim() > 1:
             audio_chunk = audio_chunk.squeeze()
 
         chunk_samples = len(audio_chunk)
-        self.accumulated_since_cut_ms += int(chunk_samples * 1000 / self.sample_rate)
+        self._total_audio_samples += chunk_samples
+        self._update_speech_duration()
 
         self._apply_dynamic_threshold()
         initial_cache_kwargs = {}
@@ -163,17 +178,22 @@ class DynamicStreamingVAD:
                 self.current_speech_start = None
                 self.accumulated_since_cut_ms = 0
 
+        self._update_speech_duration()
+        # Preserve final state for callers' tail fallback; reset before the next stream.
+        self._needs_stream_reset = is_final
         return new_confirmed
 
     def finalize(self) -> List[List[int]]:
         """结束流式处理，返回最后可能未结束的语音段。
 
-        调用此方法后，VAD 状态会被重置。
-        如果当前有正在进行的语音段，会被强制结束。
+        本次状态保留到下一次 feed，便于调用方补齐未返回结束信号的尾段。
+        下一次 feed 会重置状态，开始新的流。
 
         Returns:
             最后确认的语音段列表。
         """
+        if self._needs_stream_reset:
+            return []
         # Feed empty with is_final=True to flush
         empty = torch.zeros(int(self.sample_rate * 0.01), dtype=torch.float32)
         return self.feed(empty, is_final=True)
@@ -228,3 +248,5 @@ class DynamicStreamingVAD:
         self.confirmed_segments = []
         self.current_speech_start = None
         self.accumulated_since_cut_ms = 0
+        self._total_audio_samples = 0
+        self._needs_stream_reset = False
