@@ -189,8 +189,8 @@ are not stable identities across recordings.</p>
 <tr>
 <td>LLM-based ASR or Chinese/English/Japanese + dialect experiments</td>
 <td>Fun-ASR-Nano</td>
-<td>LLM-based model path; use vLLM when decoder throughput matters.</td>
-<td><a href="https://www.funasr.com/en/docs/vllm.html">vLLM guide</a></td>
+<td>Evaluate the Python path first; split-engine and native vLLM use different loading contracts.</td>
+<td><a href="#vllm-checkpoint-paths">Choose a vLLM path</a></td>
 </tr>
 <tr>
 <td>Offline long-form ASR with anonymous diarization</td>
@@ -225,7 +225,13 @@ are not stable identities across recordings.</p>
 <li><strong><code>paraformer</code></strong> uses <code>paraformer-zh</code> with VAD and punctuation for a Mandarin-oriented route.</li>
 <li><strong><code>paraformer-en</code></strong> uses <code>paraformer-en</code> with VAD for English transcription in OpenAI-style clients.</li>
 <li><strong><code>fun-asr-nano</code></strong> uses <code>FunAudioLLM/Fun-ASR-Nano-2512</code> for evaluating Chinese, English, Japanese, and Chinese dialect/accent coverage. Select a compatible runtime when evaluating vLLM acceleration.</li>
+<li><strong><code>moss-transcribe-diarize</code></strong> uses the third-party <code>OpenMOSS-Team/MOSS-Transcribe-Diarize</code> model for offline transcription and anonymous per-recording speaker labels. Prepare its separate dependencies and reviewed remote code using the <a href="https://www.funasr.com/en/docs/moss-transcribe-diarize.html">MOSS guide</a>; request <code>verbose_json</code> for structured segments. It does not require an external VAD/speaker model and does not identify known people.</li>
 </ul>
+<p>These aliases describe <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/server.py">the example server</a>,
+which loads <code>AutoModel</code>. They do not configure native vLLM or automatically select
+<code>AutoModelVLLM</code>. The packaged <code>funasr-server</code> has a separate loader and backend
+selection; do not copy an alias or a performance result between services without
+checking the corresponding <a href="https://www.funasr.com/en/docs/http-server.html">HTTP guide</a>.</p>
 <p>The example HTTP service cleans both top-level <code>text</code> and segment <code>text</code> in
 <code>verbose_json</code>; that format does not restore emotion/event tags. If you need
 the original tags, use the Python SDK and preserve the returned <code>text</code> before
@@ -273,12 +279,46 @@ python examples/openai_api/smoke_test.py --base-url http://localhost:8000 --mode
 </tr>
 <tr>
 <td>LLM-based ASR throughput</td>
-<td>vLLM path for Fun-ASR-Nano</td>
-<td>vLLM accelerates autoregressive decoding; it does not apply to non-autoregressive Paraformer.</td>
+<td>Choose split-engine or native vLLM below</td>
+<td>Match the checkpoint, loading API and tested environment; this is not a Paraformer backend.</td>
 </tr>
 </tbody>
 </table>
 <p>See the <a href="https://www.funasr.com/en/docs/deployment-matrix.html">deployment matrix</a> when you are choosing between these paths.</p>
+<p><a id="vllm-checkpoint-paths"></a></p>
+<h2 id="choose-the-vllm-checkpoint-and-interface">Choose the vLLM Checkpoint and Interface</h2>
+<table>
+<thead>
+<tr>
+<th>Path</th>
+<th>Checkpoint and interface</th>
+<th>Read next</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>FunASR split-engine</td>
+<td>Base <code>FunAudioLLM/Fun-ASR-Nano-2512</code> assets through <code>AutoModelVLLM</code>; FunASR handles the audio side and vLLM the decoder.</td>
+<td><a href="https://www.funasr.com/en/docs/vllm.html">Split-engine preparation and limits</a></td>
+</tr>
+<tr>
+<td>Official native vLLM</td>
+<td>Converted <code>FunAudioLLM/Fun-ASR-Nano-2512-vllm</code> snapshot through vLLM's native model implementation and <code>/v1/audio/transcriptions</code>. Not an <code>AutoModelVLLM</code> load.</td>
+<td><a href="https://www.funasr.com/en/docs/official-native-vllm.html">Official functional validation</a></td>
+</tr>
+<tr>
+<td>Historical community native vLLM</td>
+<td>Community <code>allendou/Fun-ASR-Nano-2512-vllm</code>, tested on 2026-08-13. Its timings belong to that checkpoint and environment.</td>
+<td><a href="https://www.funasr.com/en/docs/native-vllm.html">Historical community record</a></td>
+</tr>
+</tbody>
+</table>
+<p>The official record pins a model revision and an existing environment; it is not
+a clean-install recipe, a sustained-load benchmark, or proof of <code>/v1/realtime</code>
+streaming. Do not reuse the historical community timings for the official model.
+For MOSS, follow its own deployment guide: the Nano checkpoints and validation
+above do not establish MOSS runtime compatibility. Choose model, checkpoint,
+interface and environment together before testing your own workload.</p>
 <span data-legacy-doc-anchor="benchmark-before-committing" id="benchmark"></span><h2 id="benchmark-before-committing">Benchmark before committing</h2>
 <p>Do not choose a model from a single clean demo file. Use a small representative set first:</p>
 <ul>
@@ -309,6 +349,7 @@ python examples/openai_api/smoke_test.py --base-url http://localhost:8000 --mode
 <li><a href="#decision-table">Decision table</a></li>
 <li><a href="#openai-compatible-api-aliases">OpenAI-compatible API aliases</a></li>
 <li><a href="#runtime-choice-by-workload">Runtime choice by workload</a></li>
+<li><a href="#choose-the-vllm-checkpoint-and-interface">Choose the vLLM Checkpoint and Interface</a></li>
 <li><a href="#benchmark-before-committing">Benchmark before committing</a></li>
 <li><a href="#practical-recommendations">Practical recommendations</a></li>
 </ul>
