@@ -14,8 +14,9 @@ requirements = {
         "scipy>=1.4.1",
         "librosa",
         "soundfile>=0.12.1",
-        # Keep the scientific stack ABI-compatible with the supported SciPy wheels.
-        "numpy<2",
+        # numpy 2.x is supported; deprecated aliases (np.float, np.int) were
+        # removed from call sites so the package imports and runs on both 1.x and 2.x.
+        "numpy",
         "PyYAML>=5.1.2",
         "tqdm",
         "requests",

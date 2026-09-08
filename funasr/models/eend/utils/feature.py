@@ -35,7 +35,7 @@ def transform(Y, transform_type=None, dtype=np.float32):
 
     Args:
         Y: STFT
-            (n_frames, n_bins)-shaped np.complex array
+            (n_frames, n_bins)-shaped complex array
         transform_type:
             None, "log"
         dtype: output data type
