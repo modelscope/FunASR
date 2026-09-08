@@ -63,6 +63,7 @@ ${train_tool} \
 ++train_conf.save_checkpoint_interval=2000 \
 ++train_conf.keep_nbest_models=20 \
 ++train_conf.avg_nbest_model=10 \
+++train_conf.avg_keep_nbest_models_type=loss \
 ++train_conf.use_deepspeed=false \
 ++train_conf.deepspeed_config=${deepspeed_config} \
 ++optim_conf.lr=0.0002 \

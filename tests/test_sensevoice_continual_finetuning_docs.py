@@ -38,6 +38,25 @@ def test_english_guide_covers_retention_controls_and_worked_example():
     assert all(item in guide for item in required)
 
 
+def test_checkpoint_selection_recipe_and_evaluation_boundaries():
+    recipe = (SENSEVOICE_DIR / "finetune.sh").read_text(encoding="utf-8")
+    assert "++train_conf.avg_keep_nbest_models_type=loss" in recipe
+    for name in ("CONTINUAL_FINETUNING.md", "CONTINUAL_FINETUNING_zh.md"):
+        guide = (SENSEVOICE_DIR / name).read_text(encoding="utf-8")
+        assert "++train_conf.avg_keep_nbest_models_type=loss" in guide
+        assert "acc_rich" in guide
+        assert "<|minnan|>" in guide
+        assert "93.3%" not in guide
+    english = (SENSEVOICE_DIR / "CONTINUAL_FINETUNING.md").read_text(encoding="utf-8")
+    chinese = (SENSEVOICE_DIR / "CONTINUAL_FINETUNING_zh.md").read_text(encoding="utf-8")
+    assert "independently audited" in english
+    assert "new output directory" in english
+    assert "allowlist" in english
+    assert "独立核验" in chinese
+    assert "新的输出目录" in chinese
+    assert "白名单" in chinese
+
+
 def test_chinese_guide_covers_retention_controls_and_worked_example():
     guide = (SENSEVOICE_DIR / "CONTINUAL_FINETUNING_zh.md").read_text(encoding="utf-8")
 

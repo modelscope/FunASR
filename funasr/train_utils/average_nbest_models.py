@@ -14,6 +14,7 @@ import torch
 import re
 from collections import OrderedDict
 from functools import cmp_to_key
+from funasr.train_utils.checkpoint_metrics import finite_scalar
 
 
 def _get_checkpoint_paths(output_dir: str, last_n: int = 5, use_deepspeed=False, **kwargs):
@@ -31,7 +32,19 @@ def _get_checkpoint_paths(output_dir: str, last_n: int = 5, use_deepspeed=False,
             )
         avg_keep_nbest_models_type = checkpoint["avg_keep_nbest_models_type"]
         val_step_or_epoch = checkpoint[f"val_{avg_keep_nbest_models_type}_step_or_epoch"]
-        sorted_items = sorted(val_step_or_epoch.items(), key=lambda x: x[1], reverse=True)
+        eligible = []
+        for key, value in val_step_or_epoch.items():
+            value = finite_scalar(value)
+            ckpt = os.path.join(output_dir, key)
+            if use_deepspeed:
+                ckpt = os.path.join(ckpt, "mp_rank_00_model_states.pt")
+            if value is not None and os.path.isfile(ckpt):
+                eligible.append((key, value))
+        if not eligible:
+            logging.warning("No checkpoints with an available finite %s metric for averaging.",
+                            avg_keep_nbest_models_type)
+            return []
+        sorted_items = sorted(eligible, key=lambda x: x[1], reverse=True)
         sorted_items = (
             sorted_items[:last_n] if avg_keep_nbest_models_type == "acc" else sorted_items[-last_n:]
         )
@@ -43,8 +56,8 @@ def _get_checkpoint_paths(output_dir: str, last_n: int = 5, use_deepspeed=False,
                 ckpt = os.path.join(output_dir, key, "mp_rank_00_model_states.pt")
             checkpoint_paths.append(ckpt)
 
-    except:
-        print(f"{checkpoint} does not exist, avg the lastet checkpoint.")
+    except (FileNotFoundError, KeyError):
+        logging.warning("Checkpoint ranking metadata unavailable; averaging latest checkpoints.")
         # List all files in the output directory
         files = os.listdir(output_dir)
         # Filter out checkpoint files and extract epoch numbers
