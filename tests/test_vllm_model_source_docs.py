@@ -1,6 +1,9 @@
 from pathlib import Path
+import ast
+import importlib.util
 
 import pytest
+from bs4 import BeautifulSoup
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -8,6 +11,65 @@ VLLM_GUIDES = [
     "docs/vllm_guide.md",
     "docs/vllm_guide_zh.md",
 ]
+
+
+@pytest.mark.parametrize("suffix", ["", "_zh", "_ja", "_ko"])
+def test_model_selection_distinguishes_checkpoint_and_service_paths(suffix):
+    text = (ROOT / f"docs/model_selection{suffix}.md").read_text()
+    language_suffix = "_zh" if suffix == "_zh" else ""
+    for target in (f"vllm_guide{language_suffix}.md",
+                   f"vllm_official_native_validation{language_suffix}.md",
+                   "vllm_native_funasr_validation.md"):
+        assert f"](./{target})" in text
+        assert (ROOT / "docs" / target).is_file()
+    for marker in ("AutoModelVLLM", "FunAudioLLM/Fun-ASR-Nano-2512-vllm",
+                   "/v1/audio/transcriptions", "/v1/realtime", "2026-08-13"):
+        assert marker in text
+    if suffix == "_zh":
+        assert "](./vllm_guide.md)" not in text
+
+
+@pytest.mark.parametrize("suffix", ["", "_zh", "_ja", "_ko"])
+def test_model_selection_moss_alias_matches_real_service_configuration(suffix):
+    tree = ast.parse((ROOT / "examples/openai_api/server.py").read_text())
+    config = next(node.value for node in ast.walk(tree) if isinstance(node, ast.Assign)
+                  and any(isinstance(t, ast.Name) and t.id == "MODEL_CONFIGS" for t in node.targets))
+    moss = next(value for key, value in zip(config.keys, config.values)
+                if isinstance(key, ast.Constant) and key.value == "moss-transcribe-diarize")
+    model = next(ast.literal_eval(value) for key, value in zip(moss.keys, moss.values)
+                 if ast.literal_eval(key) == "model")
+    assert model == "OpenMOSS-Team/MOSS-Transcribe-Diarize"
+    text = (ROOT / f"docs/model_selection{suffix}.md").read_text()
+    assert "**`moss-transcribe-diarize`**" in text
+    assert f"`{model}`" in text
+    assert "verbose_json" in text
+
+
+@pytest.mark.parametrize("language", ["en", "zh"])
+def test_model_selection_renders_distinct_local_native_and_split_links(language):
+    spec = importlib.util.spec_from_file_location(
+        "model_choice_documentation", ROOT / "web-pages/product-site/documentation.py")
+    documentation = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(documentation)
+    catalogue = documentation.load_catalogue()
+    entry = next(page for page in catalogue["pages"] if page["slug"] == "model-selection")
+    rendered = documentation.render_source(entry, language, catalogue)
+    soup = BeautifulSoup(rendered["content_html"], "html.parser")
+    prefix = "/en" if language == "en" else ""
+    targets = {a.get("href") for a in soup.select("a[href]")}
+    for slug in ("vllm", "official-native-vllm", "native-vllm", "moss-transcribe-diarize"):
+        assert f"{prefix}/docs/{slug}.html" in targets
+    ids = [node["id"] for node in soup.select("[id]")]
+    assert ids.count("vllm-checkpoint-paths") == 1
+    assert len(ids) == len(set(ids)), "Existing and new section anchors must stay unique"
+
+
+def test_documentation_hub_keeps_official_and_historical_native_entries_separate():
+    text = (ROOT / "docs/README.md").read_text()
+    for target in ("vllm_official_native_validation.md", "vllm_official_native_validation_zh.md",
+                   "vllm_native_funasr_validation.md"):
+        assert f"]({target})" in text
+    assert "2026-08-13" in text
 
 
 @pytest.mark.parametrize("relpath", VLLM_GUIDES)
