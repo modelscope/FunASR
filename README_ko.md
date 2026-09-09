@@ -103,7 +103,7 @@ checkpoint/revision, 오디오 집합, 하드웨어, 배치, 워밍업, 측정 �
 ## 최신 소식
 
 - **MOSS-Transcribe-Diarize**를 FunASR service, Docker, Kubernetes, vLLM/SGLang workflow, FunClip에 통합해 긴 오디오 ASR, timestamp, 익명 speaker label을 한 번에 처리합니다. [MOSS 배포 ->](./docs/moss_transcribe_diarize.md)
-- **FunASR 1.4.14**는 MOSS service / Model Zoo 진입점을 완성하고 realtime serving 안정성을 개선하며 NumPy ABI 보호를 유지합니다. `python -m pip install -U "funasr==1.4.14"`. [Release ->](https://github.com/modelscope/FunASR/releases/tag/v1.4.14)
+- **FunASR 1.4.15**는 테스트를 거친 NumPy 2 호환성을 추가하고 스트리밍 KWS/VAD 경계 처리와 checkpoint 순위 산정을 수정합니다. `python -m pip install -U "funasr==1.4.15"`. [릴리스 및 검증 범위 ->](https://github.com/modelscope/FunASR/releases/tag/v1.4.15)
 - **Production deployment**에 더 빠르고 안정적인 realtime serving과 Linux, macOS, Windows 10개 target용 llama.cpp package를 추가했습니다. [GPU service ->](./docs/vllm_guide.md) · [CPU / edge package ->](https://www.funasr.com/en/deploy/llama-cpp.html) · [v0.2.6 binaries ->](https://github.com/modelscope/FunASR/releases/tag/runtime-llamacpp-v0.2.6)
 
 > 전체 변경 기록과 download asset은 [GitHub Releases](https://github.com/modelscope/FunASR/releases)에서 확인할 수 있습니다.

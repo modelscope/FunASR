@@ -570,14 +570,18 @@ def test_readme_model_tables_surface_public_gguf_entries():
 
 
 def test_top_level_readmes_surface_current_release_and_edge_runtime():
+    release_version = (ROOT / "funasr" / "version.txt").read_text().strip()
     readmes = {
         name: (ROOT / name).read_text()
         for name in ("README.md", "README_zh.md", "README_ja.md", "README_ko.md")
     }
 
     for name, text in readmes.items():
-        assert 'python -m pip install -U "funasr==1.4.14"' in text, name
-        assert "https://github.com/modelscope/FunASR/releases/tag/v1.4.14" in text, name
+        assert f'python -m pip install -U "funasr=={release_version}"' in text, name
+        assert (
+            f"https://github.com/modelscope/FunASR/releases/tag/v{release_version}"
+            in text
+        ), name
         assert "runtime-llamacpp-v0.2.6" in text, name
 
     assert "https://www.funasr.com/en/deploy/llama-cpp.html" in readmes["README.md"]
@@ -615,13 +619,15 @@ def test_top_level_readme_news_stays_concise():
 
 
 def test_repository_roadmap_tracks_current_delivery_and_open_work():
+    release_version = (ROOT / "funasr" / "version.txt").read_text().strip()
     docs = [
         (ROOT / "docs/repository_roles.md").read_text(),
         (ROOT / "docs/repository_roles_zh.md").read_text(),
     ]
 
     for text in docs:
-        assert "1.4.14" in text
+        assert f"funasr=={release_version}" in text
+        assert f"releases/tag/v{release_version}" in text
         assert "v1.3.26" not in text
         assert "runtime-llamacpp-v0.2.6" in text
         assert "MOSS-Transcribe-Diarize" in text

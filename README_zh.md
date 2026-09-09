@@ -149,7 +149,7 @@ checkpoint/revision、音频集、硬件、批量大小、预热、计时范围�
 ## 最新动态
 
 - **MOSS-Transcribe-Diarize** 已接入 FunASR 服务、Docker、Kubernetes、vLLM/SGLang 工作流和 FunClip，一次完成长音频转写、时间戳与匿名说话人标注。[部署 MOSS ->](./docs/moss_transcribe_diarize_zh.md)
-- **FunASR 1.4.14** 补齐 MOSS 服务与 Model Zoo 入口，提升实时服务稳定性，并保留 NumPy ABI 兼容保护。升级命令：`python -m pip install -U "funasr==1.4.14"`。[发布页 ->](https://github.com/modelscope/FunASR/releases/tag/v1.4.14)
+- **FunASR 1.4.15** 新增经过测试的 NumPy 2 兼容支持，修复流式 KWS/VAD 边界处理和 checkpoint 排序。升级命令：`python -m pip install -U "funasr==1.4.15"`。[发布说明与验证范围 ->](https://github.com/modelscope/FunASR/releases/tag/v1.4.15)
 - **工业部署** 新增更快、更稳定的实时服务，以及覆盖 Linux、macOS、Windows 十种目标的 llama.cpp 预编译包。[GPU 服务 ->](./docs/vllm_guide_zh.md) · [CPU/端侧包 ->](https://www.funasr.com/deploy/llama-cpp.html)
 
 > 完整改动记录和可下载资产请查看 [GitHub Releases](https://github.com/modelscope/FunASR/releases)。
