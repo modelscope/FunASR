@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HTTP 200 不等于转写成功：会议录音的验收清单 | FunASR</title>
+<meta name="description" content="从会议纪要、字幕和说话人剪辑出发，区分 ASR 文本、匿名标签、时间戳与尾部覆盖；附经过测试的 Python 结构检查器。">
+<meta property="og:title" content="HTTP 200 不等于转写成功：会议录音的验收清单"><meta property="og:description" content="从会议纪要、字幕和说话人剪辑出发，区分 ASR 文本、匿名标签、时间戳与尾部覆盖；附经过测试的 Python 结构检查器。"><meta property="og:type" content="article"><meta property="og:url" content="https://www.funasr.com/blog/meeting-transcript-acceptance.html"><meta property="og:image" content="https://www.funasr.com/img/funclip-v2-1-0-interface.jpg">
+<link rel="canonical" href="https://www.funasr.com/blog/meeting-transcript-acceptance.html"><link rel="alternate" hreflang="en" href="https://www.funasr.com/en/blog/meeting-transcript-acceptance.html">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"HTTP 200 不等于转写成功：会议录音的验收清单","datePublished":"2026-09-09","dateModified":"2026-09-09","author":{"@type":"Organization","name":"FunASR"},"mainEntityOfPage":{"@type":"WebPage","@id":"https://www.funasr.com/blog/meeting-transcript-acceptance.html"}}</script>
+<style>body{margin:0;font-family:system-ui,sans-serif;color:#202827;line-height:1.8;background:#fff}*{box-sizing:border-box}a{color:#126a59}a:hover{text-decoration:underline}.container{max-width:920px;margin:auto;padding:0 24px}.nav{border-bottom:1px solid #dce3df;padding:14px 0}.nav .container{display:flex;align-items:center;gap:20px}.nav-links{margin-left:auto;display:flex;gap:16px}.nav-logo{font-weight:700}.nav-btn{font-weight:600}article{padding:48px 0 64px}h1{font-size:2rem;line-height:1.3;letter-spacing:0}h2{font-size:1.4rem;margin-top:36px;letter-spacing:0}.lead{font-size:1.1rem}.meta,figcaption{color:#5e6864;font-size:.875rem}figure{margin:24px 0}.article-image{display:block;max-width:100%;height:auto}pre{overflow:auto;padding:18px;background:#f3f6f5;border:1px solid #dce3df;border-radius:6px;line-height:1.6}code{font-family:ui-monospace,monospace}p code,li code{overflow-wrap:anywhere}table{width:100%;border-collapse:collapse}th,td{padding:10px;text-align:left;vertical-align:top;border-bottom:1px solid #dce3df}th{background:#f3f6f5}footer{border-top:1px solid #dce3df;padding:24px}@media(max-width:700px){h1{font-size:1.6rem}.nav-links{display:none}.container{padding:0 20px}table{font-size:.9rem}th,td{padding:7px}}</style>
+</head><body>
+<nav class="nav"><div class="container"><a class="nav-logo" href="/">FunASR</a><div class="nav-links"><a href="/deploy/">部署</a><a href="/blog/">技术博客</a></div><a href="/en/blog/meeting-transcript-acceptance.html">EN</a><a class="nav-btn" href="/go/github">GitHub</a></div></nav>
+<article><div class="container">
+<h1>HTTP 200 不等于转写成功：会议录音的验收清单</h1>
+<p class="meta">2026-09-09 · 应用工程 · 阅读约 8 分钟</p>
+<p class="lead">一次请求返回了文本，离“这份会议记录可以交给同事”还有多远？把 ASR 接进字幕、会议纪要或按说话人剪辑时，需要分别验收内容、说话人、时间和处理完整性。下面用 FunASR 的 MOSS 结果讲清这些层次，并提供一个只依赖 Python 标准库的结构检查脚本。</p>
+<figure><img class="article-image" src="/img/funclip-v2-1-0-interface.jpg" alt="FunClip 的视频、字幕与剪辑工作区"><figcaption>应用出口示意：已有 FunClip 工作区。不是下文合成样例的运行截图。</figcaption></figure>
+<h2>先分清四个问题</h2>
+<table><thead><tr><th>检查层次</th><th>要回答的问题</th><th>不能用什么代替</th></tr></thead><tbody>
+<tr><td>请求与结构</td><td>请求完成了吗？字段、单位、顺序是否符合约定？</td><td>HTTP 200、非空 JSON 不能证明内容正确。</td></tr>
+<tr><td>文本</td><td>名字、数字、否定词和关键决策是否转对？</td><td>语句流畅不能证明没有漏句或幻觉。</td></tr>
+<tr><td>说话人</td><td>每次轮次和重叠发言分给了谁？</td><td>输出了两个标签，不等于两位人物分得正确。</td></tr>
+<tr><td>时间与覆盖</td><td>字幕能定位到正确声音吗？开头、中段和结尾有无遗漏？</td><td>最后一个时间戳接近总时长，不等于全程转写完整。</td></tr>
+</tbody></table>
+<p>三项常见混淆值得单独拆开。<strong>VAD</strong> 检测哪些时间段可能有语音；<strong>ASR</strong> 给出说了什么；<strong>说话人分离（diarization）</strong> 给匿名说话人划分发言区间。它们不是同一个评测目标。<code>S01</code> 是当前录音内的标签，不是姓名、已注册声纹或跨录音身份。</p>
+<h2>给应用选对输出，而不只是选模型</h2>
+<p><a href="https://github.com/OpenMOSS/MOSS-Transcribe-Diarize">MOSS-Transcribe-Diarize</a> 是 OpenMOSS 维护的第三方模型。FunASR 集成把它的输出整理成文本和带匿名标签的时间段；采用这条路径不需要再外接 VAD 或说话人模型。不要为了“加上 VAD”先把会议任意切成独立请求，然后假定每段的 <code>S01</code> 都是同一个人。</p>
+<ul>
+<li><strong>整句字幕或说话人片段：</strong>段级时间戳是合适的接口，但仍须回听边界与说话人轮次。</li>
+<li><strong>逐字高亮或任意文本精确剪辑：</strong>段级时间戳不够。选择有对应字/词对齐输出的路径，例如检查 Paraformer 的时间戳能力与适用语言，不能把一句话的时长平均分配成“准确字时间”。</li>
+<li><strong>会议纪要：</strong>先保留可回溯的原文、匿名标签与时间段，再生成摘要；错误的人名、数字或决策不能靠摘要模型自动修复。</li>
+</ul>
+<p>具体服务版本和安装命令集中维护在 <a href="/deploy/moss-transcribe-diarize.html">MOSS 部署页</a>及 <a href="/docs/moss-transcribe-diarize.html">集成指南</a>。本文不另写一套会随版本漂移的安装流程。FunClip 的能力与限制见 <a href="/blog/funclip-v2-2-0-moss-speaker-clipping.html">说话人剪辑实践</a>；模型选型从 <a href="/models.html">模型页</a>进入。</p>
+<h2>一个能自动化、但不冒充质量评估的检查器</h2>
+<p><a href="/blog/transcript-audit.py" download>下载 transcript-audit.py</a>，也可以直接阅读源码。它只读文件，不访问网络，不修改转写结果。输入是 FunASR <code>AutoModel.generate(...)[0]</code> 的单个 MOSS 结果对象，或仓库离线示例写出的 <code>.moss-vllm.json</code>；不是原始 vLLM <code>diarized_json</code>、SRT，也不是 Qwen3 示例的 <code>segments</code> 格式。</p>
+<p>以下是人为构造的 12 秒录音结果，不是真实模型输出，也没有准确率含义：</p>
+<pre><code data-example="audit-input">{
+  "text": "Let's start. Agreed.",
+  "sentence_info": [
+    {"start": 1000, "end": 3500, "spk": "S01", "text": "Let's start."},
+    {"start": 6000, "end": 8000, "spk": "S02", "text": "Agreed."}
+  ]
+}</code></pre>
+<p>把示例 JSON 作为 <code>result.json</code>。检查器使用毫秒，12 秒应传 12000，不是 12：</p>
+<pre><code>python3 transcript-audit.py result.json --duration-ms 12000</code></pre>
+<p>输出的 <code>segment_count</code> 是 2，<code>last_end_ms</code> 是 8000，<code>tail_not_covered_ms</code> 是 4000。<code>quality_verified</code> 始终为 <code>false</code>：程序没有听过音频，更没有人工参考答案，因此不能给出质量通过证书。Python 3.12 下的合成样例、非法字段和命令行行为有回归测试；它们验证检查代码，不验证模型。检查器选择拒绝零长度段，这是本文应用验收的额外约束，不表示模型适配器承诺所有时间段都大于零。</p>
+<ul>
+<li>缺少 <code>sentence_info</code>、非数值/无穷时间、反向、零长度或超出录音范围的区间会报错并以非零状态退出。</li>
+<li>空文本、开始时间乱序和区间重叠会列出从 0 开始的下标，保留原始结果以便检查。重叠可以是真实抢话，不能直接删除；检查器按开始时间排序判断相交，列出与先开始区间相交的片段原始下标；边界相接不算重叠。</li>
+<li>空结果会显式显示 0 段和完整的未覆盖尾部。静音录音可能合理，会议录音则需要核验输入或服务结果。</li>
+<li>尾部差值只是“最后一个输出区间到录音终点”的时间，既不是漏识别时长，也不是语音召回率。中间即使漏掉一句话，这个值也可能是 0。</li>
+</ul>
+<h2>从结构检查走到人工验收</h2>
+<ol>
+<li><strong>固定输入和配置。</strong>保留原音频散列、时长、采样率/声道、模型 revision、服务版本、请求格式和生成上限。记录重采样、混音与裁剪；裁掉静音后必须保存偏移映射，否则时间戳无法回到原视频。</li>
+<li><strong>回听高风险位置。</strong>开头与结尾、长静音两侧、说话人交替、重叠发言、低音量以及关键数字。抽查能发现问题，但抽查通过不等于整段准确。</li>
+<li><strong>把文本与说话人分开评估。</strong>有人工参考转写时，可按统一的标点、大小写及分词规则计算 CER/WER；有人工说话人时间标注时，再使用说话人指标。不要把“输出了两个标签”作为 diarization 的通过条件。</li>
+<li><strong>冻结说话人评测口径。</strong><a href="https://github.com/pyannote/pyannote-metrics/blob/5b197b13ba39ac9baad37da66659da196090053c/src/pyannote/metrics/diarization.py#L51">pyannote.metrics</a> 提供说话人错误率等指标；边界宽容区间（collar）和是否计入重叠语音会影响结果。比较系统时必须使用同一标注与配置，指标数字不能脱离这些前提。</li>
+<li><strong>完整性异常先定位，再调参。</strong>检查响应是否因生成上限中止、结构是否完整、客户端是否漏读。增大 token 上限只可能缓解某些截断，不保证召回；不能用“接口正常返回”关闭用户的问题。</li>
+</ol>
+<h2>上线前留下什么</h2>
+<p>遵循授权范围和保留期限，只保存必要的数据，并限制对录音与说话人标注的访问。一份可复查的交付应包含原音频标识、固定配置、原始结果、结构报告和人工确认记录。会议纪要保留到原文的回链；字幕检查可读性、定位及隐私；剪辑回看实际片段，不能只看时间段长度。涉及已知人物身份时另行设计授权、登记和验证流程，不把匿名聚类标签改名后当作身份识别。</p>
+<p>这篇文章的检查器是进入验收流程的第一道结构检查，不是模型排行榜，也不会替代回听与标注。下一步可以沿 <a href="/deploy/">部署中心</a>跑通实际工作负载，再到 <a href="https://github.com/modelscope/FunASR">FunASR 仓库</a>查看实现或提交带最小复现的问题。</p>
+<h2>来源与复现入口</h2>
+<ul>
+<li><a href="https://github.com/OpenMOSS/MOSS-Transcribe-Diarize">OpenMOSS 模型项目</a>：模型归属与任务定义；<a href="https://huggingface.co/OpenMOSS-Team/MOSS-Transcribe-Diarize/blob/e8681d68e7042738ffca8ac8212bc8fcb1131ab8/README.md">固定 revision 的模型卡</a>解释匿名标签。</li>
+<li><a href="https://github.com/modelscope/FunASR/blob/fdf1d042342e59569144209abdfacf312771d9be/examples/industrial_data_pretraining/qwen3_asr/transcribe_vllm_offline.py">本文检查的离线结果文件契约</a>：固定仓库提交，MOSS 分支写出单个结果对象。</li>
+<li><a href="https://github.com/pyannote/pyannote-metrics/blob/5b197b13ba39ac9baad37da66659da196090053c/src/pyannote/metrics/diarization.py#L51">pyannote.metrics 官方实现</a>：说话人指标与评测配置。本文没有运行或报告 DER/CER/WER。</li>
+</ul>
+</div></article><footer><div class="container">FunASR · 应用实践与技术解读</div></footer>
+</body></html>
