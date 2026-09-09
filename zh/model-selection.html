@@ -56,6 +56,7 @@
 <details open="">
 <summary>开始使用</summary>
 <nav aria-label="开始使用">
+<a href="https://www.funasr.com/docs/native-transformers.html">Transformers 快速开始</a>
 <a href="https://www.funasr.com/docs/installation.html">安装与环境验证</a>
 <a href="https://www.funasr.com/docs/quickstart.html">第一次转写</a>
 <a href="https://www.funasr.com/docs/python-api.html">Python SDK: AutoModel</a>
@@ -67,7 +68,6 @@
 <details open="">
 <summary>模型与能力</summary>
 <nav aria-label="模型与能力">
-<a href="https://www.funasr.com/docs/native-transformers.html">Transformers 原生 Fun-ASR-Nano</a>
 <a href="https://www.funasr.com/docs/moss-transcribe-diarize.html">MOSS 转写与说话人分离</a>
 <a href="https://www.funasr.com/docs/model-zoo.html">Model Zoo</a>
 <a href="https://www.funasr.com/docs/streaming-vad.html">流式语音活动检测</a>
@@ -132,6 +132,8 @@
 <nav aria-label="面包屑" class="breadcrumbs"><a href="https://www.funasr.com/">FunASR</a><span>/</span><a href="https://www.funasr.com/docs/">文档</a><span>/</span><span>选择第一个模型</span></nav>
 <header class="docs-title"><h1>选择第一个模型</h1><a class="source-link" data-source-link="" href="https://github.com/modelscope/FunASR/blob/main/docs/model_selection_zh.md">查看 / 编辑源文档 ↗</a></header>
 <article class="docs-article"><div class="source-title-anchor" id="funasr-模型选择指南"></div>
+<h2 id="先用-transformers-体验-nano">先用 Transformers 体验 Nano</h2>
+<p>通过 Hugging Face API 转写中、英、日语音，先用 <a href="https://www.funasr.com/docs/native-transformers.html">原生 Transformers 5.17.0</a>、官方 <code>FunAudioLLM/Fun-ASR-Nano-2512-hf</code> 权重和 CPU 示例。下文的工具库与服务路径仍独立；原生导出不自动提供时间戳、说话人或 HTTP 接口。</p>
 <p>当你第一次选择模型、评估是否从 Whisper 或云端 ASR 迁移，或者准备通过 OpenAI 兼容 API 暴露模型别名时，可以先看这份指南。</p>
 <span data-legacy-doc-anchor="默认快速路径" id="default"></span><h2 id="默认快速路径">默认快速路径</h2>
 <p>如果有 GPU，需要评估中文、英文、日语或中文方言和地域口音，可以先试旗舰 <strong>Fun-ASR-Nano</strong>（SenseVoice 编码器 + Qwen3 解码器）。确定生产模型前，请用自己的音频做对比：</p>
@@ -339,6 +341,7 @@ MOSS 请遵循其独立部署指南：以上 Nano 权重和验证不能证明 MO
 <aside class="docs-toc"><strong>本页目录</strong><div class="toc">
 <ul>
 <li><a href="#funasr-模型选择指南">FunASR 模型选择指南</a><ul>
+<li><a href="#先用-transformers-体验-nano">先用 Transformers 体验 Nano</a></li>
 <li><a href="#默认快速路径">默认快速路径</a></li>
 <li><a href="#决策表">决策表</a></li>
 <li><a href="#openai-兼容-api-别名">OpenAI 兼容 API 别名</a></li>

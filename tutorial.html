@@ -56,6 +56,7 @@
 <details open="">
 <summary>Get started</summary>
 <nav aria-label="Get started">
+<a href="https://www.funasr.com/en/docs/native-transformers.html">Transformers quickstart</a>
 <a href="https://www.funasr.com/en/docs/installation.html">Installation &amp; environment checks</a>
 <a aria-current="page" href="https://www.funasr.com/en/docs/quickstart.html">Your first transcription</a>
 <a href="https://www.funasr.com/en/docs/python-api.html">Python SDK: AutoModel</a>
@@ -67,7 +68,6 @@
 <details open="">
 <summary>Models &amp; capabilities</summary>
 <nav aria-label="Models &amp; capabilities">
-<a href="https://www.funasr.com/en/docs/native-transformers.html">Native Transformers Fun-ASR-Nano</a>
 <a href="https://www.funasr.com/en/docs/moss-transcribe-diarize.html">MOSS transcription &amp; diarization</a>
 <a href="https://www.funasr.com/en/docs/model-zoo.html">Model Zoo</a>
 <a href="https://www.funasr.com/en/docs/streaming-vad.html">Streaming voice activity detection</a>
@@ -133,6 +133,9 @@
 <header class="docs-title"><h1>Your first transcription</h1><a class="source-link" data-source-link="" href="https://github.com/modelscope/FunASR/blob/main/docs/tutorial/README.md">View / edit source ↗</a></header>
 <article class="docs-article"><p>(<a href="https://www.funasr.com/docs/quickstart.html">简体中文</a> | English)</p>
 <div class="source-title-anchor" id="python-sdk-tutorial"></div>
+<blockquote>
+<p><strong>Only need native Fun-ASR-Nano transcription?</strong> Start with <a href="https://www.funasr.com/en/docs/native-transformers.html">Transformers 5.17.0</a>. It loads the separate <code>-hf</code> checkpoint without the FunASR toolkit. This page covers the <code>funasr.AutoModel</code> toolkit path; do not mix dependencies, parameters or output contracts.</p>
+</blockquote>
 <p>Start with <a href="https://www.funasr.com/en/docs/installation.html">installation and environment verification</a>. This path covers one transcript, result inspection, VAD, batching, and model-specific options. For model selection, languages, dependencies, and model cards, use the <a href="https://www.funasr.com/en/docs/model-zoo.html">Model Zoo</a>, not a universal capability list. No local setup yet? See the <a href="https://github.com/modelscope/FunASR/blob/main/examples/colab/README.md">Colab quickstart</a>.</p>
 <p>FunASR software uses the <a href="https://github.com/modelscope/FunASR/blob/main/LICENSE">MIT license</a>. Each model weight has its own license: record the full model ID and revision, and follow its model card. The <a href="https://github.com/modelscope/FunASR/blob/main/MODEL_LICENSE">FunASR Model License Agreement</a> applies only when the model card explicitly links to it. Third-party integrations remain third-party models; for example, MOSS-Transcribe-Diarize is from OpenMOSS, not a FunASR-trained checkpoint.</p>
 <p><a id="Inference" name="Inference"></a></p>

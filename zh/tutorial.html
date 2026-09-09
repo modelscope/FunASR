@@ -56,6 +56,7 @@
 <details open="">
 <summary>开始使用</summary>
 <nav aria-label="开始使用">
+<a href="https://www.funasr.com/docs/native-transformers.html">Transformers 快速开始</a>
 <a href="https://www.funasr.com/docs/installation.html">安装与环境验证</a>
 <a aria-current="page" href="https://www.funasr.com/docs/quickstart.html">第一次转写</a>
 <a href="https://www.funasr.com/docs/python-api.html">Python SDK: AutoModel</a>
@@ -67,7 +68,6 @@
 <details open="">
 <summary>模型与能力</summary>
 <nav aria-label="模型与能力">
-<a href="https://www.funasr.com/docs/native-transformers.html">Transformers 原生 Fun-ASR-Nano</a>
 <a href="https://www.funasr.com/docs/moss-transcribe-diarize.html">MOSS 转写与说话人分离</a>
 <a href="https://www.funasr.com/docs/model-zoo.html">Model Zoo</a>
 <a href="https://www.funasr.com/docs/streaming-vad.html">流式语音活动检测</a>
@@ -133,6 +133,9 @@
 <header class="docs-title"><h1>第一次转写</h1><a class="source-link" data-source-link="" href="https://github.com/modelscope/FunASR/blob/main/docs/tutorial/README_zh.md">查看 / 编辑源文档 ↗</a></header>
 <article class="docs-article"><p>(简体中文 | <a href="https://www.funasr.com/en/docs/quickstart.html">English</a>)</p>
 <div class="source-title-anchor" id="python-sdk-教程"></div>
+<blockquote>
+<p><strong>只需 Fun-ASR-Nano 原生推理？</strong> 使用 <a href="https://www.funasr.com/docs/native-transformers.html">Transformers 5.17.0 快速开始</a>。它加载独立的 <code>-hf</code> 权重，不要求 FunASR 工具库。本页保留 <code>funasr.AutoModel</code> 工具库路径，两者的依赖、参数和输出不可混用。</p>
+</blockquote>
 <p>先完成<a href="https://www.funasr.com/docs/installation.html">安装与环境验证</a>。本页按首次转写、结果检查、VAD、批处理、模型专属选项的顺序介绍。模型选择、语言、依赖和模型卡请查阅<a href="https://www.funasr.com/docs/model-zoo.html">模型仓库</a>，不要将某个示例当成所有模型的通用能力。尚未配置本地环境时，可先看 <a href="https://github.com/modelscope/FunASR/blob/main/examples/colab/README_zh.md">Colab 快速体验</a>。</p>
 <p>FunASR 软件采用 <a href="https://github.com/modelscope/FunASR/blob/main/LICENSE">MIT 许可</a>。每个模型权重都有各自的许可：请记录完整模型 ID 与 revision，并以对应模型卡为准。只有模型卡明确链接 <a href="https://github.com/modelscope/FunASR/blob/main/MODEL_LICENSE">FunASR 模型许可协议</a> 时，该协议才适用。第三方集成仍属于第三方模型，例如 MOSS-Transcribe-Diarize 来自 OpenMOSS，不是 FunASR 训练的权重。</p>
 <p><a id="模型推理" name="模型推理"></a></p>

@@ -4,15 +4,15 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1" name="viewport"/>
-<title>Native Transformers Fun-ASR-Nano - FunASR</title>
-<meta content="Native Transformers Fun-ASR-Nano" name="description"/>
+<title>Transformers quickstart - FunASR</title>
+<meta content="Transformers quickstart" name="description"/>
 <meta content="#ffffff" name="theme-color"/>
 <link href="https://www.funasr.com/en/docs/native-transformers.html" rel="canonical"/>
 <link href="https://www.funasr.com/docs/native-transformers.html" hreflang="zh-CN" rel="alternate"/>
 <link href="https://www.funasr.com/en/docs/native-transformers.html" hreflang="en" rel="alternate"/>
 <meta content="website" property="og:type"/>
-<meta content="Native Transformers Fun-ASR-Nano - FunASR" property="og:title"/>
-<meta content="Native Transformers Fun-ASR-Nano" property="og:description"/>
+<meta content="Transformers quickstart - FunASR" property="og:title"/>
+<meta content="Transformers quickstart" property="og:description"/>
 <meta content="https://www.funasr.com/en/docs/native-transformers.html" property="og:url"/>
 <link href="assets/css/site.7be954c8e106.css" rel="stylesheet"/>
 <link href="assets/css/experience.34d6e632686e.css" rel="stylesheet"/>
@@ -56,6 +56,7 @@
 <details open="">
 <summary>Get started</summary>
 <nav aria-label="Get started">
+<a aria-current="page" href="https://www.funasr.com/en/docs/native-transformers.html">Transformers quickstart</a>
 <a href="https://www.funasr.com/en/docs/installation.html">Installation &amp; environment checks</a>
 <a href="https://www.funasr.com/en/docs/quickstart.html">Your first transcription</a>
 <a href="https://www.funasr.com/en/docs/python-api.html">Python SDK: AutoModel</a>
@@ -67,7 +68,6 @@
 <details open="">
 <summary>Models &amp; capabilities</summary>
 <nav aria-label="Models &amp; capabilities">
-<a aria-current="page" href="https://www.funasr.com/en/docs/native-transformers.html">Native Transformers Fun-ASR-Nano</a>
 <a href="https://www.funasr.com/en/docs/moss-transcribe-diarize.html">MOSS transcription &amp; diarization</a>
 <a href="https://www.funasr.com/en/docs/model-zoo.html">Model Zoo</a>
 <a href="https://www.funasr.com/en/docs/streaming-vad.html">Streaming voice activity detection</a>
@@ -129,130 +129,42 @@
 </details>
 </aside>
 <div class="docs-body">
-<nav aria-label="Breadcrumbs" class="breadcrumbs"><a href="https://www.funasr.com/en/">FunASR</a><span>/</span><a href="https://www.funasr.com/en/docs/">Docs</a><span>/</span><span>Native Transformers Fun-ASR-Nano</span></nav>
-<header class="docs-title"><h1>Native Transformers Fun-ASR-Nano</h1><a class="source-link" data-source-link="" href="https://github.com/modelscope/FunASR/blob/main/docs/transformers_native.md">View / edit source ↗</a></header>
-<article class="docs-article"><div class="source-title-anchor" id="fun-asr-nano-with-native-transformers"></div>
+<nav aria-label="Breadcrumbs" class="breadcrumbs"><a href="https://www.funasr.com/en/">FunASR</a><span>/</span><a href="https://www.funasr.com/en/docs/">Docs</a><span>/</span><span>Transformers quickstart</span></nav>
+<header class="docs-title"><h1>Transformers quickstart</h1><a class="source-link" data-source-link="" href="https://github.com/modelscope/FunASR/blob/main/docs/transformers_native.md">View / edit source ↗</a></header>
+<article class="docs-article"><div class="source-title-anchor" id="fun-asr-nano-with-transformers"></div>
 <p><a href="https://www.funasr.com/docs/native-transformers.html">简体中文</a> | English</p>
-<p>Use this path when your Python application already works with Hugging Face
-processors and generation APIs. It runs Fun-ASR-Nano through native Transformers
-classes, without the FunASR toolkit or checkpoint-provided remote Python code.
-For a managed HTTP service, start with the <a href="https://www.funasr.com/en/docs/deployment-matrix.html">deployment matrix</a>;
-this guide does not add an OpenAI endpoint, request queue or realtime server.</p>
-<h2 id="what-was-merged-and-what-was-released">What was merged, and what was released?</h2>
-<p>On <strong>2026-09-09</strong>, <a href="https://github.com/huggingface/transformers/pull/46180">Transformers PR #46180</a>
-was merged as <code>fc501343edfccdc840eb8594a6cafa8185c2de53</code>.
-At verification time that day, the latest stable <strong>5.16.1 did not contain this
-model</strong>: both its release tag and actual wheel were inspected. A merge is not
-a stable release. The source build identifies itself as <code>5.17.0.dev0</code>; that is
-not a promised release version or date. Pin the tested source below, or check
-that a later released package really contains <code>fun_asr_nano</code> before migrating.</p>
-<h2 id="choose-the-checkpoint-and-the-interface-together">Choose the checkpoint and the interface together</h2>
-<table>
-<thead>
-<tr>
-<th>Path</th>
-<th>Checkpoint</th>
-<th>Entry point</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>FunASR toolkit</td>
-<td><code>FunAudioLLM/Fun-ASR-Nano-2512</code></td>
-<td><code>funasr.AutoModel</code>; separate documented split-engine path</td>
-</tr>
-<tr>
-<td>Native Transformers</td>
-<td><code>FunAudioLLM/Fun-ASR-Nano-2512-hf</code></td>
-<td><code>AutoProcessor</code> + <code>AutoModelForSpeechSeq2Seq</code></td>
-</tr>
-<tr>
-<td>Native vLLM</td>
-<td><code>FunAudioLLM/Fun-ASR-Nano-2512-vllm</code></td>
-<td><a href="https://www.funasr.com/en/docs/official-native-vllm.html">Official native vLLM guide</a></td>
-</tr>
-<tr>
-<td>Native C++</td>
-<td>Converted GGUF files for the chosen runtime</td>
-<td><a href="https://github.com/modelscope/FunASR/blob/main/runtime/llama.cpp/README.md">llama.cpp guide</a></td>
-</tr>
-</tbody>
-</table>
-<p>These are different artifacts and API contracts. Renaming a model ID or passing
-<code>backend="vllm"</code> does not convert weights. Native Transformers support does not
-make the <code>-hf</code> checkpoint a vLLM, GGUF or FunASR HTTP-server checkpoint.</p>
-<p>The official <a href="https://huggingface.co/FunAudioLLM/Fun-ASR-Nano-2512-hf/tree/d93b302ee7fd505e1b3576120fc142fc6f7820e1">native HF checkpoint</a>
-is public and ungated at revision <code>d93b302ee7fd505e1b3576120fc142fc6f7820e1</code>.
-Its configuration maps to <code>FunAsrNanoForConditionalGeneration</code>. Its feature
-extractor is embedded in <code>processor_config.json</code>; a separate
-<code>preprocessor_config.json</code> is not required for this snapshot.</p>
-<h2 id="independent-cpu-environment">Independent CPU environment</h2>
-<p>Use a new directory for the virtual environment; do not upgrade an existing
-FunASR or vLLM service environment in place. The following is <strong>Linux x86-64,
-Python 3.12, CPU-only</strong>, not a CUDA or macOS installation recipe.</p>
+<p>Transcribe Chinese, English and Japanese with <code>AutoProcessor</code> and
+<code>AutoModelForSpeechSeq2Seq</code>. <strong>Transformers 5.17.0 is a released package with
+native Fun-ASR-Nano support.</strong> No source checkout, FunASR toolkit or
+checkpoint-provided Python code is needed.</p>
+<p><a href="https://huggingface.co/spaces/FunAudioLLM/Fun-ASR-Nano">Try the Space</a> ·
+<a href="https://colab.research.google.com/github/QwenAudio/Fun-ASR/blob/main/examples/colab/fun_asr_nano_transformers.ipynb">Open the notebook</a> ·
+<a href="https://github.com/QwenAudio/Fun-ASR/tree/main/examples/transformers">Runnable examples</a></p>
+<h2 id="get-your-first-transcript">Get your first transcript</h2>
+<p>Start in an isolated environment. This reproducible installation is for Linux
+x86-64, Python 3.12 and <strong>CPU</strong>; do not upgrade an existing vLLM or FunASR service
+environment in place. Torch and torchaudio must match because the native
+feature extractor uses <code>torchaudio.compliance.kaldi.fbank</code>.</p>
 <pre id="code-0"><code class="language-bash">python3.12 -m venv .venv-funasr-native
 . .venv-funasr-native/bin/activate
 python -m pip install --index-url https://download.pytorch.org/whl/cpu \
   'torch==2.10.0+cpu' 'torchaudio==2.10.0+cpu'
-python -m pip install 'numpy==1.26.4' 'librosa==0.11.0' 'soundfile==0.13.1' \
-  'huggingface-hub==1.30.0' 'tokenizers==0.23.2' \
-  'https://github.com/huggingface/transformers/archive/fc501343edfccdc840eb8594a6cafa8185c2de53.zip'
+python -m pip install 'transformers==5.17.0' 'numpy==1.26.4' \
+  'librosa==0.11.0' 'soundfile==0.13.1' \
+  'huggingface-hub==1.30.0' 'tokenizers==0.23.2'
 python -m pip check
 </code></pre>
-<p>The verification environment installed a wheel built from the exact source
-commit above. Matching <strong>torch and torchaudio</strong> are required for this native
-feature extractor: it calls <code>torchaudio.compliance.kaldi.fbank</code>. The toolkit's
-optional audio dependencies do not imply that torchaudio is optional here.
-Older prepared environments failed dependency gates; do not disable those gates
-or mix incompatible Hub/tokenizers versions to get an import to succeed.
-This is a tested environment, not a complete lock of every transitive dependency;
-record <code>python -m pip freeze</code>, platform details and model revision in your own run.</p>
-<h2 id="check-preprocessing-without-loading-weights">Check preprocessing without loading weights</h2>
-<p>This downloads the public configuration, tokenizer and chat template, <strong>not
-model weights</strong>. One second of synthetic silence checks the entry point; it is
-not a speech-recognition quality test.</p>
-<!-- native-example: processor -->
-<pre id="code-1"><code class="language-python">import numpy as np
-from transformers import AutoProcessor
-
-model_id = "FunAudioLLM/Fun-ASR-Nano-2512-hf"
-revision = "d93b302ee7fd505e1b3576120fc142fc6f7820e1"
-processor = AutoProcessor.from_pretrained(
-    model_id, revision=revision, trust_remote_code=False, token=False
-)
-inputs = processor.apply_transcription_request(
-    audio=np.zeros(16000, dtype=np.float32),
-    language="en",
-    processor_kwargs={
-        "return_tensors": "pt",
-        "audio_kwargs": {"sampling_rate": 16000},
-    },
-)
-print({name: tuple(value.shape) for name, value in inputs.items()})
-</code></pre>
-<p>In the verified environment the text tensors have shape <code>(1, 42)</code>, audio features
-<code>(1, 17, 560)</code>, and feature mask <code>(1, 17)</code>. There are 17 audio placeholder tokens
-and 17 valid feature frames. These shapes depend on input length and template;
-do not hard-code them for real recordings.</p>
-<h2 id="transcribe-one-recording">Transcribe one recording</h2>
-<p>Prepare a non-empty <strong>mono 16 kHz WAV</strong> named <code>audio.wav</code> in your working directory.
-The code deliberately rejects a different sample rate or channel layout rather
-than silently assigning 16 kHz to arbitrary samples. Resample/downmix with an
-explicit policy before this step and preserve the original recording for review.</p>
-<p>The first model load downloads the weights unless the pinned snapshot is already
-cached. It needs substantially more memory and time than preprocessing. This
-example uses CPU float32 explicitly; GPU placement, mixed precision, attention
-backends and service concurrency need separate validation.</p>
+<p>Run this Python example. It downloads about 1.66 GB of model weights on first
+use and transcribes a short, pinned official English sample. CPU float32 is
+explicit; no GPU is needed for this example.</p>
 <!-- native-example: transcribe -->
-<pre id="code-2"><code class="language-python">import soundfile as sf
-import torch
+<pre id="code-1"><code class="language-python">import torch
 from transformers import AutoModelForSpeechSeq2Seq, AutoProcessor
 
+torch.set_num_threads(4)
 model_id = "FunAudioLLM/Fun-ASR-Nano-2512-hf"
 revision = "d93b302ee7fd505e1b3576120fc142fc6f7820e1"
-audio, sample_rate = sf.read("audio.wav", dtype="float32")
-if sample_rate != 16000 or audio.ndim != 1 or audio.size == 0:
-    raise ValueError("Use a non-empty mono 16 kHz WAV file")
+audio = "https://huggingface.co/FunAudioLLM/Fun-ASR-Nano-2512/resolve/272c57b82523ada6fd87095e955f8e29100979ab/example/en.mp3"
 
 processor = AutoProcessor.from_pretrained(
     model_id, revision=revision, trust_remote_code=False, token=False
@@ -262,10 +174,11 @@ model = AutoModelForSpeechSeq2Seq.from_pretrained(
     dtype=torch.float32,
 ).to("cpu").eval()
 inputs = processor.apply_transcription_request(
-    audio=audio, language="zh",
+    audio=audio, language="en",
     processor_kwargs={
         "return_tensors": "pt",
-        "audio_kwargs": {"sampling_rate": sample_rate},
+        "audio_kwargs": {"sampling_rate": 16000},
+        "text_kwargs": {"padding": True},
     },
 )
 with torch.inference_mode():
@@ -273,78 +186,132 @@ with torch.inference_mode():
 new_tokens = generated[:, inputs.input_ids.shape[1]:]
 print(processor.batch_decode(new_tokens, skip_special_tokens=True)[0])
 </code></pre>
-<p><code>generated</code> includes the input prompt. Slice off <code>inputs.input_ids.shape[1]</code>
-before decoding so prompt framing is not mistaken for recognized speech.
-<code>max_new_tokens=128</code> bounds this short-file example; hitting the limit can
-truncate output. A longer limit is not proof of complete coverage.
-Use <code>language="en"</code> or <code>language="ja"</code> for the corresponding target language;
-language selection is a transcription instruction, not a promise of translation.</p>
-<h2 id="context-hotwords-and-batches">Context, hotwords and batches</h2>
-<p><code>apply_transcription_request</code> accepts <code>prompt</code> for context and <code>keywords</code> for
-hotwords. These are native processor arguments, not the toolkit's <code>hotword</code>
-parameter or a vLLM HTTP field. The source API accepts one language for the batch
-or a language list matching its length; per-recording prompt and nested keyword
-lists must also match the batch. Keep the decoded results in input order.</p>
-<p>Do not infer quality gains from a template accepting a keyword. Evaluate names,
-numbers and unusual terms against authorized, representative recordings.
-Batch padding, memory use and generated-text correctness must be tested together
-before turning a single-file example into a production batch worker.</p>
-<h2 id="evidence-and-limits">Evidence and limits</h2>
-<p>The documented single-recording recipe was also executed on the official Chinese
-sample, followed by an English single recording, a Chinese keyword request and a
-Chinese/English batch. All returned non-empty text and EOS before the 128-token
-limit. These are functional checks on two short public samples, not a CER/WER or
-capacity evaluation. CPU: Intel Xeon Platinum 8480+, float32, four Torch threads;
-matching torch/torchaudio 2.10.0+cpu and librosa 0.11.0. Model weights were loaded
-from a previously downloaded official cache whose SHA/size were rechecked.</p>
-<p>Samples came from the original model's
+<p>The model returns the prompt and generated tokens together. Remove the full
+input tensor width before decoding. For this sample, the observed raw output
+was: “The tribal chieftain called for the boy, and presented him with fifty
+pieces of gold.” This is a functional example, not a quality guarantee.</p>
+<h2 id="your-files-keywords-and-batches">Your files, keywords and batches</h2>
+<p>The <a href="https://github.com/QwenAudio/Fun-ASR/tree/main/examples/transformers">command-line example</a>
+adds explicit input validation, sample-rate conversion and completion checks.
+Clone the <strong>QwenAudio/Fun-ASR code repository</strong> (not an HF weights repository),
+install the <a href="https://github.com/QwenAudio/Fun-ASR/tree/main/examples/transformers">independent native requirements</a>,
+and run these commands from its root directory:</p>
+<pre id="code-2"><code class="language-bash">python examples/transformers/transcribe.py recording.wav --language zh --keywords 开放时间
+python examples/transformers/transcribe.py chinese.wav english.wav --language zh en
+</code></pre>
+<p>It averages multichannel audio to mono and resamples to 16 kHz with <code>soxr_hq</code>;
+it never overwrites the original file. It accepts 1-4 files with at most
+60 seconds of total audio. Longer recordings, empty input and non-finite samples
+are rejected, not silently trimmed.</p>
+<p>For your own application, pass a waveform, local path or supported URL to
+<code>processor.apply_transcription_request</code>. A raw waveform must have its true
+sample rate; do not label 48 kHz samples as 16 kHz. Use <code>language="zh"</code>,
+<code>"en"</code> or <code>"ja"</code>. For a batch, use an audio list, matching language list and
+<code>text_kwargs={"padding": True}</code>. Preserve input order when decoding.</p>
+<p><code>keywords</code> supplies vocabulary hints and <code>prompt</code> supplies context. They are
+not enforced vocabulary and are not the toolkit's <code>hotword</code> parameter. In our
+Chinese sample, adding <code>开放时间</code> did not correct the raw output <code>开饭时间</code>.
+Use representative recordings and human references to assess quality.</p>
+<p>The short example bounds generation at 128 new tokens. Missing EOS can indicate
+truncation; increasing the limit does not prove coverage of a long recording.
+The CLI reports <code>reached_eos</code> and exits unsuccessfully for missing EOS or empty
+text. EOS itself is not proof that all words were recognized.</p>
+<h2 id="from-an-example-to-a-service">From an example to a service</h2>
+<table>
+<thead>
+<tr>
+<th>Need</th>
+<th>Checkpoint and interface</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Native Transformers in Python</td>
+<td><code>FunAudioLLM/Fun-ASR-Nano-2512-hf</code>, <code>AutoProcessor</code> + <code>AutoModelForSpeechSeq2Seq</code></td>
+</tr>
+<tr>
+<td>FunASR pipelines and HTTP adapters</td>
+<td><code>FunAudioLLM/Fun-ASR-Nano-2512</code>, <code>funasr.AutoModel</code>; <a href="https://www.funasr.com/en/docs/deployment-matrix.html">deployment matrix</a></td>
+</tr>
+<tr>
+<td>Native vLLM</td>
+<td><code>FunAudioLLM/Fun-ASR-Nano-2512-vllm</code>; <a href="https://www.funasr.com/en/docs/official-native-vllm.html">native vLLM guide</a></td>
+</tr>
+<tr>
+<td>C++ / edge</td>
+<td>Converted GGUF files; <a href="https://github.com/modelscope/FunASR/blob/main/runtime/llama.cpp/README.md">llama.cpp</a></td>
+</tr>
+</tbody>
+</table>
+<p>These are different artifacts, not interchangeable model IDs. Native
+Transformers support does not add an HTTP server, queue, streaming protocol,
+word timestamps or speaker identities. This native export omits the CTC
+timestamp branch. The base Nano checkpoint covers zh/en/ja and Chinese
+dialects/accents; the <strong>31-language MLT</strong> checkpoint is separate.</p>
+<p>For transcription with anonymous speakers and segment timestamps, see the
+third-party OpenMOSS <a href="https://www.funasr.com/en/docs/moss-transcribe-diarize.html">MOSS guide</a>. For other tasks,
+use the <a href="https://www.funasr.com/en/docs/model-zoo.html">Model Zoo</a>. Validate GPU dtype, attention
+backends, memory, concurrency and quality on the actual target hardware.</p>
+<h2 id="troubleshooting-without-loading-weights">Troubleshooting without loading weights</h2>
+<p>If loading fails, check the active interpreter, <code>transformers.__version__</code>,
+the <code>-hf</code> model ID and model revision first. Version 5.16.1 lacks this model;
+upgrade in the new environment, not an unrelated running service. The native
+classes live in <code>transformers.models.fun_asr_nano</code>.</p>
+<p>This optional synthetic-silence check downloads the processor, not model weights:</p>
+<!-- native-example: processor -->
+<pre id="code-3"><code class="language-python">import numpy as np
+from transformers import AutoProcessor
+
+model_id = "FunAudioLLM/Fun-ASR-Nano-2512-hf"
+revision = "d93b302ee7fd505e1b3576120fc142fc6f7820e1"
+processor = AutoProcessor.from_pretrained(
+    model_id, revision=revision, trust_remote_code=False, token=False
+)
+inputs = processor.apply_transcription_request(
+    audio=np.zeros(16000, dtype=np.float32), language="en",
+    processor_kwargs={
+        "return_tensors": "pt",
+        "audio_kwargs": {"sampling_rate": 16000},
+    },
+)
+print({name: tuple(value.shape) for name, value in inputs.items()})
+</code></pre>
+<p>Reject empty recordings and batches before calling the processor. Synthetic
+preprocessing success is <strong>not an accuracy or capacity result</strong>.</p>
+<h2 id="reproducibility-and-sources">Reproducibility and sources</h2>
+<p>Verified on <strong>2026-09-09</strong> using the actual released 5.17.0 wheel, Python 3.12.3,
+matching torch/torchaudio 2.10.0+cpu, float32 and four Torch threads on an Intel
+Xeon Platinum 8480+. Official English URL, Chinese waveform, Chinese keywords
+and a padded Chinese/English batch all returned non-empty text and EOS before
+128 tokens. These two short public samples do not establish CER/WER, GPU
+compatibility or serving capacity.</p>
+<p>The public native revision is
+<code>d93b302ee7fd505e1b3576120fc142fc6f7820e1</code>; it resolves to
+<code>FunAsrNanoForConditionalGeneration</code> with <code>trust_remote_code=False</code>.
+<code>model.safetensors</code> is 1,659,773,320 bytes, SHA256
+<code>1bbb6dcc5d8b75084a399d48c4d4b0f3aa1d3f09f2616ae40ed2c4fba03d89c9</code>.
+Audio samples come from the original repository's
 <a href="https://huggingface.co/FunAudioLLM/Fun-ASR-Nano-2512/tree/272c57b82523ada6fd87095e955f8e29100979ab/example">fixed example directory</a>,
-not from an invented -hf example directory. The mono 48 kHz Chinese MP3 was
-explicitly resampled with librosa's default soxr_hq and written as float32 16 kHz
-WAV before running the unmodified recipe. Its raw text was
-<code>开饭时间早上九点至下午五点。</code>; adding the candidate keyword <code>开放时间</code> did not force that
-spelling into the output. A keyword is a hint, not an enforced vocabulary.</p>
-<p>Synthetic processor tests exercised language aliases, context/keyword lists and
-two-length batches. The empty-list case still raises an upstream <code>IndexError</code>
-before its intended validation; reject empty batches in your application.
-The guide's explicit non-empty waveform check avoids that entry path. Successful
-cases do not erase this observed limitation. Initial resampling also exposed the
-old librosa 0.10.1 dependency on removed <code>pkg_resources</code>; the final environment
-uses 0.11.0 and was retested.</p>
-<p>The 2026-09-09 isolated CPU verification passed package dependency checks,
-native configuration/class resolution and synthetic preprocessing with the
-pinned official revision. Installed configuration, modeling, processing and
-feature-extraction files were byte-identical to the merged upstream source.
-A preprocessing pass is <strong>not an accuracy or capacity result</strong>. It does not
-establish word timestamps, diarization, realtime behavior, GPU compatibility,
-or performance equivalence with vLLM.</p>
-<p>For anonymous speakers and segment timestamps, see the third-party OpenMOSS
-<a href="https://www.funasr.com/en/docs/moss-transcribe-diarize.html">MOSS guide</a>; for other choices see the
-<a href="https://www.funasr.com/en/docs/model-zoo.html">Model Zoo</a>. Do not infer timestamp or identity support
-from a model returning text. Preserve input hashes, versions, raw responses and
-an authorized human review when assessing an application. Never attach private
-recordings or credentials to a public issue.</p>
-<h2 id="sources-and-next-steps">Sources and next steps</h2>
-<ul>
-<li><a href="https://github.com/huggingface/transformers/blob/fc501343edfccdc840eb8594a6cafa8185c2de53/docs/source/en/model_doc/fun_asr_nano.md">Merged implementation and usage documentation</a>.</li>
-<li><a href="https://github.com/huggingface/transformers/blob/fc501343edfccdc840eb8594a6cafa8185c2de53/src/transformers/models/fun_asr_nano/processing_fun_asr_nano.py">Native processor</a> and <a href="https://github.com/huggingface/transformers/blob/fc501343edfccdc840eb8594a6cafa8185c2de53/src/transformers/models/fun_asr_nano/feature_extraction_fun_asr_nano.py">audio feature extractor</a>.</li>
-<li><a href="https://www.funasr.com/en/blog/fun-asr-nano-transformers.html">Why the checkpoint suffix matters</a>, an application-oriented walkthrough.</li>
-<li><a href="https://github.com/QwenAudio/Fun-ASR">Fun-ASR model project</a> and <a href="https://github.com/modelscope/FunASR">FunASR toolkit</a>.</li>
-</ul></article>
+not an invented <code>-hf/example</code> path.</p>
+<p><a href="https://github.com/huggingface/transformers/pull/46180">PR #46180</a> merged as
+<code>fc501343edfccdc840eb8594a6cafa8185c2de53</code> before the stable package was
+published. Earlier source-only instructions described that interval; new
+installations should use the released package above.
+See the <a href="https://huggingface.co/docs/transformers/v5.17.0/en/model_doc/fun_asr_nano">official 5.17.0 model documentation</a>
+and <a href="https://huggingface.co/FunAudioLLM/Fun-ASR-Nano-2512-hf">native model card</a>.</p>
+<p>Keep versions, input hashes and raw results with application evaluations.
+Never attach private recordings or credentials to a public issue.</p></article>
 <nav aria-label="Adjacent documents" class="docs-next">
 <a href="https://www.funasr.com/en/docs/installation.html">Installation &amp; environment checks →</a> </nav>
 </div>
 <aside class="docs-toc"><strong>On this page</strong><div class="toc">
 <ul>
-<li><a href="#fun-asr-nano-with-native-transformers">Fun-ASR-Nano with native Transformers</a><ul>
-<li><a href="#what-was-merged-and-what-was-released">What was merged, and what was released?</a></li>
-<li><a href="#choose-the-checkpoint-and-the-interface-together">Choose the checkpoint and the interface together</a></li>
-<li><a href="#independent-cpu-environment">Independent CPU environment</a></li>
-<li><a href="#check-preprocessing-without-loading-weights">Check preprocessing without loading weights</a></li>
-<li><a href="#transcribe-one-recording">Transcribe one recording</a></li>
-<li><a href="#context-hotwords-and-batches">Context, hotwords and batches</a></li>
-<li><a href="#evidence-and-limits">Evidence and limits</a></li>
-<li><a href="#sources-and-next-steps">Sources and next steps</a></li>
+<li><a href="#fun-asr-nano-with-transformers">Fun-ASR-Nano with Transformers</a><ul>
+<li><a href="#get-your-first-transcript">Get your first transcript</a></li>
+<li><a href="#your-files-keywords-and-batches">Your files, keywords and batches</a></li>
+<li><a href="#from-an-example-to-a-service">From an example to a service</a></li>
+<li><a href="#troubleshooting-without-loading-weights">Troubleshooting without loading weights</a></li>
+<li><a href="#reproducibility-and-sources">Reproducibility and sources</a></li>
 </ul>
 </li>
 </ul>

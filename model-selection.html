@@ -56,6 +56,7 @@
 <details open="">
 <summary>Get started</summary>
 <nav aria-label="Get started">
+<a href="https://www.funasr.com/en/docs/native-transformers.html">Transformers quickstart</a>
 <a href="https://www.funasr.com/en/docs/installation.html">Installation &amp; environment checks</a>
 <a href="https://www.funasr.com/en/docs/quickstart.html">Your first transcription</a>
 <a href="https://www.funasr.com/en/docs/python-api.html">Python SDK: AutoModel</a>
@@ -67,7 +68,6 @@
 <details open="">
 <summary>Models &amp; capabilities</summary>
 <nav aria-label="Models &amp; capabilities">
-<a href="https://www.funasr.com/en/docs/native-transformers.html">Native Transformers Fun-ASR-Nano</a>
 <a href="https://www.funasr.com/en/docs/moss-transcribe-diarize.html">MOSS transcription &amp; diarization</a>
 <a href="https://www.funasr.com/en/docs/model-zoo.html">Model Zoo</a>
 <a href="https://www.funasr.com/en/docs/streaming-vad.html">Streaming voice activity detection</a>
@@ -132,6 +132,8 @@
 <nav aria-label="Breadcrumbs" class="breadcrumbs"><a href="https://www.funasr.com/en/">FunASR</a><span>/</span><a href="https://www.funasr.com/en/docs/">Docs</a><span>/</span><span>Choose your first model</span></nav>
 <header class="docs-title"><h1>Choose your first model</h1><a class="source-link" data-source-link="" href="https://github.com/modelscope/FunASR/blob/main/docs/model_selection.md">View / edit source ↗</a></header>
 <article class="docs-article"><div class="source-title-anchor" id="funasr-model-selection-guide"></div>
+<h2 id="transformers-first-nano-evaluation">Transformers-first Nano evaluation</h2>
+<p>For Chinese, English and Japanese transcription through Hugging Face APIs, start with <a href="https://www.funasr.com/en/docs/native-transformers.html">native Transformers 5.17.0</a>, the official <code>FunAudioLLM/Fun-ASR-Nano-2512-hf</code> checkpoint and the CPU example. The toolkit and service paths below remain separate; the native export does not add timestamps, speakers or an HTTP endpoint.</p>
 <p>Use this guide when you are choosing a first model, comparing FunASR with Whisper or a cloud ASR provider, or deciding which model alias to expose through the OpenAI-compatible API.</p>
 <span data-legacy-doc-anchor="fast-default-path" id="default"></span><h2 id="fast-default-path">Fast default path</h2>
 <p>For GPU evaluation of Chinese, English, Japanese, or Chinese dialects and regional accents, start with the flagship <strong>Fun-ASR-Nano</strong> (SenseVoice encoder + Qwen3 decoder). Compare it on your own audio before choosing a production model:</p>
@@ -345,6 +347,7 @@ interface and environment together before testing your own workload.</p>
 <aside class="docs-toc"><strong>On this page</strong><div class="toc">
 <ul>
 <li><a href="#funasr-model-selection-guide">FunASR Model Selection Guide</a><ul>
+<li><a href="#transformers-first-nano-evaluation">Transformers-first Nano evaluation</a></li>
 <li><a href="#fast-default-path">Fast default path</a></li>
 <li><a href="#decision-table">Decision table</a></li>
 <li><a href="#openai-compatible-api-aliases">OpenAI-compatible API aliases</a></li>
