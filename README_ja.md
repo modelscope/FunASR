@@ -105,7 +105,7 @@ CER/WER をそろえて比較してください。オフラインのスループ
 
 - **MOSS-Transcribe-Diarize** を FunASR service、Docker、Kubernetes、vLLM/SGLang workflow、FunClip に統合し、長時間 ASR、timestamp、匿名 speaker label を一度に処理できます。[MOSS をデプロイ ->](./docs/moss_transcribe_diarize.md)
 - **FunASR 1.4.15** はテスト済みの NumPy 2 互換性を追加し、ストリーミング KWS/VAD の境界処理と checkpoint の順位付けを修正します。`python -m pip install -U "funasr==1.4.15"`。[リリースと検証範囲 ->](https://github.com/modelscope/FunASR/releases/tag/v1.4.15)
-- **Production deployment** に、より高速で安定した realtime serving と、Linux、macOS、Windows の 10 target 向け llama.cpp package を追加しました。[GPU service ->](./docs/vllm_guide.md) · [CPU / edge package ->](https://www.funasr.com/en/deploy/llama-cpp.html) · [v0.2.6 binaries ->](https://github.com/modelscope/FunASR/releases/tag/runtime-llamacpp-v0.2.6)
+- **ネイティブ Transformers：** Fun-ASR-Nano が[上流にマージ](https://github.com/huggingface/transformers/pull/46180)されました。公式 `-hf` checkpoint と固定ソースを使用します。安定版 5.16.1 には未収録です。[導入ガイド（英語） ->](./docs/transformers_native.md)
 
 > 完全な変更履歴と download asset は [GitHub Releases](https://github.com/modelscope/FunASR/releases) を参照してください。
 

@@ -21,6 +21,16 @@ the [deployment matrix](../docs/deployment_matrix.md) for serving options.
 
 ## Model Usage
 
+### Native Transformers checkpoint
+
+Use [FunAudioLLM/Fun-ASR-Nano-2512-hf](https://huggingface.co/FunAudioLLM/Fun-ASR-Nano-2512-hf)
+with `AutoProcessor` and `AutoModelForSpeechSeq2Seq`, not the original toolkit,
+native vLLM or GGUF loader. [Installation and inference](../docs/transformers_native.md)
+pin the merged source and official revision. As checked on 2026-09-09, stable
+Transformers 5.16.1 does not contain this native model. Matching torchaudio is required.
+
+### FunASR toolkit
+
 Start with the [installation guide](../docs/installation/installation.md) and
 [Python tutorial](../docs/tutorial/README.md). Use an explicit hub and record the
 resolved checkpoint/revision, FunASR version, device and inference options.

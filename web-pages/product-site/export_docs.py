@@ -14,6 +14,7 @@ from documentation import load_catalogue, render_source
 
 ORIGIN = 'https://www.funasr.com'
 ALIASES = {
+    'native-transformers': 'native-transformers.html',
     'quickstart': 'tutorial.html',
     'training': 'training.html',
     'model-registration': 'model-registration.html',

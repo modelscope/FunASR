@@ -20,6 +20,16 @@
 
 ## 模型用法
 
+### 原生 Transformers checkpoint
+
+[FunAudioLLM/Fun-ASR-Nano-2512-hf](https://huggingface.co/FunAudioLLM/Fun-ASR-Nano-2512-hf)
+使用 `AutoProcessor` 和 `AutoModelForSpeechSeq2Seq`，不是原始工具包、原生 vLLM 或
+GGUF 的加载路径。[安装与推理指南](../docs/transformers_native_zh.md)固定了上游提交和官方
+模型 revision。2026-09-09 核验的稳定版 Transformers 5.16.1 尚未包含该原生模型，
+并且这条路径需要匹配的 torchaudio。
+
+### FunASR 工具包
+
 先完成[安装](../docs/installation/installation_zh.md)和
 [Python 教程](../docs/tutorial/README_zh.md)。显式选择 hub，并记录实际下载的
 checkpoint/revision、FunASR 版本、设备和推理选项。

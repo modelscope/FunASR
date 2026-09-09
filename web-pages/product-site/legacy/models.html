@@ -89,6 +89,7 @@ footer a{color:#60a5fa}
 <div class="model-card">
 <div class="model-name">Fun-ASR-Nano <span class="badge badge-orange">⭐ 旗舰 / 默认推荐</span></div>
 <div class="model-meta">800M 参数 &middot; LLM 架构 (SenseVoice 编码器 + Qwen3-0.6B) &middot; <a href="/go/fun-asr">GitHub</a> &middot; <a href="https://huggingface.co/FunAudioLLM/Fun-ASR-Nano-2512">HuggingFace</a></div>
+<p data-native-transformers>原生 Transformers 路径已合入上游：使用 <a href="https://huggingface.co/FunAudioLLM/Fun-ASR-Nano-2512-hf">官方 -hf checkpoint</a>，不要与原始权重、-vllm 或 GGUF 混用。<a href="/docs/native-transformers.html">固定版本的安装与推理指南</a>说明 5.16.1 稳定版尚未包含的边界。</p>
 <div class="model-desc">新一代 LLM 架构 ASR 模型。融合 SenseVoice 音频编码器与 Qwen3-0.6B 语言模型，具备更强的上下文理解能力。支持 vLLM 加速的高吞吐批量推理与实时流式服务。发布的 <code>model.pt</code> checkpoint 不提供可靠的原生字级时间戳（<a href="https://github.com/QwenAudio/Fun-ASR/issues/106" target="_blank" rel="noopener">issue #106</a>）。</div>
 <div class="model-features">
 <span class="badge badge-green">vLLM 加速</span>

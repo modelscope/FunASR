@@ -15,6 +15,7 @@
     {"id": "reference", "zh": "协议与参考", "en": "Protocols & reference"}
   ],
   "pages": [
+    {"slug": "native-transformers", "group": "models", "zh": "Transformers 原生 Fun-ASR-Nano", "en": "Native Transformers Fun-ASR-Nano", "source_zh": "docs/transformers_native_zh.md", "source_en": "docs/transformers_native.md"},
     {"slug": "installation", "group": "start", "zh": "安装与环境验证", "en": "Installation & environment checks", "source_zh": "docs/installation/installation_zh.md", "source_en": "docs/installation/installation.md"},
     {"slug": "quickstart", "group": "start", "zh": "第一次转写", "en": "Your first transcription", "source_zh": "docs/tutorial/README_zh.md", "source_en": "docs/tutorial/README.md"},
     {"slug": "python-api", "group": "start", "zh": "Python SDK: AutoModel", "en": "Python SDK: AutoModel", "source_zh": "docs/python_api_zh.md", "source_en": "docs/python_api.md"},
