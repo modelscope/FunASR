@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Transcribe Long Audio with FunASR: Hours in a Single Call | FunASR</title><meta name="description" content="Whisper processes only 30s at a time, so a 1-hour file means manual chunking and stitching. FunASR has built-in VAD: a single generate() call ingests audio of any length - tested 13.2 min transcribed in 4.3s (186x realtime). Runnable code + long-audio best practices."><meta name="keywords" content="transcribe long audio, long audio transcription, whisper 30 second limit, transcribe 1 hour audio, podcast transcription, meeting transcription, FunASR, audio to text python">
-<link rel="icon" href="/logo.png"><meta property="og:title" content="Transcribe Long Audio with FunASR: Hours in a Single Call"><meta property="og:description" content="Whisper processes only 30s at a time, so a 1-hour file means manual chunking and stitching. FunASR has built-in VAD: a single generate() call ingests audio of any length - tested 13.2 min transcribed in 4.3s (186x realtime). Runnable code + long-audio best practices.">
+<title>Long-File Transcription: VAD Segmentation, Batching and Acceptance | FunASR</title><meta name="description" content="Understand full-file loading, VAD batch budgets and CPU behavior in FunASR 1.4.15's offline SenseVoice path. Separate Whisper decoding windows from file limits and prepare a long-recording acceptance checklist."><meta name="keywords" content="long audio transcription, VAD segmentation, SenseVoice, FSMN-VAD, FunASR, memory budget, batching, transcript acceptance">
+<link rel="icon" href="/logo.png"><meta property="og:title" content="Long-File Transcription: VAD Segmentation, Batching and Acceptance"><meta property="og:description" content="Understand full-file loading, VAD batch budgets and CPU behavior in FunASR 1.4.15's offline SenseVoice path. Separate Whisper decoding windows from file limits and prepare a long-recording acceptance checklist.">
 <meta property="og:type" content="article"><meta property="og:url" content="https://www.funasr.com/en/blog/funasr-transcribe-long-audio.html"><meta property="og:image" content="https://www.funasr.com/logo.png">
 <link rel="canonical" href="https://www.funasr.com/en/blog/funasr-transcribe-long-audio.html"><link rel="alternate" hreflang="en" href="https://www.funasr.com/en/blog/funasr-transcribe-long-audio.html"><link rel="alternate" hreflang="zh" href="https://www.funasr.com/blog/funasr-transcribe-long-audio.html"><link rel="alternate" hreflang="x-default" href="https://www.funasr.com/en/blog/funasr-transcribe-long-audio.html">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"BlogPosting","headline":"Transcribe Long Audio with FunASR: Hours in a Single Call","description":"Whisper processes only 30s at a time, so a 1-hour file means manual chunking and stitching. FunASR has built-in VAD: a single generate() call ingests audio of any length - tested 13.2 min transcribed in 4.3s (186x realtime). Runnable code + long-audio best practices.","datePublished":"2026-06-17","dateModified":"2026-06-17","author":{"@type":"Organization","name":"FunASR / Tongyi Lab"},"publisher":{"@type":"Organization","name":"FunASR","logo":{"@type":"ImageObject","url":"https://www.funasr.com/logo.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://www.funasr.com/en/blog/funasr-transcribe-long-audio.html"},"image":"https://www.funasr.com/logo.png"}
+{"@context":"https://schema.org","@type":"BlogPosting","headline":"Long-File Transcription: VAD Segmentation, Batching and Acceptance","description":"Understand full-file loading, VAD batch budgets and CPU behavior in FunASR 1.4.15's offline SenseVoice path. Separate Whisper decoding windows from file limits and prepare a long-recording acceptance checklist.","datePublished":"2026-06-17","dateModified":"2026-09-09","author":{"@type":"Organization","name":"FunASR / Tongyi Lab"},"publisher":{"@type":"Organization","name":"FunASR","logo":{"@type":"ImageObject","url":"https://www.funasr.com/logo.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://www.funasr.com/en/blog/funasr-transcribe-long-audio.html"},"image":"https://www.funasr.com/logo.png"}
 </script>
 <style>:root{--primary:#2563eb;--primary-dark:#1d4ed8;--bg:#fff;--surface:#f8fafc;--border:#e2e8f0;--text:#0f172a;--text-soft:#475569;--text-muted:#94a3b8;--radius:12px}
 *{margin:0;padding:0;box-sizing:border-box}
@@ -45,51 +45,79 @@ footer{background:#0f172a;color:#94a3b8;padding:28px 0;text-align:center;font-si
 footer a{color:#94a3b8}</style></head><body>
 <nav class="nav"><div class="container"><a href="/" class="nav-logo">Fun<span>ASR</span></a><div class="nav-links"><a href="/en/#capabilities">Capabilities</a><a href="/en/#usage">How to Use</a><a href="/en/#benchmark">Benchmark</a><a href="/en/#demo">Demo</a><a href="https://modelscope.github.io/FunASR/" target="_blank">Docs</a><a href="/en/quickstart.html">Quickstart</a><a href="/en/models.html">Models</a><a href="/en/ecosystem.html">Ecosystem</a><a href="/en/blog/">Blog</a><a href="/en/vs-whisper.html">vs Whisper</a><a href="/en/donors.html">Donors</a></div><a href="https://www.funasr.com/blog/funasr-transcribe-long-audio.html" style="font-size:0.83rem;font-weight:600;color:var(--text-soft)">中文</a><a href="https://github.com/modelscope/FunASR" target="_blank" class="nav-btn">GitHub ★</a></div></nav>
 <article><div class="container">
-<h1>Transcribe Long Audio with FunASR: Hours in a Single Call</h1>
-<p class="post-meta">FunASR Blog · 2026-06-17 · Tutorial</p>
-<p>Transcribing a 1-hour podcast, lecture or meeting with Whisper is painful: it processes only <strong>30 seconds</strong> at a time, so you have to chunk the audio, transcribe each piece, and stitch the results back together - while handling words cut off at chunk boundaries.</p>
-<p><strong>FunASR makes this trivial.</strong> With built-in VAD (voice activity detection), a single <code>generate()</code> call ingests audio of <strong>any length</strong> - it segments, batch-decodes and reassembles the full text for you, with zero chunking code.</p>
-<h2>Install</h2>
-<pre><code>pip install -U funasr modelscope</code></pre>
-<h2>Full, runnable code</h2>
-<pre><code>from funasr import AutoModel
+<h1>Long-File Transcription: VAD Segmentation, Batching and Acceptance</h1>
+<p class="post-meta">FunASR Blog · 2026-06-17 · Updated 2026-09-09</p>
+<p>Podcasts, courses and meeting recordings require more than passing a file to a model: resource budgets, pauses, overlapping speech and missing tail speech all matter. This guide uses the <strong>offline SenseVoice + FSMN-VAD path in FunASR 1.4.15</strong> to explain what happens inside a file-level call and what to check before rollout.</p>
+<aside class="limitation-callout" data-long-audio-contract="window">
+<p><strong>Separate windows, files and services.</strong> Open-source Whisper's <code>transcribe()</code> loops over roughly 30-second decoding windows internally. That is not a file-duration limit, and this entry point does not require users to split and stitch every window themselves. Low-level <code>decode()</code>, file transcription and hosted APIs have different contracts. See the <a href="https://github.com/openai/whisper/blob/86098128c0b4f24f0e2aa2994de830614b474227/README.md#L115">official file-transcription guide</a> and <a href="https://github.com/openai/whisper/blob/86098128c0b4f24f0e2aa2994de830614b474227/whisper/transcribe.py#L272">pinned window-loop implementation</a>. This article makes no claim about current cloud upload quotas.</p>
+<p>With an explicitly configured VAD model, FunASR can organize segmentation and recognition inside one <code>generate()</code> call. One call does not imply unlimited duration, fixed memory, complete recognition or realtime streaming.</p>
+</aside>
+<h2>Start with one explicit offline configuration</h2>
+<section data-long-audio-contract="prerequisites">
+<p>Use an already prepared, separate FunASR 1.4.15 environment with PyTorch, working audio-decoding dependencies and access to model weights. Follow the <a href="/en/docs/installation.html">installation and environment guide</a> for platform preparation, then check the <a href="/en/docs/python-api.html">Python SDK guide</a>. The version check below inspects installed package metadata; it is not proof of a complete installation or acoustic inference.</p>
+<p>Place a local file you are authorized to process at <code>meeting.wav</code>. Validate the environment with a short recording before moving to longer business recordings; initial loading may download models. The output contains transcript text, which should stay out of public logs. The recipe pins the toolkit version, not every dependency or model revision; record and pin those separately for deployment.</p>
+</section>
+<pre data-long-audio-contract="recipe"><code>from importlib.metadata import version
+from pathlib import Path
+
+installed = version("funasr")
+if installed != "1.4.15":
+    raise RuntimeError(f"Expected FunASR 1.4.15, found {installed}")
+
+audio = Path("meeting.wav")
+if not audio.is_file():
+    raise FileNotFoundError(audio)
+
+from funasr import AutoModel
 
 model = AutoModel(
-    model="iic/SenseVoiceSmall",   # or "paraformer-zh"
-    vad_model="fsmn-vad",          # built-in voice activity detection
+    model="iic/SenseVoiceSmall",
+    vad_model="fsmn-vad",
     vad_kwargs={"max_single_segment_time": 30000},
+    device="cpu",
 )
-
-# One call on a full 1-hour file - VAD segments and batches it internally.
-res = model.generate(
-    input="podcast_1hour.wav",
-    batch_size_s=300,   # dynamic batching of VAD segments (throughput)
+result = model.generate(
+    input=str(audio),
+    batch_size_s=300,
 )
-print(res[0]["text"])</code></pre>
-<h2>Tested: 13 minutes transcribed in 4.3s</h2>
-<pre><code>long clip: 791s = 13.2 min
-transcribed 791s in 4.3s -> RTFx=186
-output chars: 2104   # full transcript, head to tail</code></pre>
-<p>We fed a <strong>13.2-minute (791s)</strong> recording into a single <code>generate()</code> call - done in <strong>4.3s (186x realtime)</strong>, with output covering the full file head to tail. A 1-hour file works exactly the same way, no code changes.</p>
-<h2>Why it handles any length</h2>
+if not result or not isinstance(result[0], dict):
+    raise RuntimeError("No result record; inspect audio and model logs")
+text = result[0].get("text", "")
+if not isinstance(text, str) or not text.strip():
+    raise RuntimeError("Empty transcript; inspect audio, silence and VAD output")
+print(text)</code></pre>
+<p>This explicit CPU path handles VAD regions individually; <code>batch_size_s</code> is not a CPU parallelism control or a speed recommendation. Empty output needs inspection: silence, VAD selection, input problems or inference errors are possible causes. It is not automatically success or a model defect. The example deliberately stops for inspection and supplies no fabricated transcript output.</p>
+<h2>The resource path inside a file call</h2>
+<section data-long-audio-contract="resources">
+<p>This offline path loads the complete audio waveform into CPU memory, then organizes ASR inputs using VAD regions. It is not a bounded-memory stream that reads only the current segment from disk. Segmentation can change the work in one inference batch, but the full waveform, decoding buffers, segment metadata, outputs and concurrent requests still consume resources.</p>
+<p>For a 16 kHz, mono, float32 waveform alone, one hour is about 230 MB. This is a data-size estimate, not measured peak process RAM or GPU memory, and excludes decoder copies and model state. It cannot establish support for every file or equal GPU memory for one-hour and one-minute inputs. Validate acceptable durations on the chosen hardware, model, audio format and concurrency.</p>
+<p>See <a href="https://github.com/modelscope/FunASR/blob/5be786088ea6ea9db5f1abf18a6c16e550760e10/funasr/auto/auto_model.py#L920">whole-file loading and segment sorting</a> and the <a href="https://github.com/modelscope/FunASR/blob/5be786088ea6ea9db5f1abf18a6c16e550760e10/funasr/utils/load_utils.py#L128">audio-decoding entry point</a>. Source inspection explains the data path; it does not replace peak-memory measurement.</p>
+</section>
+<h2>Two parameters with different boundaries</h2>
+<section data-long-audio-contract="batching">
+<table><thead><tr><th>Parameter</th><th>Meaning</th><th>What it does not guarantee</th></tr></thead><tbody>
+<tr><td><code>max_single_segment_time=30000</code></td><td>An FSMN-VAD endpoint threshold in milliseconds (ms), used in frame-level speech segmentation decisions.</td><td>It is not a file-duration limit or a guarantee of exactly equal segments or cuts at word and sentence boundaries.</td></tr>
+<tr><td><code>batch_size_s=300</code></td><td>A VAD-wrapper batch budget in seconds (s), converted to milliseconds internally. Grouping considers the longest segment duration multiplied by the number of segments.</td><td>It is not simply the sum of segment durations or a hard memory cap; a longer segment may still be processed alone.</td></tr>
+</tbody></table>
+<p><strong>CPU exception:</strong> the current wrapper disables that grouping budget for <code>device="cpu"</code> and handles segments individually. Changing <code>batch_size_s</code> in this example is therefore not evidence of CPU batch-throughput optimization. A prepared and validated GPU setup needs new measurements, not inherited memory or speed conclusions. See <a href="https://github.com/modelscope/FunASR/blob/5be786088ea6ea9db5f1abf18a6c16e550760e10/funasr/auto/auto_model.py#L899">budget units</a> and the <a href="https://github.com/modelscope/FunASR/blob/5be786088ea6ea9db5f1abf18a6c16e550760e10/funasr/auto/auto_model.py#L935">CPU branch and grouping rule</a>.</p>
+</section>
+<h2>Acceptance before admitting long recordings</h2>
+<section data-long-audio-contract="acceptance">
+<ol>
+<li><strong>Verify inputs:</strong> check decodability, actual duration, channels and sample rate. A successful read or nonempty transcript is not completeness evidence.</li>
+<li><strong>Cover business difficulties:</strong> include short recordings, long silences, overlapping speakers, sustained speech and a clear spoken tail. Listen around cuts, key entities and the end. A timestamp gap may also be silence.</li>
+<li><strong>Record resources and latency:</strong> identify model/dependency versions, hardware, device, audio and concurrency. Separate initialization from file-call timing, state warmup conditions, measure peak RAM and GPU memory, and retain errors and empty results.</li>
+<li><strong>Increase load gradually:</strong> raise duration and concurrency to establish admission, timeout, queue and retry policies. One successful request does not validate all durations; a client timeout does not prove that backend inference was cancelled.</li>
+</ol>
+<p>See the <a href="/en/blog/meeting-transcript-acceptance.html">meeting-transcript acceptance checklist</a> and <a href="/en/docs/benchmark-method.html">reproducible performance guide</a>. The former's MOSS <code>sentence_info</code> audit script has a specific input contract, not an adapter for arbitrary SenseVoice results. Structural checks do not prove text accuracy or complete speech coverage.</p>
+</section>
+<h2>Choose models and services separately</h2>
 <ul>
-<li><strong>VAD auto-segmentation</strong>: <code>fsmn-vad</code> splits the long audio into speech segments at pauses; <code>max_single_segment_time</code> caps the longest segment.</li>
-<li><strong>Dynamic batching</strong>: <code>batch_size_s=300</code> packs segments by total duration for high-throughput decoding.</li>
-<li><strong>Bounded memory</strong>: because it processes segments, GPU memory is <strong>independent of total file length</strong> - 1 hour uses about as much as 1 minute.</li>
+<li>This is an offline SenseVoice example with explicitly configured external FSMN-VAD. Check Paraformer configuration and outputs separately. SenseVoice rich-text tags are not verified emotion accuracy.</li>
+<li>Third-party <a href="/en/docs/moss-transcribe-diarize.html">MOSS-Transcribe-Diarize</a> has its own whole-recording transcription and native diarization path. It does not require this external VAD or CAM++ recipe. Anonymous speaker labels are not verified real-world identities.</li>
+<li>For realtime microphone transcription, select an explicitly supported streaming model and service using the <a href="/en/deploy/">deployment matrix</a>. Smaller offline batches do not create a streaming protocol. See <a href="/en/docs/model-selection.html">model selection</a> for capability differences.</li>
 </ul>
-<h2>Going further</h2>
-<ul>
-<li>Add <code>punc_model="ct-punc"</code> for automatic punctuation;</li>
-<li>Add <code>spk_model="cam++"</code> for <a href="/en/blog/funasr-speaker-diarization.html">speaker diarization</a> (who spoke when);</li>
-<li>Use <code>SenseVoiceSmall</code> for <a href="/en/blog/sensevoice-emotion-language-detection.html">language & emotion</a>; for max speed see the <a href="/en/blog/funasr-vs-whisper-benchmark.html">benchmark</a>.</li>
-</ul>
-<h2>Typical use cases</h2>
-<ul>
-<li><strong>Podcasts / audiobooks</strong>: transcribe a whole episode at once.</li>
-<li><strong>Meetings / lectures</strong>: batch long recordings to text + archive/search.</li>
-<li><strong>Call recordings</strong>: full-call transcription for QA and mining.</li>
-</ul>
-<div class="cta"><p>FunASR is Tongyi Lab's open-source, industrial-grade speech recognition toolkit - long audio, streaming and multilingual all covered.</p><a class="btn" href="https://github.com/modelscope/FunASR" target="_blank">Star FunASR on GitHub ★</a></div>
+<p data-long-audio-contract="evidence">This article explains pinned source behavior, not new long-recording performance or accuracy measurements. The previous page's timing and full-coverage promotion lacked complete reproduction conditions and has been removed. Repository history preserves that text; it is not a current deployment promise.</p>
 <!--related-posts-->
 <h2>Related posts</h2>
 <ul class="post-list">
