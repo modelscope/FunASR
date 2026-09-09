@@ -1,13 +1,11 @@
 <!DOCTYPE html>
 <html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>长录音转写：VAD 分段、批处理与结果验收 | FunASR</title><meta name="description" content="以 FunASR 1.4.15 的 SenseVoice + FSMN-VAD 离线路径为例，解释完整音频加载、批处理预算与 CPU 行为，区分 Whisper 解码窗口和文件长度，并给出长录音上线验收清单。"><meta name="keywords" content="长录音转写, VAD 分段, SenseVoice, FSMN-VAD, FunASR, 内存预算, 批处理, 会议转写验收">
-<link rel="icon" href="/logo.png"><meta property="og:title" content="长录音转写：VAD 分段、批处理与结果验收"><meta property="og:description" content="以 FunASR 1.4.15 的 SenseVoice + FSMN-VAD 离线路径为例，解释完整音频加载、批处理预算与 CPU 行为，区分 Whisper 解码窗口和文件长度，并给出长录音上线验收清单。">
+<title>长录音为什么会漏掉结尾？ | FunASR</title><meta name="description" content="转写返回了文本，最后一句却不见了？沿输入、分段和结果定位问题，用一个离线示例说明怎样检查完整性。"><meta name="keywords" content="长录音转写, VAD 分段, SenseVoice, FSMN-VAD, FunASR, 内存预算, 批处理, 会议转写验收">
+<link rel="icon" href="/logo.png"><meta property="og:title" content="长录音为什么会漏掉结尾？"><meta property="og:description" content="转写返回了文本，最后一句却不见了？沿输入、分段和结果定位问题，用一个离线示例说明怎样检查完整性。">
 <meta property="og:type" content="article"><meta property="og:url" content="https://www.funasr.com/blog/funasr-transcribe-long-audio.html"><meta property="og:image" content="https://www.funasr.com/logo.png">
 <link rel="canonical" href="https://www.funasr.com/blog/funasr-transcribe-long-audio.html"><link rel="alternate" hreflang="en" href="https://www.funasr.com/en/blog/funasr-transcribe-long-audio.html"><link rel="alternate" hreflang="zh" href="https://www.funasr.com/blog/funasr-transcribe-long-audio.html"><link rel="alternate" hreflang="x-default" href="https://www.funasr.com/en/blog/funasr-transcribe-long-audio.html">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<script type="application/ld+json">
-{"@context":"https://schema.org","@type":"BlogPosting","headline":"长录音转写：VAD 分段、批处理与结果验收","description":"以 FunASR 1.4.15 的 SenseVoice + FSMN-VAD 离线路径为例，解释完整音频加载、批处理预算与 CPU 行为，区分 Whisper 解码窗口和文件长度，并给出长录音上线验收清单。","datePublished":"2026-06-17","dateModified":"2026-09-09","author":{"@type":"Organization","name":"FunASR / Tongyi Lab"},"publisher":{"@type":"Organization","name":"FunASR","logo":{"@type":"ImageObject","url":"https://www.funasr.com/logo.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://www.funasr.com/blog/funasr-transcribe-long-audio.html"},"image":"https://www.funasr.com/logo.png"}
-</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"长录音为什么会漏掉结尾？","description":"转写返回了文本，最后一句却不见了？沿输入、分段和结果定位问题，用一个离线示例说明怎样检查完整性。","datePublished":"2026-06-17","dateModified":"2026-09-09","author":{"@type":"Organization","name":"FunASR / Tongyi Lab"},"publisher":{"@type":"Organization","name":"FunASR","logo":{"@type":"ImageObject","url":"https://www.funasr.com/logo.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://www.funasr.com/blog/funasr-transcribe-long-audio.html"},"image":"https://www.funasr.com/logo.png"}</script>
 <style>:root{--primary:#2563eb;--primary-dark:#1d4ed8;--bg:#fff;--surface:#f8fafc;--border:#e2e8f0;--text:#0f172a;--text-soft:#475569;--text-muted:#94a3b8;--radius:12px}
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Inter',-apple-system,sans-serif;color:var(--text);line-height:1.7}
@@ -42,16 +40,18 @@ p code,li code{background:var(--surface);padding:2px 6px;border-radius:5px;font-
 .post-card p{margin:0;color:var(--text-soft);font-size:0.9rem}
 .post-card .date{color:var(--text-muted);font-size:0.8rem}
 footer{background:#0f172a;color:#94a3b8;padding:28px 0;text-align:center;font-size:0.8rem}
-footer a{color:#94a3b8}</style></head><body>
+footer a{color:#94a3b8}article p a,article li a{color:#006a57;text-decoration:underline;text-underline-offset:.15em}
+</style></head><body>
 <nav class="nav"><div class="container"><a href="/" class="nav-logo">Fun<span>ASR</span></a><div class="nav-links"><a href="/#capabilities">核心能力</a><a href="/#usage">如何使用</a><a href="/#benchmark">性能</a><a href="/#demo">演示</a><a href="https://modelscope.github.io/FunASR/zh/" target="_blank">文档</a><a href="/quickstart.html">快速上手</a><a href="/models.html">模型</a><a href="/ecosystem.html">生态</a><a href="/blog/">技术博客</a><a href="/vs-whisper.html">对比 Whisper</a><a href="/donors.html">功德榜</a></div><a href="https://www.funasr.com/en/blog/funasr-transcribe-long-audio.html" style="font-size:0.83rem;font-weight:600;color:var(--text-soft)">EN</a><a href="https://github.com/modelscope/FunASR" target="_blank" class="nav-btn">GitHub ★</a></div></nav>
 <article><div class="container">
-<h1>长录音转写：VAD 分段、批处理与结果验收</h1>
+<h1>长录音为什么会漏掉结尾？</h1>
 <p class="post-meta">FunASR 技术博客 · 2026-06-17 · 更新于 2026-09-09</p>
-<p>播客、课程和会议录音的难点，不只是把文件交给模型，还包括资源预算、停顿与重叠语音、以及末尾是否漏识别。本文以 <strong>FunASR 1.4.15 的离线 SenseVoice + FSMN-VAD 路径</strong>为例，说明一次文件级调用内部做了什么，以及上线前该检查什么。</p>
-<aside class="limitation-callout" data-long-audio-contract="window">
-<p><strong>先区分窗口、文件和服务。</strong>开源 Whisper 的 <code>transcribe()</code> 会在内部循环处理约 30 秒的解码窗口；这不是文件长度上限，用户不必为这个入口手工逐片拼接。低层 <code>decode()</code>、文件级转写和托管 API 不是同一契约。参见<a href="https://github.com/openai/whisper/blob/86098128c0b4f24f0e2aa2994de830614b474227/README.md#L115">官方文件转写说明</a>和<a href="https://github.com/openai/whisper/blob/86098128c0b4f24f0e2aa2994de830614b474227/whisper/transcribe.py#L272">固定版本窗口循环源码</a>；本文不讨论云服务当前上传配额。</p>
-<p>FunASR 在显式配置 VAD 模型时，可以由一次 <code>generate()</code> 调用组织分段和识别。但“一次调用”不等于无限时长、固定内存、完整无漏字或实时流式处理。</p>
-</aside>
+<p class="lead" data-editorial="opening">如果团队拿到了长录音的文本，却找不到最后一句，先别急着调大批次。沿着原文件、语音分段和返回结果定位，才能知道哪一步需要处理；有文本并不代表全程完整。</p>
+<p data-editorial="example">设想一段访谈：原文件里能听到最后一句，文本里却没有。这个现象还不能直接归因于模型。先确认读取包含尾部、分段保留了那句声音，再看客户端有没有保存完整结果。</p>
+<p data-editorial="boundary">下面只用一个明确的 SenseVoice 离线分段配置说明排查路径，不是所有漏尾问题的修复。静音、切分、推理和客户端异常需要分别核验。</p>
+
+<h2>调参之前，先查三个位置</h2>
+<ol><li><strong>输入：</strong>核对实际解码的那份文件及其结尾，不是同名的另一份录音。</li><li><strong>边界：</strong>检查缺句附近的切分。语音检测负责选区域，不负责判断文字是否正确。</li><li><strong>结果：</strong>分清空记录、未读完的响应和最终保存的文本；保留错误，不靠猜测补写原文。</li></ol>
 <h2>用一个明确的离线配置开始</h2>
 <section data-long-audio-contract="prerequisites">
 <p>前提是已经准备好的独立 FunASR 1.4.15 环境，包括 PyTorch、可用的音频解码依赖和模型权重访问。先按<a href="/docs/installation.html">安装与环境验证指南</a>准备平台依赖，再核对<a href="/docs/python-api.html">Python SDK 指南</a>。下方版本检查只检查已安装包的元数据，不是完整安装或声学推理证明。</p>
@@ -87,20 +87,6 @@ if not isinstance(text, str) or not text.strip():
     raise RuntimeError("Empty transcript; inspect audio, silence and VAD output")
 print(text)</code></pre>
 <p>这里明确使用 CPU，按 VAD 片段逐个处理；<code>batch_size_s</code> 不是 CPU 并行参数，也不是速度推荐。空结果需要检查：可能是静音、VAD 未选中语音、输入问题或推理异常，不能一律当成成功或模型错误。示例故意停止并要求人工检查，不提供伪造的转写输出。</p>
-<h2>一次调用背后的资源路径</h2>
-<section data-long-audio-contract="resources">
-<p>这条离线路径会读取完整音频波形到 CPU 内存，再使用 VAD 区域组织 ASR 输入；它不是只从磁盘读取当前片段的有界内存流式处理。分段可以改变某一批推理的工作量，但整段波形、解码缓冲、分段信息、输出和并发请求仍占用资源。</p>
-<p>仅按 16 kHz、单声道、float32 波形计算，一小时数据约 230 MB；这只是数据量估算，不是进程 RAM 或 GPU 峰值内存实测，也不包含解码副本和模型。不能据此承诺任意文件都能处理，或一小时与一分钟文件显存相同。可接受的时长需要在所选硬件、模型、音频格式和并发条件下验证。</p>
-<p>查看<a href="https://github.com/modelscope/FunASR/blob/5be786088ea6ea9db5f1abf18a6c16e550760e10/funasr/auto/auto_model.py#L920">整段加载与分段排序</a>、<a href="https://github.com/modelscope/FunASR/blob/5be786088ea6ea9db5f1abf18a6c16e550760e10/funasr/utils/load_utils.py#L128">音频解码入口</a>。这些源码能说明数据路径，不能替代峰值内存测量。</p>
-</section>
-<h2>两个参数，两个不同的边界</h2>
-<section data-long-audio-contract="batching">
-<table><thead><tr><th>参数</th><th>含义</th><th>不能保证什么</th></tr></thead><tbody>
-<tr><td><code>max_single_segment_time=30000</code></td><td>FSMN-VAD 的端点阈值，单位毫秒（ms）。它参与帧级语音分段决策。</td><td>不是整文件时长限制，不保证严格等长片段或恰好切在一个词、句子的边界。</td></tr>
-<tr><td><code>batch_size_s=300</code></td><td>VAD 包装器的批预算，单位秒（s），内部转为毫秒；组批判据涉及最长片段时长乘以片段数量。</td><td>不是所有片段时长简单求和，也不是硬内存上限；较长的单段仍可能单独进入推理。</td></tr>
-</tbody></table>
-<p><strong>CPU 例外：</strong>当前包装器在 <code>device="cpu"</code> 时关闭上述组批预算，按片段逐个处理。因此调整示例中的 <code>batch_size_s</code> 不能当作 CPU 批吞吐优化已经生效。换用经过配置和验证的 GPU 环境时，应重新测量，而不是套用相同内存或速度结论。实现依据：<a href="https://github.com/modelscope/FunASR/blob/5be786088ea6ea9db5f1abf18a6c16e550760e10/funasr/auto/auto_model.py#L899">批预算单位</a>、<a href="https://github.com/modelscope/FunASR/blob/5be786088ea6ea9db5f1abf18a6c16e550760e10/funasr/auto/auto_model.py#L935">CPU 分支与组批判据</a>。</p>
-</section>
 <h2>长文件上线前怎么验收</h2>
 <section data-long-audio-contract="acceptance">
 <ol>
@@ -111,6 +97,26 @@ print(text)</code></pre>
 </ol>
 <p>更多思路见<a href="/blog/meeting-transcript-acceptance.html">会议转写验收清单</a>与<a href="/docs/benchmark-method.html">可复现性能评测</a>。前者附带的 MOSS <code>sentence_info</code> 检查器有特定输入契约，不可直接套在任意 SenseVoice 返回值上；结构检查也不证明文字准确率或语音覆盖完整。</p>
 </section>
+<section data-editorial="appendix"><h2>附录：窗口、资源与参数单位</h2>
+<aside class="limitation-callout" data-long-audio-contract="window">
+<p><strong>先区分窗口、文件和服务。</strong>开源 Whisper 的 <code>transcribe()</code> 会在内部循环处理约 30 秒的解码窗口；这不是文件长度上限，用户不必为这个入口手工逐片拼接。低层 <code>decode()</code>、文件级转写和托管 API 不是同一契约。参见<a href="https://github.com/openai/whisper/blob/86098128c0b4f24f0e2aa2994de830614b474227/README.md#L115">官方文件转写说明</a>和<a href="https://github.com/openai/whisper/blob/86098128c0b4f24f0e2aa2994de830614b474227/whisper/transcribe.py#L272">固定版本窗口循环源码</a>；本文不讨论云服务当前上传配额。</p>
+<p>FunASR 在显式配置 VAD 模型时，可以由一次 <code>generate()</code> 调用组织分段和识别。但“一次调用”不等于无限时长、固定内存、完整无漏字或实时流式处理。</p>
+</aside>
+<h2>一次调用背后的资源路径</h2>
+<section data-long-audio-contract="resources">
+<p>这条离线路径会读取完整音频波形到 CPU 内存，再使用 VAD 区域组织 ASR 输入；它不是只从磁盘读取当前片段的有界内存流式处理。分段可以改变某一批推理的工作量，但整段波形、解码缓冲、分段信息、输出和并发请求仍占用资源。</p>
+<p>仅按 16 kHz、单声道、float32 波形计算，一小时数据约 230 MB；这只是数据量估算，不是进程 RAM 或 GPU 峰值内存实测，也不包含解码副本和模型。不能据此承诺任意文件都能处理，或一小时与一分钟文件显存相同。可接受的时长需要在所选硬件、模型、音频格式和并发条件下验证。</p>
+<p>查看<a href="https://github.com/modelscope/FunASR/blob/5be786088ea6ea9db5f1abf18a6c16e550760e10/funasr/auto/auto_model.py#L920">整段加载与分段排序</a>、<a href="https://github.com/modelscope/FunASR/blob/5be786088ea6ea9db5f1abf18a6c16e550760e10/funasr/utils/load_utils.py#L128">音频解码入口</a>。这些源码能说明数据路径，不能替代峰值内存测量。</p>
+</section>
+<h2>两个参数，两个不同的边界</h2>
+<section data-long-audio-contract="batching">
+<ul>
+<li><strong><code>max_single_segment_time=30000</code></strong>: FSMN-VAD 的端点阈值，单位毫秒（ms）。它参与帧级语音分段决策。 不是整文件时长限制，不保证严格等长片段或恰好切在一个词、句子的边界。</li>
+<li><strong><code>batch_size_s=300</code></strong>: VAD 包装器的批预算，单位秒（s），内部转为毫秒；组批判据涉及最长片段时长乘以片段数量。 不是所有片段时长简单求和，也不是硬内存上限；较长的单段仍可能单独进入推理。</li>
+</ul>
+<p><strong>CPU 例外：</strong>当前包装器在 <code>device="cpu"</code> 时关闭上述组批预算，按片段逐个处理。因此调整示例中的 <code>batch_size_s</code> 不能当作 CPU 批吞吐优化已经生效。换用经过配置和验证的 GPU 环境时，应重新测量，而不是套用相同内存或速度结论。实现依据：<a href="https://github.com/modelscope/FunASR/blob/5be786088ea6ea9db5f1abf18a6c16e550760e10/funasr/auto/auto_model.py#L899">批预算单位</a>、<a href="https://github.com/modelscope/FunASR/blob/5be786088ea6ea9db5f1abf18a6c16e550760e10/funasr/auto/auto_model.py#L935">CPU 分支与组批判据</a>。</p>
+</section>
+
 <h2>模型和服务应分开选择</h2>
 <ul>
 <li>本文是明确配置外部 FSMN-VAD 的 SenseVoice 离线示例。Paraformer 的配置与输出应另行核对；SenseVoice 富文本标签不是经过验证的情绪准确率。</li>
@@ -118,32 +124,8 @@ print(text)</code></pre>
 <li>需要实时麦克风转写时，按<a href="/deploy/">部署矩阵</a>选择明确支持的流式模型与服务；缩小离线批次并不会把它变成流式协议。更多能力差异见<a href="/docs/model-selection.html">模型选型指南</a>。</li>
 </ul>
 <p data-long-audio-contract="evidence">本文依据固定版本源码解释行为，没有新增长录音性能或准确率实测。旧页缺乏完整复现条件的耗时和全程覆盖宣传已撤下；历史版本保留在仓库中，不能作为当前部署承诺。</p>
-<!--related-posts-->
-<h2>相关文章</h2>
-<ul class="post-list">
-<li><a href="/blog/funasr-vs-whisper-benchmark.html">FunASR vs Whisper 实测对比</a></li>
-<li><a href="/blog/sensevoice-deployment-guide.html">SenseVoice 部署指南</a></li>
-<li><a href="/blog/fun-asr-nano-guide.html">Fun-ASR-Nano 使用指南</a></li>
-<li><a href="/blog/funasr-speaker-diarization.html">说话人分离:谁在何时说话</a></li>
-<li><a href="/blog/sensevoice-emotion-language-detection.html">情感与语种检测</a></li>
-<li><a href="/blog/funasr-realtime-streaming-asr.html">实时流式语音识别</a></li>
-<li><a href="/blog/funasr-cli-transcribe-command-line.html">命令行转写(文本/JSON/SRT)</a></li>
-<li><a href="/blog/self-hosted-openai-whisper-api-alternative.html">自托管 OpenAI Whisper API 替代</a></li>
-<li><a href="/blog/generate-subtitles-srt-vtt-from-audio-video.html">自动生成字幕(SRT / VTT)</a></li>
-<li><a href="/blog/speech-to-text-python-transcribe-audio.html">Python 语音转文字教程</a></li>
-<li><a href="/blog/funasr-llama-cpp-whisper-cpp-alternative.html">FunASR 跑进 llama.cpp(whisper.cpp 替代)</a></li>
-<li><a href="/blog/funasr-vs-faster-whisper-chinese.html">FunASR vs faster-whisper(中文/粤语)</a></li>
-<li><a href="/blog/lightweight-speech-recognition-cpu.html">轻量语音识别(CPU 250MB)</a></li>
-<li><a href="/blog/self-hosted-deepgram-assemblyai-alternative.html">自托管替代 Deepgram/AssemblyAI</a></li>
-<li><a href="/blog/which-funasr-model.html">选哪个 FunASR 模型</a></li>
-<li><a href="/blog/cantonese-speech-recognition.html">粤语语音识别(SenseVoice 原生粤语)</a></li>
-<li><a href="/blog/japanese-speech-recognition.html">日语语音识别(SenseVoice 转写+标点+情感)</a></li>
-<li><a href="/blog/voice-activity-detection-python.html">Python 语音活动检测(VAD)</a></li>
-<li><a href="/blog/self-hosted-google-aws-azure-speech-to-text.html">自托管替代 Google/AWS/Azure 云语音 API</a></li>
-<li><a href="/blog/chinese-speech-recognition.html">中文语音识别(普通话)实战</a></li>
-<li><a href="/blog/punctuation-restoration-python.html">标点恢复 Python 实战</a></li>
-<li><a href="/blog/speech-to-text-timestamps-python.html">语音识别带时间戳(字级)</a></li>
-</ul>
+</section>
+<p data-editorial="next-step">下一步，按<a href="/blog/meeting-transcript-acceptance.html">会议转写验收清单</a>挑一份有代表性的录音回听结尾。该文下载的 MOSS 检查器有不同输入契约，不能直接套用本篇 SenseVoice 返回值。</p>
 </div></article>
 <footer><div class="container">FunASR · 通义实验室开源语音识别 · <a href="https://github.com/modelscope/FunASR">GitHub</a></div></footer>
 </body></html>

@@ -1,13 +1,11 @@
 <!DOCTYPE html>
 <html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>自托管 OpenAI Whisper API 替代：FunASR 接入与安全边界 | FunASR Blog</title><meta name="description" content="用 FunASR 部署本地文件转写：显式 loopback 监听、基本 JSON 调用、SDK 接入、格式限制与网关安全。区分部分接口兼容与完整云服务替换。"><meta name="keywords" content="openai whisper api 替代, 自托管语音识别api, openai 语音转文字 api, /v1/audio/transcriptions, whisper api self hosted, openai 兼容 asr, 本地语音转文字服务, funasr server, 替代 openai whisper api, 私有化部署语音识别">
-<link rel="icon" href="/logo.png"><meta property="og:title" content="自托管 OpenAI Whisper API 替代：FunASR 接入与安全边界 | FunASR Blog"><meta property="og:description" content="用 FunASR 部署本地文件转写：显式 loopback 监听、基本 JSON 调用、SDK 接入、格式限制与网关安全。区分部分接口兼容与完整云服务替换。">
+<title>把语音转写接进自己的 API | FunASR</title><meta name="description" content="从上传一段录音、取回文本开始，走通本地应用调用，并在对外开放前检查认证、返回格式和部署边界。"><meta name="keywords" content="openai whisper api 替代, 自托管语音识别api, openai 语音转文字 api, /v1/audio/transcriptions, whisper api self hosted, openai 兼容 asr, 本地语音转文字服务, funasr server, 替代 openai whisper api, 私有化部署语音识别">
+<link rel="icon" href="/logo.png"><meta property="og:title" content="把语音转写接进自己的 API"><meta property="og:description" content="从上传一段录音、取回文本开始，走通本地应用调用，并在对外开放前检查认证、返回格式和部署边界。">
 <meta property="og:type" content="article"><meta property="og:url" content="https://www.funasr.com/blog/self-hosted-openai-whisper-api-alternative.html"><meta property="og:image" content="https://www.funasr.com/logo.png">
 <link rel="canonical" href="https://www.funasr.com/blog/self-hosted-openai-whisper-api-alternative.html"><link rel="alternate" hreflang="en" href="https://www.funasr.com/en/blog/self-hosted-openai-whisper-api-alternative.html"><link rel="alternate" hreflang="zh" href="https://www.funasr.com/blog/self-hosted-openai-whisper-api-alternative.html"><link rel="alternate" hreflang="x-default" href="https://www.funasr.com/en/blog/self-hosted-openai-whisper-api-alternative.html">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<script type="application/ld+json">
-{"@context":"https://schema.org","@type":"BlogPosting","headline":"自托管 OpenAI Whisper API 替代：FunASR 接入与安全边界 | FunASR Blog","description":"用 FunASR 部署本地文件转写：显式 loopback 监听、基本 JSON 调用、SDK 接入、格式限制与网关安全。区分部分接口兼容与完整云服务替换。","datePublished":"2026-06-18","dateModified":"2026-09-09","author":{"@type":"Organization","name":"FunASR / Tongyi Lab"},"publisher":{"@type":"Organization","name":"FunASR","logo":{"@type":"ImageObject","url":"https://www.funasr.com/logo.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://www.funasr.com/blog/self-hosted-openai-whisper-api-alternative.html"},"image":"https://www.funasr.com/logo.png"}
-</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"把语音转写接进自己的 API","description":"从上传一段录音、取回文本开始，走通本地应用调用，并在对外开放前检查认证、返回格式和部署边界。","datePublished":"2026-06-18","dateModified":"2026-09-09","author":{"@type":"Organization","name":"FunASR / Tongyi Lab"},"publisher":{"@type":"Organization","name":"FunASR","logo":{"@type":"ImageObject","url":"https://www.funasr.com/logo.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://www.funasr.com/blog/self-hosted-openai-whisper-api-alternative.html"},"image":"https://www.funasr.com/logo.png"}</script>
 <style>:root{--primary:#2563eb;--primary-dark:#1d4ed8;--bg:#fff;--surface:#f8fafc;--border:#e2e8f0;--text:#0f172a;--text-soft:#475569;--text-muted:#94a3b8;--radius:12px}
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Inter',-apple-system,sans-serif;color:var(--text);line-height:1.7}
@@ -44,12 +42,15 @@ p code,li code{background:var(--surface);padding:2px 6px;border-radius:5px;font-
 footer{background:#0f172a;color:#94a3b8;padding:28px 0;text-align:center;font-size:0.8rem}
 footer a{color:#94a3b8}
 @media(max-width:900px){.nav-links{display:none}.nav .container{gap:16px}.nav-logo{margin-right:auto}h1{font-size:1.75rem}table{table-layout:fixed;font-size:0.78rem}th,td{padding:8px 4px;overflow-wrap:anywhere}p code,li code{overflow-wrap:anywhere;word-break:break-word}}
+article p a,article li a{color:#006a57;text-decoration:underline;text-underline-offset:.15em}
 </style></head><body>
 <nav class="nav"><div class="container"><a href="/" class="nav-logo">Fun<span>ASR</span></a><div class="nav-links"><a href="/#capabilities">核心能力</a><a href="/#usage">如何使用</a><a href="/#benchmark">性能</a><a href="/#demo">演示</a><a href="https://modelscope.github.io/FunASR/zh/" target="_blank">文档</a><a href="/quickstart.html">快速上手</a><a href="/models.html">模型</a><a href="/ecosystem.html">生态</a><a href="/blog/">技术博客</a><a href="/vs-whisper.html">对比 Whisper</a><a href="/donors.html">功德榜</a></div><a href="https://www.funasr.com/en/blog/self-hosted-openai-whisper-api-alternative.html" style="font-size:0.83rem;font-weight:600;color:var(--text-soft)">EN</a><a href="/go/github" target="_blank" class="nav-btn">GitHub ★</a></div></nav>
 <article><div class="container">
-<h1>自托管 OpenAI Whisper API 替代：FunASR 接入与安全边界</h1>
+<h1>把语音转写接进自己的 API</h1>
 <p class="post-meta">FunASR 技术博客 · 2026-06-18 · 更新于 2026-09-09</p>
-<p>把转写任务放到自己的机器上，能让团队自行选择模型、容量与数据处理方式。本文讨论 <strong>FunASR 1.4.15 的包内 <code>funasr-server</code></strong>，演示 <code>POST /v1/audio/transcriptions</code> 的基本 JSON 调用。它提供部分 OpenAI 兼容能力，不代表完整复刻 OpenAI 服务，也不代表任意 SDK 或应用都无需适配。</p>
+<p class="lead" data-editorial="opening">如果应用只需要上传一段录音、取回文字，先把这一个来回走通。团队可以先在本机核对请求与返回值，再决定怎样承接真实流量，而不是一开始就复制整套云服务。</p>
+<p data-editorial="example">这里用一份获授权的 <code>audio.wav</code>：客户端把文件发给本机 SenseVoice 服务，再读取 JSON 的 <code>text</code> 字段。示例展示调用路径，不编造转写结果，也不比较速度。</p>
+<p data-editorial="boundary">本文使用 FunASR 1.4.15 包内的 <code>funasr-server</code>。它只提供部分 OpenAI 转写接口，不是所有云功能和返回格式的替代品；连通 URL 还不等于迁移完成。</p>
 <aside class="limitation-callout" id="security-boundary" data-http-contract="security">
 <p><strong>先确定访问边界。</strong><span data-risk="authentication">包内服务默认监听 <code>0.0.0.0</code>，没有内置认证。</span><span data-risk="upload-limit">FunASR 的该入口没有实现应用层总上传大小上限。</span>下方显式使用 <code>--host 127.0.0.1</code>，仅用于客户端与后端位于同一主机网络命名空间的本地检查。</p>
 <p data-risk="backend-bypass">对外服务前应在网关配置 TLS、鉴权、上传限制、容量与超时策略，并阻止绕过网关直接访问后端。CORS 不是访问控制；客户端占位 API key 也不是认证。请先阅读<a href="/docs/security.html">服务安全指南</a>。这里说明部署风险，不意味着已经发现某个线上服务暴露。</p>
@@ -84,6 +85,18 @@ with open("audio.wav", "rb") as audio:
         model="sensevoice", file=audio, response_format="json"
     )
 print(result.text)</code></pre>
+<p>上面的基本 JSON 调用不是字幕生成器：包内服务不生成 SRT/VTT，<code>text</code> 格式也返回 JSON 字符串而非纯文本。更换应用解析器之前，先核对文末附录中的格式契约。</p>
+<h2>接入 Open WebUI 或其他应用前</h2>
+<ul>
+<li>核对应用实际发送的模型别名、文件类型和 <code>response_format</code>，以及成功、空文本、错误和超时的解析路径。</li>
+<li>容器内的 <code>127.0.0.1</code> 指向该容器自身。宿主机 loopback 服务不会因为换成 <code>host.docker.internal</code> 就自动可达；跨容器部署需要受限的私有网络和匹配的网关认证。</li>
+<li>Basic、Bearer、OIDC 等认证方式不能互换。生产环境不能照搬本地占位 key；预加载一个模型也不是模型访问白名单。</li>
+<li>先用受控录音验证端到端流程，再开放真实流量。参见<a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/CLIENTS.md">维护中的客户端接入指南</a>。</li>
+</ul>
+<h2>比较的是完整部署方案，不只是 API 单价</h2>
+<p>自托管需要计算服务器、存储、流量、维护与监控成本。是否留在受控网络，取决于客户端、代理、临时文件、日志和保留策略；不能承诺音频绝不落盘或转写永不泄露。模型权重的许可也需要单独核对，不能由工具包代码许可代替。</p>
+<p>根据语言、时延、硬件和说话人需求查看<a href="/docs/model-selection.html">模型选型</a>、<a href="/docs/moss-transcribe-diarize.html">MOSS 转写与说话人分离</a>和<a href="/deploy/">部署矩阵</a>。本文不提供新的准确率或性能排名；验收方法见<a href="/blog/meeting-transcript-acceptance.html">会议录音验收清单</a>。</p>
+<section data-editorial="appendix"><h2>附录：核对返回契约</h2>
 <h2>包内服务的兼容范围</h2>
 <table id="api-contract" data-http-contract="formats"><thead><tr><th>项目</th><th>当前行为与接入要求</th></tr></thead><tbody>
 <tr><td>请求</td><td>multipart 文件上传；路由声明 <code>file</code>、<code>model</code>、<code>language</code>、<code>response_format</code> 和 FunASR 扩展 <code>spk</code>。语言和说话人能力仍受所选模型限制。</td></tr>
@@ -95,42 +108,8 @@ print(result.text)</code></pre>
 <tr><td>其他参数与协议</td><td><code>prompt</code>、<code>temperature</code>、<code>timestamp_granularities</code> 不是该路由声明的完整能力。不要把它当成流式 WebSocket、翻译或完整云 API；额外字段未报错也不证明生效。</td></tr>
 </tbody></table>
 <p data-http-contract="schema-authority">包内服务的字段应通过私有或受限的运维路径访问运行中服务的 <code>/openapi.json</code>，并核对<a href="https://github.com/modelscope/FunASR/blob/dff96b69f1679953ac53c6643c82c74b43c70db2/funasr/bin/_server_app.py">固定版本包内处理器源码</a>。<a href="/docs/service-api.html">示例服务 API schema</a>描述的是另一种实现，不是包内处理器的完整字段说明。包内服务、仓库示例、vLLM 与 llama.cpp 的默认值、参数和响应结构并不通用。</p>
-<h2>接入 Open WebUI 或其他应用前</h2>
-<ul>
-<li>核对应用实际发送的模型别名、文件类型和 <code>response_format</code>，以及成功、空文本、错误和超时的解析路径。</li>
-<li>容器内的 <code>127.0.0.1</code> 指向该容器自身。宿主机 loopback 服务不会因为换成 <code>host.docker.internal</code> 就自动可达；跨容器部署需要受限的私有网络和匹配的网关认证。</li>
-<li>Basic、Bearer、OIDC 等认证方式不能互换。生产环境不能照搬本地占位 key；预加载一个模型也不是模型访问白名单。</li>
-<li>先用受控录音验证端到端流程，再开放真实流量。参见<a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/CLIENTS.md">维护中的客户端接入指南</a>。</li>
-</ul>
-<h2>比较的是完整部署方案，不只是 API 单价</h2>
-<p>自托管需要计算服务器、存储、流量、维护与监控成本。是否留在受控网络，取决于客户端、代理、临时文件、日志和保留策略；不能承诺音频绝不落盘或转写永不泄露。模型权重的许可也需要单独核对，不能由工具包代码许可代替。</p>
-<p>根据语言、时延、硬件和说话人需求查看<a href="/docs/model-selection.html">模型选型</a>、<a href="/docs/moss-transcribe-diarize.html">MOSS 转写与说话人分离</a>和<a href="/deploy/">部署矩阵</a>。本文不提供新的准确率或性能排名；验收方法见<a href="/blog/meeting-transcript-acceptance.html">会议录音验收清单</a>。</p>
-<!--related-posts-->
-<h2>相关文章</h2>
-<ul class="post-list">
-<li><a href="/blog/funasr-vs-whisper-benchmark.html">FunASR vs Whisper 实测对比</a></li>
-<li><a href="/blog/sensevoice-deployment-guide.html">SenseVoice 部署指南</a></li>
-<li><a href="/blog/fun-asr-nano-guide.html">Fun-ASR-Nano 使用指南</a></li>
-<li><a href="/blog/funasr-speaker-diarization.html">说话人分离:谁在何时说话</a></li>
-<li><a href="/blog/sensevoice-emotion-language-detection.html">情感与语种检测</a></li>
-<li><a href="/blog/funasr-realtime-streaming-asr.html">实时流式语音识别</a></li>
-<li><a href="/blog/funasr-transcribe-long-audio.html">转写超长音频(1小时一次搞定)</a></li>
-<li><a href="/blog/funasr-cli-transcribe-command-line.html">命令行转写(文本/JSON/SRT)</a></li>
-<li><a href="/blog/generate-subtitles-srt-vtt-from-audio-video.html">自动生成字幕(SRT / VTT)</a></li>
-<li><a href="/blog/speech-to-text-python-transcribe-audio.html">Python 语音转文字教程</a></li>
-<li><a href="/blog/funasr-llama-cpp-whisper-cpp-alternative.html">FunASR 跑进 llama.cpp(whisper.cpp 替代)</a></li>
-<li><a href="/blog/funasr-vs-faster-whisper-chinese.html">FunASR vs faster-whisper(中文/粤语)</a></li>
-<li><a href="/blog/lightweight-speech-recognition-cpu.html">轻量语音识别(CPU 250MB)</a></li>
-<li><a href="/blog/self-hosted-deepgram-assemblyai-alternative.html">自托管替代 Deepgram/AssemblyAI</a></li>
-<li><a href="/blog/which-funasr-model.html">选哪个 FunASR 模型</a></li>
-<li><a href="/blog/cantonese-speech-recognition.html">粤语语音识别(SenseVoice 原生粤语)</a></li>
-<li><a href="/blog/japanese-speech-recognition.html">日语语音识别(SenseVoice 转写+标点+情感)</a></li>
-<li><a href="/blog/voice-activity-detection-python.html">Python 语音活动检测(VAD)</a></li>
-<li><a href="/blog/self-hosted-google-aws-azure-speech-to-text.html">自托管替代 Google/AWS/Azure 云语音 API</a></li>
-<li><a href="/blog/chinese-speech-recognition.html">中文语音识别(普通话)实战</a></li>
-<li><a href="/blog/punctuation-restoration-python.html">标点恢复 Python 实战</a></li>
-<li><a href="/blog/speech-to-text-timestamps-python.html">语音识别带时间戳(字级)</a></li>
-</ul>
+</section>
+<p data-editorial="next-step">下一步，在让其他用户接入前，按<a href="/docs/security.html">服务安全指南</a>验证网关鉴权和后端不可绕过。在这些部署检查通过前，保留本机私有调用范围。</p>
 </div></article>
 <footer><div class="container">FunASR · 通义实验室开源语音识别 · <a href="/go/github">GitHub</a></div></footer>
 </body></html>

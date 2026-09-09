@@ -175,6 +175,10 @@ def test_migration_claims_are_bounded_in_article_metadata_and_index(site_tree, p
     for text in prose_and_metadata(soup):
         assert_no_blanket_claims(text)
     index = read_page(site_tree, prefix, "index.html")
+    if site_tree != SITE / "legacy" and slug == "self-hosted-deepgram-assemblyai-alternative.html":
+        assert index.select_one(f'[data-blog-more] a[href="/{prefix}blog/archive/"]')
+        assert not index.select(f'a.post-card[href="/{prefix}blog/{slug}"]')
+        index = read_page(site_tree, prefix, "archive/index.html")
     cards = index.select(f'a.post-card[href="/{prefix}blog/{slug}"]')
     assert len(cards) == 1
     assert_no_blanket_claims(visible_text(cards[0]))

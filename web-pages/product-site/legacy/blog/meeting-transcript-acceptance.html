@@ -1,18 +1,21 @@
 <!DOCTYPE html>
 <html lang="zh"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>HTTP 200 不等于转写成功：会议录音的验收清单 | FunASR</title>
-<meta name="description" content="从会议纪要、字幕和说话人剪辑出发，区分 ASR 文本、匿名标签、时间戳与尾部覆盖；附经过测试的 Python 结构检查器。">
-<meta property="og:title" content="HTTP 200 不等于转写成功：会议录音的验收清单"><meta property="og:description" content="从会议纪要、字幕和说话人剪辑出发，区分 ASR 文本、匿名标签、时间戳与尾部覆盖；附经过测试的 Python 结构检查器。"><meta property="og:type" content="article"><meta property="og:url" content="https://www.funasr.com/blog/meeting-transcript-acceptance.html"><meta property="og:image" content="https://www.funasr.com/img/funclip-v2-1-0-interface.jpg">
+<title>会议转写，怎样才算做好了？ | FunASR</title>
+<meta name="description" content="拿到文本之后，怎样判断它能否交付？用一个明确标注的合成案例，分清自动结构检查与仍需回听的内容。">
+<meta property="og:title" content="会议转写，怎样才算做好了？"><meta property="og:description" content="拿到文本之后，怎样判断它能否交付？用一个明确标注的合成案例，分清自动结构检查与仍需回听的内容。"><meta property="og:type" content="article"><meta property="og:url" content="https://www.funasr.com/blog/meeting-transcript-acceptance.html"><meta property="og:image" content="https://www.funasr.com/img/funclip-v2-1-0-interface.jpg">
 <link rel="canonical" href="https://www.funasr.com/blog/meeting-transcript-acceptance.html"><link rel="alternate" hreflang="en" href="https://www.funasr.com/en/blog/meeting-transcript-acceptance.html">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"HTTP 200 不等于转写成功：会议录音的验收清单","datePublished":"2026-09-09","dateModified":"2026-09-09","author":{"@type":"Organization","name":"FunASR"},"mainEntityOfPage":{"@type":"WebPage","@id":"https://www.funasr.com/blog/meeting-transcript-acceptance.html"}}</script>
-<style>body{margin:0;font-family:system-ui,sans-serif;color:#202827;line-height:1.8;background:#fff}*{box-sizing:border-box}a{color:#126a59}a:hover{text-decoration:underline}.container{max-width:920px;margin:auto;padding:0 24px}.nav{border-bottom:1px solid #dce3df;padding:14px 0}.nav .container{display:flex;align-items:center;gap:20px}.nav-links{margin-left:auto;display:flex;gap:16px}.nav-logo{font-weight:700}.nav-btn{font-weight:600}article{padding:48px 0 64px}h1{font-size:2rem;line-height:1.3;letter-spacing:0}h2{font-size:1.4rem;margin-top:36px;letter-spacing:0}.lead{font-size:1.1rem}.meta,figcaption{color:#5e6864;font-size:.875rem}figure{margin:24px 0}.article-image{display:block;max-width:100%;height:auto}pre{overflow:auto;padding:18px;background:#f3f6f5;border:1px solid #dce3df;border-radius:6px;line-height:1.6}code{font-family:ui-monospace,monospace}p code,li code{overflow-wrap:anywhere}table{width:100%;border-collapse:collapse}th,td{padding:10px;text-align:left;vertical-align:top;border-bottom:1px solid #dce3df}th{background:#f3f6f5}footer{border-top:1px solid #dce3df;padding:24px}@media(max-width:700px){h1{font-size:1.6rem}.nav-links{display:none}.container{padding:0 20px}table{font-size:.9rem}th,td{padding:7px}}</style>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"会议转写，怎样才算做好了？","datePublished":"2026-09-09","dateModified":"2026-09-09","author":{"@type":"Organization","name":"FunASR"},"mainEntityOfPage":{"@type":"WebPage","@id":"https://www.funasr.com/blog/meeting-transcript-acceptance.html"},"description":"拿到文本之后，怎样判断它能否交付？用一个明确标注的合成案例，分清自动结构检查与仍需回听的内容。"}</script>
+<style>body{margin:0;font-family:system-ui,sans-serif;color:#202827;line-height:1.8;background:#fff}*{box-sizing:border-box}a{color:#126a59}a:hover{text-decoration:underline}.container{max-width:920px;margin:auto;padding:0 24px}.nav{border-bottom:1px solid #dce3df;padding:14px 0}.nav .container{display:flex;align-items:center;gap:20px}.nav-links{margin-left:auto;display:flex;gap:16px}.nav-logo{font-weight:700}.nav-btn{font-weight:600}article{padding:48px 0 64px}h1{font-size:2rem;line-height:1.3;letter-spacing:0}h2{font-size:1.4rem;margin-top:36px;letter-spacing:0}.lead{font-size:1.1rem}.meta,figcaption{color:#5e6864;font-size:.875rem}figure{margin:24px 0}.article-image{display:block;max-width:100%;height:auto}pre{overflow:auto;padding:18px;background:#f3f6f5;border:1px solid #dce3df;border-radius:6px;line-height:1.6}code{font-family:ui-monospace,monospace}p code,li code{overflow-wrap:anywhere}table{width:100%;border-collapse:collapse}th,td{padding:10px;text-align:left;vertical-align:top;border-bottom:1px solid #dce3df}th{background:#f3f6f5}footer{border-top:1px solid #dce3df;padding:24px}@media(max-width:700px){h1{font-size:1.6rem}.nav-links{display:none}.container{padding:0 20px}table{font-size:.9rem}th,td{padding:7px}}article p a,article li a{color:#006a57;text-decoration:underline;text-underline-offset:.15em}
+</style>
 </head><body>
 <nav class="nav"><div class="container"><a class="nav-logo" href="/">FunASR</a><div class="nav-links"><a href="/deploy/">部署</a><a href="/blog/">技术博客</a></div><a href="/en/blog/meeting-transcript-acceptance.html">EN</a><a class="nav-btn" href="/go/github">GitHub</a></div></nav>
 <article><div class="container">
-<h1>HTTP 200 不等于转写成功：会议录音的验收清单</h1>
+<h1>会议转写，怎样才算做好了？</h1>
 <p class="meta">2026-09-09 · 应用工程 · 阅读约 8 分钟</p>
-<p class="lead">一次请求返回了文本，离“这份会议记录可以交给同事”还有多远？把 ASR 接进字幕、会议纪要或按说话人剪辑时，需要分别验收内容、说话人、时间和处理完整性。下面用 FunASR 的 MOSS 结果讲清这些层次，并提供一个只依赖 Python 标准库的结构检查脚本。</p>
+<p class="lead" data-editorial="opening">团队准备交付会议纪要或字幕时，需要确认名字、决策和原声音能对得上，而不只是“接口返回了文本”。自动检查可以找出结构问题，交付质量仍需要回听和人工确认。</p>
+<p data-editorial="example">下文的合成案例是一份12秒录音结果，最后一段到第8秒结束。剩下4秒值得回听，却不能直接算成“漏识别了4秒”：那里也可能只有静音。</p>
+<p data-editorial="boundary">检查器没有听过录音。两个说话人标签、或接近终点的时间戳，都不等于转写正确；录音内的匿名标签也不是人物身份。</p>
 <figure><img class="article-image" src="/img/funclip-v2-1-0-interface.jpg" alt="FunClip 的视频、字幕与剪辑工作区"><figcaption>应用出口示意：已有 FunClip 工作区。不是下文合成样例的运行截图。</figcaption></figure>
 <h2>先分清四个问题</h2>
 <table><thead><tr><th>检查层次</th><th>要回答的问题</th><th>不能用什么代替</th></tr></thead><tbody>
@@ -53,18 +56,21 @@
 <ol>
 <li><strong>固定输入和配置。</strong>保留原音频散列、时长、采样率/声道、模型 revision、服务版本、请求格式和生成上限。记录重采样、混音与裁剪；裁掉静音后必须保存偏移映射，否则时间戳无法回到原视频。</li>
 <li><strong>回听高风险位置。</strong>开头与结尾、长静音两侧、说话人交替、重叠发言、低音量以及关键数字。抽查能发现问题，但抽查通过不等于整段准确。</li>
-<li><strong>把文本与说话人分开评估。</strong>有人工参考转写时，可按统一的标点、大小写及分词规则计算 CER/WER；有人工说话人时间标注时，再使用说话人指标。不要把“输出了两个标签”作为 diarization 的通过条件。</li>
-<li><strong>冻结说话人评测口径。</strong><a href="https://github.com/pyannote/pyannote-metrics/blob/5b197b13ba39ac9baad37da66659da196090053c/src/pyannote/metrics/diarization.py#L51">pyannote.metrics</a> 提供说话人错误率等指标；边界宽容区间（collar）和是否计入重叠语音会影响结果。比较系统时必须使用同一标注与配置，指标数字不能脱离这些前提。</li>
+
+
 <li><strong>完整性异常先定位，再调参。</strong>检查响应是否因生成上限中止、结构是否完整、客户端是否漏读。增大 token 上限只可能缓解某些截断，不保证召回；不能用“接口正常返回”关闭用户的问题。</li>
 </ol>
 <h2>上线前留下什么</h2>
 <p>遵循授权范围和保留期限，只保存必要的数据，并限制对录音与说话人标注的访问。一份可复查的交付应包含原音频标识、固定配置、原始结果、结构报告和人工确认记录。会议纪要保留到原文的回链；字幕检查可读性、定位及隐私；剪辑回看实际片段，不能只看时间段长度。涉及已知人物身份时另行设计授权、登记和验证流程，不把匿名聚类标签改名后当作身份识别。</p>
-<p>这篇文章的检查器是进入验收流程的第一道结构检查，不是模型排行榜，也不会替代回听与标注。下一步可以沿 <a href="/deploy/">部署中心</a>跑通实际工作负载，再到 <a href="https://github.com/modelscope/FunASR">FunASR 仓库</a>查看实现或提交带最小复现的问题。</p>
-<h2>来源与复现入口</h2>
+
+<section data-editorial="appendix"><h2>附录：评测口径与来源</h2>
+<ul><li><strong>把文本与说话人分开评估。</strong>有人工参考转写时，可按统一的标点、大小写及分词规则计算 CER/WER；有人工说话人时间标注时，再使用说话人指标。不要把“输出了两个标签”作为 diarization 的通过条件。</li><li><strong>冻结说话人评测口径。</strong><a href="https://github.com/pyannote/pyannote-metrics/blob/5b197b13ba39ac9baad37da66659da196090053c/src/pyannote/metrics/diarization.py#L51">pyannote.metrics</a> 提供说话人错误率等指标；边界宽容区间（collar）和是否计入重叠语音会影响结果。比较系统时必须使用同一标注与配置，指标数字不能脱离这些前提。</li></ul>
 <ul>
 <li><a href="https://github.com/OpenMOSS/MOSS-Transcribe-Diarize">OpenMOSS 模型项目</a>：模型归属与任务定义；<a href="https://huggingface.co/OpenMOSS-Team/MOSS-Transcribe-Diarize/blob/e8681d68e7042738ffca8ac8212bc8fcb1131ab8/README.md">固定 revision 的模型卡</a>解释匿名标签。</li>
 <li><a href="https://github.com/modelscope/FunASR/blob/fdf1d042342e59569144209abdfacf312771d9be/examples/industrial_data_pretraining/qwen3_asr/transcribe_vllm_offline.py">本文检查的离线结果文件契约</a>：固定仓库提交，MOSS 分支写出单个结果对象。</li>
 <li><a href="https://github.com/pyannote/pyannote-metrics/blob/5b197b13ba39ac9baad37da66659da196090053c/src/pyannote/metrics/diarization.py#L51">pyannote.metrics 官方实现</a>：说话人指标与评测配置。本文没有运行或报告 DER/CER/WER。</li>
 </ul>
+</section>
+<p data-editorial="next-step">下一步，<a href="/blog/transcript-audit.py" download>下载只读结构检查器</a>，先跑通上面明确标注的合成案例。用报告安排回听位置，不把它当作会议转写的质量合格证。</p>
 </div></article><footer><div class="container">FunASR · 应用实践与技术解读</div></footer>
 </body></html>

@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block extra_head %}<link rel="stylesheet" href="{{ assets['css/blog.css'] }}">{% endblock %}
+{% block structured_data %}<script type="application/ld+json">{{ {
+  '@context': 'https://schema.org', '@type': 'Blog' if blog.view == 'home' else 'CollectionPage',
+  'name': blog.heading, 'description': blog.description, 'url': canonical, 'inLanguage': html_language
+} | tojson }}</script>{% endblock %}
+{% block content %}
+<div class="blog-publication" data-blog-view="{{ blog.view }}">
+  <header class="blog-heading">
+    {% if blog.view != 'home' %}<a class="blog-parent" href="{{ blog.prefix }}/blog/">{{ 'FunASR 技术博客' if language == 'zh' else 'FunASR Blog' }}</a>{% endif %}
+    <h1>{{ blog.heading }}</h1>
+    <p>{{ blog.description }}</p>
+  </header>
+  <nav class="blog-topics" data-blog-navigation aria-label="{{ '阅读栏目' if language == 'zh' else 'Reading categories' }}">
+    {% for topic in blog.topics %}<a href="{{ topic.href }}"{% if blog.view == topic.id %} aria-current="page"{% endif %}>{{ topic.label }}</a>{% endfor %}
+  </nav>
+  {% if blog.view == 'home' %}
+  <section class="blog-lead" data-blog-lead aria-labelledby="lead-title">
+    <a class="blog-lead-story post-card" data-blog-story data-blog-category="{{ blog.lead.category }}" href="{{ blog.lead.href }}">
+      <span class="blog-kicker">{{ '本期精选' if language == 'zh' else 'Featured story' }} · {{ blog.lead.category_label }}</span>
+      <h2 id="lead-title">{{ blog.lead.title }}</h2>
+      <p>{{ blog.lead.summary }}</p>
+      <img src="{{ blog.lead_image }}" alt="{{ 'FunClip 的视频、字幕和按片段剪辑工作区' if language == 'zh' else 'The FunClip workspace for video, subtitles and segment editing' }}" width="1200" height="680" fetchpriority="high">
+      <span class="blog-caption">{{ 'FunClip 工作区。实际模型与剪辑范围见文中说明。' if language == 'zh' else 'The FunClip workspace. See the story for model and clipping scope.' }}</span>
+    </a>
+  </section>
+  <section class="blog-selection" data-blog-selected aria-labelledby="selected-title">
+    <div class="blog-section-heading"><h2 id="selected-title">{{ '值得读一读' if language == 'zh' else 'Worth a read' }}</h2><a href="{{ blog.prefix }}/blog/archive/">{{ '全部文章' if language == 'zh' else 'All articles' }} <img src="{{ assets['lucide/arrow-right.svg'] }}" alt=""></a></div>
+    <div class="blog-selection-grid">
+      {% for story in blog.selected %}
+      <a class="blog-story post-card" data-blog-story data-blog-category="{{ story.category }}" href="{{ story.href }}">
+        <span class="blog-kicker">{{ story.category_label }}</span><h3>{{ story.title }}</h3><p>{{ story.summary }}</p>
+      </a>
+      {% endfor %}
+    </div>
+  </section>
+  {% else %}
+  {% if blog.view == 'releases' %}<p class="blog-release-link"><a href="https://github.com/modelscope/FunASR/releases">GitHub Releases <img src="{{ assets['lucide/arrow-right.svg'] }}" alt=""></a></p>{% endif %}
+  <section class="blog-archive" aria-label="{{ blog.heading }}">
+    {% for story in blog.stories %}
+    <a class="blog-archive-story post-card" data-blog-story data-blog-category="{{ story.category }}" href="{{ story.href }}">
+      <div class="blog-archive-meta"><span>{{ story.category_label }}</span>{% if story.date %}<time datetime="{{ story.date }}">{{ story.date }}</time>{% endif %}</div>
+      <div><h2>{{ story.title }}</h2>{% if story.reviewed %}<p>{{ story.summary }}</p>{% endif %}</div>
+      <img class="blog-row-arrow" src="{{ assets['lucide/arrow-right.svg'] }}" alt="">
+    </a>
+    {% endfor %}
+  </section>
+  {% endif %}
+  <nav class="blog-more" data-blog-more aria-label="{{ '历史内容' if language == 'zh' else 'Browse history' }}">
+    <a href="{{ blog.prefix }}/blog/archive/"{% if blog.view == 'archive' %} aria-current="page"{% endif %}>{{ '全部文章' if language == 'zh' else 'All articles' }}</a>
+    <a href="{{ blog.prefix }}/blog/releases/"{% if blog.view == 'releases' %} aria-current="page"{% endif %}>{{ '版本记录' if language == 'zh' else 'Release history' }}</a>
+  </nav>
+</div>
+{% endblock %}

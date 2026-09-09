@@ -18,7 +18,7 @@ for (const prefix of ['', 'en/']) {
           overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
           headingTop: box('h1').top,
           navBottom: document.querySelector('nav')!.getBoundingClientRect().bottom,
-          warningBottom: box('[data-long-audio-contract="window"]').bottom,
+          warningBottom: box('[data-editorial="boundary"]').bottom,
           recipeTop: box('[data-long-audio-contract="recipe"]').top,
         };
       });
@@ -26,23 +26,22 @@ for (const prefix of ['', 'en/']) {
       expect(layout.headingTop).toBeGreaterThanOrEqual(layout.navBottom);
       expect(layout.warningBottom).toBeLessThanOrEqual(layout.recipeTop);
       await page.screenshot({ path: testInfo.outputPath('article-top.png') });
-      const table = page.locator('[data-long-audio-contract="batching"] table');
-      await table.scrollIntoViewIfNeeded();
-      const scroll = await table.evaluate((node) => {
-        const wrapper = node.closest('.table-wrap')!;
-        const rect = wrapper.getBoundingClientRect();
-        wrapper.scrollLeft = wrapper.scrollWidth;
-        return { left: rect.left, right: rect.right, width: wrapper.clientWidth,
-          content: wrapper.scrollWidth, scrolled: wrapper.scrollLeft };
-      });
-      expect(scroll.left).toBeGreaterThanOrEqual(0);
-      expect(scroll.right).toBeLessThanOrEqual(width);
-      if (width === 390) {
-        expect(scroll.content).toBeGreaterThan(scroll.width);
-        expect(scroll.scrolled).toBeGreaterThan(0);
-        expect(scroll.scrolled + scroll.width).toBeGreaterThanOrEqual(scroll.content - 1);
+      const batching = page.locator('[data-long-audio-contract="batching"]');
+      await batching.scrollIntoViewIfNeeded();
+      await expect(batching.locator('li')).toHaveCount(2);
+      for (const value of ['max_single_segment_time=30000', 'batch_size_s=300', 'CPU']) {
+        await expect(batching).toContainText(value);
       }
-      await page.screenshot({ path: testInfo.outputPath('batching-table.png') });
+      const boxes = await batching.locator('li').evaluateAll(nodes => nodes.map(node => {
+        const rect = node.getBoundingClientRect();
+        return { left: rect.left, right: rect.right, width: node.clientWidth, content: node.scrollWidth };
+      }));
+      for (const box of boxes) {
+        expect(box.left).toBeGreaterThanOrEqual(0);
+        expect(box.right).toBeLessThanOrEqual(width);
+        expect(box.content).toBeLessThanOrEqual(box.width + 1);
+      }
+      await page.screenshot({ path: testInfo.outputPath('batching-list.png') });
       await page.locator(`article a[href="/${prefix}docs/python-api.html"]`).click();
       await expect(page.locator('[data-source-link]')).toHaveAttribute(
         'href', new RegExp(`/docs/python_api${prefix ? '' : '_zh'}\\.md$`),

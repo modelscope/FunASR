@@ -15,7 +15,7 @@
   <meta property="og:url" content="{{ canonical }}">
   <link rel="stylesheet" href="{{ assets['css/site.css'] }}">
   <link rel="stylesheet" href="{{ assets['css/experience.css'] }}">
-  <script type="application/ld+json">{{ {
+  {% block structured_data %}<script type="application/ld+json">{{ {
     '@context': 'https://schema.org',
     '@type': 'SoftwareApplication',
     'name': 'FunASR',
@@ -25,7 +25,8 @@
     'dateModified': date_modified,
     'codeRepository': github_repository_url,
     'license': 'https://github.com/modelscope/FunASR/blob/main/LICENSE'
-  } | tojson }}</script>
+  } | tojson }}</script>{% endblock %}
+  {% block extra_head %}{% endblock %}
 </head>
 <body data-language="{{ language }}" data-route="{{ route }}" data-copy-icon="{{ assets['lucide/copy.svg'] }}">
   <a class="skip-link" href="#main">{{ '跳到主要内容' if language == 'zh' else 'Skip to main content' }}</a>

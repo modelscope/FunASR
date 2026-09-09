@@ -1,13 +1,11 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Long-File Transcription: VAD Segmentation, Batching and Acceptance | FunASR</title><meta name="description" content="Understand full-file loading, VAD batch budgets and CPU behavior in FunASR 1.4.15's offline SenseVoice path. Separate Whisper decoding windows from file limits and prepare a long-recording acceptance checklist."><meta name="keywords" content="long audio transcription, VAD segmentation, SenseVoice, FSMN-VAD, FunASR, memory budget, batching, transcript acceptance">
-<link rel="icon" href="/logo.png"><meta property="og:title" content="Long-File Transcription: VAD Segmentation, Batching and Acceptance"><meta property="og:description" content="Understand full-file loading, VAD batch budgets and CPU behavior in FunASR 1.4.15's offline SenseVoice path. Separate Whisper decoding windows from file limits and prepare a long-recording acceptance checklist.">
+<title>Why can a long transcript miss the ending? | FunASR</title><meta name="description" content="A transcript returned, but the last sentence is missing. Trace the input, segmentation and result before changing parameters in an offline workflow."><meta name="keywords" content="long audio transcription, VAD segmentation, SenseVoice, FSMN-VAD, FunASR, memory budget, batching, transcript acceptance">
+<link rel="icon" href="/logo.png"><meta property="og:title" content="Why can a long transcript miss the ending?"><meta property="og:description" content="A transcript returned, but the last sentence is missing. Trace the input, segmentation and result before changing parameters in an offline workflow.">
 <meta property="og:type" content="article"><meta property="og:url" content="https://www.funasr.com/en/blog/funasr-transcribe-long-audio.html"><meta property="og:image" content="https://www.funasr.com/logo.png">
 <link rel="canonical" href="https://www.funasr.com/en/blog/funasr-transcribe-long-audio.html"><link rel="alternate" hreflang="en" href="https://www.funasr.com/en/blog/funasr-transcribe-long-audio.html"><link rel="alternate" hreflang="zh" href="https://www.funasr.com/blog/funasr-transcribe-long-audio.html"><link rel="alternate" hreflang="x-default" href="https://www.funasr.com/en/blog/funasr-transcribe-long-audio.html">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<script type="application/ld+json">
-{"@context":"https://schema.org","@type":"BlogPosting","headline":"Long-File Transcription: VAD Segmentation, Batching and Acceptance","description":"Understand full-file loading, VAD batch budgets and CPU behavior in FunASR 1.4.15's offline SenseVoice path. Separate Whisper decoding windows from file limits and prepare a long-recording acceptance checklist.","datePublished":"2026-06-17","dateModified":"2026-09-09","author":{"@type":"Organization","name":"FunASR / Tongyi Lab"},"publisher":{"@type":"Organization","name":"FunASR","logo":{"@type":"ImageObject","url":"https://www.funasr.com/logo.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://www.funasr.com/en/blog/funasr-transcribe-long-audio.html"},"image":"https://www.funasr.com/logo.png"}
-</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"Why can a long transcript miss the ending?","description":"A transcript returned, but the last sentence is missing. Trace the input, segmentation and result before changing parameters in an offline workflow.","datePublished":"2026-06-17","dateModified":"2026-09-09","author":{"@type":"Organization","name":"FunASR / Tongyi Lab"},"publisher":{"@type":"Organization","name":"FunASR","logo":{"@type":"ImageObject","url":"https://www.funasr.com/logo.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://www.funasr.com/en/blog/funasr-transcribe-long-audio.html"},"image":"https://www.funasr.com/logo.png"}</script>
 <style>:root{--primary:#2563eb;--primary-dark:#1d4ed8;--bg:#fff;--surface:#f8fafc;--border:#e2e8f0;--text:#0f172a;--text-soft:#475569;--text-muted:#94a3b8;--radius:12px}
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Inter',-apple-system,sans-serif;color:var(--text);line-height:1.7}
@@ -42,16 +40,18 @@ p code,li code{background:var(--surface);padding:2px 6px;border-radius:5px;font-
 .post-card p{margin:0;color:var(--text-soft);font-size:0.9rem}
 .post-card .date{color:var(--text-muted);font-size:0.8rem}
 footer{background:#0f172a;color:#94a3b8;padding:28px 0;text-align:center;font-size:0.8rem}
-footer a{color:#94a3b8}</style></head><body>
+footer a{color:#94a3b8}article p a,article li a{color:#006a57;text-decoration:underline;text-underline-offset:.15em}
+</style></head><body>
 <nav class="nav"><div class="container"><a href="/" class="nav-logo">Fun<span>ASR</span></a><div class="nav-links"><a href="/en/#capabilities">Capabilities</a><a href="/en/#usage">How to Use</a><a href="/en/#benchmark">Benchmark</a><a href="/en/#demo">Demo</a><a href="https://modelscope.github.io/FunASR/" target="_blank">Docs</a><a href="/en/quickstart.html">Quickstart</a><a href="/en/models.html">Models</a><a href="/en/ecosystem.html">Ecosystem</a><a href="/en/blog/">Blog</a><a href="/en/vs-whisper.html">vs Whisper</a><a href="/en/donors.html">Donors</a></div><a href="https://www.funasr.com/blog/funasr-transcribe-long-audio.html" style="font-size:0.83rem;font-weight:600;color:var(--text-soft)">中文</a><a href="https://github.com/modelscope/FunASR" target="_blank" class="nav-btn">GitHub ★</a></div></nav>
 <article><div class="container">
-<h1>Long-File Transcription: VAD Segmentation, Batching and Acceptance</h1>
+<h1>Why can a long transcript miss the ending?</h1>
 <p class="post-meta">FunASR Blog · 2026-06-17 · Updated 2026-09-09</p>
-<p>Podcasts, courses and meeting recordings require more than passing a file to a model: resource budgets, pauses, overlapping speech and missing tail speech all matter. This guide uses the <strong>offline SenseVoice + FSMN-VAD path in FunASR 1.4.15</strong> to explain what happens inside a file-level call and what to check before rollout.</p>
-<aside class="limitation-callout" data-long-audio-contract="window">
-<p><strong>Separate windows, files and services.</strong> Open-source Whisper's <code>transcribe()</code> loops over roughly 30-second decoding windows internally. That is not a file-duration limit, and this entry point does not require users to split and stitch every window themselves. Low-level <code>decode()</code>, file transcription and hosted APIs have different contracts. See the <a href="https://github.com/openai/whisper/blob/86098128c0b4f24f0e2aa2994de830614b474227/README.md#L115">official file-transcription guide</a> and <a href="https://github.com/openai/whisper/blob/86098128c0b4f24f0e2aa2994de830614b474227/whisper/transcribe.py#L272">pinned window-loop implementation</a>. This article makes no claim about current cloud upload quotas.</p>
-<p>With an explicitly configured VAD model, FunASR can organize segmentation and recognition inside one <code>generate()</code> call. One call does not imply unlimited duration, fixed memory, complete recognition or realtime streaming.</p>
-</aside>
+<p class="lead" data-editorial="opening">If your team has a transcript but cannot find the final sentence, do not begin by increasing a batch parameter. Trace the recording, the selected speech regions and the returned result first. A nonempty response does not prove complete coverage.</p>
+<p data-editorial="example">Consider an interview whose last remark is audible in the original file but absent from the transcript. That observation alone does not identify a model defect: establish whether the loaded audio includes the end, whether segmentation retains it and whether the client saves the full response.</p>
+<p data-editorial="boundary">The example below is one offline SenseVoice configuration with an external speech detector, not a fix for every missing tail. Silence, segmentation and inference or client failures need different evidence.</p>
+
+<h2>Three places to look before changing parameters</h2>
+<ol><li><strong>The input:</strong> listen to the end of the same decoded file, not another copy with a similar name.</li><li><strong>The boundary:</strong> inspect cuts near the missing sentence. Speech detection chooses regions; it does not verify the words.</li><li><strong>The result:</strong> distinguish an empty record, incomplete response and saved text. Retain errors rather than filling a missing sentence by guesswork.</li></ol>
 <h2>Start with one explicit offline configuration</h2>
 <section data-long-audio-contract="prerequisites">
 <p>Use an already prepared, separate FunASR 1.4.15 environment with PyTorch, working audio-decoding dependencies and access to model weights. Follow the <a href="/en/docs/installation.html">installation and environment guide</a> for platform preparation, then check the <a href="/en/docs/python-api.html">Python SDK guide</a>. The version check below inspects installed package metadata; it is not proof of a complete installation or acoustic inference.</p>
@@ -87,20 +87,6 @@ if not isinstance(text, str) or not text.strip():
     raise RuntimeError("Empty transcript; inspect audio, silence and VAD output")
 print(text)</code></pre>
 <p>This explicit CPU path handles VAD regions individually; <code>batch_size_s</code> is not a CPU parallelism control or a speed recommendation. Empty output needs inspection: silence, VAD selection, input problems or inference errors are possible causes. It is not automatically success or a model defect. The example deliberately stops for inspection and supplies no fabricated transcript output.</p>
-<h2>The resource path inside a file call</h2>
-<section data-long-audio-contract="resources">
-<p>This offline path loads the complete audio waveform into CPU memory, then organizes ASR inputs using VAD regions. It is not a bounded-memory stream that reads only the current segment from disk. Segmentation can change the work in one inference batch, but the full waveform, decoding buffers, segment metadata, outputs and concurrent requests still consume resources.</p>
-<p>For a 16 kHz, mono, float32 waveform alone, one hour is about 230 MB. This is a data-size estimate, not measured peak process RAM or GPU memory, and excludes decoder copies and model state. It cannot establish support for every file or equal GPU memory for one-hour and one-minute inputs. Validate acceptable durations on the chosen hardware, model, audio format and concurrency.</p>
-<p>See <a href="https://github.com/modelscope/FunASR/blob/5be786088ea6ea9db5f1abf18a6c16e550760e10/funasr/auto/auto_model.py#L920">whole-file loading and segment sorting</a> and the <a href="https://github.com/modelscope/FunASR/blob/5be786088ea6ea9db5f1abf18a6c16e550760e10/funasr/utils/load_utils.py#L128">audio-decoding entry point</a>. Source inspection explains the data path; it does not replace peak-memory measurement.</p>
-</section>
-<h2>Two parameters with different boundaries</h2>
-<section data-long-audio-contract="batching">
-<table><thead><tr><th>Parameter</th><th>Meaning</th><th>What it does not guarantee</th></tr></thead><tbody>
-<tr><td><code>max_single_segment_time=30000</code></td><td>An FSMN-VAD endpoint threshold in milliseconds (ms), used in frame-level speech segmentation decisions.</td><td>It is not a file-duration limit or a guarantee of exactly equal segments or cuts at word and sentence boundaries.</td></tr>
-<tr><td><code>batch_size_s=300</code></td><td>A VAD-wrapper batch budget in seconds (s), converted to milliseconds internally. Grouping considers the longest segment duration multiplied by the number of segments.</td><td>It is not simply the sum of segment durations or a hard memory cap; a longer segment may still be processed alone.</td></tr>
-</tbody></table>
-<p><strong>CPU exception:</strong> the current wrapper disables that grouping budget for <code>device="cpu"</code> and handles segments individually. Changing <code>batch_size_s</code> in this example is therefore not evidence of CPU batch-throughput optimization. A prepared and validated GPU setup needs new measurements, not inherited memory or speed conclusions. See <a href="https://github.com/modelscope/FunASR/blob/5be786088ea6ea9db5f1abf18a6c16e550760e10/funasr/auto/auto_model.py#L899">budget units</a> and the <a href="https://github.com/modelscope/FunASR/blob/5be786088ea6ea9db5f1abf18a6c16e550760e10/funasr/auto/auto_model.py#L935">CPU branch and grouping rule</a>.</p>
-</section>
 <h2>Acceptance before admitting long recordings</h2>
 <section data-long-audio-contract="acceptance">
 <ol>
@@ -111,6 +97,26 @@ print(text)</code></pre>
 </ol>
 <p>See the <a href="/en/blog/meeting-transcript-acceptance.html">meeting-transcript acceptance checklist</a> and <a href="/en/docs/benchmark-method.html">reproducible performance guide</a>. The former's MOSS <code>sentence_info</code> audit script has a specific input contract, not an adapter for arbitrary SenseVoice results. Structural checks do not prove text accuracy or complete speech coverage.</p>
 </section>
+<section data-editorial="appendix"><h2>Appendix: windows, resources and parameter units</h2>
+<aside class="limitation-callout" data-long-audio-contract="window">
+<p><strong>Separate windows, files and services.</strong> Open-source Whisper's <code>transcribe()</code> loops over roughly 30-second decoding windows internally. That is not a file-duration limit, and this entry point does not require users to split and stitch every window themselves. Low-level <code>decode()</code>, file transcription and hosted APIs have different contracts. See the <a href="https://github.com/openai/whisper/blob/86098128c0b4f24f0e2aa2994de830614b474227/README.md#L115">official file-transcription guide</a> and <a href="https://github.com/openai/whisper/blob/86098128c0b4f24f0e2aa2994de830614b474227/whisper/transcribe.py#L272">pinned window-loop implementation</a>. This article makes no claim about current cloud upload quotas.</p>
+<p>With an explicitly configured VAD model, FunASR can organize segmentation and recognition inside one <code>generate()</code> call. One call does not imply unlimited duration, fixed memory, complete recognition or realtime streaming.</p>
+</aside>
+<h2>The resource path inside a file call</h2>
+<section data-long-audio-contract="resources">
+<p>This offline path loads the complete audio waveform into CPU memory, then organizes ASR inputs using VAD regions. It is not a bounded-memory stream that reads only the current segment from disk. Segmentation can change the work in one inference batch, but the full waveform, decoding buffers, segment metadata, outputs and concurrent requests still consume resources.</p>
+<p>For a 16 kHz, mono, float32 waveform alone, one hour is about 230 MB. This is a data-size estimate, not measured peak process RAM or GPU memory, and excludes decoder copies and model state. It cannot establish support for every file or equal GPU memory for one-hour and one-minute inputs. Validate acceptable durations on the chosen hardware, model, audio format and concurrency.</p>
+<p>See <a href="https://github.com/modelscope/FunASR/blob/5be786088ea6ea9db5f1abf18a6c16e550760e10/funasr/auto/auto_model.py#L920">whole-file loading and segment sorting</a> and the <a href="https://github.com/modelscope/FunASR/blob/5be786088ea6ea9db5f1abf18a6c16e550760e10/funasr/utils/load_utils.py#L128">audio-decoding entry point</a>. Source inspection explains the data path; it does not replace peak-memory measurement.</p>
+</section>
+<h2>Two parameters with different boundaries</h2>
+<section data-long-audio-contract="batching">
+<ul>
+<li><strong><code>max_single_segment_time=30000</code></strong>: An FSMN-VAD endpoint threshold in milliseconds (ms), used in frame-level speech segmentation decisions. It is not a file-duration limit or a guarantee of exactly equal segments or cuts at word and sentence boundaries.</li>
+<li><strong><code>batch_size_s=300</code></strong>: A VAD-wrapper batch budget in seconds (s), converted to milliseconds internally. Grouping considers the longest segment duration multiplied by the number of segments. It is not simply the sum of segment durations or a hard memory cap; a longer segment may still be processed alone.</li>
+</ul>
+<p><strong>CPU exception:</strong> the current wrapper disables that grouping budget for <code>device="cpu"</code> and handles segments individually. Changing <code>batch_size_s</code> in this example is therefore not evidence of CPU batch-throughput optimization. A prepared and validated GPU setup needs new measurements, not inherited memory or speed conclusions. See <a href="https://github.com/modelscope/FunASR/blob/5be786088ea6ea9db5f1abf18a6c16e550760e10/funasr/auto/auto_model.py#L899">budget units</a> and the <a href="https://github.com/modelscope/FunASR/blob/5be786088ea6ea9db5f1abf18a6c16e550760e10/funasr/auto/auto_model.py#L935">CPU branch and grouping rule</a>.</p>
+</section>
+
 <h2>Choose models and services separately</h2>
 <ul>
 <li>This is an offline SenseVoice example with explicitly configured external FSMN-VAD. Check Paraformer configuration and outputs separately. SenseVoice rich-text tags are not verified emotion accuracy.</li>
@@ -118,32 +124,8 @@ print(text)</code></pre>
 <li>For realtime microphone transcription, select an explicitly supported streaming model and service using the <a href="/en/deploy/">deployment matrix</a>. Smaller offline batches do not create a streaming protocol. See <a href="/en/docs/model-selection.html">model selection</a> for capability differences.</li>
 </ul>
 <p data-long-audio-contract="evidence">This article explains pinned source behavior, not new long-recording performance or accuracy measurements. The previous page's timing and full-coverage promotion lacked complete reproduction conditions and has been removed. Repository history preserves that text; it is not a current deployment promise.</p>
-<!--related-posts-->
-<h2>Related posts</h2>
-<ul class="post-list">
-<li><a href="/en/blog/funasr-vs-whisper-benchmark.html">FunASR vs Whisper Benchmark</a></li>
-<li><a href="/en/blog/sensevoice-deployment-guide.html">SenseVoice Deployment Guide</a></li>
-<li><a href="/en/blog/fun-asr-nano-guide.html">Fun-ASR-Nano Guide</a></li>
-<li><a href="/en/blog/funasr-speaker-diarization.html">Speaker Diarization: Who Spoke When</a></li>
-<li><a href="/en/blog/sensevoice-emotion-language-detection.html">Emotion & Language Detection</a></li>
-<li><a href="/en/blog/funasr-realtime-streaming-asr.html">Real-Time Streaming Speech-to-Text</a></li>
-<li><a href="/en/blog/funasr-cli-transcribe-command-line.html">Transcribe from the Command Line</a></li>
-<li><a href="/en/blog/self-hosted-openai-whisper-api-alternative.html">Self-Hosted OpenAI Whisper API Alternative</a></li>
-<li><a href="/en/blog/generate-subtitles-srt-vtt-from-audio-video.html">Auto-Generate Subtitles (SRT / VTT)</a></li>
-<li><a href="/en/blog/speech-to-text-python-transcribe-audio.html">Speech to Text in Python</a></li>
-<li><a href="/en/blog/funasr-llama-cpp-whisper-cpp-alternative.html">FunASR on llama.cpp (whisper.cpp Alternative)</a></li>
-<li><a href="/en/blog/funasr-vs-faster-whisper-chinese.html">FunASR vs faster-whisper (Chinese/Cantonese)</a></li>
-<li><a href="/en/blog/lightweight-speech-recognition-cpu.html">Lightweight Speech Recognition on CPU</a></li>
-<li><a href="/en/blog/self-hosted-deepgram-assemblyai-alternative.html">Self-Hosted Deepgram/AssemblyAI Alternative</a></li>
-<li><a href="/en/blog/which-funasr-model.html">Which FunASR Model?</a></li>
-<li><a href="/en/blog/cantonese-speech-recognition.html">Cantonese Speech Recognition (SenseVoice)</a></li>
-<li><a href="/en/blog/japanese-speech-recognition.html">Japanese Speech Recognition (SenseVoice)</a></li>
-<li><a href="/en/blog/voice-activity-detection-python.html">Voice Activity Detection in Python</a></li>
-<li><a href="/en/blog/self-hosted-google-aws-azure-speech-to-text.html">Self-Hosted Google/AWS/Azure STT Alternative</a></li>
-<li><a href="/en/blog/chinese-speech-recognition.html">Chinese Speech Recognition in Python</a></li>
-<li><a href="/en/blog/punctuation-restoration-python.html">Punctuation Restoration in Python</a></li>
-<li><a href="/en/blog/speech-to-text-timestamps-python.html">Speech-to-Text with Timestamps in Python</a></li>
-</ul>
+</section>
+<p data-editorial="next-step">Next, use the <a href="/en/blog/meeting-transcript-acceptance.html">meeting-transcript checklist</a> to choose what to listen for at the end of a representative recording. Its downloadable MOSS checker has a different input contract from this SenseVoice recipe.</p>
 </div></article>
 <footer><div class="container">FunASR · Open-source speech recognition by Tongyi Lab · <a href="https://github.com/modelscope/FunASR">GitHub</a></div></footer>
 </body></html>
