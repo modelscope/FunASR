@@ -1,0 +1,84 @@
+name: Validate NumPy compatibility
+
+on:
+  pull_request:
+    paths:
+      - "setup.py"
+      - "funasr/__init__.py"
+      - "funasr/frontends/**"
+      - "funasr/models/emotion2vec/**"
+      - "funasr/models/campplus/**"
+      - "funasr/models/eend/utils/feature.py"
+      - "tests/test_numpy_compatibility.py"
+      - "tests/test_numpy_cluster_compatibility.py"
+      - "tests/test_eend_feature_compatibility.py"
+      - "tests/test_pypi_metadata.py"
+      - ".github/workflows/test-numpy-compatibility.yml"
+  push:
+    branches: [main]
+    paths:
+      - "setup.py"
+      - "funasr/__init__.py"
+      - "funasr/frontends/**"
+      - "funasr/models/emotion2vec/**"
+      - "funasr/models/campplus/**"
+      - "funasr/models/eend/utils/feature.py"
+      - "tests/test_numpy_compatibility.py"
+      - "tests/test_numpy_cluster_compatibility.py"
+      - "tests/test_eend_feature_compatibility.py"
+      - "tests/test_pypi_metadata.py"
+      - ".github/workflows/test-numpy-compatibility.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  numpy-compatibility:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        numpy: ["1.26.4", "2.4.0"]
+    env:
+      OMP_NUM_THREADS: "1"
+      MKL_NUM_THREADS: "1"
+      NUMBA_NUM_THREADS: "1"
+      HF_HUB_OFFLINE: "1"
+      NUMPY_VERSION: ${{ matrix.numpy }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install CPU runtime and requested NumPy version
+        run: |
+          python -m pip install torch==2.10.0 torchaudio==2.10.0 --index-url https://download.pytorch.org/whl/cpu
+          python -m pip install "numpy==$NUMPY_VERSION" -e . pytest einops pytorch-wpe --report install-report.json
+      - name: Record resolved environment and validate dependencies
+        run: |
+          git rev-parse HEAD | tee source-commit.txt
+          python -c "import numpy, os; assert numpy.__version__ == os.environ['NUMPY_VERSION']"
+          python -m pip freeze | tee resolved-dependencies.txt
+          python -m pip check | tee pip-check.txt
+      - name: Exercise real frontend, masking, import and array boundaries
+        run: |
+          python -m pytest -q \
+            tests/test_numpy_compatibility.py \
+            tests/test_numpy_cluster_compatibility.py \
+            tests/test_eend_feature_compatibility.py \
+            tests/test_pypi_metadata.py \
+            --junitxml=numpy-results.xml
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: numpy-${{ matrix.numpy }}-evidence
+          path: |
+            resolved-dependencies.txt
+            pip-check.txt
+            numpy-results.xml
+            source-commit.txt
+            install-report.json
