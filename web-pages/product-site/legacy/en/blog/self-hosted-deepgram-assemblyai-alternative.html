@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Self-Hosted Deepgram / AssemblyAI Alternative: Open-Source Speech-to-Text API | FunASR Blog</title><meta name="description" content="Looking to replace per-minute cloud STT APIs like Deepgram or AssemblyAI? FunASR is open-source, free, self-hostable, keeps audio local, leads on Chinese, and exposes an OpenAI-compatible /v1/audio/transcriptions — migrate by changing base_url."><meta name="keywords" content="deepgram alternative, assemblyai alternative, self-hosted speech to text api, open source speech recognition api, replace cloud stt, on-premise speech recognition, openai compatible stt, FunASR"><link rel="icon" href="/logo.png">
-<meta property="og:title" content="Self-Hosted Deepgram / AssemblyAI Alternative: Open-Source Speech-to-Text API | FunASR Blog"><meta property="og:description" content="Looking to replace per-minute cloud STT APIs like Deepgram or AssemblyAI? FunASR is open-source, free, self-hostable, keeps audio local, leads on Chinese, and exposes an OpenAI-compatible /v1/audio/transcriptions — migrate by changing base_url."><meta property="og:type" content="article"><meta property="og:url" content="https://www.funasr.com/en/blog/self-hosted-deepgram-assemblyai-alternative.html"><meta property="og:image" content="https://www.funasr.com/logo.png">
+<title>Migrating from Deepgram / AssemblyAI to Self-Hosted FunASR | FunASR Blog</title><meta name="description" content="Plan a self-hosted transcription migration: map request and response contracts, authentication, formats, model quality and operating costs. Includes a local FunASR JSON recipe, not a drop-in vendor SDK replacement."><meta name="keywords" content="deepgram alternative, assemblyai alternative, self-hosted speech to text api, open source speech recognition api, replace cloud stt, on-premise speech recognition, openai compatible stt, FunASR"><link rel="icon" href="/logo.png">
+<meta property="og:title" content="Migrating from Deepgram / AssemblyAI to Self-Hosted FunASR | FunASR Blog"><meta property="og:description" content="Plan a self-hosted transcription migration: map request and response contracts, authentication, formats, model quality and operating costs. Includes a local FunASR JSON recipe, not a drop-in vendor SDK replacement."><meta property="og:type" content="article"><meta property="og:url" content="https://www.funasr.com/en/blog/self-hosted-deepgram-assemblyai-alternative.html"><meta property="og:image" content="https://www.funasr.com/logo.png">
 <link rel="canonical" href="https://www.funasr.com/en/blog/self-hosted-deepgram-assemblyai-alternative.html"><link rel="alternate" hreflang="en" href="https://www.funasr.com/en/blog/self-hosted-deepgram-assemblyai-alternative.html"><link rel="alternate" hreflang="zh" href="https://www.funasr.com/blog/self-hosted-deepgram-assemblyai-alternative.html"><link rel="alternate" hreflang="x-default" href="https://www.funasr.com/en/blog/self-hosted-deepgram-assemblyai-alternative.html">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"BlogPosting","headline":"Self-Hosted Deepgram / AssemblyAI Alternative: Open-Source Speech-to-Text API | FunASR Blog","description":"Looking to replace per-minute cloud STT APIs like Deepgram or AssemblyAI? FunASR is open-source, free, self-hostable, keeps audio local, leads on Chinese, and exposes an OpenAI-compatible /v1/audio/transcriptions — migrate by changing base_url.","datePublished":"2026-06-23","dateModified":"2026-06-23","author":{"@type":"Organization","name":"FunASR / Tongyi Lab"},"publisher":{"@type":"Organization","name":"FunASR","logo":{"@type":"ImageObject","url":"https://www.funasr.com/logo.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://www.funasr.com/en/blog/self-hosted-deepgram-assemblyai-alternative.html"},"image":"https://www.funasr.com/logo.png"}
+{"@context":"https://schema.org","@type":"BlogPosting","headline":"Migrating from Deepgram / AssemblyAI to Self-Hosted FunASR | FunASR Blog","description":"Plan a self-hosted transcription migration: map request and response contracts, authentication, formats, model quality and operating costs. Includes a local FunASR JSON recipe, not a drop-in vendor SDK replacement.","datePublished":"2026-06-23","dateModified":"2026-09-09","author":{"@type":"Organization","name":"FunASR / Tongyi Lab"},"publisher":{"@type":"Organization","name":"FunASR","logo":{"@type":"ImageObject","url":"https://www.funasr.com/logo.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://www.funasr.com/en/blog/self-hosted-deepgram-assemblyai-alternative.html"},"image":"https://www.funasr.com/logo.png"}
 </script>
 <style>:root{--primary:#2563eb;--primary-dark:#1d4ed8;--bg:#fff;--surface:#f8fafc;--border:#e2e8f0;--text:#0f172a;--text-soft:#475569;--text-muted:#94a3b8;--radius:12px}
 *{margin:0;padding:0;box-sizing:border-box}
@@ -46,35 +46,54 @@ footer a{color:#94a3b8}
 </style></head><body>
 <nav class="nav"><div class="container"><a href="/en/" class="nav-logo">Fun<span>ASR</span></a><div class="nav-links"><a href="/en/#capabilities">Capabilities</a><a href="/en/#usage">How to Use</a><a href="/en/#benchmark">Benchmark</a><a href="/en/#demo">Demo</a><a href="https://modelscope.github.io/FunASR/" target="_blank">Docs</a><a href="/en/quickstart.html">Quickstart</a><a href="/en/models.html">Models</a><a href="/en/ecosystem.html">Ecosystem</a><a href="/en/blog/">Blog</a><a href="/en/vs-whisper.html">vs Whisper</a><a href="/en/donors.html">Donors</a></div><a href="https://www.funasr.com/blog/self-hosted-deepgram-assemblyai-alternative.html" style="font-size:0.83rem;font-weight:500;color:var(--text-soft)">中文</a><a href="https://github.com/modelscope/FunASR" target="_blank" class="nav-btn">GitHub ★</a></div></nav>
 <article><div class="container">
-<h1>Self-Hosted Alternative to Deepgram &amp; AssemblyAI: Open-Source, Free, Data Stays Local</h1>
-<p class="post-meta">2026-06-23 · FunASR Team</p>
-<p>Cloud speech-to-text APIs like Deepgram, AssemblyAI and Google/Azure Speech bill per minute and require uploading your audio to a third party. If you want to <strong>self-host, pay no per-minute fees, and keep audio on your own machines</strong> — especially for Chinese — <a href="https://github.com/modelscope/FunASR" target="_blank">FunASR</a> is a direct open-source alternative with a built-in <strong>OpenAI-compatible transcription API</strong>: clients just change the base URL.</p>
-
-<h2>Comparison</h2>
-<table>
-<tr><th></th><th>FunASR (self-hosted)</th><th>Deepgram / AssemblyAI</th></tr>
-<tr><td>Price</td><td><strong>Free (MIT), no per-minute billing</strong></td><td>Pay per minute</td></tr>
-<tr><td>Deployment</td><td>Self-hosted (local / private cloud / edge)</td><td>Cloud API (managed)</td></tr>
-<tr><td>Data privacy</td><td><strong>Audio never leaves your machine</strong></td><td>Uploaded to vendor</td></tr>
-<tr><td>Chinese / Cantonese</td><td><strong>Industry-leading</strong></td><td>English-first</td></tr>
-<tr><td>Interface</td><td>OpenAI-compatible (drop-in)</td><td>Proprietary SDKs</td></tr>
-<tr><td>Offline / CPU</td><td>✅ (incl. <a href="/en/llama-cpp.html">llama.cpp single binary</a>)</td><td>❌ cloud only</td></tr>
-</table>
-<p>Cloud APIs win on zero-ops, elastic scaling, and mature English/value-added features; FunASR wins on cost, self-hosting, privacy, and Chinese. Choose by your needs.</p>
-
-<h2>Run an OpenAI-compatible local STT server</h2>
-<pre>pip install funasr
-funasr-server --model sensevoice --device cuda      # or --device cpu
-# → POST http://localhost:8000/v1/audio/transcriptions</pre>
-<p>Then any OpenAI client just changes <code>base_url</code> — no business-code changes:</p>
-<pre>from openai import OpenAI
-client = OpenAI(base_url="http://localhost:8000/v1", api_key="not-needed")
-text = client.audio.transcriptions.create(model="sensevoice", file=open("audio.wav","rb")).text</pre>
-<p>Migrating from Deepgram/AssemblyAI or the OpenAI Whisper API: point requests at your own funasr-server — usage bills go to zero and audio stays local.</p>
-
-<h2>Which model?</h2>
-<p>Use SenseVoice for multilingual + emotion; Paraformer for Chinese + timestamps/hotwords; flagship Fun-ASR-Nano for zh/en/ja plus Chinese dialects/accents; and the separate Fun-ASR-MLT-Nano for 31 languages. See the <a href="/en/blog/which-funasr-model.html">model selection guide</a>.</p>
-<div class="cta"><p><strong>FunASR is open-source, commercial-friendly, and self-hostable.</strong> A Star really helps 👇</p><p><a class="btn" href="https://github.com/modelscope/FunASR" target="_blank">⭐ Star FunASR</a></p><p style="margin-top:10px;font-size:0.85rem">Also: <a href="https://github.com/QwenAudio/SenseVoice" target="_blank">SenseVoice</a> · <a href="https://github.com/QwenAudio/Fun-ASR" target="_blank">Fun-ASR</a> · <a href="https://github.com/modelscope/FunClip" target="_blank">FunClip</a></p></div>
+<h1>Migrating from Deepgram / AssemblyAI to Self-Hosted FunASR: Integration and Acceptance</h1>
+<p class="post-meta">FunASR Blog · 2026-06-23 · Updated 2026-09-09</p>
+<p>A self-hosted transcription migration is an application-contract change: upload protocols, model selection, authentication, result structures and operational ownership all matter. This guide covers file transcription with the <strong>packaged <code>funasr-server</code> in FunASR 1.4.15</strong>. It is not a direct replacement for proprietary Deepgram / AssemblyAI APIs or SDKs, nor a promise of complete cloud-service feature parity.</p>
+<aside class="limitation-callout" id="security-boundary" data-http-contract="security">
+<p><strong>Choose the access boundary first.</strong> <span data-risk="authentication">The packaged service defaults to <code>0.0.0.0</code> and has no built-in authentication.</span> <span data-risk="upload-limit">This FunASR entry point implements no application-level total-upload-size limit.</span> The command below explicitly uses <code>--host 127.0.0.1</code> for a local check where client and backend share the same host network namespace.</p>
+<p data-risk="backend-bypass">Before sharing the service, enforce TLS, authentication, upload limits, capacity and timeout policies at the gateway, and block direct backend access that bypasses it. CORS is not access control; a placeholder API key is not authentication. Read the <a href="/en/docs/security.html">service security guide</a>. This describes deployment risks, not evidence that a particular running service is exposed.</p>
+</aside>
+<h2>List migration requirements before choosing a model</h2>
+<table><thead><tr><th>Application layer</th><th>What to verify</th></tr></thead><tbody>
+<tr><td>Request protocol</td><td>Map the existing SDK or HTTP call to the target route, multipart file upload and declared fields. Check addresses, headers and parameters.</td></tr>
+<tr><td>Task lifecycle</td><td>The local example is a single file-upload transcription, not a streaming session, asynchronous job queue or webhook service. Applications depending on those workflows need separate implementation or an appropriate deployment service.</td></tr>
+<tr><td>Result structure</td><td>Map text, time units, segments, speaker labels and empty results explicitly. Diarization labels are not verified real-world speaker identities; available information differs by model.</td></tr>
+<tr><td>Failure handling</td><td>Check authentication failures, invalid files, timeouts, retries and overload behavior. A client timeout does not prove that background inference has been cancelled.</td></tr>
+<tr><td>Operational ownership</td><td>Plan capacity, monitoring, upgrades, retention and recovery. Evaluate your own recordings instead of choosing from unverified language or price rankings.</td></tr>
+</tbody></table>
+<p>Start with <a href="/en/docs/model-selection.html">model selection</a> and the <a href="/en/deploy/">deployment matrix</a>. For transcription plus speaker diarization, evaluate the integration path for the third-party <a href="/en/docs/moss-transcribe-diarize.html">MOSS-Transcribe-Diarize</a> model. Do not project one backend's capabilities onto every FunASR service.</p>
+<h2>Minimal local integration: verify JSON text first</h2>
+<section data-http-contract="prerequisites">
+<p><strong>Prerequisite: a separate, already prepared and verified FunASR 1.4.15 environment.</strong> This is not a from-scratch installation tutorial. The Python and <code>funasr-server</code> commands must use the same activated environment, with <code>funasr==1.4.15</code>, PyTorch, audio dependencies, FastAPI, Uvicorn, python-multipart, model-weight access and an audio file ready. Use the <a href="/en/docs/installation.html">installation guide</a> for platform dependencies; other versions require a fresh behavior check.</p>
+<pre><code>python -c 'from importlib.metadata import version; assert version("funasr") == "1.4.15", version("funasr")'
+python -m pip check</code></pre>
+<p>The version assertion and <code>pip check</code> inspect package metadata; they do not prove working CUDA, audio decoding or acoustic inference. The command below explicitly selects SenseVoice CPU for an integration check, not a performance recommendation. Do not start two servers on the same port. The separate <a href="/en/docs/http-server.html">repository example HTTP service guide</a> is an implementation comparison: it prepares and starts the example server, not the packaged 1.4.15 environment required here.</p>
+</section>
+<pre><code>funasr-server --host 127.0.0.1 --port 8000 --model sensevoice --device cpu</code></pre>
+<p>From another terminal on the same host, submit an <code>audio.wav</code> file you are authorized to process. Transcript text is printed to the terminal; keep private results out of public logs.</p>
+<pre><code>curl --fail --show-error --silent --max-time 120 \
+  http://127.0.0.1:8000/v1/audio/transcriptions \
+  -F "file=@audio.wav" \
+  -F "model=sensevoice" \
+  -F "response_format=json"</code></pre>
+<p>The expected structure is a JSON object containing <code>text</code>; its content depends on the audio and model. The 120-second client timeout is an example, not an audio-duration or throughput guarantee. For a basic OpenAI Python SDK call, see the <a href="/en/blog/self-hosted-openai-whisper-api-alternative.html">local transcription integration guide</a>. This does not make the original vendor SDK reusable unchanged.</p>
+<h2>Make response-format limits explicit</h2>
+<table data-http-contract="formats"><thead><tr><th>response_format</th><th>Packaged handler behavior</th></tr></thead><tbody>
+<tr data-response-format="json"><td><code>json</code></td><td>Returns a JSON object containing <code>text</code>.</td></tr>
+<tr data-response-format="verbose_json"><td><code>verbose_json</code></td><td>Returns structured JSON with fields including <code>segments</code> and <code>duration</code>. Actual timing and speaker information depend on the model and result.</td></tr>
+<tr data-response-format="text"><td><code>text</code></td><td>Returns a JSON string, not a plain-text response.</td></tr>
+<tr data-response-format="srt"><td><code>srt</code></td><td>Does not produce SRT subtitles; this value reaches the JSON text-object branch. HTTP 200 does not prove that a subtitle file was returned.</td></tr>
+<tr data-response-format="vtt"><td><code>vtt</code></td><td>Does not produce VTT subtitles; this value also reaches the JSON text-object branch.</td></tr>
+</tbody></table>
+<p>The route declares <code>file</code>, <code>model</code>, <code>language</code>, <code>response_format</code> and the extension <code>spk</code>. An extra field being accepted does not prove it was applied.</p>
+<p data-http-contract="schema-authority">For the packaged service, verify fields against its running <code>/openapi.json</code> over a private or restricted operational path and the <a href="https://github.com/modelscope/FunASR/blob/dff96b69f1679953ac53c6643c82c74b43c70db2/funasr/bin/_server_app.py">pinned packaged handler source</a>. The <a href="/en/docs/service-api.html">example-service API schema</a> documents a different implementation, not this packaged handler. Packaged, repository example, vLLM and llama.cpp servers do not share every default, field or response shape.</p>
+<h2>Three acceptance gates before rollout</h2>
+<ol>
+<li><strong>Contract:</strong> run representative controlled requests against old and new implementations. Check fields, text parsing, time units, failures and timeouts; one HTTP 200 is not complete compatibility evidence.</li>
+<li><strong>Quality:</strong> use business recordings to check key entities, overlapping speakers, segmentation and difficult audio. Follow the <a href="/en/blog/meeting-transcript-acceptance.html">meeting-transcript acceptance checklist</a> and record model, hardware and version.</li>
+<li><strong>Security and operations:</strong> test gateway authentication and prevention of backend bypass. A container's <code>127.0.0.1</code> is the container itself; design a restricted network for cross-container access. Assess compute, storage, bandwidth, monitoring and maintenance costs, and review the selected model-weight license separately.</li>
+</ol>
+<p>Self-hosting provides control over data processing, not an automatic guarantee of no-disk audio handling, transcript-free logs or zero cost. Include temporary files, proxies, clients and retention policies in the review. This article does not compare current vendor prices or claim new accuracy or performance results.</p>
 <!--related-posts-->
 <h2>Related posts</h2>
 <ul class="post-list">

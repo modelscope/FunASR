@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Self-Hosted OpenAI Whisper API Alternative: Drop-in /v1/audio/transcriptions with FunASR | FunASR</title><meta name="description" content="Run an OpenAI-compatible speech-to-text server with FunASR: `funasr-server` exposes /v1/audio/transcriptions, and the OpenAI SDK works by changing only base_url. Local, free, private, stronger on Chinese, faster than Whisper. All code tested."><meta name="keywords" content="openai whisper api alternative, self-hosted speech to text api, openai audio transcriptions api, whisper api self-hosted, /v1/audio/transcriptions, openai compatible asr, replace openai whisper api, local whisper api, private speech to text api, funasr server">
-<link rel="icon" href="/logo.png"><meta property="og:title" content="Self-Hosted OpenAI Whisper API Alternative: Drop-in /v1/audio/transcriptions with FunASR"><meta property="og:description" content="Run an OpenAI-compatible speech-to-text server with FunASR: `funasr-server` exposes /v1/audio/transcriptions, and the OpenAI SDK works by changing only base_url. Local, free, private, stronger on Chinese, faster than Whisper. All code tested.">
+<title>Self-Hosted OpenAI Whisper API Alternative: Integration and Security | FunASR Blog</title><meta name="description" content="Integrate local FunASR file transcription with explicit loopback binding, JSON requests, SDK checks, response-format limits and gateway security. Partial API support is not complete cloud-service parity."><meta name="keywords" content="openai whisper api alternative, self-hosted speech to text api, openai audio transcriptions api, whisper api self-hosted, /v1/audio/transcriptions, openai compatible asr, replace openai whisper api, local whisper api, private speech to text api, funasr server">
+<link rel="icon" href="/logo.png"><meta property="og:title" content="Self-Hosted OpenAI Whisper API Alternative: Integration and Security | FunASR Blog"><meta property="og:description" content="Integrate local FunASR file transcription with explicit loopback binding, JSON requests, SDK checks, response-format limits and gateway security. Partial API support is not complete cloud-service parity.">
 <meta property="og:type" content="article"><meta property="og:url" content="https://www.funasr.com/en/blog/self-hosted-openai-whisper-api-alternative.html"><meta property="og:image" content="https://www.funasr.com/logo.png">
 <link rel="canonical" href="https://www.funasr.com/en/blog/self-hosted-openai-whisper-api-alternative.html"><link rel="alternate" hreflang="en" href="https://www.funasr.com/en/blog/self-hosted-openai-whisper-api-alternative.html"><link rel="alternate" hreflang="zh" href="https://www.funasr.com/blog/self-hosted-openai-whisper-api-alternative.html"><link rel="alternate" hreflang="x-default" href="https://www.funasr.com/en/blog/self-hosted-openai-whisper-api-alternative.html">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"BlogPosting","headline":"Self-Hosted OpenAI Whisper API Alternative: Drop-in /v1/audio/transcriptions with FunASR","description":"Run an OpenAI-compatible speech-to-text server with FunASR: `funasr-server` exposes /v1/audio/transcriptions, and the OpenAI SDK works by changing only base_url. Local, free, private, stronger on Chinese, faster than Whisper. All code tested.","datePublished":"2026-06-18","dateModified":"2026-06-18","author":{"@type":"Organization","name":"FunASR / Tongyi Lab"},"publisher":{"@type":"Organization","name":"FunASR","logo":{"@type":"ImageObject","url":"https://www.funasr.com/logo.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://www.funasr.com/en/blog/self-hosted-openai-whisper-api-alternative.html"},"image":"https://www.funasr.com/logo.png"}
+{"@context":"https://schema.org","@type":"BlogPosting","headline":"Self-Hosted OpenAI Whisper API Alternative: Integration and Security | FunASR Blog","description":"Integrate local FunASR file transcription with explicit loopback binding, JSON requests, SDK checks, response-format limits and gateway security. Partial API support is not complete cloud-service parity.","datePublished":"2026-06-18","dateModified":"2026-09-09","author":{"@type":"Organization","name":"FunASR / Tongyi Lab"},"publisher":{"@type":"Organization","name":"FunASR","logo":{"@type":"ImageObject","url":"https://www.funasr.com/logo.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://www.funasr.com/en/blog/self-hosted-openai-whisper-api-alternative.html"},"image":"https://www.funasr.com/logo.png"}
 </script>
 <style>:root{--primary:#2563eb;--primary-dark:#1d4ed8;--bg:#fff;--surface:#f8fafc;--border:#e2e8f0;--text:#0f172a;--text-soft:#475569;--text-muted:#94a3b8;--radius:12px}
 *{margin:0;padding:0;box-sizing:border-box}
@@ -47,79 +47,64 @@ footer a{color:#94a3b8}
 </style></head><body>
 <nav class="nav"><div class="container"><a href="/" class="nav-logo">Fun<span>ASR</span></a><div class="nav-links"><a href="/en/#capabilities">Capabilities</a><a href="/en/#usage">How to Use</a><a href="/en/#benchmark">Benchmark</a><a href="/en/#demo">Demo</a><a href="https://modelscope.github.io/FunASR/" target="_blank">Docs</a><a href="/en/quickstart.html">Quickstart</a><a href="/en/models.html">Models</a><a href="/en/ecosystem.html">Ecosystem</a><a href="/en/blog/">Blog</a><a href="/en/vs-whisper.html">vs Whisper</a><a href="/en/donors.html">Donors</a></div><a href="https://www.funasr.com/blog/self-hosted-openai-whisper-api-alternative.html" style="font-size:0.83rem;font-weight:600;color:var(--text-soft)">中文</a><a href="/go/github" target="_blank" class="nav-btn">GitHub ★</a></div></nav>
 <article><div class="container">
-<h1>Self-Hosted OpenAI Whisper API Alternative: Drop-in /v1/audio/transcriptions with FunASR</h1>
-<p class="post-meta">FunASR Blog · 2026-06-18 · Tutorial</p>
-<p>OpenAI's <code>/v1/audio/transcriptions</code> (the Whisper API) charges per minute, uploads your audio to the cloud, and is rate-limited. If you just need audio turned into text, you can run a server with an <strong>identical interface</strong> on your own machine — existing code switches over by changing a single <code>base_url</code>. FunASR ships exactly that as <code>funasr-server</code>. Every snippet below is tested.</p>
-
-<h2>Start an OpenAI-compatible server in one line</h2>
-<pre><code>pip install -U funasr
-funasr-server --model sensevoice --device cuda     # listens on localhost:8000</code></pre>
-<p>You now have the same two endpoints OpenAI exposes: <code>POST /v1/audio/transcriptions</code> and <code>GET /v1/models</code>.</p>
-
-<h2>Call it with the official OpenAI SDK (just change base_url)</h2>
-<p>Your existing OpenAI code is almost unchanged — point <code>base_url</code> at the local server and put any non-empty <code>api_key</code>:</p>
+<h1>Self-Hosted OpenAI Whisper API Alternative: FunASR Integration and Security</h1>
+<p class="post-meta">FunASR Blog · 2026-06-18 · Updated 2026-09-09</p>
+<p>Self-hosting lets a team choose its speech models, capacity and data-handling policy. This guide covers the <strong>packaged <code>funasr-server</code> in FunASR 1.4.15</strong> and a basic JSON request to <code>POST /v1/audio/transcriptions</code>. It implements part of the OpenAI transcription interface, not the complete hosted service or every SDK and application contract.</p>
+<aside class="limitation-callout" id="security-boundary" data-http-contract="security">
+<p><strong>Choose the access boundary first.</strong> <span data-risk="authentication">The packaged service defaults to <code>0.0.0.0</code> and has no built-in authentication.</span> <span data-risk="upload-limit">This FunASR entry point implements no application-level total-upload-size limit.</span> The command below explicitly uses <code>--host 127.0.0.1</code> for a local check where client and backend share the same host network namespace.</p>
+<p data-risk="backend-bypass">Before sharing the service, enforce TLS, authentication, upload limits, capacity and timeout policies at the gateway, and block direct backend access that bypasses it. CORS is not access control; a placeholder API key is not authentication. Read the <a href="/en/docs/security.html">service security guide</a>. This describes deployment risks, not evidence that a particular running service is exposed.</p>
+</aside>
+<h2>Start with one local JSON transcription</h2>
+<section data-http-contract="prerequisites">
+<p><strong>Prerequisite: a separate, already prepared and verified FunASR 1.4.15 environment.</strong> This is not a from-scratch installation tutorial. The Python and <code>funasr-server</code> commands must use the same activated environment, with <code>funasr==1.4.15</code>, PyTorch, audio dependencies, FastAPI, Uvicorn, python-multipart, model-weight access and an audio file ready. Use the <a href="/en/docs/installation.html">installation guide</a> for platform dependencies; other versions require a fresh behavior check.</p>
+<pre><code>python -c 'from importlib.metadata import version; assert version("funasr") == "1.4.15", version("funasr")'
+python -m pip check</code></pre>
+<p>The version assertion and <code>pip check</code> inspect package metadata; they do not prove working CUDA, audio decoding or acoustic inference. The command below explicitly selects SenseVoice CPU for an integration check, not a performance recommendation. Do not start two servers on the same port. The separate <a href="/en/docs/http-server.html">repository example HTTP service guide</a> is an implementation comparison: it prepares and starts the example server, not the packaged 1.4.15 environment required here.</p>
+</section>
+<pre><code>funasr-server --host 127.0.0.1 --port 8000 --model sensevoice --device cpu</code></pre>
+<p>From another terminal on the same host, upload an <code>audio.wav</code> file you are authorized to process. The command prints transcript content; keep private audio results out of public logs.</p>
+<pre><code>curl --fail --show-error --silent --max-time 120 \
+  http://127.0.0.1:8000/v1/audio/transcriptions \
+  -F "file=@audio.wav" \
+  -F "model=sensevoice" \
+  -F "response_format=json"</code></pre>
+<p>The response is a JSON object containing <code>text</code>. Its content depends on the recording and model. The 120-second client timeout is an example, not a duration guarantee or proof that timed-out inference is cancelled.</p>
+<h2>OpenAI Python SDK: specify the model and format</h2>
+<p>The following basic call uses an environment with the separate <code>openai</code> client installed. A migration must still check model names, fields, response parsing, errors and gateway authentication, not just URL reachability.</p>
 <pre><code>from openai import OpenAI
 
-client = OpenAI(base_url="http://localhost:8000/v1", api_key="not-needed")
-
-with open("audio.wav", "rb") as f:
-    r = client.audio.transcriptions.create(model="sensevoice", file=f)
-print(r.text)
-# -&gt; 欢迎大家来体验达摩院推出的语音识别模型   (the Chinese sample above)</code></pre>
-<p>Listing models works the same way:</p>
-<pre><code>print([m.id for m in client.models.list().data])
-# -&gt; ['fun-asr-nano', 'sensevoice', 'paraformer']</code></pre>
-
-<h2>Or use curl / any HTTP client</h2>
-<pre><code>curl http://localhost:8000/v1/audio/transcriptions \
-  -F "file=@audio.wav" \
-  -F "model=sensevoice"
-# -&gt; {"text": "..."}</code></pre>
-<p>Because the API is OpenAI-compatible, the Node <code>openai</code> package, LangChain, and most existing SDKs connect to it unchanged.</p>
-
-<h2>OpenAI Whisper API vs self-hosted FunASR</h2>
-<table><thead><tr><th></th><th>OpenAI Whisper API</th><th>FunASR self-hosted</th></tr></thead><tbody>
-<tr><td>Cost</td><td>$0.006 / min</td><td>Free (your hardware)</td></tr>
-<tr><td>Privacy</td><td>Audio leaves your machine</td><td>Stays local</td></tr>
-<tr><td>Rate limits</td><td>Yes</td><td>None</td></tr>
-<tr><td>Chinese accuracy</td><td>Mediocre</td><td>Higher (<a href="/en/blog/funasr-vs-whisper-benchmark.html">benchmark</a>)</td></tr>
-<tr><td>Speed</td><td>—</td><td>SenseVoice is non-autoregressive, far faster than Whisper</td></tr>
-<tr><td>Interface</td><td>/v1/audio/transcriptions</td><td>Identical</td></tr>
+client = OpenAI(
+    base_url="http://127.0.0.1:8000/v1",
+    api_key="not-needed",
+    timeout=120.0,
+    max_retries=0,
+)
+with open("audio.wav", "rb") as audio:
+    result = client.audio.transcriptions.create(
+        model="sensevoice", file=audio, response_format="json"
+    )
+print(result.text)</code></pre>
+<h2>Compatibility of the packaged handler</h2>
+<table id="api-contract" data-http-contract="formats"><thead><tr><th>Item</th><th>Current behavior and integration requirement</th></tr></thead><tbody>
+<tr><td>Request</td><td>Multipart upload. The route declares <code>file</code>, <code>model</code>, <code>language</code>, <code>response_format</code> and the FunASR extension <code>spk</code>. Language and speaker capabilities depend on the selected model.</td></tr>
+<tr data-response-format="json"><td><code>json</code></td><td>A JSON object with <code>text</code>, suitable for a first basic transcription check.</td></tr>
+<tr data-response-format="verbose_json"><td><code>verbose_json</code></td><td>Returns structured JSON with fields including <code>segments</code> and <code>duration</code>. Actual timing and speaker information depend on the model and result.</td></tr>
+<tr data-response-format="text"><td><code>text</code></td><td>The packaged handler returns a JSON string, not a standard plain-text response. Do not assume identical cloud-client parsing.</td></tr>
+<tr data-response-format="srt"><td><code>srt</code></td><td>Does not produce SRT subtitles; this value reaches the JSON text-object branch. HTTP 200 does not prove that a subtitle file was returned.</td></tr>
+<tr data-response-format="vtt"><td><code>vtt</code></td><td>Does not produce VTT subtitles; this value also reaches the JSON text-object branch.</td></tr>
+<tr><td>Other fields and protocols</td><td><code>prompt</code>, <code>temperature</code> and <code>timestamp_granularities</code> are not declared capabilities of this route. It is not a streaming WebSocket, translation or complete cloud API. An extra field causing no error does not prove it was applied.</td></tr>
 </tbody></table>
-
-<h2>Which model to pick</h2>
+<p data-http-contract="schema-authority">For the packaged service, verify fields against its running <code>/openapi.json</code> over a private or restricted operational path and the <a href="https://github.com/modelscope/FunASR/blob/dff96b69f1679953ac53c6643c82c74b43c70db2/funasr/bin/_server_app.py">pinned packaged handler source</a>. The <a href="/en/docs/service-api.html">example-service API schema</a> documents a different implementation, not this packaged handler. Packaged, repository example, vLLM and llama.cpp servers do not share every default, field or response shape.</p>
+<h2>Before connecting Open WebUI or another application</h2>
 <ul>
-<li><code>sensevoice</code> — default; non-autoregressive, very fast, Mandarin, Cantonese, English, Japanese, and Korean, with emotion/events. Best everyday choice.</li>
-<li><code>fun-asr-nano</code> — flagship LLM decoder for zh/en/ja plus Chinese dialects/accents (needs vLLM).</li>
-<li>For 31 languages, deploy the separate <code>FunAudioLLM/Fun-ASR-MLT-Nano-2512</code> checkpoint.</li>
-<li><code>paraformer</code> — classic, production-grade Chinese.</li>
+<li>Inspect the application's actual model alias, file type and <code>response_format</code>, plus how it handles success, empty text, errors and timeouts.</li>
+<li>A container's <code>127.0.0.1</code> is the container itself. A host loopback listener does not become reachable merely by changing a URL to <code>host.docker.internal</code>. Cross-container setups need a restricted private network and matching gateway authentication.</li>
+<li>Basic, Bearer and OIDC credentials are not interchangeable. Do not reuse the local placeholder as a production credential. Preloading one model is not a model-admission policy.</li>
+<li>Verify the entire path with controlled audio before admitting real traffic. Follow the <a href="https://github.com/modelscope/FunASR/blob/main/examples/openai_api/CLIENTS.md">maintained client recipes</a>.</li>
 </ul>
-<p>Just set <code>model=</code> in the request — no server restart needed.</p>
-
-<h2>What changes when migrating from OpenAI</h2>
-<ul>
-<li><strong>base_url</strong>: point it at your <code>funasr-server</code>.</li>
-<li><strong>api_key</strong>: not validated locally — any non-empty string works.</li>
-<li><strong>Everything else</strong>: the <code>client.audio.transcriptions.create(...)</code> call is the same.</li>
-</ul>
-
-<h2>Use FunASR as the speech-to-text in Open-WebUI</h2>
-<p><strong>Open-WebUI</strong> (the 150k-star self-hosted LLM interface) lets its speech-to-text (STT) point at any OpenAI-compatible endpoint. Since <code>funasr-server</code> <em>is</em> OpenAI-compatible, you just point it there — <strong>no plugin, no Open-WebUI code changes</strong> — and get more accurate Chinese transcription than the built-in Whisper, fully local and free.</p>
-<p>1. Start FunASR (as above):</p>
-<pre>funasr-server --model sensevoice --device cuda   # listens on localhost:8000</pre>
-<p>2. In Open-WebUI: <strong>Admin Panel &rarr; Settings &rarr; Audio &rarr; Speech-to-Text</strong>, set Engine to <strong>OpenAI</strong> and fill in:</p>
-<ul>
-<li>API Base URL: <code>http://localhost:8000/v1</code> (if Open-WebUI runs in Docker and FunASR on the host, use <code>http://host.docker.internal:8000/v1</code>)</li>
-<li>API Key: any non-empty string (funasr-server does not validate it)</li>
-<li>STT Model: <code>sensevoice</code> (or <code>paraformer</code> / <code>fun-asr-nano</code>)</li>
-</ul>
-<p>With Docker Compose this is the same as a few environment variables:</p>
-<pre>AUDIO_STT_ENGINE=openai
-AUDIO_STT_OPENAI_API_BASE_URL=http://host.docker.internal:8000/v1
-AUDIO_STT_OPENAI_API_KEY=funasr
-AUDIO_STT_MODEL=sensevoice</pre>
-<p>Now Open-WebUI's microphone / voice input runs through FunASR — better Chinese accuracy, data never leaves your machine. The same config works for any tool that supports a custom OpenAI STT endpoint (LibreChat, AnythingLLM, etc.).</p>
-<div class="cta"><p>FunASR is Tongyi Lab's open-source, industrial-grade speech recognition toolkit.</p><a class="btn" href="/go/github" target="_blank">Star FunASR on GitHub ★</a></div>
+<h2>Compare complete deployments, not just API prices</h2>
+<p>Self-hosting has compute, storage, bandwidth, maintenance and monitoring costs. Data control depends on the client, proxy, temporary files, logs and retention policy; neither no-disk handling nor leak-free transcripts are automatic. Review model-weight licenses separately from the toolkit's code license.</p>
+<p>Choose by language, latency, hardware and speaker requirements using <a href="/en/docs/model-selection.html">model selection</a>, <a href="/en/docs/moss-transcribe-diarize.html">MOSS transcription and diarization</a> and the <a href="/en/deploy/">deployment matrix</a>. This article supplies no new accuracy or performance ranking. For acceptance criteria, see the <a href="/en/blog/meeting-transcript-acceptance.html">meeting-audio checklist</a>.</p>
 <!--related-posts-->
 <h2>Related posts</h2>
 <ul class="post-list">
