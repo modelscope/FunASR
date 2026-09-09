@@ -18617,7 +18617,7 @@
     n_fft = 2 * (Y.shape[1] - 1)
     sr = 8000
     n_mels = 23
-    mel_basis = librosa.filters.mel(sr, n_fft, n_mels)
+    mel_basis = librosa.filters.mel(sr=sr, n_fft=n_fft, n_mels=n_mels)
     Y = np.dot(Y**2, mel_basis.T)
     Y = np.log10(np.maximum(Y, 1e-10))
     mean = np.mean(Y, axis=0)
