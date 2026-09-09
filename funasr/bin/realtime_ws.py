@@ -1421,9 +1421,125 @@ def create_vad(vad_model, args):
     return DynamicStreamingVAD(session_model)
 
 
+class ReceiveBufferOverflow(RuntimeError):
+    """A connection exceeded its bounded application receive queue."""
+
+
+class RealtimeReceiveBuffer:
+    """Receive independently of inference without mutating the ASR session."""
+
+    def __init__(self, websocket, max_messages=128, max_bytes=16 * 1024 * 1024):
+        for name, value in (("max_messages", max_messages), ("max_bytes", max_bytes)):
+            if type(value) is not int or value <= 0:
+                raise ValueError(f"{name} must be a positive integer")
+        self.websocket = websocket
+        self.max_messages = max_messages
+        self.max_bytes = max_bytes
+        self._messages = deque()
+        self._bytes = 0
+        self._ready = asyncio.Event()
+        self._done = False
+        self._error = None
+        self._reader = None
+        self.peak_messages = 0
+        self.peak_bytes = 0
+
+    def start(self):
+        if self._reader is not None or self._done:
+            raise RuntimeError("receive buffer can only be started once")
+        self._reader = asyncio.create_task(self._receive(), name="funasr-receive")
+
+    @property
+    def pending_audio(self):
+        return bool(
+            self._messages
+            and isinstance(self._messages[0][0], bytes)
+            and self._messages[0][0]
+        )
+
+    def _clear(self):
+        self._messages.clear()
+        self._bytes = 0
+
+    def check_connection(self):
+        """Recheck receive failure after an in-flight session operation finishes."""
+        if self._error is not None:
+            raise self._error
+        return getattr(self.websocket, "close_code", None) is None
+
+    async def _receive(self):
+        try:
+            async for message in self.websocket:
+                size = len(message) if isinstance(message, bytes) else len(message.encode("utf-8"))
+                if len(self._messages) >= self.max_messages or self._bytes + size > self.max_bytes:
+                    self._error = ReceiveBufferOverflow("Realtime receive buffer exceeded")
+                    self._clear()
+                    self._ready.set()
+                    await self.websocket.close(code=1013, reason="Realtime receive buffer exceeded")
+                    return
+                self._messages.append((message, size))
+                self._bytes += size
+                self.peak_messages = max(self.peak_messages, len(self._messages))
+                self.peak_bytes = max(self.peak_bytes, self._bytes)
+                self._ready.set()
+            if getattr(self.websocket, "close_code", None) is not None:
+                self._clear()
+        except Exception as error:
+            self._error = self._error or error
+            self._clear()
+        finally:
+            self._done = True
+            self._ready.set()
+
+    def __aiter__(self):
+        return self
+
+    async def __anext__(self):
+        while True:
+            if self._error is not None:
+                raise self._error
+            if self._messages:
+                message, size = self._messages.popleft()
+                self._bytes -= size
+                return message
+            if self._done:
+                raise StopAsyncIteration
+            self._ready.clear()
+            await self._ready.wait()
+
+    async def aclose(self):
+        try:
+            if self._reader is not None:
+                self._reader.cancel()
+                await asyncio.gather(self._reader, return_exceptions=True)
+        finally:
+            # Completed tasks and receive tracebacks can retain their last payload.
+            self._reader = None
+            self._error = None
+            self._clear()
+            self._done = True
+            self._ready.set()
+
+
 async def run_session_work(_args, operation, *operation_args, **operation_kwargs):
     """Run one session off-loop; shared ASR calls are serialized by the batcher."""
-    return await asyncio.to_thread(operation, *operation_args, **operation_kwargs)
+    worker = asyncio.create_task(
+        asyncio.to_thread(operation, *operation_args, **operation_kwargs)
+    )
+    try:
+        return await asyncio.shield(worker)
+    except asyncio.CancelledError:
+        # Cancelling an asyncio waiter cannot stop a thread mutating the session.
+        while not worker.done():
+            try:
+                await asyncio.shield(worker)
+            except asyncio.CancelledError:
+                continue
+            except Exception:
+                break
+        if not worker.cancelled():
+            worker.exception()
+        raise
 
 
 def log_session_stats(session):
@@ -1464,9 +1580,16 @@ async def handle_client(websocket, args):
     last_decode_time = 0
     stats_interval = getattr(args, "log_session_stats_interval", 0.0)
     last_stats_time = time.time()
+    receive = RealtimeReceiveBuffer(
+        websocket,
+        max_messages=getattr(args, "ws_receive_max_messages", 128),
+        max_bytes=getattr(args, "ws_receive_max_bytes", 16 * 1024 * 1024),
+    )
+    skipped_partials = 0
+    receive.start()
 
     try:
-        async for message in websocket:
+        async for message in receive:
             if isinstance(message, str):
                 cmd = message.strip()
                 if cmd.upper() == "START":
@@ -1521,6 +1644,8 @@ async def handle_client(websocket, args):
                     else:
                         commit_started = time.perf_counter()
                         result = await run_session_work(args, session.commit)
+                        if not receive.check_connection():
+                            break
                         await websocket.send(json.dumps(result))
                         last_decode_time = time.time()
                         elapsed_ms = (time.perf_counter() - commit_started) * 1000
@@ -1543,6 +1668,8 @@ async def handle_client(websocket, args):
                             result = await run_session_work(
                                 args, session.decode, is_final=True
                             )
+                        if not receive.check_connection():
+                            break
                         await websocket.send(json.dumps(result))
                         logger.info(
                             "Final: %d sentences", len(result.get("sentences", []))
@@ -1551,6 +1678,8 @@ async def handle_client(websocket, args):
                     await websocket.send(json.dumps({"event": "stopped"}))
             elif isinstance(message, bytes) and session.is_active:
                 await run_session_work(args, session.add_audio, message)
+                if not receive.check_connection():
+                    break
                 now = time.time()
                 if (
                     stats_interval
@@ -1560,18 +1689,39 @@ async def handle_client(websocket, args):
                     log_session_stats(session)
                     last_stats_time = now
                 if now - last_decode_time >= decode_interval and session.should_decode():
+                    if receive.pending_audio:
+                        skipped_partials += 1
+                        continue
                     result = await run_session_work(args, session.decode, is_final=False)
+                    if not receive.check_connection():
+                        break
                     await websocket.send(json.dumps(result))
                     last_decode_time = now
 
     except ConnectionClosed:
         logger.info("Client disconnected")
+    except ReceiveBufferOverflow:
+        logger.warning("Client exceeded the bounded receive queue; connection closed with 1013")
     except Exception as e:
         logger.error(f"Error: {e}", exc_info=True)
+    finally:
+        await receive.aclose()
+        if getattr(args, "log_decode_profile", False):
+            logger.info(
+                "Realtime receive profile: peak_messages=%d peak_bytes=%d skipped_partials=%d",
+                receive.peak_messages, receive.peak_bytes, skipped_partials,
+            )
 
 
 def _positive_or_none(value):
     return None if value <= 0 else value
+
+
+def _positive_int(value):
+    number = int(value)
+    if number <= 0:
+        raise argparse.ArgumentTypeError("must be a positive integer")
+    return number
 
 
 def build_websocket_serve_kwargs(args):
@@ -1701,6 +1851,14 @@ def build_arg_parser():
                         help="WebSocket close handshake timeout in seconds.")
     parser.add_argument("--ws-max-size", type=int, default=10 * 1024 * 1024,
                         help="Maximum incoming WebSocket message size in bytes.")
+    parser.add_argument(
+        "--ws-receive-max-messages", type=_positive_int, default=128,
+        help="Maximum queued application messages per connection; overflow closes with 1013.",
+    )
+    parser.add_argument(
+        "--ws-receive-max-bytes", type=_positive_int, default=16 * 1024 * 1024,
+        help="Maximum queued application payload bytes per connection; overflow closes with 1013.",
+    )
     parser.add_argument("--log-session-stats-interval", type=float, default=0.0,
                         help="Log bounded long-session state every N seconds; <=0 disables.")
     return parser
