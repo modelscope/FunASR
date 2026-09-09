@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Did fine-tuning actually make your model better? | FunASR</title>
+<meta name="description" content="A clearly synthetic example explains trustworthy references, checkpoint selection under old-domain constraints, and final service acceptance.">
+<meta property="og:title" content="Did fine-tuning actually make your model better?"><meta property="og:description" content="A clearly synthetic example explains trustworthy references, checkpoint selection under old-domain constraints, and final service acceptance."><meta property="og:type" content="article"><meta property="og:url" content="https://www.funasr.com/en/blog/sensevoice-finetuning-acceptance.html"><meta property="og:image" content="https://www.funasr.com/img/continual-eval-example.png">
+<link rel="canonical" href="https://www.funasr.com/en/blog/sensevoice-finetuning-acceptance.html"><link rel="alternate" hreflang="zh-CN" href="https://www.funasr.com/blog/sensevoice-finetuning-acceptance.html">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"Did fine-tuning actually make your model better?","datePublished":"2026-09-10","dateModified":"2026-09-10","author":{"@type":"Organization","name":"FunASR"},"mainEntityOfPage":{"@type":"WebPage","@id":"https://www.funasr.com/en/blog/sensevoice-finetuning-acceptance.html"},"description":"A clearly synthetic example explains trustworthy references, checkpoint selection under old-domain constraints, and final service acceptance."}</script>
+<style>body{margin:0;font-family:system-ui,sans-serif;color:#202827;line-height:1.8;background:#fff}*{box-sizing:border-box}.container{max-width:920px;margin:auto;padding:0 24px}a{color:#006a57;text-decoration:underline;text-underline-offset:.15em}.nav{padding:14px 0;border-bottom:1px solid #dce3df}.nav .container{display:flex;gap:20px;align-items:center}.nav-logo{font-weight:700}.nav-links{margin-left:auto}article{padding:48px 0 64px}h1{font-size:2rem;line-height:1.3;letter-spacing:0}h2{font-size:1.4rem;margin-top:36px;letter-spacing:0}.lead{font-size:1.1rem}.meta,figcaption{color:#515c56;font-size:.875rem}figure{margin:24px 0}.article-image{display:block;max-width:100%;height:auto}code{overflow-wrap:anywhere}table{width:100%;border-collapse:collapse}th,td{padding:10px;text-align:left;vertical-align:top;border-bottom:1px solid #dce3df}th{background:#f3f6f5}footer{padding:24px;border-top:1px solid #dce3df}@media(max-width:700px){.container{padding:0 20px}h1{font-size:1.6rem}table{font-size:.875rem}th,td{padding:6px}.nav-links{display:none}}</style>
+<style>
+table[data-continual-eval], .legacy-page table[data-continual-eval] { min-width: 0; table-layout: fixed; }
+table[data-continual-eval] th:first-child { width: 43%; }
+table[data-continual-eval] th:nth-child(2) { width: 21%; }
+table[data-continual-eval] th:nth-child(n+3) { width: 18%; }
+table[data-continual-eval] th, table[data-continual-eval] td { overflow-wrap: anywhere; }
+@media (max-width: 700px) {
+  table[data-continual-eval] th, table[data-continual-eval] td { padding: 8px 4px; }
+}
+</style>
+</head><body>
+<nav class="nav"><div class="container"><a class="nav-logo" href="/en/">FunASR</a><div class="nav-links"><a href="/en/blog/">Blog</a></div><a href="/blog/sensevoice-finetuning-acceptance.html">中文</a><a href="/go/github">GitHub</a></div></nav>
+<article><div class="container">
+<h1>Did fine-tuning actually make your model better?</h1>
+<p class="meta">2026-09-10 · Technical explanations · 6 min read</p>
+<p class="lead" data-editorial="opening">Your model now recognizes a new dialect, but the Mandarin it used to handle has become worse. The training loss is falling and the checkpoint is called best. Can you ship it? The useful question is whether the application improved under the same trustworthy evaluation rules.</p>
+<p data-editorial="example">This synthetic example makes the trade-off concrete: A has an overall CER of 12.4%, versus B at 12.9%, but A regresses by 6 percentage points on spontaneous Cantonese. Every number is invented for teaching. No acoustic training was run and these are not SenseVoice measurements.</p>
+<p data-editorial="boundary">Lowest loss, lowest aggregate CER and readiness to ship are different conclusions. Passing this example does not validate a real model. Your application must define acceptable old-domain regression in advance.</p>
+<h2>First, validate the ruler</h2>
+<p>In a <a href="https://github.com/modelscope/FunASR/issues/3388#issuecomment-5578763142">SenseVoice continual-learning report</a>, the developer withdrew earlier new-dialect CER results: references and training labels came from the same unverified process. Even whether the labels were verbatim transcripts or written paraphrases had not been checked. This can invalidate checkpoint selection without causing a training error.</p>
+<p>Listen to a sample and record the labeling policy: number formatting, fillers, dialect words and whether paraphrasing is allowed. Separate speakers between training and evaluation, and independently check the origin of the references. Scoring a model against its own generated transcripts is not independent validation.</p>
+<p>Distinguish the <strong>validation sets used for tuning and checkpoint selection</strong> from a <strong>separate test set reserved for final acceptance</strong>. If references or CER normalization change, re-evaluate the original model and every candidate under that same policy. Do not subtract an old baseline from a newly defined score. Repeatedly choosing configurations on a test set makes it part of selection.</p>
+<h2>Then, stop one aggregate score from making the decision</h2>
+<p>Suppose the application serves Mandarin, Cantonese and a new dialect. Each slice below has exactly 1,000 reference characters. CER counts substitutions, deletions and insertions, divided by reference characters. For this synthetic example only, each old-domain slice may regress by <strong>at most 1 percentage point</strong>. That limit is not an official recommendation.</p>
+<table data-continual-eval><thead><tr><th>Validation slice</th><th>Original</th><th>A</th><th>B</th></tr></thead><tbody>
+<tr><td>Mandarin · read</td><td>6%</td><td>5%</td><td>6%</td></tr>
+<tr><td>Mandarin · spontaneous</td><td>8%</td><td>8%</td><td>8.5%</td></tr>
+<tr><td>Cantonese · read</td><td>9%</td><td>9%</td><td>9.5%</td></tr>
+<tr><td>Cantonese · spontaneous</td><td>12%</td><td>18%</td><td>12.5%</td></tr>
+<tr><td>New dialect</td><td>60%</td><td>22%</td><td>28%</td></tr>
+</tbody></table>
+<figure><img class="article-image" src="/img/continual-eval-example.png" alt="Synthetic example: A regresses 6 percentage points on spontaneous Cantonese; B's worst old-domain regression is 0.5 points"><figcaption>Synthetic old-domain validation changes, not training curves or a measured benchmark. The dashed line is this example's chosen 1-point limit.</figcaption></figure>
+<p>Total errors divided by total reference characters gives 19%, 12.4% and 12.9% for the original, A and B. A wins on both aggregate and new-dialect CER, yet violates the old-domain constraint. B qualifies for independent testing and service acceptance, not automatic deployment. With unequal real slice sizes, do not simply average percentages. Report every slice and its sample size so a large population cannot hide a smaller language.</p>
+<p>Keep units explicit: moving from 12% CER to 18% adds 6 percentage points, a 50% relative increase. Relative regression is undefined when the baseline is zero. Small differences on small samples may also be noise: use more independent speakers and listen to errors rather than treating decimal places as proof of reliability.</p>
+<h2>Finally, read best literally and test the real output path</h2>
+<p>FunASR <a href="https://github.com/modelscope/FunASR/pull/3677">#3677</a> fixed missing selection metrics being treated as zero; the fix is included in 1.4.15. The maintained SenseVoice recipe explicitly ranks by total validation loss. Its <code>acc_rich</code> is not ASR accuracy or CER. The name <code>model.pt.best</code> refers only to the configured, valid metric; it cannot replace application constraints.</p>
+<p>Use a new output directory when changing the ranking metric. Updating software cannot restore deleted checkpoints or automatically repair historical artificial-zero rankings. Re-evaluate candidates that remain. Averaged weights are another candidate to test, not an assumed improvement over every source checkpoint.</p>
+<p>Run fixed audio through <strong>model output → exported runtime or server → client</strong>. After adding a language tag, the model may return valid text while an old downstream allowlist discards it. Preserve intermediate outputs and check the tokenizer, model mapping and parsing contract. Do not disable all validation merely to obtain nonempty text, or assume an existing vocabulary token is an unused slot that can be repurposed freely.</p>
+<p>Keep a rollback-ready acceptance record: original and candidate weight hashes, data and annotation-policy versions, normalization rules, per-slice results, the fixed request and final client output. Use only appropriately authorized data. Check old-domain retention and silent empty-output failures in the real path before a gradual rollout. None of this claims that catastrophic forgetting or CTC blank bias has been solved.</p>
+<p data-editorial="next-step">Next, open the version-pinned <a href="https://github.com/modelscope/FunASR/blob/v1.4.15/examples/industrial_data_pretraining/sense_voice/CONTINUAL_FINETUNING.md">SenseVoice continual fine-tuning guide</a>. Write down your validation slices, separate test set and acceptance limits before starting the next training run.</p>
+</div></article><footer><div class="container">FunASR · Technical explanations</div></footer>
+</body></html>

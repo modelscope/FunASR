@@ -3,6 +3,9 @@
   "source": "https://www.funasr.com/ public static corpus",
   "captured": "2026-07-26",
   "files": {
+    "blog/sensevoice-finetuning-acceptance.html": "df48083c643321de767b17f9055bd28e26552974e6fb97c834ba3680b8ff0612",
+    "en/blog/sensevoice-finetuning-acceptance.html": "a45590971d7b41fb126b59053fa4bf25b7a9882d8d9b4a73c7ed982b2fb01f62",
+    "img/continual-eval-example.png": "20b7a0de64fdd08ea761d67a7ccd7ce9a421f3669d9a212b176124630cc0f259",
     "blog/fun-asr-nano-transformers.html": "139401dd9790362bb7c8d935eb1241f51af67ae6135e5c268699f64707941719",
     "en/blog/fun-asr-nano-transformers.html": "0cb7a1cab4210a29622b17154b3ad59b0f2d6be67829ef12060f5d5780738c8f",
     "img/fun-asr-nano-native-waveform.png": "930517464ffb47bc7f9051dbdcb5422e1b3daa5c6abaa455a8bf072359ae0f0b",

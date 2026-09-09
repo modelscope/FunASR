@@ -78,7 +78,7 @@ for (const prefix of ['', 'en/']) {
       }
       await page.locator(`[data-blog-more] a[href="/${prefix}blog/archive/"]`).click();
       const archive = page.locator('[data-blog-view="archive"]');
-      await expect(archive.locator('[data-blog-story]')).toHaveCount(35);
+      await expect(archive.locator('[data-blog-story]')).toHaveCount(36);
       await page.screenshot({ path: testInfo.outputPath('archive.png') });
       await archive.locator(`a[href="/${prefix}blog/self-hosted-deepgram-assemblyai-alternative.html"]`).click();
       await expect(page.locator('article h1')).toBeVisible();
