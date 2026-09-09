@@ -6,7 +6,7 @@
 
 | 路径 | 适合场景 | 从这里开始 | 运维提示 |
 |---|---|---|---|
-| 原生 Transformers | 已使用 Hugging Face 处理器与生成接口的 Python 应用 | [原生 Fun-ASR-Nano 指南](./transformers_native_zh.md) | 官方 `-hf` checkpoint 与固定源码；2026-09-09 核验的稳定版 5.16.1 尚未包含。是 Python 推理入口，不是 HTTP 或实时服务器。 |
+| 原生 Transformers | Nano 首次转写、Notebook 与 Hugging Face Python 应用 | [原生 Fun-ASR-Nano 指南](./transformers_native_zh.md) | 正式版 **5.17.0**，官方 `-hf` checkpoint，CPU 与批处理示例。是 Python 推理入口，不是 HTTP 或实时服务器。 |
 | Colab Notebook | 浏览器 smoke test、首次评估、可分享 demo | [Colab 快速体验](../examples/colab/README_zh.md) | 不需要本地环境；首次运行会下载模型，GPU runtime 更快。 |
 | Python API | Notebook、离线任务、首次模型评测 | [README 快速开始](../README_zh.md#快速开始) | 最简单；调用方自己负责批处理、重试和文件管理。 |
 | OpenAI 兼容 API | 私有语音 API、Agent、Dify/LangChain/AutoGen 风格客户端 | [OpenAI API 示例](../examples/openai_api/README_zh.md) | 已支持 OpenAI audio API 的应用最容易接入。 |

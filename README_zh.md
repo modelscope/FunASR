@@ -28,6 +28,14 @@
 
 ## 快速开始
 
+### 原生 Transformers
+
+使用 Hugging Face API 转写 Fun-ASR-Nano，先看 [Transformers 5.17.0 CPU 快速开始](./docs/transformers_native_zh.md)，不需要安装 FunASR 工具库或执行远程 Python 代码。
+
+[Space](https://huggingface.co/spaces/FunAudioLLM/Fun-ASR-Nano) · [Notebook](https://colab.research.google.com/github/QwenAudio/Fun-ASR/blob/main/examples/colab/fun_asr_nano_transformers.ipynb) · [Python / batch examples](https://github.com/QwenAudio/Fun-ASR/tree/main/examples/transformers)
+
+### FunASR 工具库与流水线
+
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/modelscope/FunASR/blob/main/examples/colab/funasr_quickstart.ipynb)
 
 不想先配置本地环境？可以打开 [Colab 快速体验](./examples/colab/README_zh.md) 在浏览器里转写公开样例或上传自己的音频。
@@ -150,7 +158,7 @@ checkpoint/revision、音频集、硬件、批量大小、预热、计时范围�
 
 - **MOSS-Transcribe-Diarize** 已接入 FunASR 服务、Docker、Kubernetes、vLLM/SGLang 工作流和 FunClip，一次完成长音频转写、时间戳与匿名说话人标注。[部署 MOSS ->](./docs/moss_transcribe_diarize_zh.md)
 - **FunASR 1.4.15** 新增经过测试的 NumPy 2 兼容支持，修复流式 KWS/VAD 边界处理和 checkpoint 排序。升级命令：`python -m pip install -U "funasr==1.4.15"`。[发布说明与验证范围 ->](https://github.com/modelscope/FunASR/releases/tag/v1.4.15)
-- **原生 Transformers：** Fun-ASR-Nano [已合入上游](https://github.com/huggingface/transformers/pull/46180)。使用官方 `-hf` checkpoint 与固定源码；稳定版 5.16.1 尚未包含。[安装与推理 ->](./docs/transformers_native_zh.md)
+- **原生 Transformers：** 正式版 **5.17.0** 已支持 Fun-ASR-Nano。官方 `-hf` 权重、CPU 示例与 Notebook：[安装与推理 ->](./docs/transformers_native_zh.md)
 
 > 完整改动记录和可下载资产请查看 [GitHub Releases](https://github.com/modelscope/FunASR/releases)。
 

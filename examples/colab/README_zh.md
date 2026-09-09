@@ -1,5 +1,7 @@
 # FunASR Colab 快速体验
 
+**Fun-ASR-Nano 原生 Transformers：** [打开新 Notebook](https://colab.research.google.com/github/QwenAudio/Fun-ASR/blob/main/examples/colab/fun_asr_nano_transformers.ipynb)。正式版 5.17.0、CPU、官方样例与自己的录音，无需 FunASR 工具库。下方保留独立的工具库 Notebook。
+
 [English](README.md) | 简体中文 | [日本語](README_ja.md) | [한국어](README_ko.md)
 
 无需提前配置本地 Python 环境，直接在浏览器里运行 FunASR。

@@ -26,8 +26,9 @@ the [deployment matrix](../docs/deployment_matrix.md) for serving options.
 Use [FunAudioLLM/Fun-ASR-Nano-2512-hf](https://huggingface.co/FunAudioLLM/Fun-ASR-Nano-2512-hf)
 with `AutoProcessor` and `AutoModelForSpeechSeq2Seq`, not the original toolkit,
 native vLLM or GGUF loader. [Installation and inference](../docs/transformers_native.md)
-pin the merged source and official revision. As checked on 2026-09-09, stable
-Transformers 5.16.1 does not contain this native model. Matching torchaudio is required.
+use released Transformers **5.17.0** and a pinned official revision. CPU examples,
+batching and a notebook are available; matching torchaudio is required. This
+zh/en/ja export returns text, not word timestamps or speaker identities.
 
 ### FunASR toolkit
 

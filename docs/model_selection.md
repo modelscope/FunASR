@@ -1,5 +1,9 @@
 # FunASR Model Selection Guide
 
+## Transformers-first Nano evaluation
+
+For Chinese, English and Japanese transcription through Hugging Face APIs, start with [native Transformers 5.17.0](./transformers_native.md), the official `FunAudioLLM/Fun-ASR-Nano-2512-hf` checkpoint and the CPU example. The toolkit and service paths below remain separate; the native export does not add timestamps, speakers or an HTTP endpoint.
+
 Use this guide when you are choosing a first model, comparing FunASR with Whisper or a cloud ASR provider, or deciding which model alias to expose through the OpenAI-compatible API.
 
 ## Fast default path

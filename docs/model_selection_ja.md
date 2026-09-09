@@ -1,5 +1,9 @@
 # FunASR モデル選択ガイド
 
+## Transformers で Nano を試す
+
+中国語・英語・日本語の文字起こしには [Transformers 5.17.0 ガイド（英語）](./transformers_native.md) と公式 `FunAudioLLM/Fun-ASR-Nano-2512-hf` checkpoint を使えます。CPU サンプルがあり、toolkit とサービスの経路は別です。ネイティブ出力はテキストで、タイムスタンプ・話者・HTTP サーバーを追加しません。
+
 初めて FunASR を試すとき、Whisper やクラウド ASR から移行するとき、または OpenAI 互換 API で公開するモデル alias を決めるときに使ってください。
 
 ## 迷ったらここから

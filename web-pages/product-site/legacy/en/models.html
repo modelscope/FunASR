@@ -88,14 +88,14 @@ footer a{color:#60a5fa}
 
 <div class="model-card">
 <div class="model-name">Fun-ASR-Nano <span class="badge badge-orange">⭐ Flagship / default</span></div>
-<div class="model-meta">800M params &middot; LLM-based (SenseVoice encoder + Qwen3-0.6B) &middot; <a href="/go/fun-asr">GitHub</a> &middot; <a href="https://huggingface.co/FunAudioLLM/Fun-ASR-Nano-2512">HuggingFace</a></div>
-<p data-native-transformers>Native Transformers support is merged upstream. Use the <a href="https://huggingface.co/FunAudioLLM/Fun-ASR-Nano-2512-hf">official -hf checkpoint</a>, distinct from original, -vllm and GGUF artifacts. The <a href="/en/docs/native-transformers.html">pinned installation and inference guide</a> explains why stable 5.16.1 is not sufficient.</p>
-<div class="model-desc">Next-generation LLM-based ASR model. Combines SenseVoice's audio encoder with Qwen3-0.6B language model for superior context understanding. Supports vLLM acceleration for high-throughput batch inference and real-time streaming. The released <code>model.pt</code> checkpoint does not provide reliable checkpoint-native character timestamps (<a href="https://github.com/QwenAudio/Fun-ASR/issues/106" target="_blank" rel="noopener">issue #106</a>).</div>
+<div class="model-meta">800M params &middot; LLM-based (SenseVoice encoder + Qwen3-0.6B) &middot; <a href="/go/fun-asr">GitHub</a> &middot; <a href="https://huggingface.co/FunAudioLLM/Fun-ASR-Nano-2512-hf">HuggingFace</a></div>
+<p data-native-transformers>Start with released <strong>Transformers 5.17.0</strong> and the <a href="https://huggingface.co/FunAudioLLM/Fun-ASR-Nano-2512-hf">official -hf checkpoint</a>. <a href="/en/docs/native-transformers.html">CPU quickstart and batches</a> · <a href="https://huggingface.co/spaces/FunAudioLLM/Fun-ASR-Nano">Try online</a> · <a href="https://colab.research.google.com/github/QwenAudio/Fun-ASR/blob/main/examples/colab/fun_asr_nano_transformers.ipynb">Notebook</a>. Text transcription for zh/en/ja; original, -vllm and GGUF artifacts use different interfaces.</p>
+<div class="model-desc">SenseVoice audio encoder plus Qwen3-0.6B decoder. Native Transformers produces text; service and edge paths use their own vLLM or GGUF artifacts. Timestamp and speaker capabilities depend on the exact checkpoint and pipeline: see the <a href="https://github.com/QwenAudio/Fun-ASR#capability-boundaries">model capability boundaries</a>.</div>
 <div class="model-features">
-<span class="badge badge-green">vLLM accelerated</span>
+<span class="badge badge-green">vLLM runtime</span>
 <span class="badge badge-blue">zh/en/ja + Chinese dialects/accents</span>
-<span class="badge badge-blue">Streaming</span>
-<span class="badge badge-orange">LLM-quality</span>
+<span class="badge badge-blue">Transformers</span>
+<span class="badge badge-orange">Context hints</span>
 </div>
 <h3>When to use</h3>
 <p>Best for high-throughput batch processing, real-time subtitles, and scenarios where LLM-quality context understanding improves output (e.g., proper nouns and code-switching). For reliable character-level timestamps, use Paraformer.</p>

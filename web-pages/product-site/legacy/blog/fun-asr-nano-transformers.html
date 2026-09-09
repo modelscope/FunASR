@@ -16,6 +16,7 @@
 <p class="lead" data-editorial="opening">如果你已经在用 Transformers，接入语音识别时先确认权重属于这条接口。同一个模型名字，不代表工具包、服务端和原生 Python 能互换文件。</p>
 <p data-editorial="example">例如，文件下载完了，应用却提示“不认识模型类型”。先检查安装包有没有实现、权重是不是对应格式，不要急着把问题归为文件损坏。本篇选择官方 <code>-hf</code> 权重。</p>
 <p data-editorial="boundary">这条路径生成转写文本，不是现成服务。加载成功不等于拿到了字级时间戳、说话人分离或实时流式能力。</p>
+<p>想直接试一段录音？查看 <a href="/docs/native-transformers.html">Transformers 5.17.0 快速开始</a>，或打开 <a href="https://huggingface.co/spaces/FunAudioLLM/Fun-ASR-Nano">Space</a>、<a href="https://colab.research.google.com/github/QwenAudio/Fun-ASR/blob/main/examples/colab/fun_asr_nano_transformers.ipynb">Notebook</a>。先得到一次转写，再扩展批处理与服务部署。</p>
 
 <figure><img src="/img/fun-asr-nano-native-waveform.png" width="1800" height="510" alt="用于功能检查的官方中文样本波形，横轴为秒，纵轴为振幅"><figcaption>官方中文样本原始波形：约 5.62 秒、单声道 48 kHz。运行指南前应明确重采样为 16 kHz。波形图不是准确率或性能结果。</figcaption></figure>
 <section data-native-section="formats"><h2>同一模型家族，四条不同路径</h2>
@@ -30,7 +31,7 @@
 
 
 <section data-native-section="observations"><h2>一次真实短录音检查说明了什么？</h2>
-<p>在固定源码、官方 -hf revision 和 CPU float32 环境中，我们运行了中文单录音、英文单录音、中英混合批量，以及一个带关键词的中文请求。四个请求均返回文本并在上限前生成 EOS；批量结果顺序正确。这是两份公开短音频的功能检查，不是准确率排行榜。</p>
+<p>在正式版 Transformers 5.17.0、官方 -hf revision 和 CPU float32 环境中，我们运行了中文单录音、英文单录音、中英混合批量，以及一个带关键词的中文请求。四个请求均返回文本并在上限前生成 EOS；批量结果顺序正确。这是两份公开短音频的功能检查，不是准确率排行榜。</p>
 <div class="table-wrap"><table><thead><tr><th>同一份中文音频</th><th>原始输出</th></tr></thead><tbody>
 <tr><td>不传关键词</td><td>开饭时间早上九点至下午五点。</td></tr>
 <tr><td>候选关键词：开放时间</td><td>开饭时间：早上九点至下午五点。</td></tr>
@@ -46,7 +47,7 @@
 
 <section data-editorial="appendix"><h2>附录：环境与接口细节</h2>
 <section data-native-section="release"><h2>先确认安装包，不只看合并状态</h2>
-<p><a href="https://github.com/huggingface/transformers/pull/46180">PR #46180</a> 于 2026-09-09 合并。当天核验的稳定版 <code>5.16.1</code> 还没有原生 <code>fun_asr_nano</code> 文件；源码包显示的 <code>5.17.0.dev0</code> 也不是下一稳定版发布承诺。请从<a href="/docs/native-transformers.html">固定版本接入指南</a>安装明确的源码提交，不要只执行一次无版本约束的升级就假定已经兼容。</p>
+<p><a href="https://github.com/huggingface/transformers/pull/46180">PR #46180</a> 于 2026-09-09 合并，随后发布的 <strong>Transformers 5.17.0</strong> 已包含原生实现。我们检查了实际 wheel，并在 CPU 上复测真实中英文、热词和批处理。现在可以直接使用<a href="/docs/native-transformers.html">正式包快速开始</a>，不再要求从源码安装。</p>
 <p>这种区别影响排障方向：未知模型类型可能是安装包未包含实现，不一定是 checkpoint 损坏；模型能下载也不代表所选运行时认识它。</p></section>
 <section data-native-section="mechanics"><h2>从声音到文本，中间实际经过什么？</h2>
 <ol><li><strong>音频样本。</strong>采样率与声道是数据含义的一部分。48 kHz 的数组不能只改参数标成 16 kHz；那会改变模型看到的时间尺度。指南先要求明确的单声道 16 kHz WAV。</li>

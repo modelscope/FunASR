@@ -2,6 +2,8 @@
 
 # Python SDK tutorial
 
+> **Only need native Fun-ASR-Nano transcription?** Start with [Transformers 5.17.0](../transformers_native.md). It loads the separate `-hf` checkpoint without the FunASR toolkit. This page covers the `funasr.AutoModel` toolkit path; do not mix dependencies, parameters or output contracts.
+
 Start with [installation and environment verification](../installation/installation.md). This path covers one transcript, result inspection, VAD, batching, and model-specific options. For model selection, languages, dependencies, and model cards, use the [Model Zoo](../../model_zoo/readme.md), not a universal capability list. No local setup yet? See the [Colab quickstart](../../examples/colab/README.md).
 
 FunASR software uses the [MIT license](../../LICENSE). Each model weight has its own license: record the full model ID and revision, and follow its model card. The [FunASR Model License Agreement](../../MODEL_LICENSE) applies only when the model card explicitly links to it. Third-party integrations remain third-party models; for example, MOSS-Transcribe-Diarize is from OpenMOSS, not a FunASR-trained checkpoint.

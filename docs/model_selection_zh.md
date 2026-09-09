@@ -1,5 +1,9 @@
 # FunASR 模型选择指南
 
+## 先用 Transformers 体验 Nano
+
+通过 Hugging Face API 转写中、英、日语音，先用 [原生 Transformers 5.17.0](./transformers_native_zh.md)、官方 `FunAudioLLM/Fun-ASR-Nano-2512-hf` 权重和 CPU 示例。下文的工具库与服务路径仍独立；原生导出不自动提供时间戳、说话人或 HTTP 接口。
+
 当你第一次选择模型、评估是否从 Whisper 或云端 ASR 迁移，或者准备通过 OpenAI 兼容 API 暴露模型别名时，可以先看这份指南。
 
 ## 默认快速路径

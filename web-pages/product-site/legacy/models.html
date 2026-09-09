@@ -88,14 +88,14 @@ footer a{color:#60a5fa}
 
 <div class="model-card">
 <div class="model-name">Fun-ASR-Nano <span class="badge badge-orange">⭐ 旗舰 / 默认推荐</span></div>
-<div class="model-meta">800M 参数 &middot; LLM 架构 (SenseVoice 编码器 + Qwen3-0.6B) &middot; <a href="/go/fun-asr">GitHub</a> &middot; <a href="https://huggingface.co/FunAudioLLM/Fun-ASR-Nano-2512">HuggingFace</a></div>
-<p data-native-transformers>原生 Transformers 路径已合入上游：使用 <a href="https://huggingface.co/FunAudioLLM/Fun-ASR-Nano-2512-hf">官方 -hf checkpoint</a>，不要与原始权重、-vllm 或 GGUF 混用。<a href="/docs/native-transformers.html">固定版本的安装与推理指南</a>说明 5.16.1 稳定版尚未包含的边界。</p>
-<div class="model-desc">新一代 LLM 架构 ASR 模型。融合 SenseVoice 音频编码器与 Qwen3-0.6B 语言模型，具备更强的上下文理解能力。支持 vLLM 加速的高吞吐批量推理与实时流式服务。发布的 <code>model.pt</code> checkpoint 不提供可靠的原生字级时间戳（<a href="https://github.com/QwenAudio/Fun-ASR/issues/106" target="_blank" rel="noopener">issue #106</a>）。</div>
+<div class="model-meta">800M 参数 &middot; LLM 架构 (SenseVoice 编码器 + Qwen3-0.6B) &middot; <a href="/go/fun-asr">GitHub</a> &middot; <a href="https://huggingface.co/FunAudioLLM/Fun-ASR-Nano-2512-hf">HuggingFace</a></div>
+<p data-native-transformers>从正式版 <strong>Transformers 5.17.0</strong> 和 <a href="https://huggingface.co/FunAudioLLM/Fun-ASR-Nano-2512-hf">官方 -hf 权重</a>开始。<a href="/docs/native-transformers.html">CPU 快速上手与批处理</a> · <a href="https://huggingface.co/spaces/FunAudioLLM/Fun-ASR-Nano">在线体验</a> · <a href="https://colab.research.google.com/github/QwenAudio/Fun-ASR/blob/main/examples/colab/fun_asr_nano_transformers.ipynb">Notebook</a>。支持中英日文本转写；原始、-vllm 和 GGUF 权重的接口不同。</p>
+<div class="model-desc">融合 SenseVoice 音频编码器与 Qwen3-0.6B 解码器。原生 Transformers 返回文本；服务与端侧分别使用对应的 vLLM、GGUF 权重。时间戳和说话人能力取决于具体 checkpoint 与流水线，见<a href="https://github.com/QwenAudio/Fun-ASR/blob/main/README_zh.md#能力边界">模型能力边界</a>。</div>
 <div class="model-features">
-<span class="badge badge-green">vLLM 加速</span>
+<span class="badge badge-green">vLLM 服务</span>
 <span class="badge badge-blue">中/英/日 + 中文方言/口音</span>
-<span class="badge badge-blue">实时流式</span>
-<span class="badge badge-orange">LLM 级别</span>
+<span class="badge badge-blue">Transformers</span>
+<span class="badge badge-orange">上下文提示</span>
 </div>
 <h3>适用场景</h3>
 <p>适合高吞吐批处理、实时字幕，以及 LLM 级别上下文理解可提升输出质量的场景（如专有名词、代码混合语音）；需要可靠字级时间戳时请使用 Paraformer。</p>

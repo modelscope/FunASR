@@ -2,6 +2,8 @@
 
 # Python SDK 教程
 
+> **只需 Fun-ASR-Nano 原生推理？** 使用 [Transformers 5.17.0 快速开始](../transformers_native_zh.md)。它加载独立的 `-hf` 权重，不要求 FunASR 工具库。本页保留 `funasr.AutoModel` 工具库路径，两者的依赖、参数和输出不可混用。
+
 先完成[安装与环境验证](../installation/installation_zh.md)。本页按首次转写、结果检查、VAD、批处理、模型专属选项的顺序介绍。模型选择、语言、依赖和模型卡请查阅[模型仓库](../../model_zoo/readme_zh.md)，不要将某个示例当成所有模型的通用能力。尚未配置本地环境时，可先看 [Colab 快速体验](../../examples/colab/README_zh.md)。
 
 FunASR 软件采用 [MIT 许可](../../LICENSE)。每个模型权重都有各自的许可：请记录完整模型 ID 与 revision，并以对应模型卡为准。只有模型卡明确链接 [FunASR 模型许可协议](../../MODEL_LICENSE) 时，该协议才适用。第三方集成仍属于第三方模型，例如 MOSS-Transcribe-Diarize 来自 OpenMOSS，不是 FunASR 训练的权重。

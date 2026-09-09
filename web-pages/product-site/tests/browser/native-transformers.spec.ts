@@ -43,6 +43,8 @@ for (const prefix of ['', 'en/']) {
         'href', new RegExp(`/docs/transformers_native${prefix ? '' : '_zh'}\\.md$`),
       );
       await expect(page.locator('.docs-article')).toContainText('torchaudio==2.10.0+cpu');
+      await expect(page.locator('.docs-article')).toContainText('transformers==5.17.0');
+      await expect(page.locator('.docs-article a[href*="fun_asr_nano_transformers.ipynb"]')).toBeVisible();
       expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
       await page.screenshot({ path: testInfo.outputPath('guide-top.png') });
       await page.goto(`/${prefix}models.html`);

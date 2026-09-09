@@ -1,5 +1,7 @@
 # Python SDK: AutoModel
 
+> **Only need native Fun-ASR-Nano transcription?** Start with [Transformers 5.17.0](./transformers_native.md). It loads the separate `-hf` checkpoint without the FunASR toolkit. This page covers the `funasr.AutoModel` toolkit path; do not mix dependencies, parameters or output contracts.
+
 [简体中文](python_api_zh.md) | [Installation](installation/installation.md) | [Model selection](model_selection.md)
 
 `from funasr import AutoModel` runs models inside your Python process. It is not an HTTP client and does not implement the entire OpenAI API. This guide describes the implementation in this checkout, not every historical FunASR release or upstream checkpoint.

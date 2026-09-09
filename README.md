@@ -29,6 +29,14 @@
 
 ## Quick Start
 
+### Native Transformers
+
+For Fun-ASR-Nano transcription with the Hugging Face API, start with the [Transformers 5.17.0 CPU quickstart](./docs/transformers_native.md). No FunASR toolkit or remote Python code is needed.
+
+[Space](https://huggingface.co/spaces/FunAudioLLM/Fun-ASR-Nano) · [Notebook](https://colab.research.google.com/github/QwenAudio/Fun-ASR/blob/main/examples/colab/fun_asr_nano_transformers.ipynb) · [Python / batch examples](https://github.com/QwenAudio/Fun-ASR/tree/main/examples/transformers)
+
+### FunASR toolkit and pipelines
+
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/modelscope/FunASR/blob/main/examples/colab/funasr_quickstart.ipynb)
 
 No local setup? Open the [Colab quickstart](./examples/colab/) to transcribe a public sample or upload your own audio in a browser.
@@ -55,7 +63,7 @@ PY
 Only use `device="cuda"` when this prints `True`; otherwise use `device="cpu"`
 or reinstall PyTorch with the correct CUDA wheel.
 
-**Flagship model — Fun-ASR-Nano** (LLM-ASR for Chinese, English, and Japanese, plus Chinese dialect groups and regional accents; needs a GPU):
+**FunASR toolkit GPU example: Fun-ASR-Nano** (Chinese, English, Japanese, and Chinese dialect groups and regional accents; the separate native Transformers CPU path is linked above):
 
 ```python
 from funasr import AutoModel
@@ -357,7 +365,7 @@ recordings with the same evaluation scope.
 
 - **MOSS-Transcribe-Diarize** brings long-form ASR, timestamps, and anonymous speaker labels to FunASR services, Docker, Kubernetes, vLLM/SGLang workflows, and FunClip. [Deploy MOSS ->](./docs/moss_transcribe_diarize.md)
 - **FunASR 1.4.15** adds tested NumPy 2 compatibility and fixes streaming KWS/VAD boundaries and checkpoint ranking. Install with `python -m pip install -U "funasr==1.4.15"`. [Release and verification scope ->](https://github.com/modelscope/FunASR/releases/tag/v1.4.15)
-- **Native Transformers:** Fun-ASR-Nano [merged upstream](https://github.com/huggingface/transformers/pull/46180). Use the official `-hf` checkpoint and pinned source; stable 5.16.1 does not include it. [Installation and inference ->](./docs/transformers_native.md)
+- **Native Transformers:** Released **5.17.0** supports Fun-ASR-Nano with the official `-hf` checkpoint, CPU examples and a notebook. [Get started ->](./docs/transformers_native.md)
 
 > See [GitHub Releases](https://github.com/modelscope/FunASR/releases) for the complete changelog and downloadable assets.
 

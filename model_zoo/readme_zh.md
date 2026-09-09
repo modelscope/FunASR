@@ -24,9 +24,9 @@
 
 [FunAudioLLM/Fun-ASR-Nano-2512-hf](https://huggingface.co/FunAudioLLM/Fun-ASR-Nano-2512-hf)
 使用 `AutoProcessor` 和 `AutoModelForSpeechSeq2Seq`，不是原始工具包、原生 vLLM 或
-GGUF 的加载路径。[安装与推理指南](../docs/transformers_native_zh.md)固定了上游提交和官方
-模型 revision。2026-09-09 核验的稳定版 Transformers 5.16.1 尚未包含该原生模型，
-并且这条路径需要匹配的 torchaudio。
+GGUF 的加载路径。[安装与推理指南](../docs/transformers_native_zh.md)使用正式版
+Transformers **5.17.0** 与固定模型 revision，提供 CPU、批处理和 Notebook 示例。
+需要匹配的 torchaudio；该中英日原生导出返回文本，不提供字级时间戳或说话人身份。
 
 ### FunASR 工具包
 
