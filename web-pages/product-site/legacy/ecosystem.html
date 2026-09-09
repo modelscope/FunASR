@@ -246,7 +246,7 @@ footer a{color:#60a5fa}
 <div class="card">
 <div class="card-title"><a href="https://github.com/langflow-ai/langflow">Langflow</a></div>
 <div class="card-stars">75K+ stars</div>
-<div class="card-desc">可视化工作流与 Agent 平台，已通过 <a href="https://github.com/langflow-ai/langflow/pull/14225">#14225</a> 合并专用 FunASR speech-to-text 组件。默认连接本地 <code>/v1</code> 与 <code>sensevoice</code>，支持可选网关鉴权和语言选择；自托管服务启用 SSRF 防护时，请把服务主机加入 allow-list。</div>
+<div class="card-desc">FunASR 转写组件已通过 <a href="https://github.com/langflow-ai/langflow/pull/14225">#14225</a> 合入 <code>release-1.13.0</code>；正式版 <code>Langflow 1.12.1</code> 和 <code>lfx-bundles 1.1.23</code> <strong>尚未包含</strong>该组件（2026-09-10 核验）。<a href="https://github.com/langflow-ai/langflow/blob/8a56d1b1c93c30661984f3626e8969e41cfcf10a/src/bundles/lfx-bundles/src/lfx_bundles/funasr/funasr_transcription.py">已审阅源码</a>默认使用 <code>/v1</code> 与 <code>sensevoice</code>，支持网关鉴权、语言选择和私有主机 SSRF allow-list。发行前可直接使用 <a href="https://github.com/modelscope/FunASR/tree/main/examples/openai_api">FunASR API</a>。</div>
 <div><span class="card-tag">Workflow</span><span class="card-tag">Local FunASR</span><span class="card-tag">OpenAI 兼容</span></div>
 </div>
 <div class="card">

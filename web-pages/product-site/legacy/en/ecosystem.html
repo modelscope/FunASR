@@ -247,7 +247,7 @@ footer a{color:#60a5fa}
 <div class="card">
 <div class="card-title"><a href="https://github.com/langflow-ai/langflow">Langflow</a></div>
 <div class="card-stars">75K+ stars</div>
-<div class="card-desc">A visual workflow and agent platform with a dedicated FunASR speech-to-text component merged in <a href="https://github.com/langflow-ai/langflow/pull/14225">#14225</a>. It defaults to local <code>/v1</code> and <code>sensevoice</code>, with optional gateway authentication and language selection; add a self-hosted service host to Langflow's SSRF allow-list when that protection is enabled.</div>
+<div class="card-desc">FunASR transcription was merged into <code>release-1.13.0</code> via <a href="https://github.com/langflow-ai/langflow/pull/14225">#14225</a>, but is <strong>not included</strong> in stable <code>Langflow 1.12.1</code> or <code>lfx-bundles 1.1.23</code> (checked 2026-09-10). The <a href="https://github.com/langflow-ai/langflow/blob/8a56d1b1c93c30661984f3626e8969e41cfcf10a/src/bundles/lfx-bundles/src/lfx_bundles/funasr/funasr_transcription.py">reviewed source</a> defaults to <code>/v1</code> and <code>sensevoice</code>, with gateway auth, language selection and a private-host SSRF allow-list. Until its release, use the <a href="https://github.com/modelscope/FunASR/tree/main/examples/openai_api">FunASR API</a> directly.</div>
 <div><span class="card-tag">Workflow</span><span class="card-tag">Local FunASR</span><span class="card-tag">OpenAI-compat</span></div>
 </div>
 <div class="card">
