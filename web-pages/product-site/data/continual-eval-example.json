@@ -1,0 +1,46 @@
+{
+  "synthetic": true,
+  "old_domain_limit_pp": 1,
+  "slices": [
+    {
+      "label": "Mandarin / read",
+      "old_domain": true,
+      "reference_characters": 1000,
+      "baseline_errors": 60,
+      "a_errors": 50,
+      "b_errors": 60
+    },
+    {
+      "label": "Mandarin / spontaneous",
+      "old_domain": true,
+      "reference_characters": 1000,
+      "baseline_errors": 80,
+      "a_errors": 80,
+      "b_errors": 85
+    },
+    {
+      "label": "Cantonese / read",
+      "old_domain": true,
+      "reference_characters": 1000,
+      "baseline_errors": 90,
+      "a_errors": 90,
+      "b_errors": 95
+    },
+    {
+      "label": "Cantonese / spontaneous",
+      "old_domain": true,
+      "reference_characters": 1000,
+      "baseline_errors": 120,
+      "a_errors": 180,
+      "b_errors": 125
+    },
+    {
+      "label": "New dialect",
+      "old_domain": false,
+      "reference_characters": 1000,
+      "baseline_errors": 600,
+      "a_errors": 220,
+      "b_errors": 280
+    }
+  ]
+}

@@ -10,6 +10,19 @@
   "lead_image": "/img/funclip-v2-1-0-interface.jpg",
   "articles": [
     {
+      "slug": "sensevoice-finetuning-acceptance",
+      "category": "explanations",
+      "reviewed": true,
+      "zh": {
+        "title": "微调后，怎样确认模型真的更好？",
+        "summary": "从一次持续学习反馈出发，先验证评测尺子，再选择 checkpoint，最后检查真实服务。"
+      },
+      "en": {
+        "title": "Did fine-tuning actually make your model better?",
+        "summary": "Validate the ruler, choose a checkpoint under old-domain constraints, then test the real service."
+      }
+    },
+    {
       "slug": "cantonese-speech-recognition",
       "category": "applications",
       "reviewed": false,

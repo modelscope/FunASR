@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="zh"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>微调后，怎样确认模型真的更好？ | FunASR</title>
+<meta name="description" content="从一个明确标注的合成案例出发，核验参考文本、分语种选 checkpoint，再检查真实服务，避免把最低 loss 当成上线保证。">
+<meta property="og:title" content="微调后，怎样确认模型真的更好？"><meta property="og:description" content="从一个明确标注的合成案例出发，核验参考文本、分语种选 checkpoint，再检查真实服务，避免把最低 loss 当成上线保证。"><meta property="og:type" content="article"><meta property="og:url" content="https://www.funasr.com/blog/sensevoice-finetuning-acceptance.html"><meta property="og:image" content="https://www.funasr.com/img/continual-eval-example.png">
+<link rel="canonical" href="https://www.funasr.com/blog/sensevoice-finetuning-acceptance.html"><link rel="alternate" hreflang="en" href="https://www.funasr.com/en/blog/sensevoice-finetuning-acceptance.html">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"微调后，怎样确认模型真的更好？","datePublished":"2026-09-10","dateModified":"2026-09-10","author":{"@type":"Organization","name":"FunASR"},"mainEntityOfPage":{"@type":"WebPage","@id":"https://www.funasr.com/blog/sensevoice-finetuning-acceptance.html"},"description":"从一个明确标注的合成案例出发，核验参考文本、分语种选 checkpoint，再检查真实服务，避免把最低 loss 当成上线保证。"}</script>
+<style>body{margin:0;font-family:system-ui,sans-serif;color:#202827;line-height:1.8;background:#fff}*{box-sizing:border-box}.container{max-width:920px;margin:auto;padding:0 24px}a{color:#006a57;text-decoration:underline;text-underline-offset:.15em}.nav{padding:14px 0;border-bottom:1px solid #dce3df}.nav .container{display:flex;gap:20px;align-items:center}.nav-logo{font-weight:700}.nav-links{margin-left:auto}article{padding:48px 0 64px}h1{font-size:2rem;line-height:1.3;letter-spacing:0}h2{font-size:1.4rem;margin-top:36px;letter-spacing:0}.lead{font-size:1.1rem}.meta,figcaption{color:#515c56;font-size:.875rem}figure{margin:24px 0}.article-image{display:block;max-width:100%;height:auto}code{overflow-wrap:anywhere}table{width:100%;border-collapse:collapse}th,td{padding:10px;text-align:left;vertical-align:top;border-bottom:1px solid #dce3df}th{background:#f3f6f5}footer{padding:24px;border-top:1px solid #dce3df}@media(max-width:700px){.container{padding:0 20px}h1{font-size:1.6rem}table{font-size:.875rem}th,td{padding:6px}.nav-links{display:none}}</style>
+<style>
+table[data-continual-eval], .legacy-page table[data-continual-eval] { min-width: 0; table-layout: fixed; }
+table[data-continual-eval] th:first-child { width: 43%; }
+table[data-continual-eval] th:nth-child(2) { width: 21%; }
+table[data-continual-eval] th:nth-child(n+3) { width: 18%; }
+table[data-continual-eval] th, table[data-continual-eval] td { overflow-wrap: anywhere; }
+@media (max-width: 700px) {
+  table[data-continual-eval] th, table[data-continual-eval] td { padding: 8px 4px; }
+}
+</style>
+</head><body>
+<nav class="nav"><div class="container"><a class="nav-logo" href="/">FunASR</a><div class="nav-links"><a href="/blog/">技术博客</a></div><a href="/en/blog/sensevoice-finetuning-acceptance.html">EN</a><a href="/go/github">GitHub</a></div></nav>
+<article><div class="container">
+<h1>微调后，怎样确认模型真的更好？</h1>
+<p class="meta">2026-09-10 · 技术解读 · 阅读约 6 分钟</p>
+<p class="lead" data-editorial="opening">你让模型学会了新方言，却发现原来能听懂的普通话变差了。训练曲线在下降，文件名也叫 best，为什么仍不能放心上线？要回答的不是“训得顺不顺”，而是“用同一把可信的尺子，业务有没有变好”。</p>
+<p data-editorial="example">下面用一个合成案例说明：A 的整体 CER 为 12.4%，B 为 12.9%，但 A 在粤语自发口语上退化了 6 个百分点。所有数字都是教学构造，没有运行声学训练，也不是 SenseVoice 的测量结果。</p>
+<p data-editorial="boundary">最低 loss、最低整体 CER 和可上线是三个不同结论。通过本文的例子不等于真实模型通过验收；旧域退化阈值必须由你的业务提前决定。</p>
+<h2>第一步：先确认尺子，再比较模型</h2>
+<p>在 <a href="https://github.com/modelscope/FunASR/issues/3388#issuecomment-5578763142">一次 SenseVoice 持续微调反馈</a>中，开发者主动撤回了早期的新方言 CER：参考文本和训练标签来自同一套未经独立核验的流程，连“逐字转写还是书面语意译”都没有先确认。这种错误不一定让训练报错，却会让选点依据失效。</p>
+<p>先抽样回听，并写下标注规范：数字怎么写、语气词留不留、方言词如何记录、是否允许意译。训练与评估要隔离说话人，也要检查参考文本来源。把模型自己的转写再次当参考答案，并不能独立验证它。</p>
+<p>区分<strong>用于调参和选点的验证集</strong>，以及<strong>最终验收时才使用的独立测试集</strong>。修改了参考文本或 CER 归一化规则，就在同一新口径下重测原模型和所有候选；不要把旧基线与新分数直接相减。若总在同一测试集上试配置，它实际上已经参与了选点。</p>
+<h2>第二步：不要让一个总分替你做决定</h2>
+<p>假设业务同时服务普通话、粤语和新方言。下面每一格都恰有 1,000 个参考字符，CER 是替换、删除、插入错误数之和除以参考字符数。这个合成例子把旧域每格的允许退化设为 <strong>最多 1 个百分点</strong>，只是演示，不是官方推荐阈值。</p>
+<table data-continual-eval><thead><tr><th>验证切片</th><th>原模型</th><th>A</th><th>B</th></tr></thead><tbody>
+<tr><td>普通话 · 朗读</td><td>6%</td><td>5%</td><td>6%</td></tr>
+<tr><td>普通话 · 自发口语</td><td>8%</td><td>8%</td><td>8.5%</td></tr>
+<tr><td>粤语 · 朗读</td><td>9%</td><td>9%</td><td>9.5%</td></tr>
+<tr><td>粤语 · 自发口语</td><td>12%</td><td>18%</td><td>12.5%</td></tr>
+<tr><td>新方言</td><td>60%</td><td>22%</td><td>28%</td></tr>
+</tbody></table>
+<figure><img class="article-image" src="/img/continual-eval-example.png" alt="合成例子中 A 的粤语自发口语 CER 增加 6 个百分点，B 的旧域最差增加 0.5 个百分点"><figcaption>合成验证数据的旧域变化，不是训练曲线或实测 benchmark。虚线为这个例子自定的 1 个百分点门槛。</figcaption></figure>
+<p>按总错误数除以总参考字符数计算，原模型、A、B 分别为 19%、12.4%、12.9%。A 的整体和新方言分数都更好，却违反旧域约束；B 只获得进入独立测试与服务验收的资格，不是自动获准上线。真实切片大小不同时，不能直接平均各格百分比；同时报告每格样本量，避免大集合掩盖小语种。</p>
+<p>也不要混淆单位：CER 从 12% 到 18% 是增加 6 个百分点，相对增加 50%。如果原基线为零，相对退化没有定义。少量样本上的小差异也可能只是波动，需要更多独立说话人和误例回听，不能把小数位当成可靠性的证明。</p>
+<h2>第三步：认清 best，再验证真正的出口</h2>
+<p>FunASR <a href="https://github.com/modelscope/FunASR/pull/3677">#3677</a>修复了选点指标缺失被当作零的路径，已包含在 1.4.15。维护中的 SenseVoice 微调脚本明确按总验证 loss 排名；<code>acc_rich</code> 不等于 ASR 准确率或 CER。因此 <code>model.pt.best</code> 的“best”只对应所配置的有效指标，不能代替上面的业务约束。</p>
+<p>更换排名指标要用新输出目录。升级软件不会恢复已删掉的 checkpoint，也不能自动纠正历史虚假零值排名。对仍保留的候选重新评估；平均权重也应作为一个新的候选复测，而不是默认优于参与平均的模型。</p>
+<p>最后用固定音频穿过<strong>模型输出 → 导出或服务端 → 客户端</strong>。新增语言 tag 后，模型可能正确输出，下游旧白名单却把结果丢掉。保留各层原始结果，核对 tokenizer、模型映射和解析约定；不要为得到非空文本而关掉所有校验，也不要把词表中已有的 token 当作可随意复用的空闲槽位。</p>
+<p>留下一份可回滚的验收记录：基线与候选权重散列、数据与标注规范版本、归一化规则、每格结果、固定请求及客户端输出。样本须有合法使用授权。先确认真实链路没有旧域回退和静默空输出，再逐步放量；这不是对灾难性遗忘或 CTC blank 偏置已经解决的承诺。</p>
+<p data-editorial="next-step">下一步，打开固定版本的<a href="https://github.com/modelscope/FunASR/blob/v1.4.15/examples/industrial_data_pretraining/sense_voice/CONTINUAL_FINETUNING_zh.md">SenseVoice 持续微调指南</a>，先写好你的验证切片、独立测试集和接受阈值，再开始下一轮训练。</p>
+</div></article><footer><div class="container">FunASR · 技术解读</div></footer>
+</body></html>
