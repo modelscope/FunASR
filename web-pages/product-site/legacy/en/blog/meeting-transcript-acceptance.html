@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HTTP 200 is not a usable transcript: a meeting-audio acceptance checklist | FunASR</title>
+<meta name="description" content="A practical checklist for meeting transcripts, subtitles and speaker clips: words, anonymous labels, timestamps and tail coverage, with a tested Python structural checker.">
+<meta property="og:title" content="HTTP 200 is not a usable transcript: a meeting-audio acceptance checklist"><meta property="og:description" content="A practical checklist for meeting transcripts, subtitles and speaker clips: words, anonymous labels, timestamps and tail coverage, with a tested Python structural checker."><meta property="og:type" content="article"><meta property="og:url" content="https://www.funasr.com/en/blog/meeting-transcript-acceptance.html"><meta property="og:image" content="https://www.funasr.com/img/funclip-v2-1-0-interface.jpg">
+<link rel="canonical" href="https://www.funasr.com/en/blog/meeting-transcript-acceptance.html"><link rel="alternate" hreflang="zh-CN" href="https://www.funasr.com/blog/meeting-transcript-acceptance.html">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"HTTP 200 is not a usable transcript: a meeting-audio acceptance checklist","datePublished":"2026-09-09","dateModified":"2026-09-09","author":{"@type":"Organization","name":"FunASR"},"mainEntityOfPage":{"@type":"WebPage","@id":"https://www.funasr.com/en/blog/meeting-transcript-acceptance.html"}}</script>
+<style>body{margin:0;font-family:system-ui,sans-serif;color:#202827;line-height:1.8;background:#fff}*{box-sizing:border-box}a{color:#126a59}a:hover{text-decoration:underline}.container{max-width:920px;margin:auto;padding:0 24px}.nav{border-bottom:1px solid #dce3df;padding:14px 0}.nav .container{display:flex;align-items:center;gap:20px}.nav-links{margin-left:auto;display:flex;gap:16px}.nav-logo{font-weight:700}.nav-btn{font-weight:600}article{padding:48px 0 64px}h1{font-size:2rem;line-height:1.3;letter-spacing:0}h2{font-size:1.4rem;margin-top:36px;letter-spacing:0}.lead{font-size:1.1rem}.meta,figcaption{color:#5e6864;font-size:.875rem}figure{margin:24px 0}.article-image{display:block;max-width:100%;height:auto}pre{overflow:auto;padding:18px;background:#f3f6f5;border:1px solid #dce3df;border-radius:6px;line-height:1.6}code{font-family:ui-monospace,monospace}p code,li code{overflow-wrap:anywhere}table{width:100%;border-collapse:collapse}th,td{padding:10px;text-align:left;vertical-align:top;border-bottom:1px solid #dce3df}th{background:#f3f6f5}footer{border-top:1px solid #dce3df;padding:24px}@media(max-width:700px){h1{font-size:1.6rem}.nav-links{display:none}.container{padding:0 20px}table{font-size:.9rem}th,td{padding:7px}}</style>
+</head><body>
+<nav class="nav"><div class="container"><a class="nav-logo" href="/en/">FunASR</a><div class="nav-links"><a href="/en/deploy/">Deployment</a><a href="/en/blog/">Blog</a></div><a href="/blog/meeting-transcript-acceptance.html">中文</a><a class="nav-btn" href="/go/github">GitHub</a></div></nav>
+<article><div class="container">
+<h1>HTTP 200 is not a usable transcript: a meeting-audio acceptance checklist</h1>
+<p class="meta">2026-09-09 · Application engineering · 8 minute read</p>
+<p class="lead">A transcription request returned text. Is it ready for meeting notes, subtitles or speaker-based editing? Treat transport, words, speakers and timing as separate acceptance questions. This article uses a FunASR MOSS result and a small standard-library Python checker to show what can be automated, and what still needs listening.</p>
+<figure><img class="article-image" src="/img/funclip-v2-1-0-interface.jpg" alt="FunClip video, subtitle and editing workspace"><figcaption>An existing FunClip workspace illustrates the downstream application. This is not a screenshot of the synthetic example below.</figcaption></figure>
+<h2>Four questions, four kinds of evidence</h2>
+<table><thead><tr><th>Layer</th><th>Question</th><th>Not a substitute</th></tr></thead><tbody>
+<tr><td>Request and structure</td><td>Did the request complete with the expected fields, units and ordering?</td><td>HTTP 200 and nonempty JSON do not establish correctness.</td></tr>
+<tr><td>Words</td><td>Are names, numbers, negations and decisions transcribed correctly?</td><td>Fluent text can still omit or invent speech.</td></tr>
+<tr><td>Speakers</td><td>Are turns and overlapping speech assigned consistently?</td><td>Two output labels do not prove correct separation of two people.</td></tr>
+<tr><td>Timing and coverage</td><td>Do subtitles locate the right sound? Are the beginning, middle and end covered?</td><td>An end timestamp near the recording duration does not prove complete transcription.</td></tr>
+</tbody></table>
+<p><strong>VAD</strong> detects regions that may contain speech; <strong>ASR</strong> transcribes words; <strong>speaker diarization</strong> assigns anonymous speakers to speech regions. They answer different evaluation questions. A label such as <code>S01</code> is local to a recording, not a name, an enrolled voiceprint or a cross-recording identity.</p>
+<h2>Choose the output contract for the application</h2>
+<p><a href="https://github.com/OpenMOSS/MOSS-Transcribe-Diarize">MOSS-Transcribe-Diarize</a> is a third-party model maintained by OpenMOSS. FunASR normalizes its output into text and timed segments with anonymous speaker labels. This path does not require an additional external VAD or speaker model. Do not arbitrarily split a meeting into independent requests and then assume that every chunk's <code>S01</code> identifies the same person.</p>
+<ul>
+<li><strong>Sentence subtitles or speaker clips:</strong> segment timestamps are an appropriate interface, but boundaries and speaker turns still need listening checks.</li>
+<li><strong>Word highlighting or arbitrary text-based precision edits:</strong> segment timing is insufficient. Choose a path with the required character/word alignment, checking capabilities and supported languages, for example Paraformer. Dividing a sentence duration evenly does not create accurate word timing.</li>
+<li><strong>Meeting notes:</strong> retain traceable transcript text, anonymous labels and time ranges before summarization. A summarizer cannot be assumed to repair incorrect names, numbers or decisions.</li>
+</ul>
+<p>Version-specific installation belongs in the maintained <a href="/en/deploy/moss-transcribe-diarize.html">MOSS deployment page</a> and <a href="/en/docs/moss-transcribe-diarize.html">integration guide</a>, not a second recipe that drifts independently. See the <a href="/en/blog/funclip-v2-2-0-moss-speaker-clipping.html">speaker-clipping walkthrough</a> for FunClip boundaries and the <a href="/en/models.html">model catalogue</a> for selection.</p>
+<h2>A structural checker, not a quality evaluator</h2>
+<p><a href="/blog/transcript-audit.py" download>Download transcript-audit.py</a> or read its source. It reads one file, makes no network requests and does not modify results. The input is one MOSS result object from FunASR <code>AutoModel.generate(...)[0]</code>, also written as <code>.moss-vllm.json</code> by the repository's offline example. It is not raw vLLM <code>diarized_json</code>, SRT or the Qwen3 example's <code>segments</code> schema.</p>
+<p>This deliberately constructed result represents a hypothetical 12-second recording. It is not model output and carries no accuracy claim:</p>
+<pre><code data-example="audit-input">{
+  "text": "Let's start. Agreed.",
+  "sentence_info": [
+    {"start": 1000, "end": 3500, "spk": "S01", "text": "Let's start."},
+    {"start": 6000, "end": 8000, "spk": "S02", "text": "Agreed."}
+  ]
+}</code></pre>
+<p>Use the example JSON as <code>result.json</code>. Units are milliseconds: pass 12000 for 12 seconds, not 12.</p>
+<pre><code>python3 transcript-audit.py result.json --duration-ms 12000</code></pre>
+<p>The report has <code>segment_count=2</code>, <code>last_end_ms=8000</code> and <code>tail_not_covered_ms=4000</code>. It always returns <code>quality_verified=false</code>: it has neither heard the audio nor received human reference annotations. Synthetic cases, invalid fields and CLI behavior are regression-tested on Python 3.12. Those tests validate the checker, not the model. Rejecting zero-length segments is an additional acceptance policy here, not a guarantee that the model adapter always emits positive-length intervals.</p>
+<ul>
+<li>Missing <code>sentence_info</code>, nonnumeric or infinite timing, reversed or zero-length intervals and intervals outside the recording produce an error and nonzero exit status.</li>
+<li>Empty text, nonchronological starts and overlapping intervals are listed by zero-based index without rewriting the data. Overlap may be real simultaneous speech; do not delete it automatically. The checker sorts by start time, marking the original indices of segments that intersect an earlier-starting interval. Touching boundaries do not count as overlap.</li>
+<li>An empty result explicitly reports zero segments and the full uncovered tail. That may be reasonable for silence, but requires investigation for a meeting recording.</li>
+<li>The tail is only the distance from the last output interval to the recording end, not a duration of missed speech or a speech-recall metric. A missing sentence in the middle can coexist with a zero tail.</li>
+</ul>
+<h2>Move from structural checks to acceptance</h2>
+<ol>
+<li><strong>Freeze input and configuration.</strong> Retain the audio hash, duration, sample rate/channels, model revision, server version, response format and generation limit. Record resampling, channel mixing and trimming. Removing silence requires an offset map if timestamps must locate the original video.</li>
+<li><strong>Listen at high-risk positions.</strong> Check the start and end, both sides of long silence, speaker changes, interruptions, quiet speech and critical numbers. Sampling can reveal problems; a successful sample is not proof of whole-recording accuracy.</li>
+<li><strong>Evaluate text and speakers separately.</strong> With a human reference transcript, measure CER/WER under consistent punctuation, case and tokenization rules. With human speaker/time annotations, evaluate diarization. The number of distinct output labels is not a diarization acceptance test.</li>
+<li><strong>Freeze the diarization scoring policy.</strong> <a href="https://github.com/pyannote/pyannote-metrics/blob/5b197b13ba39ac9baad37da66659da196090053c/src/pyannote/metrics/diarization.py#L51">pyannote.metrics</a> provides speaker metrics. Boundary collars and whether overlapping speech is scored affect results. Compare systems on the same reference and configuration, not detached numbers.</li>
+<li><strong>Diagnose incomplete output before tuning.</strong> Inspect termination due to generation limits, structural completeness and whether the client consumed the whole response. Raising a token limit may address some truncations, but cannot guarantee recall. A successful request is not grounds to close an unresolved user issue.</li>
+</ol>
+<h2>What should travel with the result?</h2>
+<p>Follow consent and retention requirements, store only necessary data, and restrict access to audio and speaker annotations. Retain the source-audio identifier, fixed configuration, original output, structural report and human acceptance notes. Link summaries back to transcript passages. Check subtitle readability, positioning and privacy. Replay edited clips instead of only checking interval lengths. Known-person identification needs a separate consent, enrollment and verification design; renaming anonymous cluster labels does not provide it.</p>
+<p>This checker is an entry point into acceptance, not a leaderboard or a substitute for listening and annotation. Start a real workload through the <a href="/en/deploy/">deployment centre</a>, then use the <a href="https://github.com/modelscope/FunASR">FunASR repository</a> for implementation details or a minimal reproducible issue.</p>
+<h2>Sources and reproduction</h2>
+<ul>
+<li><a href="https://github.com/OpenMOSS/MOSS-Transcribe-Diarize">OpenMOSS project</a>: ownership and task definition; the <a href="https://huggingface.co/OpenMOSS-Team/MOSS-Transcribe-Diarize/blob/e8681d68e7042738ffca8ac8212bc8fcb1131ab8/README.md">fixed-revision model card</a> explains anonymous labels.</li>
+<li><a href="https://github.com/modelscope/FunASR/blob/fdf1d042342e59569144209abdfacf312771d9be/examples/industrial_data_pretraining/qwen3_asr/transcribe_vllm_offline.py">Offline result-file contract inspected here</a>: fixed repository commit; the MOSS branch writes one result object.</li>
+<li><a href="https://github.com/pyannote/pyannote-metrics/blob/5b197b13ba39ac9baad37da66659da196090053c/src/pyannote/metrics/diarization.py#L51">Official pyannote.metrics implementation</a>: diarization metrics and configuration. This article does not run or report DER, CER or WER.</li>
+</ul>
+</div></article><footer><div class="container">FunASR · Applications and technical explainers</div></footer>
+</body></html>

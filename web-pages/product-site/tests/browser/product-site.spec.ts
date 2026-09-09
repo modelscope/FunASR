@@ -436,7 +436,16 @@ for (const viewport of [
         page.locator(`.launch-feature a[href="${release.article}"]`),
       ).toBeVisible();
       const history = page.locator('.previous-release .post-card');
-      await expect(history).toHaveCount(4);
+      const historySlugs = [
+        'meeting-transcript-acceptance.html',
+        'funasr-v1-4-14-portable-source-release.html',
+        'funasr-v1-4-5-pypi-llama-cpp-release.html',
+        'funasr-v1-4-3-pypi-release.html',
+        'funasr-v1-4-0-pypi-release.html',
+      ];
+      await expect(history).toHaveCount(historySlugs.length);
+      expect(await history.evaluateAll(cards => cards.map(card => card.getAttribute('href'))))
+        .toEqual(historySlugs.map(slug => `${release.index}${slug}`));
       await expect(
         page.locator(`.previous-release a[href="${release.previous}"]`),
       ).toBeVisible();
@@ -445,7 +454,7 @@ for (const viewport of [
         rows: new Set(cards.map((card) => Math.round(card.getBoundingClientRect().top))).size,
       }));
       expect(indexLayout.overflow).toBeLessThanOrEqual(1);
-      expect(indexLayout.rows).toBe(viewport.name === 'mobile' ? 4 : 1);
+      expect(indexLayout.rows).toBe(Math.ceil(historySlugs.length / (viewport.name === 'mobile' ? 1 : 4)));
 
       await page.goto(release.article);
       await expect(page.locator('h1')).toContainText('FunClip v2.2.0');
