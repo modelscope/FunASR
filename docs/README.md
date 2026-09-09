@@ -12,6 +12,7 @@
 | Install and check the Python environment | [Installation](installation/installation.md) / [中文](installation/installation_zh.md) |
 | Choose a model, language, or timestamp capability | [Model selection](model_selection.md) / [中文](model_selection_zh.md) |
 | Run the first transcription | [Quickstart](tutorial/README.md) / [中文](tutorial/README_zh.md) / [CLI](cli.md) |
+| Use native Hugging Face Transformers APIs | [Fun-ASR-Nano native guide](transformers_native.md) / [中文](transformers_native_zh.md) |
 | Configure AutoModel, generate, and streaming cache | [Python SDK](python_api.md) / [中文](python_api_zh.md) |
 | Move from Whisper or a cloud API | [Migration](migration_from_whisper.md) / [中文](migration_from_whisper_zh.md) |
 

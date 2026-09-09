@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Fun-ASR-Nano + Transformers：先选对权重，再接入应用 | FunASR</title>
+<meta name="description" content="原生 Transformers 支持已合并：分清 -hf、原始权重、vLLM 和 GGUF，理解音频预处理、生成结果与应用验收，附固定版本接入指南。">
+<meta property="og:title" content="Fun-ASR-Nano + Transformers：先选对权重，再接入应用"><meta property="og:description" content="原生 Transformers 支持已合并：分清 -hf、原始权重、vLLM 和 GGUF，理解音频预处理、生成结果与应用验收，附固定版本接入指南。"><meta property="og:type" content="article"><meta property="og:url" content="https://www.funasr.com/blog/fun-asr-nano-transformers.html"><meta property="og:image" content="https://www.funasr.com/img/fun-asr-nano-native-waveform.png">
+<link rel="canonical" href="https://www.funasr.com/blog/fun-asr-nano-transformers.html"><link rel="alternate" hreflang="en" href="https://www.funasr.com/en/blog/fun-asr-nano-transformers.html">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"Fun-ASR-Nano + Transformers：先选对权重，再接入应用","datePublished":"2026-09-09","dateModified":"2026-09-09","author":{"@type":"Organization","name":"FunASR"},"mainEntityOfPage":{"@type":"WebPage","@id":"https://www.funasr.com/blog/fun-asr-nano-transformers.html"}}</script>
+<style>body{margin:0;font-family:system-ui,sans-serif;color:#202827;line-height:1.8;background:#fff}*{box-sizing:border-box}a{color:#126a59}a:hover{text-decoration:underline}.container{max-width:920px;margin:auto;padding:0 24px}.nav{border-bottom:1px solid #dce3df;padding:14px 0}.nav .container{display:flex;align-items:center;gap:20px}.nav-links{margin-left:auto;display:flex;gap:16px}.nav-logo{font-weight:700}article{padding:48px 0 64px}h1{font-size:2rem;line-height:1.3;letter-spacing:0}h2{font-size:1.4rem;margin-top:36px;letter-spacing:0}.lead{font-size:1.1rem}.meta,figcaption{color:#5e6864;font-size:.875rem}figure{margin:24px 0}img{display:block;max-width:100%;height:auto}pre{overflow:auto;padding:18px;background:#f3f6f5;border:1px solid #dce3df;border-radius:6px;line-height:1.6}code{font-family:ui-monospace,monospace}p code,li code{overflow-wrap:anywhere}.table-wrap{overflow-x:auto}table{width:100%;min-width:640px;border-collapse:collapse}th,td{padding:10px;text-align:left;vertical-align:top;border-bottom:1px solid #dce3df}th{background:#f3f6f5}footer{border-top:1px solid #dce3df;padding:24px}@media(max-width:700px){h1{font-size:1.6rem}.nav-links{display:none}.container{padding:0 20px}table{font-size:.9rem}th,td{padding:7px}}</style>
+</head><body>
+<nav class="nav"><div class="container"><a class="nav-logo" href="/">FunASR</a><div class="nav-links"><a href="/deploy/">部署</a><a href="/blog/">技术博客</a></div><a href="/en/blog/fun-asr-nano-transformers.html">EN</a><a href="/go/github">GitHub</a></div></nav>
+<article><div class="container">
+<h1>Fun-ASR-Nano + Transformers：先选对权重，再接入应用</h1>
+<p class="meta">2026-09-09 · 生态技术与应用 · 阅读约 7 分钟</p>
+<p class="lead">在已有 Hugging Face 应用里接入语音识别，最容易踩的坑往往不是模型大小，而是把“同一模型家族”当成“同一种权重和接口”。Fun-ASR-Nano 已进入 Transformers 主线。这篇文章从 checkpoint、处理器到生成结果，解释如何把这次集成接到自己的应用中。</p>
+<section data-native-section="release"><h2>先确认安装包，不只看合并状态</h2>
+<p><a href="https://github.com/huggingface/transformers/pull/46180">PR #46180</a> 于 2026-09-09 合并。当天核验的稳定版 <code>5.16.1</code> 还没有原生 <code>fun_asr_nano</code> 文件；源码包显示的 <code>5.17.0.dev0</code> 也不是下一稳定版发布承诺。请从<a href="/docs/native-transformers.html">固定版本接入指南</a>安装明确的源码提交，不要只执行一次无版本约束的升级就假定已经兼容。</p>
+<p>这种区别影响排障方向：未知模型类型可能是安装包未包含实现，不一定是 checkpoint 损坏；模型能下载也不代表所选运行时认识它。</p></section>
+<section data-native-section="formats"><h2>同一模型家族，四条不同路径</h2>
+<div class="table-wrap"><table><thead><tr><th>应用已有的接口</th><th>选择什么</th><th>不要混淆</th></tr></thead><tbody>
+<tr><td>FunASR AutoModel</td><td><code>Fun-ASR-Nano-2512</code></td><td>原始工具包路径；拆分引擎看对应文档。</td></tr>
+<tr><td>Transformers processor / generate</td><td><code>Fun-ASR-Nano-2512-hf</code></td><td>本篇的原生接口，不是 vLLM 的转换包。</td></tr>
+<tr><td>原生 vLLM HTTP 服务</td><td><code>Fun-ASR-Nano-2512-vllm</code></td><td>使用独立运行时、模型格式及服务参数。</td></tr>
+<tr><td>C++ / GGML 运行时</td><td>与运行时匹配的 GGUF</td><td>不是把 Transformers 目录改后缀。</td></tr>
+</tbody></table></div>
+<p>这几个官方模型仓库位于 <code>FunAudioLLM</code> 下。原生 Transformers 路径加载 <a href="https://huggingface.co/FunAudioLLM/Fun-ASR-Nano-2512-hf">官方 -hf checkpoint</a>，模型和处理器代码来自固定的 Transformers 安装，不需要执行 checkpoint 的远程 Python 代码。它减少了一种接入依赖，并不自动提供鉴权、队列或服务监控。</p>
+<p>如果目标是多客户端并发请求，直接查看<a href="/deploy/vllm.html">原生 vLLM 部署页</a>；如果目标是离线 C++ 运行，查看<a href="/deploy/llama-cpp.html">llama.cpp 部署页</a>。原生 Python 接口是一个可组合入口，不是所有服务的替换品。</p></section>
+<section data-native-section="mechanics"><h2>从声音到文本，中间实际经过什么？</h2>
+<ol><li><strong>音频样本。</strong>采样率与声道是数据含义的一部分。48 kHz 的数组不能只改参数标成 16 kHz；那会改变模型看到的时间尺度。指南先要求明确的单声道 16 kHz WAV。</li>
+<li><strong>音频特征。</strong>原生特征提取器用 torchaudio 的 Kaldi fbank，再做 LFR 堆叠与降采样。这里仍需要匹配版本的 torchaudio；不能套用 FunASR 工具包的可选依赖结论。</li>
+<li><strong>转写请求。</strong><code>apply_transcription_request</code> 把音频、语言、上下文和关键词整理成模型的聊天模板，并对齐音频占位 token 与特征。</li>
+<li><strong>生成和解码。</strong><code>AutoModelForSpeechSeq2Seq</code> 返回 token。去掉输入 prompt 的长度后再解码，才能避免把模板混进转写文本。</li></ol>
+<figure><img src="/img/fun-asr-nano-native-waveform.png" width="1800" height="510" alt="用于功能检查的官方中文样本波形，横轴为秒，纵轴为振幅"><figcaption>官方中文样本原始波形：约 5.62 秒、单声道 48 kHz。运行指南前应明确重采样为 16 kHz。波形图不是准确率或性能结果。</figcaption></figure>
+<p>先用合成静音验证配置和张量形状，可以把依赖、模板错误与权重加载问题分开。但预处理没有调用生成模型，不能据此宣布“识别通过”。</p></section>
+<section data-native-section="context"><h2>应用上下文应该放在哪里？</h2>
+<p>业务词表通过原生 <code>keywords</code> 参数传入，相关背景通过 <code>prompt</code> 传入。它们不是工具包的 <code>hotword</code> 参数，也不是 HTTP 层字段。给两份录音分别传上下文时，语言、prompt 和嵌套关键词列表应与录音数量一致。输出顺序应回到同一份输入清单。</p>
+<p>例如客服录音里的人名、产品名，可以作为候选关键词；但“模板中出现了关键词”和“模型在噪声中识别对了这个词”是两项测试。不要把拼写纠正或摘要改写后的文本冒充原始 ASR 输出。</p>
+<p>当前固定快照默认左侧 padding；批量示例仍可显式设置 padding 以便阅读。生成返回值要按整批输入张量的宽度去除 prompt，不是各条 attention mask 有效长度。空录音和空列表应在应用边界提前拒绝。</p></section>
+<section data-native-section="observations"><h2>一次真实短录音检查说明了什么？</h2>
+<p>在固定源码、官方 -hf revision 和 CPU float32 环境中，我们运行了中文单录音、英文单录音、中英混合批量，以及一个带关键词的中文请求。四个请求均返回文本并在上限前生成 EOS；批量结果顺序正确。这是两份公开短音频的功能检查，不是准确率排行榜。</p>
+<div class="table-wrap"><table><thead><tr><th>同一份中文音频</th><th>原始输出</th></tr></thead><tbody>
+<tr><td>不传关键词</td><td>开饭时间早上九点至下午五点。</td></tr>
+<tr><td>候选关键词：开放时间</td><td>开饭时间：早上九点至下午五点。</td></tr>
+</tbody></table></div>
+<p>这个例子没有显示关键词强制生效，不能包装成“加热词就会识别对”。API 参数被接收、输出发生变化和业务词写对，是不同结论。保留原文，再结合人工参考检查；不要用提示词替代验收。环境、样本来源与重采样口径见<a href="/docs/native-transformers.html">验证记录</a>。</p></section>
+<section data-native-section="acceptance"><h2>接入成功之后，还要验收什么？</h2>
+<ul><li><strong>范围。</strong>这条 -hf 路径用于生成式转写，不包含原生 CTC 分支；不能把结果文本当作字级时间戳或说话人分离输出。</li>
+<li><strong>完整性。</strong>短文件示例的生成上限是 128 个新 token。触顶可能截断；增加上限不会自动证明长录音没有漏句。</li>
+<li><strong>资源。</strong>独立 CPU 示例不是 CUDA、服务并发或 vLLM 性能测试。分别记录下载、模型加载和生成，不把首次下载算成模型推理，也不把一次短录音当作容量规划。</li>
+<li><strong>质量与隐私。</strong>在授权录音中回听关键数字、否定词和末尾，保留固定版本与原始结果；公开反馈不要携带客户录音、token 或身份信息。</li></ul>
+<p>需要段级时间戳和匿名说话人时，可比较 OpenMOSS 的第三方 <a href="/docs/moss-transcribe-diarize.html">MOSS 统一转写与分离路径</a>。匿名标签不是人物身份，模型选型仍应从应用真正需要的输出开始。</p></section>
+<section data-native-section="next"><h2>从哪里开始</h2>
+<p>先打开<a href="/docs/native-transformers.html">原生 Transformers 安装与推理指南</a>，完成独立 CPU 环境、无权重预处理和短录音生成，再决定是否需要批量或服务化。模型页和 <a href="/docs/model-zoo.html">Model Zoo</a>保留格式入口；<a href="/blog/meeting-transcript-acceptance.html">会议录音验收清单</a>帮助把结果交付到应用。</p>
+<p>源码依据：<a href="https://github.com/huggingface/transformers/blob/fc501343edfccdc840eb8594a6cafa8185c2de53/docs/source/en/model_doc/fun_asr_nano.md">固定提交的官方模型文档</a>、<a href="https://huggingface.co/FunAudioLLM/Fun-ASR-Nano-2512-hf/blob/d93b302ee7fd505e1b3576120fc142fc6f7820e1/README.md">固定 revision 的模型卡</a>。模型项目与贡献入口见 <a href="https://github.com/QwenAudio/Fun-ASR">Fun-ASR</a> 和 <a href="https://github.com/modelscope/FunASR">FunASR</a>。</p></section>
+
+</div></article><footer><div class="container">FunASR · 应用实践与技术解读</div></footer>
+</body></html>

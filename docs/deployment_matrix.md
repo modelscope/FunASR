@@ -6,6 +6,7 @@ Use this page to choose the shortest deployment path for a product, demo, benchm
 
 | Path | Best for | Start here | Operational notes |
 |---|---|---|---|
+| Native Transformers | Python applications using Hugging Face processors and generation | [Native Fun-ASR-Nano guide](./transformers_native.md) | Official `-hf` checkpoint and pinned source; stable 5.16.1 lacks support at the 2026-09-09 check. Python inference, not an HTTP or realtime server. |
 | Colab notebook | Browser smoke tests, first evaluation, shareable demos | [Colab quickstart](../examples/colab/) | No local setup; first run downloads model files, GPU runtime is faster. |
 | Python API | Notebooks, offline jobs, first model evaluation | [README quick start](../README.md#quick-start) | Lowest ceremony; caller owns batching, retries, and files. |
 | OpenAI-compatible API | Private speech API, agents, Dify/LangChain/AutoGen-style clients | [OpenAI API example](../examples/openai_api/) | Easiest integration for apps that already support OpenAI audio APIs. |

@@ -357,7 +357,7 @@ recordings with the same evaluation scope.
 
 - **MOSS-Transcribe-Diarize** brings long-form ASR, timestamps, and anonymous speaker labels to FunASR services, Docker, Kubernetes, vLLM/SGLang workflows, and FunClip. [Deploy MOSS ->](./docs/moss_transcribe_diarize.md)
 - **FunASR 1.4.15** adds tested NumPy 2 compatibility and fixes streaming KWS/VAD boundaries and checkpoint ranking. Install with `python -m pip install -U "funasr==1.4.15"`. [Release and verification scope ->](https://github.com/modelscope/FunASR/releases/tag/v1.4.15)
-- **Production deployment** now includes faster, more resilient realtime serving and verified llama.cpp archives for ten Linux, macOS, and Windows targets. [GPU services ->](./docs/vllm_guide.md) · [CPU/edge packages ->](https://www.funasr.com/en/deploy/llama-cpp.html)
+- **Native Transformers:** Fun-ASR-Nano [merged upstream](https://github.com/huggingface/transformers/pull/46180). Use the official `-hf` checkpoint and pinned source; stable 5.16.1 does not include it. [Installation and inference ->](./docs/transformers_native.md)
 
 > See [GitHub Releases](https://github.com/modelscope/FunASR/releases) for the complete changelog and downloadable assets.
 
