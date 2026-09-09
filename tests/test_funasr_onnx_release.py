@@ -7,7 +7,7 @@ import unittest
 ROOT = Path(__file__).resolve().parents[1]
 PACKAGE_ROOT = ROOT / "runtime" / "python" / "onnxruntime"
 SETUP_PATH = PACKAGE_ROOT / "setup.py"
-EXPECTED_VERSION = "0.4.2"
+EXPECTED_VERSION = "0.4.3"
 REQUIREMENT_NAME_PATTERN = re.compile(r"^\s*([A-Za-z0-9](?:[A-Za-z0-9._-]*[A-Za-z0-9])?)")
 
 
@@ -44,7 +44,7 @@ def normalized_requirement_name(requirement):
 
 
 class FunASROnnxReleaseContractTest(unittest.TestCase):
-    def test_release_version_is_0_4_2(self):
+    def test_release_version_is_0_4_3(self):
         self.assertEqual(assigned_literal(read_setup_tree(), "VERSION_NUM"), EXPECTED_VERSION)
 
     def test_runtime_dependencies_keep_onnx_install_torch_free(self):
