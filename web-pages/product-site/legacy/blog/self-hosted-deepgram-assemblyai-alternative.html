@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>自托管替代 Deepgram / AssemblyAI:开源免费的语音识别 API | FunASR 博客</title><meta name="description" content="想替代 Deepgram/AssemblyAI 这类按分钟付费的云语音识别 API?FunASR 开源免费、可自托管、音频不出本地、中文领先,自带 OpenAI 兼容 /v1/audio/transcriptions,客户端只改 base_url 即可迁移。"><meta name="keywords" content="Deepgram 替代, AssemblyAI 替代, 自托管语音识别 API, 开源语音转文字 API, 替代云语音识别, 私有化语音识别, OpenAI 兼容语音识别, FunASR"><link rel="icon" href="/logo.png">
-<meta property="og:title" content="自托管替代 Deepgram / AssemblyAI:开源免费的语音识别 API | FunASR 博客"><meta property="og:description" content="想替代 Deepgram/AssemblyAI 这类按分钟付费的云语音识别 API?FunASR 开源免费、可自托管、音频不出本地、中文领先,自带 OpenAI 兼容 /v1/audio/transcriptions,客户端只改 base_url 即可迁移。"><meta property="og:type" content="article"><meta property="og:url" content="https://www.funasr.com/blog/self-hosted-deepgram-assemblyai-alternative.html"><meta property="og:image" content="https://www.funasr.com/logo.png">
+<title>从 Deepgram / AssemblyAI 迁移到自托管 FunASR：接入与验收 | FunASR Blog</title><meta name="description" content="评估自托管转写迁移：映射请求和结果契约，检查鉴权、返回格式、模型质量与运维成本。提供 FunASR 本地 JSON 示例，不承诺厂商 API 或 SDK 直接替换。"><meta name="keywords" content="Deepgram 替代, AssemblyAI 替代, 自托管语音识别 API, 开源语音转文字 API, 替代云语音识别, 私有化语音识别, OpenAI 兼容语音识别, FunASR"><link rel="icon" href="/logo.png">
+<meta property="og:title" content="从 Deepgram / AssemblyAI 迁移到自托管 FunASR：接入与验收 | FunASR Blog"><meta property="og:description" content="评估自托管转写迁移：映射请求和结果契约，检查鉴权、返回格式、模型质量与运维成本。提供 FunASR 本地 JSON 示例，不承诺厂商 API 或 SDK 直接替换。"><meta property="og:type" content="article"><meta property="og:url" content="https://www.funasr.com/blog/self-hosted-deepgram-assemblyai-alternative.html"><meta property="og:image" content="https://www.funasr.com/logo.png">
 <link rel="canonical" href="https://www.funasr.com/blog/self-hosted-deepgram-assemblyai-alternative.html"><link rel="alternate" hreflang="en" href="https://www.funasr.com/en/blog/self-hosted-deepgram-assemblyai-alternative.html"><link rel="alternate" hreflang="zh" href="https://www.funasr.com/blog/self-hosted-deepgram-assemblyai-alternative.html"><link rel="alternate" hreflang="x-default" href="https://www.funasr.com/en/blog/self-hosted-deepgram-assemblyai-alternative.html">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"BlogPosting","headline":"自托管替代 Deepgram / AssemblyAI:开源免费的语音识别 API | FunASR 博客","description":"想替代 Deepgram/AssemblyAI 这类按分钟付费的云语音识别 API?FunASR 开源免费、可自托管、音频不出本地、中文领先,自带 OpenAI 兼容 /v1/audio/transcriptions,客户端只改 base_url 即可迁移。","datePublished":"2026-06-23","dateModified":"2026-06-23","author":{"@type":"Organization","name":"FunASR / Tongyi Lab"},"publisher":{"@type":"Organization","name":"FunASR","logo":{"@type":"ImageObject","url":"https://www.funasr.com/logo.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://www.funasr.com/blog/self-hosted-deepgram-assemblyai-alternative.html"},"image":"https://www.funasr.com/logo.png"}
+{"@context":"https://schema.org","@type":"BlogPosting","headline":"从 Deepgram / AssemblyAI 迁移到自托管 FunASR：接入与验收 | FunASR Blog","description":"评估自托管转写迁移：映射请求和结果契约，检查鉴权、返回格式、模型质量与运维成本。提供 FunASR 本地 JSON 示例，不承诺厂商 API 或 SDK 直接替换。","datePublished":"2026-06-23","dateModified":"2026-09-09","author":{"@type":"Organization","name":"FunASR / Tongyi Lab"},"publisher":{"@type":"Organization","name":"FunASR","logo":{"@type":"ImageObject","url":"https://www.funasr.com/logo.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://www.funasr.com/blog/self-hosted-deepgram-assemblyai-alternative.html"},"image":"https://www.funasr.com/logo.png"}
 </script>
 <style>:root{--primary:#2563eb;--primary-dark:#1d4ed8;--bg:#fff;--surface:#f8fafc;--border:#e2e8f0;--text:#0f172a;--text-soft:#475569;--text-muted:#94a3b8;--radius:12px}
 *{margin:0;padding:0;box-sizing:border-box}
@@ -46,35 +46,54 @@ footer a{color:#94a3b8}
 </style></head><body>
 <nav class="nav"><div class="container"><a href="/" class="nav-logo">Fun<span>ASR</span></a><div class="nav-links"><a href="/#capabilities">核心能力</a><a href="/#usage">如何使用</a><a href="/#benchmark">性能</a><a href="/#demo">演示</a><a href="https://modelscope.github.io/FunASR/zh/" target="_blank">文档</a><a href="/quickstart.html">快速上手</a><a href="/models.html">模型</a><a href="/ecosystem.html">生态</a><a href="/blog/">技术博客</a><a href="/vs-whisper.html">对比 Whisper</a><a href="/donors.html">功德榜</a></div><a href="https://www.funasr.com/en/blog/self-hosted-deepgram-assemblyai-alternative.html" style="font-size:0.83rem;font-weight:500;color:var(--text-soft)">EN</a><a href="https://github.com/modelscope/FunASR" target="_blank" class="nav-btn">GitHub ★</a></div></nav>
 <article><div class="container">
-<h1>自托管替代 Deepgram / AssemblyAI:开源、免费、数据不出本地</h1>
-<p class="post-meta">2026-06-23 · FunASR 团队</p>
-<p>Deepgram、AssemblyAI、Google/Azure Speech 这类云端语音识别 API 按分钟计费,音频还得上传到第三方。如果你想<strong>自己托管、零按量费用、音频不出本地</strong>——尤其中文场景——<a href="https://github.com/modelscope/FunASR" target="_blank">FunASR</a> 是一个直接的开源替代:它自带 <strong>OpenAI 兼容的转写 API</strong>,客户端只改 base_url 即可。</p>
-
-<h2>对比</h2>
-<table>
-<tr><th></th><th>FunASR(自托管)</th><th>Deepgram / AssemblyAI</th></tr>
-<tr><td>价格</td><td><strong>免费(MIT),无按分钟计费</strong></td><td>按分钟付费</td></tr>
-<tr><td>部署</td><td>自托管(本地/私有云/边缘)</td><td>云 API(托管)</td></tr>
-<tr><td>数据隐私</td><td><strong>音频不出本地</strong></td><td>上传到供应商</td></tr>
-<tr><td>中文/粤语</td><td><strong>业界领先</strong></td><td>以英文为主</td></tr>
-<tr><td>接口</td><td>OpenAI 兼容(drop-in)</td><td>各自专有 SDK</td></tr>
-<tr><td>离线/CPU</td><td>✅(含 <a href="/llama-cpp.html">llama.cpp 单二进制</a>)</td><td>❌ 仅云</td></tr>
-</table>
-<p>云 API 的优势是免运维、弹性扩缩、英文与增值功能成熟;FunASR 的优势是免费、自托管、隐私、中文。按需求取舍。</p>
-
-<h2>起一个 OpenAI 兼容的本地 STT 服务</h2>
-<pre>pip install funasr
-funasr-server --model sensevoice --device cuda      # 或 --device cpu
-# → POST http://localhost:8000/v1/audio/transcriptions</pre>
-<p>然后任何 OpenAI 客户端只改 <code>base_url</code> 即可——无需改业务代码:</p>
-<pre>from openai import OpenAI
-client = OpenAI(base_url="http://localhost:8000/v1", api_key="not-needed")
-text = client.audio.transcriptions.create(model="sensevoice", file=open("audio.wav","rb")).text</pre>
-<p>从 Deepgram/AssemblyAI 或 OpenAI Whisper API 迁移:把请求指向你自己的 funasr-server 即可,按量账单归零、数据留在本地。</p>
-
-<h2>选模型</h2>
-<p>多语种 + 情感选 SenseVoice;中文 + 时间戳/热词选 Paraformer;中英日及中文方言/口音的旗舰识别选 Fun-ASR-Nano;需要 31 语种选独立的 Fun-ASR-MLT-Nano。详见 <a href="/blog/which-funasr-model.html">选型指南</a>。</p>
-<div class="cta"><p><strong>FunASR 全家桶开源、可商用、可自托管。</strong>觉得有用点个 Star 👇</p><p><a class="btn" href="https://github.com/modelscope/FunASR" target="_blank">⭐ Star FunASR</a></p><p style="margin-top:10px;font-size:0.85rem">也欢迎:<a href="https://github.com/QwenAudio/SenseVoice" target="_blank">SenseVoice</a> · <a href="https://github.com/QwenAudio/Fun-ASR" target="_blank">Fun-ASR</a> · <a href="https://github.com/modelscope/FunClip" target="_blank">FunClip</a></p></div>
+<h1>从 Deepgram / AssemblyAI 迁移到自托管 FunASR：接入与验收清单</h1>
+<p class="post-meta">FunASR Blog · 2026-06-23 · 更新于 2026-09-09</p>
+<p>评估自托管语音转写时，真正要迁移的是应用契约：上传方式、模型选择、鉴权、结果结构和运行责任。本文以 <strong>FunASR 1.4.15 的包内 <code>funasr-server</code></strong> 为边界，介绍文件转写的接入路径。它不是 Deepgram / AssemblyAI 专有 API 或 SDK 的直接替换，也不提供完整云服务功能对等承诺。</p>
+<aside class="limitation-callout" id="security-boundary" data-http-contract="security">
+<p><strong>先确定访问边界。</strong><span data-risk="authentication">包内服务默认监听 <code>0.0.0.0</code>，没有内置认证。</span><span data-risk="upload-limit">FunASR 的该入口没有实现应用层总上传大小上限。</span>下方显式使用 <code>--host 127.0.0.1</code>，仅用于客户端与后端位于同一主机网络命名空间的本地检查。</p>
+<p data-risk="backend-bypass">对外服务前应在网关配置 TLS、鉴权、上传限制、容量与超时策略，并阻止绕过网关直接访问后端。CORS 不是访问控制；客户端占位 API key 也不是认证。请先阅读<a href="/docs/security.html">服务安全指南</a>。这里说明部署风险，不意味着已经发现某个线上服务暴露。</p>
+</aside>
+<h2>先列迁移清单，再选择模型</h2>
+<table><thead><tr><th>应用环节</th><th>迁移时要验证什么</th></tr></thead><tbody>
+<tr><td>请求协议</td><td>把现有 SDK 或 HTTP 调用映射到目标路由、multipart 文件上传及其实际声明的字段。连接地址、请求头和参数都需要检查。</td></tr>
+<tr><td>任务方式</td><td>本地示例是一次文件上传转写，不是流式会话、异步任务队列或回调服务。原应用依赖这些流程时，需要单独实现或选择对应部署服务。</td></tr>
+<tr><td>结果结构</td><td>明确文本、时间单位、分段、说话人标签以及空结果的映射。说话人分离标签不是实名身份识别；不同模型提供的信息不同。</td></tr>
+<tr><td>故障处理</td><td>检查鉴权失败、无效文件、超时、重试与过载行为；客户端超时不等于后台推理已经取消。</td></tr>
+<tr><td>运行责任</td><td>安排容量、监控、升级、数据留存及故障恢复。用自己的音频评估质量，不按未经验证的语言或价格排名选型。</td></tr>
+</tbody></table>
+<p>先参考<a href="/docs/model-selection.html">模型选型指南</a>和<a href="/deploy/">部署矩阵</a>。需要转写与说话人分离时，可评估第三方模型 <a href="/docs/moss-transcribe-diarize.html">MOSS-Transcribe-Diarize</a> 的集成路径；不要把任一后端的能力推定为所有 FunASR 服务都具备。</p>
+<h2>最小本地接入：先验证 JSON 文本</h2>
+<section data-http-contract="prerequisites">
+<p><strong>前提：已经准备并验证过的独立 FunASR 1.4.15 环境。</strong>本段不是从零安装教程。运行下列命令的 Python 和 <code>funasr-server</code> 必须来自同一个已激活环境，且 <code>funasr==1.4.15</code>、PyTorch、音频依赖、FastAPI、Uvicorn、python-multipart、模型权重访问及音频文件均已准备好。平台依赖参见<a href="/docs/installation.html">安装指南</a>；其他版本需要重新核对行为。</p>
+<pre><code>python -c 'from importlib.metadata import version; assert version("funasr") == "1.4.15", version("funasr")'
+python -m pip check</code></pre>
+<p>版本检查和 <code>pip check</code> 只检查包元数据，不能证明 CUDA、音频解码或实际转写可用。下方明确选择 SenseVoice CPU 做接入验证，不是性能建议；不要在同一端口同时启动多个服务。另有<a href="/docs/http-server.html">仓库示例 HTTP 服务指南</a>可作实现对照，但它准备并启动的是 example server，不是本文所要求的包内 1.4.15 环境。</p>
+</section>
+<pre><code>funasr-server --host 127.0.0.1 --port 8000 --model sensevoice --device cpu</code></pre>
+<p>在同一主机另一个终端提交有权处理的 <code>audio.wav</code>。返回文本会写到终端，请勿把私人转写内容放进公开日志。</p>
+<pre><code>curl --fail --show-error --silent --max-time 120 \
+  http://127.0.0.1:8000/v1/audio/transcriptions \
+  -F "file=@audio.wav" \
+  -F "model=sensevoice" \
+  -F "response_format=json"</code></pre>
+<p>预期结构是包含 <code>text</code> 的 JSON 对象，具体内容取决于音频与模型。120 秒是示例客户端超时，不是可处理音频时长或吞吐承诺。使用 OpenAI Python SDK 的基本调用可参考<a href="/blog/self-hosted-openai-whisper-api-alternative.html">本地转写接入指南</a>；这不意味着原厂商 SDK 可以原样使用。</p>
+<h2>明确返回格式边界</h2>
+<table data-http-contract="formats"><thead><tr><th>response_format</th><th>包内处理器的行为</th></tr></thead><tbody>
+<tr data-response-format="json"><td><code>json</code></td><td>返回含 <code>text</code> 的 JSON 对象。</td></tr>
+<tr data-response-format="verbose_json"><td><code>verbose_json</code></td><td>返回结构化 JSON，包括 <code>segments</code>、<code>duration</code> 等字段；具体时间与说话人信息依赖模型和实际结果。</td></tr>
+<tr data-response-format="text"><td><code>text</code></td><td>返回 JSON 字符串，不是普通纯文本响应。</td></tr>
+<tr data-response-format="srt"><td><code>srt</code></td><td>不生成 SRT 字幕，落入 JSON 文本对象分支；HTTP 200 不能证明返回了字幕文件。</td></tr>
+<tr data-response-format="vtt"><td><code>vtt</code></td><td>不生成 VTT 字幕，同样落入 JSON 文本对象分支。</td></tr>
+</tbody></table>
+<p>该路由声明 <code>file</code>、<code>model</code>、<code>language</code>、<code>response_format</code> 和扩展字段 <code>spk</code>；其他字段被请求接受不代表已经应用。</p>
+<p data-http-contract="schema-authority">包内服务的字段应通过私有或受限的运维路径访问运行中服务的 <code>/openapi.json</code>，并核对<a href="https://github.com/modelscope/FunASR/blob/dff96b69f1679953ac53c6643c82c74b43c70db2/funasr/bin/_server_app.py">固定版本包内处理器源码</a>。<a href="/docs/service-api.html">示例服务 API schema</a>描述的是另一种实现，不是包内处理器的完整字段说明。包内服务、仓库示例、vLLM 与 llama.cpp 的默认值、参数和响应结构并不通用。</p>
+<h2>上线前的三项验收</h2>
+<ol>
+<li><strong>契约：</strong>在旧、新实现上运行有代表性的受控请求，核对字段、文本解析、时间单位、错误与超时；不要以一次 200 响应作为全部兼容证据。</li>
+<li><strong>质量：</strong>用业务录音检查关键实体、多人重叠、分段与低质量音频。参考<a href="/blog/meeting-transcript-acceptance.html">会议转写验收清单</a>，记录模型、硬件和版本。</li>
+<li><strong>安全与运维：</strong>验证网关认证和后端不可绕过；容器的 <code>127.0.0.1</code> 指向容器自身，跨容器需设计受限网络。按需要评估计算、存储、带宽、监控和维护成本，另行核对所用模型权重许可证。</li>
+</ol>
+<p>自托管提供数据处理的控制空间，不自动保证音频从不落盘、日志不含转写或零成本。临时文件、代理、客户端及留存策略都要纳入检查。本文不比较厂商当前价格，也不声称新的准确率或性能测试结果。</p>
 <!--related-posts-->
 <h2>相关文章</h2>
 <ul class="post-list">
