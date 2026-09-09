@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Native Transformers Fun-ASR-Nano - FunASR</title>
+<meta content="Native Transformers Fun-ASR-Nano" name="description"/>
+<meta content="#ffffff" name="theme-color"/>
+<link href="https://www.funasr.com/en/docs/native-transformers.html" rel="canonical"/>
+<link href="https://www.funasr.com/docs/native-transformers.html" hreflang="zh-CN" rel="alternate"/>
+<link href="https://www.funasr.com/en/docs/native-transformers.html" hreflang="en" rel="alternate"/>
+<meta content="website" property="og:type"/>
+<meta content="Native Transformers Fun-ASR-Nano - FunASR" property="og:title"/>
+<meta content="Native Transformers Fun-ASR-Nano" property="og:description"/>
+<meta content="https://www.funasr.com/en/docs/native-transformers.html" property="og:url"/>
+<link href="assets/css/site.7be954c8e106.css" rel="stylesheet"/>
+<link href="assets/css/experience.34d6e632686e.css" rel="stylesheet"/>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "SoftwareApplication", "applicationCategory": "DeveloperApplication", "codeRepository": "https://github.com/modelscope/FunASR", "dateModified": "2026-09-01", "license": "https://github.com/modelscope/FunASR/blob/main/LICENSE", "name": "FunASR", "operatingSystem": "Linux, macOS, Windows", "url": "https://www.funasr.com/en/docs/native-transformers.html"}</script>
+</head>
+<body data-copy-icon="assets/lucide/copy.ea80e566c7a1.svg" data-language="en" data-route="/en/docs/native-transformers.html">
+<a class="skip-link" href="#main">Skip to main content</a>
+<header class="site-header">
+<a aria-label="FunASR home" class="brand" href="https://www.funasr.com/en/">
+<span aria-hidden="true" class="brand-mark">F</span>
+<span>FunASR</span>
+</a>
+<button aria-controls="primary-navigation" aria-expanded="false" class="icon-button menu-button" data-menu-toggle="" title="Open navigation" type="button">
+<img alt="" src="assets/lucide/menu.90a31b3ab1cf.svg"/>
+</button>
+<nav aria-label="Primary navigation" class="primary-navigation" data-primary-nav="" id="primary-navigation">
+<a href="https://www.funasr.com/en/">Product</a>
+<a href="https://www.funasr.com/en/deploy/">Deploy</a>
+<a href="https://www.funasr.com/en/models.html">Models</a>
+<a href="https://www.funasr.com/en/benchmarks.html">Benchmarks</a>
+<a href="https://www.funasr.com/en/ecosystem.html">Ecosystem</a>
+<a href="https://www.funasr.com/en/blog/">Blog</a>
+<a href="https://www.funasr.com/en/docs/">Docs</a>
+<a href="https://www.funasr.com/en/donors.html">Donors</a>
+</nav>
+<div class="header-actions">
+<a class="icon-link" href="https://www.funasr.com/docs/native-transformers.html" title="简体中文">
+<img alt="" src="assets/lucide/languages.ae9048feb2c7.svg"/>
+<span>中文</span>
+</a>
+<a aria-label="GitHub" class="icon-button" href="https://www.funasr.com/go/github" title="GitHub">
+<img alt="" src="assets/lucide/github.793554449a30.svg"/>
+</a>
+</div>
+</header>
+<main id="main">
+<div class="docs-layout">
+<aside class="docs-sidebar">
+<a class="docs-home" href="https://www.funasr.com/en/docs/">Documentation</a>
+<details class="docs-navigation" open="">
+<summary class="docs-navigation-toggle">Browse topics</summary>
+<details open="">
+<summary>Get started</summary>
+<nav aria-label="Get started">
+<a href="https://www.funasr.com/en/docs/installation.html">Installation &amp; environment checks</a>
+<a href="https://www.funasr.com/en/docs/quickstart.html">Your first transcription</a>
+<a href="https://www.funasr.com/en/docs/python-api.html">Python SDK: AutoModel</a>
+<a href="https://www.funasr.com/en/docs/model-selection.html">Choose your first model</a>
+<a href="https://www.funasr.com/en/docs/command-line.html">Command-line transcription</a>
+<a href="https://www.funasr.com/en/docs/migration.html">Migrate from Whisper &amp; cloud APIs</a>
+</nav>
+</details>
+<details open="">
+<summary>Models &amp; capabilities</summary>
+<nav aria-label="Models &amp; capabilities">
+<a aria-current="page" href="https://www.funasr.com/en/docs/native-transformers.html">Native Transformers Fun-ASR-Nano</a>
+<a href="https://www.funasr.com/en/docs/moss-transcribe-diarize.html">MOSS transcription &amp; diarization</a>
+<a href="https://www.funasr.com/en/docs/model-zoo.html">Model Zoo</a>
+<a href="https://www.funasr.com/en/docs/streaming-vad.html">Streaming voice activity detection</a>
+<a href="https://www.funasr.com/en/docs/keyword-spotting.html">Keyword spotting</a>
+<a href="https://www.funasr.com/en/docs/speaker-emotion.html">Speakers and emotion tags</a>
+</nav>
+</details>
+<details open="">
+<summary>Train &amp; extend</summary>
+<nav aria-label="Train &amp; extend">
+<a href="https://www.funasr.com/en/docs/training.html">Fine-tuning &amp; evaluation</a>
+<a href="https://www.funasr.com/en/docs/model-registration.html">Custom model registration</a>
+</nav>
+</details>
+<details open="">
+<summary>Deploy &amp; integrate</summary>
+<nav aria-label="Deploy &amp; integrate">
+<a href="https://www.funasr.com/en/docs/docker.html">Containers &amp; image selection</a>
+<a href="https://www.funasr.com/en/docs/runtime-guide.html">Serving entry points</a>
+<a href="https://www.funasr.com/en/docs/http-server.html">Python HTTP service</a>
+<a href="https://www.funasr.com/en/docs/kubernetes.html">Kubernetes deployment</a>
+<a href="https://www.funasr.com/en/docs/deployment-matrix.html">Runtime &amp; deployment matrix</a>
+<a href="https://www.funasr.com/en/docs/vllm.html">vLLM split-engine inference</a>
+<a href="https://www.funasr.com/en/docs/official-native-vllm.html">Official native vLLM functional validation (2026-09-07)</a>
+<a href="https://www.funasr.com/en/docs/native-vllm.html">Historical community native vLLM record (2026-08-13)</a>
+</nav>
+</details>
+<details open="">
+<summary>Evaluate &amp; operate</summary>
+<nav aria-label="Evaluate &amp; operate">
+<a href="https://www.funasr.com/en/docs/troubleshooting.html">Troubleshooting</a>
+<a href="https://www.funasr.com/en/docs/security.html">Service security boundaries</a>
+<a href="https://www.funasr.com/en/docs/benchmark-method.html">Reproducible performance tests</a>
+<a href="https://www.funasr.com/en/docs/historical-asr-benchmark.html">Historical ASR benchmark</a>
+<a href="https://www.funasr.com/en/docs/realtime-benchmark.html">Realtime WebSocket benchmarking</a>
+</nav>
+</details>
+<details open="">
+<summary>Applications &amp; ecosystem</summary>
+<nav aria-label="Applications &amp; ecosystem">
+<a href="https://www.funasr.com/en/docs/agent-integration.html">Agent integration</a>
+<a href="https://www.funasr.com/en/docs/use-cases.html">Use cases &amp; examples</a>
+<a href="https://www.funasr.com/en/docs/community.html">Community integrations</a>
+<a href="https://www.funasr.com/en/docs/repositories.html">Repositories &amp; contribution paths</a>
+<a href="https://www.funasr.com/en/docs/javascript.html">JavaScript clients</a>
+<a href="https://www.funasr.com/en/docs/gradio.html">Gradio browser client</a>
+<a href="https://www.funasr.com/en/docs/workflows.html">Workflow integrations</a>
+</nav>
+</details>
+<details open="">
+<summary>Protocols &amp; reference</summary>
+<nav aria-label="Protocols &amp; reference">
+<a href="https://www.funasr.com/en/docs/service-api.html">HTTP API contract</a>
+<a href="https://www.funasr.com/en/docs/websocket-protocol.html">C++ WebSocket protocol</a>
+<a href="https://www.funasr.com/en/docs/onnx-output.html">ONNX binary output contract</a>
+</nav>
+</details>
+<a href="https://www.funasr.com/en/deploy/">Deployment guides →</a>
+</details>
+</aside>
+<div class="docs-body">
+<nav aria-label="Breadcrumbs" class="breadcrumbs"><a href="https://www.funasr.com/en/">FunASR</a><span>/</span><a href="https://www.funasr.com/en/docs/">Docs</a><span>/</span><span>Native Transformers Fun-ASR-Nano</span></nav>
+<header class="docs-title"><h1>Native Transformers Fun-ASR-Nano</h1><a class="source-link" data-source-link="" href="https://github.com/modelscope/FunASR/blob/main/docs/transformers_native.md">View / edit source ↗</a></header>
+<article class="docs-article"><div class="source-title-anchor" id="fun-asr-nano-with-native-transformers"></div>
+<p><a href="https://www.funasr.com/docs/native-transformers.html">简体中文</a> | English</p>
+<p>Use this path when your Python application already works with Hugging Face
+processors and generation APIs. It runs Fun-ASR-Nano through native Transformers
+classes, without the FunASR toolkit or checkpoint-provided remote Python code.
+For a managed HTTP service, start with the <a href="https://www.funasr.com/en/docs/deployment-matrix.html">deployment matrix</a>;
+this guide does not add an OpenAI endpoint, request queue or realtime server.</p>
+<h2 id="what-was-merged-and-what-was-released">What was merged, and what was released?</h2>
+<p>On <strong>2026-09-09</strong>, <a href="https://github.com/huggingface/transformers/pull/46180">Transformers PR #46180</a>
+was merged as <code>fc501343edfccdc840eb8594a6cafa8185c2de53</code>.
+At verification time that day, the latest stable <strong>5.16.1 did not contain this
+model</strong>: both its release tag and actual wheel were inspected. A merge is not
+a stable release. The source build identifies itself as <code>5.17.0.dev0</code>; that is
+not a promised release version or date. Pin the tested source below, or check
+that a later released package really contains <code>fun_asr_nano</code> before migrating.</p>
+<h2 id="choose-the-checkpoint-and-the-interface-together">Choose the checkpoint and the interface together</h2>
+<table>
+<thead>
+<tr>
+<th>Path</th>
+<th>Checkpoint</th>
+<th>Entry point</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>FunASR toolkit</td>
+<td><code>FunAudioLLM/Fun-ASR-Nano-2512</code></td>
+<td><code>funasr.AutoModel</code>; separate documented split-engine path</td>
+</tr>
+<tr>
+<td>Native Transformers</td>
+<td><code>FunAudioLLM/Fun-ASR-Nano-2512-hf</code></td>
+<td><code>AutoProcessor</code> + <code>AutoModelForSpeechSeq2Seq</code></td>
+</tr>
+<tr>
+<td>Native vLLM</td>
+<td><code>FunAudioLLM/Fun-ASR-Nano-2512-vllm</code></td>
+<td><a href="https://www.funasr.com/en/docs/official-native-vllm.html">Official native vLLM guide</a></td>
+</tr>
+<tr>
+<td>Native C++</td>
+<td>Converted GGUF files for the chosen runtime</td>
+<td><a href="https://github.com/modelscope/FunASR/blob/main/runtime/llama.cpp/README.md">llama.cpp guide</a></td>
+</tr>
+</tbody>
+</table>
+<p>These are different artifacts and API contracts. Renaming a model ID or passing
+<code>backend="vllm"</code> does not convert weights. Native Transformers support does not
+make the <code>-hf</code> checkpoint a vLLM, GGUF or FunASR HTTP-server checkpoint.</p>
+<p>The official <a href="https://huggingface.co/FunAudioLLM/Fun-ASR-Nano-2512-hf/tree/d93b302ee7fd505e1b3576120fc142fc6f7820e1">native HF checkpoint</a>
+is public and ungated at revision <code>d93b302ee7fd505e1b3576120fc142fc6f7820e1</code>.
+Its configuration maps to <code>FunAsrNanoForConditionalGeneration</code>. Its feature
+extractor is embedded in <code>processor_config.json</code>; a separate
+<code>preprocessor_config.json</code> is not required for this snapshot.</p>
+<h2 id="independent-cpu-environment">Independent CPU environment</h2>
+<p>Use a new directory for the virtual environment; do not upgrade an existing
+FunASR or vLLM service environment in place. The following is <strong>Linux x86-64,
+Python 3.12, CPU-only</strong>, not a CUDA or macOS installation recipe.</p>
+<pre id="code-0"><code class="language-bash">python3.12 -m venv .venv-funasr-native
+. .venv-funasr-native/bin/activate
+python -m pip install --index-url https://download.pytorch.org/whl/cpu \
+  'torch==2.10.0+cpu' 'torchaudio==2.10.0+cpu'
+python -m pip install 'numpy==1.26.4' 'librosa==0.11.0' 'soundfile==0.13.1' \
+  'huggingface-hub==1.30.0' 'tokenizers==0.23.2' \
+  'https://github.com/huggingface/transformers/archive/fc501343edfccdc840eb8594a6cafa8185c2de53.zip'
+python -m pip check
+</code></pre>
+<p>The verification environment installed a wheel built from the exact source
+commit above. Matching <strong>torch and torchaudio</strong> are required for this native
+feature extractor: it calls <code>torchaudio.compliance.kaldi.fbank</code>. The toolkit's
+optional audio dependencies do not imply that torchaudio is optional here.
+Older prepared environments failed dependency gates; do not disable those gates
+or mix incompatible Hub/tokenizers versions to get an import to succeed.
+This is a tested environment, not a complete lock of every transitive dependency;
+record <code>python -m pip freeze</code>, platform details and model revision in your own run.</p>
+<h2 id="check-preprocessing-without-loading-weights">Check preprocessing without loading weights</h2>
+<p>This downloads the public configuration, tokenizer and chat template, <strong>not
+model weights</strong>. One second of synthetic silence checks the entry point; it is
+not a speech-recognition quality test.</p>
+<!-- native-example: processor -->
+<pre id="code-1"><code class="language-python">import numpy as np
+from transformers import AutoProcessor
+
+model_id = "FunAudioLLM/Fun-ASR-Nano-2512-hf"
+revision = "d93b302ee7fd505e1b3576120fc142fc6f7820e1"
+processor = AutoProcessor.from_pretrained(
+    model_id, revision=revision, trust_remote_code=False, token=False
+)
+inputs = processor.apply_transcription_request(
+    audio=np.zeros(16000, dtype=np.float32),
+    language="en",
+    processor_kwargs={
+        "return_tensors": "pt",
+        "audio_kwargs": {"sampling_rate": 16000},
+    },
+)
+print({name: tuple(value.shape) for name, value in inputs.items()})
+</code></pre>
+<p>In the verified environment the text tensors have shape <code>(1, 42)</code>, audio features
+<code>(1, 17, 560)</code>, and feature mask <code>(1, 17)</code>. There are 17 audio placeholder tokens
+and 17 valid feature frames. These shapes depend on input length and template;
+do not hard-code them for real recordings.</p>
+<h2 id="transcribe-one-recording">Transcribe one recording</h2>
+<p>Prepare a non-empty <strong>mono 16 kHz WAV</strong> named <code>audio.wav</code> in your working directory.
+The code deliberately rejects a different sample rate or channel layout rather
+than silently assigning 16 kHz to arbitrary samples. Resample/downmix with an
+explicit policy before this step and preserve the original recording for review.</p>
+<p>The first model load downloads the weights unless the pinned snapshot is already
+cached. It needs substantially more memory and time than preprocessing. This
+example uses CPU float32 explicitly; GPU placement, mixed precision, attention
+backends and service concurrency need separate validation.</p>
+<!-- native-example: transcribe -->
+<pre id="code-2"><code class="language-python">import soundfile as sf
+import torch
+from transformers import AutoModelForSpeechSeq2Seq, AutoProcessor
+
+model_id = "FunAudioLLM/Fun-ASR-Nano-2512-hf"
+revision = "d93b302ee7fd505e1b3576120fc142fc6f7820e1"
+audio, sample_rate = sf.read("audio.wav", dtype="float32")
+if sample_rate != 16000 or audio.ndim != 1 or audio.size == 0:
+    raise ValueError("Use a non-empty mono 16 kHz WAV file")
+
+processor = AutoProcessor.from_pretrained(
+    model_id, revision=revision, trust_remote_code=False, token=False
+)
+model = AutoModelForSpeechSeq2Seq.from_pretrained(
+    model_id, revision=revision, trust_remote_code=False, token=False,
+    dtype=torch.float32,
+).to("cpu").eval()
+inputs = processor.apply_transcription_request(
+    audio=audio, language="zh",
+    processor_kwargs={
+        "return_tensors": "pt",
+        "audio_kwargs": {"sampling_rate": sample_rate},
+    },
+)
+with torch.inference_mode():
+    generated = model.generate(**inputs, max_new_tokens=128, do_sample=False)
+new_tokens = generated[:, inputs.input_ids.shape[1]:]
+print(processor.batch_decode(new_tokens, skip_special_tokens=True)[0])
+</code></pre>
+<p><code>generated</code> includes the input prompt. Slice off <code>inputs.input_ids.shape[1]</code>
+before decoding so prompt framing is not mistaken for recognized speech.
+<code>max_new_tokens=128</code> bounds this short-file example; hitting the limit can
+truncate output. A longer limit is not proof of complete coverage.
+Use <code>language="en"</code> or <code>language="ja"</code> for the corresponding target language;
+language selection is a transcription instruction, not a promise of translation.</p>
+<h2 id="context-hotwords-and-batches">Context, hotwords and batches</h2>
+<p><code>apply_transcription_request</code> accepts <code>prompt</code> for context and <code>keywords</code> for
+hotwords. These are native processor arguments, not the toolkit's <code>hotword</code>
+parameter or a vLLM HTTP field. The source API accepts one language for the batch
+or a language list matching its length; per-recording prompt and nested keyword
+lists must also match the batch. Keep the decoded results in input order.</p>
+<p>Do not infer quality gains from a template accepting a keyword. Evaluate names,
+numbers and unusual terms against authorized, representative recordings.
+Batch padding, memory use and generated-text correctness must be tested together
+before turning a single-file example into a production batch worker.</p>
+<h2 id="evidence-and-limits">Evidence and limits</h2>
+<p>The documented single-recording recipe was also executed on the official Chinese
+sample, followed by an English single recording, a Chinese keyword request and a
+Chinese/English batch. All returned non-empty text and EOS before the 128-token
+limit. These are functional checks on two short public samples, not a CER/WER or
+capacity evaluation. CPU: Intel Xeon Platinum 8480+, float32, four Torch threads;
+matching torch/torchaudio 2.10.0+cpu and librosa 0.11.0. Model weights were loaded
+from a previously downloaded official cache whose SHA/size were rechecked.</p>
+<p>Samples came from the original model's
+<a href="https://huggingface.co/FunAudioLLM/Fun-ASR-Nano-2512/tree/272c57b82523ada6fd87095e955f8e29100979ab/example">fixed example directory</a>,
+not from an invented -hf example directory. The mono 48 kHz Chinese MP3 was
+explicitly resampled with librosa's default soxr_hq and written as float32 16 kHz
+WAV before running the unmodified recipe. Its raw text was
+<code>开饭时间早上九点至下午五点。</code>; adding the candidate keyword <code>开放时间</code> did not force that
+spelling into the output. A keyword is a hint, not an enforced vocabulary.</p>
+<p>Synthetic processor tests exercised language aliases, context/keyword lists and
+two-length batches. The empty-list case still raises an upstream <code>IndexError</code>
+before its intended validation; reject empty batches in your application.
+The guide's explicit non-empty waveform check avoids that entry path. Successful
+cases do not erase this observed limitation. Initial resampling also exposed the
+old librosa 0.10.1 dependency on removed <code>pkg_resources</code>; the final environment
+uses 0.11.0 and was retested.</p>
+<p>The 2026-09-09 isolated CPU verification passed package dependency checks,
+native configuration/class resolution and synthetic preprocessing with the
+pinned official revision. Installed configuration, modeling, processing and
+feature-extraction files were byte-identical to the merged upstream source.
+A preprocessing pass is <strong>not an accuracy or capacity result</strong>. It does not
+establish word timestamps, diarization, realtime behavior, GPU compatibility,
+or performance equivalence with vLLM.</p>
+<p>For anonymous speakers and segment timestamps, see the third-party OpenMOSS
+<a href="https://www.funasr.com/en/docs/moss-transcribe-diarize.html">MOSS guide</a>; for other choices see the
+<a href="https://www.funasr.com/en/docs/model-zoo.html">Model Zoo</a>. Do not infer timestamp or identity support
+from a model returning text. Preserve input hashes, versions, raw responses and
+an authorized human review when assessing an application. Never attach private
+recordings or credentials to a public issue.</p>
+<h2 id="sources-and-next-steps">Sources and next steps</h2>
+<ul>
+<li><a href="https://github.com/huggingface/transformers/blob/fc501343edfccdc840eb8594a6cafa8185c2de53/docs/source/en/model_doc/fun_asr_nano.md">Merged implementation and usage documentation</a>.</li>
+<li><a href="https://github.com/huggingface/transformers/blob/fc501343edfccdc840eb8594a6cafa8185c2de53/src/transformers/models/fun_asr_nano/processing_fun_asr_nano.py">Native processor</a> and <a href="https://github.com/huggingface/transformers/blob/fc501343edfccdc840eb8594a6cafa8185c2de53/src/transformers/models/fun_asr_nano/feature_extraction_fun_asr_nano.py">audio feature extractor</a>.</li>
+<li><a href="https://www.funasr.com/en/blog/fun-asr-nano-transformers.html">Why the checkpoint suffix matters</a>, an application-oriented walkthrough.</li>
+<li><a href="https://github.com/QwenAudio/Fun-ASR">Fun-ASR model project</a> and <a href="https://github.com/modelscope/FunASR">FunASR toolkit</a>.</li>
+</ul></article>
+<nav aria-label="Adjacent documents" class="docs-next">
+<a href="https://www.funasr.com/en/docs/installation.html">Installation &amp; environment checks →</a> </nav>
+</div>
+<aside class="docs-toc"><strong>On this page</strong><div class="toc">
+<ul>
+<li><a href="#fun-asr-nano-with-native-transformers">Fun-ASR-Nano with native Transformers</a><ul>
+<li><a href="#what-was-merged-and-what-was-released">What was merged, and what was released?</a></li>
+<li><a href="#choose-the-checkpoint-and-the-interface-together">Choose the checkpoint and the interface together</a></li>
+<li><a href="#independent-cpu-environment">Independent CPU environment</a></li>
+<li><a href="#check-preprocessing-without-loading-weights">Check preprocessing without loading weights</a></li>
+<li><a href="#transcribe-one-recording">Transcribe one recording</a></li>
+<li><a href="#context-hotwords-and-batches">Context, hotwords and batches</a></li>
+<li><a href="#evidence-and-limits">Evidence and limits</a></li>
+<li><a href="#sources-and-next-steps">Sources and next steps</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</aside></div>
+</main>
+<footer class="site-footer">
+<div>
+<strong>FunASR</strong>
+<p>Open speech infrastructure for production deployment.</p>
+</div>
+<nav aria-label="Official repositories" class="footer-repositories" data-footer-repositories="">
+<strong>Official repositories</strong>
+<div class="footer-links">
+<a href="https://www.funasr.com/go/fun-asr">Fun-ASR</a>
+<a href="https://www.funasr.com/go/sensevoice">SenseVoice</a>
+<a href="https://www.funasr.com/go/funclip">FunClip</a>
+</div>
+</nav>
+<div class="footer-links">
+<a href="https://www.funasr.com/en/deploy/">Deploy</a>
+<a href="https://www.funasr.com/en/docs/">Docs</a>
+<a href="https://www.funasr.com/go/releases">Releases</a>
+<a href="https://www.funasr.com/en/donors.html">Donors</a>
+</div>
+</footer>
+<script defer="" src="assets/js/site.d446f5fbcfe2.js"></script>
+<script defer="" src="assets/js/experience.3f688a12942a.js"></script>
+</body>
+</html>
