@@ -2,6 +2,11 @@
 
 ## Install `funasr-onnx`
 
+`funasr-onnx` is a separate distribution from `funasr`. Upgrading `funasr`
+does not update the installed ONNX wrappers. Check their versions separately
+with `python -m pip show funasr-onnx funasr`; use the source installation below
+when a required wrapper fix is newer than the published PyPI package.
+
 install from pip
 
 ```shell
