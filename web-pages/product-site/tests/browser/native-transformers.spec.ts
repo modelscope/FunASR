@@ -21,7 +21,12 @@ for (const prefix of ['', 'en/']) {
       await expect(waveform).toBeVisible();
       expect(await waveform.evaluate((node: HTMLImageElement) => node.complete && node.naturalWidth === 1800)).toBeTruthy();
       await page.screenshot({ path: testInfo.outputPath('waveform.png') });
-      const table = page.locator('[data-native-section="formats"] table');
+      const formats = page.locator('[data-native-section="formats"]');
+      await expect(formats.locator('li')).toHaveCount(4);
+      for (const model of ['Fun-ASR-Nano-2512', 'Fun-ASR-Nano-2512-hf', 'Fun-ASR-Nano-2512-vllm', 'GGUF']) {
+        await expect(formats).toContainText(model);
+      }
+      const table = page.locator('[data-native-section="observations"] table');
       await table.scrollIntoViewIfNeeded();
       const scroll = await table.evaluate((tableNode) => {
         const node = tableNode.closest('.table-wrap')!;

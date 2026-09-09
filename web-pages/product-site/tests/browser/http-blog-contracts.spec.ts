@@ -11,6 +11,9 @@ for (const prefix of ['', 'en/']) {
       test(`HTTP blog contract ${prefix}${slug} at ${width}px`, async ({ page }, testInfo) => {
         await page.setViewportSize({ width, height: 900 });
         await page.goto(`/${prefix}blog/`);
+        if (slug === 'self-hosted-deepgram-assemblyai-alternative.html') {
+          await page.locator(`[data-blog-more] a[href="/${prefix}blog/archive/"]`).click();
+        }
         const route = `/${prefix}blog/${slug}`;
         await page.locator(`a.post-card[href="${route}"]`).click();
         await expect(page).toHaveURL(new RegExp(slug.replaceAll('.', '\\.')));

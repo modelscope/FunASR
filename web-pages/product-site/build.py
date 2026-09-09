@@ -17,6 +17,7 @@ from jinja2 import Environment, FileSystemLoader, StrictUndefined, select_autoes
 from legacy import normalize_document
 from registry import load_registry, validate_registry
 from selector import MATCH_WEIGHTS
+from blog import load_blog, blog_views
 from documentation import load_catalogue, doc_route, render_source, write_search_indexes
 
 
@@ -431,6 +432,19 @@ def build(output_dir: Path) -> dict[str, Any]:
                 wrapper = soup.new_tag('div', attrs={'class': 'table-wrap'})
                 table.wrap(wrapper)
             path.write_text(str(soup), encoding='utf-8')
+
+        blog_data = load_blog(SITE_ROOT)
+        for language in ('zh', 'en'):
+            for view in blog_views(blog_data, language, SITE_ROOT):
+                context = _page_context(
+                    language=language, route=view['route'], peer_route=view['peer_route'],
+                    title=view['heading'] + ' - FunASR', description=view['description'],
+                    date_modified=registry['verified'], navigation=navigation, assets=assets,
+                )
+                context['blog'] = view
+                _render_page(environment, 'blog.html', route_path(stage, view['route']), context)
+                pages.append({'route': view['route'], 'language': language,
+                    'canonical': context['canonical'], 'hreflang': context['peer_canonical']})
 
         write_search_indexes(stage)
         last_modified_by_route = {

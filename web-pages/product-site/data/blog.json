@@ -1,0 +1,468 @@
+{
+  "schema_version": 1,
+  "lead": "funclip-v2-2-0-moss-speaker-clipping",
+  "selected": [
+    "meeting-transcript-acceptance",
+    "fun-asr-nano-transformers",
+    "self-hosted-openai-whisper-api-alternative",
+    "funasr-transcribe-long-audio"
+  ],
+  "lead_image": "/img/funclip-v2-1-0-interface.jpg",
+  "articles": [
+    {
+      "slug": "cantonese-speech-recognition",
+      "category": "applications",
+      "reviewed": false,
+      "zh": {
+        "title": "粤语录音转写实践",
+        "summary": ""
+      },
+      "en": {
+        "title": "Transcribing Cantonese recordings",
+        "summary": ""
+      }
+    },
+    {
+      "slug": "chinese-speech-recognition",
+      "category": "applications",
+      "reviewed": false,
+      "zh": {
+        "title": "中文录音转写入门",
+        "summary": ""
+      },
+      "en": {
+        "title": "Getting started with Mandarin transcription",
+        "summary": ""
+      }
+    },
+    {
+      "slug": "fun-asr-nano-guide",
+      "category": "selection",
+      "reviewed": false,
+      "zh": {
+        "title": "Fun-ASR-Nano 使用笔记",
+        "summary": ""
+      },
+      "en": {
+        "title": "Using Fun-ASR-Nano",
+        "summary": ""
+      }
+    },
+    {
+      "slug": "fun-asr-nano-transformers",
+      "category": "selection",
+      "reviewed": true,
+      "zh": {
+        "title": "接入 Transformers，先选对权重",
+        "summary": "同名模型的权重格式不能混用。先理清格式，再跑通原生接入。"
+      },
+      "en": {
+        "title": "Choose the right checkpoint for Transformers",
+        "summary": "Checkpoint formats are not interchangeable. Choose the right artifact before connecting the API."
+      }
+    },
+    {
+      "slug": "funasr-cli-transcribe-command-line",
+      "category": "applications",
+      "reviewed": false,
+      "zh": {
+        "title": "从命令行转写音频",
+        "summary": ""
+      },
+      "en": {
+        "title": "Transcribing audio from the command line",
+        "summary": ""
+      }
+    },
+    {
+      "slug": "funasr-llama-cpp-whisper-cpp-alternative",
+      "category": "selection",
+      "reviewed": false,
+      "zh": {
+        "title": "用 llama.cpp 部署中文语音识别",
+        "summary": ""
+      },
+      "en": {
+        "title": "Chinese speech recognition with llama.cpp",
+        "summary": ""
+      }
+    },
+    {
+      "slug": "funasr-realtime-streaming-asr",
+      "category": "applications",
+      "reviewed": false,
+      "zh": {
+        "title": "实时字幕的流式识别路径",
+        "summary": ""
+      },
+      "en": {
+        "title": "A streaming path for live captions",
+        "summary": ""
+      }
+    },
+    {
+      "slug": "funasr-speaker-diarization",
+      "category": "explanations",
+      "reviewed": false,
+      "zh": {
+        "title": "说话人分离：谁在何时说话",
+        "summary": ""
+      },
+      "en": {
+        "title": "Speaker diarization: who spoke when",
+        "summary": ""
+      }
+    },
+    {
+      "slug": "funasr-transcribe-long-audio",
+      "category": "explanations",
+      "reviewed": true,
+      "zh": {
+        "title": "长录音为什么会漏掉结尾？",
+        "summary": "从切分边界、生成上限和结果覆盖出发，检查长录音的遗漏。"
+      },
+      "en": {
+        "title": "Why can a long transcript miss the ending?",
+        "summary": "Check segmentation, generation limits and output coverage when a recording seems incomplete."
+      }
+    },
+    {
+      "slug": "funasr-v1-3-26-openai-vllm-llama-cpp",
+      "category": "releases",
+      "reviewed": false,
+      "zh": {
+        "title": "v1.3.26：API 与运行时入口",
+        "summary": ""
+      },
+      "en": {
+        "title": "v1.3.26: API and runtime entry points",
+        "summary": ""
+      }
+    },
+    {
+      "slug": "funasr-v1-3-27-language-metadata-vllm-fallback",
+      "category": "releases",
+      "reviewed": false,
+      "zh": {
+        "title": "v1.3.27：语种信息与回退处理",
+        "summary": ""
+      },
+      "en": {
+        "title": "v1.3.27: Language metadata and fallback",
+        "summary": ""
+      }
+    },
+    {
+      "slug": "funasr-v1-3-28-realtime-websocket-subtitles",
+      "category": "releases",
+      "reviewed": false,
+      "zh": {
+        "title": "v1.3.28：实时识别与字幕修复",
+        "summary": ""
+      },
+      "en": {
+        "title": "v1.3.28: Realtime and subtitle fixes",
+        "summary": ""
+      }
+    },
+    {
+      "slug": "funasr-v1-4-0-pypi-release",
+      "category": "releases",
+      "reviewed": false,
+      "zh": {
+        "title": "v1.4.0：安装包与参数校验",
+        "summary": ""
+      },
+      "en": {
+        "title": "v1.4.0: Packaging and argument validation",
+        "summary": ""
+      }
+    },
+    {
+      "slug": "funasr-v1-4-14-portable-source-release",
+      "category": "releases",
+      "reviewed": false,
+      "zh": {
+        "title": "v1.4.14：源码包与 MOSS 入口",
+        "summary": ""
+      },
+      "en": {
+        "title": "v1.4.14: Source packages and MOSS discovery",
+        "summary": ""
+      }
+    },
+    {
+      "slug": "funasr-v1-4-3-pypi-release",
+      "category": "releases",
+      "reviewed": false,
+      "zh": {
+        "title": "v1.4.3：VAD 与说话人聚类",
+        "summary": ""
+      },
+      "en": {
+        "title": "v1.4.3: VAD and speaker clustering",
+        "summary": ""
+      }
+    },
+    {
+      "slug": "funasr-v1-4-5-pypi-llama-cpp-release",
+      "category": "releases",
+      "reviewed": false,
+      "zh": {
+        "title": "v1.4.5：Python 依赖与运行时",
+        "summary": ""
+      },
+      "en": {
+        "title": "v1.4.5: Python dependencies and runtimes",
+        "summary": ""
+      }
+    },
+    {
+      "slug": "funasr-vs-faster-whisper-chinese",
+      "category": "selection",
+      "reviewed": false,
+      "zh": {
+        "title": "中文与粤语：历史对比实验",
+        "summary": ""
+      },
+      "en": {
+        "title": "Chinese and Cantonese: an earlier comparison",
+        "summary": ""
+      }
+    },
+    {
+      "slug": "funasr-vs-whisper-benchmark",
+      "category": "selection",
+      "reviewed": false,
+      "zh": {
+        "title": "FunASR 与 Whisper：历史测量记录",
+        "summary": ""
+      },
+      "en": {
+        "title": "FunASR and Whisper: historical measurements",
+        "summary": ""
+      }
+    },
+    {
+      "slug": "funclip-v2-1-0-video-clipping-release",
+      "category": "releases",
+      "reviewed": false,
+      "zh": {
+        "title": "FunClip v2.1.0：首个版本化发布",
+        "summary": ""
+      },
+      "en": {
+        "title": "FunClip v2.1.0: The first versioned release",
+        "summary": ""
+      }
+    },
+    {
+      "slug": "funclip-v2-2-0-moss-speaker-clipping",
+      "category": "applications",
+      "reviewed": true,
+      "zh": {
+        "title": "把多人录音变成可剪辑的字幕",
+        "summary": "从一段对话出发，生成带匿名说话人标签的字幕，再按人选段。"
+      },
+      "en": {
+        "title": "Turn a conversation into editable subtitles",
+        "summary": "Create subtitles with recording-local speaker labels, then select the passages you need."
+      }
+    },
+    {
+      "slug": "generate-subtitles-srt-vtt-from-audio-video",
+      "category": "applications",
+      "reviewed": false,
+      "zh": {
+        "title": "从录音生成字幕文件",
+        "summary": ""
+      },
+      "en": {
+        "title": "From a recording to subtitle files",
+        "summary": ""
+      }
+    },
+    {
+      "slug": "japanese-speech-recognition",
+      "category": "applications",
+      "reviewed": false,
+      "zh": {
+        "title": "日语录音转写实践",
+        "summary": ""
+      },
+      "en": {
+        "title": "Transcribing Japanese recordings",
+        "summary": ""
+      }
+    },
+    {
+      "slug": "lightweight-speech-recognition-cpu",
+      "category": "selection",
+      "reviewed": false,
+      "zh": {
+        "title": "CPU 语音识别的部署取舍",
+        "summary": ""
+      },
+      "en": {
+        "title": "Deployment choices for CPU speech recognition",
+        "summary": ""
+      }
+    },
+    {
+      "slug": "meeting-transcript-acceptance",
+      "category": "applications",
+      "reviewed": true,
+      "zh": {
+        "title": "会议转写，怎样才算做好了？",
+        "summary": "有文字还不够：检查关键内容、说话人轮次和时间覆盖。"
+      },
+      "en": {
+        "title": "When is a meeting transcript ready to use?",
+        "summary": "Text alone is not enough. Review key details, speaker turns and time coverage."
+      }
+    },
+    {
+      "slug": "punctuation-restoration-python",
+      "category": "explanations",
+      "reviewed": false,
+      "zh": {
+        "title": "怎样给转写结果补标点",
+        "summary": ""
+      },
+      "en": {
+        "title": "Restoring punctuation in a transcript",
+        "summary": ""
+      }
+    },
+    {
+      "slug": "self-hosted-deepgram-assemblyai-alternative",
+      "category": "selection",
+      "reviewed": false,
+      "zh": {
+        "title": "迁移语音 API 前，先核对什么",
+        "summary": ""
+      },
+      "en": {
+        "title": "What to check before migrating a speech API",
+        "summary": ""
+      }
+    },
+    {
+      "slug": "self-hosted-google-aws-azure-speech-to-text",
+      "category": "selection",
+      "reviewed": false,
+      "zh": {
+        "title": "自托管语音服务的迁移笔记",
+        "summary": ""
+      },
+      "en": {
+        "title": "Notes on migrating to self-hosted speech",
+        "summary": ""
+      }
+    },
+    {
+      "slug": "self-hosted-openai-whisper-api-alternative",
+      "category": "applications",
+      "reviewed": true,
+      "zh": {
+        "title": "把语音转写接进自己的 API",
+        "summary": "先跑通本地请求，再明确鉴权、返回格式和服务责任。"
+      },
+      "en": {
+        "title": "Add transcription to your own API",
+        "summary": "Start with a local request, then define authentication, output formats and operating responsibilities."
+      }
+    },
+    {
+      "slug": "sensevoice-deployment-guide",
+      "category": "applications",
+      "reviewed": false,
+      "zh": {
+        "title": "SenseVoice 部署入门",
+        "summary": ""
+      },
+      "en": {
+        "title": "Getting started with SenseVoice",
+        "summary": ""
+      }
+    },
+    {
+      "slug": "sensevoice-emotion-language-detection",
+      "category": "explanations",
+      "reviewed": false,
+      "zh": {
+        "title": "文字之外，语音里还有什么信息",
+        "summary": ""
+      },
+      "en": {
+        "title": "What can speech tell us beyond the words?",
+        "summary": ""
+      }
+    },
+    {
+      "slug": "speech-to-text-python-transcribe-audio",
+      "category": "applications",
+      "reviewed": false,
+      "zh": {
+        "title": "用 Python 转写一份录音",
+        "summary": ""
+      },
+      "en": {
+        "title": "Transcribe a recording with Python",
+        "summary": ""
+      }
+    },
+    {
+      "slug": "speech-to-text-timestamps-python",
+      "category": "applications",
+      "reviewed": false,
+      "zh": {
+        "title": "用时间戳定位原始录音",
+        "summary": ""
+      },
+      "en": {
+        "title": "Finding the original audio with timestamps",
+        "summary": ""
+      }
+    },
+    {
+      "slug": "subtitle-edit-fun-asr-sensevoice-local-subtitles",
+      "category": "applications",
+      "reviewed": false,
+      "zh": {
+        "title": "在 Subtitle Edit 中生成本地字幕",
+        "summary": ""
+      },
+      "en": {
+        "title": "Generating local subtitles in Subtitle Edit",
+        "summary": ""
+      }
+    },
+    {
+      "slug": "voice-activity-detection-python",
+      "category": "explanations",
+      "reviewed": false,
+      "zh": {
+        "title": "VAD 如何找到语音区间",
+        "summary": ""
+      },
+      "en": {
+        "title": "How VAD identifies speech regions",
+        "summary": ""
+      }
+    },
+    {
+      "slug": "which-funasr-model",
+      "category": "selection",
+      "reviewed": false,
+      "zh": {
+        "title": "FunASR 模型选型笔记",
+        "summary": ""
+      },
+      "en": {
+        "title": "Notes on choosing a FunASR model",
+        "summary": ""
+      }
+    }
+  ]
+}

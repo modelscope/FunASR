@@ -9,6 +9,11 @@ Python build; no browser framework or runtime application server is required.
 - Repository `docs/`, `model_zoo/`, `runtime/` and `examples/openai_api/`
   Markdown listed in the catalogue: documentation body, shared with GitHub readers.
 - `data/deployments.json`: versions, hardware, evidence and operational limits.
+- `data/blog.json`: bilingual editorial titles, categories and the five-story
+  homepage selection. `blog.py` validates complete article coverage and renders
+  reading categories, archive and release history through `templates/blog.html`.
+  Published blog indexes are generated; the old `legacy/blog/index.html` and
+  English counterpart remain historical snapshots, not the live ordering source.
 - `templates/`: generated homepage, deployment manuals and documentation shell.
 - `assets/css/experience.css`: shared product and legacy reading experience.
 - `legacy/`: preserved public routes, content and demo assets. Do not delete or

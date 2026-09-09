@@ -3,10 +3,10 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>FunClip v2.2.0：MOSS 长音频说话人识别与视频剪辑 | FunASR</title>
-  <meta name="description" content="FunClip v2.2.0 集成第三方 MOSS-Transcribe-Diarize，通过 vLLM 完成长音频 ASR、说话人分段、SRT 和按说话人剪辑。">
-  <meta property="og:title" content="FunClip v2.2.0：MOSS 说话人识别与视频剪辑">
-  <meta property="og:description" content="一条经过端到端验证的 vLLM 路径，输出说话人分段、SRT，并支持按说话人剪辑。">
+  <title>把多人录音变成可剪辑的字幕 | FunASR</title>
+  <meta name="description" content="从一段访谈到按说话人选段：用 FunClip 的已有案例理解字幕、匿名标签和剪辑边界，再进入维护中的部署指南。">
+  <meta property="og:title" content="把多人录音变成可剪辑的字幕">
+  <meta property="og:description" content="从一段访谈到按说话人选段：用 FunClip 的已有案例理解字幕、匿名标签和剪辑边界，再进入维护中的部署指南。">
   <meta property="og:type" content="article">
   <meta property="og:url" content="https://www.funasr.com/blog/funclip-v2-2-0-moss-speaker-clipping.html">
   <meta property="og:image" content="https://www.funasr.com/img/funclip-v2-1-0-interface.jpg">
@@ -14,31 +14,37 @@
   <link rel="alternate" hreflang="en" href="https://www.funasr.com/en/blog/funclip-v2-2-0-moss-speaker-clipping.html">
   <link rel="alternate" hreflang="zh" href="https://www.funasr.com/blog/funclip-v2-2-0-moss-speaker-clipping.html">
   <link rel="alternate" hreflang="x-default" href="https://www.funasr.com/en/blog/funclip-v2-2-0-moss-speaker-clipping.html">
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"FunClip v2.2.0：MOSS 长音频说话人识别与视频剪辑","datePublished":"2026-08-31","dateModified":"2026-08-31","author":{"@type":"Organization","name":"FunASR / Tongyi Lab"},"publisher":{"@type":"Organization","name":"FunASR"},"mainEntityOfPage":{"@type":"WebPage","@id":"https://www.funasr.com/blog/funclip-v2-2-0-moss-speaker-clipping.html"},"image":"https://www.funasr.com/img/funclip-v2-1-0-interface.jpg"}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"把多人录音变成可剪辑的字幕","datePublished":"2026-08-31","dateModified":"2026-09-09","author":{"@type":"Organization","name":"FunASR / Tongyi Lab"},"publisher":{"@type":"Organization","name":"FunASR"},"mainEntityOfPage":{"@type":"WebPage","@id":"https://www.funasr.com/blog/funclip-v2-2-0-moss-speaker-clipping.html"},"image":"https://www.funasr.com/img/funclip-v2-1-0-interface.jpg","description":"从一段访谈到按说话人选段：用 FunClip 的已有案例理解字幕、匿名标签和剪辑边界，再进入维护中的部署指南。"}</script>
   <style>
   p code,li code,td code,.proof code{overflow-wrap:anywhere}
   :root{--primary:#2563eb;--accent:#047857;--surface:#f8fafc;--border:#dbe3ec;--text:#0f172a;--soft:#475569}
-  *{box-sizing:border-box}body{margin:0;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--text);line-height:1.72;background:#fff}a{color:var(--primary);text-decoration:none}a:hover{text-decoration:underline}.container{max-width:840px;margin:auto;padding:0 24px}.nav{position:sticky;top:0;z-index:10;background:#fff;border-bottom:1px solid var(--border);padding:14px 0}.nav .container{max-width:1120px;display:flex;align-items:center;gap:20px}.nav-logo{font-weight:800;color:var(--text)}.nav-logo span{color:var(--primary)}.nav-links{display:flex;gap:16px;margin-left:auto}.nav-btn{padding:8px 14px;background:var(--primary);color:#fff;border-radius:7px}article{padding:64px 0 80px}h1{font-size:2.1rem;line-height:1.28;margin:0 0 12px}h2{font-size:1.35rem;margin:36px 0 12px;padding-top:20px;border-top:1px solid var(--border)}p,li{color:var(--soft)}.meta{color:#64748b}.lead{font-size:1.08rem;color:var(--text)}.hero-media{width:100%;aspect-ratio:2.04/1;object-fit:cover;border:1px solid var(--border);border-radius:8px;margin:18px 0 24px}pre{overflow:auto;background:#172033;color:#e2e8f0;padding:18px;border-radius:8px;line-height:1.6}code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}p code,li code,td code{background:var(--surface);padding:2px 5px;border-radius:4px;color:#1d4ed8}table{width:100%;border-collapse:collapse;margin:18px 0}th,td{text-align:left;vertical-align:top;padding:11px;border-bottom:1px solid var(--border)}th{background:var(--surface)}.proof{border-left:4px solid var(--accent);background:#f0fdf4;padding:14px 16px;color:#14532d}.cta{margin-top:30px;padding:22px;border:1px solid var(--border);border-radius:8px}.cta a{font-weight:700}footer{padding:28px;background:#0f172a;color:#94a3b8;text-align:center}@media(max-width:800px){.nav-links{display:none}h1{font-size:1.65rem}}
-  </style>
+  *{box-sizing:border-box}body{margin:0;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--text);line-height:1.72;background:#fff}a{color:var(--primary);text-decoration:none}a:hover{text-decoration:underline}.container{max-width:840px;margin:auto;padding:0 24px}.nav{position:sticky;top:0;z-index:10;background:#fff;border-bottom:1px solid var(--border);padding:14px 0}.nav .container{max-width:1120px;display:flex;align-items:center;gap:20px}.nav-logo{font-weight:800;color:var(--text)}.nav-logo span{color:var(--primary)}.nav-links{display:flex;gap:16px;margin-left:auto}.nav-btn{padding:8px 14px;background:var(--primary);color:#fff;border-radius:7px}article{padding:64px 0 80px}h1{font-size:2.1rem;line-height:1.28;margin:0 0 12px}h2{font-size:1.35rem;margin:36px 0 12px;padding-top:20px;border-top:1px solid var(--border)}article p,article li{color:#475569}.meta{color:#64748b}.lead{font-size:1.08rem;color:var(--text)}.hero-media{width:100%;aspect-ratio:2.04/1;object-fit:cover;border:1px solid var(--border);border-radius:8px;margin:18px 0 24px}pre{overflow:auto;background:#172033;color:#e2e8f0;padding:18px;border-radius:8px;line-height:1.6}code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}p code,li code,td code{background:var(--surface);padding:2px 5px;border-radius:4px;color:#1d4ed8}table{width:100%;border-collapse:collapse;margin:18px 0}th,td{text-align:left;vertical-align:top;padding:11px;border-bottom:1px solid var(--border)}th{background:var(--surface)}.proof{border-left:4px solid var(--accent);background:#f0fdf4;padding:14px 16px;color:#14532d}.cta{margin-top:30px;padding:22px;border:1px solid var(--border);border-radius:8px}.cta a{font-weight:700}footer{padding:28px;background:#0f172a;color:#94a3b8;text-align:center}@media(max-width:800px){.nav-links{display:none}h1{font-size:1.65rem}}
+  article p a,article li a{color:#006a57;text-decoration:underline;text-underline-offset:.15em}
+</style>
 </head>
 <body>
 <nav class="nav"><div class="container"><a class="nav-logo" href="/">Fun<span>ASR</span></a><div class="nav-links"><a href="/deploy/">部署</a><a href="/blog/">博客</a><a href="/ecosystem.html">生态</a></div><a href="/en/blog/funclip-v2-2-0-moss-speaker-clipping.html">EN</a><a class="nav-btn" href="https://github.com/modelscope/FunASR">GitHub</a></div></nav>
 <article><div class="container">
-  <h1>FunClip v2.2.0：用 MOSS 做长音频说话人分离与视频剪辑</h1>
-  <p class="meta">2026-08-31 · FunClip Release</p>
-  <img class="hero-media" src="/img/funclip-v2-1-0-interface.jpg" alt="FunClip 本地视频、字幕识别和智能剪辑界面">
-  <p class="lead">FunClip v2.2.0 新增一条可选的 MOSS 路径：把长音频交给 vLLM 服务，FunASR 将模型输出归一化为文本、匿名说话人标签和时间段，FunClip 再生成 SRT 或按 <code>spkS01</code>、<code>spkS02</code> 剪辑。</p>
-  <p><a href="https://github.com/OpenMOSS/MOSS-Transcribe-Diarize">MOSS-Transcribe-Diarize</a> 是 OpenMOSS 维护的第三方模型，不属于 FunASR 或 FunClip。集成固定使用 <code>OpenMOSS-Team/MOSS-Transcribe-Diarize</code> revision <code>e8681d68e7042738ffca8ac8212bc8fcb1131ab8</code>，并明确保留模型归属与支持边界。</p>
-  <p><code>spkS01</code> 与 <code>spkS02</code> 只是当前录音内的匿名标签，不能识别已知人物、验证已注册声纹，也不保证不同录音中的同名标签对应同一个人。</p>
-
-  <h2>数据路径</h2>
-  <table><thead><tr><th>阶段</th><th>职责</th></tr></thead><tbody>
-    <tr><td>vLLM</td><td>加载固定 MOSS revision，通过 <code>/v1/audio/transcriptions</code> 返回带时间与说话人标记的 JSON。</td></tr>
-    <tr><td>FunASR 1.4.9+</td><td>解析转写结果并生成统一的 <code>text</code>、<code>timestamp</code> 与 <code>sentence_info</code>。</td></tr>
-    <tr><td>FunClip 2.2.0</td><td>渲染说话人 SRT、按说话人选段，或把时间段交给现有音视频剪辑流程。</td></tr>
-  </tbody></table>
-
-  <h2>1. 启动固定 revision 的 vLLM 服务</h2>
+  <h1>把多人录音变成可剪辑的字幕</h1>
+  <p class="meta">2026-08-31 · 应用实践 · 更新于 2026-09-09</p>
+  <p class="lead" data-editorial="opening">如果你要从一段访谈里剪出某位嘉宾的发言，先得到能回到原声音的字幕，比先追求一整页流畅文字更有用。FunClip 可以用录音内的说话人标签选段；剪辑前仍要回听。</p>
+  <p data-editorial="example">已有的 FunClip v2.2.0 双人样例走通了这条链路：得到 S01/S02 两个标签、生成字幕，再按 S02 剪出片段。这是下文的历史功能案例，不是“任何访谈都能剪准”的证明。</p>
+  <p data-editorial="boundary">标签不是人物身份。<code>spkS01</code> 与 <code>spkS02</code> 只属于当前录音；换一段录音，同名标签不保证对应同一个人。段级字幕也不能代替逐字精确对齐。</p>
+  <figure><img class="hero-media" src="/img/funclip-v2-1-0-interface.jpg" alt="FunClip 本地视频、字幕识别和智能剪辑界面"><figcaption>已有 FunClip v2.1.0 工作区截图，用于展示视频、字幕与选段的关系；不是上述 MOSS 样例的运行截图。</figcaption></figure>
+  <h2>先找到发言，再决定怎么剪</h2>
+  <p><a href="https://github.com/OpenMOSS/MOSS-Transcribe-Diarize">MOSS-Transcribe-Diarize</a> 是 OpenMOSS 维护的第三方模型。它提供转写和匿名说话人时间段；FunASR 整理结果，FunClip 把时间段接到字幕与音视频剪辑流程。</p>
+  <ol><li><strong>给模型连续的录音。</strong>这条路径不接外部 VAD 或说话人模型，避免先切成独立请求后丢失录音内的说话人上下文。</li>
+  <li><strong>在字幕里核对目标发言。</strong>标签帮助找到候选片段，但名字、数字、抢话和转场仍要回听，不能凭标签数量验收。</li>
+  <li><strong>先导出一段，再批量处理。</strong>回看实际片段的开头、结尾和字幕；不要只检查剪辑命令退出成功。</li></ol>
+  <h2>哪些剪辑适合这条路径？</h2>
+  <ul><li>按整段或说话人剪辑：MOSS 的段级时间戳可作为入口，FunClip 也支持有效的不足一秒短说话片段。</li>
+  <li>任意文字的精确字符级剪辑：保留 Paraformer 路径，并核对所选模型的语言和时间戳能力，不要把一句话平均切成字时间。</li>
+  <li>最后一段没有结束时间戳：发布记录中的 FunClip 会明确报错并提示提高 <code>--moss-max-tokens</code>，而非静默丢弃该段。调整上限后仍需核对尾部，不能据此保证完整召回。</li></ul>
+  <p>开始新部署时，用<a href="/deploy/moss-transcribe-diarize.html">维护中的 MOSS 部署指南</a>核对运行时、显存和服务格式。下方旧命令仅解释这次发布，不替代当前环境准备；也不要把服务直接暴露到公网。</p>
+  <section data-editorial="appendix"><h2>附录：v2.2.0 历史发布记录</h2>
+  <p>以下保存原发布的命令、归档散列与测试口径，<strong>不是当前安装配方</strong>。其中未固定版本的 <code>pip install -U vllm</code> 不能保证今天的兼容性；不要直接复制升级。依赖、服务别名和请求格式应按维护指南重新核对，FunClip 命令的相对路径要求位于对应仓库根目录。</p>
+  <p>历史集成固定使用 <code>OpenMOSS-Team/MOSS-Transcribe-Diarize</code> revision <code>e8681d68e7042738ffca8ac8212bc8fcb1131ab8</code>。当时的 FunASR 1.4.9+ 集成整理 <code>text</code>、<code>timestamp</code> 和 <code>sentence_info</code>，FunClip 2.2.0 渲染 SRT 并剪辑；不是所有未来版本的兼容承诺。</p>
+  <h3>当时的服务与请求</h3>
   <pre><code>python -m venv .venv-moss
 . .venv-moss/bin/activate
 pip install -U vllm
@@ -47,41 +53,29 @@ vllm serve OpenMOSS-Team/MOSS-Transcribe-Diarize \
   --revision e8681d68e7042738ffca8ac8212bc8fcb1131ab8 \
   --served-model-name moss-transcribe-diarize \
   --trust-remote-code --host 127.0.0.1 --port 8898</code></pre>
-  <p>先用真实音频检查服务契约。当前经过验证的格式是 <code>response_format=json</code>：</p>
+  <p>这次历史验证使用 <code>response_format=json</code>，不是对所有 MOSS 后端格式的通用说明：</p>
   <pre><code>curl -fsS http://127.0.0.1:8898/v1/audio/transcriptions \
   -F file=@sample.wav \
   -F model=moss-transcribe-diarize \
   -F response_format=json \
   -F max_completion_tokens=8192</code></pre>
-
-  <h2>2. 启动 FunClip</h2>
+  <h3>当时的 FunClip 启动参数</h3>
   <pre><code>python -m pip install -U -r requirements.txt
 python funclip/launch.py \
   --model moss \
   --moss-backend vllm \
   --moss-base-url http://127.0.0.1:8898/v1 \
   --moss-max-tokens 8192</code></pre>
-  <p>远端服务需要 bearer token 时，把凭据放进 <code>MOSS_API_KEY</code> 环境变量；FunClip 不要求把 token 写进命令行或仓库。</p>
-
-  <h2>能力与边界</h2>
-  <ul>
-    <li>支持长音频 ASR、匿名说话人标注、SRT，以及按说话人剪辑，包括不足一秒的有效短说话片段。</li>
-    <li>MOSS 提供段级时间戳，适合按整段或说话人剪辑；任意文本的精确字符级剪辑仍应使用 Paraformer。</li>
-    <li>单次录音内的标签一致性依赖模型看到连续音频，因此不接外部 VAD 或说话人模型，避免预切块破坏标签一致性。</li>
-    <li>如果最后一个 MOSS 片段因 token 上限没有结束时间戳，FunClip 会明确报错并提示提高 <code>--moss-max-tokens</code>，不会静默丢掉尾段。</li>
-  </ul>
-  <p>完整生产部署、健康检查和容量边界见 <a href="/deploy/moss-transcribe-diarize.html">MOSS 双语部署指南</a>。</p>
-
-  <h2>下载与校验 v2.2.0</h2>
+  <p>需要 bearer token 时通过 <code>MOSS_API_KEY</code> 环境变量提供，不把凭据放进命令行或仓库。</p>
+  <h3>归档与功能检查</h3>
   <pre><code>FunClip-2.2.0.tar.gz
 SHA256 994c5d9cf392b74b36284d526eca8bada1560a3e7825ab7baa9c673a1b4ef216
 
 FunClip-2.2.0.zip
 SHA256 4f5a7d33d9ea65467f29b55b15ed5be18e64de7e57e2f9f36fe51a23b40557e7</code></pre>
-  <p>从 <a href="https://github.com/modelscope/FunClip/releases/tag/v2.2.0">FunClip v2.2.0 Release</a> 下载归档和 <code>SHA256SUMS</code>，不要从不明镜像复制二进制或凭据。</p>
-
-  <div class="proof">发布内容对应 commit <code>c205bf32a8b11226ff5e8acb9a3c7a1f00cd3b06</code>。仓库测试结果为 84 passed、1 skipped；H100 + vLLM 两说话人样例返回 S01/S02、有效 SRT，并成功按 S02 剪辑。这个验证证明发布链路可用，不代表所有语言、音频条件或并发规模。</div>
-  <div class="cta"><p>先按部署指南跑通一段真实双人音频，再进入 FunClip 处理自己的视频。</p><a href="https://github.com/modelscope/FunClip/releases/tag/v2.2.0">查看 FunClip v2.2.0 发布与下载</a></div>
+  <p>归档和 <code>SHA256SUMS</code> 来自 <a href="https://github.com/modelscope/FunClip/releases/tag/v2.2.0">FunClip v2.2.0 Release</a>。对应 commit <code>c205bf32a8b11226ff5e8acb9a3c7a1f00cd3b06</code> 的历史仓库测试为 84 passed、1 skipped；H100 + vLLM 双人样例返回 S01/S02、有效 SRT，并按 S02 剪辑。这不是本次编辑重跑的结果，也不代表所有语言、音频条件或并发规模。</p>
+  </section>
+  <p data-editorial="next-step">下一步：从一段获授权的短访谈开始，按<a href="/deploy/moss-transcribe-diarize.html">MOSS 部署指南</a>跑通同一条链路，并人工回看第一个导出的片段。</p>
 </div></article>
 <footer>© 2024-2026 Tongyi Lab, Alibaba Group</footer>
 </body>

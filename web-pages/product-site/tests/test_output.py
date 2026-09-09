@@ -588,7 +588,12 @@ def test_subtitle_edit_blog_is_bilingual_and_evidence_backed(
 def test_blog_indexes_surface_subtitle_edit_release(built_site, relative, href):
     soup = read_soup(built_site / relative)
 
-    assert soup.select_one(f'a[href="{href}"]')
+    archive_route = '/' + str(Path(relative).parent) + '/archive/'
+    assert soup.select_one(f'[data-blog-more] a[href="{archive_route}"]')
+    assert not soup.select_one(f'[data-blog-story][href="{href}"]')
+    archive = read_soup(built_site / archive_route.lstrip('/') / 'index.html')
+    assert archive.select_one(f'a[href="{href}"]')
+    assert read_soup(built_site / href.lstrip('/')).select_one('article h1')
 
 
 def test_complete_build_passes_output_validation(built_site):
@@ -749,12 +754,17 @@ def test_blog_index_features_latest_release_and_preserves_history(
     built_site, relative, feature_href, history_href
 ):
     soup = read_soup(built_site / relative)
-    feature = soup.select_one(f'.launch-feature a[href="{feature_href}"]')
+    feature = soup.select_one(f'[data-blog-lead] a[href="{feature_href}"]')
 
     assert feature
-    assert 'FunClip v2.2.0' in feature.get_text(' ', strip=True)
-    history = soup.select_one('.previous-release')
-    assert history
+    assert feature.select_one('h2').get_text(' ', strip=True)
+    assert 'FunClip v2.2.0' in read_soup(
+        built_site / feature_href.lstrip('/')
+    ).get_text(' ', strip=True)
+    history_route = '/' + str(Path(relative).parent) + '/releases/'
+    assert soup.select_one(f'[data-blog-more] a[href="{history_route}"]')
+    assert not soup.select_one(f'[data-blog-story][href="{history_href}"]')
+    history = read_soup(built_site / history_route.lstrip('/') / 'index.html')
     assert history.select_one(f'a[href="{history_href}"]')
     history_text = history.get_text(' ', strip=True)
     assert 'v1.4.14' in history_text

@@ -433,31 +433,34 @@ for (const viewport of [
     ]) {
       await page.goto(release.index);
       await expect(
-        page.locator(`.launch-feature a[href="${release.article}"]`),
+        page.locator(`[data-blog-lead] a[href="${release.article}"]`),
       ).toBeVisible();
-      const history = page.locator('.previous-release .post-card');
+      await expect(page.locator(`[data-blog-selected] a[href="${release.index}meeting-transcript-acceptance.html"]`)).toBeVisible();
+      await page.locator(`[data-blog-more] a[href="${release.index}releases/"]`).click();
+      const history = page.locator('[data-blog-view="releases"] [data-blog-story]');
       const historySlugs = [
-        'meeting-transcript-acceptance.html',
         'funasr-v1-4-14-portable-source-release.html',
         'funasr-v1-4-5-pypi-llama-cpp-release.html',
         'funasr-v1-4-3-pypi-release.html',
         'funasr-v1-4-0-pypi-release.html',
       ];
-      await expect(history).toHaveCount(historySlugs.length);
       expect(await history.evaluateAll(cards => cards.map(card => card.getAttribute('href'))))
-        .toEqual(historySlugs.map(slug => `${release.index}${slug}`));
+        .toEqual(expect.arrayContaining(historySlugs.map(slug => `${release.index}${slug}`)));
+      await expect(page.locator('[data-blog-view="releases"] [data-blog-story]:not([data-blog-category="releases"])')).toHaveCount(0);
       await expect(
-        page.locator(`.previous-release a[href="${release.previous}"]`),
+        page.locator(`[data-blog-view="releases"] a[href="${release.previous}"]`),
       ).toBeVisible();
       const indexLayout = await history.evaluateAll((cards) => ({
         overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
         rows: new Set(cards.map((card) => Math.round(card.getBoundingClientRect().top))).size,
       }));
       expect(indexLayout.overflow).toBeLessThanOrEqual(1);
-      expect(indexLayout.rows).toBe(Math.ceil(historySlugs.length / (viewport.name === 'mobile' ? 1 : 4)));
+      expect(indexLayout.rows).toBe(await history.count());
 
       await page.goto(release.article);
-      await expect(page.locator('h1')).toContainText('FunClip v2.2.0');
+      await expect(page.locator('h1')).toHaveText(release.language === 'zh'
+        ? '把多人录音变成可剪辑的字幕' : 'Turn a conversation into editable subtitles');
+      await expect(page.locator('article')).toContainText('FunClip v2.2.0');
       await expect(page.getByText('OpenMOSS-Team/MOSS-Transcribe-Diarize', { exact: false }).first()).toBeVisible();
       await expect(page.getByText('/v1/audio/transcriptions', { exact: false }).first()).toBeVisible();
       await expect(page.locator('img[src="/img/funclip-v2-1-0-interface.jpg"]')).toBeVisible();

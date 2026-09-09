@@ -462,7 +462,7 @@ def test_funclip_v220_moss_release_pages_are_bilingual_indexed_and_verifiable():
         assert image
         metadata = json.loads(soup.select_one('script[type="application/ld+json"]').string)
         assert metadata['datePublished'] == '2026-08-31'
-        assert metadata['dateModified'] == '2026-08-31'
+        assert metadata['dateModified'] == '2026-09-09'
 
     zh_index = (LEGACY / 'blog' / 'index.html').read_text(encoding='utf-8')
     en_index = (LEGACY / 'en' / 'blog' / 'index.html').read_text(encoding='utf-8')
