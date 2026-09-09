@@ -196,6 +196,41 @@ def test_openmaic_ecosystem_entry_is_merged_attributed_and_bounded():
         assert 'https://github.com/THU-MAIC/OpenMAIC/pull/1044' in text
 
 
+def test_langflow_entries_distinguish_release_branch_from_published_packages():
+    revision = '8a56d1b1c93c30661984f3626e8969e41cfcf10a'
+    source = (
+        f'https://github.com/langflow-ai/langflow/blob/{revision}/'
+        'src/bundles/lfx-bundles/src/lfx_bundles/funasr/funasr_transcription.py'
+    )
+    api_guide = 'https://github.com/modelscope/FunASR/tree/main/examples/openai_api'
+    for language in ('en', 'zh'):
+        page = LEGACY / ('en/ecosystem.html' if language == 'en' else 'ecosystem.html')
+        soup = BeautifulSoup(page.read_text(encoding='utf-8'), 'html.parser')
+        cards = [
+            card for card in soup.select('.card')
+            if card.select_one('.card-title').get_text(' ', strip=True) == 'Langflow'
+        ]
+        assert len(cards) == 1
+        card = cards[0]
+        text = card.get_text(' ', strip=True)
+        links = {link.get('href') for link in card.select('a[href]')}
+        assert {source, api_guide} <= links
+        assert 'release-1.13.0' in text
+        assert '1.12.1' in text and '1.1.23' in text
+        assert '2026-09-10' in text
+        assert ('尚未包含' in text) if language == 'zh' else ('not included' in text)
+        assert 'SSRF' in text
+
+        name = 'community_projects.md' if language == 'en' else 'community_projects_zh.md'
+        document = (SITE_ROOT.parents[1] / 'docs' / name).read_text(encoding='utf-8')
+        row = next(line for line in document.splitlines() if '[Langflow](' in line)
+        assert source in row and api_guide in row
+        assert 'release-1.13.0' in row
+        assert '1.12.1' in row and '1.1.23' in row
+        assert ('尚未包含' in row) if language == 'zh' else ('not included' in row)
+        assert 'https://github.com/langflow-ai/langflow/blob/main/' not in row
+
+
 def test_recent_merged_ecosystem_integrations_are_bilingual_and_attributed():
     pages = {
         'zh': LEGACY / 'ecosystem.html',
