@@ -15,6 +15,21 @@ For model selection and deployment boundaries, start with the
 Here we provided several pretrained models on different datasets. The details of models and datasets can be found on [ModelScope](https://www.modelscope.cn/models?page=1&tasks=auto-speech-recognition).
 
 ### Speech Recognition Models
+
+#### Fun-ASR-Nano: choose the checkpoint for your interface
+
+| Checkpoint | Interface | Scope |
+| --- | --- | --- |
+| [Fun-ASR-Nano-2512-hf](https://huggingface.co/FunAudioLLM/Fun-ASR-Nano-2512-hf) | Native Transformers **5.17.0**, `AutoProcessor` + `AutoModelForSpeechSeq2Seq` | Chinese, English, Japanese transcription; no remote Python code, native word timestamps or speaker identities |
+| [Fun-ASR-Nano-2512](https://huggingface.co/FunAudioLLM/Fun-ASR-Nano-2512) | FunASR toolkit `AutoModel` | Original toolkit artifact; not interchangeable with the native export |
+| [Fun-ASR-Nano-2512-vllm](https://huggingface.co/FunAudioLLM/Fun-ASR-Nano-2512-vllm) | Native vLLM | Separate serving conversion and runtime |
+| [Fun-ASR-MLT-Nano-2512](https://huggingface.co/FunAudioLLM/Fun-ASR-MLT-Nano-2512) | FunASR toolkit | Separate 31-language checkpoint, not the zh/en/ja native export |
+
+Start with the [native Transformers guide](../docs/transformers_native.md),
+[online Space](https://huggingface.co/spaces/FunAudioLLM/Fun-ASR-Nano), or
+[batch examples and notebook](https://github.com/QwenAudio/Fun-ASR/tree/main/examples/transformers).
+For a service, follow the [deployment matrix](../docs/deployment_matrix.md).
+
 #### Paraformer Models
 
 |                               Model Name                                | Language |           Training Data            | Vocab Size | Parameter | Offline/Online | Notes                                                                                                                           |

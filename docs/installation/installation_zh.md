@@ -2,6 +2,8 @@
 
 # 安装 Python SDK
 
+> **只需 Fun-ASR-Nano 原生推理？** 使用 [Transformers 5.17.0 快速开始](../transformers_native_zh.md)。它加载独立的 `-hf` 权重，不要求 FunASR 工具库。本页保留 `funasr.AutoModel` 工具库路径，两者的依赖、参数和输出不可混用。
+
 本页适用于 `from funasr import AutoModel`。需要打包好的 C++ 服务时，请先看 [Docker 与运行时镜像](./docker_zh.md)。安装完成后进入 [SDK 教程](../tutorial/README_zh.md)。
 
 ## 1. 创建独立环境

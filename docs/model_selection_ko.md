@@ -1,5 +1,9 @@
 # FunASR 모델 선택 가이드
 
+## Transformers로 Nano 시작하기
+
+중국어·영어·일본어 전사는 [Transformers 5.17.0 가이드(영문)](./transformers_native.md)와 공식 `FunAudioLLM/Fun-ASR-Nano-2512-hf` checkpoint로 시작할 수 있습니다. CPU 예제가 있으며 toolkit과 서비스 경로는 별도입니다. 네이티브 출력은 텍스트이며 타임스탬프·화자·HTTP 서버를 추가하지 않습니다.
+
 처음 FunASR을 사용할 때, Whisper나 클라우드 ASR에서 전환할 때, 또는 OpenAI 호환 API에서 노출할 model alias를 정할 때 참고하세요.
 
 ## 고민된다면 여기서 시작

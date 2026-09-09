@@ -1,5 +1,7 @@
 # Python SDK：AutoModel
 
+> **只需 Fun-ASR-Nano 原生推理？** 使用 [Transformers 5.17.0 快速开始](./transformers_native_zh.md)。它加载独立的 `-hf` 权重，不要求 FunASR 工具库。本页保留 `funasr.AutoModel` 工具库路径，两者的依赖、参数和输出不可混用。
+
 [English](python_api.md) | [安装](installation/installation_zh.md) | [模型选择](model_selection_zh.md)
 
 `from funasr import AutoModel` 在当前 Python 进程内运行模型。它不是 HTTP 客户端，也不实现完整的 OpenAI API。本文说明当前代码版本的实现，不代表所有历史 FunASR 版本或上游 checkpoint 的行为。

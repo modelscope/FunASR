@@ -2,6 +2,8 @@
 
 # Install the Python SDK
 
+> **Only need native Fun-ASR-Nano transcription?** Start with [Transformers 5.17.0](../transformers_native.md). It loads the separate `-hf` checkpoint without the FunASR toolkit. This page covers the `funasr.AutoModel` toolkit path; do not mix dependencies, parameters or output contracts.
+
 Use this guide for `from funasr import AutoModel`. For a packaged C++ service, start with [Docker and runtime images](./docker.md). After installation, continue to the [SDK tutorial](../tutorial/README.md).
 
 ## 1. Create an isolated environment

@@ -1,5 +1,7 @@
 # FunASR Colab Quickstart
 
+**Fun-ASR-Nano / Transformers:** [Open the native notebook](https://colab.research.google.com/github/QwenAudio/Fun-ASR/blob/main/examples/colab/fun_asr_nano_transformers.ipynb) for released 5.17.0, CPU, the official sample and your recordings. No toolkit is needed; the toolkit notebook below is a separate environment.
+
 English | [简体中文](README_zh.md) | [日本語](README_ja.md) | [한국어](README_ko.md)
 
 Run FunASR in a browser without preparing a local Python environment.

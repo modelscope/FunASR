@@ -16,6 +16,7 @@
 <p class="lead" data-editorial="opening">If you are adding speech recognition to an existing Transformers application, choose the checkpoint for that interface first. A shared model name does not make toolkit, serving and native Python weights interchangeable.</p>
 <p data-editorial="example">For example, a checkpoint may download successfully while the application reports an unknown model type. Check both the installed implementation and the selected artifact before assuming the weights are damaged. The native path here uses the official <code>-hf</code> checkpoint.</p>
 <p data-editorial="boundary">This is a text-generation interface, not a ready-made service. It does not supply word timestamps, speaker separation or streaming simply because loading succeeds.</p>
+<p>Ready to try it? Follow the <a href="/en/docs/native-transformers.html">Transformers 5.17.0 quickstart</a>, <a href="https://huggingface.co/spaces/FunAudioLLM/Fun-ASR-Nano">open the Space</a> or <a href="https://colab.research.google.com/github/QwenAudio/Fun-ASR/blob/main/examples/colab/fun_asr_nano_transformers.ipynb">run the notebook</a>. Start with one recording, then add batches or a deployment backend.</p>
 
 <figure><img src="/img/fun-asr-nano-native-waveform.png" width="1800" height="510" alt="Official Chinese functional-test sample waveform, time in seconds and amplitude"><figcaption>The official Chinese sample: approximately 5.62 seconds, mono, originally 48 kHz. Explicitly resample it to 16 kHz before the guide's input step. A waveform is not an accuracy or performance result.</figcaption></figure>
 <section data-native-section="formats"><h2>One family, four different paths</h2>
@@ -30,7 +31,7 @@
 
 
 <section data-native-section="observations"><h2>What did the short-recording check establish?</h2>
-<p>With pinned source, official -hf revision and CPU float32, we ran a Chinese recording, an English recording, a mixed Chinese/English batch and a Chinese keyword request. All four requests returned text and EOS before the limit, with the batch in input order. These are functional checks on two public short recordings, not an accuracy ranking.</p>
+<p>With released Transformers 5.17.0, official -hf revision and CPU float32, we ran a Chinese recording, an English recording, a mixed Chinese/English batch and a Chinese keyword request. All four requests returned text and EOS before the limit, with the batch in input order. These are functional checks on two public short recordings, not an accuracy ranking.</p>
 <div class="table-wrap"><table><thead><tr><th>The same Chinese audio</th><th>Raw output</th></tr></thead><tbody>
 <tr><td>No keywords</td><td>开饭时间早上九点至下午五点。</td></tr>
 <tr><td>Candidate keyword: 开放时间</td><td>开饭时间：早上九点至下午五点。</td></tr>
@@ -46,7 +47,7 @@
 
 <section data-editorial="appendix"><h2>Appendix: environment and interface details</h2>
 <section data-native-section="release"><h2>Check the package, not just the merge</h2>
-<p><a href="https://github.com/huggingface/transformers/pull/46180">PR #46180</a> merged on 2026-09-09. The stable <code>5.16.1</code> package checked that day did not contain native <code>fun_asr_nano</code> files. The source build's <code>5.17.0.dev0</code> label is not a promise of the next stable version or release date. Use the explicit source commit in the <a href="/en/docs/native-transformers.html">pinned setup guide</a>; an unversioned upgrade alone is not evidence of compatibility.</p>
+<p><a href="https://github.com/huggingface/transformers/pull/46180">PR #46180</a> merged on 2026-09-09, and released <strong>Transformers 5.17.0</strong> now contains the native implementation. We inspected the published wheel and repeated real Chinese/English inference, keywords and batching on CPU. Use the <a href="/en/docs/native-transformers.html">stable-package quickstart</a>; a source build is no longer required.</p>
 <p>This distinction changes troubleshooting: an unknown model type may mean that the installed package lacks the implementation, not that the checkpoint is corrupt. A successful model download does not prove that the selected runtime can load it.</p></section>
 <section data-native-section="mechanics"><h2>What happens between audio and text?</h2>
 <ol><li><strong>Audio samples.</strong> Sample rate and channel layout are part of the data's meaning. Labeling a 48 kHz array as 16 kHz changes the time scale seen by the model. The guide requires an explicitly prepared mono 16 kHz WAV.</li>

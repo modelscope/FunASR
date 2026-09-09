@@ -12,6 +12,8 @@ entry to these guides. Source Markdown remains in this repository.
    :maxdepth: 1
    :caption: Get Started
 
+   transformers_native
+   transformers_native_zh
    installation/installation
    installation/installation_zh
    installation/docker

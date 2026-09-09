@@ -1,5 +1,7 @@
 # FunASR Colab クイックスタート
 
+**Fun-ASR-Nano / Transformers：** [ネイティブ Notebook](https://colab.research.google.com/github/QwenAudio/Fun-ASR/blob/main/examples/colab/fun_asr_nano_transformers.ipynb) は正式版 5.17.0、CPU、公式サンプルとローカル音声を使います。下記 toolkit Notebook とは別環境です。
+
 [English](README.md) | [简体中文](README_zh.md) | 日本語 | [한국어](README_ko.md)
 
 ローカルの Python 環境を準備せずに、ブラウザだけで FunASR を実行できます。

@@ -1,5 +1,7 @@
 # Fun-ASR
 
+> **只需 Fun-ASR-Nano 原生推理？** 使用 [Transformers 5.17.0 快速开始](../../../docs/transformers_native_zh.md)。它加载独立的 `-hf` 权重，不要求 FunASR 工具库。本页保留 `funasr.AutoModel` 工具库路径，两者的依赖、参数和输出不可混用。
+
 「简体中文」|「[English](README.md)」
 
 Fun-ASR 是通义实验室推出的端到端语音识别大模型，是基于数千万小时真实语音数据训练而成，具备强大的上下文理解能力与行业适应性，支持低延迟实时听写。Fun-ASR-Nano 支持中文、英文、日语，以及 7 种中文方言和 26 种地域口音；独立的 Fun-ASR-MLT-Nano checkpoint 则覆盖 31 个语种。在教育、金融等垂直领域表现出色，能准确识别专业术语与行业表达，有效应对"幻觉"生成和语种混淆等挑战，实现"听得清、懂其意、写得准"。

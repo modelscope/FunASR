@@ -48,10 +48,12 @@ def test_catalogue_and_pages_export_own_both_native_guides():
 def test_native_guide_pins_format_runtime_and_audio_dependency(suffix):
     text = guide(suffix)
     for expected in (MODEL, REVISION, HEAD, "torchaudio==2.10.0+cpu",
-                     "torch==2.10.0+cpu", "5.16.1", "2026-09-09",
+                     "torch==2.10.0+cpu", "transformers==5.17.0", "2026-09-09",
                      "vllm", "GGUF", "46180"):
         assert expected in text
-    assert re.search(r"not.*stable|stable.*not|稳定版.*不|不.*稳定版", text, re.I)
+    assert "huggingface/transformers/archive/" not in text
+    assert "examples/transformers" in text
+    assert text.index("native-example: transcribe") < text.index("native-example: processor")
     assert re.search(r"not.*(?:capacity|accuracy)|不.*(?:容量|准确率)", text, re.I)
 
 
@@ -77,7 +79,28 @@ def test_bilingual_recipes_are_identical_and_use_fixed_native_checkpoint(name):
         assert "inference_mode" in en and "max_new_tokens" in en
         assert "generated[:, inputs.input_ids.shape[1]:]" in en
         assert "batch_decode" in en
-        assert "16000" in en and "ndim" in en
+        assert "16000" in en and "example/en.mp3" in en
+        assert "272c57b82523ada6fd87095e955f8e29100979ab" in en
+
+
+@pytest.mark.parametrize("suffix", ["", "_zh", "_ja", "_ko"])
+def test_all_language_entry_points_reach_native_examples(suffix):
+    for name in [f"README{suffix}.md", f"docs/model_selection{suffix}.md",
+                 f"docs/deployment_matrix{suffix}.md", f"examples/colab/README{suffix}.md"]:
+        text = (ROOT / name).read_text()
+        assert "5.17.0" in text, name
+        assert "5.16.1" not in text, name
+    text = (ROOT / f"README{suffix}.md").read_text()
+    assert "examples/transformers" in text
+    assert "fun_asr_nano_transformers.ipynb" in text
+
+
+def test_hf_catalogue_and_sphinx_reach_native_model():
+    text = (ROOT / "model_zoo/huggingface_models.md").read_text()
+    assert MODEL in text and "transformers_native.md" in text
+    text = (ROOT / "docs/index.rst").read_text()
+    assert "   transformers_native\n" in text
+    assert "   transformers_native_zh\n" in text
 
 
 @pytest.mark.parametrize("name,heading", [

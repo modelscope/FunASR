@@ -1,5 +1,9 @@
 # FunASR 배포 선택 매트릭스
 
+## Transformers로 Nano 시작하기
+
+중국어·영어·일본어 전사는 [Transformers 5.17.0 가이드(영문)](./transformers_native.md)와 공식 `FunAudioLLM/Fun-ASR-Nano-2512-hf` checkpoint로 시작할 수 있습니다. CPU 예제가 있으며 toolkit과 서비스 경로는 별도입니다. 네이티브 출력은 텍스트이며 타임스탬프·화자·HTTP 서버를 추가하지 않습니다.
+
 제품, 데모, 벤치마크, 내부 워크플로에 맞는 가장 짧은 배포 경로를 고르기 위한 가이드입니다. 먼저 요구를 만족하는 최소 구성에서 시작하고, throughput, latency, integration 요구가 명확해질 때 더 무거운 runtime으로 이동하세요.
 
 ## 빠른 결정 표

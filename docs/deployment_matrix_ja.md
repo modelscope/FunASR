@@ -1,5 +1,9 @@
 # FunASR デプロイ選択マトリクス
 
+## Transformers で Nano を試す
+
+中国語・英語・日本語の文字起こしには [Transformers 5.17.0 ガイド（英語）](./transformers_native.md) と公式 `FunAudioLLM/Fun-ASR-Nano-2512-hf` checkpoint を使えます。CPU サンプルがあり、toolkit とサービスの経路は別です。ネイティブ出力はテキストで、タイムスタンプ・話者・HTTP サーバーを追加しません。
+
 プロダクト、デモ、ベンチマーク、社内ワークフローに合わせて最短のデプロイ経路を選ぶためのガイドです。まずは要件を満たす最小構成から始め、throughput、latency、integration 要件が明確になったら重い runtime に移行してください。
 
 ## クイック判断表

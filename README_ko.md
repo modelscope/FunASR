@@ -30,6 +30,14 @@
 
 ## 빠른 시작
 
+### 네이티브 Transformers
+
+Hugging Face API로 Fun-ASR-Nano를 사용하려면 [Transformers 5.17.0 CPU 가이드(영문)](./docs/transformers_native.md)에서 시작하세요. FunASR toolkit이나 원격 Python 코드가 필요 없습니다.
+
+[Space](https://huggingface.co/spaces/FunAudioLLM/Fun-ASR-Nano) · [Notebook](https://colab.research.google.com/github/QwenAudio/Fun-ASR/blob/main/examples/colab/fun_asr_nano_transformers.ipynb) · [Python / batch examples](https://github.com/QwenAudio/Fun-ASR/tree/main/examples/transformers)
+
+### FunASR toolkit 및 파이프라인
+
 ```bash
 python -m pip install torch torchaudio
 python -m pip install funasr
@@ -104,7 +112,7 @@ checkpoint/revision, 오디오 집합, 하드웨어, 배치, 워밍업, 측정 �
 
 - **MOSS-Transcribe-Diarize**를 FunASR service, Docker, Kubernetes, vLLM/SGLang workflow, FunClip에 통합해 긴 오디오 ASR, timestamp, 익명 speaker label을 한 번에 처리합니다. [MOSS 배포 ->](./docs/moss_transcribe_diarize.md)
 - **FunASR 1.4.15**는 테스트를 거친 NumPy 2 호환성을 추가하고 스트리밍 KWS/VAD 경계 처리와 checkpoint 순위 산정을 수정합니다. `python -m pip install -U "funasr==1.4.15"`. [릴리스 및 검증 범위 ->](https://github.com/modelscope/FunASR/releases/tag/v1.4.15)
-- **네이티브 Transformers:** Fun-ASR-Nano가 [업스트림에 병합](https://github.com/huggingface/transformers/pull/46180)되었습니다. 공식 `-hf` checkpoint와 고정 소스를 사용하세요. 안정 버전 5.16.1에는 아직 포함되지 않았습니다. [설치 가이드(영문) ->](./docs/transformers_native.md)
+- **네이티브 Transformers:** 정식 버전 **5.17.0**이 Fun-ASR-Nano를 지원합니다. 공식 `-hf` checkpoint, CPU 예제, Notebook: [설치 가이드(영문) ->](./docs/transformers_native.md)
 
 > 전체 변경 기록과 download asset은 [GitHub Releases](https://github.com/modelscope/FunASR/releases)에서 확인할 수 있습니다.
 

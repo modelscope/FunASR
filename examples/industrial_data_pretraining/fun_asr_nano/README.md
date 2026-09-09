@@ -1,5 +1,7 @@
 # Fun-ASR
 
+> **Only need native Fun-ASR-Nano transcription?** Start with [Transformers 5.17.0](../../../docs/transformers_native.md). It loads the separate `-hf` checkpoint without the FunASR toolkit. This page covers the `funasr.AutoModel` toolkit path; do not mix dependencies, parameters or output contracts.
+
 「[简体中文](README_zh.md)」|「English」
 
 Fun-ASR is an end-to-end speech recognition large model launched by Tongyi Lab. It is trained on tens of millions of hours of real speech data, possessing powerful contextual understanding capabilities and industry adaptability. The Nano checkpoint supports low-latency real-time transcription for Chinese, English, and Japanese, plus Chinese dialect groups and regional accents; the separate MLT-Nano checkpoint extends coverage to 31 languages. It excels in vertical domains such as education and finance, accurately recognizing professional terminology and industry expressions, effectively addressing challenges like "hallucination" generation and language confusion, achieving "clear hearing, understanding meaning, and accurate writing."
