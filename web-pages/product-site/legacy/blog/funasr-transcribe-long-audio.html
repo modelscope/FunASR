@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>用 FunASR 转写超长音频:1 小时录音也能一次搞定 | FunASR</title><meta name="description" content="Whisper 一次只处理 30 秒,转写 1 小时音频要自己切片再拼接。FunASR 内置 VAD,一次 generate 调用直接吃下任意时长音频:实测 13.2 分钟录音 4.3 秒转完(186x 实时)。附可运行代码与长音频最佳实践。"><meta name="keywords" content="转写长音频, transcribe long audio, 长音频语音识别, whisper 30秒限制, 一小时音频转文字, 播客转写, 会议录音转文字, FunASR, 音频转文字, long audio transcription">
-<link rel="icon" href="/logo.png"><meta property="og:title" content="用 FunASR 转写超长音频:1 小时录音也能一次搞定"><meta property="og:description" content="Whisper 一次只处理 30 秒,转写 1 小时音频要自己切片再拼接。FunASR 内置 VAD,一次 generate 调用直接吃下任意时长音频:实测 13.2 分钟录音 4.3 秒转完(186x 实时)。附可运行代码与长音频最佳实践。">
+<title>长录音转写：VAD 分段、批处理与结果验收 | FunASR</title><meta name="description" content="以 FunASR 1.4.15 的 SenseVoice + FSMN-VAD 离线路径为例，解释完整音频加载、批处理预算与 CPU 行为，区分 Whisper 解码窗口和文件长度，并给出长录音上线验收清单。"><meta name="keywords" content="长录音转写, VAD 分段, SenseVoice, FSMN-VAD, FunASR, 内存预算, 批处理, 会议转写验收">
+<link rel="icon" href="/logo.png"><meta property="og:title" content="长录音转写：VAD 分段、批处理与结果验收"><meta property="og:description" content="以 FunASR 1.4.15 的 SenseVoice + FSMN-VAD 离线路径为例，解释完整音频加载、批处理预算与 CPU 行为，区分 Whisper 解码窗口和文件长度，并给出长录音上线验收清单。">
 <meta property="og:type" content="article"><meta property="og:url" content="https://www.funasr.com/blog/funasr-transcribe-long-audio.html"><meta property="og:image" content="https://www.funasr.com/logo.png">
 <link rel="canonical" href="https://www.funasr.com/blog/funasr-transcribe-long-audio.html"><link rel="alternate" hreflang="en" href="https://www.funasr.com/en/blog/funasr-transcribe-long-audio.html"><link rel="alternate" hreflang="zh" href="https://www.funasr.com/blog/funasr-transcribe-long-audio.html"><link rel="alternate" hreflang="x-default" href="https://www.funasr.com/en/blog/funasr-transcribe-long-audio.html">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"BlogPosting","headline":"用 FunASR 转写超长音频:1 小时录音也能一次搞定","description":"Whisper 一次只处理 30 秒,转写 1 小时音频要自己切片再拼接。FunASR 内置 VAD,一次 generate 调用直接吃下任意时长音频:实测 13.2 分钟录音 4.3 秒转完(186x 实时)。附可运行代码与长音频最佳实践。","datePublished":"2026-06-17","dateModified":"2026-06-17","author":{"@type":"Organization","name":"FunASR / Tongyi Lab"},"publisher":{"@type":"Organization","name":"FunASR","logo":{"@type":"ImageObject","url":"https://www.funasr.com/logo.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://www.funasr.com/blog/funasr-transcribe-long-audio.html"},"image":"https://www.funasr.com/logo.png"}
+{"@context":"https://schema.org","@type":"BlogPosting","headline":"长录音转写：VAD 分段、批处理与结果验收","description":"以 FunASR 1.4.15 的 SenseVoice + FSMN-VAD 离线路径为例，解释完整音频加载、批处理预算与 CPU 行为，区分 Whisper 解码窗口和文件长度，并给出长录音上线验收清单。","datePublished":"2026-06-17","dateModified":"2026-09-09","author":{"@type":"Organization","name":"FunASR / Tongyi Lab"},"publisher":{"@type":"Organization","name":"FunASR","logo":{"@type":"ImageObject","url":"https://www.funasr.com/logo.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://www.funasr.com/blog/funasr-transcribe-long-audio.html"},"image":"https://www.funasr.com/logo.png"}
 </script>
 <style>:root{--primary:#2563eb;--primary-dark:#1d4ed8;--bg:#fff;--surface:#f8fafc;--border:#e2e8f0;--text:#0f172a;--text-soft:#475569;--text-muted:#94a3b8;--radius:12px}
 *{margin:0;padding:0;box-sizing:border-box}
@@ -45,51 +45,79 @@ footer{background:#0f172a;color:#94a3b8;padding:28px 0;text-align:center;font-si
 footer a{color:#94a3b8}</style></head><body>
 <nav class="nav"><div class="container"><a href="/" class="nav-logo">Fun<span>ASR</span></a><div class="nav-links"><a href="/#capabilities">核心能力</a><a href="/#usage">如何使用</a><a href="/#benchmark">性能</a><a href="/#demo">演示</a><a href="https://modelscope.github.io/FunASR/zh/" target="_blank">文档</a><a href="/quickstart.html">快速上手</a><a href="/models.html">模型</a><a href="/ecosystem.html">生态</a><a href="/blog/">技术博客</a><a href="/vs-whisper.html">对比 Whisper</a><a href="/donors.html">功德榜</a></div><a href="https://www.funasr.com/en/blog/funasr-transcribe-long-audio.html" style="font-size:0.83rem;font-weight:600;color:var(--text-soft)">EN</a><a href="https://github.com/modelscope/FunASR" target="_blank" class="nav-btn">GitHub ★</a></div></nav>
 <article><div class="container">
-<h1>用 FunASR 转写超长音频:1 小时录音也能一次搞定</h1>
-<p class="post-meta">FunASR 技术博客 · 2026-06-17 · 教程</p>
-<p>转写一段 1 小时的播客、讲座或会议录音,用 Whisper 会很痛苦:它一次只处理 <strong>30 秒</strong>,你得自己把音频切片、逐片识别、再把结果拼起来,还要处理切片边界把词切断的问题。</p>
-<p><strong>FunASR 不用这么麻烦。</strong>它内置 VAD(语音端点检测),一次 <code>generate()</code> 调用就能吃下<strong>任意时长</strong>的音频——自动切句、批量解码、拼回完整文本,你一行切片代码都不用写。</p>
-<h2>安装</h2>
-<pre><code>pip install -U funasr modelscope</code></pre>
-<h2>完整代码(可直接运行)</h2>
-<pre><code>from funasr import AutoModel
+<h1>长录音转写：VAD 分段、批处理与结果验收</h1>
+<p class="post-meta">FunASR 技术博客 · 2026-06-17 · 更新于 2026-09-09</p>
+<p>播客、课程和会议录音的难点，不只是把文件交给模型，还包括资源预算、停顿与重叠语音、以及末尾是否漏识别。本文以 <strong>FunASR 1.4.15 的离线 SenseVoice + FSMN-VAD 路径</strong>为例，说明一次文件级调用内部做了什么，以及上线前该检查什么。</p>
+<aside class="limitation-callout" data-long-audio-contract="window">
+<p><strong>先区分窗口、文件和服务。</strong>开源 Whisper 的 <code>transcribe()</code> 会在内部循环处理约 30 秒的解码窗口；这不是文件长度上限，用户不必为这个入口手工逐片拼接。低层 <code>decode()</code>、文件级转写和托管 API 不是同一契约。参见<a href="https://github.com/openai/whisper/blob/86098128c0b4f24f0e2aa2994de830614b474227/README.md#L115">官方文件转写说明</a>和<a href="https://github.com/openai/whisper/blob/86098128c0b4f24f0e2aa2994de830614b474227/whisper/transcribe.py#L272">固定版本窗口循环源码</a>；本文不讨论云服务当前上传配额。</p>
+<p>FunASR 在显式配置 VAD 模型时，可以由一次 <code>generate()</code> 调用组织分段和识别。但“一次调用”不等于无限时长、固定内存、完整无漏字或实时流式处理。</p>
+</aside>
+<h2>用一个明确的离线配置开始</h2>
+<section data-long-audio-contract="prerequisites">
+<p>前提是已经准备好的独立 FunASR 1.4.15 环境，包括 PyTorch、可用的音频解码依赖和模型权重访问。先按<a href="/docs/installation.html">安装与环境验证指南</a>准备平台依赖，再核对<a href="/docs/python-api.html">Python SDK 指南</a>。下方版本检查只检查已安装包的元数据，不是完整安装或声学推理证明。</p>
+<p>把你有权处理的本地文件放在 <code>meeting.wav</code>。先用短录音验证环境，再逐步测试业务长录音；首次加载可能联网下载模型。输出包含转写文本，不要把私人内容放进公开日志。代码固定工具包版本，但未锁定全部依赖和模型 revision，正式部署应另行记录并固定它们。</p>
+</section>
+<pre data-long-audio-contract="recipe"><code>from importlib.metadata import version
+from pathlib import Path
+
+installed = version("funasr")
+if installed != "1.4.15":
+    raise RuntimeError(f"Expected FunASR 1.4.15, found {installed}")
+
+audio = Path("meeting.wav")
+if not audio.is_file():
+    raise FileNotFoundError(audio)
+
+from funasr import AutoModel
 
 model = AutoModel(
-    model="iic/SenseVoiceSmall",   # or "paraformer-zh"
-    vad_model="fsmn-vad",          # built-in voice activity detection
+    model="iic/SenseVoiceSmall",
+    vad_model="fsmn-vad",
     vad_kwargs={"max_single_segment_time": 30000},
+    device="cpu",
 )
-
-# One call on a full 1-hour file - VAD segments and batches it internally.
-res = model.generate(
-    input="podcast_1hour.wav",
-    batch_size_s=300,   # dynamic batching of VAD segments (throughput)
+result = model.generate(
+    input=str(audio),
+    batch_size_s=300,
 )
-print(res[0]["text"])</code></pre>
-<h2>实测:13 分钟音频 4.3 秒转完</h2>
-<pre><code>long clip: 791s = 13.2 min
-transcribed 791s in 4.3s -> RTFx=186
-output chars: 2104   # full transcript, head to tail</code></pre>
-<p>我们把一段 <strong>13.2 分钟(791 秒)</strong>的录音丢进单次 <code>generate()</code>,<strong>4.3 秒</strong>就转写完毕(<strong>186x 实时</strong>),输出完整覆盖从开头到结尾。换成 1 小时的文件,做法完全一样——不用改一行代码。</p>
-<h2>为什么能处理任意时长</h2>
+if not result or not isinstance(result[0], dict):
+    raise RuntimeError("No result record; inspect audio and model logs")
+text = result[0].get("text", "")
+if not isinstance(text, str) or not text.strip():
+    raise RuntimeError("Empty transcript; inspect audio, silence and VAD output")
+print(text)</code></pre>
+<p>这里明确使用 CPU，按 VAD 片段逐个处理；<code>batch_size_s</code> 不是 CPU 并行参数，也不是速度推荐。空结果需要检查：可能是静音、VAD 未选中语音、输入问题或推理异常，不能一律当成成功或模型错误。示例故意停止并要求人工检查，不提供伪造的转写输出。</p>
+<h2>一次调用背后的资源路径</h2>
+<section data-long-audio-contract="resources">
+<p>这条离线路径会读取完整音频波形到 CPU 内存，再使用 VAD 区域组织 ASR 输入；它不是只从磁盘读取当前片段的有界内存流式处理。分段可以改变某一批推理的工作量，但整段波形、解码缓冲、分段信息、输出和并发请求仍占用资源。</p>
+<p>仅按 16 kHz、单声道、float32 波形计算，一小时数据约 230 MB；这只是数据量估算，不是进程 RAM 或 GPU 峰值内存实测，也不包含解码副本和模型。不能据此承诺任意文件都能处理，或一小时与一分钟文件显存相同。可接受的时长需要在所选硬件、模型、音频格式和并发条件下验证。</p>
+<p>查看<a href="https://github.com/modelscope/FunASR/blob/5be786088ea6ea9db5f1abf18a6c16e550760e10/funasr/auto/auto_model.py#L920">整段加载与分段排序</a>、<a href="https://github.com/modelscope/FunASR/blob/5be786088ea6ea9db5f1abf18a6c16e550760e10/funasr/utils/load_utils.py#L128">音频解码入口</a>。这些源码能说明数据路径，不能替代峰值内存测量。</p>
+</section>
+<h2>两个参数，两个不同的边界</h2>
+<section data-long-audio-contract="batching">
+<table><thead><tr><th>参数</th><th>含义</th><th>不能保证什么</th></tr></thead><tbody>
+<tr><td><code>max_single_segment_time=30000</code></td><td>FSMN-VAD 的端点阈值，单位毫秒（ms）。它参与帧级语音分段决策。</td><td>不是整文件时长限制，不保证严格等长片段或恰好切在一个词、句子的边界。</td></tr>
+<tr><td><code>batch_size_s=300</code></td><td>VAD 包装器的批预算，单位秒（s），内部转为毫秒；组批判据涉及最长片段时长乘以片段数量。</td><td>不是所有片段时长简单求和，也不是硬内存上限；较长的单段仍可能单独进入推理。</td></tr>
+</tbody></table>
+<p><strong>CPU 例外：</strong>当前包装器在 <code>device="cpu"</code> 时关闭上述组批预算，按片段逐个处理。因此调整示例中的 <code>batch_size_s</code> 不能当作 CPU 批吞吐优化已经生效。换用经过配置和验证的 GPU 环境时，应重新测量，而不是套用相同内存或速度结论。实现依据：<a href="https://github.com/modelscope/FunASR/blob/5be786088ea6ea9db5f1abf18a6c16e550760e10/funasr/auto/auto_model.py#L899">批预算单位</a>、<a href="https://github.com/modelscope/FunASR/blob/5be786088ea6ea9db5f1abf18a6c16e550760e10/funasr/auto/auto_model.py#L935">CPU 分支与组批判据</a>。</p>
+</section>
+<h2>长文件上线前怎么验收</h2>
+<section data-long-audio-contract="acceptance">
+<ol>
+<li><strong>先验证输入：</strong>检查文件可解码、实际时长、声道和采样率。不要把读取成功或非空文本视为完整处理证明。</li>
+<li><strong>覆盖业务难点：</strong>准备短录音、长静音、多人重叠、连续长发言，以及末尾有明确语音的样本。重点复听切分处、关键实体和尾部；时间戳空隙也可能是静音。</li>
+<li><strong>记录资源和时延：</strong>固定模型与依赖版本、硬件、设备、音频身份和并发；分开记录初始化与文件调用耗时，说明是否预热，测量 RAM 和 GPU 峰值，保留失败与空结果。</li>
+<li><strong>再扩大负载：</strong>逐步增加录音长度和并发，确定服务的准入、超时、队列与重试策略。一次成功不能证明所有时长都可用；客户端超时也不等于后台推理被取消。</li>
+</ol>
+<p>更多思路见<a href="/blog/meeting-transcript-acceptance.html">会议转写验收清单</a>与<a href="/docs/benchmark-method.html">可复现性能评测</a>。前者附带的 MOSS <code>sentence_info</code> 检查器有特定输入契约，不可直接套在任意 SenseVoice 返回值上；结构检查也不证明文字准确率或语音覆盖完整。</p>
+</section>
+<h2>模型和服务应分开选择</h2>
 <ul>
-<li><strong>VAD 自动切句</strong>:<code>fsmn-vad</code> 先把长音频按停顿切成一句句语音段,<code>max_single_segment_time</code> 控制单段最长时长。</li>
-<li><strong>动态批处理</strong>:<code>batch_size_s=300</code> 把多段语音按总时长打包成批,一次性高吞吐解码。</li>
-<li><strong>内存可控</strong>:因为是分段处理,显存占用<strong>与文件总长无关</strong>,1 小时和 1 分钟占用相近。</li>
+<li>本文是明确配置外部 FSMN-VAD 的 SenseVoice 离线示例。Paraformer 的配置与输出应另行核对；SenseVoice 富文本标签不是经过验证的情绪准确率。</li>
+<li>第三方 <a href="/docs/moss-transcribe-diarize.html">MOSS-Transcribe-Diarize</a> 有自己的整录音转写与原生说话人分离路径，不需要照搬本文的外部 VAD 或 CAM++。匿名说话人标签不等于实名身份识别。</li>
+<li>需要实时麦克风转写时，按<a href="/deploy/">部署矩阵</a>选择明确支持的流式模型与服务；缩小离线批次并不会把它变成流式协议。更多能力差异见<a href="/docs/model-selection.html">模型选型指南</a>。</li>
 </ul>
-<h2>进阶</h2>
-<ul>
-<li>加 <code>punc_model="ct-punc"</code> 自动补标点;</li>
-<li>加 <code>spk_model="cam++"</code> 得到<a href="/blog/funasr-speaker-diarization.html">说话人分离</a>(谁在什么时候说);</li>
-<li>用 <code>SenseVoiceSmall</code> 可同时拿到<a href="/blog/sensevoice-emotion-language-detection.html">语种与情感</a>;追求最快可看 <a href="/blog/funasr-vs-whisper-benchmark.html">速度对比</a>。</li>
-</ul>
-<h2>典型场景</h2>
-<ul>
-<li><strong>播客 / 有声书</strong>:整集一次转写、生成文稿。</li>
-<li><strong>会议 / 讲座 / 庭审</strong>:长录音批量转文字 + 存档检索。</li>
-<li><strong>客服通话</strong>:整通录音转写做质检与挖掘。</li>
-</ul>
-<div class="cta"><p>FunASR 是通义实验室开源的工业级语音识别工具包,长音频、流式、多语种全覆盖。</p><a class="btn" href="https://github.com/modelscope/FunASR" target="_blank">在 GitHub 上 Star FunASR ★</a></div>
+<p data-long-audio-contract="evidence">本文依据固定版本源码解释行为，没有新增长录音性能或准确率实测。旧页缺乏完整复现条件的耗时和全程覆盖宣传已撤下；历史版本保留在仓库中，不能作为当前部署承诺。</p>
 <!--related-posts-->
 <h2>相关文章</h2>
 <ul class="post-list">
