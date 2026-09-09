@@ -87,6 +87,12 @@ speaker `segments` 直接映射到 `sentence_info`。认证可通过 `vllm_api_k
 此时 `raw_text` 保留原始标签生成；结构化模式下，`raw_text` 是 vLLM 返回的清理后
 `text`，权威说话人信息位于 `sentence_info`。
 
+需要可直接运行、保存说话人 JSON 并打印分段时间的命令行示例，可用
+[`transcribe_vllm_offline.py --engine moss`](../examples/industrial_data_pretraining/qwen3_asr/transcribe_vllm_offline_notes.md#moss-离线转写与匿名说话人)。
+它将整条录音发送给独立的 MOSS vLLM 服务，不经过 Qwen3 切块，也不下载本地权重。
+示例保留默认的 Qwen3 单独转写路径，不混拼 Qwen3 文本与 MOSS 标签；客户端安装、
+认证、输出字段和长音频输出上限见该说明。
+
 ## FunASR OpenAI 兼容服务
 
 内置离线 HTTP 服务通过 `/v1/audio/transcriptions` 返回同一套标准化结果。

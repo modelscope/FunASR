@@ -1,0 +1,65 @@
+name: Validate checkpoint selection
+
+on:
+  pull_request:
+    paths:
+      - "funasr/train_utils/**"
+      - "tests/test_checkpoint_metric_*.py"
+      - "tests/test_trainer_ds_unvalidated_ckpt.py"
+      - "tests/test_train_ds_distributed_config.py"
+      - "tests/test_sensevoice_continual_finetuning_docs.py"
+      - "examples/industrial_data_pretraining/sense_voice/**"
+      - ".github/workflows/test-checkpoint-selection.yml"
+  push:
+    branches: [main]
+    paths:
+      - "funasr/train_utils/**"
+      - "tests/test_checkpoint_metric_*.py"
+      - "tests/test_trainer_ds_unvalidated_ckpt.py"
+      - "tests/test_train_ds_distributed_config.py"
+      - "tests/test_sensevoice_continual_finetuning_docs.py"
+      - "examples/industrial_data_pretraining/sense_voice/**"
+      - ".github/workflows/test-checkpoint-selection.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  checkpoint-selection:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      OMP_NUM_THREADS: "1"
+      MKL_NUM_THREADS: "1"
+      PYTEST_DISABLE_PLUGIN_AUTOLOAD: "1"
+      TORCH_FORCE_WEIGHTS_ONLY_LOAD: "1"
+      HF_HUB_OFFLINE: "1"
+      GLOO_SOCKET_IFNAME: lo
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install CPU test dependencies
+        run: |
+          python -m pip install torch==2.10.0 torchaudio==2.10.0 --index-url https://download.pytorch.org/whl/cpu
+          python -m pip install "numpy<2" kaldiio librosa rapidfuzz six pytest omegaconf hydra-core pyyaml tqdm
+      - name: Check recipe syntax
+        run: bash -n examples/industrial_data_pretraining/sense_voice/finetune.sh
+      - name: Test validation, checkpoint lifecycle and two-rank collectives
+        run: |
+          python -m pytest -q \
+            tests/test_checkpoint_metric_presence.py \
+            tests/test_checkpoint_metric_distributed.py \
+            tests/test_trainer_ds_unvalidated_ckpt.py \
+            tests/test_train_ds_distributed_config.py \
+            tests/test_sensevoice_continual_finetuning_docs.py \
+            --junitxml=checkpoint-selection.xml
+      - name: Save test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: checkpoint-selection-report
+          path: checkpoint-selection.xml
+          if-no-files-found: error

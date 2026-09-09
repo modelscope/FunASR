@@ -140,6 +140,18 @@ def test_documentation_links_are_mapped_to_local_pages_or_repository(output):
         assert href.startswith(('/', '#', 'https://', 'http://', 'mailto:')), href
 
 
+@pytest.mark.parametrize('prefix', ['', 'en/'])
+def test_model_selection_renders_distinct_local_native_and_split_links(output, prefix):
+    page = BeautifulSoup((output / prefix / 'docs/model-selection.html').read_text(), 'html.parser')
+    article = page.select_one('.docs-article')
+    targets = {a['href'] for a in article.select('a[href]')}
+    for slug in ('vllm', 'official-native-vllm', 'native-vllm', 'moss-transcribe-diarize'):
+        assert f'/{prefix}docs/{slug}.html' in targets
+    ids = [node['id'] for node in page.select('[id]')]
+    assert ids.count('vllm-checkpoint-paths') == 1
+    assert len(ids) == len(set(ids)), 'Existing and new section anchors must stay unique'
+
+
 def test_source_fragment_links_keep_unicode_and_punctuation_boundaries(output):
     for prefix in ('', 'en/'):
         for path in (output / prefix / 'docs').glob('*.html'):

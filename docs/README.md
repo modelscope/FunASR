@@ -33,7 +33,8 @@
 | Distinguish speaker vectors, anonymous labels and emotion tags | [Speakers and emotion tags](speaker_emotion.md) / [中文](speaker_emotion_zh.md) |
 | Transcribe and diarize with third-party MOSS | [MOSS](moss_transcribe_diarize.md) / [中文](moss_transcribe_diarize_zh.md) |
 | Accelerate with the FunASR vLLM split engine | [vLLM](vllm_guide.md) / [中文](vllm_guide_zh.md) |
-| Evaluate native vLLM serving | [Validation record](vllm_native_funasr_validation.md) |
+| Evaluate official native vLLM serving | [Official checkpoint validation](vllm_official_native_validation.md) / [中文](vllm_official_native_validation_zh.md) |
+| Inspect the historical community native vLLM run (2026-08-13) | [Historical community record](vllm_native_funasr_validation.md) |
 | Deploy llama.cpp, TensorRT, Docker or Kubernetes | [Deployment manuals](https://www.funasr.com/en/deploy/) |
 | Choose a service entry point and runtime SDK | [Runtime guide](../runtime/readme.md) / [中文](../runtime/readme_cn.md) |
 | Select a development or serving container | [Docker](installation/docker.md) / [中文](installation/docker_zh.md) |

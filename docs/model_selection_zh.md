@@ -40,7 +40,7 @@ SenseVoice 生成转写和富文本标签；`fsmn-vad` 定位语音，`cam++` �
 | 快速多语种私有转写 | SenseVoice-Small | 兼顾 ASR、情感标签、音频事件标签和 CPU 可用性。 | [README 快速开始](../README_zh.md#快速开始) |
 | 中文生产 ASR | Paraformer-Large | 成熟中文 ASR 路径，可组合 VAD 和标点。 | [教程](./tutorial/README_zh.md) |
 | OpenAI API 示例中的英文路由 | `paraformer-en` alias | 适合在 OpenAI 风格客户端里验证较轻量英文路径。 | [OpenAI API 示例](../examples/openai_api/README_zh.md) |
-| LLM-based ASR 或中文/英文/日语 + 方言实验 | Fun-ASR-Nano | LLM-based 模型路径；解码吞吐敏感时配合 vLLM。 | [vLLM 指南](./vllm_guide.md) |
+| LLM-based ASR 或中文/英文/日语 + 方言实验 | Fun-ASR-Nano | 先评估 Python 路径；split-engine 与原生 vLLM 的加载契约不同。 | [选择 vLLM 路径](#vllm-checkpoint-paths) |
 | 离线长音频 ASR 与匿名说话人标签 | MOSS-Transcribe-Diarize | 一次离线请求返回转写、时间戳和录音内匿名说话人标签；不识别已知人物，也不需要外部 VAD 或说话人模型。 | [MOSS 部署指南](./moss_transcribe_diarize_zh.md) |
 | 实时字幕或客服流式音频 | Runtime WebSocket 服务 | 面向长连接流式会话和中间结果。 | [Runtime 服务文档](../runtime/readme_cn.md) |
 | 录音归档批处理 | SenseVoice-Small 或 Paraformer-Large | 稳定离线转写路径；调用方负责 manifest、重试和日志。 | [批处理示例](../examples/batch_asr_improved.py) |
@@ -54,6 +54,12 @@ SenseVoice 生成转写和富文本标签；`fsmn-vad` 定位语音，`cam++` �
 - **`paraformer`** 使用 `paraformer-zh`，组合 VAD 和标点，适合评估中文转写。
 - **`paraformer-en`** 使用 `paraformer-en`，组合 VAD，提供 OpenAI 风格客户端的英文转写路径。
 - **`fun-asr-nano`** 使用 `FunAudioLLM/Fun-ASR-Nano-2512`，评估中文、英文、日语与中文方言/口音覆盖；测试 vLLM 加速时须选择兼容的运行路径。
+- **`moss-transcribe-diarize`** 使用第三方 `OpenMOSS-Team/MOSS-Transcribe-Diarize`，用于离线转写和录音内匿名说话人标签。先按 [MOSS 指南](./moss_transcribe_diarize_zh.md) 准备独立依赖并审查远程代码；需要结构化分段时请求 `verbose_json`。它不需要外部 VAD/说话人模型，也不识别已知人物。
+
+这些别名属于加载 `AutoModel` 的[示例服务](../examples/openai_api/server.py)，
+不会配置原生 vLLM，也不会自动选择 `AutoModelVLLM`。
+包内 `funasr-server` 有独立的加载与后端选择逻辑；不要跨服务直接套用别名或性能结果，
+先核对对应的 [HTTP 指南](../examples/openai_api/README_zh.md)。
 
 示例 HTTP 服务会清理顶层 `text` 和 `verbose_json` 中各分段的 `text`；
 切换到该格式不会恢复情感/事件标签。需要原始标签时，请使用 Python SDK，
@@ -79,9 +85,24 @@ SDK、JavaScript、工作流、Postman、OpenAPI、Docker 和 Kubernetes 路径�
 | 可复现本地容器 demo | Docker Compose API | CPU-first smoke test；使用 CUDA 前先适配镜像。 |
 | 集群内私有服务 | Kubernetes API 模板 | 私有 `ClusterIP`、持久化模型缓存、`/health` probes 和 port-forward smoke test。 |
 | 实时音频 | Runtime WebSocket 服务 | 用真实音频验证 chunk size、VAD、断句、重连和客户端背压。 |
-| LLM-based ASR 吞吐 | Fun-ASR-Nano 的 vLLM 路径 | vLLM 加速自回归解码；不适用于非自回归 Paraformer。 |
+| LLM-based ASR 吞吐 | 在下方选择 split-engine 或原生 vLLM | 同时匹配 checkpoint、加载接口和已测环境；这不是 Paraformer 后端。 |
 
 选择部署方式时可以参考 [部署选型表](./deployment_matrix_zh.md)。
+
+<a id="vllm-checkpoint-paths"></a>
+
+## 选择 vLLM 权重与接口
+
+| 路径 | 权重与接口 | 下一步 |
+| --- | --- | --- |
+| FunASR split-engine | 基础 `FunAudioLLM/Fun-ASR-Nano-2512` 资产，由 `AutoModelVLLM` 加载；FunASR 处理音频部分，vLLM 处理解码器。 | [Split-engine 准备与边界](./vllm_guide_zh.md) |
+| 官方原生 vLLM | 转换后的 `FunAudioLLM/Fun-ASR-Nano-2512-vllm` 快照，通过 vLLM 原生模型实现和 `/v1/audio/transcriptions` 提供服务；不是 `AutoModelVLLM` 加载。 | [官方功能验证](./vllm_official_native_validation_zh.md) |
+| 历史社区原生 vLLM | 社区 `allendou/Fun-ASR-Nano-2512-vllm`，测试日期 2026-08-13；耗时只属于当时的权重与环境。 | [历史社区记录](./vllm_native_funasr_validation.md) |
+
+官方记录固定了模型 revision 和既有环境，不是全新安装配方、持续负载性能评测，
+也不是 `/v1/realtime` 流式验证。不要把社区历史耗时用于官方模型。
+MOSS 请遵循其独立部署指南：以上 Nano 权重和验证不能证明 MOSS 的运行时兼容性。
+先一起确定模型、权重、接口与环境，再评估自己的工作负载。
 
 ## 上线前先 benchmark
 

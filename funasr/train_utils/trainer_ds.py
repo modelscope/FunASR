@@ -14,6 +14,9 @@ from torch.distributed.fsdp import FullyShardedDataParallel as FSDP
 from funasr.train_utils.device_funcs import to_device
 from funasr.train_utils.recursive_op import recursive_average
 from funasr.train_utils.average_nbest_models import average_checkpoints
+from funasr.train_utils.checkpoint_metrics import (
+    ValidationMetrics, check_resume_ranking, record_validation_metrics,
+)
 from torch.distributed.fsdp.sharded_grad_scaler import ShardedGradScaler
 import funasr.utils.misc as misc_utils
 
@@ -129,6 +132,7 @@ class Trainer:
         self.best_step_or_epoch = ""
         self.val_acc_step_or_epoch = {}
         self.val_loss_step_or_epoch = {}
+        self._warned_validation_metric = False
 
         self.reset_gpu_cache = kwargs.get("reset_gpu_cache", False)
         self.start_data_split_i = 0
@@ -226,14 +230,8 @@ class Trainer:
                 ckpt_name = f"model.pt.ep{epoch}.{step}"
             filename = os.path.join(self.output_dir, ckpt_name)
 
-            # torch.save(state, filename)
-            with torch.no_grad():
-                model.save_checkpoint(save_dir=self.output_dir, tag=ckpt_name, client_state=state)
-            logging.info(f"\nCheckpoint saved to {filename}\n")
-            latest = Path(os.path.join(self.output_dir, f"model.pt"))
-            # torch.save(state, latest)
-            with torch.no_grad():
-                model.save_checkpoint(save_dir=self.output_dir, tag=f"model.pt", client_state=state)
+            write_best = False
+            prune_path = None
             if self.best_step_or_epoch == "" and ckpt_name in getattr(
                 self, f"val_{self.avg_keep_nbest_models_type}_step_or_epoch"
             ):
@@ -245,11 +243,7 @@ class Trainer:
                 if cur_acc is not None and (best_acc is None or cur_acc >= best_acc):
                     self.best_step_or_epoch = ckpt_name
                     best_ckpt = Path(os.path.join(self.output_dir, f"model.pt.best"))
-                    # torch.save(state, best_ckpt)
-                    with torch.no_grad():
-                        model.save_checkpoint(
-                            save_dir=self.output_dir, tag=f"model.pt.best", client_state=state
-                        )
+                    write_best = True
                     logging.info(
                         f"Update best acc: {cur_acc:.4f}, {best_ckpt}"
                     )
@@ -267,11 +261,7 @@ class Trainer:
                 if cur_loss is not None and (best_loss is None or cur_loss <= best_loss):
                     self.best_step_or_epoch = ckpt_name
                     best_ckpt = Path(os.path.join(self.output_dir, f"model.pt.best"))
-                    # torch.save(state, best_ckpt)
-                    with torch.no_grad():
-                        model.save_checkpoint(
-                            save_dir=self.output_dir, tag=f"model.pt.best", client_state=state
-                        )
+                    write_best = True
                     logging.info(
                         f"Update best loss: {cur_loss:.4f}, {best_ckpt}"
                     )
@@ -311,11 +301,24 @@ class Trainer:
                                 key = max(self.saved_ckpts, key=self.saved_ckpts.get)
                             if key in self.saved_ckpts:
                                 del self.saved_ckpts[key]
-                            filename = os.path.join(self.output_dir, key)
-                            logging.info(f"Delete: {filename}")
-                            if os.path.exists(filename):
-                                # os.remove(filename)
-                                misc_utils.smart_remove(filename)
+                            prune_path = os.path.join(self.output_dir, key)
+
+            if dist.is_initialized():
+                # Ranking is owned by rank zero; engine writes remain collective.
+                decision = [(self.best_step_or_epoch, self.saved_ckpts, write_best)]
+                dist.broadcast_object_list(decision, src=0)
+                self.best_step_or_epoch, self.saved_ckpts, write_best = decision[0]
+            state["best_step_or_epoch"] = self.best_step_or_epoch
+            state["saved_ckpts"] = dict(self.saved_ckpts)
+            with torch.no_grad():
+                model.save_checkpoint(save_dir=self.output_dir, tag=ckpt_name, client_state=state)
+                model.save_checkpoint(save_dir=self.output_dir, tag="model.pt", client_state=state)
+                if write_best:
+                    model.save_checkpoint(save_dir=self.output_dir, tag="model.pt.best", client_state=state)
+            logging.info(f"Checkpoint saved to {filename}")
+            if self.rank == 0 and prune_path is not None and os.path.exists(prune_path):
+                logging.info(f"Delete: {prune_path}")
+                misc_utils.smart_remove(prune_path)
 
         elif self.use_fsdp:
             raise NotImplementedError(
@@ -373,11 +376,9 @@ class Trainer:
             else:
                 ckpt_name = f"model.pt.ep{epoch}.{step}"
             filename = os.path.join(self.output_dir, ckpt_name)
-            torch.save(state, filename)
-
-            logging.info(f"\nCheckpoint saved to {filename}\n")
             latest = Path(os.path.join(self.output_dir, f"model.pt"))
-            torch.save(state, latest)
+            write_best = False
+            prune_path = None
             if self.best_step_or_epoch == "" and ckpt_name in getattr(
                 self, f"val_{self.avg_keep_nbest_models_type}_step_or_epoch"
             ):
@@ -389,7 +390,7 @@ class Trainer:
                 if cur_acc is not None and (best_acc is None or cur_acc >= best_acc):
                     self.best_step_or_epoch = ckpt_name
                     best_ckpt = Path(os.path.join(self.output_dir, f"model.pt.best"))
-                    torch.save(state, best_ckpt)
+                    write_best = True
                     logging.info(
                         f"Update best acc: {cur_acc:.4f}, {best_ckpt}"
                     )
@@ -407,7 +408,7 @@ class Trainer:
                 if cur_loss is not None and (best_loss is None or cur_loss <= best_loss):
                     self.best_step_or_epoch = ckpt_name
                     best_ckpt = Path(os.path.join(self.output_dir, f"model.pt.best"))
-                    torch.save(state, best_ckpt)
+                    write_best = True
                     logging.info(
                         f"Update best loss: {cur_loss:.4f}, {best_ckpt}"
                     )
@@ -446,11 +447,18 @@ class Trainer:
                             key = max(self.saved_ckpts, key=self.saved_ckpts.get)
                         if key in self.saved_ckpts:
                             del self.saved_ckpts[key]
-                        filename = os.path.join(self.output_dir, key)
-                        logging.info(f"Delete: {filename}")
-                        if os.path.exists(filename):
-                            # os.remove(filename)
-                            misc_utils.smart_remove(filename)
+                        prune_path = os.path.join(self.output_dir, key)
+
+            state["best_step_or_epoch"] = self.best_step_or_epoch
+            state["saved_ckpts"] = dict(self.saved_ckpts)
+            torch.save(state, filename)
+            torch.save(state, latest)
+            if write_best:
+                torch.save(state, best_ckpt)
+            logging.info(f"Checkpoint saved to {filename}")
+            if prune_path is not None and os.path.exists(prune_path):
+                logging.info(f"Delete: {prune_path}")
+                misc_utils.smart_remove(prune_path)
 
         if self.use_ddp or self.use_fsdp:
             dist.barrier()
@@ -475,6 +483,7 @@ class Trainer:
                 ckpt = os.path.join(self.output_dir, "model.pt")
                 if os.path.exists(ckpt):
                     _, checkpoint = model.load_checkpoint(self.output_dir, "model.pt")
+                    check_resume_ranking(checkpoint, self.avg_keep_nbest_models_type)
                     self.start_epoch = checkpoint["epoch"]
                     self.saved_ckpts = checkpoint["saved_ckpts"]
                     self.val_acc_step_or_epoch = (
@@ -520,6 +529,7 @@ class Trainer:
                 ckpt = os.path.join(self.output_dir, "model.pt")
                 if os.path.isfile(ckpt):
                     checkpoint = torch.load(ckpt, map_location="cpu")
+                    check_resume_ranking(checkpoint, self.avg_keep_nbest_models_type)
                     self.start_epoch = checkpoint["epoch"]
                     # self.model.load_state_dict(checkpoint['state_dict'])
                     src_state = checkpoint["state_dict"]
@@ -812,8 +822,7 @@ class Trainer:
         Args:
             epoch (int): The current epoch number.
         """
-        self.val_loss_avg = 0.0
-        self.val_acc_avg  = 0.0
+        metrics = ValidationMetrics()
 
         if self.use_ddp or self.use_fsdp or self.use_deepspeed:
             dist.barrier()
@@ -860,31 +869,23 @@ class Trainer:
 
                 loss_dict["batch_num_epoch"] = len(dataloader_val)
 
+                metrics.update(loss_dict["loss"], loss_dict["stats"])
+                running = metrics.compute(self.device)
+                self.val_loss_avg = running["loss"] if running["loss"] is not None else float("nan")
+                self.val_acc_avg = running["acc"] if running["acc"] is not None else float("nan")
                 self.log(loss_dict, tag="val")
                 time_beg = time.perf_counter()
-                self.val_loss_avg = (
-                    self.val_loss_avg * batch_idx + loss_dict["loss"].detach().cpu().item()
-                ) / (batch_idx + 1)
-                if "acc" in loss_dict["stats"]:
-                    self.val_acc_avg = (
-                        self.val_acc_avg * batch_idx
-                        + loss_dict["stats"]["acc"].detach().cpu().item()
-                    ) / (batch_idx + 1)
-
-            if self.use_ddp or self.use_fsdp or self.use_deepspeed:
-                val_loss_avg = torch.tensor(self.val_loss_avg, dtype=torch.float32).to(self.device)
-                val_acc_avg = torch.tensor(self.val_acc_avg, dtype=torch.float32).to(self.device)
-                dist.all_reduce(val_loss_avg, op=dist.ReduceOp.SUM)
-                dist.all_reduce(val_acc_avg, op=dist.ReduceOp.SUM)
-                self.val_loss_avg = val_loss_avg.detach().cpu().item() / self.world_size
-                self.val_acc_avg = val_acc_avg.detach().cpu().item() / self.world_size
 
         if kwargs.get("step_in_epoch", None) is None:
             ckpt_name = f"model.pt.ep{epoch}"
         else:
             ckpt_name = f'model.pt.ep{epoch}.{kwargs.get("step_in_epoch")}'
-        self.val_acc_step_or_epoch[ckpt_name] = self.val_acc_avg
-        self.val_loss_step_or_epoch[ckpt_name] = self.val_loss_avg
+        record_validation_metrics(
+            self, ckpt_name,
+            metrics.compute(
+                self.device, distributed=self.use_ddp or self.use_fsdp or self.use_deepspeed
+            ),
+        )
 
         if self.use_ddp or self.use_fsdp or self.use_deepspeed:
             dist.barrier()

@@ -52,21 +52,21 @@ def transform(Y, transform_type=None, dtype=np.float32):
         n_fft = 2 * (Y.shape[1] - 1)
         sr = 16000
         n_mels = 40
-        mel_basis = librosa.filters.mel(sr, n_fft, n_mels)
+        mel_basis = librosa.filters.mel(sr=sr, n_fft=n_fft, n_mels=n_mels)
         Y = np.dot(Y**2, mel_basis.T)
         Y = np.log10(np.maximum(Y, 1e-10))
     elif transform_type == "logmel23":
         n_fft = 2 * (Y.shape[1] - 1)
         sr = 8000
         n_mels = 23
-        mel_basis = librosa.filters.mel(sr, n_fft, n_mels)
+        mel_basis = librosa.filters.mel(sr=sr, n_fft=n_fft, n_mels=n_mels)
         Y = np.dot(Y**2, mel_basis.T)
         Y = np.log10(np.maximum(Y, 1e-10))
     elif transform_type == "logmel23_mn":
         n_fft = 2 * (Y.shape[1] - 1)
         sr = 8000
         n_mels = 23
-        mel_basis = librosa.filters.mel(sr, n_fft, n_mels)
+        mel_basis = librosa.filters.mel(sr=sr, n_fft=n_fft, n_mels=n_mels)
         Y = np.dot(Y**2, mel_basis.T)
         Y = np.log10(np.maximum(Y, 1e-10))
         mean = np.mean(Y, axis=0)
@@ -75,7 +75,7 @@ def transform(Y, transform_type=None, dtype=np.float32):
         n_fft = 2 * (Y.shape[1] - 1)
         sr = 8000
         n_mels = 23
-        mel_basis = librosa.filters.mel(sr, n_fft, n_mels)
+        mel_basis = librosa.filters.mel(sr=sr, n_fft=n_fft, n_mels=n_mels)
         Y = np.dot(Y**2, mel_basis.T)
         Y = np.log10(np.maximum(Y, 1e-10))
         # b = np.ones(300)/300
@@ -92,7 +92,7 @@ def transform(Y, transform_type=None, dtype=np.float32):
         n_fft = 2 * (Y.shape[1] - 1)
         sr = 8000
         n_mels = 23
-        mel_basis = librosa.filters.mel(sr, n_fft, n_mels)
+        mel_basis = librosa.filters.mel(sr=sr, n_fft=n_fft, n_mels=n_mels)
         Y = np.dot(Y**2, mel_basis.T)
         Y = np.log10(np.maximum(Y, 1e-10))
         mean = np.mean(Y, axis=0)
