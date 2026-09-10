@@ -216,6 +216,24 @@ Use representative recordings and human references to assess quality.</p>
 truncation; increasing the limit does not prove coverage of a long recording.
 The CLI reports <code>reached_eos</code> and exits unsuccessfully for missing EOS or empty
 text. EOS itself is not proof that all words were recognized.</p>
+<h2 id="run-the-cli-on-cuda">Run the CLI on CUDA</h2>
+<p>Follow the <a href="https://github.com/QwenAudio/Fun-ASR/tree/main/examples/transformers#cuda-an-isolated-tested-recipe">isolated CUDA installation</a>,
+including its separate <code>requirements-gpu.txt</code>, before running this from the
+QwenAudio/Fun-ASR code repository with your local audio files:</p>
+<pre id="code-3"><code class="language-bash">python examples/transformers/transcribe.py chinese.wav english.wav --language zh en --device cuda --dtype bfloat16
+</code></pre>
+<p>On <strong>2026-09-10</strong>, Linux/Python 3.12, H100 80 GB, driver <strong>550.127.08</strong>,
+torch/torchaudio <strong>2.11.0+cu128</strong> and Transformers <strong>5.17.0</strong> passed eight
+float32/BF16 English, Chinese, keyword and padded mixed-batch functional cases.
+The updated CLI also passed GPU single-file/batch and default CPU regression.
+These are not accuracy, minimum-VRAM or serving-capacity benchmarks; the Chinese
+keyword error described above remains. Other GPUs and float16 were not tested.</p>
+<p>No device flags still means CPU float32. Explicit CUDA fails when unavailable,
+and BF16 requires device support; no silent CPU fallback. The model and inputs
+move together without casting integer token IDs. Output records device and dtype.
+An attention-dispatch warning was observed; successful inference does not verify
+every component's kernel or imply Flash Attention performance. Hosted GPU
+Space/Colab execution has not been verified by these local checks.</p>
 <h2 id="from-an-example-to-a-service">From an example to a service</h2>
 <table>
 <thead>
@@ -259,7 +277,7 @@ upgrade in the new environment, not an unrelated running service. The native
 classes live in <code>transformers.models.fun_asr_nano</code>.</p>
 <p>This optional synthetic-silence check downloads the processor, not model weights:</p>
 <!-- native-example: processor -->
-<pre id="code-3"><code class="language-python">import numpy as np
+<pre id="code-4"><code class="language-python">import numpy as np
 from transformers import AutoProcessor
 
 model_id = "FunAudioLLM/Fun-ASR-Nano-2512-hf"
@@ -309,6 +327,7 @@ Never attach private recordings or credentials to a public issue.</p></article>
 <li><a href="#fun-asr-nano-with-transformers">Fun-ASR-Nano with Transformers</a><ul>
 <li><a href="#get-your-first-transcript">Get your first transcript</a></li>
 <li><a href="#your-files-keywords-and-batches">Your files, keywords and batches</a></li>
+<li><a href="#run-the-cli-on-cuda">Run the CLI on CUDA</a></li>
 <li><a href="#from-an-example-to-a-service">From an example to a service</a></li>
 <li><a href="#troubleshooting-without-loading-weights">Troubleshooting without loading weights</a></li>
 <li><a href="#reproducibility-and-sources">Reproducibility and sources</a></li>

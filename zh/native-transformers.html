@@ -207,6 +207,22 @@ python examples/transformers/transcribe.py chinese.wav english.wav --language zh
 <p>上面的短样例最多生成 128 个新 token。没有 EOS 可能意味着截断，单纯提高
 上限不等于长录音已完整覆盖。CLI 输出 <code>reached_eos</code>，缺少 EOS 或文本为空时
 以非零状态结束；出现 EOS 也不代表每个字都识别正确。</p>
+<h2 id="用-cuda-运行-cli">用 CUDA 运行 CLI</h2>
+<p>先按<a href="https://github.com/QwenAudio/Fun-ASR/tree/main/examples/transformers#cuda-an-isolated-tested-recipe">独立 CUDA 安装指南</a>
+安装专用的 <code>requirements-gpu.txt</code>，不要混入 CPU 环境。在 QwenAudio/Fun-ASR
+代码仓库根目录，用自己的本地录音运行：</p>
+<pre id="code-3"><code class="language-bash">python examples/transformers/transcribe.py chinese.wav english.wav --language zh en --device cuda --dtype bfloat16
+</code></pre>
+<p><strong>2026-09-10</strong> 在 Linux/Python 3.12、H100 80 GB、驱动 <strong>550.127.08</strong>、
+torch/torchaudio <strong>2.11.0+cu128</strong>、Transformers <strong>5.17.0</strong> 上完成八项功能检查：
+float32/BF16 各覆盖英文、中文、关键词和中英 padding 批次。修改后的 CLI 也通过
+GPU 单文件、批次与默认 CPU 回归。这不是准确率、最低显存或服务容量评测；
+前述中文关键词识别错误仍存在。其他 GPU 和 float16 尚未测试。</p>
+<p>不传设备参数仍使用 CPU float32。显式请求 CUDA 但设备不可用时直接报错，
+BF16 也会检查设备支持，不会静默回退 CPU。模型和输入一起迁移设备，不把整数
+token ID 转成浮点数；输出记录实际设备与精度。测试中出现过 attention 分派警告，
+功能通过不代表每个组件的内核已验证，也不意味着 Flash Attention 性能已验证。
+这些本地检查不覆盖托管 GPU Space 或 Colab 的实际运行。</p>
 <h2 id="从示例走向服务">从示例走向服务</h2>
 <table>
 <thead>
@@ -247,7 +263,7 @@ python examples/transformers/transcribe.py chinese.wav english.wav --language zh
 原生类位于 <code>transformers.models.fun_asr_nano</code>。</p>
 <p>下面是可选的合成静音预处理检查，只下载 processor，不加载模型权重：</p>
 <!-- native-example: processor -->
-<pre id="code-3"><code class="language-python">import numpy as np
+<pre id="code-4"><code class="language-python">import numpy as np
 from transformers import AutoProcessor
 
 model_id = "FunAudioLLM/Fun-ASR-Nano-2512-hf"
@@ -292,6 +308,7 @@ SHA256：<code>1bbb6dcc5d8b75084a399d48c4d4b0f3aa1d3f09f2616ae40ed2c4fba03d89c9<
 <li><a href="#用-transformers-转写-fun-asr-nano">用 Transformers 转写 Fun-ASR-Nano</a><ul>
 <li><a href="#先得到第一条转写">先得到第一条转写</a></li>
 <li><a href="#换成自己的录音再做批处理">换成自己的录音，再做批处理</a></li>
+<li><a href="#用-cuda-运行-cli">用 CUDA 运行 CLI</a></li>
 <li><a href="#从示例走向服务">从示例走向服务</a></li>
 <li><a href="#不加载权重的排查方法">不加载权重的排查方法</a></li>
 <li><a href="#复现记录与来源">复现记录与来源</a></li>
