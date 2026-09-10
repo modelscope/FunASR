@@ -337,14 +337,14 @@
     {
       "slug": "punctuation-restoration-python",
       "category": "explanations",
-      "reviewed": false,
+      "reviewed": true,
       "zh": {
-        "title": "怎样给转写结果补标点",
-        "summary": ""
+        "title": "文字都在，标点为什么还是断错？",
+        "summary": "保留原始转写，生成标点候选，再检查归句和专名，不把句号当作语义修复。"
       },
       "en": {
-        "title": "Restoring punctuation in a transcript",
-        "summary": ""
+        "title": "The words are right. Why is the punctuation wrong?",
+        "summary": "Keep the original, generate a candidate, then review sentence meaning and names."
       }
     },
     {
