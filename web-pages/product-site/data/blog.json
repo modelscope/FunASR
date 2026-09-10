@@ -285,14 +285,14 @@
     {
       "slug": "generate-subtitles-srt-vtt-from-audio-video",
       "category": "applications",
-      "reviewed": false,
+      "reviewed": true,
       "zh": {
-        "title": "从录音生成字幕文件",
-        "summary": ""
+        "title": "字幕文件生成了，然后呢？",
+        "summary": "从一段普通话录音得到 SRT，转换为 VTT，再回听检查时间与文字。"
       },
       "en": {
-        "title": "From a recording to subtitle files",
-        "summary": ""
+        "title": "You have a subtitle file. Is it ready?",
+        "summary": "Create SRT from a Mandarin recording, convert it to VTT, then check timing and text against the audio."
       }
     },
     {
