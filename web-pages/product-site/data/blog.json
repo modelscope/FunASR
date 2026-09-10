@@ -402,14 +402,14 @@
     {
       "slug": "sensevoice-emotion-language-detection",
       "category": "explanations",
-      "reviewed": false,
+      "reviewed": true,
       "zh": {
-        "title": "文字之外，语音里还有什么信息",
-        "summary": ""
+        "title": "SenseVoice 的情绪标签，该怎么用？",
+        "summary": "保留原始预测，区分显示文本与评测标签，不把分类结果当作人的真实情绪。"
       },
       "en": {
-        "title": "What can speech tell us beyond the words?",
-        "summary": ""
+        "title": "How should you use SenseVoice emotion tags?",
+        "summary": "Keep raw predictions, separate display from evaluation, and do not mistake a tag for a person's true state."
       }
     },
     {
