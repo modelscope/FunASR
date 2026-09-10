@@ -157,6 +157,21 @@ def test_relative_links_and_internal_navigation_resolve(name):
             assert unquote(target.fragment) in anchors, (name, link["href"])
 
 
+@pytest.mark.parametrize("name", LANGUAGES)
+def test_model_zoo_distinguishes_native_transformers_and_toolkit_downloads(name):
+    body = section(name, LANGUAGES[name][3])
+    rows = {row.find("td").get_text(strip=True): row for row in body.select("tr")
+            if row.find("td")}
+    links = {link.get_text(strip=True): link.get("href")
+             for link in rows["Fun-ASR-Nano"].select("a[href]")}
+    assert links.get("HF / Transformers") == "https://huggingface.co/FunAudioLLM/Fun-ASR-Nano-2512-hf"
+    assert links.get("HF / FunASR") == "https://huggingface.co/FunAudioLLM/Fun-ASR-Nano-2512"
+    assert links.get("GGUF") == "https://huggingface.co/FunAudioLLM/Fun-ASR-Nano-GGUF"
+    mlt_links = {link.get("href") for link in rows["Fun-ASR-MLT-Nano"].select("a[href]")}
+    assert "https://huggingface.co/FunAudioLLM/Fun-ASR-MLT-Nano-2512" in mlt_links
+    assert "https://huggingface.co/FunAudioLLM/Fun-ASR-Nano-2512-hf" not in mlt_links
+
+
 def test_speaker_field_explanation_has_implementation_evidence():
     camp = ast.parse(read("funasr/models/campplus/model.py"))
     assert any(isinstance(node, ast.Constant) and node.value == "spk_embedding" for node in ast.walk(camp))
