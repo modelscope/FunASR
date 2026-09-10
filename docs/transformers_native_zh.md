@@ -94,6 +94,28 @@ python examples/transformers/transcribe.py chinese.wav english.wav --language zh
 上限不等于长录音已完整覆盖。CLI 输出 `reached_eos`，缺少 EOS 或文本为空时
 以非零状态结束；出现 EOS 也不代表每个字都识别正确。
 
+## 用 CUDA 运行 CLI
+
+先按[独立 CUDA 安装指南](https://github.com/QwenAudio/Fun-ASR/tree/main/examples/transformers#cuda-an-isolated-tested-recipe)
+安装专用的 `requirements-gpu.txt`，不要混入 CPU 环境。在 QwenAudio/Fun-ASR
+代码仓库根目录，用自己的本地录音运行：
+
+```bash
+python examples/transformers/transcribe.py chinese.wav english.wav --language zh en --device cuda --dtype bfloat16
+```
+
+**2026-09-10** 在 Linux/Python 3.12、H100 80 GB、驱动 **550.127.08**、
+torch/torchaudio **2.11.0+cu128**、Transformers **5.17.0** 上完成八项功能检查：
+float32/BF16 各覆盖英文、中文、关键词和中英 padding 批次。修改后的 CLI 也通过
+GPU 单文件、批次与默认 CPU 回归。这不是准确率、最低显存或服务容量评测；
+前述中文关键词识别错误仍存在。其他 GPU 和 float16 尚未测试。
+
+不传设备参数仍使用 CPU float32。显式请求 CUDA 但设备不可用时直接报错，
+BF16 也会检查设备支持，不会静默回退 CPU。模型和输入一起迁移设备，不把整数
+token ID 转成浮点数；输出记录实际设备与精度。测试中出现过 attention 分派警告，
+功能通过不代表每个组件的内核已验证，也不意味着 Flash Attention 性能已验证。
+这些本地检查不覆盖托管 GPU Space 或 Colab 的实际运行。
+
 ## 从示例走向服务
 
 | 需求 | checkpoint 与接口 |

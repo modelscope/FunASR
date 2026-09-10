@@ -95,6 +95,16 @@ def test_all_language_entry_points_reach_native_examples(suffix):
     assert "fun_asr_nano_transformers.ipynb" in text
 
 
+@pytest.mark.parametrize("suffix", ["", "_zh"])
+def test_cuda_route_is_explicit_bounded_and_reaches_canonical_recipe(suffix):
+    text = guide(suffix)
+    for expected in ("--device cuda --dtype bfloat16", "H100", "550.127.08",
+                     "2.11.0+cu128", "2026-09-10", "requirements-gpu.txt"):
+        assert expected in text
+    assert "https://github.com/QwenAudio/Fun-ASR/tree/main/examples/transformers#cuda-an-isolated-tested-recipe" in text
+    assert "torch==2.10.0+cpu" in text
+
+
 def test_hf_catalogue_and_sphinx_reach_native_model():
     text = (ROOT / "model_zoo/huggingface_models.md").read_text()
     assert MODEL in text and "transformers_native.md" in text
