@@ -140,7 +140,7 @@ FunASR はアダプターを提供します。統合経路はオフラインで�
 
 | モデル | タスク | 言語 | パラメータ | リンク |
 |--------|--------|------|-----------|--------|
-| **Fun-ASR-Nano** | 認識 | 中/英/日 + 中国語方言 | 800M | [⭐](https://www.modelscope.cn/models/FunAudioLLM/Fun-ASR-Nano-2512) [🤗](https://huggingface.co/FunAudioLLM/Fun-ASR-Nano-2512) [GGUF](https://huggingface.co/FunAudioLLM/Fun-ASR-Nano-GGUF) |
+| **Fun-ASR-Nano** | 認識 | 中/英/日 + 中国語方言 | 800M | [⭐](https://www.modelscope.cn/models/FunAudioLLM/Fun-ASR-Nano-2512) [HF / Transformers](https://huggingface.co/FunAudioLLM/Fun-ASR-Nano-2512-hf) · [HF / FunASR](https://huggingface.co/FunAudioLLM/Fun-ASR-Nano-2512) [GGUF](https://huggingface.co/FunAudioLLM/Fun-ASR-Nano-GGUF) |
 | **Fun-ASR-MLT-Nano** | 認識 | 31言語 | 800M | [⭐](https://www.modelscope.cn/models/FunAudioLLM/Fun-ASR-MLT-Nano-2512) [🤗](https://huggingface.co/FunAudioLLM/Fun-ASR-MLT-Nano-2512) |
 | **SenseVoiceSmall** | 認識 + 感情 + イベント | 中/英/日/韓/粤 | 234M | [⭐](https://www.modelscope.cn/models/iic/SenseVoiceSmall) [🤗](https://huggingface.co/FunAudioLLM/SenseVoiceSmall) [GGUF](https://huggingface.co/FunAudioLLM/SenseVoiceSmall-GGUF) |
 | **MOSS-Transcribe-Diarize** | 第三者 OpenMOSS：オフライン認識 + タイムスタンプ + 匿名話者 | 公式モデルカードを参照 | 公式モデルカードを参照 | [🤗](https://huggingface.co/OpenMOSS-Team/MOSS-Transcribe-Diarize) [ガイド](./docs/moss_transcribe_diarize.md) |

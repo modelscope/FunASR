@@ -10,6 +10,7 @@ on:
       - 'docs/_ext/**'
       - 'tests/test_sphinx_links.py'
       - 'tests/test_vllm_examples_contract.py'
+      - 'tests/test_readme_task_entrypoints.py'
       - 'model_zoo/**/*.md'
       - 'runtime/**/*.md'
       - 'examples/openai_api/**/*.md'
@@ -32,6 +33,7 @@ on:
       - 'docs/_ext/**'
       - 'tests/test_sphinx_links.py'
       - 'tests/test_vllm_examples_contract.py'
+      - 'tests/test_readme_task_entrypoints.py'
       - 'model_zoo/**/*.md'
       - 'runtime/**/*.md'
       - 'examples/openai_api/**/*.md'
@@ -88,6 +90,7 @@ jobs:
       - name: Run model-free documentation contracts
         run: >-
           python -m pytest
+          tests/test_readme_task_entrypoints.py
           tests/test_learning_docs_contract.py
           tests/test_reference_docs_contract.py
           tests/test_vllm_examples_contract.py
