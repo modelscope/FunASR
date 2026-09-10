@@ -103,6 +103,30 @@ truncation; increasing the limit does not prove coverage of a long recording.
 The CLI reports `reached_eos` and exits unsuccessfully for missing EOS or empty
 text. EOS itself is not proof that all words were recognized.
 
+## Run the CLI on CUDA
+
+Follow the [isolated CUDA installation](https://github.com/QwenAudio/Fun-ASR/tree/main/examples/transformers#cuda-an-isolated-tested-recipe),
+including its separate `requirements-gpu.txt`, before running this from the
+QwenAudio/Fun-ASR code repository with your local audio files:
+
+```bash
+python examples/transformers/transcribe.py chinese.wav english.wav --language zh en --device cuda --dtype bfloat16
+```
+
+On **2026-09-10**, Linux/Python 3.12, H100 80 GB, driver **550.127.08**,
+torch/torchaudio **2.11.0+cu128** and Transformers **5.17.0** passed eight
+float32/BF16 English, Chinese, keyword and padded mixed-batch functional cases.
+The updated CLI also passed GPU single-file/batch and default CPU regression.
+These are not accuracy, minimum-VRAM or serving-capacity benchmarks; the Chinese
+keyword error described above remains. Other GPUs and float16 were not tested.
+
+No device flags still means CPU float32. Explicit CUDA fails when unavailable,
+and BF16 requires device support; no silent CPU fallback. The model and inputs
+move together without casting integer token IDs. Output records device and dtype.
+An attention-dispatch warning was observed; successful inference does not verify
+every component's kernel or imply Flash Attention performance. Hosted GPU
+Space/Colab execution has not been verified by these local checks.
+
 ## From an example to a service
 
 | Need | Checkpoint and interface |
