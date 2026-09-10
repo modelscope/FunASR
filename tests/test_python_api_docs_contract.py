@@ -46,7 +46,7 @@ class PythonApiDocsContract(unittest.TestCase):
             "funasr/models/paraformer_streaming/model.py")))
         for path in DOCS:
             blocks = python_blocks(path)
-            self.assertEqual(len(blocks), 3, path.name)
+            self.assertEqual(len(blocks), 4, path.name)
             for index, block in enumerate(blocks):
                 with self.subTest(doc=path.name, block=index):
                     compile(block, str(path), "exec")
@@ -62,6 +62,38 @@ class PythonApiDocsContract(unittest.TestCase):
 
     def test_translations_keep_identical_executable_examples(self):
         self.assertEqual(python_blocks(DOCS[0]), python_blocks(DOCS[1]))
+
+    def alignment_helper(self, path):
+        blocks = [block for block in python_blocks(path)
+                  if "def sensevoice_word_intervals(" in block]
+        self.assertEqual(len(blocks), 1, path.name)
+        namespace = {}
+        exec(compile(blocks[0], str(path), "exec"), namespace)
+        return namespace["sensevoice_word_intervals"]
+
+    def test_sensevoice_example_pairs_words_not_display_characters(self):
+        # SenseVoice215: display characters are not the alignment units.
+        result = {"text": "<|en|>hello world", "words": ["hello", "world"],
+                  "timestamp": [[0, 500], [700, 1000]]}
+        for path in DOCS:
+            with self.subTest(doc=path.name):
+                helper = self.alignment_helper(path)
+                self.assertEqual(helper(result), [
+                    {"word": "hello", "start_ms": 0, "end_ms": 500},
+                    {"word": "world", "start_ms": 700, "end_ms": 1000},
+                ])
+                self.assertEqual(helper({"words": [], "timestamp": []}), [])
+                self.assertEqual(result["words"], ["hello", "world"])
+
+    def test_sensevoice_example_rejects_missing_or_truncated_alignment(self):
+        for path in DOCS:
+            helper = self.alignment_helper(path)
+            for result in ({"text": ""}, {"words": [], "timestamp": None},
+                           {"words": ["hello"], "timestamp": []},
+                           {"words": [], "timestamp": [[0, 500]]}):
+                with self.subTest(doc=path.name, result=result):
+                    with self.assertRaises(ValueError):
+                        helper(result)
 
     def test_local_links_resolve_without_repository_scan(self):
         for path in DOCS:
