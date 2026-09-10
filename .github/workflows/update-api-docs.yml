@@ -28,6 +28,15 @@ jobs:
         with:
           python-version: '3.11'
 
+      - name: Read retained Chinese API reference
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          path: previous-pages
+          sparse-checkout: zh/api.html
+          sparse-checkout-cone-mode: false
+          persist-credentials: false
+
       - name: Generate API docs
         run: python3 scripts/gen_api_docs.py
 
@@ -40,6 +49,7 @@ jobs:
           python3 web-pages/product-site/build.py --output /tmp/funasr-docs-site
           python3 web-pages/product-site/validate.py /tmp/funasr-docs-site
           python3 web-pages/product-site/export_docs.py --site /tmp/funasr-docs-site --output gh-pages-output
+          python3 web-pages/product-site/link_api_guides.py --output gh-pages-output --previous previous-pages
 
       - name: Deploy to gh-pages
         uses: peaceiris/actions-gh-pages@v3
