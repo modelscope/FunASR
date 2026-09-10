@@ -135,6 +135,29 @@ For `sentence_timestamp=True` without speakers, the current wrapper can return V
 
 Additional fields such as `words`, `ctc_timestamps`, or speaker embeddings are model-specific. Do not relabel SDK milliseconds as service seconds without conversion. See [timestamp regression tests](../tests/test_paraformer_timestamp_contract.py) and the model sources below.
 
+### Consuming SenseVoice Alignment
+
+For this toolkit's SenseVoice path, request `output_timestamp=True` in `generate()`. Pair the returned `words` with `timestamp` in **milliseconds**. These are model alignment units: English subwords can merge into words, while other languages can retain character units. Neither the raw rich-tagged text nor `rich_transcription_postprocess(text)` is a character-by-character index into the timestamps. Display postprocessing and text replacements do not realign audio.
+
+Use this helper on each result that has alignment fields. The length check prevents silent truncation; missing fields require explicit application handling, not invented timestamps.
+
+```python
+def sensevoice_word_intervals(result):
+    words, timestamps = result.get("words"), result.get("timestamp")
+    if words is None or timestamps is None:
+        raise ValueError("This result has no word/timestamp alignment")
+    if len(words) != len(timestamps):
+        raise ValueError("Word/timestamp count mismatch")
+    return [
+        {"word": word, "start_ms": start_ms, "end_ms": end_ms}
+        for word, (start_ms, end_ms) in zip(words, timestamps)
+    ]
+```
+
+Call `sensevoice_word_intervals(result)` for a dictionary from `model.generate(..., output_timestamp=True)`. Empty aligned lists return an empty list; a no-speech result without `words` raises instead. Keep display-text cleanup separate from the aligned sequence.
+
+A fixed-checkpoint check on FunASR 1.4.15 produced 242 paired units for the public Chinese sample with ITN and 217 without ITN. An English sample had 84 display characters but 16 paired units. These results illustrate the consumption contract, not timestamp precision, transcription accuracy or a fix for every special-symbol case. See the [reproducible inputs and boundaries](https://github.com/QwenAudio/SenseVoice/issues/215#issuecomment-5615363096). This is not native Nano Transformers output and does not add speaker identity.
+
 ## Language, Hotwords, and Alignment Are Model-Specific
 
 | Implementation | Runtime controls in this checkout |

@@ -135,6 +135,29 @@ for result in model.generate(input=str(paths["audio"]), return_spk_res=True):
 
 `words`、`ctc_timestamps`、说话人特征等额外字段属于模型特有输出。不能不经换算就把 SDK 毫秒值当作服务端秒值。参见[时间戳回归测试](../tests/test_paraformer_timestamp_contract.py) 及下列模型源码。
 
+### 使用 SenseVoice 对齐结果
+
+在本工具包的 SenseVoice 路径中，通过 `generate()` 的 `output_timestamp=True` 请求对齐。应将返回的 `words` 与**毫秒**单位的 `timestamp` 配对。这些是模型的对齐单元：英文子词可能合并成词，其他语言则可能保留字符单元。原始富标签文本和 `rich_transcription_postprocess(text)` 都不能作为时间戳的逐字符索引；显示后处理和文本替换不会重新对齐音频。
+
+对含对齐字段的每个结果使用下面的辅助函数。长度检查避免静默截断；缺少字段时应由应用显式处理，不能编造时间戳。
+
+```python
+def sensevoice_word_intervals(result):
+    words, timestamps = result.get("words"), result.get("timestamp")
+    if words is None or timestamps is None:
+        raise ValueError("This result has no word/timestamp alignment")
+    if len(words) != len(timestamps):
+        raise ValueError("Word/timestamp count mismatch")
+    return [
+        {"word": word, "start_ms": start_ms, "end_ms": end_ms}
+        for word, (start_ms, end_ms) in zip(words, timestamps)
+    ]
+```
+
+将 `model.generate(..., output_timestamp=True)` 返回的结果字典传给 `sensevoice_word_intervals(result)`。两份对齐列表均为空时返回空列表；无语音结果若缺少 `words`，则明确报错。显示文本清理应与对齐序列分开处理。
+
+在 FunASR 1.4.15 的固定 checkpoint 检查中，公开中文样例开启 ITN 得到 242 组配对单元，关闭 ITN 得到 217 组；英文样例有 84 个显示字符，但只有 16 组配对单元。这些结果用于说明消费契约，不是时间戳精度、转写准确率评测，也不代表所有特殊符号问题已修复。参见[可复现输入与验证边界](https://github.com/QwenAudio/SenseVoice/issues/215#issuecomment-5615363096)。这不是原生 Nano Transformers 的输出，也不提供说话人身份识别。
+
 ## 语言、热词和对齐取决于模型
 
 | 实现 | 当前代码版本的运行参数 |
