@@ -4,6 +4,8 @@
 #  MIT License  (https://opensource.org/licenses/MIT)
 # Modified from 3D-Speaker (https://github.com/alibaba-damo-academy/3D-Speaker)
 
+import contextlib
+
 import scipy
 import torch
 import sklearn
@@ -12,6 +14,30 @@ import numpy as np
 from sklearn.cluster._kmeans import k_means
 from sklearn.cluster import HDBSCAN
 from sklearn.preprocessing import normalize
+
+try:
+    import threadpoolctl
+except ImportError:
+    threadpoolctl = None
+
+
+def _blas_thread_limit():
+    """Cap BLAS threads while clustering.
+
+    The similarity/Laplacian matrices here are only a few hundred to a few
+    thousand rows, and at that size BLAS's parallel drivers spend more time in
+    thread synchronization than in arithmetic. OpenBLAS defaults to one thread
+    per core, so a single clustering call can pin every core on the box:
+    measured on a 64-core host with a 357-row input, ``scipy.linalg.eigh``
+    took 0.97s / 57 core-seconds at 64 threads, versus 0.03s / 0.03
+    core-seconds at 1 thread, for identical clustering labels.
+
+    Returns a context manager that restores the previous settings on exit, or
+    a no-op one when threadpoolctl is unavailable.
+    """
+    if threadpoolctl is None:
+        return contextlib.nullcontext()
+    return threadpoolctl.threadpool_limits(limits=1, user_api="blas")
 
 
 class SpectralCluster:
@@ -109,7 +135,20 @@ class SpectralCluster:
                 L: TODO.
                 k_oracle: TODO.
             """
-        lambdas, eig_vecs = scipy.linalg.eigh(L)
+        # Only the leading eigenpairs are ever used: the speaker count comes
+        # from the gaps between the first ``max_num_spks + 1`` eigenvalues, and
+        # the embedding keeps the first ``num_of_spk`` eigenvectors. A full
+        # dense spectrum costs O(N^3) to produce N eigenpairs and throw away
+        # all but a handful of them.
+        n_eig = self.max_num_spks + 1
+        if k_oracle is not None:
+            n_eig = max(n_eig, int(k_oracle))
+        n_eig = min(n_eig, L.shape[0])
+
+        with _blas_thread_limit():
+            lambdas, eig_vecs = scipy.linalg.eigh(
+                L, subset_by_index=[0, n_eig - 1]
+            )
 
         if k_oracle is not None:
             num_of_spk = k_oracle
@@ -129,7 +168,8 @@ class SpectralCluster:
                 emb: TODO.
                 k: TODO.
             """
-        _, labels, _ = k_means(emb, k)
+        with _blas_thread_limit():
+            _, labels, _ = k_means(emb, k)
         return labels
 
     def getEigenGaps(self, eig_vals):
@@ -198,12 +238,13 @@ class KMeansCluster:
     def __call__(self, X, num_clusters):
         """Cluster L2-normalized embeddings with bounded memory usage."""
         normalized_X = normalize(X)
-        _, labels, _ = k_means(
-            normalized_X,
-            num_clusters,
-            random_state=0,
-            n_init=10,
-        )
+        with _blas_thread_limit():
+            _, labels, _ = k_means(
+                normalized_X,
+                num_clusters,
+                random_state=0,
+                n_init=10,
+            )
         return labels
 
 
