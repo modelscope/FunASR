@@ -83,6 +83,11 @@ def forced_align(log_probs: torch.Tensor, targets: torch.Tensor, blank: int = 0)
 
 _PUNCTUATION_TOKEN_RE = re.compile(r"^[^\w\s]+$")
 _SPECIAL_TOKEN_RE = re.compile(r"^<[^>]*>$")
+# tiktoken decodes a partial UTF-8 byte sequence (one id of a multi-id
+# character, e.g. SenseVoice ids [10958, 245] for 郗) as U+FFFD. All three
+# Nano timestamp paths decode each token id independently, so such fragments
+# reach classification as "�". They are spoken content, never punctuation.
+_UNDECODABLE_FRAGMENT_MARK = "�"
 
 
 def _classify_timestamp_token(token):
@@ -90,13 +95,18 @@ def _classify_timestamp_token(token):
 
     Special tokens (``<sil>``-shaped) are their own class: they are neither
     spoken content nor punctuation, so they neither trigger anchoring nor
-    serve as anchors. Non-string tokens (integer ids, if called pre-decode)
-    fall back to spoken to preserve pass-through behavior.
+    serve as anchors. Undecodable byte fragments (containing U+FFFD) are
+    spoken: they are slices of a multi-id character with real acoustic
+    extent, and collapsing their spans would delete spoken timing (issue
+    #3703). Non-string tokens (integer ids, if called pre-decode) fall back
+    to spoken to preserve pass-through behavior.
     """
     if not isinstance(token, str) or not token:
         return "spoken"
     if _SPECIAL_TOKEN_RE.match(token):
         return "special"
+    if _UNDECODABLE_FRAGMENT_MARK in token:
+        return "spoken"
     if _PUNCTUATION_TOKEN_RE.match(token):
         return "punctuation"
     return "spoken"
