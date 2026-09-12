@@ -694,7 +694,10 @@ class FunASRNanoVLLM:
     @torch.no_grad()
     def _compute_timestamps(self, encoder_out, encoder_out_lens, text):
         """CTC forced alignment for character-level timestamps."""
-        from funasr.models.fun_asr_nano.tools.utils import forced_align
+        from funasr.models.fun_asr_nano.tools.utils import (
+            anchor_punctuation_timestamps,
+            forced_align,
+        )
 
         decoder_out, decoder_out_lens = self.ctc_decoder(encoder_out, encoder_out_lens)
         ctc_logits = self.ctc.log_softmax(decoder_out)
@@ -709,6 +712,9 @@ class FunASRNanoVLLM:
             ts["token"] = self.ctc_tokenizer.decode([ts["token"]])
             ts["start_time"] = ts["start_time"] * 6 * 10 / 1000
             ts["end_time"] = ts["end_time"] * 6 * 10 / 1000
+        # See model.py: anchor punctuation at the preceding spoken token's end
+        # (issue #3702); punctuation has no acoustic extent to align.
+        anchor_punctuation_timestamps(timestamps)
         return timestamps
 
     @classmethod

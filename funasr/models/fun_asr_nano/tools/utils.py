@@ -1,4 +1,5 @@
 from itertools import groupby
+import re
 
 import librosa
 import soundfile as sf
@@ -78,3 +79,76 @@ def forced_align(log_probs: torch.Tensor, targets: torch.Tensor, blank: int = 0)
     except Exception:
         pass
     return items
+
+
+_PUNCTUATION_TOKEN_RE = re.compile(r"^[^\w\s]+$")
+_SPECIAL_TOKEN_RE = re.compile(r"^<[^>]*>$")
+# tiktoken decodes a partial UTF-8 byte sequence (one id of a multi-id
+# character, e.g. SenseVoice ids [10958, 245] for 郗) as U+FFFD. All three
+# Nano timestamp paths decode each token id independently, so such fragments
+# reach classification as "�". They are spoken content, never punctuation.
+_UNDECODABLE_FRAGMENT_MARK = "�"
+
+
+def _classify_timestamp_token(token):
+    """Classify one decoded timestamp token into spoken/punctuation/special.
+
+    Special tokens (``<sil>``-shaped) are their own class: they are neither
+    spoken content nor punctuation, so they neither trigger anchoring nor
+    serve as anchors. Undecodable byte fragments (containing U+FFFD) are
+    spoken: they are slices of a multi-id character with real acoustic
+    extent, and collapsing their spans would delete spoken timing (issue
+    #3703). Non-string tokens (integer ids, if called pre-decode) fall back
+    to spoken to preserve pass-through behavior.
+    """
+    if not isinstance(token, str) or not token:
+        return "spoken"
+    if _SPECIAL_TOKEN_RE.match(token):
+        return "special"
+    if _UNDECODABLE_FRAGMENT_MARK in token:
+        return "spoken"
+    if _PUNCTUATION_TOKEN_RE.match(token):
+        return "punctuation"
+    return "spoken"
+
+
+def anchor_punctuation_timestamps(timestamps):
+    """Anchor punctuation-only tokens at the preceding spoken token's end.
+
+    CTC forced alignment must place every target token — including punctuation
+    tokens with no acoustic realization — on at least one frame. Inside a
+    merged multi-sentence window (see FunASR issue #3702) such a token lands
+    at the next sentence's onset frame, so the current sentence's punctuation
+    timestamp reads as the next sentence start. Punctuation carries no acoustic
+    extent, so a punctuation span that is followed by more speech is pinned
+    (zero-width) at the end of the speech it terminates.
+
+    Leading punctuation (no predecessor) and trailing punctuation (no
+    successor, e.g. single-segment output) are left untouched, as are special
+    tokens such as ``<sil>``. This preserves existing single-segment behavior.
+
+    Args:
+        timestamps: List of ``{"token": str, "start_time": float,
+            "end_time": float}`` dicts in time order. Mutated in place.
+
+    Returns:
+        The same list, for convenient chaining.
+    """
+    last_spoken_end = None
+    total = len(timestamps)
+    for index, ts in enumerate(timestamps):
+        kind = _classify_timestamp_token(ts.get("token", ""))
+        if kind != "punctuation":
+            if kind == "spoken":
+                end = ts.get("end_time")
+                if isinstance(end, (int, float)):
+                    last_spoken_end = end
+            continue
+        following_spoken = any(
+            _classify_timestamp_token(later.get("token", "")) == "spoken"
+            for later in timestamps[index + 1 : total]
+        )
+        if last_spoken_end is not None and following_spoken:
+            ts["start_time"] = last_spoken_end
+            ts["end_time"] = last_spoken_end
+    return timestamps

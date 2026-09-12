@@ -322,7 +322,10 @@ class FunASRNanoVLLMPipeline:
 
     def _compute_all_timestamps(self, segment_audios, vad_segments, asr_results):
         """Compute CTC timestamps for all segments with VAD offsets."""
-        from funasr.models.fun_asr_nano.tools.utils import forced_align
+        from funasr.models.fun_asr_nano.tools.utils import (
+            anchor_punctuation_timestamps,
+            forced_align,
+        )
 
         all_timestamps = []
         for seg_audio, vad_seg, text in zip(segment_audios, vad_segments, asr_results):
@@ -356,6 +359,13 @@ class FunASRNanoVLLMPipeline:
                     ts["token"] = self.asr_engine.ctc_tokenizer.decode([ts["token"]])
                     ts["start_time"] = ts["start_time"] * 6 * 10 / 1000 + vad_offset_ms / 1000
                     ts["end_time"] = ts["end_time"] * 6 * 10 / 1000 + vad_offset_ms / 1000
+                # Same invariant as the offline/vLLM paths (issue #3702), applied
+                # per independently aligned VAD segment: punctuation carries no
+                # acoustic extent, so pin sandwiched punctuation at the preceding
+                # spoken token's end. Segment-local on purpose — speech in a
+                # later VAD segment must not rewrite this segment's trailing
+                # punctuation.
+                anchor_punctuation_timestamps(timestamps)
                 all_timestamps.extend(timestamps)
             except Exception as e:
                 logger.debug(f"Timestamp failed for segment: {e}")
