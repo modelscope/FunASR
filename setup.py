@@ -12,6 +12,7 @@ requirements = {
     "install": [
         # Core
         "scipy>=1.4.1",
+        "threadpoolctl>=3.0.0",
         "librosa",
         "soundfile>=0.12.1",
         # numpy 2.x is supported; deprecated aliases (np.float, np.int) were

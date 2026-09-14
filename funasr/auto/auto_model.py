@@ -53,6 +53,98 @@ def _resolve_ncpu(config, fallback=4):
     return max(value, 1)
 
 
+# The active BLAS limit, if any. Held for the life of the process rather than
+# scoped to a call -- see `_limit_blas_threads` for why.
+_blas_thread_limiter = None
+_blas_thread_limit = None
+
+
+def _current_blas_threads():
+    """Thread count currently configured for BLAS, or None if unreadable."""
+    try:
+        import threadpoolctl
+    except ImportError:
+        return None
+    counts = {
+        pool["num_threads"]
+        for pool in threadpoolctl.threadpool_info()
+        if pool["user_api"] == "blas"
+    }
+    return counts.pop() if len(counts) == 1 else None
+
+
+def _limit_blas_threads(ncpu):
+    """Apply `ncpu` to BLAS as well as to torch.
+
+    `ncpu` documents itself as the thread count for "CPU 内部操作并行性", but
+    it only ever reached `torch.set_num_threads`. The speaker-clustering path
+    does not run on torch at all: `scipy.linalg.eigh` on the affinity
+    Laplacian goes to BLAS, whose own default is one thread per core. So on a
+    many-core host the CPU is saturated by a library `ncpu` never touched.
+    Measured on a 64-core host with a 357-row Laplacian:
+
+        BLAS threads    wall      CPU
+        64              1.20s     68.9 core-seconds
+         4              0.05s      2.8 core-seconds
+         1              0.03s      1.8 core-seconds
+
+    At a few hundred rows the parallel driver spends its time synchronising
+    rather than computing, so bounding it is a latency win as well as a CPU
+    one.
+
+    The update follows `torch.set_num_threads`: the newest `ncpu` wins, and no
+    set is issued when BLAS already sits at that value. Both settings are
+    process-wide, so constructing a second `AutoModel` applies its `ncpu` to
+    any model already built in this process -- including ones without speaker
+    clustering. That is the same contract `torch.set_num_threads` already
+    has; the difference is only that `ncpu` used to leave BLAS untouched.
+
+    The limit is not released once applied. It is process-global, so a scoped
+    enter/exit pair per request could be interleaved by overlapping requests
+    and leave the setting unbalanced, and FunASR reaches BLAS only through
+    small one-shot operations. Doing nothing when threadpoolctl is missing
+    leaves BLAS at its own default rather than failing model construction.
+    """
+    global _blas_thread_limiter, _blas_thread_limit
+
+    current = _current_blas_threads()
+    if current is not None and current == ncpu:
+        return
+
+    if _blas_thread_limiter is not None:
+        _blas_thread_limiter.__exit__(None, None, None)
+        _blas_thread_limiter = None
+
+    try:
+        import threadpoolctl
+    except ImportError:
+        logging.info(
+            "threadpoolctl is not installed, so `ncpu` cannot be applied to "
+            "BLAS; speaker clustering may use one thread per core."
+        )
+        return
+
+    _blas_thread_limiter = threadpoolctl.threadpool_limits(
+        limits=ncpu, user_api="blas"
+    )
+    _blas_thread_limiter.__enter__()
+    _blas_thread_limit = ncpu
+
+    # BLAS pools are only visible to threadpoolctl once a library backed by
+    # them has been loaded. funasr imports such a library at package import,
+    # so they are present by the time a model is built -- but confirm rather
+    # than assume, because a dropped limit here would silently restore the
+    # CPU saturation this is meant to prevent.
+    applied = _current_blas_threads()
+    if applied is not None and applied != ncpu:
+        logging.warning(
+            "ncpu=%s could not be applied to BLAS (it reports %s); "
+            "speaker clustering may use more threads than requested.",
+            ncpu,
+            applied,
+        )
+
+
 def _join_vad_texts(texts):
     """Remove rich tags and join VAD text without adding spaces between Chinese chunks."""
     cleaned = [re.sub(r"<\|[^|]*\|>", "", text).strip() for text in texts]
@@ -570,6 +662,7 @@ class AutoModel:
         kwargs["ncpu"] = ncpu
         if torch.get_num_threads() != ncpu:
             torch.set_num_threads(ncpu)
+        _limit_blas_threads(ncpu)
 
         # build tokenizer
         tokenizer = kwargs.get("tokenizer", None)
