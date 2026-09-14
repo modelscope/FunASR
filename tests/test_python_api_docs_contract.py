@@ -46,7 +46,7 @@ class PythonApiDocsContract(unittest.TestCase):
             "funasr/models/paraformer_streaming/model.py")))
         for path in DOCS:
             blocks = python_blocks(path)
-            self.assertEqual(len(blocks), 4, path.name)
+            self.assertEqual(len(blocks), 5, path.name)
             for index, block in enumerate(blocks):
                 with self.subTest(doc=path.name, block=index):
                     compile(block, str(path), "exec")
