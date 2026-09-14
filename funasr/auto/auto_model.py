@@ -111,6 +111,15 @@ def _limit_blas_threads(ncpu):
     if current is not None and current == ncpu:
         return
 
+    # `threadpool_limits` records the OpenMP pools as well as the BLAS ones
+    # even when entered with `user_api="blas"`, and its `__exit__` restores
+    # every pool it captured. Dropping the previous limiter would therefore
+    # roll torch's thread count back to whatever it was when that limiter was
+    # created -- undoing the `torch.set_num_threads(ncpu)` that `build_model`
+    # has already performed. Save and restore it across the swap so replacing
+    # the BLAS limit cannot touch an OpenMP setting it does not own.
+    torch_threads = torch.get_num_threads()
+
     if _blas_thread_limiter is not None:
         _blas_thread_limiter.__exit__(None, None, None)
         _blas_thread_limiter = None
@@ -129,6 +138,9 @@ def _limit_blas_threads(ncpu):
     )
     _blas_thread_limiter.__enter__()
     _blas_thread_limit = ncpu
+
+    if torch.get_num_threads() != torch_threads:
+        torch.set_num_threads(torch_threads)
 
     # BLAS pools are only visible to threadpoolctl once a library backed by
     # them has been loaded. funasr imports such a library at package import,
