@@ -51,18 +51,21 @@ class RecordingModel(torch.nn.Module):
 class TestSubmodelDevice(unittest.TestCase):
     def setUp(self):
         self.old_threads = torch.get_num_threads()
+        self.addCleanup(torch.set_num_threads, self.old_threads)
         registry = {f"device-test-{role}": RecordingModel for role in ("asr", "vad", "punc", "spk")}
-        self.enterContext(patch.dict(tables.model_classes, registry))
-        self.enterContext(patch("torch.cuda.is_available", return_value=True))
-        self.enterContext(patch("funasr.auto.auto_model.ClusterBackend"))
+        self.start_patch(patch.dict(tables.model_classes, registry))
+        self.start_patch(patch("torch.cuda.is_available", return_value=True))
+        self.start_patch(patch("funasr.auto.auto_model.ClusterBackend"))
         # Reject accidental model-hub access. model_conf={} uses the local registry.
-        self.enterContext(
+        self.start_patch(
             patch("funasr.auto.auto_model.download_model", side_effect=AssertionError("network"))
         )
         self.audio = np.zeros(16000, dtype=np.float32)
 
-    def tearDown(self):
-        torch.set_num_threads(self.old_threads)
+    def start_patch(self, patcher):
+        value = patcher.start()
+        self.addCleanup(patcher.stop)
+        return value
 
     def make_model(self, with_vad=True, device="cuda:0", configs=None):
         configs = (
