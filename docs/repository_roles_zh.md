@@ -91,7 +91,7 @@
 | [L20 等 GPU 上的实时预览效率](https://github.com/modelscope/FunASR/issues/3528) | 对齐 partial 消息数量后，怎样选择刷新间隔和 partial window，才能在不静默跳过预览的前提下取得合适的延迟/吞吐平衡？ | 基于 exact commit 的客户端 JSONL 和 `--log-decode-profile` 服务端日志；固定 SPK、ping、音频、并发数、partial window 与 partial 消息数量 | 在 L20、L4、A10 或其他非 H100 GPU 上复现，并分析 queue、encoder 与 engine 时间 |
 | [AMD Windows Vulkan 稳定性](https://github.com/modelscope/FunASR/issues/3479) | 当前 runtime 能否在报告者的 AMD GPU 上完成模型初始化和转写；若不能，最后成功的初始化边界在哪里？ | 精确压缩包名称和 SHA256、GPU/驱动/Windows 版本、完整初始化日志，以及报告者硬件复测 | AMD Windows 硬件所有者和 Vulkan/llama.cpp 贡献者 |
 | [恢复公开 checkpoint 的完整能力](https://github.com/modelscope/FunASR/issues/3496) | 如何从有权限的模型所有者账号发布缺失 CTC tensors，并在上传后完成验证？ | 不可变模型 revision、文件哈希、公开 clean-cache 回下载和真实时间戳/说话人推理 | 有 Hugging Face 写权限的模型所有者和 checkpoint 验证贡献者 |
-| [上游模型集成](https://github.com/huggingface/transformers/pull/46180) | 如何让 Fun-ASR-Nano 保持 Transformers 上游兼容，同时保留固定的 model card 和回归测试边界？ | exact-head 上游 CI、聚焦本地测试、model card review 与维护者 review | Transformers reviewer，以及能在合并前验证下游加载的用户 |
+| [原生 Transformers 兼容性](https://github.com/QwenAudio/Fun-ASR) | 已合并的 Fun-ASR-Nano 集成能否在支持的 Transformers 版本中保持下游加载和转写兼容？ | 精确模型与库版本、聚焦转写测试，以及 model card 的能力边界 | 能复现下游兼容性问题的 Transformers 用户 |
 
 ### 认领前
 
@@ -110,19 +110,20 @@
 
 ### 已交付
 
+- **Fun-ASR-Nano 的 Transformers 原生集成** - [huggingface/transformers#46180](https://github.com/huggingface/transformers/pull/46180) 已于 2026-09-09 合并。请使用[原生 `-hf` checkpoint](https://huggingface.co/FunAudioLLM/Fun-ASR-Nano-2512-hf)与[模型仓库的 Transformers 入口](https://github.com/QwenAudio/Fun-ASR)。原生生成路径不包含工具包的辅助 CTC 分支；这项交付不代表已有原生时间戳、说话人区分或实时会话支持。
+- **Qwen3-ASR 离线 vLLM 工作流** - [#3592](https://github.com/modelscope/FunASR/pull/3592) 已交付原生 `Qwen3ASRModel.LLM` 示例。报告者确认完成，并于 2026-09-09 关闭 [#3419](https://github.com/modelscope/FunASR/issues/3419)。其中的准确率对照基于该报告的音频、参考文本与自定义评分脚本，不是通用 CER 保证。
 - **实时服务长会话状态有界** —— [#3214](https://github.com/modelscope/FunASR/pull/3214) 与 [QwenAudio/Fun-ASR#135](https://github.com/QwenAudio/Fun-ASR/pull/135) 已合并，诊断能力已发布，报告者证据使 [#3101](https://github.com/modelscope/FunASR/issues/3101) 可以关闭。
 - **稳定的应用接口** —— 工具包现已提供 OpenAI-compatible 转写服务、健康检查、浏览器与命令行 smoke test，并在[部署矩阵](./deployment_matrix_zh.md)中列出 Python / CLI / HTTP / WebSocket 入口。
 - **工业与边缘部署路径** —— vLLM 服务和签名发布流程已有文档；经验证的十平台 [`runtime-llamacpp-v0.2.6`](https://github.com/modelscope/FunASR/releases/tag/runtime-llamacpp-v0.2.6) 压缩包覆盖 Linux、macOS 与 Windows 的 CPU/GPU 变体，并提供面向 RTX 50 / Blackwell 的 Windows CUDA architecture 120 专用包。
 - **联合转写与说话人识别** —— 第三方 [MOSS-Transcribe-Diarize](./moss_transcribe_diarize_zh.md) 模型已通过 `AutoModel` 接入本地 Transformers 与 vLLM 后端，也可通过原生 SGLang Omni 独立服务。SGLang Omni 不是 `AutoModel` backend。它在一次推理中生成时间戳与说话人标签，不需要额外的外部 VAD 或说话人模型；模型所有者仍是 OpenMOSS。
-- **仓库职责与 issue 路由** —— [#3203](https://github.com/modelscope/FunASR/issues/3203) 继续跟踪本文档以及尚未回答完的模型权重和 vLLM 入口问题。在这些问题有证据且报告者有合理确认时间之前，issue 保持开放。
+- **仓库职责与 issue 路由** - [#3203](https://github.com/modelscope/FunASR/issues/3203) 跟踪本文档与贡献入口反馈。报告者已确认 vLLM A/B 入口说明清楚；更广泛的路线图 issue 仍保持开放，不因文档交付而自动关闭。
 
 ### 进行中
 
-- **Fun-ASR-Nano 的 Transformers 原生集成** —— [huggingface/transformers#46180](https://github.com/huggingface/transformers/pull/46180) 正在审查；以该 PR 的 exact-head CI 与 review 状态为准。
+- **原生 Transformers 下游兼容性** - 按精确模型与库版本持续核对[原生模型入口](https://github.com/QwenAudio/Fun-ASR)与下游转写回归。初始集成已经交付；兼容性维护不代表首次合并仍在等待。
 - **恢复公开 checkpoint 的完整能力** —— [#3496](https://github.com/modelscope/FunASR/issues/3496) 跟踪 Hugging Face checkpoint 缺少时间戳与说话人路径所需 CTC tensors 的问题。
 - **实时预览效率与 L20 验证** —— [#3528](https://github.com/modelscope/FunASR/issues/3528) 已确认 v1.3.9 看似更快，是因为事件循环阻塞时静默跳过了大部分 partial 预览。该 issue 继续开放，用于等工作量的 L20 profiling 和明确的刷新/window 策略；不能把它当成已经解决的吞吐回退。
-- **Qwen3-ASR 离线 vLLM 工作流** —— [#3592](https://github.com/modelscope/FunASR/pull/3592) 增加经过验证的原生 `Qwen3ASRModel.LLM` 示例。[#3419](https://github.com/modelscope/FunASR/issues/3419) 继续开放，直到能用精确模型 revision、服务配置和评分脚本复现报告者的 8–9% CER。
-- **AMD Windows Vulkan 验证** —— [#3479](https://github.com/modelscope/FunASR/issues/3479) 保持开放，等待报告者在 `runtime-llamacpp-v0.2.6` 上进行硬件复测；发布压缩包不等于硬件崩溃已经修复。
+- **AMD Windows Vulkan 验证** - [#3479](https://github.com/modelscope/FunASR/issues/3479) 保持开放，等待最初受影响的硬件路径确认。已有报告者在 runtime v0.2.5 与 AMD 26.8.1 的组合上验证 RX 9070 XT 成功运行；驱动也同时改变，因此不能单独归因于 runtime 修复，更不能据此确认原始 7600M XT / 780M 的结果。发布压缩包本身不等于硬件验收。
 
 ### 下一步
 

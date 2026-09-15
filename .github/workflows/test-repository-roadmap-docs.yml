@@ -1,0 +1,33 @@
+name: Validate repository roadmap
+
+on:
+  pull_request:
+    paths:
+      - 'docs/repository_roles.md'
+      - 'docs/repository_roles_zh.md'
+      - 'tests/test_repository_roadmap_docs.py'
+      - '.github/workflows/test-repository-roadmap-docs.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'docs/repository_roles.md'
+      - 'docs/repository_roles_zh.md'
+      - 'tests/test_repository_roadmap_docs.py'
+      - '.github/workflows/test-repository-roadmap-docs.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  roadmap-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python tests/test_repository_roadmap_docs.py -v
