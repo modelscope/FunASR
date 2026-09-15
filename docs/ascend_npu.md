@@ -33,27 +33,45 @@ model = AutoModel(
 ## 3. CAM++（说话人模型）已知问题与等价规避
 
 `funasr/models/campplus/components.py` 的 `seg_pooling` 使用
-`F.avg_pool1d(kernel_size=100, stride=100, ceil_mode=True)`。昇腾上该调用被
+`F.avg_pool1d` / `F.max_pool1d`(kernel_size=100, stride=100, ceil_mode=True)。昇腾上该调用被
 lower 为 `AvgPoolV2`，其融合算子仅支持 stride ∈ [1,63]，图编译失败并崩溃。
 
-运行时等价替换（数值一致，仅用 NPU 支持的基础算子），需在首次前向之前执行：
+运行时等价替换（仅用 NPU 支持的基础算子），需在首次前向之前执行。
+实现要点：完整段正常池化；**不完整尾段仅对其真实帧归约（显式补零会污染尾段均值/最大值，
+与 ceil_mode 语义不一致）**：
 
 ```python
 from funasr.models.campplus import components as cp
 import torch.nn.functional as F
 
 def seg_pooling(self, x, seg_len=100, stype="avg"):
+    # numerically equivalent to avg_pool1d/max_pool1d(kernel_size=seg_len,
+    # stride=seg_len, ceil_mode=True): the incomplete tail segment is
+    # reduced over its REAL frames only (no zero padding).
     B, C, T = x.shape
-    pad = (-T) % seg_len                      # 等价 ceil_mode
-    xp = F.pad(x, (0, pad), value=0.0) if pad else x
-    xg = xp.reshape(B, C, (T + pad) // seg_len, seg_len)
-    seg = xg.mean(dim=-1) if stype == "avg" else xg.max(dim=-1).values
+    n_full = T // seg_len
+    tail = T - n_full * seg_len
+    segs = []
+    if n_full > 0:
+        full = x[:, :, : n_full * seg_len].reshape(B, C, n_full, seg_len)
+        segs.append(full.mean(dim=-1) if stype == "avg" else full.max(dim=-1).values)
+    if tail > 0:
+        tail_x = x[:, :, n_full * seg_len:]
+        segs.append(tail_x.mean(dim=-1, keepdim=True) if stype == "avg"
+                    else tail_x.max(dim=-1, keepdim=True).values)
+    seg = torch.cat(segs, dim=-1) if len(segs) > 1 else segs[0]  # [B, C, nseg]
     shape = seg.shape
     seg = seg.unsqueeze(-1).expand(*shape, seg_len).reshape(*shape[:-1], -1)
     return seg[..., :T]
 
 cp.CAMLayer.seg_pooling = seg_pooling
 ```
+
+**等价性回归**（CPU，torch 2.10.0，对照 `avg_pool1d`/`max_pool1d` + `ceil_mode=True`）：
+长度 {50, 99, 100, 101, 110, 150, 199, 200, 201, 250, 1000} × {avg, max} ×
+{全 1、全负、randn} 共 66 组用例，`torch.allclose(rtol=1e-4, atol=1e-6)` 全部通过；
+残差仅为 float32 累加顺序噪声（最大 ~1.2e-7）。代表例：T=150 全 1 输入 avg 模式尾帧
+= 1.0（与原版一致，错误补零实现会得到 0.5）。
 
 ## 4. 调试技巧
 
