@@ -1,6 +1,6 @@
 # FunASR Ecosystem Growth Plan: +20,000 GitHub Stars
 
-Baseline on 2026-06-27: the FunASR ecosystem repositories had 31,224 combined GitHub stars. The next target is earning 20,000 additional stars across the ecosystem by 2026-09-30, reaching 51,224+ combined stars through better onboarding, stronger proof, and repeatable launches.
+Baseline on 2026-06-27: the FunASR ecosystem repositories had 31,224 combined GitHub stars. The next target is earning more than 20,000 additional stars across the ecosystem by 2026-09-30, reaching at least 51,225 combined stars through better onboarding, stronger proof, and repeatable launches.
 
 This plan focuses on useful adoption work rather than vanity marketing: if more users can install, evaluate, deploy, and share FunASR successfully, stars follow naturally.
 
@@ -15,11 +15,13 @@ This plan focuses on useful adoption work rather than vanity marketing: if more 
 
 ## North-star metrics
 
-- GitHub stars: +20,000 across the four-repository ecosystem by 2026-09-30
+- GitHub stars: more than +20,000 across the four-repository ecosystem by 2026-09-30
 - Monthly PyPI downloads: sustained growth after each release
 - README quick-start success: first transcription in under 5 minutes
 - Deployment success: API server, WebSocket, Docker, and vLLM examples verified on fresh machines
 - Community throughput: faster issue triage, more external PRs, more user showcases
+
+The strict remaining gap is `max(0, 51225 - total_stars)`; exactly 51,224 does not meet the strict target. The metrics collector accepts an inclusive added-star target, so use `--ecosystem --baseline-stars 31224 --target-additional-stars 20001` for this campaign. Its default of 20,000 measures reaching +20,000, not exceeding it. Historical measurements below retain their original collection dates.
 
 ## Audience segments
 
@@ -34,7 +36,7 @@ This plan focuses on useful adoption work rather than vanity marketing: if more 
 
 ## Current campaign snapshot
 
-As of 2026-09-05 05:27 UTC, the ecosystem has 37,164 combined GitHub stars, or 5,940 additional stars since the 31,224 baseline. Exceeding the +20,000 target requires another 14,060 stars to reach at least 51,224 by 2026-09-30, or roughly 563 stars/day across the remaining 25 days. The latest verified PyPI cache reports 61,795 downloads over 7 days and 417,279 over 30 days through 2026-09-04; the live PyPI statistics endpoint had a TLS certificate mismatch during collection.
+As of 2026-09-05 05:27 UTC, the ecosystem has 37,164 combined GitHub stars, or 5,940 additional stars since the 31,224 baseline. Exceeding the +20,000 target requires another 14,061 stars to reach at least 51,225 by 2026-09-30, or roughly 563 stars/day across the remaining 25 days. The latest verified PyPI cache reports 61,795 downloads over 7 days and 417,279 over 30 days through 2026-09-04; the live PyPI statistics endpoint had a TLS certificate mismatch during collection.
 
 | Repository | Stars | Forks | Open issues | Open PRs | Last push |
 |---|---:|---:|---:|---:|---|
@@ -481,4 +483,4 @@ funasr-server --device cuda
 
 ## 中文摘要
 
-目标不是单纯“求 Star”，而是让更多用户能更快完成安装、转写、部署和分享。当前增长目标按 FunASR / Fun-ASR / SenseVoice / FunClip 四仓生态统一跟踪：以 2026-06-27 的 31,224 combined stars 为基线，到 2026-09-30 累计新增 20,000 stars。最有效的抓手是：首屏转化、可复现 benchmark、OpenAI 兼容 API/流式/vLLM/Docker 部署闭环、HF/ModelScope/官网同步更新、高星生态集成，以及高效的 issue/PR 社区运营。
+目标不是单纯“求 Star”，而是让更多用户能更快完成安装、转写、部署和分享。当前增长目标按 FunASR / Fun-ASR / SenseVoice / FunClip 四仓生态统一跟踪：以 2026-06-27 的 31,224 combined stars 为基线，到 2026-09-30 累计新增超过 20,000 stars，即总量至少 51,225。最有效的抓手是：首屏转化、可复现 benchmark、OpenAI 兼容 API/流式/vLLM/Docker 部署闭环、HF/ModelScope/官网同步更新、高星生态集成，以及高效的 issue/PR 社区运营。
