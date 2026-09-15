@@ -46,8 +46,9 @@ class CTTransformer(torch.nn.Module):
     Output: {"key": "...", "text": "punctuated text", "punc_array": Tensor}
     punc_array encoding: 1=none, 2=comma(，), 3=period(。), 4=question(？)
 
-    Note: Not needed for Fun-ASR-Nano/SenseVoice/Qwen3-ASR (they output punctuation natively).
-    Only required for Paraformer models.
+    For unpunctuated SenseVoiceSmall or Paraformer output, configure punc_model
+    when punctuation is needed. Models that already emit punctuation may not
+    need this postprocessor.
 
     Author: Speech Lab of DAMO Academy, Alibaba Group
     CT-Transformer: Controllable time-delay transformer for real-time punctuation prediction and disfluency detection
