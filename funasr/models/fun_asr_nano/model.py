@@ -24,6 +24,7 @@ except ImportError:
 from .ctc import CTC
 from .checkpoint_utils import disable_incomplete_ctc, normalize_checkpoint_state
 from .device_utils import resolve_autocast_device_type
+from .llm_forward_opts import configure_llm_forward
 from .tools.utils import forced_align
 
 dtype_map = {"bf16": torch.bfloat16, "fp16": torch.float16, "fp32": torch.float32}
@@ -127,6 +128,11 @@ class FunASRNano(nn.Module):
 
         self.llm_dtype = llm_conf.get("llm_dtype", "fp32")
         self.llm = model.to(dtype_map[self.llm_dtype])
+        # Opt-in training-speed switches, both off by default (finetune.sh turns them on):
+        # llm_conf.sdpa_backends sets the process-wide SDPA backend flags while this forward
+        # runs and restores them on return; llm_conf.torch_compile compiles the decoder stack
+        # for inputs on a CUDA device (a CPU decoder stays eager). See llm_forward_opts.py.
+        configure_llm_forward(self.llm, llm_conf)
         llm_dim = model.get_input_embeddings().weight.shape[-1]
 
         # lora: inject LoRA adapters into the LLM target Linear layers
