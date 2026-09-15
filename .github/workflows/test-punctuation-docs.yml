@@ -1,0 +1,32 @@
+name: Validate punctuation documentation
+
+on:
+  pull_request:
+    paths:
+      - 'funasr/models/ct_transformer/model.py'
+      - 'tests/test_ct_transformer_docs.py'
+      - '.github/workflows/test-punctuation-docs.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'funasr/models/ct_transformer/model.py'
+      - 'tests/test_ct_transformer_docs.py'
+      - '.github/workflows/test-punctuation-docs.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  docs-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Check punctuation guidance without model dependencies
+        run: python tests/test_ct_transformer_docs.py -v
