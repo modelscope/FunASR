@@ -3010,10 +3010,9 @@
 <li><code>Output</code> — {"key": "...", "text": "punctuated text", "punc_array": Tensor}</li>
 </ul>
 <p>punc_array encoding: 1=none, 2=comma(，), 3=period(。), 4=question(？)</p>
-<ul>
-<li><code>Note</code> — Not needed for Fun-ASR-Nano/SenseVoice/Qwen3-ASR (they output punctuation natively).</li>
-</ul>
-<p>Only required for Paraformer models.</p>
+<p>For unpunctuated SenseVoiceSmall or Paraformer output, configure punc_model</p>
+<p>when punctuation is needed. Models that already emit punctuation may not</p>
+<p>need this postprocessor.</p>
 <ul>
 <li><code>Author</code> — Speech Lab of DAMO Academy, Alibaba Group</li>
 <li><code>CT</code> — Transformer: Controllable time-delay transformer for real-time punctuation prediction and disfluency detection</li>
@@ -3028,8 +3027,9 @@
     Output: {"key": "...", "text": "punctuated text", "punc_array": Tensor}
     punc_array encoding: 1=none, 2=comma(，), 3=period(。), 4=question(？)
 
-    Note: Not needed for Fun-ASR-Nano/SenseVoice/Qwen3-ASR (they output punctuation natively).
-    Only required for Paraformer models.
+    For unpunctuated SenseVoiceSmall or Paraformer output, configure punc_model
+    when punctuation is needed. Models that already emit punctuation may not
+    need this postprocessor.
 
     Author: Speech Lab of DAMO Academy, Alibaba Group
     CT-Transformer: Controllable time-delay transformer for real-time punctuation prediction and disfluency detection
@@ -3048,8 +3048,7 @@
         dropout_rate: float = 0.5,
         ignore_id: int = -1,
         sos: int = 1,
-        eos: int = 2,
-</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/ct_transformer/model.py#L40" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details><h3 class="mt">Constructor</h3><div class="mblk"><a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/ct_transformer/model.py#L57">L57</a><p>Initialize CTTransformer.</p>
+</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/ct_transformer/model.py#L40" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details><h3 class="mt">Constructor</h3><div class="mblk"><a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/ct_transformer/model.py#L58">L58</a><p>Initialize CTTransformer.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>encoder</code> — TODO.</li>
@@ -3066,7 +3065,7 @@
 <li><code>sentence_end_id</code> — TODO.</li>
 <li><code>**kwargs</code> — Additional keyword arguments.</li>
 </ul>
-</div><h3 class="mt">Methods</h3><div class="mblk"><code>.punc_forward(text: torch.Tensor, text_lengths: torch.Tensor, **kwargs)</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/ct_transformer/model.py#L113" rel="noopener noreferrer" target="_blank">L113</a><div class="mdoc"><p>Compute loss value from buffer sequences.</p>
+</div><h3 class="mt">Methods</h3><div class="mblk"><code>.punc_forward(text: torch.Tensor, text_lengths: torch.Tensor, **kwargs)</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/ct_transformer/model.py#L114" rel="noopener noreferrer" target="_blank">L114</a><div class="mdoc"><p>Compute loss value from buffer sequences.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>input (torch.Tensor)</code> — Input ids. (batch, len)</li>
@@ -3085,11 +3084,11 @@
         h, _, _ = self.encoder(x, text_lengths)
         y = self.decoder(h)
         return y, None
-</code></pre></details></div><div class="mblk"><code>.with_vad()</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/ct_transformer/model.py#L127" rel="noopener noreferrer" target="_blank">L127</a><div class="mdoc"><p>With vad.</p>
+</code></pre></details></div><div class="mblk"><code>.with_vad()</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/ct_transformer/model.py#L128" rel="noopener noreferrer" target="_blank">L128</a><div class="mdoc"><p>With vad.</p>
 </div><details class="src-block"><summary>Source</summary><pre><code>    def with_vad(self):
         """With vad."""
         return False
-</code></pre></details></div><div class="mblk"><code>.score(y: torch.Tensor, state: Any, x: torch.Tensor) -&gt; Tuple[torch.Tensor, Any]</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/ct_transformer/model.py#L131" rel="noopener noreferrer" target="_blank">L131</a><div class="mdoc"><p>Score new token.</p>
+</code></pre></details></div><div class="mblk"><code>.score(y: torch.Tensor, state: Any, x: torch.Tensor) -&gt; Tuple[torch.Tensor, Any]</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/ct_transformer/model.py#L132" rel="noopener noreferrer" target="_blank">L132</a><div class="mdoc"><p>Score new token.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>y (torch.Tensor)</code> — 1D torch.int64 prefix tokens.</li>
@@ -3121,7 +3120,7 @@
         h = self.decoder(h[:, -1])
         logp = h.log_softmax(dim=-1).squeeze(0)
         return logp, cache
-</code></pre></details></div><div class="mblk"><code>.batch_score(ys: torch.Tensor, states: List[Any], xs: torch.Tensor) -&gt; Tuple[torch.Tensor, List[Any]]</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/ct_transformer/model.py#L153" rel="noopener noreferrer" target="_blank">L153</a><div class="mdoc"><p>Score new token batch.</p>
+</code></pre></details></div><div class="mblk"><code>.batch_score(ys: torch.Tensor, states: List[Any], xs: torch.Tensor) -&gt; Tuple[torch.Tensor, List[Any]]</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/ct_transformer/model.py#L154" rel="noopener noreferrer" target="_blank">L154</a><div class="mdoc"><p>Score new token batch.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>ys (torch.Tensor)</code> — torch.int64 prefix tokens (n_batch, ylen).</li>
@@ -3163,7 +3162,7 @@
 
         # batch decoding
         h, _, states = self.encoder.forward_one_step(
-</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/ct_transformer/model.py#L153" rel="noopener noreferrer" target="_blank">View full source →</a></details></div><div class="mblk"><code>.nll(text: torch.Tensor, punc: torch.Tensor, text_lengths: torch.Tensor, punc_lengths: torch.Tensor, max_length: Optional[int] = None, vad_indexes: Optional[torch.Tensor] = None, vad_indexes_lengths: Optional[torch.Tensor] = None) -&gt; Tuple[torch.Tensor, torch.Tensor]</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/ct_transformer/model.py#L192" rel="noopener noreferrer" target="_blank">L192</a><div class="mdoc"><p>Compute negative log likelihood(nll)</p>
+</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/ct_transformer/model.py#L154" rel="noopener noreferrer" target="_blank">View full source →</a></details></div><div class="mblk"><code>.nll(text: torch.Tensor, punc: torch.Tensor, text_lengths: torch.Tensor, punc_lengths: torch.Tensor, max_length: Optional[int] = None, vad_indexes: Optional[torch.Tensor] = None, vad_indexes_lengths: Optional[torch.Tensor] = None) -&gt; Tuple[torch.Tensor, torch.Tensor]</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/ct_transformer/model.py#L193" rel="noopener noreferrer" target="_blank">L193</a><div class="mdoc"><p>Compute negative log likelihood(nll)</p>
 <p>Normally, this function is called in batchify_nll.</p>
 <h4>Args:</h4>
 <ul>
@@ -3202,7 +3201,7 @@
 
         if self.with_vad():
             # Should be VadRealtimeTransformer
-</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/ct_transformer/model.py#L192" rel="noopener noreferrer" target="_blank">View full source →</a></details></div><div class="mblk"><code>.forward(text: torch.Tensor, punc: torch.Tensor, text_lengths: torch.Tensor, punc_lengths: torch.Tensor, vad_indexes: Optional[torch.Tensor] = None, vad_indexes_lengths: Optional[torch.Tensor] = None)</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/ct_transformer/model.py#L262" rel="noopener noreferrer" target="_blank">L262</a><div class="mdoc"><p>Forward pass for training.</p>
+</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/ct_transformer/model.py#L193" rel="noopener noreferrer" target="_blank">View full source →</a></details></div><div class="mblk"><code>.forward(text: torch.Tensor, punc: torch.Tensor, text_lengths: torch.Tensor, punc_lengths: torch.Tensor, vad_indexes: Optional[torch.Tensor] = None, vad_indexes_lengths: Optional[torch.Tensor] = None)</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/ct_transformer/model.py#L263" rel="noopener noreferrer" target="_blank">L263</a><div class="mdoc"><p>Forward pass for training.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>text</code> — Text tensor or string input.</li>
@@ -3239,7 +3238,7 @@
         # force_gatherable: to-device and to-tensor if scalar for DataParallel
         loss, stats, weight = force_gatherable((loss, stats, ntokens), loss.device)
         return loss, stats, weight
-</code></pre></details></div><div class="mblk"><code>.inference(data_in, data_lengths=None, key: list = None, tokenizer=None, frontend=None, **kwargs)</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/ct_transformer/model.py#L290" rel="noopener noreferrer" target="_blank">L290</a><div class="mdoc"><p>Run inference on input data.</p>
+</code></pre></details></div><div class="mblk"><code>.inference(data_in, data_lengths=None, key: list = None, tokenizer=None, frontend=None, **kwargs)</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/ct_transformer/model.py#L291" rel="noopener noreferrer" target="_blank">L291</a><div class="mdoc"><p>Run inference on input data.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>data_in</code> — Input data (audio samples, file paths, or text).</li>
@@ -3279,7 +3278,7 @@
         split_size = kwargs.get("split_size", 20)
 
         tokens = split_words(text, jieba_usr_dict=self.jieba_usr_dict)
-</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/ct_transformer/model.py#L290" rel="noopener noreferrer" target="_blank">View full source →</a></details></div><div class="mblk"><code>.export(**kwargs)</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/ct_transformer/model.py#L475" rel="noopener noreferrer" target="_blank">L475</a><div class="mdoc"><p>Export.</p>
+</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/ct_transformer/model.py#L291" rel="noopener noreferrer" target="_blank">View full source →</a></details></div><div class="mblk"><code>.export(**kwargs)</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/ct_transformer/model.py#L476" rel="noopener noreferrer" target="_blank">L476</a><div class="mdoc"><p>Export.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>**kwargs</code> — Additional keyword arguments.</li>
@@ -3296,7 +3295,7 @@
         models = export_rebuild_model(model=self, **kwargs)
         return models
 </code></pre></details></div></div>
-<div class="api-detail" id="e33" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>CTTransformer.punc_forward(text: torch.Tensor, text_lengths: torch.Tensor, **kwargs)</code></h2><div class="dmod">funasr.models.ct_transformer.CTTransformer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/ct_transformer/model.py#L113" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Compute loss value from buffer sequences.</p>
+<div class="api-detail" id="e33" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>CTTransformer.punc_forward(text: torch.Tensor, text_lengths: torch.Tensor, **kwargs)</code></h2><div class="dmod">funasr.models.ct_transformer.CTTransformer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/ct_transformer/model.py#L114" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Compute loss value from buffer sequences.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>input (torch.Tensor)</code> — Input ids. (batch, len)</li>
@@ -3316,12 +3315,12 @@
         y = self.decoder(h)
         return y, None
 </code></pre></details></div>
-<div class="api-detail" id="e34" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>CTTransformer.with_vad()</code></h2><div class="dmod">funasr.models.ct_transformer.CTTransformer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/ct_transformer/model.py#L127" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>With vad.</p>
+<div class="api-detail" id="e34" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>CTTransformer.with_vad()</code></h2><div class="dmod">funasr.models.ct_transformer.CTTransformer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/ct_transformer/model.py#L128" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>With vad.</p>
 </div><details class="src-block"><summary>Source code</summary><pre><code>    def with_vad(self):
         """With vad."""
         return False
 </code></pre></details></div>
-<div class="api-detail" id="e35" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>CTTransformer.score(y: torch.Tensor, state: Any, x: torch.Tensor) -&gt; Tuple[torch.Tensor, Any]</code></h2><div class="dmod">funasr.models.ct_transformer.CTTransformer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/ct_transformer/model.py#L131" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Score new token.</p>
+<div class="api-detail" id="e35" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>CTTransformer.score(y: torch.Tensor, state: Any, x: torch.Tensor) -&gt; Tuple[torch.Tensor, Any]</code></h2><div class="dmod">funasr.models.ct_transformer.CTTransformer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/ct_transformer/model.py#L132" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Score new token.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>y (torch.Tensor)</code> — 1D torch.int64 prefix tokens.</li>
@@ -3354,7 +3353,7 @@
         logp = h.log_softmax(dim=-1).squeeze(0)
         return logp, cache
 </code></pre></details></div>
-<div class="api-detail" id="e36" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>CTTransformer.batch_score(ys: torch.Tensor, states: List[Any], xs: torch.Tensor) -&gt; Tuple[torch.Tensor, List[Any]]</code></h2><div class="dmod">funasr.models.ct_transformer.CTTransformer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/ct_transformer/model.py#L153" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Score new token batch.</p>
+<div class="api-detail" id="e36" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>CTTransformer.batch_score(ys: torch.Tensor, states: List[Any], xs: torch.Tensor) -&gt; Tuple[torch.Tensor, List[Any]]</code></h2><div class="dmod">funasr.models.ct_transformer.CTTransformer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/ct_transformer/model.py#L154" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Score new token batch.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>ys (torch.Tensor)</code> — torch.int64 prefix tokens (n_batch, ylen).</li>
@@ -3396,8 +3395,8 @@
 
         # batch decoding
         h, _, states = self.encoder.forward_one_step(
-</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/ct_transformer/model.py#L153" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
-<div class="api-detail" id="e37" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>CTTransformer.nll(text: torch.Tensor, punc: torch.Tensor, text_lengths: torch.Tensor, punc_lengths: torch.Tensor, max_length: Optional[int] = None, vad_indexes: Optional[torch.Tensor] = None, vad_indexes_lengths: Optional[torch.Tensor] = None) -&gt; Tuple[torch.Tensor, torch.Tensor]</code></h2><div class="dmod">funasr.models.ct_transformer.CTTransformer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/ct_transformer/model.py#L192" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Compute negative log likelihood(nll)</p>
+</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/ct_transformer/model.py#L154" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
+<div class="api-detail" id="e37" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>CTTransformer.nll(text: torch.Tensor, punc: torch.Tensor, text_lengths: torch.Tensor, punc_lengths: torch.Tensor, max_length: Optional[int] = None, vad_indexes: Optional[torch.Tensor] = None, vad_indexes_lengths: Optional[torch.Tensor] = None) -&gt; Tuple[torch.Tensor, torch.Tensor]</code></h2><div class="dmod">funasr.models.ct_transformer.CTTransformer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/ct_transformer/model.py#L193" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Compute negative log likelihood(nll)</p>
 <p>Normally, this function is called in batchify_nll.</p>
 <h4>Args:</h4>
 <ul>
@@ -3436,8 +3435,8 @@
 
         if self.with_vad():
             # Should be VadRealtimeTransformer
-</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/ct_transformer/model.py#L192" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
-<div class="api-detail" id="e38" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>CTTransformer.forward(text: torch.Tensor, punc: torch.Tensor, text_lengths: torch.Tensor, punc_lengths: torch.Tensor, vad_indexes: Optional[torch.Tensor] = None, vad_indexes_lengths: Optional[torch.Tensor] = None)</code></h2><div class="dmod">funasr.models.ct_transformer.CTTransformer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/ct_transformer/model.py#L262" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Forward pass for training.</p>
+</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/ct_transformer/model.py#L193" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
+<div class="api-detail" id="e38" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>CTTransformer.forward(text: torch.Tensor, punc: torch.Tensor, text_lengths: torch.Tensor, punc_lengths: torch.Tensor, vad_indexes: Optional[torch.Tensor] = None, vad_indexes_lengths: Optional[torch.Tensor] = None)</code></h2><div class="dmod">funasr.models.ct_transformer.CTTransformer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/ct_transformer/model.py#L263" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Forward pass for training.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>text</code> — Text tensor or string input.</li>
@@ -3475,7 +3474,7 @@
         loss, stats, weight = force_gatherable((loss, stats, ntokens), loss.device)
         return loss, stats, weight
 </code></pre></details></div>
-<div class="api-detail" id="e39" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>CTTransformer.inference(data_in, data_lengths=None, key: list = None, tokenizer=None, frontend=None, **kwargs)</code></h2><div class="dmod">funasr.models.ct_transformer.CTTransformer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/ct_transformer/model.py#L290" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Run inference on input data.</p>
+<div class="api-detail" id="e39" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>CTTransformer.inference(data_in, data_lengths=None, key: list = None, tokenizer=None, frontend=None, **kwargs)</code></h2><div class="dmod">funasr.models.ct_transformer.CTTransformer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/ct_transformer/model.py#L291" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Run inference on input data.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>data_in</code> — Input data (audio samples, file paths, or text).</li>
@@ -3515,8 +3514,8 @@
         split_size = kwargs.get("split_size", 20)
 
         tokens = split_words(text, jieba_usr_dict=self.jieba_usr_dict)
-</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/ct_transformer/model.py#L290" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
-<div class="api-detail" id="e40" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>CTTransformer.export(**kwargs)</code></h2><div class="dmod">funasr.models.ct_transformer.CTTransformer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/ct_transformer/model.py#L475" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Export.</p>
+</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/ct_transformer/model.py#L291" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
+<div class="api-detail" id="e40" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>CTTransformer.export(**kwargs)</code></h2><div class="dmod">funasr.models.ct_transformer.CTTransformer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/ct_transformer/model.py#L476" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Export.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>**kwargs</code> — Additional keyword arguments.</li>
