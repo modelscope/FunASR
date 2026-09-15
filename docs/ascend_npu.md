@@ -38,16 +38,19 @@ lower 为 `AvgPoolV2`，其融合算子仅支持 stride ∈ [1,63]，图编译�
 
 运行时等价替换（仅用 NPU 支持的基础算子），需在首次前向之前执行。
 实现要点：完整段正常池化；**不完整尾段仅对其真实帧归约（显式补零会污染尾段均值/最大值，
-与 ceil_mode 语义不一致）**：
+与 ceil_mode 语义不一致）**；未知 stype 与原版一致抛出 ValueError：
 
 ```python
-from funasr.models.campplus import components as cp
+import torch
 import torch.nn.functional as F
+from funasr.models.campplus import components as cp
 
 def seg_pooling(self, x, seg_len=100, stype="avg"):
     # numerically equivalent to avg_pool1d/max_pool1d(kernel_size=seg_len,
     # stride=seg_len, ceil_mode=True): the incomplete tail segment is
     # reduced over its REAL frames only (no zero padding).
+    if stype not in ("avg", "max"):
+        raise ValueError("Wrong segment pooling type.")
     B, C, T = x.shape
     n_full = T // seg_len
     tail = T - n_full * seg_len
@@ -67,11 +70,14 @@ def seg_pooling(self, x, seg_len=100, stype="avg"):
 cp.CAMLayer.seg_pooling = seg_pooling
 ```
 
-**等价性回归**（CPU，torch 2.10.0，对照 `avg_pool1d`/`max_pool1d` + `ceil_mode=True`）：
+**等价性回归**（仅 CPU 语义检查，torch 2.10.0+cpu，对照 `avg_pool1d`/`max_pool1d` + `ceil_mode=True`）：
 长度 {50, 99, 100, 101, 110, 150, 199, 200, 201, 250, 1000} × {avg, max} ×
 {全 1、全负、randn} 共 66 组用例，`torch.allclose(rtol=1e-4, atol=1e-6)` 全部通过；
 残差仅为 float32 累加顺序噪声（最大 ~1.2e-7）。代表例：T=150 全 1 输入 avg 模式尾帧
 = 1.0（与原版一致，错误补零实现会得到 0.5）。
+
+**范围说明**：上述回归验证的是 CPU 上的归约语义等价；NPU 侧的兼容性与精度
+需在实际昇腾环境中另行验证（本仓库初测见上文运行环境）。
 
 ## 4. 调试技巧
 
