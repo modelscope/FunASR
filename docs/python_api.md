@@ -53,6 +53,8 @@ The wrapper accepts `**kwargs`, not a universally validated parameter schema. A 
 
 ### Place submodels on separate devices
 
+> **Version requirement:** This placement contract is not included in the PyPI 1.4.15 package. Use a source checkout containing [PR #3706](https://github.com/modelscope/FunASR/pull/3706), merged at [4d8e087](https://github.com/modelscope/FunASR/commit/4d8e08748c9d7cc10f3e3a01f5f4b927a8948699), and follow the [source installation instructions](installation/installation.md). Record the checkout commit and imported `funasr.__file__`; a development checkout can still report version `1.4.15`.
+
 For example, keep FSMN VAD and punctuation on CPU while ASR uses Apple Silicon MPS:
 
 ```python
