@@ -53,6 +53,8 @@
 
 ### 为子模型分别指定设备
 
+> **版本要求：** PyPI 的 1.4.15 发行包尚不包含此设备配置契约。请使用包含 [PR #3706](https://github.com/modelscope/FunASR/pull/3706) 的源码版本（合并提交为 [4d8e087](https://github.com/modelscope/FunASR/commit/4d8e08748c9d7cc10f3e3a01f5f4b927a8948699)），并按照[源码安装说明](installation/installation_zh.md)操作。记录工作区 commit 和实际导入的 `funasr.__file__`；开发版工作区仍可能显示版本号 `1.4.15`。
+
 例如，在 Apple Silicon 上让 ASR 使用 MPS，而 FSMN VAD 和标点使用 CPU：
 
 ```python
