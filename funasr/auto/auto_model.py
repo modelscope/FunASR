@@ -426,9 +426,12 @@ class AutoModel:
                 Falls back to CPU if specified device is unavailable.
             vad_model (str, optional): VAD model for long audio segmentation.
                 Enables processing of any-length audio.
-            vad_kwargs (dict, optional): VAD config, e.g. {"max_single_segment_time": 60000}.
+            vad_kwargs (dict, optional): VAD config, e.g. {"device": "cpu"}.
+                Explicit device overrides the ASR device; otherwise inherits its resolved device.
             punc_model (str, optional): Punctuation restoration model.
                 Not needed for Fun-ASR-Nano/SenseVoice/Qwen3-ASR (they output punctuation natively).
+            punc_kwargs (dict, optional): Punctuation config; device follows the same rules as vad_kwargs.
+            spk_kwargs (dict, optional): Speaker config; device follows the same rules as vad_kwargs.
             spk_model (str, optional): Speaker model for diarization ("cam++" or full model ID).
                 Requires vad_model. For Qwen3-ASR, also requires forced_aligner.
             spk_mode (str, optional): Speaker diarization mode. "punc_segment" (default) or "vad_segment".
@@ -458,6 +461,10 @@ class AutoModel:
         log_level = getattr(logging, kwargs.get("log_level", "INFO").upper())
         logging.basicConfig(level=log_level)
 
+        # Defaults and model construction must not mutate caller-owned submodel configs.
+        for name in ("vad_kwargs", "punc_kwargs", "spk_kwargs"):
+            kwargs[name] = copy.deepcopy(kwargs.get(name) or {})
+
         model, kwargs = self.build_model(**kwargs)
 
         # if vad_model is not None, build vad model else None
@@ -467,7 +474,7 @@ class AutoModel:
             logging.info("Building VAD model.")
             vad_kwargs["model"] = vad_model
             vad_kwargs["model_revision"] = kwargs.get("vad_model_revision", "master")
-            vad_kwargs["device"] = kwargs["device"]
+            vad_kwargs.setdefault("device", kwargs["device"])
             vad_kwargs.setdefault("ncpu", kwargs.get("ncpu", 4))
             if "hub" in kwargs:
                 vad_kwargs.setdefault("hub", kwargs["hub"])
@@ -480,7 +487,7 @@ class AutoModel:
             logging.info("Building punc model.")
             punc_kwargs["model"] = punc_model
             punc_kwargs["model_revision"] = kwargs.get("punc_model_revision", "master")
-            punc_kwargs["device"] = kwargs["device"]
+            punc_kwargs.setdefault("device", kwargs["device"])
             punc_kwargs.setdefault("ncpu", kwargs.get("ncpu", 4))
             if "hub" in kwargs:
                 punc_kwargs.setdefault("hub", kwargs["hub"])
@@ -496,7 +503,7 @@ class AutoModel:
             logging.info("Building SPK model.")
             spk_kwargs["model"] = spk_model
             spk_kwargs["model_revision"] = kwargs.get("spk_model_revision", "master")
-            spk_kwargs["device"] = kwargs["device"]
+            spk_kwargs.setdefault("device", kwargs["device"])
             spk_kwargs.setdefault("ncpu", kwargs.get("ncpu", 4))
             if "hub" in kwargs:
                 spk_kwargs.setdefault("hub", kwargs["hub"])
@@ -688,7 +695,7 @@ class AutoModel:
                 **cfg: Configuration overrides.
             """
         kwargs = self.kwargs
-        deep_update(kwargs, cfg)
+        self._merge_runtime_config(kwargs, cfg)
         res = self.model(*args, kwargs)
         return res
 
@@ -709,6 +716,8 @@ class AutoModel:
             input_len (tensor, optional): Length of each input sample.
             progress_callback (callable, optional): fn(current, total) called during processing.
             **cfg: Runtime parameters:
+                - device: Placement is selected at construction. Runtime device overrides
+                  are ignored; create another AutoModel to use a different device.
                 - cache (dict): State cache for streaming mode. Pass {} for first call.
                 - hotword (str/list): Keywords to boost recognition accuracy.
                 - postprocess_hotwords (str/list/dict): Text-level hotword correction after
@@ -737,7 +746,6 @@ class AutoModel:
                 input, input_len=input_len, progress_callback=progress_callback, **cfg
             )
             if self.punc_model is not None:
-                deep_update(self.punc_kwargs, cfg)
                 for result in results:
                     punc_res = self.inference(
                         result["text"], model=self.punc_model, kwargs=self.punc_kwargs, **cfg
@@ -785,7 +793,7 @@ class AutoModel:
         kwargs = self.kwargs if kwargs is None else kwargs
         if "cache" in kwargs:
             kwargs.pop("cache")
-        deep_update(kwargs, cfg)
+        self._merge_runtime_config(kwargs, cfg)
         model = self.model if model is None else model
 
         batch_size = kwargs.get("batch_size", 1)
@@ -879,7 +887,6 @@ class AutoModel:
             cfg["return_time_stamps"] = True
         kwargs = self.kwargs
         # step.1: compute the vad model
-        deep_update(self.vad_kwargs, cfg)
         beg_vad = time.time()
         res = self.inference(
             input, input_len=input_len, model=self.vad_model, kwargs=self.vad_kwargs, **cfg
@@ -895,7 +902,7 @@ class AutoModel:
 
         # step.2 compute asr model
         model = self.model
-        deep_update(kwargs, cfg)
+        self._merge_runtime_config(kwargs, cfg)
         batch_size = max(int(kwargs.get("batch_size_s", 300)) * 1000, 1)
         batch_size_threshold_ms = int(kwargs.get("batch_size_threshold_s", 60)) * 1000
         kwargs["batch_size"] = batch_size
@@ -979,7 +986,11 @@ class AutoModel:
                         all_segments.extend(segments)
                         speech_b = [i[2] for i in segments]
                         spk_res = self.inference(
-                            speech_b, input_len=None, model=self.spk_model, kwargs=kwargs, **cfg
+                            speech_b,
+                            input_len=None,
+                            model=self.spk_model,
+                            kwargs=self.spk_kwargs,
+                            **cfg,
                         )
                         spk_embs = torch.cat([r["spk_embedding"] for r in spk_res], dim=0)
                         results[_b]["spk_embedding"] = spk_embs
@@ -1070,7 +1081,6 @@ class AutoModel:
             punc_res = None
             punc_array = None
             if self.punc_model is not None and "timestamps" not in result:
-                deep_update(self.punc_kwargs, cfg)
                 raw_text = copy.copy(result["text"])
                 punc_input_text = _join_vad_texts(
                     item.get("text", "") for item in restored_data
@@ -1321,6 +1331,14 @@ class AutoModel:
             export_dir = export_utils.export(model=model, data_in=data_list, **kwargs)
 
         return export_dir
+
+    @staticmethod
+    def _merge_runtime_config(kwargs, cfg):
+        """Merge inference options without changing an already-loaded model's placement."""
+        # A runtime device string does not move weights. Keep the resolved device,
+        # including unavailable-device fallback, for feature creation and transfer.
+        runtime_cfg = {key: value for key, value in cfg.items() if key != "device"}
+        deep_update(kwargs, runtime_cfg)
 
     def _store_base_configs(self):
         """Snapshot base kwargs for all submodules to allow reset before inference."""

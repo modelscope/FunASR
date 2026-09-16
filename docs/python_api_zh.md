@@ -23,7 +23,7 @@
 | `ngpu` | `1` | 设为零选择 CPU。它不是多 GPU 服务或模型分片配置。 |
 | `ncpu` | `4` | 正整数 CPU 线程数；非法值使用回退值，小于 1 的值限制为 1。修改进程级 PyTorch 线程数。 |
 | `vad_model`, `punc_model`, `spk_model` | `None` | 可选组件，在构建时加载。正确名称是 `vad_model`，拼错为 `vda_model` 会被拒绝。 |
-| `vad_kwargs`, `punc_kwargs`, `spk_kwargs` | `{}` | 子组件配置字典。设备继承主模型；平台和 CPU 线程数在子字典未指定时继承。 |
+| `vad_kwargs`, `punc_kwargs`, `spk_kwargs` | `{}` | 子组件配置字典。设备、平台和 CPU 线程数在子字典未指定时继承；设备继承主模型回退后实际选定的设备。填充默认值前会复制调用方字典。 |
 | `vad_model_revision`, `punc_model_revision`, `spk_model_revision` | 各自为 `"master"` | 分别指定子组件版本，不继承 ASR 版本。这些顶层参数会覆盖子字典中的 `model_revision`。 |
 | `spk_mode` | `"punc_segment"` | 使用 `"punc_segment"` 或 `"vad_segment"`。校验还接受历史值 `"default"`，但后续句子构造分支未实现它，请勿选择。 |
 | `disable_update` | `False` | 仅禁用 FunASR 包版本检查，不会禁用模型下载。 |
@@ -50,6 +50,29 @@
 | `return_raw_text` | `False` | 在实际应用标点的路径上保留标点前文本，不保证所有路径都返回该字段。 |
 
 `generate()` 在合并本次选项前恢复构建时保存的配置。每次调用都应明确传入本次需要的语言、批处理、热词等选项，不要依赖上一次调用遗留的值。配置重置不代表线程安全，也不重置每个模型属性，例如说话人模式回退会修改 `self.spk_mode`。除非自行验证过并发行为，否则应串行访问共享实例。
+
+### 为子模型分别指定设备
+
+例如，在 Apple Silicon 上让 ASR 使用 MPS，而 FSMN VAD 和标点使用 CPU：
+
+```python
+model = AutoModel(
+    model="paraformer-zh",
+    device="mps",
+    vad_model="fsmn-vad",
+    vad_kwargs={"device": "cpu"},
+    punc_model="ct-punc",
+    punc_kwargs={"device": "cpu"},
+)
+results = model.generate(input="audio.wav")
+```
+
+配置说话人模型时，`spk_kwargs={"device": "cpu"}` 遵循相同规则。
+每个模型在构建时独立处理不可用设备的回退。选定的设备在多次调用和共享
+运行参数合并过程中保持不变；`generate()` 中传入的 `device` 不会改变设备配置，
+也不会搬移已加载的权重。需要更换设备时，请构建另一个 `AutoModel`。
+其他运行参数（如 `hotword`、`batch_size_s`）仍会正常合并。
+无需替换内部模型或修改 `ComputeScores`。
 
 ## 本地文件与批处理
 
