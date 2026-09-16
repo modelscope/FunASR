@@ -16,7 +16,9 @@ import torch
 import torch.distributed as dist
 import torch.multiprocessing as mp
 
-from funasr.models.data2vec.data2vec_encoder import compute_var
+from funasr.models.data2vec.data2vec_encoder import Data2VecEncoder
+
+compute_var = Data2VecEncoder.compute_var
 
 
 def _rank_inputs(rank):
@@ -49,13 +51,49 @@ def _worker(rank, world_size, init_uri, results):
             dist.destroy_process_group()
 
 
-def _run_two_rank(tmp_path, world_size=2):
-    init_uri = (tmp_path / f"gloo-compute-var-{world_size}").as_uri()
+def _f32_worker(rank, world_size, init_uri, results):
+    dist.init_process_group(
+        "gloo",
+        rank=rank,
+        world_size=world_size,
+        init_method=init_uri,
+        timeout=timedelta(seconds=30),
+    )
+    try:
+        y = _rank_inputs(rank).float()
+        out = compute_var(y)
+        results[rank] = {"device": str(out.device), "dtype": str(out.dtype)}
+    except Exception as exc:  # pragma: no cover - surfaced in the parent assert
+        results[rank] = {"error": repr(exc)}
+    finally:
+        if dist.is_initialized():
+            dist.destroy_process_group()
+
+
+def _run_two_rank(tmp_path, world_size=2, tag="default"):
+    init_uri = (tmp_path / f"gloo-compute-var-{tag}").as_uri()
     ctx = mp.get_context("spawn")
     mgr = ctx.Manager()
     results = mgr.dict()
     procs = [
         ctx.Process(target=_worker, args=(rank, world_size, init_uri, results))
+        for rank in range(world_size)
+    ]
+    for p in procs:
+        p.start()
+    for p in procs:
+        p.join(timeout=60)
+        assert p.exitcode == 0, f"worker exited with code {p.exitcode}"
+    return dict(results)
+
+
+def _run_two_rank_with(tmp_path, worker_fn, world_size=2, tag="default"):
+    init_uri = (tmp_path / f"gloo-compute-var-{tag}").as_uri()
+    ctx = mp.get_context("spawn")
+    mgr = ctx.Manager()
+    results = mgr.dict()
+    procs = [
+        ctx.Process(target=worker_fn, args=(rank, world_size, init_uri, results))
         for rank in range(world_size)
     ]
     for p in procs:
@@ -103,28 +141,7 @@ class TestComputeVar:
 
     def test_two_rank_gloo_float32(self, tmp_path):
         """Gloo path preserves a float32 input (no dtype drift)."""
-        init_uri = (tmp_path / "gloo-compute-var-f32").as_uri()
-        ctx = mp.get_context("spawn")
-        mgr = ctx.Manager()
-        results = mgr.dict()
-
-        def f32_worker(rank, world_size, uri, out):
-            dist.init_process_group("gloo", rank=rank, world_size=world_size,
-                                    init_method=uri, timeout=timedelta(seconds=30))
-            y = _rank_inputs(rank).float()
-            try:
-                out[rank] = {"device": str(compute_var(y).device), "dtype": str(compute_var(y).dtype)}
-            except Exception as exc:  # pragma: no cover
-                out[rank] = {"error": repr(exc)}
-            finally:
-                if dist.is_initialized():
-                    dist.destroy_process_group()
-
-        procs = [ctx.Process(target=f32_worker, args=(r, 2, init_uri, results)) for r in range(2)]
-        for p in procs:
-            p.start()
-        for p in procs:
-            p.join(timeout=60)
+        results = _run_two_rank_with(tmp_path, _f32_worker, tag="f32")
         for rank in (0, 1):
             assert "error" not in results[rank], results[rank]
             assert results[rank]["device"] == "cpu"
