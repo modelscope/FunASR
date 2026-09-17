@@ -42,8 +42,8 @@ class _DummyParaformer(Paraformer):
         return (
             torch.zeros(batch, 1, 2),
             torch.ones(batch),
-            torch.zeros(batch, self.alphas_width),
-            torch.zeros(batch, self.pre_peak_width),
+            torch.arange(batch * self.alphas_width).reshape(batch, -1).float() / 100,
+            1 + torch.arange(batch * self.pre_peak_width).reshape(batch, -1).float() / 100,
         )
 
     def cal_decoder_with_predictor(
@@ -60,8 +60,18 @@ class TestParaformerTimestampPadding(unittest.TestCase):
         model = _DummyParaformer(predictor, encoder_lens, predictor_width)
         seen = []
 
-        def fake_timestamp(arg0, arg1, char_list, **kwargs):
-            seen.append((arg0.shape[-1], arg1.shape[-1]))
+        def fake_timestamp(us_alphas, us_peaks, char_list, **kwargs):
+            sample = len(seen)
+            alpha_len, peak_len = us_alphas.shape[-1], us_peaks.shape[-1]
+            torch.testing.assert_close(
+                us_alphas,
+                (sample * model.alphas_width + torch.arange(alpha_len)).float() / 100,
+            )
+            torch.testing.assert_close(
+                us_peaks,
+                1 + (sample * model.pre_peak_width + torch.arange(peak_len)).float() / 100,
+            )
+            seen.append((alpha_len, peak_len))
             return "", [[0, 100]]
 
         with mock.patch.object(
