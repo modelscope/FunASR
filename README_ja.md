@@ -112,7 +112,7 @@ CER/WER をそろえて比較してください。オフラインのスループ
 ## 最新情報
 
 - **MOSS-Transcribe-Diarize** を FunASR service、Docker、Kubernetes、vLLM/SGLang workflow、FunClip に統合し、長時間 ASR、timestamp、匿名 speaker label を一度に処理できます。[MOSS をデプロイ ->](./docs/moss_transcribe_diarize.md)
-- **FunASR 1.4.15** はテスト済みの NumPy 2 互換性を追加し、ストリーミング KWS/VAD の境界処理と checkpoint の順位付けを修正します。`python -m pip install -U "funasr==1.4.15"`。[リリースと検証範囲 ->](https://github.com/modelscope/FunASR/releases/tag/v1.4.15)
+- **FunASR 1.4.16** は複数回の推論でも VAD、句読点、話者モデルの明示的な device 配置を保持し、テスト済みのネイティブ Transformers 導入ガイドを追加します。`python -m pip install -U "funasr==1.4.16"`。[リリースと検証範囲 ->](https://github.com/modelscope/FunASR/releases/tag/v1.4.16)
 - **ネイティブ Transformers：** 正式版 **5.17.0** が Fun-ASR-Nano に対応。公式 `-hf` checkpoint、CPU サンプル、Notebook：[導入ガイド（英語） ->](./docs/transformers_native.md)
 
 > 完全な変更履歴と download asset は [GitHub Releases](https://github.com/modelscope/FunASR/releases) を参照してください。
