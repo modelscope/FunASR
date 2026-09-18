@@ -24,7 +24,7 @@ except ImportError:
 from .ctc import CTC
 from .checkpoint_utils import disable_incomplete_ctc, normalize_checkpoint_state
 from .device_utils import resolve_autocast_device_type
-from .tools.utils import forced_align
+from .tools.utils import anchor_punctuation_timestamps, forced_align
 
 dtype_map = {"bf16": torch.bfloat16, "fp16": torch.float16, "fp32": torch.float32}
 
@@ -1069,6 +1069,12 @@ class FunASRNano(nn.Module):
                     timestamp["token"] = self.ctc_tokenizer.decode([timestamp["token"]])
                     timestamp["start_time"] = timestamp["start_time"] * 6 * 10 / 1000
                     timestamp["end_time"] = timestamp["end_time"] * 6 * 10 / 1000
+            # Punctuation tokens have no acoustic realization; without anchoring,
+            # forced alignment places them at the next sentence's onset inside
+            # merged multi-sentence windows (issue #3702). Applied after decoding
+            # (tokens are still integer ids above). ctc_timestamps is left
+            # untouched: greedy CTC text carries no punctuation to anchor.
+            anchor_punctuation_timestamps(result["timestamps"])
 
         if ibest_writer is not None:
             ibest_writer["text"][key[0]] = response.replace("\n", " ")
