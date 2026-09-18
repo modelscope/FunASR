@@ -205,6 +205,19 @@
       }
     },
     {
+      "slug": "funasr-v1-4-16-submodel-device-release",
+      "category": "releases",
+      "reviewed": true,
+      "zh": {
+        "title": "v1.4.16：混合设备子模型修复",
+        "summary": "保持 VAD、标点和说话人子模型的显式设备配置，并补齐原生 Transformers 指南。"
+      },
+      "en": {
+        "title": "v1.4.16: Mixed-device submodel fix",
+        "summary": "Preserve explicit VAD, punctuation, and speaker placement, with tested native Transformers guides."
+      }
+    },
+    {
       "slug": "funasr-v1-4-3-pypi-release",
       "category": "releases",
       "reviewed": false,
