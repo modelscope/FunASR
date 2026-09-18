@@ -339,6 +339,59 @@ def test_v140_release_pages_are_bilingual_indexed_and_precise():
     assert f'https://www.funasr.com/en/blog/{slug}' in sitemap
 
 
+def test_v1416_release_pages_are_bilingual_indexed_and_precise():
+    slug = 'funasr-v1-4-16-submodel-device-release.html'
+    pages = {
+        'zh': LEGACY / 'blog' / slug,
+        'en': LEGACY / 'en' / 'blog' / slug,
+    }
+    release_assets = {
+        'SHA256SUMS',
+        'funasr-1.4.16-py3-none-any.whl',
+        'funasr-1.4.16.tar.gz',
+        'funasr-llamacpp-linux-arm64.tar.gz',
+        'funasr-llamacpp-linux-x64-avx2.tar.gz',
+        'funasr-llamacpp-linux-x64-vulkan.tar.gz',
+        'funasr-llamacpp-linux-x64.tar.gz',
+        'funasr-llamacpp-macos-arm64.tar.gz',
+        'funasr-llamacpp-windows-x64-avx2.zip',
+        'funasr-llamacpp-windows-x64-cuda.zip',
+        'funasr-llamacpp-windows-x64-vulkan.zip',
+        'funasr-llamacpp-windows-x64.zip',
+    }
+
+    for language, path in pages.items():
+        text = path.read_text(encoding='utf-8')
+        soup = BeautifulSoup(text, 'html.parser')
+        assert 'funasr==1.4.16' in text
+        assert '904cd18681b8083de5e1039bd0ecebc4f49ede60' in text
+        assert 'f95943f6a8111349a1b08907363b048a49e9cb9caa1e3afd8c92970d08bf450d' in text
+        assert '1e2f8e3887fbc4b164cce40f73bf1324907da6ab59d1e8bf2add827f534c69e7' in text
+        assert 'https://pypi.org/project/funasr/1.4.16/' in text
+        assert 'https://github.com/modelscope/FunASR/releases/tag/v1.4.16' in text
+        assert 'submodel' in text.lower()
+        assert 'blackwell' not in text.lower()
+        asset_codes = {
+            code.get_text(strip=True)
+            for code in soup.select('code')
+            if code.get_text(strip=True).startswith(('funasr-', 'SHA256SUMS'))
+        }
+        assert asset_codes == release_assets
+        expected_route = f'/{"" if language == "zh" else "en/"}blog/{slug}'
+        assert soup.select_one('link[rel="canonical"]')['href'].endswith(expected_route)
+        peer_route = f'/{"en/" if language == "zh" else ""}blog/{slug}'
+        peer_language = 'en' if language == 'zh' else 'zh'
+        assert soup.select_one(f'link[rel="alternate"][hreflang="{peer_language}"]')['href'].endswith(peer_route)
+
+    zh_index = (LEGACY / 'blog' / 'index.html').read_text(encoding='utf-8')
+    en_index = (LEGACY / 'en' / 'blog' / 'index.html').read_text(encoding='utf-8')
+    sitemap = (LEGACY / 'sitemap.xml').read_text(encoding='utf-8')
+    assert f'/blog/{slug}' in zh_index
+    assert f'/en/blog/{slug}' in en_index
+    assert f'https://www.funasr.com/blog/{slug}' in sitemap
+    assert f'https://www.funasr.com/en/blog/{slug}' in sitemap
+
+
 def test_v145_release_pages_are_bilingual_indexed_and_operational():
     slug = 'funasr-v1-4-5-pypi-llama-cpp-release.html'
     pages = {
