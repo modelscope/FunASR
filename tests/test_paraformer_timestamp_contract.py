@@ -1,4 +1,4 @@
-"""Regression tests for Paraformer timestamp flag precedence."""
+"""Regression tests for Paraformer timestamp flags and predictor arguments."""
 
 import importlib
 import unittest
@@ -82,6 +82,62 @@ class TestParaformerTimestampContract(unittest.TestCase):
                         **timestamp_kwargs,
                     )
                     self.assertEqual("timestamp" in results[0], expected_timestamp)
+
+    def test_inference_timestamp_boundaries_with_real_helper(self):
+        from funasr.models.paraformer.cif_predictor import cif
+        from funasr.utils import timestamp_tools
+
+        cases = (
+            # Three fires already provide the two tokens' boundary positions.
+            ([0.0] + [0.25] * 12, [[150, 390], [390, 780]], False),
+            # Two fires require the helper to normalize alphas to three boundaries.
+            (
+                [0.1, 0.1, 0.4, 0.6] + [0.0] * 4 + [0.1] * 10,
+                [[90, 510], [510, 1080]],
+                True,
+            ),
+        )
+        for weights, expected, needs_fallback in cases:
+            for offset in (0, 1000):
+                with self.subTest(needs_fallback=needs_fallback, offset=offset):
+                    model = self._make_paraformer()
+                    alphas = torch.tensor([weights])
+                    width = alphas.shape[1]
+                    hidden = torch.zeros(1, width, 2)
+                    _, peaks = cif(hidden, alphas, threshold=1.0)
+                    model.encode.return_value = (hidden, torch.tensor([width]))
+                    model.calc_predictor.return_value = (
+                        torch.zeros(1, 2, 2),
+                        torch.tensor([2.0]),
+                        alphas,
+                        peaks,
+                    )
+                    model.cal_decoder_with_predictor.return_value = (
+                        torch.tensor([[[0.0, 0.0, 0.0, 4.0]] * 2]),
+                        torch.tensor([2]),
+                    )
+                    with patch.object(
+                        timestamp_tools,
+                        "cif_wo_hidden",
+                        wraps=timestamp_tools.cif_wo_hidden,
+                    ) as fallback:
+                        results, _ = model.inference(
+                            hidden,
+                            data_lengths=torch.tensor([[width]]),
+                            key=["utt"],
+                            tokenizer=_Tokenizer(),
+                            frontend=None,
+                            device="cpu",
+                            data_type="fbank",
+                            pred_timestamp=True,
+                            begin_time=offset,
+                        )
+                    self.assertEqual(results[0]["text"], "你 你")
+                    self.assertEqual(
+                        results[0]["timestamp"],
+                        [[start + offset, end + offset] for start, end in expected],
+                    )
+                    self.assertEqual(fallback.call_count, int(needs_fallback))
 
 
 if __name__ == "__main__":
