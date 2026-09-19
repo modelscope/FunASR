@@ -631,7 +631,7 @@ class Data2VecEncoder(nn.Module):
             """
         y = y.view(-1, y.size(-1))
         if dist.is_initialized():
-            zc = torch.tensor(y.size(0)).cuda()
+            zc = torch.tensor(y.size(0), device=y.device)
             zs = y.sum(dim=0)
             zss = (y**2).sum(dim=0)
 
