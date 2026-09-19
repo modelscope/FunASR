@@ -62,4 +62,6 @@ ${train_tool} \
 ++audio_encoder_conf.freeze=true \
 ++audio_adaptor_conf.freeze=true \
 ++llm_conf.freeze=false \
+++llm_conf.torch_compile=true \
+++llm_conf.sdpa_backends=[flash,efficient,math] \
 ++output_dir="${output_dir}" &> ${log_file}

@@ -87,6 +87,13 @@ For more detailed parameters, refer to: [SenseVoice Model Training and Testing](
 bash finetune.sh
 ```
 
+### Training-speed options
+
+Two `llm_conf` keys, both off by default; `finetune.sh` turns them on.
+
+- `++llm_conf.torch_compile=true` runs the LLM decoder stack through `torch.compile(dynamic=True)` for inputs on a CUDA GPU (a CPU decoder and single-sequence batches stay eager); the first compiled step pays a one-time compile.
+- `++llm_conf.sdpa_backends=[flash,efficient,math]` runs the LLM forward under `torch.nn.attention.sdpa_kernel` with these attention backends. It matters on sm_90 / sm_100 GPUs, where torch prefers cuDNN and cuDNN builds an execution plan for every new batch shape. The flags it sets are process-wide while the forward runs (restored on return), so a thread running attention concurrently in the same process sees the same selection; leave it unset when several models share one process.
+
 ### Recommended Configuration
 
 - For training data less than 1000 hours, it is recommended to fine-tune the audio_adaptor.
