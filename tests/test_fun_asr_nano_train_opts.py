@@ -3,6 +3,7 @@ class and the recipe's model.py, imported by path). CPU-only, no weights: tiny s
 
 import importlib.util
 import os
+import re
 import sys
 import types
 
@@ -134,3 +135,20 @@ def test_torch_compile_keeps_cpu_decoder_eager(build):
     _run(model, 1)
     _run(model, 4)
     assert [c["batch"] for c in model.llm.model.eager_calls] == [1, 4]
+
+
+def test_recipe_declares_the_torch_floor_its_options_need():
+    """sdpa_backends goes through torch.nn.attention, absent before torch 2.3; if a recipe
+    turns it on, the example's requirements.txt has to say so."""
+    for recipe in ("finetune.sh", "lora_finetune.sh"):
+        path = os.path.join(RECIPE_DIR, recipe)
+        if not os.path.exists(path):
+            continue
+        with open(path) as f:
+            if "llm_conf.sdpa_backends" not in f.read():
+                continue
+        with open(os.path.join(RECIPE_DIR, "requirements.txt")) as f:
+            declared = re.search(r"^torch>=(\d+)\.(\d+)", f.read(), re.M)
+        assert declared, f"{recipe} sets sdpa_backends but requirements.txt pins no torch floor"
+        floor = (int(declared.group(1)), int(declared.group(2)))
+        assert floor >= (2, 3), f"{recipe} sets sdpa_backends; torch floor is {floor}, needs >= 2.3"
