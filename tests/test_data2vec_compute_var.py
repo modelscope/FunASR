@@ -79,12 +79,21 @@ def _run_two_rank(tmp_path, world_size=2, tag="default"):
         ctx.Process(target=_worker, args=(rank, world_size, init_uri, results))
         for rank in range(world_size)
     ]
-    for p in procs:
-        p.start()
-    for p in procs:
-        p.join(timeout=60)
-        assert p.exitcode == 0, f"worker exited with code {p.exitcode}"
-    return dict(results)
+    try:
+        for p in procs:
+            p.start()
+        for p in procs:
+            p.join(timeout=60)
+        for p in procs:
+            assert p.exitcode == 0, f"worker exited with code {p.exitcode}"
+        return dict(results)
+    finally:
+        # 失败路径：join(timeout) 不终止仍在运行的 worker，需 terminate/kill 后 join
+        for p in procs:
+            if p.is_alive():
+                p.terminate()
+                p.join(timeout=30)
+        mgr.shutdown()
 
 
 def _run_two_rank_with(tmp_path, worker_fn, world_size=2, tag="default"):
@@ -96,12 +105,21 @@ def _run_two_rank_with(tmp_path, worker_fn, world_size=2, tag="default"):
         ctx.Process(target=worker_fn, args=(rank, world_size, init_uri, results))
         for rank in range(world_size)
     ]
-    for p in procs:
-        p.start()
-    for p in procs:
-        p.join(timeout=60)
-        assert p.exitcode == 0, f"worker exited with code {p.exitcode}"
-    return dict(results)
+    try:
+        for p in procs:
+            p.start()
+        for p in procs:
+            p.join(timeout=60)
+        for p in procs:
+            assert p.exitcode == 0, f"worker exited with code {p.exitcode}"
+        return dict(results)
+    finally:
+        # 失败路径：join(timeout) 不终止仍在运行的 worker，需 terminate/kill 后 join
+        for p in procs:
+            if p.is_alive():
+                p.terminate()
+                p.join(timeout=30)
+        mgr.shutdown()
 
 
 def _reference_var(y):
