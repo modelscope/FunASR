@@ -690,9 +690,9 @@ class Paraformer(torch.nn.Module):
                             timestamp_pre_peak_index = timestamp_pre_peak_index[:timestamp_len]
                             timestamp_alphas = timestamp_alphas[:timestamp_len]
                         timestamp_str, timestamp = ts_prediction_lfr6_standard(
-                            timestamp_pre_peak_index,
-                            timestamp_alphas,
-                            copy.copy(token),
+                            us_alphas=timestamp_alphas,
+                            us_peaks=timestamp_pre_peak_index,
+                            char_list=copy.copy(token),
                             vad_offset=kwargs.get("begin_time", 0),
                             upsample_rate=1,
                         )

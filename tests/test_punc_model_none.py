@@ -22,6 +22,7 @@ class TestPuncModelNone(unittest.TestCase):
             punc_model.punc_list = ["<unk>", "_", "，", "。", "？", "、"]
         am.punc_kwargs = {}
         am.spk_model = spk_model
+        am.spk_kwargs = {}
         am.cb_model = None
         am.spk_mode = spk_mode
         am.vad_kwargs = {}

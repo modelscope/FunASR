@@ -111,7 +111,7 @@ checkpoint/revision, 오디오 집합, 하드웨어, 배치, 워밍업, 측정 �
 ## 최신 소식
 
 - **MOSS-Transcribe-Diarize**를 FunASR service, Docker, Kubernetes, vLLM/SGLang workflow, FunClip에 통합해 긴 오디오 ASR, timestamp, 익명 speaker label을 한 번에 처리합니다. [MOSS 배포 ->](./docs/moss_transcribe_diarize.md)
-- **FunASR 1.4.15**는 테스트를 거친 NumPy 2 호환성을 추가하고 스트리밍 KWS/VAD 경계 처리와 checkpoint 순위 산정을 수정합니다. `python -m pip install -U "funasr==1.4.15"`. [릴리스 및 검증 범위 ->](https://github.com/modelscope/FunASR/releases/tag/v1.4.15)
+- **FunASR 1.4.16**은 여러 번의 추론에서도 VAD, 문장 부호, 화자 모델의 명시적 device 배치를 유지하고 검증된 네이티브 Transformers 도입 가이드를 추가합니다. `python -m pip install -U "funasr==1.4.16"`. [릴리스 및 검증 범위 ->](https://github.com/modelscope/FunASR/releases/tag/v1.4.16)
 - **네이티브 Transformers:** 정식 버전 **5.17.0**이 Fun-ASR-Nano를 지원합니다. 공식 `-hf` checkpoint, CPU 예제, Notebook: [설치 가이드(영문) ->](./docs/transformers_native.md)
 
 > 전체 변경 기록과 download asset은 [GitHub Releases](https://github.com/modelscope/FunASR/releases)에서 확인할 수 있습니다.

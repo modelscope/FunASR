@@ -5,7 +5,7 @@ This document explains the responsibility boundaries, user entry points, and iss
 > **Directional roadmap, not a release promise.**
 > This document records shipped capabilities and active work, but does not commit to
 > future version numbers or dates. The current Python release is
-> [`funasr==1.4.15`](https://github.com/modelscope/FunASR/releases/tag/v1.4.15).
+> [`funasr==1.4.16`](https://github.com/modelscope/FunASR/releases/tag/v1.4.16).
 > Any future breaking release still requires a maintainer-approved milestone and
 > migration plan.
 
@@ -93,7 +93,7 @@ The roadmap is a queue of testable outcomes, not a list reserved for maintainers
 | [Realtime preview efficiency on L20-class GPUs](https://github.com/modelscope/FunASR/issues/3528) | After matching the number of partial messages, which refresh interval and partial window provide the best latency/throughput trade-off without silently skipping previews? | Client JSONL and `--log-decode-profile` server logs from the exact commit, with SPK, ping, audio, concurrency, partial window, and partial-message count held constant | Reproduction on L20, L4, A10, or other non-H100 GPUs; analysis of queue, encoder, and engine time |
 | [AMD Windows Vulkan stability](https://github.com/modelscope/FunASR/issues/3479) | Does the current runtime reach model initialization and transcription on the reporter's AMD GPU, and where is the last successful initialization boundary if it does not? | Exact archive name and SHA256, GPU/driver/Windows versions, full initialization log, and a reporter hardware retest | AMD Windows hardware owners and Vulkan/llama.cpp contributors |
 | [Complete public checkpoint functionality](https://github.com/modelscope/FunASR/issues/3496) | How should the missing CTC tensors be published from an authorized model-owner account and validated after upload? | Immutable model revision, file hashes, public clean-cache download, and real timestamp/diarization inference | Model owners with Hugging Face write access and checkpoint validation experience |
-| [Upstream model integrations](https://github.com/huggingface/transformers/pull/46180) | Can Fun-ASR-Nano remain compatible with upstream Transformers while preserving pinned model-card and regression-test boundaries? | Exact-head upstream CI, focused local tests, model-card review, and maintainer review | Transformers reviewers and users who can test downstream loading before merge |
+| [Native Transformers compatibility](https://github.com/QwenAudio/Fun-ASR) | Can the merged Fun-ASR-Nano integration retain downstream loading and transcription compatibility across supported Transformers versions? | Exact model and library revisions, focused transcription tests, and model-card capability boundaries | Transformers users who can reproduce downstream compatibility failures |
 
 ### Before claiming an item
 
@@ -112,19 +112,20 @@ Contributions and issue evidence may be written in Chinese or English. A roadmap
 
 ### Delivered
 
+- **Fun-ASR-Nano native Transformers integration** - [huggingface/transformers#46180](https://github.com/huggingface/transformers/pull/46180) merged on 2026-09-09. Use the [native `-hf` checkpoint](https://huggingface.co/FunAudioLLM/Fun-ASR-Nano-2512-hf) and the [model repository's Transformers entry point](https://github.com/QwenAudio/Fun-ASR). The native generation path does not include the toolkit's auxiliary CTC branch; this milestone does not establish native timestamps, diarization, or realtime sessions.
+- **Qwen3-ASR offline vLLM workflow** - [#3592](https://github.com/modelscope/FunASR/pull/3592) delivered the native `Qwen3ASRModel.LLM` example. The reporter confirmed completion and closed [#3419](https://github.com/modelscope/FunASR/issues/3419) on 2026-09-09. Its accuracy comparison used that report's audio, reference, and custom scorer, not a general CER guarantee.
 - **Bounded realtime long-session state** — fixes merged via [#3214](https://github.com/modelscope/FunASR/pull/3214) and [QwenAudio/Fun-ASR#135](https://github.com/QwenAudio/Fun-ASR/pull/135), diagnostics shipped, and reporter evidence allowed [#3101](https://github.com/modelscope/FunASR/issues/3101) to close.
 - **Stable application-facing APIs** — the toolkit now ships an OpenAI-compatible transcription server, health checks, browser and command-line smoke tests, and documented Python / CLI / HTTP / WebSocket entry points in the [deployment matrix](./deployment_matrix.md).
 - **Industrial and edge deployment paths** — vLLM serving and signed release workflows are documented; the verified ten-platform [`runtime-llamacpp-v0.2.6`](https://github.com/modelscope/FunASR/releases/tag/runtime-llamacpp-v0.2.6) archives cover Linux, macOS, and Windows CPU/GPU variants, including a dedicated Windows CUDA architecture 120 package for RTX 50 / Blackwell GPUs.
 - **Joint transcription and diarization** — the third-party [MOSS-Transcribe-Diarize](./moss_transcribe_diarize.md) model is available through `AutoModel` with local Transformers and vLLM backends, or as an independent native SGLang Omni service. SGLang Omni is not an `AutoModel` backend. The model produces timestamps and speaker labels in one pass without a separate external VAD or speaker model; OpenMOSS remains the model owner.
-- **Repository roles and issue routing** — [#3203](https://github.com/modelscope/FunASR/issues/3203) tracks this document and the remaining model-weight and vLLM entry-point questions. It stays open until those questions have evidence and the reporter has time to confirm.
+- **Repository roles and issue routing** - [#3203](https://github.com/modelscope/FunASR/issues/3203) tracks this document and contribution-entry feedback. The reporter has confirmed the vLLM A/B entry-point explanation; the broader roadmap issue remains open, and documentation delivery does not close it automatically.
 
 ### In progress
 
-- **Fun-ASR-Nano native Transformers integration** — [huggingface/transformers#46180](https://github.com/huggingface/transformers/pull/46180) is in review; use the PR's exact-head CI and review state as the source of truth.
+- **Native Transformers downstream compatibility** - keep the [native model entry point](https://github.com/QwenAudio/Fun-ASR) and downstream transcription regressions aligned with exact model and library revisions. The initial integration is delivered; compatibility work is not a pending initial merge.
 - **Restore complete public checkpoint functionality** — [#3496](https://github.com/modelscope/FunASR/issues/3496) tracks missing CTC tensors needed by timestamp and diarization paths in the Hugging Face checkpoint.
 - **Realtime preview efficiency and L20 validation** — [#3528](https://github.com/modelscope/FunASR/issues/3528) established that v1.3.9 appeared faster by silently skipping most partial previews while its event loop was blocked. The issue remains open for equal-work L20 profiling and a deliberate refresh/window policy; it is not treated as a resolved throughput regression.
-- **Qwen3-ASR offline vLLM workflow** — [#3592](https://github.com/modelscope/FunASR/pull/3592) adds a tested native `Qwen3ASRModel.LLM` example. [#3419](https://github.com/modelscope/FunASR/issues/3419) remains open until the reporter's 8–9% CER result can be reproduced with an exact model revision, service configuration, and scoring script.
-- **AMD Windows Vulkan validation** — [#3479](https://github.com/modelscope/FunASR/issues/3479) remains open for reporter hardware retesting against `runtime-llamacpp-v0.2.6`; publication of the archive is not evidence that the hardware crash is fixed.
+- **AMD Windows Vulkan validation** - [#3479](https://github.com/modelscope/FunASR/issues/3479) remains open for the original affected hardware paths. A reporter verified successful RX 9070 XT execution with runtime v0.2.5 and AMD 26.8.1 together; the driver also changed, so this does not isolate the runtime fix or establish the original 7600M XT / 780M outcome. Published archives alone are not hardware acceptance evidence.
 
 ### Next
 

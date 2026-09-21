@@ -23,7 +23,7 @@ The wrapper accepts `**kwargs`, not a universally validated parameter schema. A 
 | `ngpu` | `1` | Zero selects CPU. This is not a multi-GPU serving or sharding configuration. |
 | `ncpu` | `4` | Positive CPU thread count; invalid values use the fallback and values below 1 clamp to 1. Sets process-wide PyTorch threads. |
 | `vad_model`, `punc_model`, `spk_model` | `None` | Optional components, built once. Use `vad_model`, not the rejected typo `vda_model`. |
-| `vad_kwargs`, `punc_kwargs`, `spk_kwargs` | `{}` | Component configuration dictionaries. Device is inherited; hub and CPU threads are inherited unless provided in the component dictionary. |
+| `vad_kwargs`, `punc_kwargs`, `spk_kwargs` | `{}` | Component configuration dictionaries. Device, hub and CPU threads are inherited unless explicitly provided in the component dictionary. Device inherits the resolved ASR device (after fallback). Caller dictionaries are copied before defaults are applied. |
 | `vad_model_revision`, `punc_model_revision`, `spk_model_revision` | `"master"` each | Separate component revisions, not inherited from the ASR revision. These top-level values replace `model_revision` in the component dictionaries. |
 | `spk_mode` | `"punc_segment"` | Use `"punc_segment"` or `"vad_segment"`. The validation also accepts legacy `"default"`, but the sentence-building branches do not implement it; do not select it. |
 | `disable_update` | `False` | Disables the FunASR package version check only, not model downloading. |
@@ -50,6 +50,32 @@ The wrapper accepts `**kwargs`, not a universally validated parameter schema. A 
 | `return_raw_text` | `False` | Preserves pre-punctuation text where punctuation is applied; does not guarantee this field on every path. |
 
 `generate()` restores saved construction configuration before merging call options. Repeat request-specific options on each call; do not rely on the previous call's language, batch settings, or hotwords. This configuration reset does not establish thread safety or reset every model attribute: for example, a speaker-mode fallback mutates `self.spk_mode`. Serialize access to a shared instance unless your own concurrency tests establish otherwise.
+
+### Place submodels on separate devices
+
+> **Version requirement:** This placement contract is included in [PyPI 1.4.16](https://pypi.org/project/funasr/1.4.16/), but not in 1.4.15. Install the verified release with `python -m pip install "funasr==1.4.16"`; see the [installation guide](installation/installation.md) for dependencies. For a source installation, use a checkout containing [PR #3706](https://github.com/modelscope/FunASR/pull/3706) (merge commit [4d8e087](https://github.com/modelscope/FunASR/commit/4d8e08748c9d7cc10f3e3a01f5f4b927a8948699)). Record the installed version and imported `funasr.__file__`, plus the commit for source checkouts; a source checkout's version string alone does not establish which fixes it contains.
+
+For example, keep FSMN VAD and punctuation on CPU while ASR uses Apple Silicon MPS:
+
+```python
+model = AutoModel(
+    model="paraformer-zh",
+    device="mps",
+    vad_model="fsmn-vad",
+    vad_kwargs={"device": "cpu"},
+    punc_model="ct-punc",
+    punc_kwargs={"device": "cpu"},
+)
+results = model.generate(input="audio.wav")
+```
+
+`spk_kwargs={"device": "cpu"}` works the same way when a speaker model is configured.
+Each model resolves unavailable-device fallback independently at construction.
+The selected devices remain fixed across calls, including when shared runtime
+options are merged. A `device` passed to `generate()` is ignored for placement;
+it does not move loaded weights. Construct another `AutoModel` to change devices.
+Other runtime options, such as `hotword` and `batch_size_s`, continue to be merged.
+No internal model replacement or `ComputeScores` patch is needed.
 
 ## Local Files and Batching
 

@@ -10,6 +10,7 @@ from bs4 import BeautifulSoup
 
 SITE = Path(__file__).resolve().parents[1]
 ROOT = SITE.parents[1]
+RELEASE_VERSION = (ROOT / "funasr/version.txt").read_text().strip()
 sys.path.insert(0, str(SITE))
 from build import build
 from export_docs import export_documentation
@@ -123,7 +124,7 @@ def test_readme_news_stays_three_items_with_native_guide(name, heading):
     bullets = re.findall(r"^- .*", section, re.M)
     assert len(bullets) == 3
     assert any("Transformers" in row and "transformers_native" in row for row in bullets)
-    assert any("1.4.15" in row for row in bullets)
+    assert any(RELEASE_VERSION in row for row in bullets)
     assert any("MOSS" in row for row in bullets)
 
 

@@ -104,12 +104,23 @@ class SpectralCluster:
 
     def get_spec_embs(self, L, k_oracle=None):
         """Get spec embs.
-        
+
             Args:
                 L: TODO.
                 k_oracle: TODO.
             """
-        lambdas, eig_vecs = scipy.linalg.eigh(L)
+        # Only the leading eigenpairs are ever used: the speaker count comes
+        # from the gaps between the first ``max_num_spks + 1`` eigenvalues, and
+        # the embedding keeps the first ``num_of_spk`` eigenvectors. Producing
+        # the full spectrum costs O(N^3) and throws all but a handful away.
+        n_eig = self.max_num_spks + 1
+        if k_oracle is not None:
+            n_eig = max(n_eig, int(k_oracle))
+        n_eig = min(n_eig, L.shape[0])
+
+        lambdas, eig_vecs = scipy.linalg.eigh(
+            L, subset_by_index=[0, n_eig - 1]
+        )
 
         if k_oracle is not None:
             num_of_spk = k_oracle
