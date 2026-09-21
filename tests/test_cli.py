@@ -609,3 +609,20 @@ def test_merge_subtitle_segments_avoids_single_character_phrase_breaks():
             for boundary in boundary_offsets
         )
         search_from = phrase_start + 1
+
+
+def test_subtitle_break_weights_warns_once_without_jieba(monkeypatch):
+    text = "钟书成为朴家保姆后他轻易的偷偷扭了一下儿子的耳朵"
+    token_spans = [[index, index + 1] for index in range(len(text))]
+    monkeypatch.setattr(cli, "_SUBTITLE_WORD_BOUNDARY_FALLBACK_WARNED", False, raising=False)
+
+    with (
+        patch.dict(sys.modules, {"jieba": None}),
+        patch("logging.warning") as warning,
+    ):
+        first = cli._subtitle_break_weights(text, token_spans)
+        second = cli._subtitle_break_weights(text, token_spans)
+
+    assert first == second == {len(token_spans): 0.0}
+    assert warning.call_count == 1
+    assert "jieba" in warning.call_args[0][0]
