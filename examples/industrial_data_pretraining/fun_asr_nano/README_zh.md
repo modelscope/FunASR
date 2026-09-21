@@ -58,6 +58,8 @@ cd Fun-ASR
 pip install -r requirements.txt
 ```
 
+`finetune.sh` 会设置 `llm_conf.sdpa_backends`，该选项依赖 `torch.nn.attention`，因此使用它进行微调需要 PyTorch 2.3 或更高版本。
+
 <a name="用法教程"></a>
 
 # TODO
