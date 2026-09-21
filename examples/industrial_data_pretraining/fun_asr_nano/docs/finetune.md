@@ -91,8 +91,25 @@ bash finetune.sh
 
 Two `llm_conf` keys, both off by default; `finetune.sh` turns them on.
 
+**Availability:** These options were merged in [PR #3705](https://github.com/modelscope/FunASR/pull/3705)
+after the PyPI `funasr==1.4.16` release and are not included in that wheel.
+Use a source revision containing that change, with the package and recipe
+from the same checkout. Record the Git revision and check `funasr.__file__`
+to avoid running an older installed package with a newer recipe.
+
 - `++llm_conf.torch_compile=true` runs the LLM decoder stack through `torch.compile(dynamic=True)` for inputs on a CUDA GPU (a CPU decoder and single-sequence batches stay eager); the first compiled step pays a one-time compile.
-- `++llm_conf.sdpa_backends=[flash,efficient,math]` runs the LLM forward under `torch.nn.attention.sdpa_kernel` with these attention backends. It matters on sm_90 / sm_100 GPUs, where torch prefers cuDNN and cuDNN builds an execution plan for every new batch shape. The flags it sets are process-wide while the forward runs (restored on return), so a thread running attention concurrently in the same process sees the same selection; leave it unset when several models share one process.
+- `++llm_conf.sdpa_backends=[flash,efficient,math]` runs the LLM forward under `torch.nn.attention.sdpa_kernel` with these attention backends. The reported B200 (sm_100), PyTorch 2.11.0 / cuDNN 9.19 experiment observed slow cuDNN plan builds for new batch shapes. Backend selection and any benefit depend on the hardware, software, masks, and shapes; this is not a guarantee for all sm_90 / sm_100 workloads. The flags it sets are process-wide while the forward runs (restored on return), so a thread running attention concurrently in the same process sees the same selection; leave it unset when several models share one process.
+
+**Validation scope:** The measurements in PR #3705 cover one B200, not
+other GPUs, multi-GPU training, or DeepSpeed. Compare total training time
+including the initial compilation, not only steady-state step time. The
+contributor reported 23 of 6,128 numerical checks outside their preset
+tolerances; similar final validation metrics do not establish numerical
+equivalence. Validate loss, gradients, and task quality on your workload
+before adopting either option. To isolate the backend change, set
+`++llm_conf.torch_compile=false` in the recipe while evaluating
+`sdpa_backends`; to retain the previous behavior, also remove the
+`sdpa_backends` override and leave that key unset in the model config.
 
 ### Recommended Configuration
 
