@@ -6,14 +6,36 @@
 ## 1. 安装注意
 
 昇腾环境要求 torch 为 CPU 版并与 torch_npu 严格配对（如 torch 2.10.0+cpu + torch_npu 2.10.0）。
-建议使用 `--no-deps` 安装 funasr 以避免依赖解析替换 torch，随后手动补齐运行时依赖：
+funasr 元数据不声明 torch（由用户自备环境）；在已装好配对 torch 的环境中默认解析不会触碰 torch，
+但在全新无 torch 的环境里，依赖解析可能安装最新通用（CUDA）构建，与预装 torch_npu 不配对。
+建议使用 `--no-deps` 安装 funasr 以避免依赖解析干扰 torch 配对，随后补齐运行时依赖并自检。
+
+本节清单对应 funasr **1.3.14** 的声明依赖（取自 PyPI 1.3.14 元数据），作为依赖完整性的基准：
 
 ```bash
 pip install funasr --no-deps
-pip install torch_complex kaldiio omegaconf librosa kaldi-native-fbank \
-    editdistance jieba zhconv tgt umap-learn praat-parselmouth \
-    tensorboardX onnxruntime sentencepiece
+
+# funasr 1.3.14 完整声明依赖（install_requires）
+pip install "scipy>=1.4.1" librosa "soundfile>=0.12.1" numpy "PyYAML>=5.1.2" tqdm requests \
+    "omegaconf>=2.0" "hydra-core>=1.3.2" modelscope huggingface_hub safetensors transformers \
+    tiktoken sentencepiece "kaldiio>=2.17.0" jieba jamo jaconv umap_learn "editdistance>=0.5.2" \
+    torch_complex tensorboardX oss2
+
+# 部分模型运行时还会用到（按需）
+pip install kaldi-native-fbank zhconv tgt praat-parselmouth onnxruntime
+
+# 安装后自检
+pip check
 ```
+
+其中 `hydra-core`、`modelscope`、`huggingface_hub`、`safetensors`、`transformers`、`tiktoken`
+等在常见 NPU 基础镜像中通常已预装，是否缺项以 `pip check` 为准；
+预装镜像可运行不代表清单本身完整，补包时仍应对照上面的声明依赖全集。
+
+注意：在某个已配好环境 dry-run 中曾解析出 7 个缺失包（jaconv、jamo、oss2、
+aliyun-python-sdk-core、aliyun-python-sdk-kms、crcmod、pycryptodome），
+那只是该环境与镜像预装的当次差集，不是所有环境通用的依赖表；
+其中 oss2 会带入 aliyun-python-sdk-*、crcmod、pycryptodome 等传递依赖。
 
 ## 2. 设备指定
 
