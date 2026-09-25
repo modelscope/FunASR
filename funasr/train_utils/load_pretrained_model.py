@@ -8,7 +8,6 @@ import torch
 import torch.nn
 import torch.optim
 import pdb
-import copy
 
 
 def load_pretrained_model(
@@ -41,7 +40,10 @@ def load_pretrained_model(
         buffer = BytesIO(oss_bucket.get_object(path).read())
         ori_state = torch.load(buffer, map_location=map_location)
 
-    src_state = copy.deepcopy(ori_state)
+    # ori_state is created by torch.load inside this function, is not shared
+    # with the caller, and is not read again below; src_state is only read.
+    # Deep-copying every tensor here doubles peak load memory with no effect.
+    src_state = ori_state
     src_state = src_state["state_dict"] if "state_dict" in src_state else src_state
     src_state = src_state["model_state_dict"] if "model_state_dict" in src_state else src_state
     src_state = src_state["model"] if "model" in src_state else src_state
