@@ -117,6 +117,29 @@ limit. In particular, long speech segments create synchronized, expensive
 final decodes that are not representative of every meeting or voice-agent
 workload.
 
+## Receive Pressure Acceptance
+
+The bounded receive FIFO and deferred provisional decodes must be evaluated
+separately from acoustic throughput. Record both receive limits, actual
+`websockets` version, frame size and send interval, and whether the load is paced
+or a burst. With `--log-decode-profile`, retain the receive high-water observations
+(`peak_messages`, `peak_bytes`, `skipped_partials`) and engine profile together.
+
+Acceptance covers: Ping/Pong during a finite decode stall; explicit close1013
+when either receive limit is exceeded; no silent PCM loss/reordering; ordered
+START, hotword/language changes, COMMIT and STOP; full completed-segment inputs;
+and reader/worker cleanup after disconnect or cancellation. A disconnected or
+overloaded session is a failed session, not a completed final. The queue limits
+do not bound the whole process: protocol and session buffers remain additional.
+
+Fewer partials mean different work and potentially different context/fallback
+observations. Compare first text, preview freshness, complete transcripts and
+final latency alongside request counts and encoded seconds; a lower wall time
+alone is not a win. Keep low-concurrency interactive cases in the matrix, then
+run the reporter's L20 paced47-second/16-client workload and another GPU before
+claiming a performance fix. Synthetic blocked-decoder tests establish transport
+behavior only; they do not demonstrate GPU capacity or resolve issue#3528.
+
 ## Report Template
 
 When publishing a realtime WebSocket benchmark or issue report, include:

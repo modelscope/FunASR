@@ -686,10 +686,27 @@ CUDA_VISIBLE_DEVICES=0 python examples/industrial_data_pretraining/fun_asr_nano/
 
 只有在按生产流量测得最坏推理和排队延迟后，才设置正数
 `--ws-ping-timeout`；该值应高于实测延迟，并与网关 idle timeout 策略配合。
-`websockets` 库的 `max_queue` 设置只限制入站消息的接收缓冲，不会改变
-ping/pong 的超时语义，因此增大它不能解决 keepalive timeout。只有外部网关
+`websockets` 库的接收高水位 `max_queue` 在队列满时可能暂停 socket 读取；
+即使推理已经移出事件循环，后续 Ping 帧也会因此延迟处理。
+增大高水位只是推后过载触发点，不是吞吐修复。只有外部网关
 已经统一负责 keepalive / reconnect 策略时，才设置 `--ws-ping-interval 0`
 关闭服务端 ping。
+
+源码服务将消息接收与会话推理解耦，应用层 FIFO 默认限制为
+`--ws-receive-max-messages 128` 和 `--ws-receive-max-bytes 16777216`，
+两项都必须为正数。限制分别统计排队消息数和载荷字节数（文本命令按 UTF-8
+字节计），并非进程总内存上限；协议缓冲、正在处理的消息与会话音频还会占用内存。
+超限时连接以 **1013** 关闭，不会作为成功的 final 返回。没有应用层恢复策略时，
+不要自动重放可能已经部分处理的会话。
+
+音频与命令保持原顺序。当队列中的下一条消息仍是音频时，会推迟一次本已到期的
+临时预览解码，先消费积压音频；不会丢弃或合并音频帧。VAD 完整段解码和
+`COMMIT`/`STOP` 最终解码仍处理完整输入。负载下的预览频率、上下文与回退观测可能
+变化，因此不保证转写文本逐字一致或硬件吞吐提升。使用 `--log-decode-profile`
+可同时记录 `peak_messages`、`peak_bytes`、`skipped_partials` 与原有 engine profile。
+
+以上源码改动尚未进入已发布的 `funasr==1.4.15`。合成解码器的传输测试不能代替
+L20 或生产流量验收，详见[压测契约](benchmark/realtime_ws_benchmark.md)。
 
 长会话排障，尤其是启用 `--enable-spk` 时，可以打开周期性 session 状态日志：
 
