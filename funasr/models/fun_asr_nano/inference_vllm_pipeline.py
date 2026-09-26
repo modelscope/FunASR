@@ -163,7 +163,6 @@ class FunASRNanoVLLMPipeline:
     def _process_one(self, audio_path, **kwargs):
         """Process a single audio file through the full pipeline."""
         from funasr.utils.load_utils import load_audio_text_image_video
-        from funasr.utils.vad_utils import slice_padding_audio_samples
 
         key = os.path.splitext(os.path.basename(audio_path))[0]
 
