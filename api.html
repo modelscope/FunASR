@@ -27323,7 +27323,7 @@ Then run Python (api_key is a placeholder, not authentication):
         if p.dim() == 1:
             p.data.zero_()
 </code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/initialize.py#L9" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
-<div class="api-detail" id="e559" tabindex="-1"><span class="dtag badge-f">function</span><h2><code>load_pretrained_model(path: str, model: torch.nn.Module, ignore_init_mismatch: bool = True, map_location: str = "cpu", oss_bucket=None, scope_map=[], excludes=None, **kwargs)</code></h2><div class="dmod">funasr.train_utils.load_pretrained_model · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/load_pretrained_model.py#L14" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Load a model state and set it to the model.</p>
+<div class="api-detail" id="e559" tabindex="-1"><span class="dtag badge-f">function</span><h2><code>load_pretrained_model(path: str, model: torch.nn.Module, ignore_init_mismatch: bool = True, map_location: str = "cpu", oss_bucket=None, scope_map=[], excludes=None, **kwargs)</code></h2><div class="dmod">funasr.train_utils.load_pretrained_model · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/load_pretrained_model.py#L13" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Load a model state and set it to the model.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>init_param</code> — &lt;file_path&gt;:&lt;src_key&gt;:&lt;dst_key&gt;:&lt;exclude_Keys&gt;</li>
@@ -27359,7 +27359,7 @@ Then run Python (api_key is a placeholder, not authentication):
         buffer = BytesIO(oss_bucket.get_object(path).read())
         ori_state = torch.load(buffer, map_location=map_location)
 
-</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/load_pretrained_model.py#L14" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
+</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/load_pretrained_model.py#L13" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
 <div class="api-detail" id="e560" tabindex="-1"><span class="dtag badge-f">function</span><h2><code>get_human_readable_count(number: int) -&gt; str</code></h2><div class="dmod">funasr.train_utils.model_summary · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/train_utils/model_summary.py#L5" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Return human_readable_count</p>
 <p>Originated from:</p>
 <p>https://github.com/PyTorchLightning/pytorch-lightning/blob/master/pytorch_lightning/core/memory.py</p>
