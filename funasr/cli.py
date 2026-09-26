@@ -2,6 +2,7 @@
 
 import argparse
 import json
+import logging
 import os
 import re
 import sys
@@ -184,13 +185,28 @@ def _timestamps_are_ordered(timestamps):
     )
 
 
+_SUBTITLE_WORD_BOUNDARY_FALLBACK_WARNED = False
+
+
+def _warn_subtitle_word_boundary_fallback(error):
+    """Report once that subtitle splitting lost its word-boundary scoring."""
+    global _SUBTITLE_WORD_BOUNDARY_FALLBACK_WARNED
+    if _SUBTITLE_WORD_BOUNDARY_FALLBACK_WARNED:
+        return
+    _SUBTITLE_WORD_BOUNDARY_FALLBACK_WARNED = True
+    logging.warning(
+        f"jieba word segmentation is unavailable ({error}); readable subtitles "
+        "fall back to punctuation-only boundaries and can split words across "
+        "cues. Install jieba to restore word-aware subtitle splitting."
+    )
+
+
 def _subtitle_break_weights(text, token_spans):
     """Map token-boundary indices to lexical and punctuation preferences."""
     boundary_to_token = {span[1]: index + 1 for index, span in enumerate(token_spans)}
     breaks = {len(token_spans): 0.0}
 
     try:
-        import logging
         import warnings
 
         with warnings.catch_warnings():
@@ -222,8 +238,8 @@ def _subtitle_break_weights(text, token_spans):
                     breaks[token_index] = max(
                         breaks.get(token_index, 0.0), strength
                     )
-    except (ImportError, RuntimeError, ValueError):
-        pass
+    except (ImportError, RuntimeError, ValueError) as error:
+        _warn_subtitle_word_boundary_fallback(error)
 
     for index, span in enumerate(token_spans[:-1], 1):
         boundary = span[1]
