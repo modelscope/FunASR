@@ -320,8 +320,8 @@ if __name__ == "__main__":
                     continue
         name = tmp[0]
         content = tmp[1]
-        name = re.sub("\.pcm", "", name)
-        name = re.sub("\.wav", "", name)
+        name = re.sub("\\.pcm", "", name)
+        name = re.sub("\\.wav", "", name)
         content = recoformat(content)
         content = numbersingle(content)
         content = ch_number2digit(content)

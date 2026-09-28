@@ -351,7 +351,7 @@ class Normalizer:
             upper_case_unicode = "\u0410-\u042F"
 
         # Read and split transcript by utterance (roughly, sentences)
-        split_pattern = f"(?<!\w\.\w.)(?<![A-Z{upper_case_unicode}][a-z{lower_case_unicode}]+\.)(?<![A-Z{upper_case_unicode}]\.)(?<=\.|\?|\!|\.”|\?”\!”)\s(?![0-9]+[a-z]*\.)"
+        split_pattern = f"(?<!\\w\\.\\w.)(?<![A-Z{upper_case_unicode}][a-z{lower_case_unicode}]+\\.)(?<![A-Z{upper_case_unicode}]\\.)(?<=\\.|\\?|\\!|\\.”|\\?”\\!”)\\s(?![0-9]+[a-z]*\\.)"
 
         sentences = regex.split(split_pattern, text)
         return sentences
