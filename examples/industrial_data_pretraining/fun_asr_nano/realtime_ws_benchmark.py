@@ -103,6 +103,13 @@ async def recv_results(ws, metrics, audio_started_at, stop_sent_at_ref, timeout)
             metrics["result_messages"] += 1
             if metrics["first_update_ms"] is None:
                 metrics["first_update_ms"] = (now - audio_started_at) * 1000.0
+            texts = [data.get("partial")] + [
+                sentence.get("text") for sentence in data.get("sentences", [])
+            ]
+            if metrics["first_text_ms"] is None and any(
+                isinstance(text, str) and text.strip() for text in texts
+            ):
+                metrics["first_text_ms"] = (now - audio_started_at) * 1000.0
             if data.get("partial"):
                 metrics["partial_messages"] += 1
             duration_ms = data.get("duration_ms")
@@ -135,6 +142,7 @@ async def run_client(client_id, args, audio_bytes, audio_seconds):
         "final_messages": 0,
         "events": {},
         "first_update_ms": None,
+        "first_text_ms": None,
         "final_update_ms": None,
         "final_after_stop_ms": None,
         "response_lag_ms": [],
@@ -194,6 +202,7 @@ async def run_client(client_id, args, audio_bytes, audio_seconds):
     metrics.update(
         {
             "first_update_ms": round_or_none(metrics["first_update_ms"], 1),
+            "first_text_ms": round_or_none(metrics["first_text_ms"], 1),
             "final_update_ms": round_or_none(metrics["final_update_ms"], 1),
             "final_after_stop_ms": round_or_none(metrics["final_after_stop_ms"], 1),
             "wall_seconds": round(wall_seconds, 3),
@@ -210,6 +219,7 @@ async def run_client(client_id, args, audio_bytes, audio_seconds):
 def summarize(results, elapsed_seconds):
     total_audio = sum(item["audio_seconds"] for item in results)
     first_updates = [item["first_update_ms"] for item in results if item["first_update_ms"] is not None]
+    first_texts = [item["first_text_ms"] for item in results if item["first_text_ms"] is not None]
     final_after_stop = [
         item["final_after_stop_ms"] for item in results if item["final_after_stop_ms"] is not None
     ]
@@ -224,6 +234,11 @@ def summarize(results, elapsed_seconds):
         if first_updates
         else None,
         "first_update_ms_p95": round_or_none(percentile(first_updates, 95), 1),
+        "first_text_ms_p50": round_or_none(statistics.median(first_texts), 1)
+        if first_texts
+        else None,
+        "first_text_ms_p95": round_or_none(percentile(first_texts, 95), 1),
+        "clients_with_text": len(first_texts),
         "final_after_stop_ms_p50": round_or_none(statistics.median(final_after_stop), 1)
         if final_after_stop
         else None,
@@ -242,6 +257,8 @@ def print_summary(summary, results):
     print(f"elapsed seconds: {summary['elapsed_seconds']}")
     print(f"aggregate audio/wall: {summary['aggregate_audio_per_wall']}x")
     print(f"first update p50/p95 ms: {summary['first_update_ms_p50']} / {summary['first_update_ms_p95']}")
+    print(f"first text p50/p95 ms: {summary['first_text_ms_p50']} / {summary['first_text_ms_p95']}")
+    print(f"clients with text: {summary['clients_with_text']}/{summary['clients']}")
     print(
         "final after STOP p50/p95 ms: "
         f"{summary['final_after_stop_ms_p50']} / {summary['final_after_stop_ms_p95']}"

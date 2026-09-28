@@ -1,0 +1,35 @@
+name: Validate realtime benchmark
+
+on:
+  pull_request:
+    paths:
+      - "examples/industrial_data_pretraining/fun_asr_nano/realtime_ws_benchmark.py"
+      - "tests/test_realtime_ws_benchmark.py"
+      - "docs/benchmark/realtime_ws_benchmark.md"
+      - ".github/workflows/test-realtime-benchmark.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "examples/industrial_data_pretraining/fun_asr_nano/realtime_ws_benchmark.py"
+      - "tests/test_realtime_ws_benchmark.py"
+      - "docs/benchmark/realtime_ws_benchmark.md"
+      - ".github/workflows/test-realtime-benchmark.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install benchmark test dependencies
+        run: python -m pip install pytest websockets
+      - name: Run CPU-only benchmark tests
+        run: python -m pytest -q tests/test_realtime_ws_benchmark.py

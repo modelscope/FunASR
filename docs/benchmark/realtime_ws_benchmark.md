@@ -75,11 +75,22 @@ stress signal, not as user-facing realtime latency.
 |--------|---------|
 | `aggregate_audio_per_wall` | Total input audio seconds across all clients divided by benchmark wall time |
 | `first_update_ms_p50/p95` | Time from first audio frame to first result message with `sentences`, `partial`, or `is_final` |
+| `first_text_ms_p50/p95` | Time from first audio frame to first result containing non-blank `partial` or sentence `text`, including final-only text |
+| `clients_with_text` | Number of clients that received non-blank text; compare with `clients` when interpreting first-text percentiles |
 | `final_after_stop_ms_p50/p95` | Time from sending `STOP` to receiving the final result |
 | `client_response_lag_ms_p95_max` | Largest per-client p95 of non-final `(client receive time - audio start) - server duration_ms`; useful mainly in paced mode for preview/partial lag |
 | `partial_messages` | Count of non-final result messages with a non-empty `partial` |
 | `final_messages` | Count of final result messages |
 | `errors` | Connection, timeout, protocol, or client-side validation errors |
+
+`first_update_ms` is unchanged: an empty result message can set it before any
+transcript arrives. Use `first_text_ms` for the first client-visible transcript,
+not model token-generation latency or a guarantee that the text is correct or
+stable. Each client JSONL row includes both values. A client with no non-blank
+text has `first_text_ms: null` and is excluded from the first-text percentiles;
+if no client receives text, both percentiles are `null`. Always report
+`clients_with_text`, total `clients`, and `errors` together so missing transcripts
+cannot look like a latency improvement.
 
 The script can observe only client-side timing and fields returned by the
 server. For a performance investigation, add `--log-decode-profile` to record
