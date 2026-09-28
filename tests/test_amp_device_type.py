@@ -163,3 +163,111 @@ def test_grad_scaler_keeps_cuda_and_cpu_on_the_generic_implementation(monkeypatc
     _patch_accelerator(monkeypatch, None)
     amp.GradScaler(enabled=True)
     assert generic_scaler.calls[-1] == ((), {"enabled": True, "device": "cuda"})
+
+
+def _patch_npu_scaler(monkeypatch):
+    """Register an NPU AMP scaler that records the arguments it is called with."""
+    accelerator_scaler = _Recorder()
+    monkeypatch.setattr(
+        torch,
+        "npu",
+        types.SimpleNamespace(amp=types.SimpleNamespace(GradScaler=accelerator_scaler)),
+        raising=False,
+    )
+    return accelerator_scaler
+
+
+def test_grad_scaler_honours_an_explicit_keyword_device(monkeypatch):
+    """``GradScaler(device="cpu", ...)`` must not reach the NPU implementation.
+
+    The accelerator scaler has no ``device`` parameter, so forwarding it would
+    raise ``TypeError``; the generic implementation must be selected instead.
+    """
+    amp = _load_amp()
+    _patch_accelerator(monkeypatch, "npu")
+    accelerator_scaler = _patch_npu_scaler(monkeypatch)
+    generic_scaler = _Recorder()
+    monkeypatch.setattr(amp, "_amp_grad_scaler", generic_scaler)
+
+    amp.GradScaler(device="cpu", enabled=False)
+
+    assert accelerator_scaler.calls == []
+    assert generic_scaler.calls == [((), {"device": "cpu", "enabled": False})]
+
+
+def test_grad_scaler_honours_an_explicit_positional_device(monkeypatch):
+    """``GradScaler("cpu", ...)`` keeps ``"cpu"`` as the device, not as ``init_scale``."""
+    amp = _load_amp()
+    _patch_accelerator(monkeypatch, "npu")
+    accelerator_scaler = _patch_npu_scaler(monkeypatch)
+    generic_scaler = _Recorder()
+    monkeypatch.setattr(amp, "_amp_grad_scaler", generic_scaler)
+
+    amp.GradScaler("cpu", enabled=False)
+
+    assert accelerator_scaler.calls == []
+    assert generic_scaler.calls == [(("cpu",), {"enabled": False})]
+
+
+def test_grad_scaler_honours_an_explicit_torch_device(monkeypatch):
+    """A ``torch.device`` is resolved by its type, like ``torch.amp.GradScaler``."""
+    amp = _load_amp()
+    _patch_accelerator(monkeypatch, "npu")
+    accelerator_scaler = _patch_npu_scaler(monkeypatch)
+    generic_scaler = _Recorder()
+    monkeypatch.setattr(amp, "_amp_grad_scaler", generic_scaler)
+
+    device = torch.device("cpu")
+    amp.GradScaler(device, enabled=False)
+
+    assert accelerator_scaler.calls == []
+    assert generic_scaler.calls == [((device,), {"enabled": False})]
+
+
+def test_grad_scaler_drops_the_device_for_the_accelerator_implementation(monkeypatch):
+    """An explicit accelerator device selects its scaler without forwarding ``device``."""
+    amp = _load_amp()
+    _patch_accelerator(monkeypatch, "npu")
+    accelerator_scaler = _patch_npu_scaler(monkeypatch)
+    generic_scaler = _Recorder()
+    monkeypatch.setattr(amp, "_amp_grad_scaler", generic_scaler)
+
+    amp.GradScaler(device="npu", enabled=True)
+    amp.GradScaler("npu", 1024.0)
+
+    assert generic_scaler.calls == []
+    assert accelerator_scaler.calls == [
+        ((), {"enabled": True}),
+        ((1024.0,), {}),
+    ]
+
+
+def test_grad_scaler_keeps_an_explicit_cuda_device_on_the_generic_implementation(monkeypatch):
+    amp = _load_amp()
+    _patch_accelerator(monkeypatch, "npu")
+    accelerator_scaler = _patch_npu_scaler(monkeypatch)
+    generic_scaler = _Recorder()
+    monkeypatch.setattr(amp, "_amp_grad_scaler", generic_scaler)
+
+    amp.GradScaler(device="cuda")
+    amp.GradScaler("cuda:0", enabled=False)
+
+    assert accelerator_scaler.calls == []
+    assert generic_scaler.calls == [
+        ((), {"device": "cuda"}),
+        (("cuda:0",), {"enabled": False}),
+    ]
+
+
+def test_grad_scaler_without_a_device_still_prefers_the_accelerator(monkeypatch):
+    """No explicit device keeps the previous behaviour: the active accelerator wins."""
+    amp = _load_amp()
+    _patch_accelerator(monkeypatch, "npu")
+    accelerator_scaler = _patch_npu_scaler(monkeypatch)
+    generic_scaler = _Recorder()
+    monkeypatch.setattr(amp, "_amp_grad_scaler", generic_scaler)
+
+    amp.GradScaler(enabled=True)
+
+    assert generic_scaler.calls == []
+    assert accelerator_scaler.calls == [((), {"enabled": True})]

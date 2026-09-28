@@ -37,6 +37,14 @@ Both now default to the accelerator that is actually active
 ``funasr/models/fun_asr_nano/device_utils.py`` accepts for the Nano inference
 path — and keep the historical ``"cuda"`` (a no-op on CPU-only builds) when no
 accelerator is available, so CPU behaviour is unchanged.
+
+An explicit device always wins over the detected accelerator:
+``GradScaler(device="cpu", enabled=False)`` and ``GradScaler("cpu", ...)``
+keep whichever implementation understands that device, exactly as the
+``torch.amp.GradScaler`` export they replace did. On an accelerator that ships
+its own scaler the ``device`` argument is consumed by this shim (that
+constructor takes no ``device``) while every other argument is forwarded
+unchanged.
 """
 
 import torch
@@ -46,6 +54,11 @@ torch_amp = getattr(torch, "amp", None)
 # Device types that FunASR is willing to enter an AMP context on; anything else
 # keeps the historical "cuda" no-op instead of risking an unsupported context.
 _ACCELERATOR_DEVICE_TYPES = ("cuda", "npu", "xpu", "mps")
+
+# Backends that ship their own AMP scaler. Everything else — including ``cpu``,
+# whose ``torch.cpu.amp`` is only a deprecated re-export of the generic scaler —
+# goes through ``torch.amp.GradScaler``.
+_NATIVE_SCALER_DEVICE_TYPES = ("npu", "xpu")
 
 
 def resolve_amp_device_type():
@@ -65,6 +78,21 @@ def resolve_amp_device_type():
         if device_type and str(device_type).lower() in _ACCELERATOR_DEVICE_TYPES:
             return str(device_type).lower()
     return "cuda"
+
+
+def _resolve_device_type(device):
+    """Return the device type of an explicitly passed device, or ``None``.
+
+    Accepts whatever ``torch.amp.GradScaler`` accepts (``str``, ``torch.device``),
+    so ``"npu"``, ``"cuda:0"`` and ``torch.device("cpu")`` all resolve.
+    """
+    if device is None:
+        return None
+    device_type = getattr(device, "type", None)
+    if device_type is None:
+        device_type = str(device).split(":")[0]
+    device_type = str(device_type).strip().lower()
+    return device_type or None
 
 
 if torch_amp is not None and hasattr(torch_amp, "autocast") and hasattr(
@@ -90,27 +118,55 @@ if torch_amp is not None and hasattr(torch_amp, "autocast") and hasattr(
         fails in ``update()`` (``aclnnAmpUpdateScale`` error 561002 on CANN 9.1.0
         with torch_npu 2.15), while ``torch.npu.amp.GradScaler`` runs a full
         fp16 step. CUDA and CPU stay on ``torch.amp.GradScaler``, i.e. the
-        non-deprecated API this shim exists for.
+        non-deprecated API this shim exists for — note that ``torch.cpu.amp``
+        does exist on recent torch but is a deprecated re-export of the generic
+        scaler with the device pinned, so it must not be picked up here.
         """
-        if device_type != "cuda":
+        if device_type in _NATIVE_SCALER_DEVICE_TYPES:
             amp_module = getattr(getattr(torch, device_type, None), "amp", None)
             grad_scaler = getattr(amp_module, "GradScaler", None)
             if grad_scaler is not None:
                 return grad_scaler
         return _amp_grad_scaler
 
-    def GradScaler(*args, **kwargs):
-        """Return the AMP ``GradScaler`` of the active accelerator.
+    def _caller_device(args, kwargs):
+        """Return ``(device, where)`` for the device the caller passed, if any.
 
-        ``torch.amp.GradScaler``-compatible, with the accelerator resolved the
-        same way as ``autocast()``. The device is only filled in for the generic
-        implementation; accelerator-specific scalers default to their own
-        device.
+        ``torch.amp.GradScaler``'s first positional parameter is ``device``, so
+        ``GradScaler("cpu", ...)`` and ``GradScaler(device="cpu", ...)`` name a
+        device while anything else leaves the scaler defaults in place.
         """
-        device_type = resolve_amp_device_type()
+        if "device" in kwargs:
+            return kwargs["device"], "keyword"
+        if args:
+            return args[0], "positional"
+        return None, None
+
+    def GradScaler(*args, **kwargs):
+        """Return the AMP ``GradScaler`` for the requested / active device.
+
+        ``torch.amp.GradScaler``-compatible: an explicit ``device`` (positional
+        or keyword) selects the implementation for that device and is forwarded
+        untouched to the generic scaler. Without an explicit device the active
+        accelerator decides, and the device is filled in for the generic
+        implementation only — accelerator-specific scalers default to their own
+        device and their constructor takes no ``device`` argument.
+        """
+        device, where = _caller_device(args, kwargs)
+        device_type = (
+            resolve_amp_device_type() if device is None else _resolve_device_type(device)
+        )
         scaler_class = _grad_scaler_class(device_type)
-        if scaler_class is _amp_grad_scaler and not args and "device" not in kwargs:
-            kwargs["device"] = device_type
+        if scaler_class is _amp_grad_scaler:
+            if device is None:
+                kwargs["device"] = device_type
+            return scaler_class(*args, **kwargs)
+        # The accelerator implementation owns its device and has no ``device``
+        # parameter, so drop ours before forwarding the remaining arguments.
+        if where == "keyword":
+            kwargs.pop("device", None)
+        elif where == "positional":
+            args = args[1:]
         return scaler_class(*args, **kwargs)
 
 else:
