@@ -4,6 +4,8 @@ on:
   pull_request:
     paths:
       - "funasr/models/moss_transcribe_diarize/**"
+      - "funasr/models/campplus/utils.py"
+      - "tests/test_campplus_utils.py"
       - "funasr/auto/auto_model.py"
       - "funasr/bin/_server_app.py"
       - "funasr/bin/server.py"
@@ -21,6 +23,8 @@ on:
       - main
     paths:
       - "funasr/models/moss_transcribe_diarize/**"
+      - "funasr/models/campplus/utils.py"
+      - "tests/test_campplus_utils.py"
       - "funasr/auto/auto_model.py"
       - "funasr/bin/_server_app.py"
       - "funasr/bin/server.py"
@@ -58,6 +62,7 @@ jobs:
       - name: Check formatting and syntax
         run: |
           python -m black --check \
+            tests/test_campplus_utils.py \
             funasr/models/moss_transcribe_diarize/model.py \
             tests/test_moss_transcribe_diarize_model.py \
             tests/test_moss_transcribe_diarize_docs.py \
@@ -71,6 +76,7 @@ jobs:
       - name: Run adapter and documentation contracts
         run: |
           python -m pytest -q \
+            tests/test_campplus_utils.py \
             tests/test_moss_transcribe_diarize_model.py \
             tests/test_moss_transcribe_diarize_docs.py \
             tests/test_server_app_openai_segments.py \
