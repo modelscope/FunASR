@@ -254,26 +254,21 @@ def smooth(res, mindur=0.7):
 
 
 def distribute_spk(sentence_list, sd_time_list):
-    """Distribute spk.
-    
-        Args:
-            sentence_list: TODO.
-            sd_time_list: TODO.
-        """
+    """Assign each sentence to the speaker with the greatest total overlap.
+
+    Sentence times are milliseconds; diarization times are seconds. Equal
+    totals retain the first overlapping speaker, and no overlap defaults to 0.
+    """
     sd_time_list = [(spk_st * 1000, spk_ed * 1000, spk) for spk_st, spk_ed, spk in sd_time_list]
     for d in sentence_list:
         sentence_start = d['start']
         sentence_end = d['end']
-        sentence_spk = 0
-        max_overlap = 0
+        speaker_overlaps = {}
         for spk_st, spk_ed, spk in sd_time_list:
             overlap = max(min(sentence_end, spk_ed) - max(sentence_start, spk_st), 0)
-            if overlap > max_overlap:
-                max_overlap = overlap
-                sentence_spk = spk
-            if overlap > 0 and sentence_spk == spk:
-                max_overlap += overlap
-        d['spk'] = int(sentence_spk)
+            if overlap > 0:
+                speaker_overlaps[spk] = speaker_overlaps.get(spk, 0) + overlap
+        d['spk'] = int(max(speaker_overlaps, key=speaker_overlaps.get, default=0))
     return sentence_list
 
 
