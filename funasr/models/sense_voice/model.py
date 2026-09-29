@@ -1095,6 +1095,7 @@ class SenseVoiceSmall(nn.Module):
             if word == "▁":
                 continue
             if i == 0:
+                word = word[1:] if word.startswith("▁") else word
                 # timestamp_new.append([word, start, end])
                 timestamp_new.append([start, end])
                 words_new.append(word)

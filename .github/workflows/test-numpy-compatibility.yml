@@ -8,10 +8,12 @@ on:
       - "funasr/frontends/**"
       - "funasr/models/emotion2vec/**"
       - "funasr/models/campplus/**"
+      - "funasr/models/sense_voice/model.py"
       - "funasr/models/eend/utils/feature.py"
       - "tests/test_numpy_compatibility.py"
       - "tests/test_numpy_cluster_compatibility.py"
       - "tests/test_eend_feature_compatibility.py"
+      - "tests/test_sensevoice_word_timestamps.py"
       - "tests/test_pypi_metadata.py"
       - ".github/workflows/test-numpy-compatibility.yml"
   push:
@@ -22,10 +24,12 @@ on:
       - "funasr/frontends/**"
       - "funasr/models/emotion2vec/**"
       - "funasr/models/campplus/**"
+      - "funasr/models/sense_voice/model.py"
       - "funasr/models/eend/utils/feature.py"
       - "tests/test_numpy_compatibility.py"
       - "tests/test_numpy_cluster_compatibility.py"
       - "tests/test_eend_feature_compatibility.py"
+      - "tests/test_sensevoice_word_timestamps.py"
       - "tests/test_pypi_metadata.py"
       - ".github/workflows/test-numpy-compatibility.yml"
 
@@ -71,6 +75,7 @@ jobs:
             tests/test_numpy_cluster_compatibility.py \
             tests/test_eend_feature_compatibility.py \
             tests/test_pypi_metadata.py \
+            tests/test_sensevoice_word_timestamps.py \
             --junitxml=numpy-results.xml
       - uses: actions/upload-artifact@v4
         if: always()
