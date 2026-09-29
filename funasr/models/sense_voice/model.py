@@ -1093,8 +1093,10 @@ class SenseVoiceSmall(nn.Module):
             start = int(start * 1000)
             end = int(end * 1000)
             if word == "▁":
+                prev_word = None
                 continue
             if i == 0:
+                word = word[1:] if word.startswith("▁") else word
                 # timestamp_new.append([word, start, end])
                 timestamp_new.append([start, end])
                 words_new.append(word)
