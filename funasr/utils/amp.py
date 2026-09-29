@@ -43,8 +43,8 @@ An explicit device always wins over the detected accelerator:
 keep whichever implementation understands that device, exactly as the
 ``torch.amp.GradScaler`` export they replace did. On an accelerator that ships
 its own scaler the ``device`` argument is consumed by this shim (that
-constructor takes no ``device``) while every other argument is forwarded
-unchanged.
+constructor takes no ``device``) while every other argument is translated by
+name, because those constructors do not share the generic positional order.
 """
 
 import torch
@@ -59,6 +59,19 @@ _ACCELERATOR_DEVICE_TYPES = ("cuda", "npu", "xpu", "mps")
 # whose ``torch.cpu.amp`` is only a deprecated re-export of the generic scaler —
 # goes through ``torch.amp.GradScaler``.
 _NATIVE_SCALER_DEVICE_TYPES = ("npu", "xpu")
+
+# Parameter names of ``torch.amp.GradScaler``: ``device`` first, ``enabled``
+# last. A call written against the generic signature is bound by name before it
+# is dispatched to an accelerator-specific scaler, whose parameter order is not
+# the same (``torch_npu`` inserts ``dynamic`` before ``enabled``).
+_GENERIC_SCALER_PARAMETERS = (
+    "device",
+    "init_scale",
+    "growth_factor",
+    "backoff_factor",
+    "growth_interval",
+    "enabled",
+)
 
 
 def resolve_amp_device_type():
@@ -129,18 +142,24 @@ if torch_amp is not None and hasattr(torch_amp, "autocast") and hasattr(
                 return grad_scaler
         return _amp_grad_scaler
 
-    def _caller_device(args, kwargs):
-        """Return ``(device, where)`` for the device the caller passed, if any.
+    def _generic_arguments(args, kwargs):
+        """Bind a ``torch.amp.GradScaler`` call to its parameter names.
 
-        ``torch.amp.GradScaler``'s first positional parameter is ``device``, so
-        ``GradScaler("cpu", ...)`` and ``GradScaler(device="cpu", ...)`` name a
-        device while anything else leaves the scaler defaults in place.
+        Returns the arguments keyed by generic parameter name, or ``None`` when
+        the call does not match the generic signature (unknown or repeated
+        parameters) — such calls are forwarded unchanged so that the selected
+        scaler raises the error ``torch.amp`` would have raised.
         """
-        if "device" in kwargs:
-            return kwargs["device"], "keyword"
-        if args:
-            return args[0], "positional"
-        return None, None
+        if len(args) > len(_GENERIC_SCALER_PARAMETERS):
+            return None
+        arguments = dict(kwargs)
+        for name, value in zip(_GENERIC_SCALER_PARAMETERS, args):
+            if name in arguments:
+                return None
+            arguments[name] = value
+        if any(name not in _GENERIC_SCALER_PARAMETERS for name in arguments):
+            return None
+        return arguments
 
     def GradScaler(*args, **kwargs):
         """Return the AMP ``GradScaler`` for the requested / active device.
@@ -151,8 +170,16 @@ if torch_amp is not None and hasattr(torch_amp, "autocast") and hasattr(
         accelerator decides, and the device is filled in for the generic
         implementation only — accelerator-specific scalers default to their own
         device and their constructor takes no ``device`` argument.
+
+        The accelerator implementations do not share the generic positional
+        order (``torch_npu`` inserts ``dynamic`` before ``enabled``), so their
+        arguments are translated by name: ``GradScaler("npu", 1024.0, 2.0, 0.5,
+        2000, False)`` reaches ``torch.npu.amp.GradScaler`` with
+        ``enabled=False`` instead of filling the trailing positionals into the
+        native parameters one slot early and enabling a static scaler.
         """
-        device, where = _caller_device(args, kwargs)
+        arguments = _generic_arguments(args, kwargs)
+        device = None if arguments is None else arguments.get("device")
         device_type = (
             resolve_amp_device_type() if device is None else _resolve_device_type(device)
         )
@@ -161,13 +188,18 @@ if torch_amp is not None and hasattr(torch_amp, "autocast") and hasattr(
             if device is None:
                 kwargs["device"] = device_type
             return scaler_class(*args, **kwargs)
+        if arguments is None:
+            # Not the generic signature: keep the plain export behaviour and
+            # only drop the device the caller spelled out, if any.
+            if "device" in kwargs:
+                kwargs.pop("device", None)
+            elif args:
+                args = args[1:]
+            return scaler_class(*args, **kwargs)
         # The accelerator implementation owns its device and has no ``device``
-        # parameter, so drop ours before forwarding the remaining arguments.
-        if where == "keyword":
-            kwargs.pop("device", None)
-        elif where == "positional":
-            args = args[1:]
-        return scaler_class(*args, **kwargs)
+        # parameter, so drop ours and forward every remaining argument by name.
+        arguments.pop("device", None)
+        return scaler_class(**arguments)
 
 else:
     from torch.cuda.amp import autocast, GradScaler

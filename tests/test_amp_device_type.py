@@ -165,16 +165,47 @@ def test_grad_scaler_keeps_cuda_and_cpu_on_the_generic_implementation(monkeypatc
     assert generic_scaler.calls[-1] == ((), {"enabled": True, "device": "cuda"})
 
 
-def _patch_npu_scaler(monkeypatch):
-    """Register an NPU AMP scaler that records the arguments it is called with."""
-    accelerator_scaler = _Recorder()
+class _NpuGradScalerStub:
+    """``torch.npu.amp.GradScaler`` stand-in with torch_npu's real signature.
+
+    The parameter order matters: torch_npu inserts ``dynamic`` before
+    ``enabled``
+    (https://github.com/Ascend/pytorch/blob/6d59edda7452b26267eecbb6c328d876a6521ada/torch_npu/npu/amp/grad_scaler.py#L93-L99),
+    so a ``*args, **kwargs`` recorder cannot tell a correctly translated call
+    from one whose positional tail landed one parameter too early.
+    """
+
+    def __init__(
+        self,
+        init_scale=2.0 ** 16,
+        growth_factor=2.0,
+        backoff_factor=0.5,
+        growth_interval=2000,
+        dynamic=True,
+        enabled=True,
+    ):
+        self.init_scale = init_scale
+        self.growth_factor = growth_factor
+        self.backoff_factor = backoff_factor
+        self.growth_interval = growth_interval
+        self.dynamic = dynamic
+        self._enabled = enabled
+
+    def is_enabled(self):
+        return self._enabled
+
+
+def _patch_npu_scaler(monkeypatch, scaler=None):
+    """Register an NPU AMP scaler (an argument recorder by default)."""
+    if scaler is None:
+        scaler = _Recorder()
     monkeypatch.setattr(
         torch,
         "npu",
-        types.SimpleNamespace(amp=types.SimpleNamespace(GradScaler=accelerator_scaler)),
+        types.SimpleNamespace(amp=types.SimpleNamespace(GradScaler=scaler)),
         raising=False,
     )
-    return accelerator_scaler
+    return scaler
 
 
 def test_grad_scaler_honours_an_explicit_keyword_device(monkeypatch):
@@ -238,8 +269,73 @@ def test_grad_scaler_drops_the_device_for_the_accelerator_implementation(monkeyp
     assert generic_scaler.calls == []
     assert accelerator_scaler.calls == [
         ((), {"enabled": True}),
-        ((1024.0,), {}),
+        ((), {"init_scale": 1024.0}),
     ]
+
+
+@pytest.mark.parametrize("enabled", [False, True])
+def test_grad_scaler_translates_the_generic_positional_tail_for_the_npu_scaler(
+    monkeypatch, enabled
+):
+    """``GradScaler("npu", 1024.0, 2.0, 0.5, 2000, enabled)`` keeps ``enabled``.
+
+    The last parameter of the generic signature is ``enabled``, but torch_npu
+    inserts ``dynamic`` before it, so forwarding the positional tail unchanged
+    hands ``False`` to ``dynamic`` and leaves the scaler enabled — a caller
+    asking to disable scaling gets an enabled static scaler instead.
+    """
+    amp = _load_amp()
+    _patch_accelerator(monkeypatch, "npu")
+    _patch_npu_scaler(monkeypatch, scaler=_NpuGradScalerStub)
+    generic_scaler = _Recorder()
+    monkeypatch.setattr(amp, "_amp_grad_scaler", generic_scaler)
+
+    scaler = amp.GradScaler("npu", 1024.0, 2.0, 0.5, 2000, enabled)
+
+    assert generic_scaler.calls == []
+    assert isinstance(scaler, _NpuGradScalerStub)
+    assert scaler.is_enabled() is enabled
+    assert scaler.init_scale == 1024.0
+    assert scaler.growth_factor == 2.0
+    assert scaler.backoff_factor == 0.5
+    assert scaler.growth_interval == 2000
+    assert scaler.dynamic is True
+
+
+def test_grad_scaler_translates_arguments_by_name_before_dispatch(monkeypatch):
+    """The accelerator scaler is called with parameter names, not a shifted tail."""
+    amp = _load_amp()
+    _patch_accelerator(monkeypatch, "npu")
+    accelerator_scaler = _patch_npu_scaler(monkeypatch)
+    generic_scaler = _Recorder()
+    monkeypatch.setattr(amp, "_amp_grad_scaler", generic_scaler)
+
+    amp.GradScaler("npu", 1024.0, 2.0, 0.5, 2000, False)
+
+    assert generic_scaler.calls == []
+    assert accelerator_scaler.calls == [
+        (
+            (),
+            {
+                "init_scale": 1024.0,
+                "growth_factor": 2.0,
+                "backoff_factor": 0.5,
+                "growth_interval": 2000,
+                "enabled": False,
+            },
+        )
+    ]
+
+
+def test_grad_scaler_keeps_a_keyword_enabled_flag_for_the_npu_scaler(monkeypatch):
+    """The keyword form keeps meaning the same thing on every scaler."""
+    amp = _load_amp()
+    _patch_accelerator(monkeypatch, "npu")
+    _patch_npu_scaler(monkeypatch, scaler=_NpuGradScalerStub)
+
+    assert amp.GradScaler(enabled=False).is_enabled() is False
+    assert amp.GradScaler(device="npu", enabled=False).is_enabled() is False
+    assert amp.GradScaler("npu", enabled=True).is_enabled() is True
 
 
 def test_grad_scaler_keeps_an_explicit_cuda_device_on_the_generic_implementation(monkeypatch):
