@@ -66,6 +66,24 @@ from funasr.models.sense_voice.model import SenseVoiceSmall
         pytest.param(
             ["A", "\u2581B", "C"], ["A", "BC"], [[0, 125], [125, 375]], id="word-boundary"
         ),
+        pytest.param(
+            ["Hello", "\u2581", "world"],
+            ["Hello", "world"],
+            [[0, 125], [250, 375]],
+            id="standalone-word-boundary",
+        ),
+        pytest.param(
+            ["\u2581Hel", "lo", "\u2581", "wor", "ld"],
+            ["Hello", "world"],
+            [[0, 250], [375, 625]],
+            id="subpieces-around-standalone-boundary",
+        ),
+        pytest.param(
+            ["Hello", "\u2581", "\u2581", "world"],
+            ["Hello", "world"],
+            [[0, 125], [375, 500]],
+            id="repeated-standalone-boundaries",
+        ),
     ],
 )
 def test_post_preserves_word_boundaries_and_timestamp_alignment(tokens, words, timestamps):

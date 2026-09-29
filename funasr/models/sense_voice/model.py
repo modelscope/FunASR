@@ -1093,6 +1093,7 @@ class SenseVoiceSmall(nn.Module):
             start = int(start * 1000)
             end = int(end * 1000)
             if word == "▁":
+                prev_word = None
                 continue
             if i == 0:
                 word = word[1:] if word.startswith("▁") else word
