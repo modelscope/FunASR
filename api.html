@@ -15479,8 +15479,10 @@
             start = int(start * 1000)
             end = int(end * 1000)
             if word == "▁":
+                prev_word = None
                 continue
             if i == 0:
+                word = word[1:] if word.startswith("▁") else word
                 # timestamp_new.append([word, start, end])
                 timestamp_new.append([start, end])
                 words_new.append(word)
@@ -15493,9 +15495,7 @@
                 timestamp_new[-1][1] = end
                 words_new[-1] = word
             else:
-                # timestamp_new[-1][0] += word
-                timestamp_new.append([start, end])
-</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/sense_voice/model.py#L1082" rel="noopener noreferrer" target="_blank">View full source →</a></details></div><div class="mblk"><code>.export(**kwargs)</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/sense_voice/model.py#L1116" rel="noopener noreferrer" target="_blank">L1116</a><div class="mdoc"><p>Export.</p>
+</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/sense_voice/model.py#L1082" rel="noopener noreferrer" target="_blank">View full source →</a></details></div><div class="mblk"><code>.export(**kwargs)</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/sense_voice/model.py#L1118" rel="noopener noreferrer" target="_blank">L1118</a><div class="mdoc"><p>Export.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>**kwargs</code> — Additional keyword arguments.</li>
@@ -15671,8 +15671,10 @@
             start = int(start * 1000)
             end = int(end * 1000)
             if word == "▁":
+                prev_word = None
                 continue
             if i == 0:
+                word = word[1:] if word.startswith("▁") else word
                 # timestamp_new.append([word, start, end])
                 timestamp_new.append([start, end])
                 words_new.append(word)
@@ -15685,10 +15687,8 @@
                 timestamp_new[-1][1] = end
                 words_new[-1] = word
             else:
-                # timestamp_new[-1][0] += word
-                timestamp_new.append([start, end])
 </code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/sense_voice/model.py#L1082" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
-<div class="api-detail" id="e241" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>SenseVoiceSmall.export(**kwargs)</code></h2><div class="dmod">funasr.models.sense_voice.SenseVoiceSmall · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/sense_voice/model.py#L1116" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Export.</p>
+<div class="api-detail" id="e241" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>SenseVoiceSmall.export(**kwargs)</code></h2><div class="dmod">funasr.models.sense_voice.SenseVoiceSmall · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/sense_voice/model.py#L1118" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Export.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>**kwargs</code> — Additional keyword arguments.</li>
