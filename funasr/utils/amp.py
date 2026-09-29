@@ -147,8 +147,12 @@ if torch_amp is not None and hasattr(torch_amp, "autocast") and hasattr(
 
         Returns the arguments keyed by generic parameter name, or ``None`` when
         the call does not match the generic signature (unknown or repeated
-        parameters) — such calls are forwarded unchanged so that the selected
-        scaler raises the error ``torch.amp`` would have raised.
+        parameters). Those calls keep the plain export behaviour: an explicit
+        ``device`` is dropped and the rest is forwarded untouched, so the
+        *generic* scaler rejects them as ``torch.amp`` would, while an
+        accelerator-specific scaler validates the remaining arguments against
+        its own signature (``torch_npu`` takes one parameter more, so a call
+        the generic scaler would reject can still bind natively).
         """
         if len(args) > len(_GENERIC_SCALER_PARAMETERS):
             return None
