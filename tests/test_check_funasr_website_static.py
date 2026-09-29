@@ -50,7 +50,7 @@ def test_website_contract_accepts_current_public_copy():
             vLLM Acceleration
         """,
         "https://www.funasr.com/ecosystem.html": """
-            <div class="stat-num">36K+</div>
+            <div class="stat-num">37K+</div>
             <a href="/donors.html">功德榜</a>
             <a href="https://github.com/BerriAI/litellm">LiteLLM</a>
             <a href="https://github.com/modelscope/FunClip/releases/tag/v2.1.1">FunClip v2.1.1</a>
@@ -58,7 +58,7 @@ def test_website_contract_accepts_current_public_copy():
             <a href="https://github.com/0xShug0/audio.cpp/pull/155">merged PR</a>
             <a href="https://github.com/0xShug0/audio.cpp/blob/1778b23a5f6a4951c788e4bb0e7baa04f20012a2/docs/models/fun_asr_nano.md">pinned guide</a>
             <a href="https://github.com/RVC-Boss/GPT-SoVITS/pull/2824">merged Transformers fix</a>
-            <div>custom_openai</div>
+            <div>openai/sensevoice api_base: http://127.0.0.1:8000/v1</div>
             <div>54.3K stars</div>
             <a href="https://marketplace.dify.ai/plugin/langgenius/funasr">
                 FunASR 官方插件 0.1.1
@@ -66,7 +66,7 @@ def test_website_contract_accepts_current_public_copy():
             <div>支持最大 25 MB 音频上传</div>
         """,
         "https://www.funasr.com/en/ecosystem.html": """
-            <div class="stat-num">36K+</div>
+            <div class="stat-num">37K+</div>
             <a href="/en/donors.html">Thanks</a>
             <a href="https://github.com/BerriAI/litellm">LiteLLM</a>
             <a href="https://github.com/modelscope/FunClip/releases/tag/v2.1.1">FunClip v2.1.1</a>
@@ -74,7 +74,7 @@ def test_website_contract_accepts_current_public_copy():
             <a href="https://github.com/0xShug0/audio.cpp/pull/155">merged PR</a>
             <a href="https://github.com/0xShug0/audio.cpp/blob/1778b23a5f6a4951c788e4bb0e7baa04f20012a2/docs/models/fun_asr_nano.md">pinned guide</a>
             <a href="https://github.com/RVC-Boss/GPT-SoVITS/pull/2824">merged Transformers fix</a>
-            <div>custom_openai</div>
+            <div>openai/sensevoice api_base: http://127.0.0.1:8000/v1</div>
             <div>54.3K stars</div>
             <a href="https://marketplace.dify.ai/plugin/langgenius/funasr">
                 FunASR plugin 0.1.1
@@ -277,9 +277,22 @@ def test_homepage_contract_accepts_current_product_site_build(tmp_path, monkeypa
     assert checker.validate_pages(pages) == []
 
 
-def test_llamacpp_comparison_contract_accepts_current_product_site_build(
-    tmp_path, monkeypatch
-):
+def test_ecosystem_contract_accepts_current_product_site_build(tmp_path, monkeypatch):
+    checker = _load_module()
+    builder = _load_product_site_builder()
+    builder.build(tmp_path)
+    routes = ("ecosystem.html", "en/ecosystem.html")
+    pages = {
+        f"https://www.funasr.com/{route}": (tmp_path / route).read_text(encoding="utf-8")
+        for route in routes
+    }
+    monkeypatch.setattr(
+        checker, "PAGE_CONTRACTS", {url: checker.PAGE_CONTRACTS[url] for url in pages}
+    )
+    assert checker.validate_pages(pages) == []
+
+
+def test_llamacpp_comparison_contract_accepts_current_product_site_build(tmp_path, monkeypatch):
     checker = _load_module()
     builder = _load_product_site_builder()
     builder.build(tmp_path)
@@ -288,9 +301,7 @@ def test_llamacpp_comparison_contract_accepts_current_product_site_build(
         "en/blog/funasr-llama-cpp-whisper-cpp-alternative.html",
     )
     pages = {
-        f"https://www.funasr.com/{route}": (tmp_path / route).read_text(
-            encoding="utf-8"
-        )
+        f"https://www.funasr.com/{route}": (tmp_path / route).read_text(encoding="utf-8")
         for route in routes
     }
     monkeypatch.setattr(
@@ -326,7 +337,7 @@ def test_ecosystem_contract_requires_current_release_and_native_runtime():
         "https://www.funasr.com/en/ecosystem.html",
     ):
         contract = checker.PAGE_CONTRACTS[url]
-        assert "36K+" in contract.required
+        assert "37K+" in contract.required
         assert evidence_links <= set(contract.required_links)
 
 
@@ -336,10 +347,10 @@ def test_ecosystem_contract_requires_live_dify_marketplace():
     pages = {
         url: """
             <body>
-            <div class="stat-num">36K+</div>
+            <div class="stat-num">37K+</div>
             <a href="/en/donors.html">Thanks</a>
             <a href="https://github.com/BerriAI/litellm">LiteLLM</a>
-            <div>custom_openai</div>
+            <div>openai/sensevoice api_base: http://127.0.0.1:8000/v1</div>
             <div>54.3K stars</div>
             <a href="https://github.com/langgenius/dify">Dify</a>
             </body>
@@ -350,8 +361,7 @@ def test_ecosystem_contract_requires_live_dify_marketplace():
 
     assert any(
         url in failure
-        and "missing link `https://marketplace.dify.ai/plugin/langgenius/funasr`"
-        in failure
+        and "missing link `https://marketplace.dify.ai/plugin/langgenius/funasr`" in failure
         for failure in failures
     )
     assert any(
@@ -359,15 +369,14 @@ def test_ecosystem_contract_requires_live_dify_marketplace():
         for failure in failures
     )
     assert any(
-        url in failure and "visible text missing `25 MB uploads`" in failure
-        for failure in failures
+        url in failure and "visible text missing `25 MB uploads`" in failure for failure in failures
     )
 
 
 def _valid_english_ecosystem_html():
     return """
         <body>
-        <div class="stat-num">36K+</div>
+        <div class="stat-num">37K+</div>
         <a href="/en/donors.html">Thanks</a>
         <a href="https://github.com/BerriAI/litellm">LiteLLM</a>
         <a href="https://github.com/modelscope/FunClip/releases/tag/v2.1.1">FunClip v2.1.1</a>
@@ -375,7 +384,7 @@ def _valid_english_ecosystem_html():
         <a href="https://github.com/0xShug0/audio.cpp/pull/155">merged PR</a>
         <a href="https://github.com/0xShug0/audio.cpp/blob/1778b23a5f6a4951c788e4bb0e7baa04f20012a2/docs/models/fun_asr_nano.md">pinned guide</a>
         <a href="https://github.com/RVC-Boss/GPT-SoVITS/pull/2824">merged Transformers fix</a>
-        <div>custom_openai</div>
+        <div>openai/sensevoice api_base: http://127.0.0.1:8000/v1</div>
         <div>54.3K stars</div>
         <a href="https://marketplace.dify.ai/plugin/langgenius/funasr">
             FunASR plugin 0.1.1
@@ -383,6 +392,75 @@ def _valid_english_ecosystem_html():
         <div>supports 25 MB uploads</div>
         </body>
     """
+
+
+@pytest.fixture(params=["en/", ""])
+def litellm_ecosystem_page(request):
+    language = request.param
+    html = _valid_english_ecosystem_html()
+    if not language:
+        html = (
+            html.replace("/en/donors.html", "/donors.html")
+            .replace("FunASR plugin 0.1.1", "FunASR 官方插件 0.1.1")
+            .replace("supports 25 MB uploads", "支持最大 25 MB 音频上传")
+        )
+    return f"https://www.funasr.com/{language}ecosystem.html", html
+
+
+def test_ecosystem_accepts_litellm_transcription_route(litellm_ecosystem_page):
+    checker = _load_module()
+    url, html = litellm_ecosystem_page
+    assert not [
+        failure for failure in checker.validate_pages({url: html}) if failure.startswith(url + ":")
+    ]
+
+
+@pytest.mark.parametrize("legacy", ["custom_openai", "openai/FunAudioLLM/SenseVoiceSmall"])
+def test_ecosystem_rejects_legacy_litellm_routing(litellm_ecosystem_page, legacy):
+    checker = _load_module()
+    url, html = litellm_ecosystem_page
+    failures = checker.validate_pages({url: html + f"<code>{legacy}</code>"})
+    assert f"{url}: forbidden `{legacy}`" in failures
+
+
+@pytest.mark.parametrize("suffix", ["Small", "/model", "-extra"])
+def test_ecosystem_rejects_wrong_litellm_model_alias(litellm_ecosystem_page, suffix):
+    checker = _load_module()
+    url, html = litellm_ecosystem_page
+    html = html.replace("openai/sensevoice", "openai/sensevoice" + suffix)
+    failures = checker.validate_pages({url: html})
+    assert f"{url}: visible text missing `openai/sensevoice`" in failures
+
+
+@pytest.mark.parametrize("required", ["openai/sensevoice", "api_base", "http://127.0.0.1:8000/v1"])
+def test_ecosystem_requires_visible_litellm_configuration(litellm_ecosystem_page, required):
+    checker = _load_module()
+    url, html = litellm_ecosystem_page
+    html = html.replace(required, f"<span hidden>{required}</span>")
+    failures = checker.validate_pages({url: html})
+    assert f"{url}: visible text missing `{required}`" in failures
+
+
+@pytest.mark.parametrize("suffix", ["0", "/audio/transcriptions", "?route=other"])
+def test_ecosystem_rejects_wrong_litellm_api_base(litellm_ecosystem_page, suffix):
+    checker = _load_module()
+    url, html = litellm_ecosystem_page
+    api_base = "http://127.0.0.1:8000/v1"
+    html = html.replace(api_base, api_base + suffix)
+    failures = checker.validate_pages({url: html})
+    assert f"{url}: visible text missing `{api_base}`" in failures
+
+
+def test_ecosystem_source_uses_working_litellm_configuration(litellm_ecosystem_page):
+    checker = _load_module()
+    url, _ = litellm_ecosystem_page
+    relative = url.removeprefix("https://www.funasr.com/")
+    source = ROOT / "web-pages" / "product-site" / "legacy" / relative
+    visible = checker.extract_visible_text(source.read_text())
+    assert "openai/sensevoice" in visible
+    assert "api_base" in visible
+    assert "http://127.0.0.1:8000/v1" in visible
+    assert "custom_openai" not in visible
 
 
 def test_ecosystem_contract_rejects_longer_dify_version():
@@ -393,9 +471,7 @@ def test_ecosystem_contract_rejects_longer_dify_version():
 
     failures = checker.validate_pages(pages)
 
-    assert any(
-        url in failure and "FunASR plugin 0.1.1" in failure for failure in failures
-    )
+    assert any(url in failure and "FunASR plugin 0.1.1" in failure for failure in failures)
 
 
 def test_ecosystem_contract_rejects_dify_version_suffixes():
@@ -408,9 +484,7 @@ def test_ecosystem_contract_rejects_dify_version_suffixes():
 
         failures = checker.validate_pages(pages)
 
-        assert any(
-            url in failure and "FunASR plugin 0.1.1" in failure for failure in failures
-        )
+        assert any(url in failure and "FunASR plugin 0.1.1" in failure for failure in failures)
 
 
 def test_ecosystem_contract_rejects_larger_dify_upload_limit():
@@ -475,8 +549,7 @@ def test_website_contract_includes_funclip_v210_launch():
         in checker.PAGE_CONTRACTS
     )
     assert (
-        "https://www.funasr.com/img/funclip-v2-1-0-interface.jpg"
-        in checker.STATIC_ASSET_CONTRACTS
+        "https://www.funasr.com/img/funclip-v2-1-0-interface.jpg" in checker.STATIC_ASSET_CONTRACTS
     )
 
 
@@ -523,17 +596,14 @@ def test_funclip_v210_contract_rejects_hidden_evidence_and_wrong_routes():
         for failure in failures
     )
     assert any(
-        url in failure
-        and "missing link `https://github.com/modelscope/FunClip`" in failure
+        url in failure and "missing link `https://github.com/modelscope/FunClip`" in failure
         for failure in failures
     )
     assert any(
-        url in failure and "missing link `/en/donors.html`" in failure
-        for failure in failures
+        url in failure and "missing link `/en/donors.html`" in failure for failure in failures
     )
     assert any(
-        url in failure
-        and "missing image `/img/funclip-v2-1-0-interface.jpg`" in failure
+        url in failure and "missing image `/img/funclip-v2-1-0-interface.jpg`" in failure
         for failure in failures
     )
 
@@ -573,13 +643,11 @@ def test_funclip_v210_contract_rejects_zero_area_links():
     failures = checker.validate_pages(pages)
 
     assert any(
-        url in failure
-        and "missing link `https://github.com/modelscope/FunClip`" in failure
+        url in failure and "missing link `https://github.com/modelscope/FunClip`" in failure
         for failure in failures
     )
     assert any(
-        url in failure and "missing link `/en/donors.html`" in failure
-        for failure in failures
+        url in failure and "missing link `/en/donors.html`" in failure for failure in failures
     )
 
 
@@ -606,8 +674,7 @@ def test_v1328_contract_rejects_language_swapped_body():
     failures = checker.validate_pages(pages)
 
     assert any(
-        url in failure
-        and "visible text missing `精确合并源码通过 118 项聚焦回归测试`" in failure
+        url in failure and "visible text missing `精确合并源码通过 118 项聚焦回归测试`" in failure
         for failure in failures
     )
 
@@ -640,8 +707,7 @@ def test_v1328_contract_rejects_css_test_count_and_indirect_repo_link():
         for failure in failures
     )
     assert any(
-        url in failure
-        and "missing link `https://github.com/modelscope/FunASR`" in failure
+        url in failure and "missing link `https://github.com/modelscope/FunASR`" in failure
         for failure in failures
     )
 
@@ -670,14 +736,12 @@ def test_v1328_contract_requires_visible_stop_and_sensevoice_copy():
     failures = checker.validate_pages(pages)
 
     assert any(
-        url in failure
-        and "visible text missing `including STOP final decode`" in failure
+        url in failure and "visible text missing `including STOP final decode`" in failure
         for failure in failures
     )
     assert any(
         url in failure
-        and "visible text missing `SenseVoice users receive the subtitle alignment fix`"
-        in failure
+        and "visible text missing `SenseVoice users receive the subtitle alignment fix`" in failure
         for failure in failures
     )
 
@@ -725,16 +789,15 @@ def test_website_contract_reports_stale_runtime_and_star_copy():
 
     pages = {url: "" for url in checker.PAGE_CONTRACTS}
     pages["https://www.funasr.com/ecosystem.html"] = "16K+"
-    pages[
-        "https://www.funasr.com/blog/funasr-llama-cpp-whisper-cpp-alternative.html"
-    ] = "runtime-llamacpp-v0.1.1"
+    pages["https://www.funasr.com/blog/funasr-llama-cpp-whisper-cpp-alternative.html"] = (
+        "runtime-llamacpp-v0.1.1"
+    )
     pages["https://www.funasr.com/llama-cpp.html"] = "runtime-llamacpp-v0.1.1"
 
     failures = checker.validate_pages(pages)
 
     assert any(
-        "ecosystem.html" in failure and "forbidden `16K+`" in failure
-        for failure in failures
+        "ecosystem.html" in failure and "forbidden `16K+`" in failure for failure in failures
     )
     assert any(
         "funasr-llama-cpp-whisper-cpp-alternative.html" in failure
@@ -771,8 +834,7 @@ def test_website_contract_requires_visible_donor_usage_copy():
     failures = checker.validate_pages(pages)
 
     assert any(
-        "donors.html" in failure
-        and "visible text missing `购买和维护服务器`" in failure
+        "donors.html" in failure and "visible text missing `购买和维护服务器`" in failure
         for failure in failures
     )
     assert any(
@@ -855,8 +917,7 @@ def test_navigation_contract_requires_donors_as_last_directory_link():
 
     assert not any("ok.html" in failure for failure in failures)
     assert any(
-        "missing.html" in failure and "missing `/en/donors.html`" in failure
-        for failure in failures
+        "missing.html" in failure and "missing `/en/donors.html`" in failure for failure in failures
     )
     assert any(
         "not-last.html" in failure and "must be the last directory link" in failure
@@ -867,8 +928,7 @@ def test_navigation_contract_requires_donors_as_last_directory_link():
         for failure in failures
     )
     assert any(
-        "wrong-language.html" in failure
-        and "contains wrong-language `/donors.html`" in failure
+        "wrong-language.html" in failure and "contains wrong-language `/donors.html`" in failure
         for failure in failures
     )
     assert not any("plain.html" in failure for failure in failures)
@@ -903,23 +963,19 @@ def test_navigation_contract_requires_visible_correctly_labeled_donor_link():
     failures = checker.validate_navigation(pages)
 
     assert any(
-        "hidden.html" in failure
-        and "missing `/donors.html`; link must be visible" in failure
+        "hidden.html" in failure and "missing `/donors.html`; link must be visible" in failure
         for failure in failures
     )
     assert any(
-        "wrong-label.html" in failure
-        and "must use visible label `功德榜`" in failure
+        "wrong-label.html" in failure and "must use visible label `功德榜`" in failure
         for failure in failures
     )
     assert any(
-        "hidden-label.html" in failure
-        and "missing `/donors.html`; link must be visible" in failure
+        "hidden-label.html" in failure and "missing `/donors.html`; link must be visible" in failure
         for failure in failures
     )
     assert any(
-        "empty.html" in failure
-        and "missing `/en/donors.html`; link must be visible" in failure
+        "empty.html" in failure and "missing `/en/donors.html`; link must be visible" in failure
         for failure in failures
     )
 
