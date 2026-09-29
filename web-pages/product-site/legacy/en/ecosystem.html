@@ -277,7 +277,7 @@ footer a{color:#60a5fa}
 <div class="card">
 <div class="card-title"><a href="https://github.com/BerriAI/litellm">LiteLLM</a></div>
 <div class="card-stars">54.3K stars</div>
-<div class="card-desc">OpenAI-compatible AI Gateway. FunASR / SenseVoice can be routed through <code>custom_openai</code> as a self-hosted transcription endpoint.</div>
+<div class="card-desc">OpenAI-compatible AI Gateway. Use <code>openai/sensevoice</code> with an explicit <code>api_base: http://127.0.0.1:8000/v1</code> for a self-hosted FunASR transcription server on the same host. <code>sensevoice</code> is a server model alias, not a checkpoint repository ID; containers need a backend address reachable from inside the container. The <a href="https://github.com/BerriAI/litellm-docs/pull/610">configuration docs PR</a> is awaiting upstream merge.</div>
 <div><span class="card-tag">AI Gateway</span><span class="card-tag">OpenAI-compatible</span></div>
 </div>
 <div class="card">

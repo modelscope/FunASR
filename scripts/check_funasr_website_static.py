@@ -16,9 +16,7 @@ import xml.etree.ElementTree as ET
 
 
 BASE_URL = "https://www.funasr.com"
-DONOR_PAGE_URLS = frozenset(
-    (f"{BASE_URL}/donors.html", f"{BASE_URL}/en/donors.html")
-)
+DONOR_PAGE_URLS = frozenset((f"{BASE_URL}/donors.html", f"{BASE_URL}/en/donors.html"))
 
 
 @dataclass(frozen=True)
@@ -57,13 +55,18 @@ PAGE_CONTRACTS: dict[str, PageContract] = {
     ),
     f"{BASE_URL}/ecosystem.html": PageContract(
         required=(
-            "36K+",
+            "37K+",
             "/donors.html",
             "LiteLLM",
-            "custom_openai",
             "54.3K stars",
         ),
+        visible_required=("api_base",),
         visible_patterns=(
+            ("openai/sensevoice", r"(?<![\w/])openai/sensevoice(?![\w./+-])"),
+            (
+                "http://127.0.0.1:8000/v1",
+                r"(?<![\w/])http://127\.0\.0\.1:8000/v1(?![\w/?#.:+-])",
+            ),
             ("FunASR 官方插件 0.1.1", r"FunASR 官方插件 0\.1\.1(?![\w.+-])"),
             ("最大 25 MB 音频上传", r"最大 (?<!\d)25 MB 音频上传"),
         ),
@@ -75,17 +78,22 @@ PAGE_CONTRACTS: dict[str, PageContract] = {
             "https://github.com/0xShug0/audio.cpp/blob/1778b23a5f6a4951c788e4bb0e7baa04f20012a2/docs/models/fun_asr_nano.md",
             "https://github.com/RVC-Boss/GPT-SoVITS/pull/2824",
         ),
-        forbidden=("16K+",),
+        forbidden=("16K+", "custom_openai", "openai/FunAudioLLM/SenseVoiceSmall"),
     ),
     f"{BASE_URL}/en/ecosystem.html": PageContract(
         required=(
-            "36K+",
+            "37K+",
             "/en/donors.html",
             "LiteLLM",
-            "custom_openai",
             "54.3K stars",
         ),
+        visible_required=("api_base",),
         visible_patterns=(
+            ("openai/sensevoice", r"(?<![\w/])openai/sensevoice(?![\w./+-])"),
+            (
+                "http://127.0.0.1:8000/v1",
+                r"(?<![\w/])http://127\.0\.0\.1:8000/v1(?![\w/?#.:+-])",
+            ),
             ("FunASR plugin 0.1.1", r"FunASR plugin 0\.1\.1(?![\w.+-])"),
             ("25 MB uploads", r"(?<!\d)25 MB uploads"),
         ),
@@ -97,7 +105,7 @@ PAGE_CONTRACTS: dict[str, PageContract] = {
             "https://github.com/0xShug0/audio.cpp/blob/1778b23a5f6a4951c788e4bb0e7baa04f20012a2/docs/models/fun_asr_nano.md",
             "https://github.com/RVC-Boss/GPT-SoVITS/pull/2824",
         ),
-        forbidden=("16K+",),
+        forbidden=("16K+", "custom_openai", "openai/FunAudioLLM/SenseVoiceSmall"),
     ),
     f"{BASE_URL}/donors.html": PageContract(
         required=(
@@ -444,9 +452,7 @@ class _VisibleContentCollector(HTMLParser):
         tag = tag.lower()
         attributes = {name.lower(): value for name, value in attrs}
         hidden = (
-            self._parent_hidden
-            or tag in _HIDDEN_TAGS
-            or self._has_hidden_attribute(attributes)
+            self._parent_hidden or tag in _HIDDEN_TAGS or self._has_hidden_attribute(attributes)
         )
         if not hidden:
             if tag == "img" and attributes.get("src"):
@@ -460,9 +466,7 @@ class _VisibleContentCollector(HTMLParser):
         tag = tag.lower()
         attributes = {name.lower(): value for name, value in attrs}
         hidden = (
-            self._parent_hidden
-            or tag in _HIDDEN_TAGS
-            or self._has_hidden_attribute(attributes)
+            self._parent_hidden or tag in _HIDDEN_TAGS or self._has_hidden_attribute(attributes)
         )
         if not hidden and tag == "img" and attributes.get("src"):
             self.images.add(attributes["src"])
@@ -541,10 +545,7 @@ class _DirectoryNavigationCollector(HTMLParser):
         tag = tag.lower()
         attributes = {name.lower(): value for name, value in attrs}
         if not self._stack:
-            is_navigation = (
-                tag == "div"
-                and "nav-links" in (attributes.get("class") or "").split()
-            )
+            is_navigation = tag == "div" and "nav-links" in (attributes.get("class") or "").split()
             if not is_navigation:
                 return
             self.found_navigation = True
@@ -619,9 +620,7 @@ def validate_navigation(pages: dict[str, str]) -> list[str]:
         directory_links: list[DirectoryLink] = []
         for link in navigation_links:
             target = urlparse(urljoin(url, link.href))
-            is_language_toggle = (
-                target.netloc == "www.funasr.com" and target.path == alternate_path
-            )
+            is_language_toggle = target.netloc == "www.funasr.com" and target.path == alternate_path
             is_github_action = target.netloc == "github.com"
             if not is_language_toggle and not is_github_action:
                 directory_links.append(link)
@@ -633,21 +632,14 @@ def validate_navigation(pages: dict[str, str]) -> list[str]:
             expected_links = [link for link in navigation_links if link.href == expected]
             if not any(link.label in expected_labels for link in expected_links):
                 label_description = "` or `".join(expected_labels)
-                failures.append(
-                    f"{url}: `{expected}` must use visible label `{label_description}`"
-                )
-        if expected in links and (
-            not directory_links or directory_links[-1].href != expected
-        ):
+                failures.append(f"{url}: `{expected}` must use visible label `{label_description}`")
+        if expected in links and (not directory_links or directory_links[-1].href != expected):
             failures.append(f"{url}: `{expected}` must be the last directory link")
         if links.count(expected) > 1:
-            failures.append(
-                f"{url}: directory navigation contains duplicate `{expected}`"
-            )
+            failures.append(f"{url}: directory navigation contains duplicate `{expected}`")
         if wrong_language in links:
             failures.append(
-                f"{url}: directory navigation contains wrong-language "
-                f"`{wrong_language}`"
+                f"{url}: directory navigation contains wrong-language " f"`{wrong_language}`"
             )
     return failures
 
@@ -723,9 +715,7 @@ def validate_assets(assets: dict[str, bytes]) -> list[str]:
     return failures
 
 
-def _fetch_bytes(
-    url: str, timeout: float, retries: int, require_exact_url: bool = False
-) -> bytes:
+def _fetch_bytes(url: str, timeout: float, retries: int, require_exact_url: bool = False) -> bytes:
     last_error: Exception | None = None
     for attempt in range(retries + 1):
         try:
@@ -741,17 +731,13 @@ def _fetch_bytes(
     raise last_error
 
 
-def _fetch_url(
-    url: str, timeout: float, retries: int, require_exact_url: bool = False
-) -> str:
+def _fetch_url(url: str, timeout: float, retries: int, require_exact_url: bool = False) -> str:
     return _fetch_bytes(
         url,
         timeout=timeout,
         retries=retries,
         require_exact_url=require_exact_url,
-    ).decode(
-        "utf-8", errors="replace"
-    )
+    ).decode("utf-8", errors="replace")
 
 
 def fetch_pages(timeout: float, retries: int = 3) -> dict[str, str]:
@@ -790,9 +776,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--retries", type=int, default=3)
     args = parser.parse_args(argv)
 
-    navigation_pages = fetch_navigation_pages(
-        timeout=args.timeout, retries=args.retries
-    )
+    navigation_pages = fetch_navigation_pages(timeout=args.timeout, retries=args.retries)
     pages = {}
     for url in PAGE_CONTRACTS:
         if url in DONOR_PAGE_URLS:
@@ -810,9 +794,7 @@ def main(argv: list[str] | None = None) -> int:
     all_navigation_pages.update(pages)
     failures = validate_pages(pages)
     failures.extend(validate_navigation(all_navigation_pages))
-    failures.extend(
-        validate_assets(fetch_assets(timeout=args.timeout, retries=args.retries))
-    )
+    failures.extend(validate_assets(fetch_assets(timeout=args.timeout, retries=args.retries)))
     if failures:
         print("funasr.com static page contract failed:", file=sys.stderr)
         for failure in failures:
