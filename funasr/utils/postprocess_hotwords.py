@@ -19,6 +19,9 @@ HotwordInput = Union[str, Sequence[str], Mapping[str, str], None]
 
 _EXPLICIT_SEPARATORS = ("=>", "->", "→")
 _TOKEN_PATTERN = re.compile(r"[\u4e00-\u9fff]|[a-zA-Z]+|[0-9]+")
+_HAN_PATTERN = re.compile(r"[\u4e00-\u9fff]")
+_LATIN_PATTERN = re.compile(r"[a-zA-Z]")
+_ASCII_ALNUM = frozenset("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
 
 _LAZY_PINYIN = None
 _PINYIN_STYLE = None
@@ -76,7 +79,10 @@ def _require_rapidfuzz():
 
 def _to_pinyin_key(text: str) -> str:
     lazy_pinyin, style = _require_pypinyin()
-    return "".join(lazy_pinyin(text, style=style.NORMAL, errors="ignore")).lower()
+    # Keep non-Chinese characters in the key. Dropping them makes a window with
+    # extra punctuation, digits or Latin letters score 1.0 against the target,
+    # and gives every Latin-only target and window the same empty key.
+    return "".join(lazy_pinyin(text, style=style.NORMAL, errors="default")).lower()
 
 
 def _parse_line(line: str) -> Tuple[Optional[str], Optional[str], bool]:
@@ -230,14 +236,21 @@ class PostprocessHotwordMatcher:
                 seen.add(target_s)
                 self.fuzzy_targets.append(target_s)
 
-        self._length_buckets: Dict[int, List[Tuple[str, str]]] = {}
+        self._length_buckets: Dict[int, List[Tuple[str, str, bool, bool]]] = {}
         self._fuzz = None
         if self.fuzzy_targets and self.enable_fuzzy:
             self._fuzz = _require_rapidfuzz()
             _require_pypinyin()
             for target in self.fuzzy_targets:
                 bucket = self._length_buckets.setdefault(len(target), [])
-                bucket.append((target, _to_pinyin_key(target)))
+                bucket.append(
+                    (
+                        target,
+                        _to_pinyin_key(target),
+                        bool(_HAN_PATTERN.search(target)),
+                        bool(_LATIN_PATTERN.search(target)),
+                    )
+                )
 
     def apply_text(self, text: str) -> Tuple[str, List[HotwordMatch]]:
         if not text:
@@ -330,11 +343,26 @@ class PostprocessHotwordMatcher:
                 segment = text[start:end]
                 if not segment or not _TOKEN_PATTERN.search(segment):
                     continue
+                # Do not split a Latin word or a number: with target "Win11",
+                # the window "Win1" inside "Win10" would become "Win110".
+                if start > 0 and text[start - 1] in _ASCII_ALNUM and text[start] in _ASCII_ALNUM:
+                    continue
+                if end < text_len and text[end - 1] in _ASCII_ALNUM and text[end] in _ASCII_ALNUM:
+                    continue
                 segment_py = _to_pinyin_key(segment)
+                segment_han = bool(_HAN_PATTERN.search(segment))
+                segment_latin = bool(_LATIN_PATTERN.search(segment))
 
                 for length in bucket_keys:
-                    for target, target_py in self._length_buckets[length]:
+                    for target, target_py, target_han, target_latin in self._length_buckets[length]:
                         if segment == target:
+                            continue
+                        # Lower-cased Latin letters can spell pinyin, so keep
+                        # scripts apart unless the target mixes them: "AI" plus
+                        # a character read "li" must not become a Chinese
+                        # target read "ali", and a Latin target must not
+                        # replace a Chinese character read "ai".
+                        if (segment_latin and not target_latin) or (segment_han and not target_han):
                             continue
                         score = self._fuzz.ratio(segment_py, target_py) / 100.0
                         if score >= self.threshold:
@@ -348,6 +376,25 @@ class PostprocessHotwordMatcher:
                                 )
                             )
 
+        if not candidates:
+            return text, []
+
+        # A target already spelled correctly must not be rewritten into itself
+        # by a neighbouring window that only resembles it. Only candidates for
+        # the same target are dropped, so a short target found inside a longer
+        # one does not block the longer one.
+        exact_spans: Dict[str, List[Tuple[int, int]]] = {}
+        for target in {c.replacement for c in candidates}:
+            spans = exact_spans.setdefault(target, [])
+            idx = text.find(target)
+            while idx >= 0:
+                spans.append((idx, idx + len(target)))
+                idx = text.find(target, idx + 1)
+        candidates = [
+            c
+            for c in candidates
+            if not any(c.start < end and start < c.end for start, end in exact_spans[c.replacement])
+        ]
         if not candidates:
             return text, []
 
