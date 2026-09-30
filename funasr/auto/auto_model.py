@@ -527,7 +527,8 @@ class AutoModel:
         Args:
             model (str): Model name (hub alias or full ID) or local path.
             device (str): Device for inference. "cuda:0", "cpu", "mps", "npu:0".
-                Falls back to CPU if specified device is unavailable.
+                Logs a warning and falls back to CPU if unavailable (default: "cuda").
+                Explicit CPU use or ngpu=0 does not emit a fallback warning.
             vad_model (str, optional): VAD model for long audio segmentation.
                 Enables processing of any-length audio.
             vad_kwargs (dict, optional): VAD config, e.g. {"device": "cpu"}.
@@ -673,6 +674,14 @@ class AutoModel:
             or (device.startswith("npu") and not is_npu_available())
             or kwargs.get("ngpu", 1) == 0
         ):
+            if kwargs.get("ngpu", 1) != 0:
+                logging.warning(
+                    "AutoModel: requested device '%s' is unavailable for model '%s'; "
+                    "falling back to CPU. Check your PyTorch build and accelerator "
+                    "availability, or set device='cpu' to use CPU explicitly.",
+                    device,
+                    kwargs["model"],
+                )
             device = "cpu"
             kwargs["batch_size"] = 1
         kwargs["device"] = device
