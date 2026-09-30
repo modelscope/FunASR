@@ -125,7 +125,7 @@ results = model.generate(["audio1.wav", "audio2.wav"], language="auto")
 >
 > **Use with AI agents:** [MCP Server](examples/mcp_server/) for Claude/Cursor · [OpenAI API](examples/openai_api/) for LangChain/Dify/AutoGen
 >
-> **Use with voice agents:** [OpenClaw realtime plugin](integrations/openclaw/) for self-hosted Talk and Voice Call transcription
+> **Use with voice agents:** [OpenClaw realtime plugin](integrations/openclaw/) for self-hosted Talk and Voice Call transcription · [Hugging Face speech-to-speech with SenseVoice](./docs/community_projects.md#speech-to-speech) (merged source checkout; not in v1.0.0)
 
 ### Why FunASR?
 

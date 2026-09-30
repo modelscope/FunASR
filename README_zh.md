@@ -115,7 +115,7 @@ results = model.generate(["audio1.wav", "audio2.wav"], language="auto")
 >
 > **接入 AI Agent：** [MCP 服务](examples/mcp_server/) 支持 Claude/Cursor · [OpenAI API](examples/openai_api/README_zh.md) 支持 LangChain/Dify/AutoGen
 >
-> **接入语音 Agent：** [OpenClaw 实时转写插件](integrations/openclaw/) 支持私有部署的 Talk 与 Voice Call 转写
+> **接入语音 Agent：** [OpenClaw 实时转写插件](integrations/openclaw/) 支持私有部署的 Talk 与 Voice Call 转写 · [Hugging Face speech-to-speech + SenseVoice](./docs/community_projects_zh.md#speech-to-speech)（已合入源码，v1.0.0 尚未包含）
 
 ### 为什么选 FunASR？
 

@@ -6,6 +6,27 @@ This page lists maintained projects where FunASR, Fun-ASR-Nano, SenseVoice, or a
 
 These integrations are community-maintained. Their release cadence, hardware support, and API stability are controlled by the upstream project, not by the FunASR maintainers.
 
+<a id="speech-to-speech"></a>
+## Hugging Face speech-to-speech: SenseVoice
+
+The native SenseVoiceSmall backend was merged upstream in [#319](https://github.com/huggingface/speech-to-speech/pull/319) on 2026-09-29 (UTC). It transcribes VAD segments through FunASR, uses the Hugging Face checkpoint `FunAudioLLM/SenseVoiceSmall`, and emits the pipeline's progressive/final transcription events. These events do not make the offline checkpoint a chunk-streaming ASR model. The checkpoint supports Mandarin, Cantonese, English, Japanese, and Korean.
+
+**Source installation, checked 2026-09-30:** this backend is not included in the released [v1.0.0](https://github.com/huggingface/speech-to-speech/releases/tag/v1.0.0). Use the merged source revision below, not `pip install speech-to-speech==1.0.0`. First follow the upstream [platform and environment setup](https://github.com/huggingface/speech-to-speech/blob/9e2ed1099190a4e4bc8a972b4a3488949ff1b9f6/README.md); Python 3.10+ is required.
+
+```bash
+git clone https://github.com/huggingface/speech-to-speech.git
+cd speech-to-speech
+git checkout --detach 9e2ed1099190a4e4bc8a972b4a3488949ff1b9f6
+python -m pip install -e ".[sensevoice]"
+speech-to-speech serve --stt sense-voice \
+  --sense_voice_stt_device cpu \
+  --sense_voice_stt_model_name FunAudioLLM/SenseVoiceSmall --help
+```
+
+The last command inspects CLI options; it does not start a model-backed conversation. After configuring the LLM and TTS backends using the upstream guide, add these SenseVoice flags (without `--help`) to your `serve` or `local` command. The explicit CPU flag avoids assuming a compatible CUDA installation; model files are downloaded on first actual use unless cached.
+
+Local STT does not imply an entirely offline voice agent: LLM/TTS backends and their network or API-key requirements are configured separately. The upstream `--log_transcripts` option controls application logs, not the terminal conversation display; terminal output may still contain transcription text. See the pinned [handler](https://github.com/huggingface/speech-to-speech/blob/9e2ed1099190a4e4bc8a972b4a3488949ff1b9f6/src/speech_to_speech/STT/sense_voice_handler.py) and [logging contract](https://github.com/huggingface/speech-to-speech/blob/9e2ed1099190a4e4bc8a972b4a3488949ff1b9f6/src/speech_to_speech/pipeline/transcript_logging.py). No new model, GPU, or complete voice-conversation validation is claimed by this listing.
+
 ## Voice agents and applications
 
 | Project | What is integrated | Start here |

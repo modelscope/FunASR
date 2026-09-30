@@ -6,6 +6,27 @@
 
 这些集成由社区项目维护，其发布节奏、硬件支持和 API 稳定性由上游项目决定，不属于 FunASR 维护者的兼容性承诺。
 
+<a id="speech-to-speech"></a>
+## Hugging Face speech-to-speech：SenseVoice
+
+原生 SenseVoiceSmall 后端已于 2026-09-29（UTC）通过 [#319](https://github.com/huggingface/speech-to-speech/pull/319) 合入上游。它通过 FunASR 转写 VAD 分段，使用 Hugging Face checkpoint `FunAudioLLM/SenseVoiceSmall`，并输出流水线的 progressive/final 转写事件。这些事件不代表离线 checkpoint 具备分块流式 ASR 能力。该 checkpoint 支持普通话、粤语、英语、日语和韩语。
+
+**源码安装，核验日期 2026-09-30：** 已发布的 [v1.0.0](https://github.com/huggingface/speech-to-speech/releases/tag/v1.0.0) 尚未包含此后端。请使用下面已合入的源码提交，不要用 `pip install speech-to-speech==1.0.0` 代替。先按上游的[平台与环境配置](https://github.com/huggingface/speech-to-speech/blob/9e2ed1099190a4e4bc8a972b4a3488949ff1b9f6/README.md)准备环境；需要 Python 3.10+。
+
+```bash
+git clone https://github.com/huggingface/speech-to-speech.git
+cd speech-to-speech
+git checkout --detach 9e2ed1099190a4e4bc8a972b4a3488949ff1b9f6
+python -m pip install -e ".[sensevoice]"
+speech-to-speech serve --stt sense-voice \
+  --sense_voice_stt_device cpu \
+  --sense_voice_stt_model_name FunAudioLLM/SenseVoiceSmall --help
+```
+
+最后一条命令只查看 CLI 选项，不启动真实模型对话。按上游指南配置 LLM 与 TTS 后，把这些 SenseVoice 参数（去掉 `--help`）加入自己的 `serve` 或 `local` 命令。这里显式选择 CPU，不假定已安装兼容 CUDA 环境；首次实际运行会下载未缓存的模型文件。
+
+本地 STT 不等于整条语音 Agent 流水线都离线：LLM/TTS 后端及网络、API key 要求需要单独配置。上游 `--log_transcripts` 控制应用日志，不控制终端对话显示；终端输出仍可能包含转写文本。实现边界见固定版本的 [handler](https://github.com/huggingface/speech-to-speech/blob/9e2ed1099190a4e4bc8a972b4a3488949ff1b9f6/src/speech_to_speech/STT/sense_voice_handler.py) 和[日志契约](https://github.com/huggingface/speech-to-speech/blob/9e2ed1099190a4e4bc8a972b4a3488949ff1b9f6/src/speech_to_speech/pipeline/transcript_logging.py)。本条目不宣称完成了新的模型、GPU 或完整语音对话验证。
+
 ## 语音 Agent 与应用
 
 | 项目 | 已集成能力 | 从这里开始 |

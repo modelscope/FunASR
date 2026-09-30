@@ -21,6 +21,37 @@ def output(tmp_path_factory):
     return path
 
 
+@pytest.mark.parametrize('prefix', ['', 'en/'])
+def test_speech_to_speech_ecosystem_entry_links_to_bounded_source_recipe(output, prefix):
+    repo = 'https://github.com/huggingface/speech-to-speech'
+    guide = f'/{prefix}docs/community.html#speech-to-speech'
+    ecosystem = BeautifulSoup((output / prefix / 'ecosystem.html').read_text(), 'html.parser')
+    cards = [card for card in ecosystem.select('.card')
+             if card.select_one('.card-title a[href="' + repo + '"]')]
+    assert len(cards) == 1
+    links = {link['href'] for link in cards[0].select('a[href]')}
+    assert {repo + '/pull/319', guide} <= links
+    text = cards[0].get_text(' ', strip=True)
+    assert 'SenseVoiceSmall' in text and 'v1.0.0' in text
+    assert ('not included' in text) if prefix else ('尚未包含' in text)
+
+    page = BeautifulSoup((output / prefix / 'docs/community.html').read_text(), 'html.parser')
+    article = page.select_one('.docs-article')
+    assert article.select_one('#speech-to-speech')
+    commands = '\n'.join(block.get_text() for block in article.select('pre code'))
+    assert 'git checkout --detach 9e2ed1099190a4e4bc8a972b4a3488949ff1b9f6' in commands
+    assert 'python -m pip install -e ".[sensevoice]"' in commands
+    assert 'speech-to-speech serve --stt sense-voice' in commands
+    assert '--sense_voice_stt_device cpu' in commands and '--help' in commands
+    text = article.get_text(' ', strip=True)
+    assert 'LLM' in text and 'TTS' in text and '--log_transcripts' in text
+    assert ('terminal' in text) if prefix else ('终端' in text)
+    assert ('not included' in text) if prefix else ('尚未包含' in text)
+    language = 'en' if prefix else 'zh'
+    index = json.loads((output / f'search-{language}.json').read_text())
+    assert any(row['url'] == f'/{prefix}docs/community.html' for row in index)
+
+
 def test_bilingual_docs_have_navigation_and_real_source_content(output):
     for prefix in ('', 'en/'):
         index = BeautifulSoup((output / prefix / 'docs/index.html').read_text(), 'html.parser')
