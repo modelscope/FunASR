@@ -1,4 +1,4 @@
-from funasr.utils.timestamp_tools import timestamp_sentence_en
+from funasr.utils.timestamp_tools import timestamp_sentence, timestamp_sentence_en
 
 
 def test_timestamp_sentence_en_handles_whitespace_only_segment():
@@ -37,3 +37,19 @@ def test_timestamp_sentence_en_preserves_normal_sentence_output():
             "raw_text": "hello world",
         }
     ]
+
+
+def test_timestamp_sentence_en_missing_trailing_timestamp_matches_zh_fallback():
+    # timestamp_postprocessed is one entry shorter than punc_id_list/text_postprocessed,
+    # the mismatch the function itself warns about. The second sentence ("bar.") has no
+    # timestamp for its only word, so its start must be reported as unknown (None),
+    # not silently reused from the previous, unrelated sentence.
+    punc_id_list = [1, 3, 3]
+    timestamp_postprocessed = [[0, 100], [100, 200]]
+    text_postprocessed = "hello world bar"
+
+    en_result = timestamp_sentence_en(punc_id_list, timestamp_postprocessed, text_postprocessed)
+    zh_result = timestamp_sentence(punc_id_list, timestamp_postprocessed, text_postprocessed)
+
+    assert en_result[1]["start"] is None
+    assert en_result[1]["start"] == zh_result[1]["start"]

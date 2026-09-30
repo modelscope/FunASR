@@ -263,9 +263,10 @@ def timestamp_sentence_en(
     punc_stamp_text_list = list(
         zip_longest(punc_id_list, timestamp_postprocessed, texts, fillvalue=None)
     )
-    is_sentence_start = True
     for punc_stamp_text in punc_stamp_text_list:
         punc_id, timestamp, text = punc_stamp_text
+        if sentence_start is None and timestamp is not None:
+            sentence_start = timestamp[0]
         # sentence_text += text if text is not None else ''
         if text is not None:
             if "a" <= text[0] <= "z" or "A" <= text[0] <= "Z":
@@ -283,11 +284,7 @@ def timestamp_sentence_en(
         sentence_end = timestamp[1] if timestamp is not None else sentence_end
         if sentence_text.startswith(" "):
             sentence_text = sentence_text[1:]
-        if is_sentence_start:
-            sentence_start = timestamp[0] if timestamp is not None else sentence_start
-            is_sentence_start = False
         if punc_id > 1:
-            is_sentence_start = True
             sentence_text += punc_list[punc_id - 2]
             if sentence_text_seg.endswith(" "):
                 sentence_text_seg = sentence_text_seg[:-1]
@@ -313,4 +310,5 @@ def timestamp_sentence_en(
             sentence_text = ""
             sentence_text_seg = ""
             ts_list = []
+            sentence_start = None
     return res
