@@ -4,7 +4,7 @@ This short FAQ covers the install and deployment failures that most often block 
 
 ## Top support questions from recent issues
 
-Recent issue triage shows three repeat blockers that stop first-time users most often:
+Recent issue triage shows these common first-run blockers:
 
 - **Which install or hub path should I use?** See [Install or import fails](#install-or-import-fails) and [Model download is slow or fails](#model-download-is-slow-or-fails). This covers reports like #3321, #3045, #3042, #2973, and #2976.
 - **Which runtime package should I run on CPU, CUDA, Vulkan, or GGUF?** See [llama.cpp or GGUF runtime does not start](#llamacpp-or-gguf-runtime-does-not-start). This covers reports like #3298, #3297, #3296, #3289, and #3243.
@@ -12,15 +12,52 @@ Recent issue triage shows three repeat blockers that stop first-time users most 
 
 ## Install or import fails
 
-- Install `torch` and `torchaudio` first, then install FunASR:
+- Follow the [Python SDK installation guide](./installation/installation.md). Install matching `torch` and `torchaudio` builds for your OS, interpreter and accelerator before choosing a released FunASR package or a source checkout. A generic upgrade command does not select the right CUDA build for every environment.
+- Keep PyTorch-family packages compatible. If you use vLLM, follow [the vLLM guide](./vllm_guide.md) and avoid mixing unrelated CUDA wheels in the same environment.
+- Check the interpreter used by your IDE as well as your terminal. Use `python -m pip --version` and `python -m pip check` in that environment. Include the versions, paths and exact traceback when reporting an import failure; redact personal directory names if needed.
 
-```bash
-python -m pip install -U torch torchaudio
-python -m pip install -U "funasr==1.3.26"
+## Is AutoModel using the GPU?
+
+For the PyTorch `AutoModel` path, there is no separate "FunASR GPU edition". A system CUDA installation or working llama.cpp GPU backend does not establish CUDA support in the Python environment running FunASR. Low whole-GPU utilization alone cannot identify the model's device.
+
+Add this after your existing `model = AutoModel(...)` call, using the same interpreter and run configuration. It inspects already-loaded objects and does not load another model:
+
+```python
+import os
+import sys
+from importlib.metadata import PackageNotFoundError, version
+from itertools import chain
+import torch
+
+print("Python:", sys.executable)
+try:
+    print("FunASR:", version("funasr"))
+except PackageNotFoundError:
+    print("FunASR: no installed package metadata; check source checkout/PYTHONPATH")
+print("PyTorch:", torch.__version__, torch.__file__)
+print("PyTorch CUDA build:", torch.version.cuda)
+print("CUDA available:", torch.cuda.is_available())
+print("CUDA_VISIBLE_DEVICES:", os.environ.get("CUDA_VISIBLE_DEVICES", "<unset>"))
+print("ASR resolved device:", model.kwargs.get("device"))
+
+for name, attr in [("ASR", "model"), ("VAD", "vad_model"),
+                   ("PUNC", "punc_model"), ("SPK", "spk_model")]:
+    module = getattr(model, attr, None)
+    if module is None:
+        print(name, "not enabled")
+    elif isinstance(module, torch.nn.Module):
+        devices = sorted({str(t.device) for t in chain(module.parameters(), module.buffers())})
+        print(name, "parameter/buffer devices:", devices or ["no parameters/buffers"])
+    else:
+        print(name, "non-PyTorch module:", type(module).__name__)
 ```
 
-- Keep `torch`, `torchaudio`, and `torchvision` on compatible versions from the same install channel. If you use vLLM, follow [the vLLM guide](./vllm_guide.md) and avoid mixing unrelated CUDA wheels in the same environment.
-- If import still fails, create a fresh virtual environment and include the complete Python version, operating system, CUDA driver, `pip list | grep -E "torch|torchaudio|funasr"`, and the exact traceback in a **Deployment Help** issue.
+- CUDA build `None`: this PyTorch build has no CUDA support. Changing `cuda` to `cuda:0` cannot add it.
+- A CUDA build version with availability `False`: check driver compatibility, device visibility and the actual interpreter before changing FunASR parameters.
+- Parameter/buffer devices such as `cuda:0`: those tensors are on the GPU. This does not mean every preprocessing operation runs there or that utilization stays high. Check ASR, VAD, punctuation and speaker models separately; an empty tensor list is not proof of CPU placement.
+- Resolved device `cpu`: in the [current implementation](../funasr/auto/auto_model.py), unavailable CUDA or `ngpu=0` causes CPU fallback. Check the installed version and actual settings. A requested device is not proof of effective placement.
+
+For a support request, paste this text output and the selected model/configuration rather than only Task Manager screenshots. Whole-card memory includes other processes. Redact personal paths; audio is not needed for this initial environment check. Use the installation guide's official PyTorch links if a different build is needed; do not uninstall ONNX Runtime to diagnose this PyTorch path.
 
 ## Model download is slow or fails
 
