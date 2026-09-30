@@ -2,18 +2,18 @@
 
 ## Production record
 
-- Released: `2026-09-02`
-- Source commit: `e25fb88f4c06dfe186baee9d0d3f9a840346955d`
-- Product release: `20260902T104600Z`
-- Previous release: `20260901T065930Z`
+- Released: `2026-10-01` (Asia/Shanghai; verified at `2026-09-30T21:57:20Z`)
+- Source commit: `460f00675499924fec0a14bdbeb7125ed505dbb2`
+- Product release: `20260930T211757Z`
+- Previous release: `20260918T065924Z`
 - Current link: `/root/FunASR/web-pages/current`
 - Release root: `/root/FunASR/web-pages/releases`
-- Backup root: `/root/FunASR/web-pages/backups/product-site-20260902T103700Z`
-- Build archive SHA-256: `4e224fbd23b55515bcbf7c5d02a7af1953ba9e02ea4221857c2bbf2f032e2d16`
-- Release manifest SHA-256: `d73f247d951d8e49703d089ca7cca7de9077b73260f907f26c2f287b42e14276`
+- Backup root: `/root/FunASR/web-pages/backups/product-site-20260930T211757Z`
+- Build archive SHA-256: `408cc357883dfcae935faef87c95765cdfe249f5ff5916295c87d950b0f49221`
+- Release manifest SHA-256: `d381634a0c25df10096cdd1befe2a03d4b4c3d968f8ff06ce7292a57acd56f8b`
 - Active Nginx SHA-256: `4450f8616438fdf095728c12f50e0fa878a5afd6ccb63cd1cd4af4cc91f88233`
 
-The product-site tree was verified unchanged between the release source commit and the subsequent growth-snapshot documentation merge.
+The source checkout used for the build matches the source commit's tree `73c82edb750f4e91253468779633fbf3200f7bfb`. The release ID was allocated during backup preparation, before the verified publication time above. This release publishes the merged speech-to-speech / SenseVoice source-install guide and bilingual ecosystem entries; it does not publish a new speech model or Python package.
 
 ## Backup evidence
 
@@ -21,19 +21,23 @@ The pre-release site and Nginx configuration were archived before the atomic swi
 
 | Artifact | SHA-256 |
 | --- | --- |
-| `live-dist.tar.gz` | `4c8957d6f2212ea6753494078dcfbfe6abb5d24e1454587500e0af15c6758244` |
+| `live-dist.tar.gz` | `1df646e40da3ccdba3a254b6878aff40faf857be4d20d69c398bd07f1467d6ff` |
 | `nginx.conf` | `4450f8616438fdf095728c12f50e0fa878a5afd6ccb63cd1cd4af4cc91f88233` |
-| `build.tar.gz` | `4e224fbd23b55515bcbf7c5d02a7af1953ba9e02ea4221857c2bbf2f032e2d16` |
+| `build.tar.gz` | `408cc357883dfcae935faef87c95765cdfe249f5ff5916295c87d950b0f49221` |
 
-The previous release remains intact at `20260901T065930Z`. The release script's rollback trap was exercised twice during publish dry attempts, preserving that target before the final atomic switch.
+The previous release remains intact at `20260918T065924Z`; its 206 pages passed the production validator before switching. The old release's file hashes were checked again immediately before deployment. No rollback was needed or exercised for this release. The existing Nginx master was gracefully reloaded, with its PID/start identity and configuration unchanged; no model service was restarted.
 
 ## Verification
 
-- Exact-main GitHub Actions run `33619555092` passed both product-site build/validation and Playwright browser jobs.
-- Static validator: 110 pages passed on ind-gpu8 before transfer and again in the production staging directory.
-- Public smoke: `/`, both ecosystem pages, `/deploy/`, `/blog/`, `/donors.html`, and both llama.cpp routes returned successfully.
-- The Chinese and English ecosystem pages both contain the updated `37K+` social proof.
-- Production HTML is no-cache and the checked response includes `X-Frame-Options`, `X-Content-Type-Options`, and HSTS headers.
+- Exact-source GitHub Actions [Product site run `36747934507`](https://github.com/modelscope/FunASR/actions/runs/36747934507) passed all three jobs: legacy document links, build/validation, and browser checks. All five workflows on the release source commit completed successfully.
+- Native pre-release checks: 521 product-site tests passed; selected root documentation tests had 100 passes and one collection skip because Sphinx was absent. The separate hosted legacy-document-link job passed.
+- The 117-page product build plus preserved legacy routes passed validation for 206 total HTML pages on ind-gpu8, in production staging, and in the release script's copied staging tree. All 206 pre-existing HTML routes remain present.
+- All 273 deployed files match the transferred per-file SHA-256 inventory. The archive is 8,470,216 bytes. Its output is byte-identical to the earlier browser-tested build.
+- Thirteen public routes returned HTTP 200 with response bodies matching the release files: both homepages, ecosystem pages, community guides, deployment indexes, blog indexes and llama.cpp guides, plus `/donors.html`.
+- A separate Chromium run from ind-gpu8 against the public domain passed four cases: Chinese/English at 1365px desktop and 390px mobile widths. It verified the integration card, localized guide link/anchor, pinned source recipe, no horizontal overflow and no JavaScript errors. Non-site requests were blocked; no audio/model conversation was run.
+- All thirteen checked HTML responses are no-cache and include `X-Frame-Options`, `X-Content-Type-Options`, and HSTS headers.
+
+The previous and new `deployment-manifest.json` files have the same checksum despite different HTML content. That manifest checksum alone does **not** prove publication freshness. Verify the actual [Chinese guide](https://www.funasr.com/docs/community.html#speech-to-speech), [English guide](https://www.funasr.com/en/docs/community.html#speech-to-speech), and per-file hashes when checking this release. Both guides must contain source revision `9e2ed1099190a4e4bc8a972b4a3488949ff1b9f6` and the explicit v1.0.0 exclusion.
 
 ## Release commands
 
@@ -67,7 +71,7 @@ PYTHON_BIN=python3 \
 Restore the pre-release Nginx configuration only if the new configuration is implicated:
 
 ```bash
-cp -a /root/FunASR/web-pages/backups/product-site-20260726T171818Z/nginx.conf /etc/nginx/nginx.conf
+cp -a /root/FunASR/web-pages/backups/product-site-20260930T211757Z/nginx.conf /etc/nginx/nginx.conf
 nginx -t
 kill -HUP <master-pid>
 ```
