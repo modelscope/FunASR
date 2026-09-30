@@ -4,7 +4,7 @@
 
 ## 最近 issue 里的 Top 支持问题
 
-最近 issue 巡检显示，最容易阻塞首次试用的三类问题是：
+最近 issue 巡检显示，首次试用常见的阻塞问题包括：
 
 - **应该用哪个安装命令、模型 id 或 hub？** 看[安装或 import 失败](#安装或-import-失败)和[模型下载慢或失败](#模型下载慢或失败)。对应 #3321、#3045、#3042、#2973、#2976 等问题。
 - **CPU、CUDA、Vulkan、GGUF 应该下载哪个 runtime 包？** 看[llama.cpp 或 GGUF runtime 无法启动](#llamacpp-或-gguf-runtime-无法启动)。对应 #3298、#3297、#3296、#3289、#3243 等问题。
@@ -13,15 +13,52 @@
 
 ## 安装或 import 失败
 
-- 先安装 `torch` 和 `torchaudio`，再安装 FunASR：
+- 按[Python SDK 安装指南](./installation/installation_zh.md)操作：先安装与操作系统、解释器和加速设备匹配的 `torch`、`torchaudio`，再选择已发布的 FunASR 包或源码安装。通用升级命令不能替所有环境选择正确的 CUDA 构建。
+- 保持 PyTorch 系列包的版本兼容。如果使用 vLLM，请按 [vLLM 指南](./vllm_guide_zh.md)配置，避免混装不匹配的 CUDA wheel。
+- 同时确认 IDE 和终端实际使用的解释器。在对应环境运行 `python -m pip --version` 和 `python -m pip check`。报告 import 问题时附上版本、路径和完整 traceback；路径中的个人信息可以打码。
 
-```bash
-python -m pip install -U torch torchaudio
-python -m pip install -U "funasr==1.3.26"
+## AutoModel 是否真的在使用 GPU
+
+PyTorch `AutoModel` 路径不需要另装“FunASR GPU 版”。系统装有 CUDA、或者 llama.cpp 的 GPU 后端可用，都不能证明运行 FunASR 的 Python 环境支持 CUDA。仅凭整张显卡的利用率低，也无法判断模型设备。
+
+把下面代码放在已有的 `model = AutoModel(...)` 之后，使用原来的解释器和运行配置执行。它只检查已加载对象，不会再次加载模型：
+
+```python
+import os
+import sys
+from importlib.metadata import PackageNotFoundError, version
+from itertools import chain
+import torch
+
+print("Python:", sys.executable)
+try:
+    print("FunASR:", version("funasr"))
+except PackageNotFoundError:
+    print("FunASR: no installed package metadata; check source checkout/PYTHONPATH")
+print("PyTorch:", torch.__version__, torch.__file__)
+print("PyTorch CUDA build:", torch.version.cuda)
+print("CUDA available:", torch.cuda.is_available())
+print("CUDA_VISIBLE_DEVICES:", os.environ.get("CUDA_VISIBLE_DEVICES", "<unset>"))
+print("ASR resolved device:", model.kwargs.get("device"))
+
+for name, attr in [("ASR", "model"), ("VAD", "vad_model"),
+                   ("PUNC", "punc_model"), ("SPK", "spk_model")]:
+    module = getattr(model, attr, None)
+    if module is None:
+        print(name, "not enabled")
+    elif isinstance(module, torch.nn.Module):
+        devices = sorted({str(t.device) for t in chain(module.parameters(), module.buffers())})
+        print(name, "parameter/buffer devices:", devices or ["no parameters/buffers"])
+    else:
+        print(name, "non-PyTorch module:", type(module).__name__)
 ```
 
-- 保持 `torch`、`torchaudio`、`torchvision` 来自同一安装渠道且版本兼容。如果使用 vLLM，请按 [vLLM 指南](./vllm_guide_zh.md)配置，避免在同一环境里混装不匹配的 CUDA wheel。
-- 如果仍然 import 失败，建议新建干净虚拟环境复现，并在 **Deployment Help** issue 里附上 Python 版本、操作系统、CUDA driver、`pip list | grep -E "torch|torchaudio|funasr"` 和完整 traceback。
+- CUDA build 为 `None`：当前 PyTorch 构建不含 CUDA。把 `cuda` 改为 `cuda:0` 不能补上 CUDA 支持。
+- CUDA build 有版本、availability 为 `False`：先检查驱动兼容性、设备可见性及实际解释器，再判断是否为 FunASR 参数问题。
+- 参数/缓冲区设备为 `cuda:0`：这些张量确实在 GPU 上，但不代表每个预处理步骤都使用 GPU，或利用率必须一直很高。ASR、VAD、标点和说话人模型分别查看；张量列表为空也不能证明它在 CPU 上。
+- resolved device 为 `cpu`：[当前实现](../funasr/auto/auto_model.py)在 CUDA 不可用或 `ngpu=0` 时会回退 CPU。请结合已安装版本和实际配置排查；请求的设备不等于最终设备。
+
+求助时请贴上述文本输出和所选模型/配置，不要只发任务管理器截图。整卡显存包含其他进程；路径中的个人信息可以打码，初步环境检查不需要录音。确需更换 PyTorch 构建时，使用安装指南中的官方链接；不要通过卸载 ONNX Runtime 来诊断这条 PyTorch 路径。
 
 ## 模型下载慢或失败
 
