@@ -5,6 +5,10 @@ on:
     paths:
       - "setup.py"
       - "funasr/__init__.py"
+      - "funasr/auto/auto_model.py"
+      - "funasr/utils/load_utils.py"
+      - "tests/test_pcm_input_format.py"
+      - "tests/test_load_audio_bytes.py"
       - "funasr/frontends/**"
       - "funasr/models/emotion2vec/**"
       - "funasr/models/campplus/**"
@@ -21,6 +25,10 @@ on:
     paths:
       - "setup.py"
       - "funasr/__init__.py"
+      - "funasr/auto/auto_model.py"
+      - "funasr/utils/load_utils.py"
+      - "tests/test_pcm_input_format.py"
+      - "tests/test_load_audio_bytes.py"
       - "funasr/frontends/**"
       - "funasr/models/emotion2vec/**"
       - "funasr/models/campplus/**"
@@ -58,6 +66,11 @@ jobs:
         with:
           python-version: "3.12"
           cache: pip
+      - name: Install audio decoder
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends -y ffmpeg
+          ffmpeg -version
       - name: Install CPU runtime and requested NumPy version
         run: |
           python -m pip install torch==2.10.0 torchaudio==2.10.0 --index-url https://download.pytorch.org/whl/cpu
@@ -76,6 +89,8 @@ jobs:
             tests/test_eend_feature_compatibility.py \
             tests/test_pypi_metadata.py \
             tests/test_sensevoice_word_timestamps.py \
+            tests/test_pcm_input_format.py \
+            tests/test_load_audio_bytes.py \
             --junitxml=numpy-results.xml
       - uses: actions/upload-artifact@v4
         if: always()
