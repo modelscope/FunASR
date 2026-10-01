@@ -448,8 +448,10 @@ except:
     pass
 
 
-def prepare_data_iterator(data_in, input_len=None, data_type=None, key=None):
-    """ """
+def prepare_data_iterator(
+    data_in, input_len=None, data_type=None, key=None, input_format="auto"
+):
+    """Prepare inputs, optionally interpreting audio bytes as explicit PCM16."""
     data_list = []
     key_list = []
     filelist = [".scp", ".txt", ".json", ".jsonl", ".text"]
@@ -490,7 +492,7 @@ def prepare_data_iterator(data_in, input_len=None, data_type=None, key=None):
             data_list_tmp = []
             for data_in_i, data_type_i in zip(data_in, data_type):
                 key_list, data_list_i = prepare_data_iterator(
-                    data_in=data_in_i, data_type=data_type_i
+                    data_in=data_in_i, data_type=data_type_i, input_format=input_format
                 )
                 data_list_tmp.append(data_list_i)
             data_list = []
@@ -499,6 +501,12 @@ def prepare_data_iterator(data_in, input_len=None, data_type=None, key=None):
         else:
             # [audio sample point, fbank, text]
             data_list = data_in
+            if input_format != "auto":
+                data_list = [
+                    load_bytes(item, input_format=input_format)
+                    if isinstance(item, bytes) else item
+                    for item in data_in
+                ]
             key_list = []
             for data_i in data_in:
                 if isinstance(data_i, str) and os.path.exists(data_i):
@@ -510,7 +518,7 @@ def prepare_data_iterator(data_in, input_len=None, data_type=None, key=None):
 
     else:  # raw text; audio sample point, fbank; bytes
         if isinstance(data_in, bytes):  # audio bytes
-            data_in = load_bytes(data_in)
+            data_in = load_bytes(data_in, input_format=input_format)
         if key is None:
             key = "rand_key_" + "".join(random.choice(chars) for _ in range(13))
         data_list = [data_in]
@@ -833,6 +841,9 @@ class AutoModel:
                 - device: Placement is selected at construction. Runtime device overrides
                   are ignored; create another AutoModel to use a different device.
                 - cache (dict): State cache for streaming mode. Pass {} for first call.
+                - input_format (str): "auto" (default) or "pcm_s16le" to bypass
+                  container detection for mono little-endian PCM16 byte inputs.
+                  Use fs for the source sample rate.
                 - hotword (str/list): Keywords to boost recognition accuracy.
                 - postprocess_hotwords (str/list/dict): Text-level hotword correction after
                   decoding. Unlike model-level ``hotword``, this runs on the final text.
@@ -915,7 +926,8 @@ class AutoModel:
         #     batch_size = 1
 
         key_list, data_list = prepare_data_iterator(
-            input, input_len=input_len, data_type=kwargs.get("data_type", None), key=key
+            input, input_len=input_len, data_type=kwargs.get("data_type", None), key=key,
+            input_format=kwargs.get("input_format", "auto"),
         )
 
         speed_stats = {}
@@ -1002,8 +1014,13 @@ class AutoModel:
         kwargs = self.kwargs
         # step.1: compute the vad model
         beg_vad = time.time()
+        vad_cfg = {
+            "input_format": kwargs.get("input_format", "auto"),
+            "fs": kwargs.get("fs", 16000),
+            **cfg,
+        }
         res = self.inference(
-            input, input_len=input_len, model=self.vad_model, kwargs=self.vad_kwargs, **cfg
+            input, input_len=input_len, model=self.vad_model, kwargs=self.vad_kwargs, **vad_cfg
         )
         end_vad = time.time()
 
@@ -1022,9 +1039,12 @@ class AutoModel:
         kwargs["batch_size"] = batch_size
 
         key_list, data_list = prepare_data_iterator(
-            input, input_len=input_len, data_type=kwargs.get("data_type", None)
+            input, input_len=input_len, data_type=kwargs.get("data_type", None),
+            input_format=kwargs.get("input_format", "auto"),
         )
         results_ret_list = []
+        # ASR updates kwargs with the resampled rate; retain the original for each input.
+        input_fs = kwargs.get("fs", 16000)
         time_speech_total_all_samples = 1e-6
 
         beg_total = time.time()
@@ -1038,7 +1058,7 @@ class AutoModel:
             vadsegments = res[i]["value"]
             input_i = data_list[i]
             fs = kwargs["frontend"].fs if hasattr(kwargs["frontend"], "fs") else 16000
-            speech = load_audio_text_image_video(input_i, fs=fs, audio_fs=kwargs.get("fs", 16000))
+            speech = load_audio_text_image_video(input_i, fs=fs, audio_fs=input_fs)
             speech_lengths = len(speech)
             n = len(vadsegments)
             data_with_index = [(vadsegments[i], i) for i in range(n)]
@@ -1084,7 +1104,7 @@ class AutoModel:
                     speech, speech_lengths, sorted_data[beg_idx:end_idx]
                 )
                 results = self.inference(
-                    speech_j, input_len=None, model=model, kwargs=kwargs, **cfg
+                    speech_j, input_len=None, model=model, kwargs=kwargs, **{**cfg, "fs": fs}
                 )
                 if self.spk_model is not None:
                     # compose vad segments: [[start_time_sec, end_time_sec, speech], [...]]
@@ -1435,7 +1455,8 @@ class AutoModel:
         type = kwargs.get("type", "onnx")
 
         key_list, data_list = prepare_data_iterator(
-            input, input_len=None, data_type=kwargs.get("data_type", None), key=None
+            input, input_len=None, data_type=kwargs.get("data_type", None), key=None,
+            input_format=kwargs.get("input_format", "auto"),
         )
 
         with torch.no_grad():

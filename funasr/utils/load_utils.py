@@ -312,15 +312,25 @@ def _is_audio_container(data: bytes) -> bool:
     return False
 
 
-def load_bytes(input):
+def load_bytes(input, input_format="auto"):
     """Convert raw PCM or container-formatted audio bytes to a waveform.
 
     Args:
         input (bytes): Raw int16 PCM or encoded audio-file bytes.
+        input_format (str): "auto" preserves format detection. "pcm_s16le"
+            reads mono signed little-endian PCM16 without probing or decoding.
 
     Returns:
-        numpy.ndarray: Mono float32 samples at 16 kHz.
+        numpy.ndarray: Normalized float32 samples. Containers are resampled to
+        16 kHz; raw PCM keeps its source rate and is not resampled here.
     """
+    if input_format not in ("auto", "pcm_s16le"):
+        raise ValueError("input_format must be 'auto' or 'pcm_s16le'")
+    if input_format == "pcm_s16le":
+        if len(input) % 2:
+            raise ValueError("PCM16 input must contain complete 2-byte samples")
+        return np.frombuffer(input, dtype="<i2").astype(np.float32) / 32768.0
+
     if _is_audio_container(input):
         try:
             waveform = load_audio_text_image_video(BytesIO(input), fs=16000)
