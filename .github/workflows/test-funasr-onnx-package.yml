@@ -4,17 +4,25 @@ on:
   pull_request:
     paths:
       - ".github/workflows/test-funasr-onnx-package.yml"
+      - "funasr/utils/postprocess_utils.py"
       - "runtime/python/onnxruntime/**"
+      - "runtime/python/libtorch/funasr_torch/utils/postprocess_utils.py"
       - "tests/test_funasr_onnx_release.py"
       - "tests/test_funasr_onnx_installed.py"
+      - "tests/test_rich_transcription_postprocess.py"
+      - "tests/test_rich_transcription_event_segments.py"
   push:
     branches:
       - main
     paths:
       - ".github/workflows/test-funasr-onnx-package.yml"
+      - "funasr/utils/postprocess_utils.py"
       - "runtime/python/onnxruntime/**"
+      - "runtime/python/libtorch/funasr_torch/utils/postprocess_utils.py"
       - "tests/test_funasr_onnx_release.py"
       - "tests/test_funasr_onnx_installed.py"
+      - "tests/test_rich_transcription_postprocess.py"
+      - "tests/test_rich_transcription_event_segments.py"
   workflow_dispatch:
 
 permissions:
@@ -41,10 +49,16 @@ jobs:
           cache: pip
 
       - name: Install build tooling
-        run: python -m pip install --upgrade pip build twine
+        run: python -m pip install --upgrade pip build twine pytest
 
       - name: Check release contract
         run: python tests/test_funasr_onnx_release.py
+
+      - name: Run rich transcription regressions
+        run: |
+          python -m pytest -q -p no:cacheprovider \
+            tests/test_rich_transcription_postprocess.py \
+            tests/test_rich_transcription_event_segments.py
 
       - name: Build wheel and source distribution
         run: python -m build runtime/python/onnxruntime --outdir dist/funasr-onnx
