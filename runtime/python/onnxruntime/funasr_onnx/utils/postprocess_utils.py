@@ -316,7 +316,7 @@ event_dict = {
     "<|Cry|>": "😭",
     "<|Sneeze|>": "🤧",
     "<|Breath|>": "",
-    "<|Cough|>": "🤧",
+    "<|Cough|>": "😷",
 }
 
 lang_dict = {
