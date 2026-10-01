@@ -609,3 +609,45 @@ def test_merge_subtitle_segments_avoids_single_character_phrase_breaks():
             for boundary in boundary_offsets
         )
         search_from = phrase_start + 1
+
+
+class NoSentenceAutoModel(DummyAutoModel):
+    def generate(self, **kwargs):
+        self.generate_kwargs = kwargs
+        return [
+            {
+                "text": "hello world",
+                "sentence_info": [],
+                "timestamp": [[300, 800], [900, 1700]],
+            }
+        ]
+
+
+def _run_cli_with_output_format(tmp_path, output_format):
+    audio_path = tmp_path / "sample.wav"
+    audio_path.write_bytes(b"not a real wav")
+    fake_torch = types.SimpleNamespace(
+        cuda=types.SimpleNamespace(is_available=lambda: False),
+    )
+    argv = ["funasr", str(audio_path), "--output-format", output_format]
+    out = io.StringIO()
+    with (
+        patch.object(sys, "argv", argv),
+        patch.dict(sys.modules, {"torch": fake_torch}),
+        patch("funasr.AutoModel", NoSentenceAutoModel),
+        redirect_stdout(out),
+    ):
+        cli.main()
+    return out.getvalue()
+
+
+def test_cli_tsv_without_sentence_info_spans_token_timestamps(tmp_path):
+    assert _run_cli_with_output_format(tmp_path, "tsv") == (
+        "start\tend\ttext\n0.300\t1.700\thello world\n"
+    )
+
+
+def test_cli_srt_without_sentence_info_spans_token_timestamps(tmp_path):
+    assert _run_cli_with_output_format(tmp_path, "srt") == (
+        "1\n00:00:00,300 --> 00:00:01,700\nhello world\n\n"
+    )

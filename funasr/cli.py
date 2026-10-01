@@ -526,6 +526,18 @@ def _timestamp_bounds_ms(result):
     return min(start for start, _ in bounds), max(end for _, end in bounds)
 
 
+def _fallback_bounds_ms(timestamps, audio_path):
+    """Span for a single cue when no sentence timestamps exist: token bounds, else audio length."""
+    bounds = _timestamp_bounds_ms({"timestamp": timestamps})
+    if bounds:
+        return bounds
+    try:
+        import soundfile as sf
+        return 0, int(sf.info(audio_path).duration * 1000)
+    except Exception:
+        return 0, 0
+
+
 def _format_output(text, segments, timestamps, fmt, audio_path, model_name, language, elapsed):
     if fmt == "text":
         return text
@@ -547,18 +559,13 @@ def _format_output(text, segments, timestamps, fmt, audio_path, model_name, lang
             return format_srt(segments)
         # No per-sentence timestamps: emit one valid cue spanning the known
         # timestamp/audio bounds instead of a bogus 99:59:59 end time.
-        timestamp_bounds = _timestamp_bounds_ms({"timestamp": timestamps})
-        if timestamp_bounds:
-            start_ms, end_ms = timestamp_bounds
-            return f"1\n{_srt_time(start_ms)} --> {_srt_time(end_ms)}\n{text}\n"
-        try:
-            import soundfile as sf
-            dur_ms = int(sf.info(audio_path).duration * 1000)
-        except Exception:
-            dur_ms = 0
-        return f"1\n00:00:00,000 --> {_srt_time(dur_ms)}\n{text}\n"
+        start_ms, end_ms = _fallback_bounds_ms(timestamps, audio_path)
+        return f"1\n{_srt_time(start_ms)} --> {_srt_time(end_ms)}\n{text}\n"
     elif fmt == "tsv":
-        return format_tsv(segments) if segments else f"start\tend\ttext\n0.000\t0.000\t{text}"
+        if segments:
+            return format_tsv(segments)
+        start_ms, end_ms = _fallback_bounds_ms(timestamps, audio_path)
+        return format_tsv([{"start": start_ms, "end": end_ms, "text": text}])
 
 
 def _get_version():
