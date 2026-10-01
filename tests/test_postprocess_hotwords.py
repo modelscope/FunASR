@@ -79,6 +79,65 @@ class TestPostprocessHotwordMatcher(unittest.TestCase):
         self.assertTrue(matches)
         self.assertEqual(matches[0].replacement, "科大讯飞")
 
+    def test_fuzzy_leaves_surrounding_text_alone(self):
+        try:
+            import pypinyin  # noqa: F401
+            import rapidfuzz  # noqa: F401
+        except ImportError:
+            self.skipTest("pypinyin and rapidfuzz are required for fuzzy tests")
+
+        matcher = PostprocessHotwordMatcher(fuzzy_targets=["科大讯飞"])
+        # Already correct: nothing may change.
+        for text in ["我在科大讯飞工作", "去科大讯飞", "欢迎来到科大讯飞。", "今天科大讯飞，发布了新模型。"]:
+            self.assertEqual(matcher.apply_text(text), (text, []))
+        # Misrecognized: only the hotword changes, adjacent characters stay.
+        self.assertEqual(matcher.apply_text("欢迎来到科大迅飞。")[0], "欢迎来到科大讯飞。")
+        self.assertEqual(matcher.apply_text("科大迅飞2024年报")[0], "科大讯飞2024年报")
+
+    def test_fuzzy_short_target_does_not_block_longer_target(self):
+        try:
+            import pypinyin  # noqa: F401
+            import rapidfuzz  # noqa: F401
+        except ImportError:
+            self.skipTest("pypinyin and rapidfuzz are required for fuzzy tests")
+
+        matcher = PostprocessHotwordMatcher(fuzzy_targets=["讯飞", "科大讯飞"])
+        self.assertEqual(matcher.apply_text("可达讯飞发布")[0], "科大讯飞发布")
+
+    def test_fuzzy_latin_target_does_not_match_unrelated_text(self):
+        try:
+            import pypinyin  # noqa: F401
+            import rapidfuzz  # noqa: F401
+        except ImportError:
+            self.skipTest("pypinyin and rapidfuzz are required for fuzzy tests")
+
+        matcher = PostprocessHotwordMatcher(fuzzy_targets=["FunASR"])
+        text = "please open the model page today"
+        self.assertEqual(matcher.apply_text(text), (text, []))
+        # Windows must not split a Latin word or a number.
+        matcher = PostprocessHotwordMatcher(fuzzy_targets=["AI"])
+        self.assertEqual(matcher.apply_text("he said it"), ("he said it", []))
+        matcher = PostprocessHotwordMatcher(fuzzy_targets=["Win11"])
+        self.assertEqual(matcher.apply_text("Win10系统"), ("Win10系统", []))
+
+    def test_fuzzy_keeps_latin_and_chinese_apart(self):
+        try:
+            import pypinyin  # noqa: F401
+            import rapidfuzz  # noqa: F401
+        except ImportError:
+            self.skipTest("pypinyin and rapidfuzz are required for fuzzy tests")
+
+        # "AI" lower-cased is the pinyin "ai"; with the next character it would
+        # otherwise score 0.8571 against "ali".
+        matcher = PostprocessHotwordMatcher(fuzzy_targets=["阿里"])
+        self.assertEqual(matcher.apply_text("在AI里面"), ("在AI里面", []))
+        # A Latin target must not replace a Chinese character read "ai".
+        matcher = PostprocessHotwordMatcher(fuzzy_targets=["AI"])
+        self.assertEqual(matcher.apply_text("我爱你"), ("我爱你", []))
+        # A target that mixes scripts still corrects its Chinese homophone.
+        matcher = PostprocessHotwordMatcher(fuzzy_targets=["AI助手"])
+        self.assertEqual(matcher.apply_text("打开爱助手")[0], "打开AI助手")
+
     def test_missing_fuzzy_dependency_raises(self):
         with mock.patch.object(
             postprocess_hotwords,
