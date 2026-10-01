@@ -5,6 +5,8 @@ on:
     paths:
       - "setup.py"
       - "funasr/__init__.py"
+      - "funasr/cli.py"
+      - "tests/test_cli.py"
       - "funasr/auto/auto_model.py"
       - "funasr/utils/load_utils.py"
       - "tests/test_pcm_input_format.py"
@@ -25,6 +27,8 @@ on:
     paths:
       - "setup.py"
       - "funasr/__init__.py"
+      - "funasr/cli.py"
+      - "tests/test_cli.py"
       - "funasr/auto/auto_model.py"
       - "funasr/utils/load_utils.py"
       - "tests/test_pcm_input_format.py"
@@ -81,7 +85,7 @@ jobs:
           python -c "import numpy, os; assert numpy.__version__ == os.environ['NUMPY_VERSION']"
           python -m pip freeze | tee resolved-dependencies.txt
           python -m pip check | tee pip-check.txt
-      - name: Exercise real frontend, masking, import and array boundaries
+      - name: Exercise real frontend, masking, import, array and CLI boundaries
         run: |
           python -m pytest -q \
             tests/test_numpy_compatibility.py \
@@ -91,6 +95,7 @@ jobs:
             tests/test_sensevoice_word_timestamps.py \
             tests/test_pcm_input_format.py \
             tests/test_load_audio_bytes.py \
+            tests/test_cli.py \
             --junitxml=numpy-results.xml
       - uses: actions/upload-artifact@v4
         if: always()
