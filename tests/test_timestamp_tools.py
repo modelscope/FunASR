@@ -53,3 +53,14 @@ def test_timestamp_sentence_en_missing_trailing_timestamp_matches_zh_fallback():
 
     assert en_result[1]["start"] is None
     assert en_result[1]["start"] == zh_result[1]["start"]
+
+
+def test_timestamp_sentence_raw_text_keeps_token_separators():
+    result = timestamp_sentence(
+        punc_id_list=[1, 2, 1, 1, 3],
+        timestamp_postprocessed=[[0, 100], [100, 200], [200, 300], [300, 400], [400, 500]],
+        text_postprocessed="我 用 iphone pro max",
+        return_raw_text=True,
+    )
+
+    assert [sentence["raw_text"] for sentence in result] == ["我 用", "iphone pro max"]
