@@ -22669,7 +22669,7 @@
             shutil.rmtree(path)
             print(f"Non-empty directory {path} has been recursively deleted.")
 </code></pre></details></div>
-<div class="api-detail" id="e402" tabindex="-1"><span class="dtag badge-c">class</span><h2>HotwordMatch</h2><div class="dmod">funasr.utils.postprocess_hotwords · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/postprocess_hotwords.py#L29" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>A single postprocess hotword replacement.</p>
+<div class="api-detail" id="e402" tabindex="-1"><span class="dtag badge-c">class</span><h2>HotwordMatch</h2><div class="dmod">funasr.utils.postprocess_hotwords · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/postprocess_hotwords.py#L32" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>A single postprocess hotword replacement.</p>
 </div><details class="src-block"><summary>Source code</summary><pre><code>class HotwordMatch:
     """A single postprocess hotword replacement."""
 
@@ -22687,7 +22687,7 @@
             "start": self.start,
             "end": self.end,
         }
-</code></pre></details><h3 class="mt">Methods</h3><div class="mblk"><code>.as_dict() -&gt; Dict[str, Any]</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/postprocess_hotwords.py#L38" rel="noopener noreferrer" target="_blank">L38</a><div class="mdoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>Source</summary><pre><code>    def as_dict(self) -&gt; Dict[str, Any]:
+</code></pre></details><h3 class="mt">Methods</h3><div class="mblk"><code>.as_dict() -&gt; Dict[str, Any]</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/postprocess_hotwords.py#L41" rel="noopener noreferrer" target="_blank">L41</a><div class="mdoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>Source</summary><pre><code>    def as_dict(self) -&gt; Dict[str, Any]:
         return {
             "original": self.original,
             "replacement": self.replacement,
@@ -22696,7 +22696,7 @@
             "end": self.end,
         }
 </code></pre></details></div></div>
-<div class="api-detail" id="e403" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>HotwordMatch.as_dict() -&gt; Dict[str, Any]</code></h2><div class="dmod">funasr.utils.postprocess_hotwords.HotwordMatch · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/postprocess_hotwords.py#L38" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>Source code</summary><pre><code>    def as_dict(self) -&gt; Dict[str, Any]:
+<div class="api-detail" id="e403" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>HotwordMatch.as_dict() -&gt; Dict[str, Any]</code></h2><div class="dmod">funasr.utils.postprocess_hotwords.HotwordMatch · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/postprocess_hotwords.py#L41" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>Source code</summary><pre><code>    def as_dict(self) -&gt; Dict[str, Any]:
         return {
             "original": self.original,
             "replacement": self.replacement,
@@ -22705,7 +22705,7 @@
             "end": self.end,
         }
 </code></pre></details></div>
-<div class="api-detail" id="e404" tabindex="-1"><span class="dtag badge-f">function</span><h2><code>parse_hotword_file(path: str) -&gt; Tuple[Dict[str, str], List[str]]</code></h2><div class="dmod">funasr.utils.postprocess_hotwords · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/postprocess_hotwords.py#L105" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>Source code</summary><pre><code>def parse_hotword_file(path: str) -&gt; Tuple[Dict[str, str], List[str]]:
+<div class="api-detail" id="e404" tabindex="-1"><span class="dtag badge-f">function</span><h2><code>parse_hotword_file(path: str) -&gt; Tuple[Dict[str, str], List[str]]</code></h2><div class="dmod">funasr.utils.postprocess_hotwords · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/postprocess_hotwords.py#L111" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>Source code</summary><pre><code>def parse_hotword_file(path: str) -&gt; Tuple[Dict[str, str], List[str]]:
     if not os.path.isfile(path):
         raise FileNotFoundError(f"postprocess_hotword_file not found: {path}")
 
@@ -22722,7 +22722,7 @@
                 fuzzy_targets.append(right)
     return explicit, fuzzy_targets
 </code></pre></details></div>
-<div class="api-detail" id="e405" tabindex="-1"><span class="dtag badge-f">function</span><h2><code>parse_postprocess_hotwords(postprocess_hotwords: HotwordInput) -&gt; Tuple[Dict[str, str], List[str]]</code></h2><div class="dmod">funasr.utils.postprocess_hotwords · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/postprocess_hotwords.py#L123" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Parse in-memory hotword config into explicit and fuzzy buckets.</p>
+<div class="api-detail" id="e405" tabindex="-1"><span class="dtag badge-f">function</span><h2><code>parse_postprocess_hotwords(postprocess_hotwords: HotwordInput) -&gt; Tuple[Dict[str, str], List[str]]</code></h2><div class="dmod">funasr.utils.postprocess_hotwords · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/postprocess_hotwords.py#L129" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Parse in-memory hotword config into explicit and fuzzy buckets.</p>
 </div><details class="src-block"><summary>Source code</summary><pre><code>def parse_postprocess_hotwords(
     postprocess_hotwords: HotwordInput,
 ) -&gt; Tuple[Dict[str, str], List[str]]:
@@ -22753,8 +22753,8 @@
             if wrong_s and wrong_s != right_s:
                 explicit[wrong_s] = right_s
             else:
-</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/postprocess_hotwords.py#L123" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
-<div class="api-detail" id="e406" tabindex="-1"><span class="dtag badge-f">function</span><h2><code>build_postprocess_hotword_matcher(postprocess_hotwords: HotwordInput = None, postprocess_hotword_file: Optional[str] = None, postprocess_hotword_threshold: float = 0.85, enable_fuzzy: bool = True) -&gt; Optional["PostprocessHotwordMatcher"]</code></h2><div class="dmod">funasr.utils.postprocess_hotwords · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/postprocess_hotwords.py#L176" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Compile a matcher once per ``generate()`` call.</p>
+</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/postprocess_hotwords.py#L129" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
+<div class="api-detail" id="e406" tabindex="-1"><span class="dtag badge-f">function</span><h2><code>build_postprocess_hotword_matcher(postprocess_hotwords: HotwordInput = None, postprocess_hotword_file: Optional[str] = None, postprocess_hotword_threshold: float = 0.85, enable_fuzzy: bool = True) -&gt; Optional["PostprocessHotwordMatcher"]</code></h2><div class="dmod">funasr.utils.postprocess_hotwords · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/postprocess_hotwords.py#L182" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Compile a matcher once per ``generate()`` call.</p>
 </div><details class="src-block"><summary>Source code</summary><pre><code>def build_postprocess_hotword_matcher(
     postprocess_hotwords: HotwordInput = None,
     postprocess_hotword_file: Optional[str] = None,
@@ -22785,7 +22785,7 @@
         enable_fuzzy=enable_fuzzy,
     )
 </code></pre></details></div>
-<div class="api-detail" id="e407" tabindex="-1"><span class="dtag badge-c">class</span><h2><code>PostprocessHotwordMatcher(explicit_map: Optional[Dict[str, str]] = None, fuzzy_targets: Optional[Iterable[str]] = None, threshold: float = 0.85, enable_fuzzy: bool = True)</code></h2><div class="dmod">funasr.utils.postprocess_hotwords · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/postprocess_hotwords.py#L207" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Compiled matcher reused across all results in one generate() call.</p>
+<div class="api-detail" id="e407" tabindex="-1"><span class="dtag badge-c">class</span><h2><code>PostprocessHotwordMatcher(explicit_map: Optional[Dict[str, str]] = None, fuzzy_targets: Optional[Iterable[str]] = None, threshold: float = 0.85, enable_fuzzy: bool = True)</code></h2><div class="dmod">funasr.utils.postprocess_hotwords · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/postprocess_hotwords.py#L213" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Compiled matcher reused across all results in one generate() call.</p>
 </div><details class="src-block"><summary>Source code</summary><pre><code>class PostprocessHotwordMatcher:
     """Compiled matcher reused across all results in one generate() call."""
 
@@ -22812,11 +22812,11 @@
                 seen.add(target_s)
                 self.fuzzy_targets.append(target_s)
 
-        self._length_buckets: Dict[int, List[Tuple[str, str]]] = {}
+        self._length_buckets: Dict[int, List[Tuple[str, str, bool, bool]]] = {}
         self._fuzz = None
         if self.fuzzy_targets and self.enable_fuzzy:
             self._fuzz = _require_rapidfuzz()
-</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/postprocess_hotwords.py#L207" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details><h3 class="mt">Constructor</h3><div class="mblk"><a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/postprocess_hotwords.py#L210">L210</a><p class="muted">No documentation yet.</p></div><h3 class="mt">Methods</h3><div class="mblk"><code>.apply_text(text: str) -&gt; Tuple[str, List[HotwordMatch]]</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/postprocess_hotwords.py#L242" rel="noopener noreferrer" target="_blank">L242</a><div class="mdoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>Source</summary><pre><code>    def apply_text(self, text: str) -&gt; Tuple[str, List[HotwordMatch]]:
+</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/postprocess_hotwords.py#L213" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details><h3 class="mt">Constructor</h3><div class="mblk"><a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/postprocess_hotwords.py#L216">L216</a><p class="muted">No documentation yet.</p></div><h3 class="mt">Methods</h3><div class="mblk"><code>.apply_text(text: str) -&gt; Tuple[str, List[HotwordMatch]]</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/postprocess_hotwords.py#L255" rel="noopener noreferrer" target="_blank">L255</a><div class="mdoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>Source</summary><pre><code>    def apply_text(self, text: str) -&gt; Tuple[str, List[HotwordMatch]]:
         if not text:
             return text, []
 
@@ -22826,7 +22826,7 @@
             updated, fuzzy_matches = self._apply_fuzzy(updated)
             matches.extend(fuzzy_matches)
         return updated, matches
-</code></pre></details></div><div class="mblk"><code>.apply_result(result: Dict[str, Any], return_matches: bool = False) -&gt; Dict[str, Any]</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/postprocess_hotwords.py#L253" rel="noopener noreferrer" target="_blank">L253</a><div class="mdoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>Source</summary><pre><code>    def apply_result(self, result: Dict[str, Any], return_matches: bool = False) -&gt; Dict[str, Any]:
+</code></pre></details></div><div class="mblk"><code>.apply_result(result: Dict[str, Any], return_matches: bool = False) -&gt; Dict[str, Any]</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/postprocess_hotwords.py#L266" rel="noopener noreferrer" target="_blank">L266</a><div class="mdoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>Source</summary><pre><code>    def apply_result(self, result: Dict[str, Any], return_matches: bool = False) -&gt; Dict[str, Any]:
         text = result.get("text", "")
         if not isinstance(text, str) or not text:
             if return_matches:
@@ -22855,7 +22855,7 @@
             result["timestamp"] = original_timestamp
         return result
 </code></pre></details></div></div>
-<div class="api-detail" id="e408" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>PostprocessHotwordMatcher.apply_text(text: str) -&gt; Tuple[str, List[HotwordMatch]]</code></h2><div class="dmod">funasr.utils.postprocess_hotwords.PostprocessHotwordMatcher · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/postprocess_hotwords.py#L242" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>Source code</summary><pre><code>    def apply_text(self, text: str) -&gt; Tuple[str, List[HotwordMatch]]:
+<div class="api-detail" id="e408" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>PostprocessHotwordMatcher.apply_text(text: str) -&gt; Tuple[str, List[HotwordMatch]]</code></h2><div class="dmod">funasr.utils.postprocess_hotwords.PostprocessHotwordMatcher · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/postprocess_hotwords.py#L255" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>Source code</summary><pre><code>    def apply_text(self, text: str) -&gt; Tuple[str, List[HotwordMatch]]:
         if not text:
             return text, []
 
@@ -22866,7 +22866,7 @@
             matches.extend(fuzzy_matches)
         return updated, matches
 </code></pre></details></div>
-<div class="api-detail" id="e409" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>PostprocessHotwordMatcher.apply_result(result: Dict[str, Any], return_matches: bool = False) -&gt; Dict[str, Any]</code></h2><div class="dmod">funasr.utils.postprocess_hotwords.PostprocessHotwordMatcher · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/postprocess_hotwords.py#L253" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>Source code</summary><pre><code>    def apply_result(self, result: Dict[str, Any], return_matches: bool = False) -&gt; Dict[str, Any]:
+<div class="api-detail" id="e409" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>PostprocessHotwordMatcher.apply_result(result: Dict[str, Any], return_matches: bool = False) -&gt; Dict[str, Any]</code></h2><div class="dmod">funasr.utils.postprocess_hotwords.PostprocessHotwordMatcher · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/postprocess_hotwords.py#L266" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>Source code</summary><pre><code>    def apply_result(self, result: Dict[str, Any], return_matches: bool = False) -&gt; Dict[str, Any]:
         text = result.get("text", "")
         if not isinstance(text, str) or not text:
             if return_matches:
@@ -22895,7 +22895,7 @@
             result["timestamp"] = original_timestamp
         return result
 </code></pre></details></div>
-<div class="api-detail" id="e410" tabindex="-1"><span class="dtag badge-f">function</span><h2><code>apply_postprocess_hotwords_to_results(results: List[Dict[str, Any]], cfg: Mapping[str, Any]) -&gt; List[Dict[str, Any]]</code></h2><div class="dmod">funasr.utils.postprocess_hotwords · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/postprocess_hotwords.py#L378" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Apply compiled matcher to each result dict if configured in cfg.</p>
+<div class="api-detail" id="e410" tabindex="-1"><span class="dtag badge-f">function</span><h2><code>apply_postprocess_hotwords_to_results(results: List[Dict[str, Any]], cfg: Mapping[str, Any]) -&gt; List[Dict[str, Any]]</code></h2><div class="dmod">funasr.utils.postprocess_hotwords · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/postprocess_hotwords.py#L425" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Apply compiled matcher to each result dict if configured in cfg.</p>
 </div><details class="src-block"><summary>Source code</summary><pre><code>def apply_postprocess_hotwords_to_results(
     results: List[Dict[str, Any]],
     cfg: Mapping[str, Any],
