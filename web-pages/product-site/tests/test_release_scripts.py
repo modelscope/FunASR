@@ -146,3 +146,52 @@ def test_nginx_contract_uses_current_release_and_hardening():
     assert 'funasr-conversions.log' in config
     assert r'\.[0-9a-f]{12}' in config
     assert 'max-age=31536000, immutable' in config
+
+
+def test_monitoring_docs_use_actual_open_log_inodes():
+    document = (REPO_ROOT / 'docs/operations/funasr-com-site-release.md').read_text()
+    monitoring = document.split('## Monitoring\n', 1)[1]
+
+    assert '/proc/$master_pid/fd' in monitoring
+    assert "stat -Lc '%d:%i %s %n'" in monitoring
+    assert '.log.1' in monitoring
+    assert 'rotated and compressed history' in monitoring
+    assert 'tail -200 /var/log/nginx/' not in monitoring
+    assert "grep -vE" not in monitoring
+
+
+def test_monitoring_metadata_snippet_requires_explicit_numeric_master_pid():
+    document = (REPO_ROOT / 'docs/operations/funasr-com-site-release.md').read_text()
+    monitoring = document.split('## Monitoring\n', 1)[1]
+    blocks = re.findall(r'\x60\x60\x60bash\n(.*?)\x60\x60\x60', monitoring, re.S)
+    assert blocks and '{NGINX_MASTER_PID:?' in blocks[0]
+    for block in blocks:
+        subprocess.run(['bash', '-n'], input=block, text=True, check=True)
+        assert not re.search(r'(?m)^\s*(kill|invoke-rc.d|start-stop-daemon)\b', block)
+
+    environment = os.environ.copy()
+    environment.pop('NGINX_MASTER_PID', None)
+    missing = subprocess.run(
+        ['bash', '-c', blocks[0]], env=environment, capture_output=True, text=True,
+    )
+    assert missing.returncode != 0
+    assert 'verified Nginx master PID' in missing.stderr
+
+    environment['NGINX_MASTER_PID'] = 'not-a-pid'
+    invalid = subprocess.run(
+        ['bash', '-c', blocks[0]], env=environment, capture_output=True, text=True,
+    )
+    assert invalid.returncode == 2
+    assert 'NGINX_MASTER_PID must be numeric' in invalid.stderr
+
+
+def test_monitoring_docs_distinguish_static_checks_from_backend_health():
+    document = (REPO_ROOT / 'docs/operations/funasr-com-site-release.md').read_text()
+    monitoring = document.split('## Monitoring\n', 1)[1]
+
+    assert '502/503/504' in monitoring
+    assert '302' in monitoring
+    assert 'not proof of backend health' in monitoring
+    assert 'equal-duration' in monitoring
+    assert 'not organic traffic' in monitoring
+    assert 'static release is implicated' in monitoring
