@@ -216,6 +216,16 @@ def timestamp_sentence(
             sentence_text_seg = ""
             ts_list = []
             sentence_start = None
+    if sentence_text and all(timestamp is not None for timestamp in ts_list):
+        sentence = {
+            "text": sentence_text,
+            "start": sentence_start,
+            "end": sentence_end,
+            "timestamp": ts_list,
+        }
+        if return_raw_text:
+            sentence["raw_text"] = sentence_text_seg.rstrip()
+        res.append(sentence)
     return res
 
 
@@ -310,4 +320,14 @@ def timestamp_sentence_en(
             sentence_text_seg = ""
             ts_list = []
             sentence_start = None
+    if sentence_text and all(timestamp is not None for timestamp in ts_list):
+        sentence = {
+            "text": sentence_text,
+            "start": sentence_start,
+            "end": sentence_end,
+            "timestamp": ts_list,
+        }
+        if return_raw_text:
+            sentence["raw_text"] = sentence_text_seg.rstrip()
+        res.append(sentence)
     return res
