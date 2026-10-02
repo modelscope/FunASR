@@ -84,21 +84,62 @@ the direct GitHub URL so attribution does not change search metadata. Redirect
 targets are defined only in `web-pages/nginx/conversion-map.conf`; never accept a
 target from a query parameter.
 
-Check after one hour and again after 24 hours:
+For each new release, check after one hour and again after 24 hours, recording
+completion once. For release `20260930T211757Z`, both checks are complete; the
+[follow-up record](https://github.com/modelscope/FunASR/pull/3745) reports passing
+static checks with legacy-upstream and log-rotation warnings. Do not repeat these
+completed windows as pending work.
+
+Before reading logs, discover the serving master and verify its PID, command and
+start identity. A failed systemd unit or an empty PID file does not mean that the
+manually started master has stopped. Set `NGINX_MASTER_PID` to the freshly verified
+master, then inspect log descriptors and file metadata without sending signals:
 
 ```bash
-tail -200 /var/log/nginx/error.log
-tail -200 /var/log/nginx/funasr-conversions.log
-curl -fsSI https://www.funasr.com/
-curl -fsSI https://www.funasr.com/deploy/vllm.html
-curl -fsSI https://www.funasr.com/blog/
+set -eu
+master_pid=${NGINX_MASTER_PID:?set the verified Nginx master PID}
+case "$master_pid" in
+  ''|*[!0-9]*) printf '%s\n' 'NGINX_MASTER_PID must be numeric' >&2; exit 2 ;;
+esac
+ps -p "$master_pid" -o pid=,ppid=,lstart=,args=
+find "/proc/$master_pid/fd" -maxdepth 1 -type l -lname '/var/log/nginx/*' \
+  -printf '%f -> %l\n' -exec stat -Lc '%d:%i %s %n' {} \;
+stat -Lc '%d:%i %s %n' /var/log/nginx/error.log /var/log/nginx/funasr-conversions.log
 ```
 
-Count non-smoke conversion requests by route:
+Compare device/inode identities, not just filenames. After rotation, live
+descriptors may still reference `.log.1` or deleted files while the current
+`.log` paths are empty. Empty files are not evidence of no requests or errors.
+Read the actual open logs and relevant rotated and compressed history for the
+chosen time interval; do not draw a health conclusion if that coverage is missing.
+Use equal-duration before/after windows and retain aggregate status/upstream
+counts only, not visitor addresses or raw requests. Filter known validation
+traffic when possible, but remaining requests are not organic traffic by default
+and do not establish star-growth attribution.
+
+The 2026-10-02 read-only inspection found an empty configured PID file while the
+manual master was alive. The packaged rotation selector could not find that
+master in test mode, and its init-script helper is written to return success unconditionally.
+The event that emptied the PID file was not established. Repairing process
+ownership or log reopening is a separate operational action: do not rewrite the
+PID file, restart the working master, or invoke service actions during acceptance.
+
+Check legacy upstream errors separately. Existing WebSocket error-page routing
+converts upstream `502/503/504` failures into `302` redirects, so zero visible 5xx
+is not proof of backend health. Confirm the upstream/listener against the current
+configuration; do not attribute pre-existing backend timeouts to a static release.
+
+Header probes supplement, but do not replace, the page-body hashes, indexed-route,
+asset, mobile-layout and fixed-redirect checks described above:
 
 ```bash
-grep -vE '"(FunASR release smoke|curl/)' /var/log/nginx/funasr-conversions.log \
-  | awk '{print $7}' | sort | uniq -c | sort -nr
+curl --max-time 15 -fsSI https://www.funasr.com/
+curl --max-time 15 -fsSI https://www.funasr.com/deploy/vllm.html
+curl --max-time 15 -fsSI https://www.funasr.com/blog/
 ```
 
-Roll back on elevated 5xx responses, missing indexed routes, mobile overflow, missing assets, invalid conversion redirects, or a failed static validation.
+Investigate elevated 5xx responses, missing indexed routes, mobile overflow,
+missing assets, invalid conversion redirects or failed static validation. Roll
+back when the static release is implicated, after checking the current release
+and retained backup; do not roll back healthy static content solely because a
+legacy backend or log-rotation path is unhealthy.
