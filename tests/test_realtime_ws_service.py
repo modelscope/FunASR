@@ -696,6 +696,61 @@ def test_long_segment_can_recover_the_best_earlier_partial():
     assert text == best_partial
 
 
+def test_long_segment_recovers_from_merged_window_history_when_final_is_short():
+    module = load_service_module()
+    session = module.RealtimeASRSession(
+        FixedTextEngine(""),
+        {},
+        ControllableVad(),
+        sample_rate=16000,
+        chunk_ms=960,
+        partial_window_sec=8.0,
+    )
+    session.total_samples = 8000 * 16
+    session._record_partial_text(
+        "今天会议讨论项目进度以及后续计划安排", start_ms=0
+    )
+    session.total_samples = 12000 * 16
+    session._record_partial_text(
+        "后续计划安排需要各部门继续确认资源", start_ms=4000
+    )
+    session.total_samples = 16000 * 16
+    session._record_partial_text(
+        "继续确认资源之后再安排下周执行时间", start_ms=8000
+    )
+
+    text = session._reconcile_completed_segment_text(
+        "今天会议", [0, 16000], decode_succeeded=True
+    )
+
+    assert text == (
+        "今天会议讨论项目进度以及后续计划安排"
+        "需要各部门继续确认资源之后再安排下周执行时间"
+    )
+
+
+def test_unaligned_merged_history_does_not_shadow_valid_best_partial():
+    module = load_service_module()
+    best_partial = (
+        "哇，不好意思，上午高雄交通比较混乱一点，我们不晓得我们有点。"
+        "哎，O K O K，好嘞，胡总各位长官。"
+    )
+    session = make_reported_long_segment_reconciliation_session(
+        module, best_partial, partial_end_ms=13500
+    )
+    session.segment_partial_text = best_partial + "这段更长但没有覆盖语音段起点"
+    session.segment_partial_start_ms = 4000
+    session.segment_partial_end_ms = 13500
+    session.segment_partial_observation_count = 4
+    session.segment_partial_stable_count = 1
+
+    text = session._reconcile_completed_segment_text(
+        "哇，嘿", [2920, 14000], decode_succeeded=True
+    )
+
+    assert text == best_partial
+
+
 def test_long_segment_keeps_clean_history_after_a_hallucinated_partial():
     module = load_service_module()
     best_partial = (
