@@ -1,3 +1,5 @@
+import pytest
+
 from funasr.utils.timestamp_tools import timestamp_sentence, timestamp_sentence_en
 
 
@@ -64,3 +66,40 @@ def test_timestamp_sentence_raw_text_keeps_token_separators():
     )
 
     assert [sentence["raw_text"] for sentence in result] == ["我 用", "iphone pro max"]
+
+
+@pytest.mark.parametrize(
+    ("splitter", "words", "first", "last"),
+    [
+        (timestamp_sentence, "你 好 世界", "你好。", "世界"),
+        (timestamp_sentence_en, "hello world again", "hello world.", "again"),
+    ],
+)
+def test_timestamp_sentence_keeps_unpunctuated_tail(splitter, words, first, last):
+    result = splitter(
+        [1, 3, 1],
+        [[0, 100], [100, 200], [200, 300]],
+        words,
+        return_raw_text=True,
+    )
+
+    assert [sentence["text"].strip() for sentence in result] == [first, last]
+    assert result[-1] == {
+        "text": last,
+        "start": 200,
+        "end": 300,
+        "timestamp": [[200, 300]],
+        "raw_text": last,
+    }
+
+
+@pytest.mark.parametrize("splitter", [timestamp_sentence, timestamp_sentence_en])
+def test_timestamp_sentence_does_not_emit_tail_without_its_timestamp(splitter):
+    result = splitter(
+        [1, 3, 1],
+        [[0, 100], [100, 200]],
+        "hello world again",
+    )
+
+    assert len(result) == 1
+    assert result[0]["end"] == 200
