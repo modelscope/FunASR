@@ -1090,6 +1090,20 @@ class RealtimeASRSession:
                 recent_end_ms = self.segment_best_partial_end_ms
                 recent_observations = self.segment_best_partial_observation_count
                 recent_eligible = True
+            merged_tail_gap_ms = int(seg[1]) - int(self.segment_partial_end_ms)
+            if (
+                len(_normalize_transcript(self.segment_partial_text))
+                > len(_normalize_transcript(recent_partial))
+                and self.segment_partial_observation_count >= 2
+                and int(self.segment_partial_start_ms) == int(seg[0])
+                and -max(100, decode_chunk_ms) <= merged_tail_gap_ms
+                and merged_tail_gap_ms <= max(100, decode_chunk_ms * 2)
+            ):
+                recent_partial = self.segment_partial_text.strip()
+                recent_start_ms = self.segment_partial_start_ms
+                recent_end_ms = self.segment_partial_end_ms
+                recent_observations = self.segment_partial_observation_count
+                recent_eligible = True
             tail_gap_ms = int(seg[1]) - int(recent_end_ms)
             recent_partial, recent_hallucinated = detect_and_fix_hallucination(
                 recent_partial
