@@ -37,6 +37,62 @@ def test_cmvn_load_returns_float64_arrays(cmvn_path):
     np.testing.assert_array_equal(scales, np.full(8, 1.25, dtype=np.float64))
 
 
+def test_cmvn_readers_skip_blank_lines(tmp_path):
+    from funasr.frontends.default import MultiChannelFrontend
+    from funasr.frontends.wav_frontend import load_cmvn
+
+    path = tmp_path / "blank_lines.cmvn"
+    path.write_text(
+        "\n<AddShift>\n \t \n<LearnRateCoef> 0 0 "
+        + " ".join(["0.1"] * 8)
+        + " </LearnRateCoef>\n</AddShift>\n\n"
+        + "<Rescale>\n<LearnRateCoef> 0 0 "
+        + " ".join(["1.25"] * 8)
+        + " </LearnRateCoef>\n</Rescale>\n\n",
+        encoding="utf-8",
+    )
+    means, scales = MultiChannelFrontend._load_cmvn(None, path)
+    np.testing.assert_array_equal(means, np.full(8, 0.1, dtype=np.float64))
+    np.testing.assert_array_equal(scales, np.full(8, 1.25, dtype=np.float64))
+    cmvn = load_cmvn(str(path))
+    assert cmvn.shape == (2, 8)
+    torch.testing.assert_close(cmvn[0], torch.full((8,), 0.1))
+    torch.testing.assert_close(cmvn[1], torch.full((8,), 1.25))
+
+
+def test_cmvn_readers_reject_files_without_statistics(tmp_path):
+    from funasr.frontends.default import MultiChannelFrontend
+    from funasr.frontends.wav_frontend import load_cmvn
+
+    # Kaldi also emits the whole nnet on a single line; the readers walk lines,
+    # so nothing matches and empty statistics used to be returned silently.
+    compact = tmp_path / "compact.cmvn"
+    compact.write_text(
+        "<Nnet> <AddShift> <LearnRateCoef> 1 [ -1.0 -2.0 ] </LearnRateCoef> "
+        "<Rescale> <LearnRateCoef> 1 [ 0.5 0.5 ] </Rescale> </Nnet>\n",
+        encoding="utf-8",
+    )
+    truncated = tmp_path / "truncated.cmvn"
+    truncated.write_text("<AddShift> 2 2\n", encoding="utf-8")
+    for path in (compact, truncated):
+        with pytest.raises(ValueError) as excinfo:
+            MultiChannelFrontend._load_cmvn(None, path)
+        assert str(path) in str(excinfo.value)
+        with pytest.raises(ValueError) as excinfo:
+            load_cmvn(str(path))
+        assert str(path) in str(excinfo.value)
+
+
+def test_cmvn_reader_loads_the_am_mvn_shipped_by_the_runtime():
+    from funasr.frontends.wav_frontend import load_cmvn
+
+    path = Path(__file__).resolve().parents[1] / (
+        "runtime/triton_gpu/model_repo_sense_voice_small/feature_extractor/am.mvn"
+    )
+    cmvn = load_cmvn(str(path))
+    assert cmvn.shape == (2, 560) and torch.isfinite(cmvn).all()
+
+
 def test_frontend_applies_cmvn_and_preserves_padding(cmvn_path):
     from funasr.frontends.default import MultiChannelFrontend
 
