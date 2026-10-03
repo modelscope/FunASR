@@ -97,6 +97,25 @@ def test_default_batch_behavior_is_unchanged():
     assert values is data
 
 
+def test_scp_filelist_skips_blank_lines(tmp_path):
+    list_path = tmp_path / "wav.scp"
+    list_path.write_text("utt1 /a.wav\n\n \t \nutt2 /b.wav\n", encoding="utf-8")
+    keys, values = prepare_data_iterator(str(list_path))
+    assert keys == ["utt1", "utt2"]
+    assert values == ["/a.wav", "/b.wav"]
+
+
+def test_jsonl_filelist_skips_blank_lines(tmp_path):
+    list_path = tmp_path / "data.jsonl"
+    list_path.write_text(
+        '{"key": "k1", "source": "/a.wav"}\n\n \t \n{"key": "k2", "source": "/b.wav"}\n',
+        encoding="utf-8",
+    )
+    keys, values = prepare_data_iterator(str(list_path))
+    assert keys == ["k1", "k2"]
+    assert values == ["/a.wav", "/b.wav"]
+
+
 class _RecordingModel(torch.nn.Module):
     def __init__(self, vad=False):
         super().__init__()
