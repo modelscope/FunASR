@@ -179,7 +179,7 @@ If you encounter any problems during use, please join our user group for feedbac
 
 |                                DingDing Group                                |                             Wechat                             |
 |:----------------------------------------------------------------------------:|:--------------------------------------------------------------:|
-| <div align="left"><img src="../../../docs/images/dingding.jpg" width="250"/> | <img src="../../../docs/images/wechat.png" width="232"/></div> |
+| <div align="left"><img src="../../docs/images/dingding.png" width="250"/> | <img src="../../docs/images/wechat.png" width="232"/></div> |
 
 
 
