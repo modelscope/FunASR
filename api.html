@@ -18981,30 +18981,31 @@
             cmvn_file: TODO.
         """
     with open(cmvn_file, "r", encoding="utf-8") as f:
-        lines = f.readlines()
+        lines = [line for line in f.readlines() if line.split()]
     means_list = []
     vars_list = []
     for i in range(len(lines)):
         line_item = lines[i].split()
         if line_item[0] == "&lt;AddShift&gt;":
-            line_item = lines[i + 1].split()
-            if line_item[0] == "&lt;LearnRateCoef&gt;":
+            line_item = lines[i + 1].split() if i + 1 &lt; len(lines) else []
+            if line_item and line_item[0] == "&lt;LearnRateCoef&gt;":
                 add_shift_line = line_item[3 : (len(line_item) - 1)]
                 means_list = list(add_shift_line)
                 continue
         elif line_item[0] == "&lt;Rescale&gt;":
-            line_item = lines[i + 1].split()
-            if line_item[0] == "&lt;LearnRateCoef&gt;":
+            line_item = lines[i + 1].split() if i + 1 &lt; len(lines) else []
+            if line_item and line_item[0] == "&lt;LearnRateCoef&gt;":
                 rescale_line = line_item[3 : (len(line_item) - 1)]
                 vars_list = list(rescale_line)
                 continue
+    if not means_list or not vars_list:
+        raise ValueError(f"No &lt;AddShift&gt;/&lt;Rescale&gt; statistics found in cmvn file: {cmvn_file}")
     means = np.array(means_list).astype(np.float32)
     vars = np.array(vars_list).astype(np.float32)
     cmvn = np.array([means, vars])
     cmvn = torch.as_tensor(cmvn, dtype=torch.float32)
-    return cmvn
-</code></pre></details></div>
-<div class="api-detail" id="e297" tabindex="-1"><span class="dtag badge-f">function</span><h2><code>apply_cmvn(inputs, cmvn)</code></h2><div class="dmod">funasr.frontends.wav_frontend · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L46" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Apply CMVN with mvn data</p>
+</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L15" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
+<div class="api-detail" id="e297" tabindex="-1"><span class="dtag badge-f">function</span><h2><code>apply_cmvn(inputs, cmvn)</code></h2><div class="dmod">funasr.frontends.wav_frontend · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L48" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Apply CMVN with mvn data</p>
 </div><details class="src-block"><summary>Source code</summary><pre><code>def apply_cmvn(inputs, cmvn):  # noqa
     """
     Apply CMVN with mvn data
@@ -19021,7 +19022,7 @@
 
     return inputs.type(torch.float32)
 </code></pre></details></div>
-<div class="api-detail" id="e298" tabindex="-1"><span class="dtag badge-f">function</span><h2><code>apply_lfr(inputs, lfr_m, lfr_n)</code></h2><div class="dmod">funasr.frontends.wav_frontend · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L63" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Apply lfr.</p>
+<div class="api-detail" id="e298" tabindex="-1"><span class="dtag badge-f">function</span><h2><code>apply_lfr(inputs, lfr_m, lfr_n)</code></h2><div class="dmod">funasr.frontends.wav_frontend · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L65" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Apply lfr.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>inputs</code> — TODO.</li>
@@ -19053,7 +19054,7 @@
     LFR_outputs = inputs.as_strided(sizes, strides)
     return LFR_outputs.clone().type(torch.float32)
 </code></pre></details></div>
-<div class="api-detail" id="e299" tabindex="-1"><span class="dtag badge-c">class</span><h2><code>WavFrontend(cmvn_file: str = None, fs: int = 16000, window: str = "hamming", n_mels: int = 80, frame_length: int = 25, frame_shift: int = 10, filter_length_min: int = -1, filter_length_max: int = -1, lfr_m: int = 1, lfr_n: int = 1, dither: float = 1.0, snip_edges: bool = True, upsacle_samples: bool = True, **kwargs)</code></h2><div class="dmod">funasr.frontends.wav_frontend · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L91" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Conventional frontend structure for ASR.</p>
+<div class="api-detail" id="e299" tabindex="-1"><span class="dtag badge-c">class</span><h2><code>WavFrontend(cmvn_file: str = None, fs: int = 16000, window: str = "hamming", n_mels: int = 80, frame_length: int = 25, frame_shift: int = 10, filter_length_min: int = -1, filter_length_max: int = -1, lfr_m: int = 1, lfr_n: int = 1, dither: float = 1.0, snip_edges: bool = True, upsacle_samples: bool = True, **kwargs)</code></h2><div class="dmod">funasr.frontends.wav_frontend · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L93" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Conventional frontend structure for ASR.</p>
 </div><details class="src-block"><summary>Source code</summary><pre><code>class WavFrontend(nn.Module):
     """Conventional frontend structure for ASR."""
 
@@ -19084,7 +19085,7 @@
                 frame_length: TODO.
                 frame_shift: TODO.
                 filter_length_min: TODO.
-</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L91" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details><h3 class="mt">Constructor</h3><div class="mblk"><a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L94">L94</a><p>Initialize WavFrontend.</p>
+</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L93" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details><h3 class="mt">Constructor</h3><div class="mblk"><a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L96">L96</a><p>Initialize WavFrontend.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>cmvn_file</code> — TODO.</li>
@@ -19102,11 +19103,11 @@
 <li><code>upsacle_samples</code> — TODO.</li>
 <li><code>**kwargs</code> — Additional keyword arguments.</li>
 </ul>
-</div><h3 class="mt">Methods</h3><div class="mblk"><code>.output_size() -&gt; int</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L145" rel="noopener noreferrer" target="_blank">L145</a><div class="mdoc"><p>Output size.</p>
+</div><h3 class="mt">Methods</h3><div class="mblk"><code>.output_size() -&gt; int</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L147" rel="noopener noreferrer" target="_blank">L147</a><div class="mdoc"><p>Output size.</p>
 </div><details class="src-block"><summary>Source</summary><pre><code>    def output_size(self) -&gt; int:
         """Output size."""
         return self.n_mels * self.lfr_m
-</code></pre></details></div><div class="mblk"><code>.forward(input: torch.Tensor, input_lengths, **kwargs) -&gt; Tuple[torch.Tensor, torch.Tensor]</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L149" rel="noopener noreferrer" target="_blank">L149</a><div class="mdoc"><p>Forward pass for training.</p>
+</code></pre></details></div><div class="mblk"><code>.forward(input: torch.Tensor, input_lengths, **kwargs) -&gt; Tuple[torch.Tensor, torch.Tensor]</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L151" rel="noopener noreferrer" target="_blank">L151</a><div class="mdoc"><p>Forward pass for training.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>input</code> — Input audio/text data.</li>
@@ -19143,7 +19144,7 @@
                 dither=self.dither,
                 energy_floor=0.0,
                 window_type=self.window,
-</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L149" rel="noopener noreferrer" target="_blank">View full source →</a></details></div><div class="mblk"><code>.forward_fbank(input: torch.Tensor, input_lengths: torch.Tensor) -&gt; Tuple[torch.Tensor, torch.Tensor]</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L198" rel="noopener noreferrer" target="_blank">L198</a><div class="mdoc"><p>Forward fbank.</p>
+</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L151" rel="noopener noreferrer" target="_blank">View full source →</a></details></div><div class="mblk"><code>.forward_fbank(input: torch.Tensor, input_lengths: torch.Tensor) -&gt; Tuple[torch.Tensor, torch.Tensor]</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L200" rel="noopener noreferrer" target="_blank">L200</a><div class="mdoc"><p>Forward fbank.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>input</code> — Input audio/text data.</li>
@@ -19179,7 +19180,7 @@
 
             feat_length = mat.size(0)
             feats.append(mat)
-</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L198" rel="noopener noreferrer" target="_blank">View full source →</a></details></div><div class="mblk"><code>.forward_lfr_cmvn(input: torch.Tensor, input_lengths: torch.Tensor) -&gt; Tuple[torch.Tensor, torch.Tensor]</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L234" rel="noopener noreferrer" target="_blank">L234</a><div class="mdoc"><p>Forward lfr cmvn.</p>
+</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L200" rel="noopener noreferrer" target="_blank">View full source →</a></details></div><div class="mblk"><code>.forward_lfr_cmvn(input: torch.Tensor, input_lengths: torch.Tensor) -&gt; Tuple[torch.Tensor, torch.Tensor]</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L236" rel="noopener noreferrer" target="_blank">L236</a><div class="mdoc"><p>Forward lfr cmvn.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>input</code> — Input audio/text data.</li>
@@ -19211,12 +19212,12 @@
         feats_pad = pad_sequence(feats, batch_first=True, padding_value=0.0)
         return feats_pad, feats_lens
 </code></pre></details></div></div>
-<div class="api-detail" id="e300" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>WavFrontend.output_size() -&gt; int</code></h2><div class="dmod">funasr.frontends.wav_frontend.WavFrontend · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L145" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Output size.</p>
+<div class="api-detail" id="e300" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>WavFrontend.output_size() -&gt; int</code></h2><div class="dmod">funasr.frontends.wav_frontend.WavFrontend · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L147" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Output size.</p>
 </div><details class="src-block"><summary>Source code</summary><pre><code>    def output_size(self) -&gt; int:
         """Output size."""
         return self.n_mels * self.lfr_m
 </code></pre></details></div>
-<div class="api-detail" id="e301" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>WavFrontend.forward(input: torch.Tensor, input_lengths, **kwargs) -&gt; Tuple[torch.Tensor, torch.Tensor]</code></h2><div class="dmod">funasr.frontends.wav_frontend.WavFrontend · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L149" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Forward pass for training.</p>
+<div class="api-detail" id="e301" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>WavFrontend.forward(input: torch.Tensor, input_lengths, **kwargs) -&gt; Tuple[torch.Tensor, torch.Tensor]</code></h2><div class="dmod">funasr.frontends.wav_frontend.WavFrontend · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L151" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Forward pass for training.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>input</code> — Input audio/text data.</li>
@@ -19253,8 +19254,8 @@
                 dither=self.dither,
                 energy_floor=0.0,
                 window_type=self.window,
-</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L149" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
-<div class="api-detail" id="e302" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>WavFrontend.forward_fbank(input: torch.Tensor, input_lengths: torch.Tensor) -&gt; Tuple[torch.Tensor, torch.Tensor]</code></h2><div class="dmod">funasr.frontends.wav_frontend.WavFrontend · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L198" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Forward fbank.</p>
+</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L151" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
+<div class="api-detail" id="e302" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>WavFrontend.forward_fbank(input: torch.Tensor, input_lengths: torch.Tensor) -&gt; Tuple[torch.Tensor, torch.Tensor]</code></h2><div class="dmod">funasr.frontends.wav_frontend.WavFrontend · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L200" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Forward fbank.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>input</code> — Input audio/text data.</li>
@@ -19290,8 +19291,8 @@
 
             feat_length = mat.size(0)
             feats.append(mat)
-</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L198" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
-<div class="api-detail" id="e303" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>WavFrontend.forward_lfr_cmvn(input: torch.Tensor, input_lengths: torch.Tensor) -&gt; Tuple[torch.Tensor, torch.Tensor]</code></h2><div class="dmod">funasr.frontends.wav_frontend.WavFrontend · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L234" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Forward lfr cmvn.</p>
+</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L200" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
+<div class="api-detail" id="e303" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>WavFrontend.forward_lfr_cmvn(input: torch.Tensor, input_lengths: torch.Tensor) -&gt; Tuple[torch.Tensor, torch.Tensor]</code></h2><div class="dmod">funasr.frontends.wav_frontend.WavFrontend · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L236" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Forward lfr cmvn.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>input</code> — Input audio/text data.</li>
@@ -19323,7 +19324,7 @@
         feats_pad = pad_sequence(feats, batch_first=True, padding_value=0.0)
         return feats_pad, feats_lens
 </code></pre></details></div>
-<div class="api-detail" id="e304" tabindex="-1"><span class="dtag badge-c">class</span><h2><code>WavFrontendOnline(cmvn_file: str = None, fs: int = 16000, window: str = "hamming", n_mels: int = 80, frame_length: int = 25, frame_shift: int = 10, filter_length_min: int = -1, filter_length_max: int = -1, lfr_m: int = 1, lfr_n: int = 1, dither: float = 1.0, snip_edges: bool = True, upsacle_samples: bool = True, **kwargs)</code></h2><div class="dmod">funasr.frontends.wav_frontend · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L262" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Conventional frontend structure for streaming ASR/VAD.</p>
+<div class="api-detail" id="e304" tabindex="-1"><span class="dtag badge-c">class</span><h2><code>WavFrontendOnline(cmvn_file: str = None, fs: int = 16000, window: str = "hamming", n_mels: int = 80, frame_length: int = 25, frame_shift: int = 10, filter_length_min: int = -1, filter_length_max: int = -1, lfr_m: int = 1, lfr_n: int = 1, dither: float = 1.0, snip_edges: bool = True, upsacle_samples: bool = True, **kwargs)</code></h2><div class="dmod">funasr.frontends.wav_frontend · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L264" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Conventional frontend structure for streaming ASR/VAD.</p>
 </div><details class="src-block"><summary>Source code</summary><pre><code>class WavFrontendOnline(nn.Module):
     """Conventional frontend structure for streaming ASR/VAD."""
 
@@ -19354,7 +19355,7 @@
                 window: TODO.
                 n_mels: TODO.
                 frame_length: TODO.
-</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L262" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details><h3 class="mt">Constructor</h3><div class="mblk"><a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L267">L267</a><p>Initialize WavFrontendOnline.</p>
+</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L264" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details><h3 class="mt">Constructor</h3><div class="mblk"><a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L269">L269</a><p>Initialize WavFrontendOnline.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>cmvn_file</code> — TODO.</li>
@@ -19372,11 +19373,11 @@
 <li><code>upsacle_samples</code> — TODO.</li>
 <li><code>**kwargs</code> — Additional keyword arguments.</li>
 </ul>
-</div><h3 class="mt">Methods</h3><div class="mblk"><code>.output_size() -&gt; int</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L326" rel="noopener noreferrer" target="_blank">L326</a><div class="mdoc"><p>Output size.</p>
+</div><h3 class="mt">Methods</h3><div class="mblk"><code>.output_size() -&gt; int</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L328" rel="noopener noreferrer" target="_blank">L328</a><div class="mdoc"><p>Output size.</p>
 </div><details class="src-block"><summary>Source</summary><pre><code>    def output_size(self) -&gt; int:
         """Output size."""
         return self.n_mels * self.lfr_m
-</code></pre></details></div><div class="mblk"><code>.apply_cmvn(inputs: torch.Tensor, cmvn: torch.Tensor) -&gt; torch.Tensor</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L331" rel="noopener noreferrer" target="_blank">L331</a><div class="mdoc"><p>Apply CMVN with mvn data</p>
+</code></pre></details></div><div class="mblk"><code>.apply_cmvn(inputs: torch.Tensor, cmvn: torch.Tensor) -&gt; torch.Tensor</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L333" rel="noopener noreferrer" target="_blank">L333</a><div class="mdoc"><p>Apply CMVN with mvn data</p>
 </div><details class="src-block"><summary>Source</summary><pre><code>    def apply_cmvn(inputs: torch.Tensor, cmvn: torch.Tensor) -&gt; torch.Tensor:
         """
         Apply CMVN with mvn data
@@ -19392,7 +19393,7 @@
         inputs *= torch.from_numpy(vars).type(dtype).to(device)
 
         return inputs.type(torch.float32)
-</code></pre></details></div><div class="mblk"><code>.apply_lfr(inputs: torch.Tensor, lfr_m: int, lfr_n: int, is_final: bool = False) -&gt; Tuple[torch.Tensor, torch.Tensor, int]</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L348" rel="noopener noreferrer" target="_blank">L348</a><div class="mdoc"><p>Apply lfr with data</p>
+</code></pre></details></div><div class="mblk"><code>.apply_lfr(inputs: torch.Tensor, lfr_m: int, lfr_n: int, is_final: bool = False) -&gt; Tuple[torch.Tensor, torch.Tensor, int]</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L350" rel="noopener noreferrer" target="_blank">L350</a><div class="mdoc"><p>Apply lfr with data</p>
 </div><details class="src-block"><summary>Source</summary><pre><code>    def apply_lfr(
         inputs: torch.Tensor, lfr_m: int, lfr_n: int, is_final: bool = False
     ) -&gt; Tuple[torch.Tensor, torch.Tensor, int]:
@@ -19423,7 +19424,7 @@
                 splice_idx = last_idx
         splice_idx = min(T - 1, splice_idx * lfr_n)
         LFR_outputs = inputs[:splice_idx].as_strided(sizes, strides)
-</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L348" rel="noopener noreferrer" target="_blank">View full source →</a></details></div><div class="mblk"><code>.compute_frame_num(sample_length: int, frame_sample_length: int, frame_shift_sample_length: int) -&gt; int</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L382" rel="noopener noreferrer" target="_blank">L382</a><div class="mdoc"><p>Compute frame num.</p>
+</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L350" rel="noopener noreferrer" target="_blank">View full source →</a></details></div><div class="mblk"><code>.compute_frame_num(sample_length: int, frame_sample_length: int, frame_shift_sample_length: int) -&gt; int</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L384" rel="noopener noreferrer" target="_blank">L384</a><div class="mdoc"><p>Compute frame num.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>sample_length</code> — TODO.</li>
@@ -19442,7 +19443,7 @@
             """
         frame_num = int((sample_length - frame_sample_length) / frame_shift_sample_length + 1)
         return frame_num if frame_num &gt;= 1 and sample_length &gt;= frame_sample_length else 0
-</code></pre></details></div><div class="mblk"><code>.forward_fbank(input: torch.Tensor, input_lengths: torch.Tensor, cache: dict = None, **kwargs) -&gt; Tuple[torch.Tensor, torch.Tensor, torch.Tensor]</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L395" rel="noopener noreferrer" target="_blank">L395</a><div class="mdoc"><p>Forward fbank.</p>
+</code></pre></details></div><div class="mblk"><code>.forward_fbank(input: torch.Tensor, input_lengths: torch.Tensor, cache: dict = None, **kwargs) -&gt; Tuple[torch.Tensor, torch.Tensor, torch.Tensor]</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L397" rel="noopener noreferrer" target="_blank">L397</a><div class="mdoc"><p>Forward fbank.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>input</code> — Input audio/text data.</li>
@@ -19480,7 +19481,7 @@
         waveforms = torch.empty(0)
         feats_pad = torch.empty(0)
         feats_lens = torch.empty(0)
-</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L395" rel="noopener noreferrer" target="_blank">View full source →</a></details></div><div class="mblk"><code>.forward_lfr_cmvn(input: torch.Tensor, input_lengths: torch.Tensor, is_final: bool = False, cache: dict = None, **kwargs)</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L464" rel="noopener noreferrer" target="_blank">L464</a><div class="mdoc"><p>Forward lfr cmvn.</p>
+</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L397" rel="noopener noreferrer" target="_blank">View full source →</a></details></div><div class="mblk"><code>.forward_lfr_cmvn(input: torch.Tensor, input_lengths: torch.Tensor, is_final: bool = False, cache: dict = None, **kwargs)</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L466" rel="noopener noreferrer" target="_blank">L466</a><div class="mdoc"><p>Forward lfr cmvn.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>input</code> — Input audio/text data.</li>
@@ -19519,7 +19520,7 @@
                 # mat, self.lfr_splice_cache[i], lfr_splice_frame_idx = self.apply_lfr(mat, self.lfr_m, self.lfr_n, self.lfr_splice_cache[i],
                 mat, cache["lfr_splice_cache"][i], lfr_splice_frame_idx = self.apply_lfr(
                     mat, self.lfr_m, self.lfr_n, is_final
-</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L464" rel="noopener noreferrer" target="_blank">View full source →</a></details></div><div class="mblk"><code>.forward(input: torch.Tensor, input_lengths: torch.Tensor, **kwargs)</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L507" rel="noopener noreferrer" target="_blank">L507</a><div class="mdoc"><p>Forward pass for training.</p>
+</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L466" rel="noopener noreferrer" target="_blank">View full source →</a></details></div><div class="mblk"><code>.forward(input: torch.Tensor, input_lengths: torch.Tensor, **kwargs)</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L509" rel="noopener noreferrer" target="_blank">L509</a><div class="mdoc"><p>Forward pass for training.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>input</code> — Input audio/text data.</li>
@@ -19556,7 +19557,7 @@
                 else torch.cat((cache["waveform_buffer"], input), dim=1)
             )
 
-</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L507" rel="noopener noreferrer" target="_blank">View full source →</a></details></div><div class="mblk"><code>.init_cache(cache: dict = None)</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L644" rel="noopener noreferrer" target="_blank">L644</a><div class="mdoc"><p>Init cache.</p>
+</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L509" rel="noopener noreferrer" target="_blank">View full source →</a></details></div><div class="mblk"><code>.init_cache(cache: dict = None)</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L646" rel="noopener noreferrer" target="_blank">L646</a><div class="mdoc"><p>Init cache.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>cache</code> — State cache dict for streaming inference.</li>
@@ -19581,12 +19582,12 @@
         cache["fbanks_lens"] = None
         return cache
 </code></pre></details></div></div>
-<div class="api-detail" id="e305" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>WavFrontendOnline.output_size() -&gt; int</code></h2><div class="dmod">funasr.frontends.wav_frontend.WavFrontendOnline · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L326" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Output size.</p>
+<div class="api-detail" id="e305" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>WavFrontendOnline.output_size() -&gt; int</code></h2><div class="dmod">funasr.frontends.wav_frontend.WavFrontendOnline · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L328" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Output size.</p>
 </div><details class="src-block"><summary>Source code</summary><pre><code>    def output_size(self) -&gt; int:
         """Output size."""
         return self.n_mels * self.lfr_m
 </code></pre></details></div>
-<div class="api-detail" id="e306" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>WavFrontendOnline.apply_cmvn(inputs: torch.Tensor, cmvn: torch.Tensor) -&gt; torch.Tensor</code></h2><div class="dmod">funasr.frontends.wav_frontend.WavFrontendOnline · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L331" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Apply CMVN with mvn data</p>
+<div class="api-detail" id="e306" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>WavFrontendOnline.apply_cmvn(inputs: torch.Tensor, cmvn: torch.Tensor) -&gt; torch.Tensor</code></h2><div class="dmod">funasr.frontends.wav_frontend.WavFrontendOnline · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L333" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Apply CMVN with mvn data</p>
 </div><details class="src-block"><summary>Source code</summary><pre><code>    def apply_cmvn(inputs: torch.Tensor, cmvn: torch.Tensor) -&gt; torch.Tensor:
         """
         Apply CMVN with mvn data
@@ -19603,7 +19604,7 @@
 
         return inputs.type(torch.float32)
 </code></pre></details></div>
-<div class="api-detail" id="e307" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>WavFrontendOnline.apply_lfr(inputs: torch.Tensor, lfr_m: int, lfr_n: int, is_final: bool = False) -&gt; Tuple[torch.Tensor, torch.Tensor, int]</code></h2><div class="dmod">funasr.frontends.wav_frontend.WavFrontendOnline · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L348" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Apply lfr with data</p>
+<div class="api-detail" id="e307" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>WavFrontendOnline.apply_lfr(inputs: torch.Tensor, lfr_m: int, lfr_n: int, is_final: bool = False) -&gt; Tuple[torch.Tensor, torch.Tensor, int]</code></h2><div class="dmod">funasr.frontends.wav_frontend.WavFrontendOnline · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L350" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Apply lfr with data</p>
 </div><details class="src-block"><summary>Source code</summary><pre><code>    def apply_lfr(
         inputs: torch.Tensor, lfr_m: int, lfr_n: int, is_final: bool = False
     ) -&gt; Tuple[torch.Tensor, torch.Tensor, int]:
@@ -19634,8 +19635,8 @@
                 splice_idx = last_idx
         splice_idx = min(T - 1, splice_idx * lfr_n)
         LFR_outputs = inputs[:splice_idx].as_strided(sizes, strides)
-</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L348" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
-<div class="api-detail" id="e308" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>WavFrontendOnline.compute_frame_num(sample_length: int, frame_sample_length: int, frame_shift_sample_length: int) -&gt; int</code></h2><div class="dmod">funasr.frontends.wav_frontend.WavFrontendOnline · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L382" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Compute frame num.</p>
+</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L350" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
+<div class="api-detail" id="e308" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>WavFrontendOnline.compute_frame_num(sample_length: int, frame_sample_length: int, frame_shift_sample_length: int) -&gt; int</code></h2><div class="dmod">funasr.frontends.wav_frontend.WavFrontendOnline · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L384" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Compute frame num.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>sample_length</code> — TODO.</li>
@@ -19655,7 +19656,7 @@
         frame_num = int((sample_length - frame_sample_length) / frame_shift_sample_length + 1)
         return frame_num if frame_num &gt;= 1 and sample_length &gt;= frame_sample_length else 0
 </code></pre></details></div>
-<div class="api-detail" id="e309" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>WavFrontendOnline.forward_fbank(input: torch.Tensor, input_lengths: torch.Tensor, cache: dict = None, **kwargs) -&gt; Tuple[torch.Tensor, torch.Tensor, torch.Tensor]</code></h2><div class="dmod">funasr.frontends.wav_frontend.WavFrontendOnline · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L395" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Forward fbank.</p>
+<div class="api-detail" id="e309" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>WavFrontendOnline.forward_fbank(input: torch.Tensor, input_lengths: torch.Tensor, cache: dict = None, **kwargs) -&gt; Tuple[torch.Tensor, torch.Tensor, torch.Tensor]</code></h2><div class="dmod">funasr.frontends.wav_frontend.WavFrontendOnline · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L397" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Forward fbank.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>input</code> — Input audio/text data.</li>
@@ -19693,8 +19694,8 @@
         waveforms = torch.empty(0)
         feats_pad = torch.empty(0)
         feats_lens = torch.empty(0)
-</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L395" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
-<div class="api-detail" id="e310" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>WavFrontendOnline.forward_lfr_cmvn(input: torch.Tensor, input_lengths: torch.Tensor, is_final: bool = False, cache: dict = None, **kwargs)</code></h2><div class="dmod">funasr.frontends.wav_frontend.WavFrontendOnline · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L464" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Forward lfr cmvn.</p>
+</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L397" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
+<div class="api-detail" id="e310" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>WavFrontendOnline.forward_lfr_cmvn(input: torch.Tensor, input_lengths: torch.Tensor, is_final: bool = False, cache: dict = None, **kwargs)</code></h2><div class="dmod">funasr.frontends.wav_frontend.WavFrontendOnline · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L466" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Forward lfr cmvn.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>input</code> — Input audio/text data.</li>
@@ -19733,8 +19734,8 @@
                 # mat, self.lfr_splice_cache[i], lfr_splice_frame_idx = self.apply_lfr(mat, self.lfr_m, self.lfr_n, self.lfr_splice_cache[i],
                 mat, cache["lfr_splice_cache"][i], lfr_splice_frame_idx = self.apply_lfr(
                     mat, self.lfr_m, self.lfr_n, is_final
-</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L464" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
-<div class="api-detail" id="e311" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>WavFrontendOnline.forward(input: torch.Tensor, input_lengths: torch.Tensor, **kwargs)</code></h2><div class="dmod">funasr.frontends.wav_frontend.WavFrontendOnline · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L507" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Forward pass for training.</p>
+</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L466" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
+<div class="api-detail" id="e311" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>WavFrontendOnline.forward(input: torch.Tensor, input_lengths: torch.Tensor, **kwargs)</code></h2><div class="dmod">funasr.frontends.wav_frontend.WavFrontendOnline · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L509" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Forward pass for training.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>input</code> — Input audio/text data.</li>
@@ -19771,8 +19772,8 @@
                 else torch.cat((cache["waveform_buffer"], input), dim=1)
             )
 
-</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L507" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
-<div class="api-detail" id="e312" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>WavFrontendOnline.init_cache(cache: dict = None)</code></h2><div class="dmod">funasr.frontends.wav_frontend.WavFrontendOnline · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L644" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Init cache.</p>
+</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L509" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
+<div class="api-detail" id="e312" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>WavFrontendOnline.init_cache(cache: dict = None)</code></h2><div class="dmod">funasr.frontends.wav_frontend.WavFrontendOnline · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L646" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Init cache.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>cache</code> — State cache dict for streaming inference.</li>
@@ -19797,7 +19798,7 @@
         cache["fbanks_lens"] = None
         return cache
 </code></pre></details></div>
-<div class="api-detail" id="e313" tabindex="-1"><span class="dtag badge-c">class</span><h2><code>WavFrontendMel23(fs: int = 16000, frame_length: int = 25, frame_shift: int = 10, lfr_m: int = 1, lfr_n: int = 1, **kwargs)</code></h2><div class="dmod">funasr.frontends.wav_frontend · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L665" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Conventional frontend structure for ASR.</p>
+<div class="api-detail" id="e313" tabindex="-1"><span class="dtag badge-c">class</span><h2><code>WavFrontendMel23(fs: int = 16000, frame_length: int = 25, frame_shift: int = 10, lfr_m: int = 1, lfr_n: int = 1, **kwargs)</code></h2><div class="dmod">funasr.frontends.wav_frontend · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L667" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Conventional frontend structure for ASR.</p>
 </div><details class="src-block"><summary>Source code</summary><pre><code>class WavFrontendMel23(nn.Module):
     """Conventional frontend structure for ASR."""
 
@@ -19828,7 +19829,7 @@
         self.lfr_n = lfr_n
         self.n_mels = 23
 
-</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L665" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details><h3 class="mt">Constructor</h3><div class="mblk"><a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L668">L668</a><p>Initialize WavFrontendMel23.</p>
+</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L667" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details><h3 class="mt">Constructor</h3><div class="mblk"><a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L670">L670</a><p>Initialize WavFrontendMel23.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>fs</code> — TODO.</li>
@@ -19838,11 +19839,11 @@
 <li><code>lfr_n</code> — TODO.</li>
 <li><code>**kwargs</code> — Additional keyword arguments.</li>
 </ul>
-</div><h3 class="mt">Methods</h3><div class="mblk"><code>.output_size() -&gt; int</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L695" rel="noopener noreferrer" target="_blank">L695</a><div class="mdoc"><p>Output size.</p>
+</div><h3 class="mt">Methods</h3><div class="mblk"><code>.output_size() -&gt; int</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L697" rel="noopener noreferrer" target="_blank">L697</a><div class="mdoc"><p>Output size.</p>
 </div><details class="src-block"><summary>Source</summary><pre><code>    def output_size(self) -&gt; int:
         """Output size."""
         return self.n_mels * (2 * self.lfr_m + 1)
-</code></pre></details></div><div class="mblk"><code>.forward(input: torch.Tensor, input_lengths: torch.Tensor) -&gt; Tuple[torch.Tensor, torch.Tensor]</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L699" rel="noopener noreferrer" target="_blank">L699</a><div class="mdoc"><p>Forward pass for training.</p>
+</code></pre></details></div><div class="mblk"><code>.forward(input: torch.Tensor, input_lengths: torch.Tensor) -&gt; Tuple[torch.Tensor, torch.Tensor]</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L701" rel="noopener noreferrer" target="_blank">L701</a><div class="mdoc"><p>Forward pass for training.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>input</code> — Input audio/text data.</li>
@@ -19877,12 +19878,12 @@
         feats_pad = pad_sequence(feats, batch_first=True, padding_value=0.0)
         return feats_pad, feats_lens
 </code></pre></details></div></div>
-<div class="api-detail" id="e314" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>WavFrontendMel23.output_size() -&gt; int</code></h2><div class="dmod">funasr.frontends.wav_frontend.WavFrontendMel23 · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L695" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Output size.</p>
+<div class="api-detail" id="e314" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>WavFrontendMel23.output_size() -&gt; int</code></h2><div class="dmod">funasr.frontends.wav_frontend.WavFrontendMel23 · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L697" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Output size.</p>
 </div><details class="src-block"><summary>Source code</summary><pre><code>    def output_size(self) -&gt; int:
         """Output size."""
         return self.n_mels * (2 * self.lfr_m + 1)
 </code></pre></details></div>
-<div class="api-detail" id="e315" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>WavFrontendMel23.forward(input: torch.Tensor, input_lengths: torch.Tensor) -&gt; Tuple[torch.Tensor, torch.Tensor]</code></h2><div class="dmod">funasr.frontends.wav_frontend.WavFrontendMel23 · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L699" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Forward pass for training.</p>
+<div class="api-detail" id="e315" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>WavFrontendMel23.forward(input: torch.Tensor, input_lengths: torch.Tensor) -&gt; Tuple[torch.Tensor, torch.Tensor]</code></h2><div class="dmod">funasr.frontends.wav_frontend.WavFrontendMel23 · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/frontends/wav_frontend.py#L701" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Forward pass for training.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>input</code> — Input audio/text data.</li>
