@@ -183,7 +183,7 @@ sudo bash funasr-runtime-deploy-online-cpu-zh.sh update --ssl 0
 
 |                                    钉钉用户群                                     |                                      微信               |
 |:----------------------------------------------------------------------------:|:-----------------------------------------------------:|
-| <div align="left"><img src="../../../docs/images/dingding.jpg" width="250"/> | <img src="../../../docs/images/wechat.png" width="232"/></div> |
+| <div align="left"><img src="../../docs/images/dingding.png" width="250"/> | <img src="../../docs/images/wechat.png" width="232"/></div> |
 
 
 ## 视频demo
