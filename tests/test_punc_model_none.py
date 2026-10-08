@@ -649,6 +649,33 @@ class TestPuncModelNone(unittest.TestCase):
     @patch("funasr.auto.auto_model.slice_padding_audio_samples")
     @patch("funasr.auto.auto_model.load_audio_text_image_video")
     @patch("funasr.auto.auto_model.prepare_data_iterator")
+    def test_sentence_timestamp_keeps_unpunctuated_tail_without_asr_words(
+        self, mock_prep, mock_load, mock_slice
+    ):
+        am = self._make_auto_model(punc_model=MagicMock())
+        results_seq = [
+            [{"key": "test_utt", "value": [[0, 300]]}],
+            [{"text": "hello world", "timestamp": [[0, 100], [100, 300]]}],
+            [{"text": "hello world", "punc_array": [1, 1]}],
+        ]
+        am.inference = MagicMock(side_effect=lambda *args, **kwargs: results_seq.pop(0))
+        mock_prep.return_value = (["test_utt"], [np.zeros(4800, dtype=np.float32)])
+        mock_load.return_value = np.zeros(4800, dtype=np.float32)
+        mock_slice.return_value = ([np.zeros(4800, dtype=np.float32)], [4800])
+
+        result = am.inference_with_vad(
+            "dummy_input", sentence_timestamp=True, en_post_proc=True
+        )
+
+        self.assertEqual(
+            [item["text"].strip() for item in result[0]["sentence_info"]],
+            ["hello world"],
+        )
+        self.assertEqual(result[0]["sentence_info"][0]["timestamp"], [[0, 100], [100, 300]])
+
+    @patch("funasr.auto.auto_model.slice_padding_audio_samples")
+    @patch("funasr.auto.auto_model.load_audio_text_image_video")
+    @patch("funasr.auto.auto_model.prepare_data_iterator")
     def test_sentence_timestamp_handles_unsized_punc_array(self, mock_prep, mock_load, mock_slice):
         """Malformed punctuation metadata must use the legacy no-punctuation fallback."""
         am = self._make_auto_model(punc_model=MagicMock())
