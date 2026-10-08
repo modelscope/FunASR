@@ -34,7 +34,7 @@ _CJK_RE = re.compile(r"[一-鿿]")
 def _clean_text(text: str) -> str:
     """Remove tags, repetitive garbage, filler tokens, and invalid chars."""
     text = re.sub(r'<[^>]*>|</[^>]*>', '', text)
-    text = re.sub(r'(>.{2,8}?){3,}', '', text)
+    text = re.sub(r'(>.{2,8}?)\1{3,}', '', text)
     text = re.sub(r'\[breath\]|\[noise\]|/sil|endofbreak|FFFF', '', text)
     text = re.sub(r'\s+', ' ', text)
     text = text.replace('�', '').lstrip('>')
