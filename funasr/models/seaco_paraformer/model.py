@@ -8,7 +8,6 @@ import re
 import time
 import copy
 import torch
-import codecs
 import logging
 import tempfile
 import requests
@@ -629,9 +628,11 @@ class SeacoParaformer(BiCifParaformer, Paraformer):
             logging.info("Attempting to parse hotwords from local txt...")
             hotword_list = []
             hotword_str_list = []
-            with codecs.open(hotword_list_or_file, "r") as fin:
+            with open(hotword_list_or_file, "r", encoding="utf-8") as fin:
                 for line in fin.readlines():
                     hw = line.strip()
+                    if not hw:
+                        continue
                     hw_list = hw.split()
                     if seg_dict is not None:
                         hw_list = seg_tokenize(hw_list, seg_dict)
@@ -656,9 +657,11 @@ class SeacoParaformer(BiCifParaformer, Paraformer):
             hotword_list_or_file = text_file_path
             hotword_list = []
             hotword_str_list = []
-            with codecs.open(hotword_list_or_file, "r") as fin:
+            with open(hotword_list_or_file, "r", encoding="utf-8") as fin:
                 for line in fin.readlines():
                     hw = line.strip()
+                    if not hw:
+                        continue
                     hw_list = hw.split()
                     if seg_dict is not None:
                         hw_list = seg_tokenize(hw_list, seg_dict)
