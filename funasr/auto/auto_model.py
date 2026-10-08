@@ -1124,7 +1124,7 @@ class AutoModel:
                             input_len=None,
                             model=self.spk_model,
                             kwargs=self.spk_kwargs,
-                            **cfg,
+                            **{**cfg, "fs": fs},
                         )
                         spk_embs = torch.cat([r["spk_embedding"] for r in spk_res], dim=0)
                         results[_b]["spk_embedding"] = spk_embs
