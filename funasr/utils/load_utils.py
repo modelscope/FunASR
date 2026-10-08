@@ -140,7 +140,11 @@ def load_audio_text_image_video(
                 except:
                     if hasattr(data_or_path_or_list, "seek"):
                         data_or_path_or_list.seek(0)
-                    data_or_path_or_list = _load_audio_ffmpeg(data_or_path_or_list, sr=fs)
+                    data_or_path_or_list = _load_audio_ffmpeg(
+                        data_or_path_or_list, sr=fs, input_sr=audio_fs
+                    )
+                    # FFmpeg has already resampled its output to the target rate.
+                    audio_fs = fs
                     data_or_path_or_list = torch.from_numpy(
                         data_or_path_or_list
                     ).squeeze()  # [n_samples,]
@@ -438,7 +442,7 @@ def extract_fbank(data, data_len=None, data_type: str = "sound", frontend=None, 
     return data.to(torch.float32), data_len.to(torch.int32)
 
 
-def _load_audio_ffmpeg(file, sr: int = 16000):
+def _load_audio_ffmpeg(file, sr: int = 16000, input_sr=None):
     """
     Open an audio file and read as mono waveform, resampling as necessary
 
@@ -449,6 +453,10 @@ def _load_audio_ffmpeg(file, sr: int = 16000):
 
     sr: int
         The sample rate to resample the audio if necessary
+
+    input_sr: int or None
+        The source sample rate for raw PCM files. Defaults to sr; ignored for
+        containers, which provide their own sample rate.
 
     Returns
     -------
@@ -470,7 +478,7 @@ def _load_audio_ffmpeg(file, sr: int = 16000):
     if isinstance(input_source, str) and input_source.lower().endswith('.pcm'):
         pcm_params = [
             "-f", "s16le",
-            "-ar", str(sr),
+            "-ar", str(sr if input_sr is None else input_sr),
             "-ac", "1"
         ]
 

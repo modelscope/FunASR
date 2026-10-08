@@ -256,6 +256,41 @@ def test_vad_source_rates_are_not_reapplied_to_resampled_segments(
         np.testing.assert_allclose(loaded, expected, atol=1e-6, rtol=0)
 
 
+@pytest.mark.skipif(not load_utils.is_ffmpeg_installed(), reason="ffmpeg is required")
+@pytest.mark.parametrize("source_rate", [8000, 48000])
+@pytest.mark.parametrize("batch", [False, True])
+def test_vad_ffmpeg_fallback_preserves_resampled_audio(
+    source_rate, batch, tmp_path, monkeypatch
+):
+    import soundfile as sf
+
+    samples = np.round(
+        np.sin(2 * np.pi * 440 * np.arange(source_rate) / source_rate) * 12000
+    ).astype("<i2")
+    path = tmp_path / "audio.wav"
+    sf.write(path, samples, source_rate, subtype="PCM_16")
+    expected = load_utils._load_audio_ffmpeg(str(path), sr=16000)
+
+    def decoder_unavailable(*args, **kwargs):
+        raise RuntimeError("decoder unavailable")
+
+    monkeypatch.setattr(load_utils.torchaudio, "load", decoder_unavailable)
+    monkeypatch.setattr(sf, "read", decoder_unavailable)
+    wrapper = _wrapper(vad=True)
+    wrapper.vad_model.segments = [[0, 1000]]
+    value = [str(path), str(path)] if batch else str(path)
+
+    results = wrapper.generate(input=value, fs=source_rate)
+
+    assert len(results) == (2 if batch else 1)
+    for _, vad_options in wrapper.vad_model.calls:
+        assert vad_options["fs"] == source_rate
+    for segments, asr_options in wrapper.model.calls:
+        assert asr_options["fs"] == 16000
+        assert len(segments[0]) == 16000
+        np.testing.assert_array_equal(segments[0], expected)
+
+
 class _RecordingSpeaker(torch.nn.Module):
     """Use CAMPPlus preprocessing with a stand-in embedding network."""
 
