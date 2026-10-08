@@ -2538,7 +2538,7 @@
 <li><code>**kwargs</code> — Additional keyword arguments.</li>
 </ul>
 </div></div>
-<div class="api-detail" id="e25" tabindex="-1"><span class="dtag badge-c">class</span><h2><code>ContextualParaformer(*args, **kwargs)</code></h2><div class="dmod">funasr.models.contextual_paraformer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/contextual_paraformer/model.py#L46" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><ul>
+<div class="api-detail" id="e25" tabindex="-1"><span class="dtag badge-c">class</span><h2><code>ContextualParaformer(*args, **kwargs)</code></h2><div class="dmod">funasr.models.contextual_paraformer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/contextual_paraformer/model.py#L45" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><ul>
 <li><code>ContextualParaformer</code> — Paraformer with hotword/context biasing.</li>
 </ul>
 <p>Extends Paraformer with a context encoder that incorporates user-defined</p>
@@ -2576,13 +2576,13 @@
         crit_attn_smooth = kwargs.get("crit_attn_smooth", 0.0)
         bias_encoder_dropout_rate = kwargs.get("bias_encoder_dropout_rate", 0.0)
 
-</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/contextual_paraformer/model.py#L46" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details><h3 class="mt">Constructor</h3><div class="mblk"><a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/contextual_paraformer/model.py#L55">L55</a><p>Initialize ContextualParaformer.</p>
+</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/contextual_paraformer/model.py#L45" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details><h3 class="mt">Constructor</h3><div class="mblk"><a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/contextual_paraformer/model.py#L54">L54</a><p>Initialize ContextualParaformer.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>*args</code> — Variable positional arguments.</li>
 <li><code>**kwargs</code> — Additional keyword arguments.</li>
 </ul>
-</div><h3 class="mt">Methods</h3><div class="mblk"><code>.forward(speech: torch.Tensor, speech_lengths: torch.Tensor, text: torch.Tensor, text_lengths: torch.Tensor, **kwargs) -&gt; Tuple[torch.Tensor, Dict[str, torch.Tensor], torch.Tensor]</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/contextual_paraformer/model.py#L96" rel="noopener noreferrer" target="_blank">L96</a><div class="mdoc"><p>Frontend + Encoder + Decoder + Calc loss</p>
+</div><h3 class="mt">Methods</h3><div class="mblk"><code>.forward(speech: torch.Tensor, speech_lengths: torch.Tensor, text: torch.Tensor, text_lengths: torch.Tensor, **kwargs) -&gt; Tuple[torch.Tensor, Dict[str, torch.Tensor], torch.Tensor]</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/contextual_paraformer/model.py#L95" rel="noopener noreferrer" target="_blank">L95</a><div class="mdoc"><p>Frontend + Encoder + Decoder + Calc loss</p>
 <h4>Args:</h4>
 <ul>
 <li><code>speech</code> — (Batch, Length, ...)</li>
@@ -2620,7 +2620,7 @@
 
         loss_ctc, cer_ctc = None, None
 
-</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/contextual_paraformer/model.py#L96" rel="noopener noreferrer" target="_blank">View full source →</a></details></div><div class="mblk"><code>.sampler(encoder_out, encoder_out_lens, ys_pad, ys_pad_lens, pre_acoustic_embeds, contextual_info)</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/contextual_paraformer/model.py#L268" rel="noopener noreferrer" target="_blank">L268</a><div class="mdoc"><p>Sampler.</p>
+</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/contextual_paraformer/model.py#L95" rel="noopener noreferrer" target="_blank">View full source →</a></details></div><div class="mblk"><code>.sampler(encoder_out, encoder_out_lens, ys_pad, ys_pad_lens, pre_acoustic_embeds, contextual_info)</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/contextual_paraformer/model.py#L267" rel="noopener noreferrer" target="_blank">L267</a><div class="mdoc"><p>Sampler.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>encoder_out</code> — Encoder output tensor.</li>
@@ -2660,7 +2660,7 @@
         with torch.no_grad():
             decoder_outs = self.decoder(
                 encoder_out,
-</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/contextual_paraformer/model.py#L268" rel="noopener noreferrer" target="_blank">View full source →</a></details></div><div class="mblk"><code>.cal_decoder_with_predictor(encoder_out, encoder_out_lens, sematic_embeds, ys_pad_lens, hw_list=None, clas_scale=1.0)</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/contextual_paraformer/model.py#L331" rel="noopener noreferrer" target="_blank">L331</a><div class="mdoc"><p>Cal decoder with predictor.</p>
+</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/contextual_paraformer/model.py#L267" rel="noopener noreferrer" target="_blank">View full source →</a></details></div><div class="mblk"><code>.cal_decoder_with_predictor(encoder_out, encoder_out_lens, sematic_embeds, ys_pad_lens, hw_list=None, clas_scale=1.0)</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/contextual_paraformer/model.py#L330" rel="noopener noreferrer" target="_blank">L330</a><div class="mdoc"><p>Cal decoder with predictor.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>encoder_out</code> — Encoder output tensor.</li>
@@ -2700,7 +2700,7 @@
             hw_embed = h_n.repeat(encoder_out.shape[0], 1, 1)
         else:
             hw_lengths = [len(i) for i in hw_list]
-</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/contextual_paraformer/model.py#L331" rel="noopener noreferrer" target="_blank">View full source →</a></details></div><div class="mblk"><code>.inference(data_in, data_lengths=None, key: list = None, tokenizer=None, frontend=None, **kwargs)</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/contextual_paraformer/model.py#L387" rel="noopener noreferrer" target="_blank">L387</a><div class="mdoc"><p>Run inference on input data.</p>
+</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/contextual_paraformer/model.py#L330" rel="noopener noreferrer" target="_blank">View full source →</a></details></div><div class="mblk"><code>.inference(data_in, data_lengths=None, key: list = None, tokenizer=None, frontend=None, **kwargs)</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/contextual_paraformer/model.py#L386" rel="noopener noreferrer" target="_blank">L386</a><div class="mdoc"><p>Run inference on input data.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>data_in</code> — Input data (audio samples, file paths, or text).</li>
@@ -2740,7 +2740,7 @@
             self.init_beam_search(**kwargs)
             self.nbest = kwargs.get("nbest", 1)
 
-</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/contextual_paraformer/model.py#L387" rel="noopener noreferrer" target="_blank">View full source →</a></details></div><div class="mblk"><code>.generate_hotwords_list(hotword_list_or_file, tokenizer=None, frontend=None)</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/contextual_paraformer/model.py#L534" rel="noopener noreferrer" target="_blank">L534</a><div class="mdoc"><p>Generate hotwords list.</p>
+</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/contextual_paraformer/model.py#L386" rel="noopener noreferrer" target="_blank">View full source →</a></details></div><div class="mblk"><code>.generate_hotwords_list(hotword_list_or_file, tokenizer=None, frontend=None)</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/contextual_paraformer/model.py#L533" rel="noopener noreferrer" target="_blank">L533</a><div class="mdoc"><p>Generate hotwords list.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>hotword_list_or_file</code> — TODO.</li>
@@ -2777,7 +2777,7 @@
             
                 Args:
                     txt: TODO.
-</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/contextual_paraformer/model.py#L534" rel="noopener noreferrer" target="_blank">View full source →</a></details></div><div class="mblk"><code>.export(**kwargs)</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/contextual_paraformer/model.py#L659" rel="noopener noreferrer" target="_blank">L659</a><div class="mdoc"><p>Export.</p>
+</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/contextual_paraformer/model.py#L533" rel="noopener noreferrer" target="_blank">View full source →</a></details></div><div class="mblk"><code>.export(**kwargs)</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/contextual_paraformer/model.py#L662" rel="noopener noreferrer" target="_blank">L662</a><div class="mdoc"><p>Export.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>**kwargs</code> — Additional keyword arguments.</li>
@@ -2798,7 +2798,7 @@
         models = export_rebuild_model(model=self, **kwargs)
         return models
 </code></pre></details></div></div>
-<div class="api-detail" id="e26" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>ContextualParaformer.forward(speech: torch.Tensor, speech_lengths: torch.Tensor, text: torch.Tensor, text_lengths: torch.Tensor, **kwargs) -&gt; Tuple[torch.Tensor, Dict[str, torch.Tensor], torch.Tensor]</code></h2><div class="dmod">funasr.models.contextual_paraformer.ContextualParaformer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/contextual_paraformer/model.py#L96" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Frontend + Encoder + Decoder + Calc loss</p>
+<div class="api-detail" id="e26" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>ContextualParaformer.forward(speech: torch.Tensor, speech_lengths: torch.Tensor, text: torch.Tensor, text_lengths: torch.Tensor, **kwargs) -&gt; Tuple[torch.Tensor, Dict[str, torch.Tensor], torch.Tensor]</code></h2><div class="dmod">funasr.models.contextual_paraformer.ContextualParaformer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/contextual_paraformer/model.py#L95" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Frontend + Encoder + Decoder + Calc loss</p>
 <h4>Args:</h4>
 <ul>
 <li><code>speech</code> — (Batch, Length, ...)</li>
@@ -2836,8 +2836,8 @@
 
         loss_ctc, cer_ctc = None, None
 
-</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/contextual_paraformer/model.py#L96" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
-<div class="api-detail" id="e27" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>ContextualParaformer.sampler(encoder_out, encoder_out_lens, ys_pad, ys_pad_lens, pre_acoustic_embeds, contextual_info)</code></h2><div class="dmod">funasr.models.contextual_paraformer.ContextualParaformer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/contextual_paraformer/model.py#L268" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Sampler.</p>
+</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/contextual_paraformer/model.py#L95" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
+<div class="api-detail" id="e27" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>ContextualParaformer.sampler(encoder_out, encoder_out_lens, ys_pad, ys_pad_lens, pre_acoustic_embeds, contextual_info)</code></h2><div class="dmod">funasr.models.contextual_paraformer.ContextualParaformer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/contextual_paraformer/model.py#L267" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Sampler.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>encoder_out</code> — Encoder output tensor.</li>
@@ -2877,8 +2877,8 @@
         with torch.no_grad():
             decoder_outs = self.decoder(
                 encoder_out,
-</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/contextual_paraformer/model.py#L268" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
-<div class="api-detail" id="e28" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>ContextualParaformer.cal_decoder_with_predictor(encoder_out, encoder_out_lens, sematic_embeds, ys_pad_lens, hw_list=None, clas_scale=1.0)</code></h2><div class="dmod">funasr.models.contextual_paraformer.ContextualParaformer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/contextual_paraformer/model.py#L331" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Cal decoder with predictor.</p>
+</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/contextual_paraformer/model.py#L267" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
+<div class="api-detail" id="e28" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>ContextualParaformer.cal_decoder_with_predictor(encoder_out, encoder_out_lens, sematic_embeds, ys_pad_lens, hw_list=None, clas_scale=1.0)</code></h2><div class="dmod">funasr.models.contextual_paraformer.ContextualParaformer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/contextual_paraformer/model.py#L330" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Cal decoder with predictor.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>encoder_out</code> — Encoder output tensor.</li>
@@ -2918,8 +2918,8 @@
             hw_embed = h_n.repeat(encoder_out.shape[0], 1, 1)
         else:
             hw_lengths = [len(i) for i in hw_list]
-</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/contextual_paraformer/model.py#L331" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
-<div class="api-detail" id="e29" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>ContextualParaformer.inference(data_in, data_lengths=None, key: list = None, tokenizer=None, frontend=None, **kwargs)</code></h2><div class="dmod">funasr.models.contextual_paraformer.ContextualParaformer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/contextual_paraformer/model.py#L387" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Run inference on input data.</p>
+</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/contextual_paraformer/model.py#L330" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
+<div class="api-detail" id="e29" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>ContextualParaformer.inference(data_in, data_lengths=None, key: list = None, tokenizer=None, frontend=None, **kwargs)</code></h2><div class="dmod">funasr.models.contextual_paraformer.ContextualParaformer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/contextual_paraformer/model.py#L386" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Run inference on input data.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>data_in</code> — Input data (audio samples, file paths, or text).</li>
@@ -2959,8 +2959,8 @@
             self.init_beam_search(**kwargs)
             self.nbest = kwargs.get("nbest", 1)
 
-</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/contextual_paraformer/model.py#L387" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
-<div class="api-detail" id="e30" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>ContextualParaformer.generate_hotwords_list(hotword_list_or_file, tokenizer=None, frontend=None)</code></h2><div class="dmod">funasr.models.contextual_paraformer.ContextualParaformer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/contextual_paraformer/model.py#L534" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Generate hotwords list.</p>
+</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/contextual_paraformer/model.py#L386" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
+<div class="api-detail" id="e30" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>ContextualParaformer.generate_hotwords_list(hotword_list_or_file, tokenizer=None, frontend=None)</code></h2><div class="dmod">funasr.models.contextual_paraformer.ContextualParaformer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/contextual_paraformer/model.py#L533" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Generate hotwords list.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>hotword_list_or_file</code> — TODO.</li>
@@ -2997,8 +2997,8 @@
             
                 Args:
                     txt: TODO.
-</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/contextual_paraformer/model.py#L534" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
-<div class="api-detail" id="e31" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>ContextualParaformer.export(**kwargs)</code></h2><div class="dmod">funasr.models.contextual_paraformer.ContextualParaformer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/contextual_paraformer/model.py#L659" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Export.</p>
+</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/contextual_paraformer/model.py#L533" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
+<div class="api-detail" id="e31" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>ContextualParaformer.export(**kwargs)</code></h2><div class="dmod">funasr.models.contextual_paraformer.ContextualParaformer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/contextual_paraformer/model.py#L662" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Export.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>**kwargs</code> — Additional keyword arguments.</li>
@@ -14745,7 +14745,7 @@
         )
 
 </code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/scama/model.py#L741" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
-<div class="api-detail" id="e224" tabindex="-1"><span class="dtag badge-c">class</span><h2><code>SeacoParaformer(*args, **kwargs)</code></h2><div class="dmod">funasr.models.seaco_paraformer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/seaco_paraformer/model.py#L50" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><ul>
+<div class="api-detail" id="e224" tabindex="-1"><span class="dtag badge-c">class</span><h2><code>SeacoParaformer(*args, **kwargs)</code></h2><div class="dmod">funasr.models.seaco_paraformer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/seaco_paraformer/model.py#L49" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><ul>
 <li><code>SeACo</code> — Paraformer: Semantic-Aware Contextual Paraformer.</li>
 </ul>
 <p>The recommended Chinese ASR model. Combines Paraformer's non-autoregressive</p>
@@ -14784,13 +14784,13 @@
         seaco_lsm_weight = kwargs.get("seaco_lsm_weight", 0.0)
         seaco_length_normalized_loss = kwargs.get("seaco_length_normalized_loss", True)
 
-</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/seaco_paraformer/model.py#L50" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details><h3 class="mt">Constructor</h3><div class="mblk"><a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/seaco_paraformer/model.py#L60">L60</a><p>Initialize SeacoParaformer.</p>
+</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/seaco_paraformer/model.py#L49" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details><h3 class="mt">Constructor</h3><div class="mblk"><a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/seaco_paraformer/model.py#L59">L59</a><p>Initialize SeacoParaformer.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>*args</code> — Variable positional arguments.</li>
 <li><code>**kwargs</code> — Additional keyword arguments.</li>
 </ul>
-</div><h3 class="mt">Methods</h3><div class="mblk"><code>.forward(speech: torch.Tensor, speech_lengths: torch.Tensor, text: torch.Tensor, text_lengths: torch.Tensor, **kwargs) -&gt; Tuple[torch.Tensor, Dict[str, torch.Tensor], torch.Tensor]</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/seaco_paraformer/model.py#L122" rel="noopener noreferrer" target="_blank">L122</a><div class="mdoc"><p>Frontend + Encoder + Decoder + Calc loss</p>
+</div><h3 class="mt">Methods</h3><div class="mblk"><code>.forward(speech: torch.Tensor, speech_lengths: torch.Tensor, text: torch.Tensor, text_lengths: torch.Tensor, **kwargs) -&gt; Tuple[torch.Tensor, Dict[str, torch.Tensor], torch.Tensor]</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/seaco_paraformer/model.py#L121" rel="noopener noreferrer" target="_blank">L121</a><div class="mdoc"><p>Frontend + Encoder + Decoder + Calc loss</p>
 <h4>Args:</h4>
 <ul>
 <li><code>speech</code> — (Batch, Length, ...)</li>
@@ -14828,7 +14828,7 @@
         seaco_label_pad = kwargs.get("seaco_label_pad")
         if len(hotword_lengths.size()) &gt; 1:
             hotword_lengths = hotword_lengths[:, 0]
-</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/seaco_paraformer/model.py#L122" rel="noopener noreferrer" target="_blank">View full source →</a></details></div><div class="mblk"><code>.calc_predictor(encoder_out, encoder_out_lens)</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/seaco_paraformer/model.py#L202" rel="noopener noreferrer" target="_blank">L202</a><div class="mdoc"><p>Calc predictor.</p>
+</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/seaco_paraformer/model.py#L121" rel="noopener noreferrer" target="_blank">View full source →</a></details></div><div class="mblk"><code>.calc_predictor(encoder_out, encoder_out_lens)</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/seaco_paraformer/model.py#L201" rel="noopener noreferrer" target="_blank">L201</a><div class="mdoc"><p>Calc predictor.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>encoder_out</code> — Encoder output tensor.</li>
@@ -14848,7 +14848,7 @@
             encoder_out, None, encoder_out_mask, ignore_id=self.ignore_id
         )
         return predictor_outs[:4]
-</code></pre></details></div><div class="mblk"><code>.inference(data_in, data_lengths=None, key: list = None, tokenizer=None, frontend=None, **kwargs)</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/seaco_paraformer/model.py#L422" rel="noopener noreferrer" target="_blank">L422</a><div class="mdoc"><p>Run inference on input data.</p>
+</code></pre></details></div><div class="mblk"><code>.inference(data_in, data_lengths=None, key: list = None, tokenizer=None, frontend=None, **kwargs)</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/seaco_paraformer/model.py#L421" rel="noopener noreferrer" target="_blank">L421</a><div class="mdoc"><p>Run inference on input data.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>data_in</code> — Input data (audio samples, file paths, or text).</li>
@@ -14888,7 +14888,7 @@
             self.init_beam_search(**kwargs)
             self.nbest = kwargs.get("nbest", 1)
         meta_data = {}
-</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/seaco_paraformer/model.py#L422" rel="noopener noreferrer" target="_blank">View full source →</a></details></div><div class="mblk"><code>.generate_hotwords_list(hotword_list_or_file, tokenizer=None, frontend=None)</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/seaco_paraformer/model.py#L583" rel="noopener noreferrer" target="_blank">L583</a><div class="mdoc"><p>Generate hotwords list.</p>
+</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/seaco_paraformer/model.py#L421" rel="noopener noreferrer" target="_blank">View full source →</a></details></div><div class="mblk"><code>.generate_hotwords_list(hotword_list_or_file, tokenizer=None, frontend=None)</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/seaco_paraformer/model.py#L582" rel="noopener noreferrer" target="_blank">L582</a><div class="mdoc"><p>Generate hotwords list.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>hotword_list_or_file</code> — TODO.</li>
@@ -14925,7 +14925,7 @@
                             else:
                                 out_txt += "&lt;unk&gt;" + " "
                     else:
-</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/seaco_paraformer/model.py#L583" rel="noopener noreferrer" target="_blank">View full source →</a></details></div><div class="mblk"><code>.export(**kwargs)</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/seaco_paraformer/model.py#L692" rel="noopener noreferrer" target="_blank">L692</a><div class="mdoc"><p>Export.</p>
+</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/seaco_paraformer/model.py#L582" rel="noopener noreferrer" target="_blank">View full source →</a></details></div><div class="mblk"><code>.export(**kwargs)</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/seaco_paraformer/model.py#L695" rel="noopener noreferrer" target="_blank">L695</a><div class="mdoc"><p>Export.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>**kwargs</code> — Additional keyword arguments.</li>
@@ -14946,7 +14946,7 @@
         models = export_rebuild_model(model=self, **kwargs)
         return models
 </code></pre></details></div></div>
-<div class="api-detail" id="e225" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>SeacoParaformer.forward(speech: torch.Tensor, speech_lengths: torch.Tensor, text: torch.Tensor, text_lengths: torch.Tensor, **kwargs) -&gt; Tuple[torch.Tensor, Dict[str, torch.Tensor], torch.Tensor]</code></h2><div class="dmod">funasr.models.seaco_paraformer.SeacoParaformer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/seaco_paraformer/model.py#L122" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Frontend + Encoder + Decoder + Calc loss</p>
+<div class="api-detail" id="e225" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>SeacoParaformer.forward(speech: torch.Tensor, speech_lengths: torch.Tensor, text: torch.Tensor, text_lengths: torch.Tensor, **kwargs) -&gt; Tuple[torch.Tensor, Dict[str, torch.Tensor], torch.Tensor]</code></h2><div class="dmod">funasr.models.seaco_paraformer.SeacoParaformer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/seaco_paraformer/model.py#L121" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Frontend + Encoder + Decoder + Calc loss</p>
 <h4>Args:</h4>
 <ul>
 <li><code>speech</code> — (Batch, Length, ...)</li>
@@ -14984,8 +14984,8 @@
         seaco_label_pad = kwargs.get("seaco_label_pad")
         if len(hotword_lengths.size()) &gt; 1:
             hotword_lengths = hotword_lengths[:, 0]
-</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/seaco_paraformer/model.py#L122" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
-<div class="api-detail" id="e226" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>SeacoParaformer.calc_predictor(encoder_out, encoder_out_lens)</code></h2><div class="dmod">funasr.models.seaco_paraformer.SeacoParaformer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/seaco_paraformer/model.py#L202" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Calc predictor.</p>
+</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/seaco_paraformer/model.py#L121" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
+<div class="api-detail" id="e226" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>SeacoParaformer.calc_predictor(encoder_out, encoder_out_lens)</code></h2><div class="dmod">funasr.models.seaco_paraformer.SeacoParaformer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/seaco_paraformer/model.py#L201" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Calc predictor.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>encoder_out</code> — Encoder output tensor.</li>
@@ -15006,7 +15006,7 @@
         )
         return predictor_outs[:4]
 </code></pre></details></div>
-<div class="api-detail" id="e227" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>SeacoParaformer.inference(data_in, data_lengths=None, key: list = None, tokenizer=None, frontend=None, **kwargs)</code></h2><div class="dmod">funasr.models.seaco_paraformer.SeacoParaformer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/seaco_paraformer/model.py#L422" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Run inference on input data.</p>
+<div class="api-detail" id="e227" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>SeacoParaformer.inference(data_in, data_lengths=None, key: list = None, tokenizer=None, frontend=None, **kwargs)</code></h2><div class="dmod">funasr.models.seaco_paraformer.SeacoParaformer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/seaco_paraformer/model.py#L421" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Run inference on input data.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>data_in</code> — Input data (audio samples, file paths, or text).</li>
@@ -15046,8 +15046,8 @@
             self.init_beam_search(**kwargs)
             self.nbest = kwargs.get("nbest", 1)
         meta_data = {}
-</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/seaco_paraformer/model.py#L422" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
-<div class="api-detail" id="e228" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>SeacoParaformer.generate_hotwords_list(hotword_list_or_file, tokenizer=None, frontend=None)</code></h2><div class="dmod">funasr.models.seaco_paraformer.SeacoParaformer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/seaco_paraformer/model.py#L583" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Generate hotwords list.</p>
+</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/seaco_paraformer/model.py#L421" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
+<div class="api-detail" id="e228" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>SeacoParaformer.generate_hotwords_list(hotword_list_or_file, tokenizer=None, frontend=None)</code></h2><div class="dmod">funasr.models.seaco_paraformer.SeacoParaformer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/seaco_paraformer/model.py#L582" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Generate hotwords list.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>hotword_list_or_file</code> — TODO.</li>
@@ -15084,8 +15084,8 @@
                             else:
                                 out_txt += "&lt;unk&gt;" + " "
                     else:
-</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/seaco_paraformer/model.py#L583" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
-<div class="api-detail" id="e229" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>SeacoParaformer.export(**kwargs)</code></h2><div class="dmod">funasr.models.seaco_paraformer.SeacoParaformer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/seaco_paraformer/model.py#L692" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Export.</p>
+</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/seaco_paraformer/model.py#L582" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
+<div class="api-detail" id="e229" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>SeacoParaformer.export(**kwargs)</code></h2><div class="dmod">funasr.models.seaco_paraformer.SeacoParaformer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/seaco_paraformer/model.py#L695" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Export.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>**kwargs</code> — Additional keyword arguments.</li>
@@ -15106,7 +15106,7 @@
         models = export_rebuild_model(model=self, **kwargs)
         return models
 </code></pre></details></div>
-<div class="api-detail" id="e230" tabindex="-1"><span class="dtag badge-f">function</span><h2><code>load_seg_dict(seg_dict_file)</code></h2><div class="dmod">funasr.models.seaco_paraformer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/seaco_paraformer/model.py#L710" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Load seg dict.</p>
+<div class="api-detail" id="e230" tabindex="-1"><span class="dtag badge-f">function</span><h2><code>load_seg_dict(seg_dict_file)</code></h2><div class="dmod">funasr.models.seaco_paraformer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/seaco_paraformer/model.py#L713" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Load seg dict.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>seg_dict_file</code> — TODO.</li>
