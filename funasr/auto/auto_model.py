@@ -469,6 +469,8 @@ def prepare_data_iterator(
         if file_extension in filelist:  # filelist: wav.scp, file.jsonl;text.txt;
             with open(data_in, encoding="utf-8") as fin:
                 for line in fin:
+                    if not line.strip():
+                        continue
                     key = "rand_key_" + "".join(random.choice(chars) for _ in range(13))
                     if data_in.endswith(".jsonl"):  # file.jsonl: json.dumps({"source": data})
                         lines = json.loads(line.strip())
