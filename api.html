@@ -23548,7 +23548,7 @@
         res.append(
             {
 </code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/timestamp_tools.py#L125" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
-<div class="api-detail" id="e431" tabindex="-1"><span class="dtag badge-f">function</span><h2><code>timestamp_sentence_en(punc_id_list, timestamp_postprocessed, text_postprocessed, return_raw_text=False)</code></h2><div class="dmod">funasr.utils.timestamp_tools · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/timestamp_tools.py#L222" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Timestamp sentence en.</p>
+<div class="api-detail" id="e431" tabindex="-1"><span class="dtag badge-f">function</span><h2><code>timestamp_sentence_en(punc_id_list, timestamp_postprocessed, text_postprocessed, return_raw_text=False)</code></h2><div class="dmod">funasr.utils.timestamp_tools · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/timestamp_tools.py#L232" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Timestamp sentence en.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>punc_id_list</code> — TODO.</li>
@@ -23586,7 +23586,7 @@
                 "end": timestamp_postprocessed[-1][1],
                 "timestamp": timestamp_postprocessed,
             }
-</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/timestamp_tools.py#L222" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
+</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/timestamp_tools.py#L232" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
 <div class="api-detail" id="e432" tabindex="-1"><span class="dtag badge-c">class</span><h2><code>MakePadMask(max_seq_len=512, flip=True)</code></h2><div class="dmod">funasr.utils.torch_function · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/torch_function.py#L9" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p class="muted">No documentation yet.</p></div><details class="src-block"><summary>Source code</summary><pre><code>class MakePadMask(nn.Module):
     def __init__(self, max_seq_len=512, flip=True):
         """Initialize MakePadMask.
