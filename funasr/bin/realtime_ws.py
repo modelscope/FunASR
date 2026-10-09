@@ -1348,6 +1348,7 @@ def load_models(args):
             gpu_memory_utilization=getattr(args, 'gpu_memory_utilization', 0.8),
             max_model_len=getattr(args, 'max_model_len', 2048),
             enforce_eager=getattr(args, 'enforce_eager', False),
+            vllm_kwargs={"hf_overrides": args.hf_overrides} if args.hf_overrides else {},
         )
         _vllm_engine = RealtimeBatchingEngine(
             engine,
@@ -1620,6 +1621,12 @@ def build_arg_parser():
     parser.add_argument("--model", type=str, default="FunAudioLLM/Fun-ASR-Nano-2512")
     parser.add_argument("--hub", type=str, default="ms", choices=["ms", "hf"])
     parser.add_argument("--device", type=str, default="cuda:0")
+    parser.add_argument(
+        "--hf-overrides",
+        type=json.loads,
+        default=None,
+        help=("JSON object forwarded to the vLLM model configuration."),
+    )
     parser.add_argument(
         "--vad-device",
         type=str,
