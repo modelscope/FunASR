@@ -157,7 +157,8 @@ checkpoint/revision、音频集、硬件、批量大小、预热、计时范围�
 ## 最新动态
 
 - **MOSS-Transcribe-Diarize** 已接入 FunASR 服务、Docker、Kubernetes、vLLM/SGLang 工作流和 FunClip，一次完成长音频转写、时间戳与匿名说话人标注。[部署 MOSS ->](./docs/moss_transcribe_diarize_zh.md)
-- **FunASR 1.4.16** 修复 VAD、标点和说话人子模型在多次推理时的显式设备放置，并新增经过测试的原生 Transformers 使用指南。升级命令：`python -m pip install -U "funasr==1.4.16"`。[发布说明与验证范围 ->](https://github.com/modelscope/FunASR/releases/tag/v1.4.16)
+- **FunASR 1.4.17 发布候选**新增显式 PCM16 输入，改进时间戳、热词、说话人采样率与长片段流式处理。正式发布后安装：`python -m pip install -U "funasr==1.4.17"`。[发布说明与验证范围 ->](https://github.com/modelscope/FunASR/releases/tag/v1.4.17)
+  **FunASR 1.4.16** 仍是当前正式版本，修复 VAD、标点和说话人子模型在多次推理时的显式设备放置，并新增经过测试的原生 Transformers 使用指南。升级命令：`python -m pip install -U "funasr==1.4.16"`。[发布说明与验证范围 ->](https://github.com/modelscope/FunASR/releases/tag/v1.4.16)
 - **原生 Transformers：** 正式版 **5.17.0** 已支持 Fun-ASR-Nano。官方 `-hf` 权重、CPU 示例与 Notebook：[安装与推理 ->](./docs/transformers_native_zh.md)
 
 > 完整改动记录和可下载资产请查看 [GitHub Releases](https://github.com/modelscope/FunASR/releases)。
