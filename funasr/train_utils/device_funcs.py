@@ -66,6 +66,11 @@ def force_gatherable(data, device):
 
 _ACCELERATOR_DEVICE_TYPES = ("cuda", "npu", "xpu")
 
+#: Default ``torch.distributed`` backend for each accelerator, most preferred
+#: first. XCCL (oneCCL) is what current torch exposes for XPU; builds that
+#: predate the 2.6 rename know the same backend as ``"ccl"``.
+_ACCELERATOR_DIST_BACKENDS = {"npu": ("hccl",), "xpu": ("xccl", "ccl")}
+
 
 def _accelerator_module(device_type):
     """Return the torch submodule owning ``device_type``, or ``None``.
@@ -128,13 +133,40 @@ def set_accelerator_device(local_rank=0):
     return device_type
 
 
+def _dist_backend_available(backend):
+    """Ask torch whether ``backend`` is usable: ``is_<backend>_available()``.
+
+    A build that does not expose the probe cannot confirm anything, so it
+    reports ``False`` and the caller keeps the accelerator's canonical backend
+    name instead of inventing availability.
+    """
+    distributed = getattr(torch, "distributed", None)
+    probe = getattr(distributed, "is_{}_available".format(backend), None)
+    if probe is None:
+        return False
+    try:
+        return bool(probe())
+    except Exception:
+        return False
+
+
 def get_default_dist_backend():
     """Return the ``torch.distributed`` backend for the active accelerator.
 
-    CUDA keeps the historical ``"nccl"``; Ascend NPU uses HCCL. This is only the
-    default — an explicit ``backend=...`` still wins.
+    CUDA keeps the historical ``"nccl"``, Ascend NPU uses HCCL and XPU uses
+    XCCL (``"ccl"`` on builds older than the oneCCL rename). Candidates are
+    probed with ``torch.distributed.is_<backend>_available()`` where available
+    so the selected backend matches the build, but a non-CUDA accelerator never
+    falls back to NCCL. This is only the default — an explicit ``backend=...``
+    still wins.
     """
-    return "hccl" if get_accelerator_device_type() == "npu" else "nccl"
+    candidates = _ACCELERATOR_DIST_BACKENDS.get(get_accelerator_device_type())
+    if not candidates:
+        return "nccl"
+    for backend in candidates:
+        if _dist_backend_available(backend):
+            return backend
+    return candidates[0]
 
 
 def clear_accelerator_cache(device=None):

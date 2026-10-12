@@ -77,8 +77,29 @@ class TestAcceleratorResolution(unittest.TestCase):
         self.assertEqual(device_funcs.get_default_dist_backend(), "hccl")
         self._patch(cuda=True)
         self.assertEqual(device_funcs.get_default_dist_backend(), "nccl")
+        self._patch(xpu=True)
+        self.assertEqual(device_funcs.get_default_dist_backend(), "xccl")
         self._patch()
         self.assertEqual(device_funcs.get_default_dist_backend(), "nccl")
+
+    def test_xpu_backend_selection_is_capability_aware(self):
+        """XPU uses XCCL and never NCCL; only a build that confirms oneCCL's
+        legacy name keeps ``"ccl"``."""
+        self._patch(xpu=True)
+        with mock.patch.object(
+            device_funcs,
+            "_dist_backend_available",
+            side_effect=lambda backend: backend == "xccl",
+        ):
+            self.assertEqual(device_funcs.get_default_dist_backend(), "xccl")
+        with mock.patch.object(
+            device_funcs,
+            "_dist_backend_available",
+            side_effect=lambda backend: backend == "ccl",
+        ):
+            self.assertEqual(device_funcs.get_default_dist_backend(), "ccl")
+        with mock.patch.object(device_funcs, "_dist_backend_available", return_value=False):
+            self.assertEqual(device_funcs.get_default_dist_backend(), "xccl")
 
     def test_clear_accelerator_cache_dispatches_to_active_backend(self):
         modules = self._patch(npu=True)
