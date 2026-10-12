@@ -97,6 +97,56 @@ def test_default_batch_behavior_is_unchanged():
     assert values is data
 
 
+@pytest.mark.parametrize("container", [list, tuple])
+@pytest.mark.parametrize("input_kind", ["array", "pcm"])
+def test_batch_automatic_keys_identify_each_input(container, input_kind):
+    arrays = [np.zeros(3200, np.float32), np.ones(3200, np.float32)]
+    data = arrays if input_kind == "array" else [b"\x00\x00" * 3200, b"\x01\x00" * 3200]
+    # Repeated input objects also represent separate batch entries.
+    data = container([data[0], data[1], data[0]])
+    options = {} if input_kind == "array" else {"input_format": "pcm_s16le"}
+    keys, values = prepare_data_iterator(data, **options)
+    assert len(keys) == len(values) == 3
+    assert len(set(keys)) == 3
+    assert all(key.startswith("rand_key_") for key in keys)
+    for original, value in zip(data, values):
+        if input_kind == "array":
+            assert value is original
+        else:
+            np.testing.assert_array_equal(value, _expected(original))
+
+
+@pytest.mark.parametrize("key", ["session", ""])
+def test_array_batch_preserves_explicit_key(key):
+    data = [np.zeros(3200, np.float32), np.ones(3200, np.float32)]
+    keys, values = prepare_data_iterator(data, key=key)
+    assert keys == [key, key]
+    assert values is data
+
+
+def test_mixed_batch_does_not_reuse_path_key_for_arrays(tmp_path):
+    path = tmp_path / "recording.wav"
+    path.touch()
+    waveform = np.zeros(3200, np.float32)
+    data = [waveform, str(path), waveform, waveform]
+    keys, values = prepare_data_iterator(data)
+    assert keys[1] == "recording"
+    assert len(set(keys)) == len(data)
+    assert all(keys[index].startswith("rand_key_") for index in (0, 2, 3))
+    assert values is data
+
+
+def test_batch_path_keys_keep_existing_basename_behavior(tmp_path):
+    paths = [tmp_path / name / "recording.wav" for name in ("first", "second")]
+    for path in paths:
+        path.parent.mkdir()
+        path.touch()
+    data = [str(path) for path in paths]
+    keys, values = prepare_data_iterator(data)
+    assert keys == ["recording", "recording"]
+    assert values is data
+
+
 def test_scp_filelist_skips_blank_lines(tmp_path):
     list_path = tmp_path / "wav.scp"
     list_path.write_text("utt1 /a.wav\n\n \t \nutt2 /b.wav\n", encoding="utf-8")
@@ -148,6 +198,23 @@ def _wrapper(vad=False, default_format=None):
     wrapper.vad_kwargs = {"device": "cpu", "disable_pbar": True}
     wrapper._store_base_configs()
     return wrapper
+
+
+@pytest.mark.parametrize("batch_size", [1, 2])
+@pytest.mark.parametrize("input_kind", ["array", "pcm"])
+def test_generate_batch_results_have_distinct_automatic_keys(batch_size, input_kind):
+    arrays = [np.zeros(3200, np.float32), np.ones(3200, np.float32)]
+    data = arrays if input_kind == "array" else [b"\x00\x00" * 3200, b"\x01\x00" * 3200]
+    options = {} if input_kind == "array" else {"input_format": "pcm_s16le"}
+    wrapper = _wrapper()
+    results = wrapper.generate(input=data, batch_size=batch_size, **options)
+    assert len(results) == 2
+    assert len({result["key"]: result for result in results}) == 2
+    samples = [sample for batch, _ in wrapper.model.calls for sample in batch]
+    assert len(samples) == len(data)
+    for original, sample in zip(data, samples):
+        expected = original if input_kind == "array" else _expected(original)
+        np.testing.assert_array_equal(sample, expected)
 
 
 @pytest.mark.parametrize("vad", [False, True])

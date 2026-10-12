@@ -510,11 +510,12 @@ def prepare_data_iterator(
                     for item in data_in
                 ]
             key_list = []
+            has_explicit_key = key is not None
             for data_i in data_in:
                 if isinstance(data_i, str) and os.path.exists(data_i):
                     key = misc.extract_filename_without_extension(data_i)
                 else:
-                    if key is None:
+                    if not has_explicit_key:
                         key = "rand_key_" + "".join(random.choice(chars) for _ in range(13))
                 key_list.append(key)
 
