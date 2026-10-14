@@ -6,10 +6,10 @@
 SenseVoice is a speech foundation model with multiple speech understanding capabilities, including automatic speech recognition (ASR),  spoken language identification (LID), speech emotion recognition (SER), and audio event detection (AED). 
 
 <div align="center">  
-<img src="image/sensevoice2.png">
+<img src="https://raw.githubusercontent.com/QwenAudio/SenseVoice/main/image/sensevoice2.png">
 </div>
 
-[//]: # (<div align="center"><img src="image/sensevoice.png" width="700"/> </div>)
+[//]: # (<div align="center"><img src="https://raw.githubusercontent.com/QwenAudio/SenseVoice/main/image/sensevoice.png" width="700"/> </div>)
 
 <div align="center">  
 <h4>
@@ -56,7 +56,7 @@ Online Demo:
 We compared the performance of multilingual speech recognition between SenseVoice and Whisper on open-source benchmark datasets, including AISHELL-1, AISHELL-2, Wenetspeech, LibriSpeech, and Common Voice. In terms of Chinese and Cantonese recognition, the SenseVoice-Small model has advantages.
 
 <div align="center">  
-<img src="image/asr_results1.png" width="400" /><img src="image/asr_results2.png" width="400" />
+<img src="https://raw.githubusercontent.com/QwenAudio/SenseVoice/main/image/asr_results1.png" width="400" /><img src="https://raw.githubusercontent.com/QwenAudio/SenseVoice/main/image/asr_results2.png" width="400" />
 </div>
 
 ## Speech Emotion Recognition
@@ -64,13 +64,13 @@ We compared the performance of multilingual speech recognition between SenseVoic
 Due to the current lack of widely-used benchmarks and methods for speech emotion recognition, we conducted evaluations across various metrics on multiple test sets and performed a comprehensive comparison with numerous results from recent benchmarks. The selected test sets encompass data in both Chinese and English, and include multiple styles such as performances, films, and natural conversations. Without finetuning on the target data, SenseVoice was able to achieve and exceed the performance of the current best speech emotion recognition models.
 
 <div align="center">  
-<img src="image/ser_table.png" width="1000" />
+<img src="https://raw.githubusercontent.com/QwenAudio/SenseVoice/main/image/ser_table.png" width="1000" />
 </div>
 
 Furthermore, we compared multiple open-source speech emotion recognition models on the test sets, and the results indicate that the SenseVoice-Large model achieved the best performance on nearly all datasets, while the SenseVoice-Small model also surpassed other open-source models on the majority of the datasets.
 
 <div align="center">  
-<img src="image/ser_figure.png" width="500" />
+<img src="https://raw.githubusercontent.com/QwenAudio/SenseVoice/main/image/ser_figure.png" width="500" />
 </div>
 
 ## Audio Event Detection
@@ -78,7 +78,7 @@ Furthermore, we compared multiple open-source speech emotion recognition models 
 Although trained exclusively on speech data, SenseVoice can still function as a standalone event detection model. We compared its performance on the environmental sound classification ESC-50 dataset against the widely used industry models BEATS and PANN. The SenseVoice model achieved commendable results on these tasks. However, due to limitations in training data and methodology, its event classification performance has some gaps compared to specialized AED models.
 
 <div align="center">  
-<img src="image/aed_figure.png" width="500" />
+<img src="https://raw.githubusercontent.com/QwenAudio/SenseVoice/main/image/aed_figure.png" width="500" />
 </div>
 
 ## Computational  Efficiency
@@ -86,7 +86,7 @@ Although trained exclusively on speech data, SenseVoice can still function as a 
 The SenseVoice-Small model deploys a non-autoregressive end-to-end architecture, resulting in extremely low inference latency. With a similar number of parameters to the Whisper-Small model, it infers more than 5 times faster than Whisper-Small and 15 times faster than Whisper-Large. 
 
 <div align="center">  
-<img src="image/inference.png" width="1000" />
+<img src="https://raw.githubusercontent.com/QwenAudio/SenseVoice/main/image/inference.png" width="1000" />
 </div>
 
 
@@ -360,7 +360,7 @@ For adding a new accent, language, or domain while retaining existing capabiliti
 python webui.py
 ```
 
-<div align="center"><img src="image/webui.png" width="700"/> </div>
+<div align="center"><img src="https://raw.githubusercontent.com/QwenAudio/SenseVoice/main/image/webui.png" width="700"/> </div>
 
 
 ## Remarkable Third-Party Work
@@ -378,6 +378,6 @@ You can also scan the following DingTalk group QR code to join the community gro
 
 |                          FunASR                          |
 |:--------------------------------------------------------:|
-| <img src="image/dingding_funasr.png" width="250"/></div> |
+| <img src="https://raw.githubusercontent.com/QwenAudio/SenseVoice/main/image/dingding_funasr.png" width="250"/></div> |
 
 
