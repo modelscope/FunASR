@@ -19,8 +19,8 @@ def gen_scp_from_jsonl(jsonl_file, data_type_list, wav_scp_file, text_file):
             wav_scp_file: TODO.
             text_file: TODO.
         """
-    wav_f = open(wav_scp_file, "w")
-    text_f = open(text_file, "w")
+    wav_f = open(wav_scp_file, "w", encoding="utf-8")
+    text_f = open(text_file, "w", encoding="utf-8")
     with open(jsonl_file, encoding="utf-8") as fin:
         for line in fin:
             data = json.loads(line.strip())

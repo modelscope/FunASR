@@ -34,7 +34,7 @@ def gen_jsonl_from_wav_text_list(
         json_dict = {}
         for data_type, data_file in zip(data_type_list, path):
             json_dict[data_type] = {}
-            with open(data_file, "r") as f:
+            with open(data_file, "r", encoding="utf-8") as f:
 
                 data_file_lists = f.readlines()
                 lines_for_each_th = (len(data_file_lists) - 1) // cpu_cores + 1
@@ -62,7 +62,7 @@ def gen_jsonl_from_wav_text_list(
                     res = parse_context_length(data_file_lists, data_type)
                     json_dict[data_type].update(res)
 
-        with open(jsonl_file_out, "w") as f:
+        with open(jsonl_file_out, "w", encoding="utf-8") as f:
             for key in json_dict[data_type_list[0]].keys():
                 jsonl_line = {"key": key}
                 for data_file in data_type_list:
