@@ -29389,8 +29389,8 @@ Then run Python (api_key is a placeholder, not authentication):
             wav_scp_file: TODO.
             text_file: TODO.
         """
-    wav_f = open(wav_scp_file, "w")
-    text_f = open(text_file, "w")
+    wav_f = open(wav_scp_file, "w", encoding="utf-8")
+    text_f = open(text_file, "w", encoding="utf-8")
     with open(jsonl_file, encoding="utf-8") as fin:
         for line in fin:
             data = json.loads(line.strip())
@@ -30010,7 +30010,7 @@ Then run Python (api_key is a placeholder, not authentication):
         json_dict = {}
         for data_type, data_file in zip(data_type_list, path):
             json_dict[data_type] = {}
-            with open(data_file, "r") as f:
+            with open(data_file, "r", encoding="utf-8") as f:
 
                 data_file_lists = f.readlines()
                 lines_for_each_th = (len(data_file_lists) - 1) // cpu_cores + 1
@@ -30213,7 +30213,7 @@ Then run Python (api_key is a placeholder, not authentication):
         json_dict = {}
         for data_type, data_file in zip(data_type_list, path):
             json_dict[data_type] = {}
-            with open(data_file, "r") as f:
+            with open(data_file, "r", encoding="utf-8") as f:
 
                 data_file_lists = f.readlines()
                 lines_for_each_th = (len(data_file_lists) - 1) // cpu_cores + 1
