@@ -10,6 +10,7 @@ import unittest
 from unittest import mock
 import wave
 
+import pytest
 import numpy as np
 
 
@@ -87,6 +88,69 @@ def _free_format_mp3_bytes():
     for offset in (0, 144, 288, 432, 576):
         data[offset + 2] &= 0x0F
     return bytes(data)
+
+
+@pytest.mark.parametrize("without_torchaudio", [False, True])
+@pytest.mark.parametrize("as_file", [False, True], ids=["bytesio", "path"])
+@pytest.mark.parametrize("source_rate", [8000, 16000, 48000])
+@pytest.mark.parametrize("channels", [1, 2, 3])
+@pytest.mark.parametrize("reduce_channels", [False, True])
+def test_soundfile_channel_layout(
+    without_torchaudio,
+    as_file,
+    source_rate,
+    channels,
+    reduce_channels,
+    monkeypatch,
+    tmp_path,
+):
+    import torch
+
+    times = np.arange(source_rate // 10) / source_rate
+    samples = np.stack(
+        [np.sin(2 * np.pi * (440 + 220 * channel) * times) for channel in range(channels)],
+        axis=1,
+    )
+    pcm = np.round(samples * 12000).astype("<i2")
+    stream = io.BytesIO()
+    with wave.open(stream, "wb") as wav_file:
+        wav_file.setnchannels(channels)
+        wav_file.setsampwidth(2)
+        wav_file.setframerate(source_rate)
+        wav_file.writeframes(pcm.tobytes())
+    if as_file:
+        path = tmp_path / "channels.wav"
+        path.write_bytes(stream.getvalue())
+        source = str(path)
+    else:
+        source = stream
+
+    def fail_torchaudio_load(*args, **kwargs):
+        raise RuntimeError("Exercise the soundfile fallback")
+
+    def forbid_ffmpeg(*args, **kwargs):
+        raise AssertionError("The generated WAV must be decoded by soundfile")
+
+    if without_torchaudio:
+        monkeypatch.setattr(LOAD_UTILS, "torchaudio", None)
+    else:
+        if LOAD_UTILS.torchaudio is None:
+            pytest.skip("torchaudio is not installed")
+        monkeypatch.setattr(LOAD_UTILS.torchaudio, "load", fail_torchaudio_load)
+    monkeypatch.setattr(LOAD_UTILS, "_load_audio_ffmpeg", forbid_ffmpeg)
+
+    # In-memory tensors already use [channels, samples], as torchaudio.load does.
+    reference = torch.from_numpy(pcm.T.astype(np.float32) / 32768.0)
+    if reduce_channels:
+        reference = reference.mean(0)
+    expected = LOAD_UTILS.load_audio_text_image_video(reference, fs=16000, audio_fs=source_rate)
+    actual = LOAD_UTILS.load_audio_text_image_video(
+        source, fs=16000, reduce_channels=reduce_channels
+    )
+
+    assert actual.shape == ((1600,) if reduce_channels else (channels, 1600))
+    assert actual.dtype == torch.float32
+    torch.testing.assert_close(actual, expected, rtol=0, atol=1e-6)
 
 
 class TestLoadAudioBytes(unittest.TestCase):

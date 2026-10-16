@@ -133,10 +133,14 @@ def load_audio_text_image_video(
                     if hasattr(data_or_path_or_list, "seek"):
                         data_or_path_or_list.seek(0)
                     import soundfile as sf
-                    data_np, audio_fs = sf.read(data_or_path_or_list, dtype="float32")
-                    data_or_path_or_list = torch.from_numpy(data_np).squeeze()
-                    if data_or_path_or_list.ndim > 1 and kwargs.get("reduce_channels", True):
-                        data_or_path_or_list = data_or_path_or_list.mean(-1)
+                    data_np, audio_fs = sf.read(
+                        data_or_path_or_list, dtype="float32", always_2d=True
+                    )
+                    # Match torchaudio's [channels, samples] layout so resampling
+                    # always operates on the sample axis, including retained channels.
+                    data_or_path_or_list = torch.from_numpy(data_np.T)
+                    if kwargs.get("reduce_channels", True):
+                        data_or_path_or_list = data_or_path_or_list.mean(0)
                 except:
                     if hasattr(data_or_path_or_list, "seek"):
                         data_or_path_or_list.seek(0)
