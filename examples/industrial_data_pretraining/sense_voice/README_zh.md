@@ -5,7 +5,7 @@
 SenseVoice 是具有音频理解能力的音频基础模型，包括语音识别（ASR）、语种识别（LID）、语音情感识别（SER）和声学事件分类（AEC）或声学事件检测（AED）。本项目提供 SenseVoice 模型的介绍以及在多个任务测试集上的 benchmark，以及体验模型所需的环境安装的与推理方式。
 
 <div align="center">  
-<img src="image/sensevoice2.png">
+<img src="https://raw.githubusercontent.com/QwenAudio/SenseVoice/main/image/sensevoice2.png">
 </div>
 
 <div align="center">  
@@ -58,7 +58,7 @@ SenseVoice 是具有音频理解能力的音频基础模型，包括语音识别
 我们在开源基准数据集（包括 AISHELL-1、AISHELL-2、Wenetspeech、Librispeech 和 Common Voice）上比较了 SenseVoice 与 Whisper 的多语言语音识别性能和推理效率。在中文和粤语识别效果上，SenseVoice-Small 模型具有明显的效果优势。
 
 <div align="center">  
-<img src="image/asr_results1.png" width="400" /><img src="image/asr_results2.png" width="400" />
+<img src="https://raw.githubusercontent.com/QwenAudio/SenseVoice/main/image/asr_results1.png" width="400" /><img src="https://raw.githubusercontent.com/QwenAudio/SenseVoice/main/image/asr_results2.png" width="400" />
 </div>
 
 ## 情感识别
@@ -66,13 +66,13 @@ SenseVoice 是具有音频理解能力的音频基础模型，包括语音识别
 由于目前缺乏被广泛使用的情感识别测试指标和方法，我们在多个测试集的多种指标进行测试，并与近年来 Benchmark 上的多个结果进行了全面的对比。所选取的测试集同时包含中文 / 英文两种语言以及表演、影视剧、自然对话等多种风格的数据，在不进行目标数据微调的前提下，SenseVoice 能够在测试数据上达到和超过目前最佳情感识别模型的效果。
 
 <div align="center">  
-<img src="image/ser_table.png" width="1000" />
+<img src="https://raw.githubusercontent.com/QwenAudio/SenseVoice/main/image/ser_table.png" width="1000" />
 </div>
 
 同时，我们还在测试集上对多个开源情感识别模型进行对比，结果表明，SenseVoice-Large 模型可以在几乎所有数据上都达到了最佳效果，而 SenseVoice-Small 模型同样可以在多数数据集上取得超越其他开源模型的效果。
 
 <div align="center">  
-<img src="image/ser_figure.png" width="500" />
+<img src="https://raw.githubusercontent.com/QwenAudio/SenseVoice/main/image/ser_figure.png" width="500" />
 </div>
 
 ## 事件检测
@@ -80,7 +80,7 @@ SenseVoice 是具有音频理解能力的音频基础模型，包括语音识别
 尽管 SenseVoice 只在语音数据上进行训练，它仍然可以作为事件检测模型进行单独使用。我们在环境音分类 ESC-50 数据集上与目前业内广泛使用的 BEATS 与 PANN 模型的效果进行了对比。SenseVoice 模型能够在这些任务上取得较好的效果，但受限于训练数据与训练方式，其事件分类效果专业的事件检测模型相比仍然有一定的差距。
 
 <div align="center">  
-<img src="image/aed_figure.png" width="500" />
+<img src="https://raw.githubusercontent.com/QwenAudio/SenseVoice/main/image/aed_figure.png" width="500" />
 </div>
 
 ## 推理效率
@@ -88,7 +88,7 @@ SenseVoice 是具有音频理解能力的音频基础模型，包括语音识别
 SenseVoice-small 模型采用非自回归端到端架构，推理延迟极低。在参数量与 Whisper-Small 模型相当的情况下，比 Whisper-Small 模型推理速度快 5 倍，比 Whisper-Large 模型快 15 倍。同时 SenseVoice-small 模型在音频时长增加的情况下，推理耗时也无明显增加。
 
 <div align="center">  
-<img src="image/inference.png" width="1000" />
+<img src="https://raw.githubusercontent.com/QwenAudio/SenseVoice/main/image/inference.png" width="1000" />
 </div>
 
 <a name="环境安装"></a>
@@ -388,7 +388,7 @@ bash finetune.sh
 python webui.py
 ```
 
-<div align="center"><img src="image/webui.png" width="700"/> </div>
+<div align="center"><img src="https://raw.githubusercontent.com/QwenAudio/SenseVoice/main/image/webui.png" width="700"/> </div>
 
 ## 优秀三方工作
 
@@ -404,4 +404,4 @@ python webui.py
 
 |                          FunASR                          |
 |:--------------------------------------------------------:|
-| <img src="image/dingding_funasr.png" width="250"/></div> |
+| <img src="https://raw.githubusercontent.com/QwenAudio/SenseVoice/main/image/dingding_funasr.png" width="250"/></div> |

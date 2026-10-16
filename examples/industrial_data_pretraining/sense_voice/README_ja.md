@@ -5,9 +5,9 @@
 SenseVoiceは、音声認識（ASR）、言語識別（LID）、音声感情認識（SER）、および音響イベント分類（AEC）または音響イベント検出（AED）を含む音声理解能力を備えた音声基盤モデルです。本プロジェクトでは、SenseVoiceモデルの紹介と、複数のタスクテストセットでのベンチマーク、およびモデルの体験に必要な環境のインストールと推論方法を提供します。
 
 <div align="center">  
-<img src="image/sensevoice2.png">
+<img src="https://raw.githubusercontent.com/QwenAudio/SenseVoice/main/image/sensevoice2.png">
 </div>
-[//]: # (<div align="center"><img src="image/sensevoice2.png" width="700"/> </div>)
+[//]: # (<div align="center"><img src="https://raw.githubusercontent.com/QwenAudio/SenseVoice/main/image/sensevoice2.png" width="700"/> </div>)
  
 <div align="center">  
 <h4>
@@ -52,7 +52,7 @@ SenseVoiceは、音声認識（ASR）、言語識別（LID）、音声感情認�
 オープンソースのベンチマークデータセット（AISHELL-1、AISHELL-2、Wenetspeech、Librispeech、Common Voiceを含む）でSenseVoiceとWhisperの多言語音声認識性能と推論効率を比較しました。中国語と広東語の認識効果において、SenseVoice-Smallモデルは明らかな効果の優位性を持っています。
 
 <div align="center">  
-<img src="image/asr_results1.png" width="400" /><img src="image/asr_results2.png" width="400" />
+<img src="https://raw.githubusercontent.com/QwenAudio/SenseVoice/main/image/asr_results1.png" width="400" /><img src="https://raw.githubusercontent.com/QwenAudio/SenseVoice/main/image/asr_results2.png" width="400" />
 </div>
 
 ## 感情認識
@@ -60,13 +60,13 @@ SenseVoiceは、音声認識（ASR）、言語識別（LID）、音声感情認�
 現在、広く使用されている感情認識のテスト指標と方法が不足しているため、複数のテストセットでさまざまな指標をテストし、最近のベンチマークの複数の結果と包括的に比較しました。選択されたテストセットには、中国語/英語の両方の言語と、パフォーマンス、映画、自然な会話などのさまざまなスタイルのデータが含まれています。ターゲットデータの微調整を行わない前提で、SenseVoiceはテストデータで現在の最良の感情認識モデルの効果を達成および上回ることができました。
 
 <div align="center">  
-<img src="image/ser_table.png" width="1000" />
+<img src="https://raw.githubusercontent.com/QwenAudio/SenseVoice/main/image/ser_table.png" width="1000" />
 </div>
 
 さらに、テストセットで複数のオープンソースの感情認識モデルを比較し、結果はSenseVoice-Largeモデルがほぼすべてのデータで最良の効果を達成し、SenseVoice-Smallモデルも多数のデータセットで他のオープンソースモデルを上回る効果を達成したことを示しています。
 
 <div align="center">  
-<img src="image/ser_figure.png" width="500" />
+<img src="https://raw.githubusercontent.com/QwenAudio/SenseVoice/main/image/ser_figure.png" width="500" />
 </div>
 
 ## イベント検出
@@ -74,7 +74,7 @@ SenseVoiceは、音声認識（ASR）、言語識別（LID）、音声感情認�
 SenseVoiceは音声データのみでトレーニングされていますが、イベント検出モデルとして単独で使用することもできます。環境音分類ESC-50データセットで、現在業界で広く使用されているBEATSおよびPANNモデルの効果と比較しました。SenseVoiceモデルはこれらのタスクで良好な効果を達成しましたが、トレーニングデータとトレーニング方法の制約により、イベント分類の効果は専門のイベント検出モデルと比較してまだ一定の差があります。
 
 <div align="center">  
-<img src="image/aed_figure.png" width="500" />
+<img src="https://raw.githubusercontent.com/QwenAudio/SenseVoice/main/image/aed_figure.png" width="500" />
 </div>
 
 ## 推論効率
@@ -82,7 +82,7 @@ SenseVoiceは音声データのみでトレーニングされていますが、�
 SenseVoice-smallモデルは非自己回帰エンドツーエンドアーキテクチャを採用しており、推論遅延が非常に低いです。Whisper-Smallモデルと同等のパラメータ量で、Whisper-Smallモデルより5倍高速で、Whisper-Largeモデルより15倍高速です。同時に、SenseVoice-smallモデルは音声の長さが増加しても、推論時間に明らかな増加はありません。
 
 <div align="center">  
-<img src="image/inference.png" width="1000" />
+<img src="https://raw.githubusercontent.com/QwenAudio/SenseVoice/main/image/inference.png" width="1000" />
 </div>
 
 <a name="环境安装"></a>
@@ -339,7 +339,7 @@ bash finetune.sh
 python webui.py
 ```
 
-<div align="center"><img src="image/webui.png" width="700"/> </div>
+<div align="center"><img src="https://raw.githubusercontent.com/QwenAudio/SenseVoice/main/image/webui.png" width="700"/> </div>
 
 ## 注目すべきサードパーティの取り組み
 - Triton (GPU) デプロイメントのベストプラクティス：Triton + TensorRT を使用し、FP32 でテスト。V100 GPU で加速比 526 を達成。FP16 のサポートは進行中です。[リポジトリ](https://github.com/modelscope/FunASR/blob/main/runtime/triton_gpu/README.md)
@@ -354,5 +354,5 @@ python webui.py
 
 |                          FunASR                          |
 |:--------------------------------------------------------:|
-| <img src="image/dingding_funasr.png" width="250"/></div> |
+| <img src="https://raw.githubusercontent.com/QwenAudio/SenseVoice/main/image/dingding_funasr.png" width="250"/></div> |
 
