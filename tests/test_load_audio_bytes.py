@@ -11,6 +11,8 @@ from unittest import mock
 import wave
 
 import numpy as np
+import pytest
+import soundfile as sf
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -46,6 +48,13 @@ def _load_utils_module():
 
 
 LOAD_UTILS = _load_utils_module()
+
+
+def _consume_then_fail(value, *args, **kwargs):
+    if hasattr(value, "read"):
+        value.read()
+    raise RuntimeError("decoder unavailable")
+
 
 # 80 ms, 16 kHz mono, generated without ID3 or Xing metadata by ffmpeg 6.1.1.
 NO_ID3_MP3 = base64.b64decode(
@@ -229,6 +238,111 @@ class TestLoadAudioBytes(unittest.TestCase):
 
         with self.assertRaisesRegex(RuntimeError, "complete supported audio file"):
             LOAD_UTILS.load_bytes(corrupt_wav)
+
+
+@pytest.mark.skipif(not LOAD_UTILS.is_ffmpeg_installed(), reason="ffmpeg is required")
+@pytest.mark.parametrize("source_rate", [8000, 16000, 48000])
+@pytest.mark.parametrize("target_rate", [16000, 24000])
+@pytest.mark.parametrize("rate_hint", [8000, 16000, 48000])
+@pytest.mark.parametrize("file_like", [False, True])
+def test_ffmpeg_fallback_uses_decoded_rate(
+    source_rate, target_rate, rate_hint, file_like, tmp_path, monkeypatch
+):
+    samples = _sine_pcm(source_rate, duration=1.0)
+    wav_data = _wav_bytes(samples, source_rate)
+    path = tmp_path / "audio.wav"
+    path.write_bytes(wav_data)
+    source = io.BytesIO(wav_data) if file_like else str(path)
+    expected = LOAD_UTILS._load_audio_ffmpeg(str(path), sr=target_rate)
+    monkeypatch.setattr(LOAD_UTILS.torchaudio, "load", _consume_then_fail)
+    monkeypatch.setattr(sf, "read", _consume_then_fail)
+
+    actual = LOAD_UTILS.load_audio_text_image_video(
+        source, fs=target_rate, audio_fs=rate_hint
+    )
+
+    assert len(actual) == target_rate
+    np.testing.assert_array_equal(actual, expected)
+
+
+@pytest.mark.skipif(not LOAD_UTILS.is_ffmpeg_installed(), reason="ffmpeg is required")
+@pytest.mark.parametrize("source_rate", [8000, 48000])
+def test_ffmpeg_fallback_without_torchaudio(source_rate, monkeypatch):
+    source = io.BytesIO(_wav_bytes(_sine_pcm(source_rate, 1.0), source_rate))
+    expected = LOAD_UTILS._load_audio_ffmpeg(source, sr=16000)
+    monkeypatch.setattr(LOAD_UTILS, "torchaudio", None)
+    monkeypatch.setattr(sf, "read", _consume_then_fail)
+
+    actual = LOAD_UTILS.load_audio_text_image_video(
+        source, fs=16000, audio_fs=source_rate
+    )
+
+    assert len(actual) == 16000
+    np.testing.assert_array_equal(actual, expected)
+
+
+@pytest.mark.parametrize("source_rate", [8000, 16000, 48000])
+@pytest.mark.parametrize("target_rate", [16000, 24000])
+@pytest.mark.parametrize("decoder", ["torchaudio", "soundfile"])
+def test_normal_decoders_use_container_rate(
+    source_rate, target_rate, decoder, tmp_path, monkeypatch
+):
+    samples = _sine_pcm(source_rate, duration=1.0)
+    path = tmp_path / "audio.wav"
+    path.write_bytes(_wav_bytes(samples, source_rate))
+    if decoder == "soundfile":
+        monkeypatch.setattr(LOAD_UTILS.torchaudio, "load", _consume_then_fail)
+    else:
+        # torchaudio 2.9+ requires the optional torchcodec package to load audio.
+        try:
+            LOAD_UTILS.torchaudio.load(str(path))
+        except (ImportError, RuntimeError) as error:
+            pytest.skip(f"torchaudio decoder unavailable: {error}")
+        monkeypatch.setattr(sf, "read", mock.Mock(side_effect=AssertionError))
+    fallback = mock.Mock(side_effect=AssertionError("unexpected ffmpeg fallback"))
+    monkeypatch.setattr(LOAD_UTILS, "_load_audio_ffmpeg", fallback)
+
+    actual = LOAD_UTILS.load_audio_text_image_video(
+        str(path), fs=target_rate, audio_fs=12345
+    )
+
+    assert len(actual) == target_rate
+    expected = _sine_pcm(target_rate, 1.0).astype(np.float32) / 32768.0
+    np.testing.assert_allclose(actual[100:-100], expected[100:-100], atol=0.001)
+    fallback.assert_not_called()
+
+
+@pytest.mark.skipif(not LOAD_UTILS.is_ffmpeg_installed(), reason="ffmpeg is required")
+@pytest.mark.parametrize("source_rate", [8000, 16000, 48000])
+@pytest.mark.parametrize("target_rate", [16000, 24000])
+def test_ffmpeg_raw_pcm_preserves_source_rate(
+    source_rate, target_rate, tmp_path, monkeypatch
+):
+    samples = _sine_pcm(source_rate, duration=1.0)
+    path = tmp_path / "audio.pcm"
+    path.write_bytes(samples.astype("<i2").tobytes())
+    monkeypatch.setattr(LOAD_UTILS.torchaudio, "load", _consume_then_fail)
+    monkeypatch.setattr(sf, "read", _consume_then_fail)
+
+    actual = LOAD_UTILS.load_audio_text_image_video(
+        str(path), fs=target_rate, audio_fs=source_rate
+    )
+
+    assert len(actual) == target_rate
+    expected = _sine_pcm(target_rate, 1.0).astype(np.float32) / 32768.0
+    np.testing.assert_allclose(actual[100:-100], expected[100:-100], atol=0.001)
+
+
+@pytest.mark.skipif(not LOAD_UTILS.is_ffmpeg_installed(), reason="ffmpeg is required")
+@pytest.mark.parametrize("sample_rate", [8000, 16000, 48000])
+def test_direct_ffmpeg_raw_pcm_defaults_to_requested_rate(sample_rate, tmp_path):
+    samples = _sine_pcm(sample_rate, duration=1.0)
+    path = tmp_path / "audio.pcm"
+    path.write_bytes(samples.astype("<i2").tobytes())
+
+    actual = LOAD_UTILS._load_audio_ffmpeg(str(path), sr=sample_rate)
+
+    np.testing.assert_array_equal(actual, samples.astype(np.float32) / 32768.0)
 
 
 if __name__ == "__main__":
