@@ -11,7 +11,7 @@ from contextlib import nullcontext, contextmanager
 from pathlib import Path
 from torch.nn.parallel import DistributedDataParallel as DDP
 from torch.distributed.fsdp import FullyShardedDataParallel as FSDP
-from funasr.train_utils.device_funcs import to_device
+from funasr.train_utils.device_funcs import accelerator_device, to_device
 from funasr.train_utils.recursive_op import recursive_average
 from funasr.train_utils.average_nbest_models import average_checkpoints
 from funasr.train_utils.checkpoint_metrics import (
@@ -1027,7 +1027,7 @@ class Trainer:
 
         elif self.use_ddp:
             local_rank = int(os.environ.get("LOCAL_RANK", 0))
-            model = model.cuda(local_rank)
+            model = model.to(accelerator_device(local_rank))
             model = DDP(
                 model,
                 device_ids=[local_rank],

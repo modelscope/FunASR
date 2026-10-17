@@ -32,6 +32,12 @@ from funasr.train_utils.initialize import initialize
 from funasr.download.download_model_from_hub import download_model
 from funasr.models.lora.utils import mark_only_lora_as_trainable
 from funasr.train_utils.set_all_random_seed import set_all_random_seed
+from funasr.train_utils.device_funcs import (
+    accelerator_device,
+    clear_accelerator_cache,
+    get_default_dist_backend,
+    set_accelerator_device,
+)
 from funasr.train_utils.load_pretrained_model import load_pretrained_model
 from funasr.utils.misc import prepare_model_dir
 from funasr.train_utils.model_summary import model_summary
@@ -81,8 +87,11 @@ def main(**kwargs):
     use_fsdp = kwargs.get("use_fsdp", False)
     # use_ddp = False if use_fsdp else use_fsdp
     if use_ddp or use_fsdp:
-        dist.init_process_group(backend=kwargs.get("backend", "nccl"), init_method="env://")
-        torch.cuda.set_device(local_rank)
+        dist.init_process_group(
+            backend=kwargs.get("backend", get_default_dist_backend()),
+            init_method="env://",
+        )
+        set_accelerator_device(local_rank)
 
     logging.info("Build model, frontend, tokenizer")
     device = kwargs.get("device", "cuda")
@@ -128,7 +137,7 @@ def main(**kwargs):
         logging.info(f"{model_summary(model)}")
 
     if use_ddp:
-        model = model.cuda(local_rank)
+        model = model.to(accelerator_device(local_rank))
         model = DDP(
             model,
             device_ids=[local_rank],
@@ -161,12 +170,12 @@ def main(**kwargs):
 
         # Configure a custom `min_num_params`
         my_auto_wrap_policy = functools.partial(custom_auto_wrap_policy, min_num_params=int(1e5))
-        torch.cuda.set_device(local_rank)
+        set_accelerator_device(local_rank)
         model = FSDP(
             model,
             auto_wrap_policy=custom_auto_wrap_policy,
             mixed_precision=None,
-            device_id=torch.cuda.current_device(),
+            device_id=local_rank,
         )
     else:
         model = model.to(device=kwargs.get("device", "cuda"))
@@ -246,9 +255,7 @@ def main(**kwargs):
             trainer.start_step = 0
 
             device = next(model.parameters()).device
-            if device.type == "cuda":
-                with torch.cuda.device(device):
-                    torch.cuda.empty_cache()
+            clear_accelerator_cache(device)
 
             time_escaped = (time.perf_counter() - time_slice_i) / 3600.0
             logging.info(

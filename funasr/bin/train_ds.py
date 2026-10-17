@@ -30,6 +30,11 @@ from funasr.train_utils.initialize import initialize
 from funasr.download.download_model_from_hub import download_model
 from funasr.models.lora.utils import mark_only_lora_as_trainable
 from funasr.train_utils.set_all_random_seed import set_all_random_seed
+from funasr.train_utils.device_funcs import (
+    clear_accelerator_cache,
+    get_default_dist_backend,
+    set_accelerator_device,
+)
 from funasr.train_utils.load_pretrained_model import load_pretrained_model
 from funasr.utils.misc import prepare_model_dir
 from funasr.train_utils.model_summary import model_summary
@@ -121,16 +126,17 @@ def main(**kwargs):
         deepspeed_config,
         trainer_conf,
     ) = _resolve_distributed_config(kwargs, world_size)
+    dist_backend = kwargs.get("backend", get_default_dist_backend())
     if use_deepspeed:
         logging.info(f"use_deepspeed: {use_deepspeed}")
-        deepspeed.init_distributed(dist_backend=kwargs.get("backend", "nccl"))
+        deepspeed.init_distributed(dist_backend=dist_backend)
     elif use_ddp or use_fsdp:
         logging.info(f"use_ddp: {use_ddp}, use_fsdp: {use_fsdp}")
         dist.init_process_group(
-            backend=kwargs.get("backend", "nccl"),
+            backend=dist_backend,
             init_method="env://",
         )
-        torch.cuda.set_device(local_rank)
+        set_accelerator_device(local_rank)
 
     # rank = dist.get_rank()
 
@@ -241,9 +247,7 @@ def main(**kwargs):
             trainer.start_step = 0
 
             device = next(model.parameters()).device
-            if device.type == "cuda":
-                with torch.cuda.device(device):
-                    torch.cuda.empty_cache()
+            clear_accelerator_cache(device)
 
             time_escaped = (time.perf_counter() - time_slice_i) / 3600.0
             logging.info(
