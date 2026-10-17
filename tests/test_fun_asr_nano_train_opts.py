@@ -6,6 +6,7 @@ import os
 import re
 import sys
 import types
+from unittest.mock import Mock
 
 import pytest
 import torch
@@ -78,6 +79,32 @@ def _load_recipe_model():
 @pytest.fixture(scope="module", params=["funasr", "recipe"])
 def model_class(request):
     return funasr_model.FunASRNano if request.param == "funasr" else _load_recipe_model()
+
+
+@pytest.mark.parametrize("options", [{}, {"fs": 16000}, {"fs": 48000, "audio_fs": 48000}])
+@pytest.mark.parametrize("fail", [False, True])
+def test_audio_loading(model_class, monkeypatch, options, fail):
+    module = sys.modules[model_class.__module__]
+    error = OSError("Cannot decode audio")
+    loader = Mock(side_effect=error) if fail else Mock(return_value=torch.zeros(160))
+    extract = Mock(return_value=(torch.zeros(1, 4, 80), torch.tensor([4])))
+    monkeypatch.setattr(module, "load_audio_text_image_video", loader)
+    monkeypatch.setattr(module, "extract_fbank", extract)
+    args = (
+        types.SimpleNamespace(use_low_frame_rate=False),
+        {"system": [""], "user": ["<|startofspeech|>!sample.wav<|endofspeech|>"], "assistant": [""]},
+        types.SimpleNamespace(encode=lambda text: [1]),
+        types.SimpleNamespace(fs=16000, frame_shift=10, lfr_n=1),
+    )
+    if fail:
+        with pytest.raises(OSError) as caught:
+            model_class.data_load_speech(*args, meta_data={}, **options)
+        assert caught.value is error
+        extract.assert_not_called()
+    else:
+        output = model_class.data_load_speech(*args, meta_data={}, **options)
+        assert output["speech"].shape == (1, 4, 80)
+    loader.assert_called_once_with("sample.wav", **{**options, "fs": 16000})
 
 
 @pytest.fixture
