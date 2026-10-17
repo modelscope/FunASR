@@ -77,29 +77,27 @@ class TestAcceleratorResolution(unittest.TestCase):
         self.assertEqual(device_funcs.get_default_dist_backend(), "hccl")
         self._patch(cuda=True)
         self.assertEqual(device_funcs.get_default_dist_backend(), "nccl")
-        self._patch(xpu=True)
-        self.assertEqual(device_funcs.get_default_dist_backend(), "xccl")
         self._patch()
         self.assertEqual(device_funcs.get_default_dist_backend(), "nccl")
 
-    def test_xpu_backend_selection_is_capability_aware(self):
-        """XPU uses XCCL and never NCCL; only a build that confirms oneCCL's
-        legacy name keeps ``"ccl"``."""
+    def test_npu_backend_needs_no_capability_probe(self):
+        """HCCL is the canonical backend name for Ascend NPU, so a build that
+        exposes no ``is_hccl_available()`` probe still resolves to it."""
+        self._patch(npu=True)
+        with mock.patch.object(device_funcs, "_dist_backend_available", return_value=False):
+            self.assertEqual(device_funcs.get_default_dist_backend(), "hccl")
+
+    def test_xpu_keeps_the_historical_nccl_default(self):
+        """XPU is a valid ``torch.distributed`` backend (XCCL / oneCCL), but this
+        change has no XPU hardware to exercise it, so it must not advertise XCCL:
+        the value for an XPU run stays exactly what it was before the change."""
         self._patch(xpu=True)
         with mock.patch.object(
             device_funcs,
             "_dist_backend_available",
             side_effect=lambda backend: backend == "xccl",
         ):
-            self.assertEqual(device_funcs.get_default_dist_backend(), "xccl")
-        with mock.patch.object(
-            device_funcs,
-            "_dist_backend_available",
-            side_effect=lambda backend: backend == "ccl",
-        ):
-            self.assertEqual(device_funcs.get_default_dist_backend(), "ccl")
-        with mock.patch.object(device_funcs, "_dist_backend_available", return_value=False):
-            self.assertEqual(device_funcs.get_default_dist_backend(), "xccl")
+            self.assertEqual(device_funcs.get_default_dist_backend(), "nccl")
 
     def test_clear_accelerator_cache_dispatches_to_active_backend(self):
         modules = self._patch(npu=True)

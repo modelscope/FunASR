@@ -66,10 +66,13 @@ def force_gatherable(data, device):
 
 _ACCELERATOR_DEVICE_TYPES = ("cuda", "npu", "xpu")
 
-#: Default ``torch.distributed`` backend for each accelerator, most preferred
-#: first. XCCL (oneCCL) is what current torch exposes for XPU; builds that
-#: predate the 2.6 rename know the same backend as ``"ccl"``.
-_ACCELERATOR_DIST_BACKENDS = {"npu": ("hccl",), "xpu": ("xccl", "ccl")}
+#: Default ``torch.distributed`` backend per accelerator, most preferred first.
+#: Only Ascend NPU is listed. Every other device keeps the historical ``"nccl"``
+#: default, exactly as before this change, so the backend this module selects at
+#: runtime is always one that has been exercised on real hardware. XPU does use
+#: XCCL (the former oneCCL name ``"ccl"``), but selecting that backend is not
+#: covered by hardware here and is tracked separately, outside this change.
+_ACCELERATOR_DIST_BACKENDS = {"npu": ("hccl",)}
 
 
 def _accelerator_module(device_type):
@@ -153,12 +156,16 @@ def _dist_backend_available(backend):
 def get_default_dist_backend():
     """Return the ``torch.distributed`` backend for the active accelerator.
 
-    CUDA keeps the historical ``"nccl"``, Ascend NPU uses HCCL and XPU uses
-    XCCL (``"ccl"`` on builds older than the oneCCL rename). Candidates are
-    probed with ``torch.distributed.is_<backend>_available()`` where available
-    so the selected backend matches the build, but a non-CUDA accelerator never
-    falls back to NCCL. This is only the default — an explicit ``backend=...``
-    still wins.
+    CUDA keeps the historical ``"nccl"`` and Ascend NPU uses HCCL, probed with
+    ``torch.distributed.is_hccl_available()`` where the build exposes it so the
+    selected backend matches the build. A non-CUDA accelerator never falls back
+    to NCCL. This is only the default — an explicit ``backend=...`` still wins.
+
+    XPU is deliberately absent: it is a valid ``torch.distributed`` backend
+    (XCCL / the former oneCCL name ``"ccl"``), but no XPU hardware is available
+    to this change, so XPU keeps the historical ``"nccl"`` value here rather
+    than advertising a runtime path nobody can exercise. Selecting XCCL is a
+    separate follow-up.
     """
     candidates = _ACCELERATOR_DIST_BACKENDS.get(get_accelerator_device_type())
     if not candidates:
