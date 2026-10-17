@@ -206,6 +206,9 @@ def print_cer_detail(rst):
         Args:
             rst: TODO.
         """
+    # An empty reference (e.g. a silent utterance) has no words; report its
+    # errors against one word instead of raising ZeroDivisionError.
+    nwords = max(rst["nwords"], 1)
     return (
         "("
         + "nwords="
@@ -219,9 +222,9 @@ def print_cer_detail(rst):
         + ",sub="
         + str(rst["sub"])
         + ") corr:"
-        + "{:.2%}".format(rst["cor"] / rst["nwords"])
+        + "{:.2%}".format(rst["cor"] / nwords)
         + ",cer:"
-        + "{:.2%}".format(rst["wrong"] / rst["nwords"])
+        + "{:.2%}".format(rst["wrong"] / nwords)
     )
 
 
