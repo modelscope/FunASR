@@ -403,12 +403,13 @@ class FunASRNano(nn.Module):
                         try:
                             time1 = time.perf_counter()
                             data_src = load_audio_text_image_video(
-                                sub_str, fs=frontend.fs, **kwargs
+                                sub_str, **{**kwargs, "fs": frontend.fs}
                             )
                             time2 = time.perf_counter()
                             meta_data["load_data"] = f"{time2 - time1:0.3f}"
                         except Exception as e:
                             logging.error(f"Loading wav failed! {str(e)}, {traceback.format_exc()}")
+                            raise
 
                         speech, speech_lengths = extract_fbank(
                             data_src,
