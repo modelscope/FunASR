@@ -7438,7 +7438,7 @@
             [],
         )
         input_source_ids = []
-</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fun_asr_nano/model.py#L470" rel="noopener noreferrer" target="_blank">View full source →</a></details></div><div class="mblk"><code>.inference_prepare(data_in, data_lengths=None, key: list = None, tokenizer=None, frontend=None, **kwargs)</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fun_asr_nano/model.py#L632" rel="noopener noreferrer" target="_blank">L632</a><div class="mdoc"><p>Inference prepare.</p>
+</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fun_asr_nano/model.py#L470" rel="noopener noreferrer" target="_blank">View full source →</a></details></div><div class="mblk"><code>.inference_prepare(data_in, data_lengths=None, key: list = None, tokenizer=None, frontend=None, **kwargs)</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fun_asr_nano/model.py#L633" rel="noopener noreferrer" target="_blank">L633</a><div class="mdoc"><p>Inference prepare.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>data_in</code> — Input data (audio samples, file paths, or text).</li>
@@ -7478,7 +7478,7 @@
 
         # audio encoder
         speech = batch["speech"]
-</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fun_asr_nano/model.py#L632" rel="noopener noreferrer" target="_blank">View full source →</a></details></div><div class="mblk"><code>.get_prompt(hotwords: list[str], language: str = None, itn: bool = True)</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fun_asr_nano/model.py#L731" rel="noopener noreferrer" target="_blank">L731</a><div class="mdoc"><p>Get prompt.</p>
+</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fun_asr_nano/model.py#L633" rel="noopener noreferrer" target="_blank">View full source →</a></details></div><div class="mblk"><code>.get_prompt(hotwords: list[str], language: str = None, itn: bool = True)</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fun_asr_nano/model.py#L732" rel="noopener noreferrer" target="_blank">L732</a><div class="mdoc"><p>Get prompt.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>hotwords</code> — TODO.</li>
@@ -7506,7 +7506,7 @@
         if not itn:
             prompt += "，不进行文本规整"
         return prompt + "："
-</code></pre></details></div><div class="mblk"><code>.generate_chatml(prompt: str, data: Union[str, torch.Tensor])</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fun_asr_nano/model.py#L753" rel="noopener noreferrer" target="_blank">L753</a><div class="mdoc"><p>Generate chatml.</p>
+</code></pre></details></div><div class="mblk"><code>.generate_chatml(prompt: str, data: Union[str, torch.Tensor])</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fun_asr_nano/model.py#L754" rel="noopener noreferrer" target="_blank">L754</a><div class="mdoc"><p>Generate chatml.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>prompt</code> — TODO.</li>
@@ -7535,7 +7535,7 @@
                 },
                 {"role": "assistant", "content": "null"},
             ]
-</code></pre></details></div><div class="mblk"><code>.inference(data_in, data_lengths=None, key: list = None, tokenizer=None, frontend=None, **kwargs)</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fun_asr_nano/model.py#L777" rel="noopener noreferrer" target="_blank">L777</a><div class="mdoc"><p>Run inference on input data.</p>
+</code></pre></details></div><div class="mblk"><code>.inference(data_in, data_lengths=None, key: list = None, tokenizer=None, frontend=None, **kwargs)</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fun_asr_nano/model.py#L778" rel="noopener noreferrer" target="_blank">L778</a><div class="mdoc"><p>Run inference on input data.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>data_in</code> — Input data (audio samples, file paths, or text).</li>
@@ -7575,7 +7575,7 @@
                 chars = string.ascii_letters + string.digits
                 key.append("rand_key_" + "".join(random.choice(chars) for _ in range(13)))
 
-</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fun_asr_nano/model.py#L777" rel="noopener noreferrer" target="_blank">View full source →</a></details></div><div class="mblk"><code>.inference_llm(data_in, data_lengths=None, key: list = None, tokenizer=None, frontend=None, **kwargs)</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fun_asr_nano/model.py#L937" rel="noopener noreferrer" target="_blank">L937</a><div class="mdoc"><p>Inference llm.</p>
+</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fun_asr_nano/model.py#L778" rel="noopener noreferrer" target="_blank">View full source →</a></details></div><div class="mblk"><code>.inference_llm(data_in, data_lengths=None, key: list = None, tokenizer=None, frontend=None, **kwargs)</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fun_asr_nano/model.py#L938" rel="noopener noreferrer" target="_blank">L938</a><div class="mdoc"><p>Inference llm.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>data_in</code> — Input data (audio samples, file paths, or text).</li>
@@ -7615,7 +7615,7 @@
             return self._inference_llm_ctc_sequential(
                 data_in, data_lengths, key, tokenizer, frontend, **kwargs
             )
-</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fun_asr_nano/model.py#L937" rel="noopener noreferrer" target="_blank">View full source →</a></details></div><div class="mblk"><code>.from_pretrained(model: str = None, **kwargs)</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fun_asr_nano/model.py#L1093" rel="noopener noreferrer" target="_blank">L1093</a><div class="mdoc"><p>From pretrained.</p>
+</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fun_asr_nano/model.py#L938" rel="noopener noreferrer" target="_blank">View full source →</a></details></div><div class="mblk"><code>.from_pretrained(model: str = None, **kwargs)</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fun_asr_nano/model.py#L1094" rel="noopener noreferrer" target="_blank">L1094</a><div class="mdoc"><p>From pretrained.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>model</code> — Model instance or model name.</li>
@@ -7795,7 +7795,7 @@
         )
         input_source_ids = []
 </code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fun_asr_nano/model.py#L470" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
-<div class="api-detail" id="e113" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>FunASRNano.inference_prepare(data_in, data_lengths=None, key: list = None, tokenizer=None, frontend=None, **kwargs)</code></h2><div class="dmod">funasr.models.fun_asr_nano.FunASRNano · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fun_asr_nano/model.py#L632" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Inference prepare.</p>
+<div class="api-detail" id="e113" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>FunASRNano.inference_prepare(data_in, data_lengths=None, key: list = None, tokenizer=None, frontend=None, **kwargs)</code></h2><div class="dmod">funasr.models.fun_asr_nano.FunASRNano · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fun_asr_nano/model.py#L633" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Inference prepare.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>data_in</code> — Input data (audio samples, file paths, or text).</li>
@@ -7835,8 +7835,8 @@
 
         # audio encoder
         speech = batch["speech"]
-</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fun_asr_nano/model.py#L632" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
-<div class="api-detail" id="e114" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>FunASRNano.get_prompt(hotwords: list[str], language: str = None, itn: bool = True)</code></h2><div class="dmod">funasr.models.fun_asr_nano.FunASRNano · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fun_asr_nano/model.py#L731" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Get prompt.</p>
+</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fun_asr_nano/model.py#L633" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
+<div class="api-detail" id="e114" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>FunASRNano.get_prompt(hotwords: list[str], language: str = None, itn: bool = True)</code></h2><div class="dmod">funasr.models.fun_asr_nano.FunASRNano · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fun_asr_nano/model.py#L732" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Get prompt.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>hotwords</code> — TODO.</li>
@@ -7865,7 +7865,7 @@
             prompt += "，不进行文本规整"
         return prompt + "："
 </code></pre></details></div>
-<div class="api-detail" id="e115" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>FunASRNano.generate_chatml(prompt: str, data: Union[str, torch.Tensor])</code></h2><div class="dmod">funasr.models.fun_asr_nano.FunASRNano · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fun_asr_nano/model.py#L753" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Generate chatml.</p>
+<div class="api-detail" id="e115" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>FunASRNano.generate_chatml(prompt: str, data: Union[str, torch.Tensor])</code></h2><div class="dmod">funasr.models.fun_asr_nano.FunASRNano · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fun_asr_nano/model.py#L754" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Generate chatml.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>prompt</code> — TODO.</li>
@@ -7895,7 +7895,7 @@
                 {"role": "assistant", "content": "null"},
             ]
 </code></pre></details></div>
-<div class="api-detail" id="e116" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>FunASRNano.inference(data_in, data_lengths=None, key: list = None, tokenizer=None, frontend=None, **kwargs)</code></h2><div class="dmod">funasr.models.fun_asr_nano.FunASRNano · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fun_asr_nano/model.py#L777" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Run inference on input data.</p>
+<div class="api-detail" id="e116" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>FunASRNano.inference(data_in, data_lengths=None, key: list = None, tokenizer=None, frontend=None, **kwargs)</code></h2><div class="dmod">funasr.models.fun_asr_nano.FunASRNano · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fun_asr_nano/model.py#L778" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Run inference on input data.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>data_in</code> — Input data (audio samples, file paths, or text).</li>
@@ -7935,8 +7935,8 @@
                 chars = string.ascii_letters + string.digits
                 key.append("rand_key_" + "".join(random.choice(chars) for _ in range(13)))
 
-</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fun_asr_nano/model.py#L777" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
-<div class="api-detail" id="e117" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>FunASRNano.inference_llm(data_in, data_lengths=None, key: list = None, tokenizer=None, frontend=None, **kwargs)</code></h2><div class="dmod">funasr.models.fun_asr_nano.FunASRNano · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fun_asr_nano/model.py#L937" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Inference llm.</p>
+</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fun_asr_nano/model.py#L778" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
+<div class="api-detail" id="e117" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>FunASRNano.inference_llm(data_in, data_lengths=None, key: list = None, tokenizer=None, frontend=None, **kwargs)</code></h2><div class="dmod">funasr.models.fun_asr_nano.FunASRNano · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fun_asr_nano/model.py#L938" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Inference llm.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>data_in</code> — Input data (audio samples, file paths, or text).</li>
@@ -7976,8 +7976,8 @@
             return self._inference_llm_ctc_sequential(
                 data_in, data_lengths, key, tokenizer, frontend, **kwargs
             )
-</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fun_asr_nano/model.py#L937" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
-<div class="api-detail" id="e118" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>FunASRNano.from_pretrained(model: str = None, **kwargs)</code></h2><div class="dmod">funasr.models.fun_asr_nano.FunASRNano · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fun_asr_nano/model.py#L1093" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>From pretrained.</p>
+</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fun_asr_nano/model.py#L938" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
+<div class="api-detail" id="e118" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>FunASRNano.from_pretrained(model: str = None, **kwargs)</code></h2><div class="dmod">funasr.models.fun_asr_nano.FunASRNano · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fun_asr_nano/model.py#L1094" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>From pretrained.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>model</code> — Model instance or model name.</li>
