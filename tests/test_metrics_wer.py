@@ -9,6 +9,26 @@ def test_cer_detail_for_empty_reference_does_not_divide_by_zero():
     assert print_cer_detail(out_item).endswith("corr:0.00%,cer:100.00%")
 
 
+def test_wer_by_line_handles_inputs_at_the_int16_boundary():
+    # 32768 tokens used to raise OverflowError: the cost matrix was int16, so
+    # initialising its first row/column could not store the index 32768.
+    out_item = compute_wer_by_line(["a"] * 32768, ["a"])
+
+    assert out_item["nwords"] == 1
+    assert out_item["cor"] == 1
+    assert out_item["wrong"] == 32767
+    assert out_item["ins"] == 32767
+
+
+def test_wer_by_line_handles_a_long_reference_at_the_int16_boundary():
+    out_item = compute_wer_by_line(["a"], ["a"] * 32768)
+
+    assert out_item["nwords"] == 32768
+    assert out_item["cor"] == 1
+    assert out_item["wrong"] == 32767
+    assert out_item["del"] == 32767
+
+
 def test_compute_wer_scores_all_utterances_when_one_reference_is_empty(tmp_path):
     ref_file = tmp_path / "ref.txt"
     hyp_file = tmp_path / "hyp.txt"
