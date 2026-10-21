@@ -1,4 +1,55 @@
+import importlib.util
+from pathlib import Path
+
+import pytest
+
 from funasr.metrics.wer import compute_wer, compute_wer_by_line, print_cer_detail
+
+# Standalone copies of compute_wer_by_line kept for the runtime bundles and the
+# Aishell examples. They duplicate the helper instead of importing it, so they
+# need the same boundary coverage as the library version.
+DUPLICATE_WER_HELPERS = [
+    "runtime/python/utils/compute_wer.py",
+    "runtime/python/libtorch/funasr_torch/utils/compute_wer.py",
+    "examples/aishell/paraformer/utils/compute_wer.py",
+    "examples/aishell/e_paraformer/utils/compute_wer.py",
+]
+
+
+def _load_helper(relative_path):
+    path = Path(__file__).resolve().parent.parent / relative_path
+    spec = importlib.util.spec_from_file_location(
+        f"dup_{relative_path.replace('/', '_').removesuffix('.py')}", path
+    )
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+@pytest.mark.parametrize("relative_path", DUPLICATE_WER_HELPERS)
+def test_duplicate_wer_helpers_handle_inputs_at_the_int16_boundary(relative_path):
+    helper = _load_helper(relative_path)
+
+    out_item = helper.compute_wer_by_line(["a"] * 32768, ["a"])
+
+    assert out_item["nwords"] == 1
+    assert out_item["cor"] == 1
+    assert out_item["wrong"] == 32767
+    assert out_item["ins"] == 32767
+
+
+@pytest.mark.parametrize("relative_path", DUPLICATE_WER_HELPERS)
+def test_duplicate_wer_helpers_agree_with_the_library(relative_path):
+    helper = _load_helper(relative_path)
+
+    for hyp, ref in [
+        (["a", "b", "c"], ["a", "x", "c"]),
+        (["uh"], []),
+        (["the", "cat", "sat"], ["the", "cat", "sat", "down"]),
+    ]:
+        assert {
+            k: int(v) for k, v in helper.compute_wer_by_line(hyp, ref).items()
+        } == {k: int(v) for k, v in compute_wer_by_line(hyp, ref).items()}
 
 
 def test_cer_detail_for_empty_reference_does_not_divide_by_zero():
