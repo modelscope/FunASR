@@ -94,3 +94,36 @@ def test_compute_wer_scores_all_utterances_when_one_reference_is_empty(tmp_path)
     assert "utt3(nwords=2,cor=2,ins=0,del=0,sub=0) corr:100.00%,cer:0.00%" in report
     assert "%WER 20.0 [ 1 / 5, 1 ins, 0 del, 0 sub ]" in report
     assert "%SER 33.33 [ 1 / 3 ]" in report
+
+
+def _write_summary_fixture(tmp_path):
+    # utt2 has a reference but no hypothesis; utt9 has a hypothesis but no
+    # reference. Neither can be scored.
+    ref_file = tmp_path / "ref.txt"
+    hyp_file = tmp_path / "hyp.txt"
+    ref_file.write_text("utt1 the cat sat\nutt2 hello world\nutt3 good morning\n", encoding="utf-8")
+    hyp_file.write_text(
+        "utt1 the cat sat\nutt3 good morning\nutt9 stray output\n", encoding="utf-8"
+    )
+    return ref_file, hyp_file, tmp_path / "out.wer"
+
+
+def test_compute_wer_summary_counts_references_missing_from_hyp(tmp_path):
+    ref_file, hyp_file, cer_file = _write_summary_fixture(tmp_path)
+
+    compute_wer(str(ref_file), str(hyp_file), str(cer_file))
+
+    report = cer_file.read_text(encoding="utf-8")
+    assert "%SER 0.0 [ 0 / 2 ]" in report
+    assert "Scored 2 sentences, 1 not present in hyp." in report
+
+
+@pytest.mark.parametrize("relative_path", DUPLICATE_WER_HELPERS)
+def test_duplicate_wer_helpers_count_references_missing_from_hyp(relative_path, tmp_path):
+    helper = _load_helper(relative_path)
+    ref_file, hyp_file, cer_file = _write_summary_fixture(tmp_path)
+
+    helper.compute_wer(str(ref_file), str(hyp_file), str(cer_file))
+
+    report = cer_file.read_text(encoding="utf-8")
+    assert "Scored 2 sentences, 1 not present in hyp." in report

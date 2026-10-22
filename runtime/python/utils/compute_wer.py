@@ -81,9 +81,9 @@ def compute_wer(ref_file, hyp_file, cer_detail_file):
     )
     cer_detail_writer.write(
         "Scored "
-        + str(len(hyp_dict))
+        + str(rst["Snt"])
         + " sentences, "
-        + str(len(hyp_dict) - rst["Snt"])
+        + str(len(ref_dict) - rst["Snt"])
         + " not present in hyp."
         + "\n"
     )
