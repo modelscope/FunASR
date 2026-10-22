@@ -441,11 +441,13 @@ def _format_unregistered_component_error(component_type, component_name, registr
     )
 
 
+# Speaker dependencies are optional for ASR-only use.
+_speaker_import_error = None
 try:
     from funasr.models.campplus.utils import sv_chunk, postprocess, distribute_spk
     from funasr.models.campplus.cluster_backend import ClusterBackend
-except:
-    pass
+except Exception as error:
+    _speaker_import_error = error
 
 
 def prepare_data_iterator(
@@ -616,6 +618,12 @@ class AutoModel:
             {} if spk_kwargs.get("cb_kwargs", {}) is None else spk_kwargs.get("cb_kwargs", {})
         )
         if spk_model is not None:
+            if _speaker_import_error is not None:
+                raise ImportError(
+                    "Speaker diarization with `spk_model` is unavailable because its dependencies "
+                    "could not be imported. Install or repair the speaker dependencies reported "
+                    "in the chained exception."
+                ) from _speaker_import_error
             logging.info("Building SPK model.")
             spk_kwargs["model"] = spk_model
             spk_kwargs["model_revision"] = kwargs.get("spk_model_revision", "master")
