@@ -9,6 +9,7 @@ on:
       - "runtime/python/libtorch/funasr_torch/utils/postprocess_utils.py"
       - "tests/test_funasr_onnx_release.py"
       - "tests/test_funasr_onnx_installed.py"
+      - "tests/test_funasr_onnx_paraformer_online_empty_final.py"
       - "tests/test_rich_transcription_postprocess.py"
       - "tests/test_rich_transcription_event_segments.py"
   push:
@@ -21,6 +22,7 @@ on:
       - "runtime/python/libtorch/funasr_torch/utils/postprocess_utils.py"
       - "tests/test_funasr_onnx_release.py"
       - "tests/test_funasr_onnx_installed.py"
+      - "tests/test_funasr_onnx_paraformer_online_empty_final.py"
       - "tests/test_rich_transcription_postprocess.py"
       - "tests/test_rich_transcription_event_segments.py"
   workflow_dispatch:
@@ -94,6 +96,9 @@ jobs:
 
       - name: Verify installed wrapper error paths
         run: python tests/test_funasr_onnx_installed.py
+
+      - name: Verify empty split-final Paraformer result
+        run: python tests/test_funasr_onnx_paraformer_online_empty_final.py
 
       - name: Verify source distribution error paths
         run: |
