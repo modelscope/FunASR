@@ -225,17 +225,24 @@ class ClusterBackend(torch.nn.Module):
         model_config: The model config.
     """
 
-    def __init__(self, merge_thr=0.78):
+    def __init__(self, merge_thr=0.78, max_num_spks=15):
         """Initialize ClusterBackend.
         
             Args:
                 merge_thr: TODO.
+                max_num_spks: Positive upper bound for automatic speaker counting.
             """
         super().__init__()
+        if (
+            isinstance(max_num_spks, bool)
+            or not isinstance(max_num_spks, (int, np.integer))
+            or max_num_spks < 1
+        ):
+            raise ValueError("max_num_spks must be a positive integer")
         self.model_config = {"merge_thr": merge_thr}
         # self.other_config = kwargs
 
-        self.spectral_cluster = SpectralCluster()
+        self.spectral_cluster = SpectralCluster(max_num_spks=max_num_spks)
         self.umap_hdbscan_cluster = UmapHdbscan()
         self.kmeans_cluster = KMeansCluster()
 
@@ -257,11 +264,28 @@ class ClusterBackend(torch.nn.Module):
             labels = self.kmeans_cluster(X, k)
         else:
             labels = self.umap_hdbscan_cluster(X)
+            labels = self.merge_to_max_spks(labels, X, self.spectral_cluster.max_num_spks)
 
         if k is None and "merge_thr" in self.model_config:
             labels = self.merge_by_cos(labels, X, self.model_config["merge_thr"])
 
         return labels
+
+    def merge_to_max_spks(self, labels, embs, max_num_spks):
+        """Merge closest speaker centroids until the cap is met, preserving noise labels."""
+        labels = labels.copy()
+        embs = np.asarray(embs)
+        while True:
+            speaker_labels = np.unique(labels[labels >= 0])
+            if len(speaker_labels) <= max_num_spks:
+                return labels
+            centers = np.stack([embs[labels == label].mean(0) for label in speaker_labels])
+            affinity = sklearn.metrics.pairwise.cosine_similarity(centers)
+            rows, cols = np.triu_indices(len(speaker_labels), k=1)
+            closest = np.argmax(affinity[rows, cols])
+            keep, remove = speaker_labels[rows[closest]], speaker_labels[cols[closest]]
+            labels[labels == remove] = keep
+            labels[labels > remove] -= 1
 
     def merge_by_cos(self, labels, embs, cos_thr):
         # merge the similar speakers by cosine similarity

@@ -124,7 +124,7 @@ class PythonApiDocsContract(unittest.TestCase):
             "disable_update": False, "disable_pbar": False,
             "batch_size": 1, "batch_size_s": 300,
             "batch_size_threshold_s": 60, "merge_vad": False,
-            "merge_length_s": 15, "spk_mode": "punc_segment",
+            "merge_length_s": 15, "spk_mode": "punc_segment", "max_num_spks": 15,
             "return_spk_res": True, "return_spk_center": False,
             "preset_spk_num": None, "sentence_timestamp": False,
             "return_raw_text": False,
