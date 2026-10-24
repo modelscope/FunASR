@@ -26,6 +26,7 @@ The wrapper accepts `**kwargs`, not a universally validated parameter schema. A 
 | `vad_kwargs`, `punc_kwargs`, `spk_kwargs` | `{}` | Component configuration dictionaries. Device, hub and CPU threads are inherited unless explicitly provided in the component dictionary. Device inherits the resolved ASR device (after fallback). Caller dictionaries are copied before defaults are applied. |
 | `vad_model_revision`, `punc_model_revision`, `spk_model_revision` | `"master"` each | Separate component revisions, not inherited from the ASR revision. These top-level values replace `model_revision` in the component dictionaries. |
 | `spk_mode` | `"punc_segment"` | Use `"punc_segment"` or `"vad_segment"`. The validation also accepts legacy `"default"`, but the sentence-building branches do not implement it; do not select it. |
+| `spk_kwargs["cb_kwargs"]["max_num_spks"]` | `15` | Positive integer cap on automatically inferred speakers, for both spectral and UMAP/HDBSCAN clustering. An explicit `preset_spk_num` takes precedence. |
 | `disable_update` | `False` | Disables the FunASR package version check only, not model downloading. |
 | `disable_pbar` | `False` | Suppresses wrapper progress bars. |
 | `trust_remote_code` | `False` in hub loaders | Opt-in to model-supplied requirements and code paths. Review the exact files and dependencies first. |
@@ -138,6 +139,7 @@ model = AutoModel(
     vad_model=str(paths["vad_dir"]),
     punc_model=str(paths["punc_dir"]),
     spk_model=str(paths["spk_dir"]),
+    spk_kwargs={"cb_kwargs": {"max_num_spks": 5}},
     spk_mode="punc_segment",
     device="cpu",
     disable_update=True,
@@ -150,6 +152,8 @@ for result in model.generate(input=str(paths["audio"]), return_spk_res=True):
 ```
 
 With `vad_model` configured, the wrapper detects regions, sorts them by duration for ASR batching, restores their order, and offsets timestamps to the original recording. Generic speaker clustering runs in this VAD path; setting only `spk_model` does not add diarization to direct inference. `punc_segment` needs usable punctuation and timestamps; missing punctuation or timestamp fields can change the mode to `vad_segment`. VAD boundaries are speech-region boundaries, not necessarily speaker changes. Labels such as `spk=0` are anonymous within a result, not verified identities or stable IDs across recordings.
+
+`spk_kwargs={"cb_kwargs": {"max_num_spks": 5}}` limits automatic speaker counting to at most five speakers; it does not request exactly five. For 2048 or more speaker embeddings, UMAP/HDBSCAN clusters above the cap are merged by centroid cosine similarity. Noise labels are preserved and do not count as speakers. The default cap is 15. A cap below the actual speaker count can merge different people; choose it for the recording. When `preset_spk_num` is supplied, the known-count spectral or KMeans path takes precedence over this automatic cap.
 
 For `sentence_timestamp=True` without speakers, the current wrapper can return VAD-aligned sentence records when both punctuation and token timestamps are absent, or when punctuation/timestamp lengths fail alignment. Other combinations can return an empty `sentence_info`, including timestamps present but no punctuation result. This flag does not create a forced aligner.
 
