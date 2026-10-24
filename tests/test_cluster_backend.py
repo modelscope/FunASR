@@ -88,23 +88,56 @@ def test_invalid_speaker_cap_is_rejected(max_num_spks):
         ClusterBackend(max_num_spks=max_num_spks)
 
 
-def test_speaker_cap_is_configurable_through_auto_model(monkeypatch):
+@pytest.fixture
+def auto_model_factory(monkeypatch):
     from funasr.auto.auto_model import AutoModel
 
     monkeypatch.setattr(
         AutoModel, "build_model", staticmethod(lambda **kwargs: (torch.nn.Identity(), kwargs))
     )
-    spk_kwargs = {"cb_kwargs": {"max_num_spks": 3}}
-    model = AutoModel(
-        model="stub-asr",
-        spk_model="stub-speaker",
-        spk_kwargs=spk_kwargs,
-        device="cpu",
-        disable_update=True,
-    )
 
-    assert model.cb_model.spectral_cluster.max_num_spks == 3
-    assert spk_kwargs == {"cb_kwargs": {"max_num_spks": 3}}
+    def build(**kwargs):
+        return AutoModel(
+            model="stub-asr",
+            spk_model="stub-speaker",
+            device="cpu",
+            disable_update=True,
+            **kwargs,
+        )
+
+    return build
+
+
+@pytest.mark.parametrize("max_num_spks", [1, 3, 16])
+def test_speaker_cap_is_configurable_through_auto_model(auto_model_factory, max_num_spks):
+    spk_kwargs = {"cb_kwargs": {"merge_thr": 0.91}}
+    model = auto_model_factory(max_num_spks=max_num_spks, spk_kwargs=spk_kwargs)
+
+    assert model.cb_model.spectral_cluster.max_num_spks == max_num_spks
+    assert model.cb_model.model_config["merge_thr"] == 0.91
+    assert spk_kwargs == {"cb_kwargs": {"merge_thr": 0.91}}
+
+
+@pytest.mark.parametrize(
+    "spk_kwargs", [{}, {"cb_kwargs": None}, {"cb_kwargs": {"merge_thr": 0.91}}]
+)
+def test_auto_model_defaults_to_fifteen_speakers(auto_model_factory, spk_kwargs):
+    model = auto_model_factory(spk_kwargs=spk_kwargs)
+
+    assert model.cb_model.spectral_cluster.max_num_spks == 15
+
+
+@pytest.mark.parametrize("max_num_spks", [0, -1, 1.5, True, None])
+def test_auto_model_rejects_invalid_speaker_cap(auto_model_factory, max_num_spks):
+    with pytest.raises(ValueError, match="max_num_spks must be a positive integer"):
+        auto_model_factory(max_num_spks=max_num_spks)
+
+
+@pytest.mark.parametrize("spk_kwargs", [{"max_num_spks": 3}, {"cb_kwargs": {"max_num_spks": 3}}])
+@pytest.mark.parametrize("top_level", [{}, {"max_num_spks": 3}, {"max_num_spks": 5}])
+def test_auto_model_rejects_nested_speaker_cap(auto_model_factory, spk_kwargs, top_level):
+    with pytest.raises(TypeError, match="max_num_spks.*top-level AutoModel"):
+        auto_model_factory(spk_kwargs=spk_kwargs, **top_level)
 
 
 @pytest.mark.parametrize("num_embeddings", [64, 2048])

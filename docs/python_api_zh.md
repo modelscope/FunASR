@@ -26,7 +26,7 @@
 | `vad_kwargs`, `punc_kwargs`, `spk_kwargs` | `{}` | 子组件配置字典。设备、平台和 CPU 线程数在子字典未指定时继承；设备继承主模型回退后实际选定的设备。填充默认值前会复制调用方字典。 |
 | `vad_model_revision`, `punc_model_revision`, `spk_model_revision` | 各自为 `"master"` | 分别指定子组件版本，不继承 ASR 版本。这些顶层参数会覆盖子字典中的 `model_revision`。 |
 | `spk_mode` | `"punc_segment"` | 使用 `"punc_segment"` 或 `"vad_segment"`。校验还接受历史值 `"default"`，但后续句子构造分支未实现它，请勿选择。 |
-| `spk_kwargs["cb_kwargs"]["max_num_spks"]` | `15` | 自动推断说话人数的正整数上限，对谱聚类和 UMAP/HDBSCAN 均生效。显式指定的 `preset_spk_num` 优先。 |
+| `max_num_spks` | `15` | 构建时配置的自动说话人数正整数上限，对谱聚类和 UMAP/HDBSCAN 均生效。显式指定的 `preset_spk_num` 优先。 |
 | `disable_update` | `False` | 仅禁用 FunASR 包版本检查，不会禁用模型下载。 |
 | `disable_pbar` | `False` | 隐藏包装层进度条。 |
 | `trust_remote_code` | 平台加载器中为 `False` | 允许模型附带的依赖安装及代码路径；启用前检查实际文件和依赖。 |
@@ -138,7 +138,7 @@ model = AutoModel(
     vad_model=str(paths["vad_dir"]),
     punc_model=str(paths["punc_dir"]),
     spk_model=str(paths["spk_dir"]),
-    spk_kwargs={"cb_kwargs": {"max_num_spks": 5}},
+    max_num_spks=5,
     spk_mode="punc_segment",
     device="cpu",
     disable_update=True,
@@ -152,7 +152,9 @@ for result in model.generate(input=str(paths["audio"]), return_spk_res=True):
 
 配置 `vad_model` 后，包装层检测语音区域、按时长排序组批识别、恢复原始顺序，再将时间戳偏移到原始录音坐标。通用说话人聚类在这条 VAD 路径运行；只设置 `spk_model` 不会给直接推理增加说话人分离。`punc_segment` 依赖可用的标点和时间戳，缺少标点或时间戳字段可能使模式变为 `vad_segment`。VAD 边界是语音区域边界，不一定是说话人切换点。`spk=0` 等标签是本次结果内的匿名标签，不是已验证的身份，也不是跨录音稳定的 ID。
 
-`spk_kwargs={"cb_kwargs": {"max_num_spks": 5}}` 将自动推断的人数限制为最多五人，并不强制分成五人。声纹片段达到 2048 个时，UMAP/HDBSCAN 超出上限的簇按声纹中心余弦相似度合并；噪声标签保留，且不计入人数。默认上限为 15。上限低于实际人数时可能合并不同的人，应按录音设置。传入 `preset_spk_num` 时，已知人数的谱聚类或 KMeans 路径优先于此自动上限。
+`AutoModel(..., max_num_spks=5)` 将自动推断的人数限制为最多五人，并不强制分成五人。该顶层参数在构建时配置。声纹片段达到 2048 个时，UMAP/HDBSCAN 超出上限的簇按声纹中心余弦相似度合并；噪声标签保留，且不计入人数。默认上限为 15。上限低于实际人数时可能合并不同的人，应按录音设置。传入 `preset_spk_num` 时，已知人数的谱聚类或 KMeans 路径优先于此自动上限。
+
+在 `spk_kwargs` 或 `spk_kwargs["cb_kwargs"]` 内传入 `max_num_spks` 会抛出 `TypeError`；该参数只接受顶层入口。`merge_thr` 等其他聚类选项仍通过 `spk_kwargs["cb_kwargs"]` 配置。
 
 没有说话人模型而设置 `sentence_timestamp=True` 时，当前包装层可在标点和 token 时间戳均缺失，或标点与时间戳长度无法对齐时，返回按 VAD 区域对齐的句子记录。其他组合可能返回空的 `sentence_info`，包括已有时间戳但没有标点结果的情形。该开关不会创建强制对齐模型。
 
