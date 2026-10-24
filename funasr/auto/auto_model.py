@@ -1238,7 +1238,7 @@ class AutoModel:
                     )
                 result["text"] = punctuated_surface or punc_res[0]["text"]
 
-            timestamp_text = punc_input_text
+            timestamp_text = raw_text
             sentence_timestamps = result.get("timestamp", [])
             punc_alignment_failed = False
             if punc_res is not None:
