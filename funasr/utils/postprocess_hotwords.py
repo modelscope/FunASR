@@ -364,6 +364,11 @@ class PostprocessHotwordMatcher:
                         # replace a Chinese character read "ai".
                         if (segment_latin and not target_latin) or (segment_han and not target_han):
                             continue
+                        # Cross-script correction needs a complete homophone:
+                        # "ai zhushou" can become "AI助手", but "duan" must
+                        # not gain the missing Latin prefix in "C端".
+                        if target_latin and not segment_latin and segment_py != target_py:
+                            continue
                         score = self._fuzz.ratio(segment_py, target_py) / 100.0
                         if score >= self.threshold:
                             candidates.append(

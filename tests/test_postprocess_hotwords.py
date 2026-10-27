@@ -138,6 +138,23 @@ class TestPostprocessHotwordMatcher(unittest.TestCase):
         matcher = PostprocessHotwordMatcher(fuzzy_targets=["AI助手"])
         self.assertEqual(matcher.apply_text("打开爱助手")[0], "打开AI助手")
 
+    def test_fuzzy_mixed_target_requires_complete_cross_script_homophone(self):
+        try:
+            import pypinyin  # noqa: F401
+            import rapidfuzz  # noqa: F401
+        except ImportError:
+            self.skipTest("pypinyin and rapidfuzz are required for fuzzy tests")
+
+        matcher = PostprocessHotwordMatcher(fuzzy_targets=["C端"])
+        for text in ["这个端口", "端", "端口2024", "C端产品"]:
+            with self.subTest(text=text):
+                self.assertEqual(matcher.apply_text(text), (text, []))
+        self.assertEqual(matcher.apply_text("C段产品")[0], "C端产品")
+
+        matcher = PostprocessHotwordMatcher(fuzzy_targets=["AI助手"])
+        self.assertEqual(matcher.apply_text("打开爱助手")[0], "打开AI助手")
+        self.assertEqual(matcher.apply_text("打开AI助守")[0], "打开AI助手")
+
     def test_missing_fuzzy_dependency_raises(self):
         with mock.patch.object(
             postprocess_hotwords,
