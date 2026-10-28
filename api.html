@@ -22131,7 +22131,7 @@
 <li><code>ctc (torch.nn.Module)</code> — The CTC implementation.</li>
 <li class="sub">For example, :class:`espnet.nets.pytorch_backend.ctc.CTC`</li>
 </ul>
-</div><h3 class="mt">Methods</h3><div class="mblk"><code>.beam_search(logits: torch.Tensor, logits_lengths: torch.Tensor, keywords_tokenset: set = None, score_beam_size: int = 3, path_beam_size: int = 20) -&gt; Tuple[List[List[int]], torch.Tensor]</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/kws_utils.py#L125" rel="noopener noreferrer" target="_blank">L125</a><div class="mdoc"><p>CTC prefix beam search inner implementation</p>
+</div><h3 class="mt">Methods</h3><div class="mblk"><code>.beam_search(logits: torch.Tensor, logits_lengths: torch.Tensor, keywords_tokenset: set = None, score_beam_size: int = 3, path_beam_size: int = 20) -&gt; Tuple[List[List[int]], torch.Tensor]</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/kws_utils.py#L130" rel="noopener noreferrer" target="_blank">L130</a><div class="mdoc"><p>CTC prefix beam search inner implementation</p>
 <h4>Args:</h4>
 <ul>
 <li><code>logits (torch.Tensor)</code> — (1, max_len, vocab_size)</li>
@@ -22172,7 +22172,7 @@
             probs = ctc_probs[t]  # (vocab_size,)
             # key: prefix, value (pb, pnb), default value(-inf, -inf)
             next_hyps = defaultdict(lambda: (0.0, 0.0, []))
-</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/kws_utils.py#L125" rel="noopener noreferrer" target="_blank">View full source →</a></details></div><div class="mblk"><code>.is_sublist(main_list, check_list)</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/kws_utils.py#L232" rel="noopener noreferrer" target="_blank">L232</a><div class="mdoc"><p>Is sublist.</p>
+</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/kws_utils.py#L130" rel="noopener noreferrer" target="_blank">View full source →</a></details></div><div class="mblk"><code>.is_sublist(main_list, check_list)</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/kws_utils.py#L237" rel="noopener noreferrer" target="_blank">L237</a><div class="mdoc"><p>Is sublist.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>main_list</code> — TODO.</li>
@@ -22200,7 +22200,7 @@
                     return i
         else:
             return -1
-</code></pre></details></div><div class="mblk"><code>.decode(x: torch.Tensor)</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/kws_utils.py#L295" rel="noopener noreferrer" target="_blank">L295</a><div class="mdoc"><p>Get an initial state for decoding.</p>
+</code></pre></details></div><div class="mblk"><code>.decode(x: torch.Tensor)</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/kws_utils.py#L300" rel="noopener noreferrer" target="_blank">L300</a><div class="mdoc"><p>Get an initial state for decoding.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>x (torch.Tensor)</code> — The encoded feature tensor</li>
@@ -22221,7 +22221,7 @@
 
         return self._decode_inside(raw_logp, xlen)
 </code></pre></details></div></div>
-<div class="api-detail" id="e385" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>KwsCtcPrefixDecoder.beam_search(logits: torch.Tensor, logits_lengths: torch.Tensor, keywords_tokenset: set = None, score_beam_size: int = 3, path_beam_size: int = 20) -&gt; Tuple[List[List[int]], torch.Tensor]</code></h2><div class="dmod">funasr.utils.kws_utils.KwsCtcPrefixDecoder · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/kws_utils.py#L125" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>CTC prefix beam search inner implementation</p>
+<div class="api-detail" id="e385" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>KwsCtcPrefixDecoder.beam_search(logits: torch.Tensor, logits_lengths: torch.Tensor, keywords_tokenset: set = None, score_beam_size: int = 3, path_beam_size: int = 20) -&gt; Tuple[List[List[int]], torch.Tensor]</code></h2><div class="dmod">funasr.utils.kws_utils.KwsCtcPrefixDecoder · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/kws_utils.py#L130" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>CTC prefix beam search inner implementation</p>
 <h4>Args:</h4>
 <ul>
 <li><code>logits (torch.Tensor)</code> — (1, max_len, vocab_size)</li>
@@ -22262,8 +22262,8 @@
             probs = ctc_probs[t]  # (vocab_size,)
             # key: prefix, value (pb, pnb), default value(-inf, -inf)
             next_hyps = defaultdict(lambda: (0.0, 0.0, []))
-</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/kws_utils.py#L125" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
-<div class="api-detail" id="e386" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>KwsCtcPrefixDecoder.is_sublist(main_list, check_list)</code></h2><div class="dmod">funasr.utils.kws_utils.KwsCtcPrefixDecoder · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/kws_utils.py#L232" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Is sublist.</p>
+</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/kws_utils.py#L130" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
+<div class="api-detail" id="e386" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>KwsCtcPrefixDecoder.is_sublist(main_list, check_list)</code></h2><div class="dmod">funasr.utils.kws_utils.KwsCtcPrefixDecoder · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/kws_utils.py#L237" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Is sublist.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>main_list</code> — TODO.</li>
@@ -22292,7 +22292,7 @@
         else:
             return -1
 </code></pre></details></div>
-<div class="api-detail" id="e387" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>KwsCtcPrefixDecoder.decode(x: torch.Tensor)</code></h2><div class="dmod">funasr.utils.kws_utils.KwsCtcPrefixDecoder · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/kws_utils.py#L295" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Get an initial state for decoding.</p>
+<div class="api-detail" id="e387" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>KwsCtcPrefixDecoder.decode(x: torch.Tensor)</code></h2><div class="dmod">funasr.utils.kws_utils.KwsCtcPrefixDecoder · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/kws_utils.py#L300" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Get an initial state for decoding.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>x (torch.Tensor)</code> — The encoded feature tensor</li>
