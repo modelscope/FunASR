@@ -116,7 +116,8 @@ jobs:
           diff -qr /tmp/funasr-site-a /tmp/funasr-site-b
 
   browser:
-    runs-on: ubuntu-latest
+    # Playwright 1.55 supports Ubuntu 24.04, not the moving ubuntu-latest image.
+    runs-on: ubuntu-24.04
     needs: build-and-validate
     defaults:
       run:
