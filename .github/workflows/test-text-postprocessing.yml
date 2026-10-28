@@ -1,0 +1,63 @@
+name: Validate text postprocessing
+
+on:
+  pull_request:
+    paths:
+      - "funasr/utils/postprocess_hotwords.py"
+      - "funasr/utils/postprocess_utils.py"
+      - "runtime/python/onnxruntime/funasr_onnx/utils/postprocess_utils.py"
+      - "runtime/python/libtorch/funasr_torch/utils/postprocess_utils.py"
+      - "tests/test_postprocess_hotwords.py"
+      - "tests/test_rich_transcription_postprocess.py"
+      - ".github/workflows/test-text-postprocessing.yml"
+  push:
+    branches: [main]
+    paths:
+      - "funasr/utils/postprocess_hotwords.py"
+      - "funasr/utils/postprocess_utils.py"
+      - "runtime/python/onnxruntime/funasr_onnx/utils/postprocess_utils.py"
+      - "runtime/python/libtorch/funasr_torch/utils/postprocess_utils.py"
+      - "tests/test_postprocess_hotwords.py"
+      - "tests/test_rich_transcription_postprocess.py"
+      - ".github/workflows/test-text-postprocessing.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  text-postprocessing:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.10", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Install text test dependencies
+        run: python -m pip install pytest==8.1.1 pypinyin==0.55.0 rapidfuzz==3.14.5
+      - name: Record source and dependencies
+        run: |
+          git rev-parse HEAD | tee source-commit.txt
+          python -m pip freeze | tee resolved-dependencies.txt
+          python -m pip check
+          python -c "import pypinyin, rapidfuzz"
+      - name: Check hotword and rich transcription behavior without model weights
+        run: |
+          python -m pytest -q \
+            tests/test_postprocess_hotwords.py \
+            tests/test_rich_transcription_postprocess.py \
+            --junitxml=text-postprocessing-results.xml
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: text-postprocessing-python-${{ matrix.python }}
+          path: |
+            source-commit.txt
+            resolved-dependencies.txt
+            text-postprocessing-results.xml
