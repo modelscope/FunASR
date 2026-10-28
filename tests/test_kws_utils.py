@@ -1,7 +1,27 @@
 import re
 import unittest
 
-from funasr.utils.kws_utils import query_token_set, split_mixed_label, symbol_str
+import torch
+
+from funasr.utils.kws_utils import (
+    KwsCtcPrefixDecoder,
+    query_token_set,
+    split_mixed_label,
+    symbol_str,
+)
+
+
+class _IdentityCtc:
+    def softmax(self, x):
+        return x
+
+
+def _posteriors(token_ids, vocab_size=4):
+    # One frame per entry: token_id gets all the probability mass (0 is blank).
+    probs = torch.zeros(len(token_ids), vocab_size)
+    for frame, token_id in enumerate(token_ids):
+        probs[frame, token_id] = 1.0
+    return probs
 
 
 class KwsUtilsTest(unittest.TestCase):
@@ -17,6 +37,19 @@ class KwsUtilsTest(unittest.TestCase):
 
         self.assertEqual(tokens, ("a", "中"))
         self.assertEqual(token_ids, (1, 2))
+
+    def test_empty_keyword_entries_do_not_produce_detections(self):
+        token_list = ["<blank>", "<unk>", "小", "云"]
+        for keywords in ("小云小云,", "小云小云, ,", ",小云小云", "小云小云,!!"):
+            with self.subTest(keywords=keywords):
+                decoder = KwsCtcPrefixDecoder(_IdentityCtc(), keywords, token_list, {})
+
+                self.assertEqual(decoder.decode(_posteriors([0, 0, 0, 0])), (False, None, None))
+                self.assertEqual(decoder.decode(_posteriors([2, 0, 0, 0])), (False, None, None))
+                self.assertEqual(
+                    decoder.decode(_posteriors([2, 3, 0, 2, 3])), (True, "小云小云", 1.0)
+                )
+                self.assertEqual(list(decoder.keywords_token), ["小云小云"])
 
 
 if __name__ == "__main__":

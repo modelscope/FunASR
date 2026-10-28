@@ -117,6 +117,11 @@ class KwsCtcPrefixDecoder():
         keywords_list = self.keywords_str.strip().replace(' ', '').split(',')
         for keyword in keywords_list:
             strs, indexs = query_token_set(keyword, token_table, seg_dict)
+            if len(indexs) == 0:
+                # An empty entry (e.g. from a trailing comma) would match every
+                # hypothesis, so skip it instead of reporting a false detection.
+                logging.warning(f"Skipping keyword {keyword!r}: it has no tokens to match.")
+                continue
             self.keywords_token[keyword] = {}
             self.keywords_token[keyword]['token_id'] = indexs
             self.keywords_token[keyword]['token_str'] = ''.join('%s ' % str(i) for i in indexs)
