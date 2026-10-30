@@ -8,6 +8,8 @@ on:
       - "funasr/cli.py"
       - "tests/test_cli.py"
       - "funasr/auto/auto_model.py"
+      - "funasr/tokenizer/sentencepiece_tokenizer.py"
+      - "tests/test_sentencepiece_tokenizer.py"
       - "funasr/utils/load_utils.py"
       - "funasr/utils/timestamp_tools.py"
       - "funasr/models/contextual_paraformer/model.py"
@@ -36,6 +38,8 @@ on:
       - "funasr/cli.py"
       - "tests/test_cli.py"
       - "funasr/auto/auto_model.py"
+      - "funasr/tokenizer/sentencepiece_tokenizer.py"
+      - "tests/test_sentencepiece_tokenizer.py"
       - "funasr/utils/load_utils.py"
       - "funasr/utils/timestamp_tools.py"
       - "funasr/models/contextual_paraformer/model.py"
@@ -105,6 +109,7 @@ jobs:
             tests/test_eend_feature_compatibility.py \
             tests/test_pypi_metadata.py \
             tests/test_sensevoice_word_timestamps.py \
+            tests/test_sentencepiece_tokenizer.py \
             tests/test_pcm_input_format.py \
             tests/test_load_audio_bytes.py \
             tests/test_timestamp_tools.py \
