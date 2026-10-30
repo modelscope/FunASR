@@ -141,9 +141,10 @@ def sentence_postprocess(words: List[Any], time_stamp: List[List] = None):
     word_lists = []
     word_item = ""
     ts_lists = []
+    kept_indices = []
 
     # wash words lists
-    for i in words:
+    for index, i in enumerate(words):
         word = ""
         if isinstance(i, str):
             word = i
@@ -154,6 +155,11 @@ def sentence_postprocess(words: List[Any], time_stamp: List[List] = None):
             continue
         else:
             middle_lists.append(word)
+            kept_indices.append(index)
+
+    # time_stamp has one entry per token, including the ones washed out above
+    if time_stamp is not None and max(kept_indices, default=-1) < len(time_stamp):
+        time_stamp = [time_stamp[index] for index in kept_indices]
 
     # all chinese characters
     if isAllChinese(middle_lists):
