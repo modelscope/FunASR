@@ -119,6 +119,17 @@ def test_cli_defaults_disable_speaker_and_bound_partial_window():
     assert args.log_decode_profile is False
     assert args.vad_device == "cpu"
     assert args.vad_ncpu == 1
+    assert args.hf_overrides is None
+
+
+def test_cli_accepts_hf_overrides_json_object():
+    module = load_service_module()
+
+    args = module.build_arg_parser().parse_args(
+        ["--hf-overrides", '{"architectures":["FunASRForCausalLM"]}']
+    )
+
+    assert args.hf_overrides == {"architectures": ["FunASRForCausalLM"]}
 
 
 def test_cli_accepts_client_endpoint_mode():
@@ -1804,6 +1815,39 @@ def test_load_models_reads_postprocess_hotword_file(monkeypatch, tmp_path):
         "return_postprocess_hotword_matches": True,
     }
     assert auto_model_calls == []
+
+
+def test_load_models_forwards_hf_overrides_to_vllm(monkeypatch):
+    module = load_service_module()
+    module._vllm_engine = None
+    module._asr_kwargs = None
+    module._vad_model = None
+    module._spk_model = None
+    vllm_calls = []
+
+    import funasr
+
+    monkeypatch.setattr(funasr, "AutoModel", lambda *args, **kwargs: object())
+    vllm_stub = types.ModuleType("funasr.auto.auto_model_vllm")
+    vllm_stub.AutoModelVLLM = (
+        lambda **kwargs: vllm_calls.append(kwargs) or object()
+    )
+    monkeypatch.setitem(sys.modules, "funasr.auto.auto_model_vllm", vllm_stub)
+
+    args = module.build_arg_parser().parse_args(
+        [
+            "--endpoint-mode",
+            "client",
+            "--hf-overrides",
+            '{"architectures":["FunASRForCausalLM"]}',
+        ]
+    )
+
+    module.load_models(args)
+
+    assert vllm_calls[0]["vllm_kwargs"] == {
+        "hf_overrides": {"architectures": ["FunASRForCausalLM"]}
+    }
 
 
 def test_two_hour_session_keeps_audio_bounded_and_duration_absolute():

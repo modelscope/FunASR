@@ -1348,6 +1348,9 @@ def load_models(args):
             gpu_memory_utilization=getattr(args, 'gpu_memory_utilization', 0.8),
             max_model_len=getattr(args, 'max_model_len', 2048),
             enforce_eager=getattr(args, 'enforce_eager', False),
+            vllm_kwargs={"hf_overrides": getattr(args, "hf_overrides", None)}
+            if getattr(args, "hf_overrides", None)
+            else {},
         )
         _vllm_engine = RealtimeBatchingEngine(
             engine,
@@ -1614,12 +1617,25 @@ async def main(args):
         await asyncio.Future()
 
 
+def _parse_hf_overrides(value):
+    overrides = json.loads(value)
+    if not isinstance(overrides, dict):
+        raise argparse.ArgumentTypeError("--hf-overrides must be a JSON object")
+    return overrides
+
+
 def build_arg_parser():
     parser = argparse.ArgumentParser(description="Fun-ASR-Nano Streaming WebSocket Server")
     parser.add_argument("--port", type=int, default=10095)
     parser.add_argument("--model", type=str, default="FunAudioLLM/Fun-ASR-Nano-2512")
     parser.add_argument("--hub", type=str, default="ms", choices=["ms", "hf"])
     parser.add_argument("--device", type=str, default="cuda:0")
+    parser.add_argument(
+        "--hf-overrides",
+        type=_parse_hf_overrides,
+        default=None,
+        help=("JSON object forwarded to the vLLM model configuration."),
+    )
     parser.add_argument(
         "--vad-device",
         type=str,
