@@ -1,10 +1,26 @@
 from pathlib import Path
 
+import pytest
+
 
 ROOT = Path(__file__).resolve().parents[1]
 RELEASE_VERSION = "1.4.18"
 README_FILES = ("README.md", "README_zh.md", "README_ja.md", "README_ko.md")
 REPOSITORY_ROLE_FILES = ("docs/repository_roles.md", "docs/repository_roles_zh.md")
+
+
+@pytest.mark.parametrize("name,expected,incorrect", [
+    ("README.md", "cross-script hotword misreplacement", "hotword-file loading"),
+    ("README_zh.md", "\u8de8\u4e2d\u82f1\u6587\u70ed\u8bcd\u8bef\u66ff\u6362", "\u70ed\u8bcd\u6587\u4ef6\u8bfb\u53d6"),
+    ("README_ja.md", "\u4e2d\u56fd\u8a9e\u3068\u30e9\u30c6\u30f3\u6587\u5b57\u304c\u6df7\u5728\u3059\u308b hotword \u306e\u8aa4\u7f6e\u63db", "hotword \u30d5\u30a1\u30a4\u30eb\u306e\u8aad\u307f\u8fbc\u307f"),
+    ("README_ko.md", "\uc911\uad6d\uc5b4\uc640 \ub77c\ud2f4 \ubb38\uc790\uac00 \uc11e\uc778 hotword\uc758 \uc798\ubabb\ub41c \uce58\ud658", "hotword \ud30c\uc77c \uc77d\uae30"),
+])
+def test_release_hotword_summary_matches_cross_script_fix(name, expected, incorrect):
+    lines = (ROOT / name).read_text(encoding="utf-8").splitlines()
+    summaries = [line for line in lines if f"**FunASR {RELEASE_VERSION}**" in line]
+    assert len(summaries) == 1
+    assert expected in summaries[0]
+    assert incorrect not in summaries[0]
 
 
 def test_release_version_uses_required_carry_rule():
