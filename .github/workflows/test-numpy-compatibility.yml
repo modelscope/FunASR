@@ -10,10 +10,12 @@ on:
       - "funasr/auto/auto_model.py"
       - "funasr/utils/load_utils.py"
       - "funasr/utils/timestamp_tools.py"
+      - "funasr/models/paraformer/model.py"
       - "funasr/models/contextual_paraformer/model.py"
       - "funasr/models/seaco_paraformer/model.py"
       - "tests/test_timestamp_tools.py"
       - "tests/test_punc_model_none.py"
+      - "tests/test_paraformer_empty_token_batch.py"
       - "tests/test_paraformer_hotword_file.py"
       - "tests/test_pcm_input_format.py"
       - "tests/test_load_audio_bytes.py"
@@ -38,10 +40,12 @@ on:
       - "funasr/auto/auto_model.py"
       - "funasr/utils/load_utils.py"
       - "funasr/utils/timestamp_tools.py"
+      - "funasr/models/paraformer/model.py"
       - "funasr/models/contextual_paraformer/model.py"
       - "funasr/models/seaco_paraformer/model.py"
       - "tests/test_timestamp_tools.py"
       - "tests/test_punc_model_none.py"
+      - "tests/test_paraformer_empty_token_batch.py"
       - "tests/test_paraformer_hotword_file.py"
       - "tests/test_pcm_input_format.py"
       - "tests/test_load_audio_bytes.py"
@@ -109,6 +113,7 @@ jobs:
             tests/test_load_audio_bytes.py \
             tests/test_timestamp_tools.py \
             tests/test_punc_model_none.py \
+            tests/test_paraformer_empty_token_batch.py \
             tests/test_paraformer_hotword_file.py \
             tests/test_cli.py \
             --junitxml=numpy-results.xml
