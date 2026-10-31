@@ -1268,7 +1268,7 @@
             "fs": kwargs.get("fs", 16000),
             **cfg,
         }
-</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/auto/auto_model.py#L995" rel="noopener noreferrer" target="_blank">View full source →</a></details></div><div class="mblk"><code>.export(input=None, **cfg)</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/auto/auto_model.py#L1410" rel="noopener noreferrer" target="_blank">L1410</a><div class="mdoc"><p>Export model to ONNX format.</p>
+</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/auto/auto_model.py#L995" rel="noopener noreferrer" target="_blank">View full source →</a></details></div><div class="mblk"><code>.export(input=None, **cfg)</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/auto/auto_model.py#L1414" rel="noopener noreferrer" target="_blank">L1414</a><div class="mdoc"><p>Export model to ONNX format.</p>
 <p>Creates a deep copy of the model to isolate ONNX operator monkey-patching,</p>
 <p>then runs torch.onnx.export. The original model remains usable after export.</p>
 <h4>Args:</h4>
@@ -1313,7 +1313,7 @@
 
         device = cfg.get("device", "cpu")
         
-</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/auto/auto_model.py#L1410" rel="noopener noreferrer" target="_blank">View full source →</a></details></div></div>
+</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/auto/auto_model.py#L1414" rel="noopener noreferrer" target="_blank">View full source →</a></details></div></div>
 <div class="api-detail" id="e4" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>AutoModel.build_model(**kwargs)</code></h2><div class="dmod">funasr.auto.auto_model.AutoModel · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/auto/auto_model.py#L645" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Download model from hub, build all components, and load pretrained weights.</p>
 <p>This method handles the full model construction pipeline:</p>
 <p>1. Download model files from ModelScope/HuggingFace (if not local)</p>
@@ -1528,7 +1528,7 @@
             **cfg,
         }
 </code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/auto/auto_model.py#L995" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
-<div class="api-detail" id="e8" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>AutoModel.export(input=None, **cfg)</code></h2><div class="dmod">funasr.auto.auto_model.AutoModel · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/auto/auto_model.py#L1410" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Export model to ONNX format.</p>
+<div class="api-detail" id="e8" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>AutoModel.export(input=None, **cfg)</code></h2><div class="dmod">funasr.auto.auto_model.AutoModel · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/auto/auto_model.py#L1414" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Export model to ONNX format.</p>
 <p>Creates a deep copy of the model to isolate ONNX operator monkey-patching,</p>
 <p>then runs torch.onnx.export. The original model remains usable after export.</p>
 <h4>Args:</h4>
@@ -1573,7 +1573,7 @@
 
         device = cfg.get("device", "cpu")
         
-</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/auto/auto_model.py#L1410" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
+</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/auto/auto_model.py#L1414" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
 <div class="api-detail" id="e660" tabindex="-1"><span class="dtag badge-f">function</span><h2><code>check_vllm_applicable(model_name: str) -&gt; bool</code></h2><div class="dmod">funasr.auto.auto_model_vllm · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/auto/auto_model_vllm.py#L68" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Check if a model can use vLLM inference.</p>
 <h4>Args:</h4>
 <ul>
