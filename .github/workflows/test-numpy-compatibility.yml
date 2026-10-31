@@ -26,6 +26,7 @@ on:
       - "funasr/models/eend/utils/feature.py"
       - "tests/test_numpy_compatibility.py"
       - "tests/test_numpy_cluster_compatibility.py"
+      - "tests/test_cluster_backend.py"
       - "tests/test_eend_feature_compatibility.py"
       - "tests/test_sensevoice_word_timestamps.py"
       - "tests/test_pypi_metadata.py"
@@ -56,6 +57,7 @@ on:
       - "funasr/models/eend/utils/feature.py"
       - "tests/test_numpy_compatibility.py"
       - "tests/test_numpy_cluster_compatibility.py"
+      - "tests/test_cluster_backend.py"
       - "tests/test_eend_feature_compatibility.py"
       - "tests/test_sensevoice_word_timestamps.py"
       - "tests/test_pypi_metadata.py"
@@ -106,6 +108,7 @@ jobs:
           python -m pytest -q \
             tests/test_numpy_compatibility.py \
             tests/test_numpy_cluster_compatibility.py \
+            tests/test_cluster_backend.py \
             tests/test_eend_feature_compatibility.py \
             tests/test_pypi_metadata.py \
             tests/test_sensevoice_word_timestamps.py \
