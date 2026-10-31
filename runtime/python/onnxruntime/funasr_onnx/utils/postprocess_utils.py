@@ -157,8 +157,11 @@ def sentence_postprocess(words: List[Any], time_stamp: List[List] = None):
             middle_lists.append(word)
             kept_indices.append(index)
 
-    # time_stamp has one entry per token, including the ones washed out above
-    if time_stamp is not None and max(kept_indices, default=-1) < len(time_stamp):
+    # Timestamps use original token indices. Only trailing filtered tokens
+    # may be missing timestamps; guessing alignment would silently shift words.
+    if time_stamp is not None:
+        if max(kept_indices, default=-1) >= len(time_stamp):
+            raise ValueError("time_stamp is missing a retained token timestamp")
         time_stamp = [time_stamp[index] for index in kept_indices]
 
     # all chinese characters
