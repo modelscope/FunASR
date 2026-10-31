@@ -2,7 +2,7 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-RELEASE_VERSION = "1.4.17"
+RELEASE_VERSION = "1.4.18"
 README_FILES = ("README.md", "README_zh.md", "README_ja.md", "README_ko.md")
 REPOSITORY_ROLE_FILES = ("docs/repository_roles.md", "docs/repository_roles_zh.md")
 
@@ -40,10 +40,10 @@ def test_release_documents_do_not_describe_a_pending_candidate():
         assert version_lines, name
         assert not any(label in line.lower() for line in version_lines
                        for label in candidate_labels), name
-        assert 'pip install -U "funasr==1.4.16"' not in text, name
+        assert 'pip install -U "funasr==1.4.17"' not in text, name
     for name in REPOSITORY_ROLE_FILES:
         text = (ROOT / name).read_text(encoding="utf-8")
-        assert "funasr==1.4.16" not in text, name
+        assert "funasr==1.4.17" not in text, name
         assert "not published yet" not in text, name
         assert "\u5c1a\u672a\u6b63\u5f0f\u53d1\u5e03" not in text, name
         assert not any(label in text.lower() for label in candidate_labels), name
