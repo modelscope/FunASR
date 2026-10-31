@@ -183,7 +183,7 @@ class Paraformer:
                                 res[key][1].extend(value[1])
                             else:
                                 res[key] = [value[0], value[1]]
-                    return [res]
+                    return [res] if res else []
             else:
                 feats = self.add_overlap_chunk(feats, cache)
 
