@@ -112,7 +112,7 @@ CER/WER をそろえて比較してください。オフラインのスループ
 ## 最新情報
 
 - **MOSS-Transcribe-Diarize** を FunASR service、Docker、Kubernetes、vLLM/SGLang workflow、FunClip に統合し、長時間 ASR、timestamp、匿名 speaker label を一度に処理できます。[MOSS をデプロイ ->](./docs/moss_transcribe_diarize.md)
-- **FunASR 1.4.18** はローカル hotword ファイルの読み込み、特殊 token 除去後の timestamp 対応、中国語 VAD 分割での文と話者のずれを修正します。`python -m pip install -U "funasr==1.4.18"` でインストールできます。[リリースと検証範囲 ->](https://github.com/modelscope/FunASR/releases/tag/v1.4.18)
+- **FunASR 1.4.18** は中国語とラテン文字が混在する hotword の誤置換、特殊 token 除去後の timestamp 対応、中国語 VAD 分割での文と話者のずれを修正します。`python -m pip install -U "funasr==1.4.18"` でインストールできます。[リリースと検証範囲 ->](https://github.com/modelscope/FunASR/releases/tag/v1.4.18)
   前のリリース **FunASR 1.4.17** は明示的な PCM16 入力を追加し、timestamp、hotword、speaker sample rate、長い segment の streaming 処理を改善しました。[リリースと検証範囲 ->](https://github.com/modelscope/FunASR/releases/tag/v1.4.17)
   以前のリリース **FunASR 1.4.16** は複数回の推論でも VAD、句読点、話者モデルの明示的な device 配置を保持し、テスト済みのネイティブ Transformers 導入ガイドを追加しました。[リリースと検証範囲 ->](https://github.com/modelscope/FunASR/releases/tag/v1.4.16)
 - **ネイティブ Transformers：** 正式版 **5.17.0** が Fun-ASR-Nano に対応。公式 `-hf` checkpoint、CPU サンプル、Notebook：[導入ガイド（英語） ->](./docs/transformers_native.md)
