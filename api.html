@@ -2745,7 +2745,7 @@
             self.init_beam_search(**kwargs)
             self.nbest = kwargs.get("nbest", 1)
 
-</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/contextual_paraformer/model.py#L386" rel="noopener noreferrer" target="_blank">View full source →</a></details></div><div class="mblk"><code>.generate_hotwords_list(hotword_list_or_file, tokenizer=None, frontend=None)</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/contextual_paraformer/model.py#L533" rel="noopener noreferrer" target="_blank">L533</a><div class="mdoc"><p>Generate hotwords list.</p>
+</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/contextual_paraformer/model.py#L386" rel="noopener noreferrer" target="_blank">View full source →</a></details></div><div class="mblk"><code>.generate_hotwords_list(hotword_list_or_file, tokenizer=None, frontend=None)</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/contextual_paraformer/model.py#L537" rel="noopener noreferrer" target="_blank">L537</a><div class="mdoc"><p>Generate hotwords list.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>hotword_list_or_file</code> — TODO.</li>
@@ -2782,7 +2782,7 @@
             
                 Args:
                     txt: TODO.
-</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/contextual_paraformer/model.py#L533" rel="noopener noreferrer" target="_blank">View full source →</a></details></div><div class="mblk"><code>.export(**kwargs)</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/contextual_paraformer/model.py#L662" rel="noopener noreferrer" target="_blank">L662</a><div class="mdoc"><p>Export.</p>
+</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/contextual_paraformer/model.py#L537" rel="noopener noreferrer" target="_blank">View full source →</a></details></div><div class="mblk"><code>.export(**kwargs)</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/contextual_paraformer/model.py#L666" rel="noopener noreferrer" target="_blank">L666</a><div class="mdoc"><p>Export.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>**kwargs</code> — Additional keyword arguments.</li>
@@ -2965,7 +2965,7 @@
             self.nbest = kwargs.get("nbest", 1)
 
 </code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/contextual_paraformer/model.py#L386" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
-<div class="api-detail" id="e30" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>ContextualParaformer.generate_hotwords_list(hotword_list_or_file, tokenizer=None, frontend=None)</code></h2><div class="dmod">funasr.models.contextual_paraformer.ContextualParaformer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/contextual_paraformer/model.py#L533" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Generate hotwords list.</p>
+<div class="api-detail" id="e30" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>ContextualParaformer.generate_hotwords_list(hotword_list_or_file, tokenizer=None, frontend=None)</code></h2><div class="dmod">funasr.models.contextual_paraformer.ContextualParaformer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/contextual_paraformer/model.py#L537" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Generate hotwords list.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>hotword_list_or_file</code> — TODO.</li>
@@ -3002,8 +3002,8 @@
             
                 Args:
                     txt: TODO.
-</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/contextual_paraformer/model.py#L533" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
-<div class="api-detail" id="e31" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>ContextualParaformer.export(**kwargs)</code></h2><div class="dmod">funasr.models.contextual_paraformer.ContextualParaformer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/contextual_paraformer/model.py#L662" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Export.</p>
+</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/contextual_paraformer/model.py#L537" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
+<div class="api-detail" id="e31" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>ContextualParaformer.export(**kwargs)</code></h2><div class="dmod">funasr.models.contextual_paraformer.ContextualParaformer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/contextual_paraformer/model.py#L666" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Export.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>**kwargs</code> — Additional keyword arguments.</li>
@@ -11083,7 +11083,7 @@
             else kwargs.get("output_timestamp", False)
         )
         if self.beam_search is None and (is_use_lm or is_use_ctc):
-</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/paraformer/model.py#L534" rel="noopener noreferrer" target="_blank">View full source →</a></details></div><div class="mblk"><code>.export(**kwargs)</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/paraformer/model.py#L717" rel="noopener noreferrer" target="_blank">L717</a><div class="mdoc"><p>Export.</p>
+</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/paraformer/model.py#L534" rel="noopener noreferrer" target="_blank">View full source →</a></details></div><div class="mblk"><code>.export(**kwargs)</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/paraformer/model.py#L722" rel="noopener noreferrer" target="_blank">L722</a><div class="mdoc"><p>Export.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>**kwargs</code> — Additional keyword arguments.</li>
@@ -11340,7 +11340,7 @@
         )
         if self.beam_search is None and (is_use_lm or is_use_ctc):
 </code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/paraformer/model.py#L534" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
-<div class="api-detail" id="e170" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>Paraformer.export(**kwargs)</code></h2><div class="dmod">funasr.models.paraformer.Paraformer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/paraformer/model.py#L717" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Export.</p>
+<div class="api-detail" id="e170" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>Paraformer.export(**kwargs)</code></h2><div class="dmod">funasr.models.paraformer.Paraformer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/paraformer/model.py#L722" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Export.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>**kwargs</code> — Additional keyword arguments.</li>
@@ -14893,7 +14893,7 @@
             self.init_beam_search(**kwargs)
             self.nbest = kwargs.get("nbest", 1)
         meta_data = {}
-</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/seaco_paraformer/model.py#L421" rel="noopener noreferrer" target="_blank">View full source →</a></details></div><div class="mblk"><code>.generate_hotwords_list(hotword_list_or_file, tokenizer=None, frontend=None)</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/seaco_paraformer/model.py#L582" rel="noopener noreferrer" target="_blank">L582</a><div class="mdoc"><p>Generate hotwords list.</p>
+</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/seaco_paraformer/model.py#L421" rel="noopener noreferrer" target="_blank">View full source →</a></details></div><div class="mblk"><code>.generate_hotwords_list(hotword_list_or_file, tokenizer=None, frontend=None)</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/seaco_paraformer/model.py#L588" rel="noopener noreferrer" target="_blank">L588</a><div class="mdoc"><p>Generate hotwords list.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>hotword_list_or_file</code> — TODO.</li>
@@ -14930,7 +14930,7 @@
                             else:
                                 out_txt += "&lt;unk&gt;" + " "
                     else:
-</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/seaco_paraformer/model.py#L582" rel="noopener noreferrer" target="_blank">View full source →</a></details></div><div class="mblk"><code>.export(**kwargs)</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/seaco_paraformer/model.py#L695" rel="noopener noreferrer" target="_blank">L695</a><div class="mdoc"><p>Export.</p>
+</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/seaco_paraformer/model.py#L588" rel="noopener noreferrer" target="_blank">View full source →</a></details></div><div class="mblk"><code>.export(**kwargs)</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/seaco_paraformer/model.py#L701" rel="noopener noreferrer" target="_blank">L701</a><div class="mdoc"><p>Export.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>**kwargs</code> — Additional keyword arguments.</li>
@@ -15052,7 +15052,7 @@
             self.nbest = kwargs.get("nbest", 1)
         meta_data = {}
 </code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/seaco_paraformer/model.py#L421" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
-<div class="api-detail" id="e228" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>SeacoParaformer.generate_hotwords_list(hotword_list_or_file, tokenizer=None, frontend=None)</code></h2><div class="dmod">funasr.models.seaco_paraformer.SeacoParaformer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/seaco_paraformer/model.py#L582" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Generate hotwords list.</p>
+<div class="api-detail" id="e228" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>SeacoParaformer.generate_hotwords_list(hotword_list_or_file, tokenizer=None, frontend=None)</code></h2><div class="dmod">funasr.models.seaco_paraformer.SeacoParaformer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/seaco_paraformer/model.py#L588" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Generate hotwords list.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>hotword_list_or_file</code> — TODO.</li>
@@ -15089,8 +15089,8 @@
                             else:
                                 out_txt += "&lt;unk&gt;" + " "
                     else:
-</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/seaco_paraformer/model.py#L582" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
-<div class="api-detail" id="e229" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>SeacoParaformer.export(**kwargs)</code></h2><div class="dmod">funasr.models.seaco_paraformer.SeacoParaformer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/seaco_paraformer/model.py#L695" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Export.</p>
+</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/seaco_paraformer/model.py#L588" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
+<div class="api-detail" id="e229" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>SeacoParaformer.export(**kwargs)</code></h2><div class="dmod">funasr.models.seaco_paraformer.SeacoParaformer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/seaco_paraformer/model.py#L701" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Export.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>**kwargs</code> — Additional keyword arguments.</li>
@@ -15111,7 +15111,7 @@
         models = export_rebuild_model(model=self, **kwargs)
         return models
 </code></pre></details></div>
-<div class="api-detail" id="e230" tabindex="-1"><span class="dtag badge-f">function</span><h2><code>load_seg_dict(seg_dict_file)</code></h2><div class="dmod">funasr.models.seaco_paraformer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/seaco_paraformer/model.py#L713" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Load seg dict.</p>
+<div class="api-detail" id="e230" tabindex="-1"><span class="dtag badge-f">function</span><h2><code>load_seg_dict(seg_dict_file)</code></h2><div class="dmod">funasr.models.seaco_paraformer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/seaco_paraformer/model.py#L719" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Load seg dict.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>seg_dict_file</code> — TODO.</li>
