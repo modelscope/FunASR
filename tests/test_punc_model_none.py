@@ -700,6 +700,115 @@ class TestPuncModelNone(unittest.TestCase):
         self.assertEqual(results[0]["sentence_info"][0]["text"], ["你", "好"])
 
 
+
+    def _check_vad_chunk_alignment(
+        self, chunks, expected_texts, punc_input, *, speaker=False,
+        raw_text=False, english=False, timestamps=None,
+    ):
+        """Keep model responses fixed; exercise real VAD merging and speaker assignment."""
+        am = self._make_auto_model(
+            punc_model=MagicMock(),
+            spk_model=MagicMock() if speaker else None,
+            spk_mode="punc_segment",
+        )
+        if speaker:
+            am.cb_model = MagicMock(return_value=np.arange(len(chunks)))
+        if timestamps is None:
+            timestamps = [
+                [[i * 200, (i + 1) * 200] for i in range(len(text.split()))]
+                for text in chunks
+            ]
+        segments = []
+        offset = 0
+        for stamps in timestamps:
+            segments.append([offset, offset + stamps[-1][1]])
+            offset = segments[-1][1]
+        order = iter(sorted(range(len(chunks)), key=lambda i: segments[i][1] - segments[i][0]))
+        punc_array = []
+        for i, stamps in enumerate(timestamps):
+            punc_array.extend([1] * (len(stamps) - 1) + [3 if i == len(chunks) - 1 else 2])
+        top_text = " ".join(expected_texts)
+
+        def infer(data, input_len=None, model=None, kwargs=None, **cfg):
+            if model is am.vad_model:
+                return [{"key": "chunk_alignment", "value": [s[:] for s in segments]}]
+            if model is am.model:
+                self.assertEqual(len(data), 1)
+                i = next(order)
+                return [{"text": chunks[i], "timestamp": [t[:] for t in timestamps[i]]}]
+            if model is am.spk_model:
+                return [{"spk_embedding": torch.ones(1, 4)} for _ in data]
+            if model is am.punc_model:
+                self.assertEqual(data, punc_input)
+                return [{"text": top_text, "punc_array": punc_array}]
+            self.fail("Unexpected model")
+
+        am.inference = infer
+        result = am.inference_with_vad(
+            np.zeros(offset * 16, dtype=np.float32),
+            sentence_timestamp=True, return_raw_text=raw_text, en_post_proc=english,
+        )[0]
+        self.assertEqual(result["text"], top_text)
+        sentences = result["sentence_info"]
+        self.assertEqual([s["text"] for s in sentences], expected_texts)
+        expected_all = []
+        for i, sentence in enumerate(sentences):
+            expected = [[a + segments[i][0], b + segments[i][0]] for a, b in timestamps[i]]
+            expected_all.extend(expected)
+            self.assertEqual(sentence["timestamp"], expected)
+            self.assertEqual((sentence["start"], sentence["end"]), (expected[0][0], expected[-1][1]))
+            if speaker:
+                self.assertEqual(sentence["spk"], i)
+        self.assertEqual(result["timestamp"], expected_all)
+        if raw_text:
+            self.assertEqual(result["raw_text"], " ".join(chunks))
+        return result
+
+    def test_chinese_vad_boundaries_preserve_timestamp_units(self):
+        chunks = ["今 天 天 气 很 好", "我 们 去 公 园 吧"]
+        for speaker in (False, True):
+            for raw_text in (False, True):
+                with self.subTest(speaker=speaker, raw_text=raw_text):
+                    self._check_vad_chunk_alignment(
+                        chunks, ["今天天气很好，", "我们去公园吧。"],
+                        "今 天 天 气 很 好我 们 去 公 园 吧",
+                        speaker=speaker, raw_text=raw_text,
+                    )
+
+    def test_chinese_vad_boundaries_restore_sorted_segments(self):
+        for speaker in (False, True):
+            with self.subTest(speaker=speaker):
+                self._check_vad_chunk_alignment(
+                    ["今 天 天 气 很 好", "我 们 去 公 园 吧", "一 起 出 发"],
+                    ["今天天气很好，", "我们去公园吧，", "一起出发。"],
+                    "今 天 天 气 很 好我 们 去 公 园 吧一 起 出 发",
+                    speaker=speaker,
+                )
+
+    def test_chinese_vad_boundaries_remove_rich_tags_only_for_alignment(self):
+        self._check_vad_chunk_alignment(
+            ["<|zh|><|NEUTRAL|>今 天 天 气 很 好", "<|zh|>我 们 去 公 园 吧"],
+            ["今天天气很好，", "我们去公园吧。"],
+            "今 天 天 气 很 好我 们 去 公 园 吧",
+            speaker=True, raw_text=True,
+        )
+
+    def test_mixed_vad_boundaries_preserve_timestamp_units(self):
+        self._check_vad_chunk_alignment(
+            ["你 好 hello", "world 我 来"],
+            ["你好 hello，", " world 我来。"],
+            "你 好 hello world 我 来",
+            raw_text=True,
+        )
+
+    def test_english_vad_boundaries_preserve_timestamp_units(self):
+        self._check_vad_chunk_alignment(
+            ["hello world", "from funasr"],
+            ["hello world,", "from funasr."],
+            "hello world from funasr",
+            english=True, raw_text=True,
+        )
+
 class TestCTTransformerPunctuation(unittest.TestCase):
     """Keep CT-Transformer text and punctuation-array endings consistent."""
 

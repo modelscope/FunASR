@@ -1238,7 +1238,11 @@ class AutoModel:
                     )
                 result["text"] = punctuated_surface or punc_res[0]["text"]
 
-            timestamp_text = punc_input_text
+            # Timestamp units need VAD boundary spaces; punctuation surface text does not.
+            timestamp_text = (
+                re.sub(r"<\|[^|]*\|>", "", raw_text).strip()
+                if raw_text is not None else None
+            )
             sentence_timestamps = result.get("timestamp", [])
             punc_alignment_failed = False
             if punc_res is not None:
