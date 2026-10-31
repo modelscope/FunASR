@@ -278,6 +278,66 @@ class TestPuncModelNone(unittest.TestCase):
     @patch("funasr.auto.auto_model.slice_padding_audio_samples")
     @patch("funasr.auto.auto_model.load_audio_text_image_video")
     @patch("funasr.auto.auto_model.prepare_data_iterator")
+    @patch("funasr.auto.auto_model.sv_chunk")
+    @patch("funasr.auto.auto_model.postprocess")
+    def test_sentence_timestamps_preserve_token_boundaries_across_vad_segments(
+        self, mock_postprocess, mock_sv_chunk, mock_prep, mock_load, mock_slice
+    ):
+        mock_prep.return_value = (["test_utt"], [np.zeros(40000, dtype=np.float32)])
+        mock_load.return_value = np.zeros(40000, dtype=np.float32)
+        mock_slice.return_value = ([np.zeros(16000, dtype=np.float32)], [16000])
+        mock_sv_chunk.side_effect = lambda segments: segments
+        mock_postprocess.return_value = [[0.0, 1.0, 0], [1.5, 2.5, 1]]
+
+        for with_speakers in (False, True):
+            with self.subTest(with_speakers=with_speakers):
+                am = self._make_auto_model(
+                    punc_model=MagicMock(),
+                    spk_model=MagicMock() if with_speakers else None,
+                    spk_mode="punc_segment" if with_speakers else None,
+                )
+                results_seq = [
+                    [{"key": "test_utt", "value": [[0, 1000], [1500, 2500]]}],
+                    [{"text": "客 户", "timestamp": [[0, 500], [500, 1000]]}],
+                ]
+                if with_speakers:
+                    am.cb_model = MagicMock(return_value=np.array([0, 1]))
+                    results_seq.append([{"spk_embedding": torch.tensor([[1.0, 0.0]])}])
+                results_seq.append([{"text": "需 求", "timestamp": [[0, 500], [500, 1000]]}])
+                if with_speakers:
+                    results_seq.append([{"spk_embedding": torch.tensor([[0.0, 1.0]])}])
+                results_seq.append([{"text": "客户，需求。", "punc_array": [1, 2, 1, 3]}])
+                am.inference = MagicMock(side_effect=lambda *args, **kwargs: results_seq.pop(0))
+
+                result = am.inference_with_vad(
+                    "dummy_input", sentence_timestamp=True, return_raw_text=True
+                )[0]
+
+                expected = [
+                    {
+                        "text": "客户，",
+                        "raw_text": "客 户",
+                        "start": 0,
+                        "end": 1000,
+                        "timestamp": [[0, 500], [500, 1000]],
+                    },
+                    {
+                        "text": "需求。",
+                        "raw_text": "需 求",
+                        "start": 1500,
+                        "end": 2500,
+                        "timestamp": [[1500, 2000], [2000, 2500]],
+                    },
+                ]
+                if with_speakers:
+                    for index, sentence in enumerate(expected):
+                        sentence["spk"] = index
+                self.assertEqual(result["text"], "客户，需求。")
+                self.assertEqual(result["sentence_info"], expected)
+
+    @patch("funasr.auto.auto_model.slice_padding_audio_samples")
+    @patch("funasr.auto.auto_model.load_audio_text_image_video")
+    @patch("funasr.auto.auto_model.prepare_data_iterator")
     def test_sentence_timestamp_falls_back_to_vad_when_punctuation_alignment_fails(
         self, mock_prep, mock_load, mock_slice
     ):
