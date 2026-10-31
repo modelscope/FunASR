@@ -551,6 +551,8 @@ class AutoModel:
             spk_model (str, optional): Speaker model for diarization ("cam++" or full model ID).
                 Requires vad_model. For Qwen3-ASR, also requires forced_aligner.
             spk_mode (str, optional): Speaker diarization mode. "punc_segment" (default) or "vad_segment".
+            max_num_spks (int, optional): Construction-time cap on automatic speaker counting
+                (default: 15). An explicit preset_spk_num takes precedence.
             hub (str): Model hub. "ms" (ModelScope, default) or "hf" (HuggingFace).
             ncpu (int): CPU threads (default: 4).
             disable_update (bool): Skip version check on startup.
@@ -615,6 +617,8 @@ class AutoModel:
         cb_kwargs = (
             {} if spk_kwargs.get("cb_kwargs", {}) is None else spk_kwargs.get("cb_kwargs", {})
         )
+        if "max_num_spks" in spk_kwargs or "max_num_spks" in cb_kwargs:
+            raise TypeError("max_num_spks must be passed as a top-level AutoModel argument")
         if spk_model is not None:
             logging.info("Building SPK model.")
             spk_kwargs["model"] = spk_model
@@ -624,7 +628,9 @@ class AutoModel:
             if "hub" in kwargs:
                 spk_kwargs.setdefault("hub", kwargs["hub"])
             spk_model, spk_kwargs = self.build_model(**spk_kwargs)
-            self.cb_model = ClusterBackend(**cb_kwargs).to(kwargs["device"])
+            self.cb_model = ClusterBackend(
+                max_num_spks=kwargs.get("max_num_spks", 15), **cb_kwargs
+            ).to(kwargs["device"])
             spk_mode = kwargs.get("spk_mode", "punc_segment")
             if spk_mode not in ["default", "vad_segment", "punc_segment"]:
                 logging.error("spk_mode should be one of default, vad_segment and punc_segment.")
