@@ -8,6 +8,7 @@ on:
       - "funasr/cli.py"
       - "tests/test_cli.py"
       - "funasr/auto/auto_model.py"
+      - "tests/test_speaker_optional_dependency.py"
       - "funasr/utils/load_utils.py"
       - "funasr/bin/realtime_ws.py"
       - "tests/test_realtime_ws_service.py"
@@ -42,6 +43,7 @@ on:
       - "funasr/cli.py"
       - "tests/test_cli.py"
       - "funasr/auto/auto_model.py"
+      - "tests/test_speaker_optional_dependency.py"
       - "funasr/utils/load_utils.py"
       - "funasr/bin/realtime_ws.py"
       - "tests/test_realtime_ws_service.py"
@@ -115,6 +117,7 @@ jobs:
             tests/test_numpy_compatibility.py \
             tests/test_numpy_cluster_compatibility.py \
             tests/test_cluster_backend.py \
+            tests/test_speaker_optional_dependency.py \
             tests/test_eend_feature_compatibility.py \
             tests/test_pypi_metadata.py \
             tests/test_sensevoice_word_timestamps.py \
