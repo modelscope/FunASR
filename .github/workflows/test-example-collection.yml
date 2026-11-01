@@ -5,6 +5,8 @@ on:
     paths:
       - "examples/mcp_server/**"
       - "examples/openai_api/**"
+      - "examples/industrial_data_pretraining/fun_asr_nano/client_test.py"
+      - "tests/test_streaming_client_collection.py"
       - "tests/test_example_smoke_collection.py"
       - "tests/test_mcp_server_example.py"
       - "tests/test_openai_api_docker_validation.py"
@@ -14,6 +16,8 @@ on:
     paths:
       - "examples/mcp_server/**"
       - "examples/openai_api/**"
+      - "examples/industrial_data_pretraining/fun_asr_nano/client_test.py"
+      - "tests/test_streaming_client_collection.py"
       - "tests/test_example_smoke_collection.py"
       - "tests/test_mcp_server_example.py"
       - "tests/test_openai_api_docker_validation.py"
@@ -37,14 +41,15 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python }}
-      - name: Install test runner
-        run: python -m pip install pytest
+      - name: Install test runner and client dependencies
+        run: python -m pip install pytest numpy soundfile 'websockets>=10,<16'
       - name: Check collection and standalone CLI compatibility
         run: |
           git rev-parse HEAD > source-commit.txt
           python -m pip freeze > resolved-dependencies.txt
           python -m pytest -q \
             tests/test_example_smoke_collection.py \
+            tests/test_streaming_client_collection.py \
             tests/test_mcp_server_example.py \
             tests/test_openai_api_docker_validation.py \
             --junitxml=example-results.xml
