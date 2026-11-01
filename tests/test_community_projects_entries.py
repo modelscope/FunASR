@@ -53,3 +53,42 @@ def test_speech_to_speech_source_install_is_discoverable_and_release_bounded():
                if "`huggingface/speech-to-speech#319`" in line)
     assert revision in row and "Merged" in row
     assert "Wait for maintainer review" not in row
+
+
+def test_openclaw_readme_entrypoints_disclose_unmerged_sdk_requirement():
+    for suffix, marker in (("", "experimental; requires an unmerged upstream SDK patch"),
+                           ("_zh", "\u5b9e\u9a8c\u6027\uff1b\u4f9d\u8d56\u5c1a\u672a\u5408\u5e76\u7684\u4e0a\u6e38 SDK \u8865\u4e01")):
+        text = (ROOT / f"README{suffix}.md").read_text(encoding="utf-8")
+        entry = next(line for line in text.splitlines() if "integrations/openclaw/" in line)
+        assert "integrations/openclaw/#compatibility" in entry
+        assert marker in entry
+
+
+def test_openclaw_compatibility_records_closed_unmerged_dependency():
+    text = (ROOT / "integrations/openclaw/README.md").read_text()
+    compatibility = text.split("## Compatibility", 1)[1].split("\n## ", 1)[0]
+    assert "2026-10-31" in compatibility
+    assert "closed without merging" in compatibility
+    assert "https://github.com/openclaw/openclaw/pull/118977" in compatibility
+    assert "not a supported stock-install compatibility floor" in compatibility
+    assert "npm and ClawHub" in compatibility
+    assert "accepted and released upstream SDK contract" in compatibility
+
+
+def test_openclaw_protocol_proof_is_not_released_host_acceptance():
+    text = (ROOT / "integrations/openclaw/README.md").read_text()
+    proof = text.split("## Verified behavior", 1)[1].split("\n## ", 1)[0]
+    assert "historical local protocol proof" in proof
+    assert "not validation of a released OpenClaw installation" in proof
+    assert "278 audio frames" in proof
+    assert "seven partial transcripts" in proof
+
+
+def test_openclaw_growth_record_keeps_history_and_current_disposition_separate():
+    text = (ROOT / "docs/community_growth_20k.md").read_text()
+    section = text.split("### 2026-08-16 OpenClaw", 1)[1].split("\n### ", 1)[0]
+    assert "154 successful, 39 skipped" in section
+    assert "2026-10-31 disposition" in section
+    assert "closed without merging" in section
+    assert "#issuecomment-6542645321" in section
+    assert "not a merged integration or adoption result" in section

@@ -11,6 +11,7 @@ on:
       - 'tests/test_sphinx_links.py'
       - 'tests/test_vllm_examples_contract.py'
       - 'tests/test_readme_task_entrypoints.py'
+      - 'tests/test_community_projects_entries.py'
       - 'model_zoo/**/*.md'
       - 'runtime/**/*.md'
       - 'examples/openai_api/**/*.md'
@@ -34,6 +35,7 @@ on:
       - 'tests/test_sphinx_links.py'
       - 'tests/test_vllm_examples_contract.py'
       - 'tests/test_readme_task_entrypoints.py'
+      - 'tests/test_community_projects_entries.py'
       - 'model_zoo/**/*.md'
       - 'runtime/**/*.md'
       - 'examples/openai_api/**/*.md'
@@ -91,6 +93,7 @@ jobs:
         run: >-
           python -m pytest
           tests/test_readme_task_entrypoints.py
+          tests/test_community_projects_entries.py
           tests/test_learning_docs_contract.py
           tests/test_reference_docs_contract.py
           tests/test_vllm_examples_contract.py
