@@ -101,6 +101,8 @@ As of 2026-09-05 05:27 UTC, the ecosystem has 37,164 combined GitHub stars, or 5
 - The remaining package-boundary review finding was addressed on signed+DCO head `d2e9e8803a90b13a0a9816f2afb37a6c64aaa0e2`. Fresh local evidence passed the external package consumer, all 147 public Plugin SDK subpaths, the SDK surface budget, 21 package-contract tests, formatting, and `git diff --check`.
 - Exact-head GitHub CI completed with 154 successful, 39 skipped, and one neutral check, zero failures, and zero unresolved review threads. The permanent public SDK boundary still requires an OpenClaw maintainer decision.
 
+**2026-10-31 disposition:** #118977 was closed without merging. The [closing bot comment](https://github.com/openclaw/openclaw/pull/118977#issuecomment-6542645321) reports no demonstrated bundled-provider need for the proposed public SDK surface. The August validation above is historical; this is not a merged integration or adoption result. The [local plugin remains experimental](../integrations/openclaw/README.md#compatibility) and still requires the unmerged SDK patch.
+
 ### 2026-08-17 Fun-ASR-Nano checkpoint owner handoff
 
 - FunASR issue [#3496](https://github.com/modelscope/FunASR/issues/3496) was routed to `LauraGPT` and `pengzhendong`, the two maintainers with direct write access to `QwenAudio/Fun-ASR`. The issue blocks the Hugging Face checkpoint path because 86 CTC tensors are absent there, while the complete ModelScope artifact is available and integrity-checked.
