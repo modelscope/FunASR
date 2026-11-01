@@ -21,6 +21,8 @@ on:
       - "tests/test_punc_model_none.py"
       - "tests/test_paraformer_empty_token_batch.py"
       - "tests/test_paraformer_hotword_file.py"
+      - "funasr/models/ct_transformer_streaming/model.py"
+      - "tests/test_ct_transformer_streaming_empty_input.py"
       - "tests/test_pcm_input_format.py"
       - "tests/test_load_audio_bytes.py"
       - "funasr/frontends/**"
@@ -56,6 +58,8 @@ on:
       - "tests/test_punc_model_none.py"
       - "tests/test_paraformer_empty_token_batch.py"
       - "tests/test_paraformer_hotword_file.py"
+      - "funasr/models/ct_transformer_streaming/model.py"
+      - "tests/test_ct_transformer_streaming_empty_input.py"
       - "tests/test_pcm_input_format.py"
       - "tests/test_load_audio_bytes.py"
       - "funasr/frontends/**"
@@ -129,6 +133,7 @@ jobs:
             tests/test_punc_model_none.py \
             tests/test_paraformer_empty_token_batch.py \
             tests/test_paraformer_hotword_file.py \
+            tests/test_ct_transformer_streaming_empty_input.py \
             tests/test_cli.py \
             --junitxml=numpy-results.xml
       - uses: actions/upload-artifact@v4
