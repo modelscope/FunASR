@@ -289,11 +289,11 @@ class Fsmn_vad_online:
         is_final = param_dict.get("is_final", False)
         frontend: WavFrontendOnline = param_dict.get("frontend", WavFrontendOnline(cmvn_file=self.cmvn_file, **self.config["frontend_conf"]))
         feats, feats_len = self.extract_feat(frontend=frontend, waveforms=waveforms, is_final=is_final)
+        vad_scorer = param_dict.get("vad_scorer", E2EVadModel(self.config["model_conf"]))
         segments = []
         if feats.size != 0:
             in_cache = param_dict.get("in_cache", list())
             in_cache = self.prepare_cache(in_cache)
-            vad_scorer = param_dict.get("vad_scorer", E2EVadModel(self.config["model_conf"]))
             try:
                 inputs = [feats]
                 inputs.extend(in_cache)
