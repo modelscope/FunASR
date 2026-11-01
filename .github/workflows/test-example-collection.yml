@@ -1,0 +1,58 @@
+name: Validate example collection
+
+on:
+  pull_request:
+    paths:
+      - "examples/mcp_server/**"
+      - "examples/openai_api/**"
+      - "tests/test_example_smoke_collection.py"
+      - "tests/test_mcp_server_example.py"
+      - "tests/test_openai_api_docker_validation.py"
+      - ".github/workflows/test-example-collection.yml"
+  push:
+    branches: [main]
+    paths:
+      - "examples/mcp_server/**"
+      - "examples/openai_api/**"
+      - "tests/test_example_smoke_collection.py"
+      - "tests/test_mcp_server_example.py"
+      - "tests/test_openai_api_docker_validation.py"
+      - ".github/workflows/test-example-collection.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  collection:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.10", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Install test runner
+        run: python -m pip install pytest
+      - name: Check collection and standalone CLI compatibility
+        run: |
+          git rev-parse HEAD > source-commit.txt
+          python -m pip freeze > resolved-dependencies.txt
+          python -m pytest -q \
+            tests/test_example_smoke_collection.py \
+            tests/test_mcp_server_example.py \
+            tests/test_openai_api_docker_validation.py \
+            --junitxml=example-results.xml
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: example-collection-${{ matrix.python }}
+          path: |
+            source-commit.txt
+            resolved-dependencies.txt
+            example-results.xml
