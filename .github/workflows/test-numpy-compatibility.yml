@@ -8,6 +8,8 @@ on:
       - "funasr/cli.py"
       - "tests/test_cli.py"
       - "funasr/auto/auto_model.py"
+      - "funasr/tokenizer/sentencepiece_tokenizer.py"
+      - "tests/test_sentencepiece_tokenizer.py"
       - "funasr/utils/load_utils.py"
       - "funasr/bin/realtime_ws.py"
       - "tests/test_realtime_ws_service.py"
@@ -42,6 +44,8 @@ on:
       - "funasr/cli.py"
       - "tests/test_cli.py"
       - "funasr/auto/auto_model.py"
+      - "funasr/tokenizer/sentencepiece_tokenizer.py"
+      - "tests/test_sentencepiece_tokenizer.py"
       - "funasr/utils/load_utils.py"
       - "funasr/bin/realtime_ws.py"
       - "tests/test_realtime_ws_service.py"
@@ -118,6 +122,7 @@ jobs:
             tests/test_eend_feature_compatibility.py \
             tests/test_pypi_metadata.py \
             tests/test_sensevoice_word_timestamps.py \
+            tests/test_sentencepiece_tokenizer.py \
             tests/test_pcm_input_format.py \
             tests/test_realtime_ws_service.py \
             tests/test_realtime_ws_hf_overrides.py \
