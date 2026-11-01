@@ -54,3 +54,31 @@ def test_hub_catalogues_do_not_assign_one_license_to_all_models(source):
     assert '../LICENSE' in intro
     assert 'OpenMOSS' in intro
     assert '-  Apache License 2.0' not in intro
+
+
+def test_ascend_guide_scopes_historical_model_and_environment_evidence():
+    content = (ROOT / 'docs/ascend_npu.md').read_text(encoding='utf-8')
+    intro = content.split('## 1.', 1)[0]
+    for identity in ('310P3', 'CANN 9.1.0-beta.1', 'torch 2.10.0+cpu',
+                     'torch_npu 2.10.0', 'funasr 1.3.14', 'fsmn-vad',
+                     'paraformer', 'ct-transformer', 'cam++'):
+        assert identity in intro
+    assert 'https://github.com/modelscope/FunASR/pull/3708' in intro
+    assert '\u4e0d\u8986\u76d6 Nano/Qwen3' in intro
+    assert 'CPU' in intro and '\u4fee\u8ba2\u7248' in intro
+    assert '\u4e0a\u5b8c\u6574\u9a8c\u8bc1' not in intro
+
+
+def test_ascend_pooling_and_latency_are_not_universal_npu_guarantees():
+    content = (ROOT / 'docs/ascend_npu.md').read_text(encoding='utf-8')
+    pooling = content.split('## 3.', 1)[1].split('## 4.', 1)[0]
+    assert '\u4ec5 CPU \u8bed\u4e49\u68c0\u67e5' in pooling
+    assert '\u53e6\u884c\u9a8c\u8bc1' in pooling
+    assert '\u4ec5\u7528 NPU \u652f\u6301\u7684\u57fa\u7840\u7b97\u5b50' not in pooling
+    behavior = content.split('## 5.', 1)[1]
+    assert '\u51b7\u542f\u52a8' in behavior
+    assert '\u9884\u70ed\u540e' in behavior
+    assert '\u8f93\u51fa\u6b63\u786e\u6027' in behavior
+    assert '\u4e0d\u80fd\u4ec5\u51ed' in behavior
+    assert '\u5c5e\u6b63\u5e38\u73b0\u8c61\uff0c\u975e\u5361\u6b7b' not in behavior
+    assert 'fsmn-vad / paraformer / ct-transformer \u53ef\u76f4\u63a5\u8fd0\u884c' not in behavior
