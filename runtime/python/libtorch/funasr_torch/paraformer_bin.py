@@ -75,7 +75,8 @@ class Paraformer:
         self.converter = TokenIDConverter(token_list)
         self.tokenizer = CharTokenizer()
         self.frontend = WavFrontend(cmvn_file=cmvn_file, **config["frontend_conf"])
-        self.ort_infer = torch.jit.load(model_file)
+        self.device = torch.device("cpu" if int(device_id) == -1 else f"cuda:{int(device_id)}")
+        self.ort_infer = torch.jit.load(model_file, map_location=self.device).eval()
         self.batch_size = batch_size
         self.device_id = device_id
         self.plot_timestamp_to = plot_timestamp_to
@@ -98,12 +99,11 @@ class Paraformer:
             feats, feats_len = self.extract_feat(waveform_list[beg_idx:end_idx])
             try:
                 with torch.no_grad():
-                    if int(self.device_id) == -1:
-                        outputs = self.ort_infer(feats, feats_len)
-                        am_scores, valid_token_lens = outputs[0], outputs[1]
-                    else:
-                        outputs = self.ort_infer(feats.cuda(), feats_len.cuda())
-                        am_scores, valid_token_lens = outputs[0].cpu(), outputs[1].cpu()
+                    outputs = self.ort_infer(
+                        feats.to(self.device), feats_len.to(self.device)
+                    )
+                    outputs = tuple(output.cpu() for output in outputs)
+                    am_scores, valid_token_lens = outputs[0], outputs[1]
                 if len(outputs) == 4:
                     # for BiCifParaformer Inference
                     us_alphas, us_peaks = outputs[2], outputs[3]
