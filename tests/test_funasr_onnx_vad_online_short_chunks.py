@@ -55,11 +55,12 @@ def make_audio():
     return audio
 
 
-def stream(chunk_sizes):
+def stream(chunk_sizes, param_dict=None):
     # Feed the audio in chunks, cycling through chunk_sizes; the last chunk is final.
     model = make_model()
     audio = make_audio()
-    param_dict = {"in_cache": []}
+    if param_dict is None:
+        param_dict = {"in_cache": []}
     results = []
     offset = 0
     for size in itertools.cycle(chunk_sizes):
@@ -71,6 +72,16 @@ def stream(chunk_sizes):
             results.append(segments)
         if param_dict["is_final"]:
             return results
+
+
+def short_stream(sizes, param_dict):
+    # Send silent chunks of these sizes as a whole stream; the last call is final.
+    model = make_model()
+    results = []
+    for i, size in enumerate(sizes):
+        param_dict["is_final"] = i == len(sizes) - 1
+        results.append(model(audio_in=np.zeros(size, dtype=np.float32), param_dict=param_dict))
+    return results
 
 
 class FsmnVadOnlineShortChunkTest(unittest.TestCase):
@@ -89,6 +100,27 @@ class FsmnVadOnlineShortChunkTest(unittest.TestCase):
         for chunk_sizes in ([1600, 40], [1600, 80, 80]):
             with self.subTest(chunk_sizes=chunk_sizes):
                 self.assertEqual(stream(chunk_sizes), EXPECTED)
+
+    def test_short_first_and_final_call(self):
+        # Under 400 samples (25 ms) the stream has no fbank frame to flush.
+        for size in (0, 160, 320, 399):
+            with self.subTest(size=size):
+                self.assertEqual(short_stream([size], {"in_cache": []}), [[]])
+
+    def test_empty_final_call_after_partial_chunk(self):
+        # 400-719 samples give one or two fbank frames but no LFR frame. The empty final call
+        # flushes them with less than one 25 ms window of waveform, so they have no decibel value.
+        for size in (400, 480, 560, 719):
+            with self.subTest(size=size):
+                self.assertEqual(short_stream([size, 0], {"in_cache": []}), [[], []])
+
+    def test_param_dict_reuse_after_short_stream(self):
+        # The final call of a short stream resets the frontend and scorer for the next stream.
+        for sizes in ([320], [480, 0], [480]):
+            with self.subTest(sizes=sizes):
+                param_dict = {"in_cache": []}
+                self.assertEqual(short_stream(sizes, param_dict), [[]] * len(sizes))
+                self.assertEqual(stream([1600], param_dict), EXPECTED)
 
 
 if __name__ == "__main__":
