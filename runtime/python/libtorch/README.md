@@ -24,7 +24,7 @@ python -m funasr.export.export_model --model-name damo/speech_paraformer-large_a
 install from pip
 
 ```shell
-pip install -U funasr_torch
+pip install -U "funasr_torch>=0.1.4"
 # For the users in China, you could install with the command:
 # pip install -U funasr_torch -i https://mirror.sjtu.edu.cn/pypi/web/simple
 ```
@@ -33,7 +33,7 @@ or install from source code
 
 ```shell
 git clone https://github.com/modelscope/FunASR.git && cd FunASR
-cd funasr/runtime/python/libtorch
+cd runtime/python/libtorch
 pip install -e ./
 # For the users in China, you could install with the command:
 # pip install -e ./ -i https://mirror.sjtu.edu.cn/pypi/web/simple
