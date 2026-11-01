@@ -157,8 +157,9 @@ checkpoint/revision、音频集、硬件、批量大小、预热、计时范围�
 ## 最新动态
 
 - **MOSS-Transcribe-Diarize** 已接入 FunASR 服务、Docker、Kubernetes、vLLM/SGLang 工作流和 FunClip，一次完成长音频转写、时间戳与匿名说话人标注。[部署 MOSS ->](./docs/moss_transcribe_diarize_zh.md)
-- **FunASR 1.4.18** 修复跨中英文热词误替换、过滤特殊符号后的时间戳对齐，以及中文 VAD 分段的句子与说话人错位。安装：`python -m pip install -U "funasr==1.4.18"`。[发布说明与验证范围 ->](https://github.com/modelscope/FunASR/releases/tag/v1.4.18)
-  **上一版本：FunASR 1.4.17** 新增显式 PCM16 输入，改进时间戳、热词、说话人采样率与长片段流式处理。[发布说明与验证范围 ->](https://github.com/modelscope/FunASR/releases/tag/v1.4.17)
+- **FunASR 1.4.19** 修复 Paraformer 空 token 批次处理，使自动聚类遵守 `max_speakers` 上限，并为实时 WebSocket 服务新增带 JSON 对象校验的 `--hf_overrides` 参数。安装：`python -m pip install -U "funasr==1.4.19"`。[发布说明与验证范围 ->](https://github.com/modelscope/FunASR/releases/tag/v1.4.19)
+  上一版本 **FunASR 1.4.18** 修复跨中英文热词误替换、过滤特殊符号后的时间戳对齐，以及中文 VAD 分段的句子与说话人错位。[发布说明与验证范围 ->](https://github.com/modelscope/FunASR/releases/tag/v1.4.18)
+  **更早版本：FunASR 1.4.17** 新增显式 PCM16 输入，改进时间戳、热词、说话人采样率与长片段流式处理。[发布说明与验证范围 ->](https://github.com/modelscope/FunASR/releases/tag/v1.4.17)
   **更早版本：FunASR 1.4.16** 修复 VAD、标点和说话人子模型在多次推理时的显式设备放置，并新增经过测试的原生 Transformers 使用指南。[发布说明与验证范围 ->](https://github.com/modelscope/FunASR/releases/tag/v1.4.16)
 - **原生 Transformers：** 正式版 **5.17.0** 已支持 Fun-ASR-Nano。官方 `-hf` 权重、CPU 示例与 Notebook：[安装与推理 ->](./docs/transformers_native_zh.md)
 

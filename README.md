@@ -364,8 +364,9 @@ recordings with the same evaluation scope.
 ## What's new
 
 - **MOSS-Transcribe-Diarize** brings long-form ASR, timestamps, and anonymous speaker labels to FunASR services, Docker, Kubernetes, vLLM/SGLang workflows, and FunClip. [Deploy MOSS ->](./docs/moss_transcribe_diarize.md)
-- **FunASR 1.4.18** fixes cross-script hotword misreplacement, filtered-token timestamp alignment, and Chinese VAD sentence/speaker drift. Install with `python -m pip install -U "funasr==1.4.18"`. [Release and verification scope ->](https://github.com/modelscope/FunASR/releases/tag/v1.4.18)
-  **Previous release: FunASR 1.4.17** adds explicit PCM16 input and improves timestamp, hotword, speaker-sample-rate, and long-segment streaming handling. [Release and verification scope ->](https://github.com/modelscope/FunASR/releases/tag/v1.4.17)
+- **FunASR 1.4.19** handles empty-token Paraformer batches, enforces `max_speakers` for automatic clustering, and adds validated JSON-object `--hf_overrides` support to realtime WebSocket serving. Install with `python -m pip install -U "funasr==1.4.19"`. [Release and verification scope ->](https://github.com/modelscope/FunASR/releases/tag/v1.4.19)
+  Previous release **FunASR 1.4.18** fixes cross-script hotword misreplacement, filtered-token timestamp alignment, and Chinese VAD sentence/speaker drift. [Release and verification scope ->](https://github.com/modelscope/FunASR/releases/tag/v1.4.18)
+  **Earlier release: FunASR 1.4.17** adds explicit PCM16 input and improves timestamp, hotword, speaker-sample-rate, and long-segment streaming handling. [Release and verification scope ->](https://github.com/modelscope/FunASR/releases/tag/v1.4.17)
   **Earlier release: FunASR 1.4.16** preserves explicit VAD, punctuation, and speaker-model device placement across inference calls, and adds tested native Transformers adoption guides. [Release and verification scope ->](https://github.com/modelscope/FunASR/releases/tag/v1.4.16)
 - **Native Transformers:** Released **5.17.0** supports Fun-ASR-Nano with the official `-hf` checkpoint, CPU examples and a notebook. [Get started ->](./docs/transformers_native.md)
 
