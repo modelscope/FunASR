@@ -1,7 +1,19 @@
 # 在昇腾 NPU（Ascend）上运行 FunASR
 
-适用环境：Atlas 推理/训练卡 + CANN + torch_npu。
-已在 Atlas 300I Pro（Ascend 310P3）、CANN 9.1.0-beta.1、torch 2.10.0+cpu、torch_npu 2.10.0、funasr 1.3.14 上完整验证。
+**验证范围**：本页记录 [#3708 原始贡献者的运行报告](https://github.com/modelscope/FunASR/pull/3708)，
+环境为 Atlas 300I Pro（Ascend 310P3）、CANN 9.1.0-beta.1、torch 2.10.0+cpu、
+torch_npu 2.10.0、funasr 1.3.14，模型为 fsmn-vad / paraformer / ct-transformer / cam++。
+该报告中的 cam++ 使用了当时的池化规避方案；下文修订版 `seg_pooling` 的回归仅为 CPU
+语义检查，不代表修订版已重新通过 NPU 验证。
+
+上述报告不覆盖 Nano/Qwen3，也不构成对所有 Atlas 卡、CANN/torch_npu 组合或 FunASR
+模型的兼容承诺。更换模型、模型版本或软件栈后，应另行验证设备执行、输出正确性与性能。
+
+[#3708 后续报告](https://github.com/modelscope/FunASR/pull/3708#issuecomment-6558464421)
+中的 Nano/Qwen3 `AutoConfig` 加载失败，与后来的 SenseVoiceSmall NPU 耗时报告是不同问题。
+CAM++ 池化规避不能解决模型配置或 Transformers/Torch 的依赖兼容性；不要仅为识别
+Qwen3 配置而单独升级 torch，破坏与 torch_npu/CANN 的配对。后续耗时报告也尚不能
+证明 NPU 性能或识别质量已通过验证。
 
 ## 1. 安装注意
 
@@ -60,10 +72,11 @@ model = AutoModel(
 ## 3. CAM++（说话人模型）已知问题与等价规避
 
 `funasr/models/campplus/components.py` 的 `seg_pooling` 使用
-`F.avg_pool1d` / `F.max_pool1d`(kernel_size=100, stride=100, ceil_mode=True)。昇腾上该调用被
+`F.avg_pool1d` / `F.max_pool1d`(kernel_size=100, stride=100, ceil_mode=True)。原始报告环境中该调用被
 lower 为 `AvgPoolV2`，其融合算子仅支持 stride ∈ [1,63]，图编译失败并崩溃。
 
-运行时等价替换（仅用 NPU 支持的基础算子），需在首次前向之前执行。
+下面是拆分为基础归约算子的运行时规避方案，需在首次前向之前执行。
+其 CPU 语义等价检查见下文；目标 NPU 上的算子支持、精度和性能仍需另行验证。
 实现要点：完整段正常池化；**不完整尾段仅对其真实帧归约（显式补零会污染尾段均值/最大值，
 与 ceil_mode 语义不一致）**；未知 stype 与原版一致抛出 ValueError：
 
@@ -103,8 +116,9 @@ cp.CAMLayer.seg_pooling = seg_pooling
 残差仅为 float32 累加顺序噪声（最大 ~1.2e-7）。代表例：T=150 全 1 输入 avg 模式尾帧
 = 1.0（与原版一致，错误补零实现会得到 0.5）。
 
-**范围说明**：上述回归验证的是 CPU 上的归约语义等价；NPU 侧的兼容性与精度
-需在实际昇腾环境中另行验证（本仓库初测见上文运行环境）。
+**范围说明**：上述回归验证的是修订版在 CPU 上的归约语义等价；NPU 侧的兼容性与精度
+需在实际昇腾环境中另行验证。原始贡献者的运行报告不能替代对本修订版在目标
+模型和设备上的实测。
 
 ## 4. 调试技巧
 
@@ -117,6 +131,9 @@ export ASCEND_LAUNCH_BLOCKING=1   # 仅调试用，会显著降速，定位后�
 
 ## 5. 预期行为
 
-- 首次推理包含 NPU 图编译开销（几十秒量级），属正常现象，非卡死；
-- fsmn-vad / paraformer / ct-transformer 可直接运行；
-- cam++ 需上述 seg_pooling 补丁后运行。
+- 原始贡献者报告上述环境中的 fsmn-vad / paraformer / ct-transformer 可运行，
+  cam++ 当时需池化规避；这不代表其他模型或软件栈已通过验证。
+- 首次推理可能包含 NPU 图编译开销，但不能仅凭首次耗时认定是正常编译或排除故障。
+  对同一输入分别记录模型加载、冷启动和预热后推理耗时，并在计时边界同步设备。
+- 同时核对实际设备、调试开关及原始转录/时间戳等输出正确性；预热后仍慢、算子告警
+  或输出异常需要单独定位，不能以“首次编译”解释所有问题。
