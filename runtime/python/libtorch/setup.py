@@ -15,13 +15,14 @@ def get_readme():
 
 setuptools.setup(
     name="funasr_torch",
-    version="0.1.3",
+    version="0.1.4",
     platforms="Any",
     url="https://github.com/modelscope/FunASR.git",
     author="Speech Lab of DAMO Academy, Alibaba Group",
     author_email="funasr@list.alibaba-inc.com",
     description="FunASR: A Fundamental End-to-End Speech Recognition Toolkit",
     license="The MIT License",
+    license_files=["LICENSE"],
     long_description=get_readme(),
     long_description_content_type="text/markdown",
     include_package_data=True,

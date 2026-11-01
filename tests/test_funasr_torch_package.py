@@ -118,3 +118,43 @@ def test_torch_package_does_not_require_unrelated_runtime_engines(distributions)
         for item in metadata(wheel).get_all("Requires-Dist", [])
     }
     assert not names & {"torch-quant", "onnxruntime", "onnxruntime-gpu"}
+
+def test_distribution_version_excludes_empty_published_release(distributions):
+    from packaging.version import Version
+
+    wheel, sdist = distributions
+    version = metadata(wheel)["Version"]
+    assert Version(version) >= Version("0.1.4")
+    with tarfile.open(sdist, "r:gz") as archive:
+        member = next(item for item in archive.getmembers()
+                      if item.name.count("/") == 1 and item.name.endswith("/PKG-INFO"))
+        assert BytesParser().parsebytes(archive.extractfile(member).read())["Version"] == version
+
+
+def test_wheel_includes_repository_license(distributions):
+    wheel, _ = distributions
+    with zipfile.ZipFile(wheel) as archive:
+        licenses = [name for name in archive.namelist()
+                    if ".dist-info/" in name and name.endswith("/LICENSE")]
+        assert len(licenses) == 1
+        assert archive.read(licenses[0]) == (ROOT / "LICENSE").read_bytes()
+    assert metadata(wheel).get_all("License-File") == ["LICENSE"]
+
+
+def test_sdist_includes_repository_license(distributions):
+    _, sdist = distributions
+    with tarfile.open(sdist, "r:gz") as archive:
+        licenses = [item for item in archive.getmembers()
+                    if item.name.count("/") == 1 and item.name.endswith("/LICENSE")]
+        assert len(licenses) == 1
+        assert archive.extractfile(licenses[0]).read() == (ROOT / "LICENSE").read_bytes()
+
+
+def test_readme_source_install_directory_exists():
+    lines = (RUNTIME / "README.md").read_text().splitlines()
+    clone = lines.index("git clone https://github.com/modelscope/FunASR.git && cd FunASR")
+    command = lines[clone + 1]
+    assert command.startswith("cd ")
+    directory = ROOT / command.removeprefix("cd ")
+    assert directory.resolve() == RUNTIME.resolve()
+    assert (directory / "setup.py").is_file()
