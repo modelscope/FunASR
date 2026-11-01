@@ -27,14 +27,14 @@ setuptools.setup(
     include_package_data=True,
     install_requires=[
         "librosa",
-        "onnxruntime>=1.7.0",
+        "torch",
         "scipy",
         "numpy>=1.19.3",
         "kaldi-native-fbank",
         "PyYAML>=5.1.2",
-        "torch-quant >= 0.4.0",
+        "sentencepiece",
     ],
-    packages=find_packages(include=["torch_paraformer*"]),
+    packages=find_packages(include=["funasr_torch", "funasr_torch.*"]),
     keywords=["funasr, paraformer, funasr_torch"],
     classifiers=[
         "Programming Language :: Python :: 3.6",

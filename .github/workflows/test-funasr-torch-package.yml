@@ -1,0 +1,73 @@
+name: Validate funasr-torch package
+
+on:
+  pull_request:
+    paths:
+      - "runtime/python/libtorch/**"
+      - "tests/test_funasr_torch_package.py"
+      - ".github/workflows/test-funasr-torch-package.yml"
+  push:
+    branches: [main]
+    paths:
+      - "runtime/python/libtorch/**"
+      - "tests/test_funasr_torch_package.py"
+      - ".github/workflows/test-funasr-torch-package.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  torch-package:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.10", "3.12"]
+    env:
+      HF_HUB_OFFLINE: "1"
+      MODELSCOPE_OFFLINE: "1"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Install build and CPU import dependencies
+        run: |
+          python -m pip install torch==2.8.0 --index-url https://download.pytorch.org/whl/cpu
+          python -m pip install build setuptools wheel twine pytest packaging librosa scipy "numpy<2" kaldi-native-fbank PyYAML sentencepiece
+      - name: Verify actual distributions
+        run: |
+          git rev-parse HEAD > source-commit.txt
+          python -m pip freeze > resolved-dependencies.txt
+          python -m pytest -q tests/test_funasr_torch_package.py --junitxml=torch-package-results.xml
+          python -m build --no-isolation runtime/python/libtorch --outdir dist/torch-runtime
+          python -m twine check dist/torch-runtime/*
+      - name: Verify installed wheel outside the checkout
+        run: |
+          python -m pip install --no-deps --target "$RUNNER_TEMP/torch-runtime-installed" dist/torch-runtime/*.whl
+          cd "$RUNNER_TEMP"
+          PYTHONPATH="$RUNNER_TEMP/torch-runtime-installed" python - <<'PY'
+          import importlib.util
+          import os
+          from pathlib import Path
+          import funasr_torch
+          root = Path(os.environ["RUNNER_TEMP"]) / "torch-runtime-installed"
+          assert Path(funasr_torch.__file__).is_relative_to(root)
+          assert callable(funasr_torch.Paraformer)
+          assert callable(funasr_torch.SenseVoiceSmall)
+          assert importlib.util.find_spec("onnxruntime") is None
+          assert importlib.util.find_spec("torch_quant") is None
+          print("Installed Torch runtime imports passed without ONNX Runtime or torch-quant")
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: torch-package-${{ matrix.python }}
+          path: |
+            source-commit.txt
+            resolved-dependencies.txt
+            torch-package-results.xml
+            dist/torch-runtime/*
