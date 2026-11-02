@@ -309,6 +309,9 @@ class Fsmn_vad_online:
                 logging.warning("input wav is silence or noise")
                 segments = []
         param_dict.update({"frontend": frontend, "vad_scorer": vad_scorer})
+        if is_final:
+            # Start the next stream with a fresh FSMN cache, as init_cache() and Reset() do.
+            param_dict["in_cache"] = []
         return segments
 
     def load_data(self, wav_content: Union[str, np.ndarray, List[str]], fs: int = None) -> List:

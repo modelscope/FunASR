@@ -31,7 +31,8 @@ def fake_infer(inputs):
     # Score loud frames as speech instead of running the ONNX session.
     sil = np.where(inputs[0][0].mean(-1) > 5.0, 0.05, 0.95)
     scores = np.stack((sil, 1.0 - sil), axis=-1)[None].astype(np.float32)
-    return scores, inputs[1:]
+    # Change the cache so a cache carried into the next stream shows up.
+    return scores, [cache + 1.0 for cache in inputs[1:]]
 
 
 def make_model():
@@ -115,11 +116,12 @@ class FsmnVadOnlineShortChunkTest(unittest.TestCase):
                 self.assertEqual(short_stream([size, 0], {"in_cache": []}), [[], []])
 
     def test_param_dict_reuse_after_short_stream(self):
-        # The final call of a short stream resets the frontend and scorer for the next stream.
+        # The final call of a short stream resets the frontend, scorer and cache for the next stream.
         for sizes in ([320], [480, 0], [480]):
             with self.subTest(sizes=sizes):
                 param_dict = {"in_cache": []}
                 self.assertEqual(short_stream(sizes, param_dict), [[]] * len(sizes))
+                self.assertEqual(param_dict["in_cache"], [])
                 self.assertEqual(stream([1600], param_dict), EXPECTED)
 
 
