@@ -147,7 +147,7 @@ class Paraformer:
             return asr_res
 
         feats, feats_len = self.extract_feat(waveforms, is_final)
-        if feats.shape[1] != 0:
+        if feats.size != 0:
             feats *= self.encoder_output_size**0.5
             cache = self.prepare_cache(cache)
             cache["is_final"] = is_final
