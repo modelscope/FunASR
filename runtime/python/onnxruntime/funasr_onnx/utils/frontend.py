@@ -361,9 +361,11 @@ class WavFrontendOnline(WavFrontend):
                     self.lfr_splice_cache[i] = np.concatenate(
                         (self.lfr_splice_cache[i], feats[i]), axis=0
                     )
-                return np.empty(0, dtype=np.float32), feats_lengths
+                # No LFR frame yet; a final call still resets the caches below.
+                feats = np.empty(0, dtype=np.float32)
         else:
-            if is_final:
+            # A stream without a full 25 ms window has no fbank frame to flush.
+            if is_final and self.lfr_splice_cache:
                 self.waveforms = (
                     waveforms if self.reserve_waveforms is None else self.reserve_waveforms
                 )

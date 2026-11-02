@@ -452,6 +452,10 @@ class E2EVadModel:
 
     def GetFrameState(self, t: int) -> FrameState:
         frame_state = FrameState.kFrameStateInvalid
+        # A final call can flush frames that lack a full 25 ms window (streams under 45 ms) and
+        # so a decibel value; score them as silence, as FsmnVADStreaming.GetFrameState does.
+        if t >= len(self.decibel):
+            return FrameState.kFrameStateSil
         cur_decibel = self.decibel[t]
         cur_snr = cur_decibel - self.noise_average_decibel
         # for each frame, calc log posterior probability of each state
