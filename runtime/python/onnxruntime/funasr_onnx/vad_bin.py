@@ -96,10 +96,11 @@ class Fsmn_vad:
         waveform_list = self.load_data(audio_in, self.frontend.opts.frame_opts.samp_freq)
         waveform_nums = len(waveform_list)
         is_final = kwargs.get("kwargs", False)
-        segments = [[]] * self.batch_size
-        for beg_idx in range(0, waveform_nums, self.batch_size):
+        segments = [[] for _ in range(waveform_nums)]
+        # E2EVadModel and prepare_cache handle one waveform at a time, so batch_size is not used.
+        for beg_idx in range(0, waveform_nums):
             vad_scorer = E2EVadModel(self.vad_scorer_config)
-            end_idx = min(waveform_nums, beg_idx + self.batch_size)
+            end_idx = beg_idx + 1
             waveform = waveform_list[beg_idx:end_idx]
             feats, feats_len = self.extract_feat(waveform)
             waveform = np.array(waveform)
@@ -137,8 +138,7 @@ class Fsmn_vad:
                     # segments = self.vad_scorer(scores, waveform[0][None, :], is_final=is_final, max_end_sil=self.max_end_sil)
 
                     if segments_part:
-                        for batch_num in range(0, self.batch_size):
-                            segments[batch_num] += segments_part[batch_num]
+                        segments[beg_idx] += segments_part[0]
 
             except ONNXRuntimeError:
                 # logging.warning(traceback.format_exc())
