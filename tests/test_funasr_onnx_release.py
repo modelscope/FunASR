@@ -7,7 +7,7 @@ import unittest
 ROOT = Path(__file__).resolve().parents[1]
 PACKAGE_ROOT = ROOT / "runtime" / "python" / "onnxruntime"
 SETUP_PATH = PACKAGE_ROOT / "setup.py"
-EXPECTED_VERSION = "0.4.3"
+EXPECTED_VERSION = "0.4.4"
 REQUIREMENT_NAME_PATTERN = re.compile(r"^\s*([A-Za-z0-9](?:[A-Za-z0-9._-]*[A-Za-z0-9])?)")
 
 
@@ -44,8 +44,26 @@ def normalized_requirement_name(requirement):
 
 
 class FunASROnnxReleaseContractTest(unittest.TestCase):
-    def test_release_version_is_0_4_3(self):
+    def test_release_version_is_0_4_4(self):
         self.assertEqual(assigned_literal(read_setup_tree(), "VERSION_NUM"), EXPECTED_VERSION)
+
+    def test_standalone_license_preserves_repository_notice(self):
+        license_path = PACKAGE_ROOT / "LICENSE"
+        self.assertTrue(license_path.is_file())
+        self.assertEqual(license_path.read_bytes(), (ROOT / "LICENSE").read_bytes())
+        self.assertEqual(setup_keyword_literal(read_setup_tree(), "license_files"), ["LICENSE"])
+
+    def test_workflow_checks_and_artifact_use_release_version(self):
+        workflow = (ROOT / ".github/workflows/test-funasr-onnx-package.yml").read_text()
+        self.assertIn(f'assert version("funasr-onnx") == "{EXPECTED_VERSION}"', workflow)
+        self.assertIn(f"name: funasr-onnx-{EXPECTED_VERSION}", workflow)
+
+    def test_readme_names_the_standalone_fix_release(self):
+        readme = (PACKAGE_ROOT / "README.md").read_text()
+        self.assertIn(f'pip install -U "funasr-onnx>={EXPECTED_VERSION}"', readme)
+        self.assertIn("does not update the installed ONNX wrappers", readme)
+        self.assertIn("short/final VAD", readme)
+        self.assertIn("zero-overlap", readme)
 
     def test_runtime_dependencies_keep_onnx_install_torch_free(self):
         requirements = setup_keyword_literal(read_setup_tree(), "install_requires")

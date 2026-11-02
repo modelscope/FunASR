@@ -7,12 +7,17 @@ does not update the installed ONNX wrappers. Check their versions separately
 with `python -m pip show funasr-onnx funasr`; use the source installation below
 when a required wrapper fix is newer than the published PyPI package.
 
+Version 0.4.4 includes the streaming Paraformer zero-overlap cache and empty-final
+result fixes, short/final VAD handling and stream-cache reset, and corrected
+timestamp alignment and rich-transcription event handling. These are wrapper
+and postprocessing fixes, not a model-weight update or an ASR accuracy claim.
+
 install from pip
 
 ```shell
-pip install -U funasr-onnx
+pip install -U "funasr-onnx>=0.4.4"
 # For the users in China, you could install with the command:
-# pip install -U funasr-onnx -i https://mirror.sjtu.edu.cn/pypi/web/simple
+# pip install -U "funasr-onnx>=0.4.4" -i https://mirror.sjtu.edu.cn/pypi/web/simple
 # If you want to export .onnx file, you should install modelscope and funasr
 pip install -U modelscope funasr
 # For the users in China, you could install with the command:
