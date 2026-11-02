@@ -12,6 +12,7 @@ on:
       - "tests/test_funasr_onnx_paraformer_online_overlap.py"
       - "tests/test_funasr_onnx_paraformer_online_empty_final.py"
       - "tests/test_funasr_onnx_vad_online_short_chunks.py"
+      - "tests/test_funasr_onnx_vad_multiple_inputs.py"
       - "tests/test_rich_transcription_postprocess.py"
       - "tests/test_rich_transcription_event_segments.py"
   push:
@@ -27,6 +28,7 @@ on:
       - "tests/test_funasr_onnx_paraformer_online_overlap.py"
       - "tests/test_funasr_onnx_paraformer_online_empty_final.py"
       - "tests/test_funasr_onnx_vad_online_short_chunks.py"
+      - "tests/test_funasr_onnx_vad_multiple_inputs.py"
       - "tests/test_rich_transcription_postprocess.py"
       - "tests/test_rich_transcription_event_segments.py"
   workflow_dispatch:
@@ -109,6 +111,9 @@ jobs:
 
       - name: Verify streaming VAD short chunks
         run: python tests/test_funasr_onnx_vad_online_short_chunks.py
+
+      - name: Verify offline VAD results per input
+        run: python tests/test_funasr_onnx_vad_multiple_inputs.py
 
       - name: Verify source distribution error paths
         run: |
