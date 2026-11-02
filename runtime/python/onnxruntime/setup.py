@@ -13,7 +13,7 @@ def get_readme():
 
 
 MODULE_NAME = "funasr_onnx"
-VERSION_NUM = "0.4.3"
+VERSION_NUM = "0.4.4"
 
 setuptools.setup(
     name=MODULE_NAME,
@@ -24,6 +24,7 @@ setuptools.setup(
     author_email="funasr@list.alibaba-inc.com",
     description="FunASR: A Fundamental End-to-End Speech Recognition Toolkit",
     license="MIT",
+    license_files=["LICENSE"],
     long_description=get_readme(),
     long_description_content_type="text/markdown",
     include_package_data=True,
