@@ -84,7 +84,7 @@ jobs:
           import importlib.util
           from importlib.metadata import requires, version
 
-          assert version("funasr-onnx") == "0.4.5"
+          assert version("funasr-onnx") == "0.4.6"
           assert importlib.util.find_spec("torch") is None
 
           requirements = requires("funasr-onnx") or []
@@ -125,6 +125,7 @@ jobs:
         if: matrix.python-version == '3.12'
         uses: actions/upload-artifact@v7
         with:
-          name: funasr-onnx-0.4.5
+          name: funasr-onnx-0.4.6
           path: dist/funasr-onnx/*
           if-no-files-found: error
+
