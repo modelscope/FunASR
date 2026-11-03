@@ -13,7 +13,7 @@ def get_readme():
 
 
 MODULE_NAME = "funasr_onnx"
-VERSION_NUM = "0.4.5"
+VERSION_NUM = "0.4.6"
 
 setuptools.setup(
     name=MODULE_NAME,
@@ -48,3 +48,4 @@ setuptools.setup(
         "Programming Language :: Python :: 3.10",
     ],
 )
+
