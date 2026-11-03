@@ -102,6 +102,9 @@ class CTTransformerStreaming(CTTransformer):
         if cache is None:
             cache = {}
         assert len(data_in) == 1
+        if not data_in[0] or (isinstance(data_in[0], str) and not data_in[0].strip()):
+            meta_data = {"batch_data_time": -1}
+            return [{"key": key[0] if key else "", "text": "", "punc_array": None}], meta_data
 
         if len(cache) == 0:
             cache["pre_text"] = []
