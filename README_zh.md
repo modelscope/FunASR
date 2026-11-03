@@ -157,7 +157,8 @@ checkpoint/revision、音频集、硬件、批量大小、预热、计时范围�
 ## 最新动态
 
 - **MOSS-Transcribe-Diarize** 已接入 FunASR 服务、Docker、Kubernetes、vLLM/SGLang 工作流和 FunClip，一次完成长音频转写、时间戳与匿名说话人标注。[部署 MOSS ->](./docs/moss_transcribe_diarize_zh.md)
-- **FunASR 1.4.20** 在指定 `spk_model` 而可选说话人依赖导入失败时，通过带原始异常链的 `ImportError` 提供诊断，同时保留仅 ASR 的构造路径。[修复 #3819](https://github.com/modelscope/FunASR/pull/3819)。安装：`python -m pip install -U "funasr==1.4.20"`。[发布说明与验证范围 ->](https://github.com/modelscope/FunASR/releases/tag/v1.4.20)
+- **FunASR 1.4.21** 在流式标点收到空白或空输入时保留 cache，并在不访问缓存词或 embedding 路径的情况下返回空结果；非空推理保持不变。[修复 #3824](https://github.com/modelscope/FunASR/pull/3824)。安装：`python -m pip install -U "funasr==1.4.21"`。[发布说明与验证范围 ->](https://github.com/modelscope/FunASR/releases/tag/v1.4.21)
+  **FunASR 1.4.20** 在指定 `spk_model` 而可选说话人依赖导入失败时，通过带原始异常链的 `ImportError` 提供诊断，同时保留仅 ASR 的构造路径。[修复 #3819](https://github.com/modelscope/FunASR/pull/3819)。[发布说明与验证范围 ->](https://github.com/modelscope/FunASR/releases/tag/v1.4.20)
   **FunASR 1.4.19** 修复 Paraformer 空 token 批次处理，使自动聚类遵守 `max_speakers` 上限，并为实时 WebSocket 服务新增带 JSON 对象校验的 `--hf_overrides` 参数。[发布说明与验证范围 ->](https://github.com/modelscope/FunASR/releases/tag/v1.4.19)
   上一版本 **FunASR 1.4.18** 修复跨中英文热词误替换、过滤特殊符号后的时间戳对齐，以及中文 VAD 分段的句子与说话人错位。[发布说明与验证范围 ->](https://github.com/modelscope/FunASR/releases/tag/v1.4.18)
   **更早版本：FunASR 1.4.17** 新增显式 PCM16 输入，改进时间戳、热词、说话人采样率与长片段流式处理。[发布说明与验证范围 ->](https://github.com/modelscope/FunASR/releases/tag/v1.4.17)
