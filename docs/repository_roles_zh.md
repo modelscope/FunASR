@@ -4,7 +4,7 @@
 
 > **方向性路线图，不是版本承诺。**
 > 本文档记录已交付能力与正在推进的工作，但不承诺未来版本号或日期。当前 Python
-> 版本是 [`funasr==1.4.20`](https://github.com/modelscope/FunASR/releases/tag/v1.4.20)。
+> 版本是 [`funasr==1.4.21`](https://github.com/modelscope/FunASR/releases/tag/v1.4.21)。
 > 任何未来的 breaking release 仍需 maintainer 确认 milestone 与迁移方案。
 
 ---
