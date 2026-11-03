@@ -161,3 +161,115 @@ def test_real_cli_outputs_and_audio_duration(native_fixture, tmp_path, backend, 
             }
         )
     )
+
+
+@pytest.fixture(scope="module")
+def hotword_fixture(tmp_path_factory):
+    torch = pytest.importorskip("torch")
+    np = pytest.importorskip("numpy")
+    onnx = pytest.importorskip("onnx")
+    pytest.importorskip("onnxruntime")
+    pytest.importorskip("kaldi_native_fbank")
+    directory = tmp_path_factory.mktemp("runtime-hotword")
+    tokens = ["<blank>", "<s>", "</s>", "你", "好", "魔", "搭", "<unk>"]
+
+    class EmbedderFixture(torch.nn.Module):
+        def __init__(self):
+            super().__init__()
+            self.register_buffer("weight", torch.ones(len(tokens), 512))
+
+        def forward(self, hotword):
+            # [num_hotwords, 10] -> [10, num_hotwords, 512], like the exported model_eb
+            return torch.nn.functional.embedding(hotword.long(), self.weight).transpose(0, 1)
+
+    class BackboneFixture(torch.nn.Module):
+        def __init__(self):
+            super().__init__()
+            self.register_buffer("bias", torch.tensor([0.0, 0.0, 0.0, 5.0, 0.0, 0.0, 0.0, 0.0]))
+
+        def forward(self, speech, speech_lengths, bias_embed):
+            # bias_embed [batch, num_hotwords, 512] is added as zeros; every frame predicts token 3
+            hotword_bias = bias_embed.sum(dim=(1, 2), keepdim=True) * 0.0
+            logits = speech[..., :1] * 0.0 + hotword_bias + self.bias
+            return logits, (speech_lengths // 4).to(torch.int32)
+
+    embedder, backbone = EmbedderFixture().eval(), BackboneFixture().eval()
+    hotword = torch.zeros(3, 10, dtype=torch.int32)
+    speech = torch.zeros(2, 12, 4)
+    lengths = torch.tensor([12, 8], dtype=torch.int32)
+    bias_embed = torch.zeros(2, 3, 512)
+    torch.jit.trace(embedder, (hotword,)).save(str(directory / "model_eb.torchscript"))
+    torch.jit.trace(backbone, (speech, lengths, bias_embed)).save(
+        str(directory / "model_bb.torchscript")
+    )
+    torch.onnx.export(
+        embedder,
+        (hotword,),
+        str(directory / "model_eb.onnx"),
+        dynamo=False,
+        input_names=["hotword"],
+        output_names=["hw_embed"],
+        dynamic_axes={"hotword": {0: "num_hotwords"}, "hw_embed": {1: "num_hotwords"}},
+        opset_version=17,
+    )
+    torch.onnx.export(
+        backbone,
+        (speech, lengths, bias_embed),
+        str(directory / "model.onnx"),
+        dynamo=False,
+        input_names=["speech", "speech_lengths", "bias_embed"],
+        output_names=["logits", "token_num"],
+        dynamic_axes={
+            "speech": {0: "batch_size", 1: "feats_length"},
+            "speech_lengths": {0: "batch_size"},
+            "bias_embed": {0: "batch_size", 1: "num_hotwords"},
+            "logits": {0: "batch_size", 1: "logits_length"},
+            "token_num": {0: "batch_size"},
+        },
+        opset_version=17,
+    )
+    for name in ("model_eb.onnx", "model.onnx"):
+        onnx.checker.check_model(str(directory / name))
+    (directory / "tokens.json").write_text(json.dumps(tokens))
+    (directory / "config.yaml").write_text(
+        json.dumps(
+            {
+                "frontend_conf": {"n_mels": 4, "lfr_m": 1, "lfr_n": 1, "dither": 0.0},
+                "model_conf": {"predictor_bias": 1},
+            }
+        )
+    )
+    (directory / "am.mvn").write_text(
+        "<AddShift> 4 4\n<LearnRateCoef> 1 [ 0 0 0 0 ]\n"
+        "<Rescale> 4 4\n<LearnRateCoef> 1 [ 1 1 1 1 ]\n"
+    )
+    paths = []
+    for index, count in enumerate([4000, 8000, 12000]):
+        path = directory / f"hotword {index}.wav"
+        signal = (np.sin(np.arange(count) * 2 * np.pi * 440 / 16000) * 3000).astype("<i2")
+        with wave.open(str(path), "wb") as output:
+            output.setnchannels(1)
+            output.setsampwidth(2)
+            output.setframerate(16000)
+            output.writeframes(signal.tobytes())
+        paths.append(str(path))
+    return directory, paths
+
+
+@pytest.mark.parametrize("backend", ["torch", "onnx"])
+@pytest.mark.parametrize("wrapper", ["ContextualParaformer", "SeacoParaformer"])
+@pytest.mark.parametrize("batch_size", [1, 2])
+def test_hotword_wrappers_decode_every_batch(
+    hotword_fixture, monkeypatch, backend, wrapper, batch_size
+):
+    directory, paths = hotword_fixture
+    location = "libtorch" if backend == "torch" else "onnxruntime"
+    monkeypatch.syspath_prepend(str(ROOT / "runtime/python" / location))
+    module = importlib.import_module("funasr_" + backend + ".paraformer_bin")
+    # CPU only: on CUDA the Torch hotword wrapper moves its inputs, not these CPU-traced modules.
+    model = getattr(module, wrapper)(str(directory), batch_size=batch_size, intra_op_num_threads=1)
+    hotwords = "魔搭 你好"
+    alone = [model(path, hotwords)[0] for path in paths]
+    assert [row["preds"][0] for row in alone] == ["你" * 4, "你" * 11, "你" * 17]
+    # More files than batch_size: every batch must return its results.
+    assert model(paths, hotwords) == alone

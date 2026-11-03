@@ -342,14 +342,16 @@ class ContextualParaformer(Paraformer):
         for beg_idx in range(0, waveform_nums, self.batch_size):
             end_idx = min(waveform_nums, beg_idx + self.batch_size)
             feats, feats_len = self.extract_feat(waveform_list[beg_idx:end_idx])
-            bias_embed = torch.unsqueeze(bias_embed, 0).repeat(feats.shape[0], 1, 1)
+            batch_bias_embed = torch.unsqueeze(bias_embed, 0).repeat(feats.shape[0], 1, 1)
             try:
                 with torch.no_grad():
                     if int(self.device_id) == -1:
-                        outputs = self.bb_infer(feats, feats_len, bias_embed)
+                        outputs = self.bb_infer(feats, feats_len, batch_bias_embed)
                         am_scores, valid_token_lens = outputs[0], outputs[1]
                     else:
-                        outputs = self.bb_infer(feats.cuda(), feats_len.cuda(), bias_embed.cuda())
+                        outputs = self.bb_infer(
+                            feats.cuda(), feats_len.cuda(), batch_bias_embed.cuda()
+                        )
                         am_scores, valid_token_lens = outputs[0].cpu(), outputs[1].cpu()
             except:
                 # logging.warning(traceback.format_exc())
