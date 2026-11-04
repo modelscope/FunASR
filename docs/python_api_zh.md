@@ -42,7 +42,7 @@
 | `batch_size_s` | `300` | VAD 路径的秒级批处理预算，按最长补齐片段长度乘以片段数量估算，不是文件时长硬上限。CPU 的 VAD 路径按单片段处理。 |
 | `batch_size_threshold_s` | `60` | VAD 片段参与组批的时长阈值，不是 VAD 切分参数。 |
 | `merge_vad` | `False` | 为本次调用启用 VAD 区域合并。 |
-| `merge_length_s` | `15` | VAD 合并目标，在本次参数合并进 ASR 配置之前读取。当前代码版本应在构建时设置它。 |
+| `merge_length_s` | `15` | `merge_vad=True` 时合并后 VAD 片段的目标长度，单位为秒。本次调用传入的值会覆盖构建时设置的值。 |
 | `cache` | 包装层不维护会话 | 每次流式调用都传入调用方持有的字典。它不是模型下载缓存。 |
 | `sentence_timestamp` | `False` | 请求 VAD 流程输出句子记录，依赖实际时间戳与标点，部分情形可回退到 VAD 区域。 |
 | `return_spk_res` | `True` | 配置 VAD 与说话人模型时输出聚类结果。设为 `False` 并不能省去模型构建或片段说话人特征计算。 |

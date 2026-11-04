@@ -42,7 +42,7 @@ The wrapper accepts `**kwargs`, not a universally validated parameter schema. A 
 | `batch_size_s` | `300` | VAD-path batching budget in seconds, based on longest padded segment times segment count, not a hard file-duration limit. CPU VAD processing uses single-segment batches. |
 | `batch_size_threshold_s` | `60` | VAD batching threshold for segment duration, not a VAD splitting setting. |
 | `merge_vad` | `False` | Enables merging detected VAD regions for this call. |
-| `merge_length_s` | `15` | VAD merge target read before call overrides are merged into ASR config. Set this at construction in this checkout. |
+| `merge_length_s` | `15` | Target length in seconds for merged VAD regions when `merge_vad=True`. A per-call value overrides the construction value. |
 | `cache` | No wrapper-managed session | Pass a caller-owned dictionary on every streaming call. It is not a hub/model download cache. |
 | `sentence_timestamp` | `False` | Requests sentence records in the VAD pipeline; depends on available timestamps and punctuation, with limited VAD fallback. |
 | `return_spk_res` | `True` | Includes clustered speaker results when VAD and a speaker model are configured. `False` does not avoid construction or segment embedding computation. |
