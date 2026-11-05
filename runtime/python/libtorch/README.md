@@ -21,12 +21,18 @@ python -m funasr.export.export_model --model-name damo/speech_paraformer-large_a
 
 ## Install the `funasr_torch`
 
+`funasr_torch` is a separate distribution from `funasr`; upgrading the root
+package alone does not update these TorchScript wrappers. Version 0.1.5
+includes the Contextual/Seaco Paraformer hotword batching and empty
+hotword-file handling fix (#3838). This is a runtime wrapper fix, not a
+model-weight update or an ASR accuracy claim.
+
 install from pip
 
 ```shell
-pip install -U "funasr_torch>=0.1.4"
+pip install -U "funasr_torch>=0.1.5"
 # For the users in China, you could install with the command:
-# pip install -U funasr_torch -i https://mirror.sjtu.edu.cn/pypi/web/simple
+# pip install -U "funasr_torch>=0.1.5" -i https://mirror.sjtu.edu.cn/pypi/web/simple
 ```
 
 or install from source code

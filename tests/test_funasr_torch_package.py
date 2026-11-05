@@ -119,12 +119,12 @@ def test_torch_package_does_not_require_unrelated_runtime_engines(distributions)
     }
     assert not names & {"torch-quant", "onnxruntime", "onnxruntime-gpu"}
 
-def test_distribution_version_excludes_empty_published_release(distributions):
+def test_distribution_version_includes_hotword_batching_fix(distributions):
     from packaging.version import Version
 
     wheel, sdist = distributions
     version = metadata(wheel)["Version"]
-    assert Version(version) >= Version("0.1.4")
+    assert Version(version) >= Version("0.1.5")
     with tarfile.open(sdist, "r:gz") as archive:
         member = next(item for item in archive.getmembers()
                       if item.name.count("/") == 1 and item.name.endswith("/PKG-INFO"))
