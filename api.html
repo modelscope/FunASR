@@ -5972,7 +5972,7 @@
             """
         return self.encoder.to_pytorch_net(kaldi_file)
 </code></pre></details></div>
-<div class="api-detail" id="e84" tabindex="-1"><span class="dtag badge-c">class</span><h2><code>FsmnVADStreaming(encoder: str = None, encoder_conf: Optional[Dict] = None, vad_post_args: Dict[str, Any] = None, **kwargs)</code></h2><div class="dmod">funasr.models.fsmn_vad_streaming · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L367" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><ul>
+<div class="api-detail" id="e84" tabindex="-1"><span class="dtag badge-c">class</span><h2><code>FsmnVADStreaming(encoder: str = None, encoder_conf: Optional[Dict] = None, vad_post_args: Dict[str, Any] = None, **kwargs)</code></h2><div class="dmod">funasr.models.fsmn_vad_streaming · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L368" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><ul>
 <li><code>FSMN</code> — based Voice Activity Detection (streaming/offline).</li>
 </ul>
 <p>Detects speech segments in audio, returning start/end timestamps (milliseconds).</p>
@@ -6014,7 +6014,7 @@
                 **kwargs: Additional keyword arguments.
             """
         super().__init__()
-</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L367" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details><h3 class="mt">Constructor</h3><div class="mblk"><a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L381">L381</a><p>Initialize FsmnVADStreaming.</p>
+</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L368" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details><h3 class="mt">Constructor</h3><div class="mblk"><a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L382">L382</a><p>Initialize FsmnVADStreaming.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>encoder</code> — TODO.</li>
@@ -6022,7 +6022,7 @@
 <li><code>vad_post_args</code> — TODO.</li>
 <li><code>**kwargs</code> — Additional keyword arguments.</li>
 </ul>
-</div><h3 class="mt">Methods</h3><div class="mblk"><code>.DropCachedFrames(drop_frames: int, cache: dict = None) -&gt; None</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L406" rel="noopener noreferrer" target="_blank">L406</a><div class="mdoc"><p>Release score, decibel, and waveform history before an absolute frame.</p>
+</div><h3 class="mt">Methods</h3><div class="mblk"><code>.DropCachedFrames(drop_frames: int, cache: dict = None) -&gt; None</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L407" rel="noopener noreferrer" target="_blank">L407</a><div class="mdoc"><p>Release score, decibel, and waveform history before an absolute frame.</p>
 </div><details class="src-block"><summary>Source</summary><pre><code>    def DropCachedFrames(self, drop_frames: int, cache: dict = None) -&gt; None:
         """Release score, decibel, and waveform history before an absolute frame."""
         if cache is None:
@@ -6051,7 +6051,7 @@
             0,
         ) * frame_shift_length
         stats.data_buf = stats.data_buf_all[data_buf_offset:]
-</code></pre></details></div><div class="mblk"><code>.ResetDetection(cache: dict = None)</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L435" rel="noopener noreferrer" target="_blank">L435</a><div class="mdoc"><p>Resetdetection.</p>
+</code></pre></details></div><div class="mblk"><code>.ResetDetection(cache: dict = None)</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L436" rel="noopener noreferrer" target="_blank">L436</a><div class="mdoc"><p>Resetdetection.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>cache</code> — State cache dict for streaming inference.</li>
@@ -6078,7 +6078,7 @@
             assert cache["stats"].output_data_buf[-1].contain_seg_end_point == True
             drop_frames = int(cache["stats"].output_data_buf[-1].end_ms / self.vad_opts.frame_in_ms)
             self.DropCachedFrames(drop_frames, cache=cache)
-</code></pre></details></div><div class="mblk"><code>.ComputeDecibel(cache: dict = None, frame_count: Optional[int] = None) -&gt; None</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L458" rel="noopener noreferrer" target="_blank">L458</a><div class="mdoc"><p>Computedecibel.</p>
+</code></pre></details></div><div class="mblk"><code>.ComputeDecibel(cache: dict = None, frame_count: Optional[int] = None) -&gt; None</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L459" rel="noopener noreferrer" target="_blank">L459</a><div class="mdoc"><p>Computedecibel.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>frame_count</code> — Number of VAD score frames emitted for this waveform.</li>
@@ -6114,7 +6114,7 @@
         # The frontend provides the exact waveform span for these VAD score frames.
         aligned_sample_count = (
             (frame_count - 1) * frame_shift_length + frame_sample_length
-</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L458" rel="noopener noreferrer" target="_blank">View full source →</a></details></div><div class="mblk"><code>.ComputeScores(feats: torch.Tensor, cache: dict = None) -&gt; None</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L532" rel="noopener noreferrer" target="_blank">L532</a><div class="mdoc"><p>Computescores.</p>
+</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L459" rel="noopener noreferrer" target="_blank">View full source →</a></details></div><div class="mblk"><code>.ComputeScores(feats: torch.Tensor, cache: dict = None) -&gt; None</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L533" rel="noopener noreferrer" target="_blank">L533</a><div class="mdoc"><p>Computescores.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>feats</code> — Feature tensor (e.g., fbank), shape (batch, frames, dim).</li>
@@ -6139,7 +6139,7 @@
             cache["stats"].scores = scores  # the first calculation
         else:
             cache["stats"].scores = torch.cat((cache["stats"].scores, scores), dim=1)
-</code></pre></details></div><div class="mblk"><code>.PopDataBufTillFrame(frame_idx: int, cache: dict = None) -&gt; None</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L552" rel="noopener noreferrer" target="_blank">L552</a><div class="mdoc"><p>Popdatabuftillframe.</p>
+</code></pre></details></div><div class="mblk"><code>.PopDataBufTillFrame(frame_idx: int, cache: dict = None) -&gt; None</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L553" rel="noopener noreferrer" target="_blank">L553</a><div class="mdoc"><p>Popdatabuftillframe.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>frame_idx</code> — TODO.</li>
@@ -6163,7 +6163,7 @@
                     (cache["stats"].data_buf_start_frame - cache["stats"].last_drop_frames)
                     * int(self.vad_opts.frame_in_ms * self.vad_opts.sample_rate / 1000) :
                 ]
-</code></pre></details></div><div class="mblk"><code>.PopDataToOutputBuf(start_frm: int, frm_cnt: int, first_frm_is_start_point: bool, last_frm_is_end_point: bool, end_point_is_sent_end: bool, cache: dict = None) -&gt; None</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L571" rel="noopener noreferrer" target="_blank">L571</a><div class="mdoc"><p>Popdatatooutputbuf.</p>
+</code></pre></details></div><div class="mblk"><code>.PopDataToOutputBuf(start_frm: int, frm_cnt: int, first_frm_is_start_point: bool, last_frm_is_end_point: bool, end_point_is_sent_end: bool, cache: dict = None) -&gt; None</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L572" rel="noopener noreferrer" target="_blank">L572</a><div class="mdoc"><p>Popdatatooutputbuf.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>start_frm</code> — TODO.</li>
@@ -6203,7 +6203,7 @@
                 0,
                 int(
                     self.vad_opts.frame_length_ms * self.vad_opts.sample_rate / 1000
-</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L571" rel="noopener noreferrer" target="_blank">View full source →</a></details></div><div class="mblk"><code>.OnSilenceDetected(valid_frame: int, cache: dict = None)</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L641" rel="noopener noreferrer" target="_blank">L641</a><div class="mdoc"><p>Onsilencedetected.</p>
+</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L572" rel="noopener noreferrer" target="_blank">View full source →</a></details></div><div class="mblk"><code>.OnSilenceDetected(valid_frame: int, cache: dict = None)</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L642" rel="noopener noreferrer" target="_blank">L642</a><div class="mdoc"><p>Onsilencedetected.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>valid_frame</code> — TODO.</li>
@@ -6221,7 +6221,7 @@
         cache["stats"].lastest_confirmed_silence_frame = valid_frame
         if cache["stats"].vad_state_machine == VadStateMachine.kVadInStateStartPointNotDetected:
             self.PopDataBufTillFrame(valid_frame, cache=cache)
-</code></pre></details></div><div class="mblk"><code>.OnVoiceDetected(valid_frame: int, cache: dict = None) -&gt; None</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L657" rel="noopener noreferrer" target="_blank">L657</a><div class="mdoc"><p>Onvoicedetected.</p>
+</code></pre></details></div><div class="mblk"><code>.OnVoiceDetected(valid_frame: int, cache: dict = None) -&gt; None</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L658" rel="noopener noreferrer" target="_blank">L658</a><div class="mdoc"><p>Onvoicedetected.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>valid_frame</code> — TODO.</li>
@@ -6238,7 +6238,7 @@
             cache = {}
         cache["stats"].latest_confirmed_speech_frame = valid_frame
         self.PopDataToOutputBuf(valid_frame, 1, False, False, False, cache=cache)
-</code></pre></details></div><div class="mblk"><code>.OnVoiceStart(start_frame: int, fake_result: bool = False, cache: dict = None) -&gt; None</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L669" rel="noopener noreferrer" target="_blank">L669</a><div class="mdoc"><p>Onvoicestart.</p>
+</code></pre></details></div><div class="mblk"><code>.OnVoiceStart(start_frame: int, fake_result: bool = False, cache: dict = None) -&gt; None</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L670" rel="noopener noreferrer" target="_blank">L670</a><div class="mdoc"><p>Onvoicestart.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>start_frame</code> — TODO.</li>
@@ -6269,7 +6269,7 @@
             self.PopDataToOutputBuf(
                 cache["stats"].confirmed_start_frame, 1, True, False, False, cache=cache
             )
-</code></pre></details></div><div class="mblk"><code>.OnVoiceEnd(end_frame: int, fake_result: bool, is_last_frame: bool, cache: dict = None) -&gt; None</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L694" rel="noopener noreferrer" target="_blank">L694</a><div class="mdoc"><p>Onvoiceend.</p>
+</code></pre></details></div><div class="mblk"><code>.OnVoiceEnd(end_frame: int, fake_result: bool, is_last_frame: bool, cache: dict = None) -&gt; None</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L695" rel="noopener noreferrer" target="_blank">L695</a><div class="mdoc"><p>Onvoiceend.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>end_frame</code> — TODO.</li>
@@ -6304,7 +6304,7 @@
                 cache["stats"].confirmed_end_frame, 1, False, True, is_last_frame, cache=cache
             )
         cache["stats"].number_end_time_detected += 1
-</code></pre></details></div><div class="mblk"><code>.MaybeOnVoiceEndIfLastFrame(is_final_frame: bool, cur_frm_idx: int, cache: dict = None) -&gt; None</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L722" rel="noopener noreferrer" target="_blank">L722</a><div class="mdoc"><p>Maybeonvoiceendiflastframe.</p>
+</code></pre></details></div><div class="mblk"><code>.MaybeOnVoiceEndIfLastFrame(is_final_frame: bool, cur_frm_idx: int, cache: dict = None) -&gt; None</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L723" rel="noopener noreferrer" target="_blank">L723</a><div class="mdoc"><p>Maybeonvoiceendiflastframe.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>is_final_frame</code> — Boolean flag for final frame.</li>
@@ -6326,7 +6326,7 @@
         if is_final_frame:
             self.OnVoiceEnd(cur_frm_idx, False, True, cache=cache)
             cache["stats"].vad_state_machine = VadStateMachine.kVadInStateEndPointDetected
-</code></pre></details></div><div class="mblk"><code>.GetLatency(cache: dict = None) -&gt; int</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L738" rel="noopener noreferrer" target="_blank">L738</a><div class="mdoc"><p>Getlatency.</p>
+</code></pre></details></div><div class="mblk"><code>.GetLatency(cache: dict = None) -&gt; int</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L739" rel="noopener noreferrer" target="_blank">L739</a><div class="mdoc"><p>Getlatency.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>cache</code> — State cache dict for streaming inference.</li>
@@ -6340,7 +6340,7 @@
         if cache is None:
             cache = {}
         return int(self.LatencyFrmNumAtStartPoint(cache=cache) * self.vad_opts.frame_in_ms)
-</code></pre></details></div><div class="mblk"><code>.LatencyFrmNumAtStartPoint(cache: dict = None) -&gt; int</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L748" rel="noopener noreferrer" target="_blank">L748</a><div class="mdoc"><p>Latencyfrmnumatstartpoint.</p>
+</code></pre></details></div><div class="mblk"><code>.LatencyFrmNumAtStartPoint(cache: dict = None) -&gt; int</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L749" rel="noopener noreferrer" target="_blank">L749</a><div class="mdoc"><p>Latencyfrmnumatstartpoint.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>cache</code> — State cache dict for streaming inference.</li>
@@ -6357,7 +6357,7 @@
         if self.vad_opts.do_extend:
             vad_latency += int(self.vad_opts.lookback_time_start_point / self.vad_opts.frame_in_ms)
         return vad_latency
-</code></pre></details></div><div class="mblk"><code>.GetFrameState(t: int, cache: dict = None)</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L761" rel="noopener noreferrer" target="_blank">L761</a><div class="mdoc"><p>Getframestate.</p>
+</code></pre></details></div><div class="mblk"><code>.GetFrameState(t: int, cache: dict = None)</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L762" rel="noopener noreferrer" target="_blank">L762</a><div class="mdoc"><p>Getframestate.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>t</code> — TODO.</li>
@@ -6393,7 +6393,7 @@
             - Put the iteration of `sil_pdf_ids` inside `sum()` to reduce the overhead of creating a new list.
             - The default `sil_pdf_ids` is [0], the `if` statement is used to reduce the overhead of expression
               generation, which result in a mere (~2%) performance gain.
-</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L761" rel="noopener noreferrer" target="_blank">View full source →</a></details></div><div class="mblk"><code>.forward(feats: torch.Tensor, waveform: torch.tensor, cache: dict = None, is_final: bool = False, **kwargs)</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L825" rel="noopener noreferrer" target="_blank">L825</a><div class="mdoc"><p>Forward pass for training.</p>
+</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L762" rel="noopener noreferrer" target="_blank">View full source →</a></details></div><div class="mblk"><code>.forward(feats: torch.Tensor, waveform: torch.tensor, cache: dict = None, is_final: bool = False, **kwargs)</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L826" rel="noopener noreferrer" target="_blank">L826</a><div class="mdoc"><p>Forward pass for training.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>feats</code> — Feature tensor (e.g., fbank), shape (batch, frames, dim).</li>
@@ -6432,7 +6432,7 @@
         self.ComputeScores(feats, cache=cache)
         if not is_final:
             self.DetectCommonFrames(cache=cache)
-</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L825" rel="noopener noreferrer" target="_blank">View full source →</a></details></div><div class="mblk"><code>.init_cache(cache: dict = None, **kwargs)</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L911" rel="noopener noreferrer" target="_blank">L911</a><div class="mdoc"><p>Init cache.</p>
+</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L826" rel="noopener noreferrer" target="_blank">View full source →</a></details></div><div class="mblk"><code>.init_cache(cache: dict = None, **kwargs)</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L912" rel="noopener noreferrer" target="_blank">L912</a><div class="mdoc"><p>Init cache.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>cache</code> — State cache dict for streaming inference.</li>
@@ -6468,7 +6468,7 @@
             sil_pdf_ids=self.vad_opts.sil_pdf_ids,
             max_end_sil_frame_cnt_thresh=self.vad_opts.max_end_silence_time
             - self.vad_opts.speech_to_sil_time_thres,
-</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L911" rel="noopener noreferrer" target="_blank">View full source →</a></details></div><div class="mblk"><code>.inference(data_in, data_lengths=None, key: list = None, tokenizer=None, frontend=None, cache: dict = None, **kwargs)</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L949" rel="noopener noreferrer" target="_blank">L949</a><div class="mdoc"><p>Run inference on input data.</p>
+</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L912" rel="noopener noreferrer" target="_blank">View full source →</a></details></div><div class="mblk"><code>.inference(data_in, data_lengths=None, key: list = None, tokenizer=None, frontend=None, cache: dict = None, **kwargs)</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L950" rel="noopener noreferrer" target="_blank">L950</a><div class="mdoc"><p>Run inference on input data.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>data_in</code> — Input data (audio samples, file paths, or text).</li>
@@ -6509,7 +6509,7 @@
         chunk_size = kwargs.get("chunk_size", 60000)  # 50ms
         chunk_stride_samples = int(chunk_size * frontend.fs / 1000)
 
-</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L949" rel="noopener noreferrer" target="_blank">View full source →</a></details></div><div class="mblk"><code>.export(**kwargs)</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L1105" rel="noopener noreferrer" target="_blank">L1105</a><div class="mdoc"><p>Export.</p>
+</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L950" rel="noopener noreferrer" target="_blank">View full source →</a></details></div><div class="mblk"><code>.export(**kwargs)</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L1088" rel="noopener noreferrer" target="_blank">L1088</a><div class="mdoc"><p>Export.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>**kwargs</code> — Additional keyword arguments.</li>
@@ -6525,7 +6525,7 @@
 
         models = export_rebuild_model(model=self, **kwargs)
         return models
-</code></pre></details></div><div class="mblk"><code>.DetectCommonFrames(cache: dict = None) -&gt; int</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L1117" rel="noopener noreferrer" target="_blank">L1117</a><div class="mdoc"><p>Detectcommonframes.</p>
+</code></pre></details></div><div class="mblk"><code>.DetectCommonFrames(cache: dict = None) -&gt; int</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L1100" rel="noopener noreferrer" target="_blank">L1100</a><div class="mdoc"><p>Detectcommonframes.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>cache</code> — State cache dict for streaming inference.</li>
@@ -6548,7 +6548,7 @@
             self.DetectOneFrame(frame_state, cache["stats"].frm_cnt - 1 - i, False, cache=cache)
 
         return 0
-</code></pre></details></div><div class="mblk"><code>.DetectLastFrames(cache: dict = None) -&gt; int</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L1136" rel="noopener noreferrer" target="_blank">L1136</a><div class="mdoc"><p>Detectlastframes.</p>
+</code></pre></details></div><div class="mblk"><code>.DetectLastFrames(cache: dict = None) -&gt; int</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L1119" rel="noopener noreferrer" target="_blank">L1119</a><div class="mdoc"><p>Detectlastframes.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>cache</code> — State cache dict for streaming inference.</li>
@@ -6574,7 +6574,7 @@
                 self.DetectOneFrame(frame_state, cache["stats"].frm_cnt - 1, True, cache=cache)
 
         return 0
-</code></pre></details></div><div class="mblk"><code>.DetectOneFrame(cur_frm_state: FrameState, cur_frm_idx: int, is_final_frame: bool, cache: dict = None) -&gt; None</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L1158" rel="noopener noreferrer" target="_blank">L1158</a><div class="mdoc"><p>Detectoneframe.</p>
+</code></pre></details></div><div class="mblk"><code>.DetectOneFrame(cur_frm_state: FrameState, cur_frm_idx: int, is_final_frame: bool, cache: dict = None) -&gt; None</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L1141" rel="noopener noreferrer" target="_blank">L1141</a><div class="mdoc"><p>Detectoneframe.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>cur_frm_state</code> — TODO.</li>
@@ -6612,8 +6612,8 @@
             cache["stats"].continous_silence_frame_count = 0
             cache["stats"].pre_end_silence_detected = False
             start_frame = 0
-</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L1158" rel="noopener noreferrer" target="_blank">View full source →</a></details></div></div>
-<div class="api-detail" id="e85" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>FsmnVADStreaming.DropCachedFrames(drop_frames: int, cache: dict = None) -&gt; None</code></h2><div class="dmod">funasr.models.fsmn_vad_streaming.FsmnVADStreaming · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L406" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Release score, decibel, and waveform history before an absolute frame.</p>
+</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L1141" rel="noopener noreferrer" target="_blank">View full source →</a></details></div></div>
+<div class="api-detail" id="e85" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>FsmnVADStreaming.DropCachedFrames(drop_frames: int, cache: dict = None) -&gt; None</code></h2><div class="dmod">funasr.models.fsmn_vad_streaming.FsmnVADStreaming · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L407" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Release score, decibel, and waveform history before an absolute frame.</p>
 </div><details class="src-block"><summary>Source code</summary><pre><code>    def DropCachedFrames(self, drop_frames: int, cache: dict = None) -&gt; None:
         """Release score, decibel, and waveform history before an absolute frame."""
         if cache is None:
@@ -6643,7 +6643,7 @@
         ) * frame_shift_length
         stats.data_buf = stats.data_buf_all[data_buf_offset:]
 </code></pre></details></div>
-<div class="api-detail" id="e86" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>FsmnVADStreaming.ResetDetection(cache: dict = None)</code></h2><div class="dmod">funasr.models.fsmn_vad_streaming.FsmnVADStreaming · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L435" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Resetdetection.</p>
+<div class="api-detail" id="e86" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>FsmnVADStreaming.ResetDetection(cache: dict = None)</code></h2><div class="dmod">funasr.models.fsmn_vad_streaming.FsmnVADStreaming · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L436" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Resetdetection.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>cache</code> — State cache dict for streaming inference.</li>
@@ -6671,7 +6671,7 @@
             drop_frames = int(cache["stats"].output_data_buf[-1].end_ms / self.vad_opts.frame_in_ms)
             self.DropCachedFrames(drop_frames, cache=cache)
 </code></pre></details></div>
-<div class="api-detail" id="e87" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>FsmnVADStreaming.ComputeDecibel(cache: dict = None, frame_count: Optional[int] = None) -&gt; None</code></h2><div class="dmod">funasr.models.fsmn_vad_streaming.FsmnVADStreaming · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L458" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Computedecibel.</p>
+<div class="api-detail" id="e87" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>FsmnVADStreaming.ComputeDecibel(cache: dict = None, frame_count: Optional[int] = None) -&gt; None</code></h2><div class="dmod">funasr.models.fsmn_vad_streaming.FsmnVADStreaming · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L459" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Computedecibel.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>frame_count</code> — Number of VAD score frames emitted for this waveform.</li>
@@ -6707,8 +6707,8 @@
         # The frontend provides the exact waveform span for these VAD score frames.
         aligned_sample_count = (
             (frame_count - 1) * frame_shift_length + frame_sample_length
-</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L458" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
-<div class="api-detail" id="e88" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>FsmnVADStreaming.ComputeScores(feats: torch.Tensor, cache: dict = None) -&gt; None</code></h2><div class="dmod">funasr.models.fsmn_vad_streaming.FsmnVADStreaming · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L532" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Computescores.</p>
+</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L459" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
+<div class="api-detail" id="e88" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>FsmnVADStreaming.ComputeScores(feats: torch.Tensor, cache: dict = None) -&gt; None</code></h2><div class="dmod">funasr.models.fsmn_vad_streaming.FsmnVADStreaming · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L533" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Computescores.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>feats</code> — Feature tensor (e.g., fbank), shape (batch, frames, dim).</li>
@@ -6734,7 +6734,7 @@
         else:
             cache["stats"].scores = torch.cat((cache["stats"].scores, scores), dim=1)
 </code></pre></details></div>
-<div class="api-detail" id="e89" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>FsmnVADStreaming.PopDataBufTillFrame(frame_idx: int, cache: dict = None) -&gt; None</code></h2><div class="dmod">funasr.models.fsmn_vad_streaming.FsmnVADStreaming · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L552" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Popdatabuftillframe.</p>
+<div class="api-detail" id="e89" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>FsmnVADStreaming.PopDataBufTillFrame(frame_idx: int, cache: dict = None) -&gt; None</code></h2><div class="dmod">funasr.models.fsmn_vad_streaming.FsmnVADStreaming · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L553" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Popdatabuftillframe.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>frame_idx</code> — TODO.</li>
@@ -6759,7 +6759,7 @@
                     * int(self.vad_opts.frame_in_ms * self.vad_opts.sample_rate / 1000) :
                 ]
 </code></pre></details></div>
-<div class="api-detail" id="e90" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>FsmnVADStreaming.PopDataToOutputBuf(start_frm: int, frm_cnt: int, first_frm_is_start_point: bool, last_frm_is_end_point: bool, end_point_is_sent_end: bool, cache: dict = None) -&gt; None</code></h2><div class="dmod">funasr.models.fsmn_vad_streaming.FsmnVADStreaming · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L571" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Popdatatooutputbuf.</p>
+<div class="api-detail" id="e90" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>FsmnVADStreaming.PopDataToOutputBuf(start_frm: int, frm_cnt: int, first_frm_is_start_point: bool, last_frm_is_end_point: bool, end_point_is_sent_end: bool, cache: dict = None) -&gt; None</code></h2><div class="dmod">funasr.models.fsmn_vad_streaming.FsmnVADStreaming · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L572" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Popdatatooutputbuf.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>start_frm</code> — TODO.</li>
@@ -6799,8 +6799,8 @@
                 0,
                 int(
                     self.vad_opts.frame_length_ms * self.vad_opts.sample_rate / 1000
-</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L571" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
-<div class="api-detail" id="e91" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>FsmnVADStreaming.OnSilenceDetected(valid_frame: int, cache: dict = None)</code></h2><div class="dmod">funasr.models.fsmn_vad_streaming.FsmnVADStreaming · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L641" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Onsilencedetected.</p>
+</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L572" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
+<div class="api-detail" id="e91" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>FsmnVADStreaming.OnSilenceDetected(valid_frame: int, cache: dict = None)</code></h2><div class="dmod">funasr.models.fsmn_vad_streaming.FsmnVADStreaming · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L642" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Onsilencedetected.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>valid_frame</code> — TODO.</li>
@@ -6819,7 +6819,7 @@
         if cache["stats"].vad_state_machine == VadStateMachine.kVadInStateStartPointNotDetected:
             self.PopDataBufTillFrame(valid_frame, cache=cache)
 </code></pre></details></div>
-<div class="api-detail" id="e92" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>FsmnVADStreaming.OnVoiceDetected(valid_frame: int, cache: dict = None) -&gt; None</code></h2><div class="dmod">funasr.models.fsmn_vad_streaming.FsmnVADStreaming · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L657" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Onvoicedetected.</p>
+<div class="api-detail" id="e92" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>FsmnVADStreaming.OnVoiceDetected(valid_frame: int, cache: dict = None) -&gt; None</code></h2><div class="dmod">funasr.models.fsmn_vad_streaming.FsmnVADStreaming · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L658" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Onvoicedetected.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>valid_frame</code> — TODO.</li>
@@ -6837,7 +6837,7 @@
         cache["stats"].latest_confirmed_speech_frame = valid_frame
         self.PopDataToOutputBuf(valid_frame, 1, False, False, False, cache=cache)
 </code></pre></details></div>
-<div class="api-detail" id="e93" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>FsmnVADStreaming.OnVoiceStart(start_frame: int, fake_result: bool = False, cache: dict = None) -&gt; None</code></h2><div class="dmod">funasr.models.fsmn_vad_streaming.FsmnVADStreaming · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L669" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Onvoicestart.</p>
+<div class="api-detail" id="e93" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>FsmnVADStreaming.OnVoiceStart(start_frame: int, fake_result: bool = False, cache: dict = None) -&gt; None</code></h2><div class="dmod">funasr.models.fsmn_vad_streaming.FsmnVADStreaming · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L670" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Onvoicestart.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>start_frame</code> — TODO.</li>
@@ -6869,7 +6869,7 @@
                 cache["stats"].confirmed_start_frame, 1, True, False, False, cache=cache
             )
 </code></pre></details></div>
-<div class="api-detail" id="e94" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>FsmnVADStreaming.OnVoiceEnd(end_frame: int, fake_result: bool, is_last_frame: bool, cache: dict = None) -&gt; None</code></h2><div class="dmod">funasr.models.fsmn_vad_streaming.FsmnVADStreaming · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L694" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Onvoiceend.</p>
+<div class="api-detail" id="e94" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>FsmnVADStreaming.OnVoiceEnd(end_frame: int, fake_result: bool, is_last_frame: bool, cache: dict = None) -&gt; None</code></h2><div class="dmod">funasr.models.fsmn_vad_streaming.FsmnVADStreaming · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L695" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Onvoiceend.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>end_frame</code> — TODO.</li>
@@ -6905,7 +6905,7 @@
             )
         cache["stats"].number_end_time_detected += 1
 </code></pre></details></div>
-<div class="api-detail" id="e95" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>FsmnVADStreaming.MaybeOnVoiceEndIfLastFrame(is_final_frame: bool, cur_frm_idx: int, cache: dict = None) -&gt; None</code></h2><div class="dmod">funasr.models.fsmn_vad_streaming.FsmnVADStreaming · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L722" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Maybeonvoiceendiflastframe.</p>
+<div class="api-detail" id="e95" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>FsmnVADStreaming.MaybeOnVoiceEndIfLastFrame(is_final_frame: bool, cur_frm_idx: int, cache: dict = None) -&gt; None</code></h2><div class="dmod">funasr.models.fsmn_vad_streaming.FsmnVADStreaming · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L723" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Maybeonvoiceendiflastframe.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>is_final_frame</code> — Boolean flag for final frame.</li>
@@ -6928,7 +6928,7 @@
             self.OnVoiceEnd(cur_frm_idx, False, True, cache=cache)
             cache["stats"].vad_state_machine = VadStateMachine.kVadInStateEndPointDetected
 </code></pre></details></div>
-<div class="api-detail" id="e96" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>FsmnVADStreaming.GetLatency(cache: dict = None) -&gt; int</code></h2><div class="dmod">funasr.models.fsmn_vad_streaming.FsmnVADStreaming · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L738" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Getlatency.</p>
+<div class="api-detail" id="e96" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>FsmnVADStreaming.GetLatency(cache: dict = None) -&gt; int</code></h2><div class="dmod">funasr.models.fsmn_vad_streaming.FsmnVADStreaming · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L739" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Getlatency.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>cache</code> — State cache dict for streaming inference.</li>
@@ -6943,7 +6943,7 @@
             cache = {}
         return int(self.LatencyFrmNumAtStartPoint(cache=cache) * self.vad_opts.frame_in_ms)
 </code></pre></details></div>
-<div class="api-detail" id="e97" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>FsmnVADStreaming.LatencyFrmNumAtStartPoint(cache: dict = None) -&gt; int</code></h2><div class="dmod">funasr.models.fsmn_vad_streaming.FsmnVADStreaming · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L748" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Latencyfrmnumatstartpoint.</p>
+<div class="api-detail" id="e97" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>FsmnVADStreaming.LatencyFrmNumAtStartPoint(cache: dict = None) -&gt; int</code></h2><div class="dmod">funasr.models.fsmn_vad_streaming.FsmnVADStreaming · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L749" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Latencyfrmnumatstartpoint.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>cache</code> — State cache dict for streaming inference.</li>
@@ -6961,7 +6961,7 @@
             vad_latency += int(self.vad_opts.lookback_time_start_point / self.vad_opts.frame_in_ms)
         return vad_latency
 </code></pre></details></div>
-<div class="api-detail" id="e98" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>FsmnVADStreaming.GetFrameState(t: int, cache: dict = None)</code></h2><div class="dmod">funasr.models.fsmn_vad_streaming.FsmnVADStreaming · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L761" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Getframestate.</p>
+<div class="api-detail" id="e98" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>FsmnVADStreaming.GetFrameState(t: int, cache: dict = None)</code></h2><div class="dmod">funasr.models.fsmn_vad_streaming.FsmnVADStreaming · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L762" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Getframestate.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>t</code> — TODO.</li>
@@ -6997,8 +6997,8 @@
             - Put the iteration of `sil_pdf_ids` inside `sum()` to reduce the overhead of creating a new list.
             - The default `sil_pdf_ids` is [0], the `if` statement is used to reduce the overhead of expression
               generation, which result in a mere (~2%) performance gain.
-</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L761" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
-<div class="api-detail" id="e99" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>FsmnVADStreaming.forward(feats: torch.Tensor, waveform: torch.tensor, cache: dict = None, is_final: bool = False, **kwargs)</code></h2><div class="dmod">funasr.models.fsmn_vad_streaming.FsmnVADStreaming · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L825" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Forward pass for training.</p>
+</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L762" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
+<div class="api-detail" id="e99" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>FsmnVADStreaming.forward(feats: torch.Tensor, waveform: torch.tensor, cache: dict = None, is_final: bool = False, **kwargs)</code></h2><div class="dmod">funasr.models.fsmn_vad_streaming.FsmnVADStreaming · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L826" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Forward pass for training.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>feats</code> — Feature tensor (e.g., fbank), shape (batch, frames, dim).</li>
@@ -7037,8 +7037,8 @@
         self.ComputeScores(feats, cache=cache)
         if not is_final:
             self.DetectCommonFrames(cache=cache)
-</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L825" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
-<div class="api-detail" id="e100" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>FsmnVADStreaming.init_cache(cache: dict = None, **kwargs)</code></h2><div class="dmod">funasr.models.fsmn_vad_streaming.FsmnVADStreaming · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L911" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Init cache.</p>
+</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L826" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
+<div class="api-detail" id="e100" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>FsmnVADStreaming.init_cache(cache: dict = None, **kwargs)</code></h2><div class="dmod">funasr.models.fsmn_vad_streaming.FsmnVADStreaming · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L912" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Init cache.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>cache</code> — State cache dict for streaming inference.</li>
@@ -7074,8 +7074,8 @@
             sil_pdf_ids=self.vad_opts.sil_pdf_ids,
             max_end_sil_frame_cnt_thresh=self.vad_opts.max_end_silence_time
             - self.vad_opts.speech_to_sil_time_thres,
-</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L911" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
-<div class="api-detail" id="e101" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>FsmnVADStreaming.inference(data_in, data_lengths=None, key: list = None, tokenizer=None, frontend=None, cache: dict = None, **kwargs)</code></h2><div class="dmod">funasr.models.fsmn_vad_streaming.FsmnVADStreaming · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L949" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Run inference on input data.</p>
+</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L912" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
+<div class="api-detail" id="e101" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>FsmnVADStreaming.inference(data_in, data_lengths=None, key: list = None, tokenizer=None, frontend=None, cache: dict = None, **kwargs)</code></h2><div class="dmod">funasr.models.fsmn_vad_streaming.FsmnVADStreaming · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L950" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Run inference on input data.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>data_in</code> — Input data (audio samples, file paths, or text).</li>
@@ -7116,8 +7116,8 @@
         chunk_size = kwargs.get("chunk_size", 60000)  # 50ms
         chunk_stride_samples = int(chunk_size * frontend.fs / 1000)
 
-</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L949" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
-<div class="api-detail" id="e102" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>FsmnVADStreaming.export(**kwargs)</code></h2><div class="dmod">funasr.models.fsmn_vad_streaming.FsmnVADStreaming · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L1105" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Export.</p>
+</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L950" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
+<div class="api-detail" id="e102" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>FsmnVADStreaming.export(**kwargs)</code></h2><div class="dmod">funasr.models.fsmn_vad_streaming.FsmnVADStreaming · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L1088" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Export.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>**kwargs</code> — Additional keyword arguments.</li>
@@ -7134,7 +7134,7 @@
         models = export_rebuild_model(model=self, **kwargs)
         return models
 </code></pre></details></div>
-<div class="api-detail" id="e103" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>FsmnVADStreaming.DetectCommonFrames(cache: dict = None) -&gt; int</code></h2><div class="dmod">funasr.models.fsmn_vad_streaming.FsmnVADStreaming · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L1117" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Detectcommonframes.</p>
+<div class="api-detail" id="e103" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>FsmnVADStreaming.DetectCommonFrames(cache: dict = None) -&gt; int</code></h2><div class="dmod">funasr.models.fsmn_vad_streaming.FsmnVADStreaming · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L1100" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Detectcommonframes.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>cache</code> — State cache dict for streaming inference.</li>
@@ -7158,7 +7158,7 @@
 
         return 0
 </code></pre></details></div>
-<div class="api-detail" id="e104" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>FsmnVADStreaming.DetectLastFrames(cache: dict = None) -&gt; int</code></h2><div class="dmod">funasr.models.fsmn_vad_streaming.FsmnVADStreaming · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L1136" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Detectlastframes.</p>
+<div class="api-detail" id="e104" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>FsmnVADStreaming.DetectLastFrames(cache: dict = None) -&gt; int</code></h2><div class="dmod">funasr.models.fsmn_vad_streaming.FsmnVADStreaming · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L1119" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Detectlastframes.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>cache</code> — State cache dict for streaming inference.</li>
@@ -7185,7 +7185,7 @@
 
         return 0
 </code></pre></details></div>
-<div class="api-detail" id="e105" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>FsmnVADStreaming.DetectOneFrame(cur_frm_state: FrameState, cur_frm_idx: int, is_final_frame: bool, cache: dict = None) -&gt; None</code></h2><div class="dmod">funasr.models.fsmn_vad_streaming.FsmnVADStreaming · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L1158" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Detectoneframe.</p>
+<div class="api-detail" id="e105" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>FsmnVADStreaming.DetectOneFrame(cur_frm_state: FrameState, cur_frm_idx: int, is_final_frame: bool, cache: dict = None) -&gt; None</code></h2><div class="dmod">funasr.models.fsmn_vad_streaming.FsmnVADStreaming · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L1141" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Detectoneframe.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>cur_frm_state</code> — TODO.</li>
@@ -7223,7 +7223,7 @@
             cache["stats"].continous_silence_frame_count = 0
             cache["stats"].pre_end_silence_detected = False
             start_frame = 0
-</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L1158" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
+</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fsmn_vad_streaming/model.py#L1141" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
 <div class="api-detail" id="e106" tabindex="-1"><span class="dtag badge-c">class</span><h2><code>FunASRNano(audio_encoder: str = None, audio_encoder_conf: dict = None, audio_adaptor: str = None, audio_adaptor_conf: dict = None, llm: str = None, llm_conf: dict = None, input_size: int = 80, length_normalized_loss: bool = False, **kwargs)</code></h2><div class="dmod">funasr.models.fun_asr_nano · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/models/fun_asr_nano/model.py#L34" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><ul>
 <li><code>Fun</code> — ASR-Nano: End-to-End ASR Large Model.</li>
 </ul>
