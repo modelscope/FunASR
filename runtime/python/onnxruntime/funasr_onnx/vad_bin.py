@@ -103,6 +103,8 @@ class Fsmn_vad:
             end_idx = beg_idx + 1
             waveform = waveform_list[beg_idx:end_idx]
             feats, feats_len = self.extract_feat(waveform)
+            if feats_len[0] == 0:
+                continue
             waveform = np.array(waveform)
             param_dict = kwargs.get("param_dict", dict())
             in_cache = param_dict.get("in_cache", list())
@@ -183,8 +185,13 @@ class Fsmn_vad:
     def extract_feat(self, waveform_list: List[np.ndarray]) -> Tuple[np.ndarray, np.ndarray]:
         feats, feats_len = [], []
         for waveform in waveform_list:
-            speech, _ = self.frontend.fbank(waveform)
-            feat, feat_len = self.frontend.lfr_cmvn(speech)
+            speech, speech_len = self.frontend.fbank(waveform)
+            if speech_len == 0:
+                # LFR needs a first frame; keep the empty input at its original position.
+                feat = np.empty((0, speech.shape[1] * self.frontend.lfr_m), dtype=speech.dtype)
+                feat_len = 0
+            else:
+                feat, feat_len = self.frontend.lfr_cmvn(speech)
             feats.append(feat)
             feats_len.append(feat_len)
 
