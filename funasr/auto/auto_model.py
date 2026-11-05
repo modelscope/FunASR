@@ -1212,6 +1212,8 @@ class AutoModel:
                 ]
 
             if not len(result["text"].strip()):
+                results_ret_list.append({"key": key, "text": "", "timestamp": []})
+                logging.info("decoding, utt: {}, empty text".format(key))
                 continue
             return_raw_text = kwargs.get("return_raw_text", False)
             aligned_words = result.get("words")
