@@ -13,6 +13,7 @@ on:
       - "tests/test_funasr_onnx_paraformer_online_empty_final.py"
       - "tests/test_funasr_onnx_vad_online_short_chunks.py"
       - "tests/test_funasr_onnx_vad_multiple_inputs.py"
+      - "tests/test_funasr_onnx_punctuation_empty_input.py"
       - "tests/test_rich_transcription_postprocess.py"
       - "tests/test_rich_transcription_event_segments.py"
   push:
@@ -29,6 +30,7 @@ on:
       - "tests/test_funasr_onnx_paraformer_online_empty_final.py"
       - "tests/test_funasr_onnx_vad_online_short_chunks.py"
       - "tests/test_funasr_onnx_vad_multiple_inputs.py"
+      - "tests/test_funasr_onnx_punctuation_empty_input.py"
       - "tests/test_rich_transcription_postprocess.py"
       - "tests/test_rich_transcription_event_segments.py"
   workflow_dispatch:
@@ -84,7 +86,7 @@ jobs:
           import importlib.util
           from importlib.metadata import requires, version
 
-          assert version("funasr-onnx") == "0.4.8"
+          assert version("funasr-onnx") == "0.4.9"
           assert importlib.util.find_spec("torch") is None
 
           requirements = requires("funasr-onnx") or []
@@ -115,6 +117,9 @@ jobs:
       - name: Verify offline VAD results per input
         run: python tests/test_funasr_onnx_vad_multiple_inputs.py
 
+      - name: Verify empty punctuation streaming cache
+        run: python tests/test_funasr_onnx_punctuation_empty_input.py
+
       - name: Verify source distribution error paths
         run: |
           python -m pip install --force-reinstall --no-deps dist/funasr-onnx/*.tar.gz
@@ -125,7 +130,7 @@ jobs:
         if: matrix.python-version == '3.12'
         uses: actions/upload-artifact@v7
         with:
-          name: funasr-onnx-0.4.8
+          name: funasr-onnx-0.4.9
           path: dist/funasr-onnx/*
           if-no-files-found: error
 
