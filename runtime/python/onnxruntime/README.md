@@ -7,6 +7,12 @@ does not update the installed ONNX wrappers. Check their versions separately
 with `python -m pip show funasr-onnx funasr`; use the source installation below
 when a required wrapper fix is newer than the published PyPI package.
 
+Version 0.4.9 keeps one result per input when offline VAD receives empty or sub-frame
+audio, without invoking ONNX Runtime for zero-frame features (#3846). It also returns
+an empty punctuation chunk while it preserves the streaming cache and avoids
+tokenization and inference (#3847). These are CPU runtime-wrapper fixes, not a
+model-weight or ASR accuracy update.
+
 Version 0.4.8 makes the standalone CMVN reader accept blank lines and
 raise a file-specific error for missing or truncated statistics (#3842).
 Valid float64 statistics and shipped feature output are unchanged. This is
@@ -33,9 +39,9 @@ and postprocessing fixes, not a model-weight update or an ASR accuracy claim.
 install from pip
 
 ```shell
-pip install -U "funasr-onnx>=0.4.8"
+pip install -U "funasr-onnx>=0.4.9"
 # For the users in China, you could install with the command:
-# pip install -U "funasr-onnx>=0.4.8" -i https://mirror.sjtu.edu.cn/pypi/web/simple
+# pip install -U "funasr-onnx>=0.4.9" -i https://mirror.sjtu.edu.cn/pypi/web/simple
 # If you want to export .onnx file, you should install modelscope and funasr
 pip install -U modelscope funasr
 # For the users in China, you could install with the command:
