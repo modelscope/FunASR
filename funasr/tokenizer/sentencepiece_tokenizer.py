@@ -13,11 +13,11 @@ from funasr.register import tables
 class SentencepiecesTokenizer(BaseTokenizer):
     def __init__(self, bpemodel: Union[Path, str], **kwargs):
         """Initialize SentencepiecesTokenizer.
-        
-            Args:
-                bpemodel: TODO.
-                **kwargs: Additional keyword arguments.
-            """
+
+        Args:
+            bpemodel: TODO.
+            **kwargs: Additional keyword arguments.
+        """
         super().__init__(**kwargs)
         self.bpemodel = str(bpemodel)
         # NOTE(kamo):
@@ -41,39 +41,39 @@ class SentencepiecesTokenizer(BaseTokenizer):
 
     def text2tokens(self, line: str) -> List[str]:
         """Text2tokens.
-        
-            Args:
-                line: TODO.
-            """
+
+        Args:
+            line: TODO.
+        """
         self._build_sentence_piece_processor()
         return self.sp.EncodeAsPieces(line)
 
     def tokens2text(self, tokens: Iterable[str]) -> str:
         """Tokens2text.
-        
-            Args:
-                tokens: TODO.
-            """
+
+        Args:
+            tokens: TODO.
+        """
         self._build_sentence_piece_processor()
         return self.sp.DecodePieces(list(tokens))
 
     def encode(self, line: str, **kwargs) -> List[int]:
         """Encode.
-        
-            Args:
-                line: TODO.
-                **kwargs: Additional keyword arguments.
-            """
+
+        Args:
+            line: TODO.
+            **kwargs: Additional keyword arguments.
+        """
         self._build_sentence_piece_processor()
         return self.sp.EncodeAsIds(line)
 
     def decode(self, line: List[int], **kwargs):
         """Decode.
-        
-            Args:
-                line: TODO.
-                **kwargs: Additional keyword arguments.
-            """
+
+        Args:
+            line: TODO.
+            **kwargs: Additional keyword arguments.
+        """
         self._build_sentence_piece_processor()
         return self.sp.DecodeIds(line)
 
@@ -81,20 +81,17 @@ class SentencepiecesTokenizer(BaseTokenizer):
         """Get vocab size."""
         return self.sp.GetPieceSize()
 
-    def ids2tokens(self, *args, **kwargs):
-        """Ids2tokens.
-        
-            Args:
-                *args: Variable positional arguments.
-                **kwargs: Additional keyword arguments.
-            """
-        return self.decode(*args, **kwargs)
+    def ids2tokens(self, line, **kwargs):
+        """Return model-vocabulary pieces, or legacy decoded text without a token list."""
+        if getattr(self, "token_list", None) is not None:
+            return super().ids2tokens(line)
+        return self.decode(line, **kwargs)
 
     def tokens2ids(self, *args, **kwargs):
         """Tokens2ids.
-        
-            Args:
-                *args: Variable positional arguments.
-                **kwargs: Additional keyword arguments.
-            """
+
+        Args:
+            *args: Variable positional arguments.
+            **kwargs: Additional keyword arguments.
+        """
         return self.encode(*args, **kwargs)
