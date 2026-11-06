@@ -483,7 +483,13 @@ class SeacoParaformer(BiCifParaformer, Paraformer):
         pre_acoustic_embeds, pre_token_length = predictor_outs[0], predictor_outs[1]
         pre_token_length = pre_token_length.round().long()
         if torch.max(pre_token_length) < 1:
-            return ([],)
+            # no tokens for any utterance: keep one empty result per key
+            b = encoder_out.size(0)
+            if tokenizer is None:
+                return [{"key": key[i], "token_int": []} for i in range(b)], meta_data
+            if self.predictor_name == "CifPredictorV3":
+                return [{"key": key[i], "text": "", "timestamp": []} for i in range(b)], meta_data
+            return [{"key": key[i], "text": ""} for i in range(b)], meta_data
 
         decoder_out = self._seaco_decode_with_ASF(
             encoder_out,

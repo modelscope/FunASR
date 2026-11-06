@@ -111,7 +111,13 @@ checkpoint/revision, 오디오 집합, 하드웨어, 배치, 워밍업, 측정 �
 ## 최신 소식
 
 - **MOSS-Transcribe-Diarize**를 FunASR service, Docker, Kubernetes, vLLM/SGLang workflow, FunClip에 통합해 긴 오디오 ASR, timestamp, 익명 speaker label을 한 번에 처리합니다. [MOSS 배포 ->](./docs/moss_transcribe_diarize.md)
-- **FunASR 1.4.16**은 여러 번의 추론에서도 VAD, 문장 부호, 화자 모델의 명시적 device 배치를 유지하고 검증된 네이티브 Transformers 도입 가이드를 추가합니다. `python -m pip install -U "funasr==1.4.16"`. [릴리스 및 검증 범위 ->](https://github.com/modelscope/FunASR/releases/tag/v1.4.16)
+- **FunASR 1.4.22**는 호출별 `merge_length_s`를 반영하고 현재 발화 구간 길이에 따라 동적 VAD 무음 임계값을 프레임마다 갱신합니다. 고정 임계값 모드도 유지합니다. [수정 #3841](https://github.com/modelscope/FunASR/pull/3841), [수정 #3833](https://github.com/modelscope/FunASR/pull/3833). `python -m pip install -U "funasr==1.4.22"`로 설치할 수 있습니다. [릴리스 및 검증 범위 ->](https://github.com/modelscope/FunASR/releases/tag/v1.4.22)
+  **FunASR 1.4.21**은 스트리밍 문장부호 처리의 빈 입력에서 cache를 유지합니다. 비어 있지 않은 추론은 변경되지 않습니다. [수정 #3824](https://github.com/modelscope/FunASR/pull/3824). [릴리스 및 검증 범위 ->](https://github.com/modelscope/FunASR/releases/tag/v1.4.21)
+  **FunASR 1.4.20**은 `spk_model` 사용 시 선택적 화자 의존성 가져오기가 실패하면 원래 예외를 연결한 `ImportError`를 제공합니다. ASR 전용 구성은 계속 사용할 수 있습니다. [수정 #3819](https://github.com/modelscope/FunASR/pull/3819). [릴리스 및 검증 범위 ->](https://github.com/modelscope/FunASR/releases/tag/v1.4.20)
+  **FunASR 1.4.19**는 Paraformer의 빈 token batch를 처리하고 자동 클러스터링에 `max_speakers` 상한을 적용합니다. 실시간 WebSocket 서비스에 JSON object를 검증하는 `--hf_overrides`도 추가했습니다. [릴리스 및 검증 범위 ->](https://github.com/modelscope/FunASR/releases/tag/v1.4.19)
+  이전 릴리스 **FunASR 1.4.18**은 중국어와 라틴 문자가 섞인 hotword의 잘못된 치환, 특수 token 제거 후 timestamp 정렬, 중국어 VAD 분할의 문장 및 화자 불일치를 수정했습니다. [릴리스 및 검증 범위 ->](https://github.com/modelscope/FunASR/releases/tag/v1.4.18)
+  그 이전 릴리스 **FunASR 1.4.17**은 명시적 PCM16 입력을 추가하고 timestamp, hotword, speaker sample rate, 긴 segment의 streaming 처리를 개선했습니다. [릴리스 및 검증 범위 ->](https://github.com/modelscope/FunASR/releases/tag/v1.4.17)
+  그 이전 릴리스 **FunASR 1.4.16**은 여러 번의 추론에서도 VAD, 문장 부호, 화자 모델의 명시적 device 배치를 유지하고 검증된 네이티브 Transformers 도입 가이드를 추가했습니다. [릴리스 및 검증 범위 ->](https://github.com/modelscope/FunASR/releases/tag/v1.4.16)
 - **네이티브 Transformers:** 정식 버전 **5.17.0**이 Fun-ASR-Nano를 지원합니다. 공식 `-hf` checkpoint, CPU 예제, Notebook: [설치 가이드(영문) ->](./docs/transformers_native.md)
 
 > 전체 변경 기록과 download asset은 [GitHub Releases](https://github.com/modelscope/FunASR/releases)에서 확인할 수 있습니다.

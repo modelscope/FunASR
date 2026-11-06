@@ -112,7 +112,13 @@ CER/WER をそろえて比較してください。オフラインのスループ
 ## 最新情報
 
 - **MOSS-Transcribe-Diarize** を FunASR service、Docker、Kubernetes、vLLM/SGLang workflow、FunClip に統合し、長時間 ASR、timestamp、匿名 speaker label を一度に処理できます。[MOSS をデプロイ ->](./docs/moss_transcribe_diarize.md)
-- **FunASR 1.4.16** は複数回の推論でも VAD、句読点、話者モデルの明示的な device 配置を保持し、テスト済みのネイティブ Transformers 導入ガイドを追加します。`python -m pip install -U "funasr==1.4.16"`。[リリースと検証範囲 ->](https://github.com/modelscope/FunASR/releases/tag/v1.4.16)
+- **FunASR 1.4.22** は呼び出しごとの `merge_length_s` を反映し、現在の発話区間の長さに基づいて動的 VAD 無音しきい値をフレーム単位で更新します。固定しきい値モードも維持します。[修正 #3841](https://github.com/modelscope/FunASR/pull/3841)、[修正 #3833](https://github.com/modelscope/FunASR/pull/3833)。`python -m pip install -U "funasr==1.4.22"` でインストールできます。[リリースと検証範囲 ->](https://github.com/modelscope/FunASR/releases/tag/v1.4.22)
+  **FunASR 1.4.21** はストリーミング句読点処理の空入力で cache を保持します。非空推論は変更されません。[修正 #3824](https://github.com/modelscope/FunASR/pull/3824)。[リリースと検証範囲 ->](https://github.com/modelscope/FunASR/releases/tag/v1.4.21)
+  **FunASR 1.4.20** は `spk_model` 指定時に任意の話者依存モジュールを読み込めない場合、元の例外を連鎖した `ImportError` で報告します。ASR のみの構築は引き続き利用できます。[修正 #3819](https://github.com/modelscope/FunASR/pull/3819)。[リリースと検証範囲 ->](https://github.com/modelscope/FunASR/releases/tag/v1.4.20)
+  **FunASR 1.4.19** は Paraformer の空 token batch を処理し、自動クラスタリングの `max_speakers` 上限を適用します。リアルタイム WebSocket サービスには JSON object を検証する `--hf_overrides` を追加しました。[リリースと検証範囲 ->](https://github.com/modelscope/FunASR/releases/tag/v1.4.19)
+  前のリリース **FunASR 1.4.18** は中国語とラテン文字が混在する hotword の誤置換、特殊 token 除去後の timestamp 対応、中国語 VAD 分割での文と話者のずれを修正しました。[リリースと検証範囲 ->](https://github.com/modelscope/FunASR/releases/tag/v1.4.18)
+  以前のリリース **FunASR 1.4.17** は明示的な PCM16 入力を追加し、timestamp、hotword、speaker sample rate、長い segment の streaming 処理を改善しました。[リリースと検証範囲 ->](https://github.com/modelscope/FunASR/releases/tag/v1.4.17)
+  以前のリリース **FunASR 1.4.16** は複数回の推論でも VAD、句読点、話者モデルの明示的な device 配置を保持し、テスト済みのネイティブ Transformers 導入ガイドを追加しました。[リリースと検証範囲 ->](https://github.com/modelscope/FunASR/releases/tag/v1.4.16)
 - **ネイティブ Transformers：** 正式版 **5.17.0** が Fun-ASR-Nano に対応。公式 `-hf` checkpoint、CPU サンプル、Notebook：[導入ガイド（英語） ->](./docs/transformers_native.md)
 
 > 完全な変更履歴と download asset は [GitHub Releases](https://github.com/modelscope/FunASR/releases) を参照してください。

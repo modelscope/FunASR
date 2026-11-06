@@ -441,11 +441,13 @@ def _format_unregistered_component_error(component_type, component_name, registr
     )
 
 
+# Speaker dependencies are optional for ASR-only use.
+_speaker_import_error = None
 try:
     from funasr.models.campplus.utils import sv_chunk, postprocess, distribute_spk
     from funasr.models.campplus.cluster_backend import ClusterBackend
-except:
-    pass
+except Exception as error:
+    _speaker_import_error = error
 
 
 def prepare_data_iterator(
@@ -551,6 +553,8 @@ class AutoModel:
             spk_model (str, optional): Speaker model for diarization ("cam++" or full model ID).
                 Requires vad_model. For Qwen3-ASR, also requires forced_aligner.
             spk_mode (str, optional): Speaker diarization mode. "punc_segment" (default) or "vad_segment".
+            max_num_spks (int, optional): Construction-time cap on automatic speaker counting
+                (default: 15). An explicit preset_spk_num takes precedence.
             hub (str): Model hub. "ms" (ModelScope, default) or "hf" (HuggingFace).
             ncpu (int): CPU threads (default: 4).
             disable_update (bool): Skip version check on startup.
@@ -615,7 +619,15 @@ class AutoModel:
         cb_kwargs = (
             {} if spk_kwargs.get("cb_kwargs", {}) is None else spk_kwargs.get("cb_kwargs", {})
         )
+        if "max_num_spks" in spk_kwargs or "max_num_spks" in cb_kwargs:
+            raise TypeError("max_num_spks must be passed as a top-level AutoModel argument")
         if spk_model is not None:
+            if _speaker_import_error is not None:
+                raise ImportError(
+                    "Speaker diarization with `spk_model` is unavailable because its dependencies "
+                    "could not be imported. Install or repair the speaker dependencies reported "
+                    "in the chained exception."
+                ) from _speaker_import_error
             logging.info("Building SPK model.")
             spk_kwargs["model"] = spk_model
             spk_kwargs["model_revision"] = kwargs.get("spk_model_revision", "master")
@@ -624,7 +636,9 @@ class AutoModel:
             if "hub" in kwargs:
                 spk_kwargs.setdefault("hub", kwargs["hub"])
             spk_model, spk_kwargs = self.build_model(**spk_kwargs)
-            self.cb_model = ClusterBackend(**cb_kwargs).to(kwargs["device"])
+            self.cb_model = ClusterBackend(
+                max_num_spks=kwargs.get("max_num_spks", 15), **cb_kwargs
+            ).to(kwargs["device"])
             spk_mode = kwargs.get("spk_mode", "punc_segment")
             if spk_mode not in ["default", "vad_segment", "punc_segment"]:
                 logging.error("spk_mode should be one of default, vad_segment and punc_segment.")
@@ -1029,10 +1043,10 @@ class AutoModel:
 
         #  FIX(gcf): concat the vad clips for sense vocie model for better aed
         if cfg.get("merge_vad", False):
+            # Call options are merged into kwargs only after this point.
+            merge_length_s = cfg.get("merge_length_s", kwargs.get("merge_length_s", 15))
             for i in range(len(res)):
-                res[i]["value"] = merge_vad(
-                    res[i]["value"], kwargs.get("merge_length_s", 15) * 1000
-                )
+                res[i]["value"] = merge_vad(res[i]["value"], merge_length_s * 1000)
 
         # step.2 compute asr model
         model = self.model
@@ -1238,7 +1252,11 @@ class AutoModel:
                     )
                 result["text"] = punctuated_surface or punc_res[0]["text"]
 
-            timestamp_text = punc_input_text
+            # Timestamp units need VAD boundary spaces; punctuation surface text does not.
+            timestamp_text = (
+                re.sub(r"<\|[^|]*\|>", "", raw_text).strip()
+                if raw_text is not None else None
+            )
             sentence_timestamps = result.get("timestamp", [])
             punc_alignment_failed = False
             if punc_res is not None:

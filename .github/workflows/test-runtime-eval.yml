@@ -1,0 +1,58 @@
+name: Validate runtime evaluation tools
+
+on:
+  pull_request:
+    paths:
+      - "runtime/python/utils/**"
+      - "runtime/python/libtorch/funasr_torch/**"
+      - "runtime/python/onnxruntime/funasr_onnx/**"
+      - "tests/test_runtime_eval_*.py"
+      - ".github/workflows/test-runtime-eval.yml"
+  push:
+    branches: [main]
+    paths:
+      - "runtime/python/utils/**"
+      - "runtime/python/libtorch/funasr_torch/**"
+      - "runtime/python/onnxruntime/funasr_onnx/**"
+      - "tests/test_runtime_eval_*.py"
+      - ".github/workflows/test-runtime-eval.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  runtime-eval:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.10", "3.12"]
+    env:
+      HF_HUB_OFFLINE: "1"
+      MODELSCOPE_OFFLINE: "1"
+      OMP_NUM_THREADS: "1"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Install CPU runtime test dependencies
+        run: |
+          python -m pip install torch==2.8.0 --index-url https://download.pytorch.org/whl/cpu
+          python -m pip install pytest "numpy<2" onnx==1.19.0 onnxruntime==1.23.2 librosa kaldi-native-fbank PyYAML jieba sentencepiece
+      - name: Run CLI and native offline runtime regressions
+        run: |
+          git rev-parse HEAD > source-commit.txt
+          python -m pip freeze > resolved-dependencies.txt
+          python -m pytest -q tests/test_runtime_eval_cli.py tests/test_runtime_eval_native.py --junitxml=runtime-eval-results.xml
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: runtime-eval-${{ matrix.python }}
+          path: |
+            source-commit.txt
+            resolved-dependencies.txt
+            runtime-eval-results.xml

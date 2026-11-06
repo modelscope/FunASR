@@ -125,7 +125,7 @@ results = model.generate(["audio1.wav", "audio2.wav"], language="auto")
 >
 > **Use with AI agents:** [MCP Server](examples/mcp_server/) for Claude/Cursor · [OpenAI API](examples/openai_api/) for LangChain/Dify/AutoGen
 >
-> **Use with voice agents:** [OpenClaw realtime plugin](integrations/openclaw/) for self-hosted Talk and Voice Call transcription · [Hugging Face speech-to-speech with SenseVoice](./docs/community_projects.md#speech-to-speech) (merged source checkout; not in v1.0.0)
+> **Use with voice agents:** [OpenClaw realtime plugin](integrations/openclaw/#compatibility) (experimental; requires an unmerged upstream SDK patch) · [Hugging Face speech-to-speech with SenseVoice](./docs/community_projects.md#speech-to-speech) (merged source checkout; not in v1.0.0)
 
 ### Why FunASR?
 
@@ -364,7 +364,13 @@ recordings with the same evaluation scope.
 ## What's new
 
 - **MOSS-Transcribe-Diarize** brings long-form ASR, timestamps, and anonymous speaker labels to FunASR services, Docker, Kubernetes, vLLM/SGLang workflows, and FunClip. [Deploy MOSS ->](./docs/moss_transcribe_diarize.md)
-- **FunASR 1.4.16** preserves explicit VAD, punctuation, and speaker-model device placement across inference calls, and adds tested native Transformers adoption guides. Install with `python -m pip install -U "funasr==1.4.16"`. [Release and verification scope ->](https://github.com/modelscope/FunASR/releases/tag/v1.4.16)
+- **FunASR 1.4.22** honors per-call `merge_length_s` and evaluates dynamic VAD silence thresholds per frame using the current segment duration, preserving the fixed-threshold opt-out. [Fix #3841](https://github.com/modelscope/FunASR/pull/3841), [fix #3833](https://github.com/modelscope/FunASR/pull/3833). Install with `python -m pip install -U "funasr==1.4.22"`. [Release and verification scope ->](https://github.com/modelscope/FunASR/releases/tag/v1.4.22)
+  **FunASR 1.4.21** preserves the streaming punctuation cache on empty or whitespace chunks; nonempty inference is unchanged. [Fix #3824](https://github.com/modelscope/FunASR/pull/3824). [Release and verification scope ->](https://github.com/modelscope/FunASR/releases/tag/v1.4.21)
+  **FunASR 1.4.20** preserves the original optional speaker dependency failure in a chained `ImportError` when `spk_model` is requested, while ASR-only construction remains available. [Fix #3819](https://github.com/modelscope/FunASR/pull/3819). [Release and verification scope ->](https://github.com/modelscope/FunASR/releases/tag/v1.4.20)
+  **FunASR 1.4.19** handles empty-token Paraformer batches, enforces `max_speakers` for automatic clustering, and adds validated JSON-object `--hf_overrides` support to realtime WebSocket serving. [Release and verification scope ->](https://github.com/modelscope/FunASR/releases/tag/v1.4.19)
+  Previous release **FunASR 1.4.18** fixes cross-script hotword misreplacement, filtered-token timestamp alignment, and Chinese VAD sentence/speaker drift. [Release and verification scope ->](https://github.com/modelscope/FunASR/releases/tag/v1.4.18)
+  **Earlier release: FunASR 1.4.17** adds explicit PCM16 input and improves timestamp, hotword, speaker-sample-rate, and long-segment streaming handling. [Release and verification scope ->](https://github.com/modelscope/FunASR/releases/tag/v1.4.17)
+  **Earlier release: FunASR 1.4.16** preserves explicit VAD, punctuation, and speaker-model device placement across inference calls, and adds tested native Transformers adoption guides. [Release and verification scope ->](https://github.com/modelscope/FunASR/releases/tag/v1.4.16)
 - **Native Transformers:** Released **5.17.0** supports Fun-ASR-Nano with the official `-hf` checkpoint, CPU examples and a notebook. [Get started ->](./docs/transformers_native.md)
 
 > See [GitHub Releases](https://github.com/modelscope/FunASR/releases) for the complete changelog and downloadable assets.

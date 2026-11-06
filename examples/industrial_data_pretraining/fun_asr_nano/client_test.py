@@ -45,7 +45,7 @@ def load_audio(file_path):
     return audio.astype(np.float32)
 
 
-async def test_basic(server, audio, hotwords=None):
+async def check_basic(server, audio, hotwords=None):
     """Test basic streaming ASR flow."""
     print("=" * 60)
     print("TEST: Basic Streaming ASR")
@@ -136,7 +136,7 @@ async def test_basic(server, audio, hotwords=None):
     return True
 
 
-async def test_empty_audio(server):
+async def check_empty_audio(server):
     """Test with very short/empty audio."""
     print("\n" + "=" * 60)
     print("TEST: Empty/Short Audio Handling")
@@ -167,7 +167,7 @@ async def test_empty_audio(server):
     return True
 
 
-async def test_multiple_sessions(server, audio):
+async def check_multiple_sessions(server, audio):
     """Test multiple consecutive sessions on same connection."""
     print("\n" + "=" * 60)
     print("TEST: Multiple Sessions")
@@ -210,9 +210,9 @@ async def run_tests(args):
     failed = 0
 
     tests = [
-        ("Basic Streaming", lambda: test_basic(args.server, audio, args.hotwords)),
-        ("Empty Audio", lambda: test_empty_audio(args.server)),
-        ("Multiple Sessions", lambda: test_multiple_sessions(args.server, audio)),
+        ("Basic Streaming", lambda: check_basic(args.server, audio, args.hotwords)),
+        ("Empty Audio", lambda: check_empty_audio(args.server)),
+        ("Multiple Sessions", lambda: check_multiple_sessions(args.server, audio)),
     ]
 
     for name, test_fn in tests:

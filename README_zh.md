@@ -115,7 +115,7 @@ results = model.generate(["audio1.wav", "audio2.wav"], language="auto")
 >
 > **接入 AI Agent：** [MCP 服务](examples/mcp_server/) 支持 Claude/Cursor · [OpenAI API](examples/openai_api/README_zh.md) 支持 LangChain/Dify/AutoGen
 >
-> **接入语音 Agent：** [OpenClaw 实时转写插件](integrations/openclaw/) 支持私有部署的 Talk 与 Voice Call 转写 · [Hugging Face speech-to-speech + SenseVoice](./docs/community_projects_zh.md#speech-to-speech)（已合入源码，v1.0.0 尚未包含）
+> **接入语音 Agent：** [OpenClaw 实时转写插件](integrations/openclaw/#compatibility)（实验性；依赖尚未合并的上游 SDK 补丁）· [Hugging Face speech-to-speech + SenseVoice](./docs/community_projects_zh.md#speech-to-speech)（已合入源码，v1.0.0 尚未包含）
 
 ### 为什么选 FunASR？
 
@@ -157,7 +157,13 @@ checkpoint/revision、音频集、硬件、批量大小、预热、计时范围�
 ## 最新动态
 
 - **MOSS-Transcribe-Diarize** 已接入 FunASR 服务、Docker、Kubernetes、vLLM/SGLang 工作流和 FunClip，一次完成长音频转写、时间戳与匿名说话人标注。[部署 MOSS ->](./docs/moss_transcribe_diarize_zh.md)
-- **FunASR 1.4.16** 修复 VAD、标点和说话人子模型在多次推理时的显式设备放置，并新增经过测试的原生 Transformers 使用指南。升级命令：`python -m pip install -U "funasr==1.4.16"`。[发布说明与验证范围 ->](https://github.com/modelscope/FunASR/releases/tag/v1.4.16)
+- **FunASR 1.4.22** 支持逐调用覆盖 `merge_length_s`，并根据当前语音段时长逐帧更新动态 VAD 静音阈值，同时保留固定阈值模式。[修复 #3841](https://github.com/modelscope/FunASR/pull/3841)、[修复 #3833](https://github.com/modelscope/FunASR/pull/3833)。安装：`python -m pip install -U "funasr==1.4.22"`。[发布说明与验证范围 ->](https://github.com/modelscope/FunASR/releases/tag/v1.4.22)
+  **FunASR 1.4.21** 在流式标点收到空白或空输入时保留 cache；非空推理保持不变。[修复 #3824](https://github.com/modelscope/FunASR/pull/3824)。[发布说明与验证范围 ->](https://github.com/modelscope/FunASR/releases/tag/v1.4.21)
+  **FunASR 1.4.20** 在指定 `spk_model` 而可选说话人依赖导入失败时，通过带原始异常链的 `ImportError` 提供诊断，同时保留仅 ASR 的构造路径。[修复 #3819](https://github.com/modelscope/FunASR/pull/3819)。[发布说明与验证范围 ->](https://github.com/modelscope/FunASR/releases/tag/v1.4.20)
+  **FunASR 1.4.19** 修复 Paraformer 空 token 批次处理，使自动聚类遵守 `max_speakers` 上限，并为实时 WebSocket 服务新增带 JSON 对象校验的 `--hf_overrides` 参数。[发布说明与验证范围 ->](https://github.com/modelscope/FunASR/releases/tag/v1.4.19)
+  上一版本 **FunASR 1.4.18** 修复跨中英文热词误替换、过滤特殊符号后的时间戳对齐，以及中文 VAD 分段的句子与说话人错位。[发布说明与验证范围 ->](https://github.com/modelscope/FunASR/releases/tag/v1.4.18)
+  **更早版本：FunASR 1.4.17** 新增显式 PCM16 输入，改进时间戳、热词、说话人采样率与长片段流式处理。[发布说明与验证范围 ->](https://github.com/modelscope/FunASR/releases/tag/v1.4.17)
+  **更早版本：FunASR 1.4.16** 修复 VAD、标点和说话人子模型在多次推理时的显式设备放置，并新增经过测试的原生 Transformers 使用指南。[发布说明与验证范围 ->](https://github.com/modelscope/FunASR/releases/tag/v1.4.16)
 - **原生 Transformers：** 正式版 **5.17.0** 已支持 Fun-ASR-Nano。官方 `-hf` 权重、CPU 示例与 Notebook：[安装与推理 ->](./docs/transformers_native_zh.md)
 
 > 完整改动记录和可下载资产请查看 [GitHub Releases](https://github.com/modelscope/FunASR/releases)。

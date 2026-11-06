@@ -96,10 +96,11 @@ class Fsmn_vad:
         waveform_list = self.load_data(audio_in, self.frontend.opts.frame_opts.samp_freq)
         waveform_nums = len(waveform_list)
         is_final = kwargs.get("kwargs", False)
-        segments = [[]] * self.batch_size
-        for beg_idx in range(0, waveform_nums, self.batch_size):
+        segments = [[] for _ in range(waveform_nums)]
+        # E2EVadModel and prepare_cache handle one waveform at a time, so batch_size is not used.
+        for beg_idx in range(0, waveform_nums):
             vad_scorer = E2EVadModel(self.vad_scorer_config)
-            end_idx = min(waveform_nums, beg_idx + self.batch_size)
+            end_idx = beg_idx + 1
             waveform = waveform_list[beg_idx:end_idx]
             feats, feats_len = self.extract_feat(waveform)
             waveform = np.array(waveform)
@@ -137,8 +138,7 @@ class Fsmn_vad:
                     # segments = self.vad_scorer(scores, waveform[0][None, :], is_final=is_final, max_end_sil=self.max_end_sil)
 
                     if segments_part:
-                        for batch_num in range(0, self.batch_size):
-                            segments[batch_num] += segments_part[batch_num]
+                        segments[beg_idx] += segments_part[0]
 
             except ONNXRuntimeError:
                 # logging.warning(traceback.format_exc())
@@ -289,11 +289,11 @@ class Fsmn_vad_online:
         is_final = param_dict.get("is_final", False)
         frontend: WavFrontendOnline = param_dict.get("frontend", WavFrontendOnline(cmvn_file=self.cmvn_file, **self.config["frontend_conf"]))
         feats, feats_len = self.extract_feat(frontend=frontend, waveforms=waveforms, is_final=is_final)
+        vad_scorer = param_dict.get("vad_scorer", E2EVadModel(self.config["model_conf"]))
         segments = []
         if feats.size != 0:
             in_cache = param_dict.get("in_cache", list())
             in_cache = self.prepare_cache(in_cache)
-            vad_scorer = param_dict.get("vad_scorer", E2EVadModel(self.config["model_conf"]))
             try:
                 inputs = [feats]
                 inputs.extend(in_cache)
@@ -309,6 +309,9 @@ class Fsmn_vad_online:
                 logging.warning("input wav is silence or noise")
                 segments = []
         param_dict.update({"frontend": frontend, "vad_scorer": vad_scorer})
+        if is_final:
+            # Start the next stream with a fresh FSMN cache, as init_cache() and Reset() do.
+            param_dict["in_cache"] = []
         return segments
 
     def load_data(self, wav_content: Union[str, np.ndarray, List[str]], fs: int = None) -> List:

@@ -1,6 +1,6 @@
 # FunASR for OpenClaw
 
-`openclaw-funasr` connects OpenClaw Talk and Voice Call to a self-hosted
+`openclaw-funasr` is an experimental adapter connecting OpenClaw Talk and Voice Call to a self-hosted
 [FunASR](https://github.com/modelscope/FunASR) WebSocket server. Audio stays on
 infrastructure you control.
 
@@ -14,11 +14,18 @@ infrastructure you control.
 
 ## Compatibility
 
-The first release requires OpenClaw `>=2026.7.2` with
-[openclaw/openclaw#118977](https://github.com/openclaw/openclaw/pull/118977).
-Publishing to npm and ClawHub is intentionally gated on that SDK change landing
-in an OpenClaw release; the compatibility floor will be pinned to the exact
-release before publication.
+On 2026-10-31, [openclaw/openclaw#118977](https://github.com/openclaw/openclaw/pull/118977)
+was closed without merging. This adapter still requires that experimental SDK
+patch; the declared `>=2026.7.2` range is not a supported stock-install compatibility floor.
+No supported released OpenClaw version has been established by the validation below.
+
+The build, test, installation, and configuration instructions below apply only
+to a development checkout containing that patch. They are not a setup recipe
+for an unmodified OpenClaw release.
+
+Publishing to npm and ClawHub remains blocked pending an accepted and released upstream SDK contract.
+The exact compatible release and its behavior must be validated before publication;
+the historical local proof does not remove this requirement.
 
 ## Start FunASR
 
@@ -45,7 +52,7 @@ suite exercises the real shared WebSocket session helper, including protocol
 negotiation, audio conversion, 60 ms framing, finalization, reconnect handling,
 bounded transcript state, and package metadata.
 
-Install the packed artifact before publication:
+Install the packed artifact in that experimental checkout only:
 
 ```bash
 openclaw plugins install npm-pack:/absolute/path/to/openclaw-funasr-0.1.0.tgz --force
@@ -96,6 +103,9 @@ Embedded credentials in `baseUrl` are rejected. Use `apiKey` or
 `FUNASR_API_KEY` instead.
 
 ## Verified behavior
+
+The following is historical local protocol proof with the required SDK patch,
+not validation of a released OpenClaw installation.
 
 The end-to-end proof used the official FunASR server, a public 5.55 second
 16 kHz sample converted to the same 8 kHz mu-law frames emitted by OpenClaw,

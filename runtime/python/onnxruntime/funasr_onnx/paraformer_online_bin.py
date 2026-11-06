@@ -119,13 +119,18 @@ class Paraformer:
         # process last chunk
         overlap_feats = np.concatenate((cache["feats"], feats), axis=1)
         if cache["is_final"]:
-            cache["feats"] = overlap_feats[:, -self.chunk_size[0] :, :]
+            cache["feats"] = self._tail_frames(overlap_feats, self.chunk_size[0])
             if not cache["last_chunk"]:
                 padding_length = sum(self.chunk_size) - overlap_feats.shape[1]
                 overlap_feats = np.pad(overlap_feats, ((0, 0), (0, padding_length), (0, 0)))
         else:
-            cache["feats"] = overlap_feats[:, -(self.chunk_size[0] + self.chunk_size[2]) :, :]
+            cache["feats"] = self._tail_frames(overlap_feats, self.chunk_size[0] + self.chunk_size[2])
         return overlap_feats
+
+    @staticmethod
+    def _tail_frames(feats: np.ndarray, num_frames: int) -> np.ndarray:
+        # feats[:, -0:] would return every frame, so compute the start index explicitly.
+        return feats[:, max(feats.shape[1] - num_frames, 0) :, :]
 
     def __call__(self, audio_in: np.ndarray, **kwargs):
         waveforms = np.expand_dims(audio_in, axis=0)
@@ -142,7 +147,7 @@ class Paraformer:
             return asr_res
 
         feats, feats_len = self.extract_feat(waveforms, is_final)
-        if feats.shape[1] != 0:
+        if feats.size != 0:
             feats *= self.encoder_output_size**0.5
             cache = self.prepare_cache(cache)
             cache["is_final"] = is_final
@@ -178,7 +183,7 @@ class Paraformer:
                                 res[key][1].extend(value[1])
                             else:
                                 res[key] = [value[0], value[1]]
-                    return [res]
+                    return [res] if res else []
             else:
                 feats = self.add_overlap_chunk(feats, cache)
 

@@ -142,24 +142,26 @@ def load_cmvn(cmvn_file: Union[str, Path]) -> np.ndarray:
         raise FileNotFoundError("cmvn file not exits")
     
     with open(cmvn_file, "r", encoding="utf-8") as f:
-        lines = f.readlines()
+        lines = [line for line in f.readlines() if line.split()]
     means_list = []
     vars_list = []
     for i in range(len(lines)):
         line_item = lines[i].split()
         if line_item[0] == "<AddShift>":
-            line_item = lines[i + 1].split()
-            if line_item[0] == "<LearnRateCoef>":
+            line_item = lines[i + 1].split() if i + 1 < len(lines) else []
+            if line_item and line_item[0] == "<LearnRateCoef>":
                 add_shift_line = line_item[3 : (len(line_item) - 1)]
                 means_list = list(add_shift_line)
                 continue
         elif line_item[0] == "<Rescale>":
-            line_item = lines[i + 1].split()
-            if line_item[0] == "<LearnRateCoef>":
+            line_item = lines[i + 1].split() if i + 1 < len(lines) else []
+            if line_item and line_item[0] == "<LearnRateCoef>":
                 rescale_line = line_item[3 : (len(line_item) - 1)]
                 vars_list = list(rescale_line)
                 continue
 
+    if not means_list or not vars_list:
+        raise ValueError(f"No <AddShift>/<Rescale> statistics found in cmvn file: {cmvn_file}")
     means = np.array(means_list).astype(np.float64)
     vars = np.array(vars_list).astype(np.float64)
     cmvn = np.array([means, vars])
@@ -361,9 +363,11 @@ class WavFrontendOnline(WavFrontend):
                     self.lfr_splice_cache[i] = np.concatenate(
                         (self.lfr_splice_cache[i], feats[i]), axis=0
                     )
-                return np.empty(0, dtype=np.float32), feats_lengths
+                # No LFR frame yet; a final call still resets the caches below.
+                feats = np.empty(0, dtype=np.float32)
         else:
-            if is_final:
+            # A stream without a full 25 ms window has no fbank frame to flush.
+            if is_final and self.lfr_splice_cache:
                 self.waveforms = (
                     waveforms if self.reserve_waveforms is None else self.reserve_waveforms
                 )

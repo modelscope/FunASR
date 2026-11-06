@@ -7,12 +7,35 @@ does not update the installed ONNX wrappers. Check their versions separately
 with `python -m pip show funasr-onnx funasr`; use the source installation below
 when a required wrapper fix is newer than the published PyPI package.
 
+Version 0.4.8 makes the standalone CMVN reader accept blank lines and
+raise a file-specific error for missing or truncated statistics (#3842).
+Valid float64 statistics and shipped feature output are unchanged. This is
+a CPU parser/package fix, not a model-weight or ASR accuracy update.
+
+Version 0.4.7 includes the Contextual/Seaco Paraformer hotword batching fix
+(#3838), including empty hotword-file handling. This is a runtime wrapper
+fix, not a model-weight update or an ASR accuracy claim.
+
+Version 0.4.6 fixes offline FSMN-VAD calls with multiple inputs so each
+waveform is scored independently and returns one independent result per input.
+Requested batch sizes remain accepted, while the effective model batch remains 1
+(#3831).
+
+Version 0.4.5 also fixes streaming Paraformer crashes on short packets that have
+not produced a feature frame yet. Buffered audio and final cache flushing are
+preserved (#3827).
+
+Version 0.4.4 includes the streaming Paraformer zero-overlap cache and empty-final
+result fixes, short/final VAD handling and stream-cache reset, and corrected
+timestamp alignment and rich-transcription event handling. These are wrapper
+and postprocessing fixes, not a model-weight update or an ASR accuracy claim.
+
 install from pip
 
 ```shell
-pip install -U funasr-onnx
+pip install -U "funasr-onnx>=0.4.8"
 # For the users in China, you could install with the command:
-# pip install -U funasr-onnx -i https://mirror.sjtu.edu.cn/pypi/web/simple
+# pip install -U "funasr-onnx>=0.4.8" -i https://mirror.sjtu.edu.cn/pypi/web/simple
 # If you want to export .onnx file, you should install modelscope and funasr
 pip install -U modelscope funasr
 # For the users in China, you could install with the command:
@@ -140,7 +163,7 @@ from funasr_onnx import CT_Transformer
 model_dir = "damo/punc_ct-transformer_zh-cn-common-vocab272727-pytorch"
 model = CT_Transformer(model_dir)
 
-text_in="跨境河流是养育沿岸人民的生命之源长期以来为帮助下游地区防灾减灾中方技术人员在上游地区极为恶劣的自然条件下克服巨大困难甚至冒着生命危险向印方提供汛期水文资料处理紧急事件中方重视印方在跨境河流问题上的关切愿意进一步完善双方联合工作机制凡是中方能做的我们都会去做而且会做得更好我请印度朋友们放心中国在上游的任何开发利用都会经过科学规划和论证兼顾上下游的利益"
+text_in="è·¨å¢æ²³æµæ¯å»è²æ²¿å²¸äººæ°ççå½ä¹æºé¿æä»¥æ¥ä¸ºå¸®å©ä¸æ¸¸å°åºé²ç¾åç¾ä¸­æ¹ææ¯äººåå¨ä¸æ¸¸å°åºæä¸ºæ¶å£çèªç¶æ¡ä»¶ä¸åæå·¨å¤§å°é¾çè³åççå½å±é©åå°æ¹æä¾æ±ææ°´æèµæå¤çç´§æ¥äºä»¶ä¸­æ¹éè§å°æ¹å¨è·¨å¢æ²³æµé®é¢ä¸çå³åæ¿æè¿ä¸æ­¥å®ååæ¹èåå·¥ä½æºå¶å¡æ¯ä¸­æ¹è½åçæä»¬é½ä¼å»åèä¸ä¼åå¾æ´å¥½æè¯·å°åº¦æåä»¬æ¾å¿ä¸­å½å¨ä¸æ¸¸çä»»ä½å¼åå©ç¨é½ä¼ç»è¿ç§å­¦è§ååè®ºè¯å¼é¡¾ä¸ä¸æ¸¸çå©ç"
 result = model(text_in)
 print(result[0])
 ```
@@ -162,7 +185,7 @@ from funasr_onnx import CT_Transformer_VadRealtime
 model_dir = "damo/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727"
 model = CT_Transformer_VadRealtime(model_dir)
 
-text_in  = "跨境河流是养育沿岸|人民的生命之源长期以来为帮助下游地区防灾减灾中方技术人员|在上游地区极为恶劣的自然条件下克服巨大困难甚至冒着生命危险|向印方提供汛期水文资料处理紧急事件中方重视印方在跨境河流>问题上的关切|愿意进一步完善双方联合工作机制|凡是|中方能做的我们|都会去做而且会做得更好我请印度朋友们放心中国在上游的|任何开发利用都会经过科学|规划和论证兼顾上下游的利益"
+text_in  = "è·¨å¢æ²³æµæ¯å»è²æ²¿å²¸|äººæ°ççå½ä¹æºé¿æä»¥æ¥ä¸ºå¸®å©ä¸æ¸¸å°åºé²ç¾åç¾ä¸­æ¹ææ¯äººå|å¨ä¸æ¸¸å°åºæä¸ºæ¶å£çèªç¶æ¡ä»¶ä¸åæå·¨å¤§å°é¾çè³åççå½å±é©|åå°æ¹æä¾æ±ææ°´æèµæå¤çç´§æ¥äºä»¶ä¸­æ¹éè§å°æ¹å¨è·¨å¢æ²³æµ>é®é¢ä¸çå³å|æ¿æè¿ä¸æ­¥å®ååæ¹èåå·¥ä½æºå¶|å¡æ¯|ä¸­æ¹è½åçæä»¬|é½ä¼å»åèä¸ä¼åå¾æ´å¥½æè¯·å°åº¦æåä»¬æ¾å¿ä¸­å½å¨ä¸æ¸¸ç|ä»»ä½å¼åå©ç¨é½ä¼ç»è¿ç§å­¦|è§ååè®ºè¯å¼é¡¾ä¸ä¸æ¸¸çå©ç"
 
 vads = text_in.split("|")
 rec_result_all=""
@@ -191,3 +214,4 @@ Please ref to [benchmark](https://github.com/modelscope/FunASR/blob/main/runtime
 
 1. This project is maintained by [FunASR community](https://github.com/modelscope/FunASR).
 2. We partially refer [SWHL](https://github.com/RapidAI/RapidASR) for onnxruntime (only for paraformer model).
+

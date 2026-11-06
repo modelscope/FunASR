@@ -374,10 +374,10 @@ class ContextualParaformer(Paraformer):
         for beg_idx in range(0, waveform_nums, self.batch_size):
             end_idx = min(waveform_nums, beg_idx + self.batch_size)
             feats, feats_len = self.extract_feat(waveform_list[beg_idx:end_idx])
-            bias_embed = np.expand_dims(bias_embed, axis=0)
-            bias_embed = np.repeat(bias_embed, feats.shape[0], axis=0)
+            batch_bias_embed = np.expand_dims(bias_embed, axis=0)
+            batch_bias_embed = np.repeat(batch_bias_embed, feats.shape[0], axis=0)
             try:
-                outputs = self.bb_infer(feats, feats_len, bias_embed)
+                outputs = self.bb_infer(feats, feats_len, batch_bias_embed)
                 am_scores, valid_token_lens = outputs[0], outputs[1]
 
                 if len(outputs) == 4:

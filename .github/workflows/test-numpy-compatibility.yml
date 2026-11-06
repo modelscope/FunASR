@@ -10,13 +10,21 @@ on:
       - "funasr/auto/auto_model.py"
       - "funasr/tokenizer/sentencepiece_tokenizer.py"
       - "tests/test_sentencepiece_tokenizer.py"
+      - "tests/test_speaker_optional_dependency.py"
       - "funasr/utils/load_utils.py"
+      - "funasr/bin/realtime_ws.py"
+      - "tests/test_realtime_ws_service.py"
+      - "tests/test_realtime_ws_hf_overrides.py"
       - "funasr/utils/timestamp_tools.py"
+      - "funasr/models/paraformer/model.py"
       - "funasr/models/contextual_paraformer/model.py"
       - "funasr/models/seaco_paraformer/model.py"
       - "tests/test_timestamp_tools.py"
       - "tests/test_punc_model_none.py"
+      - "tests/test_paraformer_empty_token_batch.py"
       - "tests/test_paraformer_hotword_file.py"
+      - "funasr/models/ct_transformer_streaming/model.py"
+      - "tests/test_ct_transformer_streaming_empty_input.py"
       - "tests/test_pcm_input_format.py"
       - "tests/test_load_audio_bytes.py"
       - "funasr/frontends/**"
@@ -26,6 +34,7 @@ on:
       - "funasr/models/eend/utils/feature.py"
       - "tests/test_numpy_compatibility.py"
       - "tests/test_numpy_cluster_compatibility.py"
+      - "tests/test_cluster_backend.py"
       - "tests/test_eend_feature_compatibility.py"
       - "tests/test_sensevoice_word_timestamps.py"
       - "tests/test_pypi_metadata.py"
@@ -40,13 +49,21 @@ on:
       - "funasr/auto/auto_model.py"
       - "funasr/tokenizer/sentencepiece_tokenizer.py"
       - "tests/test_sentencepiece_tokenizer.py"
+      - "tests/test_speaker_optional_dependency.py"
       - "funasr/utils/load_utils.py"
+      - "funasr/bin/realtime_ws.py"
+      - "tests/test_realtime_ws_service.py"
+      - "tests/test_realtime_ws_hf_overrides.py"
       - "funasr/utils/timestamp_tools.py"
+      - "funasr/models/paraformer/model.py"
       - "funasr/models/contextual_paraformer/model.py"
       - "funasr/models/seaco_paraformer/model.py"
       - "tests/test_timestamp_tools.py"
       - "tests/test_punc_model_none.py"
+      - "tests/test_paraformer_empty_token_batch.py"
       - "tests/test_paraformer_hotword_file.py"
+      - "funasr/models/ct_transformer_streaming/model.py"
+      - "tests/test_ct_transformer_streaming_empty_input.py"
       - "tests/test_pcm_input_format.py"
       - "tests/test_load_audio_bytes.py"
       - "funasr/frontends/**"
@@ -56,6 +73,7 @@ on:
       - "funasr/models/eend/utils/feature.py"
       - "tests/test_numpy_compatibility.py"
       - "tests/test_numpy_cluster_compatibility.py"
+      - "tests/test_cluster_backend.py"
       - "tests/test_eend_feature_compatibility.py"
       - "tests/test_sensevoice_word_timestamps.py"
       - "tests/test_pypi_metadata.py"
@@ -94,7 +112,7 @@ jobs:
       - name: Install CPU runtime and requested NumPy version
         run: |
           python -m pip install torch==2.10.0 torchaudio==2.10.0 --index-url https://download.pytorch.org/whl/cpu
-          python -m pip install "numpy==$NUMPY_VERSION" -e . pytest einops pytorch-wpe --report install-report.json
+          python -m pip install "numpy==$NUMPY_VERSION" -e . pytest websockets einops pytorch-wpe --report install-report.json
       - name: Record resolved environment and validate dependencies
         run: |
           git rev-parse HEAD | tee source-commit.txt
@@ -106,15 +124,21 @@ jobs:
           python -m pytest -q \
             tests/test_numpy_compatibility.py \
             tests/test_numpy_cluster_compatibility.py \
+            tests/test_cluster_backend.py \
+            tests/test_speaker_optional_dependency.py \
             tests/test_eend_feature_compatibility.py \
             tests/test_pypi_metadata.py \
             tests/test_sensevoice_word_timestamps.py \
             tests/test_sentencepiece_tokenizer.py \
             tests/test_pcm_input_format.py \
+            tests/test_realtime_ws_service.py \
+            tests/test_realtime_ws_hf_overrides.py \
             tests/test_load_audio_bytes.py \
             tests/test_timestamp_tools.py \
             tests/test_punc_model_none.py \
+            tests/test_paraformer_empty_token_batch.py \
             tests/test_paraformer_hotword_file.py \
+            tests/test_ct_transformer_streaming_empty_input.py \
             tests/test_cli.py \
             --junitxml=numpy-results.xml
       - uses: actions/upload-artifact@v4

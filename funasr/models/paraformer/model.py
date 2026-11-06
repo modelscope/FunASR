@@ -616,19 +616,24 @@ class Paraformer(torch.nn.Module):
         )
         
         pre_token_length = pre_token_length.round().long()
+        b = encoder_out.size(0)
+        if isinstance(key[0], (list, tuple)):
+            key = key[0]
+        if len(key) < b:
+            key = key * b
         if torch.max(pre_token_length) < 1:
-            return []
+            # no tokens for any utterance: keep one empty result per key
+            if tokenizer is None:
+                return [{"key": key[i], "token_int": []} for i in range(b)], meta_data
+            if pred_timestamp:
+                return [{"key": key[i], "text": "", "timestamp": []} for i in range(b)], meta_data
+            return [{"key": key[i], "text": ""} for i in range(b)], meta_data
         decoder_outs = self.cal_decoder_with_predictor(
             encoder_out, encoder_out_lens, pre_acoustic_embeds, pre_token_length
         )
         decoder_out, ys_pad_lens = decoder_outs[0], decoder_outs[1]
 
         results = []
-        b, n, d = decoder_out.size()
-        if isinstance(key[0], (list, tuple)):
-            key = key[0]
-        if len(key) < b:
-            key = key * b
         for i in range(b):
             x = encoder_out[i, : encoder_out_lens[i], :]
             am_scores = decoder_out[i, : pre_token_length[i], :]
