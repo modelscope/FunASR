@@ -1005,7 +1005,9 @@ class FsmnVADStreaming(nn.Module):
 
         audio_sample = torch.cat((cache["prev_samples"], audio_sample_list[0]))
 
-        n = int(len(audio_sample) // chunk_stride_samples + int(_is_final))
+        n = len(audio_sample) // chunk_stride_samples
+        if _is_final and len(audio_sample) % chunk_stride_samples:
+            n += 1
         m = int(len(audio_sample) % chunk_stride_samples * (1 - int(_is_final)))
         segments = []
         # Keep explicit fixed-threshold requests from being overwritten by the dynamic schedule.
