@@ -44,6 +44,9 @@ class CharTokenizer(BaseTokenizer):
                 self.non_linguistic_symbols = set()
         else:
             self.non_linguistic_symbols = set(non_linguistic_symbols)
+        # An empty symbol (e.g. a blank line in the file) matches every position
+        # and would make text2tokens loop forever.
+        self.non_linguistic_symbols.discard("")
         self.remove_non_linguistic_symbols = remove_non_linguistic_symbols
         self.split_with_space = split_with_space
         self.seg_dict = None
