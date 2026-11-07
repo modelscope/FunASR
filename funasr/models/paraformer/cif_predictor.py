@@ -655,6 +655,8 @@ def cif_v1_export(hidden, alphas, threshold: float):
     batch_idxs = torch.cumsum(batch_len, dim=0)
     shift_batch_idxs = torch.roll(batch_idxs, 1, dims=0)
     shift_batch_idxs[0] = 0
+    # Empty samples have no frame to reset and may point past the last frame.
+    shift_batch_idxs = shift_batch_idxs[batch_len > 0]
     shift_frames[shift_batch_idxs] = 0
 
     remains = fires - torch.floor(fires)
@@ -884,6 +886,8 @@ def cif_v1(hidden, alphas, threshold):
     batch_idxs = torch.cumsum(batch_len, dim=0)
     shift_batch_idxs = torch.roll(batch_idxs, 1, dims=0)
     shift_batch_idxs[0] = 0
+    # Empty samples have no frame to reset and may point past the last frame.
+    shift_batch_idxs = shift_batch_idxs[batch_len > 0]
     shift_frames[shift_batch_idxs] = 0
 
     remains = fires - torch.floor(fires)
