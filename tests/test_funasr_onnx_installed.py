@@ -38,7 +38,7 @@ ENTRYPOINTS = (
 class InstalledOnnxPackageTest(unittest.TestCase):
     def test_installed_distribution_version_and_origin(self):
         distribution = importlib.metadata.distribution('funasr-onnx')
-        self.assertEqual(distribution.version, '0.4.7')
+        self.assertEqual(distribution.version, '0.4.9')
         self.assertEqual(
             Path(funasr_onnx.__file__).resolve().parent,
             Path(distribution.locate_file('funasr_onnx')).resolve(),

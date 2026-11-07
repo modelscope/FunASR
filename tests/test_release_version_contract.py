@@ -4,16 +4,18 @@ import pytest
 
 
 ROOT = Path(__file__).resolve().parents[1]
-RELEASE_VERSION = "1.4.21"
+RELEASE_VERSION = "1.4.23"
 README_FILES = ("README.md", "README_zh.md", "README_ja.md", "README_ko.md")
 REPOSITORY_ROLE_FILES = ("docs/repository_roles.md", "docs/repository_roles_zh.md")
 @pytest.mark.parametrize("name", README_FILES)
-def test_release_summary_preserves_streaming_punctuation_cache(name):
+def test_release_summary_covers_no_lfr_and_tokenizer_vocabulary(name):
     summaries = [line for line in (ROOT / name).read_text(encoding="utf-8").splitlines()
                  if f"**FunASR {RELEASE_VERSION}**" in line]
     assert len(summaries) == 1
-    assert "cache" in summaries[0].lower()
-    assert "https://github.com/modelscope/FunASR/pull/3824" in summaries[0]
+    assert "lfr_m=lfr_n=1" in summaries[0]
+    assert "token_list" in summaries[0]
+    assert "https://github.com/modelscope/FunASR/pull/3849" in summaries[0]
+    assert "https://github.com/modelscope/FunASR/pull/3783" in summaries[0]
 
 
 

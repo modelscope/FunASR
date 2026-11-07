@@ -353,6 +353,7 @@ class Stats(object):
         self.output_data_buf_offset = 0
         self.frame_probs = []
         self.max_end_sil_frame_cnt_thresh = max_end_sil_frame_cnt_thresh
+        self.silence_schedule = None
         self.speech_noise_thres = speech_noise_thres
         self.scores = None
         self.max_time_out = False
@@ -1004,7 +1005,9 @@ class FsmnVADStreaming(nn.Module):
 
         audio_sample = torch.cat((cache["prev_samples"], audio_sample_list[0]))
 
-        n = int(len(audio_sample) // chunk_stride_samples + int(_is_final))
+        n = len(audio_sample) // chunk_stride_samples
+        if _is_final and len(audio_sample) % chunk_stride_samples:
+            n += 1
         m = int(len(audio_sample) % chunk_stride_samples * (1 - int(_is_final)))
         segments = []
         # Keep explicit fixed-threshold requests from being overwritten by the dynamic schedule.
@@ -1012,9 +1015,11 @@ class FsmnVADStreaming(nn.Module):
             "dynamic_silence", kwargs.get("max_end_silence_time") is None
         )
         silence_schedule = kwargs.get("silence_schedule", DEFAULT_SILENCE_SCHEDULE)
-        speech_to_sil_ms = self.vad_opts.speech_to_sil_time_thres
-        accumulated_ms = cache.get("_dynamic_accumulated_ms", 0)
-        in_speech = cache.get("_dynamic_in_speech", False)
+        # The schedule is looked up per frame in DetectOneFrame from the current segment's duration.
+        if "stats" in cache:
+            cache["stats"].silence_schedule = silence_schedule if dynamic_silence else None
+            if dynamic_silence:
+                cache["stats"].speech_noise_thres = 0.5
         frontend_inference_kwargs = {}
         if getattr(frontend, "supports_aligned_waveforms", False):
             frontend_inference_kwargs["return_waveform"] = True
@@ -1022,21 +1027,6 @@ class FsmnVADStreaming(nn.Module):
         for i in range(n):
             kwargs["is_final"] = _is_final and i == n - 1
             audio_sample_i = audio_sample[i * chunk_stride_samples : (i + 1) * chunk_stride_samples]
-
-            # Apply dynamic silence threshold (only accumulate while in speech)
-            if dynamic_silence and "stats" in cache:
-                vad_state = cache["stats"].vad_state_machine
-                # VadStateMachine: 2=kVadInStateStartPointNotDetected, 3=kVadInStateInSpeechSegment
-                if vad_state.value == 2 or in_speech:  # kVadInStateInSpeechSegment
-                    accumulated_ms += chunk_size
-                    in_speech = True
-                for limit_ms, silence_ms in silence_schedule:
-                    if accumulated_ms <= limit_ms:
-                        cache["stats"].max_end_sil_frame_cnt_thresh = max(silence_ms - speech_to_sil_ms, 0)
-                        cache["stats"].speech_noise_thres = 0.5
-                        break
-                cache["_dynamic_accumulated_ms"] = accumulated_ms
-                cache["_dynamic_in_speech"] = in_speech
 
             # extract fbank feats
             speech, speech_lengths = extract_fbank(
@@ -1074,11 +1064,6 @@ class FsmnVADStreaming(nn.Module):
             segments_i = self.forward(**batch)
             if len(segments_i) > 0:
                 segments.extend(*segments_i)
-                if dynamic_silence:
-                    accumulated_ms = 0
-                    in_speech = False
-                    cache["_dynamic_accumulated_ms"] = 0
-                    cache["_dynamic_in_speech"] = False
 
         cache["prev_samples"] = audio_sample[-m:] if m > 0 else torch.empty(0)
         if _is_final:
@@ -1264,6 +1249,17 @@ class FsmnVADStreaming(nn.Module):
                             cur_frm_idx - self.LatencyFrmNumAtStartPoint(cache=cache), cache=cache
                         )
             elif cache["stats"].vad_state_machine == VadStateMachine.kVadInStateInSpeechSegment:
+                silence_schedule = getattr(cache["stats"], "silence_schedule", None)
+                if silence_schedule is not None:
+                    segment_ms = (
+                        cur_frm_idx - cache["stats"].confirmed_start_frame + 1
+                    ) * frm_shift_in_ms
+                    for limit_ms, silence_ms in silence_schedule:
+                        if segment_ms <= limit_ms:
+                            cache["stats"].max_end_sil_frame_cnt_thresh = max(
+                                silence_ms - self.vad_opts.speech_to_sil_time_thres, 0
+                            )
+                            break
                 if (
                     cache["stats"].continous_silence_frame_count * frm_shift_in_ms
                     >= cache["stats"].max_end_sil_frame_cnt_thresh

@@ -1043,10 +1043,10 @@ class AutoModel:
 
         #  FIX(gcf): concat the vad clips for sense vocie model for better aed
         if cfg.get("merge_vad", False):
+            # Call options are merged into kwargs only after this point.
+            merge_length_s = cfg.get("merge_length_s", kwargs.get("merge_length_s", 15))
             for i in range(len(res)):
-                res[i]["value"] = merge_vad(
-                    res[i]["value"], kwargs.get("merge_length_s", 15) * 1000
-                )
+                res[i]["value"] = merge_vad(res[i]["value"], merge_length_s * 1000)
 
         # step.2 compute asr model
         model = self.model
