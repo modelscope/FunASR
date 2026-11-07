@@ -160,7 +160,7 @@ for result in model.generate(input=str(paths["audio"]), return_spk_res=True):
 
 ### 返回字段
 
-`generate()` 返回 Python `list`，其中是模型结果字典，而不是 OpenAI 响应对象。不要假设所有模型都有全部字段，也不要未经检查直接使用 `results[0]`：VAD 路径中的部分空文本分支会跳过一条结果。没有检测到语音时，VAD 流程通常返回 `{"key": ..., "text": "", "timestamp": []}`。
+`generate()` 返回 Python `list`，其中是模型结果字典，而不是 OpenAI 响应对象。不要假设所有模型都有全部字段。使用 VAD 模型时，每个输入都保留一条结果：没有检测到语音，或检测到的语音解码后没有文本时，结果为 `{"key": ..., "text": "", "timestamp": []}`。
 
 | 字段 | 含义 |
 |---|---|
