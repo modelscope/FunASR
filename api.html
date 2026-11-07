@@ -20330,7 +20330,7 @@
 <li><code>seg_dict</code> — TODO.</li>
 <li><code>**kwargs</code> — Additional keyword arguments.</li>
 </ul>
-</div><h3 class="mt">Methods</h3><div class="mblk"><code>.text2tokens(line: Union[str, list]) -&gt; List[str]</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/tokenizer/char_tokenizer.py#L63" rel="noopener noreferrer" target="_blank">L63</a><div class="mdoc"><p>Text2tokens.</p>
+</div><h3 class="mt">Methods</h3><div class="mblk"><code>.text2tokens(line: Union[str, list]) -&gt; List[str]</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/tokenizer/char_tokenizer.py#L66" rel="noopener noreferrer" target="_blank">L66</a><div class="mdoc"><p>Text2tokens.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>line</code> — TODO.</li>
@@ -20363,7 +20363,7 @@
                     tokens.append(t)
                     line = line[1:]
         return tokens
-</code></pre></details></div><div class="mblk"><code>.tokens2text(tokens: Iterable[str]) -&gt; str</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/tokenizer/char_tokenizer.py#L92" rel="noopener noreferrer" target="_blank">L92</a><div class="mdoc"><p>Tokens2text.</p>
+</code></pre></details></div><div class="mblk"><code>.tokens2text(tokens: Iterable[str]) -&gt; str</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/tokenizer/char_tokenizer.py#L95" rel="noopener noreferrer" target="_blank">L95</a><div class="mdoc"><p>Tokens2text.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>tokens</code> — TODO.</li>
@@ -20377,7 +20377,7 @@
         tokens = [t if t != self.space_symbol else " " for t in tokens]
         return "".join(tokens)
 </code></pre></details></div></div>
-<div class="api-detail" id="e325" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>CharTokenizer.text2tokens(line: Union[str, list]) -&gt; List[str]</code></h2><div class="dmod">funasr.tokenizer.char_tokenizer.CharTokenizer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/tokenizer/char_tokenizer.py#L63" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Text2tokens.</p>
+<div class="api-detail" id="e325" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>CharTokenizer.text2tokens(line: Union[str, list]) -&gt; List[str]</code></h2><div class="dmod">funasr.tokenizer.char_tokenizer.CharTokenizer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/tokenizer/char_tokenizer.py#L66" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Text2tokens.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>line</code> — TODO.</li>
@@ -20411,7 +20411,7 @@
                     line = line[1:]
         return tokens
 </code></pre></details></div>
-<div class="api-detail" id="e326" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>CharTokenizer.tokens2text(tokens: Iterable[str]) -&gt; str</code></h2><div class="dmod">funasr.tokenizer.char_tokenizer.CharTokenizer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/tokenizer/char_tokenizer.py#L92" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Tokens2text.</p>
+<div class="api-detail" id="e326" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>CharTokenizer.tokens2text(tokens: Iterable[str]) -&gt; str</code></h2><div class="dmod">funasr.tokenizer.char_tokenizer.CharTokenizer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/tokenizer/char_tokenizer.py#L95" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Tokens2text.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>tokens</code> — TODO.</li>
@@ -20425,7 +20425,7 @@
         tokens = [t if t != self.space_symbol else " " for t in tokens]
         return "".join(tokens)
 </code></pre></details></div>
-<div class="api-detail" id="e327" tabindex="-1"><span class="dtag badge-f">function</span><h2><code>load_seg_dict(seg_dict_file)</code></h2><div class="dmod">funasr.tokenizer.char_tokenizer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/tokenizer/char_tokenizer.py#L102" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Load seg dict.</p>
+<div class="api-detail" id="e327" tabindex="-1"><span class="dtag badge-f">function</span><h2><code>load_seg_dict(seg_dict_file)</code></h2><div class="dmod">funasr.tokenizer.char_tokenizer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/tokenizer/char_tokenizer.py#L105" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Load seg dict.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>seg_dict_file</code> — TODO.</li>
@@ -20447,7 +20447,7 @@
             seg_dict[key] = " ".join(value)
     return seg_dict
 </code></pre></details></div>
-<div class="api-detail" id="e328" tabindex="-1"><span class="dtag badge-f">function</span><h2><code>seg_tokenize(txt, seg_dict)</code></h2><div class="dmod">funasr.tokenizer.char_tokenizer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/tokenizer/char_tokenizer.py#L120" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Seg tokenize.</p>
+<div class="api-detail" id="e328" tabindex="-1"><span class="dtag badge-f">function</span><h2><code>seg_tokenize(txt, seg_dict)</code></h2><div class="dmod">funasr.tokenizer.char_tokenizer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/tokenizer/char_tokenizer.py#L123" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Seg tokenize.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>txt</code> — TODO.</li>
@@ -21010,7 +21010,7 @@
 <li><code>space_symbol</code> — TODO.</li>
 <li><code>remove_non_linguistic_symbols</code> — TODO.</li>
 </ul>
-</div><h3 class="mt">Methods</h3><div class="mblk"><code>.text2tokens(line: str) -&gt; List[str]</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/tokenizer/phoneme_tokenizer.py#L614" rel="noopener noreferrer" target="_blank">L614</a><div class="mdoc"><p>Text2tokens.</p>
+</div><h3 class="mt">Methods</h3><div class="mblk"><code>.text2tokens(line: str) -&gt; List[str]</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/tokenizer/phoneme_tokenizer.py#L617" rel="noopener noreferrer" target="_blank">L617</a><div class="mdoc"><p>Text2tokens.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>line</code> — TODO.</li>
@@ -21037,7 +21037,7 @@
         line = "".join(tokens)
         tokens = self.g2p(line)
         return tokens
-</code></pre></details></div><div class="mblk"><code>.tokens2text(tokens: Iterable[str]) -&gt; str</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/tokenizer/phoneme_tokenizer.py#L637" rel="noopener noreferrer" target="_blank">L637</a><div class="mdoc"><p>Tokens2text.</p>
+</code></pre></details></div><div class="mblk"><code>.tokens2text(tokens: Iterable[str]) -&gt; str</code> <a class="gh-link" href="https://github.com/modelscope/FunASR/blob/main/funasr/tokenizer/phoneme_tokenizer.py#L640" rel="noopener noreferrer" target="_blank">L640</a><div class="mdoc"><p>Tokens2text.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>tokens</code> — TODO.</li>
@@ -21051,7 +21051,7 @@
             """
         return "".join(tokens)
 </code></pre></details></div></div>
-<div class="api-detail" id="e346" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>PhonemeTokenizer.text2tokens(line: str) -&gt; List[str]</code></h2><div class="dmod">funasr.tokenizer.phoneme_tokenizer.PhonemeTokenizer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/tokenizer/phoneme_tokenizer.py#L614" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Text2tokens.</p>
+<div class="api-detail" id="e346" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>PhonemeTokenizer.text2tokens(line: str) -&gt; List[str]</code></h2><div class="dmod">funasr.tokenizer.phoneme_tokenizer.PhonemeTokenizer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/tokenizer/phoneme_tokenizer.py#L617" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Text2tokens.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>line</code> — TODO.</li>
@@ -21079,7 +21079,7 @@
         tokens = self.g2p(line)
         return tokens
 </code></pre></details></div>
-<div class="api-detail" id="e347" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>PhonemeTokenizer.tokens2text(tokens: Iterable[str]) -&gt; str</code></h2><div class="dmod">funasr.tokenizer.phoneme_tokenizer.PhonemeTokenizer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/tokenizer/phoneme_tokenizer.py#L637" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Tokens2text.</p>
+<div class="api-detail" id="e347" tabindex="-1"><span class="dtag badge-m">method</span><h2><code>PhonemeTokenizer.tokens2text(tokens: Iterable[str]) -&gt; str</code></h2><div class="dmod">funasr.tokenizer.phoneme_tokenizer.PhonemeTokenizer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/tokenizer/phoneme_tokenizer.py#L640" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Tokens2text.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>tokens</code> — TODO.</li>
