@@ -67,12 +67,12 @@ def force_gatherable(data, device):
 _ACCELERATOR_DEVICE_TYPES = ("cuda", "npu", "xpu")
 
 #: Default ``torch.distributed`` backend per accelerator, most preferred first.
-#: Only Ascend NPU is listed. Every other device keeps the historical ``"nccl"``
-#: default, exactly as before this change, so the backend this module selects at
-#: runtime is always one that has been exercised on real hardware. XPU does use
-#: XCCL (the former oneCCL name ``"ccl"``), but selecting that backend is not
-#: covered by hardware here and is tracked separately, outside this change.
-_ACCELERATOR_DIST_BACKENDS = {"npu": ("hccl",)}
+#: Ascend NPU uses HCCL; Intel XPU uses XCCL, whose former oneCCL name ``"ccl"``
+#: is still the only spelling some builds expose. Either spelling is taken from
+#: the build's own ``is_<backend>_available()`` probe where it exists, and the
+#: first name of the list is used when the build reports no probe at all.
+#: Devices that are not listed keep the historical ``"nccl"`` default.
+_ACCELERATOR_DIST_BACKENDS = {"npu": ("hccl",), "xpu": ("xccl", "ccl")}
 
 
 def _accelerator_module(device_type):
@@ -161,11 +161,11 @@ def get_default_dist_backend():
     selected backend matches the build. A non-CUDA accelerator never falls back
     to NCCL. This is only the default — an explicit ``backend=...`` still wins.
 
-    XPU is deliberately absent: it is a valid ``torch.distributed`` backend
-    (XCCL / the former oneCCL name ``"ccl"``), but no XPU hardware is available
-    to this change, so XPU keeps the historical ``"nccl"`` value here rather
-    than advertising a runtime path nobody can exercise. Selecting XCCL is a
-    separate follow-up.
+    Intel XPU resolves to XCCL, or to the legacy oneCCL name ``"ccl"`` on a
+    build that only exposes ``is_ccl_available()``. It used to keep the
+    historical ``"nccl"`` here, which on an XPU-only build (no NCCL) made
+    ``init_process_group`` fail before the process group existed. The explicit
+    ``backend=...`` argument is unaffected.
     """
     candidates = _ACCELERATOR_DIST_BACKENDS.get(get_accelerator_device_type())
     if not candidates:
