@@ -194,8 +194,22 @@ def test_saved_config_and_checkpoint_round_trip(tmp_path):
     torch.testing.assert_close(actual, expected, rtol=0, atol=0)
 
 
+@pytest.fixture
+def ieee_fp32_matmul():
+    # Batch shapes can select different TF32 kernels; test the FP32 contract.
+    matmul = torch.backends.cuda.matmul.allow_tf32
+    cudnn = torch.backends.cudnn.allow_tf32
+    try:
+        torch.backends.cuda.matmul.allow_tf32 = False
+        torch.backends.cudnn.allow_tf32 = False
+        yield
+    finally:
+        torch.backends.cuda.matmul.allow_tf32 = matmul
+        torch.backends.cudnn.allow_tf32 = cudnn
+
+
 @pytest.mark.parametrize("norm_vars", [False, True])
-def test_real_audio_transformer_inference(device, norm_vars):
+def test_real_audio_transformer_inference(device, norm_vars, ieee_fp32_matmul):
     """Real loader/frontend/encoder/CTC; small random model, no downloads or training."""
     audio, fs = sf.read(
         Path(__file__).resolve().parents[1] / "runtime/funasr_api/asr_example.wav", dtype="float32"
