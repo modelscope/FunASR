@@ -4,18 +4,21 @@ import pytest
 
 
 ROOT = Path(__file__).resolve().parents[1]
-RELEASE_VERSION = "1.4.23"
+RELEASE_VERSION = "1.4.24"
 README_FILES = ("README.md", "README_zh.md", "README_ja.md", "README_ko.md")
 REPOSITORY_ROLE_FILES = ("docs/repository_roles.md", "docs/repository_roles_zh.md")
 @pytest.mark.parametrize("name", README_FILES)
-def test_release_summary_covers_no_lfr_and_tokenizer_vocabulary(name):
+def test_release_summary_covers_tokenizer_normalizer_and_cif(name):
     summaries = [line for line in (ROOT / name).read_text(encoding="utf-8").splitlines()
                  if f"**FunASR {RELEASE_VERSION}**" in line]
     assert len(summaries) == 1
-    assert "lfr_m=lfr_n=1" in summaries[0]
-    assert "token_list" in summaries[0]
-    assert "https://github.com/modelscope/FunASR/pull/3849" in summaries[0]
-    assert "https://github.com/modelscope/FunASR/pull/3783" in summaries[0]
+    assert "CIF" in summaries[0]
+    assert "norm_means=True" in summaries[0]
+    assert "norm_vars=True" in summaries[0]
+    assert "norm_vars=False" in summaries[0]
+    for number in (3852, 3853, 3854):
+        assert f"https://github.com/modelscope/FunASR/pull/{number}" in summaries[0]
+    assert "checkpoint" in summaries[0]
 
 
 
