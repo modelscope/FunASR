@@ -273,3 +273,40 @@ def test_hotword_wrappers_decode_every_batch(
     assert [row["preds"][0] for row in alone] == ["你" * 4, "你" * 11, "你" * 17]
     # More files than batch_size: every batch must return its results.
     assert model(paths, hotwords) == alone
+
+
+@pytest.mark.parametrize("extension", ["flac", "ogg", "mp3"])
+def test_onnx_wrappers_read_non_wav_paths(native_fixture, tmp_path, monkeypatch, extension):
+    np = pytest.importorskip("numpy")
+    librosa = pytest.importorskip("librosa")
+    soundfile = pytest.importorskip("soundfile")
+    if extension.upper() not in soundfile.available_formats():
+        pytest.skip(f"libsndfile {soundfile.__libsndfile_version__} cannot write {extension}")
+    directory, _, _ = native_fixture
+    monkeypatch.syspath_prepend(str(ROOT / "runtime/python/onnxruntime"))
+    funasr_onnx = importlib.import_module("funasr_onnx")
+    online = importlib.import_module("funasr_onnx.paraformer_online_bin")
+    audio = tmp_path / f"talk.{extension}"
+    tone = np.sin(np.arange(48000) * 2 * np.pi * 440 / 16000).astype(np.float32) * 0.1
+    soundfile.write(str(audio), tone, 16000)
+    # A different recording with the same stem must not be read in its place.
+    soundfile.write(str(tmp_path / "talk.wav"), np.zeros(16000, dtype=np.float32), 16000)
+    files = {path.name: path.read_bytes() for path in tmp_path.iterdir()}
+    expected = librosa.load(str(audio), sr=16000)[0]
+    wrappers = [
+        funasr_onnx.Paraformer,
+        funasr_onnx.ContextualParaformer,
+        funasr_onnx.SeacoParaformer,
+        online.Paraformer,
+        funasr_onnx.Fsmn_vad,
+        funasr_onnx.SenseVoiceSmall,
+    ]
+    for wrapper in wrappers:
+        # load_data uses no model state, so skip __init__ and its model files.
+        waveforms = wrapper.__new__(wrapper).load_data(str(audio), 16000)
+        assert len(waveforms) == 1
+        name = f"{wrapper.__module__}.{wrapper.__name__}"
+        np.testing.assert_array_equal(waveforms[0], expected, err_msg=name)
+    model = funasr_onnx.Paraformer(str(directory), device_id=DEVICE, intra_op_num_threads=1)
+    assert model(str(audio)) == model(expected)
+    assert {path.name: path.read_bytes() for path in tmp_path.iterdir()} == files
