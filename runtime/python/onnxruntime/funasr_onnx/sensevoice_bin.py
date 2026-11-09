@@ -169,11 +169,12 @@ class SenseVoiceSmall:
         for beg_idx in range(0, waveform_nums, self.batch_size):
             end_idx = min(waveform_nums, beg_idx + self.batch_size)
             feats, feats_len = self.extract_feat(waveform_list[beg_idx:end_idx])
-            _language_list = language_list[beg_idx:end_idx]
-            _textnorm_list = textnorm_list[beg_idx:end_idx]
-            if not len(_language_list):
-                _language_list = [language_list[0]]
-                _textnorm_list = [textnorm_list[0]]
+            _language_list = (
+                language_list if len(language_list) == 1 else language_list[beg_idx:end_idx]
+            )
+            _textnorm_list = (
+                textnorm_list if len(textnorm_list) == 1 else textnorm_list[beg_idx:end_idx]
+            )
             B = feats.shape[0]
             if len(_language_list) == 1 and B != 1:
                 _language_list = _language_list * B

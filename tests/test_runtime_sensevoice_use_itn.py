@@ -126,3 +126,45 @@ def test_sensevoice_use_itn_selects_textnorm(
     model = module.SenseVoiceSmall(str(directory), batch_size=batch_size, intra_op_num_threads=1)
     # Two files, so with batch_size=1 the second file is decoded in a batch of its own.
     assert model(paths, **kwargs) == [expected, expected]
+
+
+@pytest.mark.parametrize("backend", ["onnx", "torch"])
+@pytest.mark.parametrize("batch_size", [1, 2, 3])
+@pytest.mark.parametrize(
+    "language_kind, textnorm_kind",
+    [
+        ("scalar", "list"),
+        ("scalar", "file"),
+        ("list", "scalar"),
+        ("file", "scalar"),
+        ("list", "list"),
+        ("file", "file"),
+    ],
+)
+def test_sensevoice_mixed_scalar_and_per_utterance_tags(
+    sensevoice_fixture, monkeypatch, tmp_path, backend, batch_size, language_kind, textnorm_kind
+):
+    directory, paths = sensevoice_fixture
+    location = "libtorch" if backend == "torch" else "onnxruntime"
+    monkeypatch.syspath_prepend(str(ROOT / "runtime/python" / location))
+    module = importlib.import_module("funasr_" + backend)
+    model = module.SenseVoiceSmall(str(directory), batch_size=batch_size, intra_op_num_threads=1)
+    kwargs = {"use_itn": True}
+    for name, kind, values in [
+        ("language", language_kind, ["en", "zh", "ko"]),
+        ("textnorm", textnorm_kind, ["withitn", "woitn", "woitn"]),
+    ]:
+        if kind == "list":
+            kwargs[name] = values
+        elif kind == "file":
+            tag_file = tmp_path / (name + ".txt")
+            tag_file.write_text("\n".join(values) + "\n")
+            kwargs[name] = str(tag_file)
+    if language_kind == "scalar":
+        expected = ["<|withitn|>", "<|woitn|>", "<|woitn|>"]
+    elif textnorm_kind == "scalar":
+        expected = ["<|en|><|withitn|>", "<|query3|><|withitn|>", "<|query12|><|withitn|>"]
+    else:
+        expected = ["<|en|><|withitn|>", "<|query3|><|woitn|>", "<|query12|><|woitn|>"]
+    # Three routing entries also exercise the final partial batch at batch_size=2.
+    assert model(paths + [paths[0]], **kwargs) == expected
