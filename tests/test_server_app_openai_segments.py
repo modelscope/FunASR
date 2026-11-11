@@ -12,6 +12,11 @@ SERVICE_PATH = REPO_ROOT / "funasr" / "bin" / "_server_app.py"
 SERVER_CLI_PATH = REPO_ROOT / "funasr" / "bin" / "server.py"
 
 
+class PlainTextResponseStub:
+    def __init__(self, content=None):
+        self.content = content
+
+
 def load_server_app(monkeypatch):
     class DummyFastAPI:
         def __init__(self, *args, **kwargs):
@@ -57,6 +62,7 @@ def load_server_app(monkeypatch):
 
     responses_stub = types.ModuleType("fastapi.responses")
     responses_stub.JSONResponse = lambda content=None: content
+    responses_stub.PlainTextResponse = PlainTextResponseStub
 
     monkeypatch.setitem(sys.modules, "fastapi", fastapi_stub)
     monkeypatch.setitem(sys.modules, "fastapi.middleware", middleware_stub)
@@ -258,6 +264,28 @@ def test_n8n_whisper_model_alias_uses_preloaded_model(monkeypatch):
     assert [instance["model"] for instance in DummyAutoModel.instances] == [
         "iic/SenseVoiceSmall"
     ]
+
+
+def test_text_response_format_returns_plain_text(monkeypatch):
+    module = load_server_app(monkeypatch)
+    install_dummy_funasr(monkeypatch, generated_text='say "hi"')
+    monkeypatch.setattr(module.sf, "info", lambda path: types.SimpleNamespace(duration=1.25))
+    app = module.create_app(device="cpu", preload_model="sensevoice")
+    transcribe = app.routes[("POST", "/v1/audio/transcriptions")]
+
+    response = asyncio.run(
+        transcribe(
+            file=DummyUpload(),
+            model="sensevoice",
+            language=None,
+            response_format="text",
+            spk=False,
+        )
+    )
+
+    # OpenAI returns the bare transcript, not a JSON-encoded string.
+    assert isinstance(response, PlainTextResponseStub)
+    assert response.content == 'say "hi"'
 
 
 def test_openai_verbose_json_preserves_speaker_labels(monkeypatch):
