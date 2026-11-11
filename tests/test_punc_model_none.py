@@ -796,7 +796,7 @@ class TestPuncModelNone(unittest.TestCase):
     def test_mixed_vad_boundaries_preserve_timestamp_units(self):
         self._check_vad_chunk_alignment(
             ["你 好 hello", "world 我 来"],
-            ["你好 hello，", " world 我来。"],
+            ["你好 hello，", "world 我来。"],
             "你 好 hello world 我 来",
             raw_text=True,
         )
