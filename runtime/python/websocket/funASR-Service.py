@@ -14,6 +14,8 @@ from modelscope.utils.constant import Tasks
 from werkzeug.utils import secure_filename
 import torch
 import os
+import uuid
+import tempfile
 from openai import OpenAI
 from funasr import AutoModel
 
@@ -51,8 +53,9 @@ def Register_Speaker():
     if file.filename == '':
         return jsonify({"error": "Empty filename"}), 400
 
-    # 保存上传文件
-    filename = secure_filename(file.filename)
+    # 保存上传文件（uuid 前缀防止并发同名上传互相覆盖/误删）
+    filename = secure_filename(file.filename) or "upload.audio"
+    filename = f"{uuid.uuid4().hex}_{filename}"
     filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
     file.save(filepath)
     try:
@@ -95,18 +98,22 @@ def speech_recognition_Timestamp_cam_identify_speakers():
     if file.filename == '':
         return jsonify({"error": "Empty filename"}), 400
 
-    # 保存上传文件
-    filename = secure_filename(file.filename)
+    # 保存上传文件（uuid 前缀防止并发同名上传互相覆盖/误删）
+    filename = secure_filename(file.filename) or "upload.audio"
+    filename = f"{uuid.uuid4().hex}_{filename}"
     filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
     file.save(filepath)
     # 2. 从FormData读取参数并解析JSON
     # 读取identify_speakers（默认False）
-    identify_speakers_str = request.form.get('identify_speakers', 'false')
-    identify_speakers = json.loads(identify_speakers_str.lower())  # 转为bool
+    try:
+        identify_speakers_str = request.form.get('identify_speakers', 'false')
+        identify_speakers = json.loads(identify_speakers_str.lower())  # 转为bool
 
-    # 读取speaker_db（默认空字典）
-    speaker_db_str = request.form.get('speaker_db', '{}')
-    speaker_db = json.loads(speaker_db_str)
+        # 读取speaker_db（默认空字典）
+        speaker_db_str = request.form.get('speaker_db', '{}')
+        speaker_db = json.loads(speaker_db_str)
+    except (ValueError, TypeError, AttributeError) as e:
+        return jsonify({"error": f"invalid form JSON: {e}"}), 400
 
     # 3. 验证声纹库（如果需要对比）
     if identify_speakers:
@@ -158,7 +165,10 @@ def _extract_audio_segment(audio_path, start_sec, end_sec):
     segment = waveform[:, start_sample:end_sample]
 
     # 保存为临时文件（pipeline需要文件路径）
-    temp_path = f"/tmp/temp_segment_{start_sec}_{end_sec}.wav"
+    # 唯一临时文件：原固定 /tmp 路径会让并发请求互相覆盖片段（声纹比对错乱），
+    # 可被符号链接攻击写任意文件，且 /tmp 在 Windows 上不存在
+    fd, temp_path = tempfile.mkstemp(suffix=".wav", prefix="funasr_seg_")
+    os.close(fd)
     torchaudio.save(temp_path, segment, sample_rate)
 
     return temp_path
@@ -175,6 +185,8 @@ def process_cam_result_with_identify_speakers(result,speaker_db,filepath,identif
     # 创建JSON格式的输出
     output = []
     sentence_infos = data.get('sentence_info',[])
+    if not sentence_infos:
+        return []
 
     current_sentence = {
         "spk": sentence_infos[0]["spk"],
@@ -275,4 +287,5 @@ def calculate_similarity():
             })
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=10099, debug=True)
+    # debug=True 会在 0.0.0.0 上暴露 Werkzeug 调试器（可远程执行任意代码），必须关闭
+    app.run(host='0.0.0.0', port=10099, debug=False)

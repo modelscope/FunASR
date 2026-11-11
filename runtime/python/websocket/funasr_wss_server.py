@@ -218,7 +218,9 @@ def save_offline_wav_segment_sync(websocket, audio_bytes: bytes, reason: str = "
     base_dir = getattr(websocket, "offline_save_dir", args.save_offline_segments_dir)
     _ensure_dir(base_dir)
 
-    wav_name = (getattr(websocket, "wav_name", "microphone") or "microphone").replace("/", "_")
+    # 同时过滤 / 与 \（Windows 分隔符），并取 basename，防止客户端 wav_name 路径穿越
+    wav_name = getattr(websocket, "wav_name", "microphone") or "microphone"
+    wav_name = os.path.basename(str(wav_name).replace("\\", "/")).replace("/", "_")
     ts = int(time.time() * 1000)
     fname = f"{wav_name}_{ts}_seg{seg_idx:04d}_{reason}_{duration_ms}ms.wav"
     out_path = os.path.join(base_dir, fname)
@@ -478,8 +480,9 @@ async def ws_serve(websocket, path=None):
                     end_of_input = not websocket.is_speaking
 
                 if "chunk_interval" in messagejson:
-                    websocket.chunk_interval = _safe_int(
-                        messagejson["chunk_interval"], websocket.chunk_interval
+                    # 至少为 1：客户端传 0 会让后续 len(...) % chunk_interval 除零崩溃
+                    websocket.chunk_interval = max(
+                        1, _safe_int(messagejson["chunk_interval"], websocket.chunk_interval)
                     )
 
                 if "wav_name" in messagejson:
@@ -489,7 +492,14 @@ async def ws_serve(websocket, path=None):
                     chunk_size = messagejson["chunk_size"]
                     if isinstance(chunk_size, str):
                         chunk_size = [x.strip() for x in chunk_size.split(",") if x.strip()]
-                    websocket.status_dict_asr_online["chunk_size"] = [int(x) for x in chunk_size]
+                    # 校验客户端输入：非法类型只记录错误，不再让异常终止整个会话；
+                    # 长度不足等问题仍由后续每帧的 VAD chunk_size 检查处理
+                    try:
+                        websocket.status_dict_asr_online["chunk_size"] = [
+                            int(x) for x in chunk_size
+                        ]
+                    except (TypeError, ValueError):
+                        record_error(f"invalid chunk_size: {messagejson['chunk_size']!r}")
 
                 if "encoder_chunk_look_back" in messagejson:
                     websocket.status_dict_asr_online["encoder_chunk_look_back"] = messagejson[
@@ -510,6 +520,8 @@ async def ws_serve(websocket, path=None):
                 if "mode" in messagejson:
                     requested_mode = messagejson["mode"]
                     if requested_mode and requested_mode not in ("online", "offline", "2pass"):
+                        # 故意赋值非法 mode：后续音频帧会在入口处被丢弃，
+                        # 并在 end ack 中报告 unsupported mode（见测试契约）
                         websocket.mode = requested_mode
                         record_error(f"unsupported mode: {requested_mode!r}")
                     else:

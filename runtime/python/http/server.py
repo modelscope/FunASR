@@ -1,4 +1,6 @@
 import argparse
+import asyncio
+import functools
 import logging
 import os
 import uuid
@@ -7,6 +9,7 @@ import aiofiles
 import ffmpeg
 import uvicorn
 from fastapi import FastAPI, File, UploadFile
+from fastapi.responses import JSONResponse
 from modelscope.utils.logger import get_logger
 
 from funasr import AutoModel
@@ -52,6 +55,13 @@ parser.add_argument(
 parser.add_argument("--certfile", type=str, default=None, required=False, help="certfile for ssl")
 parser.add_argument("--keyfile", type=str, default=None, required=False, help="keyfile for ssl")
 parser.add_argument("--temp_dir", type=str, default="temp_dir/", required=False, help="temp dir")
+parser.add_argument(
+    "--max_upload_mb",
+    type=int,
+    default=100,
+    required=False,
+    help="max upload audio size in MB (reject larger uploads to avoid memory/disk exhaustion)",
+)
 args = parser.parse_args()
 logger.info("-----------  Configuration Arguments -----------")
 for arg, value in vars(args).items():
@@ -91,30 +101,54 @@ if args.hotword_path is not None and os.path.exists(args.hotword_path):
 
 @app.post("/recognition")
 async def api_recognition(audio: UploadFile = File(..., description="audio file")):
-    suffix = audio.filename.split(".")[-1]
-    audio_path = f"{args.temp_dir}/{str(uuid.uuid1())}.{suffix}"
-    async with aiofiles.open(audio_path, "wb") as out_file:
-        content = await audio.read()
-        await out_file.write(content)
+    # 扩展名只保留字母数字，防止客户端用带 ../ 的文件名做路径穿越
+    raw_suffix = (audio.filename or "").rsplit(".", 1)[-1]
+    suffix = "".join(c for c in raw_suffix if c.isalnum())[:10] or "audio"
+    audio_path = os.path.join(args.temp_dir, f"{uuid.uuid1()}.{suffix}")
+    max_bytes = args.max_upload_mb * 1024 * 1024
+    received = 0
     try:
-        audio_bytes, _ = (
-            ffmpeg.input(audio_path, threads=0)
-            .output("-", format="s16le", acodec="pcm_s16le", ac=1, ar=16000)
-            .run(cmd=["ffmpeg", "-nostdin"], capture_stdout=True, capture_stderr=True)
+        # 分块落盘并限制总大小，避免超大上传耗尽内存/磁盘
+        async with aiofiles.open(audio_path, "wb") as out_file:
+            while True:
+                chunk = await audio.read(1024 * 1024)
+                if not chunk:
+                    break
+                received += len(chunk)
+                if received > max_bytes:
+                    return JSONResponse(
+                        status_code=413,
+                        content={
+                            "msg": f"音频文件过大（上限 {args.max_upload_mb}MB）",
+                            "code": 1,
+                        },
+                    )
+                await out_file.write(chunk)
+        try:
+            audio_bytes, _ = (
+                ffmpeg.input(audio_path, threads=0)
+                .output("-", format="s16le", acodec="pcm_s16le", ac=1, ar=16000)
+                .run(cmd=["ffmpeg", "-nostdin"], capture_stdout=True, capture_stderr=True)
+            )
+        except Exception as e:
+            logger.error(f"读取音频文件发生错误，错误信息：{e}")
+            return {"msg": "读取音频文件发生错误", "code": 1}
+        # 推理是阻塞操作：放线程池执行，避免卡死事件循环导致所有客户端挂起
+        loop = asyncio.get_running_loop()
+        rec_results = await loop.run_in_executor(
+            None,
+            functools.partial(model.generate, input=audio_bytes, is_final=True, **param_dict),
         )
-    except Exception as e:
-        logger.error(f"读取音频文件发生错误，错误信息：{e}")
-        return {"msg": "读取音频文件发生错误", "code": 1}
-    rec_results = model.generate(input=audio_bytes, is_final=True, **param_dict)
-    # 结果为空
-    if len(rec_results[0]["text"] ) == 0:
-        return {"text": "", "sentences": [], "code": 0}
-    elif len(rec_results[0]["text"] ) > 0:
-        # 解析识别结果
+        # 结果为空
+        if not rec_results:
+            return {"text": "", "sentences": [], "code": 0}
         rec_result = rec_results[0]
-        text = rec_result["text"]
+        text = rec_result.get("text", "")
+        if len(text) == 0:
+            return {"text": "", "sentences": [], "code": 0}
+        # 解析识别结果
         sentences = []
-        for sentence in rec_result["sentence_info"]:
+        for sentence in rec_result.get("sentence_info", []):
             # 每句话的时间戳
             sentences.append(
                 {"text": sentence["text"], "start": sentence["start"], "end": sentence["end"]}
@@ -122,9 +156,12 @@ async def api_recognition(audio: UploadFile = File(..., description="audio file"
         ret = {"text": text, "sentences": sentences, "code": 0}
         logger.info(f"识别结果：{ret}")
         return ret
-    else:
-        logger.info(f"识别结果：{rec_results}")
-        return {"msg": "未知错误", "code": -1}
+    finally:
+        # 无论成功失败都清理临时文件，防止磁盘被上传文件占满
+        try:
+            os.remove(audio_path)
+        except OSError:
+            pass
 
 
 if __name__ == "__main__":
