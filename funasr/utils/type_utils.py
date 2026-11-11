@@ -19,7 +19,7 @@ def str2bool(value: str) -> bool:
         return True
     if normalized in ("n", "no", "f", "false", "off", "0"):
         return False
-    raise ValueError(f"invalid truth value {value!r}")
+    raise ValueError(f"invalid truth value {normalized!r}")
 
 
 def remove_parenthesis(value: str):
