@@ -7,6 +7,12 @@ does not update the installed ONNX wrappers. Check their versions separately
 with `python -m pip show funasr-onnx funasr`; use the source installation below
 when a required wrapper fix is newer than the published PyPI package.
 
+Version 0.4.10 restores direct librosa decoding for non-WAV audio in offline
+and streaming Paraformer, SenseVoice and offline VAD (#3865), without creating a WAV sidecar
+or treating every non-WAV input as MP3. Codec support still depends on the
+installed audio backend. This is a runtime loading fix, not a model-weight
+or ASR accuracy update.
+
 Version 0.4.9 keeps one result per input when offline VAD receives empty or sub-frame
 audio, without invoking ONNX Runtime for zero-frame features (#3846). It also returns
 an empty punctuation chunk while it preserves the streaming cache and avoids
@@ -39,9 +45,9 @@ and postprocessing fixes, not a model-weight update or an ASR accuracy claim.
 install from pip
 
 ```shell
-pip install -U "funasr-onnx>=0.4.9"
+pip install -U "funasr-onnx>=0.4.10"
 # For the users in China, you could install with the command:
-# pip install -U "funasr-onnx>=0.4.9" -i https://mirror.sjtu.edu.cn/pypi/web/simple
+# pip install -U "funasr-onnx>=0.4.10" -i https://mirror.sjtu.edu.cn/pypi/web/simple
 # If you want to export .onnx file, you should install modelscope and funasr
 pip install -U modelscope funasr
 # For the users in China, you could install with the command:
