@@ -19,6 +19,8 @@ if importlib.util.find_spec('funasr_onnx') is None:
     raise unittest.SkipTest('Install the standalone funasr-onnx distribution first.')
 
 import funasr_onnx
+import numpy as np
+import soundfile as sf
 from funasr_onnx.paraformer_online_bin import Paraformer as ParaformerOnline
 
 
@@ -36,9 +38,60 @@ ENTRYPOINTS = (
 
 
 class InstalledOnnxPackageTest(unittest.TestCase):
+    LOADERS = (funasr_onnx.Paraformer, ParaformerOnline,
+               funasr_onnx.SenseVoiceSmall, funasr_onnx.Fsmn_vad)
+
+    def test_lossless_non_wav_without_sidecar(self):
+        samples = (np.arange(4800, dtype=np.int16) - 2400).astype(np.float32) / 32768
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / 'sample.flac'
+            sf.write(path, samples, 16000, subtype='PCM_16')
+            before = path.read_bytes()
+            for cls in self.LOADERS:
+                with self.subTest(loader=cls.__module__):
+                    result = cls.__new__(cls).load_data(str(path), fs=16000)
+                    self.assertEqual(len(result), 1)
+                    np.testing.assert_array_equal(result[0], samples)
+                    self.assertEqual(path.read_bytes(), before)
+                    self.assertEqual(sorted(p.name for p in path.parent.iterdir()), ['sample.flac'])
+
+    def test_wav_and_flac_list_preserves_input_order(self):
+        first = np.full(800, 0.125, dtype=np.float32)
+        second = np.full(1200, -0.25, dtype=np.float32)
+        with tempfile.TemporaryDirectory() as directory:
+            paths = [Path(directory) / 'first.wav', Path(directory) / 'second.flac']
+            for path, samples in zip(paths, [first, second]):
+                sf.write(path, samples, 16000, subtype='PCM_16')
+            for cls in self.LOADERS:
+                with self.subTest(loader=cls.__module__):
+                    result = cls.__new__(cls).load_data([str(p) for p in paths], fs=16000)
+                    self.assertEqual(len(result), 2)
+                    np.testing.assert_array_equal(result[0], first)
+                    np.testing.assert_array_equal(result[1], second)
+                    self.assertEqual(sorted(p.name for p in Path(directory).iterdir()), ['first.wav', 'second.flac'])
+
+    def test_waveform_array_is_preserved(self):
+        samples = np.linspace(-0.25, 0.25, 320, dtype=np.float32)
+        for cls in self.LOADERS:
+            with self.subTest(loader=cls.__module__):
+                result = cls.__new__(cls).load_data(samples, fs=16000)
+                self.assertEqual(len(result), 1)
+                self.assertIs(result[0], samples)
+
+    def test_invalid_audio_remains_visible_without_sidecar(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / 'invalid.flac'
+            path.write_bytes(b'not audio')
+            for cls in self.LOADERS:
+                with self.subTest(loader=cls.__module__):
+                    with self.assertRaises(Exception):
+                        cls.__new__(cls).load_data(str(path), fs=16000)
+                    self.assertEqual(path.read_bytes(), b'not audio')
+                    self.assertEqual(sorted(p.name for p in path.parent.iterdir()), ['invalid.flac'])
+
     def test_installed_distribution_version_and_origin(self):
         distribution = importlib.metadata.distribution('funasr-onnx')
-        self.assertEqual(distribution.version, '0.4.9')
+        self.assertEqual(distribution.version, '0.4.10')
         self.assertEqual(
             Path(funasr_onnx.__file__).resolve().parent,
             Path(distribution.locate_file('funasr_onnx')).resolve(),
