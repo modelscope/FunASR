@@ -23,10 +23,12 @@ def download_from_url(url):
         storage = HTTPStorage()
         # bytes
         data = storage.read(url)
-        work_dir = tempfile.TemporaryDirectory().name
-        if not os.path.exists(work_dir):
-            os.makedirs(work_dir)
-        file_path = os.path.join(work_dir, os.path.basename(url))
+        # mkdtemp 返回真实存在且不会被 GC 回收的目录；
+        # 原 TemporaryDirectory().name 未持有引用，目录随即被析构删除
+        work_dir = tempfile.mkdtemp(prefix="funasr_download_")
+        # 用 URL path 的 basename，避免查询串(?a=b)进入文件名（Windows 非法字符）
+        file_name = os.path.basename(result.path) or "downloaded_file"
+        file_path = os.path.join(work_dir, file_name)
         with open(file_path, "wb") as fb:
             fb.write(data)
     assert file_path is not None, f"failed to download: {url}"
@@ -166,7 +168,8 @@ class HTTPStorage(Storage):
             Args:
                 url: TODO.
             """
-        r = requests.get(url)
+        # 超时：防止恶意/故障服务器让下载线程永久挂起
+        r = requests.get(url, timeout=(10, 60))
         r.raise_for_status()
         return r.content
 
@@ -176,7 +179,7 @@ class HTTPStorage(Storage):
             Args:
                 url: TODO.
             """
-        r = requests.get(url)
+        r = requests.get(url, timeout=(10, 60))
         r.raise_for_status()
         return r.text
 
