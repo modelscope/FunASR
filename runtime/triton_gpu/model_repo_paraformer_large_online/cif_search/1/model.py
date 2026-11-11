@@ -147,7 +147,7 @@ class TritonPythonModel:
 
     def load_vocab(self, vocab_file):
         with open(str(vocab_file), "rb") as f:
-            config = yaml.load(f, Loader=yaml.Loader)
+            config = yaml.safe_load(f)
         return config["token_list"]
 
     async def execute(self, requests):

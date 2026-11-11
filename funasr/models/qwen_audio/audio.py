@@ -47,7 +47,7 @@ def get_T_after_cnn(L_in, dilation=1):
             L_in: TODO.
             dilation: TODO.
         """
-    for padding, kernel_size, stride in eval("[(1,3,1)] + [(1,3,2)] "):
+    for padding, kernel_size, stride in [(1, 3, 1), (1, 3, 2)]:
         L_out = L_in + 2 * padding - dilation * (kernel_size - 1) - 1
         L_out = 1 + L_out // stride
         L_in = L_out

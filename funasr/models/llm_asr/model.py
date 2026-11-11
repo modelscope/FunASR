@@ -1,3 +1,4 @@
+import ast
 import logging
 from typing import Union, Dict, List, Tuple, Optional
 
@@ -1340,7 +1341,10 @@ class LLMASR4(nn.Module):
                     if sub_str.startswith("!"):
                         sub_str = sub_str[1:]
                         if sub_str.startswith("!"):  # !!bytes
-                            sub_str = eval(sub_str[1:])
+                            # 安全解析字节字面量（如 b'...'）。
+                            # 原 eval() 会执行任意代码：训练数据/用户输入中的
+                            # <|startofspeech|>!!...<|endofspeech|> 片段可注入恶意表达式。
+                            sub_str = ast.literal_eval(sub_str[1:])
                         try:
                             time1 = time.perf_counter()
                             data_src = load_audio_text_image_video(sub_str, fs=frontend.fs)

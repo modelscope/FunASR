@@ -45,6 +45,7 @@ python3 client/decode_manifest_triton_wo_cuts.py \
 
 from pydub import AudioSegment
 import argparse
+import ast
 import asyncio
 import math
 import time
@@ -182,7 +183,8 @@ def load_manifest(fp):
     data = []
     with open(fp) as f:
         for i, dp in enumerate(f.readlines()):
-            dp = eval(dp)
+            # manifest 每行是 dict 字面量；用 literal_eval 防止恶意文件执行任意代码
+            dp = ast.literal_eval(dp)
             dp["id"] = i
             data.append(dp)
     return data
