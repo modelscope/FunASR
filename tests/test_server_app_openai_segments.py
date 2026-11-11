@@ -99,6 +99,7 @@ def install_dummy_funasr(
     class DummyAutoModel:
         instances = []
         attempts = []
+        generate_calls = []
 
         def __init__(self, **kwargs):
             self.__class__.attempts.append(kwargs)
@@ -110,6 +111,7 @@ def install_dummy_funasr(
             self.__class__.instances.append(kwargs)
 
         def generate(self, **kwargs):
+            self.__class__.generate_calls.append(kwargs)
             if self.kwargs.get("model") == "fsmn-vad":
                 return [{"value": [[0, 1000]]}]
             if generated_result is not None:
@@ -663,6 +665,22 @@ def test_fun_asr_nano_reuses_fallback_after_vllm_failure(monkeypatch):
     ]
     assert len(DummyVLLM.calls) == 1
     assert len(nano_fallbacks) == 1
+
+
+def test_asr_endpoint_forwards_hotwords_to_fun_asr_nano_fallback(monkeypatch):
+    module = load_server_app(monkeypatch)
+    DummyAutoModel = install_dummy_funasr(monkeypatch)
+    install_dummy_vllm(monkeypatch, raise_on_load=True)
+    monkeypatch.setattr(module.sf, "info", lambda path: types.SimpleNamespace(duration=1.0))
+    app = module.create_app(device="cuda", preload_model="fun-asr-nano", hub="ms")
+    asr = app.routes[("POST", "/asr")]
+
+    asr_result = asyncio.run(
+        asr(file=DummyUpload(), language=None, hotwords="FunASR, 达摩院,", spk=False)
+    )
+
+    assert asr_result["text"] == "transcript"
+    assert DummyAutoModel.generate_calls[-1]["hotwords"] == ["FunASR", "达摩院"]
 
 
 def test_partial_vllm_setup_is_not_cached_after_fallback_failure(monkeypatch):

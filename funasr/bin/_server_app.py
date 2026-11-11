@@ -424,7 +424,7 @@ def create_app(
             "duration": len(audio_data) / sr,
         }
 
-    def _process_fallback(model_name, audio_path, language=None, use_spk=False):
+    def _process_fallback(model_name, audio_path, language=None, use_spk=False, hotwords=None):
         """Process with non-LLM model (SenseVoice/Paraformer)."""
         model = _load_fallback(model_name)
         try:
@@ -434,6 +434,8 @@ def create_app(
         kwargs = {"input": audio_path, "batch_size": 1}
         if language:
             kwargs["language"] = language
+        if hotwords:
+            kwargs["hotwords"] = hotwords
         result = model.generate(**kwargs)
         raw_text = result[0]["text"]
         detected_language = extract_language_from_asr_text(raw_text)
@@ -556,7 +558,7 @@ def create_app(
                 tmp_path = tmp.name
             try:
                 result = _process_fallback(
-                    "fun-asr-nano", tmp_path, language=language, use_spk=spk
+                    "fun-asr-nano", tmp_path, language=language, use_spk=spk, hotwords=hw_list
                 )
             finally:
                 os.unlink(tmp_path)
