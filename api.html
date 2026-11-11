@@ -23835,7 +23835,7 @@
             f"{feature} requires torchaudio, which is not installed. {_INSTALL_HINT}"
         ) from exc
     return torchaudio</code></pre></details></div>
-<div class="api-detail" id="e441" tabindex="-1"><span class="dtag badge-f">function</span><h2><code>str2bool(value: str) -&gt; bool</code></h2><div class="dmod">funasr.utils.type_utils · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/type_utils.py#L12" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Str2bool.</p>
+<div class="api-detail" id="e441" tabindex="-1"><span class="dtag badge-f">function</span><h2><code>str2bool(value: str) -&gt; bool</code></h2><div class="dmod">funasr.utils.type_utils · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/type_utils.py#L11" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Str2bool.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>value</code> — TODO.</li>
@@ -23846,9 +23846,14 @@
         Args:
             value: TODO.
         """
-    return bool(strtobool(value))
+    normalized = value.lower()
+    if normalized in ("y", "yes", "t", "true", "on", "1"):
+        return True
+    if normalized in ("n", "no", "f", "false", "off", "0"):
+        return False
+    raise ValueError(f"invalid truth value {normalized!r}")
 </code></pre></details></div>
-<div class="api-detail" id="e442" tabindex="-1"><span class="dtag badge-f">function</span><h2><code>remove_parenthesis(value: str)</code></h2><div class="dmod">funasr.utils.type_utils · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/type_utils.py#L21" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Remove parenthesis.</p>
+<div class="api-detail" id="e442" tabindex="-1"><span class="dtag badge-f">function</span><h2><code>remove_parenthesis(value: str)</code></h2><div class="dmod">funasr.utils.type_utils · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/type_utils.py#L25" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Remove parenthesis.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>value</code> — TODO.</li>
@@ -23866,7 +23871,7 @@
         value = value[1:-1]
     return value
 </code></pre></details></div>
-<div class="api-detail" id="e443" tabindex="-1"><span class="dtag badge-f">function</span><h2><code>remove_quotes(value: str)</code></h2><div class="dmod">funasr.utils.type_utils · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/type_utils.py#L35" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Remove quotes.</p>
+<div class="api-detail" id="e443" tabindex="-1"><span class="dtag badge-f">function</span><h2><code>remove_quotes(value: str)</code></h2><div class="dmod">funasr.utils.type_utils · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/type_utils.py#L39" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Remove quotes.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>value</code> — TODO.</li>
@@ -23884,7 +23889,7 @@
         value = value[1:-1]
     return value
 </code></pre></details></div>
-<div class="api-detail" id="e444" tabindex="-1"><span class="dtag badge-f">function</span><h2><code>int_or_none(value: str) -&gt; Optional[int]</code></h2><div class="dmod">funasr.utils.type_utils · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/type_utils.py#L49" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>int_or_none.</p>
+<div class="api-detail" id="e444" tabindex="-1"><span class="dtag badge-f">function</span><h2><code>int_or_none(value: str) -&gt; Optional[int]</code></h2><div class="dmod">funasr.utils.type_utils · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/type_utils.py#L53" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>int_or_none.</p>
 <h4>Examples:</h4>
 <p>&gt;&gt;&gt; import argparse</p>
 <p>&gt;&gt;&gt; parser = argparse.ArgumentParser()</p>
@@ -23918,7 +23923,7 @@
         return None
     return int(value)
 </code></pre></details></div>
-<div class="api-detail" id="e445" tabindex="-1"><span class="dtag badge-f">function</span><h2><code>float_or_none(value: str) -&gt; Optional[float]</code></h2><div class="dmod">funasr.utils.type_utils · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/type_utils.py#L71" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>float_or_none.</p>
+<div class="api-detail" id="e445" tabindex="-1"><span class="dtag badge-f">function</span><h2><code>float_or_none(value: str) -&gt; Optional[float]</code></h2><div class="dmod">funasr.utils.type_utils · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/type_utils.py#L75" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>float_or_none.</p>
 <h4>Examples:</h4>
 <p>&gt;&gt;&gt; import argparse</p>
 <p>&gt;&gt;&gt; parser = argparse.ArgumentParser()</p>
@@ -23952,7 +23957,7 @@
         return None
     return float(value)
 </code></pre></details></div>
-<div class="api-detail" id="e446" tabindex="-1"><span class="dtag badge-f">function</span><h2><code>humanfriendly_parse_size_or_none(value) -&gt; Optional[float]</code></h2><div class="dmod">funasr.utils.type_utils · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/type_utils.py#L93" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Humanfriendly parse size or none.</p>
+<div class="api-detail" id="e446" tabindex="-1"><span class="dtag badge-f">function</span><h2><code>humanfriendly_parse_size_or_none(value) -&gt; Optional[float]</code></h2><div class="dmod">funasr.utils.type_utils · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/type_utils.py#L97" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Humanfriendly parse size or none.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>value</code> — TODO.</li>
@@ -23969,7 +23974,7 @@
         raise ImportError("humanfriendly is required for parse_size. Install with: pip install humanfriendly")
     return humanfriendly.parse_size(value)
 </code></pre></details></div>
-<div class="api-detail" id="e447" tabindex="-1"><span class="dtag badge-f">function</span><h2><code>str_or_int(value: str) -&gt; Union[str, int]</code></h2><div class="dmod">funasr.utils.type_utils · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/type_utils.py#L106" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Str or int.</p>
+<div class="api-detail" id="e447" tabindex="-1"><span class="dtag badge-f">function</span><h2><code>str_or_int(value: str) -&gt; Union[str, int]</code></h2><div class="dmod">funasr.utils.type_utils · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/type_utils.py#L110" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Str or int.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>value</code> — TODO.</li>
@@ -23985,7 +23990,7 @@
     except ValueError:
         return value
 </code></pre></details></div>
-<div class="api-detail" id="e448" tabindex="-1"><span class="dtag badge-f">function</span><h2><code>str_or_none(value: str) -&gt; Optional[str]</code></h2><div class="dmod">funasr.utils.type_utils · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/type_utils.py#L118" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>str_or_none.</p>
+<div class="api-detail" id="e448" tabindex="-1"><span class="dtag badge-f">function</span><h2><code>str_or_none(value: str) -&gt; Optional[str]</code></h2><div class="dmod">funasr.utils.type_utils · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/type_utils.py#L122" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>str_or_none.</p>
 <h4>Examples:</h4>
 <p>&gt;&gt;&gt; import argparse</p>
 <p>&gt;&gt;&gt; parser = argparse.ArgumentParser()</p>
@@ -24019,7 +24024,7 @@
         return None
     return value
 </code></pre></details></div>
-<div class="api-detail" id="e449" tabindex="-1"><span class="dtag badge-f">function</span><h2><code>str2pair_str(value: str) -&gt; Tuple[str, str]</code></h2><div class="dmod">funasr.utils.type_utils · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/type_utils.py#L140" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>str2pair_str.</p>
+<div class="api-detail" id="e449" tabindex="-1"><span class="dtag badge-f">function</span><h2><code>str2pair_str(value: str) -&gt; Tuple[str, str]</code></h2><div class="dmod">funasr.utils.type_utils · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/type_utils.py#L144" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>str2pair_str.</p>
 <h4>Examples:</h4>
 <p>&gt;&gt;&gt; import argparse</p>
 <p>&gt;&gt;&gt; str2pair_str('abc,def ')</p>
@@ -24051,7 +24056,7 @@
     # so we need to remove double quotes from it.
     return remove_quotes(a), remove_quotes(b)
 </code></pre></details></div>
-<div class="api-detail" id="e450" tabindex="-1"><span class="dtag badge-f">function</span><h2><code>str2triple_str(value: str) -&gt; Tuple[str, str, str]</code></h2><div class="dmod">funasr.utils.type_utils · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/type_utils.py#L164" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>str2triple_str.</p>
+<div class="api-detail" id="e450" tabindex="-1"><span class="dtag badge-f">function</span><h2><code>str2triple_str(value: str) -&gt; Tuple[str, str, str]</code></h2><div class="dmod">funasr.utils.type_utils · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/type_utils.py#L168" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>str2triple_str.</p>
 <h4>Examples:</h4>
 <p>&gt;&gt;&gt; str2triple_str('abc,def ,ghi')</p>
 <p>('abc', 'def', 'ghi')</p>
