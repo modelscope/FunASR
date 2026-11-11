@@ -4,13 +4,13 @@ import pytest
 
 
 ROOT = Path(__file__).resolve().parents[1]
-RELEASE_VERSION = "1.4.24"
+RELEASE_VERSION = "1.4.25"
 README_FILES = ("README.md", "README_zh.md", "README_ja.md", "README_ko.md")
 REPOSITORY_ROLE_FILES = ("docs/repository_roles.md", "docs/repository_roles_zh.md")
 @pytest.mark.parametrize("name", README_FILES)
 def test_release_summary_covers_tokenizer_normalizer_and_cif(name):
     summaries = [line for line in (ROOT / name).read_text(encoding="utf-8").splitlines()
-                 if f"**FunASR {RELEASE_VERSION}**" in line]
+                 if "**FunASR 1.4.24**" in line]
     assert len(summaries) == 1
     assert "CIF" in summaries[0]
     assert "norm_means=True" in summaries[0]
@@ -19,6 +19,17 @@ def test_release_summary_covers_tokenizer_normalizer_and_cif(name):
     for number in (3852, 3853, 3854):
         assert f"https://github.com/modelscope/FunASR/pull/{number}" in summaries[0]
     assert "checkpoint" in summaries[0]
+
+@pytest.mark.parametrize("name", README_FILES)
+def test_release_summary_covers_parser_and_timestamp_fixes(name):
+    summaries = [line for line in (ROOT / name).read_text(encoding="utf-8").splitlines()
+                 if f"**FunASR {RELEASE_VERSION}**" in line]
+    assert len(summaries) == 1
+    assert "Python 3.12" in summaries[0]
+    assert "distutils" in summaries[0]
+    for number in (3863, 3866):
+        assert f"https://github.com/modelscope/FunASR/pull/{number}" in summaries[0]
+
 
 
 
