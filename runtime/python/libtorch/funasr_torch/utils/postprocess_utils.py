@@ -347,6 +347,11 @@ def format_str_v2(s):
     return s.strip()
 
 
+def _is_spaced_char(ch):
+    """Latin and Hangul text separates words with spaces; CJK text does not."""
+    return (ch.isascii() and not ch.isspace()) or "\uac00" <= ch <= "\ud7a3"
+
+
 def rich_transcription_postprocess(s):
     def get_emo(s):
         return s[-1] if s[-1] in emo_set else None
@@ -371,6 +376,10 @@ def rich_transcription_postprocess(s):
         cur_ent_event = get_event(s_list[i])
         if get_emo(s_list[i]) != None and get_emo(s_list[i]) == get_emo(new_s):
             new_s = new_s[:-1]
-        new_s += s_list[i].strip().lstrip()
+        segment = s_list[i].strip()
+        # Each VAD segment is its own <|lang|> block; keep the word boundary between them.
+        if segment and _is_spaced_char(new_s[-1]) and _is_spaced_char(segment[0]):
+            new_s += " "
+        new_s += segment
     new_s = new_s.replace("The.", " ")
     return new_s.strip()

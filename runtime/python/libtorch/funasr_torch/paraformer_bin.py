@@ -120,10 +120,10 @@ class Paraformer:
                         pred = sentence_postprocess(pred)
                         asr_res.append({"preds": pred})
                 else:
-                    for pred, us_peaks_ in zip(preds, us_peaks):
+                    for pred, us_peaks_, feat_len in zip(preds, us_peaks, feats_len):
                         raw_tokens = pred
                         timestamp, timestamp_raw = time_stamp_lfr6_onnx(
-                            us_peaks_, copy.copy(raw_tokens)
+                            us_peaks_[: feat_len * 3], copy.copy(raw_tokens)
                         )
                         text_proc, timestamp_proc, _ = sentence_postprocess(
                             raw_tokens, timestamp_raw

@@ -34,7 +34,9 @@ def test_repeated_event_only_segments_keep_following_text(postprocess, event, fo
 
     result = postprocess.rich_transcription_postprocess(text)
 
-    assert result == postprocess.event_dict[event] + "hello" + following_text
+    assert result == postprocess.event_dict[event] + " ".join(
+        filter(None, ["hello", following_text])
+    )
 
 
 @pytest.mark.parametrize("event", ["<|Cough|>", "<|Sneeze|>", "<|Applause|>"])
