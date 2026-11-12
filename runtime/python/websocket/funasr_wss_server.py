@@ -155,6 +155,25 @@ def _safe_int(v, default):
         return default
 
 
+def _model_hotwords(hotwords):
+    """Turn protocol hotwords into the space-separated string AutoModel reads.
+
+    Clients send hotwords as a JSON object string with weights, such as
+    '{"阿里巴巴": 20, "通义实验室": 30}' (runtime/docs/websocket_protocol.md).
+    AutoModel splits a hotword string on whitespace and takes no weights, so
+    keep only the words, as the C++ server does for NN hotwords. Any other
+    value is returned unchanged.
+    """
+    if isinstance(hotwords, str):
+        try:
+            parsed = json.loads(hotwords)
+        except ValueError:
+            return hotwords
+        if isinstance(parsed, dict):
+            return " ".join(parsed)
+    return hotwords
+
+
 # ========= speaker db：加缓存，避免每段都读盘 =========
 _SPEAKER_DB_CACHE = {}
 _SPEAKER_DB_CACHE_TS = 0.0
@@ -502,7 +521,7 @@ async def ws_serve(websocket, path=None):
                     ]
 
                 if "hotwords" in messagejson:
-                    hotword_data = messagejson["hotwords"]
+                    hotword_data = _model_hotwords(messagejson["hotwords"])
                     websocket.status_dict_asr["hotword"] = hotword_data
                     websocket.status_dict_asr_online["hotword"] = hotword_data
                     print(f"热词已更新: {hotword_data}")
