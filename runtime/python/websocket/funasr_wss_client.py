@@ -207,15 +207,21 @@ async def record_from_scp(chunk_begin, chunk_size, completion_queue):
             with open(args.hotword, encoding="utf-8") as f_scp:
                 hot_lines = f_scp.readlines()
 
-            hot_list = []
+            # the protocol's {"hotword": weight} JSON object, as in record_microphone
+            fst_dict = {}
             for line in hot_lines:
                 words = line.strip().split()
                 if not words:
                     continue
-                # Python AutoModel: 用逗号分隔多个热词
-                hot_list.append(words[0])
+                if len(words) < 2:
+                    print("Please checkout format of hotwords")
+                    continue
+                try:
+                    fst_dict[" ".join(words[:-1])] = int(words[-1])
+                except ValueError:
+                    print("Please checkout format of hotwords")
 
-            hotword_msg = ",".join(hot_list)
+            hotword_msg = json.dumps(fst_dict, ensure_ascii=False)
         else:
             hotword_msg = args.hotword
 
