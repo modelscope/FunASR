@@ -45,7 +45,7 @@ parser.add_argument("--port", type=int, default=10095, required=False, help="grp
 parser.add_argument(
     "--asr_model",
     type=str,
-    default="iic/speech_paraformer-large-contextual_asr_nat-zh-cn-16k-common-vocab8404",
+    default="paraformer-zh",
     help="model from modelscope",
 )
 parser.add_argument("--asr_model_revision", type=str, default="v2.0.4", help="")
@@ -235,8 +235,8 @@ from funasr import AutoModel  # noqa
 
 # ====== 离线 ASR ======
 model_asr = AutoModel(
-    model="paraformer-zh",
-    model_revision="v2.0.4",
+    model=args.asr_model,
+    model_revision=args.asr_model_revision,
     ngpu=args.ngpu,
     ncpu=args.ncpu,
     device=args.device,
