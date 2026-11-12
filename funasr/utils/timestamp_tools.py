@@ -189,6 +189,11 @@ def timestamp_sentence(
 
         punc_id = int(punc_id) if punc_id is not None else 1
         sentence_end = timestamp[1] if timestamp is not None else sentence_end
+        # Latin tokens are inserted with a leading space. Drop one leading
+        # space, as timestamp_sentence_en does, so a sentence that starts
+        # with an English word is not stored as " iphone...".
+        if sentence_text.startswith(" "):
+            sentence_text = sentence_text[1:]
         if punc_id > 1:
             sentence_text += punc_list[punc_id - 2]
             if sentence_text_seg.endswith(" "):

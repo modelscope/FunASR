@@ -7,7 +7,7 @@ import unittest
 ROOT = Path(__file__).resolve().parents[1]
 PACKAGE_ROOT = ROOT / "runtime" / "python" / "onnxruntime"
 SETUP_PATH = PACKAGE_ROOT / "setup.py"
-EXPECTED_VERSION = "0.4.9"
+EXPECTED_VERSION = "0.4.10"
 REQUIREMENT_NAME_PATTERN = re.compile(r"^\s*([A-Za-z0-9](?:[A-Za-z0-9._-]*[A-Za-z0-9])?)")
 
 
@@ -44,7 +44,7 @@ def normalized_requirement_name(requirement):
 
 
 class FunASROnnxReleaseContractTest(unittest.TestCase):
-    def test_release_version_is_0_4_9(self):
+    def test_release_version_is_0_4_10(self):
         self.assertEqual(assigned_literal(read_setup_tree(), "VERSION_NUM"), EXPECTED_VERSION)
 
     def test_standalone_license_preserves_repository_notice(self):
@@ -68,6 +68,8 @@ class FunASROnnxReleaseContractTest(unittest.TestCase):
         readme = (PACKAGE_ROOT / "README.md").read_text()
         self.assertIn(f'pip install -U "funasr-onnx>={EXPECTED_VERSION}"', readme)
         self.assertIn("does not update the installed ONNX wrappers", readme)
+        self.assertIn("#3865", readme)
+        self.assertIn("without creating a WAV sidecar", readme)
         self.assertIn("short/final VAD", readme)
         self.assertIn("zero-overlap", readme)
         self.assertIn("one independent result per input", readme)

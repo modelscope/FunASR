@@ -96,6 +96,26 @@ class SentencePostprocessTimestampTest(unittest.TestCase):
                     ("你好", ["你", "好"]),
                 )
 
+    def test_spelled_out_letters_are_one_word_with_one_timestamp(self):
+        self.assert_timestamps(
+            ["我", "用", "a", "i", "写", "代", "码"],
+            ["我", "用", "AI", "写", "代", "码"],
+            [[0, 100], [100, 200], [200, 400], [400, 500], [500, 600], [600, 700]],
+        )
+        self.assert_timestamps(
+            ["i", "b", "m", "is", "here"],
+            ["IBM", "is", "here"],
+            [[0, 300], [300, 400], [400, 500]],
+        )
+
+    def test_spelled_out_letters_are_one_word_without_timestamps(self):
+        for path in POSTPROCESS_UTILS:
+            with self.subTest(path=path):
+                self.assertEqual(
+                    _load_sentence_postprocess(path)(["看", "c", "c", "t", "v", "新", "闻"]),
+                    ("看CCTV新闻", ["看", "CCTV", "新", "闻"]),
+                )
+
 
 if __name__ == "__main__":
     unittest.main()
