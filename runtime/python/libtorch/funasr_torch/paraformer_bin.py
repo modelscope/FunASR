@@ -365,7 +365,10 @@ class ContextualParaformer(Paraformer):
         return asr_res
 
     def proc_hotword(self, hotwords):
-        hotwords = hotwords.split(" ")
+        # Like the C++ runtime, skip empty hotwords and keep the first max_hotword_len
+        # characters of longer ones: the exported embedding model takes that many per hotword.
+        max_hotword_len = 10
+        hotwords = [hotword[:max_hotword_len] for hotword in hotwords.split()]
         hotwords_length = [len(i) - 1 for i in hotwords]
         hotwords_length.append(0)
         hotwords_length = np.array(hotwords_length)
@@ -385,7 +388,7 @@ class ContextualParaformer(Paraformer):
 
         hotword_int = [word_map(i) for i in hotwords]
         hotword_int.append(np.array([1]))
-        hotwords = pad_list(hotword_int, pad_value=0, max_len=10)
+        hotwords = pad_list(hotword_int, pad_value=0, max_len=max_hotword_len)
         return torch.tensor(hotwords), hotwords_length
 
     def bb_infer(

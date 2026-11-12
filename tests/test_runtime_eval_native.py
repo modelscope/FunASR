@@ -404,3 +404,32 @@ def test_onnx_wrappers_read_non_wav_paths(native_fixture, tmp_path, monkeypatch,
     model = funasr_onnx.Paraformer(str(directory), device_id=DEVICE, intra_op_num_threads=1)
     assert model(str(audio)) == model(expected)
     assert {path.name: path.read_bytes() for path in tmp_path.iterdir()} == files
+
+
+@pytest.mark.parametrize("backend", ["torch", "onnx"])
+@pytest.mark.parametrize("wrapper", ["ContextualParaformer", "SeacoParaformer"])
+def test_hotword_wrappers_skip_empty_and_cut_long_hotwords(
+    hotword_fixture, monkeypatch, backend, wrapper
+):
+    directory, paths = hotword_fixture
+    location = "libtorch" if backend == "torch" else "onnxruntime"
+    monkeypatch.syspath_prepend(str(ROOT / "runtime/python" / location))
+    module = importlib.import_module("funasr_" + backend + ".paraformer_bin")
+    model = getattr(module, wrapper)(str(directory), intra_op_num_threads=1)
+    # Like the C++ runtime: skip empty hotwords, and keep the first 10 characters of a longer
+    # one (the exported model_eb takes 10 per hotword). Ids: <s> 1, 你 3, 好 4, 魔 5, 搭 6.
+    long_hotwords = " 魔搭  你好魔搭你好魔搭你好魔搭 "
+    matrix, positions = model.proc_hotword(long_hotwords)
+    assert matrix.tolist() == [
+        [5, 6, 0, 0, 0, 0, 0, 0, 0, 0],
+        [3, 4, 5, 6, 3, 4, 5, 6, 3, 4],
+        [1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    ]
+    assert positions.tolist() == [1, 9, 0]
+    matrix, positions = model.proc_hotword("")
+    assert matrix.tolist() == [[1, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
+    assert positions.tolist() == [0]
+    # Both decode every file; the 12-character hotword used to stop the call with a ValueError.
+    for hotwords in (long_hotwords, ""):
+        result = model(paths, hotwords)
+        assert [row["preds"][0] for row in result] == ["你" * 4, "你" * 11, "你" * 17]
