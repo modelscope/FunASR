@@ -1173,7 +1173,8 @@ class AutoModel:
             # TODO: rewrite for clean code
             for j in range(n):
                 for k, v in restored_data[j].items():
-                    if k.startswith("timestamp"):
+                    # timestamp, timestamps and Fun-ASR-Nano's ctc_timestamps
+                    if k.startswith("timestamp") or k == "ctc_timestamps":
                         if k not in result:
                             result[k] = []
                         for t in restored_data[j][k]:
