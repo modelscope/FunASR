@@ -176,6 +176,23 @@ def load_audio_text_image_video(
         pass
         # print(f"unsupport data type: {data_or_path_or_list}, return raw data")
 
+    if (
+        isinstance(data_or_path_or_list, torch.Tensor)
+        and data_or_path_or_list.ndim == 2
+        and data_or_path_or_list.is_floating_point()
+        and data_type in (None, "sound")
+        and kwargs.get("reduce_channels", True)
+    ):
+        # In-memory waveforms follow either torchaudio's (channels, samples) or
+        # soundfile's (samples, channels) layout; the channel axis is the shorter one.
+        # Files are already reduced to mono above.
+        if data_or_path_or_list.numel() == 0:
+            data_or_path_or_list = data_or_path_or_list.reshape(-1)
+        else:
+            data_or_path_or_list = data_or_path_or_list.mean(
+                0 if data_or_path_or_list.shape[0] <= data_or_path_or_list.shape[1] else 1
+            )
+
     if audio_fs != fs and data_type != "text":
         if torchaudio is not None:
             resampler = torchaudio.transforms.Resample(audio_fs, fs)
