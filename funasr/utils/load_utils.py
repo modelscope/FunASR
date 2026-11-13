@@ -159,6 +159,9 @@ def load_audio_text_image_video(
     elif isinstance(data_or_path_or_list, str) and data_type == "text" and tokenizer is not None:
         data_or_path_or_list = tokenizer.encode(data_or_path_or_list)
     elif isinstance(data_or_path_or_list, np.ndarray):  # audio sample point
+        if data_or_path_or_list.dtype == np.int16 and data_type in (None, "sound"):
+            # PCM16 samples, as load_bytes and the kaldi_ark branch below read them.
+            data_or_path_or_list = data_or_path_or_list.astype(np.float32) / 32768.0
         data_or_path_or_list = torch.from_numpy(data_or_path_or_list)  # .squeeze()  # [n_samples,]
     elif isinstance(data_or_path_or_list, str) and data_type == "kaldi_ark":
         data_mat = kaldiio.load_mat(data_or_path_or_list)
