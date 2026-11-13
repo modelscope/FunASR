@@ -10,6 +10,19 @@
   "lead_image": "/img/funclip-v2-1-0-interface.jpg",
   "articles": [
     {
+      "slug": "hotwords-package-boundaries",
+      "category": "explanations",
+      "reviewed": true,
+      "zh": {
+        "title": "热词没有生效？先核对传递链路和安装包",
+        "summary": "从 WebSocket 消息到 Torch 独立运行时，核对热词格式、安装版本和批次时间戳，避免把接口修复当作准确率保证。"
+      },
+      "en": {
+        "title": "Hotwords not working? Check the request path and installed package",
+        "summary": "Check hotword encoding, standalone package versions and batched timestamps, without confusing interface fixes with recognition accuracy guarantees."
+      }
+    },
+    {
       "slug": "sensevoice-finetuning-acceptance",
       "category": "explanations",
       "reviewed": true,
