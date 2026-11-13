@@ -41,6 +41,71 @@ class InstalledOnnxPackageTest(unittest.TestCase):
     LOADERS = (funasr_onnx.Paraformer, ParaformerOnline,
                funasr_onnx.SenseVoiceSmall, funasr_onnx.Fsmn_vad)
 
+    def test_long_and_empty_hotwords_stay_within_embedding_bounds(self):
+        for cls in (funasr_onnx.ContextualParaformer, funasr_onnx.SeacoParaformer):
+            with self.subTest(wrapper=cls.__name__):
+                model = cls.__new__(cls)
+                model.vocab = {'a': 3, 'b': 4}
+                matrix, positions = model.proc_hotword(' ab  abababababab ')
+                self.assertEqual(matrix.tolist(), [
+                    [3, 4, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [3, 4, 3, 4, 3, 4, 3, 4, 3, 4],
+                    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                ])
+                self.assertEqual(positions.tolist(), [1, 9, 0])
+                for value in ('', '   \t\n'):
+                    matrix, positions = model.proc_hotword(value)
+                    self.assertEqual(matrix.tolist(), [[1, 0, 0, 0, 0, 0, 0, 0, 0, 0]])
+                    self.assertEqual(positions.tolist(), [0])
+
+    def test_batched_timestamps_use_each_input_length(self):
+        def features(lengths):
+            return np.zeros((len(lengths), max(lengths), 4), dtype=np.float32), np.array(lengths)
+
+        def acoustic_output(feats, lengths):
+            peaks = np.zeros((len(lengths), feats.shape[1] * 3), dtype=np.float32)
+            for row, length in enumerate(lengths):
+                peaks[row, np.linspace(5, length * 3 - 6, 3).round().astype(int)] = 1
+            return None, None, np.zeros_like(peaks), peaks
+
+        # Acoustic outputs are synthetic. The installed batching, timestamp and
+        # postprocessing code must keep the shorter sample independent of padding.
+        for cls in (funasr_onnx.Paraformer, funasr_onnx.ContextualParaformer,
+                    funasr_onnx.SeacoParaformer):
+            with self.subTest(wrapper=cls.__name__):
+                model = cls.__new__(cls)
+                model.batch_size = 2
+                model.plot_timestamp_to = ''
+                model.language = 'zh'
+                model.frontend = SimpleNamespace(opts=SimpleNamespace(
+                    frame_opts=SimpleNamespace(samp_freq=16000)))
+                model.load_data = lambda values, fs: values
+                model.extract_feat = features
+                model.decode = lambda scores, lens: [['\u4f60', '\u597d'] for _ in range(model._rows)]
+
+                def infer(feats, lengths, *unused):
+                    model._rows = len(lengths)
+                    return acoustic_output(feats, lengths)
+
+                model.infer = infer
+                model.bb_infer = infer
+                model.vocab = {'a': 3}
+                model.eb_infer = lambda hotwords, lengths: [np.zeros((10, len(hotwords), 4), dtype=np.float32)]
+                args = () if cls is funasr_onnx.Paraformer else ('a',)
+                single = [model([length], *args)[0] for length in [17, 50]]
+                self.assertEqual([x['timestamp'] for x in single], [
+                    [[70, 470], [470, 945]], [[70, 670], [1450, 2925]],
+                ])
+                self.assertEqual(model([17, 50], *args), single)
+
+    def test_terminal_abbreviation_preserves_text_and_timestamps(self):
+        from funasr_onnx.utils.postprocess_utils import abbr_dispose
+
+        self.assertEqual(abbr_dispose(['a', ' ', 'b']), ['AB'])
+        self.assertEqual(abbr_dispose(['a', ' ', 'b'], [[0, 100], [100, 200]]),
+                         (['AB'], [[0, 200]]))
+        self.assertEqual(abbr_dispose(['a', ' ', 'b', ' ', 'c']), ['ABC'])
+
     def test_lossless_non_wav_without_sidecar(self):
         samples = (np.arange(4800, dtype=np.int16) - 2400).astype(np.float32) / 32768
         with tempfile.TemporaryDirectory() as directory:
@@ -91,7 +156,7 @@ class InstalledOnnxPackageTest(unittest.TestCase):
 
     def test_installed_distribution_version_and_origin(self):
         distribution = importlib.metadata.distribution('funasr-onnx')
-        self.assertEqual(distribution.version, '0.4.10')
+        self.assertEqual(distribution.version, '0.4.11')
         self.assertEqual(
             Path(funasr_onnx.__file__).resolve().parent,
             Path(distribution.locate_file('funasr_onnx')).resolve(),
