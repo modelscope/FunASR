@@ -8,6 +8,7 @@ import importlib
 import json
 import os
 from pathlib import Path
+import shutil
 import subprocess
 import sys
 import wave
@@ -275,6 +276,99 @@ def test_hotword_wrappers_decode_every_batch(
     assert model(paths, hotwords) == alone
 
 
+@pytest.fixture(scope="module")
+def timestamp_fixture(hotword_fixture, tmp_path_factory):
+    np = pytest.importorskip("numpy")
+    source, _ = hotword_fixture
+    directory = tmp_path_factory.mktemp("runtime-timestamp")
+    # The graphs only have to load: the timestamp test replaces the acoustic model's session.
+    for name, target in [
+        ("tokens.json", "tokens.json"),
+        ("model_eb.onnx", "model_eb.onnx"),
+        ("model.onnx", "model.onnx"),
+        ("model_bb.torchscript", "model.torchscript"),
+    ]:
+        shutil.copy(source / name, directory / target)
+    (directory / "config.yaml").write_text(
+        json.dumps(
+            {
+                "frontend_conf": {"n_mels": 4, "lfr_m": 7, "lfr_n": 6, "dither": 0.0},
+                "model_conf": {"predictor_bias": 1},
+            }
+        )
+    )
+    (directory / "am.mvn").write_text(
+        "<AddShift> 28 28\n<LearnRateCoef> 1 [ " + "0 " * 28 + "]\n"
+        "<Rescale> 28 28\n<LearnRateCoef> 1 [ " + "1 " * 28 + "]\n"
+    )
+    paths = []
+    for seconds in (1, 3):
+        path = directory / f"tone {seconds}s.wav"
+        tone = np.sin(np.arange(16000 * seconds) * 2 * np.pi * 440 / 16000) * 3000
+        with wave.open(str(path), "wb") as output:
+            output.setnchannels(1)
+            output.setsampwidth(2)
+            output.setframerate(16000)
+            output.writeframes(tone.astype("<i2").tobytes())
+        paths.append(str(path))
+    return directory, paths
+
+
+def timestamp_outputs(feats, feats_len):
+    """BiCifParaformer-style outputs for 你 好, padded to the longest row like the exported graph.
+
+    Each row's three CIF peaks lie inside its own 3 * feats_len upsampled frames; the
+    frames after them are zero padding.
+    """
+    import numpy as np
+
+    batch = len(feats_len)
+    am_scores = np.zeros((batch, 3, 8), dtype=np.float32)
+    am_scores[:, [0, 1, 2], [3, 4, 2]] = 1.0  # 你 好 </s>
+    us_alphas = np.zeros((batch, 3 * feats.shape[1]), dtype=np.float32)
+    us_peaks = np.zeros_like(us_alphas)
+    for row, feat_len in enumerate(np.asarray(feats_len).tolist()):
+        frames = 3 * feat_len
+        us_alphas[row, :frames] = 3.0 / frames
+        us_peaks[row, np.linspace(5, frames - 6, 3).round().astype(int)] = 1.0
+    return [am_scores, np.full(batch, 3, dtype=np.int32), us_alphas, us_peaks]
+
+
+@pytest.mark.parametrize(
+    "backend, wrapper",
+    [
+        ("onnx", "Paraformer"),
+        ("onnx", "ContextualParaformer"),
+        ("onnx", "SeacoParaformer"),
+        ("torch", "Paraformer"),
+    ],
+)
+def test_batched_timestamps_ignore_padding(timestamp_fixture, monkeypatch, backend, wrapper):
+    torch = pytest.importorskip("torch")
+    directory, paths = timestamp_fixture
+    location = "libtorch" if backend == "torch" else "onnxruntime"
+    monkeypatch.syspath_prepend(str(ROOT / "runtime/python" / location))
+    module = importlib.import_module("funasr_" + backend + ".paraformer_bin")
+    model = getattr(module, wrapper)(str(directory), batch_size=2, intra_op_num_threads=1)
+    if backend == "torch":
+        model.ort_infer = lambda feats, feats_len: tuple(
+            torch.from_numpy(output) for output in timestamp_outputs(feats, feats_len)
+        )
+    elif wrapper == "Paraformer":
+        model.ort_infer = lambda inputs: timestamp_outputs(*inputs)
+    else:
+        model.ort_infer_bb = lambda inputs: timestamp_outputs(*inputs[:2])
+    hotwords = () if wrapper == "Paraformer" else ("魔搭",)
+    alone = [model(path, *hotwords)[0] for path in paths]
+    # The 1 s tone ends at 1000 ms, the 3 s tone at 3000 ms.
+    assert [row["timestamp"] for row in alone] == [
+        [[70, 470], [470, 945]],
+        [[70, 670], [1450, 2925]],
+    ]
+    # Batched with the 3 s tone, the 1 s tone must not take on the padded frames.
+    assert model(paths, *hotwords) == alone
+
+
 @pytest.mark.parametrize("extension", ["flac", "ogg", "mp3"])
 def test_onnx_wrappers_read_non_wav_paths(native_fixture, tmp_path, monkeypatch, extension):
     np = pytest.importorskip("numpy")
@@ -310,3 +404,32 @@ def test_onnx_wrappers_read_non_wav_paths(native_fixture, tmp_path, monkeypatch,
     model = funasr_onnx.Paraformer(str(directory), device_id=DEVICE, intra_op_num_threads=1)
     assert model(str(audio)) == model(expected)
     assert {path.name: path.read_bytes() for path in tmp_path.iterdir()} == files
+
+
+@pytest.mark.parametrize("backend", ["torch", "onnx"])
+@pytest.mark.parametrize("wrapper", ["ContextualParaformer", "SeacoParaformer"])
+def test_hotword_wrappers_skip_empty_and_cut_long_hotwords(
+    hotword_fixture, monkeypatch, backend, wrapper
+):
+    directory, paths = hotword_fixture
+    location = "libtorch" if backend == "torch" else "onnxruntime"
+    monkeypatch.syspath_prepend(str(ROOT / "runtime/python" / location))
+    module = importlib.import_module("funasr_" + backend + ".paraformer_bin")
+    model = getattr(module, wrapper)(str(directory), intra_op_num_threads=1)
+    # Like the C++ runtime: skip empty hotwords, and keep the first 10 characters of a longer
+    # one (the exported model_eb takes 10 per hotword). Ids: <s> 1, 你 3, 好 4, 魔 5, 搭 6.
+    long_hotwords = " 魔搭  你好魔搭你好魔搭你好魔搭 "
+    matrix, positions = model.proc_hotword(long_hotwords)
+    assert matrix.tolist() == [
+        [5, 6, 0, 0, 0, 0, 0, 0, 0, 0],
+        [3, 4, 5, 6, 3, 4, 5, 6, 3, 4],
+        [1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    ]
+    assert positions.tolist() == [1, 9, 0]
+    matrix, positions = model.proc_hotword("")
+    assert matrix.tolist() == [[1, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
+    assert positions.tolist() == [0]
+    # Both decode every file; the 12-character hotword used to stop the call with a ValueError.
+    for hotwords in (long_hotwords, ""):
+        result = model(paths, hotwords)
+        assert [row["preds"][0] for row in result] == ["你" * 4, "你" * 11, "你" * 17]

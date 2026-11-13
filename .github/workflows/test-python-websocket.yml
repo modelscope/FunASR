@@ -1,0 +1,55 @@
+name: Validate Python WebSocket
+
+on:
+  pull_request:
+    paths:
+      - "runtime/python/websocket/funasr_wss_server.py"
+      - "runtime/python/websocket/funasr_wss_client.py"
+      - "tests/test_websocket_server_asr_model.py"
+      - "tests/test_websocket_server_hotwords.py"
+      - "tests/test_websocket_file_finalization.py"
+      - ".github/workflows/test-python-websocket.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "runtime/python/websocket/funasr_wss_server.py"
+      - "runtime/python/websocket/funasr_wss_client.py"
+      - "tests/test_websocket_server_asr_model.py"
+      - "tests/test_websocket_server_hotwords.py"
+      - "tests/test_websocket_file_finalization.py"
+      - ".github/workflows/test-python-websocket.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  websocket:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install isolated protocol test dependencies
+        run: |
+          python -m pip install pytest numpy scipy websockets
+          python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
+      - name: Run constructor, hotword and file-finalization regressions
+        run: >-
+          python -m pytest -q
+          tests/test_websocket_server_asr_model.py
+          tests/test_websocket_server_hotwords.py
+          tests/test_websocket_file_finalization.py
+          --junitxml=websocket-test-results.xml
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: websocket-tests-py${{ matrix.python-version }}
+          path: websocket-test-results.xml
+          if-no-files-found: error
