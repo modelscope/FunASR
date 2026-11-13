@@ -3,6 +3,7 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+import ast
 import logging
 import math
 
@@ -19,6 +20,48 @@ from funasr.models.data2vec.wav2vec2 import (
     TransformerEncoder,
 )
 from funasr.models.transformer.utils.nets_utils import make_pad_mask
+
+
+def _parse_conv_feature_layers(expr):
+    """安全解析卷积层配置字符串，替代 eval()。
+
+    仅允许整数字面量、list/tuple 以及它们之间的 + / * 运算，
+    例如 "[(512,10,5)] + [(512,3,2)] * 4"。
+    配置可能来自下载的模型 config.yaml，eval() 会执行其中任意代码。
+
+    Args:
+        expr: 卷积层配置表达式字符串。
+
+    Returns:
+        解析后的层配置列表。
+    """
+    if not isinstance(expr, str):
+        return expr
+
+    def _eval_node(node):
+        if isinstance(node, ast.Expression):
+            return _eval_node(node.body)
+        if isinstance(node, ast.Constant) and type(node.value) is int:
+            return node.value
+        if isinstance(node, ast.UnaryOp) and isinstance(node.op, ast.USub):
+            operand = _eval_node(node.operand)
+            if type(operand) is int:
+                return -operand
+        if isinstance(node, ast.List):
+            return [_eval_node(e) for e in node.elts]
+        if isinstance(node, ast.Tuple):
+            return tuple(_eval_node(e) for e in node.elts)
+        if isinstance(node, ast.BinOp):
+            left, right = _eval_node(node.left), _eval_node(node.right)
+            if isinstance(node.op, ast.Add):
+                return left + right
+            if isinstance(node.op, ast.Mult):
+                return left * right
+        raise ValueError(
+            f"Unsupported conv_feature_layers expression: {expr!r}"
+        )
+
+    return _eval_node(ast.parse(expr, mode="eval"))
 
 
 def get_annealed_rate(start, end, curr_step, total_steps):
@@ -164,7 +207,7 @@ class Data2VecEncoder(nn.Module):
 
         # ConvFeatureExtractionModel
         self.conv_feature_layers = conv_feature_layers
-        feature_enc_layers = eval(conv_feature_layers)
+        feature_enc_layers = _parse_conv_feature_layers(conv_feature_layers)
         self.extractor_embed = feature_enc_layers[-1][0]
         self.feature_extractor = ConvFeatureExtractionModel(
             conv_layers=feature_enc_layers,
@@ -401,7 +444,7 @@ class Data2VecEncoder(nn.Module):
                 """
             return torch.floor((input_length - kernel_size).to(torch.float32) / stride + 1)
 
-        conv_cfg_list = eval(self.conv_feature_layers)
+        conv_cfg_list = _parse_conv_feature_layers(self.conv_feature_layers)
 
         for i in range(len(conv_cfg_list)):
             input_lengths = _conv_out_length(

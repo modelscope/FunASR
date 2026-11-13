@@ -1,3 +1,4 @@
+import ast
 import os
 import json
 import torch
@@ -193,7 +194,8 @@ def main_hydra(cfg: DictConfig):
         ("/Users/zhifu/funasr1.0/test_local/wav.scp", "/Users/zhifu/funasr1.0/test_local/text.txt"),
     )
     if isinstance(scp_file_list, str):
-        scp_file_list = eval(scp_file_list)
+        # 只允许字面量（路径列表/元组），禁止 eval 执行任意代码
+        scp_file_list = ast.literal_eval(scp_file_list)
     data_type_list = kwargs.get("data_type_list", ("source", "target"))
     jsonl_file_out = kwargs.get(
         "jsonl_file_out", "/Users/zhifu/funasr1.0/test_local/audio_datasets.jsonl"

@@ -117,7 +117,7 @@ class TritonPythonModel:
             value = value["string_value"]
             if key == "config_path":
                 with open(str(value), "rb") as f:
-                    config = yaml.load(f, Loader=yaml.Loader)
+                    config = yaml.safe_load(f)
 
         opts = kaldifeat.FbankOptions()
         opts.frame_opts.dither = 0.0
