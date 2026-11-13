@@ -5,12 +5,14 @@ on:
     paths:
       - "runtime/python/libtorch/**"
       - "tests/test_funasr_torch_package.py"
+      - "tests/test_funasr_torch_installed.py"
       - ".github/workflows/test-funasr-torch-package.yml"
   push:
     branches: [main]
     paths:
       - "runtime/python/libtorch/**"
       - "tests/test_funasr_torch_package.py"
+      - "tests/test_funasr_torch_installed.py"
       - ".github/workflows/test-funasr-torch-package.yml"
 
 permissions:
@@ -62,6 +64,13 @@ jobs:
           assert importlib.util.find_spec("torch_quant") is None
           print("Installed Torch runtime imports passed without ONNX Runtime or torch-quant")
           PY
+      - name: Exercise installed wheel and sdist regressions
+        run: |
+          python -m pip install --no-index --no-deps --no-build-isolation --target "$RUNNER_TEMP/torch-runtime-sdist" dist/torch-runtime/*.tar.gz
+          cp tests/test_funasr_torch_installed.py "$RUNNER_TEMP/test_funasr_torch_installed.py"
+          cd "$RUNNER_TEMP"
+          PYTHONPATH="$RUNNER_TEMP/torch-runtime-installed" python -m pytest -q test_funasr_torch_installed.py --junitxml="$GITHUB_WORKSPACE/torch-installed-wheel.xml"
+          PYTHONPATH="$RUNNER_TEMP/torch-runtime-sdist" python -m pytest -q test_funasr_torch_installed.py --junitxml="$GITHUB_WORKSPACE/torch-installed-sdist.xml"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -70,4 +79,6 @@ jobs:
             source-commit.txt
             resolved-dependencies.txt
             torch-package-results.xml
+            torch-installed-wheel.xml
+            torch-installed-sdist.xml
             dist/torch-runtime/*

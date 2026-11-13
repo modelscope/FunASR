@@ -1,5 +1,23 @@
 # Libtorch-python
 
+## Version 0.1.7
+
+This standalone Torch runtime release includes the already-merged fixes for
+mixed-length Paraformer timestamp batches, long/empty contextual hotwords,
+terminal abbreviations and rich-transcription word boundaries. Contextual and
+Seaco hotwords keep their first ten characters, matching the exported embedding
+width; empty whitespace entries are omitted. These limits are not configurable
+recognition-quality guarantees.
+
+Install `funasr-torch==0.1.7` in a dedicated environment. The root `funasr`
+distribution and `funasr-onnx` have separate versions and do not replace this
+package. Python WebSocket server-script changes are also separate.
+
+Wheel and source-distribution installation regressions exercise native wrapper
+and postprocessing behavior with synthetic acoustic outputs. Exact runtime
+source is bound to previously accepted real CUDA fixture tests; this release
+does not claim new pretrained ASR accuracy, performance or a full model suite.
+
 ## Export the model
 
 ### Install [modelscope and funasr](https://github.com/modelscope/FunASR#installation)
