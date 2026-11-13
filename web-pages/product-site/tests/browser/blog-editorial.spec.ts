@@ -1,4 +1,8 @@
 import { expect, test } from '@playwright/test';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+
+const catalogue = JSON.parse(readFileSync(resolve(__dirname, '../../data/blog.json'), 'utf8'));
 
 for (const prefix of ['', 'en/']) {
   for (const width of [390, 1440]) {
@@ -78,7 +82,10 @@ for (const prefix of ['', 'en/']) {
       }
       await page.locator(`[data-blog-more] a[href="/${prefix}blog/archive/"]`).click();
       const archive = page.locator('[data-blog-view="archive"]');
-      await expect(archive.locator('[data-blog-story]')).toHaveCount(37);
+      await expect(archive.locator('[data-blog-story]')).toHaveCount(catalogue.articles.length);
+      for (const { slug } of catalogue.articles) {
+        await expect(archive.locator(`[data-blog-story][href="/${prefix}blog/${slug}.html"]`)).toHaveCount(1);
+      }
       await page.screenshot({ path: testInfo.outputPath('archive.png') });
       await archive.locator(`a[href="/${prefix}blog/self-hosted-deepgram-assemblyai-alternative.html"]`).click();
       await expect(page.locator('article h1')).toBeVisible();

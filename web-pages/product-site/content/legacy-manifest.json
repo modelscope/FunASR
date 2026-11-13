@@ -138,6 +138,8 @@
     "static/online/wav.js": "63344c3e282b80349bdc64f7508f32346ce783609881dbfbc97827a36d594c35",
     "static/online/wsconnecter.js": "a619a1cab5e111c5ff4b77ec8e68e47f9dde6ba5d7a62ca2db0c1b083c33e8ca",
     "voice/index.html": "1a6bae9e1637fea91f2f97506f5847ebd0ce429136444afa61f0a75da0beea0b",
-    "vs-whisper.html": "7d73ff1f771e4c17117108b172c2ce1952e98738787bb7101f061bf51aa8f03c"
+    "vs-whisper.html": "7d73ff1f771e4c17117108b172c2ce1952e98738787bb7101f061bf51aa8f03c",
+    "blog/hotwords-package-boundaries.html": "be0aaad687d18fc9387fb35ed10f44272bd47e161ae3e489cb68ca4c860d4307",
+    "en/blog/hotwords-package-boundaries.html": "4eae4e3f485e5fd8c7ab1b64d6e2fb28e0e529d821b02e87f040a0a73bbd3085"
   }
 }
