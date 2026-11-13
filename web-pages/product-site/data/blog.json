@@ -10,6 +10,19 @@
   "lead_image": "/img/funclip-v2-1-0-interface.jpg",
   "articles": [
     {
+      "slug": "websocket-offline-model-options",
+      "category": "explanations",
+      "reviewed": true,
+      "zh": {
+        "title": "换了模型却没生效？核对 WebSocket 启动配置",
+        "summary": "区分离线和流式模型，用不加载权重的源码检查确认参数路由，再规划真实录音验收。"
+      },
+      "en": {
+        "title": "Changed the model, but not the result? Check the WebSocket configuration",
+        "summary": "Separate offline and streaming models, inspect argument routing without loading weights, then plan acceptance on real recordings."
+      }
+    },
+    {
       "slug": "hotwords-package-boundaries",
       "category": "explanations",
       "reviewed": true,
