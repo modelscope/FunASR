@@ -983,7 +983,9 @@ class AutoModel:
             speed_stats["extract_feat"] = meta_data.get("extract_feat", 0.0)
             speed_stats["forward"] = f"{time_escape:0.3f}"
             speed_stats["batch_size"] = f"{len(results)}"
-            speed_stats["rtf"] = f"{(time_escape) / batch_data_time:0.3f}"
+            # Input shorter than one feature frame reports zero speech time.
+            rtf = time_escape / batch_data_time if batch_data_time else float("nan")
+            speed_stats["rtf"] = f"{rtf:0.3f}"
             description = f"{speed_stats}, "
             if pbar:
                 pbar.update(end_idx - beg_idx)
@@ -998,7 +1000,8 @@ class AutoModel:
 
         if pbar:
             # pbar.update(1)
-            pbar.set_description(f"rtf_avg: {time_escape_total/time_speech_total:0.3f}")
+            rtf_avg = time_escape_total / time_speech_total if time_speech_total else float("nan")
+            pbar.set_description(f"rtf_avg: {rtf_avg:0.3f}")
 
         device = next(model.parameters()).device
         if device.type == "cuda":
