@@ -7,7 +7,7 @@ import unittest
 ROOT = Path(__file__).resolve().parents[1]
 PACKAGE_ROOT = ROOT / "runtime" / "python" / "onnxruntime"
 SETUP_PATH = PACKAGE_ROOT / "setup.py"
-EXPECTED_VERSION = "0.4.10"
+EXPECTED_VERSION = "0.4.11"
 REQUIREMENT_NAME_PATTERN = re.compile(r"^\s*([A-Za-z0-9](?:[A-Za-z0-9._-]*[A-Za-z0-9])?)")
 
 
@@ -44,7 +44,7 @@ def normalized_requirement_name(requirement):
 
 
 class FunASROnnxReleaseContractTest(unittest.TestCase):
-    def test_release_version_is_0_4_10(self):
+    def test_release_version_is_0_4_11(self):
         self.assertEqual(assigned_literal(read_setup_tree(), "VERSION_NUM"), EXPECTED_VERSION)
 
     def test_standalone_license_preserves_repository_notice(self):
@@ -83,6 +83,9 @@ class FunASROnnxReleaseContractTest(unittest.TestCase):
         self.assertIn("#3847", readme)
         self.assertIn("empty or sub-frame", readme)
         self.assertIn("preserves the streaming cache", readme)
+        self.assertIn("#3869", readme)
+        self.assertIn("#3871", readme)
+        self.assertIn("#3882", readme)
 
     def test_runtime_dependencies_keep_onnx_install_torch_free(self):
         requirements = setup_keyword_literal(read_setup_tree(), "install_requires")

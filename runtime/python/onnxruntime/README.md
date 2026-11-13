@@ -7,6 +7,12 @@ does not update the installed ONNX wrappers. Check their versions separately
 with `python -m pip show funasr-onnx funasr`; use the source installation below
 when a required wrapper fix is newer than the published PyPI package.
 
+Version 0.4.11 keeps timestamps independent of padded samples in a batch
+(#3871), bounds Contextual/Seaco hotwords to the exported ten-character
+embedding input and skips whitespace-only entries (#3882), and preserves
+terminal abbreviations and their timestamps (#3869). These are wrapper and
+postprocessing fixes, not model-weight updates or ASR accuracy claims.
+
 Version 0.4.10 restores direct librosa decoding for non-WAV audio in offline
 and streaming Paraformer, SenseVoice and offline VAD (#3865), without creating a WAV sidecar
 or treating every non-WAV input as MP3. Codec support still depends on the
@@ -45,9 +51,9 @@ and postprocessing fixes, not a model-weight update or an ASR accuracy claim.
 install from pip
 
 ```shell
-pip install -U "funasr-onnx>=0.4.10"
+pip install -U "funasr-onnx>=0.4.11"
 # For the users in China, you could install with the command:
-# pip install -U "funasr-onnx>=0.4.10" -i https://mirror.sjtu.edu.cn/pypi/web/simple
+# pip install -U "funasr-onnx>=0.4.11" -i https://mirror.sjtu.edu.cn/pypi/web/simple
 # If you want to export .onnx file, you should install modelscope and funasr
 pip install -U modelscope funasr
 # For the users in China, you could install with the command:
