@@ -22349,7 +22349,7 @@
                 ):
                     data_or_path_or_list_j = load_audio_text_image_video(
 </code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/load_utils.py#L51" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
-<div class="api-detail" id="e390" tabindex="-1"><span class="dtag badge-f">function</span><h2><code>load_bytes(input, input_format="auto")</code></h2><div class="dmod">funasr.utils.load_utils · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/load_utils.py#L315" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Convert raw PCM or container-formatted audio bytes to a waveform.</p>
+<div class="api-detail" id="e390" tabindex="-1"><span class="dtag badge-f">function</span><h2><code>load_bytes(input, input_format="auto")</code></h2><div class="dmod">funasr.utils.load_utils · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/load_utils.py#L335" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Convert raw PCM or container-formatted audio bytes to a waveform.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>input (bytes)</code> — Raw int16 PCM or encoded audio-file bytes.</li>
@@ -22391,8 +22391,8 @@
             ) from exc
         else:
             if isinstance(waveform, torch.Tensor):
-</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/load_utils.py#L315" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
-<div class="api-detail" id="e391" tabindex="-1"><span class="dtag badge-f">function</span><h2><code>validate_frame_rate(input, fs: int = 16000)</code></h2><div class="dmod">funasr.utils.load_utils · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/load_utils.py#L363" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Validate frame rate.</p>
+</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/load_utils.py#L335" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
+<div class="api-detail" id="e391" tabindex="-1"><span class="dtag badge-f">function</span><h2><code>validate_frame_rate(input, fs: int = 16000)</code></h2><div class="dmod">funasr.utils.load_utils · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/load_utils.py#L383" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Validate frame rate.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>input</code> — Input audio/text data.</li>
@@ -22428,8 +22428,8 @@
         output = BytesIO()
         audio.export(output, format="wav")
         output.seek(0)
-</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/load_utils.py#L363" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
-<div class="api-detail" id="e392" tabindex="-1"><span class="dtag badge-f">function</span><h2><code>extract_fbank(data, data_len=None, data_type: str = "sound", frontend=None, **kwargs)</code></h2><div class="dmod">funasr.utils.load_utils · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/load_utils.py#L400" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Extract filter-bank features from audio data.</p>
+</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/load_utils.py#L383" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
+<div class="api-detail" id="e392" tabindex="-1"><span class="dtag badge-f">function</span><h2><code>extract_fbank(data, data_len=None, data_type: str = "sound", frontend=None, **kwargs)</code></h2><div class="dmod">funasr.utils.load_utils · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/load_utils.py#L420" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Extract filter-bank features from audio data.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>data</code> — Audio samples (list of numpy arrays or tensors).</li>
@@ -22471,7 +22471,7 @@
         for data_i in data:
             if isinstance(data_i, np.ndarray):
                 data_i = torch.from_numpy(data_i)
-</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/load_utils.py#L400" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
+</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/load_utils.py#L420" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
 <div class="api-detail" id="e393" tabindex="-1"><span class="dtag badge-f">function</span><h2><code>statistic_model_parameters(model, prefix=None)</code></h2><div class="dmod">funasr.utils.misc · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/misc.py#L10" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Statistic model parameters.</p>
 <h4>Args:</h4>
 <ul>
