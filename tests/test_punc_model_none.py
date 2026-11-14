@@ -623,6 +623,56 @@ class TestPuncModelNone(unittest.TestCase):
     @patch("funasr.auto.auto_model.slice_padding_audio_samples")
     @patch("funasr.auto.auto_model.load_audio_text_image_video")
     @patch("funasr.auto.auto_model.prepare_data_iterator")
+    def test_empty_asr_text_keeps_a_keyed_result(self, mock_prep, mock_load, mock_slice):
+        """VAD speech that decodes to no text must not remove the input from the results."""
+        for segments, asr_results in (
+            ([[0, 1000]], [[{"text": ""}]]),
+            ([[0, 1000], [2000, 3500]], [[{"text": ""}], [{"text": ""}]]),
+        ):
+            with self.subTest(segments=len(segments)):
+                am = self._make_auto_model(punc_model=MagicMock())
+                results_seq = [[{"key": "noise", "value": segments}], *asr_results]
+                am.inference = MagicMock(side_effect=lambda *args, **kwargs: results_seq.pop(0))
+                mock_prep.return_value = (["noise"], [np.zeros(16000, dtype=np.float32)])
+                mock_load.return_value = np.zeros(16000, dtype=np.float32)
+                mock_slice.return_value = ([np.zeros(16000, dtype=np.float32)], [16000])
+
+                results = am.inference_with_vad("dummy_input", sentence_timestamp=True)
+
+                self.assertEqual(results, [{"key": "noise", "text": "", "timestamp": []}])
+
+    @patch("funasr.auto.auto_model.slice_padding_audio_samples")
+    @patch("funasr.auto.auto_model.load_audio_text_image_video")
+    @patch("funasr.auto.auto_model.prepare_data_iterator")
+    def test_empty_asr_text_keeps_input_order(self, mock_prep, mock_load, mock_slice):
+        """Results stay aligned with a multi-input batch when one input has no text."""
+        am = self._make_auto_model()
+        results_seq = [
+            [
+                {"key": "first", "value": [[0, 1000]]},
+                {"key": "noise", "value": [[0, 1000]]},
+                {"key": "last", "value": [[0, 1000]]},
+            ],
+            [{"text": "hello", "timestamp": [[0, 500]]}],
+            [{"text": ""}],
+            [{"text": "world", "timestamp": [[0, 500]]}],
+        ]
+        am.inference = MagicMock(side_effect=lambda *args, **kwargs: results_seq.pop(0))
+        mock_prep.return_value = (
+            ["first", "noise", "last"],
+            [np.zeros(16000, dtype=np.float32)] * 3,
+        )
+        mock_load.return_value = np.zeros(16000, dtype=np.float32)
+        mock_slice.return_value = ([np.zeros(16000, dtype=np.float32)], [16000])
+
+        results = am.inference_with_vad("dummy_input")
+
+        self.assertEqual([r["key"] for r in results], ["first", "noise", "last"])
+        self.assertEqual([r["text"] for r in results], ["hello", "", "world"])
+
+    @patch("funasr.auto.auto_model.slice_padding_audio_samples")
+    @patch("funasr.auto.auto_model.load_audio_text_image_video")
+    @patch("funasr.auto.auto_model.prepare_data_iterator")
     def test_sentence_timestamp_ignores_empty_asr_words(self, mock_prep, mock_load, mock_slice):
         """Malformed word metadata must fall back to the existing aligned text."""
         am = self._make_auto_model(punc_model=MagicMock())
