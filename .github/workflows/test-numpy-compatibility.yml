@@ -30,6 +30,8 @@ on:
       - "tests/test_ct_transformer_streaming_empty_input.py"
       - "tests/test_pcm_input_format.py"
       - "tests/test_load_audio_bytes.py"
+      - "tests/test_load_audio_int16_array.py"
+      - "tests/test_load_audio_multichannel_arrays.py"
       - "funasr/frontends/**"
       - "funasr/models/normalize/utterance_mvn.py"
       - "tests/test_utterance_mvn.py"
@@ -74,6 +76,8 @@ on:
       - "tests/test_ct_transformer_streaming_empty_input.py"
       - "tests/test_pcm_input_format.py"
       - "tests/test_load_audio_bytes.py"
+      - "tests/test_load_audio_int16_array.py"
+      - "tests/test_load_audio_multichannel_arrays.py"
       - "funasr/frontends/**"
       - "funasr/models/normalize/utterance_mvn.py"
       - "tests/test_utterance_mvn.py"
@@ -146,6 +150,8 @@ jobs:
             tests/test_realtime_ws_service.py \
             tests/test_realtime_ws_hf_overrides.py \
             tests/test_load_audio_bytes.py \
+            tests/test_load_audio_int16_array.py \
+            tests/test_load_audio_multichannel_arrays.py \
             tests/test_timestamp_tools.py \
             tests/test_punc_model_none.py \
             tests/test_paraformer_empty_token_batch.py \
