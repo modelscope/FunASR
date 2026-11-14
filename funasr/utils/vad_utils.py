@@ -86,4 +86,14 @@ def merge_vad(vad_result, max_length=15000, min_length=0):
         #         new_result.append([bg + j * spl_l, bg + (j + 1) * spl_l])
         bg = time
     new_result.append([bg, time_step[-1]])
-    return new_result
+    # time_step mixes segment starts and ends, so a span can fall entirely in a pause
+    # between speech segments (or before the first one). Such pure-silence spans make
+    # the ASR model hallucinate text, so keep only spans that overlap a VAD segment.
+    vad_sorted = sorted(vad_result)
+    speech_result, j = [], 0
+    for seg in new_result:
+        while j < len(vad_sorted) and vad_sorted[j][1] <= seg[0]:
+            j += 1
+        if j < len(vad_sorted) and vad_sorted[j][0] < seg[1]:
+            speech_result.append(seg)
+    return speech_result
