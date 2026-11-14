@@ -128,3 +128,18 @@ def test_timestamp_sentence_does_not_emit_tail_without_its_timestamp(splitter):
 
     assert len(result) == 1
     assert result[0]["end"] == 200
+
+
+@pytest.mark.parametrize("punc_id_list", [None, []])
+def test_timestamp_sentence_without_punctuation_returns_string_text(punc_id_list):
+    timestamps = [[0, 100], [100, 200]]
+
+    zh = timestamp_sentence(punc_id_list, timestamps, "你 好", return_raw_text=True)
+    en = timestamp_sentence_en(punc_id_list, timestamps, "hello world", return_raw_text=True)
+
+    assert zh == [
+        {"text": "你好", "start": 0, "end": 200, "timestamp": timestamps, "raw_text": "你 好"}
+    ]
+    assert en == [
+        {"text": "hello world", "start": 0, "end": 200, "timestamp": timestamps, "raw_text": "hello world"}
+    ]

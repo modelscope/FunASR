@@ -150,16 +150,10 @@ def timestamp_sentence(
         return res
 
     if punc_id_list is None or len(punc_id_list) == 0:
-        res.append(
-            {
-                "text": text_postprocessed.split(),
-                "start": timestamp_postprocessed[0][0],
-                "end": timestamp_postprocessed[-1][1],
-                "timestamp": timestamp_postprocessed,
-            }
-        )
-        return res
-    if len(punc_id_list) != len(timestamp_postprocessed):
+        # No punctuation: the loop below yields a single sentence whose text is a
+        # string, like every other result.
+        punc_id_list = []
+    elif len(punc_id_list) != len(timestamp_postprocessed):
         logging.warning("length mismatch between punc and timestamp")
     sentence_text = ""
     sentence_text_seg = ""
@@ -257,16 +251,10 @@ def timestamp_sentence_en(
         return res
 
     if punc_id_list is None or len(punc_id_list) == 0:
-        res.append(
-            {
-                "text": text_postprocessed.split(),
-                "start": timestamp_postprocessed[0][0],
-                "end": timestamp_postprocessed[-1][1],
-                "timestamp": timestamp_postprocessed,
-            }
-        )
-        return res
-    if len(punc_id_list) != len(timestamp_postprocessed):
+        # No punctuation: the loop below yields a single sentence whose text is a
+        # string, like every other result.
+        punc_id_list = []
+    elif len(punc_id_list) != len(timestamp_postprocessed):
         logging.warning("length mismatch between punc and timestamp")
     sentence_text = ""
     sentence_text_seg = ""
