@@ -114,6 +114,8 @@ def load_seg_dict(seg_dict_file):
         lines = f.readlines()
         for line in lines:
             s = line.strip().split()
+            if not s:
+                continue
             key = s[0]
             value = s[1:]
             seg_dict[key] = " ".join(value)
