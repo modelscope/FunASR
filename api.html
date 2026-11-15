@@ -20442,12 +20442,14 @@
         lines = f.readlines()
         for line in lines:
             s = line.strip().split()
+            if not s:
+                continue
             key = s[0]
             value = s[1:]
             seg_dict[key] = " ".join(value)
     return seg_dict
 </code></pre></details></div>
-<div class="api-detail" id="e328" tabindex="-1"><span class="dtag badge-f">function</span><h2><code>seg_tokenize(txt, seg_dict)</code></h2><div class="dmod">funasr.tokenizer.char_tokenizer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/tokenizer/char_tokenizer.py#L123" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Seg tokenize.</p>
+<div class="api-detail" id="e328" tabindex="-1"><span class="dtag badge-f">function</span><h2><code>seg_tokenize(txt, seg_dict)</code></h2><div class="dmod">funasr.tokenizer.char_tokenizer · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/tokenizer/char_tokenizer.py#L125" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Seg tokenize.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>txt</code> — TODO.</li>
