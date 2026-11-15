@@ -677,7 +677,7 @@ class TestPuncModelNone(unittest.TestCase):
     @patch("funasr.auto.auto_model.load_audio_text_image_video")
     @patch("funasr.auto.auto_model.prepare_data_iterator")
     def test_sentence_timestamp_handles_unsized_punc_array(self, mock_prep, mock_load, mock_slice):
-        """Malformed punctuation metadata must use the legacy no-punctuation fallback."""
+        """Malformed punctuation metadata must use normalized sentence output."""
         am = self._make_auto_model(punc_model=MagicMock())
         results_seq = [
             [{"key": "test_utt", "value": [[0, 1000]]}],
@@ -697,7 +697,9 @@ class TestPuncModelNone(unittest.TestCase):
 
         results = am.inference_with_vad("dummy_input", sentence_timestamp=True)
 
-        self.assertEqual(results[0]["sentence_info"][0]["text"], ["你", "好"])
+        sentence = results[0]["sentence_info"][0]
+        self.assertEqual(sentence["text"], "你好")
+        self.assertEqual(sentence["timestamp"], [[0, 500], [500, 1000]])
 
 
 
