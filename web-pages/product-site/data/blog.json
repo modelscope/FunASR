@@ -10,6 +10,19 @@
   "lead_image": "/img/funclip-v2-1-0-interface.jpg",
   "articles": [
     {
+      "slug": "dictionary-input-checklist",
+      "category": "explanations",
+      "reviewed": true,
+      "zh": {
+        "title": "分词词典加载失败？先检查空行与重复键",
+        "summary": "运行只读 UTF-8 词典检查器，定位空行、重复键、缺失映射和隐藏字符，明确主线修复与已发布安装包的边界。"
+      },
+      "en": {
+        "title": "Dictionary loading failed? Check blank lines and duplicate keys",
+        "summary": "Run a read-only UTF-8 dictionary inspector to locate blank lines, duplicate keys, missing mappings and hidden characters, with explicit source-versus-package boundaries."
+      }
+    },
+    {
       "slug": "wav-pcm-input-checklist",
       "category": "explanations",
       "reviewed": true,
