@@ -263,6 +263,8 @@ class ClusterBackend(torch.nn.Module):
         elif k is not None:
             labels = self.kmeans_cluster(X, k)
         else:
+            if isinstance(X, torch.Tensor):
+                X = X.detach().cpu().numpy()
             labels = self.umap_hdbscan_cluster(X)
             labels = self.merge_to_max_spks(labels, X, self.spectral_cluster.max_num_spks)
 
