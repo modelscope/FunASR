@@ -554,6 +554,8 @@ class ContextualParaformer(Paraformer):
                 lines = f.readlines()
                 for line in lines:
                     s = line.strip().split()
+                    if not s:
+                        continue
                     key = s[0]
                     value = s[1:]
                     seg_dict[key] = " ".join(value)
