@@ -2,6 +2,8 @@ from typing import Collection
 
 from jaconv import jaconv
 
+from funasr.tokenizer.korean_cleaner import KoreanCleaner
+
 # import tacotron_cleaner.cleaners
 
 try:
