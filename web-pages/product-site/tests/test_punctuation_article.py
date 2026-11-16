@@ -93,6 +93,6 @@ def test_bilingual_examples_match_and_homepage_is_not_expanded():
     assert row["reviewed"] and row["category"] == "explanations"
     assert data["lead"] == "funclip-v2-2-0-moss-speaker-clipping"
     assert data["selected"] == [
-        "meeting-transcript-acceptance", "fun-asr-nano-transformers",
+        "meeting-transcript-acceptance", "speech-to-text-python-transcribe-audio",
         "self-hosted-openai-whisper-api-alternative", "funasr-transcribe-long-audio",
     ]

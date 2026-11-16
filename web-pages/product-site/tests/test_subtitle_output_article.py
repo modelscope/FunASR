@@ -75,6 +75,6 @@ def test_subtitle_story_does_not_expand_homepage_selection():
     assert row["reviewed"] and row["category"] == "applications"
     assert data["lead"] == "funclip-v2-2-0-moss-speaker-clipping"
     assert data["selected"] == [
-        "meeting-transcript-acceptance", "fun-asr-nano-transformers",
+        "meeting-transcript-acceptance", "speech-to-text-python-transcribe-audio",
         "self-hosted-openai-whisper-api-alternative", "funasr-transcribe-long-audio",
     ]
