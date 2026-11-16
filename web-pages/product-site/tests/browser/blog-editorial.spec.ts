@@ -9,7 +9,8 @@ for (const prefix of ['', 'en/']) {
     test(`selected article text contrast ${prefix || 'zh'} at ${width}px`, async ({ page }, testInfo) => {
       await page.setViewportSize({ width, height: 900 });
       for (const slug of ['funclip-v2-2-0-moss-speaker-clipping', 'meeting-transcript-acceptance',
-        'fun-asr-nano-transformers', 'self-hosted-openai-whisper-api-alternative', 'funasr-transcribe-long-audio']) {
+        'fun-asr-nano-transformers', 'speech-to-text-python-transcribe-audio',
+        'self-hosted-openai-whisper-api-alternative', 'funasr-transcribe-long-audio']) {
         await page.goto(`/${prefix}blog/${slug}.html`);
         const ratios = await page.locator('article p, article li').evaluateAll(nodes => {
           const luminance = (color: string) => {
