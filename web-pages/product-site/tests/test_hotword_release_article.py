@@ -21,7 +21,7 @@ def test_catalogue_contains_daily_article_once():
     assert len(entries) == 1
     assert entries[0]["reviewed"] and entries[0]["category"] == "explanations"
     assert data["selected"] == [
-        "meeting-transcript-acceptance", "fun-asr-nano-transformers",
+        "meeting-transcript-acceptance", "speech-to-text-python-transcribe-audio",
         "self-hosted-openai-whisper-api-alternative", "funasr-transcribe-long-audio",
     ]
 

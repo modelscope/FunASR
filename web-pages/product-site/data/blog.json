@@ -3,7 +3,7 @@
   "lead": "funclip-v2-2-0-moss-speaker-clipping",
   "selected": [
     "meeting-transcript-acceptance",
-    "fun-asr-nano-transformers",
+    "speech-to-text-python-transcribe-audio",
     "self-hosted-openai-whisper-api-alternative",
     "funasr-transcribe-long-audio"
   ],
@@ -480,14 +480,14 @@
     {
       "slug": "speech-to-text-python-transcribe-audio",
       "category": "applications",
-      "reviewed": false,
+      "reviewed": true,
       "zh": {
-        "title": "用 Python 转写一份录音",
-        "summary": ""
+        "title": "用 Python 把第一段录音转成文字",
+        "summary": "从认识工具包和模型开始，在独立 Python 环境中把一段普通话 WAV 转成 JSON 文本，附下载边界、排错步骤和 Agent 执行约定。"
       },
       "en": {
-        "title": "Transcribe a recording with Python",
-        "summary": ""
+        "title": "Transcribe your first recording with Python",
+        "summary": "Understand the toolkit and model, then turn a short Mandarin WAV into a JSON transcript in an isolated Python environment, with troubleshooting and an explicit Agent contract."
       }
     },
     {
