@@ -4,7 +4,7 @@ import pytest
 
 
 ROOT = Path(__file__).resolve().parents[1]
-RELEASE_VERSION = "1.4.26"
+RELEASE_VERSION = "1.4.27"
 README_FILES = ("README.md", "README_zh.md", "README_ja.md", "README_ko.md")
 REPOSITORY_ROLE_FILES = ("docs/repository_roles.md", "docs/repository_roles_zh.md")
 @pytest.mark.parametrize("name", README_FILES)
@@ -32,14 +32,16 @@ def test_release_summary_covers_parser_and_timestamp_fixes(name):
 
 
 @pytest.mark.parametrize("name", README_FILES)
-def test_release_summary_covers_vad_spacing_and_plain_text(name):
+def test_release_summary_covers_audio_arrays_zero_duration_timestamps_and_seg_dict(name):
     summaries = [line for line in (ROOT / name).read_text(encoding="utf-8").splitlines()
                  if f"**FunASR {RELEASE_VERSION}**" in line]
     assert len(summaries) == 1
-    assert "VAD" in summaries[0]
-    assert "response_format=text" in summaries[0]
-    for number in (3874, 3883):
+    for term in ("int16", "multichannel", "VAD", "timestamp", "blank"):
+        assert term in summaries[0]
+    for number in (3890, 3891, 3896, 3898, 3903):
         assert f"https://github.com/modelscope/FunASR/pull/{number}" in summaries[0]
+    assert f"funasr=={RELEASE_VERSION}" in summaries[0]
+    assert f"releases/tag/v{RELEASE_VERSION}" in summaries[0]
 
 
 
