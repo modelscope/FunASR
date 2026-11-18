@@ -1,25 +1,24 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Which FunASR Model? Nano vs MLT-Nano vs SenseVoice vs Paraformer (2026 Guide) | FunASR Blog</title>
-<meta name="description" content="Which FunASR model should you use? Pick flagship Fun-ASR-Nano for zh/en/ja plus Chinese dialects/accents; use the separate Fun-ASR-MLT-Nano for 31 languages; on CPU choose SenseVoice or Paraformer.">
-<meta name="keywords" content="which funasr model, fun-asr-nano, fun-asr-mlt-nano, 31 language speech recognition, sensevoice vs paraformer, funasr model comparison, SenseVoice, Paraformer, FunASR">
-<link rel="icon" href="/logo.png">
-<meta property="og:title" content="Which FunASR Model? Nano vs MLT-Nano vs SenseVoice vs Paraformer (2026 Guide) | FunASR Blog">
-<meta property="og:description" content="Which FunASR model should you use? Pick flagship Fun-ASR-Nano for zh/en/ja plus Chinese dialects/accents; use the separate Fun-ASR-MLT-Nano for 31 languages; on CPU choose SenseVoice or Paraformer.">
-<meta property="og:type" content="article">
-<meta property="og:url" content="https://www.funasr.com/en/blog/which-funasr-model.html">
-<meta property="og:image" content="https://www.funasr.com/logo.png">
-<link rel="canonical" href="https://www.funasr.com/en/blog/which-funasr-model.html">
-<link rel="alternate" hreflang="en" href="https://www.funasr.com/en/blog/which-funasr-model.html">
-<link rel="alternate" hreflang="zh" href="https://www.funasr.com/blog/which-funasr-model.html">
-<link rel="alternate" hreflang="x-default" href="https://www.funasr.com/en/blog/which-funasr-model.html">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<script type="application/ld+json">
-{"@context":"https://schema.org","@type":"BlogPosting","headline":"Which FunASR Model? Nano vs MLT-Nano vs SenseVoice vs Paraformer (2026 Guide) | FunASR Blog","description":"Which FunASR model should you use? Pick flagship Fun-ASR-Nano for zh/en/ja plus Chinese dialects/accents; use the separate Fun-ASR-MLT-Nano for 31 languages; on CPU choose SenseVoice or Paraformer.","datePublished":"2026-06-23","dateModified":"2026-07-15","author":{"@type":"Organization","name":"FunASR / Tongyi Lab"},"publisher":{"@type":"Organization","name":"FunASR","logo":{"@type":"ImageObject","url":"https://www.funasr.com/logo.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://www.funasr.com/en/blog/which-funasr-model.html"},"image":"https://www.funasr.com/logo.png"}
-</script>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<title>Choosing a FunASR model starts with the result you need | FunASR</title>
+<meta content="Distinguish text, subtitles and clipping; separate toolkits, models and runtimes; then write a selection brief covering language, output, timing and permissions." name="description"/>
+
+<link href="/logo.png" rel="icon"/>
+<meta content="Choosing a FunASR model starts with the result you need" property="og:title"/>
+<meta content="Distinguish text, subtitles and clipping; separate toolkits, models and runtimes; then write a selection brief covering language, output, timing and permissions." property="og:description"/>
+<meta content="article" property="og:type"/>
+<meta content="https://www.funasr.com/en/blog/which-funasr-model.html" property="og:url"/>
+<meta content="https://www.funasr.com/logo.png" property="og:image"/>
+<link href="https://www.funasr.com/en/blog/which-funasr-model.html" rel="canonical"/>
+<link href="https://www.funasr.com/en/blog/which-funasr-model.html" hreflang="en" rel="alternate"/>
+<link href="https://www.funasr.com/blog/which-funasr-model.html" hreflang="zh" rel="alternate"/>
+<link href="https://www.funasr.com/en/blog/which-funasr-model.html" hreflang="x-default" rel="alternate"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"Choosing a FunASR model starts with the result you need","description":"Distinguish text, subtitles and clipping; separate toolkits, models and runtimes; then write a selection brief covering language, output, timing and permissions.","datePublished":"2026-06-23","dateModified":"2026-11-19","author":{"@type":"Organization","name":"FunASR / Tongyi Lab"},"publisher":{"@type":"Organization","name":"FunASR","logo":{"@type":"ImageObject","url":"https://www.funasr.com/logo.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://www.funasr.com/en/blog/which-funasr-model.html"},"image":"https://www.funasr.com/logo.png"}</script>
 <style>:root{--primary:#2563eb;--primary-dark:#1d4ed8;--bg:#fff;--surface:#f8fafc;--border:#e2e8f0;--text:#0f172a;--text-soft:#475569;--text-muted:#94a3b8;--radius:12px}
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Inter',-apple-system,sans-serif;color:var(--text);line-height:1.7}
@@ -57,101 +56,85 @@ footer{background:#0f172a;color:#94a3b8;padding:28px 0;text-align:center;font-si
 footer a{color:#94a3b8}
 @media(max-width:900px){.nav-links{display:none}.nav .container{gap:16px}.nav-logo{margin-right:auto}table{table-layout:fixed;font-size:0.78rem}th,td{padding:8px 4px;overflow-wrap:anywhere}}
 </style>
-</head>
+<style>article a{text-decoration:underline;text-underline-offset:0.15em}</style></head>
 <body>
-<nav class="nav"><div class="container"><a href="/en/" class="nav-logo">Fun<span>ASR</span></a><div class="nav-links"><a href="/en/#capabilities">Capabilities</a><a href="/en/#usage">How to Use</a><a href="/en/#benchmark">Benchmark</a><a href="/en/#demo">Demo</a><a href="https://modelscope.github.io/FunASR/" target="_blank">Docs</a><a href="/en/quickstart.html">Quickstart</a><a href="/en/models.html">Models</a><a href="/en/ecosystem.html">Ecosystem</a><a href="/en/blog/">Blog</a><a href="/en/vs-whisper.html">vs Whisper</a><a href="/en/donors.html">Donors</a></div><a href="https://www.funasr.com/blog/which-funasr-model.html" style="font-size:0.83rem;font-weight:500;color:var(--text-soft)">中文</a><a href="https://github.com/modelscope/FunASR" target="_blank" class="nav-btn">GitHub ★</a></div></nav>
-<article><div class="container">
-<h1>Which FunASR Model? Nano vs MLT-Nano vs SenseVoice vs Paraformer (2026 Guide)</h1>
-<p class="post-meta">Updated 2026-07-15 · FunASR Team</p>
-
-<p>FunASR ships three main model families, plus a separate multilingual MLT-Nano checkpoint. In one line: <strong>with a GPU, use flagship Fun-ASR-Nano for Chinese, English, Japanese, and Chinese dialects/accents; use Fun-ASR-MLT-Nano when you need 31 languages; on CPU use SenseVoice, or Paraformer for Chinese timestamps/hotwords.</strong></p>
-
-<h2>Pick at a glance</h2>
-<table>
-<tr><th>Your situation</th><th>Pick</th><th>Why</th></tr>
-<tr><td><strong>GPU / zh, en, ja, or Chinese dialects and accents / want the best</strong></td><td>⭐ <strong>Fun-ASR-Nano</strong></td><td>LLM-ASR flagship, strongest on context and hard cases, Chinese CER 8.06%</td></tr>
-<tr><td>Need broad multilingual coverage</td><td><strong>Fun-ASR-MLT-Nano</strong></td><td>Separate checkpoint covering 31 languages</td></tr>
-<tr><td>CPU / edge / want fastest</td><td>SenseVoice</td><td>non-autoregressive &amp; very fast, real-time on CPU, multilingual + emotion, CER 7.81%</td></tr>
-<tr><td>CPU + Chinese-only + timestamps/hotwords</td><td>Paraformer</td><td>lightest, character timestamps, hotwords, CER 10.18%</td></tr>
-</table>
-<p>The Chinese CER figures compare Nano, SenseVoice, and Paraformer; all three beat Whisper on Chinese (~20%) by a wide margin. SenseVoice has a slightly lower CER, but <strong>Fun-ASR-Nano is the LLM-based flagship</strong> — more robust on real-world audio, context, and proper nouns. MLT-Nano is the choice for 31-language coverage; do not apply its language claim to Nano.</p>
-
-<h2>Fun-ASR-Nano — LLM-ASR flagship, the default (GPU)</h2>
-<p>SenseVoice encoder + a Qwen3-0.6B decoder, supporting Chinese, English, Japanese, 7 Chinese dialect groups, and 26 regional accents, with LLM-grade context understanding for hard cases and long-tail vocabulary.</p>
-<pre>pip install funasr
-
-from funasr import AutoModel
-
-model = AutoModel(model="FunAudioLLM/Fun-ASR-Nano-2512", disable_update=True, device="cuda")
-res = model.generate(input="audio.wav")
-
-print(res[0]["text"])
-# 欢迎大家来体验达摩院推出的语音识别模型。  ("Welcome everyone to try the speech model from DAMO Academy")</pre>
-<p>Models: <a href="https://huggingface.co/FunAudioLLM/Fun-ASR-Nano-2512" target="_blank" rel="noopener">Hugging Face</a> · <a href="https://modelscope.cn/models/FunAudioLLM/Fun-ASR-Nano-2512" target="_blank" rel="noopener">ModelScope</a>. For scale/throughput, use vLLM acceleration (~340× real-time measured). See the <a href="/en/blog/fun-asr-nano-guide.html">Fun-ASR-Nano guide</a>.</p>
-
-<h2>Fun-ASR-MLT-Nano — separate 31-language checkpoint (GPU)</h2>
-<p>Choose MLT-Nano for recognition across 31 languages. It is a separate checkpoint from flagship Nano, with a different model ID and language scope.</p>
-<p>Models: <a href="https://huggingface.co/FunAudioLLM/Fun-ASR-MLT-Nano-2512" target="_blank" rel="noopener">Hugging Face</a> · <a href="https://modelscope.cn/models/FunAudioLLM/Fun-ASR-MLT-Nano-2512" target="_blank" rel="noopener">ModelScope</a>.</p>
-
-<h2>SenseVoice — the CPU/edge choice</h2>
-<p>Non-autoregressive, lightweight and very fast — real-time even on CPU — emitting language + emotion + audio events in one pass; q8 quantization is ~250MB. Pick it for CPU deployment or lowest latency.</p>
-<pre>from funasr import AutoModel
-from funasr.utils.postprocess_utils import rich_transcription_postprocess
-
-model = AutoModel(model="iic/SenseVoiceSmall", disable_update=True)  # CPU by default
-res = model.generate(input="audio.wav", language="auto", use_itn=True)
-
-print(rich_transcription_postprocess(res[0]["text"]))
-# 欢迎大家来体验达摩院推出的语音识别模型。</pre>
-
-<h2>Paraformer — CPU + Chinese-only (timestamps/hotwords)</h2>
-<p>The lightest Chinese recognizer, with <strong>character-level timestamps</strong> and <strong>hotword</strong> customization — use it for subtitles or word-level alignment.</p>
-<pre>from funasr import AutoModel
-
-model = AutoModel(model="paraformer-zh", vad_model="fsmn-vad", punc_model="ct-punc")
-res = model.generate(input="audio.wav", batch_size_s=300)
-
-print(res[0]["text"])
-# 欢迎大家来体验达摩院推出的语音识别模型。
-# res[0]["timestamp"] -> [[880, 1120], [1120, 1360], ...] per-character start/end ms</pre>
-
-<h2>Quick decision</h2>
+<nav class="nav"><div class="container"><a class="nav-logo" href="/en/">Fun<span>ASR</span></a><div class="nav-links"><a href="/en/#capabilities">Capabilities</a><a href="/en/#usage">How to Use</a><a href="/en/#benchmark">Benchmark</a><a href="/en/#demo">Demo</a><a href="https://modelscope.github.io/FunASR/" target="_blank">Docs</a><a href="/en/quickstart.html">Quickstart</a><a href="/en/models.html">Models</a><a href="/en/ecosystem.html">Ecosystem</a><a href="/en/blog/">Blog</a><a href="/en/vs-whisper.html">vs Whisper</a><a href="/en/donors.html">Donors</a></div><a href="https://www.funasr.com/blog/which-funasr-model.html" style="font-size:0.83rem;font-weight:500;color:var(--text-soft)">中文</a><a class="nav-btn" href="https://github.com/modelscope/FunASR" target="_blank">GitHub ★</a></div></nav>
+<article><div class="container"><h1>Choosing a FunASR model starts with the result you need</h1>
+<p class="post-meta">Published 2026-06-23 · Revised 2026-11-19 · Beginner selection guide</p>
+<p class="lead" data-editorial="opening">You want to turn an interview into subtitles. Your search brings up FunASR, Fun-ASR, SenseVoice, Paraformer and FunClip, followed by PyTorch, ONNX and vLLM. Which one should you install? These names describe different layers: a toolkit, models, runtimes and an application. They are not interchangeable alternatives.</p>
+<p data-editorial="outcome">This article requires no installation. Its deliverable is a <strong>selection brief</strong>: what audio goes in, what result must come out, which processing path to try, and what remains to be verified. Define that task before following an installation guide.</p>
+<h2 id="deliverable">1. A transcript is not automatically a subtitle file</h2>
+<p>Imagine an interviewee says, “Send three samples next Wednesday.” Recognizing those words completes the <strong>automatic speech recognition (ASR)</strong> step. Subtitles also need start and end times. A conversation may need segments assigned to different speakers. A nonempty transcript does not establish either capability.</p>
 <ul>
-<li><strong>Need 31-language coverage?</strong> → Fun-ASR-MLT-Nano.</li>
-<li><strong>Have a GPU and mainly need zh/en/ja or Chinese dialects/accents?</strong> → Fun-ASR-Nano (the default flagship).</li>
-<li><strong>CPU only?</strong> Chinese-only with timestamps/hotwords → Paraformer; otherwise (incl. multilingual/emotion) → SenseVoice.</li>
-<li><strong>Need Cantonese?</strong> SenseVoice supports it natively — see <a href="/en/blog/cantonese-speech-recognition.html">Cantonese speech recognition</a>.</li>
+<li><strong>Text:</strong> what was said, suitable for searching and editing.</li>
+<li><strong>Timestamps:</strong> where words or segments occur in the recording. Character, word and segment timing have different granularity.</li>
+<li><strong>Speaker labels:</strong> which segments may belong to the same speaker. Speaker 0 is not a person's name and is not necessarily the same person in another recording.</li>
+<li><strong>Streaming results:</strong> partial text returned while audio is still arriving. File transcription support does not establish an equivalent streaming interface.</li>
 </ul>
-<p>More: <a href="/en/blog/chinese-speech-recognition.html">Chinese speech recognition</a> · <a href="/en/blog/funasr-vs-whisper-benchmark.html">FunASR vs Whisper benchmark</a> · <a href="/en/blog/fun-asr-nano-guide.html">Fun-ASR-Nano guide</a>.</p>
-
-<div class="cta"><p><strong>The whole FunASR stack is open-source (MIT)</strong> — Fun-ASR-Nano / MLT-Nano + SenseVoice + Paraformer + VAD/punctuation/speaker. If it helps, a GitHub Star supports the project 👇</p><p><a class="btn" href="https://github.com/QwenAudio/Fun-ASR" target="_blank">⭐ Star Fun-ASR</a></p><p style="margin-top:10px;font-size:0.85rem">Also star:<a href="https://github.com/modelscope/FunASR" target="_blank">FunASR</a> · <a href="https://github.com/QwenAudio/SenseVoice" target="_blank">SenseVoice</a> · <a href="https://github.com/modelscope/FunClip" target="_blank">FunClip</a></p></div>
-<!--related-posts-->
-<h2>Related posts</h2>
-<ul class="post-list">
-<li><a href="/en/blog/funasr-vs-whisper-benchmark.html">FunASR vs Whisper Benchmark</a></li>
-<li><a href="/en/blog/sensevoice-deployment-guide.html">SenseVoice Deployment Guide</a></li>
-<li><a href="/en/blog/fun-asr-nano-guide.html">Fun-ASR-Nano Guide</a></li>
-<li><a href="/en/blog/funasr-speaker-diarization.html">Speaker Diarization: Who Spoke When</a></li>
-<li><a href="/en/blog/sensevoice-emotion-language-detection.html">Emotion & Language Detection</a></li>
-<li><a href="/en/blog/funasr-realtime-streaming-asr.html">Real-Time Streaming Speech-to-Text</a></li>
-<li><a href="/en/blog/funasr-transcribe-long-audio.html">Transcribe Long Audio (Hours in One Call)</a></li>
-<li><a href="/en/blog/funasr-cli-transcribe-command-line.html">Transcribe from the Command Line</a></li>
-<li><a href="/en/blog/self-hosted-openai-whisper-api-alternative.html">Self-Hosted OpenAI Whisper API Alternative</a></li>
-<li><a href="/en/blog/generate-subtitles-srt-vtt-from-audio-video.html">Auto-Generate Subtitles (SRT / VTT)</a></li>
-<li><a href="/en/blog/speech-to-text-python-transcribe-audio.html">Speech to Text in Python</a></li>
-<li><a href="/en/blog/funasr-llama-cpp-whisper-cpp-alternative.html">FunASR on llama.cpp (whisper.cpp Alternative)</a></li>
-<li><a href="/en/blog/funasr-vs-faster-whisper-chinese.html">FunASR vs faster-whisper (Chinese/Cantonese)</a></li>
-<li><a href="/en/blog/lightweight-speech-recognition-cpu.html">Lightweight Speech Recognition on CPU</a></li>
-<li><a href="/en/blog/self-hosted-deepgram-assemblyai-alternative.html">Self-Hosted Deepgram/AssemblyAI Alternative</a></li>
-<li><a href="/en/blog/cantonese-speech-recognition.html">Cantonese Speech Recognition (SenseVoice)</a></li>
-<li><a href="/en/blog/japanese-speech-recognition.html">Japanese Speech Recognition (SenseVoice)</a></li>
-<li><a href="/en/blog/voice-activity-detection-python.html">Voice Activity Detection in Python</a></li>
-<li><a href="/en/blog/self-hosted-google-aws-azure-speech-to-text.html">Self-Hosted Google/AWS/Azure STT Alternative</a></li>
-<li><a href="/en/blog/chinese-speech-recognition.html">Chinese Speech Recognition in Python</a></li>
-<li><a href="/en/blog/punctuation-restoration-python.html">Punctuation Restoration in Python</a></li>
-<li><a href="/en/blog/speech-to-text-timestamps-python.html">Speech-to-Text with Timestamps in Python</a></li>
+<p>Two other components often cause confusion. <strong>Voice activity detection (VAD)</strong> locates speech regions; it does not transcribe each word. A <strong>punctuation model</strong> helps divide text into sentences; a full stop is not a subtitle timestamp. Identify the required outputs before adding every available component.</p>
+<h2 id="ecosystem">2. Four projects, different responsibilities</h2>
+<table><thead><tr><th>Name</th><th>What it is</th><th>When to start here</th></tr></thead><tbody>
+<tr><td>FunASR</td><td>A speech toolkit with runtime and service code. Its Python package is named funasr.</td><td>Combine recognition, VAD, punctuation or speaker processing in your program, or find a deployment entry point.</td></tr>
+<tr><td>Fun-ASR</td><td>A model family and model-side integrations. Nano and MLT-Nano are separate checkpoints: model weights and companion files that must be selected separately.</td><td>Check their language scope, weight formats and matching inference interfaces.</td></tr>
+<tr><td>SenseVoice</td><td>A speech understanding model family. This article discusses SenseVoiceSmall specifically.</td><td>Consider transcription plus its language, emotion and audio-event tags.</td></tr>
+<tr><td>FunClip</td><td>An application for audiovisual transcription, subtitles and clipping.</td><td>Start with a clipping workflow rather than build the whole interface yourself.</td></tr>
+</tbody></table>
+<p><code>pip install funasr</code> installs software, not every model's weights. <strong>Weights</strong> contain the parameters learned by a model. A <strong>runtime</strong> loads those files and performs computation. Different weight formats may represent related models, but they are not freely interchangeable. An HTTP service adds another layer to receive requests, invoke inference and return results.</p>
+<p>Connecting an application to an existing speech API is therefore different from installing a model locally. A remote service may upload audio and incur charges. Local execution usually requires downloading software and weights first. The toolkit's MIT licence does not automatically apply to every model's weights, dataset or external service.</p>
+<h2 id="questions">3. Answer four questions before choosing</h2>
+<h3>Which languages are actually in the audio?</h3>
+<p>“Chinese” or “multilingual” is not specific enough. Mandarin, Cantonese, Japanese, and Mandarin mixed with English product names are different test conditions. Check the <strong>specific checkpoint's language documentation</strong>, then evaluate representative audio. A listed language does not prove that your accents, noise conditions or specialist terms have been tested.</p>
+<h3>Do you need text, subtitles or edited clips?</h3>
+<p>For text alone, begin with a simple file-transcription path. For subtitles, check whether the chosen model and interface return the required timing granularity and how to export the result. Clipping one person's contributions also requires speaker processing and application-level selection. Do not distribute missing timestamps evenly across words and present them as model alignment.</p>
+<h3>Will you process a finished recording or display words as people speak?</h3>
+<p>“Offline file recognition” often means processing a complete recording; it does <strong>not</strong> guarantee that execution never contacts the network. Network-isolated operation requires prepared dependencies, weights, configuration and related resources, followed by an actual isolation test. Live captions need a streaming checkpoint or a service explicitly supporting that workflow, including partial results, end signals and session state.</p>
+<h3>What do your machine and data permissions allow?</h3>
+<p>Record the operating system, available RAM and CPU, plus GPU model and memory if present. Loading a model on CPU does not prove realtime performance. Owning a GPU does not mean the software is configured to use it. Establish whether audio may leave the machine, whether weight downloads are authorized, and whether the intended use meets the model's terms. These constraints can eliminate unsuitable paths early.</p>
+<h2 id="candidates">4. Useful candidates, not a universal ranking</h2>
+<h3>Mandarin files, timestamps or hotwords: inspect the Paraformer path</h3>
+<p>Paraformer is a family, not a single switch covering every interface. FunASR documents a Mandarin-oriented <code>paraformer-zh</code> path and timestamp and hotword usage. Check those features against the exact package, model and service you plan to use. The streaming path uses the separate <code>paraformer-zh-streaming</code> checkpoint; an offline model name is not a substitute.</p>
+<h3>Transcription with sound-related tags: inspect SenseVoiceSmall</h3>
+<p>The official documentation lists Mandarin, English, Cantonese, Japanese and Korean for SenseVoiceSmall, alongside emotion and audio-event tags. This is not a promise of arbitrary language support. An emotion tag is a model prediction, not a determination of someone's true psychological state, and it is not a speaker identity.</p>
+<p>In the SenseVoiceSmall + FSMN-VAD + CAM++ combination, VAD locates speech regions, CAM++ extracts speaker features, and the FunASR pipeline clusters them into anonymous labels. <strong>Several components work together; SenseVoiceSmall does not provide all those capabilities alone.</strong> When raw sound-related tags matter, also check whether postprocessing or the service removes them.</p>
+<h3>Evaluating Fun-ASR: choose the checkpoint before the loader</h3>
+<p>Base Fun-ASR-Nano and the 31-language Fun-ASR-MLT-Nano are different checkpoints. Base Nano's documentation covers Chinese, English and Japanese, plus the documented Chinese dialects and regional accents. Do not transfer MLT-Nano's language scope to base Nano.</p>
+<p>Distinguish original FunASR weights, the native Transformers <code>-hf</code> export, GGUF files and native vLLM artifacts. CPU, CUDA, native Transformers and vLLM paths have their own loading and dependency requirements. Changing one <code>model</code> string does not establish a successful migration, and measurements or features from one path do not automatically carry over to another.</p>
+<h3>Working with video: start from the FunClip application workflow</h3>
+<p>If the deliverable is subtitles or edited clips, inspect the FunClip workflow first, then check the recognition backend it actually uses. Export support at the application level does not mean every backend provides identical timestamps or speaker information. Before enabling external language-model-assisted clipping, establish which data will be sent, which service receives it and whether it charges for usage.</p>
+<h2 id="selection-brief">5. Produce a brief that guides the next step</h2>
+<p>This is a <strong>hypothetical task</strong>, not a completed inference result: you have permission to process a Mandarin interview, want searchable text first, have only a CPU, and cannot upload the audio to external services.</p>
+<ul data-example="selection-brief">
+<li><strong>Input:</strong> a local Mandarin interview. Begin with an authorized short excerpt containing names, numbers and a sentence ending.</li>
+<li><strong>First deliverable:</strong> a local UTF-8 transcript file. Do not promise subtitle timing or known-person identification at this stage.</li>
+<li><strong>Candidate:</strong> the toolkit's Paraformer Mandarin file-transcription path, using the beginner guide below. This is a candidate, not a proven best model.</li>
+<li><strong>Allowed operations:</strong> download specified software and weights after checking their terms. Do not upload the recording, invoke paid services or overwrite originals.</li>
+<li><strong>Acceptance:</strong> obtain a newly generated result and listen back to verify important content. Record whether local runtime and memory use are acceptable.</li>
+<li><strong>Next stage:</strong> after the short excerpt works, check long-recording coverage. Revisit timing and speaker requirements if subtitles or speaker-based clipping are added.</li>
 </ul>
+<p>This is more actionable than “find the strongest model.” If the candidate fails a requirement, retain the failing samples and reasons before comparing another candidate. Do not present only the clips that worked best.</p>
+<h2 id="agent-contract">For AI agents: requirements are not API parameters</h2>
+<p>The brief above describes the task shared by a person and an agent. It is <strong>not a FunASR SDK configuration schema</strong>. Map it to actual commands or function arguments using the selected version's documentation before execution.</p>
+<ul>
+<li><strong>Input:</strong> record the real audio path, format, channel count, sample rate in Hz and duration in seconds. Inspect unknown values rather than infer them from an extension. Example paths are not existing files.</li>
+<li><strong>Model:</strong> record the full model ID, revision or checksums, weight format, runtime and software versions. A short service alias is not necessarily a downloadable model ID.</li>
+<li><strong>Output:</strong> agree on paths, encoding and required fields. Specify timestamp units and granularity when needed, and recording-local scope for speaker labels. Never invent fields that the backend did not return.</li>
+<li><strong>Permissions:</strong> transcription instructions do not implicitly authorize downloads, external uploads, remote code, paid calls or overwriting results. Stop the relevant operation when permission is missing.</li>
+<li><strong>Failure:</strong> use actual process exit codes or API errors, and never substitute an old output for a new result. Preserve the error; retry only within agreed bounds after addressing its cause. Do not silently switch models, launch parallel copies or fall back to an external service.</li>
+</ul>
+<h2 id="verification">6. How do you know the choice fits?</h2>
+<p>First check that the path completes the task; then compare quality and resource use. Use authorized, representative audio covering clear speech, noise, names, numbers and easily missed endings. For multi-speaker or subtitle tasks, listen back to check turns and timing. One clean sample is a starting point, not a complete quality evaluation.</p>
+<p>Compare candidates on the same input with a review method chosen in advance. Fluent text is not necessarily faithful to the recording. A CER/WER figure without its data, normalization rules and evaluation scope is insufficient. Timing measurements should identify hardware and batch settings and separate downloading, loading and recognition time.</p>
+<p data-editorial="scope">This is a selection explainer based on official documentation. It adds no model-inference, accuracy, realtime or capacity measurements. It supplies neither a cross-model performance ranking nor a claim that every linked path was tested in one environment.</p>
+<h2 id="sources">Official references and your next step</h2>
+<ul>
+<li><a href="https://github.com/modelscope/FunASR/blob/114292dbeff0f8f377bb165e22121cfcfb60cf65/README.md#why-funasr">Toolkit README: tasks, checkpoints and runtimes</a></li>
+<li><a href="https://github.com/modelscope/FunASR/blob/114292dbeff0f8f377bb165e22121cfcfb60cf65/docs/model_selection.md">Model selection: language scope, speaker pipelines and interfaces</a></li>
+<li><a href="https://github.com/modelscope/FunASR/blob/114292dbeff0f8f377bb165e22121cfcfb60cf65/docs/repository_roles.md">Responsibilities and entry points across the four repositories</a></li>
+<li><a href="https://github.com/modelscope/FunASR/blob/114292dbeff0f8f377bb165e22121cfcfb60cf65/docs/deployment_matrix.md">Deployment matrix: Python, HTTP, WebSocket and other runtimes</a></li>
+</ul>
+<p data-editorial="next-step">Chosen a short Mandarin recording as your first local transcription task? Continue with <a href="/en/blog/speech-to-text-python-transcribe-audio.html">Transcribe your first recording with Python</a>, following that guide's environment and input scope. For application integration, also check the <a href="https://github.com/modelscope/FunASR/blob/114292dbeff0f8f377bb165e22121cfcfb60cf65/docs/python_api.md">Python SDK parameters and results</a>. Complete one small task before expanding the application.</p>
 </div></article>
 <footer><div class="container">© 2024-2026 Tongyi Lab, Alibaba Group · <a href="https://github.com/modelscope/FunASR/blob/main/LICENSE">MIT License</a></div></footer>
 </body>
 </html>
+
