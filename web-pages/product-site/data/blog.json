@@ -532,14 +532,14 @@
     {
       "slug": "which-funasr-model",
       "category": "selection",
-      "reviewed": false,
+      "reviewed": true,
       "zh": {
-        "title": "FunASR 模型选型笔记",
-        "summary": ""
+        "title": "FunASR 模型怎么选？先说清你要交付什么",
+        "summary": "从文字、字幕与剪辑的区别出发，分清工具包、模型和运行时，用语言、输出、时效与权限写出一份可验证的选型单。"
       },
       "en": {
-        "title": "Notes on choosing a FunASR model",
-        "summary": ""
+        "title": "Choosing a FunASR model starts with the result you need",
+        "summary": "Distinguish text, subtitles and clipping; separate toolkits, models and runtimes; then write a selection brief covering language, output, timing and permissions."
       }
     }
   ]

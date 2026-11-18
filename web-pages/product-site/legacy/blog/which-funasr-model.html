@@ -1,25 +1,24 @@
 <!DOCTYPE html>
+
 <html lang="zh">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>选哪个 FunASR 模型?Nano vs MLT-Nano vs SenseVoice vs Paraformer(2026 指南)| FunASR 博客</title>
-<meta name="description" content="FunASR 模型怎么选?有 GPU、识别中英日及中文方言/口音用旗舰 Fun-ASR-Nano(CER 8.06%);需要 31 语种用独立 Fun-ASR-MLT-Nano;CPU 用 SenseVoice;CPU+纯中文+时间戳/热词用 Paraformer。">
-<meta name="keywords" content="FunASR 模型选型, Fun-ASR-Nano, Fun-ASR-MLT-Nano, SenseVoice, Paraformer, 哪个语音识别模型, sensevoice vs paraformer, 31 语种语音识别, 语音识别模型对比, FunASR">
-<link rel="icon" href="/logo.png">
-<meta property="og:title" content="选哪个 FunASR 模型?Nano vs MLT-Nano vs SenseVoice vs Paraformer(2026 指南)| FunASR 博客">
-<meta property="og:description" content="FunASR 模型怎么选?有 GPU、识别中英日及中文方言/口音用旗舰 Fun-ASR-Nano(CER 8.06%);需要 31 语种用独立 Fun-ASR-MLT-Nano;CPU 用 SenseVoice;CPU+纯中文+时间戳/热词用 Paraformer。">
-<meta property="og:type" content="article">
-<meta property="og:url" content="https://www.funasr.com/blog/which-funasr-model.html">
-<meta property="og:image" content="https://www.funasr.com/logo.png">
-<link rel="canonical" href="https://www.funasr.com/blog/which-funasr-model.html">
-<link rel="alternate" hreflang="en" href="https://www.funasr.com/en/blog/which-funasr-model.html">
-<link rel="alternate" hreflang="zh" href="https://www.funasr.com/blog/which-funasr-model.html">
-<link rel="alternate" hreflang="x-default" href="https://www.funasr.com/en/blog/which-funasr-model.html">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<script type="application/ld+json">
-{"@context":"https://schema.org","@type":"BlogPosting","headline":"选哪个 FunASR 模型?Nano vs MLT-Nano vs SenseVoice vs Paraformer(2026 指南)| FunASR 博客","description":"FunASR 模型怎么选?有 GPU、识别中英日及中文方言/口音用旗舰 Fun-ASR-Nano(CER 8.06%);需要 31 语种用独立 Fun-ASR-MLT-Nano;CPU 用 SenseVoice;CPU+纯中文+时间戳/热词用 Paraformer。","datePublished":"2026-06-23","dateModified":"2026-07-15","author":{"@type":"Organization","name":"FunASR / Tongyi Lab"},"publisher":{"@type":"Organization","name":"FunASR","logo":{"@type":"ImageObject","url":"https://www.funasr.com/logo.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://www.funasr.com/blog/which-funasr-model.html"},"image":"https://www.funasr.com/logo.png"}
-</script>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<title>FunASR 模型怎么选？先说清你要交付什么 | FunASR</title>
+<meta content="从文字、字幕与剪辑的区别出发，分清工具包、模型和运行时，用语言、输出、时效与权限写出一份可验证的选型单。" name="description"/>
+
+<link href="/logo.png" rel="icon"/>
+<meta content="FunASR 模型怎么选？先说清你要交付什么" property="og:title"/>
+<meta content="从文字、字幕与剪辑的区别出发，分清工具包、模型和运行时，用语言、输出、时效与权限写出一份可验证的选型单。" property="og:description"/>
+<meta content="article" property="og:type"/>
+<meta content="https://www.funasr.com/blog/which-funasr-model.html" property="og:url"/>
+<meta content="https://www.funasr.com/logo.png" property="og:image"/>
+<link href="https://www.funasr.com/blog/which-funasr-model.html" rel="canonical"/>
+<link href="https://www.funasr.com/en/blog/which-funasr-model.html" hreflang="en" rel="alternate"/>
+<link href="https://www.funasr.com/blog/which-funasr-model.html" hreflang="zh" rel="alternate"/>
+<link href="https://www.funasr.com/en/blog/which-funasr-model.html" hreflang="x-default" rel="alternate"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"FunASR 模型怎么选？先说清你要交付什么","description":"从文字、字幕与剪辑的区别出发，分清工具包、模型和运行时，用语言、输出、时效与权限写出一份可验证的选型单。","datePublished":"2026-06-23","dateModified":"2026-11-19","author":{"@type":"Organization","name":"FunASR / Tongyi Lab"},"publisher":{"@type":"Organization","name":"FunASR","logo":{"@type":"ImageObject","url":"https://www.funasr.com/logo.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://www.funasr.com/blog/which-funasr-model.html"},"image":"https://www.funasr.com/logo.png"}</script>
 <style>:root{--primary:#2563eb;--primary-dark:#1d4ed8;--bg:#fff;--surface:#f8fafc;--border:#e2e8f0;--text:#0f172a;--text-soft:#475569;--text-muted:#94a3b8;--radius:12px}
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Inter',-apple-system,sans-serif;color:var(--text);line-height:1.7}
@@ -57,101 +56,85 @@ footer{background:#0f172a;color:#94a3b8;padding:28px 0;text-align:center;font-si
 footer a{color:#94a3b8}
 @media(max-width:900px){.nav-links{display:none}.nav .container{gap:16px}.nav-logo{margin-right:auto}table{table-layout:fixed;font-size:0.78rem}th,td{padding:8px 4px;overflow-wrap:anywhere}}
 </style>
-</head>
+<style>article a{text-decoration:underline;text-underline-offset:0.15em}</style></head>
 <body>
-<nav class="nav"><div class="container"><a href="/" class="nav-logo">Fun<span>ASR</span></a><div class="nav-links"><a href="/#capabilities">核心能力</a><a href="/#usage">如何使用</a><a href="/#benchmark">性能</a><a href="/#demo">演示</a><a href="https://modelscope.github.io/FunASR/zh/" target="_blank">文档</a><a href="/quickstart.html">快速上手</a><a href="/models.html">模型</a><a href="/ecosystem.html">生态</a><a href="/blog/">技术博客</a><a href="/vs-whisper.html">对比 Whisper</a><a href="/donors.html">功德榜</a></div><a href="https://www.funasr.com/en/blog/which-funasr-model.html" style="font-size:0.83rem;font-weight:500;color:var(--text-soft)">EN</a><a href="https://github.com/modelscope/FunASR" target="_blank" class="nav-btn">GitHub ★</a></div></nav>
-<article><div class="container">
-<h1>选哪个 FunASR 模型?Nano vs MLT-Nano vs SenseVoice vs Paraformer（2026 选型指南）</h1>
-<p class="post-meta">2026-07-15 更新 · FunASR 团队</p>
-
-<p>FunASR 提供三个主力模型族,Fun-ASR 另有独立的 MLT-Nano 多语 checkpoint。一句话选型:<strong>有 GPU、识别中英日及中文方言/口音就用旗舰 Fun-ASR-Nano;需要 31 语种用 Fun-ASR-MLT-Nano;只有 CPU 用 SenseVoice;CPU 且纯中文、要时间戳/热词用 Paraformer。</strong></p>
-
-<h2>一张表选型</h2>
-<table>
-<tr><th>你的情况</th><th>选</th><th>为什么</th></tr>
-<tr><td><strong>有 GPU / 中英日及中文方言/口音 / 要最强效果</strong></td><td>⭐ <strong>Fun-ASR-Nano</strong></td><td>LLM-ASR 旗舰,上下文/难例最强,中文 CER 8.06%</td></tr>
-<tr><td>需要广泛多语种覆盖</td><td><strong>Fun-ASR-MLT-Nano</strong></td><td>独立 checkpoint,覆盖 31 种语言</td></tr>
-<tr><td>只有 CPU / 边缘 / 要最快</td><td>SenseVoice</td><td>非自回归极快,CPU 也能实时,多语种+情感,CER 7.81%</td></tr>
-<tr><td>CPU + 纯中文 + 要时间戳/热词</td><td>Paraformer</td><td>最轻量,字级时间戳,热词定制,CER 10.18%</td></tr>
-</table>
-<p>表中的中文 CER 数据比较 Nano、SenseVoice 和 Paraformer,三者都远好于 Whisper(~20%)。CER 上 SenseVoice 略低,但 <strong>Fun-ASR-Nano 是基于 LLM 的旗舰模型</strong>——在真实复杂音频、上下文和专名上更鲁棒。MLT-Nano 用于 31 语种覆盖,不要把它的语言范围写到 Nano 上。</p>
-
-<h2>Fun-ASR-Nano —— LLM-ASR 旗舰,默认首选(GPU)</h2>
-<p>SenseVoice 编码器 + Qwen3-0.6B 解码,支持中文、英文、日语,以及 7 种中文方言和 26 种地域口音;具备 LLM 的上下文理解,难例与长尾词表现最好。</p>
-<pre>pip install funasr
-
-from funasr import AutoModel
-
-model = AutoModel(model="FunAudioLLM/Fun-ASR-Nano-2512", disable_update=True, device="cuda")
-res = model.generate(input="audio.wav")
-
-print(res[0]["text"])
-# 欢迎大家来体验达摩院推出的语音识别模型。</pre>
-<p>模型:<a href="https://huggingface.co/FunAudioLLM/Fun-ASR-Nano-2512" target="_blank" rel="noopener">Hugging Face</a> · <a href="https://modelscope.cn/models/FunAudioLLM/Fun-ASR-Nano-2512" target="_blank" rel="noopener">ModelScope</a>。大规模/高并发可用 vLLM 加速(实测约 340× 实时)。详见 <a href="/blog/fun-asr-nano-guide.html">Fun-ASR-Nano 使用指南</a>。</p>
-
-<h2>Fun-ASR-MLT-Nano —— 独立的 31 语种 checkpoint(GPU)</h2>
-<p>需要跨 31 种语言识别时选择 MLT-Nano。它与旗舰 Nano 是两个独立 checkpoint,模型 ID 和语言范围都不同。</p>
-<p>模型:<a href="https://huggingface.co/FunAudioLLM/Fun-ASR-MLT-Nano-2512" target="_blank" rel="noopener">Hugging Face</a> · <a href="https://modelscope.cn/models/FunAudioLLM/Fun-ASR-MLT-Nano-2512" target="_blank" rel="noopener">ModelScope</a>。</p>
-
-<h2>SenseVoice —— CPU/边缘首选</h2>
-<p>非自回归、轻量极快,CPU 也能实时,一遍出语种+情感+音频事件;q8 量化仅约 250MB。CPU 部署或要最低延迟时首选。</p>
-<pre>from funasr import AutoModel
-from funasr.utils.postprocess_utils import rich_transcription_postprocess
-
-model = AutoModel(model="iic/SenseVoiceSmall", disable_update=True)  # CPU 默认
-res = model.generate(input="audio.wav", language="auto", use_itn=True)
-
-print(rich_transcription_postprocess(res[0]["text"]))
-# 欢迎大家来体验达摩院推出的语音识别模型。</pre>
-
-<h2>Paraformer —— CPU + 纯中文(时间戳/热词)</h2>
-<p>最轻量的中文识别,提供<strong>字级时间戳</strong>和<strong>热词</strong>定制,做字幕或要逐字对齐时用它。</p>
-<pre>from funasr import AutoModel
-
-model = AutoModel(model="paraformer-zh", vad_model="fsmn-vad", punc_model="ct-punc")
-res = model.generate(input="audio.wav", batch_size_s=300)
-
-print(res[0]["text"])
-# 欢迎大家来体验达摩院推出的语音识别模型。
-# res[0]["timestamp"] -> [[880, 1120], [1120, 1360], ...] 每个字的起止毫秒</pre>
-
-<h2>快速决策</h2>
+<nav class="nav"><div class="container"><a class="nav-logo" href="/">Fun<span>ASR</span></a><div class="nav-links"><a href="/#capabilities">核心能力</a><a href="/#usage">如何使用</a><a href="/#benchmark">性能</a><a href="/#demo">演示</a><a href="https://modelscope.github.io/FunASR/zh/" target="_blank">文档</a><a href="/quickstart.html">快速上手</a><a href="/models.html">模型</a><a href="/ecosystem.html">生态</a><a href="/blog/">技术博客</a><a href="/vs-whisper.html">对比 Whisper</a><a href="/donors.html">功德榜</a></div><a href="https://www.funasr.com/en/blog/which-funasr-model.html" style="font-size:0.83rem;font-weight:500;color:var(--text-soft)">EN</a><a class="nav-btn" href="https://github.com/modelscope/FunASR" target="_blank">GitHub ★</a></div></nav>
+<article><div class="container"><h1>FunASR 模型怎么选？先说清你要交付什么</h1>
+<p class="post-meta">2026-06-23 发布 · 2026-11-19 修订 · 入门选型</p>
+<p class="lead" data-editorial="opening">你想把一段采访做成字幕，搜索后却遇到 FunASR、Fun-ASR、SenseVoice、Paraformer、FunClip，还有 PyTorch、ONNX、vLLM。到底要装哪个？先别按“最大”“最快”挑名字：这里既有工具包，也有模型、运行时和应用，它们不是同一层的替代品。</p>
+<p data-editorial="outcome">这篇不要求安装软件。读完你要得到一份<strong>选型单</strong>：输入什么音频、需要什么结果、选哪条处理路径、还要验证哪些条件。先把任务说明白，再进入安装教程，能少走很多弯路。</p>
+<h2 id="deliverable">1. “把声音变成文字”其实有好几种任务</h2>
+<p>假设采访里有人说：“下周三寄三套样品。”识别出这句话，只完成了<strong>语音识别（ASR）</strong>。如果你要把它放进视频字幕，还需要知道字幕何时出现、何时消失；如果两个人轮流说话，还需要把片段分配给不同说话人。这些结果不能从“有文字了”自动推出来。</p>
 <ul>
-<li><strong>要覆盖 31 语种?</strong> → Fun-ASR-MLT-Nano。</li>
-<li><strong>有 GPU,主要识别中英日及中文方言/口音?</strong> → Fun-ASR-Nano(默认旗舰)。</li>
-<li><strong>只有 CPU?</strong> 纯中文且要时间戳/热词 → Paraformer;否则(含多语种/情感) → SenseVoice。</li>
-<li><strong>要粤语?</strong> SenseVoice 原生支持,见 <a href="/blog/cantonese-speech-recognition.html">粤语语音识别</a>。</li>
+<li><strong>文字：</strong>说了什么。适合搜索、复制和整理笔记。</li>
+<li><strong>时间戳：</strong>文字或片段在录音中的起止位置。词级、字级和整段时间戳不是同一种精度。</li>
+<li><strong>说话人标签：</strong>哪些片段可能属于同一个人。匿名的 Speaker 0 不等于“张老师”，也不保证在另一份录音中仍指向同一个人。</li>
+<li><strong>流式结果：</strong>声音还在输入时就返回部分文字。一个能处理完整文件的模型，不因此就具备相同的流式接口。</li>
 </ul>
-<p>更多:<a href="/blog/chinese-speech-recognition.html">中文语音识别实战</a> · <a href="/blog/funasr-vs-whisper-benchmark.html">FunASR vs Whisper benchmark</a> · <a href="/blog/fun-asr-nano-guide.html">Fun-ASR-Nano 指南</a>。</p>
-
-<div class="cta"><p><strong>FunASR 全家桶开源(MIT)</strong>——Fun-ASR-Nano / MLT-Nano + SenseVoice + Paraformer + VAD/标点/说话人。觉得有用就点个 Star 👇</p><p><a class="btn" href="https://github.com/QwenAudio/Fun-ASR" target="_blank">⭐ Star Fun-ASR</a></p><p style="margin-top:10px;font-size:0.85rem">也欢迎 Star:<a href="https://github.com/modelscope/FunASR" target="_blank">FunASR</a> · <a href="https://github.com/QwenAudio/SenseVoice" target="_blank">SenseVoice</a> · <a href="https://github.com/modelscope/FunClip" target="_blank">FunClip</a></p></div>
-<!--related-posts-->
-<h2>相关文章</h2>
-<ul class="post-list">
-<li><a href="/blog/funasr-vs-whisper-benchmark.html">FunASR vs Whisper 实测对比</a></li>
-<li><a href="/blog/sensevoice-deployment-guide.html">SenseVoice 部署指南</a></li>
-<li><a href="/blog/fun-asr-nano-guide.html">Fun-ASR-Nano 使用指南</a></li>
-<li><a href="/blog/funasr-speaker-diarization.html">说话人分离:谁在何时说话</a></li>
-<li><a href="/blog/sensevoice-emotion-language-detection.html">情感与语种检测</a></li>
-<li><a href="/blog/funasr-realtime-streaming-asr.html">实时流式语音识别</a></li>
-<li><a href="/blog/funasr-transcribe-long-audio.html">转写超长音频(1小时一次搞定)</a></li>
-<li><a href="/blog/funasr-cli-transcribe-command-line.html">命令行转写(文本/JSON/SRT)</a></li>
-<li><a href="/blog/self-hosted-openai-whisper-api-alternative.html">自托管 OpenAI Whisper API 替代</a></li>
-<li><a href="/blog/generate-subtitles-srt-vtt-from-audio-video.html">自动生成字幕(SRT / VTT)</a></li>
-<li><a href="/blog/speech-to-text-python-transcribe-audio.html">Python 语音转文字教程</a></li>
-<li><a href="/blog/funasr-llama-cpp-whisper-cpp-alternative.html">FunASR 跑进 llama.cpp(whisper.cpp 替代)</a></li>
-<li><a href="/blog/funasr-vs-faster-whisper-chinese.html">FunASR vs faster-whisper(中文/粤语)</a></li>
-<li><a href="/blog/lightweight-speech-recognition-cpu.html">轻量语音识别(CPU 250MB)</a></li>
-<li><a href="/blog/self-hosted-deepgram-assemblyai-alternative.html">自托管替代 Deepgram/AssemblyAI</a></li>
-<li><a href="/blog/cantonese-speech-recognition.html">粤语语音识别(SenseVoice 原生粤语)</a></li>
-<li><a href="/blog/japanese-speech-recognition.html">日语语音识别(SenseVoice 转写+标点+情感)</a></li>
-<li><a href="/blog/voice-activity-detection-python.html">Python 语音活动检测(VAD)</a></li>
-<li><a href="/blog/self-hosted-google-aws-azure-speech-to-text.html">自托管替代 Google/AWS/Azure 云语音 API</a></li>
-<li><a href="/blog/chinese-speech-recognition.html">中文语音识别(普通话)实战</a></li>
-<li><a href="/blog/punctuation-restoration-python.html">标点恢复 Python 实战</a></li>
-<li><a href="/blog/speech-to-text-timestamps-python.html">语音识别带时间戳(字级)</a></li>
+<p>两个经常被混淆的组件也值得先认识：<strong>VAD</strong>寻找有人说话的时间区间，但不负责识别每个字；<strong>标点模型</strong>帮助给文字断句，但句号不是字幕时间轴。选型时先把必需的输出圈出来，不要先把所有组件都装上。</p>
+<h2 id="ecosystem">2. 四个项目，各负责哪一层？</h2>
+<table><thead><tr><th>名称</th><th>它是什么</th><th>何时从这里开始</th></tr></thead><tbody>
+<tr><td>FunASR</td><td>语音工具包及配套运行、服务代码。Python 安装包名是 funasr。</td><td>在自己的程序里组合识别、VAD、标点或说话人处理，或了解部署入口。</td></tr>
+<tr><td>Fun-ASR</td><td>模型系列及其模型侧集成。Nano 与 MLT-Nano 是不同的 checkpoint，即需要分别选择的模型权重与配套文件。</td><td>了解这些模型的语言范围、权重格式和对应推理入口。</td></tr>
+<tr><td>SenseVoice</td><td>语音理解模型系列。本文讨论具体的 SenseVoiceSmall。</td><td>考虑转写，以及它提供的语种、情绪和音频事件标签。</td></tr>
+<tr><td>FunClip</td><td>面向音视频转写、字幕和剪辑的应用。</td><td>希望先使用剪辑工作流，而不是自己搭建全部界面。</td></tr>
+</tbody></table>
+<p><code>pip install funasr</code> 安装的是程序，不会把全部模型权重都装进电脑。<strong>权重</strong>是模型学习得到的参数文件；<strong>运行时</strong>是实际加载权重、执行计算的软件。一个模型可以有不同格式的权重，但它们不能随意互换。HTTP 服务又是额外的一层：它接收请求、调用推理程序并返回结果。</p>
+<p>因此，“把应用接到一个现成语音 API”和“在本机安装模型”是两件事。使用远程服务可能上传音频并产生费用；本地运行通常需要提前下载软件和权重。FunASR 工具包的 MIT 许可也不代表所有模型权重、数据与外部服务都采用同样条款。</p>
+<h2 id="questions">3. 用四个问题缩小选择</h2>
+<h3>问题一：音频里是什么语言？</h3>
+<p>不要只写“中文”或“多语言”。普通话、粤语、日语，以及夹杂产品英文名的普通话，是不同的测试条件。<strong>先核对具体 checkpoint 的语言说明，再用有代表性的录音验证。</strong>模型卡列出某种语言，不等于你的口音、噪声和领域词已经测过。</p>
+<h3>问题二：你最终要文字、字幕，还是剪辑结果？</h3>
+<p>只要文字，可以先走最简单的文件转写路径。要字幕，就核对所选模型和接口能否返回所需粒度的时间戳，以及如何导出字幕。要“按某个人的发言剪辑”，还需说话人处理和应用层选段逻辑。不能把缺失的时间戳平均摊到每个字上，再声称是模型对齐结果。</p>
+<h3>问题三：录完再处理，还是边说边出字？</h3>
+<p>“离线文件识别”常指拿到完整音频后处理，<strong>不等于运行时绝不联网</strong>。真正断网还要求依赖、权重、配置和相关资源均已准备好，并验证没有外联依赖。直播字幕则要单独选择流式 checkpoint 或明确支持该工作流的服务，检查部分结果、结束信号和会话状态。</p>
+<h3>问题四：机器和数据权限允许什么？</h3>
+<p>记下操作系统、可用内存、CPU，以及 GPU 型号和显存（如有）。CPU 能加载模型，不代表能在你的机器上实时运行；有 GPU 也不代表软件已配置好。再确认录音能否离开本机、是否允许下载权重，以及用途是否符合模型条款。这些条件会先排除一批不适合的方案。</p>
+<h2 id="candidates">4. 常见候选：看能力边界，不排“万能第一名”</h2>
+<h3>普通话文件转写，兼顾时间戳或热词：检查 Paraformer 路径</h3>
+<p>Paraformer 是模型系列，不是一个覆盖所有接口的开关。FunASR 文档提供 <code>paraformer-zh</code> 的中文转写路径，并说明时间戳、热词等用法；是否能在你选的安装包、模型版本和服务接口中使用，仍要逐项核对。流式路径使用不同的 <code>paraformer-zh-streaming</code>，不能拿离线模型名称代替。</p>
+<h3>转写之外还需要声音标签：检查 SenseVoiceSmall</h3>
+<p>官方文档列出的 SenseVoiceSmall 识别语种是普通话、英语、粤语、日语和韩语，并提供情绪与音频事件标签。它不是“任何语言都可以”的通用承诺。情绪标签是模型预测，不是对说话人真实心理状态的判断；标签也不是说话人身份。</p>
+<p>若采用 SenseVoiceSmall + FSMN-VAD + CAM++ 的组合，VAD 找语音区间，CAM++ 提取说话人特征，FunASR 管线再聚类分配匿名标签。<strong>这是多个组件配合，不是 SenseVoiceSmall 单独完成了全部功能。</strong>如果需要保留原始声音标签，还要核对后处理和服务是否把它们去掉。</p>
+<h3>评估 Fun-ASR：先选 checkpoint，再选加载方式</h3>
+<p>基础 Fun-ASR-Nano 与覆盖 31 种语言的 Fun-ASR-MLT-Nano 是不同 checkpoint。基础 Nano 的官方说明面向中文、英文、日文及所列中文方言和地域口音；不要把 MLT-Nano 的语言范围搬到基础 Nano 上。</p>
+<p>同样要区分原始 FunASR 权重、原生 Transformers 的 <code>-hf</code> 导出，以及 GGUF 或原生 vLLM 的对应产物。文档中的 CPU、CUDA、原生 Transformers 和 vLLM 路径各有加载与依赖要求，不能只改一个 <code>model</code> 字符串就假定完成迁移。更不能把某一路径的测速或功能直接套到另一路径。</p>
+<h3>目标是操作视频：从 FunClip 应用工作流入手</h3>
+<p>如果产物是字幕或剪辑片段，先检查 FunClip 提供的工作流是否符合需求，再核对它实际调用的识别后端。应用支持导出某种文件，并不代表每个后端都能提供相同的时间戳或说话人信息。启用外部大模型辅助剪辑前，还要明确会发送哪些数据、使用哪个服务以及是否收费。</p>
+<h2 id="selection-brief">5. 写一份能指导下一步的选型单</h2>
+<p>下面是一个<strong>假设任务</strong>，不是已经跑出的识别结果：你有一段获得处理授权的普通话访谈，想先得到可搜索文字；当前只有 CPU，音频不能上传到外部服务。</p>
+<ul data-example="selection-brief">
+<li><strong>输入：</strong>本地访谈音频；普通话；先挑有权使用的短片段，包含人名、数字和句尾。</li>
+<li><strong>第一阶段产物：</strong>本地 UTF-8 转写文件。不在这一步承诺字幕时间轴或说话人身份。</li>
+<li><strong>候选入口：</strong>FunASR 工具包的 Paraformer 中文文件转写路径，先参考下方入门教程；它是候选，不是已证明最优的模型。</li>
+<li><strong>允许的操作：</strong>确认条款后下载指定软件和模型；不上传录音，不启用收费服务，不覆盖原文件。</li>
+<li><strong>通过标准：</strong>能得到本次生成的结果文件，并回听核对关键内容；同时记录本机耗时和内存是否可接受。</li>
+<li><strong>下一阶段：</strong>短片段通过后再检查长录音覆盖；如果新增字幕或按人剪辑需求，重新补齐时间戳和说话人条件。</li>
 </ul>
+<p>这比“给我找一个最强模型”更容易执行。若候选不满足要求，保留失败样本和原因，再比较另一个候选；不要只展示识别得最好的几段。</p>
+<h2 id="agent-contract">给 AI Agent：把选型单当需求，不当 API 参数</h2>
+<p>上面的条目是人和 Agent 之间的任务说明，<strong>不是 FunASR SDK 的配置字段</strong>。执行前必须从所选版本的文档映射到实际命令或函数参数。</p>
+<ul>
+<li><strong>输入约定：</strong>记录音频的真实路径、格式、声道数、采样率（Hz）和时长（秒）；未知值先检查，不根据文件后缀猜测。路径示例不是可直接读取的真实文件。</li>
+<li><strong>模型约定：</strong>记录完整模型 ID、revision 或校验值、权重格式、运行时及软件版本。服务中的短别名不一定是可用于下载的模型 ID。</li>
+<li><strong>输出约定：</strong>先约定文件路径、文字编码及所需字段；若需要时间戳，明确单位和粒度；若需要说话人，明确标签只在当前录音内使用。不捏造后端没有返回的字段。</li>
+<li><strong>权限约定：</strong>下载、外部上传、远程代码、付费调用和覆盖已有结果均不得从“做转写”中默认为已获许可。缺少授权时先停止对应操作。</li>
+<li><strong>失败约定：</strong>以实际程序的退出码或接口错误判断执行失败，不把旧输出当新结果。保存错误，修正原因后再按约定有界重试；不自动换模型、开并行副本或转向外部服务。</li>
+</ul>
+<h2 id="verification">6. 怎样知道自己选对了？</h2>
+<p>先验证能不能完成任务，再比较质量和资源开销。用有权处理、能代表实际工作场景的音频，覆盖清晰语音、噪声、专名、数字和容易遗漏的结尾。多人或字幕任务还要回听检查轮次与时间边界。一次干净示例成功，只是起点，不是完整质量评测。</p>
+<p>比较不同模型时，使用同一份输入和事先确定的核对方式。文字通顺不等于忠实于录音；只报一个 CER/WER 数字，也无法替代对数据、归一化规则和测试范围的说明。速度记录应区分下载、加载与识别时间，并注明硬件和批次，才有比较价值。</p>
+<p data-editorial="scope">本文是依据官方文档整理的选型解释，没有新增模型推理、准确率、实时性或容量测试。因此不提供跨模型性能排名，也不声称下列所有路径都在同一环境实测通过。</p>
+<h2 id="sources">官方依据与下一步</h2>
+<ul>
+<li><a href="https://github.com/modelscope/FunASR/blob/114292dbeff0f8f377bb165e22121cfcfb60cf65/README.md#why-funasr">工具包 README：任务、checkpoint 与运行时的对应关系</a></li>
+<li><a href="https://github.com/modelscope/FunASR/blob/114292dbeff0f8f377bb165e22121cfcfb60cf65/docs/model_selection.md">模型选择：语言范围、说话人组合和接口区别</a></li>
+<li><a href="https://github.com/modelscope/FunASR/blob/114292dbeff0f8f377bb165e22121cfcfb60cf65/docs/repository_roles.md">四个仓库的职责与应用入口</a></li>
+<li><a href="https://github.com/modelscope/FunASR/blob/114292dbeff0f8f377bb165e22121cfcfb60cf65/docs/deployment_matrix.md">部署矩阵：Python、HTTP、WebSocket 与其他运行时</a></li>
+</ul>
+<p data-editorial="next-step">已经选好“普通话短录音转成本地文字”这个第一任务？接着读<a href="/blog/speech-to-text-python-transcribe-audio.html">用 Python 把第一段录音转成文字</a>，按其中的环境和输入范围开始。要接入自己的程序，则同时核对<a href="https://github.com/modelscope/FunASR/blob/114292dbeff0f8f377bb165e22121cfcfb60cf65/docs/python_api.md">Python SDK 参数与返回结果</a>。先完成一个小任务，再扩展成你的应用。</p>
 </div></article>
 <footer><div class="container">© 2024-2026 Tongyi Lab, Alibaba Group · <a href="https://github.com/modelscope/FunASR/blob/main/LICENSE">MIT License</a></div></footer>
 </body>
 </html>
+
