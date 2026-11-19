@@ -519,14 +519,14 @@
     {
       "slug": "voice-activity-detection-python",
       "category": "explanations",
-      "reviewed": false,
+      "reviewed": true,
       "zh": {
-        "title": "VAD 如何找到语音区间",
-        "summary": ""
+        "title": "VAD 找到语音以后，为什么还不能直接做字幕？",
+        "summary": "看懂语音起止区间，区分检测、裁剪与文字对齐；用一组示意数字理解原录音和片段的时间轴。"
       },
       "en": {
-        "title": "How VAD identifies speech regions",
-        "summary": ""
+        "title": "VAD found the speech. Why isn't that enough for subtitles?",
+        "summary": "Understand speech intervals, distinguish detection from editing and word alignment, and preserve the timeline when audio is cut."
       }
     },
     {

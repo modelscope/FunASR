@@ -1,25 +1,24 @@
 <!DOCTYPE html>
+
 <html lang="zh">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Python 语音活动检测(VAD):检测语音、去静音、按停顿切分音频 | FunASR 博客</title>
-<meta name="description" content="怎么用 Python 做语音活动检测(VAD)?FunASR fsmn-vad 3 行代码返回每段语音的起止毫秒,可去静音、按停顿切分长录音、给任意 ASR(含 Whisper)做预处理防幻觉。附真实实测输出。">
-<meta name="keywords" content="语音活动检测, VAD, voice activity detection python, vad python, 去静音, 音频切分, 静音检测, 按停顿切分音频, silero vad 替代, fsmn-vad, FunASR, 语音预处理">
-<link rel="icon" href="/logo.png">
-<meta property="og:title" content="Python 语音活动检测(VAD):检测语音、去静音、按停顿切分音频 | FunASR 博客">
-<meta property="og:description" content="怎么用 Python 做语音活动检测(VAD)?FunASR fsmn-vad 3 行代码返回每段语音的起止毫秒,可去静音、按停顿切分长录音、给任意 ASR(含 Whisper)做预处理防幻觉。附真实实测输出。">
-<meta property="og:type" content="article">
-<meta property="og:url" content="https://www.funasr.com/blog/voice-activity-detection-python.html">
-<meta property="og:image" content="https://www.funasr.com/logo.png">
-<link rel="canonical" href="https://www.funasr.com/blog/voice-activity-detection-python.html">
-<link rel="alternate" hreflang="en" href="https://www.funasr.com/en/blog/voice-activity-detection-python.html">
-<link rel="alternate" hreflang="zh" href="https://www.funasr.com/blog/voice-activity-detection-python.html">
-<link rel="alternate" hreflang="x-default" href="https://www.funasr.com/en/blog/voice-activity-detection-python.html">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<script type="application/ld+json">
-{"@context":"https://schema.org","@type":"BlogPosting","headline":"Python 语音活动检测(VAD):检测语音、去静音、按停顿切分音频 | FunASR 博客","description":"怎么用 Python 做语音活动检测(VAD)?FunASR fsmn-vad 3 行代码返回每段语音的起止毫秒,可去静音、按停顿切分长录音、给任意 ASR(含 Whisper)做预处理防幻觉。附真实实测输出。","datePublished":"2026-06-22","dateModified":"2026-06-22","author":{"@type":"Organization","name":"FunASR / Tongyi Lab"},"publisher":{"@type":"Organization","name":"FunASR","logo":{"@type":"ImageObject","url":"https://www.funasr.com/logo.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://www.funasr.com/blog/voice-activity-detection-python.html"},"image":"https://www.funasr.com/logo.png"}
-</script>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<title>VAD 找到语音以后，为什么还不能直接做字幕？ | FunASR</title>
+<meta content="看懂语音起止区间，区分检测、裁剪与文字对齐；用一组示意数字理解原录音和片段的时间轴。" name="description"/>
+
+<link href="/logo.png" rel="icon"/>
+<meta content="VAD 找到语音以后，为什么还不能直接做字幕？" property="og:title"/>
+<meta content="看懂语音起止区间，区分检测、裁剪与文字对齐；用一组示意数字理解原录音和片段的时间轴。" property="og:description"/>
+<meta content="article" property="og:type"/>
+<meta content="https://www.funasr.com/blog/voice-activity-detection-python.html" property="og:url"/>
+<meta content="https://www.funasr.com/logo.png" property="og:image"/>
+<link href="https://www.funasr.com/blog/voice-activity-detection-python.html" rel="canonical"/>
+<link href="https://www.funasr.com/en/blog/voice-activity-detection-python.html" hreflang="en" rel="alternate"/>
+<link href="https://www.funasr.com/blog/voice-activity-detection-python.html" hreflang="zh" rel="alternate"/>
+<link href="https://www.funasr.com/en/blog/voice-activity-detection-python.html" hreflang="x-default" rel="alternate"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"VAD 找到语音以后，为什么还不能直接做字幕？","description":"看懂语音起止区间，区分检测、裁剪与文字对齐；用一组示意数字理解原录音和片段的时间轴。","datePublished":"2026-06-22","dateModified":"2026-11-20","author":{"@type":"Organization","name":"FunASR / Tongyi Lab"},"publisher":{"@type":"Organization","name":"FunASR","logo":{"@type":"ImageObject","url":"https://www.funasr.com/logo.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://www.funasr.com/blog/voice-activity-detection-python.html"},"image":"https://www.funasr.com/logo.png"}</script>
 <style>:root{--primary:#2563eb;--primary-dark:#1d4ed8;--bg:#fff;--surface:#f8fafc;--border:#e2e8f0;--text:#0f172a;--text-soft:#475569;--text-muted:#94a3b8;--radius:12px}
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Inter',-apple-system,sans-serif;color:var(--text);line-height:1.7}
@@ -55,100 +54,59 @@ p code,li code{background:var(--surface);padding:2px 6px;border-radius:5px;font-
 .post-card .date{color:var(--text-muted);font-size:0.8rem}
 footer{background:#0f172a;color:#94a3b8;padding:28px 0;text-align:center;font-size:0.8rem}
 footer a{color:#94a3b8}</style>
-</head>
+<style>article a{text-decoration:underline;text-underline-offset:0.15em}</style></head>
 <body>
-<nav class="nav"><div class="container"><a href="/" class="nav-logo">Fun<span>ASR</span></a><div class="nav-links"><a href="/#capabilities">核心能力</a><a href="/#usage">如何使用</a><a href="/#benchmark">性能</a><a href="/#demo">演示</a><a href="https://modelscope.github.io/FunASR/zh/" target="_blank">文档</a><a href="/quickstart.html">快速上手</a><a href="/models.html">模型</a><a href="/ecosystem.html">生态</a><a href="/blog/">技术博客</a><a href="/vs-whisper.html">对比 Whisper</a><a href="/donors.html">功德榜</a></div><a href="https://www.funasr.com/en/blog/voice-activity-detection-python.html" style="font-size:0.83rem;font-weight:500;color:var(--text-soft)">EN</a><a href="https://github.com/modelscope/FunASR" target="_blank" class="nav-btn">GitHub ★</a></div></nav>
-<article><div class="container">
-<h1>Python 语音活动检测(VAD):检测语音、去静音、按停顿切分音频</h1>
-<p class="post-meta">2026-06-22 · FunASR 团队</p>
-
-<p><strong>语音活动检测(VAD,Voice Activity Detection)</strong>是音频处理的基础一环:从一段录音里找出"哪里有人在说话、哪里是静音/噪声"。它是几乎所有语音流程的第一步——去掉静音省算力、把长录音按停顿切成小段、给下游 ASR 做预处理(<strong>包括给 Whisper 喂干净音频以省钱、防它在静音处胡乱"幻觉"出文字</strong>)。</p>
-<p><strong>FunASR 的 <code>fsmn-vad</code></strong> 是一个工业级、轻量、极快的开源 VAD 模型,3 行 Python 就能用,返回每段语音的<strong>起止毫秒</strong>。下面全部是真实实测输出。</p>
-
-<h2>3 行代码做 VAD</h2>
-<pre>pip install funasr
-
-from funasr import AutoModel
-
-model = AutoModel(model="fsmn-vad", disable_update=True)
-segments = model.generate(input="audio.wav")[0]["value"]
-
-print(segments)
-# [[610, 5530]]   # 单位:毫秒 —— 语音从 0.61s 到 5.53s,开头 610ms 静音被自动剔除</pre>
-<p>返回值是 <code>[[start_ms, end_ms], ...]</code> 的列表,每个区间是一段连续语音。上例里一段 5.55s 的录音,开头的 0.61s 静音被自动去掉了。</p>
-
-<h2>真实示例:13 秒录音切成 2 段</h2>
-<p>把两段话中间插 1.5s 停顿拼成一段 13.31s 的录音(模拟真实带停顿的录音),VAD 的真实输出:</p>
-<table>
-<tr><th>语音段</th><th>起止</th><th>时长</th></tr>
-<tr><td>seg0</td><td>0.61s → 5.45s</td><td>4.84s</td></tr>
-<tr><td>seg1</td><td>7.28s → 13.29s</td><td>6.01s</td></tr>
-</table>
-<p>VAD 准确切出两段语音、把中间 1.5s 的停顿(5.45s~7.28s)和开头静音都识别为非语音。整段 13.31s 里语音占 82%,<strong>剔除了 18% 的静音</strong>。这一步在 GPU 上只花了 <strong>0.12 秒(约 110× 实时)</strong>——VAD 本身极轻,几乎不增加流程开销。</p>
-
-<h2>三个实用场景</h2>
-<h3>1. 去静音 / 只保留语音</h3>
-<pre>import soundfile as sf
-import numpy as np
-
-audio, sr = sf.read("audio.wav")
-segments = model.generate(input="audio.wav")[0]["value"]
-
-# 拼接所有语音段,丢弃静音
-speech = np.concatenate([audio[int(s/1000*sr):int(e/1000*sr)] for s, e in segments])
-sf.write("speech_only.wav", speech, sr)</pre>
-
-<h3>2. 按停顿把长录音切成多个文件(便于批量识别)</h3>
-<pre>for i, (s, e) in enumerate(segments):
-    chunk = audio[int(s/1000*sr):int(e/1000*sr)]
-    sf.write(f"chunk_{i}.wav", chunk, sr)
-# chunk_0.wav, chunk_1.wav, ...  每个文件是一段独立语音</pre>
-
-<h3>3. 给任何 ASR(含 Whisper)做预处理</h3>
-<p>在跑识别<strong>之前</strong>先做 VAD,有两个实打实的好处:① 不把静音/噪声送进模型 = <strong>省算力、降成本</strong>;② Whisper 在长静音处容易"幻觉"出重复文字,<strong>先用 VAD 切掉静音能显著减少幻觉</strong>。FunASR 的 ASR 模型(SenseVoice / Paraformer)更是可以直接 <code>vad_model="fsmn-vad"</code> 一行接上,内部自动分段。</p>
-<pre>from funasr import AutoModel
-# ASR 直接挂载 VAD,长音频自动分段识别
-asr = AutoModel(model="iic/SenseVoiceSmall", vad_model="fsmn-vad")
-result = asr.generate(input="long_audio.wav")</pre>
-
-<h2>为什么用 fsmn-vad</h2>
-<table>
-<tr><th></th><th>fsmn-vad(FunASR)</th></tr>
-<tr><td>用法</td><td>3 行 Python,返回毫秒级语音区间</td></tr>
-<tr><td>速度</td><td>实测 13s 音频 0.12s(约 110× 实时)</td></tr>
-<tr><td>体量</td><td>轻量 FSMN 结构,CPU 也能实时跑</td></tr>
-<tr><td>生态</td><td>可独立用,也能一行挂到 FunASR 的 ASR 上自动分段</td></tr>
-<tr><td>许可证</td><td>开源,可商用</td></tr>
-</table>
-<p>如果你已经在用 FunASR 做识别,VAD 是同一套工具、零额外依赖;如果你在用 Whisper 或别的 ASR,也可以把 fsmn-vad 当成独立的预处理器。想看完整的语音流程,可参考 <a href="/blog/funasr-transcribe-long-audio.html">转写超长音频</a> 和 <a href="/blog/funasr-speaker-diarization.html">说话人分离</a>。</p>
-
-<div class="cta"><p><strong>FunASR 全家桶都是开源的</strong>——fsmn-vad、工业级 ASR、标点、说话人、情感事件、LLM-ASR,拿来即用。觉得有用就点个 Star 支持一下 👇</p><p><a class="btn" href="https://github.com/modelscope/FunASR" target="_blank">⭐ Star FunASR</a></p><p style="margin-top:10px;font-size:0.85rem">也欢迎 Star:<a href="https://github.com/QwenAudio/SenseVoice" target="_blank">SenseVoice</a> · <a href="https://github.com/QwenAudio/Fun-ASR" target="_blank">Fun-ASR</a> · <a href="https://github.com/modelscope/FunClip" target="_blank">FunClip</a></p></div>
-<!--related-posts-->
-<h2>相关文章</h2>
-<ul class="post-list">
-<li><a href="/blog/funasr-vs-whisper-benchmark.html">FunASR vs Whisper 实测对比</a></li>
-<li><a href="/blog/sensevoice-deployment-guide.html">SenseVoice 部署指南</a></li>
-<li><a href="/blog/fun-asr-nano-guide.html">Fun-ASR-Nano 使用指南</a></li>
-<li><a href="/blog/funasr-speaker-diarization.html">说话人分离:谁在何时说话</a></li>
-<li><a href="/blog/sensevoice-emotion-language-detection.html">情感与语种检测</a></li>
-<li><a href="/blog/funasr-realtime-streaming-asr.html">实时流式语音识别</a></li>
-<li><a href="/blog/funasr-transcribe-long-audio.html">转写超长音频(1小时一次搞定)</a></li>
-<li><a href="/blog/funasr-cli-transcribe-command-line.html">命令行转写(文本/JSON/SRT)</a></li>
-<li><a href="/blog/self-hosted-openai-whisper-api-alternative.html">自托管 OpenAI Whisper API 替代</a></li>
-<li><a href="/blog/generate-subtitles-srt-vtt-from-audio-video.html">自动生成字幕(SRT / VTT)</a></li>
-<li><a href="/blog/speech-to-text-python-transcribe-audio.html">Python 语音转文字教程</a></li>
-<li><a href="/blog/funasr-llama-cpp-whisper-cpp-alternative.html">FunASR 跑进 llama.cpp(whisper.cpp 替代)</a></li>
-<li><a href="/blog/funasr-vs-faster-whisper-chinese.html">FunASR vs faster-whisper(中文/粤语)</a></li>
-<li><a href="/blog/lightweight-speech-recognition-cpu.html">轻量语音识别(CPU 250MB)</a></li>
-<li><a href="/blog/self-hosted-deepgram-assemblyai-alternative.html">自托管替代 Deepgram/AssemblyAI</a></li>
-<li><a href="/blog/which-funasr-model.html">选哪个 FunASR 模型</a></li>
-<li><a href="/blog/cantonese-speech-recognition.html">粤语语音识别(SenseVoice 原生粤语)</a></li>
-<li><a href="/blog/japanese-speech-recognition.html">日语语音识别(SenseVoice 转写+标点+情感)</a></li>
-<li><a href="/blog/self-hosted-google-aws-azure-speech-to-text.html">自托管替代 Google/AWS/Azure 云语音 API</a></li>
-<li><a href="/blog/chinese-speech-recognition.html">中文语音识别(普通话)实战</a></li>
-<li><a href="/blog/punctuation-restoration-python.html">标点恢复 Python 实战</a></li>
-<li><a href="/blog/speech-to-text-timestamps-python.html">语音识别带时间戳(字级)</a></li>
+<nav class="nav"><div class="container"><a class="nav-logo" href="/">Fun<span>ASR</span></a><div class="nav-links"><a href="/#capabilities">核心能力</a><a href="/#usage">如何使用</a><a href="/#benchmark">性能</a><a href="/#demo">演示</a><a href="https://modelscope.github.io/FunASR/zh/" target="_blank">文档</a><a href="/quickstart.html">快速上手</a><a href="/models.html">模型</a><a href="/ecosystem.html">生态</a><a href="/blog/">技术博客</a><a href="/vs-whisper.html">对比 Whisper</a><a href="/donors.html">功德榜</a></div><a href="https://www.funasr.com/en/blog/voice-activity-detection-python.html" style="font-size:0.83rem;font-weight:500;color:var(--text-soft)">EN</a><a class="nav-btn" href="https://github.com/modelscope/FunASR" target="_blank">GitHub ★</a></div></nav>
+<article><div class="container"><h1>VAD 找到语音以后，为什么还不能直接做字幕？</h1>
+<p class="post-meta">2026-06-22 发布 · 2026-11-20 修订 · 语音技术入门</p>
+<p class="lead" data-editorial="opening">一段会议录音，前面有人调麦，中间有长停顿，后面才开始讨论。你希望程序先找到值得转写的部分。VAD 就像给录音画出“这里可能有人说话”的标记：它能帮助定位语音，却没有听写文字，也没有替你剪掉任何声音。</p>
+<p data-editorial="outcome">读完这篇，你应能看懂一组语音起止区间，知道它与裁剪后的音频、字幕时间戳分别是什么，并判断自己的应用还缺哪一步。本文是概念指南，不需要安装软件；下方数字是人为构造的示意，不是模型推理结果。</p>
+<h2 id="what-vad-does">1. 三个问题，不是同一个模型能力</h2>
+<p><strong>VAD（Voice Activity Detection，语音活动检测）</strong>判断音频中的哪些时间区间可能包含语音。<strong>ASR（Automatic Speech Recognition，自动语音识别）</strong>回答“说了什么”。若要字幕，还需要把文字与时间关联；若要区分发言者，还需要说话人处理。VAD 本身不输出字词，也不判断是谁在说话。两个人无缝接话，完全可能仍在同一个语音区间里。</p>
+<p>在这个生态中，<strong>FunASR 是工具包</strong>，可以调用 VAD、识别等组件；<strong>Fun-ASR 和 SenseVoice 是模型系列</strong>，具体 checkpoint 的能力要分别核对；<strong>FunClip 是转写、字幕与剪辑应用</strong>。本文聚焦 FunASR 中的 FSMN-VAD 文件处理结果，不把其他模型、HTTP 服务或 GGUF 运行时的返回格式当成同一接口。项目职责可查阅<a href="https://github.com/modelscope/FunASR/blob/3747f8496815ee0932e1a227b17d57c27442d656/docs/repository_roles.md#repository-responsibilities">官方仓库说明</a>。</p>
+<p>如果目标只是先获得文字，从<a href="/blog/speech-to-text-python-transcribe-audio.html">第一段录音转写教程</a>开始更合适；需要挑选字幕或剪辑后端，先看<a href="/blog/which-funasr-model.html">按产物选模型</a>。不要为了“流程看起来完整”就叠加一套 VAD：已有管线可能已经完成分段，重复切分还可能改变上下文与时间轴。</p>
+<h2 id="read-intervals">2. 看懂区间：标记不是剪刀</h2>
+<p>FunASR 的 FSMN-VAD 文件路径返回记录中的 <code>value</code> 存放语音区间，形如 <code>[[start_ms, end_ms], ...]</code>。<code>start_ms</code> 和 <code>end_ms</code> 是这里对每一对数值的说明，不是另两个返回字段；单位是<strong>毫秒</strong>，参考点是送入此次处理的音频起点。源码分别实现了<a href="https://github.com/modelscope/FunASR/blob/3747f8496815ee0932e1a227b17d57c27442d656/funasr/models/fsmn_vad_streaming/model.py#L859-L910">区间生成</a>和<a href="https://github.com/modelscope/FunASR/blob/3747f8496815ee0932e1a227b17d57c27442d656/funasr/models/fsmn_vad_streaming/model.py#L950-L1083">推理返回</a>。</p>
+<p data-example="illustrative">假设原录音长 10 秒，示意区间为 <code>[[1000, 3000], [6000, 9000]]</code>。这是为了讲解而编造的数字，不是某个音频或模型的实测输出。</p>
+<table data-example="intervals"><thead><tr><th>区间（毫秒）</th><th>原录音位置（秒）</th><th>区间时长</th></tr></thead><tbody>
+<tr><td>[1000, 3000]</td><td>1.0 到 3.0</td><td>2.0 秒</td></tr>
+<tr><td>[6000, 9000]</td><td>6.0 到 9.0</td><td>3.0 秒</td></tr>
+</tbody></table>
+<p>换算方法是除以 1000：6000 毫秒就是 6 秒；第二段时长为 (9000 − 6000) / 1000 = 3 秒。这张表只告诉你“模型将哪里标成语音”。<strong>原文件仍长 10 秒，并没有因此变成 5 秒。</strong>只有后续程序真的读取这些片段、拼接并写出新文件，音频才被剪辑。</p>
+<p>未被标记的部分也不能直接叫“纯静音”：它可能有背景声，也可能是漏检的轻声。VAD 是预测，不能据此断言原录音里没有重要内容。保留原文件，先回听边界附近，尤其是轻声开头、句尾和背景音乐下的人声。</p>
+<h2 id="keep-timeline">3. 裁剪以后，时间从哪里开始算？</h2>
+<p>假如把第二个区间单独保存成一个 3 秒片段，这个新文件从 0 秒开始。但它对应的是原录音的 6 秒处。若下游支持时间戳，并在片段内给出某个词的时间 <code>[0.4, 0.9]</code> 秒，把它放回<strong>原录音</strong>时应得到 <code>[6.4, 6.9]</code> 秒。</p>
+<p data-example="offset">映射关系：<strong>原录音时间 = 片段内时间 + 片段在原录音中的起点</strong>。这个示意假定没有变速或其他时间拉伸，且片段起点确实是 6 秒。如果裁剪时多留了前后余量，就记录实际裁剪起点，而不是照抄最初的 VAD 起点。</p>
+<p>如果把两个区间首尾拼起来，第二段在<strong>拼接文件</strong>里从 2 秒开始，在原录音里却从 6 秒开始。此时整份文件不能共用一个固定偏移。应为每一段保存“原文件位置 → 新文件位置”的映射，且不能把跨拼接点的时间戳当成原文件中的连续声音。</p>
+<p>对会议字幕或证据回溯，通常先保留原录音和分段映射更稳妥；对只需听取摘录的应用，去掉停顿也可能合理。两种产物没有谁天然更好，关键是明确字幕或检索结果要指向哪条时间轴。</p>
+<h2 id="not-subtitles">4. 有了 VAD 时间，为什么还不够？</h2>
+<p>一段 3 秒语音可能包含一句话、半句话，也可能有多个人交叠发言。VAD 区间不是语义句子，更不是每个字的对齐位置。把整段文字平均分到每个字上，只是人为分配时间，不能声称是模型的字级时间戳。</p>
+<ul>
+<li><strong>做可搜索文字：</strong>把符合接口要求的音频交给识别模型，再检查转写内容是否忠实于录音。</li>
+<li><strong>做视频字幕：</strong>选择明确支持所需时间戳的模型与接口；保留时间轴映射，再进行字幕分行、时长和同步检查。VAD 可以协助分段，不能替代文字对齐。</li>
+<li><strong>按发言者检索：</strong>增加合适的说话人处理。匿名标签只用于区分录音内的发言者，不等于实名身份。</li>
 </ul>
+<p>是否省时、是否减少错误，需要在同一批有代表性的音频上比较完整流程。漏掉的语音无法靠后面的识别模型凭空恢复；切得过碎也可能损失上下文。本文不据一次示例承诺实时性、识别提升或费用下降。</p>
+<h2 id="streaming-boundary">5. 文件结果与流式事件不能混用</h2>
+<p>上面的解释针对<strong>完整文件处理后的闭合区间</strong>。流式处理是声音不断送入的过程，程序可能先知道“开始说话”，稍后才知道“结束”。对应实现可能返回 <code>[start, -1]</code>、<code>[-1, end]</code>、完整区间或空列表。这里的 <code>-1</code> 是端点尚未在该事件中提供的标记，不是负一毫秒的裁剪位置。</p>
+<p>需要流式应用时，应按<a href="https://github.com/modelscope/FunASR/blob/3747f8496815ee0932e1a227b17d57c27442d656/docs/streaming_vad.md">专门的流式 VAD 文档</a>处理缓存、分块和结束信号，不把本文的区间示意作为流式客户端协议。</p>
+<h2 id="agent-contract">给 AI Agent：先保护时间轴，再决定处理动作</h2>
+<p>以下是应用侧验收约定，<strong>不是可直接传给 SDK 的配置对象</strong>。本文没有执行命令；接入时须核对所用版本的实际参数和错误行为。</p>
+<ul>
+<li><strong>输入：</strong>记录用户授权的真实音频路径、时长（秒）、采样率（Hz）、声道数，以及模型 ID、revision 和运行时版本。不能根据后缀猜音频格式，不能把重命名当成重采样。</li>
+<li><strong>输出：</strong>为完整文件的 <code>value</code> 检查二维数值列表和毫秒单位。裁剪前确认端点有限、顺序合理、<code>0 ≤ start &lt; end</code> 且不超出实际输入时长。零长度、越界或未闭合区间应保留原结果并进入核查，不静默改值后宣称模型正确。</li>
+<li><strong>空结果：</strong>一次成功处理返回 <code>[]</code> 表示没有输出语音区间，不是网络错误，也不是“文件一定没有语音”的证明。保留原音频并检查输入与检测条件，不无限重试。</li>
+<li><strong>失败边界：</strong>程序异常或非零退出与“没有检测到语音”分开记录；修正原因后才按约定有界重试。不要自动换模型、上传音频或把旧结果冒充本次结果。</li>
+<li><strong>操作权限：</strong>安装工具包与下载权重是两件事；首次加载可能下载额外文件。断网运行要先备齐并验证依赖、权重和配置。下载、外部上传、付费接口、覆盖或删除音频都需相应授权，模型许可不能从工具包许可推断。</li>
+</ul>
+<h2 id="check-understanding">读到这里，你能回答这三个问题吗？</h2>
+<ol>
+<li>示意区间总长 5 秒，原录音变短了吗？<strong>没有，返回标记不等于写出剪辑文件。</strong></li>
+<li>第二段内 0.4 秒的位置，在原录音哪里？<strong>6.4 秒，前提是片段从原录音 6 秒处开始且没有变速。</strong></li>
+<li>一个 VAD 区间意味着一句话或一个说话人吗？<strong>都不意味着。</strong></li>
+</ol>
+<p data-editorial="scope">本次修订核对了固定提交的官方实现与职责文档，并检查文中示意算术；没有运行新的模型推理或性能评测。旧稿未限定的测速和“全部实测”等说法已移除，示意数字不构成准确率证据。</p>
+<p data-editorial="next-step">接下来先完成<a href="/blog/speech-to-text-python-transcribe-audio.html">一段录音到本地文字</a>；需要把结果用于字幕或应用时，再依照<a href="/blog/which-funasr-model.html">选型指南</a>核对相应能力。先知道自己要哪条时间轴，再动手裁剪。</p>
 </div></article>
 <footer><div class="container">© 2024-2026 Tongyi Lab, Alibaba Group · <a href="https://github.com/modelscope/FunASR/blob/main/LICENSE">MIT License</a></div></footer>
 </body>
