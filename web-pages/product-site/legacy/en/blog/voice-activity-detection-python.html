@@ -1,25 +1,24 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Voice Activity Detection in Python — Detect Speech, Remove Silence, Split Audio | FunASR Blog</title>
-<meta name="description" content="How to do Voice Activity Detection (VAD) in Python? FunASR fsmn-vad returns start/end milliseconds of every speech region in 3 lines — remove silence, split long recordings on pauses, and preprocess any ASR (incl. Whisper) to cut cost and hallucinations. With real measured output.">
-<meta name="keywords" content="voice activity detection python, vad python, voice activity detection, remove silence from audio python, split audio by silence, detect speech in audio, silero vad alternative, fsmn-vad, FunASR, audio preprocessing">
-<link rel="icon" href="/logo.png">
-<meta property="og:title" content="Voice Activity Detection in Python — Detect Speech, Remove Silence, Split Audio | FunASR Blog">
-<meta property="og:description" content="How to do Voice Activity Detection (VAD) in Python? FunASR fsmn-vad returns start/end milliseconds of every speech region in 3 lines — remove silence, split long recordings on pauses, and preprocess any ASR (incl. Whisper) to cut cost and hallucinations. With real measured output.">
-<meta property="og:type" content="article">
-<meta property="og:url" content="https://www.funasr.com/en/blog/voice-activity-detection-python.html">
-<meta property="og:image" content="https://www.funasr.com/logo.png">
-<link rel="canonical" href="https://www.funasr.com/en/blog/voice-activity-detection-python.html">
-<link rel="alternate" hreflang="en" href="https://www.funasr.com/en/blog/voice-activity-detection-python.html">
-<link rel="alternate" hreflang="zh" href="https://www.funasr.com/blog/voice-activity-detection-python.html">
-<link rel="alternate" hreflang="x-default" href="https://www.funasr.com/en/blog/voice-activity-detection-python.html">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<script type="application/ld+json">
-{"@context":"https://schema.org","@type":"BlogPosting","headline":"Voice Activity Detection in Python — Detect Speech, Remove Silence, Split Audio | FunASR Blog","description":"How to do Voice Activity Detection (VAD) in Python? FunASR fsmn-vad returns start/end milliseconds of every speech region in 3 lines — remove silence, split long recordings on pauses, and preprocess any ASR (incl. Whisper) to cut cost and hallucinations. With real measured output.","datePublished":"2026-06-22","dateModified":"2026-06-22","author":{"@type":"Organization","name":"FunASR / Tongyi Lab"},"publisher":{"@type":"Organization","name":"FunASR","logo":{"@type":"ImageObject","url":"https://www.funasr.com/logo.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://www.funasr.com/en/blog/voice-activity-detection-python.html"},"image":"https://www.funasr.com/logo.png"}
-</script>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<title>VAD found the speech. Why isn't that enough for subtitles? | FunASR</title>
+<meta content="Understand speech intervals, distinguish detection from editing and word alignment, and preserve the timeline when audio is cut." name="description"/>
+
+<link href="/logo.png" rel="icon"/>
+<meta content="VAD found the speech. Why isn't that enough for subtitles?" property="og:title"/>
+<meta content="Understand speech intervals, distinguish detection from editing and word alignment, and preserve the timeline when audio is cut." property="og:description"/>
+<meta content="article" property="og:type"/>
+<meta content="https://www.funasr.com/en/blog/voice-activity-detection-python.html" property="og:url"/>
+<meta content="https://www.funasr.com/logo.png" property="og:image"/>
+<link href="https://www.funasr.com/en/blog/voice-activity-detection-python.html" rel="canonical"/>
+<link href="https://www.funasr.com/en/blog/voice-activity-detection-python.html" hreflang="en" rel="alternate"/>
+<link href="https://www.funasr.com/blog/voice-activity-detection-python.html" hreflang="zh" rel="alternate"/>
+<link href="https://www.funasr.com/en/blog/voice-activity-detection-python.html" hreflang="x-default" rel="alternate"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"VAD found the speech. Why isn't that enough for subtitles?","description":"Understand speech intervals, distinguish detection from editing and word alignment, and preserve the timeline when audio is cut.","datePublished":"2026-06-22","dateModified":"2026-11-20","author":{"@type":"Organization","name":"FunASR / Tongyi Lab"},"publisher":{"@type":"Organization","name":"FunASR","logo":{"@type":"ImageObject","url":"https://www.funasr.com/logo.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://www.funasr.com/en/blog/voice-activity-detection-python.html"},"image":"https://www.funasr.com/logo.png"}</script>
 <style>:root{--primary:#2563eb;--primary-dark:#1d4ed8;--bg:#fff;--surface:#f8fafc;--border:#e2e8f0;--text:#0f172a;--text-soft:#475569;--text-muted:#94a3b8;--radius:12px}
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Inter',-apple-system,sans-serif;color:var(--text);line-height:1.7}
@@ -55,100 +54,59 @@ p code,li code{background:var(--surface);padding:2px 6px;border-radius:5px;font-
 .post-card .date{color:var(--text-muted);font-size:0.8rem}
 footer{background:#0f172a;color:#94a3b8;padding:28px 0;text-align:center;font-size:0.8rem}
 footer a{color:#94a3b8}</style>
-</head>
+<style>article a{text-decoration:underline;text-underline-offset:0.15em}</style></head>
 <body>
-<nav class="nav"><div class="container"><a href="/en/" class="nav-logo">Fun<span>ASR</span></a><div class="nav-links"><a href="/en/#capabilities">Capabilities</a><a href="/en/#usage">How to Use</a><a href="/en/#benchmark">Benchmark</a><a href="/en/#demo">Demo</a><a href="https://modelscope.github.io/FunASR/" target="_blank">Docs</a><a href="/en/quickstart.html">Quickstart</a><a href="/en/models.html">Models</a><a href="/en/ecosystem.html">Ecosystem</a><a href="/en/blog/">Blog</a><a href="/en/vs-whisper.html">vs Whisper</a><a href="/en/donors.html">Donors</a></div><a href="https://www.funasr.com/blog/voice-activity-detection-python.html" style="font-size:0.83rem;font-weight:500;color:var(--text-soft)">中文</a><a href="https://github.com/modelscope/FunASR" target="_blank" class="nav-btn">GitHub ★</a></div></nav>
-<article><div class="container">
-<h1>Voice Activity Detection in Python — Detect Speech, Remove Silence, Split Audio by Pauses</h1>
-<p class="post-meta">2026-06-22 · FunASR Team</p>
-
-<p><strong>Voice Activity Detection (VAD)</strong> is a foundational step in audio processing: finding <em>where someone is speaking</em> versus silence/noise in a recording. It's the first stage of almost every speech pipeline — drop silence to save compute, split long recordings into utterances on pauses, and preprocess audio for any downstream ASR (<strong>including feeding Whisper clean speech to cut cost and stop it from "hallucinating" text over silent stretches</strong>).</p>
-<p><strong>FunASR's <code>fsmn-vad</code></strong> is an industrial-grade, lightweight, very fast open-source VAD model. Three lines of Python, and it returns the <strong>start/end milliseconds</strong> of every speech region. Everything below is real measured output.</p>
-
-<h2>VAD in three lines</h2>
-<pre>pip install funasr
-
-from funasr import AutoModel
-
-model = AutoModel(model="fsmn-vad", disable_update=True)
-segments = model.generate(input="audio.wav")[0]["value"]
-
-print(segments)
-# [[610, 5530]]   # milliseconds — speech from 0.61s to 5.53s; the leading 610ms of silence is dropped</pre>
-<p>The return value is a list of <code>[start_ms, end_ms]</code> intervals, one per continuous speech region. In this 5.55s clip, the 0.61s of leading silence was removed automatically.</p>
-
-<h2>Real example: a 13-second clip split into 2 segments</h2>
-<p>Concatenating two utterances with a 1.5s pause between them gives a 13.31s recording (simulating a real clip with a pause). Actual VAD output:</p>
-<table>
-<tr><th>Segment</th><th>Span</th><th>Duration</th></tr>
-<tr><td>seg0</td><td>0.61s → 5.45s</td><td>4.84s</td></tr>
-<tr><td>seg1</td><td>7.28s → 13.29s</td><td>6.01s</td></tr>
-</table>
-<p>VAD cleanly isolates the two speech regions and marks both the 1.5s pause (5.45s–7.28s) and the leading silence as non-speech. Speech is 82% of the 13.31s clip — <strong>18% of silence removed</strong>. This took just <strong>0.12s on GPU (~110× real-time)</strong>: VAD is extremely light and adds almost no overhead.</p>
-
-<h2>Three practical use cases</h2>
-<h3>1. Remove silence / keep speech only</h3>
-<pre>import soundfile as sf
-import numpy as np
-
-audio, sr = sf.read("audio.wav")
-segments = model.generate(input="audio.wav")[0]["value"]
-
-# concatenate all speech regions, drop silence
-speech = np.concatenate([audio[int(s/1000*sr):int(e/1000*sr)] for s, e in segments])
-sf.write("speech_only.wav", speech, sr)</pre>
-
-<h3>2. Split a long recording into files on pauses (for batch ASR)</h3>
-<pre>for i, (s, e) in enumerate(segments):
-    chunk = audio[int(s/1000*sr):int(e/1000*sr)]
-    sf.write(f"chunk_{i}.wav", chunk, sr)
-# chunk_0.wav, chunk_1.wav, ...  each file is one independent utterance</pre>
-
-<h3>3. Preprocess for any ASR (including Whisper)</h3>
-<p>Running VAD <strong>before</strong> recognition has two concrete benefits: (1) you never send silence/noise into the model = <strong>less compute, lower cost</strong>; (2) Whisper tends to hallucinate repeated text over long silences, and <strong>trimming silence with VAD first measurably reduces those hallucinations</strong>. With FunASR's own ASR models (SenseVoice / Paraformer) you can wire VAD in with a single <code>vad_model="fsmn-vad"</code> argument for automatic segmentation.</p>
-<pre>from funasr import AutoModel
-# attach VAD directly to ASR; long audio is auto-segmented
-asr = AutoModel(model="iic/SenseVoiceSmall", vad_model="fsmn-vad")
-result = asr.generate(input="long_audio.wav")</pre>
-
-<h2>Why fsmn-vad</h2>
-<table>
-<tr><th></th><th>fsmn-vad (FunASR)</th></tr>
-<tr><td>Usage</td><td>3 lines of Python, returns millisecond speech spans</td></tr>
-<tr><td>Speed</td><td>measured 0.12s on 13s audio (~110× real-time)</td></tr>
-<tr><td>Footprint</td><td>lightweight FSMN architecture, real-time even on CPU</td></tr>
-<tr><td>Ecosystem</td><td>use standalone, or attach to FunASR ASR in one line for auto-segmentation</td></tr>
-<tr><td>License</td><td>open-source, commercial-friendly</td></tr>
-</table>
-<p>If you already use FunASR for recognition, VAD is the same toolkit with zero extra dependencies; if you use Whisper or another ASR, fsmn-vad works as a standalone preprocessor. For full pipelines, see <a href="/en/blog/funasr-transcribe-long-audio.html">transcribing long audio</a> and <a href="/en/blog/funasr-speaker-diarization.html">speaker diarization</a>.</p>
-
-<div class="cta"><p><strong>The whole FunASR stack is open-source</strong> — fsmn-vad, industrial-grade ASR, punctuation, speaker, emotion &amp; events, LLM-ASR, ready to use. If it helps, a GitHub Star really supports the project 👇</p><p><a class="btn" href="https://github.com/modelscope/FunASR" target="_blank">⭐ Star FunASR</a></p><p style="margin-top:10px;font-size:0.85rem">Also star:<a href="https://github.com/QwenAudio/SenseVoice" target="_blank">SenseVoice</a> · <a href="https://github.com/QwenAudio/Fun-ASR" target="_blank">Fun-ASR</a> · <a href="https://github.com/modelscope/FunClip" target="_blank">FunClip</a></p></div>
-<!--related-posts-->
-<h2>Related posts</h2>
-<ul class="post-list">
-<li><a href="/en/blog/funasr-vs-whisper-benchmark.html">FunASR vs Whisper Benchmark</a></li>
-<li><a href="/en/blog/sensevoice-deployment-guide.html">SenseVoice Deployment Guide</a></li>
-<li><a href="/en/blog/fun-asr-nano-guide.html">Fun-ASR-Nano Guide</a></li>
-<li><a href="/en/blog/funasr-speaker-diarization.html">Speaker Diarization: Who Spoke When</a></li>
-<li><a href="/en/blog/sensevoice-emotion-language-detection.html">Emotion & Language Detection</a></li>
-<li><a href="/en/blog/funasr-realtime-streaming-asr.html">Real-Time Streaming Speech-to-Text</a></li>
-<li><a href="/en/blog/funasr-transcribe-long-audio.html">Transcribe Long Audio (Hours in One Call)</a></li>
-<li><a href="/en/blog/funasr-cli-transcribe-command-line.html">Transcribe from the Command Line</a></li>
-<li><a href="/en/blog/self-hosted-openai-whisper-api-alternative.html">Self-Hosted OpenAI Whisper API Alternative</a></li>
-<li><a href="/en/blog/generate-subtitles-srt-vtt-from-audio-video.html">Auto-Generate Subtitles (SRT / VTT)</a></li>
-<li><a href="/en/blog/speech-to-text-python-transcribe-audio.html">Speech to Text in Python</a></li>
-<li><a href="/en/blog/funasr-llama-cpp-whisper-cpp-alternative.html">FunASR on llama.cpp (whisper.cpp Alternative)</a></li>
-<li><a href="/en/blog/funasr-vs-faster-whisper-chinese.html">FunASR vs faster-whisper (Chinese/Cantonese)</a></li>
-<li><a href="/en/blog/lightweight-speech-recognition-cpu.html">Lightweight Speech Recognition on CPU</a></li>
-<li><a href="/en/blog/self-hosted-deepgram-assemblyai-alternative.html">Self-Hosted Deepgram/AssemblyAI Alternative</a></li>
-<li><a href="/en/blog/which-funasr-model.html">Which FunASR Model?</a></li>
-<li><a href="/en/blog/cantonese-speech-recognition.html">Cantonese Speech Recognition (SenseVoice)</a></li>
-<li><a href="/en/blog/japanese-speech-recognition.html">Japanese Speech Recognition (SenseVoice)</a></li>
-<li><a href="/en/blog/self-hosted-google-aws-azure-speech-to-text.html">Self-Hosted Google/AWS/Azure STT Alternative</a></li>
-<li><a href="/en/blog/chinese-speech-recognition.html">Chinese Speech Recognition in Python</a></li>
-<li><a href="/en/blog/punctuation-restoration-python.html">Punctuation Restoration in Python</a></li>
-<li><a href="/en/blog/speech-to-text-timestamps-python.html">Speech-to-Text with Timestamps in Python</a></li>
+<nav class="nav"><div class="container"><a class="nav-logo" href="/en/">Fun<span>ASR</span></a><div class="nav-links"><a href="/en/#capabilities">Capabilities</a><a href="/en/#usage">How to Use</a><a href="/en/#benchmark">Benchmark</a><a href="/en/#demo">Demo</a><a href="https://modelscope.github.io/FunASR/" target="_blank">Docs</a><a href="/en/quickstart.html">Quickstart</a><a href="/en/models.html">Models</a><a href="/en/ecosystem.html">Ecosystem</a><a href="/en/blog/">Blog</a><a href="/en/vs-whisper.html">vs Whisper</a><a href="/en/donors.html">Donors</a></div><a href="https://www.funasr.com/blog/voice-activity-detection-python.html" style="font-size:0.83rem;font-weight:500;color:var(--text-soft)">中文</a><a class="nav-btn" href="https://github.com/modelscope/FunASR" target="_blank">GitHub ★</a></div></nav>
+<article><div class="container"><h1>VAD found the speech. Why isn't that enough for subtitles?</h1>
+<p class="post-meta">Published 2026-06-22 · Revised 2026-11-20 · Speech technology basics</p>
+<p class="lead" data-editorial="opening">A meeting recording starts with microphone adjustments, includes long pauses, and eventually reaches the discussion you need. Voice activity detection can mark where speech may occur. Think of those marks as annotations on the recording, not scissors: they do not transcribe words or remove any audio.</p>
+<p data-editorial="outcome">By the end, you should be able to interpret speech intervals, distinguish them from edited audio and subtitle timestamps, and identify the missing step in your application. This is a conceptual guide with no installation required. Its numbers are deliberately constructed illustrations, not model inference results.</p>
+<h2 id="what-vad-does">1. Three questions, different capabilities</h2>
+<p><strong>VAD, or voice activity detection,</strong> predicts which time regions contain speech. <strong>ASR, or automatic speech recognition,</strong> answers what was said. Subtitles also need a relationship between text and time; distinguishing participants requires speaker processing. VAD does not supply words or identify speakers. Two people taking turns without a gap can occupy a single speech interval.</p>
+<p>In this ecosystem, <strong>FunASR is the toolkit</strong> that can call components such as VAD and recognition models. <strong>Fun-ASR and SenseVoice are model families</strong>, whose capabilities must be checked for the particular checkpoint. <strong>FunClip is an application</strong> for transcription, subtitles and clipping. This article concerns FSMN-VAD file-processing results in FunASR, not a universal format shared by other models, HTTP services or GGUF runtimes. See the <a href="https://github.com/modelscope/FunASR/blob/3747f8496815ee0932e1a227b17d57c27442d656/docs/repository_roles.md#repository-responsibilities">official repository responsibilities</a>.</p>
+<p>If you only need text, start with the <a href="/en/blog/speech-to-text-python-transcribe-audio.html">first-recording transcription tutorial</a>. For subtitles or clipping, use the <a href="/en/blog/which-funasr-model.html">task-based selection guide</a>. Do not add a second VAD stage simply to make a pipeline look complete: an existing pipeline may already segment audio, and repeated segmentation can alter context and timing.</p>
+<h2 id="read-intervals">2. Read the intervals: marks are not edits</h2>
+<p>In the FunASR FSMN-VAD file path, the returned record's <code>value</code> contains intervals shaped like <code>[[start_ms, end_ms], ...]</code>. Here <code>start_ms</code> and <code>end_ms</code> explain the two numbers; they are not additional response fields. Values are in <strong>milliseconds</strong>, relative to the beginning of the audio supplied for this processing operation. The implementation separates <a href="https://github.com/modelscope/FunASR/blob/3747f8496815ee0932e1a227b17d57c27442d656/funasr/models/fsmn_vad_streaming/model.py#L859-L910">interval construction</a> from the <a href="https://github.com/modelscope/FunASR/blob/3747f8496815ee0932e1a227b17d57c27442d656/funasr/models/fsmn_vad_streaming/model.py#L950-L1083">inference return value</a>.</p>
+<p data-example="illustrative">Imagine a 10-second recording and the intervals <code>[[1000, 3000], [6000, 9000]]</code>. These numbers are invented for explanation, not measured output from an audio file or model.</p>
+<table data-example="intervals"><thead><tr><th>Interval (ms)</th><th>Original position (s)</th><th>Duration</th></tr></thead><tbody>
+<tr><td>[1000, 3000]</td><td>1.0 to 3.0</td><td>2.0 seconds</td></tr>
+<tr><td>[6000, 9000]</td><td>6.0 to 9.0</td><td>3.0 seconds</td></tr>
+</tbody></table>
+<p>Divide by 1000 to convert milliseconds into seconds: 6000 ms is 6 seconds. The second interval lasts (9000 − 6000) / 1000 = 3 seconds. This table says only where speech was marked. <strong>The original file still lasts 10 seconds, not 5.</strong> Editing happens only if another operation actually reads those spans, concatenates them and writes a new file.</p>
+<p>Unmarked regions are not necessarily pure silence: they can contain background sound or missed quiet speech. A prediction cannot prove there is nothing important there. Keep the original and listen around boundaries, particularly quiet beginnings, word endings and speech over music.</p>
+<h2 id="keep-timeline">3. After a cut, which clock are you using?</h2>
+<p>Suppose you save the second interval as a separate 3-second clip. That file starts at zero, but corresponds to 6 seconds into the original. If a downstream system supports timestamps and places a word at <code>[0.4, 0.9]</code> seconds inside the clip, its position in the <strong>original recording</strong> is <code>[6.4, 6.9]</code> seconds.</p>
+<p data-example="offset">The mapping is: <strong>original time = clip-relative time + the clip's original start</strong>. This illustration assumes no speed change or time stretching, and an actual clip start of 6 seconds. If you retain extra audio around an interval, record the actual cut start, not the initial VAD boundary.</p>
+<p>If you concatenate both intervals, the second one starts at 2 seconds in the <strong>concatenated file</strong> but at 6 seconds in the original. A single offset no longer works for the whole file. Keep a separate original-to-edited mapping for each piece. A timestamp crossing a join cannot be treated as one continuous span in the original recording.</p>
+<p>For meeting subtitles or tracing a quotation back to its source, retaining the original and the mappings is usually the safer starting point. Removing pauses can be appropriate for an excerpt intended for listening. The important decision is which timeline the final subtitles or search results should address.</p>
+<h2 id="not-subtitles">4. Why speech boundaries are not word alignment</h2>
+<p>Three seconds of speech could contain a sentence, part of a sentence, or overlapping voices. A VAD interval is not a semantic sentence and does not locate every word. Distributing text uniformly across that interval creates estimated timing; it is not model-produced word alignment.</p>
+<ul>
+<li><strong>Searchable text:</strong> send audio matching the recognition interface's requirements, then check the transcript against the recording.</li>
+<li><strong>Video subtitles:</strong> choose a model and interface that explicitly provide the required timestamps. Preserve timeline mappings, then check subtitle line breaks, display duration and synchronization. VAD segmentation does not replace text alignment.</li>
+<li><strong>Search by participant:</strong> add suitable speaker processing. Anonymous labels distinguish participants within a recording; they are not real-world identities.</li>
 </ul>
+<p>To determine whether segmentation saves time or reduces errors, compare complete pipelines on the same representative audio. Recognition cannot recover speech already discarded by a previous stage, and very short cuts can lose context. This article makes no real-time, accuracy-improvement or cost-saving promise from a single example.</p>
+<h2 id="streaming-boundary">5. File intervals are not streaming events</h2>
+<p>The explanation above concerns <strong>closed intervals after complete-file processing</strong>. In a stream, more audio is still arriving. The system may learn that speech has started before learning where it ends. This implementation can emit <code>[start, -1]</code>, <code>[-1, end]</code>, a complete interval or an empty list. Here <code>-1</code> marks an endpoint not supplied in that event; it is not a negative crop position.</p>
+<p>For a streaming application, follow the <a href="https://github.com/modelscope/FunASR/blob/3747f8496815ee0932e1a227b17d57c27442d656/docs/streaming_vad.md">dedicated streaming VAD documentation</a> for state, chunks and finalization. Do not use the file illustration as a streaming client protocol.</p>
+<h2 id="agent-contract">For AI agents: preserve the timeline before acting</h2>
+<p>These are application-side acceptance rules, <strong>not an SDK configuration object</strong>. This article runs no commands; an integration must verify the actual version's parameters and error behavior.</p>
+<ul>
+<li><strong>Input:</strong> record an authorized real audio path, duration in seconds, sample rate in Hz, channel count, model ID, revision and runtime version. Do not infer the audio format from its extension or confuse renaming with resampling.</li>
+<li><strong>Output:</strong> validate complete-file <code>value</code> as a nested numeric list with millisecond units. Before cropping, require finite endpoints in a sensible order, <code>0 ≤ start &lt; end</code>, within the actual input duration. Preserve zero-length, out-of-range or unclosed results for investigation rather than silently repairing them and declaring the model correct.</li>
+<li><strong>Empty result:</strong> a successful operation returning <code>[]</code> produced no speech intervals. That is not a network failure or proof that the file contains no speech. Keep the original, inspect input and detection conditions, and do not retry indefinitely.</li>
+<li><strong>Failure:</strong> distinguish an exception or nonzero exit from no detected speech. Preserve the error and use bounded retries only after addressing its cause. Do not silently switch models, upload audio, or pass an old output off as the new result.</li>
+<li><strong>Permission:</strong> installing the toolkit and downloading model weights are separate operations. First loading may fetch additional files. Disconnected operation requires prepared and verified dependencies, weights and configuration. Downloads, external uploads, paid calls, overwriting and deleting audio each need appropriate authorization. The toolkit's license does not establish a model's terms.</li>
+</ul>
+<h2 id="check-understanding">Can you answer these three questions?</h2>
+<ol>
+<li>The illustrative intervals total 5 seconds. Has the original shortened? <strong>No. Returning annotations does not write an edited file.</strong></li>
+<li>Where is 0.4 seconds into the second clip on the original timeline? <strong>At 6.4 seconds, provided the actual cut started at 6 seconds and playback speed did not change.</strong></li>
+<li>Does one VAD interval mean one sentence or one speaker? <strong>Neither.</strong></li>
+</ol>
+<p data-editorial="scope">This revision checks the pinned official implementation, repository responsibilities and illustrative arithmetic. It adds no model inference or performance evaluation. Unqualified timing and “everything tested” claims from the old article have been removed; illustrative numbers are not accuracy evidence.</p>
+<p data-editorial="next-step">Next, complete <a href="/en/blog/speech-to-text-python-transcribe-audio.html">one recording to a local transcript</a>. For subtitles or application integration, use the <a href="/en/blog/which-funasr-model.html">selection guide</a> to check the specific capabilities you need. Decide which timeline you want before cutting the audio.</p>
 </div></article>
 <footer><div class="container">© 2024-2026 Tongyi Lab, Alibaba Group · <a href="https://github.com/modelscope/FunASR/blob/main/LICENSE">MIT License</a></div></footer>
 </body>
