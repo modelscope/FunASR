@@ -8,6 +8,7 @@ on:
       - "tests/test_websocket_server_asr_model.py"
       - "tests/test_websocket_server_hotwords.py"
       - "tests/test_websocket_file_finalization.py"
+      - "tests/test_websocket_client_hotwords.py"
       - ".github/workflows/test-python-websocket.yml"
   push:
     branches:
@@ -18,6 +19,7 @@ on:
       - "tests/test_websocket_server_asr_model.py"
       - "tests/test_websocket_server_hotwords.py"
       - "tests/test_websocket_file_finalization.py"
+      - "tests/test_websocket_client_hotwords.py"
       - ".github/workflows/test-python-websocket.yml"
 
 permissions:
@@ -40,12 +42,13 @@ jobs:
         run: |
           python -m pip install pytest numpy scipy websockets
           python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
-      - name: Run constructor, hotword and file-finalization regressions
+      - name: Run constructor, hotword, client hotword and file-finalization regressions
         run: >-
           python -m pytest -q
           tests/test_websocket_server_asr_model.py
           tests/test_websocket_server_hotwords.py
           tests/test_websocket_file_finalization.py
+          tests/test_websocket_client_hotwords.py
           --junitxml=websocket-test-results.xml
       - uses: actions/upload-artifact@v4
         if: always()
