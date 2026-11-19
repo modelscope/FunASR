@@ -34,7 +34,7 @@ FunASR实时语音听写软件包，集成了实时版本的语音端点检测�
 curl -O https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/shell/install_docker.sh
 sudo bash install_docker.sh
 ```
-docker安装失败请参考 [Docker Installation](https://modelscope.github.io/FunASR/installation.html#docker)
+docker安装失败请参考 [Docker Installation](https://github.com/modelscope/FunASR/blob/main/docs/installation/docker_zh.md)
 
 ### 镜像启动
 通过下述命令拉取并启动FunASR软件包的docker镜像：

@@ -33,7 +33,7 @@ FunASR离线文件转写GPU软件包，提供了一款功能强大的语音离�
 curl -O https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/shell/install_docker.sh；
 sudo bash install_docker.sh
 ```
-docker安装失败请参考 [Docker Installation](https://modelscope.github.io/FunASR/installation.html#docker)
+docker安装失败请参考 [Docker Installation](https://github.com/modelscope/FunASR/blob/main/docs/installation/docker_zh.md)
 
 ### 镜像启动
 

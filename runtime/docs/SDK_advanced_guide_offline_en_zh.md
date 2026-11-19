@@ -35,7 +35,7 @@ FunASR提供可一键本地或者云端服务器部署的英文离线文件转�
 curl -O https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/shell/install_docker.sh；
 sudo bash install_docker.sh
 ```
-docker安装失败请参考 [Docker Installation](https://modelscope.github.io/FunASR/installation.html#docker)
+docker安装失败请参考 [Docker Installation](https://github.com/modelscope/FunASR/blob/main/docs/installation/docker_zh.md)
 
 ### 镜像启动
 通过下述命令拉取并启动FunASR runtime-SDK的docker镜像：
