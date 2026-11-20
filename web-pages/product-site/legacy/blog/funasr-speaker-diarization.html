@@ -1,13 +1,12 @@
 <!DOCTYPE html>
-<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>用 FunASR 做说话人分离:一次调用输出「谁在何时说了什么」 | FunASR</title><meta name="description" content="FunASR 一次 generate 调用即可同时输出语音转写、说话人标签和句级时间戳,无需 pyannote+Whisper 两件套、无需 HuggingFace 授权。实测 227 秒会议录音自动切分 77 句、区分 11 个说话人。"><meta name="keywords" content="说话人分离, speaker diarization, 说话人识别, pyannote 替代, 会议转写, 谁在说话, FunASR, cam++, 语音识别说话人, 会议纪要">
-<link rel="icon" href="/logo.png"><meta property="og:title" content="用 FunASR 做说话人分离:一次调用输出「谁在何时说了什么」"><meta property="og:description" content="FunASR 一次 generate 调用即可同时输出语音转写、说话人标签和句级时间戳,无需 pyannote+Whisper 两件套、无需 HuggingFace 授权。实测 227 秒会议录音自动切分 77 句、区分 11 个说话人。">
-<meta property="og:type" content="article"><meta property="og:url" content="https://www.funasr.com/blog/funasr-speaker-diarization.html"><meta property="og:image" content="https://www.funasr.com/logo.png">
-<link rel="canonical" href="https://www.funasr.com/blog/funasr-speaker-diarization.html"><link rel="alternate" hreflang="en" href="https://www.funasr.com/en/blog/funasr-speaker-diarization.html"><link rel="alternate" hreflang="zh" href="https://www.funasr.com/blog/funasr-speaker-diarization.html"><link rel="alternate" hreflang="x-default" href="https://www.funasr.com/en/blog/funasr-speaker-diarization.html">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<script type="application/ld+json">
-{"@context":"https://schema.org","@type":"BlogPosting","headline":"用 FunASR 做说话人分离:一次调用输出「谁在何时说了什么」","description":"FunASR 一次 generate 调用即可同时输出语音转写、说话人标签和句级时间戳,无需 pyannote+Whisper 两件套、无需 HuggingFace 授权。实测 227 秒会议录音自动切分 77 句、区分 11 个说话人。","datePublished":"2026-06-17","dateModified":"2026-06-17","author":{"@type":"Organization","name":"FunASR / Tongyi Lab"},"publisher":{"@type":"Organization","name":"FunASR","logo":{"@type":"ImageObject","url":"https://www.funasr.com/logo.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://www.funasr.com/blog/funasr-speaker-diarization.html"},"image":"https://www.funasr.com/logo.png"}
-</script>
+
+<html lang="zh"><head><meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/>
+<title>speaker 0 是谁？读懂说话人分离的结果 | FunASR</title><meta content="从一段会议对话看懂匿名编号、句子归属和真实身份的区别，把转写整理成可回听、可复核的记录。" name="description"/>
+<link href="/logo.png" rel="icon"/><meta content="speaker 0 是谁？读懂说话人分离的结果" property="og:title"/><meta content="从一段会议对话看懂匿名编号、句子归属和真实身份的区别，把转写整理成可回听、可复核的记录。" property="og:description"/>
+<meta content="article" property="og:type"/><meta content="https://www.funasr.com/blog/funasr-speaker-diarization.html" property="og:url"/><meta content="https://www.funasr.com/logo.png" property="og:image"/>
+<link href="https://www.funasr.com/blog/funasr-speaker-diarization.html" rel="canonical"/><link href="https://www.funasr.com/en/blog/funasr-speaker-diarization.html" hreflang="en" rel="alternate"/><link href="https://www.funasr.com/blog/funasr-speaker-diarization.html" hreflang="zh" rel="alternate"/><link href="https://www.funasr.com/en/blog/funasr-speaker-diarization.html" hreflang="x-default" rel="alternate"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"speaker 0 是谁？读懂说话人分离的结果","description":"从一段会议对话看懂匿名编号、句子归属和真实身份的区别，把转写整理成可回听、可复核的记录。","datePublished":"2026-06-17","dateModified":"2026-11-21","author":{"@type":"Organization","name":"FunASR / Tongyi Lab"},"publisher":{"@type":"Organization","name":"FunASR","logo":{"@type":"ImageObject","url":"https://www.funasr.com/logo.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://www.funasr.com/blog/funasr-speaker-diarization.html"},"image":"https://www.funasr.com/logo.png"}</script>
 <style>:root{--primary:#2563eb;--primary-dark:#1d4ed8;--bg:#fff;--surface:#f8fafc;--border:#e2e8f0;--text:#0f172a;--text-soft:#475569;--text-muted:#94a3b8;--radius:12px}
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Inter',-apple-system,sans-serif;color:var(--text);line-height:1.7}
@@ -42,84 +41,56 @@ p code,li code{background:var(--surface);padding:2px 6px;border-radius:5px;font-
 .post-card p{margin:0;color:var(--text-soft);font-size:0.9rem}
 .post-card .date{color:var(--text-muted);font-size:0.8rem}
 footer{background:#0f172a;color:#94a3b8;padding:28px 0;text-align:center;font-size:0.8rem}
-footer a{color:#94a3b8}</style></head><body>
-<nav class="nav"><div class="container"><a href="/" class="nav-logo">Fun<span>ASR</span></a><div class="nav-links"><a href="/#capabilities">核心能力</a><a href="/#usage">如何使用</a><a href="/#benchmark">性能</a><a href="/#demo">演示</a><a href="https://modelscope.github.io/FunASR/zh/" target="_blank">文档</a><a href="/quickstart.html">快速上手</a><a href="/models.html">模型</a><a href="/ecosystem.html">生态</a><a href="/blog/">技术博客</a><a href="/vs-whisper.html">对比 Whisper</a><a href="/donors.html">功德榜</a></div><a href="https://www.funasr.com/en/blog/funasr-speaker-diarization.html" style="font-size:0.83rem;font-weight:600;color:var(--text-soft)">EN</a><a href="https://github.com/modelscope/FunASR" target="_blank" class="nav-btn">GitHub ★</a></div></nav>
-<article><div class="container">
-<h1>用 FunASR 做说话人分离:一次调用输出「谁在何时说了什么」</h1>
-<p class="post-meta">FunASR 技术博客 · 2026-06-17 · 教程</p>
-<p>做会议纪要、客服质检、访谈整理时,你不只想知道<strong>说了什么</strong>,还想知道<strong>每句话是谁说的</strong>。这件事叫<strong>说话人分离(Speaker Diarization)</strong>。</p>
-<p>常见做法是把两个工具拼起来:<strong>pyannote.audio</strong> 负责切分说话人 + <strong>Whisper</strong> 负责转写,再手动把时间轴对齐。这套流程要申请 HuggingFace 授权、装一堆依赖、自己写对齐逻辑,而且对中文不算友好。</p>
-<p><strong>用 FunASR,一次 <code>generate()</code> 调用就够了。</strong>VAD、语音识别、标点、说话人嵌入(CAM++)被串成一条流水线,直接返回每一句的<strong>说话人编号、时间戳和文本</strong>。</p>
-<h2>安装</h2>
-<pre><code>pip install -U funasr modelscope</code></pre>
-<h2>完整代码</h2>
-<pre><code>from funasr import AutoModel
-
-# One model handle = VAD + ASR + punctuation + speaker embedding (CAM++)
-model = AutoModel(
-    model="paraformer-zh",   # or "iic/SenseVoiceSmall"
-    vad_model="fsmn-vad",
-    punc_model="ct-punc",
-    spk_model="cam++",       # speaker diarization
-)
-
-res = model.generate(input="meeting.wav", batch_size_s=300)
-
-for s in res[0]["sentence_info"]:
-    print(f'[{s["start"]/1000:.1f}s-{s["end"]/1000:.1f}s] '
-          f'speaker {s["spk"]}: {s["sentence"]}')</code></pre>
-<h2>输出长这样(示例)</h2>
-<pre><code>[0.0s-3.2s] speaker 0: 大家好,今天的会议主要讨论第三季度的产品规划。
-[3.5s-7.1s] speaker 1: 我先同步一下进度,核心功能已经完成了百分之八十。
-[7.4s-9.9s] speaker 2: 测试这边可能还需要两周时间。
-[10.2s-13.6s] speaker 0: 好的,那我们把上线时间往后调一周。</code></pre>
-<p>每个 <code>sentence_info</code> 元素包含四个字段:</p>
-<table><thead><tr><th>字段</th><th>含义</th></tr></thead><tbody>
-<tr><td><code>spk</code></td><td>说话人编号,CAM++ 自动聚类得到,<strong>无需事先指定人数</strong></td></tr>
-<tr><td><code>start</code> / <code>end</code></td><td>该句的起止时间(毫秒)</td></tr>
-<tr><td><code>sentence</code></td><td>该句文本(已加标点)</td></tr>
+footer a{color:#94a3b8}</style><style>article a{text-decoration:underline;text-underline-offset:0.15em}</style></head><body>
+<nav class="nav"><div class="container"><a class="nav-logo" href="/">Fun<span>ASR</span></a><div class="nav-links"><a href="/#capabilities">核心能力</a><a href="/#usage">如何使用</a><a href="/#benchmark">性能</a><a href="/#demo">演示</a><a href="https://modelscope.github.io/FunASR/zh/" target="_blank">文档</a><a href="/quickstart.html">快速上手</a><a href="/models.html">模型</a><a href="/ecosystem.html">生态</a><a href="/blog/">技术博客</a><a href="/vs-whisper.html">对比 Whisper</a><a href="/donors.html">功德榜</a></div><a href="https://www.funasr.com/en/blog/funasr-speaker-diarization.html" style="font-size:0.83rem;font-weight:600;color:var(--text-soft)">EN</a><a class="nav-btn" href="https://github.com/modelscope/FunASR" target="_blank">GitHub ★</a></div></nav>
+<article><div class="container"><h1>speaker 0 是谁？读懂说话人分离的结果</h1>
+<p class="meta">2026-06-17 发布 · 2026-11-21 修订 · 语音技术入门</p>
+<p data-editorial="opening">会议转写里出现了“speaker 0：这个方案我来负责”。你知道文字是什么，却还不知道该把任务交给谁。说话人分离帮你把声音相近的发言归到一组，但它并没有读过参会名单。把编号直接换成某个人的名字，可能让一份看起来整齐的纪要写错责任人。</p>
+<p data-editorial="outcome">读完这篇，你应当能解释编号的含义，判断一句话的说话人标签能证明什么，并整理出保留录音位置、匿名编号和复核状态的转写记录。本文是概念与结果阅读指南，不需要安装软件；示意对话和时间数字均为人为构造，不是真实模型输出。</p>
+<h2 id="identity-boundary">1. 先分清：分组不是认人</h2>
+<p><strong>语音识别（ASR）</strong>回答“说了什么”；<strong>说话人分离（speaker diarization）</strong>尝试回答“哪些时间段由同一个说话人发出”。这里的“谁”通常只是录音内的匿名分组，不是姓名、账号或员工编号。<strong>已登记人员的身份匹配</strong>则需要另外的登记样本、匹配规则、阈值评估和授权，不能从一个聚类编号里推出来。</p>
+<p>可以把它理解成给录音贴彩色标签：同一种颜色表示系统认为这些片段属于同一组，但颜色并不知道人的名字。一次分组还可能把同一个人拆成两组，或者把不同人合到一组。因此，三个编号不等于已经证明有三个人，文字流畅也不等于归属正确。</p>
+<p id="model-boundaries">在这套生态里，<strong>FunASR 是工具包</strong>，负责组织识别、VAD 和说话人处理等组件；<strong>Fun-ASR、SenseVoice 是模型系列</strong>，具体能力要看 checkpoint 和调用路径；<strong>FunClip 是转写与剪辑应用</strong>。在本文讨论的 FunASR 组合管线中，CAM++ 提供说话人向量，后续聚类产生编号。SenseVoice 的情绪标签不是说话人身份。官方<a href="https://github.com/modelscope/FunASR/blob/aa3d789cf0c99ba955178513c8471e38d68efca9/docs/speaker_emotion.md#choose-a-task">输出类型说明</a>把向量、匿名编号和身份匹配分开列出了。</p>
+<h2 id="read-labels">2. 读一个小例子：同一录音里的 0、1、0</h2>
+<p data-example="illustrative">假设有一段九秒钟的对话，系统给出下列简化记录。这里的文字、时间和标签都只是教学示例，省略了真实响应中的其他字段。</p>
+<table data-example="turns"><thead><tr><th>区间（毫秒）</th><th>spk</th><th>文字示意</th></tr></thead><tbody>
+<tr><td>[0, 3000]</td><td>0</td><td>我们先确认需求。</td></tr>
+<tr><td>[3000, 7000]</td><td>1</td><td>我补充一下交付时间。</td></tr>
+<tr><td>[7000, 9000]</td><td>0</td><td>好，那继续讨论。</td></tr>
 </tbody></table>
-<h2>实测效果</h2>
-<p>我们在一段 <strong>227 秒的多人会议录音</strong>上实测:FunASR 自动切分出 <strong>77 个句子</strong>、区分出 <strong>11 个不同说话人</strong>,全程<strong>不需要预先告诉它有几个人</strong>。整条流水线只用一次 <code>generate()</code> 调用、一个 Python 依赖。</p>
-<h2>为什么用 FunASR 而不是 pyannote + Whisper</h2>
+<p>你可以读成：“系统把第一段和第三段归为同一组，把第二段归为另一组。”不能读成：“第一段是主持人，第二段是产品经理。”这条实现会按遇到标签的顺序重新编号，但这种排序不提供身份信息，也不保证换一次裁剪、换一套管线后编号仍相同。参见<a href="https://github.com/modelscope/FunASR/blob/aa3d789cf0c99ba955178513c8471e38d68efca9/funasr/models/campplus/utils.py#L195-L210">编号重映射实现</a>。</p>
+<p data-contract="recording-scoped-key">应用可以用 <code>(recording_id, spk)</code> 保存这次运行中的分组，再另存人工确认的显示名；这两个字段的组合是应用设计建议，不是新增 SDK 字段。重新运行或改变模型、切分方式后，也要区分运行版本。两场会议都出现 <code>spk=0</code>，不能据此把它们合并到同一个人的历史档案。</p>
+<h2>3. 一句一个编号，不代表整句只有一个声音</h2>
+<p>“一句话”是转写的组织单位，“一次换人”是声音的变化，两者未必在同一位置。有人插话时，标点可能还没断句；VAD 找到的语音区间也可能包含不止一个人。把整句标成一个编号，是一种归属规则，不是把混合音频里的每个人都单独分离出来。</p>
+<p>本文所查版本的 <code>distribute_spk</code> 会累计每个说话人区间与句子的重叠时长，选择累计重叠最多的编号。它会先把内部说话人区间的秒转换成句子使用的毫秒；时长相同时保留先遇到的重叠编号。参见<a href="https://github.com/modelscope/FunASR/blob/aa3d789cf0c99ba955178513c8471e38d68efca9/funasr/models/campplus/utils.py#L256-L272">句子归属源码</a>。</p>
+<p data-example="overlap" data-selected-speaker="1" data-sentence-ms="[0, 8000]" data-turns-seconds="[[0, 3, 0], [3, 8, 1]]">再做一个假设：一条句子记录覆盖 0–8 秒，编号 0 覆盖前 3 秒，编号 1 覆盖后 5 秒。按上述规则，这条句子会标成 <code>spk=1</code>。这并没有证明前 3 秒也是编号 1 说的，更不能把句中每个词都无条件归给同一个人。</p>
+<p id="zero-is-not-confidence">还有一个容易忽略的边界：这个函数在没有任何重叠时也默认写入 <code>0</code>。因此，单看 <code>spk=0</code> 无法区分正常分组和这一回退分支；它不是“已确认”，也不是置信度。需要更严格的业务保证时，应保留可用的时间依据并复核，不能把所有 0 自动改成“未知”，也不能把它们都当作可靠身份。</p>
+<h2 id="review-workflow">4. 把结果整理成可以负责的会议记录</h2>
+<p>如果目的是做纪要，先完成下面这条闭环，再给发言绑定负责人：</p>
+<ol>
+<li><strong>保留原始录音位置和原始结果。</strong> 给录音分配应用内编号，记录使用的模型版本、工具包版本和运行配置。不要只留下“张老师说了什么”的最终文本。</li>
+<li><strong>先显示匿名编号。</strong> 让每段文本能回到原录音的起止位置。回听发言开头、交接处、短插话和抢话处，检查漏分、错分以及一句跨多人的情况。</li>
+<li><strong>另外记录人工确认。</strong> 确认后再设置显示名，保留原编号和修订记录。没有把握就保留匿名或标注待确认，不从“我来负责”等文本内容猜名字。</li>
+<li><strong>检查业务产物。</strong> 导出纪要或按人选段前，抽查同一编号的多个不相邻片段。任务、承诺和争议性发言尤其需要回听，不只看页面是否有整齐的说话人列。</li>
+</ol>
+<p>成功判据是“关键发言能追溯到录音，未确认的归属不会伪装成姓名”，不是“输出恰好有几个编号”。有意保留待确认项，比把错误名字填满表格更有用。若需要按匿名说话人选段，可继续阅读<a href="/blog/funclip-v2-2-0-moss-speaker-clipping.html">多人录音的字幕与剪辑指南</a>，并核对它使用的独立后端。</p>
+<h2>5. 选管线时，要一起看文本和时间依据</h2>
+<p>FunASR 的通用说话人聚类位于 VAD 管线中；只配置一个说话人模型，不等于所有直接识别入口都会返回分离结果。带字词时间戳的识别结果与没有这类时间戳的结果，组织句子的方式也会不同。所查实现会在缺少相关条件时从标点分段回退到 VAD 分段，不能把“换一个 model 名称”当成输出语义不变的保证。具体分支见<a href="https://github.com/modelscope/FunASR/blob/aa3d789cf0c99ba955178513c8471e38d68efca9/funasr/auto/auto_model.py#L1296-L1375">AutoModel 的说话人处理路径</a>。</p>
+<p>如果只需要文字，先完成普通转写；如果需要带匿名编号的长录音结果，可比较组合管线和提供联合转写、分离能力的独立后端。第三方 MOSS-Transcribe-Diarize 是另一条路径，不需要再照搬本文的外部 VAD/说话人组合，具体环境、权重、许可和输出遵循它自己的指南。参见<a href="https://github.com/modelscope/FunASR/blob/aa3d789cf0c99ba955178513c8471e38d68efca9/docs/model_selection.md#decision-table">官方任务选型表</a>。</p>
+<p>安装 <code>funasr</code> 软件包不等于已备齐识别、VAD、标点和说话人组件的权重。首次获取模型需要明确下载来源、版本、许可与网络条件；后续离线运行需要完整本地快照和已安装依赖，并验证所选加载路径。本文不提供一条适用于全部模型、CPU/GPU 或服务的安装命令，也不承诺 CPU 实时性能。</p>
+<h2 id="agent-contract">6. 给 Agent 的接入边界</h2>
+<p>以下是应用侧的读取规则，不是要求所有运行时返回相同 JSON。先确认调用的是哪条管线，再解释字段：</p>
 <ul>
-<li><strong>一个调用,不用对齐</strong>:转写和说话人标签天然对齐,不必自己拼时间轴。</li>
-<li><strong>不需要 HuggingFace 授权</strong>:pyannote 的说话人模型是 gated 的,要申请、要 token;FunASR 模型公开可下载。</li>
-<li><strong>中文更准</strong>:Paraformer / SenseVoice 在中文上 CER 显著低于 Whisper(<a href="/blog/funasr-vs-whisper-benchmark.html">实测对比</a>)。</li>
-<li><strong>CPU 也能跑</strong>:没有 GPU 也能离线出结果。</li>
+<li data-contract="speaker-id"><strong>标签：</strong>本文通用 SDK 管线的 <code>sentence_info[].spk</code> 是整数匿名编号，不是名字或概率。单独调用说话人模型得到的向量也不能代替这个编号。</li>
+<li data-contract="time-units"><strong>时间：</strong>本文 <code>sentence_info</code> 的 <code>start/end</code> 以毫秒表示，参考输入录音时间轴；读取前检查数值有限、起止有序且不超出录音范围。不要把 HTTP 服务常用的秒直接代入；裁剪后应按实际裁剪偏移还原原时间轴。</li>
+<li data-contract="missing-result"><strong>缺失：</strong>缺少 <code>sentence_info</code>、空列表、缺少 <code>spk</code> 是不同情况。检查调用路径、有效语音、时间戳和日志；不要补造编号、姓名或置信度。<code>text</code>、<code>sentence</code> 等文本字段也应按对应版本的实际返回检查，不能仅凭别的教程假定存在。</li>
+<li data-contract="authorization"><strong>数据授权：</strong>下载新权重、上传会议录音到服务、登记声纹样本或把编号映射为真实姓名，都要先确认授权、保存期限与访问范围。匿名编号不意味着原录音已经匿名化。</li>
+<li data-contract="retry"><strong>失败与重试：</strong>输入、依赖或接口不匹配时停止并报告原因；不要反复运行直到出现“想要的人数”。只有明确的临时故障才按应用预设上限重试，保存原始结果且避免重复上传。</li>
 </ul>
-<h2>进阶</h2>
-<ul>
-<li>把 <code>model="paraformer-zh"</code> 换成 <code>"iic/SenseVoiceSmall"</code> 即可用 SenseVoice(还自带情感/事件标签)。</li>
-<li>遍历 <code>sentence_info</code> 即可导出 <strong>SRT 字幕</strong>或按说话人聚合成<strong>会议纪要</strong>。</li>
-</ul>
-<div class="cta"><p>FunASR 是通义实验室开源的工业级语音识别工具包,中文场景又快又准。</p><a class="btn" href="https://github.com/modelscope/FunASR" target="_blank">在 GitHub 上 Star FunASR ★</a></div>
-<!--related-posts-->
-<h2>相关文章</h2>
-<ul class="post-list">
-<li><a href="/blog/funasr-vs-whisper-benchmark.html">FunASR vs Whisper 实测对比</a></li>
-<li><a href="/blog/sensevoice-deployment-guide.html">SenseVoice 部署指南</a></li>
-<li><a href="/blog/fun-asr-nano-guide.html">Fun-ASR-Nano 使用指南</a></li>
-<li><a href="/blog/sensevoice-emotion-language-detection.html">情感与语种检测</a></li>
-<li><a href="/blog/funasr-realtime-streaming-asr.html">实时流式语音识别</a></li>
-<li><a href="/blog/funasr-transcribe-long-audio.html">转写超长音频(1小时一次搞定)</a></li>
-<li><a href="/blog/funasr-cli-transcribe-command-line.html">命令行转写(文本/JSON/SRT)</a></li>
-<li><a href="/blog/self-hosted-openai-whisper-api-alternative.html">自托管 OpenAI Whisper API 替代</a></li>
-<li><a href="/blog/generate-subtitles-srt-vtt-from-audio-video.html">自动生成字幕(SRT / VTT)</a></li>
-<li><a href="/blog/speech-to-text-python-transcribe-audio.html">Python 语音转文字教程</a></li>
-<li><a href="/blog/funasr-llama-cpp-whisper-cpp-alternative.html">FunASR 跑进 llama.cpp(whisper.cpp 替代)</a></li>
-<li><a href="/blog/funasr-vs-faster-whisper-chinese.html">FunASR vs faster-whisper(中文/粤语)</a></li>
-<li><a href="/blog/lightweight-speech-recognition-cpu.html">轻量语音识别(CPU 250MB)</a></li>
-<li><a href="/blog/self-hosted-deepgram-assemblyai-alternative.html">自托管替代 Deepgram/AssemblyAI</a></li>
-<li><a href="/blog/which-funasr-model.html">选哪个 FunASR 模型</a></li>
-<li><a href="/blog/cantonese-speech-recognition.html">粤语语音识别(SenseVoice 原生粤语)</a></li>
-<li><a href="/blog/japanese-speech-recognition.html">日语语音识别(SenseVoice 转写+标点+情感)</a></li>
-<li><a href="/blog/voice-activity-detection-python.html">Python 语音活动检测(VAD)</a></li>
-<li><a href="/blog/self-hosted-google-aws-azure-speech-to-text.html">自托管替代 Google/AWS/Azure 云语音 API</a></li>
-<li><a href="/blog/chinese-speech-recognition.html">中文语音识别(普通话)实战</a></li>
-<li><a href="/blog/punctuation-restoration-python.html">标点恢复 Python 实战</a></li>
-<li><a href="/blog/speech-to-text-timestamps-python.html">语音识别带时间戳(字级)</a></li>
-</ul>
+<h2 id="check-understanding">读完后，用三个问题检查自己</h2>
+<p>两场会议都有编号 0，能认定是同一个人吗？不能。一个长句被标成 1，能认定句内没有插话吗？不能。拿到了说话人向量，能直接填上姓名吗？仍然不能。先分清“声音分组”“文本归属”“身份确认”，才知道应用还缺哪一步。</p>
+<p data-editorial="scope"><strong>依据与范围：</strong>本文依据上面固定版本的官方源码和文档解释字段、编号重映射及归属规则，检查了示意数字与双语页面。没有运行新的声学模型推理，也没有验证会议识别准确率、说话人数或身份匹配效果；其他 checkpoint、旧安装包和服务需单独核对。</p>
+<p data-editorial="next-step">下一步：还没有转写结果，先看<a href="/blog/speech-to-text-python-transcribe-audio.html">第一段录音转文字</a>；需要决定模型与接口，阅读<a href="/blog/which-funasr-model.html">按任务选型</a>；如果你困惑的是裁剪与字幕时间，接着读<a href="/blog/voice-activity-detection-python.html">VAD 区间与时间轴</a>。</p>
 </div></article>
 <footer><div class="container">FunASR · 通义实验室开源语音识别 · <a href="https://github.com/modelscope/FunASR">GitHub</a></div></footer>
 </body></html>
