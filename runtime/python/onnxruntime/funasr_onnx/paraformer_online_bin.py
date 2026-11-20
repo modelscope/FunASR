@@ -140,6 +140,8 @@ class Paraformer:
         asr_res = []
 
         if waveforms.shape[1] < 16 * 60 and is_final and len(cache) > 0:
+            # extract_feat is skipped here, so reset the frontend as its final call would.
+            self.frontend.cache_reset()
             cache["last_chunk"] = True
             feats = cache["feats"]
             feats_len = np.array([feats.shape[1]]).astype(np.int32)

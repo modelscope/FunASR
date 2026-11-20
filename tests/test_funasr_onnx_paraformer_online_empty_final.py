@@ -151,6 +151,23 @@ class ParaformerOnlineShortChunkTest(unittest.TestCase):
         reference(np.zeros(960, np.float32), param_dict={"cache": {}})
         np.testing.assert_array_equal(model.infer.call_args.args[0], reference.infer.call_args.args[0])
 
+    def test_short_final_after_features_does_not_contaminate_next_stream(self):
+        audio = (0.1 * np.sin(np.arange(10560) * 2 * np.pi * 440 / 16000)).astype(np.float32)
+        next_audio = (0.05 * np.sin(np.arange(9600) * 2 * np.pi * 800 / 16000)).astype(np.float32)
+        reference = self.make_model()
+        reference(next_audio, param_dict={"cache": {}})
+        for samples in (0, 1, 500, 959, 960):
+            with self.subTest(samples=samples):
+                model = self.make_model()
+                cache = {}
+                model(audio[:9600], param_dict={"cache": cache})
+                model(audio[9600 : 9600 + samples], param_dict={"cache": cache, "is_final": True})
+                self.assertTrue(cache["last_chunk"])
+                model(next_audio, param_dict={"cache": {}})
+                np.testing.assert_array_equal(
+                    model.infer.call_args.args[0], reference.infer.call_args.args[0]
+                )
+
     def test_empty_nonfinal_call_preserves_existing_cache(self):
         model = self.make_model()
         cache = {}
