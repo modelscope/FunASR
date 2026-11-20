@@ -23070,7 +23070,7 @@
     # may be missing timestamps; guessing alignment would silently shift words.
     if time_stamp is not None:
 </code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/postprocess_utils.py#L165" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
-<div class="api-detail" id="e416" tabindex="-1"><span class="dtag badge-f">function</span><h2><code>sentence_postprocess_sentencepiece(words)</code></h2><div class="dmod">funasr.utils.postprocess_utils · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/postprocess_utils.py#L290" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Sentence postprocess sentencepiece.</p>
+<div class="api-detail" id="e416" tabindex="-1"><span class="dtag badge-f">function</span><h2><code>sentence_postprocess_sentencepiece(words)</code></h2><div class="dmod">funasr.utils.postprocess_utils · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/postprocess_utils.py#L295" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Sentence postprocess sentencepiece.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>words</code> — TODO.</li>
@@ -23105,8 +23105,8 @@
             word_item = ""
             word = ch.replace("\u2581", "")
             word_item += word
-</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/postprocess_utils.py#L290" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
-<div class="api-detail" id="e417" tabindex="-1"><span class="dtag badge-f">function</span><h2><code>format_str_v2(s)</code></h2><div class="dmod">funasr.utils.postprocess_utils · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/postprocess_utils.py#L420" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Format str v2.</p>
+</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/postprocess_utils.py#L295" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
+<div class="api-detail" id="e417" tabindex="-1"><span class="dtag badge-f">function</span><h2><code>format_str_v2(s)</code></h2><div class="dmod">funasr.utils.postprocess_utils · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/postprocess_utils.py#L425" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Format str v2.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>s</code> — TODO.</li>
@@ -23135,7 +23135,7 @@
         s = s.replace(emoji + " ", emoji)
     return s.strip()
 </code></pre></details></div>
-<div class="api-detail" id="e418" tabindex="-1"><span class="dtag badge-f">function</span><h2><code>rich_transcription_postprocess(s)</code></h2><div class="dmod">funasr.utils.postprocess_utils · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/postprocess_utils.py#L450" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Rich transcription postprocess.</p>
+<div class="api-detail" id="e418" tabindex="-1"><span class="dtag badge-f">function</span><h2><code>rich_transcription_postprocess(s)</code></h2><div class="dmod">funasr.utils.postprocess_utils · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/postprocess_utils.py#L455" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Rich transcription postprocess.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>s</code> — TODO.</li>
@@ -23170,7 +23170,7 @@
     cur_ent_event = get_event(new_s)
     for i in range(1, len(s_list)):
         if len(s_list[i]) == 0:
-</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/postprocess_utils.py#L450" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
+</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/postprocess_utils.py#L455" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
 <div class="api-detail" id="e419" tabindex="-1"><span class="dtag badge-f">function</span><h2><code>check_audio_list(audio: list)</code></h2><div class="dmod">funasr.utils.speaker_utils · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/speaker_utils.py#L18" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Check audio list.</p>
 <h4>Args:</h4>
 <ul>
