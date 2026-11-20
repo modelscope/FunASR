@@ -116,6 +116,38 @@ class SentencePostprocessTimestampTest(unittest.TestCase):
                     ("看CCTV新闻", ["看", "CCTV", "新", "闻"]),
                 )
 
+    def test_symbol_tokens_keep_their_own_timestamp(self):
+        self.assert_timestamps(
+            ["价", "格", "是", "3", ".", "5", "元", "好"],
+            ["价", "格", "是", "3", ".", "5", "元", "好"],
+            [[i * 100, (i + 1) * 100] for i in range(8)],
+        )
+        self.assert_timestamps(
+            ["ok", ".", "好"],
+            ["ok", ".", "好"],
+            [[0, 100], [100, 200], [200, 300]],
+        )
+        self.assert_timestamps(
+            ["x", "y", ".", "好"],
+            ["XY", ".", "好"],
+            [[0, 200], [200, 300], [300, 400]],
+        )
+
+    def test_spelled_out_letters_after_a_symbol_token_keep_their_timestamp(self):
+        self.assert_timestamps(
+            [".", "x", "y"],
+            [".", "XY"],
+            [[0, 100], [100, 300]],
+        )
+
+    def test_symbol_tokens_are_accepted_without_timestamps(self):
+        for path in POSTPROCESS_UTILS:
+            with self.subTest(path=path):
+                self.assertEqual(
+                    _load_sentence_postprocess(path)(["价", "格", "3", ".", "5", "元"]),
+                    ("价格3.5元", ["价", "格", "3", ".", "5", "元"]),
+                )
+
 
 if __name__ == "__main__":
     unittest.main()

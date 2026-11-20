@@ -267,7 +267,12 @@ def sentence_postprocess(words: List[Any], time_stamp: List[List] = None):
                     ts_lists.append([begin, end])
                     begin = end
             else:
+                if alpha_blank is True:
+                    word_lists.pop()
                 word_lists.append(ch)
+                alpha_blank = False
+                if time_stamp is not None:
+                    ts_lists.append([time_stamp[i][0], time_stamp[i][1]])
 
     if time_stamp is not None:
         word_lists, ts_lists = abbr_dispose(word_lists, ts_lists)
