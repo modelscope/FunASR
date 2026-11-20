@@ -269,6 +269,12 @@ def sentence_postprocess(words: List[Any], time_stamp: List[List] = None):
             else:
                 word_lists.append(ch)
 
+    # a trailing "@@" piece (e.g. a streaming chunk ending inside a word) is still a word
+    if word_item:
+        word_lists.append(word_item)
+        if time_stamp is not None:
+            ts_lists.append([begin, end])
+
     if time_stamp is not None:
         word_lists, ts_lists = abbr_dispose(word_lists, ts_lists)
         real_word_lists = []
