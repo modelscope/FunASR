@@ -168,14 +168,14 @@
     {
       "slug": "funasr-speaker-diarization",
       "category": "explanations",
-      "reviewed": false,
+      "reviewed": true,
       "zh": {
-        "title": "说话人分离：谁在何时说话",
-        "summary": ""
+        "title": "speaker 0 是谁？读懂说话人分离的结果",
+        "summary": "从一段会议对话看懂匿名编号、句子归属和真实身份的区别，把转写整理成可回听、可复核的记录。"
       },
       "en": {
-        "title": "Speaker diarization: who spoke when",
-        "summary": ""
+        "title": "Who is speaker 0? Reading diarization results",
+        "summary": "Understand anonymous labels, sentence attribution and real identities, then turn a meeting transcript into a record you can review against the audio."
       }
     },
     {

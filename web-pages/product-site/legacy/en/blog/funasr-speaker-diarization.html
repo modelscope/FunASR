@@ -1,13 +1,12 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Speaker Diarization with FunASR: Who Spoke When, in One Call | FunASR</title><meta name="description" content="FunASR returns transcription, speaker labels and per-sentence timestamps in a single generate() call — no pyannote+Whisper combo, no HuggingFace gated access. Tested: a 227s meeting auto-split into 77 sentences across 11 speakers."><meta name="keywords" content="speaker diarization, who spoke when, pyannote alternative, meeting transcription, speaker labels, FunASR, cam++, speech to text with speakers">
-<link rel="icon" href="/logo.png"><meta property="og:title" content="Speaker Diarization with FunASR: Who Spoke When, in One Call"><meta property="og:description" content="FunASR returns transcription, speaker labels and per-sentence timestamps in a single generate() call — no pyannote+Whisper combo, no HuggingFace gated access. Tested: a 227s meeting auto-split into 77 sentences across 11 speakers.">
-<meta property="og:type" content="article"><meta property="og:url" content="https://www.funasr.com/en/blog/funasr-speaker-diarization.html"><meta property="og:image" content="https://www.funasr.com/logo.png">
-<link rel="canonical" href="https://www.funasr.com/en/blog/funasr-speaker-diarization.html"><link rel="alternate" hreflang="en" href="https://www.funasr.com/en/blog/funasr-speaker-diarization.html"><link rel="alternate" hreflang="zh" href="https://www.funasr.com/blog/funasr-speaker-diarization.html"><link rel="alternate" hreflang="x-default" href="https://www.funasr.com/en/blog/funasr-speaker-diarization.html">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<script type="application/ld+json">
-{"@context":"https://schema.org","@type":"BlogPosting","headline":"Speaker Diarization with FunASR: Who Spoke When, in One Call","description":"FunASR returns transcription, speaker labels and per-sentence timestamps in a single generate() call — no pyannote+Whisper combo, no HuggingFace gated access. Tested: a 227s meeting auto-split into 77 sentences across 11 speakers.","datePublished":"2026-06-17","dateModified":"2026-06-17","author":{"@type":"Organization","name":"FunASR / Tongyi Lab"},"publisher":{"@type":"Organization","name":"FunASR","logo":{"@type":"ImageObject","url":"https://www.funasr.com/logo.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://www.funasr.com/en/blog/funasr-speaker-diarization.html"},"image":"https://www.funasr.com/logo.png"}
-</script>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/>
+<title>Who is speaker 0? Reading diarization results | FunASR</title><meta content="Understand anonymous labels, sentence attribution and real identities, then turn a meeting transcript into a record you can review against the audio." name="description"/>
+<link href="/logo.png" rel="icon"/><meta content="Who is speaker 0? Reading diarization results" property="og:title"/><meta content="Understand anonymous labels, sentence attribution and real identities, then turn a meeting transcript into a record you can review against the audio." property="og:description"/>
+<meta content="article" property="og:type"/><meta content="https://www.funasr.com/en/blog/funasr-speaker-diarization.html" property="og:url"/><meta content="https://www.funasr.com/logo.png" property="og:image"/>
+<link href="https://www.funasr.com/en/blog/funasr-speaker-diarization.html" rel="canonical"/><link href="https://www.funasr.com/en/blog/funasr-speaker-diarization.html" hreflang="en" rel="alternate"/><link href="https://www.funasr.com/blog/funasr-speaker-diarization.html" hreflang="zh" rel="alternate"/><link href="https://www.funasr.com/en/blog/funasr-speaker-diarization.html" hreflang="x-default" rel="alternate"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"Who is speaker 0? Reading diarization results","description":"Understand anonymous labels, sentence attribution and real identities, then turn a meeting transcript into a record you can review against the audio.","datePublished":"2026-06-17","dateModified":"2026-11-21","author":{"@type":"Organization","name":"FunASR / Tongyi Lab"},"publisher":{"@type":"Organization","name":"FunASR","logo":{"@type":"ImageObject","url":"https://www.funasr.com/logo.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://www.funasr.com/en/blog/funasr-speaker-diarization.html"},"image":"https://www.funasr.com/logo.png"}</script>
 <style>:root{--primary:#2563eb;--primary-dark:#1d4ed8;--bg:#fff;--surface:#f8fafc;--border:#e2e8f0;--text:#0f172a;--text-soft:#475569;--text-muted:#94a3b8;--radius:12px}
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Inter',-apple-system,sans-serif;color:var(--text);line-height:1.7}
@@ -42,84 +41,56 @@ p code,li code{background:var(--surface);padding:2px 6px;border-radius:5px;font-
 .post-card p{margin:0;color:var(--text-soft);font-size:0.9rem}
 .post-card .date{color:var(--text-muted);font-size:0.8rem}
 footer{background:#0f172a;color:#94a3b8;padding:28px 0;text-align:center;font-size:0.8rem}
-footer a{color:#94a3b8}</style></head><body>
-<nav class="nav"><div class="container"><a href="/" class="nav-logo">Fun<span>ASR</span></a><div class="nav-links"><a href="/en/#capabilities">Capabilities</a><a href="/en/#usage">How to Use</a><a href="/en/#benchmark">Benchmark</a><a href="/en/#demo">Demo</a><a href="https://modelscope.github.io/FunASR/" target="_blank">Docs</a><a href="/en/quickstart.html">Quickstart</a><a href="/en/models.html">Models</a><a href="/en/ecosystem.html">Ecosystem</a><a href="/en/blog/">Blog</a><a href="/en/vs-whisper.html">vs Whisper</a><a href="/en/donors.html">Donors</a></div><a href="https://www.funasr.com/blog/funasr-speaker-diarization.html" style="font-size:0.83rem;font-weight:600;color:var(--text-soft)">中文</a><a href="https://github.com/modelscope/FunASR" target="_blank" class="nav-btn">GitHub ★</a></div></nav>
-<article><div class="container">
-<h1>Speaker Diarization with FunASR: Who Spoke When, in One Call</h1>
-<p class="post-meta">FunASR Blog · 2026-06-17 · Tutorial</p>
-<p>For meeting minutes, call-center QA or interview transcripts, you don't just want to know <strong>what</strong> was said — you want to know <strong>who said each line</strong>. That task is called <strong>speaker diarization</strong>.</p>
-<p>The usual approach glues two tools together: <strong>pyannote.audio</strong> for speaker segmentation + <strong>Whisper</strong> for transcription, then you align the timelines yourself. That means requesting HuggingFace gated access, installing a stack of dependencies, and writing your own alignment logic — and it isn't especially strong on Chinese.</p>
-<p><strong>With FunASR, a single <code>generate()</code> call is enough.</strong> VAD, ASR, punctuation and speaker embedding (CAM++) are chained into one pipeline that returns the <strong>speaker id, timestamps and text for every sentence</strong>.</p>
-<h2>Install</h2>
-<pre><code>pip install -U funasr modelscope</code></pre>
-<h2>Full code</h2>
-<pre><code>from funasr import AutoModel
-
-# One model handle = VAD + ASR + punctuation + speaker embedding (CAM++)
-model = AutoModel(
-    model="paraformer-zh",   # or "iic/SenseVoiceSmall"
-    vad_model="fsmn-vad",
-    punc_model="ct-punc",
-    spk_model="cam++",       # speaker diarization
-)
-
-res = model.generate(input="meeting.wav", batch_size_s=300)
-
-for s in res[0]["sentence_info"]:
-    print(f'[{s["start"]/1000:.1f}s-{s["end"]/1000:.1f}s] '
-          f'speaker {s["spk"]}: {s["sentence"]}')</code></pre>
-<h2>What the output looks like (example)</h2>
-<pre><code>[0.0s-3.2s] speaker 0: Hi everyone, today's meeting is about the Q3 product plan.
-[3.5s-7.1s] speaker 1: Quick status update — the core features are about 80% done.
-[7.4s-9.9s] speaker 2: QA may need two more weeks on our side.
-[10.2s-13.6s] speaker 0: Got it, let's push the launch back by one week.</code></pre>
-<p>Each <code>sentence_info</code> item has four fields:</p>
-<table><thead><tr><th>Field</th><th>Meaning</th></tr></thead><tbody>
-<tr><td><code>spk</code></td><td>Speaker id, auto-clustered by CAM++ — <strong>no need to specify the number of speakers</strong></td></tr>
-<tr><td><code>start</code> / <code>end</code></td><td>Sentence start/end time (milliseconds)</td></tr>
-<tr><td><code>sentence</code></td><td>Sentence text (punctuated)</td></tr>
+footer a{color:#94a3b8}</style><style>article a{text-decoration:underline;text-underline-offset:0.15em}</style></head><body>
+<nav class="nav"><div class="container"><a class="nav-logo" href="/">Fun<span>ASR</span></a><div class="nav-links"><a href="/en/#capabilities">Capabilities</a><a href="/en/#usage">How to Use</a><a href="/en/#benchmark">Benchmark</a><a href="/en/#demo">Demo</a><a href="https://modelscope.github.io/FunASR/" target="_blank">Docs</a><a href="/en/quickstart.html">Quickstart</a><a href="/en/models.html">Models</a><a href="/en/ecosystem.html">Ecosystem</a><a href="/en/blog/">Blog</a><a href="/en/vs-whisper.html">vs Whisper</a><a href="/en/donors.html">Donors</a></div><a href="https://www.funasr.com/blog/funasr-speaker-diarization.html" style="font-size:0.83rem;font-weight:600;color:var(--text-soft)">中文</a><a class="nav-btn" href="https://github.com/modelscope/FunASR" target="_blank">GitHub ★</a></div></nav>
+<article><div class="container"><h1>Who is speaker 0? Reading diarization results</h1>
+<p class="meta">Published 2026-06-17 · Revised 2026-11-21 · Speech technology basics</p>
+<p data-editorial="opening">A meeting transcript says, “speaker 0: I'll own that proposal.” You can read the words, but you still do not know whom to assign the task to. Diarization groups speech that the system considers to belong together. It has not read your attendance list. Replacing a number with a name too early can turn a tidy transcript into a misleading record of responsibility.</p>
+<p data-editorial="outcome">By the end, you should be able to interpret speaker labels, explain what a sentence-level attribution does and does not establish, and prepare a transcript that retains audio positions, anonymous labels and review status. This is a conceptual reading guide; no installation is required. The dialogue and timing examples are deliberately invented, not model outputs.</p>
+<h2 id="identity-boundary">1. Grouping voices is not identifying people</h2>
+<p><strong>Automatic speech recognition (ASR)</strong> answers “What was said?” <strong>Speaker diarization</strong> attempts to determine which intervals belong to the same speaker. Here, “who” normally means an anonymous group within a recording, not a name, account or employee ID. <strong>Matching an enrolled person's identity</strong> requires separate enrollment samples, matching rules, threshold evaluation and authorization. A cluster number does not provide those things.</p>
+<p>Think of colored labels attached to a recording: the same color means that the system assigned those passages to the same group. The color does not know anyone's name. A system can also split one person into multiple groups or merge different people into one. Three labels do not prove there were three people, and fluent text does not prove correct attribution.</p>
+<p id="model-boundaries">In this ecosystem, <strong>FunASR is the toolkit</strong> that combines recognition, VAD and speaker-processing components. <strong>Fun-ASR and SenseVoice are model families</strong>, with capabilities that depend on the checkpoint and invocation path. <strong>FunClip is a transcription and clipping application</strong>. In the composed FunASR pipeline discussed here, CAM++ produces speaker vectors; a later clustering stage assigns labels. A SenseVoice emotion tag is not a speaker identity. The official <a href="https://github.com/modelscope/FunASR/blob/aa3d789cf0c99ba955178513c8471e38d68efca9/docs/speaker_emotion.md#choose-a-task">output-type guide</a> distinguishes vectors, anonymous labels and identity matching.</p>
+<h2 id="read-labels">2. Read a small example: 0, 1, 0 in one recording</h2>
+<p data-example="illustrative">Imagine a nine-second conversation represented by the simplified rows below. The words, times and labels are all teaching examples. Other fields in an actual response are omitted.</p>
+<table data-example="turns"><thead><tr><th>Interval (milliseconds)</th><th>spk</th><th>Illustrative words</th></tr></thead><tbody>
+<tr><td>[0, 3000]</td><td>0</td><td>Let's confirm the requirements.</td></tr>
+<tr><td>[3000, 7000]</td><td>1</td><td>I'll add the delivery schedule.</td></tr>
+<tr><td>[7000, 9000]</td><td>0</td><td>Good, let's continue.</td></tr>
 </tbody></table>
-<h2>Tested on a real recording</h2>
-<p>On a <strong>227-second multi-speaker meeting recording</strong>, FunASR automatically split the audio into <strong>77 sentences</strong> and distinguished <strong>11 different speakers</strong> — <strong>without being told the speaker count in advance</strong>. The whole pipeline is one <code>generate()</code> call and a single Python dependency.</p>
-<h2>Why FunASR instead of pyannote + Whisper</h2>
+<p>You can read this as “The system grouped the first and third passages together, and assigned the second to another group.” You cannot read it as “The first person is the chair and the second is the product manager.” This implementation renumbers labels in encounter order. That ordering conveys no identity and does not promise stable numbers after a different crop or pipeline run. See the <a href="https://github.com/modelscope/FunASR/blob/aa3d789cf0c99ba955178513c8471e38d68efca9/funasr/models/campplus/utils.py#L195-L210">label remapping implementation</a>.</p>
+<p data-contract="recording-scoped-key">An application can store a grouping under <code>(recording_id, spk)</code> for a particular run, then keep a separately reviewed display name. This pair is an application design suggestion, not a new SDK field. Distinguish run revisions when you reprocess audio or change models or segmentation. Two meetings both containing <code>spk=0</code> is not a reason to merge their records into one person's history.</p>
+<h2>3. One label per sentence does not mean one voice throughout</h2>
+<p>A sentence is an organizational unit of the transcript. A speaker change is an event in the audio. They need not happen at the same place: someone can interrupt before punctuation ends a sentence, and a VAD interval can contain more than one person. Assigning one label to the whole sentence is an attribution rule, not source separation that extracts every voice from a mixture.</p>
+<p>In the version examined here, <code>distribute_spk</code> adds up each speaker's overlap with the sentence and selects the label with the greatest total. It converts its internal diarization intervals from seconds to the milliseconds used by sentences. Equal totals retain the first overlapping label encountered. See the <a href="https://github.com/modelscope/FunASR/blob/aa3d789cf0c99ba955178513c8471e38d68efca9/funasr/models/campplus/utils.py#L256-L272">sentence-assignment source</a>.</p>
+<p data-example="overlap" data-selected-speaker="1" data-sentence-ms="[0, 8000]" data-turns-seconds="[[0, 3, 0], [3, 8, 1]]">Consider another hypothetical example: one sentence record covers 0–8 seconds, label 0 covers the first 3 seconds, and label 1 covers the following 5. Under that rule, the sentence receives <code>spk=1</code>. This does not establish that label 1 also spoke during the first 3 seconds, or that every word in the sentence belongs to that person.</p>
+<p id="zero-is-not-confidence">One easily missed boundary: this function also defaults to <code>0</code> when there is no overlap at all. Looking only at <code>spk=0</code> cannot distinguish an ordinary group assignment from that fallback. It is neither confirmation nor a confidence score. Applications needing stronger guarantees should retain the available timing evidence and review it. Do not automatically relabel every 0 as “unknown,” or treat every 0 as a reliable identity.</p>
+<h2 id="review-workflow">4. Turn the result into an accountable meeting record</h2>
+<p>If your goal is meeting minutes, complete this review loop before attaching responsibilities to named people:</p>
+<ol>
+<li><strong>Keep audio positions and original results.</strong> Assign an application-local recording ID and retain the model revision, toolkit version and run configuration. Do not keep only a final “Alex said…” text.</li>
+<li><strong>Display anonymous labels first.</strong> Make each passage traceable to its interval in the original recording. Listen to introductions, handovers, short interruptions and overlapping speech. Look for missing or wrong assignments and sentences containing multiple speakers.</li>
+<li><strong>Store human confirmation separately.</strong> Add a display name after review while preserving the original label and an edit history. Keep uncertain attributions anonymous or marked for review. Do not infer a name from words such as “I'll take responsibility.”</li>
+<li><strong>Check the actual deliverable.</strong> Before exporting minutes or selecting clips by speaker, sample multiple nonadjacent passages sharing a label. Tasks, promises and disputed statements deserve listening checks, not just a neatly populated speaker column.</li>
+</ol>
+<p>The success criterion is that important statements can be traced to audio and unconfirmed attributions do not masquerade as names. It is not that the output contains a particular number of labels. A visible unresolved item is more useful than a confidently filled-in wrong name. For selecting passages by anonymous speaker, continue with the <a href="/en/blog/funclip-v2-2-0-moss-speaker-clipping.html">conversation subtitles and clipping guide</a> and check its separate backend.</p>
+<h2>5. Choose a pipeline by its text and timing evidence</h2>
+<p>FunASR's generic speaker clustering operates inside its VAD pipeline. Configuring a speaker model alone does not make every direct-inference entry point return diarization. Recognition results with word or character timestamps and results without them also lead to different sentence construction. The examined implementation can fall back from punctuation-based segmentation to VAD-based segmentation when required inputs are unavailable. Changing a model name is not a guarantee of unchanged output semantics. See the <a href="https://github.com/modelscope/FunASR/blob/aa3d789cf0c99ba955178513c8471e38d68efca9/funasr/auto/auto_model.py#L1296-L1375">AutoModel speaker-processing branches</a>.</p>
+<p>If you only need words, start with ordinary transcription. For long recordings with anonymous labels, compare a composed pipeline with a backend offering joint transcription and diarization. Third-party MOSS-Transcribe-Diarize is a separate path; do not blindly attach the external VAD/speaker combination described here. Its own guide governs environment, weights, licensing and response details. See the <a href="https://github.com/modelscope/FunASR/blob/aa3d789cf0c99ba955178513c8471e38d68efca9/docs/model_selection.md#decision-table">official task-selection table</a>.</p>
+<p>Installing the <code>funasr</code> package does not mean that you have obtained the weights for recognition, VAD, punctuation and speaker components. Initial model acquisition needs a specified source, revision, license review and network access. Later offline use needs complete local snapshots, installed dependencies and a verified loading path. This article does not offer a universal installation command for every model, CPU/GPU configuration or service, and makes no CPU real-time promise.</p>
+<h2 id="agent-contract">6. Integration boundaries for Agents</h2>
+<p>These are application-side reading rules, not a requirement that every runtime return identical JSON. Establish which pipeline was invoked before interpreting its fields:</p>
 <ul>
-<li><strong>One call, no alignment</strong>: transcription and speaker labels are aligned by construction.</li>
-<li><strong>No HuggingFace gated access</strong>: pyannote's speaker models are gated; FunASR models are openly downloadable.</li>
-<li><strong>Stronger on Chinese</strong>: Paraformer / SenseVoice have far lower CER than Whisper on Chinese (<a href="/en/blog/funasr-vs-whisper-benchmark.html">benchmark</a>).</li>
-<li><strong>Runs on CPU</strong>: get results offline without a GPU.</li>
+<li data-contract="speaker-id"><strong>Labels:</strong> in the generic SDK pipeline discussed here, <code>sentence_info[].spk</code> is an integer anonymous label, not a name or probability. A vector from a standalone speaker model is not a substitute for this label.</li>
+<li data-contract="time-units"><strong>Times:</strong> this SDK's <code>sentence_info</code> uses milliseconds for <code>start/end</code>, relative to the input recording. Check finite values, ordered boundaries and the recording duration. Do not substitute seconds from an HTTP response without conversion. For cropped input, restore original positions using the actual crop offset.</li>
+<li data-contract="missing-result"><strong>Missing data:</strong> absent <code>sentence_info</code>, an empty list and a missing <code>spk</code> are different cases. Check the invocation path, usable speech, timestamps and logs. Do not invent labels, names or confidence scores. Check text fields such as <code>text</code> and <code>sentence</code> against the actual version's response rather than assuming a field from another tutorial exists.</li>
+<li data-contract="authorization"><strong>Data authorization:</strong> confirm permission, retention and access boundaries before downloading new weights, uploading meeting audio, enrolling voice samples or mapping labels to real names. Anonymous labels do not make the underlying recording anonymous.</li>
+<li data-contract="retry"><strong>Failures and retries:</strong> stop and report input, dependency or interface mismatches. Do not rerun until you obtain a desired headcount. Retry only identified transient failures under a preset application limit, keeping original results and avoiding duplicate uploads.</li>
 </ul>
-<h2>Going further</h2>
-<ul>
-<li>Swap <code>model="paraformer-zh"</code> for <code>"iic/SenseVoiceSmall"</code> to use SenseVoice (with emotion/event tags).</li>
-<li>Iterate over <code>sentence_info</code> to export <strong>SRT subtitles</strong> or aggregate per speaker into <strong>meeting minutes</strong>.</li>
-</ul>
-<div class="cta"><p>FunASR is Tongyi Lab's open-source, industrial-grade speech recognition toolkit — fast and accurate, especially on Chinese.</p><a class="btn" href="https://github.com/modelscope/FunASR" target="_blank">Star FunASR on GitHub ★</a></div>
-<!--related-posts-->
-<h2>Related posts</h2>
-<ul class="post-list">
-<li><a href="/en/blog/funasr-vs-whisper-benchmark.html">FunASR vs Whisper Benchmark</a></li>
-<li><a href="/en/blog/sensevoice-deployment-guide.html">SenseVoice Deployment Guide</a></li>
-<li><a href="/en/blog/fun-asr-nano-guide.html">Fun-ASR-Nano Guide</a></li>
-<li><a href="/en/blog/sensevoice-emotion-language-detection.html">Emotion & Language Detection</a></li>
-<li><a href="/en/blog/funasr-realtime-streaming-asr.html">Real-Time Streaming Speech-to-Text</a></li>
-<li><a href="/en/blog/funasr-transcribe-long-audio.html">Transcribe Long Audio (Hours in One Call)</a></li>
-<li><a href="/en/blog/funasr-cli-transcribe-command-line.html">Transcribe from the Command Line</a></li>
-<li><a href="/en/blog/self-hosted-openai-whisper-api-alternative.html">Self-Hosted OpenAI Whisper API Alternative</a></li>
-<li><a href="/en/blog/generate-subtitles-srt-vtt-from-audio-video.html">Auto-Generate Subtitles (SRT / VTT)</a></li>
-<li><a href="/en/blog/speech-to-text-python-transcribe-audio.html">Speech to Text in Python</a></li>
-<li><a href="/en/blog/funasr-llama-cpp-whisper-cpp-alternative.html">FunASR on llama.cpp (whisper.cpp Alternative)</a></li>
-<li><a href="/en/blog/funasr-vs-faster-whisper-chinese.html">FunASR vs faster-whisper (Chinese/Cantonese)</a></li>
-<li><a href="/en/blog/lightweight-speech-recognition-cpu.html">Lightweight Speech Recognition on CPU</a></li>
-<li><a href="/en/blog/self-hosted-deepgram-assemblyai-alternative.html">Self-Hosted Deepgram/AssemblyAI Alternative</a></li>
-<li><a href="/en/blog/which-funasr-model.html">Which FunASR Model?</a></li>
-<li><a href="/en/blog/cantonese-speech-recognition.html">Cantonese Speech Recognition (SenseVoice)</a></li>
-<li><a href="/en/blog/japanese-speech-recognition.html">Japanese Speech Recognition (SenseVoice)</a></li>
-<li><a href="/en/blog/voice-activity-detection-python.html">Voice Activity Detection in Python</a></li>
-<li><a href="/en/blog/self-hosted-google-aws-azure-speech-to-text.html">Self-Hosted Google/AWS/Azure STT Alternative</a></li>
-<li><a href="/en/blog/chinese-speech-recognition.html">Chinese Speech Recognition in Python</a></li>
-<li><a href="/en/blog/punctuation-restoration-python.html">Punctuation Restoration in Python</a></li>
-<li><a href="/en/blog/speech-to-text-timestamps-python.html">Speech-to-Text with Timestamps in Python</a></li>
-</ul>
+<h2 id="check-understanding">Three questions to check your understanding</h2>
+<p>Two meetings contain label 0. Is that the same person? Not established. A long sentence has label 1. Does that rule out an interruption? No. You have a speaker vector. Can you fill in a name? Still no. Distinguishing voice grouping, transcript attribution and identity confirmation tells you which part your application still needs.</p>
+<p data-editorial="scope"><strong>Evidence and scope:</strong> this article explains fields, label remapping and assignment rules from the pinned official source and documentation linked above. Its illustrative arithmetic and bilingual pages were checked. No new acoustic-model inference, meeting accuracy, speaker-count accuracy or identity-matching evaluation was performed. Other checkpoints, older packages and services require separate verification.</p>
+<p data-editorial="next-step">Next: without a transcript yet, start with <a href="/en/blog/speech-to-text-python-transcribe-audio.html">your first audio transcription</a>. For model and interface decisions, use the <a href="/en/blog/which-funasr-model.html">task-based selection guide</a>. If your question concerns cropping and subtitle timing, read <a href="/en/blog/voice-activity-detection-python.html">VAD intervals and timelines</a>.</p>
 </div></article>
 <footer><div class="container">FunASR · Open-source speech recognition by Tongyi Lab · <a href="https://github.com/modelscope/FunASR">GitHub</a></div></footer>
 </body></html>
