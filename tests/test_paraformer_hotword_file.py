@@ -82,3 +82,20 @@ def test_hotword_file_is_read_as_utf8_regardless_of_locale(model_cls, tmp_path, 
     hotword_list = _generate(model_cls, tmp_path, "阿里巴巴\n阿里云\n")
 
     assert hotword_list == [[2, 3, 4, 4], [2, 3, 5], [SOS]]
+
+
+@pytest.mark.parametrize("model_cls", [SeacoParaformer, ContextualParaformer])
+def test_blank_lines_in_seg_dict_are_skipped(model_cls, tmp_path):
+    # A seg_dict with blank or whitespace-only lines (e.g. a trailing newline
+    # added while editing it) used to raise IndexError while loading.
+    (tmp_path / "seg_dict").write_text("阿 阿\n\n里 里\n   \n巴 巴\n云 云\n\n", encoding="utf-8")
+    frontend = types.SimpleNamespace(cmvn_file=os.path.join(str(tmp_path), "am.mvn"))
+
+    hotword_list = model_cls.generate_hotwords_list(
+        types.SimpleNamespace(sos=SOS),
+        "阿里巴巴 阿里云",
+        tokenizer=_Tokenizer(),
+        frontend=frontend,
+    )
+
+    assert hotword_list == [[2, 3, 4, 4], [2, 3, 5], [SOS]]
