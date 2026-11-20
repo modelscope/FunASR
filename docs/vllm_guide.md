@@ -713,10 +713,33 @@ CUDA_VISIBLE_DEVICES=0 python examples/industrial_data_pretraining/fun_asr_nano/
 Set a positive `--ws-ping-timeout` only after measuring the worst-case decode
 and queue delay for the production traffic shape; keep it above that delay and
 coordinate it with the gateway idle-timeout policy. The `websockets` library's
-`max_queue` setting bounds receive buffering for incoming messages; it doesn't
-change ping/pong timeout semantics, so increasing it doesn't fix keepalive
-timeouts. Set `--ws-ping-interval 0` only when an external gateway already owns
+receive high-water mark (`max_queue`) can pause socket reads when its queue fills;
+this also delays processing Ping frames even if inference runs off the event loop.
+Increasing that mark only moves the overload threshold. It isn't a throughput
+fix. Set `--ws-ping-interval 0` only when an external gateway already owns
 keepalive/reconnect policy.
+
+The source server receives messages independently of session inference, with a
+bounded application FIFO: `--ws-receive-max-messages 128` and
+`--ws-receive-max-bytes 16777216`. Both limits must be positive. They count queued
+messages and payload bytes (UTF-8 bytes for text commands), not total process
+memory: protocol buffering, an in-flight message and session audio add to it.
+An overflow closes the connection with **1013**, not a successful final result.
+Do not automatically replay a partially processed session without an
+application-level recovery policy.
+
+Audio and commands remain ordered. When the next queued message is more audio,
+an otherwise-due provisional decode is deferred until that backlog is consumed;
+audio itself isn't dropped or combined. VAD completed-segment decoding and
+`COMMIT`/`STOP` final decoding still process their full input. Preview cadence and
+context/fallback observations may change under load, so identical transcript
+text or improved hardware throughput isn't guaranteed. Use
+`--log-decode-profile` to record `peak_messages`, `peak_bytes` and
+`skipped_partials` alongside the existing engine profile.
+
+These source changes are not in the published `funasr==1.4.15` package. Transport
+tests with synthetic decoding do not replace L20 or production-traffic
+acceptance; see [the benchmark contract](benchmark/realtime_ws_benchmark.md).
 
 For long-session debugging, especially with `--enable-spk`, enable periodic
 session-state logs:
