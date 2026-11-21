@@ -139,6 +139,7 @@ def _server_namespace(
         "_safe_int": lambda value, default: (
             int(value) if value is not None else default
         ),
+        "_model_audio_fs": lambda audio_fs: audio_fs,
         "_pcm_duration_ms": lambda pcm, fs, ch, sampwidth: 10,
         "async_vad": async_vad,
         "async_asr": async_asr,

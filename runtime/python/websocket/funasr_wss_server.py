@@ -155,6 +155,23 @@ def _safe_int(v, default):
         return default
 
 
+# Sample rates the models are told about. AutoModel resamples PCM input from fs to
+# the model's rate; from these rates that is cheap, while an arbitrary value (0, a
+# negative or a rate such as 44101) would fail or build a very large resampling
+# kernel on every call. Any other audio_fs keeps the models at 16000 Hz, as before.
+MODEL_AUDIO_FS = (8000, 11025, 12000, 16000, 22050, 24000, 32000, 44100, 48000)
+
+
+def _model_audio_fs(audio_fs):
+    if audio_fs in MODEL_AUDIO_FS:
+        return audio_fs
+    print(
+        f"audio_fs {audio_fs} is not a supported sample rate; the models read the audio as 16000 Hz",
+        flush=True,
+    )
+    return 16000
+
+
 def _model_hotwords(hotwords):
     """Turn protocol hotwords into the space-separated string AutoModel reads.
 
@@ -372,6 +389,15 @@ async def ws_serve(websocket, path=None):
     websocket.status_dict_asr = {}  # hotword 等
     websocket.status_dict_asr_online = {"cache": {}, "is_final": False}
     websocket.status_dict_vad = {"cache": {}, "is_final": False}
+    # Every call names its sample rate, so one connection never reads its audio at
+    # another connection's rate through the shared models' settings.
+    websocket.model_audio_fs = 16000
+    for status in (
+        websocket.status_dict_asr,
+        websocket.status_dict_asr_online,
+        websocket.status_dict_vad,
+    ):
+        status["fs"] = websocket.model_audio_fs
     websocket.status_dict_punc = {"cache": {}}
 
     websocket.chunk_interval = 10
@@ -536,6 +562,12 @@ async def ws_serve(websocket, path=None):
 
                 if "audio_fs" in messagejson:
                     websocket.audio_fs = _safe_int(messagejson["audio_fs"], 16000)
+                    # AutoModel reads PCM input at fs (16000 by default) and resamples it
+                    # to the model's rate, as the C++ servers do with audio_fs.
+                    websocket.model_audio_fs = _model_audio_fs(websocket.audio_fs)
+                    websocket.status_dict_vad["fs"] = websocket.model_audio_fs
+                    websocket.status_dict_asr_online["fs"] = websocket.model_audio_fs
+                    websocket.status_dict_asr["fs"] = websocket.model_audio_fs
 
                 if end_of_input:
                     await finish_input(send_end_ack=bool(messagejson.get("is_end")))
@@ -692,7 +724,7 @@ async def async_vad(websocket, audio_in: bytes):
     return speech_start, speech_end
 
 
-def _sv_and_match_sync(audio_in: bytes, reload_sec: int):
+def _sv_and_match_sync(audio_in: bytes, reload_sec: int, fs: int = 16000):
     """
     同步执行：SV embedding + speaker_db 匹配
     返回 (spk_name, best_score)
@@ -700,7 +732,7 @@ def _sv_and_match_sync(audio_in: bytes, reload_sec: int):
     spk_name = "unknown"
     best_score = 0.0
 
-    sv_out = model_sv.generate(input=audio_in, embedding=True)[0]
+    sv_out = model_sv.generate(input=audio_in, embedding=True, fs=fs)[0]
     embedding = sv_out["spk_embedding"][0].cpu().numpy()
 
     now_ts = time.time()
@@ -757,6 +789,7 @@ async def async_asr(websocket, audio_in: bytes):
             _sv_and_match_sync,
             audio_in,
             int(args.speaker_db_reload_sec),
+            websocket.model_audio_fs,
             sem=SEM_SV,
         )
     except Exception as e:
