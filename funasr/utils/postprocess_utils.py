@@ -483,12 +483,13 @@ def rich_transcription_postprocess(s):
     for i in range(1, len(s_list)):
         if len(s_list[i]) == 0:
             continue
-        if get_event(s_list[i]) == cur_ent_event and get_event(s_list[i]) != None:
+        event = get_event(s_list[i])
+        if event == cur_ent_event and event != None:
             s_list[i] = s_list[i][1:]
         if len(s_list[i]) == 0:
             continue
         # else:
-        cur_ent_event = get_event(s_list[i])
+        cur_ent_event = event
         if get_emo(s_list[i]) != None and get_emo(s_list[i]) == get_emo(new_s):
             new_s = new_s[:-1]
         segment = s_list[i].strip()
