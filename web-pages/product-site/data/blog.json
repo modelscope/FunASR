@@ -375,15 +375,15 @@
     },
     {
       "slug": "lightweight-speech-recognition-cpu",
-      "category": "selection",
-      "reviewed": false,
+      "category": "explanations",
+      "reviewed": true,
       "zh": {
-        "title": "CPU 语音识别的部署取舍",
-        "summary": ""
+        "title": "语音识别不买 GPU 行不行？先看懂 CPU 的四笔账",
+        "summary": "模型文件小，不等于占用内存少；RTF 小于 1，也不等于实时字幕。用一个录音转写任务，学会评估 CPU 的质量、内存、耗时和并发边界。"
       },
       "en": {
-        "title": "Deployment choices for CPU speech recognition",
-        "summary": ""
+        "title": "Can your CPU handle speech recognition? Four checks before buying a GPU",
+        "summary": "Small weights do not guarantee low memory use, and RTF below one does not guarantee live captions. Evaluate CPU transcription by quality, memory, timing and concurrency."
       }
     },
     {
