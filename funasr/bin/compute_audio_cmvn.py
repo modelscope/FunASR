@@ -110,7 +110,7 @@ def main(**kwargs):
     mean = -1.0 * mean_stats / total_frames
     var = 1.0 / np.sqrt(var_stats / total_frames - mean * mean)
     dims = mean.shape[0]
-    am_mvn = os.path.dirname(cmvn_file) + "/am.mvn"
+    am_mvn = os.path.join(os.path.dirname(cmvn_file), "am.mvn")
     with open(am_mvn, "w") as fout:
         fout.write(
             "<Nnet>"
