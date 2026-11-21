@@ -179,6 +179,15 @@ def load_audio_text_image_video(
         pass
         # print(f"unsupport data type: {data_or_path_or_list}, return raw data")
 
+    # Integer PCM tensors (and int32 arrays, converted above) to float in [-1, 1).
+    if (
+        isinstance(data_or_path_or_list, torch.Tensor)
+        and data_or_path_or_list.dtype in (torch.int16, torch.int32)
+        and data_type in (None, "sound")
+    ):
+        scale = 32768.0 if data_or_path_or_list.dtype == torch.int16 else 2147483648.0
+        data_or_path_or_list = data_or_path_or_list.to(torch.float32) / scale
+
     if (
         isinstance(data_or_path_or_list, torch.Tensor)
         and data_or_path_or_list.ndim == 2
