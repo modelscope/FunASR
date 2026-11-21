@@ -111,7 +111,10 @@ class CustomDistributedBatchSampler(Sampler):
 
         # Add extra samples to make it evenly divisible
         padding_size = self.total_size - len(indices)
-        if padding_size <= len(indices):
+        if padding_size < 0:
+            # drop_last: discard the tail that does not fill a batch on every replica.
+            indices = indices[: self.total_size]
+        elif padding_size <= len(indices):
             indices += indices[:padding_size]
         else:
             indices += (
@@ -139,7 +142,7 @@ class CustomDistributedBatchSampler(Sampler):
         ]
 
         # Drop the last batch if it's not full and drop_last is True
-        if self.drop_last and len(batches[-1]) != self.batch_size:
+        if self.drop_last and batches and len(batches[-1]) != self.batch_size:
             batches = batches[:-1]
 
         return iter(batches)
@@ -225,7 +228,10 @@ class CustomDistributedBufferBatchSampler(Sampler):
 
         # Add extra samples to make it evenly divisible
         padding_size = self.total_size - len(indices)
-        if padding_size <= len(indices):
+        if padding_size < 0:
+            # drop_last: discard the tail that does not fill a batch on every replica.
+            indices = indices[: self.total_size]
+        elif padding_size <= len(indices):
             indices += indices[:padding_size]
         else:
             indices += (
