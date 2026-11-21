@@ -1,13 +1,12 @@
 <!DOCTYPE html>
-<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>轻量语音识别:CPU 上约 250MB 跑中文 ASR(无需 GPU/Python)| FunASR 博客</title><meta name="description" content="如何在 CPU/边缘设备上轻量跑中文语音识别?FunASR llama.cpp 运行时:单二进制 + 254MB q8 模型,无需 GPU/Python,CPU 0.16s,中文 CER 7.99%(比 whisper.cpp small 还小且准 3 倍)。"><meta name="keywords" content="轻量语音识别, CPU 语音识别, 低内存 ASR, 边缘语音识别, 树莓派 语音识别, 小模型 语音识别, whisper.cpp 替代, GGUF, SenseVoice, 中文语音识别">
-<link rel="icon" href="/logo.png"><meta property="og:title" content="轻量语音识别:CPU 上约 250MB 跑中文 ASR(无需 GPU/Python)| FunASR 博客"><meta property="og:description" content="如何在 CPU/边缘设备上轻量跑中文语音识别?FunASR llama.cpp 运行时:单二进制 + 254MB q8 模型,无需 GPU/Python,CPU 0.16s,中文 CER 7.99%(比 whisper.cpp small 还小且准 3 倍)。">
-<meta property="og:type" content="article"><meta property="og:url" content="https://www.funasr.com/blog/lightweight-speech-recognition-cpu.html"><meta property="og:image" content="https://www.funasr.com/logo.png">
-<link rel="canonical" href="https://www.funasr.com/blog/lightweight-speech-recognition-cpu.html"><link rel="alternate" hreflang="en" href="https://www.funasr.com/en/blog/lightweight-speech-recognition-cpu.html"><link rel="alternate" hreflang="zh" href="https://www.funasr.com/blog/lightweight-speech-recognition-cpu.html"><link rel="alternate" hreflang="x-default" href="https://www.funasr.com/en/blog/lightweight-speech-recognition-cpu.html">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<script type="application/ld+json">
-{"@context":"https://schema.org","@type":"BlogPosting","headline":"轻量语音识别:CPU 上约 250MB 跑中文 ASR(无需 GPU/Python)| FunASR 博客","description":"如何在 CPU/边缘设备上轻量跑中文语音识别?FunASR llama.cpp 运行时:单二进制 + 254MB q8 模型,无需 GPU/Python,CPU 0.16s,中文 CER 7.99%(比 whisper.cpp small 还小且准 3 倍)。","datePublished":"2026-06-22","dateModified":"2026-06-22","author":{"@type":"Organization","name":"FunASR / Tongyi Lab"},"publisher":{"@type":"Organization","name":"FunASR","logo":{"@type":"ImageObject","url":"https://www.funasr.com/logo.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://www.funasr.com/blog/lightweight-speech-recognition-cpu.html"},"image":"https://www.funasr.com/logo.png"}
-</script>
+
+<html lang="zh"><head><meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/>
+<title>语音识别不买 GPU 行不行？先看懂 CPU 的四笔账 | FunASR</title><meta content="模型文件小，不等于占用内存少；RTF 小于 1，也不等于实时字幕。用一个录音转写任务，学会评估 CPU 的质量、内存、耗时和并发边界。" name="description"/>
+<link href="/logo.png" rel="icon"/><meta content="语音识别不买 GPU 行不行？先看懂 CPU 的四笔账" property="og:title"/><meta content="模型文件小，不等于占用内存少；RTF 小于 1，也不等于实时字幕。用一个录音转写任务，学会评估 CPU 的质量、内存、耗时和并发边界。" property="og:description"/>
+<meta content="article" property="og:type"/><meta content="https://www.funasr.com/blog/lightweight-speech-recognition-cpu.html" property="og:url"/><meta content="https://www.funasr.com/logo.png" property="og:image"/>
+<link href="https://www.funasr.com/blog/lightweight-speech-recognition-cpu.html" rel="canonical"/><link href="https://www.funasr.com/en/blog/lightweight-speech-recognition-cpu.html" hreflang="en" rel="alternate"/><link href="https://www.funasr.com/blog/lightweight-speech-recognition-cpu.html" hreflang="zh" rel="alternate"/><link href="https://www.funasr.com/en/blog/lightweight-speech-recognition-cpu.html" hreflang="x-default" rel="alternate"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"语音识别不买 GPU 行不行？先看懂 CPU 的四笔账","description":"模型文件小，不等于占用内存少；RTF 小于 1，也不等于实时字幕。用一个录音转写任务，学会评估 CPU 的质量、内存、耗时和并发边界。","datePublished":"2026-06-22","dateModified":"2026-11-22","author":{"@type":"Organization","name":"FunASR / Tongyi Lab"},"publisher":{"@type":"Organization","name":"FunASR","logo":{"@type":"ImageObject","url":"https://www.funasr.com/logo.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://www.funasr.com/blog/lightweight-speech-recognition-cpu.html"},"image":"https://www.funasr.com/logo.png"}</script>
 <style>:root{--primary:#2563eb;--primary-dark:#1d4ed8;--bg:#fff;--surface:#f8fafc;--border:#e2e8f0;--text:#0f172a;--text-soft:#475569;--text-muted:#94a3b8;--radius:12px}
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Inter',-apple-system,sans-serif;color:var(--text);line-height:1.7}
@@ -42,75 +41,66 @@ p code,li code{background:var(--surface);padding:2px 6px;border-radius:5px;font-
 .post-card p{margin:0;color:var(--text-soft);font-size:0.9rem}
 .post-card .date{color:var(--text-muted);font-size:0.8rem}
 footer{background:#0f172a;color:#94a3b8;padding:28px 0;text-align:center;font-size:0.8rem}
-footer a{color:#94a3b8}</style></head><body>
-<nav class="nav"><div class="container"><a href="/" class="nav-logo">Fun<span>ASR</span></a><div class="nav-links"><a href="/#capabilities">核心能力</a><a href="/#usage">如何使用</a><a href="/#benchmark">性能</a><a href="/#demo">演示</a><a href="https://modelscope.github.io/FunASR/zh/" target="_blank">文档</a><a href="/quickstart.html">快速上手</a><a href="/models.html">模型</a><a href="/ecosystem.html">生态</a><a href="/blog/">技术博客</a><a href="/vs-whisper.html">对比 Whisper</a><a href="/donors.html">功德榜</a></div><a href="https://www.funasr.com/en/blog/lightweight-speech-recognition-cpu.html" style="font-size:0.83rem;font-weight:500;color:var(--text-soft)">EN</a><a href="https://github.com/modelscope/FunASR" target="_blank" class="nav-btn">GitHub ★</a></div></nav>
-<article><div class="container">
-<h1>轻量语音识别:在 CPU 上用约 250MB 跑中文 ASR(无需 GPU、无需 Python)</h1>
-<p class="post-meta">2026-06-22 · FunASR 团队</p>
-<p>大多数语音识别要 GPU、要 Python 环境、模型动辄上 GB。如果你只想在一台普通笔记本、小服务器或边缘设备上把中文转成文字,这些都太重了。</p>
-<p><strong>FunASR 的 llama.cpp / GGUF 运行时</strong>把这件事压到极简:**一个自包含二进制 + 一个量化模型文件**,纯 CPU、零 Python。SenseVoice 的 q8 量化模型只有 **254MB**,精度几乎不变。</p>
-
-<h2>实测:254MB 模型,CPU 上 0.16 秒(真实输出)</h2>
-<p>下载预编译二进制(Linux/macOS/Windows)+ q8 模型,直接跑:</p>
-<pre># 下二进制见 Releases;再拉模型
-bash download-funasr-model.sh sensevoice ./gguf
-llama-funasr-sensevoice -m ./gguf/sensevoice-small-q8.gguf --vad ./gguf/fsmn-vad.gguf -a audio.wav
-# → 欢迎大家来体验达摩院推出的语音识别模型。   (CPU, 0.16s)</pre>
-<p>模型 243–254MB、VAD 仅 1.7MB,内置在二进制里,无需 Python detok。</p>
-
-<h2>又小又准:对比 whisper.cpp</h2>
-<p>同样跑在 CPU 上(中文 184 集 micro-CER,越低越准):</p>
-<table>
-<tr><th>模型</th><th>体积</th><th>中文 CER ↓</th></tr>
-<tr><td><strong>FunASR SenseVoice q8</strong></td><td><strong>254 MB</strong></td><td><strong>7.99%</strong></td></tr>
-<tr><td><strong>FunASR Paraformer q8</strong></td><td><strong>237 MB</strong></td><td>9.78%</td></tr>
-<tr><td>whisper.cpp small</td><td>466 MB</td><td>22.12%</td></tr>
-<tr><td>whisper.cpp large-v3-turbo</td><td>1.6 GB</td><td>23.15%</td></tr>
-</table>
-<p>FunASR 的 q8 模型**比 whisper.cpp small 还小**,中文准确率却高约 3 倍。</p>
-
-<h2>更小的档:量化矩阵</h2>
-<table>
-<tr><th>模型</th><th>档</th><th>体积</th><th>CER</th></tr>
-<tr><td>SenseVoice encoder</td><td>q8</td><td>254 MB</td><td>7.99%</td></tr>
-<tr><td>Paraformer encoder</td><td>q8</td><td>237 MB</td><td>9.78%</td></tr>
-<tr><td>Fun-ASR-Nano LLM(另需 encoder 470MB)</td><td>q4_K_M</td><td>484 MB</td><td>8.35%</td></tr>
-</table>
-<p>提供 Linux x64/<strong>arm64</strong>、macOS arm64、Windows x64 预编译二进制——arm64 适合树莓派/边缘盒子等。</p>
-
-<h2>从哪拿</h2>
+footer a{color:#94a3b8}</style><style>article a{text-decoration:underline;text-underline-offset:0.15em}</style></head><body>
+<nav class="nav"><div class="container"><a class="nav-logo" href="/">Fun<span>ASR</span></a><div class="nav-links"><a href="/#capabilities">核心能力</a><a href="/#usage">如何使用</a><a href="/#benchmark">性能</a><a href="/#demo">演示</a><a href="https://modelscope.github.io/FunASR/zh/" target="_blank">文档</a><a href="/quickstart.html">快速上手</a><a href="/models.html">模型</a><a href="/ecosystem.html">生态</a><a href="/blog/">技术博客</a><a href="/vs-whisper.html">对比 Whisper</a><a href="/donors.html">功德榜</a></div><a href="https://www.funasr.com/en/blog/lightweight-speech-recognition-cpu.html" style="font-size:0.83rem;font-weight:500;color:var(--text-soft)">EN</a><a class="nav-btn" href="https://github.com/modelscope/FunASR" target="_blank">GitHub ★</a></div></nav>
+<article><div class="container"><h1>语音识别不买 GPU 行不行？先看懂 CPU 的四笔账</h1>
+<p class="meta"><time datetime="2026-06-22">2026-06-22</time> 发布 · <time datetime="2026-11-22">2026-11-22</time> 修订 · 部署选型科普</p>
+<p data-editorial="opening">你有一台普通电脑，想把十分钟的采访变成文字。看到一个语音模型只有几百 MB，第一反应可能是：“这么小，我的电脑应该能跑吧？”文件能装进硬盘，只回答了最容易的那个问题。模型运行时还需要内存和计算；识别得快不快，还取决于录音、运行方式，以及你能等多久。</p>
+<p data-editorial="outcome">这篇不推荐你先买硬件，也不让你先照抄一串安装命令。读完后，你可以为一个具体转写任务写出验收条件，知道哪些数字需要测、怎样比较，避免因为“支持 CPU”就误判它适合自己的应用。本文是选型与测量概念指南，不需要安装软件；所有计时例子均为虚构，不是产品性能数据。</p>
+<section><h2 id="choose-route">1. 先说清楚：你要跑的是模型，还是完整应用？</h2>
+<p><strong>语音识别（ASR）</strong>是把声音变成文字的任务。<strong>模型权重</strong>是训练得到的数值文件，像一份学会了识别规律的“参数表”；它不能自己执行。<strong>运行时</strong>负责加载这些参数并完成计算。<strong>服务</strong>在运行时外面增加接收请求、排队、返回结果等功能。它们不是同一件东西。</p>
+<p>在 FunASR 生态中，<strong>FunASR 是工具包</strong>，可以组织模型调用和前后处理；<strong>Fun-ASR、SenseVoice 是模型系列</strong>，能力取决于具体 checkpoint（某个版本的模型权重）；<strong>FunClip 是转写与剪辑应用</strong>。安装了工具包，不等于已经下载了权重；模型能识别文字，也不等于现成支持你需要的字幕时间、说话人或 HTTP 接口。</p>
+<p>对初学者，先用 <a href="/blog/speech-to-text-python-transcribe-audio.html">Python 转写入门</a>完成一段录音，比同时研究量化、服务器和编译更容易判断问题在哪里。如果目标机器不适合安装 Python 推理环境，可以再评估独立的 C++ / GGUF 路径。GGUF 是模型文件格式，不是把任意模型文件改个后缀就能使用。官方的 <a href="https://github.com/modelscope/FunASR/blob/581150d8e1de2bc055cc390b6f2efc9ea78b48b7/runtime/llama.cpp/README.md">llama.cpp / GGUF 运行时说明</a>列出了对应模型和可执行程序。</p>
+<p>“推理时不需要 Python”也有范围：它指相应的独立 C++ 程序，不涵盖所有下载、转换和服务工具。例如这份文档中的下载助手使用 Hugging Face CLI，HTTP 包装服务使用 Python。选择安装包时，还要匹配操作系统、CPU 架构和该构建的指令集要求。x64 与 ARM64 不是可互换的文件；某台电脑能运行，不证明另一种 CPU 已经受过验证。</p>
+<p><strong>先确定产物：</strong>这次只要一份最终文字，还是边说边出现字幕？是否还要时间戳、标点或说话人标签？本文以“本地录音转成最终文字”为主。独立 GGUF 程序的 VAD 可以切分语音，但该文档明确说明它不实现 CAM++ 说话人向量与聚类，不能把这条路径等同于完整的会议分析管线。</p></section>
+<section><h2 id="memory">2. 第一笔账：硬盘放得下，不代表内存够用</h2>
+<p>下载页上的 MB 通常描述文件大小。运行后，程序还会保存中间计算结果、音频数据和其他状态；额外的 VAD、标点或说话人模型也可能占用内存。因此，要分别记录<strong>权重占用的磁盘空间</strong>和<strong>运行时的峰值内存</strong>。不要拿其中一个代替另一个。</p>
+<p><strong>量化</strong>可以理解成用更紧凑的数值表示部分权重：文件可能变小，某些硬件和实现上的计算也可能受益，但效果取决于具体模型、量化方式和运行时。它不是“无损压缩”的同义词。更小的文件不能证明准确率不变，更不能保证所有 CPU 上都更快。比较量化版本时，必须用同一组录音检查文字是否仍满足任务要求。</p>
+<p>对于一个单进程程序，可以关注峰值 RSS，即操作系统统计的该进程驻留物理内存峰值。服务如果还启动了工作进程或子进程，只看主进程就可能漏算；逐进程 RSS 简单相加又可能重复计算共享页。比较前要固定测量范围，例如“单个推理进程”或“同一容器的总内存”，并记录口径。</p>
+<p>当电脑开始频繁把内存内容换到磁盘，程序也许没有立刻报错，却可能明显变慢。应为系统和其他应用留下余量，再用计划处理的最长录音、实际批量和工作进程数检查，而不是凭一条短音频成功就认定容量足够。</p></section>
+<section><h2 id="read-timing">3. 第二笔账：RTF 告诉你处理速度，不直接告诉你用户等多久</h2>
+<p><strong>实时率 RTF（real-time factor）= 处理耗时 ÷ 音频时长。</strong>分子和分母都用秒，结果没有单位。比如十分钟音频是 600 秒，处理用了 120 秒，RTF 就是 0.2。数字越小，表示在这个测量范围内完成同样时长音频所需时间越短。RTF 小于 1，只说明处理比音频播放快。</p>
+<p>下面三个例子都是<strong>虚构的算术示例</strong>，不是三款模型的对比，也不是对你的电脑的预测。这里约定“处理耗时”包含音频预处理、识别和文本后处理，但不包含模型加载、网络传输与排队。</p>
+<table data-example="timing"><thead><tr><th>情形</th><th>音频时长</th><th>处理耗时</th><th>RTF</th></tr></thead><tbody>
+<tr data-audio-seconds="600" data-processing-seconds="120" data-rtf="0.2"><td>已加载的程序处理采访</td><td>600 秒</td><td>120 秒</td><td>0.2</td></tr>
+<tr data-audio-seconds="600" data-processing-seconds="360" data-rtf="0.6"><td>另一次不同条件的处理</td><td>600 秒</td><td>360 秒</td><td>0.6</td></tr>
+<tr data-audio-seconds="10" data-processing-seconds="2" data-rtf="0.2"><td>短录音处理</td><td>10 秒</td><td>2 秒</td><td>0.2</td></tr>
+</tbody></table>
+<p>再假设第一种情形必须先加载模型，加载用 45 秒，那么从启动到拿到文字至少是 45 + 120 = 165 秒，还没计入其他开销。第三种情形虽然同样是 RTF 0.2，用户如果也要等这 45 秒加载，就不会觉得“两秒就出结果”。长驻进程可以复用已加载的模型，但要另算持续占用的内存。</p>
+<p>这就是<strong>冷启动</strong>与<strong>热运行</strong>要分开的原因。第一次下载权重的等待应单独记录；下载完成后第一次启动并加载模型是另一项；模型已加载后的后续请求又是一项。不同缓存、硬盘和运行时会改变这些时间，不能把三者混在一个“耗时”里，也不要只挑最快的一次。</p>
+<p>工具日志里的 RTF 还可能采用不同的计时起止点。在本文引用的 <a href="https://github.com/modelscope/FunASR/blob/581150d8e1de2bc055cc390b6f2efc9ea78b48b7/funasr/auto/auto_model.py#L985-L1004">AutoModel 源码</a>中，RTF 由计时累计量与对应音频时长计算；它不是浏览器或客户端从发起请求到收到结果的计时器。因此服务评估还要单独记录<strong>请求延迟</strong>，包含你实际关心的上传、排队和返回过程。</p>
+<p><strong>离线识别不等于断网运行。</strong>在语音任务中，“离线”常表示拿到一段完整音频后再处理，与流式相对。要断网使用，还需预先备齐兼容的软件依赖、全部模型权重和配置，并确认调用路径不会在线查找或补下载。缓存存在只是条件之一，不是任意调用都无需联网的保证。</p></section>
+<section><h2 id="workload">4. 第三笔账：一条录音够快，不等于多用户够快</h2>
+<p>把采访一次处理完，只需要最终结果；实时字幕则还需要在录音尚未结束时持续给出片段。这要求模型与调用路径支持相应的流式协议，并考虑音频分块、首字等待、句末判定和结果修订。把文件识别改成每隔几秒调用一次，并不能自动得到连续、稳定的实时字幕。RTF 小于 1 也不能替代这些要求。</p>
+<p><strong>线程数</strong>是一个进程内部并行工作的配置；<strong>并发数</strong>是同时处理多少个请求。二者不是同一个旋钮。更多线程不一定更快，多个进程还可能争抢相同的 CPU 与内存带宽。官方 AutoModel 的 <code>ncpu</code> 会影响进程内线程设置；不是为每个请求独占预留相应数量的 CPU。不要在每个请求中随意改它，再把变化误认为模型波动。</p>
+<p>部署服务时，先测一个请求，再测你真正需要的并发数，记录排队后的延迟与失败数。单条录音 RTF 0.2 不能直接推出“五个请求同时运行也够快”。若报告 p95 延迟，要解释它是测得请求中约 95% 不超过的延迟，并同时写明样本数、并发和计时范围；几次请求不足以支撑稳定的尾延迟结论。</p></section>
+<section><h2 id="evaluate">5. 第四笔账：识别是否可用，和跑得快一样重要</h2>
+<p>先把“够用”写成一句可检验的话。例如：<strong>“对我有权使用的十分钟中文采访，启动后五分钟内拿到可编辑文字；关键人名和数字由我复核；处理时不能让这台办公电脑失去响应。”</strong>这是示例需求，不是产品承诺。你的时限、质量标准和内存预算应由用途决定。</p>
+<ol>
+<li><strong>固定输入和版本。</strong>用自己获授权的录音，或公开来源中许可明确、可合法使用的样本；保留输入哈希、时长、语言、噪声与是否重叠说话的说明。记录准确的模型标识与 revision、运行时版本、操作系统、CPU 型号与架构。本文不提供需读者猜来源的音频文件。</li>
+<li><strong>先完成一条完整链路。</strong>拿到真实输出，确认它包含任务需要的文字或字段，再讨论优化。人工回听重点片段，尤其是人名、数字、否定词；空结果、漏段和失败也要保留，不能只比较成功样本。</li>
+<li><strong>分开记录冷、热与并发条件。</strong>下载、首次加载、已加载请求分别计时。固定线程数和音频处理选项，做多次重复，保留每次结果以及机器上其他负载。再增加目标并发或录音长度，一次只改变一个条件。</li>
+<li><strong>按任务决定下一步。</strong>若质量不达标，先检查录音、语言与模型路径是否合适；换 GPU 不会自动解决选错模型的问题。若质量合格但耗时或内存超预算，再评估线程、批量、分段、量化或其他硬件，每次都复查质量。批量归档可以接受的等待，未必适合互动对话。</li>
+</ol>
+<p>最低限度，你最终应该有一张记录表：<em>哪段录音、什么版本、什么机器、什么运行条件、耗时多少、占用多少、文字是否通过复核</em>。它比一句脱离环境的“CPU 很快”更能帮助你做采购或部署决定。模型和依赖的使用许可也应逐项核对，不由文件大小或“开源”两个字推断。</p></section>
+<section><h2 id="agent-contract">6. 给 Agent：保存可比较的记录，不自动扩大操作范围</h2>
+<p>以下是建议的<strong>应用侧评估记录</strong>，不是 FunASR SDK 保证返回的字段。先取得用户任务、数据与下载授权，再填写环境和测量值；不要自动购买计算资源或把录音上传到远程服务。</p>
 <ul>
-<li>预编译二进制:<a href="https://github.com/modelscope/FunASR/releases" target="_blank">GitHub Releases</a>(tag <code>runtime-llamacpp-v*</code>)</li>
-<li>一站式下载与 quickstart:<a href="/llama-cpp.html">funasr.com/llama-cpp</a></li>
-<li>GGUF 模型:<a href="https://huggingface.co/FunAudioLLM" target="_blank">Hugging Face</a> / <a href="https://modelscope.cn/organization/FunAudioLLM" target="_blank">ModelScope</a></li>
+<li><strong>来源：</strong><code>input_path</code> 为用户指定的本地文件绝对路径字符串，不是示例占位文本；另存输入 SHA-256。<code>model_id</code>、<code>model_revision</code>、<code>runtime_version</code> 为确切标识字符串；同时记录 OS、CPU 型号、架构、Python 与依赖版本（非 Python 路径注明不适用），不能只填“最新版”。</li>
+<li><strong>条件：</strong><code>threads</code> 和 <code>concurrency</code> 为正整数，分别表示实际线程配置和同时请求数。<code>warm_state</code> 用字符串 <code>cold</code> 或 <code>warm</code>，并另存模型是否已加载及缓存状态的说明。软件安装与权重下载是不同操作；新下载、数据上传、付费资源和覆盖原文件均需相应授权。</li>
+<li><strong>计时：</strong><code>audio_duration_s</code> 为有限正数；<code>processing_s</code> 与 <code>request_latency_s</code> 为有限非负数，单位均为秒。记录各自起止点。只有完整成功且口径一致的处理才能计算 <code>processing_s / audio_duration_s</code>；时长未知或为零时不生成 RTF。</li>
+<li><strong>内存与结果：</strong><code>peak_rss_bytes</code> 为非负整数字节数，并明确进程范围；未测量写 <code>null</code>，不填 0 冒充测量。保存原始转写、人工复核状态及 <code>status</code>（<code>ok</code> 或 <code>error</code>）。失败项保留 <code>error</code> 原因和已完成范围，不能当作零耗时成功。</li>
+<li><strong>失败与退出：</strong>依赖缺失、模型/运行时不匹配、指令集不兼容、内存不足或无数据授权时停止，返回错误状态；批处理命令应返回非零退出码并保留失败列表。不得自动重试这些确定性错误。仅明确的暂时性故障才按用户事先允许的次数重试，记录每次尝试；参数改变后的测试属于新条件，不能覆盖原记录。</li>
 </ul>
-<div class="cta"><p><strong>FunASR 全家桶开源、可商用</strong>。觉得有用就点个 Star 👇</p><p><a class="btn" href="https://github.com/modelscope/FunASR" target="_blank">⭐ Star FunASR</a></p><p style="margin-top:10px;font-size:0.85rem">也欢迎:<a href="https://github.com/QwenAudio/SenseVoice" target="_blank">SenseVoice</a> · <a href="https://github.com/QwenAudio/Fun-ASR" target="_blank">Fun-ASR</a> · <a href="https://github.com/modelscope/FunClip" target="_blank">FunClip</a></p></div>
-<!--related-posts-->
-<h2>相关文章</h2>
-<ul class="post-list">
-<li><a href="/blog/funasr-vs-whisper-benchmark.html">FunASR vs Whisper 实测对比</a></li>
-<li><a href="/blog/sensevoice-deployment-guide.html">SenseVoice 部署指南</a></li>
-<li><a href="/blog/fun-asr-nano-guide.html">Fun-ASR-Nano 使用指南</a></li>
-<li><a href="/blog/funasr-speaker-diarization.html">说话人分离:谁在何时说话</a></li>
-<li><a href="/blog/sensevoice-emotion-language-detection.html">情感与语种检测</a></li>
-<li><a href="/blog/funasr-realtime-streaming-asr.html">实时流式语音识别</a></li>
-<li><a href="/blog/funasr-transcribe-long-audio.html">转写超长音频(1小时一次搞定)</a></li>
-<li><a href="/blog/funasr-cli-transcribe-command-line.html">命令行转写(文本/JSON/SRT)</a></li>
-<li><a href="/blog/self-hosted-openai-whisper-api-alternative.html">自托管 OpenAI Whisper API 替代</a></li>
-<li><a href="/blog/generate-subtitles-srt-vtt-from-audio-video.html">自动生成字幕(SRT / VTT)</a></li>
-<li><a href="/blog/speech-to-text-python-transcribe-audio.html">Python 语音转文字教程</a></li>
-<li><a href="/blog/funasr-llama-cpp-whisper-cpp-alternative.html">FunASR 跑进 llama.cpp(whisper.cpp 替代)</a></li>
-<li><a href="/blog/funasr-vs-faster-whisper-chinese.html">FunASR vs faster-whisper(中文/粤语)</a></li>
-<li><a href="/blog/self-hosted-deepgram-assemblyai-alternative.html">自托管替代 Deepgram/AssemblyAI</a></li>
-<li><a href="/blog/which-funasr-model.html">选哪个 FunASR 模型</a></li>
-<li><a href="/blog/cantonese-speech-recognition.html">粤语语音识别(SenseVoice 原生粤语)</a></li>
-<li><a href="/blog/japanese-speech-recognition.html">日语语音识别(SenseVoice 转写+标点+情感)</a></li>
-<li><a href="/blog/voice-activity-detection-python.html">Python 语音活动检测(VAD)</a></li>
-<li><a href="/blog/self-hosted-google-aws-azure-speech-to-text.html">自托管替代 Google/AWS/Azure 云语音 API</a></li>
-<li><a href="/blog/chinese-speech-recognition.html">中文语音识别(普通话)实战</a></li>
-<li><a href="/blog/punctuation-restoration-python.html">标点恢复 Python 实战</a></li>
-<li><a href="/blog/speech-to-text-timestamps-python.html">语音识别带时间戳(字级)</a></li>
+<p>例如遇到 <code>Illegal instruction</code>，先核对 CPU 架构、指令集和二进制构建要求，不要反复重启同一程序；内存不足时先确认范围与并发，不要直接启动更多进程。下载失败不能通过换用未授权的镜像、账户或上传渠道“自动解决”。</p></section>
+<h2 id="sources">依据与下一步</h2>
+<p><strong>范围说明：</strong>本文核对了以下固定版本的官方文档和源码，检查了示例算术与双语页面，未新增模型推理，也未测量任何 CPU 的速度、内存或识别准确率。不同模型、量化文件和运行时需要各自验证。</p>
+<ul>
+<li><a href="https://github.com/modelscope/FunASR/blob/581150d8e1de2bc055cc390b6f2efc9ea78b48b7/runtime/llama.cpp/README.md">GGUF 运行时：模型、下载助手、独立程序与 HTTP 包装层</a></li>
+<li><a href="https://github.com/modelscope/FunASR/blob/581150d8e1de2bc055cc390b6f2efc9ea78b48b7/docs/model_selection.md">模型选型：任务路径与评估记录建议</a></li>
+<li><a href="https://github.com/modelscope/FunASR/blob/581150d8e1de2bc055cc390b6f2efc9ea78b48b7/funasr/auto/auto_model.py">AutoModel 源码：线程设置与 RTF 的实际计算位置</a></li>
 </ul>
+<p>还没有完成过转写，从<a href="/blog/speech-to-text-python-transcribe-audio.html">第一段录音转文字</a>开始；拿不准应选什么组件，接着看<a href="/blog/which-funasr-model.html">按任务选模型与运行路径</a>。当你能说清“质量够用、内存装得下、等待可接受、目标并发可承受”，才真正回答了“这台 CPU 行不行”。</p>
 </div></article>
 <footer><div class="container">© 2024-2026 Tongyi Lab, Alibaba Group · <a href="https://github.com/modelscope/FunASR/blob/main/LICENSE">MIT License</a></div></footer>
 </body></html>

@@ -1,13 +1,12 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Lightweight Speech Recognition: Chinese ASR in ~250MB on CPU (no GPU/Python) | FunASR Blog</title><meta name="description" content="Run Chinese speech-to-text lightweightly on CPU/edge: FunASR's llama.cpp runtime is one binary + a 254MB q8 model, no GPU or Python, 0.16s on CPU, 7.99% CER — smaller than whisper.cpp small and ~3x more accurate on Chinese."><meta name="keywords" content="lightweight speech recognition, speech recognition on cpu, low memory asr, edge speech recognition, raspberry pi speech recognition, small asr model, whisper.cpp alternative, gguf, sensevoice">
-<link rel="icon" href="/logo.png"><meta property="og:title" content="Lightweight Speech Recognition: Chinese ASR in ~250MB on CPU (no GPU/Python) | FunASR Blog"><meta property="og:description" content="Run Chinese speech-to-text lightweightly on CPU/edge: FunASR's llama.cpp runtime is one binary + a 254MB q8 model, no GPU or Python, 0.16s on CPU, 7.99% CER — smaller than whisper.cpp small and ~3x more accurate on Chinese.">
-<meta property="og:type" content="article"><meta property="og:url" content="https://www.funasr.com/en/blog/lightweight-speech-recognition-cpu.html"><meta property="og:image" content="https://www.funasr.com/logo.png">
-<link rel="canonical" href="https://www.funasr.com/en/blog/lightweight-speech-recognition-cpu.html"><link rel="alternate" hreflang="en" href="https://www.funasr.com/en/blog/lightweight-speech-recognition-cpu.html"><link rel="alternate" hreflang="zh" href="https://www.funasr.com/blog/lightweight-speech-recognition-cpu.html"><link rel="alternate" hreflang="x-default" href="https://www.funasr.com/en/blog/lightweight-speech-recognition-cpu.html">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<script type="application/ld+json">
-{"@context":"https://schema.org","@type":"BlogPosting","headline":"Lightweight Speech Recognition: Chinese ASR in ~250MB on CPU (no GPU/Python) | FunASR Blog","description":"Run Chinese speech-to-text lightweightly on CPU/edge: FunASR's llama.cpp runtime is one binary + a 254MB q8 model, no GPU or Python, 0.16s on CPU, 7.99% CER — smaller than whisper.cpp small and ~3x more accurate on Chinese.","datePublished":"2026-06-22","dateModified":"2026-06-22","author":{"@type":"Organization","name":"FunASR / Tongyi Lab"},"publisher":{"@type":"Organization","name":"FunASR","logo":{"@type":"ImageObject","url":"https://www.funasr.com/logo.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://www.funasr.com/en/blog/lightweight-speech-recognition-cpu.html"},"image":"https://www.funasr.com/logo.png"}
-</script>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/>
+<title>Can your CPU handle speech recognition? Four checks before buying a GPU | FunASR</title><meta content="Small weights do not guarantee low memory use, and RTF below one does not guarantee live captions. Evaluate CPU transcription by quality, memory, timing and concurrency." name="description"/>
+<link href="/logo.png" rel="icon"/><meta content="Can your CPU handle speech recognition? Four checks before buying a GPU" property="og:title"/><meta content="Small weights do not guarantee low memory use, and RTF below one does not guarantee live captions. Evaluate CPU transcription by quality, memory, timing and concurrency." property="og:description"/>
+<meta content="article" property="og:type"/><meta content="https://www.funasr.com/en/blog/lightweight-speech-recognition-cpu.html" property="og:url"/><meta content="https://www.funasr.com/logo.png" property="og:image"/>
+<link href="https://www.funasr.com/en/blog/lightweight-speech-recognition-cpu.html" rel="canonical"/><link href="https://www.funasr.com/en/blog/lightweight-speech-recognition-cpu.html" hreflang="en" rel="alternate"/><link href="https://www.funasr.com/blog/lightweight-speech-recognition-cpu.html" hreflang="zh" rel="alternate"/><link href="https://www.funasr.com/en/blog/lightweight-speech-recognition-cpu.html" hreflang="x-default" rel="alternate"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"Can your CPU handle speech recognition? Four checks before buying a GPU","description":"Small weights do not guarantee low memory use, and RTF below one does not guarantee live captions. Evaluate CPU transcription by quality, memory, timing and concurrency.","datePublished":"2026-06-22","dateModified":"2026-11-22","author":{"@type":"Organization","name":"FunASR / Tongyi Lab"},"publisher":{"@type":"Organization","name":"FunASR","logo":{"@type":"ImageObject","url":"https://www.funasr.com/logo.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://www.funasr.com/en/blog/lightweight-speech-recognition-cpu.html"},"image":"https://www.funasr.com/logo.png"}</script>
 <style>:root{--primary:#2563eb;--primary-dark:#1d4ed8;--bg:#fff;--surface:#f8fafc;--border:#e2e8f0;--text:#0f172a;--text-soft:#475569;--text-muted:#94a3b8;--radius:12px}
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Inter',-apple-system,sans-serif;color:var(--text);line-height:1.7}
@@ -42,75 +41,66 @@ p code,li code{background:var(--surface);padding:2px 6px;border-radius:5px;font-
 .post-card p{margin:0;color:var(--text-soft);font-size:0.9rem}
 .post-card .date{color:var(--text-muted);font-size:0.8rem}
 footer{background:#0f172a;color:#94a3b8;padding:28px 0;text-align:center;font-size:0.8rem}
-footer a{color:#94a3b8}</style></head><body>
-<nav class="nav"><div class="container"><a href="/en/" class="nav-logo">Fun<span>ASR</span></a><div class="nav-links"><a href="/en/#capabilities">Capabilities</a><a href="/en/#usage">How to Use</a><a href="/en/#benchmark">Benchmark</a><a href="/en/#demo">Demo</a><a href="https://modelscope.github.io/FunASR/" target="_blank">Docs</a><a href="/en/quickstart.html">Quickstart</a><a href="/en/models.html">Models</a><a href="/en/ecosystem.html">Ecosystem</a><a href="/en/blog/">Blog</a><a href="/en/vs-whisper.html">vs Whisper</a><a href="/en/donors.html">Donors</a></div><a href="https://www.funasr.com/blog/lightweight-speech-recognition-cpu.html" style="font-size:0.83rem;font-weight:500;color:var(--text-soft)">中文</a><a href="https://github.com/modelscope/FunASR" target="_blank" class="nav-btn">GitHub ★</a></div></nav>
-<article><div class="container">
-<h1>Lightweight speech-to-text: Chinese ASR in ~250 MB on CPU (no GPU, no Python)</h1>
-<p class="post-meta">2026-06-22 · FunASR Team</p>
-<p>Most speech recognition wants a GPU, a Python environment, and multi-GB models. If you just need to turn Chinese speech into text on a laptop, a small server, or an edge device, that's a lot of overhead.</p>
-<p><strong>FunASR's llama.cpp / GGUF runtime</strong> strips it down to the minimum: **one self-contained binary + one quantized model file**, pure CPU, zero Python. The q8 build of SenseVoice is just **254 MB** with virtually unchanged accuracy.</p>
-
-<h2>Tested: a 254 MB model, 0.16 s on CPU (real output)</h2>
-<p>Grab a prebuilt binary (Linux/macOS/Windows) and a q8 model, then run:</p>
-<pre># binaries are on Releases; then fetch a model
-bash download-funasr-model.sh sensevoice ./gguf
-llama-funasr-sensevoice -m ./gguf/sensevoice-small-q8.gguf --vad ./gguf/fsmn-vad.gguf -a audio.wav
-# → 欢迎大家来体验达摩院推出的语音识别模型。   (CPU, 0.16 s)</pre>
-<p>The model is 243–254 MB, the VAD just 1.7 MB, and detokenization is built into the binary (no Python).</p>
-
-<h2>Small and accurate: vs whisper.cpp</h2>
-<p>Both on CPU (Chinese, 184-file micro-CER, lower is better):</p>
-<table>
-<tr><th>Model</th><th>Size</th><th>Chinese CER ↓</th></tr>
-<tr><td><strong>FunASR SenseVoice q8</strong></td><td><strong>254 MB</strong></td><td><strong>7.99%</strong></td></tr>
-<tr><td><strong>FunASR Paraformer q8</strong></td><td><strong>237 MB</strong></td><td>9.78%</td></tr>
-<tr><td>whisper.cpp small</td><td>466 MB</td><td>22.12%</td></tr>
-<tr><td>whisper.cpp large-v3-turbo</td><td>1.6 GB</td><td>23.15%</td></tr>
-</table>
-<p>FunASR's q8 model is <strong>smaller than whisper.cpp small</strong> yet ~3× more accurate on Chinese.</p>
-
-<h2>Even smaller: the quant matrix</h2>
-<table>
-<tr><th>Model</th><th>Type</th><th>Size</th><th>CER</th></tr>
-<tr><td>SenseVoice encoder</td><td>q8</td><td>254 MB</td><td>7.99%</td></tr>
-<tr><td>Paraformer encoder</td><td>q8</td><td>237 MB</td><td>9.78%</td></tr>
-<tr><td>Fun-ASR-Nano LLM (+ encoder 470 MB)</td><td>q4_K_M</td><td>484 MB</td><td>8.35%</td></tr>
-</table>
-<p>Prebuilt binaries for Linux x64 / <strong>arm64</strong>, macOS arm64, Windows x64 — the arm64 build suits Raspberry Pi and edge boxes.</p>
-
-<h2>Where to get it</h2>
+footer a{color:#94a3b8}</style><style>article a{text-decoration:underline;text-underline-offset:0.15em}</style></head><body>
+<nav class="nav"><div class="container"><a class="nav-logo" href="/en/">Fun<span>ASR</span></a><div class="nav-links"><a href="/en/#capabilities">Capabilities</a><a href="/en/#usage">How to Use</a><a href="/en/#benchmark">Benchmark</a><a href="/en/#demo">Demo</a><a href="https://modelscope.github.io/FunASR/" target="_blank">Docs</a><a href="/en/quickstart.html">Quickstart</a><a href="/en/models.html">Models</a><a href="/en/ecosystem.html">Ecosystem</a><a href="/en/blog/">Blog</a><a href="/en/vs-whisper.html">vs Whisper</a><a href="/en/donors.html">Donors</a></div><a href="https://www.funasr.com/blog/lightweight-speech-recognition-cpu.html" style="font-size:0.83rem;font-weight:500;color:var(--text-soft)">中文</a><a class="nav-btn" href="https://github.com/modelscope/FunASR" target="_blank">GitHub ★</a></div></nav>
+<article><div class="container"><h1>Can your CPU handle speech recognition? Four checks before buying a GPU</h1>
+<p class="meta">Published <time datetime="2026-06-22">2026-06-22</time> · Revised <time datetime="2026-11-22">2026-11-22</time> · Deployment concepts</p>
+<p data-editorial="opening">You have an ordinary computer and a ten-minute interview to transcribe. A speech model is only a few hundred megabytes, so surely it will run comfortably? Fitting the download on disk answers only the easiest question. Running it requires memory and computation. Whether it is fast enough also depends on the recording, the software path and how long you can wait.</p>
+<p data-editorial="outcome">This guide helps you define acceptance criteria for one transcription task before buying hardware or copying installation commands. You will learn which measurements matter and what you can compare. It is a conceptual selection guide: no software installation is required. All timing examples are invented arithmetic, not product performance measurements.</p>
+<section><h2 id="choose-route">1. Start with the output, not the download size</h2>
+<p><strong>Automatic speech recognition (ASR)</strong> turns audio into text. <strong>Model weights</strong> contain numerical parameters learned during training; they do not execute themselves. A <strong>runtime</strong> loads those parameters and performs the computation. A <strong>service</strong> adds request handling, queues and responses around that runtime. These are different components.</p>
+<p>In this ecosystem, <strong>FunASR is a toolkit</strong> that coordinates model calls and processing stages. <strong>Fun-ASR and SenseVoice are model families</strong>; capabilities depend on the particular checkpoint, meaning a specific version of the weights. <strong>FunClip is a transcription and clipping application</strong>. Installing the toolkit does not necessarily download the weights. A model that returns words does not automatically provide subtitle timing, speakers or an HTTP endpoint.</p>
+<p>For a first attempt, complete the <a href="/en/blog/speech-to-text-python-transcribe-audio.html">Python transcription tutorial</a> before optimizing several layers at once. If the target machine is unsuitable for a Python inference environment, consider a separate C++ / GGUF path. GGUF is a model file format; renaming an arbitrary model file does not convert it. The official <a href="https://github.com/modelscope/FunASR/blob/581150d8e1de2bc055cc390b6f2efc9ea78b48b7/runtime/llama.cpp/README.md">llama.cpp / GGUF runtime documentation</a> identifies the matching models and executables.</p>
+<p>“No Python at inference time” describes the relevant standalone C++ program, not every download, conversion or serving tool. The documented download helper uses the Hugging Face CLI, and the HTTP wrapper uses Python. Also match the operating system, CPU architecture and instruction-set requirements of the particular build. An x64 package is not interchangeable with an ARM64 package. Success on one CPU does not validate a different one.</p>
+<p><strong>Define your deliverable:</strong> final text from a recording, or captions while somebody is still speaking? Do you also need timestamps, punctuation or speaker labels? This article mainly considers local recordings to final text. The standalone GGUF documentation explicitly says that its VAD can segment speech but that the binaries do not implement CAM++ speaker embeddings or clustering. That path is not interchangeable with a complete meeting-analysis pipeline.</p></section>
+<section><h2 id="memory">2. The first check: disk space is not working memory</h2>
+<p>The megabytes shown on a download page usually describe a file. A running program also holds audio, intermediate calculations and other state. Separate VAD, punctuation or speaker models can add memory use. Record <strong>weight-file disk usage</strong> and <strong>peak working memory</strong> separately; neither substitutes for the other.</p>
+<p><strong>Quantization</strong> uses more compact numerical representations for some weights. It can reduce file size and can benefit computation on particular hardware and implementations, but the outcome depends on the model, quantization scheme and runtime. It is not synonymous with lossless compression. A smaller file does not prove unchanged recognition quality or faster execution on every CPU. Compare variants on the same recordings and check whether the text still meets your requirements.</p>
+<p>For a single process, peak RSS is the operating system's peak resident physical-memory measurement for that process. A service may launch workers or child processes: measuring only the parent can miss their usage, while simply adding every process's RSS can count shared pages repeatedly. Fix the measurement boundary first, such as one inference process or total memory for one container, and document it.</p>
+<p>When the machine starts swapping memory contents to disk, it may slow down without immediately reporting an error. Leave headroom for the operating system and other applications. Check the longest expected recording, actual batch size and worker count instead of treating one successful short clip as a capacity test.</p></section>
+<section><h2 id="read-timing">3. The second check: RTF is not the user's waiting time</h2>
+<p><strong>Real-time factor (RTF) = processing time / audio duration.</strong> Both measurements use seconds, so the ratio has no unit. A ten-minute recording lasts 600 seconds. Processing it in 120 seconds gives an RTF of 0.2. A lower value means less time per second of audio within that measurement boundary. RTF below one only means processing was faster than playback.</p>
+<p>The following numbers are <strong>invented examples</strong>, not a comparison of three models or a prediction for your computer. Here, processing time includes audio preprocessing, recognition and text postprocessing, but excludes model loading, network transfer and queueing.</p>
+<table data-example="timing"><thead><tr><th>Situation</th><th>Audio duration</th><th>Processing time</th><th>RTF</th></tr></thead><tbody>
+<tr data-audio-seconds="600" data-processing-seconds="120" data-rtf="0.2"><td>Interview, model already loaded</td><td>600 s</td><td>120 s</td><td>0.2</td></tr>
+<tr data-audio-seconds="600" data-processing-seconds="360" data-rtf="0.6"><td>Another run under different conditions</td><td>600 s</td><td>360 s</td><td>0.6</td></tr>
+<tr data-audio-seconds="10" data-processing-seconds="2" data-rtf="0.2"><td>Short recording</td><td>10 s</td><td>2 s</td><td>0.2</td></tr>
+</tbody></table>
+<p>Suppose the first situation also needs 45 seconds to load the model. Time from startup to text is then at least 45 + 120 = 165 seconds, before other overhead. The short recording also has RTF 0.2, but a user who must wait through the same 45-second load does not receive text in two seconds. A persistent process can reuse a loaded model, at the cost of keeping its memory allocated.</p>
+<p>This is why <strong>cold starts</strong> and <strong>warm requests</strong> need separate records. Downloading the weights for the first time is one wait. Starting the program and loading already-downloaded weights is another. Subsequent requests with the model resident are a third. Caches, storage and runtime choices affect these times. Do not combine them into an unexplained “latency” figure or select only the fastest run.</p>
+<p>A tool's logged RTF can also use different timing boundaries. The pinned <a href="https://github.com/modelscope/FunASR/blob/581150d8e1de2bc055cc390b6f2efc9ea78b48b7/funasr/auto/auto_model.py#L985-L1004">AutoModel implementation</a> computes it from accumulated timing and the corresponding audio duration; that is not a browser or client stopwatch. For a service, also measure <strong>request latency</strong> across the upload, queueing and response stages that matter to your application.</p>
+<p><strong>Offline recognition is not a promise of disconnected operation.</strong> In speech systems, “offline” often means processing a complete recording rather than streaming. Disconnected use additionally requires compatible software dependencies, all model files and configuration to be present, and a loading path that does not look up or download missing components online. A populated cache alone is not a guarantee for every call.</p></section>
+<section><h2 id="workload">4. The third check: one fast recording is not a multi-user service</h2>
+<p>File transcription can wait for a final answer. Live captions must deliver useful partial text before recording ends. That requires a suitable streaming model and calling protocol, with audio chunking, time to first text, end-of-utterance detection and revisions considered together. Repeatedly calling a file recognizer every few seconds does not automatically provide stable continuous captions. RTF below one does not establish these properties.</p>
+<p><strong>Threads</strong> configure parallel work inside a process. <strong>Concurrency</strong> describes how many requests run at once. They are different controls. More threads need not be faster, and multiple processes may compete for the same CPU and memory bandwidth. AutoModel's <code>ncpu</code> affects thread settings within the process; it does not reserve that many exclusive CPUs for each request. Changing it in every request can also confound your measurements.</p>
+<p>For a service, start with one request, then measure the concurrency you actually need. Include queueing latency and failures. RTF 0.2 on one recording does not imply that five simultaneous requests will remain fast enough. If you report p95 latency, explain it as the measured latency at or below which roughly 95% of the requests fall, and include the sample count, concurrency and timing boundary. A handful of requests cannot establish reliable tail latency.</p></section>
+<section><h2 id="evaluate">5. The fourth check: usable text matters as much as speed</h2>
+<p>Write “good enough” as a testable requirement. For example: <strong>“For an authorized ten-minute Mandarin interview, produce editable text within five minutes of startup, let me review important names and numbers, and keep my office computer responsive.”</strong> This is an example requirement, not a product guarantee. Your deadlines, quality standard and memory budget should come from the task.</p>
+<ol>
+<li><strong>Fix inputs and versions.</strong> Use recordings you are authorized to process or public samples with clear permission. Retain input hashes, durations, language, noise and overlapping-speech notes. Record the exact model identifier and revision, runtime version, operating system, CPU model and architecture. This guide does not depend on an unexplained sample file.</li>
+<li><strong>Complete one real path first.</strong> Inspect an actual result and confirm that it contains the text or fields you need. Listen back to important segments, especially names, numbers and negations. Keep empty results, omissions and failures instead of comparing only successful recordings.</li>
+<li><strong>Separate cold, warm and concurrent runs.</strong> Time downloads, loading and already-loaded requests separately. Fix threads and audio-processing options, repeat measurements and retain every attempt and other machine-load notes. Then increase concurrency or recording length, changing one condition at a time.</li>
+<li><strong>Let the task decide the next change.</strong> If quality is inadequate, check the audio, language and model path first. A GPU does not automatically fix the wrong model choice. If quality is adequate but time or memory is not, evaluate threads, batching, segmentation, quantization or hardware, rechecking quality each time. Waiting that is acceptable for an archive may be unsuitable for a conversation.</li>
+</ol>
+<p>Your minimum deliverable is a record of <em>the recording, software and model versions, machine, operating conditions, time, memory and transcript review</em>. It is more useful for a deployment decision than an unqualified claim that “CPU is fast.” Check the licenses of the chosen model and dependencies individually; file size and the phrase “open source” do not settle permitted use.</p></section>
+<section><h2 id="agent-contract">6. For agents: retain comparable records and respect authorization</h2>
+<p>The following is a suggested <strong>application-owned evaluation record</strong>, not a response schema promised by the FunASR SDK. Obtain the user's task definition, data permission and download authorization before filling in the environment and measurements. Do not automatically purchase compute or upload recordings to a remote service.</p>
 <ul>
-<li>Prebuilt binaries: <a href="https://github.com/modelscope/FunASR/releases" target="_blank">GitHub Releases</a> (tag <code>runtime-llamacpp-v*</code>)</li>
-<li>One-page quickstart: <a href="/en/llama-cpp.html">funasr.com/llama-cpp</a></li>
-<li>GGUF models: <a href="https://huggingface.co/FunAudioLLM" target="_blank">Hugging Face</a> / <a href="https://modelscope.cn/organization/FunAudioLLM" target="_blank">ModelScope</a></li>
+<li><strong>Provenance:</strong> <code>input_path</code> is the user-selected absolute local file path string, not literal placeholder text; retain the input SHA-256 separately. <code>model_id</code>, <code>model_revision</code> and <code>runtime_version</code> are exact identifier strings. Include OS, CPU model, architecture and Python/dependency versions; mark Python not applicable for a non-Python path. “Latest” is not a version.</li>
+<li><strong>Conditions:</strong> <code>threads</code> and <code>concurrency</code> are positive integers for the actual thread configuration and simultaneous request count. <code>warm_state</code> is <code>cold</code> or <code>warm</code>; also explain whether the model is loaded and the cache state. Software installation and model download are separate operations. New downloads, uploads, paid resources and overwriting originals require the corresponding authorization.</li>
+<li><strong>Timing:</strong> <code>audio_duration_s</code> is a finite positive number. <code>processing_s</code> and <code>request_latency_s</code> are finite nonnegative numbers, all in seconds. Record start and stop boundaries. Calculate <code>processing_s / audio_duration_s</code> only for complete successful processing with consistent definitions. An unknown or zero duration must not produce an RTF.</li>
+<li><strong>Memory and results:</strong> <code>peak_rss_bytes</code> is a nonnegative integer in bytes with an explicit process boundary. Use <code>null</code> when unmeasured, not a fabricated zero. Keep raw transcription, human-review status and <code>status</code> of <code>ok</code> or <code>error</code>. Failed items retain their <code>error</code> reason and completed scope; they are not zero-time successes.</li>
+<li><strong>Failure and exit:</strong> stop for missing dependencies, model/runtime mismatch, unsupported instructions, insufficient memory or missing data permission. Return an error status; a batch command should exit nonzero and retain its failed-item list. Do not automatically retry these deterministic errors. Retry only identified transient failures within the user's preauthorized limit, retaining each attempt. Changed parameters define a new condition, not a replacement for the old record.</li>
 </ul>
-<div class="cta"><p><strong>FunASR is fully open-source &amp; commercial-friendly.</strong> A GitHub Star really helps 👇</p><p><a class="btn" href="https://github.com/modelscope/FunASR" target="_blank">⭐ Star FunASR</a></p><p style="margin-top:10px;font-size:0.85rem">Also star: <a href="https://github.com/QwenAudio/SenseVoice" target="_blank">SenseVoice</a> · <a href="https://github.com/QwenAudio/Fun-ASR" target="_blank">Fun-ASR</a> · <a href="https://github.com/modelscope/FunClip" target="_blank">FunClip</a></p></div>
-<!--related-posts-->
-<h2>Related posts</h2>
-<ul class="post-list">
-<li><a href="/en/blog/funasr-vs-whisper-benchmark.html">FunASR vs Whisper Benchmark</a></li>
-<li><a href="/en/blog/sensevoice-deployment-guide.html">SenseVoice Deployment Guide</a></li>
-<li><a href="/en/blog/fun-asr-nano-guide.html">Fun-ASR-Nano Guide</a></li>
-<li><a href="/en/blog/funasr-speaker-diarization.html">Speaker Diarization: Who Spoke When</a></li>
-<li><a href="/en/blog/sensevoice-emotion-language-detection.html">Emotion & Language Detection</a></li>
-<li><a href="/en/blog/funasr-realtime-streaming-asr.html">Real-Time Streaming Speech-to-Text</a></li>
-<li><a href="/en/blog/funasr-transcribe-long-audio.html">Transcribe Long Audio (Hours in One Call)</a></li>
-<li><a href="/en/blog/funasr-cli-transcribe-command-line.html">Transcribe from the Command Line</a></li>
-<li><a href="/en/blog/self-hosted-openai-whisper-api-alternative.html">Self-Hosted OpenAI Whisper API Alternative</a></li>
-<li><a href="/en/blog/generate-subtitles-srt-vtt-from-audio-video.html">Auto-Generate Subtitles (SRT / VTT)</a></li>
-<li><a href="/en/blog/speech-to-text-python-transcribe-audio.html">Speech to Text in Python</a></li>
-<li><a href="/en/blog/funasr-llama-cpp-whisper-cpp-alternative.html">FunASR on llama.cpp (whisper.cpp Alternative)</a></li>
-<li><a href="/en/blog/funasr-vs-faster-whisper-chinese.html">FunASR vs faster-whisper (Chinese/Cantonese)</a></li>
-<li><a href="/en/blog/self-hosted-deepgram-assemblyai-alternative.html">Self-Hosted Deepgram/AssemblyAI Alternative</a></li>
-<li><a href="/en/blog/which-funasr-model.html">Which FunASR Model?</a></li>
-<li><a href="/en/blog/cantonese-speech-recognition.html">Cantonese Speech Recognition (SenseVoice)</a></li>
-<li><a href="/en/blog/japanese-speech-recognition.html">Japanese Speech Recognition (SenseVoice)</a></li>
-<li><a href="/en/blog/voice-activity-detection-python.html">Voice Activity Detection in Python</a></li>
-<li><a href="/en/blog/self-hosted-google-aws-azure-speech-to-text.html">Self-Hosted Google/AWS/Azure STT Alternative</a></li>
-<li><a href="/en/blog/chinese-speech-recognition.html">Chinese Speech Recognition in Python</a></li>
-<li><a href="/en/blog/punctuation-restoration-python.html">Punctuation Restoration in Python</a></li>
-<li><a href="/en/blog/speech-to-text-timestamps-python.html">Speech-to-Text with Timestamps in Python</a></li>
+<p>For example, an <code>Illegal instruction</code> error calls for checking CPU architecture, instruction sets and binary build requirements, not repeatedly restarting the same executable. An out-of-memory failure calls for checking scope and concurrency, not launching more workers. A failed download does not authorize a different mirror, account or upload channel.</p></section>
+<h2 id="sources">Sources and your next step</h2>
+<p><strong>Scope:</strong> the fixed-version official documents and source below were reviewed, along with example arithmetic and the bilingual pages. No new model inference was performed, and no CPU speed, memory or recognition-quality measurement is reported here. Each model, quantized file and runtime needs its own validation.</p>
+<ul>
+<li><a href="https://github.com/modelscope/FunASR/blob/581150d8e1de2bc055cc390b6f2efc9ea78b48b7/runtime/llama.cpp/README.md">GGUF runtime: models, download helper, standalone programs and HTTP wrapper</a></li>
+<li><a href="https://github.com/modelscope/FunASR/blob/581150d8e1de2bc055cc390b6f2efc9ea78b48b7/docs/model_selection.md">Model selection: task paths and evaluation records</a></li>
+<li><a href="https://github.com/modelscope/FunASR/blob/581150d8e1de2bc055cc390b6f2efc9ea78b48b7/funasr/auto/auto_model.py">AutoModel source: thread settings and RTF calculation</a></li>
 </ul>
+<p>New to transcription? Start with <a href="/en/blog/speech-to-text-python-transcribe-audio.html">your first audio-to-text task</a>. Unsure which components you need? Read <a href="/en/blog/which-funasr-model.html">choosing a model and runtime for the task</a>. “Quality is sufficient, memory fits, waiting is acceptable and target concurrency holds up” is a meaningful answer to whether your CPU can do the job.</p>
 </div></article>
 <footer><div class="container">© 2024-2026 Tongyi Lab, Alibaba Group · <a href="https://github.com/modelscope/FunASR/blob/main/LICENSE">MIT License</a></div></footer>
 </body></html>
