@@ -254,6 +254,10 @@ class ClusterBackend(torch.nn.Module):
                 X: TODO.
                 **params: Additional keyword arguments.
             """
+        # Normalize the input once so UMAP and the later centroid operations
+        # receive a NumPy array. Passing a torch.Tensor here makes UMAP 0.6.0
+        # raise TypeError: Cannot interpret 'torch.float32' as a data type.
+        X = X.detach().cpu().numpy() if isinstance(X, torch.Tensor) else np.asarray(X)
         k = params["oracle_num"] if "oracle_num" in params else None
         assert len(X.shape) == 2, "modelscope error: the shape of input should be [N, C]"
         if X.shape[0] < 20:
