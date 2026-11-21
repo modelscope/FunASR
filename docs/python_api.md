@@ -161,7 +161,7 @@ For `sentence_timestamp=True` without speakers, the current wrapper can return V
 
 ### Result Fields
 
-`generate()` returns a Python `list` of model-result dictionaries, not an OpenAI response object. Do not assume every model produces every field, or index `results[0]` without checking: some VAD empty-text paths can skip a result. No-speech VAD results commonly contain `{"key": ..., "text": "", "timestamp": []}`.
+`generate()` returns a Python `list` of model-result dictionaries, not an OpenAI response object. Do not assume every model produces every field. With a VAD model, each input keeps one result: when no speech is detected, or the detected speech decodes to no text, the result is `{"key": ..., "text": "", "timestamp": []}`.
 
 | Field | Meaning |
 |---|---|
