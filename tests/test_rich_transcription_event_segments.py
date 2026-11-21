@@ -52,3 +52,29 @@ def test_distinct_event_only_segments_remain_visible(postprocess):
     assert postprocess.rich_transcription_postprocess(text) == (
         postprocess.event_dict["<|Applause|>"] + postprocess.event_dict["<|Laughter|>"]
     )
+
+
+@pytest.mark.parametrize("event", ["<|Cough|>", "<|Sneeze|>", "<|Applause|>"])
+def test_repeated_event_with_text_across_three_segments(postprocess, event):
+    text = (
+        f"<|en|>{event}hello"
+        f"<|en|>{event}world"
+        f"<|en|>{event}again"
+    )
+    emoji = postprocess.event_dict[event]
+
+    assert postprocess.rich_transcription_postprocess(text) == f"{emoji}hello world again"
+
+
+def test_different_event_between_same_events_keeps_all_emojis(postprocess):
+    text = (
+        "<|en|><|Applause|>hello"
+        "<|en|><|Laughter|>world"
+        "<|en|><|Applause|>again"
+    )
+    applause = postprocess.event_dict["<|Applause|>"]
+    laughter = postprocess.event_dict["<|Laughter|>"]
+
+    assert postprocess.rich_transcription_postprocess(text) == (
+        f"{applause}hello{laughter}world{applause}again"
+    )
