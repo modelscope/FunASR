@@ -152,7 +152,9 @@ class SenseVoiceSmall:
 
     def __call__(self, wav_content: Union[str, np.ndarray, List[str]], **kwargs):
         language_input = kwargs.get("language", "auto")
-        textnorm_input = kwargs.get("textnorm", "woitn")
+        textnorm_input = kwargs.get("textnorm")
+        if textnorm_input is None:
+            textnorm_input = "withitn" if kwargs.get("use_itn", False) else "woitn"
         language_list, textnorm_list = self.read_tags(language_input, textnorm_input)
         
         waveform_list = self.load_data(wav_content, self.frontend.opts.frame_opts.samp_freq)
