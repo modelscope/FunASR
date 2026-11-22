@@ -1,6 +1,13 @@
 import pytest
+import torch
 
-from funasr.utils.timestamp_tools import timestamp_sentence, timestamp_sentence_en
+from funasr.utils.postprocess_utils import sentence_postprocess
+from funasr.utils.timestamp_tools import (
+    cif_wo_hidden,
+    timestamp_sentence,
+    timestamp_sentence_en,
+    ts_prediction_lfr6_standard,
+)
 
 
 def test_timestamp_sentence_en_handles_whitespace_only_segment():
@@ -143,3 +150,22 @@ def test_timestamp_sentence_without_punctuation_returns_string_text(punc_id_list
     assert en == [
         {"text": "hello world", "start": 0, "end": 200, "timestamp": timestamps, "raw_text": "hello world"}
     ]
+
+
+@pytest.mark.parametrize(
+    "alphas, tokens, expected",
+    [
+        # Captured from a ~120 ms SEACO Paraformer segment (#3934).
+        ([0.0335148, 0.0, 0.0, 0.0, 0.2435439, 1.7229414], ["嗯"], [[70, 120]]),
+        ([0.0, 0.0, 1.0, 0.0, 0.0, 2.0], ["你", "好"], [[10, 70], [70, 120]]),
+        ([0.0, 0.0, 0.0, 0.0, 0.0, 3.0], ["你", "好"], [[70, 95], [95, 120]]),
+    ],
+)
+def test_ts_prediction_times_every_token_when_last_frame_owes_fires(alphas, tokens, expected):
+    alphas = torch.tensor(alphas)
+    peaks = cif_wo_hidden(alphas.unsqueeze(0), threshold=1.0 - 1e-4)[0]
+
+    _, timestamp = ts_prediction_lfr6_standard(alphas, peaks, list(tokens))
+
+    assert timestamp == expected
+    assert sentence_postprocess(list(tokens), timestamp)[1] == expected

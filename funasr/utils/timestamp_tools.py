@@ -70,6 +70,11 @@ def ts_prediction_lfr6_standard(
             torch.where(peaks >= 1.0 - 1e-4)[0].cpu().numpy() + force_time_shift
         )  # total offset
     num_frames = peaks.shape[0]
+    # CIF fires at most once per frame, so a heavy last frame can still owe fires;
+    # spread them over the rest of the segment so every token keeps a timestamp.
+    missing = len(char_list) + 1 - len(fire_place)
+    if missing > 0:
+        fire_place = np.append(fire_place, np.linspace(fire_place[-1], num_frames, missing + 1)[1:])
     timestamp_list = []
     new_char_list = []
     # for bicif model trained with large data, cif2 actually fires when a character starts
