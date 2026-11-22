@@ -1,25 +1,24 @@
 <!DOCTYPE html>
+
 <html lang="zh">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>语音识别带时间戳(字级 timestamps)Python 实战:每个字精确到毫秒 | FunASR 博客</title>
-<meta name="description" content="怎么让语音识别输出每个字/词的时间戳?FunASR Paraformer 原生输出字级时间戳,每个字带 [起始毫秒,结束毫秒],一次调用即有。可做逐字高亮、点击跳转、字幕对齐。附真实实测输出 + 配对代码。">
-<meta name="keywords" content="语音识别时间戳, 字级时间戳, 词级时间戳, speech to text timestamps python, word level timestamps, 语音转文字 时间戳, forced alignment, Paraformer, FunASR, 字幕对齐">
-<link rel="icon" href="/logo.png">
-<meta property="og:title" content="语音识别带时间戳(字级 timestamps)Python 实战:每个字精确到毫秒 | FunASR 博客">
-<meta property="og:description" content="怎么让语音识别输出每个字/词的时间戳?FunASR Paraformer 原生输出字级时间戳,每个字带 [起始毫秒,结束毫秒],一次调用即有。可做逐字高亮、点击跳转、字幕对齐。附真实实测输出 + 配对代码。">
-<meta property="og:type" content="article">
-<meta property="og:url" content="https://www.funasr.com/blog/speech-to-text-timestamps-python.html">
-<meta property="og:image" content="https://www.funasr.com/logo.png">
-<link rel="canonical" href="https://www.funasr.com/blog/speech-to-text-timestamps-python.html">
-<link rel="alternate" hreflang="en" href="https://www.funasr.com/en/blog/speech-to-text-timestamps-python.html">
-<link rel="alternate" hreflang="zh" href="https://www.funasr.com/blog/speech-to-text-timestamps-python.html">
-<link rel="alternate" hreflang="x-default" href="https://www.funasr.com/en/blog/speech-to-text-timestamps-python.html">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<script type="application/ld+json">
-{"@context":"https://schema.org","@type":"BlogPosting","headline":"语音识别带时间戳(字级 timestamps)Python 实战:每个字精确到毫秒 | FunASR 博客","description":"怎么让语音识别输出每个字/词的时间戳?FunASR Paraformer 原生输出字级时间戳,每个字带 [起始毫秒,结束毫秒],一次调用即有。可做逐字高亮、点击跳转、字幕对齐。附真实实测输出 + 配对代码。","datePublished":"2026-06-23","dateModified":"2026-06-23","author":{"@type":"Organization","name":"FunASR / Tongyi Lab"},"publisher":{"@type":"Organization","name":"FunASR","logo":{"@type":"ImageObject","url":"https://www.funasr.com/logo.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://www.funasr.com/blog/speech-to-text-timestamps-python.html"},"image":"https://www.funasr.com/logo.png"}
-</script>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<title>时间戳写着毫秒，为什么点击文字还是跳错位置？ | FunASR</title>
+<meta content="分清时间单位、边界估计和文字对应关系，再把片段时间放回原录音；为点击回听、字幕和剪辑保留可靠的定位依据。" name="description"/>
+
+<link href="/logo.png" rel="icon"/>
+<meta content="时间戳写着毫秒，为什么点击文字还是跳错位置？" property="og:title"/>
+<meta content="分清时间单位、边界估计和文字对应关系，再把片段时间放回原录音；为点击回听、字幕和剪辑保留可靠的定位依据。" property="og:description"/>
+<meta content="article" property="og:type"/>
+<meta content="https://www.funasr.com/blog/speech-to-text-timestamps-python.html" property="og:url"/>
+<meta content="https://www.funasr.com/logo.png" property="og:image"/>
+<link href="https://www.funasr.com/blog/speech-to-text-timestamps-python.html" rel="canonical"/>
+<link href="https://www.funasr.com/en/blog/speech-to-text-timestamps-python.html" hreflang="en" rel="alternate"/>
+<link href="https://www.funasr.com/blog/speech-to-text-timestamps-python.html" hreflang="zh" rel="alternate"/>
+<link href="https://www.funasr.com/en/blog/speech-to-text-timestamps-python.html" hreflang="x-default" rel="alternate"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"时间戳写着毫秒，为什么点击文字还是跳错位置？","description":"分清时间单位、边界估计和文字对应关系，再把片段时间放回原录音；为点击回听、字幕和剪辑保留可靠的定位依据。","datePublished":"2026-06-23","dateModified":"2026-11-23","author":{"@type":"Organization","name":"FunASR / Tongyi Lab"},"publisher":{"@type":"Organization","name":"FunASR","logo":{"@type":"ImageObject","url":"https://www.funasr.com/logo.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://www.funasr.com/blog/speech-to-text-timestamps-python.html"},"image":"https://www.funasr.com/logo.png"}</script>
 <style>:root{--primary:#2563eb;--primary-dark:#1d4ed8;--bg:#fff;--surface:#f8fafc;--border:#e2e8f0;--text:#0f172a;--text-soft:#475569;--text-muted:#94a3b8;--radius:12px}
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Inter',-apple-system,sans-serif;color:var(--text);line-height:1.7}
@@ -55,89 +54,65 @@ p code,li code{background:var(--surface);padding:2px 6px;border-radius:5px;font-
 .post-card .date{color:var(--text-muted);font-size:0.8rem}
 footer{background:#0f172a;color:#94a3b8;padding:28px 0;text-align:center;font-size:0.8rem}
 footer a{color:#94a3b8}</style>
-</head>
+<style>article a{text-decoration:underline;text-underline-offset:0.15em}</style></head>
 <body>
-<nav class="nav"><div class="container"><a href="/" class="nav-logo">Fun<span>ASR</span></a><div class="nav-links"><a href="/#capabilities">核心能力</a><a href="/#usage">如何使用</a><a href="/#benchmark">性能</a><a href="/#demo">演示</a><a href="https://modelscope.github.io/FunASR/zh/" target="_blank">文档</a><a href="/quickstart.html">快速上手</a><a href="/models.html">模型</a><a href="/ecosystem.html">生态</a><a href="/blog/">技术博客</a><a href="/vs-whisper.html">对比 Whisper</a><a href="/donors.html">功德榜</a></div><a href="https://www.funasr.com/en/blog/speech-to-text-timestamps-python.html" style="font-size:0.83rem;font-weight:500;color:var(--text-soft)">EN</a><a href="https://github.com/modelscope/FunASR" target="_blank" class="nav-btn">GitHub ★</a></div></nav>
-<article><div class="container">
-<h1>语音识别带时间戳(字级 timestamps)Python 实战:每个字精确到毫秒</h1>
-<p class="post-meta">2026-06-23 · FunASR 团队</p>
-
-<p>很多场景不只要"识别出说了什么",还要知道<strong>每个字是在什么时间说的</strong>——做卡拉OK 逐字高亮、点击文字跳转音频、字幕对齐、视频剪辑定位。Whisper 的 word timestamps 是后加的(需要 DTW、精度一般)。<strong>FunASR 的 Paraformer 原生输出字级时间戳</strong>:每个字带 <code>[起始毫秒, 结束毫秒]</code>,一次调用就有。下面是真实实测输出。</p>
-
-<h2>带时间戳识别(实测输出)</h2>
-<pre>pip install funasr
-
-from funasr import AutoModel
-
-model = AutoModel(model="paraformer-zh", vad_model="fsmn-vad", disable_update=True)
-res = model.generate(input="audio.wav")
-
-text = res[0]["text"]           # 欢 迎 大 家 来 体 验 ...
-timestamp = res[0]["timestamp"] # [[880, 1120], [1120, 1360], ...]  每个字的起止毫秒</pre>
-<p><code>timestamp</code> 是一个 <code>[start_ms, end_ms]</code> 列表,和文本里的字一一对应。</p>
-
-<h2>把字和时间戳配对(实测)</h2>
-<pre>chars = text.split()          # Paraformer 中文输出是空格分隔的字
-for ch, (start, end) in zip(chars, timestamp):
-    print(f"{ch}  {start}-{end}ms")</pre>
-<p>真实输出:</p>
-<table>
-<tr><th>字</th><th>起止(毫秒)</th></tr>
-<tr><td>欢</td><td>880 – 1120</td></tr>
-<tr><td>迎</td><td>1120 – 1360</td></tr>
-<tr><td>大</td><td>1380 – 1540</td></tr>
-<tr><td>家</td><td>1540 – 1780</td></tr>
-<tr><td>来</td><td>1780 – 2020</td></tr>
-<tr><td>体</td><td>2020 – 2180</td></tr>
-<tr><td>验</td><td>2180 – 2420</td></tr>
-</table>
-<p>整句"欢迎大家来体验达摩院推出的语音识别模型"的 19 个字,每个都有精确到毫秒的起止时间。</p>
-
-<h2>能用来做什么</h2>
+<nav class="nav"><div class="container"><a class="nav-logo" href="/">Fun<span>ASR</span></a><div class="nav-links"><a href="/#capabilities">核心能力</a><a href="/#usage">如何使用</a><a href="/#benchmark">性能</a><a href="/#demo">演示</a><a href="https://modelscope.github.io/FunASR/zh/" target="_blank">文档</a><a href="/quickstart.html">快速上手</a><a href="/models.html">模型</a><a href="/ecosystem.html">生态</a><a href="/blog/">技术博客</a><a href="/vs-whisper.html">对比 Whisper</a><a href="/donors.html">功德榜</a></div><a href="https://www.funasr.com/en/blog/speech-to-text-timestamps-python.html" style="font-size:0.83rem;font-weight:500;color:var(--text-soft)">EN</a><a class="nav-btn" href="https://github.com/modelscope/FunASR" target="_blank">GitHub ★</a></div></nav>
+<article><div class="container"><h1>时间戳写着毫秒，为什么点击文字还是跳错位置？</h1>
+<p class="meta"><time datetime="2026-06-23">2026-06-23</time> 发布 · <time datetime="2026-11-23">2026-11-23</time> 修订 · 语音技术科普</p>
+<p>你把一次采访转成了文字，给每个词加上点击回听。文字看起来没错，点下去却早了半句，或者跳到了录音开头。最容易怀疑的是“模型时间戳不准”，但问题可能更基础：播放器要秒，你给了毫秒；片段从零计时，你拿它去定位整段录音；又或者文字整理过，时间戳却还对应整理前的词。</p>
+<p>本文围绕一个任务：<strong>判断一份带时间戳的转写，是否足以用于回听定位。</strong>读完后，你能说明时间坐标属于哪段音频、对应哪些文字、哪里仍需人工检查。它是概念与结果解读指南，不需要安装软件；下文数字均为虚构示例，不是模型实测输出。</p>
+<p>阅读导航：<a href="#choose-route">选对输出路径</a> · <a href="#units">单位与精度</a> · <a href="#text-alignment">文字怎样对应</a> · <a href="#read-timeline">片段怎样归位</a> · <a href="#evaluate">回听验收</a> · <a href="#agent-contract">Agent 记录约定</a></p>
+<section><h2 id="choose-route">1. 先确认：这条识别路径会给你什么？</h2>
+<p><strong>FunASR 是工具包</strong>，组织模型调用和前后处理；<strong>Fun-ASR、SenseVoice 是模型系列</strong>，具体能力还取决于权重与调用方式；<strong>FunClip 是转写和剪辑应用</strong>。模型权重、Python 安装包、独立运行时和对外服务不是同一层。一个模型能输出文字，不代表每个运行时都会返回字级时间戳，更不代表这些输出都使用同一字段和单位。</p>
+<p>如果需要细粒度定位，应先选择文档明确支持对应时间戳的模型与运行路径，再检查实际输出。在本文核对的 <a href="https://github.com/modelscope/FunASR/blob/68aa96ddb96b6ec9b2f50923b9c55d223ef483af/funasr/models/paraformer/model.py">Paraformer Python 实现</a>中，时间戳计算是有条件的分支：它读取 <code>pred_timestamp</code>，未提供时再读取 <code>output_timestamp</code>。这说明“用了 Paraformer 名字就一定返回时间戳”不是可靠的接口约定；也不能把这两个参数照搬到任意模型。</p>
+<p>只要一份可阅读文字，可以先走<a href="/blog/speech-to-text-python-transcribe-audio.html">第一段录音转写</a>。要做字幕，还需要合适的断句、显示时长和排版；要做精细剪辑，还需要回听边界，必要时人工调整。时间戳是这些应用的输入，不是成品字幕或成品剪辑的质量保证。本文没有给各模型排准确率名次，也不把一种模型的许可推广到整个生态。</p></section>
+<section><h2 id="units">2. 毫秒是尺子的刻度，不是测量误差</h2>
+<p>在明确采用毫秒的接口里，<code>[1200, 1500]</code> 表示从 1.2 秒到 1.5 秒，跨度为 0.3 秒。整数能写到个位毫秒，只说明数值表示方式；它不说明真实发音边界的误差小于一毫秒。就像手机地图能显示很多位经纬度，小数位多并不能让定位同样精确。</p>
+<p>语音不是一串边界清楚的方块。相邻音会连在一起，停顿、气声、背景音和重叠说话都可能让“某个字从哪里开始”不容易确定。识别文字正确，与时间边界适合剪辑，是两项不同的检查；文字错误也可能让后续对齐难以解释。不能拿识别错误率替代时间定位误差。</p>
+<p>Paraformer 的这条实现路径利用 CIF（Continuous Integrate-and-Fire，连续积分触发）相关的预测信号估计位置。直观地说，沿音频帧累计的权重到达阈值，会提供一个位置线索；后处理再把位置与文本单元组织成区间。它不是听到每个汉字时按下的秒表。源码里还包含时间换算、位移和长间隔处理，因此应把输出理解为<strong>该实现产生的边界估计</strong>，而不是人工标注的真值。</p>
+<p>同样，VAD 给的是“哪里可能有人说话”的区间，不是逐字对齐。用整段语音长度除以字数、给每个字分一样长的时间，只是人为排版，不会变成模型测得的字级时间戳。为字幕展示生成的时间安排，应该与模型原始估计分开保存。</p></section>
+<section><h2 id="text-alignment">3. 一串时间戳，到底对应哪一串文字？</h2>
+<p>把显示文本按空格拆开，再与时间戳逐项配对，看起来很方便。危险在于你没有先确认两边的单位。一个中文单元可能是一个字；英文单词可能由多个子词拼成；缩写、数字和符号也可能经过后处理。<strong>token</strong> 指模型或分词器使用的文本单元，不一定等于屏幕上的一个字符或一个单词。</p>
+<p>本文核对的 <a href="https://github.com/modelscope/FunASR/blob/68aa96ddb96b6ec9b2f50923b9c55d223ef483af/funasr/utils/postprocess_utils.py">文本后处理实现</a>会过滤部分特殊符号，合并带 <code>@@</code> 的子词，并处理缩写；存在时间戳时也会同步处理其索引和区间。它返回的显示文字、整理后的词列表与时间戳之间有具体逻辑，不能由消费者再凭字符数猜一遍。</p>
+<p>以“OpenAI，您好！”为例，这个<strong>虚构的显示字符串</strong>同时有英文、中文和标点。它并没有告诉你原始模型用了多少个单元、逗号是否有独立区间，或者英文是否已经合并。删除空格、补标点、把数字改写成另一种形式以后，显示字符数还会变化。因此，长度相等也只是最低限度的检查，不能单独证明语义对应正确。</p>
+<p>Python 的普通 <code>zip</code> 在两边长度不同时会静默停在较短的一边。它不会提醒你末尾丢了几个字，也不会识别中间是否错位。正确的接入顺序是：先找到所选版本对“文本单元与时间区间”的定义，保留配套原始输出，确认对应关系，再生成展示层。缺少对应信息时，返回“无法可靠对齐”，不要截短列表、补零或者均分时长来伪装成功。</p>
+<p>如果你人工校正了转写，把原始识别文本与校正文分开保存。原有区间可能仍可用作句段回听入口，但不能未经复核就当作校正后每个字的新边界。需要把给定文本重新放到音频上的任务通常称为强制对齐；它与“重新做一次文字识别”也不是同一任务，支持情况应另查具体工具。</p></section>
+<section><h2 id="read-timeline">4. 时间戳属于片段，还是属于原录音？</h2>
+<p>假设从采访的第 30 秒开始截出一段音频，在这个片段中看到 <code>[1200, 1500]</code> 毫秒。若输出约定是<strong>相对于片段</strong>，它在原录音里的区间就是 <code>[31200, 31500]</code> 毫秒。若输出已经相对于原录音，再加 30000 就会错第二次。以下是三个<strong>虚构的换算示例</strong>，都假定输入区间是片段坐标：</p>
+<table data-example="timeline"><thead><tr><th>片段原始起点</th><th>片段内区间</th><th>原录音区间</th><th>播放器起点</th></tr></thead><tbody>
+<tr data-end-ms="1500" data-offset-ms="0" data-parent-end-ms="1500" data-parent-start-ms="1200" data-parent-start-s="1.2" data-start-ms="1200"><td>0 ms</td><td>1200–1500 ms</td><td>1200–1500 ms</td><td>1.2 s</td></tr>
+<tr data-end-ms="1500" data-offset-ms="30000" data-parent-end-ms="31500" data-parent-start-ms="31200" data-parent-start-s="31.2" data-start-ms="1200"><td>30000 ms</td><td>1200–1500 ms</td><td>31200–31500 ms</td><td>31.2 s</td></tr>
+<tr data-end-ms="750" data-offset-ms="60000" data-parent-end-ms="60750" data-parent-start-ms="60250" data-parent-start-s="60.25" data-start-ms="250"><td>60000 ms</td><td>250–750 ms</td><td>60250–60750 ms</td><td>60.25 s</td></tr>
+</tbody></table>
+<p>公式只有两步：原录音毫秒数 = 片段起点毫秒数 + 片段内毫秒数；需要秒的播放器再除以 1000。真正难的是确认输入已经做过哪一步。FunASR 的模型与 AutoModel 组合路径存在偏移处理，不能看到用了 VAD 就再无条件加一次偏移。应以你所用版本、调用路径和实际返回约定为准。</p>
+<p>若你删除了多处静音，再把剩余片段拼成一个新文件，“新文件时间”与“原录音时间”通常不是一个固定偏移就能互换。需要保存每段的新旧位置映射，并按所在片段换算。只保留拼接后的音频和总删除时长，会丢掉定位原录音所需的信息。</p>
+<p>也不要根据数字“看起来像秒”来猜单位。先确认字段定义，再检查是否越过音频总时长。常见错误表现是整体差 1000 倍、每个片段从头重来，或越到后面偏得越多；这些线索有助于排查，但不是自动改数值的授权。</p></section>
+<section><h2 id="evaluate">5. 怎样知道它已经能用于点击回听？</h2>
+<ol>
+<li><strong>先看结构。</strong>所需字段存在，端点是有限数值，单位与时间轴已知；结束不能早于开始。检查负值、越界、异常零长度和顺序问题，保留异常项，不静默丢弃。允许的舍入误差由应用事先规定，不为了通过检查临时放宽。</li>
+<li><strong>再看文字对应。</strong>用所选运行路径的单元定义检查列表，保留原始文本和区间。测试中文、英文混排、数字、缩写与标点等实际会出现的情况，不只检查一条纯中文短句。</li>
+<li><strong>最后回听。</strong>选有权处理的录音，覆盖开头、结尾、分段接缝、长停顿和重要词句。点击后能否听到目标内容？剪切后是否吞掉起音或尾音？记录实际偏差和失败位置，而不是只看列表完整。</li>
+</ol>
+<p>阅读型播放器可以由产品决定在目标起点之前留一点回听余量，并将跳转位置限制在有效范围内；这是体验设计，不是修改模型边界。逐字高亮、字幕与精细剪辑需要不同的容忍度，不应共用一个未经说明的“精确”标准。你的最终产物应同时保留<strong>原始估计</strong>与<strong>用于展示或回听的派生位置</strong>。</p>
+<p>没有时间戳时，先查模型与运行时是否支持、调用是否启用；单位不明时停止转换；文字数不匹配时查后处理链路；整体偏移时查切分与拼接记录。单纯重跑同一个输入，不能修复坐标和契约错误。需要产出字幕时，下一步看<a href="/blog/generate-subtitles-srt-vtt-from-audio-video.html">SRT/VTT 生成与回听验收</a>。</p></section>
+<section><h2 id="agent-contract">6. 给 Agent：让记录能追溯，不替用户猜边界</h2>
+<p>下面是建议的应用侧记录，不是 FunASR SDK 的统一返回格式。<code>input_path</code> 是用户授权的本地音频绝对路径字符串，<code>input_sha256</code> 标识这份音频；记录精确的 <code>model_revision</code> 和 <code>runtime_version</code>，不要只写“最新版”。换模型或运行时后，先重新确认字段、单位与文本单元定义。</p>
 <ul>
-<li><strong>逐字高亮 / 卡拉OK</strong>:音频播放到某毫秒时,高亮对应的字。</li>
-<li><strong>点击文字跳转音频</strong>:点某个字,用它的 <code>start_ms</code> seek 到音频对应位置。</li>
-<li><strong>字幕精确对齐</strong>:按时间戳切句、生成逐字时间轴的字幕。完整做字幕见 <a href="/blog/generate-subtitles-srt-vtt-from-audio-video.html">生成 SRT/VTT 字幕</a>。</li>
-<li><strong>视频剪辑定位</strong>:按关键词找到它在音频里的精确时间点。</li>
+<li><strong>原始输入输出：</strong><code>raw_text</code> 为原始识别字符串，<code>raw_timestamp</code> 保留原始区间及其顺序，缺失写 <code>null</code>，不编造区间。另存原始返回对象，人工校正文与展示文本不能覆盖它。</li>
+<li><strong>时间约定：</strong><code>time_unit</code> 明确为 <code>ms</code> 或 <code>s</code>；<code>timeline</code> 明确为 <code>segment</code> 或 <code>recording</code>。不能确认时记录未知并停止派生定位。<code>segment_offset_ms</code> 是片段在原录音中的有限非负毫秒数；没有片段映射时写 <code>null</code>，不得默认零。只有已确认片段坐标时才能加一次偏移。</li>
+<li><strong>派生记录：</strong>保留每个显示单元来自哪个原始单元或区间、做过哪些转换。毫秒转秒只改单位；展示层调整应另存，不回写原始估计。结构通过不代表时间准确，另存回听复核状态。</li>
+<li><strong>失败边界：</strong><code>status</code> 用 <code>ok</code> 或 <code>error</code>，<code>error</code> 说明字段缺失、坐标未知、对应关系不明或越界等原因。批处理保留失败列表并以非零退出码结束，不能把部分结果当作全部成功。不得自动重试这些确定性契约错误；暂时性传输故障只在事先授权的次数内重试并留记录。</li>
+<li><strong>权限：</strong>本篇阅读无需下载权重。真正运行模型前，软件安装、首次权重下载及许可确认是独立步骤；后续断网运行需备齐依赖、配置与权重并确认调用不会补下载。上传音频、调用付费服务、覆盖原文件和实际剪切均需要相应授权，不能因为“校准时间戳”就扩大数据处理范围。</li>
+</ul></section>
+<h2 id="sources">依据与适用范围</h2>
+<p>本文核对了以下固定提交的官方源码和输出处理逻辑，检查了示例换算与页面结构，<strong>未新增模型推理</strong>或时间边界准确率测试。引用的是特定源码版本，不代表任意已安装包都包含同样实现；例如主线修复不能仅凭合并记录就宣称已进入 PyPI。数字示例只帮助理解坐标，不证明任何模型的精度。</p>
+<ul>
+<li><a href="https://github.com/modelscope/FunASR/blob/68aa96ddb96b6ec9b2f50923b9c55d223ef483af/funasr/models/paraformer/model.py">Paraformer：时间戳分支与输出处理</a></li>
+<li><a href="https://github.com/modelscope/FunASR/blob/68aa96ddb96b6ec9b2f50923b9c55d223ef483af/funasr/utils/timestamp_tools.py">时间戳工具：CIF 信号、边界处理与毫秒换算</a></li>
+<li><a href="https://github.com/modelscope/FunASR/blob/68aa96ddb96b6ec9b2f50923b9c55d223ef483af/funasr/utils/postprocess_utils.py">文本后处理：特殊符号、子词和缩写</a></li>
+<li><a href="https://github.com/modelscope/FunASR/blob/68aa96ddb96b6ec9b2f50923b9c55d223ef483af/funasr/auto/auto_model.py">AutoModel：VAD、片段结果与上层组合</a></li>
 </ul>
-
-<h2>为什么用 Paraformer 拿时间戳</h2>
-<table>
-<tr><th></th><th>FunASR Paraformer</th><th>Whisper</th></tr>
-<tr><td>字/词级时间戳</td><td>✅ 原生,一次调用</td><td>后加(<code>--word_timestamps</code>,靠 DTW)</td></tr>
-<tr><td>精度</td><td>非自回归 + CIF 对齐,稳定</td><td>视实现而定</td></tr>
-<tr><td>中文</td><td>字级、CER 10.18%</td><td>~20%</td></tr>
-<tr><td>许可证</td><td>开源,可商用</td><td>开源</td></tr>
-</table>
-<p>要更高精度的中文识别,默认用旗舰 <a href="/blog/which-funasr-model.html">Fun-ASR-Nano</a>;完整中文实战见 <a href="/blog/chinese-speech-recognition.html">中文语音识别</a>;长音频分段见 <a href="/blog/voice-activity-detection-python.html">VAD</a>。</p>
-
-<div class="cta"><p><strong>FunASR 全家桶开源(MIT)</strong>——字级时间戳、ASR、VAD、标点、说话人、LLM-ASR(旗舰 Fun-ASR-Nano),拿来即用。觉得有用就点个 Star 👇</p><p><a class="btn" href="https://github.com/modelscope/FunASR" target="_blank">⭐ Star FunASR</a></p><p style="margin-top:10px;font-size:0.85rem">也欢迎 Star:<a href="https://github.com/QwenAudio/SenseVoice" target="_blank">SenseVoice</a> · <a href="https://github.com/QwenAudio/Fun-ASR" target="_blank">Fun-ASR</a> · <a href="https://github.com/modelscope/FunClip" target="_blank">FunClip</a></p></div>
-<!--related-posts-->
-<h2>相关文章</h2>
-<ul class="post-list">
-<li><a href="/blog/funasr-vs-whisper-benchmark.html">FunASR vs Whisper 实测对比</a></li>
-<li><a href="/blog/sensevoice-deployment-guide.html">SenseVoice 部署指南</a></li>
-<li><a href="/blog/fun-asr-nano-guide.html">Fun-ASR-Nano 使用指南</a></li>
-<li><a href="/blog/funasr-speaker-diarization.html">说话人分离:谁在何时说话</a></li>
-<li><a href="/blog/sensevoice-emotion-language-detection.html">情感与语种检测</a></li>
-<li><a href="/blog/funasr-realtime-streaming-asr.html">实时流式语音识别</a></li>
-<li><a href="/blog/funasr-transcribe-long-audio.html">转写超长音频(1小时一次搞定)</a></li>
-<li><a href="/blog/funasr-cli-transcribe-command-line.html">命令行转写(文本/JSON/SRT)</a></li>
-<li><a href="/blog/self-hosted-openai-whisper-api-alternative.html">自托管 OpenAI Whisper API 替代</a></li>
-<li><a href="/blog/generate-subtitles-srt-vtt-from-audio-video.html">自动生成字幕(SRT / VTT)</a></li>
-<li><a href="/blog/speech-to-text-python-transcribe-audio.html">Python 语音转文字教程</a></li>
-<li><a href="/blog/funasr-llama-cpp-whisper-cpp-alternative.html">FunASR 跑进 llama.cpp(whisper.cpp 替代)</a></li>
-<li><a href="/blog/funasr-vs-faster-whisper-chinese.html">FunASR vs faster-whisper(中文/粤语)</a></li>
-<li><a href="/blog/lightweight-speech-recognition-cpu.html">轻量语音识别(CPU 250MB)</a></li>
-<li><a href="/blog/self-hosted-deepgram-assemblyai-alternative.html">自托管替代 Deepgram/AssemblyAI</a></li>
-<li><a href="/blog/which-funasr-model.html">选哪个 FunASR 模型</a></li>
-<li><a href="/blog/cantonese-speech-recognition.html">粤语语音识别(SenseVoice 原生粤语)</a></li>
-<li><a href="/blog/japanese-speech-recognition.html">日语语音识别(SenseVoice 转写+标点+情感)</a></li>
-<li><a href="/blog/voice-activity-detection-python.html">Python 语音活动检测(VAD)</a></li>
-<li><a href="/blog/self-hosted-google-aws-azure-speech-to-text.html">自托管替代 Google/AWS/Azure 云语音 API</a></li>
-<li><a href="/blog/chinese-speech-recognition.html">中文语音识别(普通话)实战</a></li>
-<li><a href="/blog/punctuation-restoration-python.html">标点恢复 Python 实战</a></li>
-</ul>
+<p>记住三个问题就够了：<strong>这个数用什么单位？相对于哪段音频？对应哪一个文本单元？</strong>三者都清楚，再回听验证用途，时间戳才能成为可靠的导航依据。</p>
 </div></article>
 <footer><div class="container">© 2024-2026 Tongyi Lab, Alibaba Group · <a href="https://github.com/modelscope/FunASR/blob/main/LICENSE">MIT License</a></div></footer>
 </body>

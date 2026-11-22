@@ -1,25 +1,24 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Speech-to-Text with Word/Character-Level Timestamps in Python — Millisecond-Accurate | FunASR Blog</title>
-<meta name="description" content="How to get per-word/character timestamps from speech recognition? FunASR Paraformer emits character-level timestamps natively — every character has [start_ms, end_ms] in a single call. Build word highlighting, click-to-seek, subtitle alignment. With real output and pairing code.">
-<meta name="keywords" content="speech to text with timestamps python, word level timestamps, word timestamps speech recognition, character timestamps, forced alignment, speech recognition timestamps, Paraformer, FunASR, subtitle alignment">
-<link rel="icon" href="/logo.png">
-<meta property="og:title" content="Speech-to-Text with Word/Character-Level Timestamps in Python — Millisecond-Accurate | FunASR Blog">
-<meta property="og:description" content="How to get per-word/character timestamps from speech recognition? FunASR Paraformer emits character-level timestamps natively — every character has [start_ms, end_ms] in a single call. Build word highlighting, click-to-seek, subtitle alignment. With real output and pairing code.">
-<meta property="og:type" content="article">
-<meta property="og:url" content="https://www.funasr.com/en/blog/speech-to-text-timestamps-python.html">
-<meta property="og:image" content="https://www.funasr.com/logo.png">
-<link rel="canonical" href="https://www.funasr.com/en/blog/speech-to-text-timestamps-python.html">
-<link rel="alternate" hreflang="en" href="https://www.funasr.com/en/blog/speech-to-text-timestamps-python.html">
-<link rel="alternate" hreflang="zh" href="https://www.funasr.com/blog/speech-to-text-timestamps-python.html">
-<link rel="alternate" hreflang="x-default" href="https://www.funasr.com/en/blog/speech-to-text-timestamps-python.html">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<script type="application/ld+json">
-{"@context":"https://schema.org","@type":"BlogPosting","headline":"Speech-to-Text with Word/Character-Level Timestamps in Python — Millisecond-Accurate | FunASR Blog","description":"How to get per-word/character timestamps from speech recognition? FunASR Paraformer emits character-level timestamps natively — every character has [start_ms, end_ms] in a single call. Build word highlighting, click-to-seek, subtitle alignment. With real output and pairing code.","datePublished":"2026-06-23","dateModified":"2026-06-23","author":{"@type":"Organization","name":"FunASR / Tongyi Lab"},"publisher":{"@type":"Organization","name":"FunASR","logo":{"@type":"ImageObject","url":"https://www.funasr.com/logo.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://www.funasr.com/en/blog/speech-to-text-timestamps-python.html"},"image":"https://www.funasr.com/logo.png"}
-</script>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<title>Why can a millisecond timestamp still seek to the wrong word? | FunASR</title>
+<meta content="Separate time units, estimated boundaries and text alignment, then map segment times back to the recording for reliable review, captions and editing." name="description"/>
+
+<link href="/logo.png" rel="icon"/>
+<meta content="Why can a millisecond timestamp still seek to the wrong word?" property="og:title"/>
+<meta content="Separate time units, estimated boundaries and text alignment, then map segment times back to the recording for reliable review, captions and editing." property="og:description"/>
+<meta content="article" property="og:type"/>
+<meta content="https://www.funasr.com/en/blog/speech-to-text-timestamps-python.html" property="og:url"/>
+<meta content="https://www.funasr.com/logo.png" property="og:image"/>
+<link href="https://www.funasr.com/en/blog/speech-to-text-timestamps-python.html" rel="canonical"/>
+<link href="https://www.funasr.com/en/blog/speech-to-text-timestamps-python.html" hreflang="en" rel="alternate"/>
+<link href="https://www.funasr.com/blog/speech-to-text-timestamps-python.html" hreflang="zh" rel="alternate"/>
+<link href="https://www.funasr.com/en/blog/speech-to-text-timestamps-python.html" hreflang="x-default" rel="alternate"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"Why can a millisecond timestamp still seek to the wrong word?","description":"Separate time units, estimated boundaries and text alignment, then map segment times back to the recording for reliable review, captions and editing.","datePublished":"2026-06-23","dateModified":"2026-11-23","author":{"@type":"Organization","name":"FunASR / Tongyi Lab"},"publisher":{"@type":"Organization","name":"FunASR","logo":{"@type":"ImageObject","url":"https://www.funasr.com/logo.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://www.funasr.com/en/blog/speech-to-text-timestamps-python.html"},"image":"https://www.funasr.com/logo.png"}</script>
 <style>:root{--primary:#2563eb;--primary-dark:#1d4ed8;--bg:#fff;--surface:#f8fafc;--border:#e2e8f0;--text:#0f172a;--text-soft:#475569;--text-muted:#94a3b8;--radius:12px}
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Inter',-apple-system,sans-serif;color:var(--text);line-height:1.7}
@@ -55,89 +54,65 @@ p code,li code{background:var(--surface);padding:2px 6px;border-radius:5px;font-
 .post-card .date{color:var(--text-muted);font-size:0.8rem}
 footer{background:#0f172a;color:#94a3b8;padding:28px 0;text-align:center;font-size:0.8rem}
 footer a{color:#94a3b8}</style>
-</head>
+<style>article a{text-decoration:underline;text-underline-offset:0.15em}</style></head>
 <body>
-<nav class="nav"><div class="container"><a href="/en/" class="nav-logo">Fun<span>ASR</span></a><div class="nav-links"><a href="/en/#capabilities">Capabilities</a><a href="/en/#usage">How to Use</a><a href="/en/#benchmark">Benchmark</a><a href="/en/#demo">Demo</a><a href="https://modelscope.github.io/FunASR/" target="_blank">Docs</a><a href="/en/quickstart.html">Quickstart</a><a href="/en/models.html">Models</a><a href="/en/ecosystem.html">Ecosystem</a><a href="/en/blog/">Blog</a><a href="/en/vs-whisper.html">vs Whisper</a><a href="/en/donors.html">Donors</a></div><a href="https://www.funasr.com/blog/speech-to-text-timestamps-python.html" style="font-size:0.83rem;font-weight:500;color:var(--text-soft)">中文</a><a href="https://github.com/modelscope/FunASR" target="_blank" class="nav-btn">GitHub ★</a></div></nav>
-<article><div class="container">
-<h1>Speech-to-Text with Word/Character-Level Timestamps in Python — Millisecond-Accurate</h1>
-<p class="post-meta">2026-06-23 · FunASR Team</p>
-
-<p>Many use cases need more than "what was said" — they need to know <strong>when each word was spoken</strong>: karaoke-style highlighting, click-a-word-to-seek transcripts, subtitle alignment, video-editing search. Whisper's word timestamps are bolted on (DTW-based, variable accuracy). <strong>FunASR's Paraformer emits character-level timestamps natively</strong>: every character comes with <code>[start_ms, end_ms]</code> in a single call. Here is real measured output.</p>
-
-<h2>Transcribe with timestamps (real output)</h2>
-<pre>pip install funasr
-
-from funasr import AutoModel
-
-model = AutoModel(model="paraformer-zh", vad_model="fsmn-vad", disable_update=True)
-res = model.generate(input="audio.wav")
-
-text = res[0]["text"]            # 欢 迎 大 家 来 体 验 ...
-timestamp = res[0]["timestamp"]  # [[880, 1120], [1120, 1360], ...]  per-character start/end ms</pre>
-<p><code>timestamp</code> is a list of <code>[start_ms, end_ms]</code> pairs, one per character in the text.</p>
-
-<h2>Pair characters with timestamps (real)</h2>
-<pre>chars = text.split()          # Paraformer's Chinese output is space-separated characters
-for ch, (start, end) in zip(chars, timestamp):
-    print(f"{ch}  {start}-{end}ms")</pre>
-<p>Actual output:</p>
-<table>
-<tr><th>Char</th><th>Span (ms)</th></tr>
-<tr><td>欢</td><td>880 – 1120</td></tr>
-<tr><td>迎</td><td>1120 – 1360</td></tr>
-<tr><td>大</td><td>1380 – 1540</td></tr>
-<tr><td>家</td><td>1540 – 1780</td></tr>
-<tr><td>来</td><td>1780 – 2020</td></tr>
-<tr><td>体</td><td>2020 – 2180</td></tr>
-<tr><td>验</td><td>2180 – 2420</td></tr>
-</table>
-<p>All 19 characters of the sentence get a millisecond-accurate start/end.</p>
-
-<h2>What you can build</h2>
+<nav class="nav"><div class="container"><a class="nav-logo" href="/en/">Fun<span>ASR</span></a><div class="nav-links"><a href="/en/#capabilities">Capabilities</a><a href="/en/#usage">How to Use</a><a href="/en/#benchmark">Benchmark</a><a href="/en/#demo">Demo</a><a href="https://modelscope.github.io/FunASR/" target="_blank">Docs</a><a href="/en/quickstart.html">Quickstart</a><a href="/en/models.html">Models</a><a href="/en/ecosystem.html">Ecosystem</a><a href="/en/blog/">Blog</a><a href="/en/vs-whisper.html">vs Whisper</a><a href="/en/donors.html">Donors</a></div><a href="https://www.funasr.com/blog/speech-to-text-timestamps-python.html" style="font-size:0.83rem;font-weight:500;color:var(--text-soft)">中文</a><a class="nav-btn" href="https://github.com/modelscope/FunASR" target="_blank">GitHub ★</a></div></nav>
+<article><div class="container"><h1>Why can a millisecond timestamp still seek to the wrong word?</h1>
+<p class="meta"><time datetime="2026-06-23">2026-06-23</time> published · Revised <time datetime="2026-11-23">2026-11-23</time> · Speech technology explained</p>
+<p>You transcribe an interview and make each word clickable. The text looks right, but clicking it plays half a sentence too early, or sends you back to the beginning. It is tempting to blame the model. First check three simpler possibilities: the player expects seconds but receives milliseconds; the interval belongs to a short segment rather than the whole recording; or the displayed words have changed while their timestamps have not.</p>
+<p>This guide answers one question: <strong>is a timestamped transcript ready for click-to-listen navigation?</strong> You will learn to identify the audio timeline, the text units each interval belongs to, and what still needs listening-based review. This is a conceptual guide, not an installation tutorial. All numeric examples are invented, not measured model outputs.</p>
+<p>In this guide: <a href="#choose-route">Choose an output path</a> · <a href="#units">Units and accuracy</a> · <a href="#text-alignment">Match the text</a> · <a href="#read-timeline">Restore the timeline</a> · <a href="#evaluate">Review the result</a> · <a href="#agent-contract">Agent record contract</a></p>
+<section><h2 id="choose-route">1. What will your recognition path actually return?</h2>
+<p><strong>FunASR is a toolkit</strong> that coordinates model calls and processing. <strong>Fun-ASR and SenseVoice are model families</strong>, whose specific capabilities depend on the checkpoint and invocation. <strong>FunClip is a transcription and editing application.</strong> Model weights, an installed Python package, an independent runtime and a network service are different layers. Producing text does not imply that every runtime returns character-level timestamps, or that all outputs use the same fields and units.</p>
+<p>For fine-grained navigation, choose a model and runtime whose documentation supports the required output, then inspect what your call actually returns. In the pinned <a href="https://github.com/modelscope/FunASR/blob/68aa96ddb96b6ec9b2f50923b9c55d223ef483af/funasr/models/paraformer/model.py">Paraformer Python implementation</a>, timestamp calculation is conditional: it reads <code>pred_timestamp</code>, falling back to <code>output_timestamp</code> when the former is not supplied. A Paraformer name alone is therefore not a dependable promise of timestamp output. These parameters are not universal switches for other models.</p>
+<p>If you only need readable text, start with <a href="/en/blog/speech-to-text-python-transcribe-audio.html">your first recording-to-text task</a>. Captions also need suitable sentence breaks, display duration and layout; precise editing also needs listening-based boundary checks. Timestamps are inputs to those applications, not a guarantee of finished-caption or finished-edit quality. This article does not rank recognition accuracy or apply one model's license to the entire ecosystem.</p></section>
+<section><h2 id="units">2. Milliseconds describe the scale, not the measurement error</h2>
+<p>For an interface explicitly using milliseconds, <code>[1200, 1500]</code> means 1.2 to 1.5 seconds, a span of 0.3 seconds. Writing an integer down to the millisecond tells you how the number is represented. It does not establish that the real speech boundary is accurate within one millisecond. More decimal places in a map coordinate do not make the location equally precise.</p>
+<p>Speech is not a sequence of neatly separated blocks. Connected sounds, pauses, breath, background noise and overlapping speakers can make a word boundary ambiguous. Correct words and edit-ready timing are separate properties. Incorrect words can also make their alignment difficult to interpret. A recognition error rate is not a substitute for a timing-error measurement.</p>
+<p>This Paraformer path estimates locations using prediction signals related to CIF, or Continuous Integrate-and-Fire. Intuitively, weights accumulate along audio frames; reaching a threshold provides a location cue, and postprocessing organizes those cues and text units into spans. This is not a stopwatch pressed at every spoken character. The implementation also includes time conversion, shifts and long-gap handling. Treat its output as <strong>estimated boundaries from a particular implementation</strong>, not as human-annotated ground truth.</p>
+<p>VAD, or voice activity detection, answers where speech may occur; it does not align every word. Dividing a speech interval evenly by the number of displayed characters creates an artificial schedule, not model-measured word timestamps. Save any timing created for presentation separately from the original estimates.</p></section>
+<section><h2 id="text-alignment">3. Which text does each interval belong to?</h2>
+<p>Splitting displayed text on spaces and pairing the pieces with timestamps is convenient, but only valid after the two units have been defined. A Chinese unit may be a character; an English word may combine several subwords; abbreviations, numbers and symbols may be transformed. A <strong>token</strong> is a unit used by a model or tokenizer, not necessarily one visible character or one word.</p>
+<p>The pinned <a href="https://github.com/modelscope/FunASR/blob/68aa96ddb96b6ec9b2f50923b9c55d223ef483af/funasr/utils/postprocess_utils.py">text postprocessor</a> filters selected special symbols, merges subwords marked with <code>@@</code>, and handles abbreviations. When timestamps are provided, it also processes their indices and intervals. The relationship among displayed text, processed words and timestamps follows that implementation; a consumer should not reconstruct it by guessing from character counts.</p>
+<p>Consider the <strong>invented display string</strong> “OpenAI，您好！” It contains English, Chinese and punctuation, but says nothing about how many units the model originally used, whether the comma has its own span, or whether the English text has already been merged. Removing spaces, adding punctuation or rewriting numbers changes the display again. Matching list lengths is a minimum check, not proof of correct semantic alignment.</p>
+<p>Python's ordinary <code>zip</code> silently stops at the shorter input. It will not warn you that trailing words disappeared, and it cannot detect a shift in the middle. First establish the selected version's text-unit-to-interval contract, retain the matching original outputs, verify their correspondence, and only then build a display layer. When the correspondence is missing, report that reliable alignment is unavailable. Do not truncate, insert zeroes or divide the duration evenly to manufacture success.</p>
+<p>Keep manual corrections separate from the original recognized text. Original spans may still offer useful sentence-level listening entry points, but they do not automatically become verified boundaries for every corrected word. Aligning a supplied transcript to audio is generally called forced alignment; it is not the same task as recognizing the words again. Check support in the specific tool you intend to use.</p></section>
+<section><h2 id="read-timeline">4. Is the timestamp relative to a segment or the recording?</h2>
+<p>Suppose a segment starts 30 seconds into an interview and contains <code>[1200, 1500]</code> milliseconds. If those numbers are <strong>segment-relative</strong>, the original-recording interval is <code>[31200, 31500]</code> milliseconds. If the output is already recording-relative, adding 30000 again introduces a second offset. These three <strong>invented conversion examples</strong> all start with segment-relative inputs:</p>
+<table data-example="timeline"><thead><tr><th>Segment origin</th><th>Local interval</th><th>Recording interval</th><th>Player start</th></tr></thead><tbody>
+<tr data-end-ms="1500" data-offset-ms="0" data-parent-end-ms="1500" data-parent-start-ms="1200" data-parent-start-s="1.2" data-start-ms="1200"><td>0 ms</td><td>1200–1500 ms</td><td>1200–1500 ms</td><td>1.2 s</td></tr>
+<tr data-end-ms="1500" data-offset-ms="30000" data-parent-end-ms="31500" data-parent-start-ms="31200" data-parent-start-s="31.2" data-start-ms="1200"><td>30000 ms</td><td>1200–1500 ms</td><td>31200–31500 ms</td><td>31.2 s</td></tr>
+<tr data-end-ms="750" data-offset-ms="60000" data-parent-end-ms="60750" data-parent-start-ms="60250" data-parent-start-s="60.25" data-start-ms="250"><td>60000 ms</td><td>250–750 ms</td><td>60250–60750 ms</td><td>60.25 s</td></tr>
+</tbody></table>
+<p>The arithmetic has two steps: recording milliseconds = segment origin milliseconds + local milliseconds; divide by 1000 for a player that expects seconds. The difficult part is determining which steps already happened. FunASR's model and AutoModel composition paths include offset handling. The presence of VAD is not a reason to add an offset unconditionally. Use the contract of the exact version and invocation you are running.</p>
+<p>If you remove several pauses and concatenate the remaining audio, the new file's timeline generally cannot be converted back with one constant offset. Preserve a mapping of each retained segment's old and new positions, then convert within the appropriate segment. The edited audio and total removed duration alone lose the information needed to locate the original recording.</p>
+<p>Do not guess units from plausible-looking numbers. Confirm the field definition before checking against recording duration. A factor-of-1000 error, every segment restarting at zero, or drift that grows later in the recording are useful diagnostic clues, not permission to automatically change values.</p></section>
+<section><h2 id="evaluate">5. When is it ready for click-to-listen?</h2>
+<ol>
+<li><strong>Check structure.</strong> Required fields exist, endpoints are finite, and the units and timeline are known. End must not precede start. Flag negative values, out-of-range intervals, suspicious zero-length spans and ordering problems. Preserve them instead of silently dropping them. Set any rounding tolerance in advance, not after seeing a failed check.</li>
+<li><strong>Check text correspondence.</strong> Apply the selected runtime's unit definition and retain original text and intervals. Include the mixed languages, numbers, abbreviations and punctuation that your actual application encounters, rather than only a short, simple sentence.</li>
+<li><strong>Listen.</strong> Use recordings you are authorized to process. Check the beginning, ending, segment joins, long pauses and important phrases. Does clicking play the intended content? Does a proposed cut remove an onset or word ending? Record observed errors and failures, not just whether the arrays are populated.</li>
+</ol>
+<p>A reading-oriented player may deliberately seek slightly before the target and clamp its playback position to valid limits. That is a product decision, not a correction to the model's original boundaries. Word highlighting, captions and fine editing need different tolerances; an unexplained “precise” label cannot serve all three. Preserve <strong>original estimates</strong> separately from <strong>derived display or playback positions</strong>.</p>
+<p>For missing timestamps, check support and invocation settings. For unknown units, stop conversion. For mismatched text, inspect the postprocessing path. For a global shift, inspect segmentation and editing records. Rerunning the same input does not fix a coordinate-system or contract error. To create captions next, see <a href="/en/blog/generate-subtitles-srt-vtt-from-audio-video.html">SRT/VTT generation and listening-based review</a>.</p></section>
+<section><h2 id="agent-contract">6. For Agents: preserve provenance instead of guessing boundaries</h2>
+<p>This is a suggested application-side record, not a universal FunASR SDK response. <code>input_path</code> is a user-authorized absolute local audio path string; <code>input_sha256</code> identifies that file. Record exact <code>model_revision</code> and <code>runtime_version</code> values, not “latest.” Changing models or runtimes requires rechecking fields, units and text-unit definitions.</p>
 <ul>
-<li><strong>Word highlighting / karaoke</strong>: highlight the character whose span contains the current playback time.</li>
-<li><strong>Click-to-seek transcripts</strong>: clicking a character seeks the audio to its <code>start_ms</code>.</li>
-<li><strong>Precise subtitle alignment</strong>: split and time captions from the timestamps. For full subtitles, see <a href="/en/blog/generate-subtitles-srt-vtt-from-audio-video.html">generating SRT/VTT subtitles</a>.</li>
-<li><strong>Video-edit search</strong>: jump to the exact moment a keyword is spoken.</li>
+<li><strong>Original output:</strong> <code>raw_text</code> is the original recognized string; <code>raw_timestamp</code> retains original intervals in order. Use <code>null</code> when missing, never fabricated spans. Keep the original response separately. Corrections and presentation text must not overwrite it.</li>
+<li><strong>Time contract:</strong> <code>time_unit</code> is explicitly <code>ms</code> or <code>s</code>; <code>timeline</code> is <code>segment</code> or <code>recording</code>. If unknown, record that state and stop deriving locations. <code>segment_offset_ms</code> is a finite nonnegative origin in recording milliseconds. Use <code>null</code> when no segment mapping exists, not an assumed zero. Add the offset once only for confirmed segment-relative inputs.</li>
+<li><strong>Derived records:</strong> retain which original unit or interval each display unit came from and every transformation applied. Milliseconds-to-seconds conversion changes units only. Save presentation adjustments separately and retain listening-review status: valid structure does not prove accurate timing.</li>
+<li><strong>Failure:</strong> <code>status</code> is <code>ok</code> or <code>error</code>; <code>error</code> explains missing fields, unknown coordinates, uncertain correspondence or invalid bounds. A batch runner must retain failed items and return a nonzero exit code, not claim that partial output is complete. Do not automatically retry deterministic contract errors. Retry temporary transport failures only within a previously authorized limit and retain each attempt.</li>
+<li><strong>Authorization:</strong> reading this article requires no model download. Running a model adds separate software-installation, initial-weight-download and license checks. Later disconnected operation requires all dependencies, configurations and weights, plus a verified path that will not fetch missing files. Audio uploads, paid services, overwriting originals and actual edits require appropriate authorization; “timestamp calibration” does not broaden data permissions.</li>
+</ul></section>
+<h2 id="sources">Sources and scope</h2>
+<p>This explanation is based on the pinned official implementations below, with checks of the example arithmetic and page structure. <strong>No new model inference</strong> or boundary-accuracy experiment was performed. A particular source revision does not establish what any installed package contains; a merged fix alone does not prove that PyPI already includes it. The examples explain coordinates, not model accuracy.</p>
+<ul>
+<li><a href="https://github.com/modelscope/FunASR/blob/68aa96ddb96b6ec9b2f50923b9c55d223ef483af/funasr/models/paraformer/model.py">Paraformer: conditional timestamp calculation and output processing</a></li>
+<li><a href="https://github.com/modelscope/FunASR/blob/68aa96ddb96b6ec9b2f50923b9c55d223ef483af/funasr/utils/timestamp_tools.py">Timestamp tools: CIF signals, boundary processing and milliseconds</a></li>
+<li><a href="https://github.com/modelscope/FunASR/blob/68aa96ddb96b6ec9b2f50923b9c55d223ef483af/funasr/utils/postprocess_utils.py">Text postprocessing: symbols, subwords and abbreviations</a></li>
+<li><a href="https://github.com/modelscope/FunASR/blob/68aa96ddb96b6ec9b2f50923b9c55d223ef483af/funasr/auto/auto_model.py">AutoModel: VAD, segment results and composition</a></li>
 </ul>
-
-<h2>Why Paraformer for timestamps</h2>
-<table>
-<tr><th></th><th>FunASR Paraformer</th><th>Whisper</th></tr>
-<tr><td>Word/char timestamps</td><td>✅ native, single call</td><td>bolt-on (<code>--word_timestamps</code>, DTW)</td></tr>
-<tr><td>Accuracy</td><td>non-autoregressive + CIF alignment, stable</td><td>implementation-dependent</td></tr>
-<tr><td>Chinese</td><td>character-level, CER 10.18%</td><td>~20%</td></tr>
-<tr><td>License</td><td>open-source, commercial-friendly</td><td>open-source</td></tr>
-</table>
-<p>For higher Chinese accuracy, default to the flagship <a href="/en/blog/which-funasr-model.html">Fun-ASR-Nano</a>; for the full Chinese walkthrough see <a href="/en/blog/chinese-speech-recognition.html">Chinese speech recognition</a>; for long-audio segmentation see <a href="/en/blog/voice-activity-detection-python.html">VAD</a>.</p>
-
-<div class="cta"><p><strong>The whole FunASR stack is open-source (MIT)</strong> — character timestamps, ASR, VAD, punctuation, speaker, LLM-ASR (flagship Fun-ASR-Nano), ready to use. If it helps, a GitHub Star supports the project 👇</p><p><a class="btn" href="https://github.com/modelscope/FunASR" target="_blank">⭐ Star FunASR</a></p><p style="margin-top:10px;font-size:0.85rem">Also star:<a href="https://github.com/QwenAudio/SenseVoice" target="_blank">SenseVoice</a> · <a href="https://github.com/QwenAudio/Fun-ASR" target="_blank">Fun-ASR</a> · <a href="https://github.com/modelscope/FunClip" target="_blank">FunClip</a></p></div>
-<!--related-posts-->
-<h2>Related posts</h2>
-<ul class="post-list">
-<li><a href="/en/blog/funasr-vs-whisper-benchmark.html">FunASR vs Whisper Benchmark</a></li>
-<li><a href="/en/blog/sensevoice-deployment-guide.html">SenseVoice Deployment Guide</a></li>
-<li><a href="/en/blog/fun-asr-nano-guide.html">Fun-ASR-Nano Guide</a></li>
-<li><a href="/en/blog/funasr-speaker-diarization.html">Speaker Diarization: Who Spoke When</a></li>
-<li><a href="/en/blog/sensevoice-emotion-language-detection.html">Emotion & Language Detection</a></li>
-<li><a href="/en/blog/funasr-realtime-streaming-asr.html">Real-Time Streaming Speech-to-Text</a></li>
-<li><a href="/en/blog/funasr-transcribe-long-audio.html">Transcribe Long Audio (Hours in One Call)</a></li>
-<li><a href="/en/blog/funasr-cli-transcribe-command-line.html">Transcribe from the Command Line</a></li>
-<li><a href="/en/blog/self-hosted-openai-whisper-api-alternative.html">Self-Hosted OpenAI Whisper API Alternative</a></li>
-<li><a href="/en/blog/generate-subtitles-srt-vtt-from-audio-video.html">Auto-Generate Subtitles (SRT / VTT)</a></li>
-<li><a href="/en/blog/speech-to-text-python-transcribe-audio.html">Speech to Text in Python</a></li>
-<li><a href="/en/blog/funasr-llama-cpp-whisper-cpp-alternative.html">FunASR on llama.cpp (whisper.cpp Alternative)</a></li>
-<li><a href="/en/blog/funasr-vs-faster-whisper-chinese.html">FunASR vs faster-whisper (Chinese/Cantonese)</a></li>
-<li><a href="/en/blog/lightweight-speech-recognition-cpu.html">Lightweight Speech Recognition on CPU</a></li>
-<li><a href="/en/blog/self-hosted-deepgram-assemblyai-alternative.html">Self-Hosted Deepgram/AssemblyAI Alternative</a></li>
-<li><a href="/en/blog/which-funasr-model.html">Which FunASR Model?</a></li>
-<li><a href="/en/blog/cantonese-speech-recognition.html">Cantonese Speech Recognition (SenseVoice)</a></li>
-<li><a href="/en/blog/japanese-speech-recognition.html">Japanese Speech Recognition (SenseVoice)</a></li>
-<li><a href="/en/blog/voice-activity-detection-python.html">Voice Activity Detection in Python</a></li>
-<li><a href="/en/blog/self-hosted-google-aws-azure-speech-to-text.html">Self-Hosted Google/AWS/Azure STT Alternative</a></li>
-<li><a href="/en/blog/chinese-speech-recognition.html">Chinese Speech Recognition in Python</a></li>
-<li><a href="/en/blog/punctuation-restoration-python.html">Punctuation Restoration in Python</a></li>
-</ul>
+<p>Keep three questions in view: <strong>What unit is this number in? Which audio timeline does it use? Which text unit does it describe?</strong> Answer those, then listen to verify the intended use. That is what makes a timestamp useful navigation data.</p>
 </div></article>
 <footer><div class="container">© 2024-2026 Tongyi Lab, Alibaba Group · <a href="https://github.com/modelscope/FunASR/blob/main/LICENSE">MIT License</a></div></footer>
 </body>

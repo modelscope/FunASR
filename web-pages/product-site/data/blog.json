@@ -492,15 +492,15 @@
     },
     {
       "slug": "speech-to-text-timestamps-python",
-      "category": "applications",
-      "reviewed": false,
+      "category": "explanations",
+      "reviewed": true,
       "zh": {
-        "title": "用时间戳定位原始录音",
-        "summary": ""
+        "title": "时间戳写着毫秒，为什么点击文字还是跳错位置？",
+        "summary": "分清时间单位、边界估计和文字对应关系，再把片段时间放回原录音；为点击回听、字幕和剪辑保留可靠的定位依据。"
       },
       "en": {
-        "title": "Finding the original audio with timestamps",
-        "summary": ""
+        "title": "Why can a millisecond timestamp still seek to the wrong word?",
+        "summary": "Separate time units, estimated boundaries and text alignment, then map segment times back to the recording for reliable review, captions and editing."
       }
     },
     {
