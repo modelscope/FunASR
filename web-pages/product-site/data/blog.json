@@ -154,15 +154,15 @@
     },
     {
       "slug": "funasr-realtime-streaming-asr",
-      "category": "applications",
-      "reviewed": false,
+      "category": "explanations",
+      "reviewed": true,
       "zh": {
-        "title": "实时字幕的流式识别路径",
-        "summary": ""
+        "title": "实时字幕为什么会改字？读懂流式识别的三种状态",
+        "summary": "从一句不断出现的字幕，分清增量文字、整段修订和输入结束确认；理解 2-pass 的用途、延迟边界与应用接入责任。"
       },
       "en": {
-        "title": "A streaming path for live captions",
-        "summary": ""
+        "title": "Why do live captions change? Three states in streaming ASR",
+        "summary": "Distinguish incremental text, a revised speech segment and end-of-input acknowledgement. Understand what two-pass recognition offers, what latency means and what your application must track."
       }
     },
     {

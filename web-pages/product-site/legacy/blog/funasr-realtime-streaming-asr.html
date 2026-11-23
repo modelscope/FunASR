@@ -1,13 +1,12 @@
 <!DOCTYPE html>
-<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>用 FunASR 实现实时流式语音识别(边说边出字) | FunASR</title><meta name="description" content="FunASR 流式 Paraformer 支持 600ms 级低延迟实时语音识别:边说边出字,带 cache 的分块解码。适合实时字幕、语音助手、会议转写。附可运行代码与 2-pass(流式+离线)最佳实践。"><meta name="keywords" content="实时语音识别, 流式语音识别, real time speech to text, streaming asr, 边说边出字, live transcription, 低延迟语音识别, FunASR streaming, paraformer streaming, 实时字幕">
-<link rel="icon" href="/logo.png"><meta property="og:title" content="用 FunASR 实现实时流式语音识别(边说边出字)"><meta property="og:description" content="FunASR 流式 Paraformer 支持 600ms 级低延迟实时语音识别:边说边出字,带 cache 的分块解码。适合实时字幕、语音助手、会议转写。附可运行代码与 2-pass(流式+离线)最佳实践。">
-<meta property="og:type" content="article"><meta property="og:url" content="https://www.funasr.com/blog/funasr-realtime-streaming-asr.html"><meta property="og:image" content="https://www.funasr.com/logo.png">
-<link rel="canonical" href="https://www.funasr.com/blog/funasr-realtime-streaming-asr.html"><link rel="alternate" hreflang="en" href="https://www.funasr.com/en/blog/funasr-realtime-streaming-asr.html"><link rel="alternate" hreflang="zh" href="https://www.funasr.com/blog/funasr-realtime-streaming-asr.html"><link rel="alternate" hreflang="x-default" href="https://www.funasr.com/en/blog/funasr-realtime-streaming-asr.html">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<script type="application/ld+json">
-{"@context":"https://schema.org","@type":"BlogPosting","headline":"用 FunASR 实现实时流式语音识别(边说边出字)","description":"FunASR 流式 Paraformer 支持 600ms 级低延迟实时语音识别:边说边出字,带 cache 的分块解码。适合实时字幕、语音助手、会议转写。附可运行代码与 2-pass(流式+离线)最佳实践。","datePublished":"2026-06-17","dateModified":"2026-06-17","author":{"@type":"Organization","name":"FunASR / Tongyi Lab"},"publisher":{"@type":"Organization","name":"FunASR","logo":{"@type":"ImageObject","url":"https://www.funasr.com/logo.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://www.funasr.com/blog/funasr-realtime-streaming-asr.html"},"image":"https://www.funasr.com/logo.png"}
-</script>
+
+<html lang="zh"><head><meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/>
+<title>实时字幕为什么会改字？读懂流式识别的三种状态 | FunASR</title><meta content="从一句不断出现的字幕，分清增量文字、整段修订和输入结束确认；理解 2-pass 的用途、延迟边界与应用接入责任。" name="description"/>
+<link href="/logo.png" rel="icon"/><meta content="实时字幕为什么会改字？读懂流式识别的三种状态" property="og:title"/><meta content="从一句不断出现的字幕，分清增量文字、整段修订和输入结束确认；理解 2-pass 的用途、延迟边界与应用接入责任。" property="og:description"/>
+<meta content="article" property="og:type"/><meta content="https://www.funasr.com/blog/funasr-realtime-streaming-asr.html" property="og:url"/><meta content="https://www.funasr.com/logo.png" property="og:image"/>
+<link href="https://www.funasr.com/blog/funasr-realtime-streaming-asr.html" rel="canonical"/><link href="https://www.funasr.com/en/blog/funasr-realtime-streaming-asr.html" hreflang="en" rel="alternate"/><link href="https://www.funasr.com/blog/funasr-realtime-streaming-asr.html" hreflang="zh" rel="alternate"/><link href="https://www.funasr.com/en/blog/funasr-realtime-streaming-asr.html" hreflang="x-default" rel="alternate"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"实时字幕为什么会改字？读懂流式识别的三种状态","description":"从一句不断出现的字幕，分清增量文字、整段修订和输入结束确认；理解 2-pass 的用途、延迟边界与应用接入责任。","datePublished":"2026-06-17","dateModified":"2026-11-24","author":{"@type":"Organization","name":"FunASR / Tongyi Lab"},"publisher":{"@type":"Organization","name":"FunASR","logo":{"@type":"ImageObject","url":"https://www.funasr.com/logo.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://www.funasr.com/blog/funasr-realtime-streaming-asr.html"},"image":"https://www.funasr.com/logo.png"}</script>
 <style>:root{--primary:#2563eb;--primary-dark:#1d4ed8;--bg:#fff;--surface:#f8fafc;--border:#e2e8f0;--text:#0f172a;--text-soft:#475569;--text-muted:#94a3b8;--radius:12px}
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Inter',-apple-system,sans-serif;color:var(--text);line-height:1.7}
@@ -42,95 +41,64 @@ p code,li code{background:var(--surface);padding:2px 6px;border-radius:5px;font-
 .post-card p{margin:0;color:var(--text-soft);font-size:0.9rem}
 .post-card .date{color:var(--text-muted);font-size:0.8rem}
 footer{background:#0f172a;color:#94a3b8;padding:28px 0;text-align:center;font-size:0.8rem}
-footer a{color:#94a3b8}</style></head><body>
-<nav class="nav"><div class="container"><a href="/" class="nav-logo">Fun<span>ASR</span></a><div class="nav-links"><a href="/#capabilities">核心能力</a><a href="/#usage">如何使用</a><a href="/#benchmark">性能</a><a href="/#demo">演示</a><a href="https://modelscope.github.io/FunASR/zh/" target="_blank">文档</a><a href="/quickstart.html">快速上手</a><a href="/models.html">模型</a><a href="/ecosystem.html">生态</a><a href="/blog/">技术博客</a><a href="/vs-whisper.html">对比 Whisper</a><a href="/donors.html">功德榜</a></div><a href="https://www.funasr.com/en/blog/funasr-realtime-streaming-asr.html" style="font-size:0.83rem;font-weight:600;color:var(--text-soft)">EN</a><a href="https://github.com/modelscope/FunASR" target="_blank" class="nav-btn">GitHub ★</a></div></nav>
-<article><div class="container">
-<h1>用 FunASR 实现实时流式语音识别(边说边出字)</h1>
-<p class="post-meta">FunASR 技术博客 · 2026-06-17 · 教程</p>
-<p>实时字幕、语音助手、会议转写——这些场景要的不是"录完再转",而是<strong>边说边出字</strong>:用户话音未落,文字已经在屏幕上滚动。这就是<strong>流式语音识别(Streaming ASR)</strong>。</p>
-<p>FunASR 的流式 Paraformer 用<strong>分块(chunk)+ 缓存(cache)</strong>解码,可以做到 <strong>600ms 级延迟</strong>的实时出字,而且 CPU 上就能跑。</p>
-<h2>安装</h2>
-<pre><code>pip install -U funasr modelscope</code></pre>
-<h2>完整代码(可直接运行)</h2>
-<pre><code>from funasr import AutoModel
-import soundfile as sf
-
-chunk_size = [0, 10, 5]          # 600 ms chunks (10 * 60 ms center)
-encoder_chunk_look_back = 4      # encoder look-back chunks
-decoder_chunk_look_back = 1      # decoder look-back chunks
-
-model = AutoModel(model="paraformer-zh-streaming")
-
-audio, sr = sf.read("speech.wav", dtype="float32")   # 16 kHz mono
-chunk_stride = chunk_size[1] * 960                    # 600 ms @ 16 kHz
-
-cache = {}
-n_chunks = (len(audio) - 1) // chunk_stride + 1
-for i in range(n_chunks):
-    chunk = audio[i * chunk_stride : (i + 1) * chunk_stride]
-    is_final = i == n_chunks - 1
-    res = model.generate(
-        input=chunk, cache=cache, is_final=is_final,
-        chunk_size=chunk_size,
-        encoder_chunk_look_back=encoder_chunk_look_back,
-        decoder_chunk_look_back=decoder_chunk_look_back,
-    )
-    if res[0]["text"]:
-        print(res[0]["text"], end="", flush=True)   # emit partial text</code></pre>
-<h2>输出是逐步增长的(示例)</h2>
-<pre><code>今天          # ~600 ms after speech starts
-今天天气
-今天天气真
-今天天气真不错    # is_final=True</code></pre>
-<p>每喂入一个 600ms 的音频块,模型就吐出这一块新识别到的文字,屏幕上的句子<strong>逐字增长</strong>,直到 <code>is_final=True</code> 收尾。实测一段 12 秒音频被切成 20 个块,逐块返回增量结果。</p>
-<h2>关键参数</h2>
-<table><thead><tr><th>参数</th><th>含义</th></tr></thead><tbody>
-<tr><td><code>chunk_size=[0,10,5]</code></td><td>[左看, 中心, 右看] 块大小,单位 60ms。中心 10 → 每块 600ms(延迟与精度的平衡点)</td></tr>
-<tr><td><code>encoder_chunk_look_back=4</code></td><td>编码器回看的历史块数(越大上下文越足、延迟略增)</td></tr>
-<tr><td><code>decoder_chunk_look_back=1</code></td><td>解码器回看的历史块数</td></tr>
-<tr><td><code>cache={}</code></td><td>跨块传递的状态,<strong>必须在多次调用间复用同一个 dict</strong></td></tr>
-<tr><td><code>is_final</code></td><td>最后一块置 <code>True</code>,触发收尾解码</td></tr>
+footer a{color:#94a3b8}</style><style>article a{text-decoration:underline;text-underline-offset:0.15em}</style></head><body>
+<nav class="nav"><div class="container"><a class="nav-logo" href="/">Fun<span>ASR</span></a><div class="nav-links"><a href="/#capabilities">核心能力</a><a href="/#usage">如何使用</a><a href="/#benchmark">性能</a><a href="/#demo">演示</a><a href="https://modelscope.github.io/FunASR/zh/" target="_blank">文档</a><a href="/quickstart.html">快速上手</a><a href="/models.html">模型</a><a href="/ecosystem.html">生态</a><a href="/blog/">技术博客</a><a href="/vs-whisper.html">对比 Whisper</a><a href="/donors.html">功德榜</a></div><a href="https://www.funasr.com/en/blog/funasr-realtime-streaming-asr.html" style="font-size:0.83rem;font-weight:600;color:var(--text-soft)">EN</a><a class="nav-btn" href="https://github.com/modelscope/FunASR" target="_blank">GitHub ★</a></div></nav>
+<article><div class="container"><h1>实时字幕为什么会改字？读懂流式识别的三种状态</h1>
+<p class="meta"><time datetime="2026-06-17">2026-06-17</time> 发布 · <time datetime="2026-11-24">2026-11-24</time> 修订 · 语音技术科普</p>
+<p>开会时，屏幕先打出“我们周四见”，说话人停顿后，字幕又变成“我们周五见。”这不一定是播放器出错：有些系统先用正在到达的声音给出临时结果，再用一整段声音重新识别。但如果接入程序把两次结果都追加到正文，你会看到同一句话出现两遍；如果它把第一句的“完成”当作整场会议结束，后半段就可能丢失。</p>
+<p>本文回答一个问题：<strong>一条实时识别消息来了，应该追加、替换，还是结束任务？</strong>读完后，你能为字幕应用划分“当前草稿、已完成片段、整份输入”三层状态。它是原理解读，不是服务器部署教程，无需安装软件。文中对话和消息顺序是虚构示例，不是模型实测结果。</p>
+<p>阅读导航：<a href="#ecosystem">先选对路径</a> · <a href="#streaming">流式怎样工作</a> · <a href="#read-messages">读懂消息</a> · <a href="#latency">延迟从哪来</a> · <a href="#acceptance">怎样验收</a> · <a href="#agent-contract">Agent 接入约定</a></p>
+<section><h2 id="ecosystem">先确认：你需要边说边出字，还是录完后交付？</h2>
+<p><strong>FunASR 是工具包</strong>，用于组织模型调用和处理流程；<strong>Fun-ASR、SenseVoice 是模型系列</strong>，具体能力取决于选用的模型、权重和运行方式；<strong>FunClip 是转写与剪辑应用</strong>。本文讲的是 FunASR 中的流式 Paraformer，以及官方仓库的 Python WebSocket 示例。不能因为这些项目都能处理语音，就把离线模型换一个名字当作流式模型，或认为剪辑应用天然提供实时字幕服务。</p>
+<p>如果目标只是把已有录音整理成文稿，先完成<a href="/blog/speech-to-text-python-transcribe-audio.html">第一段录音转写</a>，通常不必同时处理网络会话、临时文字和修订。如果观众必须在说话过程中看到文字，才需要考虑流式路径。<strong>2-pass</strong> 是“两遍处理”：第一遍尽早反馈，第二遍在片段结束后重新识别。它适合允许字幕修订的体验，不适合把每一个临时字立即作为不可撤销的付款、发信或设备控制指令。</p>
+<p>安装包是程序，模型权重是程序加载的参数文件，运行时负责执行，对外服务还要管理连接、鉴权和资源。只安装 <code>funasr</code> 不等于已备齐所有模型，更不等于部署好了服务。下面的协议说明只针对引用的 Python 示例源码；C++ 服务、HTTP API 或其他模型应另核对各自契约。更多取舍见<a href="/blog/which-funasr-model.html">模型与运行路径选型</a>。</p></section>
+<section><h2 id="streaming">流式不是把录音随便切小，再各认各的</h2>
+<p>离线识别可以先拿到一个完整输入。流式识别则要在声音尚未到齐时分块处理：前一块留下的状态，帮助模型理解后一块。这份跨块状态通常称为 <strong>cache（缓存）</strong>。这里的缓存不是硬盘上的模型下载缓存，而是当前音频会话的推理状态。</p>
+<p>在本文核对的流式 Paraformer Python 路径中，连续音频块复用同一个缓存；最后一次调用用 <code>is_final=True</code> 请求收尾。每块都换成一个空字典，相当于反复让模型从头开始；不同录音共用一份缓存，又可能串入不相干的上下文。一个块没有返回文字也不等于失败：当前声音未必足以形成可输出的文本。最后不足整块的声音仍需按接口要求收尾，不能直接丢弃。</p>
+<p>另一层是 <strong>VAD（语音活动检测）</strong>，判断哪里像有人说话、哪里可能结束了一个语音片段。它不是语法分析器：一次停顿不保证恰好是一句话，数字、专名或长句也可能跨过停顿。2-pass 的第二遍拿到更多片段上下文后，可能改词、补标点，也可能仍然识别错误。“第二遍”描述流程，不是准确率保证。</p></section>
+<section><h2 id="read-messages">把草稿、片段终稿和输入完成分开</h2>
+<p>先理解两种不同的文字接口。<strong>增量输出</strong>每次给一部分新文字，例如先来“我们”，再来“周四见”；显示层可以把它们连起来。<strong>累积假设</strong>每次给当前整段，例如先来“我们”，再来“我们周四见”；若照样追加，就会变成“我们我们周四见”。不能凭“流式”两个字判断是哪一种。</p>
+<p>引用的 Python 示例客户端把 <code>online</code> / <code>2pass-online</code> 的文字按增量处理，并把 <code>2pass-offline</code> 作为片段结果处理。下面用一段虚构对话说明设计意图，<strong>不是完整网络报文，也不是可直接复制的测试录音</strong>：</p>
+<table data-example="messages"><thead><tr><th>收到什么</th><th>意味着什么</th><th>字幕应用如何处理</th></tr></thead><tbody>
+<tr data-is-final="false" data-kind="partial" data-mode="2pass-online"><td><code>2pass-online</code><br/>先“我们”，再“周四见”</td><td>当前片段的增量草稿</td><td>草稿区显示“我们周四见”，先不当作核定内容。</td></tr>
+<tr data-is-final="true" data-kind="segment-final" data-mode="2pass-offline"><td><code>2pass-offline</code><br/>“我们周五见。”；<code>is_final=true</code></td><td>这一片段的第二遍结果</td><td>用“我们周五见。”替换对应草稿，再归入已完成片段；不把两个版本串在一起。</td></tr>
+<tr data-is-final="false" data-kind="partial" data-mode="2pass-online"><td><code>2pass-online</code><br/>“下午三点”</td><td>输入仍在继续</td><td>保留前一片段，开启新的草稿；第一条 final 并不代表整份输入结束。</td></tr>
+<tr data-has-text="false" data-is-end="true" data-is-final="true" data-kind="input-complete" data-mode="2pass"><td><code>mode=2pass</code><br/><code>is_end=true</code> 且 <code>is_final=true</code></td><td>发送方结束输入后，服务端完成收尾的确认</td><td>这是控制消息，可没有 text 字段；此时才完成本次输入的传输处理。</td></tr>
 </tbody></table>
-<h2>最佳实践:2-pass(流式 + 离线)</h2>
-<p>流式模型为了低延迟,精度会略低于离线模型。生产里常用 <strong>2-pass</strong> 方案:</p>
+<p>最后一行之前，文件输入客户端会发送 <code>is_speaking=false</code> 和 <code>is_end=true</code>，服务端处理尚未结束的在线、离线工作后回复确认。若收尾记录了错误，确认中的 <code>is_final</code> 为 <code>false</code>，并带 <code>error</code>。收到一条片段结果、发送完最后一帧、连接被关闭，这三件事都不能替代成功的结束确认。</p>
+<p>还要防止另一个误解：成功确认不保证一定有非空文字，更不证明转写正确、标点正确或所有附加功能都成功。本文引用的服务实现对某些辅助处理错误有单独处理路径。应用应分别检查协议完成、所需字段和实际内容，不用一个布尔值包办质量验收。</p>
+<p>示例客户端的显示逻辑也不是通用的并发修订协议。不要假设返回对象总有可用的片段 ID 或重放去重 ID。对接前须确认消息顺序和片段归属；应用自行维护的连接标识、片段编号与修订记录，应与原始服务字段分开。无法确定一条修订属于哪段时，停止自动拼接并保留原消息，不靠文字相似度偷偷覆盖历史。</p></section>
+<section><h2 id="latency">600 毫秒的音频块，不等于 600 毫秒看见字幕</h2>
+<p>官方流式示例使用 <code>chunk_size=[0,10,5]</code>，中心块的示例输入步长是 <code>10 × 960 = 9600</code> 个采样点。在 16000 Hz 下，这批声音覆盖 <code>9600 / 16000 = 0.6</code> 秒。这个除法算的是<strong>音频时长</strong>，不是一次推理的耗时，也不是说话开始到屏幕出字的实测延迟。</p>
+<p>观众感受到的等待还包括音频积累、模型所需上下文、上传与排队、计算、结果传输和页面刷新。第二遍结果还可能要等 VAD 判定片段结束，再完成离线识别。所以至少要分别观察：<strong>首次可见文字有多快、文字还会修订多久、说话结束后多久出现片段终稿</strong>。把音频快速读入内存后测得的吞吐，不能直接作为麦克风场景的响应速度。</p>
+<p>块更小不保证所有等待都缩短。固定开销、调度与并发可能影响总效果，参数也必须符合所用模型的约定。CPU 能否满足目标，取决于具体模型、音频、机器、线程和并发负载；GPU 同样不保证端到端实时。本文没有测量或承诺任一设备的实时性能。</p></section>
+<section><h2 id="acceptance">做字幕前，先验收这四个场景</h2>
+<ol>
+<li><strong>有修订的两段话。</strong>保留原始消息，检查第二遍替换的是当前片段，而不是追加出重复句，也不是抹掉前一段已经完成的内容。</li>
+<li><strong>结尾很短、几乎没有停顿。</strong>检查最后不足整块的声音有没有送完，结束确认之前有没有遗漏尾词。不要通过截掉录音结尾来让流程“成功”。</li>
+<li><strong>静音或没有可识别内容。</strong>允许无文字结果；把“协议正常结束但无文字”与“超时或推理失败”区分开，不编造字幕填空。</li>
+<li><strong>断网、超时和服务端报错。</strong>把任务记为失败或不完整，并保留已收到的片段。不能因为草稿区已有字，就把整份录音标成成功。</li>
+</ol>
+<p>这些检查需要你在自己的环境里，用有权处理的音频实际完成；本篇没有替你运行它们。字幕验收还要回听人名、数字和否定词。对语音助手来说，临时转写可以用于可撤销的界面反馈，但涉及发信、付费、删除等动作，应等待应用规定的确认，不能把 ASR 的“final”当作用户授权。</p></section>
+<section><h2 id="agent-contract">给 Agent：先保存事件，再生成字幕</h2>
+<p>针对本文引用的 Python WebSocket 路径，记录精确源码提交、模型标识和配置。下列字段不是整个 FunASR 生态的统一接口；对接其他服务时必须重新核对。</p>
 <ul>
-<li><strong>第一遍(流式)</strong>:用流式 Paraformer 实时出字,给用户即时反馈;</li>
-<li><strong>第二遍(离线)</strong>:一句话结束后(用 VAD 判定停顿),把整段音频再用 <a href="/blog/sensevoice-deployment-guide.html">SenseVoice</a> / 离线 Paraformer 重转一遍,得到更准的最终结果替换屏幕上的临时文本。</li>
+<li><code>mode</code> 是字符串。请求可选 <code>online</code>、<code>offline</code>、<code>2pass</code>；两遍结果可能用 <code>2pass-online</code> / <code>2pass-offline</code>。按消息类型处理，不能只检查是否存在 <code>text</code>。</li>
+<li><code>text</code> 是识别字符串，可能为空；结束确认可以没有这个字段。<code>is_final</code> 与 <code>is_end</code> 是布尔值，分别结合片段结果和结束确认理解，不能互换。<code>wav_name</code> 是输入名称字符串，不是已验证的身份、路径或唯一去重键。</li>
+<li>应用侧另存连接标识、接收顺序、原始消息和派生字幕版本。默认按单连接、有序处理的已确认契约设计，不把多条录音的缓存或草稿混在一起；这些应用侧字段不要伪装成服务端已经返回的字段。</li>
+<li>文件输入结束后，有界等待匹配的结束确认。示例 CLI 的 <code>--result_timeout</code> 单位是秒，默认 300；它是等待上限，不是性能保证。超时、负向确认或提前断连必须报告不完整。协议错误不自动重试；临时网络失败也只能在已授权次数内重试，并将新尝试分开记录，避免重放重复字幕。</li>
+<li>阅读本篇无需下载模型或上传录音。真正接入前，需分别确认软件依赖、模型权重及许可、首次下载权限和部署环境；后续离线使用要备齐文件并验证不会补下载。麦克风采集、音频上传、付费服务与保存他人录音需要相应授权，不能由“测试实时字幕”自动推导。</li>
 </ul>
-<p>FunASR 官方的 WebSocket 服务(<code>funasr-runtime-sdk-online-cpu</code>)就内置了这套 2-pass 流式协议,可直接部署。</p>
-<h2>典型场景</h2>
+<p>出现重复字，先核对增量还是累积假设；出现重复句，先核对离线修订是否被再次追加；缺结尾，先核对尾块和结束确认；延迟很大，分开测量排队、推理与端点等待。先找出是哪一层出了问题，再决定改模型还是改接入代码。</p></section>
+<h2 id="sources">依据与下一步</h2>
+<p>本文依据以下固定提交的官方源码与文档，核对了消息构造、客户端拼接、结束确认和采样点换算。对话与表格均为说明性示例；本次未运行模型推理，也未做实时延迟测试。引用的是特定源码，不代表任意已安装 wheel 都包含同版服务脚本。</p>
 <ul>
-<li><strong>实时字幕</strong>:直播、会议、课堂的即时上字幕。</li>
-<li><strong>语音助手</strong>:边听边理解,降低端到端响应延迟。</li>
-<li><strong>客服/质检</strong>:通话实时转写 + 实时关键词告警。</li>
+<li><a href="https://github.com/modelscope/FunASR/blob/ee46df3b7bca7d956af6b3c5deff23599c1de2cc/runtime/python/websocket/funasr_wss_server.py">Python WebSocket 服务：片段结果与 finish_input 收尾</a></li>
+<li><a href="https://github.com/modelscope/FunASR/blob/ee46df3b7bca7d956af6b3c5deff23599c1de2cc/runtime/python/websocket/funasr_wss_client.py">Python 客户端：增量展示、两遍结果与结束确认等待</a></li>
+<li><a href="https://github.com/modelscope/FunASR/blob/ee46df3b7bca7d956af6b3c5deff23599c1de2cc/funasr/models/paraformer_streaming/model.py">流式 Paraformer：跨块缓存、输入步长与最终收尾</a></li>
+<li><a href="https://github.com/modelscope/FunASR/blob/ee46df3b7bca7d956af6b3c5deff23599c1de2cc/runtime/python/websocket/README.md">该 Python 示例的配置与客户端说明</a></li>
 </ul>
-<div class="cta"><p>FunASR 是通义实验室开源的工业级语音识别工具包,离线 + 流式全覆盖,中文又快又准。</p><a class="btn" href="https://github.com/modelscope/FunASR" target="_blank">在 GitHub 上 Star FunASR ★</a></div>
-<!--related-posts-->
-<h2>相关文章</h2>
-<ul class="post-list">
-<li><a href="/blog/funasr-vs-whisper-benchmark.html">FunASR vs Whisper 实测对比</a></li>
-<li><a href="/blog/sensevoice-deployment-guide.html">SenseVoice 部署指南</a></li>
-<li><a href="/blog/fun-asr-nano-guide.html">Fun-ASR-Nano 使用指南</a></li>
-<li><a href="/blog/funasr-speaker-diarization.html">说话人分离:谁在何时说话</a></li>
-<li><a href="/blog/sensevoice-emotion-language-detection.html">情感与语种检测</a></li>
-<li><a href="/blog/funasr-transcribe-long-audio.html">转写超长音频(1小时一次搞定)</a></li>
-<li><a href="/blog/funasr-cli-transcribe-command-line.html">命令行转写(文本/JSON/SRT)</a></li>
-<li><a href="/blog/self-hosted-openai-whisper-api-alternative.html">自托管 OpenAI Whisper API 替代</a></li>
-<li><a href="/blog/generate-subtitles-srt-vtt-from-audio-video.html">自动生成字幕(SRT / VTT)</a></li>
-<li><a href="/blog/speech-to-text-python-transcribe-audio.html">Python 语音转文字教程</a></li>
-<li><a href="/blog/funasr-llama-cpp-whisper-cpp-alternative.html">FunASR 跑进 llama.cpp(whisper.cpp 替代)</a></li>
-<li><a href="/blog/funasr-vs-faster-whisper-chinese.html">FunASR vs faster-whisper(中文/粤语)</a></li>
-<li><a href="/blog/lightweight-speech-recognition-cpu.html">轻量语音识别(CPU 250MB)</a></li>
-<li><a href="/blog/self-hosted-deepgram-assemblyai-alternative.html">自托管替代 Deepgram/AssemblyAI</a></li>
-<li><a href="/blog/which-funasr-model.html">选哪个 FunASR 模型</a></li>
-<li><a href="/blog/cantonese-speech-recognition.html">粤语语音识别(SenseVoice 原生粤语)</a></li>
-<li><a href="/blog/japanese-speech-recognition.html">日语语音识别(SenseVoice 转写+标点+情感)</a></li>
-<li><a href="/blog/voice-activity-detection-python.html">Python 语音活动检测(VAD)</a></li>
-<li><a href="/blog/self-hosted-google-aws-azure-speech-to-text.html">自托管替代 Google/AWS/Azure 云语音 API</a></li>
-<li><a href="/blog/chinese-speech-recognition.html">中文语音识别(普通话)实战</a></li>
-<li><a href="/blog/punctuation-restoration-python.html">标点恢复 Python 实战</a></li>
-<li><a href="/blog/speech-to-text-timestamps-python.html">语音识别带时间戳(字级)</a></li>
-</ul>
+<p>下一步不是先追求更小的块，而是先写清你的交付标准：用户需要多快看到草稿、允许怎样修订、什么消息才算完成。理解这三个问题，再选择模型和服务，实时字幕才不会只是“屏幕上很快出现了字”。</p>
 </div></article>
 <footer><div class="container">FunASR · 通义实验室开源语音识别 · <a href="https://github.com/modelscope/FunASR">GitHub</a></div></footer>
 </body></html>
