@@ -617,6 +617,11 @@ def main():
     p.add_argument("--version", action="version", version=f"%(prog)s {_get_version()}")
     args = p.parse_args()
 
+    for audio_path in args.audio:
+        if not os.path.isfile(audio_path):
+            print(f"Error: file not found: {audio_path}", file=sys.stderr)
+            sys.exit(1)
+
     if args.verbose:
         print(f"Loading model: {args.model} ...", file=sys.stderr)
 
@@ -641,10 +646,6 @@ def main():
         os.makedirs(args.output_dir, exist_ok=True)
 
     for audio_path in args.audio:
-        if not os.path.isfile(audio_path):
-            print(f"Error: file not found: {audio_path}", file=sys.stderr)
-            sys.exit(1)
-
         if args.verbose:
             print(f"Transcribing: {audio_path}", file=sys.stderr)
 

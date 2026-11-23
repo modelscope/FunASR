@@ -4,6 +4,8 @@ import types
 from contextlib import redirect_stdout
 from unittest.mock import patch
 
+import pytest
+
 from funasr import cli
 
 
@@ -47,6 +49,35 @@ class ContinuationSubtitleAutoModel(DummyAutoModel):
                 ],
             }
         ]
+
+
+@pytest.mark.parametrize("input_kind", ["missing", "directory", "later_missing"])
+def test_cli_rejects_invalid_audio_paths_before_loading_model(tmp_path, capsys, input_kind):
+    valid_path = tmp_path / "first.wav"
+    valid_path.write_bytes(b"not a real wav")
+    invalid_path = tmp_path / "missing.wav"
+    if input_kind == "directory":
+        invalid_path.mkdir()
+    paths = [str(invalid_path)]
+    if input_kind == "later_missing":
+        paths.insert(0, str(valid_path))
+    out_dir = tmp_path / "output"
+    fake_torch = types.SimpleNamespace(
+        cuda=types.SimpleNamespace(is_available=lambda: False),
+    )
+
+    with (
+        patch.object(sys, "argv", ["funasr", *paths, "-o", str(out_dir)]),
+        patch.dict(sys.modules, {"torch": fake_torch}),
+        patch("funasr.AutoModel", side_effect=AssertionError("model was loaded")) as model,
+        pytest.raises(SystemExit) as exc_info,
+    ):
+        cli.main()
+
+    assert exc_info.value.code == 1
+    assert capsys.readouterr().err == f"Error: file not found: {invalid_path}\n"
+    model.assert_not_called()
+    assert not out_dir.exists()
 
 
 def test_cli_passes_hub_to_auto_model(tmp_path):
