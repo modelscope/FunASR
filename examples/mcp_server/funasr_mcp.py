@@ -230,15 +230,13 @@ def handle_request(request):
 
 def main():
     """Run MCP server over stdio."""
-    # Undecodable bytes become U+FFFD and fail JSON parsing as one bad frame
-    # instead of raising UnicodeDecodeError out of the read loop.
-    sys.stdin.reconfigure(errors="replace")
-    for line in sys.stdin:
+    # Decode each frame independently so invalid UTF-8 cannot alter a request.
+    for line in sys.stdin.buffer:
         line = line.strip()
         if not line:
             continue
         try:
-            request = json.loads(line)
+            request = json.loads(line.decode("utf-8"))
         except (ValueError, RecursionError):
             send_error(None, -32700, "Parse error")
             continue
