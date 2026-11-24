@@ -7,6 +7,8 @@ on:
       - "funasr/__init__.py"
       - "funasr/cli.py"
       - "tests/test_cli.py"
+      - "funasr/bin/tokenize_text.py"
+      - "tests/test_tokenize_text_field2slice.py"
       - "funasr/auto/auto_model.py"
       - "tests/test_auto_model_zero_speech_time.py"
       - "funasr/tokenizer/sentencepiece_tokenizer.py"
@@ -55,6 +57,8 @@ on:
       - "funasr/__init__.py"
       - "funasr/cli.py"
       - "tests/test_cli.py"
+      - "funasr/bin/tokenize_text.py"
+      - "tests/test_tokenize_text_field2slice.py"
       - "funasr/auto/auto_model.py"
       - "tests/test_auto_model_zero_speech_time.py"
       - "funasr/tokenizer/sentencepiece_tokenizer.py"
@@ -163,6 +167,7 @@ jobs:
             tests/test_paraformer_hotword_file.py \
             tests/test_ct_transformer_streaming_empty_input.py \
             tests/test_cli.py \
+            tests/test_tokenize_text_field2slice.py \
             tests/test_auto_model_zero_speech_time.py \
             --junitxml=numpy-results.xml
       - uses: actions/upload-artifact@v4
