@@ -25322,6 +25322,8 @@ Then run Python (api_key is a placeholder, not authentication):
 <div class="api-detail" id="e500" tabindex="-1"><span class="dtag badge-f">function</span><h2><code>field2slice(field: Optional[str]) -&gt; slice</code></h2><div class="dmod">funasr.bin.tokenize_text · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/tokenize_text.py#L23" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Convert field string to slice</p>
 <p>Note that field string accepts 1-based integer.</p>
 <h4>Examples:</h4>
+<p>&gt;&gt;&gt; field2slice("2")</p>
+<p>slice(1, 2, None)</p>
 <p>&gt;&gt;&gt; field2slice("1-")</p>
 <p>slice(0, None, None)</p>
 <p>&gt;&gt;&gt; field2slice("1-3")</p>
@@ -25334,6 +25336,8 @@ Then run Python (api_key is a placeholder, not authentication):
     Note that field string accepts 1-based integer.
 
     Examples:
+        &gt;&gt;&gt; field2slice("2")
+        slice(1, 2, None)
         &gt;&gt;&gt; field2slice("1-")
         slice(0, None, None)
         &gt;&gt;&gt; field2slice("1-3")
@@ -25356,10 +25360,8 @@ Then run Python (api_key is a placeholder, not authentication):
                 s2 = None
             else:
                 s2 = int(s2)
-        else:
-            # e.g. "2"
 </code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/tokenize_text.py#L23" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
-<div class="api-detail" id="e501" tabindex="-1"><span class="dtag badge-f">function</span><h2><code>tokenize(input: str, output: str, field: Optional[str], delimiter: Optional[str], token_type: str, space_symbol: str, non_linguistic_symbols: Optional[str], bpemodel: Optional[str], log_level: str, write_vocabulary: bool, vocabulary_size: int, remove_non_linguistic_symbols: bool, cutoff: int, add_symbol: List[str], cleaner: Optional[str], g2p: Optional[str])</code></h2><div class="dmod">funasr.bin.tokenize_text · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/tokenize_text.py#L69" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Tokenize.</p>
+<div class="api-detail" id="e501" tabindex="-1"><span class="dtag badge-f">function</span><h2><code>tokenize(input: str, output: str, field: Optional[str], delimiter: Optional[str], token_type: str, space_symbol: str, non_linguistic_symbols: Optional[str], bpemodel: Optional[str], log_level: str, write_vocabulary: bool, vocabulary_size: int, remove_non_linguistic_symbols: bool, cutoff: int, add_symbol: List[str], cleaner: Optional[str], g2p: Optional[str])</code></h2><div class="dmod">funasr.bin.tokenize_text · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/tokenize_text.py#L71" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Tokenize.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>input</code> — Input audio/text data.</li>
@@ -25409,8 +25411,8 @@ Then run Python (api_key is a placeholder, not authentication):
             space_symbol: TODO.
             non_linguistic_symbols: TODO.
             bpemodel: TODO.
-</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/tokenize_text.py#L69" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
-<div class="api-detail" id="e502" tabindex="-1"><span class="dtag badge-f">function</span><h2><code>get_parser() -&gt; argparse.ArgumentParser</code></h2><div class="dmod">funasr.bin.tokenize_text · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/tokenize_text.py#L211" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Get parser.</p>
+</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/tokenize_text.py#L71" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
+<div class="api-detail" id="e502" tabindex="-1"><span class="dtag badge-f">function</span><h2><code>get_parser() -&gt; argparse.ArgumentParser</code></h2><div class="dmod">funasr.bin.tokenize_text · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/tokenize_text.py#L213" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Get parser.</p>
 </div><details class="src-block"><summary>Source code</summary><pre><code>def get_parser() -&gt; argparse.ArgumentParser:
     """Get parser."""
     parser = argparse.ArgumentParser(
@@ -25441,8 +25443,8 @@ Then run Python (api_key is a placeholder, not authentication):
     )
     parser.add_argument("--delimiter", "-d", default=None, help="The delimiter")
     parser.add_argument("--space_symbol", default="&lt;space&gt;", help="The space symbol")
-</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/tokenize_text.py#L211" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
-<div class="api-detail" id="e503" tabindex="-1"><span class="dtag badge-f">function</span><h2><code>main(cmd=None)</code></h2><div class="dmod">funasr.bin.tokenize_text · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/tokenize_text.py#L293" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Main.</p>
+</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/tokenize_text.py#L213" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
+<div class="api-detail" id="e503" tabindex="-1"><span class="dtag badge-f">function</span><h2><code>main(cmd=None)</code></h2><div class="dmod">funasr.bin.tokenize_text · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/bin/tokenize_text.py#L295" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Main.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>cmd</code> — TODO.</li>
