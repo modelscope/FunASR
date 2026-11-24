@@ -26,6 +26,8 @@ def field2slice(field: Optional[str]) -> slice:
     Note that field string accepts 1-based integer.
 
     Examples:
+        >>> field2slice("2")
+        slice(1, 2, None)
         >>> field2slice("1-")
         slice(0, None, None)
         >>> field2slice("1-3")
@@ -51,7 +53,7 @@ def field2slice(field: Optional[str]) -> slice:
         else:
             # e.g. "2"
             s1 = int(field)
-            s2 = s1 + 1
+            s2 = s1
             if s1 == 0:
                 raise ValueError("must be 1 or more value")
     except ValueError:
