@@ -56,6 +56,12 @@ def send_response(id, result):
     sys.stdout.flush()
 
 
+def send_error(id, code, message):
+    msg = {"jsonrpc": "2.0", "id": id, "error": {"code": code, "message": message}}
+    sys.stdout.write(f"{json.dumps(msg)}\n")
+    sys.stdout.flush()
+
+
 def send_tool_error(id, message):
     send_response(
         id,
@@ -112,6 +118,11 @@ def handle_request(request):
     id = request.get("id")
     params = request.get("params", {})
 
+    if not isinstance(params, dict):
+        if id is not None:
+            send_error(id, -32602, "Invalid params: expected an object")
+        return
+
     if method == "initialize":
         send_response(id, {
             "protocolVersion": "2024-11-05",
@@ -166,6 +177,10 @@ def handle_request(request):
     elif method == "tools/call":
         tool_name = params.get("name")
         args = params.get("arguments", {})
+        if not isinstance(args, dict):
+            if id is not None:
+                send_error(id, -32602, "Invalid params: arguments must be an object")
+            return
 
         if tool_name == "transcribe_audio":
             audio_path = args.get("audio_path")
@@ -215,11 +230,22 @@ def handle_request(request):
 
 def main():
     """Run MCP server over stdio."""
+    # Undecodable bytes become U+FFFD and fail JSON parsing as one bad frame
+    # instead of raising UnicodeDecodeError out of the read loop.
+    sys.stdin.reconfigure(errors="replace")
     for line in sys.stdin:
         line = line.strip()
         if not line:
             continue
-        handle_request(json.loads(line))
+        try:
+            request = json.loads(line)
+        except (ValueError, RecursionError):
+            send_error(None, -32700, "Parse error")
+            continue
+        if not isinstance(request, dict):
+            send_error(None, -32600, "Invalid Request")
+            continue
+        handle_request(request)
 
 
 if __name__ == "__main__":
