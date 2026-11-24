@@ -14,6 +14,8 @@ on:
       - "funasr/tokenizer/phoneme_tokenizer.py"
       - "tests/test_char_tokenizer_non_linguistic_symbols.py"
       - "tests/test_char_tokenizer_seg_dict.py"
+      - "funasr/datasets/audio_datasets/samplers.py"
+      - "tests/test_batch_sampler_drop_last.py"
       - "tests/test_sentencepiece_tokenizer.py"
       - "tests/test_speaker_optional_dependency.py"
       - "funasr/utils/load_utils.py"
@@ -62,6 +64,8 @@ on:
       - "funasr/tokenizer/phoneme_tokenizer.py"
       - "tests/test_char_tokenizer_non_linguistic_symbols.py"
       - "tests/test_char_tokenizer_seg_dict.py"
+      - "funasr/datasets/audio_datasets/samplers.py"
+      - "tests/test_batch_sampler_drop_last.py"
       - "tests/test_sentencepiece_tokenizer.py"
       - "tests/test_speaker_optional_dependency.py"
       - "funasr/utils/load_utils.py"
@@ -151,6 +155,7 @@ jobs:
             tests/test_sentencepiece_tokenizer.py \
             tests/test_char_tokenizer_non_linguistic_symbols.py \
             tests/test_char_tokenizer_seg_dict.py \
+            tests/test_batch_sampler_drop_last.py \
             tests/test_pcm_input_format.py \
             tests/test_realtime_ws_service.py \
             tests/test_realtime_ws_hf_overrides.py \
