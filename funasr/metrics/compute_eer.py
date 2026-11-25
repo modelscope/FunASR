@@ -37,14 +37,23 @@ def compute_eer(trials_path, scores_path):
             trials_path: TODO.
             scores_path: TODO.
         """
-    labels = []
-    for one_line in open(trials_path, "r"):
-        labels.append(one_line.strip().rsplit(" ", 1)[-1] == "target")
-    labels = np.array(labels, dtype=int)
+    trials = {}
+    with open(trials_path, "r") as trials_file:
+        for line in trials_file:
+            utt1, utt2, target = line.rstrip().split()
+            trials[utt1 + " " + utt2] = target
 
+    labels = []
     scores = []
-    for one_line in open(scores_path, "r"):
-        scores.append(float(one_line.strip().rsplit(" ", 1)[-1]))
+    with open(scores_path, "r") as scores_file:
+        for line in scores_file:
+            utt1, utt2, score = line.rstrip().split()
+            trial = utt1 + " " + utt2
+            if trial not in trials:
+                raise Exception("Missing entry for " + utt1 + " and " + utt2 + " " + str(scores_path))
+            labels.append(trials[trial] == "target")
+            scores.append(float(score))
+    labels = np.array(labels, dtype=int)
     scores = np.array(scores, dtype=float)
 
     eer, threshold = _compute_eer(labels, scores)
