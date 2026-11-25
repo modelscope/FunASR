@@ -88,6 +88,46 @@ class SentencePostprocessTimestampTest(unittest.TestCase):
                     ("", [], []),
                 )
 
+    def test_trailing_bpe_piece_is_kept(self):
+        # a streaming chunk can end inside a word, e.g. ["hello", "wor@@"]
+        for path in POSTPROCESS_UTILS:
+            for tokens, expected in (
+                (["hello", "wor@@"], ("hello wor", ["hello", "wor"])),
+                (["你", "好", "wor@@"], ("你好wor", ["你", "好", "wor"])),
+            ):
+                with self.subTest(path=path, tokens=tokens):
+                    self.assertEqual(_load_sentence_postprocess(path)(tokens), expected)
+
+    def test_trailing_bpe_piece_keeps_its_timestamp(self):
+        self.assert_timestamps(
+            ["hello", "wor@@", "l@@"],
+            ["hello", "worl"],
+            [[0, 100], [100, 300]],
+        )
+
+    def test_open_bpe_piece_keeps_its_place_before_a_token_that_cannot_continue_it(self):
+        for tokens, words, timestamps in (
+            (["hel@@", "你"], ["hel", "你"], [[0, 100], [100, 200]]),
+            (["hel@@", "l@@", "你"], ["hell", "你"], [[0, 200], [200, 300]]),
+            (
+                ["hel@@", "你", "wor@@"],
+                ["hel", "你", "wor"],
+                [[0, 100], [100, 200], [200, 300]],
+            ),
+            (
+                ["hel@@", "你", "wor@@", "ld"],
+                ["hel", "你", "world"],
+                [[0, 100], [100, 200], [200, 400]],
+            ),
+            (["hel@@", "%"], ["hel", "%"], [[0, 100], [100, 200]]),
+        ):
+            self.assert_timestamps(tokens, words, timestamps)
+            for path in POSTPROCESS_UTILS:
+                with self.subTest(path=path, tokens=tokens):
+                    self.assertEqual(
+                        _load_sentence_postprocess(path)(tokens), ("".join(words), words)
+                    )
+
     def test_untimed_transcription_still_accepts_filtered_tokens(self):
         for path in POSTPROCESS_UTILS:
             with self.subTest(path=path):
