@@ -16,6 +16,9 @@ on:
       - "tests/test_auto_model_zero_speech_time.py"
       - "funasr/tokenizer/sentencepiece_tokenizer.py"
       - "funasr/tokenizer/char_tokenizer.py"
+      - "funasr/tokenizer/abs_tokenizer.py"
+      - "tests/test_tokenizer_path_token_list.py"
+      - "tests/test_tokenizer_path_boundaries.py"
       - "funasr/tokenizer/phoneme_tokenizer.py"
       - "tests/test_char_tokenizer_non_linguistic_symbols.py"
       - "tests/test_char_tokenizer_seg_dict.py"
@@ -69,6 +72,9 @@ on:
       - "tests/test_auto_model_zero_speech_time.py"
       - "funasr/tokenizer/sentencepiece_tokenizer.py"
       - "funasr/tokenizer/char_tokenizer.py"
+      - "funasr/tokenizer/abs_tokenizer.py"
+      - "tests/test_tokenizer_path_token_list.py"
+      - "tests/test_tokenizer_path_boundaries.py"
       - "funasr/tokenizer/phoneme_tokenizer.py"
       - "tests/test_char_tokenizer_non_linguistic_symbols.py"
       - "tests/test_char_tokenizer_seg_dict.py"
@@ -161,6 +167,8 @@ jobs:
             tests/test_sentencepiece_tokenizer.py \
             tests/test_char_tokenizer_non_linguistic_symbols.py \
             tests/test_char_tokenizer_seg_dict.py \
+            tests/test_tokenizer_path_token_list.py \
+            tests/test_tokenizer_path_boundaries.py \
             tests/test_pcm_input_format.py \
             tests/test_realtime_ws_service.py \
             tests/test_realtime_ws_hf_overrides.py \
