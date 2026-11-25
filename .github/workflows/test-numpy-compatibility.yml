@@ -10,6 +10,9 @@ on:
       - "funasr/bin/tokenize_text.py"
       - "tests/test_tokenize_text_field2slice.py"
       - "funasr/auto/auto_model.py"
+      - "funasr/utils/misc.py"
+      - "tests/test_misc_deep_update.py"
+      - "tests/test_misc_deep_update_boundaries.py"
       - "tests/test_auto_model_zero_speech_time.py"
       - "funasr/tokenizer/sentencepiece_tokenizer.py"
       - "funasr/tokenizer/char_tokenizer.py"
@@ -60,6 +63,9 @@ on:
       - "funasr/bin/tokenize_text.py"
       - "tests/test_tokenize_text_field2slice.py"
       - "funasr/auto/auto_model.py"
+      - "funasr/utils/misc.py"
+      - "tests/test_misc_deep_update.py"
+      - "tests/test_misc_deep_update_boundaries.py"
       - "tests/test_auto_model_zero_speech_time.py"
       - "funasr/tokenizer/sentencepiece_tokenizer.py"
       - "funasr/tokenizer/char_tokenizer.py"
@@ -169,6 +175,8 @@ jobs:
             tests/test_cli.py \
             tests/test_tokenize_text_field2slice.py \
             tests/test_auto_model_zero_speech_time.py \
+            tests/test_misc_deep_update.py \
+            tests/test_misc_deep_update_boundaries.py \
             --junitxml=numpy-results.xml
       - uses: actions/upload-artifact@v4
         if: always()
