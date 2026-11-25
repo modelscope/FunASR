@@ -204,6 +204,13 @@ def sentence_postprocess(words: List[Any], time_stamp: List[List] = None):
         begin = -1
         end = -1
         for i, ch in enumerate(middle_lists):
+            # an open "@@" word ends before a token that cannot continue it
+            if word_item and "@@" not in ch and not isAllAlpha(ch):
+                word_lists.append(word_item)
+                word_item = ""
+                if time_stamp is not None:
+                    ts_flag = True
+                    ts_lists.append([begin, end])
             if ts_flag and time_stamp is not None:
                 begin = time_stamp[i][0]
                 end = time_stamp[i][1]
