@@ -4,16 +4,71 @@ import pytest
 
 
 ROOT = Path(__file__).resolve().parents[1]
-RELEASE_VERSION = "1.4.21"
+RELEASE_VERSION = "1.4.29"
 README_FILES = ("README.md", "README_zh.md", "README_ja.md", "README_ko.md")
 REPOSITORY_ROLE_FILES = ("docs/repository_roles.md", "docs/repository_roles_zh.md")
 @pytest.mark.parametrize("name", README_FILES)
-def test_release_summary_preserves_streaming_punctuation_cache(name):
+def test_release_summary_covers_tokenizer_normalizer_and_cif(name):
+    summaries = [line for line in (ROOT / name).read_text(encoding="utf-8").splitlines()
+                 if "**FunASR 1.4.24**" in line]
+    assert len(summaries) == 1
+    assert "CIF" in summaries[0]
+    assert "norm_means=True" in summaries[0]
+    assert "norm_vars=True" in summaries[0]
+    assert "norm_vars=False" in summaries[0]
+    for number in (3852, 3853, 3854):
+        assert f"https://github.com/modelscope/FunASR/pull/{number}" in summaries[0]
+    assert "checkpoint" in summaries[0]
+
+@pytest.mark.parametrize("name", README_FILES)
+def test_release_summary_covers_parser_and_timestamp_fixes(name):
+    summaries = [line for line in (ROOT / name).read_text(encoding="utf-8").splitlines()
+                 if "**FunASR 1.4.25**" in line]
+    assert len(summaries) == 1
+    assert "Python 3.12" in summaries[0]
+    assert "distutils" in summaries[0]
+    for number in (3863, 3866):
+        assert f"https://github.com/modelscope/FunASR/pull/{number}" in summaries[0]
+
+
+@pytest.mark.parametrize("name", README_FILES)
+def test_release_summary_covers_audio_arrays_zero_duration_timestamps_and_seg_dict(name):
+    summaries = [line for line in (ROOT / name).read_text(encoding="utf-8").splitlines()
+                 if "**FunASR 1.4.27**" in line]
+    assert len(summaries) == 1
+    for term in ("int16", "multichannel", "VAD", "timestamp", "blank"):
+        assert term in summaries[0]
+    for number in (3890, 3891, 3896, 3898, 3903):
+        assert f"https://github.com/modelscope/FunASR/pull/{number}" in summaries[0]
+    assert "funasr==1.4.27" in summaries[0]
+    assert "releases/tag/v1.4.27" in summaries[0]
+
+
+@pytest.mark.parametrize("name", README_FILES)
+def test_1428_release_summary_links_whisper_lengths_and_symbol_timestamps(name):
+    summaries = [line for line in (ROOT / name).read_text(encoding="utf-8").splitlines()
+                 if "**FunASR 1.4.28**" in line]
+    assert len(summaries) == 1
+    assert "Whisper" in summaries[0]
+    for number in (3918, 3929):
+        assert f"https://github.com/modelscope/FunASR/pull/{number}" in summaries[0]
+    assert "funasr==1.4.28" in summaries[0]
+    assert "releases/tag/v1.4.28" in summaries[0]
+
+
+@pytest.mark.parametrize("name", README_FILES)
+def test_release_summary_links_event_dedupe_and_cif_timestamp_recovery(name):
     summaries = [line for line in (ROOT / name).read_text(encoding="utf-8").splitlines()
                  if f"**FunASR {RELEASE_VERSION}**" in line]
     assert len(summaries) == 1
-    assert "cache" in summaries[0].lower()
-    assert "https://github.com/modelscope/FunASR/pull/3824" in summaries[0]
+    assert "SenseVoice" in summaries[0]
+    assert "CIF" in summaries[0]
+    assert "timestamp" in summaries[0]
+    for number in (3931, 3935):
+        assert f"https://github.com/modelscope/FunASR/pull/{number}" in summaries[0]
+    assert f"funasr=={RELEASE_VERSION}" in summaries[0]
+    assert f"releases/tag/v{RELEASE_VERSION}" in summaries[0]
+
 
 
 

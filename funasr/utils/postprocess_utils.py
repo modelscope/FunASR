@@ -267,7 +267,12 @@ def sentence_postprocess(words: List[Any], time_stamp: List[List] = None):
                     ts_lists.append([begin, end])
                     begin = end
             else:
+                if alpha_blank is True:
+                    word_lists.pop()
                 word_lists.append(ch)
+                alpha_blank = False
+                if time_stamp is not None:
+                    ts_lists.append([time_stamp[i][0], time_stamp[i][1]])
 
     # a trailing "@@" piece (e.g. a streaming chunk ending inside a word) is still a word
     if word_item:
@@ -448,6 +453,11 @@ def format_str_v2(s):
     return s.strip()
 
 
+def _is_spaced_char(ch):
+    """Latin and Hangul text separates words with spaces; CJK text does not."""
+    return (ch.isascii() and not ch.isspace()) or "\uac00" <= ch <= "\ud7a3"
+
+
 def rich_transcription_postprocess(s):
     """Rich transcription postprocess.
     
@@ -479,14 +489,19 @@ def rich_transcription_postprocess(s):
     for i in range(1, len(s_list)):
         if len(s_list[i]) == 0:
             continue
-        if get_event(s_list[i]) == cur_ent_event and get_event(s_list[i]) != None:
+        event = get_event(s_list[i])
+        if event == cur_ent_event and event != None:
             s_list[i] = s_list[i][1:]
         if len(s_list[i]) == 0:
             continue
         # else:
-        cur_ent_event = get_event(s_list[i])
+        cur_ent_event = event
         if get_emo(s_list[i]) != None and get_emo(s_list[i]) == get_emo(new_s):
             new_s = new_s[:-1]
-        new_s += s_list[i].strip().lstrip()
+        segment = s_list[i].strip()
+        # Each VAD segment is its own <|lang|> block; keep the word boundary between them.
+        if segment and _is_spaced_char(new_s[-1]) and _is_spaced_char(segment[0]):
+            new_s += " "
+        new_s += segment
     new_s = new_s.replace("The.", " ")
     return new_s.strip()

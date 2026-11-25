@@ -32,6 +32,7 @@ ARTICLES = {
     "self-hosted-openai-whisper-api-alternative": {
         "titles": ("把语音转写接进自己的 API", "Add transcription to your own API"),
         "published": "2026-06-18",
+        "modified": "2026-11-12",
         "codes": ["ffaeacf00f8f84adbc0e2d5c3291412987427592ff9f5518e82cd6e3955062e4", "f87d523ad71de6c2d5f39bb7a549031c98be8feed3663e27f3419cd97179e747", "006d3d5b258d15e2c1be5822b7268b94923d584a730f0fcdd647b9beb4372d05", "4d4613a7fa2355b3134f7d4e932bb69dfac48a1fbac2485da79815e9064cef02"],
     },
     "meeting-transcript-acceptance": {
@@ -79,7 +80,7 @@ def test_title_metadata_and_existing_routes_stay_in_sync(article):
     metadata = json.loads(soup.select_one('script[type="application/ld+json"]').get_text())
     assert metadata["headline"] == expected
     assert metadata["datePublished"] == ARTICLES[slug]["published"]
-    assert metadata["dateModified"] == "2026-09-09"
+    assert metadata["dateModified"] == ARTICLES[slug].get("modified", "2026-09-09")
     assert soup.select_one('link[rel="canonical"]')["href"] == f"https://www.funasr.com/{prefix}blog/{slug}.html"
     peer = "" if prefix else "en/"
     assert soup.select_one(f'link[rel="alternate"][href="https://www.funasr.com/{peer}blog/{slug}.html"]')

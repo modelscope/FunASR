@@ -1,6 +1,13 @@
 import pytest
+import torch
 
-from funasr.utils.timestamp_tools import timestamp_sentence, timestamp_sentence_en
+from funasr.utils.postprocess_utils import sentence_postprocess
+from funasr.utils.timestamp_tools import (
+    cif_wo_hidden,
+    timestamp_sentence,
+    timestamp_sentence_en,
+    ts_prediction_lfr6_standard,
+)
 
 
 def test_timestamp_sentence_en_handles_whitespace_only_segment():
@@ -57,6 +64,31 @@ def test_timestamp_sentence_en_missing_trailing_timestamp_matches_zh_fallback():
     assert en_result[1]["start"] == zh_result[1]["start"]
 
 
+def test_timestamp_sentence_does_not_prefix_latin_text_with_a_space():
+    mixed = timestamp_sentence(
+        punc_id_list=[1, 2, 1, 1, 3],
+        timestamp_postprocessed=[[0, 100], [100, 200], [200, 300], [300, 400], [400, 500]],
+        text_postprocessed="我 用 iphone pro max",
+        return_raw_text=True,
+    )
+    assert [sentence["text"] for sentence in mixed] == ["我用，", "iphone pro max。"]
+    assert [sentence["raw_text"] for sentence in mixed] == ["我 用", "iphone pro max"]
+
+    english = timestamp_sentence(
+        [1, 3, 1],
+        [[0, 100], [100, 200], [200, 300]],
+        "hello world again",
+    )
+    assert [sentence["text"] for sentence in english] == ["hello world。", "again"]
+
+    chinese = timestamp_sentence(
+        [1, 3],
+        [[0, 100], [100, 200]],
+        "你好 世界",
+    )
+    assert chinese[0]["text"] == "你好世界。"
+
+
 def test_timestamp_sentence_raw_text_keeps_token_separators():
     result = timestamp_sentence(
         punc_id_list=[1, 2, 1, 1, 3],
@@ -103,3 +135,37 @@ def test_timestamp_sentence_does_not_emit_tail_without_its_timestamp(splitter):
 
     assert len(result) == 1
     assert result[0]["end"] == 200
+
+
+@pytest.mark.parametrize("punc_id_list", [None, []])
+def test_timestamp_sentence_without_punctuation_returns_string_text(punc_id_list):
+    timestamps = [[0, 100], [100, 200]]
+
+    zh = timestamp_sentence(punc_id_list, timestamps, "你 好", return_raw_text=True)
+    en = timestamp_sentence_en(punc_id_list, timestamps, "hello world", return_raw_text=True)
+
+    assert zh == [
+        {"text": "你好", "start": 0, "end": 200, "timestamp": timestamps, "raw_text": "你 好"}
+    ]
+    assert en == [
+        {"text": "hello world", "start": 0, "end": 200, "timestamp": timestamps, "raw_text": "hello world"}
+    ]
+
+
+@pytest.mark.parametrize(
+    "alphas, tokens, expected",
+    [
+        # Captured from a ~120 ms SEACO Paraformer segment (#3934).
+        ([0.0335148, 0.0, 0.0, 0.0, 0.2435439, 1.7229414], ["嗯"], [[70, 120]]),
+        ([0.0, 0.0, 1.0, 0.0, 0.0, 2.0], ["你", "好"], [[10, 70], [70, 120]]),
+        ([0.0, 0.0, 0.0, 0.0, 0.0, 3.0], ["你", "好"], [[70, 95], [95, 120]]),
+    ],
+)
+def test_ts_prediction_times_every_token_when_last_frame_owes_fires(alphas, tokens, expected):
+    alphas = torch.tensor(alphas)
+    peaks = cif_wo_hidden(alphas.unsqueeze(0), threshold=1.0 - 1e-4)[0]
+
+    _, timestamp = ts_prediction_lfr6_standard(alphas, peaks, list(tokens))
+
+    assert timestamp == expected
+    assert sentence_postprocess(list(tokens), timestamp)[1] == expected

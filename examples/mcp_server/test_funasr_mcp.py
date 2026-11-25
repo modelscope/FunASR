@@ -57,6 +57,100 @@ class FunASRMCPTransportTest(unittest.TestCase):
         self.assertEqual(responses[1]["result"]["tools"][0]["name"], "transcribe_audio")
 
 
+class FunASRMCPMalformedFrameTest(unittest.TestCase):
+    def run_server(self, *lines):
+        completed = subprocess.run(
+            [sys.executable, str(SERVER)],
+            input="".join(f"{line}\n" for line in lines),
+            text=True,
+            capture_output=True,
+            check=False,
+            timeout=5,
+        )
+        self.assertEqual(completed.returncode, 0, completed.stderr)
+        return [json.loads(line) for line in completed.stdout.splitlines()]
+
+    def test_malformed_json_returns_parse_error_and_keeps_serving(self):
+        valid = json.dumps({"jsonrpc": "2.0", "id": 7, "method": "tools/list"})
+        responses = self.run_server("not-json", valid)
+        self.assertEqual(responses[0]["error"]["code"], -32700)
+        self.assertIsNone(responses[0]["id"])
+        self.assertEqual(responses[1]["id"], 7)
+
+    def test_non_object_frame_returns_invalid_request(self):
+        responses = self.run_server("[1, 2]", "42")
+        self.assertEqual([r["error"]["code"] for r in responses], [-32600, -32600])
+
+    def test_non_object_params_returns_invalid_params(self):
+        call = {"jsonrpc": "2.0", "id": 1, "method": "tools/call", "params": []}
+        valid = {"jsonrpc": "2.0", "id": 2, "method": "tools/list"}
+        responses = self.run_server(json.dumps(call), json.dumps(valid))
+        self.assertEqual(responses[0]["id"], 1)
+        self.assertEqual(responses[0]["error"]["code"], -32602)
+        self.assertEqual(responses[1]["id"], 2)
+
+    def test_notifications_with_bad_params_get_no_reply(self):
+        bad_params = {"jsonrpc": "2.0", "method": "tools/call", "params": []}
+        bad_args = {
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {"name": "transcribe_audio", "arguments": "x"},
+        }
+        responses = self.run_server(json.dumps(bad_params), json.dumps(bad_args))
+        self.assertEqual(responses, [])
+
+    def test_deeply_nested_json_and_invalid_utf8_do_not_kill_server(self):
+        valid = json.dumps({"jsonrpc": "2.0", "id": 5, "method": "tools/list"})
+        completed = subprocess.run(
+            [sys.executable, str(SERVER)],
+            input=b"[" * 100000 + b"\n\x80\xff\n" + valid.encode() + b"\n",
+            capture_output=True,
+            check=False,
+            timeout=10,
+        )
+        self.assertEqual(completed.returncode, 0, completed.stderr)
+        responses = [json.loads(line) for line in completed.stdout.decode().splitlines()]
+        self.assertEqual([r.get("error", {}).get("code") for r in responses[:2]], [-32700, -32700])
+        self.assertEqual(responses[-1]["id"], 5)
+
+    def test_non_object_arguments_returns_invalid_params(self):
+        call = {
+            "jsonrpc": "2.0",
+            "id": 3,
+            "method": "tools/call",
+            "params": {"name": "transcribe_audio", "arguments": "x"},
+        }
+        responses = self.run_server(json.dumps(call))
+        self.assertEqual(responses[0]["error"]["code"], -32602)
+
+    def test_invalid_utf8_inside_json_string_is_rejected_before_dispatch(self):
+        invalid = b'{"jsonrpc":"2.0","id":9,"method":"tools/list","params":{"note":"\xff"}}\n'
+        valid = b'{"jsonrpc":"2.0","id":10,"method":"tools/list"}\n'
+        completed = subprocess.run(
+            [sys.executable, str(SERVER)], input=invalid + valid,
+            capture_output=True, check=False, timeout=5,
+        )
+        self.assertEqual(completed.returncode, 0, completed.stderr)
+        responses = [json.loads(line) for line in completed.stdout.splitlines()]
+        self.assertEqual(len(responses), 2)
+        self.assertEqual(responses[0].get("error", {}).get("code"), -32700)
+        self.assertIsNone(responses[0]["id"])
+        self.assertEqual(responses[1]["id"], 10)
+        self.assertIn("tools", responses[1]["result"])
+
+    def test_valid_utf8_replacement_character_is_not_a_parse_error(self):
+        request = {"jsonrpc": "2.0", "id": "\ufffd", "method": "tools/list"}
+        completed = subprocess.run(
+            [sys.executable, str(SERVER)],
+            input=(json.dumps(request, ensure_ascii=False) + "\n").encode("utf-8"),
+            capture_output=True, check=False, timeout=5,
+        )
+        self.assertEqual(completed.returncode, 0, completed.stderr)
+        response = json.loads(completed.stdout)
+        self.assertEqual(response["id"], "\ufffd")
+        self.assertIn("tools", response["result"])
+
+
 class FunASRMCPConfigurationTest(unittest.TestCase):
     def setUp(self):
         self.server = load_server_module()

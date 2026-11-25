@@ -1,17 +1,17 @@
 <!DOCTYPE html>
-<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Python 语音转文字:用 FunASR 本地、免费地把音频转成文本 | FunASR</title><meta name="description" content="用 Python 几行代码把音频转成文字:`AutoModel(...).generate(...)`,本地运行、免费、无 API key。带时间戳、说话人、批量处理,中文强、SenseVoiceSmall 五语种及 Fun-ASR-MLT-Nano 31 语种。代码全部实测。"><meta name="keywords" content="python 语音转文字, python 语音识别, 音频转文字 python, 语音转文本 python, funasr python, 离线语音识别 python, 免费语音转文字, python 语音转文本教程">
-<link rel="icon" href="/logo.png"><meta property="og:title" content="Python 语音转文字:用 FunASR 本地、免费地把音频转成文本"><meta property="og:description" content="用 Python 几行代码把音频转成文字:`AutoModel(...).generate(...)`,本地运行、免费、无 API key。带时间戳、说话人、批量处理,中文强、SenseVoiceSmall 五语种及 Fun-ASR-MLT-Nano 31 语种。代码全部实测。">
-<meta property="og:type" content="article"><meta property="og:url" content="https://www.funasr.com/blog/speech-to-text-python-transcribe-audio.html"><meta property="og:image" content="https://www.funasr.com/logo.png">
-<link rel="canonical" href="https://www.funasr.com/blog/speech-to-text-python-transcribe-audio.html"><link rel="alternate" hreflang="en" href="https://www.funasr.com/en/blog/speech-to-text-python-transcribe-audio.html"><link rel="alternate" hreflang="zh" href="https://www.funasr.com/blog/speech-to-text-python-transcribe-audio.html"><link rel="alternate" hreflang="x-default" href="https://www.funasr.com/en/blog/speech-to-text-python-transcribe-audio.html">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<script type="application/ld+json">
-{"@context":"https://schema.org","@type":"BlogPosting","headline":"Python 语音转文字:用 FunASR 本地、免费地把音频转成文本","description":"用 Python 几行代码把音频转成文字:`AutoModel(...).generate(...)`,本地运行、免费、无 API key。带时间戳、说话人、批量处理,中文强、SenseVoiceSmall 五语种及 Fun-ASR-MLT-Nano 31 语种。代码全部实测。","datePublished":"2026-06-18","dateModified":"2026-06-18","author":{"@type":"Organization","name":"FunASR / Tongyi Lab"},"publisher":{"@type":"Organization","name":"FunASR","logo":{"@type":"ImageObject","url":"https://www.funasr.com/logo.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://www.funasr.com/blog/speech-to-text-python-transcribe-audio.html"},"image":"https://www.funasr.com/logo.png"}
-</script>
+
+<html lang="zh"><head><meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/>
+<title>用 Python 把第一段录音转成文字 | FunASR</title><meta content="从认识工具包和模型开始，在独立 Python 环境中把一段普通话 WAV 转成 JSON 文本，附下载边界、排错步骤和 Agent 执行约定。" name="description"/>
+<link href="/logo.png" rel="icon"/><meta content="用 Python 把第一段录音转成文字" property="og:title"/><meta content="从认识工具包和模型开始，在独立 Python 环境中把一段普通话 WAV 转成 JSON 文本，附下载边界、排错步骤和 Agent 执行约定。" property="og:description"/>
+<meta content="article" property="og:type"/><meta content="https://www.funasr.com/blog/speech-to-text-python-transcribe-audio.html" property="og:url"/><meta content="https://www.funasr.com/logo.png" property="og:image"/>
+<link href="https://www.funasr.com/blog/speech-to-text-python-transcribe-audio.html" rel="canonical"/><link href="https://www.funasr.com/en/blog/speech-to-text-python-transcribe-audio.html" hreflang="en" rel="alternate"/><link href="https://www.funasr.com/blog/speech-to-text-python-transcribe-audio.html" hreflang="zh" rel="alternate"/><link href="https://www.funasr.com/en/blog/speech-to-text-python-transcribe-audio.html" hreflang="x-default" rel="alternate"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"用 Python 把第一段录音转成文字","description":"从认识工具包和模型开始，在独立 Python 环境中把一段普通话 WAV 转成 JSON 文本，附下载边界、排错步骤和 Agent 执行约定。","datePublished":"2026-06-18","dateModified":"2026-11-17","author":{"@type":"Organization","name":"FunASR / Tongyi Lab"},"publisher":{"@type":"Organization","name":"FunASR","logo":{"@type":"ImageObject","url":"https://www.funasr.com/logo.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://www.funasr.com/blog/speech-to-text-python-transcribe-audio.html"},"image":"https://www.funasr.com/logo.png"}</script>
 <style>:root{--primary:#2563eb;--primary-dark:#1d4ed8;--bg:#fff;--surface:#f8fafc;--border:#e2e8f0;--text:#0f172a;--text-soft:#475569;--text-muted:#94a3b8;--radius:12px}
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Inter',-apple-system,sans-serif;color:var(--text);line-height:1.7}
 a{color:var(--primary);text-decoration:none}a:hover{text-decoration:underline}
+article p a,article li a{text-decoration:underline;text-underline-offset:0.18em}
 .container{max-width:800px;margin:0 auto;padding:0 24px}
 .nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(255,255,255,0.9);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:14px 0}
 .nav .container{max-width:1120px;display:flex;align-items:center;gap:24px}
@@ -45,90 +45,146 @@ footer{background:#0f172a;color:#94a3b8;padding:28px 0;text-align:center;font-si
 footer a{color:#94a3b8}
 @media(max-width:900px){.nav-links{display:none}.nav .container{gap:16px}.nav-logo{margin-right:auto}h1{font-size:1.75rem}table{table-layout:fixed;font-size:0.78rem}th,td{padding:8px 4px;overflow-wrap:anywhere}p code,li code{overflow-wrap:anywhere;word-break:break-word}}
 </style></head><body>
-<nav class="nav"><div class="container"><a href="/" class="nav-logo">Fun<span>ASR</span></a><div class="nav-links"><a href="/#capabilities">核心能力</a><a href="/#usage">如何使用</a><a href="/#benchmark">性能</a><a href="/#demo">演示</a><a href="https://modelscope.github.io/FunASR/zh/" target="_blank">文档</a><a href="/quickstart.html">快速上手</a><a href="/models.html">模型</a><a href="/ecosystem.html">生态</a><a href="/blog/">技术博客</a><a href="/vs-whisper.html">对比 Whisper</a><a href="/donors.html">功德榜</a></div><a href="https://www.funasr.com/en/blog/speech-to-text-python-transcribe-audio.html" style="font-size:0.83rem;font-weight:600;color:var(--text-soft)">EN</a><a href="/go/github" target="_blank" class="nav-btn">GitHub ★</a></div></nav>
-<article><div class="container">
-<h1>Python 语音转文字:用 FunASR 本地、免费地把音频转成文本</h1>
-<p class="post-meta">FunASR 技术博客 · 2026-06-18 · 教程</p>
-<p>在 Python 里把音频转成文字,不一定要用云 API 或庞大的 Whisper。FunASR 几行代码就能在本地、免费地转写,还自带时间戳、说话人分离和批量处理。中文尤其强,同时支持 SenseVoiceSmall 五语种及 Fun-ASR-MLT-Nano 31 语种。下面每段代码都已实测。</p>
-
-<h2>安装</h2>
-<pre><code>pip install -U torch torchaudio
-pip install -U funasr</code></pre>
-
-<h2>最简单:几行转写一个文件</h2>
-<pre><code>from funasr import AutoModel
-from funasr.utils.postprocess_utils import rich_transcription_postprocess
-
-model = AutoModel(model="iic/SenseVoiceSmall", vad_model="fsmn-vad", device="cuda")
-result = model.generate(input="audio.wav")
-print(rich_transcription_postprocess(result[0]["text"]))
-# -&gt; 欢迎大家来体验达摩院推出的语音识别模型</code></pre>
-<p>默认用 SenseVoice(非自回归、极快)。<code>rich_transcription_postprocess</code> 用来清掉 SenseVoice 的 <code>&lt;|zh|&gt;</code> 等标签,得到干净文本——别漏掉这一步。</p>
-
-<h2>直接从 URL 转写</h2>
-<pre><code>result = model.generate(
-    input="https://example.com/audio.wav"   # 也支持本地路径、numpy、bytes
-)</code></pre>
-
-<h2>要时间戳和说话人</h2>
-<p>结果里的 <code>sentence_info</code> 每段都带 <code>start</code>/<code>end</code>(毫秒)、<code>spk</code>(说话人)、<code>sentence</code>:</p>
-<pre><code>model = AutoModel(model="iic/SenseVoiceSmall", vad_model="fsmn-vad", spk_model="cam++", device="cuda")
-result = model.generate(input="audio.wav")
-
-for seg in result[0]["sentence_info"]:
-    start = seg["start"] / 1000
-    text = rich_transcription_postprocess(seg["sentence"])
-    print("[%.1fs] Speaker %s: %s" % (start, seg["spk"], text))
-# -&gt; [0.6s] Speaker 0: 欢迎大家来体验达摩院推出的语音识别模型</code></pre>
-
-<h2>批量转写多个文件</h2>
-<p>把文件列表传给 <code>input</code>,一次返回每个文件的结果:</p>
-<pre><code>results = model.generate(input=["a.wav", "b.wav", "c.wav"])
-for r in results:
-    print(rich_transcription_postprocess(r["text"]))</code></pre>
-
-<h2>选哪个模型</h2>
-<table><thead><tr><th>model=</th><th>适合</th></tr></thead><tbody>
-<tr><td><code>iic/SenseVoiceSmall</code></td><td>默认,极快,SenseVoiceSmall 五语种及 Fun-ASR-MLT-Nano 31 语种,带情感/事件</td></tr>
-<tr><td><code>paraformer-zh</code></td><td>经典中文生产级,稳</td></tr>
-<tr><td><code>FunAudioLLM/Fun-ASR-Nano-2512</code></td><td>旗舰 LLM 解码,中英日 + 中文方言/口音</td></tr>
-<tr><td><code>FunAudioLLM/Fun-ASR-MLT-Nano-2512</code></td><td>独立多语 checkpoint,覆盖 31 语种</td></tr>
-</tbody></table>
-<p>换模型只改 <code>model=</code> 即可,其余代码不变。</p>
-
-<h2>为什么用 FunASR</h2>
+<nav class="nav"><div class="container"><a class="nav-logo" href="/">Fun<span>ASR</span></a><div class="nav-links"><a href="/#capabilities">核心能力</a><a href="/#usage">如何使用</a><a href="/#benchmark">性能</a><a href="/#demo">演示</a><a href="https://modelscope.github.io/FunASR/zh/" target="_blank">文档</a><a href="/quickstart.html">快速上手</a><a href="/models.html">模型</a><a href="/ecosystem.html">生态</a><a href="/blog/">技术博客</a><a href="/vs-whisper.html">对比 Whisper</a><a href="/donors.html">功德榜</a></div><a href="https://www.funasr.com/en/blog/speech-to-text-python-transcribe-audio.html" style="font-size:0.83rem;font-weight:600;color:var(--text-soft)">EN</a><a class="nav-btn" href="/go/github" target="_blank">GitHub ★</a></div></nav>
+<article><div class="container"><h1>用 Python 把第一段录音转成文字</h1>
+<p class="post-meta">2026-06-18 发布 · 2026-11-17 重写 · 入门教程</p>
+<p class="lead" data-editorial="opening">你有一段中文录音，想把里面说的话变成可以搜索、复制的文字。先不用搭服务器，也不用训练模型。这篇教程只做一件事：在自己的电脑上运行 Python，把一段短录音保存为文字结果文件。</p>
+<p data-editorial="example">我们先用官方示例音频走通流程，产物是 <code>transcript.json</code>。成功后再换成你有权使用的录音。整条路径是：准备 Python 环境 → 安装工具 → 准备音频和模型 → 识别 → 打开结果并回听核对。</p>
+<p data-editorial="boundary">本文选择普通话、CPU、单段不超过 30 秒的 WAV。这个时长是教程主动设置的入门范围，不是 FunASR 的统一上限。本例只输出转写文字，不承诺自动生成字幕、识别人名、区分说话人或达到实时速度。</p>
+<h2 id="ecosystem">1. 先分清：工具包、模型和应用</h2>
+<p><strong>语音识别（ASR）</strong>就是把声音里的话转换成文字。你需要两样东西：负责加载文件、组织计算的程序，以及已经学过如何识别语音的模型。</p>
 <ul>
-<li><strong>本地、免费、隐私</strong>:无需联网、无 API key、无时长费用。</li>
-<li><strong>快</strong>:SenseVoice 非自回归,远快于 Whisper(<a href="/blog/funasr-vs-whisper-benchmark.html">实测对比</a>),CPU 也能实时。</li>
-<li><strong>中文更准</strong> + SenseVoiceSmall 五语种及 Fun-ASR-MLT-Nano 31 语种;时间戳、说话人、热词、批量开箱即用。</li>
+<li><strong>FunASR</strong>是工具包。<code>pip install funasr</code> 安装的是 Python 程序，不是所有语音模型。</li>
+<li><strong>Paraformer、SenseVoice、Fun-ASR</strong>是不同的模型或模型系列。模型权重是另行下载的文件，支持的语言、参数和输出不完全相同。本篇只用 Paraformer 中文路径，不在第一步同时比较多个模型。</li>
+<li><strong>FunClip</strong>是面向音视频转写与剪辑的应用。想直接操作视频剪辑界面，可以从应用入手；想把识别放进自己的程序，则从本篇的 Python 路径入手。</li>
 </ul>
-<div class="cta"><p>FunASR 是通义实验室开源的工业级语音识别工具包。</p><a class="btn" href="/go/github" target="_blank">在 GitHub 上 Star FunASR ★</a></div>
-<!--related-posts-->
-<h2>相关文章</h2>
-<ul class="post-list">
-<li><a href="/blog/funasr-vs-whisper-benchmark.html">FunASR vs Whisper 实测对比</a></li>
-<li><a href="/blog/sensevoice-deployment-guide.html">SenseVoice 部署指南</a></li>
-<li><a href="/blog/fun-asr-nano-guide.html">Fun-ASR-Nano 使用指南</a></li>
-<li><a href="/blog/funasr-speaker-diarization.html">说话人分离:谁在何时说话</a></li>
-<li><a href="/blog/sensevoice-emotion-language-detection.html">情感与语种检测</a></li>
-<li><a href="/blog/funasr-realtime-streaming-asr.html">实时流式语音识别</a></li>
-<li><a href="/blog/funasr-transcribe-long-audio.html">转写超长音频(1小时一次搞定)</a></li>
-<li><a href="/blog/funasr-cli-transcribe-command-line.html">命令行转写(文本/JSON/SRT)</a></li>
-<li><a href="/blog/self-hosted-openai-whisper-api-alternative.html">自托管 OpenAI Whisper API 替代</a></li>
-<li><a href="/blog/generate-subtitles-srt-vtt-from-audio-video.html">自动生成字幕(SRT / VTT)</a></li>
-<li><a href="/blog/funasr-llama-cpp-whisper-cpp-alternative.html">FunASR 跑进 llama.cpp(whisper.cpp 替代)</a></li>
-<li><a href="/blog/funasr-vs-faster-whisper-chinese.html">FunASR vs faster-whisper(中文/粤语)</a></li>
-<li><a href="/blog/lightweight-speech-recognition-cpu.html">轻量语音识别(CPU 250MB)</a></li>
-<li><a href="/blog/self-hosted-deepgram-assemblyai-alternative.html">自托管替代 Deepgram/AssemblyAI</a></li>
-<li><a href="/blog/which-funasr-model.html">选哪个 FunASR 模型</a></li>
-<li><a href="/blog/cantonese-speech-recognition.html">粤语语音识别(SenseVoice 原生粤语)</a></li>
-<li><a href="/blog/japanese-speech-recognition.html">日语语音识别(SenseVoice 转写+标点+情感)</a></li>
-<li><a href="/blog/voice-activity-detection-python.html">Python 语音活动检测(VAD)</a></li>
-<li><a href="/blog/self-hosted-google-aws-azure-speech-to-text.html">自托管替代 Google/AWS/Azure 云语音 API</a></li>
-<li><a href="/blog/chinese-speech-recognition.html">中文语音识别(普通话)实战</a></li>
-<li><a href="/blog/punctuation-restoration-python.html">标点恢复 Python 实战</a></li>
-<li><a href="/blog/speech-to-text-timestamps-python.html">语音识别带时间戳(字级)</a></li>
+<p>第一次把录音转成文字，不需要先学训练、微调或 GPU 优化。先完成一次小任务，后面再根据字幕、会议记录或实时交互的需求加能力。</p>
+<h2 id="requirements">2. 开始前准备什么</h2>
+<p>下面是一条明确的 <strong>Linux x86_64、Python 3.11、CPU</strong> 安装路径。你需要能打开终端、创建文件夹，以及在首次安装软件和模型时联网。CPU 路径不需要配置 CUDA；运行速度和内存需求取决于模型与机器，不保证实时。</p>
+<p>Windows、macOS 或已有 GPU 环境请先走<a href="/docs/installation.html">安装指南</a>选择对应的 PyTorch 版本，不要直接把 Linux CPU 命令拼进已有环境。模型下载需要可写缓存和足够磁盘空间；软件安装成功不代表权重已准备好。</p>
+<h2 id="installation">3. 建一个独立环境，再安装</h2>
+<p>独立环境像这个练习自己的工具箱，可以减少与其他项目的依赖冲突。请在终端按顺序运行：</p>
+<pre><code data-language="shell">mkdir first-transcript
+cd first-transcript
+python3.11 -m venv .venv
+. .venv/bin/activate
+python -m pip install --upgrade pip
+python -m pip install "torch==2.8.0" "torchaudio==2.8.0" --index-url https://download.pytorch.org/whl/cpu
+python -m pip install "funasr==1.4.26"
+python -m pip check
+python -c "import sys, funasr, torch, torchaudio; from funasr import AutoModel; print(sys.executable); print(funasr.__version__, funasr.__file__); print(torch.__version__, torchaudio.__version__)"
+python -m pip freeze &gt; environment.txt</code></pre>
+<p>这里固定 FunASR 1.4.26，并按 <a href="https://pytorch.org/get-started/previous-versions/">PyTorch 官方版本页</a>配对 torch/torchaudio 2.8.0。它不是整个依赖树的锁文件，所以保留 <code>environment.txt</code>，以后排错时知道实际安装了什么。版本检查应显示 FunASR 1.4.26，Python 路径应属于刚创建的 <code>.venv</code>；这一步只证明环境能导入，不是识别成功。</p>
+<h2 id="audio">4. 先用示例音频，减少变量</h2>
+<p>下载<a href="https://github.com/modelscope/FunASR/blob/v1.4.26/docs/tutorial/README.md">官方教程引用的中文 WAV</a>。这条命令只下载音频，不会上传你的录音：</p>
+<pre><code data-language="shell">curl --fail --location --output sample.wav https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav</code></pre>
+<p>WAV 是音频文件的封装格式；16 kHz 表示每秒 16000 个采样点；单声道表示一条声音通道。本篇脚本只接受<strong>单声道、16000 Hz、16 位 PCM WAV</strong>。把 MP3 后缀改成 .wav 不会完成格式转换。</p>
+<p>换自己的音频时，先选一段有清晰普通话、你有权处理的短录音。若需要转换格式，可以用已安装的 FFmpeg 另存为新文件，保留原始录音：</p>
+<pre><code data-language="shell">ffmpeg -n -i my-recording.mp3 -ac 1 -ar 16000 -c:a pcm_s16le my-recording-16k.wav</code></pre>
+<p><code>my-recording.mp3</code> 要替换成实际文件路径；<code>-n</code> 表示已有输出不覆盖。转换整段音频不会自动变短，仍需选取不超过 30 秒的输入。确认声音正常后再交给模型，避免把文件问题误认为识别问题。</p>
+<h2 id="transcribe">5. 运行完整的转写脚本</h2>
+<p>把下面完整代码放在工作目录的 <code>transcribe_first.py</code>。你暂时不需要理解每一行：前半段检查文件，<code>AutoModel(...)</code> 加载模型，<code>generate(...)</code> 开始识别，最后保存 JSON。输入不合要求时会先停止，不先下载大模型。</p>
+<pre><code data-example="transcribe-first" data-language="python">import argparse
+import json
+from pathlib import Path
+import wave
+
+MODEL_ID = "iic/speech_seaco_paraformer_large_asr_nat-zh-cn-16k-common-vocab8404-pytorch"
+
+
+def main(argv=None):
+    parser = argparse.ArgumentParser(description="One short Mandarin WAV to one JSON transcript")
+    parser.add_argument("--audio", required=True)
+    parser.add_argument("--output", default="transcript.json")
+    source = parser.add_mutually_exclusive_group(required=True)
+    source.add_argument("--model-dir")
+    source.add_argument("--allow-download", action="store_true")
+    args = parser.parse_args(argv)
+
+    audio = Path(args.audio).expanduser().resolve(strict=True)
+    output = Path(args.output).expanduser().resolve()
+    if not audio.is_file():
+        parser.error("--audio must be a local WAV file")
+    if output.exists() or not output.parent.is_dir():
+        parser.error("Choose a new output file in an existing directory")
+    with wave.open(str(audio), "rb") as wav:
+        if (wav.getnchannels(), wav.getsampwidth(), wav.getframerate(), wav.getcomptype()) != (1, 2, 16000, "NONE"):
+            parser.error("Expected mono, 16-bit PCM WAV at 16000 Hz")
+        frames = wav.getnframes()
+        duration = frames / 16000
+        if not 0 &lt; duration &lt;= 30:
+            parser.error("This first example accepts more than 0 and at most 30 seconds")
+        if len(wav.readframes(frames)) != frames * 2:
+            parser.error("WAV data is truncated")
+
+    model_source = MODEL_ID
+    if args.model_dir:
+        directory = Path(args.model_dir).expanduser().resolve(strict=True)
+        if not directory.is_dir():
+            parser.error("--model-dir must be a complete local model directory")
+        model_source = str(directory)
+
+    from funasr import AutoModel, __version__
+
+    model = AutoModel(
+        model=model_source, hub="ms", device="cpu", ncpu=4,
+        disable_update=True, trust_remote_code=False,
+    )
+    results = model.generate(input=str(audio), batch_size=1)
+    if not isinstance(results, list) or len(results) != 1 or not isinstance(results[0], dict):
+        raise RuntimeError("Expected one result dictionary; inspect the model and input")
+    text = results[0].get("text")
+    if not isinstance(text, str) or not text.strip():
+        raise RuntimeError("No non-empty transcript; listen to the input before retrying")
+    record = {
+        "text": text,
+        "audio": str(audio),
+        "duration_seconds": duration,
+        "model_dir": str(model.model_path),
+        "funasr_version": __version__,
+    }
+    with output.open("x", encoding="utf-8") as target:
+        json.dump(record, target, ensure_ascii=False, indent=2)
+        target.write("\n")
+    print("Wrote:", output)
+
+
+if __name__ == "__main__":
+    main()
+</code></pre>
+<p>首次使用，先阅读<a href="https://modelscope.cn/models/iic/speech_seaco_paraformer_large_asr_nat-zh-cn-16k-common-vocab8404-pytorch">所选模型的模型卡和使用条款</a>，确认允许下载与使用后运行：</p>
+<pre><code data-language="shell">python transcribe_first.py --audio sample.wav --allow-download --output transcript.json</code></pre>
+<p><code>--allow-download</code> 是本教程脚本的选项，不是 FunASR 通用参数。它允许从 ModelScope 获取上面明确指定的模型。第一次运行包含下载和加载时间，不能把它当成纯识别耗时；脚本没有自动重试，也不会在失败时自行换模型。</p>
+<h2 id="result">6. 怎样判断真的做成了</h2>
+<pre><code data-language="shell">python -m json.tool transcript.json</code></pre>
+<p>先确认上一条转写命令正常退出，而且本次新建的 JSON 文件能被解析。文件里的 <code>text</code> 是识别结果；<code>audio</code> 是输入路径；<code>duration_seconds</code> 的单位是秒；<code>model_dir</code> 是实际加载的模型目录；<code>funasr_version</code> 是运行时版本。</p>
+<p>然后回听这段音频，重点核对人名、数字、否定词和句尾。<strong>生成文件是程序执行成功，文字与原音频一致才是内容可用。</strong>不要因为 JSON 里有非空文字，就把它当作准确答案。这个简单流程没有配置标点模型，也不把返回文字包装成字幕时间轴。</p>
+<p>第二次处理自己的录音时，可以复用 JSON 中记录的 <code>model_dir</code>，把它替换到下面的 <code>/absolute/path/to/model</code>。该路径必须是完整、可信的同款模型目录，不是仅有一个权重文件：</p>
+<pre><code data-language="shell">python transcribe_first.py --audio my-recording-16k.wav --model-dir /absolute/path/to/model --output my-transcript.json</code></pre>
+<p>本地目录可以避免再次按模型 ID 请求下载，但<strong>不是自动断网保证</strong>。离线部署还要准备齐依赖、模型配置及相关资源，并实际在禁止外联的环境验证。<code>disable_update=True</code> 只关闭 FunASR 版本检查。需要复现同一模型时，记录完整模型 ID、revision 和文件校验值；模型 ID 本身不是不可变版本。</p>
+<h2 id="troubleshooting">7. 卡住时，从对应的一层查起</h2>
+<table><thead><tr><th>现象</th><th>先做什么</th></tr></thead><tbody>
+<tr><td>找不到 python3.11 或 venv</td><td>先安装对应 Python 与 venv 组件，确认解释器可用；不要跳过环境步骤继续装包。</td></tr>
+<tr><td>找不到 funasr，或 torch/torchaudio 导入失败</td><td>重新激活 .venv，检查 python 路径与 python -m pip --version，再核对成对的 PyTorch 构建；不要直接升级全部依赖。</td></tr>
+<tr><td>文件不存在、不是 WAV、采样率不符或超过 30 秒</td><td>核对路径，先播放音频，再转换成要求的格式或选取短片段。脚本不会靠修改采样率标签修复音频。</td></tr>
+<tr><td>模型下载失败或长时间无结果</td><td>查看终端最后的下载/异常信息，检查网络、缓存权限与剩余磁盘；解决原因后再明确重试，不要多开一批相同进程。</td></tr>
+<tr><td>内存不足或进程被系统结束</td><td>先停止重复实例，核对可用内存与模型要求。缩短音频只能减少部分开销，不能消除权重本身的内存需求。</td></tr>
+<tr><td>提示已有输出文件</td><td>检查原结果，给新运行换一个输出文件名。脚本故意不覆盖已有文件。</td></tr>
+<tr><td>结果为空或内容不对</td><td>确认确实有人声、语种为普通话、声道与采样率正确。保留错误和原文，不用预期答案补齐或偷偷换模型。</td></tr>
+</tbody></table>
+<h2 id="agent-contract">给 AI Agent 的执行约定</h2>
+<p>把本篇作为本地文件处理任务，而不是远程语音服务接口。Agent 应先完成权限与文件检查，再执行同一条脚本路径。</p>
+<ul>
+<li><strong>输入：</strong><code>--audio</code> 是已授权的本地文件路径，不接受 URL；单声道、PCM16、16000 Hz，时长大于 0 且不超过 30 秒。<code>--output</code> 是现有目录中的新文件路径，默认 transcript.json。</li>
+<li><strong>模型选择：</strong><code>--model-dir</code> 与布尔开关 <code>--allow-download</code> 二选一。优先使用用户已准备好的完整同款目录；下载前确认来源、条款、磁盘和网络授权。不要把其他模型目录套进本篇并假定参数与能力相同。</li>
+<li><strong>输出：</strong>读取 UTF-8 JSON 文件中的 text（字符串）、audio（字符串）、duration_seconds（数字，秒）、model_dir（字符串）、funasr_version（字符串）。标准输出可能混有库日志，不能直接按 JSON 解析。</li>
+<li><strong>成功：</strong>进程退出码为 0、本次新文件存在且 JSON 可解析、text 非空。随后标记“转写待核对”，不要自动宣称内容正确或生成 speaker/timestamp 等未提供字段。</li>
+<li><strong>失败：</strong>参数错误退出码为 2；其他异常非 0。停止并保留错误，不把旧文件当新结果，不自动覆盖、重试下载、启用远程代码或改用收费服务。不上传用户音频。</li>
 </ul>
+<h2 id="verification">依据与验证范围</h2>
+<p>API 与模型选择依据 <a href="https://github.com/modelscope/FunASR/blob/v1.4.26/docs/tutorial/README.md">1.4.26 官方教程</a>、<a href="https://github.com/modelscope/FunASR/blob/v1.4.26/funasr/download/name_maps_from_hub.py">模型映射</a>及<a href="https://github.com/modelscope/FunASR/blob/v1.4.26/funasr/auto/auto_model.py">AutoModel 实现</a>。随文代码的参数、输入检查、调用约定、结果校验和文件保护使用模型替身测试；本次改写没有运行预训练模型识别，也没有验证上述安装组合的端到端识别，不提供准确率、速度或 GPU 测量结论。实际使用需完成第 6 节的首次识别与回听检查。软件许可不替代模型权重各自的条款。</p>
+<p data-editorial="next-step">短录音路径完成后，如果你的目标是处理会议或课程录音，接着读<a href="/blog/funasr-transcribe-long-audio.html">长录音怎样切分并检查是否遗漏</a>，再逐步增加复杂度。</p>
 </div></article>
 <footer><div class="container">FunASR · 通义实验室开源语音识别 · <a href="/go/github">GitHub</a></div></footer>
 </body></html>
+

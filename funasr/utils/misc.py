@@ -98,7 +98,7 @@ def deep_update(original, update):
         update (dict): Source dict with new values.
     """
     for key, value in update.items():
-        if isinstance(value, dict) and key in original:
+        if isinstance(value, dict) and isinstance(original.get(key), dict):
             if len(value) == 0:
                 original[key] = value
             deep_update(original[key], value)

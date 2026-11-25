@@ -1,13 +1,12 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Real-Time Streaming Speech-to-Text with FunASR | FunASR</title><meta name="description" content="FunASR's streaming Paraformer enables ~600ms low-latency real-time speech-to-text: partial text as you speak, via cached chunk decoding. Ideal for live captions, voice assistants and meetings. Runnable code + 2-pass (streaming + offline) best practice included."><meta name="keywords" content="real time speech to text, streaming asr, low latency speech recognition, live transcription, FunASR streaming, paraformer streaming, live captions, realtime stt python">
-<link rel="icon" href="/logo.png"><meta property="og:title" content="Real-Time Streaming Speech-to-Text with FunASR"><meta property="og:description" content="FunASR's streaming Paraformer enables ~600ms low-latency real-time speech-to-text: partial text as you speak, via cached chunk decoding. Ideal for live captions, voice assistants and meetings. Runnable code + 2-pass (streaming + offline) best practice included.">
-<meta property="og:type" content="article"><meta property="og:url" content="https://www.funasr.com/en/blog/funasr-realtime-streaming-asr.html"><meta property="og:image" content="https://www.funasr.com/logo.png">
-<link rel="canonical" href="https://www.funasr.com/en/blog/funasr-realtime-streaming-asr.html"><link rel="alternate" hreflang="en" href="https://www.funasr.com/en/blog/funasr-realtime-streaming-asr.html"><link rel="alternate" hreflang="zh" href="https://www.funasr.com/blog/funasr-realtime-streaming-asr.html"><link rel="alternate" hreflang="x-default" href="https://www.funasr.com/en/blog/funasr-realtime-streaming-asr.html">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<script type="application/ld+json">
-{"@context":"https://schema.org","@type":"BlogPosting","headline":"Real-Time Streaming Speech-to-Text with FunASR","description":"FunASR's streaming Paraformer enables ~600ms low-latency real-time speech-to-text: partial text as you speak, via cached chunk decoding. Ideal for live captions, voice assistants and meetings. Runnable code + 2-pass (streaming + offline) best practice included.","datePublished":"2026-06-17","dateModified":"2026-06-17","author":{"@type":"Organization","name":"FunASR / Tongyi Lab"},"publisher":{"@type":"Organization","name":"FunASR","logo":{"@type":"ImageObject","url":"https://www.funasr.com/logo.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://www.funasr.com/en/blog/funasr-realtime-streaming-asr.html"},"image":"https://www.funasr.com/logo.png"}
-</script>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/>
+<title>Why do live captions change? Three states in streaming ASR | FunASR</title><meta content="Distinguish incremental text, a revised speech segment and end-of-input acknowledgement. Understand what two-pass recognition offers, what latency means and what your application must track." name="description"/>
+<link href="/logo.png" rel="icon"/><meta content="Why do live captions change? Three states in streaming ASR" property="og:title"/><meta content="Distinguish incremental text, a revised speech segment and end-of-input acknowledgement. Understand what two-pass recognition offers, what latency means and what your application must track." property="og:description"/>
+<meta content="article" property="og:type"/><meta content="https://www.funasr.com/en/blog/funasr-realtime-streaming-asr.html" property="og:url"/><meta content="https://www.funasr.com/logo.png" property="og:image"/>
+<link href="https://www.funasr.com/en/blog/funasr-realtime-streaming-asr.html" rel="canonical"/><link href="https://www.funasr.com/en/blog/funasr-realtime-streaming-asr.html" hreflang="en" rel="alternate"/><link href="https://www.funasr.com/blog/funasr-realtime-streaming-asr.html" hreflang="zh" rel="alternate"/><link href="https://www.funasr.com/en/blog/funasr-realtime-streaming-asr.html" hreflang="x-default" rel="alternate"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"Why do live captions change? Three states in streaming ASR","description":"Distinguish incremental text, a revised speech segment and end-of-input acknowledgement. Understand what two-pass recognition offers, what latency means and what your application must track.","datePublished":"2026-06-17","dateModified":"2026-11-24","author":{"@type":"Organization","name":"FunASR / Tongyi Lab"},"publisher":{"@type":"Organization","name":"FunASR","logo":{"@type":"ImageObject","url":"https://www.funasr.com/logo.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://www.funasr.com/en/blog/funasr-realtime-streaming-asr.html"},"image":"https://www.funasr.com/logo.png"}</script>
 <style>:root{--primary:#2563eb;--primary-dark:#1d4ed8;--bg:#fff;--surface:#f8fafc;--border:#e2e8f0;--text:#0f172a;--text-soft:#475569;--text-muted:#94a3b8;--radius:12px}
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Inter',-apple-system,sans-serif;color:var(--text);line-height:1.7}
@@ -42,95 +41,64 @@ p code,li code{background:var(--surface);padding:2px 6px;border-radius:5px;font-
 .post-card p{margin:0;color:var(--text-soft);font-size:0.9rem}
 .post-card .date{color:var(--text-muted);font-size:0.8rem}
 footer{background:#0f172a;color:#94a3b8;padding:28px 0;text-align:center;font-size:0.8rem}
-footer a{color:#94a3b8}</style></head><body>
-<nav class="nav"><div class="container"><a href="/" class="nav-logo">Fun<span>ASR</span></a><div class="nav-links"><a href="/en/#capabilities">Capabilities</a><a href="/en/#usage">How to Use</a><a href="/en/#benchmark">Benchmark</a><a href="/en/#demo">Demo</a><a href="https://modelscope.github.io/FunASR/" target="_blank">Docs</a><a href="/en/quickstart.html">Quickstart</a><a href="/en/models.html">Models</a><a href="/en/ecosystem.html">Ecosystem</a><a href="/en/blog/">Blog</a><a href="/en/vs-whisper.html">vs Whisper</a><a href="/en/donors.html">Donors</a></div><a href="https://www.funasr.com/blog/funasr-realtime-streaming-asr.html" style="font-size:0.83rem;font-weight:600;color:var(--text-soft)">中文</a><a href="https://github.com/modelscope/FunASR" target="_blank" class="nav-btn">GitHub ★</a></div></nav>
-<article><div class="container">
-<h1>Real-Time Streaming Speech-to-Text with FunASR</h1>
-<p class="post-meta">FunASR Blog · 2026-06-17 · Tutorial</p>
-<p>Live captions, voice assistants, meeting transcription — these don't want "record then transcribe", they want text <strong>as you speak</strong>: words scrolling on screen before the sentence even ends. That is <strong>streaming ASR</strong>.</p>
-<p>FunASR's streaming Paraformer decodes with <strong>chunks + a cache</strong>, delivering real-time text at <strong>~600 ms latency</strong> — and it runs on CPU.</p>
-<h2>Install</h2>
-<pre><code>pip install -U funasr modelscope</code></pre>
-<h2>Full, runnable code</h2>
-<pre><code>from funasr import AutoModel
-import soundfile as sf
-
-chunk_size = [0, 10, 5]          # 600 ms chunks (10 * 60 ms center)
-encoder_chunk_look_back = 4      # encoder look-back chunks
-decoder_chunk_look_back = 1      # decoder look-back chunks
-
-model = AutoModel(model="paraformer-zh-streaming")
-
-audio, sr = sf.read("speech.wav", dtype="float32")   # 16 kHz mono
-chunk_stride = chunk_size[1] * 960                    # 600 ms @ 16 kHz
-
-cache = {}
-n_chunks = (len(audio) - 1) // chunk_stride + 1
-for i in range(n_chunks):
-    chunk = audio[i * chunk_stride : (i + 1) * chunk_stride]
-    is_final = i == n_chunks - 1
-    res = model.generate(
-        input=chunk, cache=cache, is_final=is_final,
-        chunk_size=chunk_size,
-        encoder_chunk_look_back=encoder_chunk_look_back,
-        decoder_chunk_look_back=decoder_chunk_look_back,
-    )
-    if res[0]["text"]:
-        print(res[0]["text"], end="", flush=True)   # emit partial text</code></pre>
-<h2>The output grows incrementally (example)</h2>
-<pre><code>Today          # ~600 ms after speech starts
-Today the
-Today the weather
-Today the weather is great    # is_final=True</code></pre>
-<p>For each 600 ms audio chunk, the model emits the newly recognized text, so the on-screen sentence <strong>grows token by token</strong> until <code>is_final=True</code>. In testing, a 12 s clip was split into 20 chunks, each returning an incremental result.</p>
-<h2>Key parameters</h2>
-<table><thead><tr><th>Parameter</th><th>Meaning</th></tr></thead><tbody>
-<tr><td><code>chunk_size=[0,10,5]</code></td><td>[left, center, right] chunk sizes in 60 ms units. center 10 → 600 ms per chunk (the latency/accuracy sweet spot)</td></tr>
-<tr><td><code>encoder_chunk_look_back=4</code></td><td>History chunks the encoder attends to (more = more context, slightly more latency)</td></tr>
-<tr><td><code>decoder_chunk_look_back=1</code></td><td>History chunks for the decoder</td></tr>
-<tr><td><code>cache={}</code></td><td>State carried across chunks — <strong>reuse the same dict across calls</strong></td></tr>
-<tr><td><code>is_final</code></td><td>Set <code>True</code> on the last chunk to flush the final decoding</td></tr>
+footer a{color:#94a3b8}</style><style>article a{text-decoration:underline;text-underline-offset:0.15em}</style></head><body>
+<nav class="nav"><div class="container"><a class="nav-logo" href="/">Fun<span>ASR</span></a><div class="nav-links"><a href="/en/#capabilities">Capabilities</a><a href="/en/#usage">How to Use</a><a href="/en/#benchmark">Benchmark</a><a href="/en/#demo">Demo</a><a href="https://modelscope.github.io/FunASR/" target="_blank">Docs</a><a href="/en/quickstart.html">Quickstart</a><a href="/en/models.html">Models</a><a href="/en/ecosystem.html">Ecosystem</a><a href="/en/blog/">Blog</a><a href="/en/vs-whisper.html">vs Whisper</a><a href="/en/donors.html">Donors</a></div><a href="https://www.funasr.com/blog/funasr-realtime-streaming-asr.html" style="font-size:0.83rem;font-weight:600;color:var(--text-soft)">中文</a><a class="nav-btn" href="https://github.com/modelscope/FunASR" target="_blank">GitHub ★</a></div></nav>
+<article><div class="container"><h1>Why do live captions change? Three states in streaming ASR</h1>
+<p class="meta">Published <time datetime="2026-06-17">2026-06-17</time> · Revised <time datetime="2026-11-24">2026-11-24</time> · Speech technology explained</p>
+<p>During a meeting, a caption first says “See you on Thursday.” After the speaker pauses, it changes to “See you on Friday.” This need not be a display bug: some systems offer an early hypothesis, then recognize a complete speech segment again. But an application that appends both versions repeats the sentence. An application that treats the first completed segment as the end of the meeting can lose everything that follows.</p>
+<p>This article answers one question: <strong>when a recognition message arrives, should you append text, replace a draft, or finish the task?</strong> You will be able to separate a current draft, completed segments and completion of the entire input. This is a conceptual guide, not a server deployment recipe. No installation is required. The conversation and message sequence below are invented illustrations, not measured model outputs.</p>
+<p>On this page: <a href="#ecosystem">Choose a route</a> · <a href="#streaming">How streaming works</a> · <a href="#read-messages">Read the messages</a> · <a href="#latency">Understand latency</a> · <a href="#acceptance">Acceptance scenarios</a> · <a href="#agent-contract">Agent integration contract</a></p>
+<section><h2 id="ecosystem">Do you need words while someone speaks, or a transcript afterwards?</h2>
+<p><strong>FunASR is a toolkit</strong> for model execution and processing pipelines. <strong>Fun-ASR and SenseVoice are model families</strong>; capabilities depend on the specific model, weights and execution path. <strong>FunClip is a transcription and clipping application.</strong> This article concerns streaming Paraformer and the official repository's Python WebSocket example. An offline model does not become a streaming model by changing its name, and an editing application is not automatically a live-caption service.</p>
+<p>For a recording that already exists, start with <a href="/en/blog/speech-to-text-python-transcribe-audio.html">your first audio transcription</a>. You may not need network sessions, provisional text and revisions at all. Streaming matters when people must see words before the speaker finishes. <strong>Two-pass recognition</strong> supplies an early result, then recognizes a completed segment again. It suits a display that permits revisions. It is not a reason to execute an irreversible payment, email or device command from every provisional word.</p>
+<p>An installation package supplies software; model weights supply learned parameters; a runtime executes the model; a service also manages connections, access and resources. Installing <code>funasr</code> does not mean every required model is available or that a service has been deployed. The protocol details below apply only to the referenced Python example. Check C++ servers, HTTP APIs and other models separately. See the <a href="/en/blog/which-funasr-model.html">model and runtime selection guide</a> for those decisions.</p></section>
+<section><h2 id="streaming">Streaming is not independent recognition of arbitrary small slices</h2>
+<p>Offline recognition can begin with a complete input. Streaming recognition processes arriving audio in chunks, using state from earlier chunks to help interpret later ones. This state is commonly called a <strong>cache</strong>. Here that means inference state for the current audio stream, not downloaded model files on disk.</p>
+<p>The inspected streaming Paraformer Python path reuses a cache across consecutive chunks and requests final processing with <code>is_final=True</code>. Replacing the cache with an empty dictionary on every call repeatedly removes that context. Sharing one cache between unrelated recordings risks mixing contexts. A chunk that emits no text is not automatically a failure: the available audio may not yet support an output. A short final remainder still needs the interface's finalization step; do not discard it.</p>
+<p><strong>Voice activity detection, or VAD,</strong> is another layer. It estimates where speech is present and where a speech segment may end. It is not a grammar parser: a pause does not necessarily end a sentence, and a name or number can span a pause. The second pass has more segment context and may revise words or punctuation. It can still be wrong. “Second pass” describes a process, not an accuracy guarantee.</p></section>
+<section><h2 id="read-messages">Separate drafts, completed segments and completed input</h2>
+<p>Two text contracts can look similar on screen. With <strong>incremental output</strong>, messages might contain “See you” and then “on Thursday”; the display joins the new pieces. With a <strong>cumulative hypothesis</strong>, messages might contain “See you” and then “See you on Thursday”. Appending those produces “See youSee you on Thursday”. The word “streaming” alone does not identify the contract.</p>
+<p>The referenced Python example client treats <code>online</code> / <code>2pass-online</code> text as increments and handles <code>2pass-offline</code> as a segment result. The following invented sequence illustrates the design. <strong>It is not a complete set of wire messages or an audio test fixture.</strong></p>
+<table data-example="messages"><thead><tr><th>What arrives</th><th>What it means</th><th>What the caption application does</th></tr></thead><tbody>
+<tr data-is-final="false" data-kind="partial" data-mode="2pass-online"><td><code>2pass-online</code><br/>“See you”, then “on Thursday”</td><td>Incremental draft for the current segment</td><td>Show “See you on Thursday” in the draft area without treating it as verified content.</td></tr>
+<tr data-is-final="true" data-kind="segment-final" data-mode="2pass-offline"><td><code>2pass-offline</code><br/>“See you on Friday.”; <code>is_final=true</code></td><td>Second-pass result for this segment</td><td>Replace the corresponding draft with “See you on Friday.” and retain it as a completed segment. Do not concatenate both versions.</td></tr>
+<tr data-is-final="false" data-kind="partial" data-mode="2pass-online"><td><code>2pass-online</code><br/>“At three”</td><td>The input is continuing</td><td>Keep the previous segment and start a new draft. The first final segment did not end the entire input.</td></tr>
+<tr data-has-text="false" data-is-end="true" data-is-final="true" data-kind="input-complete" data-mode="2pass"><td><code>mode=2pass</code><br/><code>is_end=true</code> and <code>is_final=true</code></td><td>Acknowledgement after the sender ends input and the server finishes pending work</td><td>This is a control message and can have no text field. Only now is protocol processing for this input complete.</td></tr>
 </tbody></table>
-<h2>Best practice: 2-pass (streaming + offline)</h2>
-<p>To keep latency low, the streaming model is slightly less accurate than offline. Production systems often use a <strong>2-pass</strong> design:</p>
+<p>Before that last row, the file-input client sends <code>is_speaking=false</code> and <code>is_end=true</code>. The server finishes pending online and offline work, then acknowledges it. If finalization recorded errors, the acknowledgement has <code>is_final=false</code> and an <code>error</code>. Receiving a segment result, sending the last audio frame and observing a closed connection are all different from receiving a successful end acknowledgement.</p>
+<p>A successful acknowledgement does not guarantee nonempty text, correct words, correct punctuation or success of every auxiliary feature. Some auxiliary processing errors have separate handling in the referenced implementation. Check protocol completion, required fields and content quality separately instead of letting one boolean stand for all three.</p>
+<p>The example client's display logic is not a general concurrent revision protocol. Do not assume responses contain usable segment IDs or replay-deduplication IDs. Confirm ordering and segment association before integrating. Keep connection identifiers, segment numbers and revision history maintained by your application distinct from original server fields. If a correction cannot be associated with a segment, stop automatic assembly and retain the message; do not silently overwrite history using text similarity.</p></section>
+<section><h2 id="latency">A 600 ms audio chunk is not a 600 ms caption-latency promise</h2>
+<p>The official streaming example uses <code>chunk_size=[0,10,5]</code>. Its example center-chunk input stride is <code>10 × 960 = 9600</code> samples. At 16000 Hz, those samples represent <code>9600 / 16000 = 0.6</code> seconds of sound. That arithmetic measures <strong>audio duration</strong>, not inference execution time or measured time from speech onset to visible text.</p>
+<p>The viewer's wait also includes audio accumulation, required model context, upload and queueing, computation, response delivery and display refresh. A second-pass result may additionally wait for VAD endpointing and offline recognition. Observe at least three things separately: <strong>time to first visible text, how long revisions continue, and time from speech end to the completed segment.</strong> Throughput measured by feeding an in-memory recording as fast as possible is not microphone-response latency.</p>
+<p>Smaller chunks do not guarantee a shorter wait everywhere. Fixed overhead, scheduling and concurrent load matter, and parameters must remain valid for the selected model. Whether a CPU meets a target depends on the model, audio, machine, threads and workload. A GPU does not guarantee end-to-end real-time behavior either. This article measures or promises neither device's live performance.</p></section>
+<section><h2 id="acceptance">Check four scenarios before trusting a live-caption integration</h2>
+<ol>
+<li><strong>Two segments with a revision.</strong> Retain original messages. Check that second-pass text replaces the current draft without duplicating it or erasing an earlier completed segment.</li>
+<li><strong>A short ending with little silence.</strong> Check that the last partial chunk is sent and that final words are not lost before acknowledgement. Do not trim the recording to make the workflow appear successful.</li>
+<li><strong>Silence or no recognizable content.</strong> Permit empty results. Distinguish successful protocol completion with no text from timeout or inference failure; never invent captions to fill a gap.</li>
+<li><strong>Connection loss, timeout and server error.</strong> Mark the task as failed or incomplete while retaining received segments. Text already visible in a draft area is not evidence that the entire recording succeeded.</li>
+</ol>
+<p>Run these scenarios in your environment with audio you are entitled to process; this article has not run them for you. Listen back to names, numbers and negations as part of caption acceptance. A voice assistant may use provisional text for reversible interface feedback, but sending, spending or deleting requires the application's confirmation rules. An ASR “final” flag is not user authorization.</p></section>
+<section><h2 id="agent-contract">For agents: retain events before deriving captions</h2>
+<p>Record the exact source revision, model identifiers and configuration for the referenced Python WebSocket path. These fields are not an ecosystem-wide FunASR contract. Recheck them for another service.</p>
 <ul>
-<li><strong>Pass 1 (streaming)</strong>: streaming Paraformer for instant on-screen feedback;</li>
-<li><strong>Pass 2 (offline)</strong>: once a sentence ends (VAD endpointing), re-transcribe the full segment with <a href="/en/blog/sensevoice-deployment-guide.html">SenseVoice</a> / offline Paraformer for a more accurate final result that replaces the provisional text.</li>
+<li><code>mode</code> is a string. Requests choose <code>online</code>, <code>offline</code> or <code>2pass</code>; two-pass results can use <code>2pass-online</code> / <code>2pass-offline</code>. Dispatch by message type, not merely by the presence of <code>text</code>.</li>
+<li><code>text</code> is a recognition string that may be empty; end acknowledgements can omit it. <code>is_final</code> and <code>is_end</code> are booleans with distinct segment and end-acknowledgement roles. <code>wav_name</code> is an input-name string, not a verified identity, filesystem path or unique deduplication key.</li>
+<li>Store application-side connection identity, receive order, original messages and derived caption revisions separately. Use the confirmed ordered, single-connection contract; never mix caches or drafts from different recordings. Do not present your own bookkeeping fields as server-provided data.</li>
+<li>After file input ends, wait within a bound for the matching acknowledgement. The example CLI's <code>--result_timeout</code> is in seconds and defaults to 300. That is a wait limit, not a performance guarantee. Timeouts, negative acknowledgements and early disconnects must report incompleteness. Do not automatically retry protocol errors. Retry transient transport failures only within an authorized limit, recording each attempt separately to avoid duplicate captions.</li>
+<li>Reading requires neither model downloads nor audio uploads. Actual integration separately requires dependency and environment checks, model weights and license review, and permission for initial downloads. Offline operation requires all needed files and verification that execution will not fetch missing ones. Microphone capture, audio uploads, paid services and storage of other people's recordings need the corresponding authorization.</li>
 </ul>
-<p>FunASR's official WebSocket service (<code>funasr-runtime-sdk-online-cpu</code>) ships this 2-pass streaming protocol ready to deploy.</p>
-<h2>Typical use cases</h2>
+<p>For repeated words, first check incremental versus cumulative output. For repeated sentences, check whether offline corrections were appended again. For missing endings, check the tail chunk and acknowledgement. For excessive latency, separate queueing, inference and endpoint waiting. Identify the failing layer before deciding whether the model or the integration needs to change.</p></section>
+<h2 id="sources">Sources and next steps</h2>
+<p>This explanation reviews message construction, client assembly, end acknowledgement and sample arithmetic in the pinned official sources below. Conversation and table entries are illustrative. No model inference or live-latency benchmark was run for this revision. These references identify source code, not a promise that every installed wheel includes matching server scripts.</p>
 <ul>
-<li><strong>Live captions</strong>: instant subtitles for streams, meetings, classrooms.</li>
-<li><strong>Voice assistants</strong>: understand while listening, lowering end-to-end latency.</li>
-<li><strong>Call-center QA</strong>: live transcription + real-time keyword alerts.</li>
+<li><a href="https://github.com/modelscope/FunASR/blob/ee46df3b7bca7d956af6b3c5deff23599c1de2cc/runtime/python/websocket/funasr_wss_server.py">Python WebSocket server: segment messages and finish_input</a></li>
+<li><a href="https://github.com/modelscope/FunASR/blob/ee46df3b7bca7d956af6b3c5deff23599c1de2cc/runtime/python/websocket/funasr_wss_client.py">Python client: incremental display, two-pass results and acknowledgement waiting</a></li>
+<li><a href="https://github.com/modelscope/FunASR/blob/ee46df3b7bca7d956af6b3c5deff23599c1de2cc/funasr/models/paraformer_streaming/model.py">Streaming Paraformer: state, input stride and finalization</a></li>
+<li><a href="https://github.com/modelscope/FunASR/blob/ee46df3b7bca7d956af6b3c5deff23599c1de2cc/runtime/python/websocket/README.md">Configuration and client documentation for this Python example</a></li>
 </ul>
-<div class="cta"><p>FunASR is Tongyi Lab's open-source, industrial-grade speech recognition toolkit — offline + streaming, fast and accurate on Chinese.</p><a class="btn" href="https://github.com/modelscope/FunASR" target="_blank">Star FunASR on GitHub ★</a></div>
-<!--related-posts-->
-<h2>Related posts</h2>
-<ul class="post-list">
-<li><a href="/en/blog/funasr-vs-whisper-benchmark.html">FunASR vs Whisper Benchmark</a></li>
-<li><a href="/en/blog/sensevoice-deployment-guide.html">SenseVoice Deployment Guide</a></li>
-<li><a href="/en/blog/fun-asr-nano-guide.html">Fun-ASR-Nano Guide</a></li>
-<li><a href="/en/blog/funasr-speaker-diarization.html">Speaker Diarization: Who Spoke When</a></li>
-<li><a href="/en/blog/sensevoice-emotion-language-detection.html">Emotion & Language Detection</a></li>
-<li><a href="/en/blog/funasr-transcribe-long-audio.html">Transcribe Long Audio (Hours in One Call)</a></li>
-<li><a href="/en/blog/funasr-cli-transcribe-command-line.html">Transcribe from the Command Line</a></li>
-<li><a href="/en/blog/self-hosted-openai-whisper-api-alternative.html">Self-Hosted OpenAI Whisper API Alternative</a></li>
-<li><a href="/en/blog/generate-subtitles-srt-vtt-from-audio-video.html">Auto-Generate Subtitles (SRT / VTT)</a></li>
-<li><a href="/en/blog/speech-to-text-python-transcribe-audio.html">Speech to Text in Python</a></li>
-<li><a href="/en/blog/funasr-llama-cpp-whisper-cpp-alternative.html">FunASR on llama.cpp (whisper.cpp Alternative)</a></li>
-<li><a href="/en/blog/funasr-vs-faster-whisper-chinese.html">FunASR vs faster-whisper (Chinese/Cantonese)</a></li>
-<li><a href="/en/blog/lightweight-speech-recognition-cpu.html">Lightweight Speech Recognition on CPU</a></li>
-<li><a href="/en/blog/self-hosted-deepgram-assemblyai-alternative.html">Self-Hosted Deepgram/AssemblyAI Alternative</a></li>
-<li><a href="/en/blog/which-funasr-model.html">Which FunASR Model?</a></li>
-<li><a href="/en/blog/cantonese-speech-recognition.html">Cantonese Speech Recognition (SenseVoice)</a></li>
-<li><a href="/en/blog/japanese-speech-recognition.html">Japanese Speech Recognition (SenseVoice)</a></li>
-<li><a href="/en/blog/voice-activity-detection-python.html">Voice Activity Detection in Python</a></li>
-<li><a href="/en/blog/self-hosted-google-aws-azure-speech-to-text.html">Self-Hosted Google/AWS/Azure STT Alternative</a></li>
-<li><a href="/en/blog/chinese-speech-recognition.html">Chinese Speech Recognition in Python</a></li>
-<li><a href="/en/blog/punctuation-restoration-python.html">Punctuation Restoration in Python</a></li>
-<li><a href="/en/blog/speech-to-text-timestamps-python.html">Speech-to-Text with Timestamps in Python</a></li>
-</ul>
+<p>Before chasing smaller chunks, define what you will deliver: how soon people need a draft, what revisions are acceptable, and which message completes the task. Those three answers make live captions more than words that appear quickly on a screen.</p>
 </div></article>
 <footer><div class="container">FunASR · Open-source speech recognition by Tongyi Lab · <a href="https://github.com/modelscope/FunASR">GitHub</a></div></footer>
 </body></html>

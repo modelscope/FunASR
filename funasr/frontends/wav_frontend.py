@@ -488,6 +488,7 @@ class WavFrontendOnline(nn.Module):
         lfr_splice_frame_idxs = []
         for i in range(batch_size):
             mat = input[i, : input_lengths[i], :]
+            lfr_splice_frame_idx = mat.size(0)
             if self.lfr_m != 1 or self.lfr_n != 1:
                 # update self.lfr_splice_cache in self.apply_lfr
                 # mat, self.lfr_splice_cache[i], lfr_splice_frame_idx = self.apply_lfr(mat, self.lfr_m, self.lfr_n, self.lfr_splice_cache[i],

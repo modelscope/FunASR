@@ -5,7 +5,7 @@ for (const prefix of ['', 'en/']) {
     test(`native Transformers article and guide ${prefix || 'zh'} ${width}`, async ({ page }, testInfo) => {
       await page.setViewportSize({ width, height: 900 });
       const route = `/${prefix}blog/fun-asr-nano-transformers.html`;
-      await page.goto(`/${prefix}blog/`);
+      await page.goto(`/${prefix}blog/archive/`);
       await page.locator(`a.post-card[href="${route}"]`).click();
       await expect(page).toHaveURL(new RegExp(route.replaceAll('.', '\\.')));
       const layout = await page.evaluate(() => ({

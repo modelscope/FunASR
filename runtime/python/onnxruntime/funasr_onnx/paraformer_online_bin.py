@@ -140,6 +140,8 @@ class Paraformer:
         asr_res = []
 
         if waveforms.shape[1] < 16 * 60 and is_final and len(cache) > 0:
+            # extract_feat is skipped here, so reset the frontend as its final call would.
+            self.frontend.cache_reset()
             cache["last_chunk"] = True
             feats = cache["feats"]
             feats_len = np.array([feats.shape[1]]).astype(np.int32)
@@ -219,24 +221,7 @@ class Paraformer:
         return asr_res
 
     def load_data(self, wav_content: Union[str, np.ndarray, List[str]], fs: int = None) -> List:
-        
-        def convert_to_wav(input_path, output_path):
-            from pydub import AudioSegment
-            try:
-                audio = AudioSegment.from_mp3(input_path)
-                audio.export(output_path, format="wav")
-                print("音频文件为mp3格式，已转换为wav格式")
-                
-            except Exception as e:
-                print(f"转换失败:{e}")
-
         def load_wav(path: str) -> np.ndarray:
-            if not path.lower().endswith('.wav'):
-                import os
-                input_path = path
-                path = os.path.splitext(path)[0]+'.wav'
-                convert_to_wav(input_path,path) #将mp3格式转换成wav格式
-
             waveform, _ = librosa.load(path, sr=fs)
             return waveform
 

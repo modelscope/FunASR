@@ -99,6 +99,8 @@ class CT_Transformer:
             split_text = self.code_mix_split_words_jieba(text)
         else:
             split_text = code_mix_split_words(text)
+        if not split_text:
+            return "", []
         split_text_id = self.converter.tokens2ids(split_text)
         mini_sentences = split_to_mini_sentence(split_text, split_size)
         mini_sentences_id = split_to_mini_sentence(split_text_id, split_size)
@@ -196,6 +198,9 @@ class CT_Transformer_VadRealtime(CT_Transformer):
         cache_key = "cache"
         assert cache_key in param_dict
         cache = param_dict[cache_key]
+        # An empty chunk adds no text and must not reprocess pending words.
+        if not text.strip():
+            return "", [], cache if cache is not None else []
         if cache is not None and len(cache) > 0:
             precache = "".join(cache)
         else:

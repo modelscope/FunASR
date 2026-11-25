@@ -113,6 +113,58 @@ class SentencePostprocessTimestampTest(unittest.TestCase):
                     ("你好", ["你", "好"]),
                 )
 
+    def test_spelled_out_letters_are_one_word_with_one_timestamp(self):
+        self.assert_timestamps(
+            ["我", "用", "a", "i", "写", "代", "码"],
+            ["我", "用", "AI", "写", "代", "码"],
+            [[0, 100], [100, 200], [200, 400], [400, 500], [500, 600], [600, 700]],
+        )
+        self.assert_timestamps(
+            ["i", "b", "m", "is", "here"],
+            ["IBM", "is", "here"],
+            [[0, 300], [300, 400], [400, 500]],
+        )
+
+    def test_spelled_out_letters_are_one_word_without_timestamps(self):
+        for path in POSTPROCESS_UTILS:
+            with self.subTest(path=path):
+                self.assertEqual(
+                    _load_sentence_postprocess(path)(["看", "c", "c", "t", "v", "新", "闻"]),
+                    ("看CCTV新闻", ["看", "CCTV", "新", "闻"]),
+                )
+
+    def test_symbol_tokens_keep_their_own_timestamp(self):
+        self.assert_timestamps(
+            ["价", "格", "是", "3", ".", "5", "元", "好"],
+            ["价", "格", "是", "3", ".", "5", "元", "好"],
+            [[i * 100, (i + 1) * 100] for i in range(8)],
+        )
+        self.assert_timestamps(
+            ["ok", ".", "好"],
+            ["ok", ".", "好"],
+            [[0, 100], [100, 200], [200, 300]],
+        )
+        self.assert_timestamps(
+            ["x", "y", ".", "好"],
+            ["XY", ".", "好"],
+            [[0, 200], [200, 300], [300, 400]],
+        )
+
+    def test_spelled_out_letters_after_a_symbol_token_keep_their_timestamp(self):
+        self.assert_timestamps(
+            [".", "x", "y"],
+            [".", "XY"],
+            [[0, 100], [100, 300]],
+        )
+
+    def test_symbol_tokens_are_accepted_without_timestamps(self):
+        for path in POSTPROCESS_UTILS:
+            with self.subTest(path=path):
+                self.assertEqual(
+                    _load_sentence_postprocess(path)(["价", "格", "3", ".", "5", "元"]),
+                    ("价格3.5元", ["价", "格", "3", ".", "5", "元"]),
+                )
+
 
 if __name__ == "__main__":
     unittest.main()

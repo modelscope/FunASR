@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+
+<html lang="zh"><head><meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/>
+<title>热词没有生效？先核对传递链路和安装包 | FunASR</title><meta content="从 WebSocket 消息到 Torch 独立运行时，核对热词格式、安装版本和批次时间戳，避免把接口修复当作准确率保证。" name="description"/>
+<link href="/logo.png" rel="icon"/><meta content="热词没有生效？先核对传递链路和安装包" property="og:title"/><meta content="从 WebSocket 消息到 Torch 独立运行时，核对热词格式、安装版本和批次时间戳，避免把接口修复当作准确率保证。" property="og:description"/>
+<meta content="article" property="og:type"/><meta content="https://www.funasr.com/blog/hotwords-package-boundaries.html" property="og:url"/><meta content="https://www.funasr.com/logo.png" property="og:image"/>
+<link href="https://www.funasr.com/blog/hotwords-package-boundaries.html" rel="canonical"/><link href="https://www.funasr.com/en/blog/hotwords-package-boundaries.html" hreflang="en" rel="alternate"/><link href="https://www.funasr.com/blog/hotwords-package-boundaries.html" hreflang="zh" rel="alternate"/><link href="https://www.funasr.com/en/blog/hotwords-package-boundaries.html" hreflang="x-default" rel="alternate"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"热词没有生效？先核对传递链路和安装包","description":"从 WebSocket 消息到 Torch 独立运行时，核对热词格式、安装版本和批次时间戳，避免把接口修复当作准确率保证。","datePublished":"2026-11-13","dateModified":"2026-11-13","author":{"@type":"Organization","name":"FunASR / Tongyi Lab"},"publisher":{"@type":"Organization","name":"FunASR","logo":{"@type":"ImageObject","url":"https://www.funasr.com/logo.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://www.funasr.com/blog/hotwords-package-boundaries.html"},"image":"https://www.funasr.com/logo.png"}</script>
+<style>:root{--primary:#2563eb;--primary-dark:#1d4ed8;--bg:#fff;--surface:#f8fafc;--border:#e2e8f0;--text:#0f172a;--text-soft:#475569;--text-muted:#94a3b8;--radius:12px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',-apple-system,sans-serif;color:var(--text);line-height:1.7}
+a{color:var(--primary);text-decoration:none}a:hover{text-decoration:underline}
+.container{max-width:800px;margin:0 auto;padding:0 24px}
+.nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(255,255,255,0.9);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:14px 0}
+.nav .container{max-width:1120px;display:flex;align-items:center;gap:24px}
+.nav-logo{font-size:1.2rem;font-weight:800;color:var(--text)}.nav-logo span{color:var(--primary)}
+.nav-links{display:flex;gap:20px;margin-left:auto;flex-wrap:wrap}
+.nav-links a{font-size:0.85rem;font-weight:500;color:var(--text-soft)}
+.nav-btn{padding:7px 16px;background:var(--primary);color:#fff;border-radius:7px;font-size:0.83rem;font-weight:600}
+article{padding:120px 0 80px}
+h1{font-size:2rem;font-weight:800;line-height:1.3;margin-bottom:14px}
+h2{font-size:1.3rem;font-weight:700;margin:36px 0 14px;padding-top:16px;border-top:1px solid var(--border)}
+h3{font-size:1.05rem;font-weight:700;margin:22px 0 10px}
+p{margin-bottom:14px;color:var(--text-soft)}
+ul,ol{margin:0 0 14px 22px;color:var(--text-soft)}li{margin-bottom:6px}
+table{width:100%;border-collapse:collapse;margin:16px 0;font-size:0.86rem}
+th,td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--border)}
+th{font-weight:600;background:var(--surface);font-size:0.78rem;color:var(--text-muted)}
+pre{background:#1e293b;color:#e2e8f0;padding:18px;border-radius:10px;overflow-x:auto;font-size:0.82rem;line-height:1.7;margin:14px 0}
+code{font-family:ui-monospace,Menlo,monospace}
+p code,li code{background:var(--surface);padding:2px 6px;border-radius:5px;font-size:0.85em;color:var(--primary-dark)}
+.post-meta{color:var(--text-muted);font-size:0.85rem;margin-bottom:24px}
+.cta{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin:28px 0;text-align:center}
+.cta a.btn{display:inline-block;padding:10px 24px;background:var(--primary);color:#fff;border-radius:8px;font-weight:600}
+.post-list{list-style:none;margin:0;padding:0}
+.post-list li{margin:0 0 8px}
+.post-card{display:block;border:1px solid var(--border);border-radius:var(--radius);padding:20px 22px;margin-bottom:14px}
+.post-card:hover{border-color:var(--primary);text-decoration:none}
+.post-card h2{border:none;padding:0;margin:0 0 6px;font-size:1.15rem;color:var(--text)}
+.post-card p{margin:0;color:var(--text-soft);font-size:0.9rem}
+.post-card .date{color:var(--text-muted);font-size:0.8rem}
+footer{background:#0f172a;color:#94a3b8;padding:28px 0;text-align:center;font-size:0.8rem}
+footer a{color:#94a3b8}
+@media(max-width:900px){.nav-links{display:none}.nav .container{gap:16px}.nav-logo{margin-right:auto}h1{font-size:1.75rem}table{table-layout:fixed;font-size:0.78rem}th,td{padding:8px 4px;overflow-wrap:anywhere}p code,li code{overflow-wrap:anywhere;word-break:break-word}}
+article p a,article li a{color:#006a57;text-decoration:underline;text-underline-offset:.15em}
+</style></head><body>
+<nav class="nav"><div class="container"><a class="nav-logo" href="/">Fun<span>ASR</span></a><div class="nav-links"><a href="/#capabilities">核心能力</a><a href="/#usage">如何使用</a><a href="/#benchmark">性能</a><a href="/#demo">演示</a><a href="https://modelscope.github.io/FunASR/zh/" target="_blank">文档</a><a href="/quickstart.html">快速上手</a><a href="/models.html">模型</a><a href="/ecosystem.html">生态</a><a href="/blog/">技术博客</a><a href="/vs-whisper.html">对比 Whisper</a><a href="/donors.html">功德榜</a></div><a href="https://www.funasr.com/en/blog/hotwords-package-boundaries.html" style="font-size:0.83rem;font-weight:600;color:var(--text-soft)">EN</a><a class="nav-btn" href="/go/github" target="_blank">GitHub ★</a></div></nav>
+<article><div class="container"><h1>热词没有生效？先核对传递链路和安装包</h1>
+<p class="post-meta">FunASR 技术博客 · 2026-11-13</p>
+<p class="lead" data-editorial="opening">团队接入语音识别时，产品名和人名常常需要热词提示。识别结果不理想，不一定是词表不够大：先确认客户端传出的词，确实以模型支持的形式到达了推理入口。</p>
+<p data-editorial="example">例如，客户端把两个术语放进带权重的 JSON 对象，再将它编码成 WebSocket 消息中的字符串。服务端不能把大括号、引号和数字一起当作热词正文。下面沿着消息、服务脚本和独立运行时三层，给出可核对的路径。</p>
+<p data-editorial="boundary">热词是提示，不是强制替换或正确率保证。本文解释已经验证的协议和运行时边界，不提供新的识别准确率、性能排名或生产部署承诺。</p>
+<h2>一、先分清你使用的入口</h2>
+<table><thead><tr><th>入口</th><th>应核对的对象</th></tr></thead><tbody>
+<tr><td>Python WebSocket 服务</td><td>仓库中的 <code>runtime/python/websocket/funasr_wss_server.py</code> 和实际运行的源码提交。</td></tr>
+<tr><td>Torch 独立运行时</td><td><code>funasr-torch==0.1.7</code>；导入名是 <code>funasr_torch</code>。</td></tr>
+<tr><td>ONNX 独立运行时</td><td><code>funasr-onnx==0.4.11</code>；导入名是 <code>funasr_onnx</code>。</td></tr>
+</tbody></table>
+<p>这三个入口不是同一个发布物。升级根包 <code>funasr</code>，不会自动更新你复制的服务脚本，也不能替代独立运行时的安装。WebSocket 热词修复见 <a href="https://github.com/modelscope/FunASR/pull/3892">#3892（保留 #3880 作者历史）</a>；不要仅凭一个版本号推断整个服务已升级。</p>
+<h2>二、让 JSON 热词成为模型实际接收的词</h2>
+<p>以下只展示消息编码，不会启动服务、下载权重或发送音频：</p>
+<pre><code data-language="python">import json
+
+hotwords = {"阿里巴巴": 20, "通义实验室": 30}
+message = {"hotwords": json.dumps(hotwords, ensure_ascii=False)}
+assert json.loads(message["hotwords"]) == hotwords
+print(json.dumps(message, ensure_ascii=False))</code></pre>
+<p>修复后的 Python 服务会把 JSON 对象的键整理为以空格分隔的词，分别写入离线和在线模型参数；空对象变为空字符串。普通字符串及不能解析成 JSON 的字符串仍按原文本传递。这里的 AutoModel 接口不接收数值权重，因此 <strong>20 和 30 不会成为模型的相对偏置强度</strong>。需要权重能力时，应单独核对所选模型与部署协议，不能把另一套运行时的约定直接搬过来。</p>
+<p>线上的完整消息还需要按相应客户端协议设置音频和分块参数。上述片段不是完整的流式客户端，其他格式也不能仅凭此示例认定兼容。部署时还需配置 TLS、鉴权、资源限制，并避免把私人音频、转录或敏感词表写进公开日志。</p>
+<h2>三、检查真正安装和导入的 Torch 包</h2>
+<p>在独立测试环境中安装指定版本，再查看包元数据和实际导入位置。不要直接改动正在服务的共享环境：</p>
+<pre><code data-language="shell">python -m pip install "funasr-torch==0.1.7"
+python -m pip check
+python -c 'import importlib.metadata as m, funasr_torch; print(m.version("funasr-torch")); print(funasr_torch.__file__)'</code></pre>
+<p>Contextual 和 Seaco 包装器使用的导出热词嵌入宽度为 10。0.1.7 会忽略空白条目，长热词保留前十个字符，并将索引限制在对应嵌入范围内。这解决的是运行时边界，不代表超长词的剩余部分仍能参与提示。请优先使用业务中有区分度的短词，并用获得授权的录音检查收益与误触发。</p>
+<h2>四、用单条与批次结果检查时间戳</h2>
+<p>把短音频与长音频分别运行一次，再组成同一批次运行。输出数量、文本和短音频的时间戳都应按各自录音核对。0.1.7 的 Paraformer 修复会按每条输入的特征长度截取峰值序列，防止填充帧拉长短音频的末尾时间戳。同一版本还包括末尾缩写合并及富转录片段词间空格修复。</p>
+<p>发布前分别测试了 wheel 和源码分发包的安装后行为。真实 GPU 证据使用既有合成夹具，且逐文件绑定运行时代码；它不是新的预训练模型准确率评测，也不是任意模型和硬件的完整兼容性证明。将自己常用的语言、噪声和长短录音纳入验收，仍然不可省略。</p>
+<h2>发布物与下一步</h2>
+<p>查看 <a href="https://github.com/modelscope/FunASR/releases/tag/runtime-torch-v0.1.7">Torch 0.1.7 Release 与校验清单</a>、<a href="https://pypi.org/project/funasr-torch/0.1.7/">PyPI 安装包</a>及 <a href="https://github.com/modelscope/FunASR/releases/tag/runtime-onnx-v0.4.11">ONNX 0.4.11 Release</a>。源码修复分别记录在 <a href="https://github.com/modelscope/FunASR/pull/3882">#3882</a>、<a href="https://github.com/modelscope/FunASR/pull/3871">#3871</a>和 <a href="https://github.com/modelscope/FunASR/pull/3869">#3869</a>。</p>
+<p data-editorial="next-step">下一步，用你有权处理的一小组录音，按<a href="/blog/meeting-transcript-acceptance.html">会议转写验收清单</a>检查术语、遗漏和时间戳，再决定何时更新自己的服务。</p>
+</div></article>
+<footer><div class="container">FunASR · 通义实验室开源语音识别 · <a href="/go/github">GitHub</a></div></footer>
+</body></html>
+

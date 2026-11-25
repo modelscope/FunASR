@@ -7,6 +7,33 @@ does not update the installed ONNX wrappers. Check their versions separately
 with `python -m pip show funasr-onnx funasr`; use the source installation below
 when a required wrapper fix is newer than the published PyPI package.
 
+Version 0.4.11 keeps timestamps independent of padded samples in a batch
+(#3871), bounds Contextual/Seaco hotwords to the exported ten-character
+embedding input and skips whitespace-only entries (#3882), and preserves
+terminal abbreviations and their timestamps (#3869). These are wrapper and
+postprocessing fixes, not model-weight updates or ASR accuracy claims.
+
+Version 0.4.10 restores direct librosa decoding for non-WAV audio in offline
+and streaming Paraformer, SenseVoice and offline VAD (#3865), without creating a WAV sidecar
+or treating every non-WAV input as MP3. Codec support still depends on the
+installed audio backend. This is a runtime loading fix, not a model-weight
+or ASR accuracy update.
+
+Version 0.4.9 keeps one result per input when offline VAD receives empty or sub-frame
+audio, without invoking ONNX Runtime for zero-frame features (#3846). It also returns
+an empty punctuation chunk while it preserves the streaming cache and avoids
+tokenization and inference (#3847). These are CPU runtime-wrapper fixes, not a
+model-weight or ASR accuracy update.
+
+Version 0.4.8 makes the standalone CMVN reader accept blank lines and
+raise a file-specific error for missing or truncated statistics (#3842).
+Valid float64 statistics and shipped feature output are unchanged. This is
+a CPU parser/package fix, not a model-weight or ASR accuracy update.
+
+Version 0.4.7 includes the Contextual/Seaco Paraformer hotword batching fix
+(#3838), including empty hotword-file handling. This is a runtime wrapper
+fix, not a model-weight update or an ASR accuracy claim.
+
 Version 0.4.6 fixes offline FSMN-VAD calls with multiple inputs so each
 waveform is scored independently and returns one independent result per input.
 Requested batch sizes remain accepted, while the effective model batch remains 1
@@ -24,9 +51,9 @@ and postprocessing fixes, not a model-weight update or an ASR accuracy claim.
 install from pip
 
 ```shell
-pip install -U "funasr-onnx>=0.4.6"
+pip install -U "funasr-onnx>=0.4.11"
 # For the users in China, you could install with the command:
-# pip install -U "funasr-onnx>=0.4.6" -i https://mirror.sjtu.edu.cn/pypi/web/simple
+# pip install -U "funasr-onnx>=0.4.11" -i https://mirror.sjtu.edu.cn/pypi/web/simple
 # If you want to export .onnx file, you should install modelscope and funasr
 pip install -U modelscope funasr
 # For the users in China, you could install with the command:

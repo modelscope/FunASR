@@ -81,9 +81,10 @@ def utterance_mvn(
         x -= mean
 
         if norm_vars:
+            x = x.masked_fill(make_pad_mask(ilens, x, 1), 0.0)
             var = x.pow(2).sum(dim=1, keepdim=True) / ilens_
             std = torch.clamp(var.sqrt(), min=eps)
-            x = x / std.sqrt()
+            x = x / std
         return x, ilens
     else:
         if norm_vars:

@@ -158,7 +158,10 @@ def test_rendered_blog_models_guide_and_pages_are_connected(rendered, prefix, su
     for term in ["Transformers", "-hf", "vLLM", "GGUF", "2026-09-09"]:
         assert term in body
     index = BeautifulSoup((output / prefix / "blog/index.html").read_text(), "html.parser")
-    assert len(index.select(f'a.post-card[href="/{prefix}blog/{BLOG}"]')) == 1
+    assert not index.select(f'a.post-card[href="/{prefix}blog/{BLOG}"]')
+    assert len(index.select(f'a.post-card[href="/{prefix}blog/speech-to-text-python-transcribe-audio.html"]')) == 1
+    archive = BeautifulSoup((output / prefix / "blog/archive/index.html").read_text(), "html.parser")
+    assert len(archive.select(f'a[href="/{prefix}blog/{BLOG}"]')) == 1
     models = BeautifulSoup((output / prefix / "models.html").read_text(), "html.parser")
     assert models.select_one(f'a[href="{route}"]')
     native = BeautifulSoup((output / prefix / "docs" / f"{SLUG}.html").read_text(), "html.parser")

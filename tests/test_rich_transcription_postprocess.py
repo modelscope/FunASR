@@ -32,3 +32,24 @@ def test_cough_and_sneeze_events_render_distinct_emojis(path, event, emoji):
     text = module.rich_transcription_postprocess(f"<|en|><|NEUTRAL|>{event}<|woitn|>hello")
 
     assert text == f"{emoji}hello"
+
+
+@pytest.mark.parametrize("path", POSTPROCESS_UTILS, ids=lambda path: path.parts[-3])
+@pytest.mark.parametrize(
+    "first, second, expected",
+    [
+        ("Hello world.", "How are you?", "Hello world. How are you?"),
+        ("so I went to the", "store", "so I went to the store"),
+        ("안녕하세요.", "감사합니다.", "안녕하세요. 감사합니다."),
+        ("你好。", "再见。", "你好。再见。"),
+        ("你好。", "Hello.", "你好。Hello."),
+    ],
+)
+def test_vad_segments_keep_a_space_between_spaced_scripts(path, first, second, expected):
+    module = _load(path)
+    tags = "<|NEUTRAL|><|Speech|><|withitn|>"
+
+    # AutoModel joins the tagged text of each VAD segment with a single space.
+    text = module.rich_transcription_postprocess(f"<|en|>{tags}{first} <|en|>{tags}{second}")
+
+    assert text == expected

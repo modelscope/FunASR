@@ -8,12 +8,14 @@ on:
       - "funasr/models/sanm_kws/**"
       - "funasr/models/sanm_kws_streaming/**"
       - "funasr/frontends/wav_frontend.py"
+      - "funasr/models/fsmn_vad_streaming/model.py"
       - "funasr/auto/auto_model.py"
       - "funasr/utils/datadir_writer.py"
       - "funasr/utils/kws_utils.py"
       - "tests/test_kws_optional_output.py"
       - "tests/test_kws_streaming_continuity.py"
       - "tests/test_kws_utils.py"
+      - "tests/test_wav_frontend_no_lfr.py"
       - "tests/test_fsmn_vad_streaming_buffers.py"
       - "tests/test_dynamic_streaming_vad.py"
       - "tests/test_fsmn_vad_dynamic_silence.py"
@@ -26,12 +28,14 @@ on:
       - "funasr/models/sanm_kws/**"
       - "funasr/models/sanm_kws_streaming/**"
       - "funasr/frontends/wav_frontend.py"
+      - "funasr/models/fsmn_vad_streaming/model.py"
       - "funasr/auto/auto_model.py"
       - "funasr/utils/datadir_writer.py"
       - "funasr/utils/kws_utils.py"
       - "tests/test_kws_optional_output.py"
       - "tests/test_kws_streaming_continuity.py"
       - "tests/test_kws_utils.py"
+      - "tests/test_wav_frontend_no_lfr.py"
       - "tests/test_fsmn_vad_streaming_buffers.py"
       - "tests/test_dynamic_streaming_vad.py"
       - "tests/test_fsmn_vad_dynamic_silence.py"
@@ -63,6 +67,7 @@ jobs:
             tests/test_kws_optional_output.py \
             tests/test_kws_streaming_continuity.py \
             tests/test_kws_utils.py \
+            tests/test_wav_frontend_no_lfr.py \
             tests/test_fsmn_vad_streaming_buffers.py \
             tests/test_dynamic_streaming_vad.py \
             tests/test_fsmn_vad_dynamic_silence.py

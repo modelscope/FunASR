@@ -325,7 +325,20 @@ def test_example_links_do_not_own_packaged_installation_or_schema(site_tree, pre
         visible_text(link)
 
 
-def test_packaged_format_implementation_still_matches_documented_boundary():
+@pytest.mark.parametrize("prefix,slug", PAGES)
+def test_visible_version_boundary_separates_pinned_recipe_from_current_main(site_tree, prefix, slug):
+    soup = read_page(site_tree, prefix, slug)
+    notice = soup.select_one('article [data-http-contract="version-boundary"]')
+    text = visible_text(notice)
+    for value in ("1.4.15", "response_format=text", "application/json", "text/plain", "main"):
+        assert value in text, (value, text)
+    assert notice.select_one('a[href="https://github.com/modelscope/FunASR/pull/3874"]')
+    source = "https://github.com/modelscope/FunASR/blob/be264e9382b4fef735536f3d278ee14514098a1a/funasr/bin/_server_app.py"
+    assert notice.select_one(f'a[href="{source}"]')
+    assert notice.find_next("table") == soup.select_one('[data-http-contract="formats"]')
+
+
+def test_current_packaged_text_format_returns_plain_text():
     tree = ast.parse((REPO / "funasr/bin/_server_app.py").read_text())
     handler = next(node for node in ast.walk(tree)
                    if isinstance(node, ast.AsyncFunctionDef) and node.name == "transcribe")
@@ -338,7 +351,7 @@ def test_packaged_format_implementation_still_matches_documented_boundary():
                        and node.test.left.id == "response_format"
                        and node.test.comparators[0].value == "text")
     returned = text_branch.body[0].value
-    assert isinstance(returned, ast.Call) and returned.func.id == "JSONResponse"
+    assert isinstance(returned, ast.Call) and returned.func.id == "PlainTextResponse"
     assert ast.dump(returned.args[0]) == ast.dump(ast.parse('result["text"]', mode="eval").body)
 
 

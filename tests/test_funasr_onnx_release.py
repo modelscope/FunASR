@@ -7,7 +7,7 @@ import unittest
 ROOT = Path(__file__).resolve().parents[1]
 PACKAGE_ROOT = ROOT / "runtime" / "python" / "onnxruntime"
 SETUP_PATH = PACKAGE_ROOT / "setup.py"
-EXPECTED_VERSION = "0.4.6"
+EXPECTED_VERSION = "0.4.11"
 REQUIREMENT_NAME_PATTERN = re.compile(r"^\s*([A-Za-z0-9](?:[A-Za-z0-9._-]*[A-Za-z0-9])?)")
 
 
@@ -44,7 +44,7 @@ def normalized_requirement_name(requirement):
 
 
 class FunASROnnxReleaseContractTest(unittest.TestCase):
-    def test_release_version_is_0_4_6(self):
+    def test_release_version_is_0_4_11(self):
         self.assertEqual(assigned_literal(read_setup_tree(), "VERSION_NUM"), EXPECTED_VERSION)
 
     def test_standalone_license_preserves_repository_notice(self):
@@ -58,15 +58,34 @@ class FunASROnnxReleaseContractTest(unittest.TestCase):
         self.assertIn(f'assert version("funasr-onnx") == "{EXPECTED_VERSION}"', workflow)
         self.assertIn(f"name: funasr-onnx-{EXPECTED_VERSION}", workflow)
 
+    def test_workflow_collects_empty_punctuation_regression(self):
+        workflow = (ROOT / ".github/workflows/test-funasr-onnx-package.yml").read_text()
+        test_path = "tests/test_funasr_onnx_punctuation_empty_input.py"
+        self.assertEqual(workflow.count(test_path), 3)
+        self.assertIn("python " + test_path, workflow)
+
     def test_readme_names_the_standalone_fix_release(self):
         readme = (PACKAGE_ROOT / "README.md").read_text()
         self.assertIn(f'pip install -U "funasr-onnx>={EXPECTED_VERSION}"', readme)
         self.assertIn("does not update the installed ONNX wrappers", readme)
+        self.assertIn("#3865", readme)
+        self.assertIn("without creating a WAV sidecar", readme)
         self.assertIn("short/final VAD", readme)
         self.assertIn("zero-overlap", readme)
         self.assertIn("one independent result per input", readme)
         self.assertIn("effective model batch remains 1", readme)
         self.assertIn("#3831", readme)
+        self.assertIn("#3838", readme)
+        self.assertIn("hotword", readme)
+        self.assertIn("#3842", readme)
+        self.assertIn("CMVN", readme)
+        self.assertIn("#3846", readme)
+        self.assertIn("#3847", readme)
+        self.assertIn("empty or sub-frame", readme)
+        self.assertIn("preserves the streaming cache", readme)
+        self.assertIn("#3869", readme)
+        self.assertIn("#3871", readme)
+        self.assertIn("#3882", readme)
 
     def test_runtime_dependencies_keep_onnx_install_torch_free(self):
         requirements = setup_keyword_literal(read_setup_tree(), "install_requires")

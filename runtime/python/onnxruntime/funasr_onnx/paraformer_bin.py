@@ -131,10 +131,10 @@ class Paraformer:
                             pred = sentence_postprocess(pred)
                         asr_res.append({"preds": pred})
                 else:
-                    for pred, us_peaks_ in zip(preds, us_peaks):
+                    for pred, us_peaks_, feat_len in zip(preds, us_peaks, feats_len):
                         raw_tokens = pred
                         timestamp, timestamp_raw = time_stamp_lfr6_onnx(
-                            us_peaks_, copy.copy(raw_tokens)
+                            us_peaks_[: feat_len * 3], copy.copy(raw_tokens)
                         )
                         text_proc, timestamp_proc, _ = sentence_postprocess(
                             raw_tokens, timestamp_raw
@@ -181,23 +181,7 @@ class Paraformer:
         plt.savefig(plotname, bbox_inches="tight")
 
     def load_data(self, wav_content: Union[str, np.ndarray, List[str]], fs: int = None) -> List:
-        def convert_to_wav(input_path, output_path):
-            from pydub import AudioSegment
-            try:
-                audio = AudioSegment.from_mp3(input_path)
-                audio.export(output_path, format="wav")
-                print("音频文件为mp3格式，已转换为wav格式")
-                
-            except Exception as e:
-                print(f"转换失败:{e}")
-
         def load_wav(path: str) -> np.ndarray:
-            if not path.lower().endswith('.wav'):
-                import os
-                input_path = path
-                path = os.path.splitext(path)[0]+'.wav'
-                convert_to_wav(input_path,path) #将mp3格式转换成wav格式
-
             waveform, _ = librosa.load(path, sr=fs)
             return waveform
 
@@ -374,10 +358,10 @@ class ContextualParaformer(Paraformer):
         for beg_idx in range(0, waveform_nums, self.batch_size):
             end_idx = min(waveform_nums, beg_idx + self.batch_size)
             feats, feats_len = self.extract_feat(waveform_list[beg_idx:end_idx])
-            bias_embed = np.expand_dims(bias_embed, axis=0)
-            bias_embed = np.repeat(bias_embed, feats.shape[0], axis=0)
+            batch_bias_embed = np.expand_dims(bias_embed, axis=0)
+            batch_bias_embed = np.repeat(batch_bias_embed, feats.shape[0], axis=0)
             try:
-                outputs = self.bb_infer(feats, feats_len, bias_embed)
+                outputs = self.bb_infer(feats, feats_len, batch_bias_embed)
                 am_scores, valid_token_lens = outputs[0], outputs[1]
 
                 if len(outputs) == 4:
@@ -400,10 +384,10 @@ class ContextualParaformer(Paraformer):
                             pred = sentence_postprocess(pred)
                         asr_res.append({"preds": pred})
                 else:
-                    for pred, us_peaks_ in zip(preds, us_peaks):
+                    for pred, us_peaks_, feat_len in zip(preds, us_peaks, feats_len):
                         raw_tokens = pred
                         timestamp, timestamp_raw = time_stamp_lfr6_onnx(
-                            us_peaks_, copy.copy(raw_tokens)
+                            us_peaks_[: feat_len * 3], copy.copy(raw_tokens)
                         )
                         text_proc, timestamp_proc, _ = sentence_postprocess(
                             raw_tokens, timestamp_raw
@@ -423,7 +407,10 @@ class ContextualParaformer(Paraformer):
         return asr_res
 
     def proc_hotword(self, hotwords):
-        hotwords = hotwords.split(" ")
+        # Like the C++ runtime, skip empty hotwords and keep the first max_hotword_len
+        # characters of longer ones: the exported embedding model takes that many per hotword.
+        max_hotword_len = 10
+        hotwords = [hotword[:max_hotword_len] for hotword in hotwords.split()]
         hotwords_length = [len(i) - 1 for i in hotwords]
         hotwords_length.append(0)
         hotwords_length = np.array(hotwords_length)
@@ -444,7 +431,7 @@ class ContextualParaformer(Paraformer):
         hotword_int = [word_map(i) for i in hotwords]
 
         hotword_int.append(np.array([1]))
-        hotwords = pad_list(hotword_int, pad_value=0, max_len=10)
+        hotwords = pad_list(hotword_int, pad_value=0, max_len=max_hotword_len)
         
         return hotwords, hotwords_length
 

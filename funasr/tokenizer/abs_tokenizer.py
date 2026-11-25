@@ -42,7 +42,7 @@ class BaseTokenizer(ABC):
                 **kwargs: Additional keyword arguments.
             """
         if token_list is not None:
-            if isinstance(token_list, (Path, str)) and token_list.endswith(".txt"):
+            if isinstance(token_list, (Path, str)) and str(token_list).endswith(".txt"):
                 token_list = Path(token_list)
                 self.token_list_repr = str(token_list)
                 self.token_list: List[str] = []
@@ -51,7 +51,7 @@ class BaseTokenizer(ABC):
                     for idx, line in enumerate(f):
                         line = line.rstrip()
                         self.token_list.append(line)
-            elif isinstance(token_list, (Path, str)) and token_list.endswith(".json"):
+            elif isinstance(token_list, (Path, str)) and str(token_list).endswith(".json"):
                 token_list = Path(token_list)
                 self.token_list_repr = str(token_list)
                 self.token_list: List[str] = []

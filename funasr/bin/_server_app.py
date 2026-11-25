@@ -20,7 +20,7 @@ import soundfile as sf
 try:
     from fastapi import FastAPI, UploadFile, File, Form, HTTPException
     from fastapi.middleware.cors import CORSMiddleware
-    from fastapi.responses import JSONResponse
+    from fastapi.responses import JSONResponse, PlainTextResponse
 except ImportError:
     raise ImportError(
         "funasr-server requires additional packages. Install with: pip install vllm fastapi uvicorn python-multipart"
@@ -529,7 +529,7 @@ def create_app(
         if response_format == "verbose_json":
             return JSONResponse(build_openai_verbose_json(result, requested_language=language))
         elif response_format == "text":
-            return JSONResponse(result["text"])
+            return PlainTextResponse(result["text"])
         else:
             return JSONResponse({"text": result["text"]})
 

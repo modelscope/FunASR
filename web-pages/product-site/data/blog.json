@@ -3,12 +3,64 @@
   "lead": "funclip-v2-2-0-moss-speaker-clipping",
   "selected": [
     "meeting-transcript-acceptance",
-    "fun-asr-nano-transformers",
+    "speech-to-text-python-transcribe-audio",
     "self-hosted-openai-whisper-api-alternative",
     "funasr-transcribe-long-audio"
   ],
   "lead_image": "/img/funclip-v2-1-0-interface.jpg",
   "articles": [
+    {
+      "slug": "dictionary-input-checklist",
+      "category": "explanations",
+      "reviewed": true,
+      "zh": {
+        "title": "分词词典加载失败？先检查空行与重复键",
+        "summary": "运行只读 UTF-8 词典检查器，定位空行、重复键、缺失映射和隐藏字符，明确主线修复与已发布安装包的边界。"
+      },
+      "en": {
+        "title": "Dictionary loading failed? Check blank lines and duplicate keys",
+        "summary": "Run a read-only UTF-8 dictionary inspector to locate blank lines, duplicate keys, missing mappings and hidden characters, with explicit source-versus-package boundaries."
+      }
+    },
+    {
+      "slug": "wav-pcm-input-checklist",
+      "category": "explanations",
+      "reviewed": true,
+      "zh": {
+        "title": "先检查音频输入：WAV、裸 PCM 与采样率",
+        "summary": "用可直接运行的 PCM16 WAV 检查器核对帧数、时长与峰值，区分文件检查、重采样和真实识别验收。"
+      },
+      "en": {
+        "title": "Check the audio input first: WAV, raw PCM and sample rate",
+        "summary": "Run a PCM16 WAV inspector to verify frames, duration and peak amplitude, while keeping file checks separate from resampling and ASR acceptance."
+      }
+    },
+    {
+      "slug": "websocket-offline-model-options",
+      "category": "explanations",
+      "reviewed": true,
+      "zh": {
+        "title": "换了模型却没生效？核对 WebSocket 启动配置",
+        "summary": "区分离线和流式模型，用不加载权重的源码检查确认参数路由，再规划真实录音验收。"
+      },
+      "en": {
+        "title": "Changed the model, but not the result? Check the WebSocket configuration",
+        "summary": "Separate offline and streaming models, inspect argument routing without loading weights, then plan acceptance on real recordings."
+      }
+    },
+    {
+      "slug": "hotwords-package-boundaries",
+      "category": "explanations",
+      "reviewed": true,
+      "zh": {
+        "title": "热词没有生效？先核对传递链路和安装包",
+        "summary": "从 WebSocket 消息到 Torch 独立运行时，核对热词格式、安装版本和批次时间戳，避免把接口修复当作准确率保证。"
+      },
+      "en": {
+        "title": "Hotwords not working? Check the request path and installed package",
+        "summary": "Check hotword encoding, standalone package versions and batched timestamps, without confusing interface fixes with recognition accuracy guarantees."
+      }
+    },
     {
       "slug": "sensevoice-finetuning-acceptance",
       "category": "explanations",
@@ -102,28 +154,28 @@
     },
     {
       "slug": "funasr-realtime-streaming-asr",
-      "category": "applications",
-      "reviewed": false,
+      "category": "explanations",
+      "reviewed": true,
       "zh": {
-        "title": "实时字幕的流式识别路径",
-        "summary": ""
+        "title": "实时字幕为什么会改字？读懂流式识别的三种状态",
+        "summary": "从一句不断出现的字幕，分清增量文字、整段修订和输入结束确认；理解 2-pass 的用途、延迟边界与应用接入责任。"
       },
       "en": {
-        "title": "A streaming path for live captions",
-        "summary": ""
+        "title": "Why do live captions change? Three states in streaming ASR",
+        "summary": "Distinguish incremental text, a revised speech segment and end-of-input acknowledgement. Understand what two-pass recognition offers, what latency means and what your application must track."
       }
     },
     {
       "slug": "funasr-speaker-diarization",
       "category": "explanations",
-      "reviewed": false,
+      "reviewed": true,
       "zh": {
-        "title": "说话人分离：谁在何时说话",
-        "summary": ""
+        "title": "speaker 0 是谁？读懂说话人分离的结果",
+        "summary": "从一段会议对话看懂匿名编号、句子归属和真实身份的区别，把转写整理成可回听、可复核的记录。"
       },
       "en": {
-        "title": "Speaker diarization: who spoke when",
-        "summary": ""
+        "title": "Who is speaker 0? Reading diarization results",
+        "summary": "Understand anonymous labels, sentence attribution and real identities, then turn a meeting transcript into a record you can review against the audio."
       }
     },
     {
@@ -323,15 +375,15 @@
     },
     {
       "slug": "lightweight-speech-recognition-cpu",
-      "category": "selection",
-      "reviewed": false,
+      "category": "explanations",
+      "reviewed": true,
       "zh": {
-        "title": "CPU 语音识别的部署取舍",
-        "summary": ""
+        "title": "语音识别不买 GPU 行不行？先看懂 CPU 的四笔账",
+        "summary": "模型文件小，不等于占用内存少；RTF 小于 1，也不等于实时字幕。用一个录音转写任务，学会评估 CPU 的质量、内存、耗时和并发边界。"
       },
       "en": {
-        "title": "Deployment choices for CPU speech recognition",
-        "summary": ""
+        "title": "Can your CPU handle speech recognition? Four checks before buying a GPU",
+        "summary": "Small weights do not guarantee low memory use, and RTF below one does not guarantee live captions. Evaluate CPU transcription by quality, memory, timing and concurrency."
       }
     },
     {
@@ -428,27 +480,27 @@
     {
       "slug": "speech-to-text-python-transcribe-audio",
       "category": "applications",
-      "reviewed": false,
+      "reviewed": true,
       "zh": {
-        "title": "用 Python 转写一份录音",
-        "summary": ""
+        "title": "用 Python 把第一段录音转成文字",
+        "summary": "从认识工具包和模型开始，在独立 Python 环境中把一段普通话 WAV 转成 JSON 文本，附下载边界、排错步骤和 Agent 执行约定。"
       },
       "en": {
-        "title": "Transcribe a recording with Python",
-        "summary": ""
+        "title": "Transcribe your first recording with Python",
+        "summary": "Understand the toolkit and model, then turn a short Mandarin WAV into a JSON transcript in an isolated Python environment, with troubleshooting and an explicit Agent contract."
       }
     },
     {
       "slug": "speech-to-text-timestamps-python",
-      "category": "applications",
-      "reviewed": false,
+      "category": "explanations",
+      "reviewed": true,
       "zh": {
-        "title": "用时间戳定位原始录音",
-        "summary": ""
+        "title": "时间戳写着毫秒，为什么点击文字还是跳错位置？",
+        "summary": "分清时间单位、边界估计和文字对应关系，再把片段时间放回原录音；为点击回听、字幕和剪辑保留可靠的定位依据。"
       },
       "en": {
-        "title": "Finding the original audio with timestamps",
-        "summary": ""
+        "title": "Why can a millisecond timestamp still seek to the wrong word?",
+        "summary": "Separate time units, estimated boundaries and text alignment, then map segment times back to the recording for reliable review, captions and editing."
       }
     },
     {
@@ -467,27 +519,27 @@
     {
       "slug": "voice-activity-detection-python",
       "category": "explanations",
-      "reviewed": false,
+      "reviewed": true,
       "zh": {
-        "title": "VAD 如何找到语音区间",
-        "summary": ""
+        "title": "VAD 找到语音以后，为什么还不能直接做字幕？",
+        "summary": "看懂语音起止区间，区分检测、裁剪与文字对齐；用一组示意数字理解原录音和片段的时间轴。"
       },
       "en": {
-        "title": "How VAD identifies speech regions",
-        "summary": ""
+        "title": "VAD found the speech. Why isn't that enough for subtitles?",
+        "summary": "Understand speech intervals, distinguish detection from editing and word alignment, and preserve the timeline when audio is cut."
       }
     },
     {
       "slug": "which-funasr-model",
       "category": "selection",
-      "reviewed": false,
+      "reviewed": true,
       "zh": {
-        "title": "FunASR 模型选型笔记",
-        "summary": ""
+        "title": "FunASR 模型怎么选？先说清你要交付什么",
+        "summary": "从文字、字幕与剪辑的区别出发，分清工具包、模型和运行时，用语言、输出、时效与权限写出一份可验证的选型单。"
       },
       "en": {
-        "title": "Notes on choosing a FunASR model",
-        "summary": ""
+        "title": "Choosing a FunASR model starts with the result you need",
+        "summary": "Distinguish text, subtitles and clipping; separate toolkits, models and runtimes; then write a selection brief covering language, output, timing and permissions."
       }
     }
   ]

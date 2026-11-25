@@ -5,7 +5,7 @@
 <link rel="canonical" href="https://www.funasr.com/blog/self-hosted-deepgram-assemblyai-alternative.html"><link rel="alternate" hreflang="en" href="https://www.funasr.com/en/blog/self-hosted-deepgram-assemblyai-alternative.html"><link rel="alternate" hreflang="zh" href="https://www.funasr.com/blog/self-hosted-deepgram-assemblyai-alternative.html"><link rel="alternate" hreflang="x-default" href="https://www.funasr.com/en/blog/self-hosted-deepgram-assemblyai-alternative.html">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"BlogPosting","headline":"从 Deepgram / AssemblyAI 迁移到自托管 FunASR：接入与验收 | FunASR Blog","description":"评估自托管转写迁移：映射请求和结果契约，检查鉴权、返回格式、模型质量与运维成本。提供 FunASR 本地 JSON 示例，不承诺厂商 API 或 SDK 直接替换。","datePublished":"2026-06-23","dateModified":"2026-09-09","author":{"@type":"Organization","name":"FunASR / Tongyi Lab"},"publisher":{"@type":"Organization","name":"FunASR","logo":{"@type":"ImageObject","url":"https://www.funasr.com/logo.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://www.funasr.com/blog/self-hosted-deepgram-assemblyai-alternative.html"},"image":"https://www.funasr.com/logo.png"}
+{"@context":"https://schema.org","@type":"BlogPosting","headline":"从 Deepgram / AssemblyAI 迁移到自托管 FunASR：接入与验收 | FunASR Blog","description":"评估自托管转写迁移：映射请求和结果契约，检查鉴权、返回格式、模型质量与运维成本。提供 FunASR 本地 JSON 示例，不承诺厂商 API 或 SDK 直接替换。","datePublished":"2026-06-23","dateModified":"2026-11-12","author":{"@type":"Organization","name":"FunASR / Tongyi Lab"},"publisher":{"@type":"Organization","name":"FunASR","logo":{"@type":"ImageObject","url":"https://www.funasr.com/logo.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://www.funasr.com/blog/self-hosted-deepgram-assemblyai-alternative.html"},"image":"https://www.funasr.com/logo.png"}
 </script>
 <style>:root{--primary:#2563eb;--primary-dark:#1d4ed8;--bg:#fff;--surface:#f8fafc;--border:#e2e8f0;--text:#0f172a;--text-soft:#475569;--text-muted:#94a3b8;--radius:12px}
 *{margin:0;padding:0;box-sizing:border-box}
@@ -78,6 +78,7 @@ python -m pip check</code></pre>
   -F "response_format=json"</code></pre>
 <p>预期结构是包含 <code>text</code> 的 JSON 对象，具体内容取决于音频与模型。120 秒是示例客户端超时，不是可处理音频时长或吞吐承诺。使用 OpenAI Python SDK 的基本调用可参考<a href="/blog/self-hosted-openai-whisper-api-alternative.html">本地转写接入指南</a>；这不意味着原厂商 SDK 可以原样使用。</p>
 <h2>明确返回格式边界</h2>
+<p data-http-contract="version-boundary"><strong>版本边界：</strong>本文固定的 1.4.15 安装示例中，<code>response_format=text</code> 返回 <code>application/json</code> 编码的字符串，下表描述该历史版本。当前 main 已通过 <a href="https://github.com/modelscope/FunASR/pull/3874">#3874</a> 改为 <code>text/plain</code> 纯文本（<a href="https://github.com/modelscope/FunASR/blob/be264e9382b4fef735536f3d278ee14514098a1a/funasr/bin/_server_app.py">已合并处理器源码</a>）。这不代表已安装服务自动升级；请核对实际安装版本和响应内容，再决定是否进行 JSON 解码。</p>
 <table data-http-contract="formats"><thead><tr><th>response_format</th><th>包内处理器的行为</th></tr></thead><tbody>
 <tr data-response-format="json"><td><code>json</code></td><td>返回含 <code>text</code> 的 JSON 对象。</td></tr>
 <tr data-response-format="verbose_json"><td><code>verbose_json</code></td><td>返回结构化 JSON，包括 <code>segments</code>、<code>duration</code> 等字段；具体时间与说话人信息依赖模型和实际结果。</td></tr>

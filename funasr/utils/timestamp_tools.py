@@ -70,6 +70,11 @@ def ts_prediction_lfr6_standard(
             torch.where(peaks >= 1.0 - 1e-4)[0].cpu().numpy() + force_time_shift
         )  # total offset
     num_frames = peaks.shape[0]
+    # CIF fires at most once per frame, so a heavy last frame can still owe fires;
+    # spread them over the rest of the segment so every token keeps a timestamp.
+    missing = len(char_list) + 1 - len(fire_place)
+    if missing > 0:
+        fire_place = np.append(fire_place, np.linspace(fire_place[-1], num_frames, missing + 1)[1:])
     timestamp_list = []
     new_char_list = []
     # for bicif model trained with large data, cif2 actually fires when a character starts
@@ -150,16 +155,10 @@ def timestamp_sentence(
         return res
 
     if punc_id_list is None or len(punc_id_list) == 0:
-        res.append(
-            {
-                "text": text_postprocessed.split(),
-                "start": timestamp_postprocessed[0][0],
-                "end": timestamp_postprocessed[-1][1],
-                "timestamp": timestamp_postprocessed,
-            }
-        )
-        return res
-    if len(punc_id_list) != len(timestamp_postprocessed):
+        # No punctuation: the loop below yields a single sentence whose text is a
+        # string, like every other result.
+        punc_id_list = []
+    elif len(punc_id_list) != len(timestamp_postprocessed):
         logging.warning("length mismatch between punc and timestamp")
     sentence_text = ""
     sentence_text_seg = ""
@@ -189,6 +188,11 @@ def timestamp_sentence(
 
         punc_id = int(punc_id) if punc_id is not None else 1
         sentence_end = timestamp[1] if timestamp is not None else sentence_end
+        # Latin tokens are inserted with a leading space. Drop one leading
+        # space, as timestamp_sentence_en does, so a sentence that starts
+        # with an English word is not stored as " iphone...".
+        if sentence_text.startswith(" "):
+            sentence_text = sentence_text[1:]
         if punc_id > 1:
             sentence_text += punc_list[punc_id - 2]
             if sentence_text_seg.endswith(" "):
@@ -252,16 +256,10 @@ def timestamp_sentence_en(
         return res
 
     if punc_id_list is None or len(punc_id_list) == 0:
-        res.append(
-            {
-                "text": text_postprocessed.split(),
-                "start": timestamp_postprocessed[0][0],
-                "end": timestamp_postprocessed[-1][1],
-                "timestamp": timestamp_postprocessed,
-            }
-        )
-        return res
-    if len(punc_id_list) != len(timestamp_postprocessed):
+        # No punctuation: the loop below yields a single sentence whose text is a
+        # string, like every other result.
+        punc_id_list = []
+    elif len(punc_id_list) != len(timestamp_postprocessed):
         logging.warning("length mismatch between punc and timestamp")
     sentence_text = ""
     sentence_text_seg = ""
