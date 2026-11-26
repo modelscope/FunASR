@@ -1,0 +1,63 @@
+name: Validate speaker verification metrics
+
+on:
+  pull_request:
+    paths:
+      - "funasr/metrics/compute_eer.py"
+      - "tests/test_metrics_compute_eer.py"
+      - "tests/test_metrics_eer_boundaries.py"
+      - ".github/workflows/test-speaker-metrics.yml"
+  push:
+    branches: [main]
+    paths:
+      - "funasr/metrics/compute_eer.py"
+      - "tests/test_metrics_compute_eer.py"
+      - "tests/test_metrics_eer_boundaries.py"
+      - ".github/workflows/test-speaker-metrics.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  speaker-metrics:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.10", "3.12"]
+    env:
+      CUDA_VISIBLE_DEVICES: ""
+      OMP_NUM_THREADS: "1"
+      OPENBLAS_NUM_THREADS: "1"
+      HF_HUB_OFFLINE: "1"
+      MODELSCOPE_OFFLINE: "1"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Install CPU metric dependencies
+        run: python -m pip install pytest==8.1.1 numpy==1.26.4 scikit-learn==1.7.2
+      - name: Record source and dependencies
+        run: |
+          git rev-parse HEAD | tee source-commit.txt
+          python -m pip freeze | tee resolved-dependencies.txt
+          python -m pip check | tee pip-check.txt
+      - name: Check EER pairing and command-line behavior
+        run: |
+          python -m pytest -q \
+            tests/test_metrics_compute_eer.py \
+            tests/test_metrics_eer_boundaries.py \
+            --junitxml=speaker-metrics-results.xml
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: speaker-metrics-python-${{ matrix.python }}
+          path: |
+            source-commit.txt
+            resolved-dependencies.txt
+            pip-check.txt
+            speaker-metrics-results.xml
