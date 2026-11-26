@@ -10,6 +10,8 @@ on:
       - "funasr/bin/tokenize_text.py"
       - "tests/test_tokenize_text_field2slice.py"
       - "funasr/auto/auto_model.py"
+      - "funasr/download/download_model_from_hub.py"
+      - "tests/test_download_from_hf_model_path.py"
       - "funasr/utils/misc.py"
       - "tests/test_misc_deep_update.py"
       - "tests/test_misc_deep_update_boundaries.py"
@@ -66,6 +68,8 @@ on:
       - "funasr/bin/tokenize_text.py"
       - "tests/test_tokenize_text_field2slice.py"
       - "funasr/auto/auto_model.py"
+      - "funasr/download/download_model_from_hub.py"
+      - "tests/test_download_from_hf_model_path.py"
       - "funasr/utils/misc.py"
       - "tests/test_misc_deep_update.py"
       - "tests/test_misc_deep_update_boundaries.py"
@@ -183,6 +187,7 @@ jobs:
             tests/test_cli.py \
             tests/test_tokenize_text_field2slice.py \
             tests/test_auto_model_zero_speech_time.py \
+            tests/test_download_from_hf_model_path.py \
             tests/test_misc_deep_update.py \
             tests/test_misc_deep_update_boundaries.py \
             --junitxml=numpy-results.xml
