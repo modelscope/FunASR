@@ -25712,6 +25712,7 @@ Then run Python (api_key is a placeholder, not authentication):
             print(f"Download: {model_or_path} failed!: {e}")
 
     kwargs["model_path"] = model_or_path if "model_path" not in kwargs else kwargs["model_path"]
+    model_or_path = kwargs["model_path"]
 
     if os.path.exists(os.path.join(model_or_path, "configuration.json")):
         with open(os.path.join(model_or_path, "configuration.json"), "r", encoding="utf-8") as f:
@@ -25719,9 +25720,8 @@ Then run Python (api_key is a placeholder, not authentication):
 
             cfg = {}
             if "file_path_metas" in conf_json:
-                add_file_root_path(model_or_path, conf_json["file_path_metas"], cfg)
 </code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/download/download_model_from_hub.py#L122" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
-<div class="api-detail" id="e513" tabindex="-1"><span class="dtag badge-f">function</span><h2><code>add_file_root_path(model_or_path: str, file_path_metas: dict, cfg={})</code></h2><div class="dmod">funasr.download.download_model_from_hub · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/download/download_model_from_hub.py#L191" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Add file root path.</p>
+<div class="api-detail" id="e513" tabindex="-1"><span class="dtag badge-f">function</span><h2><code>add_file_root_path(model_or_path: str, file_path_metas: dict, cfg={})</code></h2><div class="dmod">funasr.download.download_model_from_hub · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/download/download_model_from_hub.py#L192" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Add file root path.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>model_or_path</code> — TODO.</li>
@@ -25758,8 +25758,8 @@ Then run Python (api_key is a placeholder, not authentication):
                         cfg[k] = {}
                     add_file_root_path(model_or_path, v, cfg[k])
                 # elif isinstance(cfg, list):
-</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/download/download_model_from_hub.py#L191" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
-<div class="api-detail" id="e514" tabindex="-1"><span class="dtag badge-f">function</span><h2><code>get_or_download_model_dir(model, model_revision=None, is_training=False, check_latest=True)</code></h2><div class="dmod">funasr.download.download_model_from_hub · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/download/download_model_from_hub.py#L241" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Get local model directory or download model if necessary.</p>
+</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/download/download_model_from_hub.py#L192" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
+<div class="api-detail" id="e514" tabindex="-1"><span class="dtag badge-f">function</span><h2><code>get_or_download_model_dir(model, model_revision=None, is_training=False, check_latest=True)</code></h2><div class="dmod">funasr.download.download_model_from_hub · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/download/download_model_from_hub.py#L242" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Get local model directory or download model if necessary.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>model (str)</code> — model id or path to local model directory.</li>
@@ -25796,8 +25796,8 @@ Then run Python (api_key is a placeholder, not authentication):
             print("could not check the latest version")
     else:
         model_cache_dir = snapshot_download(
-</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/download/download_model_from_hub.py#L241" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
-<div class="api-detail" id="e515" tabindex="-1"><span class="dtag badge-f">function</span><h2><code>get_or_download_model_dir_hf(model, model_revision=None, is_training=False, check_latest=True)</code></h2><div class="dmod">funasr.download.download_model_from_hub · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/download/download_model_from_hub.py#L276" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Get local model directory or download model if necessary.</p>
+</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/download/download_model_from_hub.py#L242" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
+<div class="api-detail" id="e515" tabindex="-1"><span class="dtag badge-f">function</span><h2><code>get_or_download_model_dir_hf(model, model_revision=None, is_training=False, check_latest=True)</code></h2><div class="dmod">funasr.download.download_model_from_hub · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/download/download_model_from_hub.py#L277" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Get local model directory or download model if necessary.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>model (str)</code> — model id or path to local model directory.</li>
