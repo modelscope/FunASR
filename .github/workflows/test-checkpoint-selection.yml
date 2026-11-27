@@ -3,7 +3,9 @@ name: Validate checkpoint selection
 on:
   pull_request:
     paths:
+      - "funasr/models/ctc/ctc.py"
       - "funasr/train_utils/**"
+      - "tests/test_ctc_dropout_eval.py"
       - "tests/test_checkpoint_metric_*.py"
       - "tests/test_trainer_ds_unvalidated_ckpt.py"
       - "tests/test_train_ds_distributed_config.py"
@@ -13,7 +15,9 @@ on:
   push:
     branches: [main]
     paths:
+      - "funasr/models/ctc/ctc.py"
       - "funasr/train_utils/**"
+      - "tests/test_ctc_dropout_eval.py"
       - "tests/test_checkpoint_metric_*.py"
       - "tests/test_trainer_ds_unvalidated_ckpt.py"
       - "tests/test_train_ds_distributed_config.py"
@@ -50,6 +54,7 @@ jobs:
       - name: Test validation, checkpoint lifecycle and two-rank collectives
         run: |
           python -m pytest -q \
+            tests/test_ctc_dropout_eval.py \
             tests/test_checkpoint_metric_presence.py \
             tests/test_checkpoint_metric_distributed.py \
             tests/test_trainer_ds_unvalidated_ckpt.py \
