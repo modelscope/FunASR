@@ -47,6 +47,7 @@ class _FakeCTCTokenizer:
 
 def test_ctc_decoder_multi_segment_input_uses_single_segment_fallback(monkeypatch):
     instance = object.__new__(nano_model.FunASRNano)
+    torch.nn.Module.__init__(instance)
     instance.ctc_decoder = _FakeCTCDecoder()
     instance.ctc = _FakeCTC()
     instance.ctc_tokenizer = _FakeCTCTokenizer()

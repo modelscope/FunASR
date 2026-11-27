@@ -778,11 +778,11 @@ class NSWNormalizer:
 
         # 规范化纯数+量词
         pattern = re.compile(r"(\d+(\.\d+)?)[多余几]?" + COM_QUANTIFIERS)
-        matchers = pattern.findall(text)
-        if matchers:
-            # print('cardinal+quantifier')
-            for matcher in matchers:
-                text = text.replace(matcher[0], Cardinal(cardinal=matcher[0]).cardinal2chntext(), 1)
+        text = pattern.sub(
+            lambda match: Cardinal(cardinal=match.group(1)).cardinal2chntext()
+            + match.group(0)[len(match.group(1)) :],
+            text,
+        )
 
         # 规范化数字编号
         pattern = re.compile(r"(\d{4,32})")
