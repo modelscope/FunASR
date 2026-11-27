@@ -5,6 +5,7 @@ on:
     paths:
       - "funasr/models/fun_asr_nano/**"
       - "funasr/models/glm_asr/**"
+      - "tests/test_cn_tn_quantifier.py"
       - "tests/test_fun_asr_nano_*.py"
       - "tests/test_glm_asr_vllm_*.py"
       - "tests/test_vllm_model_source_docs.py"
@@ -15,6 +16,7 @@ on:
     paths:
       - "funasr/models/fun_asr_nano/**"
       - "funasr/models/glm_asr/**"
+      - "tests/test_cn_tn_quantifier.py"
       - "tests/test_fun_asr_nano_*.py"
       - "tests/test_glm_asr_vllm_*.py"
       - "tests/test_vllm_model_source_docs.py"
@@ -49,6 +51,7 @@ jobs:
       - name: Run vLLM regression contracts
         run: |
           python -m pytest -q \
+            tests/test_cn_tn_quantifier.py \
             tests/test_fun_asr_nano_autocast_device.py \
             tests/test_fun_asr_nano_ctc_batch_fallback.py \
             tests/test_fun_asr_nano_lora_injection.py \
