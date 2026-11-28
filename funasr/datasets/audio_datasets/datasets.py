@@ -37,7 +37,7 @@ class AudioDataset(torch.utils.data.Dataset):
             """
         super().__init__()
         index_ds_class = tables.index_ds_classes.get(index_ds)
-        self.index_ds = index_ds_class(path, **kwargs)
+        self.index_ds = index_ds_class(path, is_training=is_training, **kwargs)
 
         self.preprocessor_speech = None
         self.preprocessor_text = None
