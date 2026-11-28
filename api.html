@@ -21904,7 +21904,7 @@
     except Exception as e:
         print(f"Loading remote code failed: {file_path}, {e}")
 </code></pre></details></div>
-<div class="api-detail" id="e378" tabindex="-1"><span class="dtag badge-f">function</span><h2><code>export(model, data_in=None, quantize: bool = False, opset_version: int = 14, type="onnx", **kwargs)</code></h2><div class="dmod">funasr.utils.export_utils · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/export_utils.py#L10" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Export.</p>
+<div class="api-detail" id="e378" tabindex="-1"><span class="dtag badge-f">function</span><h2><code>export(model, data_in=None, quantize: bool = False, opset_version: int = 14, type="onnx", **kwargs)</code></h2><div class="dmod">funasr.utils.export_utils · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/export_utils.py#L11" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><p>Export.</p>
 <h4>Args:</h4>
 <ul>
 <li><code>model</code> — Model instance or model name.</li>
@@ -21944,7 +21944,7 @@
                 export_dir=export_dir,
                 **kwargs,
             )
-</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/export_utils.py#L10" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
+</code></pre><a class="src-more" href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/export_utils.py#L11" rel="noopener noreferrer" target="_blank">View full source on GitHub →</a></details></div>
 <div class="api-detail" id="e379" tabindex="-1"><span class="dtag badge-f">function</span><h2><code>fbank(waveform: torch.Tensor, **kwargs) -&gt; torch.Tensor</code></h2><div class="dmod">funasr.utils.fbank · <a href="https://github.com/modelscope/FunASR/blob/main/funasr/utils/fbank.py#L157" rel="noopener noreferrer" target="_blank">View on GitHub ↗</a></div><div class="ddoc"><ul>
 <li><code>Drop</code> — in replacement for :func:`torchaudio.compliance.kaldi.fbank`.</li>
 </ul>
