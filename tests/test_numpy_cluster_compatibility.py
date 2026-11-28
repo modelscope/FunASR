@@ -2,6 +2,7 @@
 
 import numpy as np
 import pytest
+import torch
 
 from funasr.models.campplus.cluster_backend import ClusterBackend, UmapHdbscan
 
@@ -77,5 +78,30 @@ def test_umap_hdbscan_preserves_separated_speakers():
         labels = cluster(embeddings)
     finally:
         numba.set_num_threads(previous_threads)
+    _assert_same_partition(labels, expected)
+    np.testing.assert_array_equal(embeddings, original)
+
+
+@pytest.mark.parametrize("input_kind", ["numpy", "tensor", "tensor_with_grad"])
+def test_large_backend_umap_accepts_numpy_and_tensor(input_kind):
+    import numba
+
+    # Reach the production UMAP dispatcher with four well-separated speakers.
+    expected = np.repeat(np.arange(4), 512)
+    rng = np.random.default_rng(0)
+    embeddings = np.eye(4, 192, dtype=np.float32)[expected]
+    embeddings += rng.normal(0, 0.01, embeddings.shape).astype(np.float32)
+    original = embeddings.copy()
+    inputs = embeddings
+    if input_kind != "numpy":
+        inputs = torch.from_numpy(embeddings).requires_grad_(input_kind == "tensor_with_grad")
+
+    previous_threads = numba.get_num_threads()
+    numba.set_num_threads(1)
+    try:
+        labels = ClusterBackend()(inputs)
+    finally:
+        numba.set_num_threads(previous_threads)
+
     _assert_same_partition(labels, expected)
     np.testing.assert_array_equal(embeddings, original)
