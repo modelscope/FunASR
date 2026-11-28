@@ -1,4 +1,5 @@
 import os
+import inspect
 import torch
 import functools
 
@@ -63,6 +64,15 @@ def export(
     return export_dir
 
 
+def _legacy_onnx_exporter_kwargs():
+    # torch >= 2.9 makes torch.onnx.export use the dynamo exporter by default, which cannot
+    # convert the dynamic_axes of some models and fails on data-dependent branches such as the
+    # CIF predictor's. Keep the TorchScript exporter wherever torch.onnx.export takes the argument.
+    if "dynamo" in inspect.signature(torch.onnx.export).parameters:
+        return {"dynamo": False}
+    return {}
+
+
 def _onnx(
     model,
     data_in=None,
@@ -107,6 +117,7 @@ def _onnx(
         input_names=model.export_input_names(),
         output_names=model.export_output_names(),
         dynamic_axes=model.export_dynamic_axes(),
+        **_legacy_onnx_exporter_kwargs(),
     )
 
     if quantize:
@@ -357,6 +368,7 @@ def _onnx_opt_for_encdec(model, path, enable_fp16):
             input_names=model.export_input_names(),
             output_names=model.export_output_names(),
             dynamic_axes=model.export_dynamic_axes(),
+            **_legacy_onnx_exporter_kwargs(),
         )
 
     # fp32 to fp16
