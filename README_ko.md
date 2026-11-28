@@ -1,4 +1,4 @@
-([English](./README.md)|[简体中文](./README_zh.md)|[日本語](./README_ja.md)|한국어)
+([English](./README.md)|[简体中文](./README_zh.md)|[日本語](./README_ja.md)|한국어|[العربية](./README_ar.md))
 
 <p align="center">
 <a href="https://github.com/modelscope/FunASR"><img src="https://svg-banners.vercel.app/api?type=origin&text1=FunASR🤠&text2=💖%20A%20Fundamental%20End-to-End%20Speech%20Recognition%20Toolkit&width=800&height=210" alt="FunASR"></a>
