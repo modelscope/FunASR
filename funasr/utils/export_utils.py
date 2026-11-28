@@ -365,10 +365,11 @@ def _onnx_opt_for_encdec(model, path, enable_fp16):
     print(f"[_onnx_opt_for_encdec(fp16)]: {fp16_model_path}\n\n")
     if os.path.exists(fp32_model_path) and not os.path.exists(fp16_model_path):
         try:
+            import onnx
             from onnxconverter_common import float16
-        except:
+        except ImportError:
             raise RuntimeError(
-                "You are converting the onnx model to fp16, please install onnxconverter-common first. via `pip install onnxconverter-common`."
+                "You are converting the onnx model to fp16, please install onnx and onnxconverter-common first. via `pip install onnx onnxconverter-common`."
             )
         fp32_onnx_model = onnx.load(fp32_model_path)
         fp16_onnx_model = float16.convert_float_to_float16(fp32_onnx_model, keep_io_types=True)
