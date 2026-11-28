@@ -44,6 +44,7 @@ on:
       - "tests/test_load_audio_bytes.py"
       - "tests/test_load_audio_int16_array.py"
       - "tests/test_load_audio_multichannel_arrays.py"
+      - "tests/test_load_audio_int_pcm_waveforms.py"
       - "funasr/frontends/**"
       - "funasr/models/normalize/utterance_mvn.py"
       - "tests/test_utterance_mvn.py"
@@ -102,6 +103,7 @@ on:
       - "tests/test_load_audio_bytes.py"
       - "tests/test_load_audio_int16_array.py"
       - "tests/test_load_audio_multichannel_arrays.py"
+      - "tests/test_load_audio_int_pcm_waveforms.py"
       - "funasr/frontends/**"
       - "funasr/models/normalize/utterance_mvn.py"
       - "tests/test_utterance_mvn.py"
@@ -179,6 +181,7 @@ jobs:
             tests/test_load_audio_bytes.py \
             tests/test_load_audio_int16_array.py \
             tests/test_load_audio_multichannel_arrays.py \
+            tests/test_load_audio_int_pcm_waveforms.py \
             tests/test_timestamp_tools.py \
             tests/test_punc_model_none.py \
             tests/test_paraformer_empty_token_batch.py \
