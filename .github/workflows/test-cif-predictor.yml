@@ -4,13 +4,17 @@ on:
   pull_request:
     paths:
       - "funasr/models/paraformer/cif_predictor.py"
+      - "funasr/utils/export_utils.py"
       - "tests/test_cif_mixed_zero_fires.py"
+      - "tests/test_onnx_export.py"
       - ".github/workflows/test-cif-predictor.yml"
   push:
     branches: [main]
     paths:
       - "funasr/models/paraformer/cif_predictor.py"
+      - "funasr/utils/export_utils.py"
       - "tests/test_cif_mixed_zero_fires.py"
+      - "tests/test_onnx_export.py"
       - ".github/workflows/test-cif-predictor.yml"
 
 permissions:
@@ -46,6 +50,10 @@ jobs:
         run: |
           python -m pytest -q tests/test_cif_mixed_zero_fires.py --junitxml=cif-results.xml
           python -c "import xml.etree.ElementTree as E; r=E.parse('cif-results.xml').getroot(); assert len(list(r.iter('testcase')))==6; assert not any(list(r.iter(k)) for k in ['failure','error','skipped'])"
+      - name: Validate ONNX export through export_utils
+        run: |
+          python -m pytest -q tests/test_onnx_export.py --junitxml=onnx-export-results.xml
+          python -c "import xml.etree.ElementTree as E; r=E.parse('onnx-export-results.xml').getroot(); assert len(list(r.iter('testcase')))==1; assert not any(list(r.iter(k)) for k in ['failure','error','skipped'])"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -54,5 +62,6 @@ jobs:
             resolved-dependencies.txt
             pip-check.txt
             cif-results.xml
+            onnx-export-results.xml
             source-commit.txt
             install-report.json
